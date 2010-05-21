@@ -1,0 +1,151 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+
+
+  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
+  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
+  <script language="JavaScript" src="/javascript/metautil.js"></script>
+  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
+  <script language="JavaScript" src="/javascript/graphutil.js"></script>
+  
+  <script language=Javascript1.2><!--
+
+  var exerciseHash = new Array();
+  var positionHash = new Array();
+  var toHighlight = new Array();
+
+  {% for exercise in exercises %}
+  exerciseHash['{{exercise.name}}'] = {level:{{exercise.h_position}}, position:{{exercise.v_position}}, sub:{{exercise.prereq_string}}, description:{{exercise.display_name}}};
+  positionHash['{{exercise.h_position}}_{{exercise.v_position}}'] = '{{exercise.name}}';
+  {% if exercise.proficient %}toHighlight['{{exercise.name}}']=2;{% endif %}
+  {% if exercise.suggested %}toHighlight['{{exercise.name}}']=1;{% endif %}
+  {% endfor %}
+  
+  var scale = 80;
+
+function graph_update()
+{
+	initPicture(0, 1680, -1*scale/2, {{map_height}});
+	fontstyle = "normal";
+	fontsize = "10";
+	fontfamily = "Arial";
+	
+	
+	
+	for(var i=0; i<21; i++)
+	{
+		
+		if (i%2==0) {
+			fill = "#121212";
+			stroke = fill;
+			
+		}
+		else {
+			fill = "#151515";
+			stroke = fill;
+		}
+		
+		rect([scale*i,-100], [scale*(i+1), {{map_height}}])
+		//text([scale*i+scale/2, -1*scale/4],""+(i+1), right);
+		//text([scale*i+scale/2, 720-1*scale/4],""+(i+1), right);
+		
+	}
+	fill = "none";
+	strokewidth = 2;
+	for(var k in exerciseHash)
+	{
+		var hori = scale*exerciseHash[k].level;
+		var vert = scale*exerciseHash[k].position;
+		var subs = exerciseHash[k].sub;
+		var coor = [hori-scale/2, {{map_height}}-scale-(vert)];
+		stroke = "#c9c299";
+		for(var i=0; i<subs.length; i++)
+		{
+			if (exerciseHash[subs[i]]==null)
+			{
+				alert([k, subs[i]]);
+			}
+			var subhori = scale*exerciseHash[subs[i]].level;
+			var subvert = scale*exerciseHash[subs[i]].position;
+			
+			if (exerciseHash[subs[i]].position<10)
+			{
+				var subcoor = [subhori-scale/2, {{map_height}}-scale-(subvert)];
+				arc(coor, subcoor);
+			}
+		
+		}
+	}
+	
+	for(var k in exerciseHash)
+	{
+		var hori = scale*exerciseHash[k].level;
+		var vert = scale*exerciseHash[k].position+1;
+		var subs = exerciseHash[k].sub;
+		var coor = [hori-scale/2, {{map_height}}-scale-(vert)];
+		stroke = "#000000";
+		if (exerciseHash[k].position<10)
+		{
+			fill = "#EEEEEE";
+			if (toHighlight[k]==1)  //Suggested
+				fill = "#fbb917";
+			if (toHighlight[k]==2)  //proficient
+				fill = "#EDE275";
+				
+			circle(coor, 30);
+			fill = "none";
+			var count=0;
+			var vertical_offset=10;
+			for (var i in exerciseHash[k].description)
+			{
+				coor = [hori-scale/2, {{map_height}}-scale-(vert)-count*vertical_offset];
+				if (count<3)
+					text(coor, exerciseHash[k].description[i].substr(0,7), above);
+				count++;
+			}
+		}
+	}
+	
+}
+
+var currentVis = 'intro';
+
+function update(event) 
+{
+	var x = event.pageX;
+	var y = event.pageY;
+	
+	var exerid = positionHash[(Math.floor(x/scale)+1)+'_'+(Math.round(y/scale)-1)];
+	
+	if (exerid!=null)
+	{
+		
+		if (parent.document.getElementById(exerid).style.visibility=='hidden')
+		{
+			parent.document.getElementById(exerid).style.visibility = 'visible';
+	
+			if (currentVis!=null)
+				parent.document.getElementById(currentVis).style.visibility = 'hidden';
+	
+			currentVis = exerid;
+		}
+	
+	}
+	
+}
+//alert(2);
+
+
+//-->
+</script>
+<body>
+
+<div OnClick="update(event)"><embed  height="{{map_height}}" width="1680" src="d.svg"   script='graph_update()' id="kmap"></div>
+
+</body>
+</html>
+

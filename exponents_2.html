@@ -1,0 +1,109 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var base = getRandomIntRange(-10,10);
+var exp = 1;
+
+if (Math.abs(base)>1)  //Only do this clause if the base is non-zero
+{
+	exp = getRandomInt(Math.log(260)/Math.log(Math.abs(base)));
+	
+	if (exp==0 || exp==1)
+		exp = getRandomInt(Math.log(260)/Math.log(Math.abs(base)));
+}
+else 
+	exp = getRandomInt(6);
+	
+	
+
+
+
+var base_string = base;
+
+if (base<0)
+	base_string = '('+base+')';
+
+var expansion_string = base_string+"";
+
+for(var i=1; i<exp; i++)
+{
+	expansion_string += "&#215;"+base_string;
+}
+
+if (getRandomInt(3)<3 && base!=0) //75% chance that the exponent will be negative
+{
+	exp = -1*exp;
+}
+
+if (exp<0)
+{
+	setCorrectAnswer(format_fraction(1,Math.pow(base,Math.abs(exp))));
+}
+else
+{
+	setCorrectAnswer(Math.pow(base,Math.abs(exp)));
+}
+
+if (base!=0 && exp!=0)
+{
+	addWrongChoice(format_fraction(1,base*exp));
+	addWrongChoice(format_fraction(-1,base*exp));
+	addWrongChoice(base*exp);
+	addWrongChoice(base*-1*exp);
+	addWrongChoice(-1*Math.pow(base,Math.abs(exp)))
+	addWrongChoice(format_fraction(-1,Math.pow(base,Math.abs(exp))));
+}
+if (base==0 && exp!=0)
+{
+	addWrongChoice(format_fraction(1,exp));
+	addWrongChoice(format_fraction(-1,exp));
+	addWrongChoice(exp);
+	addWrongChoice(-1*exp);
+	addWrongChoice(1)
+	addWrongChoice(-1);
+	addWrongChoice('`undefined`');
+}
+if (base!=0 && exp==0)
+{
+	addWrongChoice(format_fraction(1,base));
+	addWrongChoice(format_fraction(-1,base));
+	addWrongChoice(0);
+	addWrongChoice('`undefined`');
+	addWrongChoice(-1)
+	addWrongChoice(-1*base);
+}
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+write_equation(base_string+'^'+exp+'= ?');
+
+if (exp==0)
+{
+	write_step("Anything to the zero power equals 1");
+}
+else
+{
+	if (exp<0)
+	{
+		write_step(equation_string(base_string+'^'+exp+'= 1/('+base_string+'^'+(Math.abs(exp))+')'));
+		write_step(equation_string('1/('+base_string+'^'+(Math.abs(exp))+')=1/('+expansion_string+')'));
+		write_step(equation_string('=1/'+Math.pow(base,Math.abs(exp))));
+	}
+	else
+	{	
+		write_step(equation_string(base_string+'^'+exp+'='+expansion_string));
+		write_step(equation_string('='+Math.pow(base,exp)));
+	}
+}
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+

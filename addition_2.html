@@ -1,0 +1,181 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+
+
+{% endblock maincode %}
+
+
+{% block maincell %}<script language=Javascript1.2><!--
+
+var counter = 0;
+var topNumber = new Array();
+var bottomNumber = new Array(); 
+var carryArray = new Array();
+var selectedArray = new Array();
+
+
+
+var topNumberDigits =2;
+
+var bottomNumberDigits =1; //Has to be at least one less than topNumberDigits
+
+
+var answer = 0; 
+
+for (var i=0; i<(topNumberDigits-1); i++)
+{
+	topNumber.push(get_random(9));
+	carryArray.push(0);
+	if (i<bottomNumberDigits)
+	{
+		if (i<(bottomNumberDigits-1))
+		{
+			bottomNumber.push(get_random(9));
+		}
+		else
+		{
+			bottomNumber.push(get_random(8)+1);
+		}
+	}
+	else
+	{
+		bottomNumber.push(0);
+	}
+	//alert("ans:"+correctAnswer+" Digit:"+bottomNumber[i]+" Place:"+(10^i));
+	answer+=bottomNumber[i]*Math.pow(10,i);
+	//alert("ans:"+correctAnswer+" Digit:"+topNumber[i]+" Place:"+(10^i));
+	answer+=topNumber[i]*Math.pow(10,i);
+	
+}
+topNumber.push(get_random(8)+1);
+
+answer+=topNumber[topNumberDigits-1]*Math.pow(10,(topNumberDigits-1));
+//alert(correctAnswer);
+bottomNumber.push(0);
+carryArray.push(0);
+setCorrectAnswer(answer);
+
+function next_step()
+{
+	
+	if (steps_given<topNumberDigits)
+	{
+		var hintString = getFontString('Hint: ', 'noSel');
+		
+		//The while loop uncolorizes the previous hints digits
+		while (selectedArray.length>0)
+		{
+			var item = selectedArray.pop();
+			document.getElementById(item[0]).innerHTML = getFontString(item[1], 'noSel');
+		}
+		
+		var sum = carryArray[steps_given]+topNumber[steps_given]+bottomNumber[steps_given];
+		var ones = sum%10;
+		var carry = (sum-ones)/10;
+		
+		if (carryArray[steps_given]!=0)
+		{
+			document.getElementById("0_"+steps_given).innerHTML = getFontString(carryArray[steps_given], 'sel5');
+			selectedArray.push(["0_"+steps_given, carryArray[steps_given]]);
+			hintString += getFontString(carryArray[steps_given], 'sel5')+getFontString('+','noSel');
+		}
+		
+		document.getElementById("1_"+steps_given).innerHTML = getFontString(topNumber[steps_given], 'sel1');
+		selectedArray.push(["1_"+steps_given, topNumber[steps_given]]);
+		hintString += getFontString(topNumber[steps_given], 'sel1');
+		
+		
+		
+		if (steps_given<bottomNumberDigits)
+		{
+			document.getElementById("2_"+steps_given).innerHTML = getFontString(bottomNumber[steps_given], 'sel2');
+			selectedArray.push(["2_"+steps_given, bottomNumber[steps_given]]);
+			hintString += getFontString('+','noSel')+getFontString(bottomNumber[steps_given], 'sel2');
+		}
+		
+		hintString+=getFontString('=', 'noSel');
+		
+		document.getElementById("3_"+steps_given).innerHTML = getFontString(ones, 'sel3');
+		selectedArray.push(["3_"+steps_given, ones]);
+		
+		if (carry!=0)
+		{
+			hintString+=getFontString(carry, 'sel4');
+			if (steps_given<topNumberDigits-1)
+			{
+				carryArray[steps_given+1] = carry;
+				document.getElementById("0_"+(steps_given+1)).innerHTML = getFontString(carry, 'sel4');
+				selectedArray.push(["0_"+(steps_given+1), carry]);
+			}
+			else
+			{
+				document.getElementById("extra").innerHTML = getFontString(carry, 'sel4');
+				selectedArray.push(["extra", carry]);
+			}
+		
+		}
+		hintString+=getFontString(ones, 'sel3');
+		document.getElementById("hintbox").innerHTML = hintString;
+		steps_given++;
+	}
+
+}
+
+//returns an integer between 0 and max, inclusive
+function get_random(max)
+{
+	var epsilon = .9;
+	return Math.round(Math.random()*(max+epsilon) - epsilon/2);
+}
+function increment_counter()
+{
+	counter++;
+	document.getElementById("testing").innerHTML = get_random(4);
+}
+
+function getFontString(text, font)
+{
+	return ('<FONT class=\"'+font+'\">'+text+'</FONT>');
+}
+
+document.write('<table width=100%><tr><td valign=top width=80%><div ID=\"hintbox\">'+getFontString('Hint: ', 'inv')+'</div><center><table cellpadding=0 cellspacing=0><tr><td></td>');
+	
+for (var cols=0; cols<topNumberDigits; cols++)
+{
+	var index = topNumberDigits-1-cols;
+	document.write('<td><div ID=\"0_'+index+'\">'+getFontString('0','inv')+'</div></td>');
+}
+document.write('</tr><tr><td></td>');
+for (var cols=0; cols<topNumberDigits; cols++)
+{
+	var index = topNumberDigits-1-cols;
+	document.write('<td><div ID=\"1_'+index+'\">'+getFontString(topNumber[index], 'noSel')+'</div></td>');
+}
+document.write('</tr><tr><td></td><td>'+getFontString('+', 'noSel')+'</td>');
+	
+for (var cols=0; cols<topNumberDigits-1; cols++)
+{
+	if (cols< (topNumberDigits-1-bottomNumberDigits))
+	{
+		document.write('<td></td>');
+	}
+	else
+	{
+		var index = bottomNumberDigits -1 - (cols - (topNumberDigits-1-bottomNumberDigits));
+		document.write('<td><div ID=\"2_'+index+'\">'+getFontString(bottomNumber[index], 'noSel')+'</div></td>');
+	}
+}
+
+document.write('</tr><tr><td class=answer><div ID=\"extra\"></td>');
+for (var cols=0; cols<topNumberDigits; cols++)
+{
+	var index = topNumberDigits-1-cols;
+	document.write('<td class=answer><div ID=\"3_'+index+'\">'+getFontString('0','inv')+'</div></td>');
+}
+document.write('</tr></table></center>');
+
+//-->
+</script>
+
+
+{% endblock maincell %}

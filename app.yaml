@@ -1,0 +1,27 @@
+application: khanexercises
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+  
+- url: /images
+  static_dir: images
+
+- url: /javascript
+  static_dir: javascript
+
+- url: /helperpages
+  static_dir: helperpages
+  
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin  
+
+- url: .*
+  script: main.py
+  
+
+

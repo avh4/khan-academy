@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+  </head>
+  <body>
+  <H3>Edit Subject: {{ subject.name }}</h3>
+  	{% for b in breadcrumb %}
+		<A href="/editsubject?subject_key={{ b.key }}">{{ b.name }}</A>:
+	{% endfor %}
+	{{ subject.name }}
+	<A href="/viewsubject?subject_key={{subject.key}}">View</A>
+	<P>
+  
+    	<form action="/editsubject" method="get">
+		<input type="hidden" name="subject_key" value = "{{ subject.key}}">
+		Subject Name: <input type="text" name="subject_name" value= "{{ subject.name }}">
+		<input type="submit" value="edit">
+	</form>
+	<form action="/editsubject" method="get">
+		<input type="hidden" name="subject_key" value = "{{ subject.key}}">
+		<input type="text" name="child_name">
+		<input type="submit" value="Add Sub-Topic">
+	</form>
+	{% for entry in subtopics %}
+		<form action="/editsubject" method="get">
+			<input type="hidden" name="subject_key" value = "{{ entry.key}}">
+			{{ entry.index }} {{ entry.name }}
+			<input type="submit" value="edit">
+		</form>
+	{% endfor %}
+	<P>
+	{{ tree }}
+  </body>
+</html>
+

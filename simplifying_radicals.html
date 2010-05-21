@@ -1,0 +1,85 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+function type1()
+{
+	var base = null;
+	var coef = getRandomIntRange(2,9);
+
+	if (getRandomIntRange(1,4)==1) //25% chance
+		base = getRandomIntRange(20,100);
+	else
+		base = Math.pow(getRandomIntRange(2,9),2)*getRandomIntRange(1,5);
+
+	write_text("Simplify the radical expression (more than one of the answers may be equivalent, but only one is completely simplified):");
+	write_equation(coef+' sqrt('+base+')= ?');
+	
+	
+	var factor = perfect_square_factor(base);
+	if (factor.length==1)
+	{
+		write_step(base+' does not have any factors that are perfect squares so the expression cannot be simplified further');
+		//addWrongChoice(''+(coef*Math.round(Math.sqrt(base))));
+		correct_answer = coef+' sqrt('+base+')';
+	}
+	else if (factor[0]==1)
+	{
+		write_step(equation_string(coef+' sqrt('+base+')='+coef+'*'+Math.sqrt(factor[1])));
+		write_step(equation_string(coef+'*'+Math.sqrt(factor[1])+'='+(coef*Math.sqrt(factor[1]))));
+		correct_answer = (coef*Math.sqrt(factor[1]));
+		addWrongChoice(''+(coef*base));
+		
+	}
+	else 
+	{
+		write_step(equation_string(coef+ ' sqrt('+base+')='+coef+' sqrt('+factor[1]+'*'+factor[0]+')'));
+		write_step(equation_string(coef+' sqrt('+factor[1]+'*'+factor[0]+')='+coef+'* sqrt('+factor[1]+')*sqrt('+factor[0]+')'));
+		write_step(equation_string(coef+'* sqrt('+factor[1]+')*sqrt('+factor[0]+')='+coef+'*'+Math.sqrt(factor[1])+'sqrt('+factor[0]+')'));
+		write_step(equation_string(coef+'*'+Math.sqrt(factor[1])+'sqrt('+factor[0]+')='+(coef*Math.sqrt(factor[1]))+' sqrt('+factor[0]+')'));
+		correct_answer = (coef*Math.sqrt(factor[1]))+' sqrt('+factor[0]+')';
+		addWrongChoice(''+(coef*Math.round(Math.sqrt(base))));
+	}
+	
+	if (factor.length>1)
+	{
+		addWrongChoice(coef+' sqrt('+base+')');
+		for (i=4; i<Math.sqrt(factor[1]); i++)
+		{
+			if (base%(i*i)==0)
+			{
+				addWrongChoice((coef*i)+' sqrt('+base/(i*i)+')');
+				addWrongChoice((coef*i*i)+' sqrt('+base/(i*i)+')');
+			}
+		}
+	}
+	
+	for (i=2; i<(base/2); i++)
+	{
+		if ((base%i)==0)
+		{
+			addWrongChoice((coef*i)+' sqrt('+base/i+')');
+			addWrongChoice((coef*i*i)+' sqrt('+base/i+')');
+		}
+	}
+	
+	addWrongChoice(Math.round(coef*base/2)+' sqrt('+Math.round(base/2)+')');
+	addWrongChoice(Math.round(coef*base/3)+' sqrt('+Math.round(base/2)+')');
+	addWrongChoice(Math.round(coef*base/5)+' sqrt('+Math.round(base/5)+')');
+	addWrongChoice(Math.round(coef*base/5)+' sqrt('+Math.round(base/2)+')');
+	addWrongChoice(coef*2+' sqrt('+base+')');
+}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+eval("type"+getRandomIntRange(1,1)+"()");  //Randomly choose a problem type
+//-->
+</script>
+
+
+{% endblock maincell %}
+

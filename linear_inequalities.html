@@ -1,0 +1,315 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+display_per_step = 3; //the right and left panes of the hint table
+
+var selColor = "#AE9CC9";
+var noSelColor = "#333333";
+
+function getEqExpString(string)
+{
+	var selFontString = '<font color='+selColor+' size=4>';
+	return (selFontString+'`'+string+'`</font>');
+}
+/////////////////////
+
+function write_ineq_step(left, right, ineq)
+{
+	document.write(	'<tr><td align=right>'
+			+get_step_part_string('`'+left+'`', next_step_to_write, 1)
+			+'</td><td align=left>'
+			+get_step_part_string('`'+ineq+right+'`', next_step_to_write, 2)
+			+'</td></tr>');
+	next_step_to_write++;
+}
+
+function ineq_step_header(left, right, ineq)
+{
+	document.write('<center><table border=0 width=100%><tr><td align=right><font face=\"arial\" size=4>`'+
+			left+
+			'</font></td><td align=left><font face=\"arial\" size=4>`'+ineq+right+'`</font></td></tr>');	
+}
+
+function write_ineq_step(explanation, left, right, ineq)
+{
+	document.write(	'<tr><td align=left >'
+			+get_step_part_string('<FONT class=\"explanation\">'+explanation+'</font>', next_step_to_write, 3)
+			+'</td><td align=right >'
+			+get_step_part_string('`'+left+'`', next_step_to_write, 1)
+			+'</td><td align=left >'
+			+get_step_part_string('`'+ineq+right+'`', next_step_to_write, 2)
+			+'</td></tr>');
+	next_step_to_write++;
+}
+
+function ineq_step_header(explanation, left, right, ineq)
+{
+	document.write('<center><table border=0><tr><td align=left><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right><font face=\"arial\" size=4>`'+
+			left+
+			'</font></td><td align=left><font face=\"arial\" size=4>`'+ineq+right+'`</font></td></tr>');	
+}
+
+////////////////////////////
+
+function generate_steps(left_x, left_c, right_x, right_c, inequality) {
+	var new_left_x = left_x;
+	var new_left_c = left_c;
+	var new_right_x = right_x;
+	var new_right_c = right_c;
+	var sign_string = "";
+	var explanation = "";
+	
+	//write_equation(get_equation_string_side(left_x_coefficients, left_constants)+'='+get_equation_string_side(right_x_coefficients, right_constants));
+	write_text("Solve for `x`:");
+	ineq_step_header(explanation,
+				get_equation_string_side(new_left_x, new_left_c, false, false),
+				get_equation_string_side(new_right_x, new_right_c, false, false), 
+				inequality);
+	if (left_x.length>1) { //Combine the x-terms on the left-hand side
+		write_ineq_step(getEqExpString(get_equation_string_side(new_left_x, [], true, false)+'=?'),
+				get_equation_string_side(new_left_x, new_left_c, true, false),
+				get_equation_string_side(new_right_x, new_right_c, false, false),
+				inequality);
+		new_left_x = [array_sum(left_x)];
+		explanation = getEqExpString(get_equation_string_side(left_x, [], true, false)+'='+get_equation_string_side(new_left_x, [], true, false));
+		write_ineq_step(explanation,
+				get_equation_string_side(new_left_x, new_left_c, true, false),
+				get_equation_string_side(new_right_x, new_right_c, false, false),
+				inequality);
+	} 
+	if (right_x.length>1) {
+		write_ineq_step(getEqExpString(get_equation_string_side(new_right_x, [], true, false)+'=?'),
+				get_equation_string_side(new_left_x, new_left_c, false, false),
+				get_equation_string_side(new_right_x, new_right_c, true, false),
+				inequality);
+		new_right_x = [array_sum(right_x)];
+		explanation = getEqExpString(get_equation_string_side(right_x, [], true, false)+'='+get_equation_string_side(new_right_x, [], true, false));
+		write_ineq_step(explanation,
+				get_equation_string_side(new_left_x, new_left_c, false, false),
+				get_equation_string_side(new_right_x, new_right_c, true, false),
+				inequality);
+	} 
+	if (left_c.length>1) {
+		write_ineq_step(getEqExpString(get_equation_string_side([], new_left_c, false, true)+'=?'),
+				get_equation_string_side(new_left_x, new_left_c, false, true),
+				get_equation_string_side(new_right_x, new_right_c, false, false),
+				inequality);
+		
+		new_left_c = [array_sum(left_c)];
+		explanation = getEqExpString(get_equation_string_side([], left_c, false, true)+'='+get_equation_string_side([], new_left_c, false, true));
+		write_ineq_step(explanation,
+				get_equation_string_side(new_left_x, new_left_c, false, true),
+				get_equation_string_side(new_right_x, new_right_c, false, false),
+				inequality);
+	}
+	if (right_c.length>1) {
+		write_ineq_step(getEqExpString(get_equation_string_side([], new_right_c, false, true)+'=?'),
+				get_equation_string_side(new_left_x, new_left_c, false, false),
+				get_equation_string_side(new_right_x, new_right_c, false, true), inequality);
+		
+		new_right_c = [array_sum(right_c)];
+		explanation = getEqExpString(get_equation_string_side([], right_c, false, true)+'='+get_equation_string_side([], new_right_c, false, true));
+		write_ineq_step(explanation,
+				get_equation_string_side(new_left_x, new_left_c, false, false),
+				get_equation_string_side(new_right_x, new_right_c, false, true),
+				inequality);
+	}
+	if (new_right_x.length>0 && new_left_x.length>0 && new_right_x[0]!=0) {
+		
+		if (new_left_x[0]>0)
+			sign_string = '+';
+		explanation = 'Add '+getEqExpString(format_first_coefficient(-1*new_right_x[0])+'x')+' to both sides';
+		write_ineq_step(explanation,
+				'`<font color='+selColor+'>`'+format_first_coefficient(-1*new_right_x[0])
+				+'x'+'`</font>`'+sign_string+get_equation_string_side(new_left_x, new_left_c, false, false),
+				 get_equation_string_side(new_right_x, new_right_c, false, false)+'`<font color='+selColor+'>`'+format_coefficient(-1*new_right_x[0])+'x'+'`</font>`',
+				 inequality);
+		explanation = getEqExpString(get_equation_string_side([-1*new_right_x[0],new_left_x[0]] , [], true, false)+'='+get_equation_string_side([new_left_x[0]-new_right_x[0]], [], true, false));
+		explanation += '; ';
+		explanation += getEqExpString(get_equation_string_side([new_right_x[0],-1*new_right_x[0]], [], true, false)+'=0');
+		new_left_x = [new_left_x[0]-new_right_x[0]];
+		new_right_x = new Array(0);
+		write_ineq_step(explanation,
+				get_equation_string_side(new_left_x, new_left_c, true, false),
+				get_equation_string_side(new_right_x, new_right_c, true, false),
+				inequality);
+	}
+	if (new_left_c[0]!=0) {
+		if (new_left_x[0]>0)
+			sign_string = '+';
+		else
+			sign_string = '';
+		explanation = 'Add '+getEqExpString(format_first_coefficient(-1*new_left_c[0]))+' to both sides';
+		write_ineq_step(explanation,
+				'`<font color='+selColor+'>`'+(-1*new_left_c[0])+'`</font>`'+sign_string+get_equation_string_side(new_left_x, new_left_c, false, false),
+				 get_equation_string_side(new_right_x, new_right_c, false, false)+'`<font color='+selColor+'>`'+format_constant(-1*new_left_c[0])+'`</font>`',
+				 inequality);
+		explanation = getEqExpString(get_equation_string_side([], [-1*new_left_c[0],new_left_c[0]] , false, true)+'=0');
+		explanation += '; ';
+		explanation += getEqExpString(get_equation_string_side([], [new_right_c[0],-1*new_left_c[0]], false, true)+'='+get_equation_string_side([], [new_right_c[0]-new_left_c[0]], false, true));
+		new_right_c = [new_right_c[0]-new_left_c[0]];
+		new_left_c = [0];
+		write_ineq_step(explanation,
+				get_equation_string_side(new_left_x, new_left_c, false, false),
+				get_equation_string_side(new_right_x, new_right_c, false, false),
+				inequality);
+	}
+	if (new_left_x[0]>0) {
+		explanation = 'Multiply both sides by '+getEqExpString(format_fraction(1, new_left_x[0]))+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+		write_ineq_step(explanation,
+					'`<font color='+selColor+'>`('+format_fraction(1, new_left_x[0])+')`</font>`*'+get_equation_string_side(new_left_x, new_left_c, false, false),
+				 	get_equation_string_side(new_right_x, new_right_c, false, false)+'*`<font color='+selColor+'>`('+format_fraction(1, new_left_x[0])+')`</font>`',
+					inequality);
+		explanation = "Simplify...";
+		write_ineq_step(explanation, 'x',format_fraction(new_right_c[0], new_left_x[0]), inequality);
+	} 
+	else if (new_left_x[0]<0) {
+		explanation = 'Multiply both sides by '+getEqExpString(format_fraction(1, new_left_x[0]))+'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<br>(switch the inequality since&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<br>multiplying by a negative)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+		write_ineq_step(explanation,
+					'`<font color='+selColor+'>`('+format_fraction(1, new_left_x[0])+')`</font>`*'+get_equation_string_side(new_left_x, new_left_c, false, false),
+				 	get_equation_string_side(new_right_x, new_right_c, false, false)+'*`<font color='+selColor+'>`('+format_fraction(1, new_left_x[0])+')`</font>`',
+					opinequal);
+		explanation = "Simplify...";
+		write_ineq_step(explanation, 'x',format_fraction(new_right_c[0], new_left_x[0]), opinequal);
+	}
+	else {
+		explanation = "Any `x` would satisfy the orignal equation";
+		write_table_step(explanation, 'x','`undefined`');
+	}
+	table_step_footer();	
+}	
+
+function get_equation_string_side(x, c, selX, selC) {
+	var equation_string = " ";
+	var first=0; //boolean to test if the first term on the side has been printed
+	var xColor = noSelColor;
+	var cColor = noSelColor;
+
+	if (selX)
+		xColor = selColor;
+	if (selC)
+		cColor = selColor;
+		
+	equation_string = '`<font color=\"'+xColor+'\">`';
+	for (var i=0; i<x.length; i++) {
+		if (x[i]!=0) {
+			
+			if (first==0) {
+				first=1;
+				equation_string+=format_first_coefficient(x[i])+'x';
+			}
+			else {
+				equation_string+=format_coefficient(x[i])+'x';
+			}
+		}
+		
+	}
+	equation_string += '`</font><font color=\"'+cColor+'\">`'
+	for (var i=0; i<c.length; i++) {
+		if (first==0) {
+			first=1;
+			equation_string+=c[i];
+		}
+		else {
+			equation_string+=format_constant(c[i]);
+		}
+	}
+	equation_string += '`</font>`';
+	return equation_string;
+}
+
+//generate the left and right terms for the first degree linear equations
+var left_x_coefficients= new Array();
+var right_x_coefficients= new Array();
+var left_constants = new Array();
+var right_constants = new Array();
+
+left_x_coefficients[0]=get_random();
+right_x_coefficients[0]=get_random();
+while (right_x_coefficients[0]==left_x_coefficients[0])
+	right_x_coefficients[0]=get_random();
+
+
+
+left_constants[0]=get_random();
+right_constants[0]=get_random();
+
+while(left_constants[0]==right_constants[0])
+	right_constants[0]=get_random();
+
+var inequal = '>';
+var opinequal ='<';
+if (get_random()>get_random())
+{
+	inequal = '<';
+	opinequal = '>';
+}
+
+
+
+//figure out the numerator and denominator for the solution
+var numerator = 0;
+var denominator = 0;
+for (var i=0; i<right_constants.length; i++) {
+	numerator+=right_constants[i];
+}
+for (var i=0; i<left_constants.length; i++) {
+	numerator-=left_constants[i];
+}
+for (var i=0; i<left_x_coefficients.length; i++) {
+	denominator+=left_x_coefficients[i];
+}
+for (var i=0; i<right_x_coefficients.length; i++) {
+	denominator-=right_x_coefficients[i];
+}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+//Write the hints
+generate_steps(left_x_coefficients, left_constants, right_x_coefficients, right_constants, inequal);	
+
+//Right answer
+var correct_answer = 'x'+inequal + format_fraction(numerator,denominator);
+
+if (denominator<0)
+{
+	correct_answer = 'x'+opinequal + format_fraction(numerator,denominator);
+}
+
+//Wrong Answers
+while (possibleAnswers.length<6)
+{
+	var n_shift = get_random();
+	var d_shift = get_random();
+
+	while ((numerator*d_shift)==(denominator*n_shift) || (d_shift+denominator)==0) {
+		n_shift = get_random();
+		d_shift = get_random();
+	}
+	addWrongChoice('x'+inequal + format_fraction(numerator+n_shift, denominator+d_shift));
+	addWrongChoice('x'+opinequal + format_fraction(numerator+n_shift, denominator+d_shift));
+}
+
+
+
+if (denominator<0)
+{
+	addWrongChoice('x'+inequal + format_fraction(numerator, denominator));
+}
+else
+{
+	addWrongChoice('x'+opinequal + format_fraction(numerator, denominator));
+}
+	
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+

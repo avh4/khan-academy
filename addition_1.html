@@ -1,0 +1,126 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var term1 = 0;
+var term2 = 0;
+var term1color = getNextColor();
+var term2color = getNextColor();
+var hintsGiven = 0;
+var xSpacing =65;
+var ySpacing = 60;
+var xMax = 400;
+var xMin = 0;
+var yMax = 300;
+var yMin = 0;
+var leftMargin = 50;
+var circlePos = leftMargin/2;
+var circleCount = 1;
+var standardSize = 75;
+var smallSize = 17;
+
+
+
+//This function is used to generate the random entries
+var eFunction = function()
+{
+	term1 = getRandomInt(9);
+	term2 = getRandomInt(9);
+
+	while (term1+term2<10)
+	{
+		term1 = getRandomInt(9);
+		term2 = getRandomInt(9);
+	}
+}
+
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var cFunction = function(history)
+{
+	return (history.indexOf(term1+'+'+term2)!=-1 || history.indexOf(term2+'+'+term1)!=-1);
+}
+
+
+//This function defines what an entry in the history should look like
+var tFunction = function()
+{
+	return (term1+'+'+term2);
+}
+
+
+//This checks the history and regenerates random numbers if the current ones have already been used recently 
+checkHistory(cFunction, eFunction, tFunction,10);
+
+
+
+
+function graph_update()
+{
+	present.initPicture(xMin,xMax,yMin);
+	present.fontfill = nColor;
+	present.fontsize = standardSize;
+	present.fontstyle = "normal";
+	present.fontfamily = "Arial";
+	
+	present.text([leftMargin,200], term1, above, 'term1');
+	
+	present.text([leftMargin+xSpacing,200], '+', above);
+	present.text([leftMargin+2*xSpacing,200], term2, above, 'term2');
+	present.text([leftMargin+3*xSpacing,200], '=', above);
+	present.text([leftMargin+4*xSpacing,200], '?', above, 'sum');
+	setCorrectAnswer(term1+term2);
+	
+}
+
+
+function drawCircles(num, color, startX)
+{
+	present.strokewidth=3;
+	present.stroke=color;
+	present.fontfill=color;
+	var radius = 10;
+	//var row = 0;
+	var perRow = 3;//getRandomInt(3)+1;
+	var curX = startX;
+	var curY = 0;
+	for(var i=0; i<num; i++)
+	{
+		
+		curX = startX+(i%perRow)*(2*radius+5);
+		curY = 185- Math.floor(i/perRow)*(2*radius+5);
+		present.circle([curX,curY], radius, startX+'_'+i);
+		
+	}
+}
+
+function next_step()
+{
+	if (hintsGiven==0)
+	{
+		present.fontfill = term1color;
+		present.text([leftMargin,200], term1, above, 'term1');
+		drawCircles(term1, term1color, leftMargin/2);
+	}
+	else if (hintsGiven==1)
+	{
+		present.fontfill = term2color;
+		present.text([leftMargin+2*xSpacing,200], term2, above, 'term2');
+		drawCircles(term2, term2color, leftMargin/2+2*xSpacing);
+	}
+	else
+	{
+		//fontfill = nColor;
+		//text([leftMargin+4*xSpacing,100], correctAnswer, above, 'sum');
+	
+	}
+	hintsGiven++;
+	steps_given++;
+}
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
+  

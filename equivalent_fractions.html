@@ -1,0 +1,50 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+/***
+Equivalent fractions
+***/
+
+
+function getFactors(x)
+{
+	var factors = '1';
+	for(var i=2; i<=x; i++)
+	{
+		if (x%i==0)
+			factors+=','+i;
+	}
+	return factors;
+}
+
+var A = getRandomIntRange(1,12);
+var B = getRandomIntRange(1,12);
+var C = getRandomIntRange(2,10);
+
+while (B==A)
+	B=getRandomIntRange(1,15);
+setCorrectAnswer(C*A);
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+write_text('<center>`'+A+'/'+B+' = ?/'+(B*C)+'`</center>');
+
+write_step('The left denominator '+B+' was multiplied by '+C+' to get the right denominator '+(B*C)+'.');
+
+write_step('The left numerator '+A+' then needs to be multiplied by '+C+' to get the new right numerator.');
+
+write_step('<center>`'+A+'/'+B+' * '+C+'/'+C+' = '+(A*C)+'/'+(B*C)+'`</center><P>So the answer is '+(A*C)+'</P>');
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}

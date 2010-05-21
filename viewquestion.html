@@ -1,0 +1,112 @@
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/stylesheet.css" />
+    <script>
+    function addQuestion(drop_down)
+    {
+    	var selected_subject = drop_down.selectedIndex;
+	var subject_key = drop_down[selected_subject].value;
+	window.location = "/pickquestiontopic?subject_key="+subject_key
+    }
+    
+    function practiceQuestion(drop_down)
+    {
+    	var selected_subject = drop_down.selectedIndex;
+	var subject_key = drop_down[selected_subject].value;
+	window.location = "/pickquiztopic?subject_key="+subject_key
+    }
+    </script>
+  </head>
+  <body>
+  <table width=100%>
+  <tr>
+  	<td valign=top align=left rowspan=2><A href="/"><img src="/images/logo.gif" width=150 height=100></A></td>
+  	<td valign=top align=right><h4>{{greeting}}</H4>
+	
+	
+	</td>
+  </tr>
+  <tr>
+  	<td valign=center align=right> 
+	<b>
+	 <A href="/">Manage Questions</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+	 <SELECT id="add_question" onchange="practiceQuestion(this)">
+			<OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
+			{% for subject in subjects %}
+				<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
+			{% endfor %}
+	 </SELECT>
+	 &nbsp;&nbsp;|&nbsp;&nbsp;
+	 <SELECT id="add_question" onchange="addQuestion(this)">
+			<OPTION VALUE="0" SELECTED>Add a question in...</OPTION>
+				{% for subject in subjects %}
+					<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
+				{% endfor %}
+	</SELECT>
+	</b>
+	
+	</td>
+  </tr>
+  
+  </table>
+  <P>
+ <table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+    <td bgcolor=#003399><img width=1 height=1 alt=""></td>
+  </tr>
+</table><table width=100% border=0 cellpadding=2 cellspacing=0>
+   <tr>
+    <td bgcolor=#e5ecf9 align=left><B>{{mode_text}}</B></td>
+
+  </tr>
+</table>
+  	<table>
+		<tr>
+			<td align=right valign=top><h3>Subject:</h3></td>
+			<td align=left valign=top><h3>
+			{% for b in breadcrumb %}
+				{{ b.name }}:
+			{% endfor %}
+			{{ question.subject.name }}
+			</h3></td>
+			
+		</tr>
+		<tr>
+			<td align=right valign=top>Question:</td>
+			<td align=left>{{question.question_text}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Correct Answer:</td><td align=left>{{question.correct_choice_text}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Incorrect Choice 1:</td><td align=left>{{question.incorrect_1}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Incorrect Choice 2:</td><td align=left>{{question.incorrect_2}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Incorrect Choice 3:</td><td align=left>{{question.incorrect_3}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Incorrect Choice 4:</td><td align=left>{{question.incorrect_4}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Incorrect Choice 5:</td><td align=left>{{question.incorrect_5}}</td>
+		</tr>
+		<tr>
+			<td align=right valign=top>Explanation of answer:</td><td align=left>{{question.answer_text}}</td>
+		</tr>
+		</table>
+		<form action="/editquestion" method="get">
+			<input type="hidden" name="question_key" value ="{{question.key}}">
+			<center><input type="submit" value="edit"></center>
+		</form>
+		{% if question.published %}
+			<A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[unpublish]</A>
+		{% else %}
+			<A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[publish]</A>
+		{% endif %}
+		| <A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A>
+  </body>
+</html>
+

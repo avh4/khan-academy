@@ -1,0 +1,154 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var currentY = Math.round(Math.random()*10)-5;
+var gY = Math.round(Math.random()*10)-7;
+var functionPath =new Array();
+var gPath = new Array();
+functionPath.push([-11, currentY]);
+gPath.push([-11, gY]);
+for(var i=-10; i<11; i++)
+{
+	if (Math.abs(get_random()<2) && functionPath[i+10][1]<8)
+		functionPath.push([i, functionPath[i+10][1]+1]);
+	else if (Math.abs(get_random()<2) && functionPath[i+10][1]>-8)
+		functionPath.push([i, functionPath[i+10][1]-1]);
+	else if (Math.abs(get_random()<2) && functionPath[i+10][1]<7)
+		functionPath.push([i, functionPath[i+10][1]+2]);
+	else if (Math.abs(get_random()<3) && functionPath[i+10][1]>-7)
+		functionPath.push([i, functionPath[i+10][1]-2]);
+	else
+		functionPath.push([i, functionPath[i+10][1]]);
+		
+	if (Math.abs(get_random()<2) && gPath[i+10][1]<8)
+		gPath.push([i, gPath[i+10][1]+1]);
+	else if (Math.abs(get_random()<3) && gPath[i+10][1]>-8)
+		gPath.push([i, gPath[i+10][1]-1]);
+	else if (Math.abs(get_random()<2) && gPath[i+10][1]<7)
+		gPath.push([i, gPath[i+10][1]+2]);
+	else if (Math.abs(get_random()<3) && gPath[i+10][1]>-7)
+		gPath.push([i, gPath[i+10][1]-2]);
+	else
+		gPath.push([i, gPath[i+10][1]]);
+}
+
+
+var correctX = Math.round(Math.random()*18)-9;
+var correctY = functionPath[correctX+11][1];
+
+var correctGX = Math.round(Math.random()*18)-9;
+var correctGY = gPath[correctGX+11][1];
+
+var fCoef = get_random();
+var gCoef = get_random();
+
+var wrongAnswers = new Array();
+
+correct_answer = fCoef*correctY + gCoef*correctGY;
+correctAnswer = correct_answer;
+
+for(var i=0; i<6; i++)
+{
+	var y = Math.round(Math.random()*18)-9;
+	
+	while (y==correct_answer)
+	{
+		y = Math.round(Math.random()*18)-9;
+	}
+	possibleAnswers.push(y);
+}
+
+function draw_next_step() {
+
+	if (steps_given==0)
+	{
+		present.fontsize="25";
+		present.stroke="orange";
+		present.strokedasharray="5,5";
+		present.fontfill="orange";
+		present.line([correctX, 0], functionPath[correctX+11]);
+		present.marker="dot";
+		present.markerfill="orange";
+		present.line([0, correctY], functionPath[correctX+11]);
+		present.text([-11, 10], 'f('+correctX+')='+correctY, right);
+	}
+	if (steps_given==1)
+	{
+		present.stroke="#28AE7B";
+		present.fontfill="#28AE7B";
+		present.marker="none";
+		present.line([correctGX, 0], gPath[correctGX+11]);
+		present.marker="dot";
+		present.markerfill="#28AE7B";
+		present.line([0, correctGY], gPath[correctGX+11]);
+		present.text([-11, 8.7], 'g('+correctGX+')='+correctGY, right);
+	}
+	if (steps_given==2)
+	{
+		present.fontfill="black";
+		present.text([-11, 7.4], fCoef+'('+correctY+')'+format_coefficient(gCoef)+'('+correctGY+')='+correct_answer, right);
+	
+	}
+	steps_given++;
+}
+
+
+function graph_update() {
+
+
+	present.initPicture(-11,11, -11, 11);
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	present.stroke = "#DDDDDD";
+	present.strokewidth = "2";
+	for(var i=-10; i<11; i++)
+	{
+		if (i!=0)
+		{
+			present.line([i,-11], [i,11]);
+			present.line([-11,i], [11,i]);
+			present.text([i, .1], i, below);
+			present.text([0, i], i, right);
+		}
+	}
+	present.axes();
+	
+	present.stroke="orange";
+	present.fontstyle="italic";
+	present.fontfill="orange";
+	present.fontstroke="none";
+	present.fontsize="20"
+	present.text(functionPath[functionPath.length-1], 'f(x)', above);
+	present.path(functionPath);
+	
+	present.stroke="#28AE7B";
+	present.fontstyle="italic";
+	present.fontfill="#28AE7B";
+	present.fontstroke="none";
+	present.fontsize="20"
+	present.text(gPath[gPath.length-1], 'g(x)', above);
+	present.path(gPath);
+}
+
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+
+<script language=Javascript1.2><!--
+document.write('<font size=5>`'+format_first_coefficient(fCoef)+'`<font color=\"orange\" style=bold>`f('+correctX+')`</font>`'+format_coefficient(gCoef)+'`<font color=\"#28AE7B\" style=bold>`g('+correctGX+')`</font>`=?`</font>');
+//-->
+</script>
+
+
+<center><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
+</center>
+
+
+
+{% endblock maincell %}
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}

@@ -1,0 +1,1368 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var valueTable = {};
+
+var explanationStack = new Array();
+var usedRules = new Array();
+var usedVariables = new Array();
+var initCond = new Array();
+var solved = false;  //This is set to true once the choice variable is solved for
+var solvedPaths = {};
+var shortestPath = []
+var initHash = {};
+var goal = '';
+var definedVariables = new Array();
+var goalDrawn=false;
+var type = 1;
+
+var searchStack = new Array();
+var xMin = 100;
+var yMin = 100;
+var xMax = 0;
+var yMax = 0;
+
+
+function initConditions(x, depth)
+{
+	searchStack.push([x, depth, definedVariables.slice(), usedVariables.slice()]);
+	//alert('initConditions('+x+', '+depth+')');
+	usedVariables.push(x);
+	//solveDependencies(usedVariables);
+	if (depth==0)
+	{
+		definedVariables.push(x);
+		solveDependencies(definedVariables);
+		if (variables[x].type=='variableboolean')
+		{
+			initHash[x] = {value: true, reason: new Array()};
+			initHash[variables[x].dependent] = {value: variables[x].value, reason: new Array()};
+			initCond.push([variables[x].dependent, variables[x].value]);
+		}
+		else if (variables[x].type=='boolean')
+		{
+			initHash[x] = {value: true, reason: new Array()};
+			initCond.push([x, true]);
+		}
+		else if (variables[x].type=='line')
+		{
+			initHash[x] = {value: variables[x].value, reason: new Array()};
+			initCond.push([x,variables[x].value]);
+
+		}
+		else
+		{
+			var maxVal = 14;
+			var epsilon = .99;
+			var val = Math.round(Math.random()*(maxVal-1+epsilon) - epsilon/2);
+			var newValue = Math.round(variables[x].seed-maxVal/2+val);
+			initHash[x] = {value: newValue, reason: new Array()};
+			initCond.push([x,newValue]);
+		}
+	}
+	else
+	{
+		var posRules = findRulesWithVariable(x);
+		var rulesUsed = 0;
+		if (posRules.length>0)
+		{
+			var curRule = randomArrayEntry(posRules);
+			usedRules.push(curRule[0]);
+			var unusedVars = curRule[1];
+			searchStack.push([unusedVars, 1,1,1]);
+			var r = randomIndices(unusedVars.length);
+			for(var i=0; i<unusedVars.length; i++)
+			{
+				
+				if (inArray(unusedVars[r[i]], usedVariables)!=true  &&  inArray(unusedVars[r[i]], definedVariables)!=true)
+				{
+					//alert(unusedVars[r[i]]);
+					rulesUsed++;
+					
+					//solveDependencies();
+				
+					if (variables[unusedVars[r[i]]].type=='variableboolean' || variables[unusedVars[r[i]]].type=='boolean')
+					{
+						initConditions(unusedVars[r[i]], 0);
+					}
+					else
+					{
+						initConditions(unusedVars[r[i]], depth-1);
+					}
+				}
+			}
+		}
+		if (rulesUsed==0)
+		{
+			initConditions(x,0);
+		}
+	}
+}
+
+function findPathsToGoal(path, definedVars)
+{
+	var r = randomIndices(rules.length);
+	for(var i=0; i<rules.length; i++)
+	{
+		var index = r[i];
+		curRule = rules[index];
+		var x = canBeSolved(curRule, definedVars);
+		if (x!=null)
+		{
+			var newPath = path.slice();
+			newPath.push(index);
+			var newDefinedVars = definedVars.slice();
+			newDefinedVars.push(x);
+			
+			if ((newPath.length < shortestPath.length) || shortestPath.length==0)
+			{
+				if (x==goal)
+				{
+					shortestPath = newPath;
+					//alert(shortestPath);
+				}
+				else
+				{
+					findPathsToGoal(newPath, newDefinedVars);
+				}
+			}
+		}
+	}
+}
+
+var usedInitCond = new Array();
+
+function getExplanation()
+{
+	usedVariables = [];
+	for(var i=0; i<shortestPath.length; i++)
+	{
+		var curRule = rules[shortestPath[i]];
+		for(var j=0; j<(curRule.length-1); j++)  //Have to map the variables before the explanation is generated
+		{
+			if (variables[curRule[j]].type=='angle' && variables[curRule[j]].mapping==null)
+				variables[curRule[j]].mapping = mapVars.pop();
+			if (variables[curRule[j]].type=='variableboolean' && variables[curRule[j]].dependent.mapping==null)
+			{
+				variables[variables[curRule[j]].dependent].mapping = mapVars.pop();
+				//alert(variables[curRule[j]].dependent+'  :  '+variables[curRule[j]].dependent.mapping+'  :  '+mapVars.pop());
+			}
+		}
+		
+		var x = solvable(curRule, initHash);
+		performOperation(shortestPath[i], initHash);
+		explanationStack.push([x, initHash[x].reason]);
+		
+		for(var j=0; j<(curRule.length-1); j++)  //Go through all the variables in the rule currently being used
+		{
+			usedVariables.push(curRule[j]);
+			for(var k=0; k<initCond.length; k++)
+			{
+				if (initCond[k][0]==curRule[j]  && inArray(initCond[k], usedInitCond)==false) 
+				{
+					
+					usedInitCond.push(initCond[k]);
+				}
+				else if (variables[curRule[j]].type=='variableboolean')
+				{
+					if (initCond[k][0]==variables[curRule[j]].dependent && initCond[k][1]==variables[curRule[j]].value  && inArray(initCond[k], usedInitCond)==false)
+						usedInitCond.push(initCond[k]);
+				
+				}
+			}
+		}
+	}
+}
+
+
+
+
+function solveDependencies(definedVars)
+{
+	//alert('solveSideEffects()');
+	var ruleApplied=true;
+
+	while(ruleApplied==true)
+	{
+		ruleApplied=false;
+		for(var i=0; i<rules.length; i++)
+		{
+			curRule = rules[i];
+			var x = canBeSolved(curRule, definedVars);
+			if (x!=null)
+			{
+				definedVars.push(x);
+				ruleApplied=true;
+			}
+		}
+	}
+}
+
+function canBeSolved(ruleArray, definedVars)
+{
+	var variable = null;
+	var foundFalse = false;;
+	var nullCount = 0;
+	
+	for(var i=0; i<ruleArray.length-1; i++)
+	{
+		if (inArray(ruleArray[i], definedVars)!=true)
+		{
+			variable=ruleArray[i];
+			nullCount++;
+		}
+	}
+	
+	if (nullCount!=1)
+		variable = null;
+		
+	return variable;
+}
+
+function solvable(ruleArray, valHash)
+{
+	//alert('solvable('+ruleArray+')');
+	var variable = null;
+	var foundFalse = false;;
+	var nullCount = 0;
+	
+	for(var i=0; i<ruleArray.length-1; i++)
+	{
+		if (valHash[ruleArray[i]]==null)
+		{
+			variable=ruleArray[i];
+			nullCount++;
+		}
+		else if (valHash[ruleArray[i]].value==false)  //A truth that was found to be false
+		{
+			foundFalse = true;
+		}
+	}
+	
+	if (nullCount!=1 || foundFalse==true)
+		variable = null;
+		
+	return variable;
+}
+
+
+
+
+function drawVariable(a)
+{
+	if (variables[a].type=='angle' && (a!=goal || goalDrawn==false))
+	{
+		var vertex = points[variables[a].points[1]].coor;
+		var p1 = points[variables[a].points[0]].coor;
+		var p2 = points[variables[a].points[2]].coor;
+		var slope1 = getSlope(vertex, p1);
+		var slope2 = getSlope(vertex, p2);
+		var startX;
+		var startY;
+		var endX;
+		var endY;
+		var textX;
+		var textY;
+		var radius=(xMax-xMin)/15;
+		var radIncrement = radius/2;
+		if(vertexDrawn[vertex]==null)
+		{
+			vertexDrawn[vertex]=1;
+		}
+		else
+		{
+			radius = radius + vertexDrawn[vertex]*radIncrement;
+			vertexDrawn[vertex]++;
+		}
+	
+		var angle1 = (Math.atan(slope1)+(2*Math.PI))%(2*Math.PI);
+		var angle2 = (Math.atan(slope2)+(2*Math.PI))%(2*Math.PI);
+	
+		if (p1[0]<vertex[0])
+			angle1 = (angle1 + Math.PI)%(2*Math.PI);
+		if (p2[0]<vertex[0])
+			angle2 = (angle2 + Math.PI)%(2*Math.PI);
+	
+		if ((angle1-angle2)>Math.PI)
+			angle1= angle1-(2*Math.PI);
+		
+		if ((angle2-angle1)>Math.PI)
+			angle2= angle2-(2*Math.PI);
+		
+		
+	
+		if (angle1>angle2)
+		{
+			startX = vertex[0] + radius*Math.cos(angle2);
+			startY = vertex[1] + radius*Math.sin(angle2);
+			endX = vertex[0] + radius*Math.cos(angle1);
+			endY = vertex[1] + radius*Math.sin(angle1);
+		}
+		else
+		{
+			endX = vertex[0] + radius*Math.cos(angle2);
+			endY = vertex[1] + radius*Math.sin(angle2);
+			startX = vertex[0] + radius*Math.cos(angle1);
+			startY = vertex[1] + radius*Math.sin(angle1);
+		}
+		
+		var textAngle = ((angle2+angle1)/2)%(2*Math.PI);
+		textX = vertex[0] + radius*Math.cos(textAngle);
+		textY = vertex[1] + radius*Math.sin(textAngle);
+		var textPos = 'above';
+		
+		if ((textAngle*180/Math.PI)>337.5 || (textAngle*180/Math.PI)<22.5)
+			textPos = right;
+		else if ((textAngle*180/Math.PI)<67.5)
+			textPos =aboveright;
+		else if ((textAngle*180/Math.PI)<112.5)
+			textPos =above;
+		else if ((textAngle*180/Math.PI)<157.5)
+			textPos =aboveleft;
+		else if ((textAngle*180/Math.PI)<202.5)
+			textPos =left;
+		else if ((textAngle*180/Math.PI)<247.5)
+			textPos =belowleft;
+		else if ((textAngle*180/Math.PI)<292.5)
+			textPos = below;
+		else if ((textAngle*180/Math.PI)<=337.5)
+			textPos =belowright;
+		
+		
+
+		present.stroke = variables[a].color;
+		present.fontfill = variables[a].color;
+		present.fontsize=15;
+		present.fontstyle ="italic";
+		present.fontweight="normal";
+		//fontfamily="arial";
+		present.arc([startX, startY], [textX, textY], radius);
+		present.arc([textX, textY], [endX, endY], radius);
+		//present.arc([startX, startY], [endX, endY], radius);
+		if (a==goal)
+		{
+			if(goalDrawn==false)
+			{
+				present.text([textX, textY], variables[a].mapping+'=?', textPos);
+				goalDrawn=true;
+			}
+		}
+		else
+			present.text([textX, textY], variables[a].mapping+'='+initHash[a].value, textPos);
+		
+		
+		
+		//present.marker='dot';
+		//present.line([textX, textY],[textX, textY]); 
+	} else if (variables[a].type=='line' && (a!=goal || goalDrawn==false))
+	{
+		present.stroke = variables[a].color;
+		present.line(points[variables[a].points[0]].coor, points[variables[a].points[1]].coor);
+	}
+	else if (variables[a].type=='boolean' && (a!=goal || goalDrawn==false))
+	{
+		if (variables[a].var1!=null)
+			drawVariable(variables[a].var1);
+		if (variables[a].var2!=null)
+			drawVariable(variables[a].var2);	
+	}
+	
+}
+
+function writeVariable(x, value)
+{
+	var returnString;
+	var valueString = '';
+	
+	if (value!=null)
+		valueString = '='+value;
+
+	if (variables[x].type=='angle')
+	{
+		returnString = '<font color='+variables[x].color+'><b>&ang;'+variables[x].mapping+valueString+'</b></font>';
+	}
+	else if (variables[x].type=='line')
+	{
+		returnString = '<font color='+variables[x].color+'><b>'+overline(x)+valueString+'</b></font>';
+	}
+	else if (variables[x].type=='variableboolean')
+	{
+		valueString = '='+x.value;
+		returnString = '<font color='+variables[x.dependent].color+'><b>'+overline(x)+valueString+'</b></font>';
+	}
+	else if (variables[x].type=='boolean')
+	{
+		returnString = writeVariable(variables[x].var1)+variables[x].relation+writeVariable(variables[x].var2);
+	}
+	
+	return returnString;
+}
+
+
+function getSlope(p1, p2)
+{
+	return ((p1[1]-p2[1])/(p1[0]-p2[0]));
+}
+
+
+	
+var supAngles = function supplementaryAngles(ruleArray, valueHash) //Assumes that one of them has not been solved for in the valueHash and that the other two have
+{
+	//alert("supplementaryAngles("+ruleArray+","+valueHash+")");
+	var answer = null;
+	var input1 = null;
+
+	for(var i=0; i<ruleArray.length-1;i++)
+	{
+		if (valueHash[ruleArray[i]]==null)
+		{
+			answer = ruleArray[i];
+			input1 = ruleArray[((i+1)%2)];
+		}
+	}
+	
+	var in1 = valueHash[input1].value;
+	
+	valueHash[answer]= {value: (180 -  in1), reason: new Array()};
+	valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(input1));
+	valueHash[answer].reason.push(writeVariable(answer)+' and '+writeVariable(input1)+' are <A href=\"javascript:popup(\'def/supplementary.html\')\">supplementary</a>');
+	valueHash[answer].reason.push(writeVariable(answer)+'+'+writeVariable(input1)+'=180');
+	valueHash[answer].reason.push('Since '+writeVariable(input1, in1)+', '+writeVariable(answer,(180 - in1)));
+	
+}		
+
+var oppAngles = function oppositeAngles(ruleArray, valueHash) //Assumes that one of them has not been solved for in the valueHash and that the other two have
+{
+	//alert("supplementaryAngles("+ruleArray+","+valueHash+")");
+	var answer = null;
+	var input1 = null;
+
+	for(var i=0; i<ruleArray.length-1;i++)
+	{
+		if (valueHash[ruleArray[i]]==null)
+		{
+			answer = ruleArray[i];
+			input1 = ruleArray[((i+1)%2)];
+		}
+	}
+	
+	var in1 = valueHash[input1].value;
+	
+	valueHash[answer]= {value: in1, reason: new Array()};
+	valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(input1));
+	valueHash[answer].reason.push(writeVariable(answer)+' and '+writeVariable(input1)+' are opposite angles');
+	valueHash[answer].reason.push('So :'+writeVariable(answer)+'='+writeVariable(input1)+' and '+writeVariable(input1,in1));
+	valueHash[answer].reason.push('Since '+writeVariable(input1, in1)+', '+writeVariable(answer,in1));
+}
+
+var corAngles = function corresspondingAngles(ruleArray, valueHash) //Assumes that one of them has not been solved for in the valueHash and that the other two have
+{
+	//alert("supplementaryAngles("+ruleArray+","+valueHash+")");
+	var answer = null;
+	var input1 = null;
+
+	for(var i=0; i<ruleArray.length-1;i++)
+	{
+		if (valueHash[ruleArray[i]]==null)
+		{
+			answer = ruleArray[i];
+			input1 = ruleArray[((i+1)%3)];
+			input2 = ruleArray[((i+2)%3)];
+		}
+	}
+	
+	
+	if (answer.length<4)//We know that the answer will be an angle as opposed to a truth
+	{
+		var known;
+		if(input1.length <4)
+		{
+			known = input1;
+			reason = input2;
+		}
+		else
+		{
+			known = input2;
+			reason = input1;
+		}
+	
+		var knownVal = valueHash[known].value;
+	
+		valueHash[answer]= {value: knownVal, reason: new Array()};
+		valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(known));
+		valueHash[answer].reason.push('Since '+reason+', '+writeVariable(answer)+' and '+writeVariable(known)+' are corresponding angles');
+		valueHash[answer].reason.push('So:'+writeVariable(answer)+'='+writeVariable(known)+'; '+writeVariable(known,knownVal));
+		valueHash[answer].reason.push(writeVariable(answer,knownVal));
+	}
+	else
+	{
+		var in1 = valueHash[input1].value;
+		var in2 = valueHash[input2].value;
+		
+		if (in1==in2)
+		{
+			valueHash[answer] = {value: true, reason: new Array()};
+			valueHash[answer].reason.push('Since '+writeVariable(input1)+'='+writeVariable(input2)+' and they are corresponding angles, we know that '+answer);
+		}
+		else
+		{
+			valueHash[answer] = {value: false, reason: new Array()};
+			valueHash[answer].reason.push('Since '+writeVariable(input1)+' does not equal '+writeVariable(input2)+', it cannot be true that '+answer);
+		}
+	}
+}
+
+var pyth = function pythTriangle(ruleArray, valueHash) //Assumes the arguments come in the order A, B, C, X=90 where A2+B2=C2
+{
+	//alert('pythTriangle(['+ruleArray+'],{'+valueHash+'})');
+	var answer = null;
+	var inputs = {};
+	var solvingFor;
+
+	var A={name: ruleArray[0], value: null};
+	var B={name: ruleArray[1], value: null};
+	var C={name: ruleArray[2], value: null};
+	var angleRule={name: ruleArray[3], value: null};
+	
+	if (valueHash[ruleArray[0]]!=null)
+		A.value= valueHash[ruleArray[0]].value;
+	if (valueHash[ruleArray[1]]!=null)
+		B.value= valueHash[ruleArray[1]].value;
+	if (valueHash[ruleArray[2]]!=null)
+		C.value= valueHash[ruleArray[2]].value;
+	if (valueHash[ruleArray[3]]!=null)
+		angleRule.value= valueHash[ruleArray[3]].value;
+
+	
+	for(var i=0; i<ruleArray.length-1;i++)
+	{
+		if (valueHash[ruleArray[i]]==null)
+		{
+			answer = ruleArray[i];
+			inputs[0] = {name: ruleArray[((i+1)%4)], value: valueHash[ruleArray[((i+1)%4)]]};
+			inputs[1] = {name: ruleArray[((i+2)%4)], value: valueHash[ruleArray[((i+2)%4)]]};
+			inputs[2] = {name: ruleArray[((i+3)%4)], value: valueHash[ruleArray[((i+3)%4)]]};
+			solvingFor = i;
+		}
+	}
+	
+	
+	if (A.value==null)
+	{
+		valueHash[A.name]= {value: variables[A.name].value, reason: new Array()};
+		valueHash[A.name].reason.push('<b>'+writeVariable(A.name)+'<sup>2</sup>+'+writeVariable(B.name)+'<sup>2</sup>='+writeVariable(C.name)+'<sup>2</sup></b>');
+		valueHash[A.name].reason.push('<b>'+writeVariable(A.name)+'<sup>2</sup>+'+B.value+'<sup>2</sup>='+C.value+'<sup>2</sup></b>');
+		valueHash[A.name].reason.push('<b>'+writeVariable(A.name)+'`=sqrt('+Math.pow(variables[A.name].value,2)+')`</b>');
+		valueHash[A.name].reason.push(writeVariable(A.name,valueHash[A.name].value));
+	}
+	if (B.value==null)
+	{
+		valueHash[B.name]= {value: variables[B.name].value, reason: new Array()};
+		valueHash[B.name].reason.push('<b>'+writeVariable(B.name)+'<sup>2</sup>+'+writeVariable(A.name)+'<sup>2</sup>='+writeVariable(C.name)+'<sup>2</sup></b>');
+		valueHash[B.name].reason.push('<b>'+writeVariable(B.name)+'<sup>2</sup>+'+A.value+'<sup>2</sup>='+C.value+'<sup>2</sup></b>');
+		valueHash[B.name].reason.push('<b>'+writeVariable(B.name)+'`=sqrt('+Math.pow(variables[B.name].value,2)+')`</b>');
+		valueHash[B.name].reason.push(writeVariable(B.name,valueHash[B.name].value));
+	}
+	if (C.value==null)
+	{	
+		valueHash[C.name]= {value: variables[C.name].value, reason: new Array()};
+		valueHash[C.name].reason.push('<b>'+writeVariable(B.name)+'<sup>2</sup>+'+writeVariable(A.name)+'<sup>2</sup>='+writeVariable(C.name)+'<sup>2</sup></b>');
+		valueHash[C.name].reason.push('<b>'+A.value+'<sup>2</sup>+'+B.value+'<sup>2</sup>='+writeVariable(C.name)+'<sup>2</sup></b>');
+		valueHash[C.name].reason.push('<b>'+writeVariable(C.name)+'=`sqrt('+Math.pow(variables[C.name].value,2)+')`</b>');
+		valueHash[C.name].reason.push('<b>'+writeVariable(C.name,valueHash[C.name].value)+'</b>');
+	}
+	if (angleRule.value==null)
+	{
+		valueHash[angleRule]= {value: true, reason: new Array()};
+		valueHash[angleRule].reason.push('`'+writeVariable(A.name)+'<sup>2</sup>+'+writeVariable(B.name)+'<sup>2</sup>='+writeVariable(C.name)+'^<sup>2</sup>`, so '+writeVariable(angleRule));
+		valueHash[variables[angleRule].dependent]= {value: 90, reason: new Array()};
+	}
+		
+}		
+	
+
+var angSum = function angleSum(ruleArray, valueHash) //Assumes the first two angles add up to the third
+{
+	//alert("angleSum("+ruleArray+","+valueHash+")");
+	var answer = null;
+	var input1 = null;
+	var input2 = null;
+	var solvingBigAngle = false; //start with the assumption that we are solving for one of the smaller angles
+
+	for(var i=0; i<ruleArray.length-1;i++)
+	{
+		if (valueHash[ruleArray[i]]==null)
+		{
+			answer = ruleArray[i];
+			
+			
+			if (i==2)
+			{
+				solvingBigAngle = true;  //We are solving for the sum of the two smaller angles
+				input1 = ruleArray[0];
+				input2 = ruleArray[1];
+			}
+			else
+			{
+				input1 = ruleArray[((i+1)%2)];
+				input2 = ruleArray[2];
+			}
+		}
+	}
+	
+	var in1 = valueHash[input1].value;
+	var in2 = valueHash[input2].value;
+	
+	if (solvingBigAngle)
+	{
+		valueHash[answer]= {value: (in2 + in1), reason: new Array()};
+		valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(input1)+' and '+writeVariable(input2));
+		valueHash[answer].reason.push(writeVariable(input2)+'+'+writeVariable(input1)+'='+writeVariable(answer)+' and '+writeVariable(input1,in1)+', '+writeVariable(input2,in2));
+		valueHash[answer].reason.push('So '+writeVariable(answer,(in2+in1)));
+	
+	}
+	else
+	{
+		valueHash[answer]= {value: (in2 - in1), reason: new Array()};
+		valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(input1)+' and '+writeVariable(input2));
+		valueHash[answer].reason.push(writeVariable(answer)+'+'+writeVariable(input1)+'='+writeVariable(input2)+' and '+writeVariable(input1,in1)+', '+writeVariable(input2,in2));
+		valueHash[answer].reason.push('So '+writeVariable(answer)+'='+in2+'-'+in1);
+		valueHash[answer].reason.push(writeVariable(answer,(in2 - in1)));
+	}
+}
+
+var triAngSum = function triangleAngleSum(ruleArray, valueHash) //Assumes that one of them has not been solved for in the valueHash and that the other two have
+{
+	//alert("triangleAngleSum("+ruleArray+","+valueHash+")");
+	var answer = null;
+	var input1 = null;
+	var input2 = null;
+
+	for(var i=0; i<ruleArray.length-1;i++)
+	{
+		if (valueHash[ruleArray[i]]==null)
+		{
+			answer = ruleArray[i];
+			input1 = ruleArray[((i+1)%3)];
+			input2 = ruleArray[((i+2)%3)];
+		}
+	}
+	
+	var in1 = valueHash[input1].value;
+	var in2 = valueHash[input2].value;
+	
+	valueHash[answer]= {value: (180 -  in1 - in2), reason: new Array()};
+	valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(input1)+' and '+writeVariable(input2));
+	//valueHash[answer].reason.push("The sum of the angles of a triangle = 180");
+	valueHash[answer].reason.push(writeVariable(answer)+'+'+writeVariable(input1)+'+'+writeVariable(input2)+'=180');
+	valueHash[answer].reason.push(writeVariable(input1,in1)+', '+writeVariable(input2,in2));
+	valueHash[answer].reason.push(writeVariable(answer)+'=180-'+in1+'-'+in2);
+	valueHash[answer].reason.push(writeVariable(answer,(180 - in1 - in2)));
+}
+
+function performOperation(rIndex, valueHash)
+{
+	var rule = rules[rIndex]; 
+	rule[rule.length-1](rules[rIndex], valueHash);
+}
+
+
+		
+	
+function inArray(x, a)
+{
+	var answer = false;
+	
+	for(var i=0; i<a.length; i++)
+	{
+		if (x==a[i])
+		{
+			answer=true;
+			i=a.length;
+		}
+	}
+	return answer;
+}
+
+function varInRule(x, rule)
+{
+	var j=0;
+	var foundMatch = false;
+
+	while (j<(rule.length-1) && foundMatch==false)
+	{
+		if (rule[j]==x)
+		{
+			foundMatch = true;
+		}
+		j++;
+	}
+	return foundMatch;
+}
+
+function assignRandom(x)
+{
+	//alert("assignRandom("+x+")");
+	
+	if (valueTable[x]==null)
+	{
+		var maxVal;
+		if (isAngle(x))
+		{
+			maxVal = 14;
+		}
+		else if (isLength(x))
+		{
+			maxVal = 5;
+		}
+		var epsilon = .99;
+		var val = Math.round(Math.random()*(maxVal-1+epsilon) - epsilon/2);
+		var newValue = Math.round(variables[x].seed-maxVal/2+val);
+
+		valueTable[x] = {value: newValue, reason: new Array()};
+		initCond.push([x,newValue]);
+		solveSideEffects();
+	}
+}
+
+function isAngle(x)
+{
+	return (x.length==3);
+}
+
+function isTruth(x)
+{
+	return (x.length>3);
+}
+
+function isLength(x)
+{
+	return (x.length==2);
+}
+
+
+function randomIndices(length)
+{
+	var startArray = new Array();
+	var endArray = new Array();
+	
+	for(var i=0; i<length; i++)
+		startArray.push(i);
+		
+	while(startArray.length>0)
+	{
+		var epsilon = .99;
+		var maxVal = startArray.length-1;
+		var index = Math.round(Math.random()*(maxVal+epsilon) - epsilon/2);
+		
+		endArray.push(startArray.splice(index,1)[0]);
+	}
+
+	return endArray;
+
+}
+
+
+
+function findRulesWithVariable(v)
+{
+	//alert("findRulesWithVariable("+v+")");
+	var matchingRules = new Array();
+	for(var i=0; i<rules.length; i++)
+	{
+		if (varInRule(v, rules[i]) && inArray(i, usedRules)!=true && ((v!=goal && varInRule(goal, rules[i])!=true)|| v==goal))  //The variable is in the rule and the rule has not been used yet
+		{
+			var unusedVars = new Array();   //figure out all of the variables that have not been used or defined (ALL defined variables are used but not the other way around)
+			for(var j=0; j<rules[i].length-1; j++)
+			{
+				if (inArray(rules[i][j], usedVariables)!=true) //If the jth element of rule i is not a usedVariables
+					unusedVars.push(rules[i][j]);
+			}
+			if (unusedVars.length>0)
+			{
+				matchingRules.push([i, unusedVars]);
+			}
+		}
+	}
+	return matchingRules;
+}
+
+function randomArrayEntry(a) //returns a random entry from the array a
+{
+	var epsilon = .99;
+	var index = Math.round(Math.random()*(a.length-1+epsilon) - epsilon/2);
+	return a[index];
+}
+
+
+
+function overline(x)
+{
+	return ('<font style=\"text-decoration: overline;\">'+x+'</font>');
+}
+
+
+function draw_next_step() {
+	drawVariable(explanationStack[steps_given][0]);
+	steps_given++;
+	for(var i=1; i<=display_per_step; i++)
+		document.getElementById("step"+steps_given+"_"+i).style.visibility = 'visible';
+}
+
+
+function graph_update() {
+	
+	
+	for (key in points)
+	{
+		xMin = Math.min(xMin, points[key].coor[0]);
+		xMax = Math.max(xMax, points[key].coor[0]);
+		yMin = Math.min(yMin, points[key].coor[1]);
+		yMax = Math.max(yMax, points[key].coor[1]);
+	}
+	
+	
+	present.initPicture(xMin,xMax, yMin, yMax);
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	present.stroke = "#AAAAAA";
+	present.strokewidth = "2";
+	if (type==1)
+		updateType1();
+	else
+		updateType2();
+	
+	for(key in points)
+	{
+		if (points[key].label!=null)
+		{
+			present.text(points[key].coor, key, points[key].label);
+		}
+	}
+	
+	for(var i=0; i<usedInitCond.length; i++)
+	{
+		drawVariable(usedInitCond[i][0]);
+	}
+	drawVariable(goal);
+}
+
+
+
+function updateType1()
+{
+	
+
+	present.line(points.A.coor, points.C.coor);
+	present.line(points.C.coor, points.D.coor);
+	present.line(points.D.coor, points.B.coor);
+	present.line(points.B.coor, points.A.coor);
+	present.line(points.B.coor, points.C.coor);
+	present.line(points.B.coor, points.E.coor);
+	present.line(points.I.coor, points.B.coor);
+	present.line(points.H.coor, points.I.coor);
+	present.line(points.F.coor, points.G.coor);
+	
+}
+
+function updateType2()
+{
+
+	for (x in variables)
+	{
+		if (variables[x].type=='line')
+		{
+			var p1 = points[variables[x].points[0]].coor;
+			var p2 = points[variables[x].points[1]].coor;
+			present.line(p1,p2);
+		}
+	}
+/***
+	present.line(points.A.coor, points.C.coor);
+	present.line(points.A.coor, points.D.coor);
+	present.line(points.B.coor, points.E.coor);
+	present.line(points.B.coor, points.D.coor);
+	present.line(points.C.coor, points.E.coor);
+***/	
+}
+
+
+function getReasonString(reason)
+{
+	var reasonString = reason[0]+':<UL>';
+	for(var i=1; i<reason.length; i++)
+		reasonString+='<li>'+reason[i]+'</li>';
+	reasonString+='</ul>';
+	
+	return reasonString;
+
+}
+
+function type1()
+{
+	variables['BAC'] = {type: 'angle', points:['B','A','C'], seed:60, color: '#D9A326'};
+	variables['ABC'] = {type: 'angle', points:['A','B','C'], seed:60, color: '#E8887D'};
+	variables['ACB'] = {type: 'angle', points:['A','C','B'], seed:60, color: '#9CC9B7'};
+	variables['CBD'] = {type: 'angle', points:['C','B','D'], seed:30, color: '#AE9CC9'};
+	variables['BCD'] = {type: 'angle', points:['B','C','D'], seed:120, color: '#CC6699'};
+	variables['BDC'] = {type: 'angle', points:['B','D','C'], seed:30, color: '#FF6347'};
+	variables['ABD'] = {type: 'angle', points:['A','B','D'], seed:90, color: '#8E2323'};
+	variables['EBD'] = {type: 'angle', points:['E','B','D'], seed:90, color: '#CD9B9B'};
+	variables['IBE'] = {type: 'angle', points:['I','B','E'], seed:60, color: '#E47833'};
+	variables['IBD'] = {type: 'angle', points:['I','B','D'], seed:150, color: '#777777'};
+	variables['ABI'] = {type: 'angle', points:['A','B','I'], seed:120, color: '#AA5303'};
+	variables['BIF'] = {type: 'angle', points:['B','I','F'], seed:120, color: '#CDBA96'};
+	variables['CBE'] = {type: 'angle', points:['C','B','E'], seed:120, color: '#FFCC11'};
+	variables['HIF'] = {type: 'angle', points:['H','I','F'], seed:60, color: '#6B8E23'};
+	variables['GIH'] = {type: 'angle', points:['G','I','H'], seed:120, color: '#668B8B'};
+	variables['GIC'] = {type: 'angle', points:['G','I','C'], seed:60, color: '#00CED1'};
+	variables['GF'] = {type: 'line', points:['G','F'], value:10, color: '#CDBA96'};
+	variables['AE'] = {type: 'line', points:['A','E'], value:10, color: '#FF6347'};
+	variables['AB'] = {type: 'line', points:['A','B'], value:pythSide[0], color: '#E8887D'};
+	variables['BD'] = {type: 'line', points:['B','D'], value:pythSide[1], color: '#9370DB'};
+	variables['AD'] = {type: 'line', points:['A','D'], value:pythSide[2], color: '#DB70DB'};
+	variables['ABD=90'] = {type: 'variableboolean', dependent:'ABD', value:90};
+	variables['line GF is parrallel to line AE'] = {type: 'boolean', relation: ' is parallel to ', var1: 'GF', var2: 'AE'};
+	
+	points.A = {coor: [-5,0], label: left};
+	points.B = {coor: [-2,6], label: above};
+	points.C = {coor: [0,0], label: below};
+	points.D = {coor: [5,0], label: right};
+	points.E = {coor: [1, 12], label: right};
+	points.F = {coor: [-2,12], label: right};
+	points.G = {coor: [-8,0], label: below};
+	points.H = {coor: [-4, 12], label: left};
+	points.I = {coor: [-16/5, 48/5], label: left};
+
+	rules = [	['BAC', 'ABC', 'ACB', triAngSum],
+			['ABC', 'CBD', 'ABD', angSum], //Assumes the first n items make up the last item (before the function call)
+			['CBD', 'EBD', 'CBE', angSum],
+			['IBE', 'EBD', 'IBD', angSum],
+			['BAC', 'ABD', 'BDC', triAngSum],
+			['ACB', 'BCD', supAngles],
+			['CBE', 'ABC', supAngles],
+			['CBE', 'IBE', supAngles],
+			['IBE','ABC', oppAngles],
+			['GIH', 'BIF', oppAngles],
+			['HIF', 'GIC', oppAngles],
+			['ABI','CBE', oppAngles],
+			['IBE','ABI', supAngles],
+			['ABC','ABI', supAngles],
+			['ABD','EBD', supAngles],
+			['GIH', 'GIC', supAngles],
+			['HIF', 'BIF', supAngles],
+			['BIF', 'GIC', supAngles],
+			['IBE','HIF', 'line GF is parrallel to line AE', corAngles],
+			['BIF','CBE', 'line GF is parrallel to line AE', corAngles],
+			['ABI','GIH', 'line GF is parrallel to line AE', corAngles],
+			['ABC','GIC', 'line GF is parrallel to line AE', corAngles],
+			['CBD','IBD', supAngles],
+			['AB', 'BD', 'AD', 'ABD=90', pyth],
+			['BDC','BCD','CBD', triAngSum]];
+}
+
+
+function intersection(p1,p2,p3,p4)
+{
+	var m1 = (points[p1].coor[1]-points[p2].coor[1])/(points[p1].coor[0]-points[p2].coor[0]);
+	var m2 = (points[p3].coor[1]-points[p4].coor[1])/(points[p3].coor[0]-points[p4].coor[0]);
+	var b1 = points[p1].coor[1] - m1*points[p1].coor[0];
+	var b2 = points[p3].coor[1] - m2*points[p3].coor[0];
+	var x = (b2-b1)/(m1-m2);
+	var y = m1*x+b1;
+	return [Math.round(x*100)/100,Math.round(y*100)/100];
+}
+
+
+function getLine(p1, p2)
+{
+	var m = Math.round(getSlope(p1, p2)*100)/100;
+	var b = Math.round((p1[1]-p1[0]*m)*1000)/1000;
+	return [m,round2Dig(b)];
+}
+
+function equalLines(line1, line2)
+{
+	return (line1[0]==line2[0] && line1[1]==line2[1]);
+}
+
+function round2Dig(x)
+{
+
+	var s = xMax-xMin;
+	s = s/200;
+	return (Math.round(x*s)/s);
+
+}
+
+
+
+var colors = ['#D9A326', '#E8887D', '#9CC9B7', '#AE9CC9', '#CC6699', '#FF9999', '#CD9B9B', '#E47833', '#777777', '#CDBA96','#FFCC11','#6B8E23','#668B8B'];
+var curColor = 0;
+
+function getColor()
+{
+	curColor = (curColor+1)%colors.length;
+	return colors[curColor];
+}
+
+function createAngle(end1, vert, end2)
+{
+
+	if (variables[end1+vert+end2]==null && variables[end2+vert+end1]==null)
+	{
+		var e1 = points[end1].coor;
+		var e2 = points[end2].coor;
+		var v = points[vert].coor;
+	
+		var slope1 = getSlope(v, e1);
+		var slope2 = getSlope(v, e2);
+		var angle1 = (Math.atan(slope1)+(2*Math.PI))%(2*Math.PI);
+		var angle2 = (Math.atan(slope2)+(2*Math.PI))%(2*Math.PI);
+		
+		if (e1[0]<v[0])
+			angle1 = (angle1 + Math.PI)%(2*Math.PI);
+		if (e2[0]<v[0])
+			angle2 = (angle2 + Math.PI)%(2*Math.PI);
+		
+		if ((angle1-angle2)>Math.PI)
+			angle1= angle1-(2*Math.PI);
+		
+		if ((angle2-angle1)>Math.PI)
+			angle2= angle2-(2*Math.PI);
+		
+		var angle = Math.round(Math.abs(angle1-angle2)*180/Math.PI);
+		variables[end1+vert+end2]={type:'angle', points:[end1,vert,end2], seed: angle, goal:true, color: getColor()};
+		findTriangle(end1+vert+end2);
+	}
+}
+
+var incr=0;
+
+function overlappingEdges(v1, e1, v2, e2)  //we assume that the edges are on the same line, just need to make sure that they overlap in a way that means that v1 and v2 are in the same triangle
+{
+	if (v1[0]!=v2[0])
+	{
+		return (Math.round((e1[0]-v1[0])/Math.abs(e1[0]-v1[0]))==Math.round((v2[0]-v1[0])/Math.abs(v2[0]-v1[0]))
+			&&
+			Math.round((e2[0]-v2[0])/Math.abs(e2[0]-v2[0]))==Math.round((v1[0]-v2[0])/Math.abs(v1[0]-v2[0])));
+	}
+	else if (v1[1]!=v2[1])
+	{
+		return (Math.round((e1[1]-v1[1])/Math.abs(e1[1]-v1[1]))==Math.round((v2[1]-v1[1])/Math.abs(v2[1]-v1[1]))
+			&&
+			Math.round((e2[1]-v2[1])/Math.abs(e2[1]-v2[1]))==Math.round((v1[1]-v2[1])/Math.abs(v1[1]-v2[1])));
+	}
+	else
+		return false;
+}
+
+function sameDirection(p1, p2, q1, q2)
+{
+	return ((Math.round(p1)>=Math.round(p2) && Math.round(q1)>=Math.round(q2)) || (Math.round(p1)<Math.round(p2) && Math.round(q1)<Math.round(q2)));
+}
+
+
+
+
+function sameDirectionEdges(v1, e1, v2, e2)  //we assume that the edges will intersect so that we know that v1 and v2 are part of the same triangle,
+{
+
+	var i = intersection(v1, e1, v2, e2);
+	
+	var pv1 = points[v1].coor;
+	var pe1 = points[e1].coor;
+	var pv2 = points[v2].coor;
+	var pe2 = points[e2].coor;
+/***	
+	if (v1=='H' && e1=='C' && v2=='I' && e2=='C')
+	{
+		alert(pv1);
+		alert(pe1);
+		alert(pv2);
+		alert(pe2);
+	}
+	****/
+	return (sameDirection(pv1[0], i[0], pv1[0], pe1[0]) 
+		&& sameDirection(pv1[1], i[1], pv1[1], pe1[1]) 
+		&& sameDirection(pv2[0], i[0], pv2[0], pe2[0]) 
+		&& sameDirection(pv2[1], i[1], pv2[1], pe2[1]));
+}
+
+
+
+function shareSide(a1, a2) //tests if 2 angles (that do not share the same vertex do share a side
+{
+	var v1_p = variables[a1].points[1];
+	var e1_p0 = variables[a1].points[0];
+	var e1_p2 = variables[a1].points[2];
+
+	var v1 = points[v1_p].coor;
+	var e1_0 = points[e1_p0].coor;
+	var e1_2 = points[e1_p2].coor;
+	
+	var v2_p = variables[a2].points[1];
+	var e2_p0 = variables[a2].points[0];
+	var e2_p2 = variables[a2].points[2];
+	
+	var v2 = points[v2_p].coor;
+	var e2_0 = points[e2_p0].coor;
+	var e2_2 = points[e2_p2].coor;
+
+	var a1_side1 = getLine(e1_0, v1);
+	var a1_side2 = getLine(e1_2, v1);
+	var a2_side1 = getLine(e2_0, v2);
+	var a2_side2 = getLine(e2_2, v2);
+	/**
+	if (a1=='CHD' && a2=='CIB')
+	{
+		alert(a1_side1+'***'+a1_side2+'***'+a2_side1+'***'+a2_side2);
+		alert(equalLines(a1_side2, a2_side2));
+		alert(overlappingEdges(v1, e1_2, v2, e2_2));
+		alert(sameDirectionEdges(v1_p, e1_p0, v2_p, e2_p0));
+		alert('v1_p:'+v1_p+', e1_p0:'+e1_p0+', v2_p:'+v2_p+', e2_p0:'+e2_p0);
+	
+	}
+	**/
+	if ((	(equalLines(a1_side1, a2_side1) && overlappingEdges(v1, e1_0, v2, e2_0) && sameDirectionEdges(v1_p, e1_p2, v2_p, e2_p2)) || 
+		(equalLines(a1_side2, a2_side1) && overlappingEdges(v1, e1_2, v2, e2_0) && sameDirectionEdges(v1_p, e1_p0, v2_p, e2_p2)) || 
+		(equalLines(a1_side1, a2_side2) && overlappingEdges(v1, e1_0, v2, e2_2) && sameDirectionEdges(v1_p, e1_p2, v2_p, e2_p0)) || 
+		(equalLines(a1_side2, a2_side2) && overlappingEdges(v1, e1_2, v2, e2_2) && sameDirectionEdges(v1_p, e1_p0, v2_p, e2_p0)))
+		&& 
+		variables[a1].points[1]!=variables[a2].points[1])//This last line makes sure that they don't share the same vertex
+		{	
+			return true;	
+		}
+	else 
+		return false;
+}
+
+var anglesAdded =0;
+
+function findTriangle(angle)
+{
+	anglesAdded++;
+	
+	//alert(angle+', points:');
+	var shareSidesArray = new Array();
+	for (a in variables)
+	{
+		if (variables[a].type=='angle')
+		{
+			if (shareSide(a, angle))
+				shareSidesArray.push(a);
+			else
+			{/*
+				if (incr<10 && anglesAdded>10 && anglesAdded<25)
+				{
+					incr++;
+					alert('angle: '+angle+', a: '+a);
+				}*/
+			}	
+		}
+		
+	}
+	//alert(angle+'poss: '+shareSidesArray);
+/**
+	if (angle=='BIC' || angle=='CIB')
+		alert(angle+'poss: '+shareSidesArray);
+	**/	
+	for (var i=0; i<shareSidesArray.length; i++)
+	{
+		for (var j=(i+1); j<shareSidesArray.length; j++)
+		{
+			
+			if (shareSide(shareSidesArray[i], shareSidesArray[j]))
+			{
+				
+				rules.push([angle, shareSidesArray[i], shareSidesArray[j], triAngSum]);
+				//alert([angle, shareSidesArray[i], shareSidesArray[j]]);
+			}
+		}
+	}
+	//alert(angle);
+}
+
+
+function type2()
+{
+	
+	variables['AC']={type: 'line', points:['A', 'C'], goal:false, color: getColor()};
+	variables['CE']={type: 'line', points:['C', 'E'], goal:false, color: getColor()};
+	variables['EB']={type: 'line', points:['E', 'B'], goal:false, color: getColor()};
+	variables['BD']={type: 'line', points:['B', 'D'], goal:false, color: getColor()};
+	variables['DA']={type: 'line', points:['D', 'A'], goal:false, color: getColor()};
+	
+	/**
+	variables['AB']={type: 'line', points:['A', 'B'], goal:false, color: getColor()};
+	variables['BC']={type: 'line', points:['B', 'C'], goal:false, color: getColor()};
+	variables['CD']={type: 'line', points:['C', 'D'], goal:false, color: getColor()};
+	variables['DE']={type: 'line', points:['D', 'E'], goal:false, color: getColor()};
+	variables['EA']={type: 'line', points:['E', 'A'], goal:false, color: getColor()};
+	****/
+	
+	rules = new Array();
+	
+	points.A = {coor: [-100*Math.cos(18*Math.PI/180), 100*Math.sin(18*Math.PI/180)], label: left};
+	points.B = {coor: [0,100], label: above};
+	points.C = {coor: [100*Math.cos(18*Math.PI/180), 100*Math.sin(18*Math.PI/180)], label: right};
+	points.D = {coor: [100*Math.cos(-54*Math.PI/180),100*Math.sin(-54*Math.PI/180)], label: right};
+	points.E = {coor: [-100*Math.cos(-54*Math.PI/180),100*Math.sin(-54*Math.PI/180)], label: right};
+	points.F = {coor: intersection('A','D','E','B'), label: left};
+	points.G = {coor: intersection('E','B','A','C'), label: aboveleft};
+	points.H = {coor: intersection('A','C','B','D'), label: aboveright};
+	points.I = {coor: intersection('B','D','C','E'), label: right};
+	points.J = {coor: intersection('A','D','C','E'), label: below};
+	
+	for (k in variables)
+	{
+		for (j in variables)
+		{
+			if (variables[k].type=='line' && variables[j].type=='line' && k!=j)
+			{
+				
+				var a = variables[k].points[0];
+				var b = variables[k].points[1];
+				var c = variables[j].points[0];
+				var d = variables[j].points[1]; 
+				
+				if (a==c) createAngle(b,a,d);
+				else if (b==c) createAngle(a,b,d);
+				else if (a==d) createAngle(b,a,c);
+				else if (b==d) createAngle(a,b,d);
+				else
+				{
+				
+					var endpoints = [variables[k].points[0],variables[k].points[1],variables[j].points[0],variables[j].points[1]];
+					
+					var p = intersection(endpoints[0], endpoints[1], endpoints[2], endpoints[3]); 
+					
+					var vert;
+					for (m in points)
+					{
+						if (points[m].coor[0]==p[0] && points[m].coor[1]==p[1])
+						{
+							vert = m+'';
+							break;
+						}
+					}
+					
+					createAngle(a,vert,c);
+					createAngle(a,vert,d);
+					createAngle(b,vert,c);
+					createAngle(b,vert,d);
+					rules.push([a+vert+c, a+vert+d, supAngles]);
+					rules.push([b+vert+c, b+vert+d, supAngles]);
+					rules.push([a+vert+c, b+vert+c, supAngles]);
+					rules.push([a+vert+d, b+vert+d, supAngles]);
+					rules.push([a+vert+c, b+vert+d, oppAngles]);
+					rules.push([a+vert+d, b+vert+c, oppAngles]);
+				}
+				
+			}
+		}
+	}
+}
+
+
+var pythSides = new Array();
+pythSides.push([3,4,5]);
+pythSides.push([5,12,13]);
+pythSides.push([6,8,10]);
+pythSides.push([8,15,17]);
+pythSides.push([9,12,15]);
+pythSides.push([12,16,20]);
+
+var mapVars = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+
+var pythSide = randomArrayEntry(pythSides);
+
+
+var angles = {};
+var vertexDrawn = {}; //keeps track of how many times an angle is drawn at a given vertex
+var seedValues = {};
+var points = {};
+var rules;
+var variables = {};
+
+if (Math.random()>Math.random())
+	type=2;
+
+
+
+if (type==1)
+	type1();
+else
+	type2()
+
+var potChoices = new Array();
+for(key in variables)
+{		
+	if(variables[key].type=='angle')
+		potChoices.push(key);
+}
+goal = randomArrayEntry(potChoices);
+{% block problemdepth %}initConditions(goal, 1);{% endblock problemdepth %}
+var initVars = new Array();
+for(key in initHash)
+	initVars.push(key);
+
+findPathsToGoal([], initVars);
+getExplanation();
+/**
+if (usedInitCond.length==0)
+	alert(initCond+' , '+goal);*/
+//alert(usedInitCond);
+correct_answer=initHash[goal].value;
+correctAnswer = correct_answer;
+
+
+function printHash(x)
+{
+	var printString = '[';
+	for(key in x)
+		printString += key+':'+x[key].value+',';
+	printString += ']';
+
+	return printString;	
+}
+function randomArraySplice(a) //Takes a random element out of the array and returns it
+{
+	var epsilon = .99;
+	var index = Math.round(Math.random()*(a.length-1+epsilon) - epsilon/2);
+	return ((a.splice(index, 1))[0]);
+}
+
+//-->
+</script>
+
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+var initString = "<ul>";
+
+for(var i=0; i<usedInitCond.length; i++)
+{
+	initString +='<li>'+writeVariable(usedInitCond[i][0],usedInitCond[i][1])+"</li> ";
+}	
+
+initString +='</ul>';
+write_text(initString);
+write_text("What is "+writeVariable(goal)+"?");
+
+for(var i=0; i<explanationStack.length; i++)
+	write_step('<b>'+(i+1)+':</b> '+getReasonString(explanationStack[i][1]));
+	
+//-->
+</script>
+{% endblock maincell %}
+
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe></td>
+{% endblock graphdisplay %}
+
+
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}

@@ -1,0 +1,107 @@
+{% extends "percentage_word_problems_1.html" %}
+
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+/***
+Age word problems
+***/
+
+
+eval("type"+getRandomIntRange(1,5)+"()");  //Randomly choose a problem type
+
+
+function type1() {
+//Solve for the older person's age today
+C = getRandomIntRange(2,5);
+B = getRandomIntRange(2,20);
+A = getRandomIntRange(1,10)*(C-1);
+correctAnswer = (C*(-B-A)+B)/(1-C);
+write_text('<B>'+person1+' is '+A+' years older than '+person2+'.  '+B+' years ago, '+person1+' was '+C+' times as old as '+person2+'.  How old is '+person1+' today?</B>');
+write_step('Let `x=`'+person1+'\'s current age.');
+write_step('Then '+person2+'\'s current age would be `x-'+A+'`.');
+write_step(B+' years ago, '+person1+' was `x-'+B+'` years old.');
+write_step(B+' years ago, '+person2+' was `(x-'+A+')-'+B+'` years old.  That simiplifies to `x'+format_constant(-A-B)+'`.');
+write_step('We also know that '+B+' years ago, '+person1+' was '+C+' times as old as '+person2+' so:<center>`x-'+B+'='+C+'(x'+format_constant(-B-A)+')`</center>');
+write_step('<center>`x-'+B+'='+format_first_coefficient(C)+'x'+format_constant(C*(-B-A))+'`</center>'+
+		'<center>`x='+format_first_coefficient(C)+'x'+format_constant(C*(-B-A)+B)+'`</center>'+
+		'<center>`'+format_first_coefficient(1-C)+'x='+(C*(-B-A)+B)+'`</center>'+
+		'<center>`x='+(C*(-B-A)+B)/(1-C)+'`</center>');	
+}
+
+
+function type2() {
+//Solve for the younger person's age
+C = getRandomIntRange(2,5);
+B = getRandomIntRange(1,20);
+A = getRandomIntRange(1,10)*(C-1);
+correctAnswer = A/(C-1);
+write_text('<B>'+person1+' is '+C+' times as old as '+person2+'.  '+person1+' is also '+A+' years older than '+person2+'.  How old is '+person2+'?</B>');
+write_step('Let `x=`'+person2+'\'s age.');
+write_step('Then '+person1+'\'s age is `'+format_first_coefficient(C)+'x`.');
+write_step(''+person1+'\'s age could also be written as `x+'+A+'`.');
+write_step('So:<center>`'+format_first_coefficient(C)+'x = x+'+A+'`</center>');
+write_step('<center>`'+format_first_coefficient(C-1)+'x = '+A+'`</center>'+
+		'<center>`x = '+(A/(C-1))+'`</center>');
+}	
+		
+		
+
+function type3() {
+A = getRandomIntRange(2,5);
+C = getRandomIntRange(A+1,10);
+B = getRandomIntRange(2,20)*(C-A);
+correctAnswer = (C-1)*B/(C-A);
+write_text('<B>'+person1+' is '+A+' times as old as '+person2+' is today. '+B+' years ago, '+person1+' was '+C+' times as old as '+person2+'.  How old is '+person2+' today?</B>');
+write_step('Let `x=`'+person2+'\'s age today.');
+write_step('Then '+person1+'\'s age  today is `'+A+'x`.');
+write_step(B+' years ago, '+person2+'\'s age was `x-'+B+'`.');
+write_step(B+' years ago, '+person1+'\'s age was `'+A+'x-'+B+'`.');
+write_step('We know that '+B+' years ago, '+person1+' was '+C+' times as old as '+person2+' so:<center>`'+C+'(x-'+B+')='+A+'x-'+B+'`</center>');
+write_step('<center>`'+C+'x-'+(C*B)+'='+A+'x-'+B+'`</center>'+
+		'<center>`'+C+'x='+A+'x'+format_constant((C-1)*B)+'`</center>'+
+		'<center>`'+(C-A)+'x='+((C-1)*B)+'`</center>'+
+		'<center>`x='+((C-1)*B/(C-A))+'`</center>');
+}
+
+
+function type4() {
+A = getRandomIntRange(2,20);
+B = getRandomIntRange(1,5)*(A-1);		
+correctAnswer=B/(A-1);		
+write_text('<B>In '+B+' years, '+person1+' will be '+A+' times as old as '+pronoun1+' is today.  How old is '+person1+' today?</B>');
+write_step('Let `x=`'+person1+'\'s current age.');
+write_step('In '+B+' years, '+person1+'\'s age will be `x+'+B+'`.');
+write_step('We know that in '+B+' years, '+person1+' will be '+A+' times as old as '+pronoun1+' is today so:<center>`x+'+B+'='+A+'x`</center>');
+write_step('<center>`x='+(B/(A-1))+'`</center>');
+}
+
+function type5() {
+
+C = getRandomIntRange(2,5);
+B = getRandomIntRange(1,10)*(C-1);
+A = getRandomIntRange(C*B/(C-1)+1,15)*(C-1);
+correctAnswer = (A-(C*B))/(C-1);
+	
+write_text('<B>'+person1+' is '+A+' years old. '+person2+' is '+B+' years old.  How many years will it take for '+person1+' to be exactly '+C+' times as old as '+person2+'?</B>');
+write_step('Let `y=` the years it will take for '+person1+' to be '+C+' times as old as '+person2+'.');
+write_step('In `y` years, '+person1+' will be `'+A+'+y` years old');
+write_step('In `y` years, '+person2+' will be `'+B+'+y` years old');
+write_step('In `y` years, '+person1+' will be '+C+' times as old as '+person2+' so:<center>`'+A+'+y='+C+'('+B+'+y)`</center>');
+write_step('<center>`'+A+'+y='+(C*B)+'+'+C+'y`</center>'+
+		'<center>`'+(A-(C*B))+'+y='+C+'y`</center>'+
+		'<center>`'+(A-(C*B))+'='+(C-1)+'y`</center>'+
+		'<center>`'+(A-(C*B))/(C-1)+'=y`</center>');
+
+}
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+
+
+
+

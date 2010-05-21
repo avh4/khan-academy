@@ -1,0 +1,158 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+
+
+  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
+  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
+  <script language="JavaScript" src="/javascript/metautil.js"></script>
+  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
+  <script language="JavaScript" src="/javascript/graphutil.js"></script>
+
+  <script type="text/javascript">
+  	function submitForm(value)
+  	{
+  		document.forms['addexercise'].submit();
+  	}
+  </script>
+</head>
+  <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
+  <table border=0 width=100%>
+  	<tr>
+  		<td><A href="start.jsp" border="0"><img src="/images/khan.GIF"></a></td>
+  		<td align=right valign=top width=100%>
+  			<span class="mainmenu">Welcome,  <B>{{username}}</b> </span>
+  		</td>
+  	</tr>
+  	<tr>
+  		<td colspan=2>
+  			<table width=100% border=0 cellpadding=0 cellspacing=0>
+  				<tr>
+  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
+  				</tr>
+  			</table>
+  		</td>
+  	</tr>
+  </table>
+ 
+  
+  
+  
+  <div class=hdg><h3><A href="/admin94040">Edit Exercise</A>: {{main_exercise.display_name}}</h3></div>
+   Use this page to modify exercise dependencies and associations with videos.
+  <P>
+  <B>Prerequisites</B> are exercise modules that the user should become proficient in before starting on this exercise.
+  <P>
+  <b>Covers</B> are exercise modules whose concepts are a subset of the concepts practiced in this module. For example,
+  "Adding and Subtracting Fractions" makes a student practice negative and positive numbers so "Adding and
+  Subtracting Negative and Positive Numbers" would be "covered" by it.
+  <P>
+  <div class=hdg><h3>Prerequisite and Covered Modules</h3></div>
+  <table border=0 cellspacing=0 cellpadding=3 width=100%>
+  <tr><td class="colHeadL" width=50%>Prerequisites</td><td class="colHeadL">Covers</td></tr>
+  <tr><td>
+  {% for prereq in main_exercise.prerequisites %}
+  	{{prereq}}&nbsp;<A href="/updateexercise?name={{main_exercise.name}}&delete_prerequisite={{prereq}}">[delete]</A><P>
+  {% endfor %}
+  </td>
+  <td>
+  {% for sub_concept in main_exercise.covers %}
+  	{{sub_concept}}&nbsp;<A href="/updateexercise?name={{main_exercise.name}}&delete_covers={{sub_concept}}">[delete]</A><P>
+  {% endfor %}
+  </td>
+  </tr>
+  </table>
+  <P>&nbsp;<P>
+   <div class=hdg><h3>Playlists and Videos</h3></div>
+  <table border=0 cellspacing=0 cellpadding=3 width=100%>
+  <tr><td class="colHeadL" width=50%>Playlists</td><td class="colHeadL">Videos</td></tr>
+  <tr><td>
+  {% for exercise_playlist in exercise_playlists %}
+  	{{ exercise_playlist.playlist.title }}&nbsp;<A href="/updateexercise?name={{main_exercise.name}}&delete_playlist={{exercise_playlist.playlist.key}}">[delete]</A><P>
+  {% endfor %}
+  </td>
+  <td>
+  {% for exercise_video in exercise_videos %}
+  	{{ exercise_video.video.title }}&nbsp;<A href="/updateexercise?name={{main_exercise.name}}&delete_video={{exercise_video.video.key}}">[delete]</A><P>
+  {% endfor %}
+  </td>
+  </tr>
+  </table>
+  <P>&nbsp;<P>
+<div class=hdg><h3>All Exercises</h3></div>
+<table border=0 cellspacing=0 width=100%>
+<TR class="highlightWhited">
+{% for exercise in exercises %}
+<td width=50%><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A>
+    <A href="/updateexercise?name={{main_exercise.name}}&add_prerequisite={{exercise.name}}">[prerequisite]</A>
+    <A href="/updateexercise?name={{main_exercise.name}}&add_covers={{exercise.name}}">[subconcept]</A>
+    </td>
+	{% if forloop.counter|divisibleby:2 %}
+		</TR>
+		{% if forloop.counter|divisibleby:4 %}
+			<tr class="highlightWhite" >
+		{% else %}
+			<TR class="highlightGreyRelated">
+		{% endif %}
+	{% endif %}
+{% endfor %}
+</tr>
+</table>
+<P>&nbsp;<P>
+<div class=hdg><h3>All Playlists</h3></div>
+<table border=0 cellspacing=0 width=100%>
+<TR class="highlightWhited">
+{% for playlist in all_playlists %}
+<td width=50%>{{ playlist.title}}
+    <A href="/updateexercise?name={{main_exercise.name}}&add_playlist={{playlist.key}}">[add playlist]</A>
+    </td>
+	{% if forloop.counter|divisibleby:2 %}
+		</TR>
+		{% if forloop.counter|divisibleby:4 %}
+			<tr class="highlightWhite" >
+		{% else %}
+			<TR class="highlightGreyRelated">
+		{% endif %}
+	{% endif %}
+{% endfor %}
+</tr>
+</table>
+<P>&nbsp;<P>
+<div class=hdg><h3>Potential Videos</h3></div>
+<table border=0 cellspacing=0 width=100%>
+<TR class="highlightWhited">
+{% for video in videos %}
+<td width=50%>{{video.title}}
+    <A href="/updateexercise?name={{main_exercise.name}}&add_video={{video.key}}">[add video]</A>
+    </td>
+	{% if forloop.counter|divisibleby:2 %}
+		</TR>
+		{% if forloop.counter|divisibleby:4 %}
+			<tr class="highlightWhite" >
+		{% else %}
+			<TR class="highlightGreyRelated">
+		{% endif %}
+	{% endif %}
+{% endfor %}
+</tr>
+</table>
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+
+    <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
+  </tr>
+</table>
+
+
+
+  <P>&nbsp;<P>
+  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
+	<center>Send any questions or comments to sal@khanacademy.org
+		<p><font size=-2>&copy;2010 Khan Academy</font></p>
+	</center>
+  </body>
+</html>
+

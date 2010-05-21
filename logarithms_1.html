@@ -1,0 +1,60 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+//Declare the variables
+var base = nonZeroRandomInt(2,16);
+if (base > 10)
+{
+	var exp = nonZeroRandomInt(2,3);
+}
+else if (base > 4 && base<10)
+{
+	var exp = nonZeroRandomInt(2,4);
+}
+else
+{
+	var exp = nonZeroRandomInt(2,5);
+}
+
+var num = Math.pow(base,exp);
+var power_string = base;
+for (var i=1; i<exp; i++)
+{
+ power_string = power_string + 'x' + base;
+}
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+
+
+//Write out the problem
+
+writeEquation('log_{'+base+'}'+num+'=?');
+
+//Write out the steps or hints (these will be hidden until the user clicks on hints
+writeStep('If<b> ` b^e=x ` </b>,then<B> `log_{b}x=e `</b>');
+//writeStep('The logarithm of a number <b>`x`</b> is the exponent <b>`y`</b> of <b>`b^y`</b> such that <b>`x=b^y`</b>');
+writeStep('First, try to write <b>'+num+'</b>, the number we are taking the logarithm of, as a power of <b>'+base+'</b>, the base of the logarithm.');
+writeStep('<b>'+num+' </b> can be expressed as <b>'+ power_string+'</b>');
+writeStep('<b>'+num+' </b> can be expressed as <b>`'+ base+'^'+exp+'`</b>');
+writeStep('<b>`'+base+'^'+exp+'='+num+'`</b> so <B>`log_{'+base+'}'+num+'='+exp+'`</B>');
+
+
+setCorrectAnswer(exp);
+addWrongChoice(num/base);
+addWrongChoice(exp+base);
+addWrongChoice(exp*base);
+addWrongChoice(exp-1);
+
+
+//-->
+</script>
+
+
+{% endblock maincell %}
+

@@ -1,0 +1,198 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var A = get_random();
+var B = get_random();
+var C = get_random();
+
+
+while (((B*B)-4*A*C)<0)
+{
+	A = get_random();
+	B = get_random();
+	C = get_random();
+}
+
+function get_roots(a,b,c)
+{
+	var underradical=perfect_square_factor(b*b-4*a*c);
+	var root_string = "x=";
+	var i="";
+
+	if (underradical[0]<0)
+	{
+		i+='i';
+	}
+
+	
+	
+	if ((b*b-4*a*c)==0)  //0 under the radical
+	{
+		root_string+=format_fraction(-1*b, 2*a);
+	}
+
+	else if (underradical.length==1) //The number under the radical cannot be simplified
+	{
+		root_string+="(" + (-1*b) + "+-sqrt(" + Math.abs(underradical[0]) + ")" + i + ")/(" + (2*a) + ")";
+	}
+
+	else if (Math.abs(underradical[0])==1) //The absolute value of the number under the radical is a perfect square
+	{
+	
+		if (underradical[0]<0) //the number is negative
+		{
+			root_string+="(" + (-1*b) + "+-" + format_first_coefficient(Math.sqrt(Math.abs(underradical[1])))+"i)/("+(2*a)+ ")";
+		}
+	
+		else
+		{
+			root_string+=format_fraction(-1*b+Math.sqrt(underradical[1]), 2*a)+","+format_fraction(-1*b-Math.sqrt(underradical[1]), 2*a);
+		}
+	
+	}
+
+
+	else //under the radical can be partially simplified
+	{
+		var divisor=getGCD(Math.abs(b), getGCD(Math.abs(2*a),Math.sqrt(Math.abs(underradical[1]))));
+		var first_term; //only can be used in the cases when the radical is simplified
+		var last_term;
+	
+		if (divisor==Math.abs(2*a))
+		{
+			first_term=-1*b/(2*a);
+			last_term="";
+		}
+		else
+		{
+			first_term="("+(-1*b/divisor);
+			last_term=")/("+(2*a/divisor)+")";
+		}
+		root_string+=first_term+ "+-" + format_first_coefficient(Math.sqrt(underradical[1])/divisor) + "sqrt(" + Math.abs(underradical[0]) +")"+i+last_term;
+	}
+	return root_string;
+}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text('Where does the following function intersect the x-axis (i.e. what are the roots or zeros of f(x))?');
+
+write_equation('f(x)='+format_first_coefficient(A)+'x^2'+format_coefficient(B)+'x'+format_constant(C));
+//write out the hints
+
+write_step('The function interesects the x-axis when `f(x)=0` so you need to solve the equation:'
+		+equation_string(format_first_coefficient(A)+'x^2'+format_coefficient(B)+'x'+format_constant(C)+'=0'));
+	
+write_step('Quadratic formula (to solve `ax^2+bx+c=0`):'
+		+equation_string('x=(-b+-sqrt(b^2-4ac))/(2a)'));
+	
+write_step(equation_string('a='+A+', b='+B+', c='+C)
+		+equation_string('x=(-('+B+')+-sqrt(('+B+')^2-4('+A+'*'+C+')))/(2*'+A+')'));
+	
+var final_step = equation_string('x=('+(-1*B)+'+-sqrt('+(B*B)+format_constant(-4*A*C)+'))/'+(2*A))
+			+equation_string('x=('+(-1*B)+'+-sqrt('+(B*B-4*A*C)+'))/'+(2*A));
+
+var factor=perfect_square_factor(B*B-4*A*C);
+
+if (factor.length>1 && Math.abs(factor[0])!=1) //The number under the radical can be factored as a perfect square and a number (other than 1) times a perfect square
+{
+	
+	final_step+= equation_string('x=('+(-1*B)+'+-sqrt('+factor[0]+'*'+factor[1]+'))/'+(2*A));
+
+	var divisor = getGCD(B, getGCD(Math.abs(2*A), Math.sqrt(Math.abs(factor[1]))));
+	if (factor[0]<1)
+	{
+		final_step+= equation_string('x=('+(-1*B)+'+-'+Math.sqrt(factor[1])+'sqrt('+Math.abs(factor[0])+')i)/'+(2*A));
+		if (divisor>1)
+		{
+			if (divisor!=Math.abs(2*A)) 
+			{
+				final_step+= equation_string('x=('+(-1*B/divisor)+'+-'+format_first_coefficient(Math.sqrt(factor[1])/divisor)+'sqrt('+Math.abs(factor[0])+')i)/'+(2*A/divisor));					
+			}
+			else
+			{
+				final_step+= equation_string('x='+(-1*B/divisor*2*A/divisor)+'+-'+format_first_coefficient(Math.sqrt(factor[1])/divisor)+'sqrt('+Math.abs(factor[0])+')i');					
+			}
+		}
+	}
+	else
+	{	
+		final_step+= equation_string('x=('+(-1*B)+'+-'+Math.sqrt(factor[1])+'sqrt('+Math.abs(factor[0])+'))/'+(2*A));
+		if (divisor>1)
+		{
+			if (divisor!=Math.abs(2*A))
+			{
+				final_step+= equation_string('x=('+(-1*B/divisor)+'+-'+format_first_coefficient(Math.sqrt(factor[1])/divisor)+'sqrt('+Math.abs(factor[0])+'))/'+(2*A/divisor));
+			}
+			else
+			{
+				final_step+= equation_string('x='+(-1*B/(2*A))+'+-'+format_first_coefficient(Math.sqrt(factor[1])/divisor)+'sqrt('+Math.abs(factor[0])+')');
+			}
+		}
+	}
+
+		
+}
+else if (factor.length>1) //the number under the radical is a perfect square, we can assume that factor[0]==1 based on the previous condition
+{
+	if (factor[0]<1)
+	{
+		final_step+= equation_string('x=('+(-1*B)+'+-'+Math.sqrt(factor[1])+'i)/'+(2*A));
+		var divisor = getGCD(Math.abs(B), getGCD(Math.abs(2*A), Math.sqrt(Math.abs(factor[1]))));
+			
+		if (divisor>1)
+		{
+			final_step+= equation_string('x=('+(-1*B/divisor)+'+-'+(Math.sqrt(factor[1])/divisor)+'i)/'+(2*A/divisor));
+		}
+	}
+	else
+	{
+		final_step+= equation_string('x=('+(-1*B)+'+-'+Math.sqrt(factor[1])+')/'+(2*A));
+		final_step+= equation_string('x='+format_fraction(-1*B+Math.sqrt(factor[1]), 2*A)+','+format_fraction(-1*B-Math.sqrt(factor[1]), 2*A));
+	}
+}
+else if ((B*B-4*A*C)==0)//the number under the radical is 0
+{
+	final_step+= equation_string('x='+format_fraction(-1*B, 2*A));
+}
+else if (factor[0]<1)
+{
+	final_step+= equation_string('x=('+(-1*B)+'+-sqrt('+Math.abs(B*B-4*A*C)+')i)/'+(2*A));
+}
+	
+write_step(final_step);
+setCorrectAnswer(get_roots(A,B,C));
+for (var i=0; i<5; i++)
+{
+	var bad_a = get_random();
+	var bad_b = get_random();
+	var bad_c = get_random();
+	var good_gcd = getGCD(Math.abs(A), getGCD(Math.abs(B), Math.abs(C)));
+	var bad_gcd = getGCD(Math.abs(bad_a), getGCD(Math.abs(bad_b), Math.abs(bad_c)));
+
+	while (	(A*bad_gcd)==(bad_a*good_gcd) &&
+		(B*bad_gcd)==(bad_b*good_gcd) &&
+		(C*bad_gcd)==(bad_c*good_gcd) )
+	{
+		bad_a = get_random();
+		bad_b = get_random();
+		bad_c = get_random();
+
+		good_gcd = getGCD(A, getGCD(B, C));
+		bad_gcd = getGCD(bad_a, getGCD(bad_b, bad_c));
+	}
+
+		possibleAnswers.push(get_roots(bad_a, bad_b, bad_c));
+}
+
+//-->
+</script>
+
+{% endblock maincell %}
+

@@ -1,0 +1,113 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var currentY = Math.round(Math.random()*10)-5;
+var functionPath =new Array();
+functionPath.push([-11, currentY]);
+for(var i=-10; i<11; i++)
+{
+	if (Math.abs(get_random()<2) && functionPath[i+10][1]<8)
+		functionPath.push([i, functionPath[i+10][1]+1]);
+	else if (Math.abs(get_random()<2) && functionPath[i+10][1]>-8)
+		functionPath.push([i, functionPath[i+10][1]-1]);
+	else if (Math.abs(get_random()<2) && functionPath[i+10][1]<7)
+		functionPath.push([i, functionPath[i+10][1]+2]);
+	else if (Math.abs(get_random()<3) && functionPath[i+10][1]>-7)
+		functionPath.push([i, functionPath[i+10][1]-2]);
+	else
+		functionPath.push([i, functionPath[i+10][1]]);
+}
+
+
+var correctX = Math.round(Math.random()*18)-9;
+var correctY = functionPath[correctX+11][1];
+
+var wrongAnswers = new Array();
+
+setCorrectAnswer(correctY);
+
+for(var i=0; i<6; i++)
+{
+	var y = Math.round(Math.random()*18)-9;
+	
+	while (y==correctY)
+	{
+		y = Math.round(Math.random()*18)-9;
+	}
+	possibleAnswers.push(y);
+}
+
+function draw_next_step() {
+
+	if (steps_given==0)
+	{
+		present.stroke="#9999FF";
+		present.strokedasharray="5,5";
+		present.fontfill="#9999FF";
+		present.marker="dot";
+		present.line([correctX, 0], functionPath[correctX+11]);
+		present.text([correctX, correctY/2], 'x='+correctX, right);
+		
+	}
+	if (steps_given==1)
+	{
+		present.stroke="#9999FF";
+		present.strokedasharray="5,5";
+		present.line([0, correctY], functionPath[correctX+11]);
+		present.text([correctX/2, correctY], 'f('+correctX+')='+correctY, above);
+	}
+	steps_given++;
+}
+
+
+function graph_update() {
+
+
+	present.initPicture(-10,10, -10, 10);
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	present.stroke = "#DDDDDD";
+	present.strokewidth = "2";
+	for(var i=-10; i<11; i++)
+	{
+		if (i!=0)
+		{
+			present.line([i,-11], [i,11]);
+			present.line([-11,i], [11,i]);
+			present.text([i, .1], i, below);
+			present.text([0, i], i, right);
+		}
+	}
+	present.axes();
+	
+	present.stroke="orange";
+	present.fontstyle="italic";
+	present.fontfill="orange";
+	present.fontstroke="none";
+	present.fontsize="20"
+	present.text(functionPath[functionPath.length-1], 'f(x)', above);
+	present.path(functionPath);
+}
+
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+
+<script language=Javascript1.2><!--
+document.write('<font color=\"orange\" style=bold size=6>`f('+correctX+')=?`</font>');
+//-->
+</script>
+
+
+<center><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
+</center>
+
+
+
+{% endblock maincell %}
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}

@@ -1,0 +1,164 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var term1 = 1;
+var term2 = 1;
+var term1color = getNextColor();
+var term2color = getNextColor();
+var answer = 1; 
+var hintsGiven = 0;
+var xSpacing =65;
+var ySpacing = 60;
+var xMax = 400;
+var xMin = 0;
+var yMax = 600;
+var yMin = 0;
+var leftMargin = 50;
+var standardSize = 75;
+var smallSize = 17;
+var numLineY = 450;
+var circleXPos = leftMargin/2;
+var circleYPos = numLineY;
+var circleCount = 1;
+var radius = 15;
+var circleXGap = 10;
+var circleYGap = 5;
+var division = true; //will present a multiplication problem if this is false
+var answer = 0; 
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var eFunction = function()
+{
+
+	while(term1>=0 && term2>=0 || term1==0)
+	{
+		term1 = getRandomInt(18)-9;
+		term2 = getRandomInt(18)-9;
+	}
+}
+
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var cFunction = function(history)
+{
+	return (history.indexOf(term1+';'+term2)!=-1 || history.indexOf(term2+';'+term1)!=-1);
+}
+
+//This function defines what an entry in the history should look like
+var tFunction = function()
+{
+	return (term1+';'+term2);
+}
+
+//This checks the history and regenerates random numbers if the current ones have already been used recently 
+checkHistory(cFunction, eFunction, tFunction, 20);
+
+
+///////
+
+
+
+
+
+
+if (Math.random()>Math.random())
+{
+	division=false;
+	answer = term1 * term2;
+}
+
+function graph_update()
+{
+	answer = term2; 
+
+	if (Math.random()>Math.random())
+	{
+		division=false;
+		answer = term1 * term2;
+	}
+	present.initPicture(xMin,xMax,yMin);
+	present.fontfill = nColor;
+	present.fontsize = standardSize;
+	present.fontstyle = "none";
+	present.fontfamily = "Arial";
+	if(division)
+	{
+		present.text([leftMargin,500], term1*term2, above, 'term1');
+		present.text([leftMargin+xSpacing+5,500], '-', above);
+		present.text([leftMargin+xSpacing+5,500], ':', above);
+		present.text([leftMargin+2*xSpacing+5,500], term1, above, 'term2');
+		present.text([leftMargin+3*xSpacing+5,500], '=', above);
+		present.text([leftMargin+4*xSpacing+5,500], '?', above, 'quot');
+		setCorrectAnswer(term2);
+	} 
+	else
+	{
+		present.text([leftMargin,500], term1, above, 'term1');
+		present.text([leftMargin+xSpacing+5,500], 'x', above);
+		present.text([leftMargin+2*xSpacing+5,500], term2, above, 'term2');
+		present.text([leftMargin+3*xSpacing+15,500], '=', above);
+		present.text([leftMargin+4*xSpacing+5,500], '?', above, 'prod');
+		setCorrectAnswer(term1*term2);
+	}
+	
+}
+
+
+function next_step()
+{
+	if (hintsGiven==0)
+	{
+		present.fontsize = smallSize;
+		if(division && (term1*term2)<0 && term1<0)
+		{
+			present.text([(xMax+xMin)/2, numLineY], 'A negative divided by a negative is positive.', above);
+		}
+		else if (division && (term1*term2)>0 && term1<0)
+		{
+			present.text([(xMax+xMin)/2, numLineY], 'A positive divided by a negative is negative.', above);
+		}
+		else if (division && (term1*term2)<0 && term1>0)
+		{
+			present.text([(xMax+xMin)/2, numLineY], 'A negative divided by a positive is negative.', above);
+		}
+		else if(!division && (term1*term2)<0 && term1<0)
+		{
+			present.text([(xMax+xMin)/2, numLineY], 'A negative times a positive is negative.', above);
+		}
+		else if (!division && (term1*term2)>0 && term1<0)
+		{
+			present.text([(xMax+xMin)/2, numLineY], 'A positive times a negative is negative.', above);
+		}
+		else if (!division && (term1*term2)<0 && term1>0)
+		{
+			present.text([(xMax+xMin)/2, numLineY], 'A negative times a positive is negative.', above);
+		}
+		else
+		{
+			present.fontsize = standardSize;
+			if(division)
+				present.text([leftMargin+4*xSpacing,500], answer, above, 'quot');
+			else
+				present.text([leftMargin+4*xSpacing+20,500], answer, above, 'prod');
+		}
+		
+	}
+	else
+	{
+		present.fontsize = standardSize;
+		present.fontfill = getNextColor();;
+		if(division)
+			present.text([leftMargin+4*xSpacing+25,500], correctAnswer, above, 'quot');
+		else
+			present.text([leftMargin+4*xSpacing+25,500], correctAnswer, above, 'prod');
+	
+	}
+	hintsGiven++;
+	steps_given++;
+}
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=600" height="650" width="100%"></iframe>{% endblock maincell %}
+  

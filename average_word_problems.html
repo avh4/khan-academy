@@ -1,0 +1,182 @@
+{% extends "percentage_word_problems_1.html" %}
+
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+/***
+Average word problems
+***/
+
+var problemType = 0;
+
+//This function is used to generate the random entries
+var eFunction = function()
+{
+	problemType = getRandomIntRange(1,4);
+
+}
+
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var cFunction = function(history)
+{
+	return (history.indexOf(problemType)!=-1);
+}
+
+
+//This function defines what an entry in the history should look like
+var tFunction = function()
+{
+	return (problemType);
+}
+
+
+//This checks the history and regenerates random numbers if the current ones have already been used recently 
+checkHistory(cFunction, eFunction, tFunction,2);
+
+
+
+
+
+
+
+
+
+eval("type"+problemType+"()");  //Randomly choose a problem type
+
+//eval("type"+getRandomIntRange(1,4)+"()");  //Randomly choose a problem type
+
+
+function type1() {
+	//The sum of C consecutive integers is A.  B is the smallest of the numbers. 
+	C = getRandomIntRange(3,5);
+	B = getRandomIntRange(1,50);
+	A = 0;
+	var numString = "`x`";
+	var addNumString = "`x";
+	var increment = 1;
+	var modifierString = " ";
+
+	var problemType = getRandomIntRange(1,3);
+
+	if (problemType!=3)
+	{
+		increment = 2;
+		if (problemType==1) 
+		{
+			modifierString = " even ";
+			B = 2*B;
+		}
+		else
+		{
+			modifierString = " odd ";
+			B = 2*B+1;
+		}
+	}
+		
+	var constant = 0;		
+	for(var i=1; i<C; i++)
+	{
+		//A+=(B+(i*increment));
+		constant +=(i*increment);
+		numString+=" , `x+"+(i*increment)+"`";
+		addNumString+=" + (x+"+(i*increment)+")";
+	}
+	A= C*B+constant;
+	addNumString+= " = "+C+"x +"+constant+"`";
+	
+	correctAnswer = B
+	write_text('<B>The sum of '+C+' consecutive'+modifierString+' integers is '+A+'.  What is the smallest of the '+C+' integers?</B>');
+	write_step('Let `x=` the smallest of the '+C+' integers');
+	write_step('Then the '+C+' consecutive integers would be:<P><center>'+numString+'</center></P>');
+	write_step('The sum of the '+C+' integers would then be:<P><center>'+addNumString+'</center></P>');
+	write_step('So:<P><center>`'+C+'x +'+constant+' = '+A+'`</center></P>');
+	write_step('Solving for `x` gives:<P><center>`x = '+B+'`</center></P>');
+}
+
+function type2() {
+
+	C = getRandomIntRange(3,9);
+	
+	A = getRandomIntRange(60,90);
+	B = getRandomIntRange(Math.round((5+(A*C))/(C+1)),Math.round((100+(A*C))/(C+1)));
+
+	while(A==B)
+		B = getRandomIntRange(60,90);
+	
+	correctAnswer = Math.round(B*(C+1)-(A*C));
+	
+	write_text('<b>'+person1+' has an average score of '+A+' after '+C+' tests.  What does '+person1
+		+' need to get on the next test to finish with an average of '+B+' on all '+(C+1)+' tests?</b>');
+		write_step(' Since the average scores of the first '+C+' tests is '+A+', the sum of the scores of the first '+
+				C+' tests is '+C+'*'+A+'='+(C*A));
+		write_step(' If '+person1+' gets a score of `x` on the '+(C+1)+
+				'th test, then the average score on all '+(C+1)+' tests will be :<center>`('+
+				(C*A)+'+x)/'+(C+1)+'`</center>');
+		write_step(' This average needs to be equal to '+B+' so:<center>`('+
+				(C*A)+'+x)/'+(C+1)+'  = '+B+'`</center>');
+		write_step(equation_string('x='+correctAnswer));
+}	
+		
+
+function type3() {
+
+	C = getRandomIntRange(3,5);
+	D = getRandomIntRange(C+2, C+10);
+	A = getRandomIntRange(60,90);
+	B = getRandomIntRange(Math.round((5+(A*C))/(C+1)),Math.round((100+(A*C))/(C+1)));
+	
+	correctAnswer = Math.round(((C*A)+(D-C)*100)/D);
+	
+	write_text('<b>'+person1+' has an average score of '+A+' after '+C+' tests.  There are a total of '+
+			D+' tests in the class. What is the highest average that '+person1
+			+' can finish the class with (round your answer to the nearest whole number and assume that 100 is the maximum score on a test)?</b>');
+		write_step(' Since the average scores of the first '+C+' tests is '+A+', the sum of the scores of the first '+
+				C+' tests is '+C+'*'+A+'='+(C*A));
+		write_step(' If '+person1+' gets a 100 on the last '+(D-C)+
+				' tests, then their average score on all '+D+' tests will be :<center>`('+
+				(C*A)+'+'+((D-C)*100)+')/'+D+'='+correctAnswer+'`</center>');
+}
+
+
+function type4() {
+
+	C = getRandomIntRange(3,5);
+	A = getRandomIntRange(60,80);
+	D = getRandomIntRange(3,10);
+	B = Math.floor(((C*A)+(100*D))/(C+D));
+	
+
+	correctDec = Math.round(((B*C)-(C*A))/(100-B) * 100)/100;
+	
+	correctAnswer = D;
+	
+	write_text('<b>'+person1+' has an average score of '+A+' after '+C+' tests.  What is the minimum number of tests that '+
+			person1+' has to score a 100 on to get the average score to at least '+B+'?</b>');
+		write_step(' Since the average scores of the first '+C+' tests is '+A+', the sum of the scores of the first '+
+				C+' tests is '+C+'*'+A+'='+(C*A));
+		write_step(' If '+person1+' gets a 100 on the next `x` tests, then the average will be:<center>`('+
+				(C*A)+'+100x)/('+C+'+x)`</center>');
+		write_step(' This average needs to be equal to '+B+' so:<center>`('+
+				(C*A)+'+100x)/('+C+'+x)='+B+'`</center>');
+		write_step(equation_string((C*A)+'+100x = '+(B*C)+'+'+B+'x')+
+				equation_string((100-B)+'x='+((B*C)-(C*A)))+
+				equation_string('x='+correctDec));
+		if ( (correctDec - Math.floor(correctDec))>0)
+		{
+			write_step(' One cannot take less than one test, so '+person1+' needs to get a 100 on '+
+			D+' tests to get the average to at least '+B+'.');
+		}
+		
+}
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+
+
+
+

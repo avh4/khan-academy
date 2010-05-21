@@ -1,0 +1,164 @@
+{% extends "systems_of_equations.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var x1= get_random();
+var x2= get_random();
+var y1= get_random();
+var y2= get_random();
+
+var x_margin=Math.abs(x1-x2)/2;
+var y_margin=Math.abs(y1-y2)/2;
+
+var x_max=Math.max(x1,x2)+x_margin;
+var x_min=Math.min(x1,x2)-x_margin;
+var y_max=Math.max(y1,y2)+y_margin;
+var y_min=Math.min(y1,y2)-y_margin;
+
+while ((x2==x1)
+	|| (y2==y1)
+	|| (x_max<0)
+	|| (x_min>0)
+	|| (y_max<0)
+	|| (y_min>0))
+{
+	x1= get_random();
+	x2= get_random();
+	y1= get_random();
+	y2= get_random();
+
+	x_margin=Math.abs(x1-x2)/2;
+	y_margin=Math.abs(y1-y2)/2;
+
+	x_max=Math.max(x1,x2)+x_margin;
+	x_min=Math.min(x1,x2)-x_margin;
+	y_max=Math.max(y1,y2)+y_margin;
+	y_min=Math.min(y1,y2)-y_margin;
+}
+
+
+var slope_numerator = y1 - y2;
+var slope_denominator = x1 - x2;
+var m = slope_numerator/slope_denominator;
+var b = y1-(x1*m);
+
+function graph_update() {
+
+	var p1_position=present.aboveright;
+	var p2_position=present.aboveright;
+		
+	if ((y1>y2) && (x1>x2))
+	{
+		p1_position=present.aboveright;
+		p2_position=present.belowleft;
+	}
+	else if ((y1>y2) && (x1<x2))
+	{
+		p1_position=present.aboveleft;
+		p2_position=present.belowright;
+	}
+	else if ((y1<y2) && (x1<x2))
+	{
+		p1_position=present.belowleft;
+		p2_position=present.aboveright;
+	}
+	else
+	{
+		p1_position=present.belowright;
+		p2_position=present.aboveleft;
+	}
+
+	
+	if (steps_given==0)
+	{
+		
+		present.initPicture(x_min,x_max, y_min, y_max);
+		present.axes();
+		present.stroke="white";
+		present.marker="dot";
+		present.line([x1,y1], [x2,y2]);
+		present.fontsize = 12;
+		present.fontfill = "black";
+		//present.fontstroke = "black";
+
+		present.text([x1,y1], "("+x1+","+y1+")", p1_position);
+		present.text([x2,y2], "("+x2+","+y2+")", p2_position);
+	}
+	if (steps_given==1)
+	{
+		present.stroke="green";
+		present.marker="arrow";
+		present.line([x2, y2],[x2, y1]);
+		present.stroke="blue";
+		present.line([x2, y1],[x1, y1]);
+
+	}
+	if (steps_given==2)
+	{
+		present.text([x2, y2+(y1-y2)/2], ""+(y1-y2), present.right);
+		present.text([x2+(x1-x2)/2, y1], ""+(x1-x2), present.below);
+	}
+	if (steps_given==4)
+	{
+		present.stroke="red";
+		present.plot(m+"*x+"+b);
+
+	}
+}
+
+
+
+//-->
+</script>
+
+{% endblock maincode %}
+{% block maincellwidth %}70%{% endblock maincellwidth %}
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text('The equation of a line is: <center>`y=mx+b`</center><center>`m=`slope</center><center>`b=`y-intercept</center>'+
+		'<P>What is `m` and `b` for the equation of the line that passes through the points `('+x1+','+y1+')` and `('+x2+','+y2+')`?</P>');
+
+//write out the hints
+write_step('Slope (or `m`) = <b><font color=\"green\">(change in y)</font>/<font color=\"blue\">(change in x)</font></b>. So:<center>`m=(y_1-y_2)/(x_1-x_2)`</center>');
+write_step('<center>`y_1='+y1+'`</center><center>`y_2='+y2+'`</center><center>`x_1='
+	+x1+'`</center><center>`x_2='+x2+'`</center></P><P>So:<center>`m=(('+y1+')-('+y2+'))/(('+x1+')-('+x2+'))='
+	+slope_numerator+'/'+slope_denominator+'='+format_fraction(slope_numerator, slope_denominator)+'`</center>');
+write_step('We now know that `y='+format_fraction(slope_numerator,slope_denominator)
+	+'x+b`. We can figure out `b` by substituting either `(x_1, y_1)` or `(x_2, y_2)` back into the equation.');
+write_step('Substituting `('+x1+','+y1+')` back in gives: <center>`'+y1+'='+x1+'*'+format_fraction(slope_numerator,slope_denominator)
+	+'+b`</center><center>`'+y1+'='+format_fraction(x1*slope_numerator,slope_denominator)+'+b`</center><center>`b='
+	+format_fraction(y1*slope_denominator-x1*slope_numerator,slope_denominator)+'`</center><center><b>`y='
+	+format_fraction(slope_numerator, slope_denominator)+'x'+format_fraction_with_sign(y1*slope_denominator-x1*slope_numerator,slope_denominator)
+	+'`</b></center>');
+
+var correct_answer = '`m='+format_fraction(slope_numerator, slope_denominator)+'`';
+var correct_answer2 = '`b='+format_fraction(y1*slope_denominator-x1*slope_numerator,slope_denominator)+'`';
+	
+for (var i=0; i<5; i++)
+{
+	var b_num = y1*slope_denominator-x1*slope_numerator;
+	var b_den = slope_denominator;
+	var bad_m_num = get_random();
+	var bad_m_den = get_random();
+	var bad_b_num = get_random();
+	var bad_b_den = get_random();
+
+	while (slope_numerator*bad_m_den==slope_denominator*bad_m_num || bad_m_den==0)
+	{
+		bad_m_den = get_random();
+	}
+	while (b_num*bad_b_den==b_den*bad_b_num || bad_b_den==0)
+	{
+		bad_b_den = get_random();
+	}
+	possibleAnswers.push('m='+format_fraction(bad_m_num, bad_m_den));
+	possibleAnswers2.push('b='+format_fraction(bad_b_num, bad_b_den));
+}
+//-->
+</script>
+
+
+
+{% endblock maincell %}
+{% block answergraphdisplay %}<iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe>
+ {% endblock answergraphdisplay %}
+

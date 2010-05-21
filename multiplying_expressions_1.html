@@ -1,0 +1,107 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+/***
+Multiplying equations of the form (A1x+B1)(A2x+B2)
+***/
+var square = false;
+
+var A1 = get_random();
+var A2 = get_random();
+var B1 = get_random();
+var B2 = get_random();
+
+var ran = get_random();
+if (ran==1 || ran==2)
+{
+	square = true;
+	A2 = A1;
+	B2 = B1;
+}
+
+
+
+
+
+var selColor = "#E38217"; //The color of the colored text
+
+
+function colStr(string)
+{
+	var selFontString = '`<font color='+selColor+' size=4>`';
+	return (selFontString+string+'`</font>`');
+}
+
+function firstCoef(c)
+{
+	return format_first_coefficient(c);
+}
+
+function constant(c)
+{
+	return format_constant(c);
+}
+
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+if (square)
+{
+	write_text(equation_string('('+firstCoef(A2)+'x'+constant(B2)+')^2=?'));
+	
+	write_step(equation_string('('+firstCoef(A2)+'x'+constant(B2)+')^2='+colStr('('+firstCoef(A1)+'x'+constant(B1)+')')+'('+firstCoef(A2)+'x'+constant(B2)+')'));
+}
+else
+{
+	write_text(equation_string(colStr('('+firstCoef(A1)+'x'+constant(B1)+')')+'('+firstCoef(A2)+'x'+constant(B2)+')=?'));
+}
+
+write_step(equation_string(colStr(firstCoef(A1)+'x*')+'('+firstCoef(A2)+'x'+constant(B2)+')'+colStr(constant(B1)+'*')+'('+firstCoef(A2)+'x'+constant(B2)+')'));
+
+write_step(equation_string('('+colStr(firstCoef(A1)+'x*')+firstCoef(A2)+'x)'+'+('+colStr(firstCoef(A1)+'x*')+B2+')+('+colStr(B1+'*')+firstCoef(A2)+'x)+('+colStr(B1+'*')+B2+')'));
+
+write_step(equation_string(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2)+'x'+format_coefficient(B1*A2)+'x'+constant(B1*B2)));
+
+write_step(equation_string(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2)));
+
+
+
+if (A1*B2+B1*A2==0)
+{
+	write_step(equation_string(firstCoef(A1*A2)+'x^2'+constant(B1*B2)));
+	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+constant(B1*B2));
+	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+constant(-1*B1*B2));
+	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+constant(-1*B1*B2));
+	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B2));
+	possibleAnswers.push(firstCoef(A1*A1)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B1));
+	setCorrectAnswer(firstCoef(A1*A2)+'x^2'+constant(B1*B2));
+
+}
+else
+{
+
+	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+constant(B1*B2));
+	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+constant(B1*B2));
+	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+constant(-1*B1*B2));
+	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2));
+	possibleAnswers.push(firstCoef(A1+A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(-1*B1*B2));
+	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B2));
+	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*A1+B1*A2)+'x'+constant(B1*B2));
+	if (A1!=A2)
+	{
+		possibleAnswers.push(firstCoef(A1*A1)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B1));
+		possibleAnswers.push(firstCoef(A1*A1)+'x^2'+format_coefficient(A1+B2+B1+A2)+'x'+constant(B1*B2));
+	}
+	setCorrectAnswer(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2));
+}
+
+//-->
+</script>
+
+{% endblock maincell %}
+

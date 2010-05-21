@@ -1,0 +1,108 @@
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/stylesheet.css" >
+    <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+    <script type="text/javascript" language="javascript" src="/js/behavior.js"></script>
+    <script type="text/javascript" language="javascript" src="/js/rating.js"></script>
+
+    <script>
+    function addQuestion(drop_down)
+    {
+    	var selected_subject = drop_down.selectedIndex;
+	var subject_key = drop_down[selected_subject].value;
+	window.location = "/pickquestiontopic?subject_key="+subject_key
+    }
+    
+    function practiceQuestion(drop_down)
+    {
+    	var selected_subject = drop_down.selectedIndex;
+	var subject_key = drop_down[selected_subject].value;
+	window.location = "/pickquiztopic?subject_key="+subject_key
+    }
+    
+    var correct_choice = {{correct_index}};
+    var current_choice = -1;
+    var correct = new Image();
+    correct.src = "/images/face-smiley.gif";
+    var incorrect = new Image();
+    incorrect.src = "/images/face-sad.gif";
+    
+    function set_choice(c)
+    {
+    	current_choice = c;
+    }
+
+    function check_answer()
+    {
+    	if (current_choice==correct_choice)
+	{
+		document.images.feedback.src = correct.src;
+	}
+	else
+	{
+		document.images.feedback.src = incorrect.src;
+	}
+	document.getElementById("nextbutton").style.visibility = 'visible';
+	document.getElementById("answer").style.visibility = 'visible';
+    }
+    
+    function new_question()
+    {
+    	
+    }
+    
+    </script>
+  </head>
+  <body>	
+  	<table width=100%>
+	<tr>
+  		<td valign=top align=left rowspan=2><A href="/"><img src="/images/logo.gif" width=150 height=100></A></td>
+		<td valign=top align=right><h4>{{greeting}}</H4></td>
+	</tr>
+	<tr>
+  		<td valign=center align=right> 
+		<b>
+		<A href="/">Manage Questions</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<SELECT id="add_question" onchange="practiceQuestion(this)">
+			<OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
+			{% for subject in subjects %}
+				<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
+			{% endfor %}
+		</SELECT>
+		&nbsp;&nbsp;|&nbsp;&nbsp;
+		<SELECT id="add_question" onchange="addQuestion(this)">
+			<OPTION VALUE="0" SELECTED>Add a question in...</OPTION>
+				{% for subject in subjects %}
+					<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
+				{% endfor %}
+		</SELECT>
+		</b>
+	
+		</td>
+	</tr>
+  
+  </table>
+  <P>
+ <table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+    <td bgcolor=#003399><img width=1 height=1 alt=""></td>
+  </tr>
+</table><table width=100% border=0 cellpadding=2 cellspacing=0>
+   <tr>
+    <td bgcolor=#e5ecf9 align=left><B>Quiz Question</B></td>
+
+  </tr>
+</table><table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+    <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
+  </tr>
+</table>
+
+	<h3>Sorry, there are currently no questions in {{subject.name}}.
+	<P>
+	Perhaps you would like to <A href="/addquestion?subject_key={{subject.key}}">add one</A>?</h3>	
+  		
+   </body>
+</html>
+

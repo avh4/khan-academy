@@ -1,0 +1,80 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+
+
+  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
+  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
+  <script language="JavaScript" src="/javascript/metautil.js"></script>
+  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
+  <script language="JavaScript" src="/javascript/graphutil.js"></script>
+
+  <script type="text/javascript">
+  	function submitForm(value)
+  	{
+  		document.forms['addexercise'].submit();
+  	}
+  </script>
+</head>
+  <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
+  <table border=0 width=100%>
+  	<tr>
+  		<td><A href="start.jsp" border="0"><img src="/images/khan.GIF"></a></td>
+  		<td align=right valign=top width=100%>
+  			<span class="mainmenu">Welcome,  <B>{{username}}</b> </span>
+  		</td>
+  	</tr>
+  	<tr>
+  		<td colspan=2>
+  			<table width=100% border=0 cellpadding=0 cellspacing=0>
+  				<tr>
+  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
+  				</tr>
+  			</table>
+  		</td>
+  	</tr>
+  </table>
+<table border=0>
+<tr><td>Exercise Key</td><td>Vertical Position</td><td>Horizontal Position</td></tr>
+{% for exercise in exercises %}
+<tr><td><A href="/editexercise?name={{exercise.name}}">{{exercise.display_name}}</a></td><td>{{exercise.v_position}}</td><td>{{exercise.h_position}}</td></tr>
+{% endfor %}
+</table>
+ 
+
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+
+    <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
+  </tr>
+</table>
+
+
+
+   <table width=100%><tr>
+		<td valign="top">
+
+			<form id="addexercise" action="/updateexercise" method="get">
+				<INPUT type="text" name="name" size="40">
+				<input type="text" name="v_position"  value="0" size='3'>
+				<input type="text" name="h_position"  value="0" size='3'>
+				<input type="button" value="Add Exercise" onClick="submitForm()"></div></br>
+			</form>
+			<script language=Javascript1.2><!--
+				document.answerform.reset();
+			//--></script>
+		</td>
+	</tr>
+  </table>
+
+  <P>&nbsp;<P>
+  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
+	<center>Send any questions or comments to sal@khanacademy.org
+		<p><font size=-2>&copy;2010 Khan Academy</font></p>
+	</center>
+  </body>
+</html>
+

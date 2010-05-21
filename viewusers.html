@@ -1,0 +1,41 @@
+{% extends "viewexercises.html" %}
+{% block title %}View Users {% endblock title %}
+{% block content%}
+
+
+<div class=hdg>&nbsp;<h3>All Users</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td width=100% class="colHeadL">User</td><td class="colHeadL">Joined</td></tr>
+{% for user in users %}
+
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+	
+	
+		<td>{{user.user}}</td>
+		<td>{{user.joined}}</td>
+		</tr>
+	
+{% endfor %}
+</table>
+{% endblock content %}
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+
+    <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
+  </tr>
+</table>
+
+
+
+  <P>&nbsp;<P>
+  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
+	<center>Send any questions or comments to sal@khanacademy.org
+		<p><font size=-2>&copy;2010 Khan Academy</font></p>
+	</center>
+  </body>
+</html>
+

@@ -1,0 +1,228 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var x1 = get_random(); //the equation can be factored as (x+x1)(x+x2) so he roots are -x1 and -x2
+var x2 = get_random();
+
+var multfactor = Math.max(Math.min(get_random(), get_random()),Math.min(get_random(), get_random()));//like to keep this number relatively low so that the graph can be presented well
+
+var A = multfactor;
+var B = A*(x1+x2);
+var C = A*x1*x2;
+
+
+var A1 = get_random();
+var A2 = get_random();
+var B1 = get_random();
+var B2 = get_random();
+var C1 = get_random();
+var C2 = get_random();
+
+
+while ((B1*A2)==(A1*B2))
+{
+	var A1 = get_random();
+}
+
+var a_lcm = getLCM(Math.abs(A1), Math.abs(A2)); //The least common multiple of the x coefficients
+var mult_1 = a_lcm/A1; //What to multiply the top equation by
+var mult_2 = a_lcm/A2 * (-1); //What to multiply the bottom equation by..always ends up negative
+
+//get_equation_html('`x='+format_fraction(C1*(B1*mult_1+B2*mult_2)-B1*(C1*mult_1+C2*mult_2),A1*(B1*mult_1+B2*mult_2))+'`'+' , '+get_equation_string(0,1, format_fraction(C1*mult_1+C2*mult_2,B1*mult_1+B2*mult_2) ))	
+		
+var x_int = (C1*(B1*mult_1+B2*mult_2)-B1*(C1*mult_1+C2*mult_2))/(A1*(B1*mult_1+B2*mult_2));
+var y_int = (C1*mult_1+C2*mult_2)/(B1*mult_1+B2*mult_2);
+
+var x_margin=Math.max(Math.abs(x_int), 2);
+var x_max = x_int+x_margin;
+var x_min = x_int-x_margin;
+
+var y_margin=Math.max(Math.abs(y_int), 2);
+var y_max = y_int+y_margin;
+var y_min = y_int-y_margin;
+
+function graph_update() {
+	initPicture(x_min,x_max, y_min, y_max);
+	axes();
+	stroke="blue";
+	plot("draw_top(x)");
+	stroke="green";
+	plot("draw_bottom(x)");
+	
+}
+
+function draw_line(x) {
+	return ( A*x*x+B*x+C);
+}
+
+function draw_top(x) {
+	return ( -1*x*A1/B1+C1/B1);
+}
+
+function draw_bottom(x) {
+	return ( -1*x*A2/B2 + C2/B2);
+}
+
+function write_hint(hint, step)
+{
+	document.write('<div id=\"step'+step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+hint+'</font></div>');
+}
+
+function get_equation_html(equation)
+{
+	return ("<center><h3>"+equation+"</h3></center>");
+}
+
+
+function get_equation_string(a_co, b_co, c_co)
+{
+	if (a_co==0)
+		return ('`'+format_first_coefficient(b_co)+'y='+c_co+'`');
+	else if (b_co==0)
+		return ('`'+format_first_coefficient(a_co)+'x='+c_co+'`');
+	else
+		return ('`'+format_first_coefficient(a_co)+'x'+format_coefficient(b_co)+'y='+c_co+'`');
+}
+
+
+function write_system(a1_co, b1_co, c1_co, a2_co, b2_co, c2_co)
+{
+	 return equation_string('`'+get_equation_string(a1_co, b1_co, c1_co)+"<br>"+get_equation_string(a2_co, b2_co, c2_co)+'`');
+}
+
+function get_intersection_html(a1_co, b1_co, c1_co, a2_co, b2_co, c2_co)
+{
+
+	var intersection = get_intersection(a1_co, b1_co, c1_co, a2_co, b2_co, c2_co);
+	return '`x='+format_fraction(intersection[0],intersection[1])+'`'+' , '+get_equation_string(0,1, format_fraction(intersection[2],intersection[3]) );			
+}
+
+function get_intersection(a1_co, b1_co, c1_co, a2_co, b2_co, c2_co)
+{
+	var a_lcm = getLCM(Math.abs(a1_co), Math.abs(a2_co)); //The least common multiple of the x coefficients
+	var mult_1 = a_lcm/a1_co; //What to multiply the top equation by
+	var mult_2 = a_lcm/a2_co * (-1); //What to multiply the bottom equation by..always ends up negative
+	var x_num = (c1_co*(b1_co*mult_1+b2_co*mult_2)-b1_co*(c1_co*mult_1+c2_co*mult_2));
+	var x_den = (a1_co*(b1_co*mult_1+b2_co*mult_2));
+	var y_num = (c1_co*mult_1+c2_co*mult_2)
+	var y_den = (b1_co*mult_1+b2_co*mult_2);
+
+	return [x_num, x_den, y_num, y_den];			
+}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text("Solve for `x` and `y`:");
+
+document.write(write_system(A1, B1, C1, A2, B2, C2));
+//write out the hints
+
+write_step('You want both `x` coefficients to be the least common multiple of `'+A1+'` and `'+A2+
+	   '`.  So you can muliply the top equation by `'+mult_1+'` and the bottom equation by `'+mult_2+'` to get:'+
+ 	   write_system(A1*mult_1, B1*mult_1, C1*mult_1, A2*mult_2, B2*mult_2, C2*mult_2));
+
+write_step('Adding the top and bottom equations gives you:'+equation_string('`'+get_equation_string(0,B1*mult_1+B2*mult_2, C1*mult_1+C2*mult_2 )+'`'));
+
+if ((B1*mult_1+B2*mult_2)!==1)
+	write_step('Dividing both sides by `'+(B1*mult_1+B2*mult_2)+'` gives:'+
+			equation_string('`'+get_equation_string(0,1, format_fraction(C1*mult_1+C2*mult_2,B1*mult_1+B2*mult_2) )+'`'));
+var final_step ="";
+
+if (A1!=1)
+	final_step=equation_string('x='+format_fraction(C1*(B1*mult_1+B2*mult_2)-B1*(C1*mult_1+C2*mult_2),A1*(B1*mult_1+B2*mult_2)));
+
+write_step('Now you can substitute '+
+	get_equation_string(0,1, format_fraction(C1*mult_1+C2*mult_2,B1*mult_1+B2*mult_2) )+
+	' back into the top equation to get:'+
+	equation_string(format_first_coefficient(A1)+'x'+format_coefficient(B1)+'*('+format_fraction(C1*mult_1+C2*mult_2,B1*mult_1+B2*mult_2)+')='+C1)+
+	equation_string(format_first_coefficient(A1)+'x'+format_fraction_with_sign(B1*(C1*mult_1+C2*mult_2),B1*mult_1+B2*mult_2)+'='+C1)+
+	equation_string(format_first_coefficient(A1)+'x='+format_fraction(C1*(B1*mult_1+B2*mult_2)-B1*(C1*mult_1+C2*mult_2),B1*mult_1+B2*mult_2))+
+	final_step+
+	equation_string('x='+format_fraction(C1*(B1*mult_1+B2*mult_2)-B1*(C1*mult_1+C2*mult_2),A1*(B1*mult_1+B2*mult_2))+' , '+
+			'y='+format_fraction(C1*mult_1+C2*mult_2,B1*mult_1+B2*mult_2)));
+
+var intersection = get_intersection(A1, B1, C1, A2, B2, C2);
+var correct_answer = '`x='+format_fraction(intersection[0],intersection[1])+'`';
+var correct_answer2 = '`y='+format_fraction(intersection[2],intersection[3])+'`';
+
+
+//Fill in the choices
+//need to fix it so that the other choices can never be the same as the correct choice
+for (var i=0; i<5; i++)
+{
+	var x_num = intersection[0];
+	var x_den = intersection[1];
+	var y_num = intersection[2];
+	var y_den = intersection[3];
+	var bad_x_num = get_random();
+	var bad_x_den = get_random();
+	var bad_y_num = get_random();
+	var bad_y_den = get_random();
+
+	while (x_num*bad_x_den==x_den*bad_x_num || bad_x_den==0)
+	{
+		bad_x_den = get_random();
+	}
+	while (y_num*bad_y_den==y_den*bad_y_num || bad_y_den==0)
+	{
+		bad_y_den = get_random();
+	}
+	possibleAnswers.push('x='+format_fraction(bad_x_num, bad_x_den));
+	possibleAnswers2.push('y='+format_fraction(bad_y_num, bad_y_den));
+}
+
+//-->
+</script>
+
+{% endblock maincell %}
+{% block answerarea %}
+
+
+<script language=Javascript1.2><!--
+	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
+	correctchoice = Math.round(Math.random()*4.98-.49);
+	correctchoice2 = Math.round(Math.random()*4.98-.49); //every variable with a 2 is for the second set of choices
+	
+	
+	//Fill in the choices
+	//need to fix it so that the other choices can never be the same as the correct choice
+	document.write('<table border=0 width=200>');
+	for (var i=0; i<5; i++)
+	{
+		if (i==correctchoice) 
+		{
+			answerChoices[i]=correct_answer;
+		}
+		else
+		{
+			
+			var new_index = Math.round(Math.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
+			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0]
+			answerChoices[i]='`'+new_wrong_choice+'`';
+		}
+		if (i==correctchoice2) 
+		{
+			answerChoices2[i]=correct_answer2;
+		}
+		else
+		{
+			
+			var new_index = Math.round(Math.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
+			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
+			answerChoices2[i]='`'+new_wrong_choice+'`';
+		}
+		document.write('<tr><td><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]
+			+'</input></td><td><input type=\"radio\" name=\"selectAnswer2\" onClick=\"select_choice2('+i+')\">'+answerChoices2[i]+'</input></td></tr>');
+
+	}
+//-->
+</script>
+</table>
+{% endblock answerarea %}
+{% block checkanswer %}check_both_answers(){% endblock checkanswer%}
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}

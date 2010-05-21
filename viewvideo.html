@@ -1,0 +1,93 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy: {{video.title}}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta name="description" content="{{video.description}}" />
+  <meta name="keywords" content="{{video.keywords}}" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+</head>
+<body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
+  <center><table border=0 width=800 align=center>
+  	<tr>
+  		<td align=left><A href="http://www.khanacademy.org" border="0"><img src="/images/khan.GIF"></a></td>
+  	</tr>
+  	<tr>
+  		<td align=right><span class="mainmenu"><A href="http://www.khanacademy.org">Video Library</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="{{video.url}}">Rate and Comment on YouTube</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/">Exercises (Requires Login)</A></span></td>
+  	</tr>
+  	<tr>
+  	
+  	<td>
+  	<h2>{{video.title}}</h2>
+  	<P>
+  	{{video.description}}
+  	<P>
+  	<B>Playlists:</b>
+  	{% for video_playlist in video_playlists %}
+  		<A href="#{{video_playlist.playlist.youtube_id}}">{{video_playlist.playlist.title}}</A>
+  	{% endfor %}
+  	<P>
+  	<font color="#FFFFFF">{{video.keywords}}</font>
+  	<P>
+  	<object width="800" height="480"><param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="800" height="480"></embed></object>
+  	<P>
+  	&nbsp;
+  	<P>
+  	{% for video_playlist in video_playlists %}
+  	<A name="{{video_playlist.playlist.youtube_id}}"></A>
+  	<div class=hdg>&nbsp;<h3>In Playlist: {{video_playlist.playlist.title}}</h3></div>
+  	<table  border=0 cellspacing=0 cellpadding=3>
+  	<tr>
+		<td width=33% class="colHeadL" valign="top">{% if video_playlist.previous_video %}<A href="/video?v={{video_playlist.previous_video.youtube_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}{% else %}&nbsp;{% endif %} </A></td> 
+		<td class="colHeadR" width=33%>&nbsp;</td>
+		<td align=right width=33% class="colHeadR" valign="top">{% if video_playlist.next_video %}<A href="/video?v={{video_playlist.next_video.youtube_id}}"><B>Next Video:</b> {{video_playlist.next_video.title}}</A>{% else %}&nbsp;{% endif %}</td> 
+	</tr>	
+	<tr>
+		{% for playlist_video_entry in video_playlist.videos %}
+			{% if playlist_video_entry.current_video %}
+			<td class={{playlist_video_entry.current_background}}><B>{{forloop.counter}}. {{playlist_video_entry.video.title}}</B></td>
+			{% else %}
+			<td class={{playlist_video_entry.current_background}}><A href="/video?v={{playlist_video_entry.video.youtube_id}}">{{forloop.counter}}. {{playlist_video_entry.video.title}}</A></td>
+			{% endif%}
+			{% if forloop.counter|divisibleby:3 %}
+				{% if forloop.counter|divisibleby:6 %}
+				</tr><TR>
+				{% else %}
+				</tr><TR class="highlightGreyRelated">
+				{% endif %}
+			{% endif %}
+		{% endfor %}
+	</tr>
+  	</table>
+  	{% endfor %}
+  	<P>
+  	<B>Keywords:</B>:{{video.keywords}}
+  	
+  	</td>
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	<center>
+  	<P>&nbsp;<P>
+  	<table width=800 border=0 cellpadding=0 cellspacing=0>
+  	<tr>
+  		<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
+  		
+  	</tr>
+  	</table>
+  	<p><font size=-2>&copy;2010 Khan Academy</font></p>
+  	
+  	</center>
+  	</tr>
+   </table>
+   
+   
+   </center>
+</body>
+  	
+  	

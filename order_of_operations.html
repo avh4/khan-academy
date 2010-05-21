@@ -1,0 +1,53 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var A = getRandomIntRange(1,10);
+var B = getRandomIntRange(1,10);
+var C = getRandomIntRange(1,10);
+
+while ((B-C)==0)
+	C = getRandomIntRange(1,10);
+
+var D = getRandomIntRange(1,10);
+var E = getRandomIntRange(1,10);
+
+var types = [	[A+ ' + (' +B+ ' x ' +C+ ')', A+ ' + (' +B*C+ ')', A+ ' + ' +B*C, A+B*C]
+		,[A+ ' + ' +B+ ' x ' +C, A+ ' + ' +(B*C), A+B*C]
+		,[A+ ' x (' +B+ ' + ' +C+ ')', A+ ' x (' +(B+C)+ ')', A+ ' x ' +(B+C), A*(B+C)]
+		,[A+ ' + (' +B*C+ ' / ' +C+ ')', A+ ' + (' +B+ ')', A+ ' + ' +B, A+B]
+		,[A+ ' + ' +B*C+ ' / ' +C, A+ ' + ' +B, A+B]
+		,[(A*(B+C))+ ' / (' +B+ ' + ' +C+ ')', (A*(B+C))+ ' / (' +(B+C)+ ')', (A*(B+C))+ ' / ' +(B+C), A]
+		,[(A*(B-C))+ ' / (' +B+ ' - ' +C+ ')', (A*(B-C))+ ' / (' +(B-C)+ ')', (A*(B-C))+ ' / ' +(B-C), A]
+		,['('+A+' + ('+B+' - '+C+' x '+D+')) x '+E, '('+A+' + ('+B+' - '+(C*D)+')) x '+E, '('+A+' + ('+(B-(C*D))+')) x '+E, '('+A+' + '+(B-(C*D))+') x '+E, '('+A+(B-(C*D))+') x '+E, (A+(B-(C*D)))+' x '+E, (A+(B-(C*D)))*E]
+		,[A+' + ('+B+' - '+C+' x '+D+') x '+E, A+' + ('+B+' - '+(C*D)+') x '+E, A+' + ('+(B-(C*D))+') x '+E, A+' + '+(B-(C*D))+' x '+E, A+' + '+((B-(C*D))*E),A+((B-(C*D))*E)]
+		,[A+ ' - ' +B+ ' x ' +C+ ' + ' +(D*E)+ ' / ' +E, A+ ' - ' +B+ ' x ' +C+ ' + ' +D, A+ ' - ' +(B*C)+ ' + ' +D, (A-B*C)+ ' + ' +D, A-B*C+D]
+		,[A+ ' x ' +B+ ' + ' +C+ ' x ' +(D*E)+ ' / ' +E, A+ ' x ' +B+ ' + ' +C+ ' x ' +D, (A*B)+ ' + ' +C+ ' x ' +D, (A*B)+ ' + ' +(C*D), (A*B)+(C*D)]
+		,['('+A+' + '+B+' x '+C+') - '+D+' x '+E, '('+A+' + '+(B*C)+') - '+D+' x '+E, (A+(B*C))+' - '+D+' x '+E, (A+(B*C))+' - '+(D*E), (A+B*C)-(D*E)]
+		];
+
+var t = pickNumber(0,types.length-1); //Sets cookies to avoid repeats in the last 5 problems
+
+
+var eq = types[t];
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+
+writeText('Simplify the following expression (round your answer to the hundredths places):<center><b>'+eq[0]+'</b></center>');
+
+for(var i=1; i<eq.length; i++)
+	writeStep('<center>'+eq[i]+'</center>');
+
+setCorrectAnswer(eq[eq.length-1]);
+
+//-->
+</script>
+
+{% endblock maincell %}
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}

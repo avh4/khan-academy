@@ -1,0 +1,116 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+
+
+  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
+  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
+  <script language="JavaScript" src="/javascript/metautil.js"></script>
+  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
+  <script language="JavaScript" src="/javascript/graphutil.js"></script>
+
+  <script type="text/javascript">
+  	function submitForm(value)
+  	{
+  		document.forms['addexercise'].submit();
+  	}
+  </script>
+</head>
+  <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
+  <table border=0 width=100%>
+  	<tr>
+  		<td><A href="/" border="0"><img src="/images/khan.GIF"></a></td>
+  		<td align=right valign=top width=100%>
+  			<span class="mainmenu">Welcome,  <B>{{username}}</b> [<A href="{{logout_url}}">Sign Out</A>] </span>
+  			<P>
+  			<h2>Energy Points: {{points}}</h2>
+  		</td>
+  	</tr>
+  	<tr>
+  		<td colspan=2 align=right>
+  			<span class="mainmenu"><A href="/">Exercises</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/viewexercisesonmap">Knowledge Map</A>&nbsp;</span>
+  		</td>
+  	</tr>
+  </table>
+  
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+  				<tr>
+  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
+  				</tr>
+  			</table><table width=100% border=0 cellpadding=2 cellspacing=0><tr><td bgcolor=#e5ecf9 align=left><B>{% block title %}Exercise Dashboard {% endblock title %}</B></td></tr></table>
+{% block content%}
+<ul>
+Welcome to the Alpha release of the Khan Academy Exercise Application.  In order for it to work properly,
+you should be using <A href="http://www.getfirefox.com/">the latest version of Firefox</A> and <A href="http://www.khanacademy.org/setup.jsp" target="newwin">install the math fonts</A>.
+<P>
+The two advantages of this one are that 1) it should be much faster and 2) it allows you to skip around models
+and only suggests what you should work on (the suggestions change as you get streaks of 10 questions in a module
+correct).  Let me know if you have any problems.
+<br>
+-Sal
+
+<P>
+</ul>
+<div class=hdg>&nbsp;<h3>Suggested Exercises</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>
+{% for exercise in suggested_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+	
+		<td>{{exercise.points}}</td>
+		<td><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></td>
+		<td>{% if exercise.proficient %}<img src="/images/face-smiley.gif" height=20 width=20>{% endif %}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td><ul class="unit-rating" style="width:200px;">
+		<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li></ul>
+		</td>
+		</tr>
+{% endfor %}
+</table><br>
+<div class=hdg>&nbsp;<h3>All Exercises</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>
+{% for exercise in exercises %}
+
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+	
+		<td>{{exercise.points}}</td>
+		<td><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></td>
+		<td>{% if exercise.proficient %}<img src="/images/face-smiley.gif" height=20 width=20>{% endif %}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td><ul class="unit-rating" style="width:200px;">
+		<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li></ul>
+		</td>
+		</tr>
+	
+{% endfor %}
+</table>
+{% endblock content %}
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+
+    <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
+  </tr>
+</table>
+
+
+
+  <P>&nbsp;<P>
+  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
+	<center>Send any questions or comments to sal@khanacademy.org
+		<p><font size=-2>&copy;2010 Khan Academy</font></p>
+	</center>
+  </body>
+</html>
+

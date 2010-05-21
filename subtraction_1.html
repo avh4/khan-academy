@@ -1,0 +1,142 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var term1 = 0;
+var term2 = 0;
+var term1color = getNextColor();
+var term2color = getNextColor();
+var hintsGiven = 0;
+var xSpacing =65;
+var ySpacing = 60;
+var xMax = 400;
+var xMin = 0;
+var yMax = 200;
+var yMin = 0;
+var leftMargin = 50;
+var circlePos = leftMargin/2;
+var circleCount = 1;
+var standardSize = 75;
+var smallSize = 17;
+var numLineY = 50;
+var slashHeight = 15;
+var numLineMin = 0;
+var numLineMax = 10;
+var slashSpacing = (xMax-2*leftMargin)/(numLineMax-numLineMin);
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var eFunction = function()
+{
+	term1 = getRandomInt(8)+1;
+	term2 = getRandomInt(term1);
+}
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var cFunction = function(history)
+{
+	return (history.indexOf(term1+'-'+term2)!=-1);
+}
+
+//This function defines what an entry in the history should look like
+var tFunction = function()
+{
+	return (term1+'-'+term2);
+}
+
+//This checks the history and regenerates random numbers if the current ones have already been used recently 
+checkHistory(cFunction, eFunction, tFunction, 10);
+
+
+
+
+
+
+function graph_update()
+{
+	present.initPicture(xMin,xMax,yMin);
+	present.fontfill = nColor;
+	present.fontsize = standardSize;
+	present.fontweight = "normal";
+	
+	present.fontfamily = "Arial";
+	present.fontstyle = "normal";
+	present.text([leftMargin,100], term1, above, 'term1');
+	present.text([leftMargin+xSpacing,100], '-', above);
+	present.text([leftMargin+2*xSpacing,100], term2, above, 'term2');
+	present.text([leftMargin+3*xSpacing,100], '=', above);
+	present.text([leftMargin+4*xSpacing,100], '?', above, 'dif');
+	setCorrectAnswer(term1-term2);
+}
+
+
+
+function getCoor(num)
+{
+	var x = (num-numLineMin)*slashSpacing+leftMargin;
+	return [x, numLineY];
+}
+
+
+
+function drawNumLine()
+{
+	present.stroke = nColor;
+	present.fontfill = nColor;
+	present.line([leftMargin-10, numLineY], [xMax-leftMargin+10, numLineY]);
+	present.fontsize = smallSize;
+	for(var i=numLineMin; i<=numLineMax; i++)
+	{
+		var x = (i-numLineMin)*slashSpacing+leftMargin;
+		present.line([x,numLineY-slashHeight/2],[x,numLineY+slashHeight/2]);
+		present.text([x,numLineY], i, above);
+	}
+	present.fontsize = standardSize;
+}
+
+
+function next_step()
+{
+	if (hintsGiven==0)
+	{
+		present.fontfill = term1color;
+		present.text([leftMargin,100], term1, above, 'term1');
+	
+		drawNumLine();
+		present.marker="dot";
+		present.markerfill=term1color;
+		present.dotradius =4;
+		present.markerstroke = term1color;
+		present.line(getCoor(term1),getCoor(term1), 't1');
+	
+	}
+	else if (hintsGiven==1)
+	{
+		present.fontfill = term2color;
+		present.text([leftMargin+2*xSpacing,100], term2, above, 'term2');
+		present.marker="arrow";
+		present.stroke = term2color;
+		present.strokewidth = 3;
+		present.line(getCoor(term1),getCoor(term1-term2), 't2');
+	
+	}
+	else
+	{
+		present.fontfill = getNextColor();;
+		present.text([leftMargin+4*xSpacing,100], correctAnswer, above, 'dif');
+		present.markerfill=fontfill;
+		present.markerstroke=fontfill;
+		present.marker="dot";
+		present.line(getCoor(correctAnswer),getCoor(correctAnswer));
+	
+	}
+	hintsGiven++;
+	steps_given++;
+}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
+  

@@ -1,0 +1,56 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+/***
+Finding the GCD (Greatest Common Divisor) of A and B
+***/
+
+
+function getFactors(x)
+{
+	var factors = '1';
+	for(var i=2; i<=x; i++)
+	{
+		if (x%i==0)
+			factors+=','+i;
+	}
+	return factors;
+}
+
+var A = getRandomIntRange(1,20);
+var B = getRandomIntRange(1,20);
+
+
+
+
+while (B==A)
+	B = getRandomIntRange(1,36);
+var C = getRandomIntRange(1,5);
+
+B = B*C;
+A = A*C;
+	
+	
+setCorrectAnswer(getGCD(A,B));
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text('What is the greatest common divisor (or factor) of '+A+' and '+B+'?  Another way to say this is: <P><center>GCD('+A+','+B+')=?</center></P>');
+
+write_step('The greatest common divisor is the largest number that is a factor (or divisor) of both '+A+' and '+B+'.');
+
+write_step('The factors (or divisors) of '+A+' are:<center>'+getFactors(A)+'</center>');
+
+write_step('The factors (or divisors) of '+B+' are:<center>'+getFactors(B)+'</center>');
+
+write_step('So the greatest common divisor of '+A+' and '+B+' is '+correctAnswer+' or:<P><center>GCD('+A+','+B+')='+correctAnswer+'</center></P>');
+
+//-->
+</script>
+
+{% endblock maincell %}
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}

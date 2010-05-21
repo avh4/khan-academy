@@ -1,0 +1,42 @@
+{% extends "viewexercises.html" %}
+{% block title %}<A href="/">Exercise Home</A>: My Knowledge Map {% endblock title %}
+{% block content%}
+<P>
+<div style="position:relative;">
+<div id="intro" style="position:absolute; visibility:visible;">
+<center><table border=0 width=95%><tr><td>The yellow modules are those that you have already become proficient in.  The orange
+modules are those that I suggest you work on.  Click on a module to see how you're
+doing, to do a focused practice on that module, or to watch the video for that module. </td></tr></table></center>
+</div>
+
+{% for exercise in exercises %}
+<div id="{{exercise.name}}" style="position:absolute; visibility:hidden;" width=90%>
+<center>
+<table width="95%" cellpadding="3" cellspacing="0" border="0">
+	<tr>
+		<td width="100%" valign=center>&nbsp;<b><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A>&nbsp;<A href="/viewexercisevideos?exkey={{exercise.key}}">[videos]</a></b></td>
+
+		<td align=right valign=center>&nbsp;&nbsp;|&nbsp;&nbsp;Points&nbsp;per&nbsp;problem:</td><td align=left valign=center>{{exercise.points}}&nbsp;&nbsp;</td>
+		
+		<td align=right valign=center>|&nbsp;&nbsp;Longest&nbsp;Streak:</td><td align=left valign=center>{{exercise.longest_streak}}&nbsp;&nbsp;</td>
+		<td align=right valign=center>|&nbsp;&nbsp;Streak:</td><td align=left valign=center><ul class="unit-rating" style="width:200px;">
+		<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li></ul></td>
+	</tr>
+</table></center>
+</div>
+{% endfor %}
+</div>
+
+<table width=100% border=0 cellpadding=0 cellspacing=0>
+  <tr>
+    <td bgcolor=#ffffff><img width=1 height=5 alt=""></td>
+  </tr>
+</table>
+
+<br>&nbsp;</br>
+<center>
+<iframe src="{{knowledge_map_url}}" width="95%" height="400"></iframe>
+</center>
+{% endblock content %}
+
+

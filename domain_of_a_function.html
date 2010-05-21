@@ -1,0 +1,107 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+//Declare the variables
+var A = getRandomIntRange(1,10);
+var B = getRandomIntRange(1,10);
+var C = getRandomIntRange(1,10);
+
+while (B==A)
+	B = getRandomIntRange(1,10);
+	
+while (C==A || C==B)
+	C = getRandomIntRange(1,10);
+	
+	
+
+
+//type 1-2 for LEVEL1
+
+
+
+var t1 = ['`f(x) = (x+'+A+')/((x+'+A+')(x-'+B+'))`', 
+	'`f(x)` is undefined when the denominator is 0', 
+	'The denominator is 0 when `x='+(-1*A)+'` or `x='+B+'`', 
+	'`{x in RR: x!='+(-1*A)+' and x!='+B+'}`'];
+	
+var t2 = ['`f(x) = {((x+'+A+')/((x+'+A+')(x-'+B+')), if x!='+(-1*A)+' and x!='+B+'), ('+A+', if x='+B+'):}`',  
+	'The denominator is 0 when `x='+(-1*A)+'` or `x='+B+'`', 
+	'`f('+B+')` is defined.',
+	'`{x in RR: x!='+(-1*A)+'}`'];
+	
+var t3 = ['`f(x) = sqrt(x-'+A+')`', '`f(x)` is undefined when `x-'+A+'<0`', '`{x in RR: x>='+A+'}`'];
+
+var t4 = ['`f(x) = 1/sqrt(x-'+A+')`', '`f(x)` is undefined when `x-'+A+'<=0` (the expression under the radical cannot be negative and the denominator cannot be 0)', '`{x in RR: x>'+A+'}`'];
+
+var t5 = ['`f(x) = {(1/sqrt(x-'+A+'), if x>'+A+'), (1/sqrt('+A+'-x), if x<'+A+'):}`', '`f(x)` is undefined when `x-'+A+'=0` (the denominator cannot be 0)', '`{x in RR: x!='+A+'}`'];
+
+var t6 = ['`f(x) = sqrt('+(A+B)+'-x)/sqrt(x-'+A+')`', 
+	'The expression under neither radical can be less than 0', 
+	'The denominator cannot be 0', 
+	'`f(x)` is undefined when `x-'+A+'<=0` or `'+(A+B)+'-x < 0` ', 
+	'`{x in RR: '+A+' < x <='+(A+B)+'}`'];
+
+var t7 = ['`f(x) = {((x+'+A+')/((x+'+A+')(x-'+C+')), if x!='+(-1*A)+' and x!='+B+'), ('+A+', if x='+B+'):}`',  
+	'The denominator is 0 when `x='+(-1*A)+'` or `x='+C+'`', 
+	'`{x in RR: x!='+(-1*A)+' and x!='+C+'}`'];
+	
+	
+var t8 = ['`f(x) = sqrt(x-'+C+')/(x^2+'+(A+B)+'x+'+(A*B)+')`', 
+		'`f(x) = sqrt(x-'+C+')/((x+'+A+')(x+'+B+'))`', '`(x-'+C+')>=0` (since you cannot take a square root of a negative)',
+		'The denominator cannot be 0 so `x!=-'+A+'` and `x!=-'+B+'`', 
+		'`{x in RR: x>='+C+' and x!=-'+A+' and x!=-'+B+'}`'];
+		
+		
+var t9 = ['`f(x) = sqrt('+A+'-|x|)`', '`('+A+'-|x|)>=0`', '`'+A+'>=|x|`',  '`{x in RR: -'+A+' <= x <='+A+' }`'];
+		
+var t10 = ['`f(x) = '+B+'/sqrt('+A+'-|x|)`', '`('+A+'-|x|)>0`', '`'+A+'>|x|`',  '`{x in RR: -'+A+' < x < '+A+' }`'];
+
+
+//Don't use this right now; eventually wan to include some of these choices as well to further confuse students
+var incorrect  = ['`{x in RR: x!='+A+' and x!='+B+'}`', 
+	  	'`{x in RR: x!='+A+' and x!=-'+B+'}`',
+	  	'`{x in RR: x>'+C+' and x!=-'+A+' and x!=-'+B+'}`',
+		'`{x in RR: x>='+C+' and x!=-'+A+' and x!='+B+'}`',
+		'`{x in RR: x!='+A+'}`',
+		'`{x in RR: '+A+' < x <'+(A+B)+'}`',
+		'`{x in RR: '+A+' <= x <'+(A+B)+'}`',
+		'`{x in RR: x!='+(-1*A)+' and x!='+C+'}`'];
+		
+		
+		
+		
+		
+		
+	
+
+var types = [t1, t2, t3, t4, t5, t6, t7, t8, t9, t10];
+
+var t = pickNumber(0,types.length-1); //Sets cookies to avoid repeats in the last 5 problems
+
+var f = types[t];
+
+writeText('What is the domain of `f(x)`?<center>'+f[0]+'</center>');
+
+for(var i=1; i<f.length; i++)
+	writeStep('<center>'+f[i]+'</center>');
+	
+setCorrectAnswer('`'+f[f.length-1]+'`');
+
+
+for(i=0; i<types.length; i++)
+{
+	if (i!=t)
+		addWrongChoice('`'+types[i][types[i].length-1]+'`');
+}
+
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+

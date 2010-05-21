@@ -1,0 +1,91 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Rich text editor: Basic steps to installation</title>
+
+<style type="text/css">
+.codeblock{
+background-color:#EFEFEF;
+font: 12px Courier;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Basic steps to installation</h2>
+<p>This document prepared by <a href="http://www.dynamicdrive.com/">Dynamic 
+Drive</a></p>
+<p><b>Step 1:</b> Insert the below script into the HEAD section of your page:</p>
+<p class="codeblock">&lt;script language=&quot;JavaScript&quot; type=&quot;text/javascript&quot; 
+src=&quot;richtext_compressed.js&quot;&gt;&lt;/script&gt;</p>
+<p>**Note: Alternatively, you can insert the below code instead to reference the 
+original, non compressed version of the .js file instead. This file is significantly 
+larger than the compressed version, though the source is human readable:</p>
+<p class="codeblock">&lt;script language=&quot;JavaScript&quot; type=&quot;text/javascript&quot; src=&quot;richtext.js&quot;&gt;&lt;/script&gt;</p>
+<p><b>Step 2:</b> Inside the zip file you downloaded, upload the files:</p>
+<p>1) The relevant .js file you have chosen above<br>
+2) The sole .css file included in the zip file<br>
+3) Palette.htm, blank.htm and insert_table.htm<br>
+4) The entire images directory</p>
+<p>Upload the above to your web page directory, in the same directory where your 
+form is in.</p>
+<p><b>Step 3:</b> Inside your form where you wish the rich text editor to 
+appear, add the below code:</p>
+
+<p class="codeblock">&lt;script language=&quot;JavaScript&quot; type=&quot;text/javascript&quot;&gt;<br>
+&lt;!--<br>
+//Usage: writeRichText(fieldname, html, width, height, buttons, readOnly)<br>
+writeRichText('rte1', 'here&amp;#39;s the &quot;&lt;em&gt;preloaded&lt;/em&gt; &lt;b&gt;content&lt;/b&gt;&quot;', 400, 
+200, true, false);<br>
+//--&gt;<br>
+&lt;/script&gt;</p>
+<p>As you can see, you can control the initial content and dimensions of the 
+rich text editor. <b>&quot;rtel&quot;</b> is the name of the text editor, which can be 
+arbitrary but should be unique.</p>
+<p><b>Step 4:</b> Finally, just before the form containing the rich text editor 
+is submitted, the script needs to sync the value contained within the editor to 
+ensure it gets properly submitted. To archive this, a special function needs to 
+be attached to the onSubmit event of your form. This is shown below:</p>
+<p class="codeblock">&lt;form name=&quot;myform&quot; <b>onsubmit=&quot;return submitForm();&quot;</b>&gt;<br>
+<br>
+&lt;script language=&quot;JavaScript&quot; type=&quot;text/javascript&quot;&gt;<br>
+&lt;!--<br>
+function submitForm() {<br>
+//make sure hidden and iframe values are in sync before submitting form<br>
+updateRTE('rte1'); //use this when syncing only 1 rich text editor (&quot;rtel&quot; is 
+name of editor)<br>
+//updateRTEs(); //uncomment and call this line instead if there are multiple 
+rich text editors inside the form<br>
+alert(&quot;Submitted value: &quot;+document.myform.rte1.value) //alert submitted value<br>
+return true; //Set to false to disable form submission, for easy debugging.<br>
+}<br>
+<br>
+//Usage: initRTE(imagesPath, includesPath, cssFile)<br>
+initRTE(&quot;images/&quot;, &quot;&quot;, &quot;&quot;);<br>
+//--&gt;<br>
+&lt;/script&gt;<br>
+<br>
+&lt;!-rest of your form--&gt;<br>
+&quot;<br>
+&quot;<br>
+&lt;/form&gt;</p>
+<p>Don't be intimated by Step 3. Basically, just add the above script containing 
+function submitForm() to your form, and attach it to the onsubmit event handler 
+inside the form tag.</p>
+<h2>Adding more than one rich text editor inside the form</h2>
+<p>You can easily add multiple rich text editors within the same form. Simply <b>
+repeat</b> Step 3 for each instance of an editor. Then, inside the script of 
+Step 4, change:</p>
+<p class="codeblock">updateRTE('rte1');</p>
+<p>to call instead:</p>
+<p class="codeblock">updateRTEs();</p>
+<p>And that's it.</p>
+
+</body>
+
+</html>

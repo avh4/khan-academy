@@ -1,0 +1,78 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var x1 = get_random(); //the equation can be factored as (x+x1)(x+x2) so he roots are -x1 and -x2
+var x2 = get_random();
+var multfactor = Math.max(Math.min(get_random(), get_random()),Math.min(get_random(), get_random()));//like to keep this number relative low so that the graph can be presented well
+var A = multfactor;
+var B = A*(x1+x2);
+var C = A*x1*x2;
+
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text('Determine where `f(x)` intersects the x-axis.');
+if (B==0)
+{
+	//document.write('<h3><center>`f(x)='+format_first_coefficient(A)+'x^2'+format_constant(C)+'`</center></h3>');
+	write_equation('f(x)='+format_first_coefficient(A)+'x^2'+format_constant(C));
+	
+	//write out the hints
+	document.write('<div id=\"step1\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>The function interesects the x-axis when `f(x)=0` so you need to solve the equation:</font><h4><center>`'+format_first_coefficient(A)+'x^2'+format_constant(C)+'=0`</center></h4></div>');
+	document.write('<div id=\"step2\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>Dividing both sides of the equation by '+A+' gives: </font><h4><center>`x^2'+format_constant(x1*x2)+'=0`</center></h4></div>');
+	document.write('<div id=\"step3\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>We know that:<center><h4>`(x+a)(x-a)=x^2-a^2`</h4></center> </font></div>');
+	document.write('<div id=\"step4\" style=\"position:relative; visibility:hidden;\"><center><h4>`x^2'+format_constant(x1*x2)+'=(x'+format_constant(x1)+')(x'+format_constant(x2)+')=0`</h4></center><center><h4>` x='+(-1*x1)+','+(-1*x2)+'</h4></center></div>');
+}
+else
+{
+	//document.write('<h3><center>`f(x)='+format_first_coefficient(A)+'x^2'+format_coefficient(B)+'x'+format_constant(C)+'`</center></h3>');
+	
+	write_equation('f(x)='+format_first_coefficient(A)+'x^2'+format_coefficient(B)+'x'+format_constant(C));
+	
+	//write out the hints
+	write_step('The function interesects the x-axis when `f(x)=0` so you need to solve the equation:'
+			+equation_string(format_first_coefficient(A)+'x^2'+format_coefficient(B)+'x'+format_constant(C)+'=0'));
+	if (A!=1)
+	{
+		write_step('Dividing both sides of the equation by '+A+' gives:'
+				+equation_string('x^2'+format_coefficient(x1+x2)+'x'+format_constant(x1*x2)+'=0'));
+	}
+	write_step('The coefficient on the `x` term is `'+(x1+x2)
+			+'` and the constant term is `'+(x1*x2)
+			+'`, so we need to find 2 numbers that add up to `'+(x1+x2)
+			+'` and whose product is `'+(x1*x2)+'`');
+	write_step('This works for the numbers `'+x1+'` and `'+x2+'` :'
+			+equation_string('('+x1+')+('+x2+')='+ (x1+x2))
+			+equation_string(x1+'&#215;'+x2+'='+(x1*x2)));
+	write_step('So:'+equation_string('(x'+format_constant(x1)+')(x'+format_constant(x2)+')=0')
+			+equation_string('x='+(-1*x1)+','+(-1*x2)));
+}
+	
+for(var i=0; i<5; i++)
+{
+	var bad_x1 = get_random();
+	var bad_x2 = get_random();
+
+	while (x1==bad_x1 && x2==bad_x2)
+	{
+		bad_x1 = get_random();
+		bad_x2 = get_random();
+	}
+
+	possibleAnswers.push('x='+bad_x1+', '+bad_x2);
+}
+
+setCorrectAnswer('x='+(-1*x1)+', '+(-1*x2));
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+

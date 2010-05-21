@@ -1,0 +1,139 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var x1= get_random();
+var x2= get_random();
+var y1= get_random();
+var y2= get_random();
+
+var x_margin=Math.abs(x1-x2)/2;
+var y_margin=Math.abs(y1-y2)/2;
+
+var x_max=Math.max(x1,x2)+x_margin;
+var x_min=Math.min(x1,x2)-x_margin;
+var y_max=Math.max(y1,y2)+y_margin;
+var y_min=Math.min(y1,y2)-y_margin;
+
+while ((x2==x1)
+	|| (y2==y1)
+	|| (x_max<0)
+	|| (x_min>0)
+	|| (y_max<0)
+	|| (y_min>0))
+{
+	x1= get_random();
+	x2= get_random();
+	y1= get_random();
+	y2= get_random();
+
+	x_margin=Math.abs(x1-x2)/2;
+	y_margin=Math.abs(y1-y2)/2;
+
+	x_max=Math.max(x1,x2)+x_margin;
+	x_min=Math.min(x1,x2)-x_margin;
+	y_max=Math.max(y1,y2)+y_margin;
+	y_min=Math.min(y1,y2)-y_margin;
+}
+
+
+var slope_numerator = y1 - y2;
+var slope_denominator = x1 - x2;
+var m = slope_numerator/slope_denominator;
+var b = y1-(x1*m);
+
+function graph_update() {
+
+	var p1_position=aboveright;
+	var p2_position=aboveright;
+		
+	if ((y1>y2) && (x1>x2))
+	{
+		p1_position=aboveright;
+		p2_position=belowleft;
+	}
+	else if ((y1>y2) && (x1<x2))
+	{
+		p1_position=aboveleft;
+		p2_position=belowright;
+	}
+	else if ((y1<y2) && (x1<x2))
+	{
+		p1_position=belowleft;
+		p2_position=aboveright;
+	}
+	else
+	{
+		p1_position=belowright;
+		p2_position=aboveleft;
+	}
+
+	
+	if (steps_given==0)
+	{
+		
+		initPicture(x_min,x_max, y_min, y_max);
+		axes();
+		stroke="red";
+		marker='none';
+		plot("draw_line(x)");
+		stroke="none";
+		marker="dot";
+		line([x1,y1], [x1,y1]);
+
+
+		text([x1,y1], "("+x1+","+y1+")", p1_position);
+		//text([x2,y2], "("+x2+","+y2+")", p2_position);
+		
+	}
+
+}
+
+
+function draw_line(x) {
+	return ( m*x+b);
+}
+//-->
+</script>
+
+{% endblock maincode %}
+{% block maincellwidth %}70%{% endblock maincellwidth %}
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text('The equation of a line that passes through the point `('+x1+','+y1+')` is: <center><b>`y='+format_fraction(slope_numerator,slope_denominator)+'x+b`</b></center>'+
+		'<P>What is `b` (or the y-intercept)?</P>');
+
+//write out the hints
+
+write_step('Substituting `('+x1+','+y1+')` into the equation gives: <center>`'+y1+'='+x1+'*'+format_fraction(slope_numerator,slope_denominator)
+	+'+b`</center><center>`'+y1+'='+format_fraction(x1*slope_numerator,slope_denominator)+'+b`</center><center>`b='
+	+format_fraction(y1*slope_denominator-x1*slope_numerator,slope_denominator)+'`</center><center><b>`y='
+	+format_fraction(slope_numerator, slope_denominator)+'x'+format_fraction_with_sign(y1*slope_denominator-x1*slope_numerator,slope_denominator)
+	+'`</b></center>');
+
+//var correct_answer = '`m='+format_fraction(slope_numerator, slope_denominator)+'`';
+var correct_answer = 'b='+format_fraction(y1*slope_denominator-x1*slope_numerator,slope_denominator);
+	
+for (var i=0; i<5; i++)
+{
+	var b_num = y1*slope_denominator-x1*slope_numerator;
+	var b_den = slope_denominator;
+	var bad_b_num = get_random();
+	var bad_b_den = get_random();
+
+	while (b_num*bad_b_den==b_den*bad_b_num || bad_b_den==0)
+	{
+		bad_b_den = get_random();
+	}
+	//possibleAnswers.push('m='+format_fraction(bad_m_num, bad_m_den));
+	possibleAnswers.push('b='+format_fraction(bad_b_num, bad_b_den));
+}
+
+
+
+//-->
+</script>
+
+
+
+{% endblock maincell %}
+
