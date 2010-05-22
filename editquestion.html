@@ -1,7 +1,7 @@
 <html>
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/stylesheet.css" />
-    <script language="JavaScript" type="text/javascript" src="/javascript/richtext.js"></script>
+    <script language="JavaScript" type="text/javascript" src="/javascript/rte/richtext_compressed.js"></script>
     <script>
     function addQuestion(drop_down)
     {
@@ -63,8 +63,6 @@
 
   </tr>
 </table>
-
-  <body>
   
   <h2>{{ message_text }}</h2>
   	
@@ -83,7 +81,7 @@
 			}
 
 		//Usage: initRTE(imagesPath, includesPath, cssFile)
-		initRTE("/images/", "/helperpages", "/stylesheets/rte.css");
+		initRTE("/javascript/rte/images/", "/javascript/rte/", "", false);
 		//-->
 		</script>
 		<input type="hidden" name="question_key" value ="{{question.key}}">
@@ -104,12 +102,13 @@
 			<script language="JavaScript" type="text/javascript">
 			<!--
 			//Usage: writeRichText(fieldname, html, width, height, buttons, readOnly)
-			writeRichText('question_text', unescape('{{question.question_text}}'), 400, 200, true, false);
+			var question_text = new richTextEditor('question_text');
+			question_text.html = unescape('{{question.question_text|urlencode}}');
+			question_text.toggleSrc = false;
+			question_text.build();
+
 			//-->
 			</script>
-			
-			
-			
 			</td>
 		</tr>
 		<tr>
