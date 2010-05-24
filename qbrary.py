@@ -1,6 +1,7 @@
 import os
 from google.appengine.ext.webapp import template
 import random
+import logging
 
 import cgi
 
@@ -93,7 +94,7 @@ def htmlChildren(subject):
 
 	s_topics = subtopics(subject)
 	if s_topics.count()<1:
-		output = output + "<A href='/addquestion?subject_key="+subject.key().__str__()+"'>Add Question</a><br>"
+		output = output + " | <A href='/addquestion?subject_key="+subject.key().__str__()+"'>Add Question</a><br>"
 	else:
 		output = output + "<UL>"
 		for topic in s_topics:
@@ -280,7 +281,8 @@ class CreateEditSubject(webapp.RequestHandler):
 							'greeting': greeting,
 						    	'subtopics':st,
 							'tree': html_tree,
-							'breadcrumb':bc}
+							'breadcrumb':bc,
+                                                        'redirect_url' : self.request.uri}
 				path = os.path.join(os.path.dirname(__file__), 'editsubject.html')
 				self.response.out.write(template.render(path, template_values))
 			
@@ -360,6 +362,7 @@ class AnswerQuestion(webapp.RequestHandler):
 				greeting = ("user: %s [<a href=\"%s\">sign out</a>]" %
 						(user.nickname(), users.create_logout_url("/")))
 				
+                                # get all questions that are in some subtopic of given subject
 				subject = db.get(subject_key)
 				children = getBottomLevelChildren(subject)
 				questions = []
@@ -371,7 +374,9 @@ class AnswerQuestion(webapp.RequestHandler):
 				if len(questions)>0 :	
 					question = random.choice(questions)
 					answerer_question = (QuestionAnswerer.gql("WHERE answerer=:1 and question=:2", user, question)).get()
-				
+
+                                        # check if current user has answered the question before
+                                        # create new QuestionAnswerer entry if they haven't
 					if not answerer_question:
 						answerer_question = QuestionAnswerer()
 						answerer_question.answerer=user

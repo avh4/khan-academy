@@ -22,11 +22,10 @@
 		<input type="submit" value="Add Sub-Topic">
 	</form>
 	{% for entry in subtopics %}
-		<form action="/editsubject" method="get">
-			<input type="hidden" name="subject_key" value = "{{ entry.key}}">
 			{{ entry.index }} {{ entry.name }}
-			<input type="submit" value="edit">
-		</form>
+                        <a href="/editsubject?subject_key={{ entry.key }}" >edit</a> | 
+                        <a href="/deletesubject?subject_key={{ entry.key }}&redirect={{redirect_url}}" >delete</a>
+			<br />
 	{% endfor %}
 	<P>
 	{{ tree }}

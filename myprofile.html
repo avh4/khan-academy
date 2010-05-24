@@ -103,7 +103,7 @@
     	<td>{{question.subject.name}}</td>
     	<td>{{question.question_text|truncatewords:12}}</td> 
 	<td><A HREF="/editquestion?question_key={{ question.key }}">[edit]</A></td>
-	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[publish]&nbsp;&nbsp;&nbsp;&nbsp;</A></td>
+	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[publish]</A>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td><A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A></td>
 	</tr>
     {% endfor %}

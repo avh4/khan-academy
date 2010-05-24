@@ -49,7 +49,8 @@
     
     function new_question()
     {
-    	
+        // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
+    	window.location = window.location;
     }
     
     </script>
@@ -63,7 +64,7 @@
 	<tr>
   		<td valign=center align=right> 
 		<b>
-		<A href="/">Manage Questions</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+		<A href="/qbrary">Manage Questions</a>&nbsp;&nbsp;|&nbsp;&nbsp;
 		<SELECT id="add_question" onchange="practiceQuestion(this)">
 			<OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
 			{% for subject in subjects %}
@@ -99,15 +100,15 @@
   </tr>
 </table>
 
-		
   	<table width=100%>
 	<tr>
 	<td valign=top width=70%>
 		<font face="arial" size=3><font face="arial" size=3><script language="JavaScript" type="text/javascript"><!--document.write(unescape({{question.question_text}}))//-->
 			</script></font>
+		<div id="question" style="position:relative;">{{question.question_text}}</div>
 		&nbsp;<P>&nbsp;<P>
-		<div id="answer" style="position:relative; visibility:hidden;">{{question.answer_text}}</font>
-		</div>
+		<div id="answer" style="position:relative; visibility:hidden;"><b>Answer Explanation:</b> {{question.answer_text}}</div>
+		</font>
 	</td>
 	<td>
 	<td valign="top">
