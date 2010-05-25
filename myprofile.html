@@ -81,7 +81,7 @@
     {% for question in published %}
     	<tr class={% cycle 'highlighWhite','highlightGreyRelated' %}>
 	<td>{{question.subject.name}}</td>
-    	<td>{{question.question_text|truncatewords:12}}</td> 
+    	<td>{{question.question_text|smart_truncate:75}}</td> 
 	<td><A HREF="/editquestion?question_key={{ question.key }}">[edit]</A></td>
 	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[unpublish]</A></td>
 	<td><A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A></td>
@@ -101,7 +101,7 @@
     {% for question in notpublished %}
     	<tr class={% cycle 'highlighWhite','highlightGreyRelated' %}>
     	<td>{{question.subject.name}}</td>
-    	<td>{{question.question_text|truncatewords:12}}</td> 
+    	<td>{{question.question_text|smart_truncate:75}}</td> 
 	<td><A HREF="/editquestion?question_key={{ question.key }}">[edit]</A></td>
 	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[publish]</A>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td><A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A></td>

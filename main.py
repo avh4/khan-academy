@@ -1055,6 +1055,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
 				
 
 def main():
+  webapp.template.register_template_library('templatefilters')
   application = webapp.WSGIApplication([('/', ViewAllExercises),
   	  				('/library', ViewVideoLibrary),
   	  				('/youtubetest', UpdateVideoData),
