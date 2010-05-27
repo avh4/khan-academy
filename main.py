@@ -985,6 +985,22 @@ class RegisterAnswer(webapp.RequestHandler):
     	    	    self.redirect('/exercises?exid='+exid+now_proficient_string)
     	    else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
+
+# A GET request is made via AJAX when the user clicks "Check Answer".
+# This allows us to reset the user's streak if the answer was wrong.  If we wait
+# until he clicks the "Next Problem" button, he can avoid resetting his streak
+# by just reloading the page.
+    def get(self):
+    	    user = users.get_current_user()
+    	    if user:
+    	    	    key = self.request.get('key')
+    	    	    correct = int(self.request.get('correct'))
+    	    	    userExercise = db.get(key)
+    	    	    if (correct==0):
+    	    	    	    userExercise.streak =0
+    	    	    userExercise.put()
+    	    else:
+    	    	    self.redirect(users.create_login_url(self.request.uri))
     	    	   
 class ViewUsers(webapp.RequestHandler):
 	def get(self):
