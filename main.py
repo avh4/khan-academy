@@ -110,11 +110,33 @@ class DataStoreTest(webapp.RequestHandler):
 			for problem in problems_done:
 				self.response.out.write("<P>"+problem.user.nickname()+" "+problem.exercise+" done:"+str(problem.time_done)+" taken:"+str(problem.time_taken)+" correct:"+str(problem.correct))
 
+
+#Setting this up to make sure the old Video-Playlist associations are flushed before the bulk upload from the local datastore (with the new associations)
+class DeleteVideoPlaylists(webapp.RequestHandler):
+	def get(self):
+		query = VideoPlaylist.all()
+		all_video_playlists = query.fetch(100000)
+		for video_playlist in all_video_playlists:
+			video_playlist.delete()
+		
+
+
 class UpdateVideoData(webapp.RequestHandler):
 	def get(self):
 		self.response.out.write('<html>')
 		yt_service = gdata.youtube.service.YouTubeService()
 		playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
+		
+		#The next two blocks delete all the Videos and VideoPlaylists so that we don't get remnant videos or associations 
+		
+		query = VideoPlaylist.all()
+		all_video_playlists = query.fetch(100000)
+		db.delete(all_video_playlists)
+
+		query = Video.all()
+		all_videos = query.fetch(100000)
+		db.delete(all_videos)
+			
 		for playlist in playlist_feed.entry:
 			self.response.out.write('<p>Playlist  '+playlist.id.text)
 			playlist_id = playlist.id.text.replace('http://gdata.youtube.com/feeds/api/users/khanacademy/playlists/','')
@@ -1058,12 +1080,13 @@ def main():
   webapp.template.register_template_library('templatefilters')
   application = webapp.WSGIApplication([('/', ViewAllExercises),
   	  				('/library', ViewVideoLibrary),
-  	  				('/youtubetest', UpdateVideoData),
-  	  				('/playlistsync', UpdatePlaylistVideoData),
+  	  				('/syncvideodata', UpdateVideoData),
+  	  				('/singleplaylistsync', UpdatePlaylistVideoData),
   	  				('/exercises', ViewExercise),
   	  				('/assessuser', AssessUser),
   	  				('/testassess', TestAssessUser),
   	  				('/editexercise', EditExercise),
+  	  				('/deletevideoplaylists', DeleteVideoPlaylists),
   	  				('/viewexercisevideos', ViewExerciseVideos),
   	  				('/knowledgemap', KnowledgeMap),
   	  				('/viewexercisesonmap', ViewMapExercises),
