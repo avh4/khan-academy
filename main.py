@@ -667,7 +667,7 @@ class EditExercise(webapp.RequestHandler):
 class UpdateExercise(webapp.RequestHandler):
 	def get(self):
 		user = users.get_current_user()
-		if user:
+		if users.is_current_user_admin():
 			exercise_name = self.request.get('name')
 			if (exercise_name):
 				query = Exercise.all()
