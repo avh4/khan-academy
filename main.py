@@ -115,10 +115,16 @@ class DataStoreTest(webapp.RequestHandler):
 class DeleteVideoPlaylists(webapp.RequestHandler):
 	def get(self):
 		query = VideoPlaylist.all()
-		all_video_playlists = query.fetch(100000)
-		for video_playlist in all_video_playlists:
-			video_playlist.delete()
 		
+		all_video_playlists = query.fetch(450)
+		db.delete(all_video_playlists)
+		
+class DeleteVideos(webapp.RequestHandler):
+	def get(self):
+		query = Video.all()
+		
+		all_videos = query.fetch(450)
+		db.delete(all_videos)	
 
 
 class UpdateVideoData(webapp.RequestHandler):
@@ -1103,6 +1109,7 @@ def main():
   	  				('/testassess', TestAssessUser),
   	  				('/editexercise', EditExercise),
   	  				('/deletevideoplaylists', DeleteVideoPlaylists),
+  	  				('/deletevideos', DeleteVideos),
   	  				('/viewexercisevideos', ViewExerciseVideos),
   	  				('/knowledgemap', KnowledgeMap),
   	  				('/viewexercisesonmap', ViewMapExercises),
@@ -1120,8 +1127,8 @@ def main():
   	  				 ('/editsubject', qbrary.CreateEditSubject),
   	  				 ('/viewsubject', qbrary.ViewSubject),
   	  				 ('/deletequestion', qbrary.DeleteQuestion),
-  	  				 ('/deletesubject', qbrary.DeleteSubject),
-  	  				 ('/changepublished', qbrary.ChangePublished),
+  	  				 #('/deletesubject', qbrary.DeleteSubject), # These are dangerous, should be able to clean things manually from the remote python shell
+  	  				 #('/changepublished', qbrary.ChangePublished),
   	  				 ('/pickquestiontopic', qbrary.PickQuestionTopic),
   	  				 ('/pickquiztopic', qbrary.PickQuizTopic),
   	  				 ('/answerquestion', qbrary.AnswerQuestion),
