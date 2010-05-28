@@ -1108,8 +1108,8 @@ def main():
   	  				('/assessuser', AssessUser),
   	  				('/testassess', TestAssessUser),
   	  				('/editexercise', EditExercise),
-  	  				('/deletevideoplaylists', DeleteVideoPlaylists),
-  	  				('/deletevideos', DeleteVideos),
+  	  				#('/deletevideoplaylists', DeleteVideoPlaylists),# These are dangerous, should be able to clean things manually from the remote python shell
+  	  				#('/deletevideos', DeleteVideos),
   	  				('/viewexercisevideos', ViewExerciseVideos),
   	  				('/knowledgemap', KnowledgeMap),
   	  				('/viewexercisesonmap', ViewMapExercises),
@@ -1127,8 +1127,8 @@ def main():
   	  				 ('/editsubject', qbrary.CreateEditSubject),
   	  				 ('/viewsubject', qbrary.ViewSubject),
   	  				 ('/deletequestion', qbrary.DeleteQuestion),
-  	  				 #('/deletesubject', qbrary.DeleteSubject), # These are dangerous, should be able to clean things manually from the remote python shell
-  	  				 #('/changepublished', qbrary.ChangePublished),
+  	  				 ('/deletesubject', qbrary.DeleteSubject), 
+  	  				 ('/changepublished', qbrary.ChangePublished),
   	  				 ('/pickquestiontopic', qbrary.PickQuestionTopic),
   	  				 ('/pickquiztopic', qbrary.PickQuizTopic),
   	  				 ('/answerquestion', qbrary.AnswerQuestion),
