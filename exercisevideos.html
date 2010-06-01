@@ -1,6 +1,6 @@
-{% extends "viewexercises.html" %}
-{% block title%}<A href="/exercises?exid={{exercise.name}}">{{extitle}}</A> : Videos{% endblock title %}
-{% block content %}
+{% extends "page_template.html" %}
+{% block pagetitle%}<A href="/exercises?exid={{exercise.name}}">{{extitle}}</A> : Videos{% endblock pagetitle %}
+{% block pagecontent %}
 <script language=Javascript1.2><!--
 function changeVideo(identifier)
 {
@@ -21,4 +21,4 @@ function changeVideo(identifier)
 changeVideo('{{first_video.youtube_id}}');
 </script>
 <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
-{% endblock content %}
+{% endblock pagecontent %}

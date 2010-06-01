@@ -1,47 +1,14 @@
-<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
-<head>
-  <Title>Khan Academy</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
-  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
-  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
-
-
-  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
-  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
-  <script language="JavaScript" src="/javascript/metautil.js"></script>
-  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
-  <script language="JavaScript" src="/javascript/graphutil.js"></script>
-
+{% extends "page_template.html" %}
+{% block pagescript %}
   <script type="text/javascript">
   	function submitForm(value)
   	{
   		document.forms['addexercise'].submit();
   	}
   </script>
-</head>
-  <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
-  <table border=0 width=100%>
-  	<tr>
-  		<td><A href="/" border="0"><img src="/images/khan.GIF"></a></td>
-  		<td align=right valign=top width=100%>
-  			<span class="mainmenu">Welcome,  <B>{{username}}</b> [<A href="{{logout_url}}">Sign Out</A>] </span>
-  			<P>
-  			<h2>Energy Points: {{points}}</h2>
-  		</td>
-  	</tr>
-  	<tr>
-  		<td colspan=2 align=right>
-  			<span class="mainmenu"><A href="/">Exercises</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/viewexercisesonmap">Knowledge Map</A>&nbsp;</span>
-  		</td>
-  	</tr>
-  </table>
-  
-<table width=100% border=0 cellpadding=0 cellspacing=0>
-  				<tr>
-  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
-  				</tr>
-  			</table><table width=100% border=0 cellpadding=2 cellspacing=0><tr><td bgcolor=#e5ecf9 align=left><B>{% block title %}Exercise Dashboard {% endblock title %}</B></td></tr></table>
-{% block content%}
+{% endblock pagescript %}
+{% block pagetitle %}Exercise Dashboard{% endblock pagetitle %}
+{% block pagecontent %}
 <ul>
 Welcome to the Alpha release of the Khan Academy Exercise Application.  In order for it to work properly,
 you should be using <A href="http://www.getfirefox.com/">the latest version of Firefox</A> and <A href="http://www.khanacademy.org/setup.jsp" target="newwin">install the math fonts</A>.
@@ -96,21 +63,4 @@ correct).  Let me know if you have any problems.
 	
 {% endfor %}
 </table>
-{% endblock content %}
-<table width=100% border=0 cellpadding=0 cellspacing=0>
-  <tr>
-
-    <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
-  </tr>
-</table>
-
-
-
-  <P>&nbsp;<P>
-  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
-	<center>Send any questions or comments to sal@khanacademy.org
-		<p><font size=-2>&copy;2010 Khan Academy</font></p>
-	</center>
-  </body>
-</html>
-
+{% endblock pagecontent %}

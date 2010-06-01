@@ -1,0 +1,65 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+
+
+  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
+  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
+  <script language="JavaScript" src="/javascript/metautil.js"></script>
+  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
+  <script language="JavaScript" src="/javascript/graphutil.js"></script>
+  <script language="JavaScript" src="http://ajax.googleapis.com/ajax/libs/dojo/VERSION/dojo/dojo.xd.js"></script>
+<script language=Javascript1.2><!--
+
+var username = "{{cookiename}}";
+var currentexercise = "{{exid}}";
+//-->
+</script>
+
+{% block pagescript %}
+{% endblock pagescript %}
+</head>
+  <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
+  <table border=0 width=100%>
+  	<tr>
+  		<td><A href="/" border="0"><img src="/images/khan.GIF"></a></td>
+  		<td align=right valign=top width=100%>
+  			<span class="mainmenu">Welcome,  <B>{{username}}</b> [<A href="{{logout_url}}">Sign Out</A>] </span>
+  			<P>
+  			<h2>Energy Points: {{points}}</h2>
+  		</td>
+  	</tr>
+  	  <tr>
+  		<td colspan=2 align=right>
+  		{% block pagemainmenu %}
+  			<span class="mainmenu"><A href="/">Exercises</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/viewexercisesonmap">Knowledge Map</A>&nbsp;</span>
+  		{% endblock pagemainmenu %}
+  		</td>
+  	</tr>
+  </table>
+  <table width=100% border=0 cellpadding=0 cellspacing=0>
+  				<tr>
+  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
+  				</tr>
+  			</table><table width=100% border=0 cellpadding=2 cellspacing=0><tr><td bgcolor=#e5ecf9 align=left>
+  			{% block pagesubmenu %}
+  			<B>{% block pagetitle %}{% endblock pagetitle %}</B>
+  			{% endblock pagesubmenu %}
+   </td></tr></table>
+
+{% block pagemessage %}
+{% endblock pagemessage %}
+
+{% block pagecontent %}
+{% endblock pagecontent %}
+  <P>&nbsp;<P>
+  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
+	<center>Send any questions or comments to <a href="mailto:sal@khanacademy.org">sal@khanacademy.org</a>
+		<p><font size=-2>&copy;2010 Khan Academy</font></p>
+	</center>
+  </body>
+</html>
+

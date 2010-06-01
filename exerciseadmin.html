@@ -1,42 +1,18 @@
-<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
-<head>
-  <Title>Khan Academy</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
-  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
-  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
-
-
-  <script language="Javascript" src="/javascript/ASCIIMathML.js"></script>
-  <script language="JavaScript" src="/javascript/ASCIIsvg.js"></script>
-  <script language="JavaScript" src="/javascript/metautil.js"></script>
-  <script language="JavaScript" src="/javascript/exerciseutil.js"></script>
-  <script language="JavaScript" src="/javascript/graphutil.js"></script>
-
+{% extends "page_template.html" %}
+{% block pagescript %}
   <script type="text/javascript">
   	function submitForm(value)
   	{
   		document.forms['addexercise'].submit();
   	}
   </script>
-</head>
-  <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
-  <table border=0 width=100%>
-  	<tr>
-  		<td><A href="start.jsp" border="0"><img src="/images/khan.GIF"></a></td>
-  		<td align=right valign=top width=100%>
-  			<span class="mainmenu">Welcome,  <B>{{username}}</b> </span>
-  		</td>
-  	</tr>
-  	<tr>
-  		<td colspan=2>
-  			<table width=100% border=0 cellpadding=0 cellspacing=0>
-  				<tr>
-  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
-  				</tr>
-  			</table>
-  		</td>
-  	</tr>
-  </table>
+{% endblock pagescript %}
+
+{% block pagemainmenu %}
+	<span class="mainmenu"><A href="/">Exercises</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/viewexercisesonmap">Knowledge Map</A>&nbsp;</span>
+{% endblock pagemainmenu %}
+
+{% block pagecontent %}
 <table border=0>
 <tr><td>Exercise Key</td><td>Vertical Position</td><td>Horizontal Position</td></tr>
 {% for exercise in exercises %}
@@ -69,12 +45,5 @@
 		</td>
 	</tr>
   </table>
-
-  <P>&nbsp;<P>
-  <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
-	<center>Send any questions or comments to sal@khanacademy.org
-		<p><font size=-2>&copy;2010 Khan Academy</font></p>
-	</center>
-  </body>
-</html>
+{% endblock pagecontent %}
 

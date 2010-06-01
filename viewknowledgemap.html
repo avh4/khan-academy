@@ -1,6 +1,6 @@
-{% extends "viewexercises.html" %}
-{% block title %}<A href="/">Exercise Home</A>: My Knowledge Map {% endblock title %}
-{% block content%}
+{% extends "page_template.html" %}
+{% block pagetitle %}<A href="/">Exercise Home</A>: My Knowledge Map {% endblock pagetitle %}
+{% block pagecontent%}
 <P>
 <div style="position:relative;">
 <div id="intro" style="position:absolute; visibility:visible;">
@@ -37,6 +37,6 @@ doing, to do a focused practice on that module, or to watch the video for that m
 <center>
 <iframe src="{{knowledge_map_url}}" width="95%" height="400"></iframe>
 </center>
-{% endblock content %}
+{% endblock pagecontent %}
 
 
