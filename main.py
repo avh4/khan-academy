@@ -411,6 +411,43 @@ class ExerciseAdminPage(webapp.RequestHandler):
 		else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
     	    	    
+class ReportIssue(webapp.RequestHandler):
+	def get(self):
+		user = users.get_current_user()
+		if user:
+			query = UserData.all()
+			query.filter("user =", user)
+			user_data = query.get()
+			
+			if user_data is None:
+				user_data = UserData(user=user,last_login=datetime.datetime.now(),proficient_exercises=[],suggested_exercises=[],assigned_exercises=[],need_to_reassess=True, points=0)
+				user_data.put()
+
+			logout_url = users.create_logout_url(self.request.uri)
+
+    	    	    	template_values = {
+    	    	    	    'points': user_data.points,
+    	    	    	    'username': user.nickname(),
+    	    	    	    'referer': self.request.headers.get("Referer"),
+    	    	    	    'logout_url': logout_url}
+    	    	    	issue_type = self.request.get('type')
+    	    	    	page = 'reportissue_template.html'
+    	    	    	if (issue_type == 'Defect'):
+				page = 'reportproblem.html'
+    	    	    	elif (issue_type == 'Enhancement'):
+    	    	    		page = 'makesuggestion.html'
+    	    	    	elif (issue_type == 'New-Video'):
+    	    	    		page = 'requestvideo.html'
+    	    	    	elif (issue_type == 'Comment'):
+    	    	    		page = 'makecomment.html'
+    	    	    	elif (issue_type == 'Question'):
+    	    	    		page = 'askquestion.html'
+			path = os.path.join(os.path.dirname(__file__), page)
+			self.response.out.write(template.render(path, template_values))
+			
+		else:
+    	    	    self.redirect(users.create_login_url(self.request.uri))
+    	    	    
     	    	    
 	    	    
     
@@ -1122,6 +1159,7 @@ def main():
   	  				 ('/graphpage.html', GraphPage),
   	  				 ('/registeranswer', RegisterAnswer),
   	  				 ('/video', ViewVideo),
+  	  				 ('/reportissue', ReportIssue),
   	  				 ('/qbrary', qbrary.MainPage), #here and below are all qbrary related pages
   	  				 ('/subjectmanager', qbrary.SubjectManager),
   	  				 ('/editsubject', qbrary.CreateEditSubject),

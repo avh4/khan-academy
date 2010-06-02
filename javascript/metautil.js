@@ -260,7 +260,6 @@ function graphicalFooter()
 }
 
 
-
 /* 
 	XmlHttpRequest Wrapper
 	Version 1.2.2

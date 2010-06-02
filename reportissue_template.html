@@ -1,0 +1,36 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<script type="text/javascript">
+function submitForm(value)
+{
+        document.forms['reportissue'].submit();
+}
+</script>
+<style>
+	p { margin-bottom: 1em; }
+</style>
+{% endblock pagescript %}
+{% block pagetitle %}Report an issue{% endblock pagetitle %}
+{% block pagecontent %}
+<div style="padding: 10%;">
+        <p>{% block have_an_issue %}Have an issue?{% endblock have_an_issue %}&nbsp;
+        We want to know about it!&nbsp; 
+        </p>
+        <p>If you're lucky, someone has already 
+        {% block submitted_the_issue %}submitted the issue{% endblock submitted_the_issue %} 
+        and you can simply vote for it by turning on <b>the star next to it</b> in
+        the 
+        {% block list_of_issues_link %}<a href="http://code.google.com/p/khanacademy/issues/list?can=2&q=Status:Accepted,Started%20Type:Defect&sort=-stars&colspec=Summary">list of known problems</a>{% endblock list_of_issues_link %}.&nbsp; 
+        Otherwise, just fill in the <b>Summary</b> and <b>Description</b> fields and then click the <b>Submit Issue</b> 
+        button on the 
+        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Defect%20report%20from%20user&labels=Referer-{{referer|urlencode}},Type-Defect,Priority-Medium">new problem form</a>{% endblock new_issue_link %}.&nbsp;
+        Your submission will show up in the list once we've had a chance to give it a quick review.&nbsp;
+        </p>
+        <p>If you vote for something or submit something new, you'll get emails as people comment on it.&nbsp;
+        When we think we've taken care of it you'll get an email saying "Status: Fixed", and you'll see the difference 
+        the next time we upgrade the site.&nbsp;  If at any point you want to stop getting the emails, just follow the
+        link in one of them and click on the star to make it dim.&nbsp;
+        </p>
+        <p><i>Thanks for taking the time to help us make Khan Academy better!&nbsp;</i></p>
+</div>
+{% endblock pagecontent %}
