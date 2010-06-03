@@ -38,19 +38,30 @@
     	if (current_choice==correct_choice)
 	{
 		document.images.feedback.src = correct.src;
+                document.getElementById("explain_answer_button").style.visibility = 'visible';
 	}
 	else
 	{
 		document.images.feedback.src = incorrect.src;
 	}
 	document.getElementById("nextbutton").style.visibility = 'visible';
-	document.getElementById("answer").style.visibility = 'visible';
     }
     
     function new_question()
     {
         // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
     	window.location = window.location;
+    }
+
+
+    function show_hint()
+    {
+        document.getElementById("hint").style.visibility = 'visible';
+    }
+
+    function show_answer()
+    {
+        document.getElementById("answer").style.visibility = 'visible';
     }
     
     </script>
@@ -106,6 +117,8 @@
 		<font face="arial" size=3><font face="arial" size=3><script language="JavaScript" type="text/javascript"><!--document.write(unescape({{question.question_text}}))//-->
 			</script></font>
 		<div id="question" style="position:relative;">{{question.question_text}}</div>
+		&nbsp;<P>&nbsp;<P>
+		<div id="hint" style="position:relative; visibility:hidden;"><b>Hint:</b> {{question.hint_text}}</div>
 		&nbsp;<P>&nbsp;<P>
 		<div id="answer" style="position:relative; visibility:hidden;"><b>Answer Explanation:</b> {{question.answer_text}}</div>
 		</font>
@@ -172,6 +185,10 @@
 </td></tr></table>
 <P>
 <input type="button" value="Check Answer" onClick="check_answer()">
+{% if question.hint_text %}
+<input id="hint_button" type="button" value="Get Hint" onClick="show_hint()">
+{% endif %}
+<input id="explain_answer_button" style="visibility:hidden" type="button" value="Explain Answer" onClick="show_answer()">
 <P>
 		<img src="/images/blank.gif" name="feedback"><br>
 		<div id="nextbutton" style="position:relative; visibility:hidden;">

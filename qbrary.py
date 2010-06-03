@@ -43,6 +43,7 @@ class Question(db.Model):
 	avg_importance = db.RatingProperty()
 	avg_difficulty = db.RatingProperty()
 	avg_quality = db.RatingProperty()
+        hint_text = db.TextProperty()
 	
 	
 class QuestionAnswerer(db.Model):
@@ -550,6 +551,7 @@ class CreateEditQuestion(webapp.RequestHandler):
 					question.incorrect_4=self.request.get('incorrect_4')
 					question.incorrect_5=self.request.get('incorrect_5')
 					question.answer_text = self.request.get('answer_text')
+                                        question.hint_text = self.request.get('hint_text')
 					question.not_completed = False
 					question.put()
 					self.redirect('/qbrary')
@@ -574,6 +576,7 @@ class CreateEditQuestion(webapp.RequestHandler):
 				question.incorrect_4=""
 				question.incorrect_5=""
 				question.answer_text=""
+                                question.hint_text = "" 
 				question.put()
 				mode_text = 'Add Question'
 				button_text = 'Create Question'
