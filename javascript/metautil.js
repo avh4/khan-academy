@@ -179,38 +179,36 @@ function arraySum(a)
 function checkFreeAnswer()
 {
 	var isCorrect = (parseFloat(document.getElementById("answer").value)==parseFloat(correctAnswer));
+	// Attempt to register the correctness of the answer with the server, before telling the user 
+	// whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
+	// avoid blowing a streak when he gets a wrong answer.  If the attempt to register the correctness fails,
+	// we don't worry about it because they might just be having connectivity problems or need to log in again.
+	// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
+	// but it takes longer and is more noticeable.
 	Http.get({ 
-		url: "/registeranswer"
+		method: Http.Method.Post,
+		url: "/registercorrectness"
 			+ "?key=" + document.getElementById("key").value
 			+ "&correct=" + ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),			
-		callback: answerRegistered
+		callback: function() { }
 		}, isCorrect);
+	if (isCorrect)
+	{
 		
-	function answerRegistered(req) {
-		if (req.status != 200)
+		if (tries==0 && steps_given==0)
 		{
-			window.alert("Could not register your answer.  Status=" + req.status 
-					+ ".  responseText=" + req.responseText);
-			return;
-		}			
-		if (isCorrect)
-		{
-			
-			if (tries==0 && steps_given==0)
-			{
-				document.getElementById("correct").value="1"
-			}
-			document.getElementById("nextbutton").style.visibility = 'visible';
-			document.images.feedback.src = correct.src;
-			eraseCookie(notDoneCookie);
-			document.forms['answerform'].correctnextbutton.focus()
+			document.getElementById("correct").value="1"
 		}
-		else
-		{
-			
-			tries++;
-			document.images.feedback.src= incorrect.src;
-		}
+		document.getElementById("nextbutton").style.visibility = 'visible';
+		document.images.feedback.src = correct.src;
+		eraseCookie(notDoneCookie);
+		document.forms['answerform'].correctnextbutton.focus()
+	}
+	else
+	{
+		
+		tries++;
+		document.images.feedback.src= incorrect.src;
 	}
 }
 

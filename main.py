@@ -1029,11 +1029,12 @@ class RegisterAnswer(webapp.RequestHandler):
     	    else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
 
-# A GET request is made via AJAX when the user clicks "Check Answer".
+class RegisterCorrectness(webapp.RequestHandler):
+# A POST request is made via AJAX when the user clicks "Check Answer".
 # This allows us to reset the user's streak if the answer was wrong.  If we wait
 # until he clicks the "Next Problem" button, he can avoid resetting his streak
 # by just reloading the page.
-    def get(self):
+    def post(self):
     	    user = users.get_current_user()
     	    if user:
     	    	    key = self.request.get('key')
@@ -1158,6 +1159,7 @@ def main():
   	  				 ('/updateexercise', UpdateExercise),
   	  				 ('/graphpage.html', GraphPage),
   	  				 ('/registeranswer', RegisterAnswer),
+  	  				 ('/registercorrectness', RegisterCorrectness),
   	  				 ('/video', ViewVideo),
   	  				 ('/reportissue', ReportIssue),
   	  				 ('/qbrary', qbrary.MainPage), #here and below are all qbrary related pages
