@@ -38,11 +38,12 @@
     	if (current_choice==correct_choice)
 	{
 		document.images.feedback.src = correct.src;
-                document.getElementById("explain_answer_button").style.visibility = 'visible';
+                show_answer();
 	}
 	else
 	{
 		document.images.feedback.src = incorrect.src;
+                document.getElementById("explain_answer_button").style.visibility = 'visible';
 	}
 	document.getElementById("nextbutton").style.visibility = 'visible';
     }
@@ -52,7 +53,6 @@
         // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
     	window.location = window.location;
     }
-
 
     function show_hint()
     {
