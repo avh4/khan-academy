@@ -1175,7 +1175,9 @@ def main():
   	  				 ('/rating', qbrary.Rating),
   	  				 ('/viewquestion', qbrary.ViewQuestion),
   	  				 ('/editquestion', qbrary.CreateEditQuestion),
-  	  				 ('/addquestion', qbrary.CreateEditQuestion)],
+  	  				 ('/addquestion', qbrary.CreateEditQuestion),
+    				         ('/checkanswer', qbrary.CheckAnswer),
+    				         ('/initqbrary', qbrary.InitQbrary)],
   	  				 debug=True)
   run_wsgi_app(application)
 

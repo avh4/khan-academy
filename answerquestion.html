@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
     <script type="text/javascript" language="javascript" src="/javascript/behavior.js"></script>
     <script type="text/javascript" language="javascript" src="/javascript/rating.js"></script>
+    <script type="text/javascript" language="javascript" src="/javascript/jquery.js"></script>
 
     <script>
     function addQuestion(drop_down)
@@ -35,25 +36,39 @@
 
     function check_answer()
     {
-    	if (current_choice==correct_choice)
-	{
-		document.images.feedback.src = correct.src;
-                show_answer();
-	}
-	else
-	{
-		document.images.feedback.src = incorrect.src;
-                document.getElementById("explain_answer_button").style.visibility = 'visible';
-	}
-	document.getElementById("nextbutton").style.visibility = 'visible';
-    }
-    
-    function new_question()
-    {
-        // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
-    	window.location = window.location;
+        var is_correct = (current_choice==correct_choice);
+    	if (is_correct)
+		{
+			document.images.feedback.src = correct.src;
+			show_answer();
+		}
+		else
+		{
+			document.images.feedback.src = incorrect.src;
+			document.getElementById("explain_answer_button").style.visibility = 'visible';
+		}
+
+		show_next_button();	
+		disable_next_button();
+		
+		$.post("/checkanswer", 
+				{"session_key" : '{{session_key}}',
+                                "answer_chosen_index" : current_choice,
+                                "was_correct" : is_correct}, 
+				function(result) { check_answer_callback(result); });
     }
 
+    function check_answer_callback(result)
+    {
+//        alert("check answer with result: " + result);
+        enable_next_button();
+    }
+    
+    function show_next_button()
+    {
+    	document.getElementById("nextbutton_div").style.visibility = 'visible';	
+    }
+    
     function show_hint()
     {
         document.getElementById("hint").style.visibility = 'visible';
@@ -61,7 +76,54 @@
 
     function show_answer()
     {
-        document.getElementById("answer").style.visibility = 'visible';
+        document.getElementById("answer").style.visibility = 'visible';        
+    }
+    
+    function disable_next_button()
+    {
+    	document.getElementById("next_button").disabled = true;        
+    }
+    
+    function enable_next_button()
+    {
+    	document.getElementById("next_button").disabled = false;        
+    }
+    
+    function handle_check_answer_button_clicked()
+    {
+    	check_answer();
+    }
+
+    function handle_next_button_clicked()
+    {
+		$.post("/sessionaction", 
+			{"action_type" : "next_button_clicked"}, 
+			function(result) { session_action_callback(result); });	        	
+    }
+    
+    function handle_hint_button_clicked()
+    {
+    	show_hint();
+		
+		$.post("/sessionaction", 
+			{"action_type" : "hint_button_clicked"}, 
+			function(result) { session_action_callback(result); });	    
+    }
+    
+    function handle_explain_button_clicked()
+    {
+    	show_answer();
+	
+		$.post("/sessionaction", 
+			{"action_type" : "explain_button_clicked"}, 
+			function(result) { session_action_callback(result); });
+    }
+    
+    function session_action_callback(result)
+    {
+    	// todo: only do this if next button was clicked
+        // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
+    	window.location = window.location;	
     }
     
     function show_warning_if_needed()
@@ -191,15 +253,15 @@
 </div>
 </td></tr></table>
 <P>
-<input type="button" value="Check Answer" onClick="check_answer()">
+<input type="button" value="Check Answer" onClick="handle_check_answer_button_clicked()">
 {% if question.hint_text %}
-<input id="hint_button" type="button" value="Get Hint" onClick="show_hint()">
+<input id="hint_button" type="button" value="Get Hint" onClick="handle_hint_button_clicked()">
 {% endif %}
-<input id="explain_answer_button" style="visibility:hidden" type="button" value="Explain Answer" onClick="show_answer()">
+<input id="explain_answer_button" style="visibility:hidden" type="button" value="Explain Answer" onClick="handle_explain_button_clicked()">
 <P>
 		<img src="/images/blank.gif" name="feedback"><br>
-		<div id="nextbutton" style="position:relative; visibility:hidden;">
-			<input type="button" value="Next Question" onClick="new_question()">
+		<div id="nextbutton_div" style="position:relative; visibility:hidden;">
+			<input id="next_button" type="button" value="Next Question" onClick="handle_next_button_clicked()">
 		</div>
 		</form>
 	</td>

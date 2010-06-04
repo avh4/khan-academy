@@ -58,7 +58,32 @@ class QuestionAnswerer(db.Model):
 	difficulty_width = db.IntegerProperty() #used for the pixel width of the actual stars
 	quality_rating = db.RatingProperty()
 	quality_width = db.IntegerProperty() #used for the pixel width of the actual stars
-	
+
+class QuestionAnswerSession(db.Model):
+        answerer = db.UserProperty()
+        question = db.ReferenceProperty(Question)
+        page_loaded_timestamp = db.DateTimeProperty(auto_now_add=True)  # set auto_now_add to True so that it's auto set on insert
+        correct_on_first_attempt = db.BooleanProperty()
+        total_attempts = db.IntegerProperty()
+        choice_1 = db.IntegerProperty()
+        choice_2 = db.IntegerProperty()
+        choice_3 = db.IntegerProperty()
+        choice_4 = db.IntegerProperty()
+        choice_5 = db.IntegerProperty()
+
+class QuestionAnswerSessionAttempt(db.Model):
+        session = db.ReferenceProperty(QuestionAnswerSession)
+        answer_chosen_timestamp = db.DateTimeProperty(auto_now_add=True) # set auto_now_add to True so that it's auto set on insert
+        answer_chosen_index = db.IntegerProperty()
+	was_correct = db.BooleanProperty()
+
+class QuestionAnswerSessionActionTypes(db.Model):
+        type = db.StringProperty()
+
+class QuestionAnswerSessionAction(db.Model):
+        session = db.ReferenceProperty(QuestionAnswerSession)
+        action = db.ReferenceProperty(QuestionAnswerSessionActionTypes)
+        action_timestamp = db.DateTimeProperty()
 
 class AnswerLog(db.Model):
 	answer_author = db.UserProperty()
@@ -104,6 +129,8 @@ def htmlChildren(subject):
 	
 	return output
 		
+def str_to_bool(str):
+  return (str == "True") or (str == "true")
 
 	
 def pickQuestionTopicHTML(subject):
@@ -142,6 +169,15 @@ def getBottomLevelChildren(subj):
 		for topic in s_topics:
 			output.extend(getBottomLevelChildren(topic))
 	return output
+
+class InitQbrary(webapp.RequestHandler):
+        def get(self):
+          action_types = ["hint_button_clicked", "explain_button_clicked", "next_button_clicked"]
+          for action_type in action_types:
+            new_action = QuestionAnswerSessionActionTypes()
+            new_action.type = action_type
+            new_action.put()
+
 	
 class DeleteSubject(webapp.RequestHandler):
 	def get(self):
@@ -402,26 +438,29 @@ class AnswerQuestion(webapp.RequestHandler):
 					choices = random.sample(all_incorrect,4)
 					correct_index = random.randint(0,4)
 					choices.insert(correct_index, question.correct_choice_text)
-					choice0 = choices[0]
-					choice1 = choices[1]
-					choice2 = choices[2]
-					choice3 = choices[3]
-					choice4 = choices[4]
 					
-
+                                        # create an answer session for this question
+                                        # todo: need to set the choice_* fields
+                                        qa_session = QuestionAnswerSession()
+                                        qa_session.answerer = user
+                                        qa_session.question = question
+                                        qa_session.total_attempts = 0
+                                        qa_session.put()
 				
 					template_values = {'subject':subject,
 							'subjects': subjects,
 							'greeting': greeting,
 							'user_question': answerer_question,
 							'correct_index': correct_index,
-							'choice0': choice0,
-							'choice1': choice1,
-							'choice2': choice2,
-							'choice3': choice3,
-							'choice4': choice4,
+							'choice0': choices[0],
+							'choice1': choices[1],
+							'choice2': choices[2],
+							'choice3': choices[3],
+							'choice4': choices[4],
 							'question':question,
+                                                           'session_key': str(qa_session.key()),
 							'untested_warning':untested_warning}
+
 					path = os.path.join(os.path.dirname(__file__), 'answerquestion.html')
 					self.response.out.write(template.render(path, template_values))
 				else:
@@ -605,11 +644,23 @@ class CreateEditQuestion(webapp.RequestHandler):
 		else:
 			self.redirect(users.create_login_url(self.request.uri))
 		
-		
+class CheckAnswer(webapp.RequestHandler):
+  def post(self):
+    answer_chosen_index = self.request.get("answer_chosen_index")
+    session_key = self.request.get("session_key")
+    was_correct = self.request.get("was_correct")
 
-		
-		
-		
+    # get the current question answer session
+    qa_session = db.get(db.Key(session_key))
+
+    # record a new question answer attempt for the current session
+    qa_session_att = QuestionAnswerSessionAttempt()
+    qa_session_att.session = qa_session 
+    qa_session_att.answer_chosen_index = int(answer_chosen_index)
+    qa_session_att.was_correct = str_to_bool(was_correct)
+    qa_session_att.put()
+
+    self.response.out.write("Recorded attempt for session" + session_key);
     
     
 class Guestbook(webapp.RequestHandler):
@@ -638,6 +689,8 @@ application = webapp.WSGIApplication(
 				      ('/viewquestion', ViewQuestion),
 				      ('/editquestion', CreateEditQuestion),
 				      ('/addquestion', CreateEditQuestion),
+				      ('/checkanswer', CheckAnswer),
+ 				      ('/initqbrary', InitQbrary),
                                       ('/sign', Guestbook)],
                                      debug=True)
 
