@@ -28,12 +28,12 @@ class Question(db.Model):
 	author = db.UserProperty()
 	subject = db.ReferenceProperty(Subject)
 	question_text = db.TextProperty()
-	correct_choice_text = db.StringProperty()
-	incorrect_1 = db.StringProperty()
-	incorrect_2 = db.StringProperty()
-	incorrect_3 = db.StringProperty()
-	incorrect_4 = db.StringProperty()
-	incorrect_5 = db.StringProperty()
+	correct_choice_text = db.TextProperty()
+	incorrect_1 = db.TextProperty()
+	incorrect_2 = db.TextProperty()
+	incorrect_3 = db.TextProperty()
+	incorrect_4 = db.TextProperty()
+	incorrect_5 = db.TextProperty()
 	answer_text = db.TextProperty()
 	date_created = db.DateTimeProperty(auto_now_add=True)
 	published = db.BooleanProperty()
@@ -43,7 +43,7 @@ class Question(db.Model):
 	avg_importance = db.RatingProperty()
 	avg_difficulty = db.RatingProperty()
 	avg_quality = db.RatingProperty()
-        hint_text = db.TextProperty()
+	hint_text = db.TextProperty()
 	
 	
 class QuestionAnswerer(db.Model):
@@ -374,6 +374,9 @@ class AnswerQuestion(webapp.RequestHandler):
 					
 				if len(questions)>0 :	
 					question = random.choice(questions)
+					
+					untested_warning = (QuestionAnswerer.gql("WHERE question=:1", question)).count() < 5	 # TODO: clean this up
+					
 					answerer_question = (QuestionAnswerer.gql("WHERE answerer=:1 and question=:2", user, question)).get()
 
                                         # check if current user has answered the question before
@@ -417,7 +420,8 @@ class AnswerQuestion(webapp.RequestHandler):
 							'choice2': choice2,
 							'choice3': choice3,
 							'choice4': choice4,
-							'question':question}
+							'question':question,
+							'untested_warning':untested_warning}
 					path = os.path.join(os.path.dirname(__file__), 'answerquestion.html')
 					self.response.out.write(template.render(path, template_values))
 				else:

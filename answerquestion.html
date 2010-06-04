@@ -64,9 +64,14 @@
         document.getElementById("answer").style.visibility = 'visible';
     }
     
+    function show_warning_if_needed()
+    {
+   		document.getElementById("warning_untested_msg").style.visibility = "{{untested_warning}}" == "True" ? "visible" : "hidden";
+    }
+    
     </script>
   </head>
-  <body>	
+  <body onload="show_warning_if_needed()">	
   	<table width=100%>
 	<tr>
   		<td valign=top align=left rowspan=2><A href="/"><img src="/images/logo.gif" width=150 height=100></A></td>
@@ -101,10 +106,12 @@
     <td bgcolor=#003399><img width=1 height=1 alt=""></td>
   </tr>
 </table><table width=100% border=0 cellpadding=2 cellspacing=0>
-   <tr>
-    <td bgcolor=#e5ecf9 align=left><B>Quiz Question</B> (author: {{question.author}})</td>
-
-  </tr>
+	<tr>
+		<td bgcolor=#e5ecf9 align=left><B>Quiz Question</B> (author: {{question.author}})</td>
+    </tr>
+    <tr id="warning_untested_msg" style="visibility:hidden">
+    	<td bgcolor=#ff2233 align=left><B>Warning:</B> This question has not been fully tested, and may not be of high quality.</td>
+    </tr>
 </table><table width=100% border=0 cellpadding=0 cellspacing=0>
   <tr>
     <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>

@@ -82,6 +82,22 @@
 
 		//Usage: initRTE(imagesPath, includesPath, cssFile)
 		initRTE("/javascript/rte/images/", "/javascript/rte/", "", false);
+		
+		function createRTE(varname, default_value, height, width)
+		{
+			var rte = new richTextEditor(varname);
+			rte.html = unescape(default_value);
+			rte.toggleSrc = false;
+			if (height>0)
+				rte.height = height;
+			else
+				rte.height = 100;
+			if (width>0)
+				rte.width = width;
+			rte.build();
+			return rte;
+		}
+
 		//-->
 		</script>
 		<input type="hidden" name="question_key" value ="{{question.key}}">
@@ -97,43 +113,87 @@
 			
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Question:</td><td align=left>
-			
-			<script language="JavaScript" type="text/javascript">
-			<!--
-			//Usage: writeRichText(fieldname, html, width, height, buttons, readOnly)
-			var question_text = new richTextEditor('question_text');
-			question_text.html = unescape('{{question.question_text|urlencode}}');
-			question_text.toggleSrc = false;
-			question_text.build();
-
-			//-->
-			</script>
+			<td align=right valign=top><h3>Question:</td>
+			<td align=left>
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("question_text", '{{question.question_text|urlencode}}', 600, 600);
+				//-->
+				</script>
 			</td>
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Correct Answer:</h3></td><td align=left><input type="text" name="correct_choice_text"  size="53" value="{{question.correct_choice_text}}"></td>
+			<td align=right valign=top><h3>Correct Answer:</h3></td>
+			<td align=left>
+<!--			<input type="text" name="correct_choice_text"  size="53" value="{{question.correct_choice_text}}"> -->
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("correct_choice_text", '{{question.correct_choice_text|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Incorrect Choice 1:</h3></td><td align=left><input type="text" name="incorrect_1" size="53" value="{{question.incorrect_1}}"></td>
+			<td align=right valign=top><h3>Incorrect Choice 1:</h3></td>
+			<td align=left>
+<!--				<input type="text" name="incorrect_1" size="53" value="{{question.incorrect_1}}"> -->
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("incorrect_1", '{{question.incorrect_1|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Incorrect Choice 2:</h3></td><td align=left><input type="text" name="incorrect_2"  size="53" value="{{question.incorrect_2}}"></td>
+			<td align=right valign=top><h3>Incorrect Choice 2:</h3></td>
+			<td align=left>
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("incorrect_2", '{{question.incorrect_2|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Incorrect Choice 3:</h3></td><td align=left><input type="text" name="incorrect_3"  size="53" value="{{question.incorrect_3}}"></td>
+			<td align=right valign=top><h3>Incorrect Choice 3:</h3></td>
+			<td align=left>
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("incorrect_3", '{{question.incorrect_3|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Incorrect Choice 4:</h3></td><td align=left><input type="text" name="incorrect_4"  size="53" value="{{question.incorrect_4}}"></td>
+			<td align=right valign=top><h3>Incorrect Choice 4:</h3></td>
+			<td align=left>
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("incorrect_4", '{{question.incorrect_4|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Incorrect Choice 5:</h3></td><td align=left><input type="text" name="incorrect_5"  size="53"  value="{{question.incorrect_5}}"></td>
+			<td align=right valign=top><h3>Incorrect Choice 5:</h3></td>
+			<td align=left>
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("incorrect_5", '{{question.incorrect_5|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		<tr>
-		        <td align=right valign=top><h3>Hint text:</h3></td><td align=left><textarea name="hint_text" cols="40" rows="6" wrap="on">{{question.hint_text}}</textarea></td>
-		</tr>
-		<tr>
-			<td align=right valign=top><h3>Explanation of answer:</h3></td><td align=left><textarea name="answer_text" cols="40" rows="6" wrap="on">{{question.answer_text}}</textarea></td>
+			<td align=right valign=top><h3>Explanation of answer:</h3></td>
+			<td align=left>
+<!--			<textarea name="answer_text" cols="40" rows="6" wrap="on">{{question.answer_text}}</textarea> -->
+				<script language="JavaScript" type="text/javascript">
+				<!--
+					createRTE("answer_text", '{{question.answer_text|urlencode}}');
+				//-->
+				</script>
+			</td>
 		</tr>
 		</table>
 		<center><input type="submit" value="{{button_text}}"></center>
