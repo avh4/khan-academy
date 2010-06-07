@@ -103,12 +103,15 @@ class VideoDataTest(webapp.RequestHandler):
 
 class DataStoreTest(webapp.RequestHandler):
 	def get(self):
-		self.response.out.write('<html>')
-		user = users.get_current_user()
-		if user:
-			problems_done = ProblemLog.all()
-			for problem in problems_done:
-				self.response.out.write("<P>"+problem.user.nickname()+" "+problem.exercise+" done:"+str(problem.time_done)+" taken:"+str(problem.time_taken)+" correct:"+str(problem.correct))
+		if users.is_current_user_admin():	
+			self.response.out.write('<html>')
+			user = users.get_current_user()
+			if user:
+				problems_done = ProblemLog.all()
+				for problem in problems_done:
+					self.response.out.write("<P>"+problem.user.nickname()+" "+problem.exercise+" done:"+str(problem.time_done)+" taken:"+str(problem.time_taken)+" correct:"+str(problem.correct))
+		else:
+			self.redirect(users.create_login_url(self.request.uri))
 
 
 #Setting this up to make sure the old Video-Playlist associations are flushed before the bulk upload from the local datastore (with the new associations)
@@ -1134,6 +1137,14 @@ class ViewVideoLibrary(webapp.RequestHandler):
 				   'playlist_names': cols}   	    
     	    	path = os.path.join(os.path.dirname(__file__), 'videolibrary.html')
     	    	self.response.out.write(template.render(path, template_values))
+
+class Export(webapp.RequestHandler):
+	def get(self):
+		query = Exercise.all()
+		exercises = query.fetch(50)
+		for ex in exercises:
+			self.response.out.write(ex)
+
 				
 
 def main():
@@ -1162,6 +1173,7 @@ def main():
   	  				 ('/registercorrectness', RegisterCorrectness),
   	  				 ('/video', ViewVideo),
   	  				 ('/reportissue', ReportIssue),
+  	  				 ('/export', Export),
   	  				 ('/qbrary', qbrary.MainPage), #here and below are all qbrary related pages
   	  				 ('/subjectmanager', qbrary.SubjectManager),
   	  				 ('/editsubject', qbrary.CreateEditSubject),
