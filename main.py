@@ -194,62 +194,6 @@ class UpdateVideoData(webapp.RequestHandler):
 					playlist_video.video_position = int(video.position.text)
 					playlist_video.put()
 					
-					
-class UpdatePlaylistVideoData(webapp.RequestHandler):
-	def get(self):
-		self.response.out.write('<html>')
-		yt_service = gdata.youtube.service.YouTubeService()
-		playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
-		playlist_number_string = self.request.get('playlist_number')  #only update this playlist--instead of the 34+ ones. Hacking this to avoid the timeout at the production server
-		playlist_number = int(playlist_number_string)
-		count = 0
-		for playlist in playlist_feed.entry:
-			count = count +1
-			if count==playlist_number:
-				self.response.out.write('<p>Playlist  '+playlist.id.text)
-				playlist_id = playlist.id.text.replace('http://gdata.youtube.com/feeds/api/users/khanacademy/playlists/','')
-				playlist_uri = playlist.id.text.replace('users/khanacademy/','') 
-				query = Playlist.all()
-				query.filter("youtube_id =", playlist_id)
-				playlist_data = query.get()
-				if not playlist_data:
-					playlist_data = Playlist(youtube_id=playlist_id)
-				playlist_data.url = playlist_uri
-				playlist_data.title = playlist.title.text
-				playlist_data.description = playlist.description.text
-				playlist_data.put()
-				
-				for i in range(0,4):
-					start_index = i*50+1
-					video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri+"?start-index="+str(start_index)+"&max-results=50")
-					for video in video_feed.entry:
-						
-						video_id = video.media.player.url.replace('http://www.youtube.com/watch?v=','')
-						video_id = video_id.replace('&feature=youtube_gdata','')
-						query = Video.all()
-						query.filter("youtube_id =", video_id.decode("windows-1252"))
-						video_data =query.get()
-						if not video_data:
-							video_data = Video(youtube_id=video_id.decode("windows-1252"))
-							video_data.playlists = []
-						video_data.title = video.media.title.text.decode("windows-1252")
-						video_data.url = video.media.player.url.decode("windows-1252")
-						video_data.description = video.media.description.text.decode("windows-1252")
-						
-						if playlist.title.text not in video_data.playlists:
-							video_data.playlists.append(playlist.title.text.decode("windows-1252"))
-						video_data.keywords = video.media.keywords.text.decode("windows-1252")
-						video_data.put()
-						query = VideoPlaylist.all()
-						query.filter("playlist =", playlist_data.key())
-						query.filter("video =", video_data.key())
-						playlist_video = query.get()
-						if not playlist_video:
-							playlist_video = VideoPlaylist(playlist=playlist_data.key(),video=video_data.key())
-						
-						playlist_video.video_position = int(video.position.text)
-						playlist_video.put()
-				self.response.out.write('<p>Done Update  ')
 			
 					
 
@@ -1152,7 +1096,6 @@ def main():
   application = webapp.WSGIApplication([('/', ViewAllExercises),
   	  				('/library', ViewVideoLibrary),
   	  				('/syncvideodata', UpdateVideoData),
-  	  				('/singleplaylistsync', UpdatePlaylistVideoData),
   	  				('/exercises', ViewExercise),
   	  				('/assessuser', AssessUser),
   	  				('/testassess', TestAssessUser),
