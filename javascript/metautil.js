@@ -179,19 +179,20 @@ function arraySum(a)
 function checkFreeAnswer()
 {
 	var isCorrect = (parseFloat(document.getElementById("answer").value)==parseFloat(correctAnswer));
+
 	// Attempt to register the correctness of the answer with the server, before telling the user 
 	// whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
 	// avoid blowing a streak when he gets a wrong answer.  If the attempt to register the correctness fails,
 	// we don't worry about it because they might just be having connectivity problems or need to log in again.
 	// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
 	// but it takes longer and is more noticeable.
-	Http.get({ 
-		method: Http.Method.Post,
-		url: "/registercorrectness"
-			+ "?key=" + document.getElementById("key").value
-			+ "&correct=" + ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),			
-		callback: function() { }
-		}, isCorrect);
+
+	$.post("/registercorrectness", 
+		{
+			key: document.getElementById("key").value,
+			correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
+		}); // Fire and forget, no callback.
+
 	if (isCorrect)
 	{
 		
@@ -428,23 +429,6 @@ var Http = {
 		this.status = Http.Status.OK
 		this.responseText = response
 	}	
-}
-
-Http.Init()
-
-function json_response(response){
-	var js = response.responseText;
-	try{
-		return eval(js); 
-	} catch(e){
-		if (Http.logging){
-			Logging.logError(["json_response: " + e]);
-		}
-		else{
-			alert("Error: " + e + "\n" + js);
-		}
-		return null;
-	}
 }
 
 function getResponseProps(response, header){
