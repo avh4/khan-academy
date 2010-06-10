@@ -172,7 +172,7 @@
 		<td bgcolor=#e5ecf9 align=left><B>Quiz Question</B> (author: {{question.author}})</td>
     </tr>
     <tr id="warning_untested_msg" style="visibility:hidden">
-    	<td bgcolor=#ff2233 align=left><B>Warning:</B> This question has not been fully tested, and may not be of high quality.</td>
+    	<td bgcolor=#ff8877 align=left><B>Warning:</B> This question has not been fully tested and may contain mistakes or incorrect information.</td>
     </tr>
 </table><table width=100% border=0 cellpadding=0 cellspacing=0>
   <tr>
@@ -195,13 +195,13 @@
 	<td>
 	<td valign="top">
 		<form name="answerform">
-	
-			<input type="radio" name="select_answer" onClick="set_choice(0)">{{choice0}}</input><br>
-			<input type="radio" name="select_answer" onClick="set_choice(1)">{{choice1}}</input><br>
-			<input type="radio" name="select_answer" onClick="set_choice(2)">{{choice2}}</input><br>
-			<input type="radio" name="select_answer" onClick="set_choice(3)">{{choice3}}</input><br>
-			<input type="radio" name="select_answer" onClick="set_choice(4)">{{choice4}}</input><br>
-			
+		<table border="0">
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(0)"></input></td><td valign=top>{{choice0}}</td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(1)"></input></td><td valign=top>{{choice1}}</td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(2)"></input></td><td valign=top>{{choice2}}</td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(3)"></input></td><td valign=top>{{choice3}}</td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(4)"></input></td><td valign=top>{{choice4}}</td></tr>
+		</table>	
 		
 		<P>
 <table width=150px><tr><td>
