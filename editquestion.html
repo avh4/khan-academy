@@ -2,6 +2,8 @@
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/stylesheet.css" />
     <script language="JavaScript" type="text/javascript" src="/javascript/rte/richtext_compressed.js"></script>
+    <script type="text/javascript" src="/javascript/jquery.js"></script>
+    <script type="text/javascript" src="/javascript/ckeditor/ckeditor.js"></script>
     <script>
     function addQuestion(drop_down)
     {
@@ -66,42 +68,16 @@
   
   <h2>{{ message_text }}</h2>
   	
-  	
 	<P>
 	
 	<center>
-	<form name="mainform" action="/editquestion" method="get" onsubmit="return submitForm();">
+	<form name="mainform" action="/editquestion" method="get">
 	<script language="JavaScript" type="text/javascript">
 		<!--
-		function submitForm() {
-			//make sure hidden and iframe values are in sync before submitting form
-			updateRTEs(); //uncomment and call this line instead if there are multiple rich text editors inside the form
-			
-			return true; //Set to false to disable form submission, for easy debugging.
-			}
-
-		//Usage: initRTE(imagesPath, includesPath, cssFile)
-		initRTE("/javascript/rte/images/", "/javascript/rte/", "", false);
-		
-		function createRTE(varname, default_value, height, width)
-		{
-			var rte = new richTextEditor(varname);
-			rte.html = unescape(default_value);
-			rte.toggleSrc = false;
-			if (height>0)
-				rte.height = height;
-			else
-				rte.height = 100;
-			if (width>0)
-				rte.width = width;
-			rte.build();
-			return rte;
-		}
-
-		//-->
+			//-->
 		</script>
 		<input type="hidden" name="question_key" value ="{{question.key}}">
-		<table>
+		<table id="table_content">
 		<tr>
 			<td align=right valign=top><h3>Subject:</h3></td>
 			<td align=left valign=top><h3>
@@ -113,90 +89,85 @@
 			
 		</tr>
 		<tr>
-			<td align=right valign=top><h3>Question:</td>
+			<td align=right valign=top><h3>Question:</h3></td>
 			<td align=left>
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("question_text", '{{question.question_text|urlencode}}', 600, 600);
-				//-->
-				</script>
+				<textarea id="question_text" name="question_text">{{question.question_text}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Correct Answer:</h3></td>
 			<td align=left>
-<!--			<input type="text" name="correct_choice_text"  size="53" value="{{question.correct_choice_text}}"> -->
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("correct_choice_text", '{{question.correct_choice_text|urlencode}}');
-				//-->
-				</script>
+				<textarea id="correct_choice_text" name="correct_choice_text">{{question.correct_choice_text}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Incorrect Choice 1:</h3></td>
 			<td align=left>
-<!--				<input type="text" name="incorrect_1" size="53" value="{{question.incorrect_1}}"> -->
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("incorrect_1", '{{question.incorrect_1|urlencode}}');
-				//-->
-				</script>
+				<textarea id="incorrect_1" name="incorrect_1">{{question.incorrect_1}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Incorrect Choice 2:</h3></td>
 			<td align=left>
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("incorrect_2", '{{question.incorrect_2|urlencode}}');
-				//-->
-				</script>
+				<textarea id="incorrect_2" name="incorrect_2">{{question.incorrect_2}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Incorrect Choice 3:</h3></td>
 			<td align=left>
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("incorrect_3", '{{question.incorrect_3|urlencode}}');
-				//-->
-				</script>
+				<textarea id="incorrect_3" name="incorrect_3">{{question.incorrect_3}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Incorrect Choice 4:</h3></td>
 			<td align=left>
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("incorrect_4", '{{question.incorrect_4|urlencode}}');
-				//-->
-				</script>
+				<textarea id="incorrect_4" name="incorrect_4">{{question.incorrect_4}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Incorrect Choice 5:</h3></td>
 			<td align=left>
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("incorrect_5", '{{question.incorrect_5|urlencode}}');
-				//-->
-				</script>
+				<textarea id="incorrect_5" name="incorrect_5">{{question.incorrect_5}}</textarea>
 			</td>
 		</tr>
 		<tr>
 			<td align=right valign=top><h3>Explanation of answer:</h3></td>
 			<td align=left>
-<!--			<textarea name="answer_text" cols="40" rows="6" wrap="on">{{question.answer_text}}</textarea> -->
-				<script language="JavaScript" type="text/javascript">
-				<!--
-					createRTE("answer_text", '{{question.answer_text|urlencode}}');
-				//-->
-				</script>
+				<textarea id="answer_text" name="answer_text">{{question.answer_text}}</textarea>
 			</td>
 		</tr>
 		</table>
 		<center><input type="submit" value="{{button_text}}"></center>
+		<script>
+			// Swap in CKEditors
+			$("#table_content textarea").each(function() {
+				CKEDITOR.replace(this.id,
+					{
+						toolbar :
+						[[ 
+							'Bold', 'Italic', 'Underline', '-', 
+							'JustifyLeft', 'JustifyCenter', 'JustifyRight', '-',
+							'HorizontalRule', 'NumberedList', 'BulletedList', '-', 
+							'Outdent', 'Indent', '-',
+							'Link', 'Image', 'Table', 'SpecialChar'
+						], '/',
+						[
+							'Format', 'Font', 'FontSize', 'TextColor', 'BGColor'
+						]],
+						skin : 'kama',
+						toolbarCanCollapse: false,
+						removePlugins : 'elementspath',
+						resize_minWidth: 300,
+						width: 600,
+						height: (this.id == "question_text" ? 300 : 100),
+						scayt_autoStartup: false,
+						disableNativeSpellChecker: false
+					});
+			});
+
+			// After swapping in all CKEditors make sure we're scrolled to the top of the page
+			document.body.scrollTop = 0;
+		</script>
 	</form>
 	</center>
   </body>
