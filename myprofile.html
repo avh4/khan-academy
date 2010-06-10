@@ -81,7 +81,7 @@
     {% for question in published %}
     	<tr class={% cycle 'highlighWhite','highlightGreyRelated' %}>
 	<td>{{question.subject.name}}</td>
-    	<td>{{question.question_text|smart_truncate:75}}</td> 
+    	<td>{{question.question_text|striptags|smart_truncate:75}}</td> 
 	<td><A HREF="/editquestion?question_key={{ question.key }}">[edit]</A></td>
 	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[unpublish]</A></td>
 	<td><A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A></td>
