@@ -9,8 +9,15 @@ var selectedArray = new Array();
 var topNumberDigits =3;
 var bottomNumberDigits =3; //Has to be at least one less than topNumberDigits
 var answer = 0;
-var topDecPosition = get_random(topNumberDigits);
-var botDecPosition = get_random(bottomNumberDigits);
+
+var topDecPosition = 0;
+var botDecPosition = 0;
+while (0 == topDecPosition && 0 == botDecPosition)
+{
+	// At least one of the two numbers must have a decimal
+	topDecPosition = get_random(topNumberDigits);
+	botDecPosition = get_random(bottomNumberDigits);
+}
 
 for (var i=0; i<(topNumberDigits-1); i++)
 {
