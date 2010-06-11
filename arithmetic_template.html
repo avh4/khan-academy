@@ -190,8 +190,12 @@ function next_step()
 				{% endblock answerform %}
 			</form>
 			<script language=Javascript1.2><!--
-				document.forms['answerform'].reset();
-				document.forms['answerform'].answer.focus();
+				var elForm = document.forms['answerform'];
+				if (elForm)
+				{
+					elForm.reset();
+					if (elForm.answer) elForm.answer.focus();
+				}
 			//--></script>
 		</td>
 	</tr>
