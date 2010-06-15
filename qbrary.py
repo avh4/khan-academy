@@ -429,23 +429,39 @@ class AnswerQuestion(webapp.RequestHandler):
 						answerer_question.importance_width = 0
 						answerer_question.put()
 				
-					all_incorrect = [question.incorrect_1, 
-							question.incorrect_2,
-							question.incorrect_3,
-							question.incorrect_4,
-							question.incorrect_5]
 					#need to randomly take out 4 of the incorrect choices
-					choices = random.sample(all_incorrect,4)
 					correct_index = random.randint(0,4)
-					choices.insert(correct_index, question.correct_choice_text)
+					all_incorrect_indices = [1,2,3,4,5]
+					question_ordering = random.sample(all_incorrect_indices, 4)
+					question_ordering.insert(correct_index, 0)
+					#by this point, question_ordering is an array with 5 indices, and holds 0 (correct answer) along with 4 of (1..5) in a random order, eg [4,0,3,1,2]
+					choices = []
+					for question_index in question_ordering:
+						if question_index == 0:
+							choices.append(question.correct_choice_text)
+						if question_index == 1:
+							choices.append(question.incorrect_1)
+						if question_index == 2:
+							choices.append(question.incorrect_2)
+						if question_index == 3:
+							choices.append(question.incorrect_3)
+						if question_index == 4:
+							choices.append(question.incorrect_4)
+						if question_index == 5:
+							choices.append(question.incorrect_5)
 					
-                                        # create an answer session for this question
-                                        # todo: need to set the choice_* fields
-                                        qa_session = QuestionAnswerSession()
-                                        qa_session.answerer = user
-                                        qa_session.question = question
-                                        qa_session.total_attempts = 0
-                                        qa_session.put()
+					# create an answer session for this question
+					# todo: need to set the choice_* fields
+					qa_session = QuestionAnswerSession()
+					qa_session.answerer = user
+					qa_session.question = question
+					qa_session.total_attempts = 0
+					qa_session.choice_1 = question_ordering[0]
+					qa_session.choice_2 = question_ordering[1]
+					qa_session.choice_3 = question_ordering[2]
+					qa_session.choice_4 = question_ordering[3]
+					qa_session.choice_5 = question_ordering[4]
+					qa_session.put()
 				
 					template_values = {'subject':subject,
 							'subjects': subjects,
@@ -458,7 +474,7 @@ class AnswerQuestion(webapp.RequestHandler):
 							'choice3': choices[3],
 							'choice4': choices[4],
 							'question':question,
-                                                           'session_key': str(qa_session.key()),
+							'session_key': str(qa_session.key()),
 							'untested_warning':untested_warning}
 
 					path = os.path.join(os.path.dirname(__file__), 'answerquestion.html')
