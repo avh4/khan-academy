@@ -65,11 +65,11 @@ class QuestionAnswerSession(db.Model):
         page_loaded_timestamp = db.DateTimeProperty(auto_now_add=True)  # set auto_now_add to True so that it's auto set on insert
         correct_on_first_attempt = db.BooleanProperty()
         total_attempts = db.IntegerProperty()
+        choice_0 = db.IntegerProperty()
         choice_1 = db.IntegerProperty()
         choice_2 = db.IntegerProperty()
         choice_3 = db.IntegerProperty()
         choice_4 = db.IntegerProperty()
-        choice_5 = db.IntegerProperty()
 
 class QuestionAnswerSessionAttempt(db.Model):
         session = db.ReferenceProperty(QuestionAnswerSession)
@@ -83,7 +83,7 @@ class QuestionAnswerSessionActionTypes(db.Model):
 class QuestionAnswerSessionAction(db.Model):
         session = db.ReferenceProperty(QuestionAnswerSession)
         action = db.ReferenceProperty(QuestionAnswerSessionActionTypes)
-        action_timestamp = db.DateTimeProperty()
+        timestamp = db.DateTimeProperty(auto_now_add=True)  # set auto_now_add to True so that it's auto set on insert
 
 class AnswerLog(db.Model):
 	answer_author = db.UserProperty()
@@ -456,11 +456,11 @@ class AnswerQuestion(webapp.RequestHandler):
 					qa_session.answerer = user
 					qa_session.question = question
 					qa_session.total_attempts = 0
-					qa_session.choice_1 = question_ordering[0]
-					qa_session.choice_2 = question_ordering[1]
-					qa_session.choice_3 = question_ordering[2]
-					qa_session.choice_4 = question_ordering[3]
-					qa_session.choice_5 = question_ordering[4]
+					qa_session.choice_0 = question_ordering[0]
+					qa_session.choice_1 = question_ordering[1]
+					qa_session.choice_2 = question_ordering[2]
+					qa_session.choice_3 = question_ordering[3]
+					qa_session.choice_4 = question_ordering[4]
 					qa_session.put()
 				
 					template_values = {'subject':subject,
@@ -676,7 +676,24 @@ class CheckAnswer(webapp.RequestHandler):
     qa_session_att.was_correct = str_to_bool(was_correct)
     qa_session_att.put()
 
-    self.response.out.write("Recorded attempt for session" + session_key);
+    self.response.out.write("Recorded attempt for session: " + session_key);
+
+
+class SessionAction(webapp.RequestHandler):
+  def post(self):
+    action_type = self.request.get("action_type")
+    session_key = self.request.get("session_key")
+
+    qa_session = db.get(db.Key(session_key))
+    qa_action_type = QuestionAnswerSessionActionTypes.gql("WHERE type=:1", action_type).get()
+
+    # record a new question answer action
+    qa_session_action = QuestionAnswerSessionAction()
+    qa_session_action.session = qa_session
+    qa_session_action.action = qa_action_type
+    qa_session_action.put()
+
+    self.response.out.write(action_type)
     
     
 class Guestbook(webapp.RequestHandler):
@@ -706,6 +723,7 @@ application = webapp.WSGIApplication(
 				      ('/editquestion', CreateEditQuestion),
 				      ('/addquestion', CreateEditQuestion),
 				      ('/checkanswer', CheckAnswer),
+ 				      ('/sessionaction', SessionAction),
  				      ('/initqbrary', InitQbrary),
                                       ('/sign', Guestbook)],
                                      debug=True)

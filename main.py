@@ -1132,6 +1132,7 @@ def main():
   	  				 ('/editquestion', qbrary.CreateEditQuestion),
   	  				 ('/addquestion', qbrary.CreateEditQuestion),
     				         ('/checkanswer', qbrary.CheckAnswer),
+					 ('/sessionaction', qbrary.SessionAction),
     				         ('/initqbrary', qbrary.InitQbrary)],
   	  				 debug=True)
   run_wsgi_app(application)

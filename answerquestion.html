@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
     <script type="text/javascript" language="javascript" src="/javascript/behavior.js"></script>
     <script type="text/javascript" language="javascript" src="/javascript/rating.js"></script>
-    <script type="text/javascript" language="javascript" src="/javascript/jquery.js"></script>
+    <script type="text/javascript" language="javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 
     <script>
     function addQuestion(drop_down)
@@ -40,7 +40,8 @@
     	if (is_correct)
 		{
 			document.images.feedback.src = correct.src;
-			show_answer();
+			show_explanation();
+                        disable_check_answer_button();
 		}
 		else
 		{
@@ -72,11 +73,28 @@
     function show_hint()
     {
         document.getElementById("hint").style.visibility = 'visible';
+        disable_hint_button();
     }
 
-    function show_answer()
+    function show_explanation()
     {
-        document.getElementById("answer").style.visibility = 'visible';        
+        document.getElementById("explanation").style.visibility = 'visible';        
+        disable_explain_button();
+    }
+
+    function disable_check_answer_button()
+    {
+    	document.getElementById("check_answer_button").disabled = true;        
+    }
+
+    function disable_hint_button()
+    {
+    	document.getElementById("hint_button").disabled = true;        
+    }
+
+    function disable_explain_button()
+    {
+    	document.getElementById("explain_answer_button").disabled = true;        
     }
     
     function disable_next_button()
@@ -97,7 +115,8 @@
     function handle_next_button_clicked()
     {
 		$.post("/sessionaction", 
-			{"action_type" : "next_button_clicked"}, 
+                       {"session_key" : '{{session_key}}',
+			"action_type" : "next_button_clicked"}, 
 			function(result) { session_action_callback(result); });	        	
     }
     
@@ -106,24 +125,27 @@
     	show_hint();
 		
 		$.post("/sessionaction", 
-			{"action_type" : "hint_button_clicked"}, 
+                       {"session_key" : '{{session_key}}',
+			"action_type" : "hint_button_clicked"}, 
 			function(result) { session_action_callback(result); });	    
     }
     
     function handle_explain_button_clicked()
     {
-    	show_answer();
+    	show_explanation();
 	
 		$.post("/sessionaction", 
-			{"action_type" : "explain_button_clicked"}, 
+                       {"session_key" : '{{session_key}}',
+			"action_type" : "explain_button_clicked"}, 
 			function(result) { session_action_callback(result); });
     }
     
     function session_action_callback(result)
     {
-    	// todo: only do this if next button was clicked
-        // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
-    	window.location = window.location;	
+        if (result == "next_button_clicked") {
+           // vishal: this is a funny little hack to reload the page; this needs to be redone such that questions aren't repeated
+    	   window.location = window.location;	
+        }
     }
     
     function show_warning_if_needed()
@@ -189,7 +211,7 @@
 		&nbsp;<P>&nbsp;<P>
 		<div id="hint" style="position:relative; visibility:hidden;"><b>Hint:</b> {{question.hint_text}}</div>
 		&nbsp;<P>&nbsp;<P>
-		<div id="answer" style="position:relative; visibility:hidden;"><b>Answer Explanation:</b> {{question.answer_text}}</div>
+		<div id="explanation" style="position:relative; visibility:hidden;"><b>Answer Explanation:</b> {{question.answer_text}}</div>
 		</font>
 	</td>
 	<td>
@@ -253,7 +275,7 @@
 </div>
 </td></tr></table>
 <P>
-<input type="button" value="Check Answer" onClick="handle_check_answer_button_clicked()">
+<input id="check_answer_button" type="button" value="Check Answer" onClick="handle_check_answer_button_clicked()">
 {% if question.hint_text %}
 <input id="hint_button" type="button" value="Get Hint" onClick="handle_hint_button_clicked()">
 {% endif %}
