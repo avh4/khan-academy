@@ -27,14 +27,19 @@ class UserExercise(db.Model):
     total_done = db.IntegerProperty()
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=86400)
+    
+    def get_review_interval(self):
+        review_interval = datetime.timedelta(seconds=self.review_interval_secs)
+        return review_interval
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
         if self.streak + correct < 10:
             return
-        review_interval = datetime.timedelta(seconds=self.review_interval_secs)
-        time_since_last_review = now - self.last_review
-        if correct and time_since_last_review >= review_interval and self.streak >= 10:
-            review_interval = time_since_last_review * 2
+        review_interval = self.get_review_interval()
+        if correct and self.streak >= 10 and self.last_review != datetime.datetime.min:
+            time_since_last_review = now - self.last_review
+            if time_since_last_review >= review_interval:
+                review_interval = time_since_last_review * 2
         if not correct:
             review_interval = review_interval // 3
         if correct:
@@ -161,7 +166,7 @@ class ExerciseGraph(object):
             if ex.next_review is None:
                 ex.next_review = datetime.datetime.min
                 if ex.user_exercise is not None and ex.user_exercise.last_review > datetime.datetime.min:
-                    next_review = ex.user_exercise.last_review + datetime.timedelta(seconds=ex.user_exercise.review_interval_secs)
+                    next_review = ex.user_exercise.last_review + ex.user_exercise.get_review_interval()
                     if next_review > ex.next_review:
                         ex.next_review = next_review
                 for c in ex.coverers:
@@ -1099,6 +1104,17 @@ class AdminViewUser(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'adminviewuser.html')
             self.response.out.write(template.render(path, template_values))
 
+class AdminResetAllReviewIntervals(webapp.RequestHandler):
+
+    def get(self):
+        if users.is_current_user_admin():
+            query = UserExercise.all()
+            for user_ex in query:
+                user_ex.review_interval_secs = 86400
+                user_ex.put()
+            self.response.out.write("All review intervals reset.")
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
 
 class RegisterAnswer(webapp.RequestHandler):
 
@@ -1300,9 +1316,7 @@ class Export(webapp.RequestHandler):
 
 def main():
     webapp.template.register_template_library('templatefilters')
-    application = webapp.WSGIApplication([  # ('/deletevideoplaylists', DeleteVideoPlaylists),# These are dangerous, should be able to clean things manually from the remote python shell
-                                            # ('/deletevideos', DeleteVideos),
-                                            # here and below are all qbrary related pages
+    application = webapp.WSGIApplication([ 
         ('/', ViewAllExercises),
         ('/library', ViewVideoLibrary),
         ('/syncvideodata', UpdateVideoData),
@@ -1325,6 +1339,12 @@ def main():
         ('/video', ViewVideo),
         ('/reportissue', ReportIssue),
         ('/export', Export),
+        # These are dangerous, should be able to clean things manually from the remote python shell
+        # ('/deletevideos', DeleteVideos),
+        # ('/deletevideoplaylists', DeleteVideoPlaylists),        
+        ('/resetallreviewintervals', AdminResetAllReviewIntervals),
+
+        # Below are all qbrary related pages
         ('/qbrary', qbrary.MainPage),
         ('/subjectmanager', qbrary.SubjectManager),
         ('/editsubject', qbrary.CreateEditSubject),
