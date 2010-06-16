@@ -1104,19 +1104,6 @@ class AdminViewUser(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'adminviewuser.html')
             self.response.out.write(template.render(path, template_values))
 
-class AdminResetAllReviewIntervals(webapp.RequestHandler):
-
-    def get(self):
-        if users.is_current_user_admin():
-            query = UserExercise.all()
-            query.filter('review_interval_secs !=', 86400)
-            for user_ex in query:
-                user_ex.review_interval_secs = 86400
-                user_ex.put()
-            self.response.out.write("All review intervals reset.")
-        else:
-            self.redirect(users.create_login_url(self.request.uri))
-
 class RegisterAnswer(webapp.RequestHandler):
 
     def post(self):
@@ -1343,7 +1330,6 @@ def main():
         # These are dangerous, should be able to clean things manually from the remote python shell
         # ('/deletevideos', DeleteVideos),
         # ('/deletevideoplaylists', DeleteVideoPlaylists),        
-        ('/resetallreviewintervals', AdminResetAllReviewIntervals),
 
         # Below are all qbrary related pages
         ('/qbrary', qbrary.MainPage),
