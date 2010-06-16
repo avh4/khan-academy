@@ -1109,6 +1109,7 @@ class AdminResetAllReviewIntervals(webapp.RequestHandler):
     def get(self):
         if users.is_current_user_admin():
             query = UserExercise.all()
+            query.filter('review_interval_secs !=', 86400)
             for user_ex in query:
                 user_ex.review_interval_secs = 86400
                 user_ex.put()
