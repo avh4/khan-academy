@@ -21,6 +21,28 @@ correct).  Let me know if you have any problems.
 
 <P>
 </ul>
+{% if review_exercises %}
+<div class=hdg>&nbsp;<h3>Review Exercises</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>
+{% for exercise in review_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+	
+		<td>{{exercise.points}}</td>
+		<td><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></td>
+		<td>{% if exercise.proficient %}<img src="/images/face-smiley.gif" height=20 width=20>{% endif %}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td><ul class="unit-rating" style="width:200px;">
+		<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li></ul>
+		</td>
+		</tr>
+{% endfor %}
+</table><br>
+{% endif %}
 <div class=hdg>&nbsp;<h3>Suggested Exercises</h3></div>
 <table border=0 cellspacing=0 cellpadding=3>
 <tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>

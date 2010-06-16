@@ -190,6 +190,7 @@ function checkFreeAnswer()
 	$.post("/registercorrectness", 
 		{
 			key: document.getElementById("key").value,
+			time_warp: document.getElementById("time_warp").value,
 			correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
 		}); // Fire and forget, no callback.
 

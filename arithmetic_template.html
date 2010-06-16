@@ -183,6 +183,7 @@ function next_step()
 				<input type="hidden" id="key" name="key" value="{{key}}">
 				<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
 				<input type="hidden" id="correct" name="correct" value="0">
+				<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 				{% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {checkFreeAnswer(); return false;}"></br>{% endblock answerarea %}
 				<br><input type="button" value="Hint" onClick="{% block hintfunction %}next_step(){% endblock hintfunction %}">
 				<input type="button" value="Check Answer" onClick="{% block checkanswer %}checkFreeAnswer(){% endblock checkanswer %}"></br>

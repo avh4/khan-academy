@@ -23,6 +23,7 @@
   positionHash['{{exercise.h_position}}_{{exercise.v_position}}'] = '{{exercise.name}}';
   {% if exercise.proficient %}toHighlight['{{exercise.name}}']=2;{% endif %}
   {% if exercise.suggested %}toHighlight['{{exercise.name}}']=1;{% endif %}
+  {% if exercise.review %}toHighlight['{{exercise.name}}']=3;{% endif %}
   {% endfor %}
   
   var scale = 85;
@@ -105,6 +106,8 @@ function graph_update()
 				fill = "#fbb917";
 			if (toHighlight[k]==2)  //proficient
 				fill = "#EDE275";
+			if (toHighlight[k]==3)  //review
+				fill = "#FF9999";
 				
 			circle(coor, 30);
 			fill = "none";

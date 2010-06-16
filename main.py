@@ -25,7 +25,24 @@ class UserExercise(db.Model):
 	first_done = db.DateTimeProperty(auto_now_add=True)
 	last_done = db.DateTimeProperty()
 	total_done = db.IntegerProperty()	
-	
+	last_review = db.DateTimeProperty(default=datetime.datetime.min)
+	review_interval_secs = db.IntegerProperty(default=86400)
+		
+	def schedule_review(self, correct, now = datetime.datetime.now()):
+		if self.streak + correct < 10:
+			return
+		review_interval = datetime.timedelta(seconds=self.review_interval_secs)
+		time_since_last_review = now - self.last_review
+		if correct and time_since_last_review >= review_interval and self.streak >= 10:
+			review_interval = time_since_last_review * 2
+		if not correct:
+			review_interval = review_interval // 3
+		if correct:
+			self.last_review = now
+		else:
+			self.last_review = datetime.datetime.min
+		self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
+		
 
 class Exercise(db.Model):
 	name = db.StringProperty()
@@ -83,7 +100,74 @@ class ExerciseVideo(db.Model):
 class ExercisePlaylist(db.Model):
 	exercise = db.ReferenceProperty(Exercise)
 	playlist = db.ReferenceProperty(Playlist)
+	
+class ExerciseGraph(object):
+	def __init__(self, exercises, user_exercises):
+		self.exercises = exercises
+		exercise_by_name = {}
+		for ex in exercises:
+			exercise_by_name[ex.name] = ex
+			ex.coverers = []
+			ex.user_exercise = None
+			ex.next_review = None # Not set initially
+			ex.is_review_candidate = False
+			ex.is_ancestor_review_candidate = None # Not set initially
+		for ex in exercises:
+			for covered in ex.covers:
+				exercise_by_name[covered].coverers.append(ex)
+			ex.prerequisites_ex = []
+			for prereq in ex.prerequisites:
+				ex.prerequisites_ex.append(exercise_by_name[prereq])
+		for ex in user_exercises:
+			exercise_by_name[ex.exercise].user_exercise = ex
 
+	def get_review_exercises(self, now):
+# An exercise ex should be reviewed iff all of the following are true:
+#   * It and all of its covering ancestors have are scheduled to have their next review in the past
+#   * None of ex's covering ancestors should be reviewed
+#   * The user is proficient at ex
+# The algorithm:
+#   For each exercise:
+#     traverse it's ancestors, computing and storing the most recent successful review if not already done
+#   Select and mark the exercises in which the user is proficient but were last reviewed too long ago as review candidates
+#   For each of those candidates:
+#     traverse it's ancestors, computing and storing whether an ancestor is also a candidate
+#   All exercises that are candidates but do not have ancestors as candidates should be listed for review
+		def compute_next_review(ex):
+			if ex.next_review is None:
+				ex.next_review = datetime.datetime.min
+				if ex.user_exercise is not None and ex.user_exercise.last_review > datetime.datetime.min:
+					next_review = ex.user_exercise.last_review + datetime.timedelta(seconds=ex.user_exercise.review_interval_secs)
+					if next_review > ex.next_review:
+						ex.next_review = next_review
+				for c in ex.coverers:
+					c_next_review = compute_next_review(c)
+					if c_next_review > ex.next_review:
+						ex.next_review = c_next_review
+			return ex.next_review
+		
+		def compute_is_ancestor_review_candidate(rc):
+			if rc.is_ancestor_review_candidate is None:
+				rc.is_ancestor_review_candidate = False
+				for c in rc.coverers:
+					rc.is_ancestor_review_candidate = rc.is_ancestor_review_candidate or c.is_review_candidate or compute_is_ancestor_review_candidate(c)
+			return rc.is_ancestor_review_candidate
+
+		for ex in self.exercises:
+			compute_next_review(ex)
+		review_candidates = []		
+		for ex in self.exercises:
+			if ex.user_exercise is not None and ex.user_exercise.streak >= 10 and ex.next_review < now:
+				ex.is_review_candidate = True
+				review_candidates.append(ex)
+			else:
+				ex.is_review_candidate = False
+		review_exercises = []
+		for rc in review_candidates:
+			if not compute_is_ancestor_review_candidate(rc):
+				review_exercises.append(rc)
+		return review_exercises
+		
 
 def PointCalculator(streak, suggested, proficient):
 	points = 5+max(streak,10)
@@ -204,6 +288,7 @@ class ViewExercise(webapp.RequestHandler):
     	    	    exid = self.request.get('exid')
     	    	    key = self.request.get('key')
     	    	    proficient = self.request.get('proficient')
+    	    	    time_warp = self.request.get('time_warp')
     	    	    
     	    	    query = UserExercise.all()
     	    	    query.filter("user =", user)
@@ -246,7 +331,9 @@ class ViewExercise(webapp.RequestHandler):
     	    	    	'extitle': exid.replace('_', ' ').capitalize(),
     	    	    	'streakwidth': userExercise.streak*20,
     	    	    	'logout_url': logout_url,
-    	    	    	'streak': userExercise.streak }
+			'streak': userExercise.streak,
+			'time_warp': time_warp,
+    	    	     }
     	    	    	
     	    	    path = os.path.join(os.path.dirname(__file__), exid+'.html')
     	    	    self.response.out.write(template.render(path, template_values))
@@ -457,10 +544,18 @@ class ViewMapExercises(webapp.RequestHandler):
 				if exercise.suggested:
 					suggested_exercises.append(exercise)
 			
+			ex_graph = ExerciseGraph(exercises, user_exercises)
+			review_exercises = ex_graph.get_review_exercises(self.get_time())
+			review_count = 0
+			for review_exercise in review_exercises:
+				knowledge_map_url = knowledge_map_url+"&r"+str(review_count)+"="+review_exercise.name
+				review_count = review_count + 1
+
 			logout_url = users.create_logout_url(self.request.uri)
 			
 			template_values = {'exercises': exercises,
 					   'suggested_exercises':suggested_exercises,
+					   'review_exercises':review_exercises,
 					   'knowledge_map_url':knowledge_map_url,
 				      	   'points':user_data.points,
 					   'username': user.nickname(),
@@ -472,11 +567,15 @@ class ViewMapExercises(webapp.RequestHandler):
 		else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
     	    	    
+	def get_time(self):
+		time_warp = int(self.request.get('time_warp') or "0")
+		return datetime.datetime.now() + datetime.timedelta(days=time_warp)    	 
+    	    	    
+    	    	    
 class ViewAllExercises(webapp.RequestHandler):
 	def get(self):
 		user = users.get_current_user()
 		if user:
-			
 			query = UserData.all()
 			query.filter("user =", user)
 			user_data = query.get()
@@ -508,7 +607,7 @@ class ViewAllExercises(webapp.RequestHandler):
 					
 				if exercise.name in user_data.suggested_exercises:
 					exercise.suggested = True
-					
+									
 				exercise.streak = 0
 				for user_exercise in user_exercises:
 					if user_exercise.exercise == exercise.name:
@@ -524,9 +623,13 @@ class ViewAllExercises(webapp.RequestHandler):
 				if exercise.suggested:
 					suggested_exercises.append(exercise)
 			
+			ex_graph = ExerciseGraph(exercises, user_exercises)
+			review_exercises = ex_graph.get_review_exercises(self.get_time())
+			
 			logout_url = users.create_logout_url(self.request.uri)
 			
 			template_values = {'exercises': exercises,
+					   'review_exercises':review_exercises,
 					   'suggested_exercises':suggested_exercises,
 				      	   'points':user_data.points,
 					   'username': user.nickname(),
@@ -537,6 +640,11 @@ class ViewAllExercises(webapp.RequestHandler):
 			
 		else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
+    	    	    
+	def get_time(self):
+		time_warp = int(self.request.get('time_warp') or "0")
+		return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+		
     	    	 
 class VideolessExercises(webapp.RequestHandler):
 	def get(self):
@@ -559,6 +667,7 @@ class KnowledgeMap(webapp.RequestHandler):
 			
 			proficient_exercises = []
 			suggested_exercises = []
+			review_exercises = []
 			
 			proficient_count = 0
 			proficient_exercise = self.request.get('p'+str(proficient_count))
@@ -574,6 +683,12 @@ class KnowledgeMap(webapp.RequestHandler):
 				suggested_count = suggested_count + 1
 				suggested_exercise = self.request.get('s'+str(suggested_count))
 			
+			review_count = 0
+			review_exercise = self.request.get('r'+str(review_count))
+			while review_exercise:
+				review_exercises.append(review_exercise)
+				review_count = review_count + 1
+				review_exercise = self.request.get('r'+str(review_count))
 			
 			for exercise in exercises:
 				exercise.suggested = False
@@ -582,6 +697,8 @@ class KnowledgeMap(webapp.RequestHandler):
 					exercise.suggested = True
 				if exercise.name in proficient_exercises:
 					exercise.proficient = True
+				if exercise.name in review_exercises:
+					exercise.review = True
 				name = exercise.name.capitalize()
 				name_list = name.split('_')
 				exercise.display_name = str(name_list).replace("[u'", "['").replace(", u'", ", '")
@@ -598,8 +715,6 @@ class KnowledgeMap(webapp.RequestHandler):
 			
 		else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
-    	 
-    	    	 
     	    	    
 class EditExercise(webapp.RequestHandler):
 	def get(self):
@@ -950,31 +1065,40 @@ class RegisterAnswer(webapp.RequestHandler):
     	    	    else:
     	    	    	    userExercise.total_done=1
     	    	    now_proficient_string = ""
+	    	    userExercise.schedule_review((correct == 1), self.get_time())
     	    	    if (correct==1):
     	    	    	    userExercise.streak = userExercise.streak+1
     	    	    	    if (userExercise.streak > userExercise.longest_streak):
     	    	    	    	    userExercise.longest_streak = userExercise.streak
-    	    	    	    	    if userExercise.streak==10:
-    	    	    	    	    	    now_proficient_string = "&proficient=1"
-    	    	    	    	    	    query = UserData.all()
-    	    	    	    	    	    query.filter("user =", user)
-    	    	    	    	    	    user_data = query.get()
-    	    	    	    	    	    if user_data is None:
-    	    	    	    	    	    	    user_data = UserData(user=user,last_login=datetime.datetime.now(),proficient_exercises=[],suggested_exercises=[],assigned_exercises=[])
+    	    	    	    if userExercise.streak >= 10:
+    	    	    	      	    now_proficient_string = "&proficient=1"
+    	    	    	    if userExercise.streak == 10:
+    	    	    	       	    query = UserData.all()
+    	    	    	       	    query.filter("user =", user)
+    	    	    	       	    user_data = query.get()
+    	    	    	       	    if user_data is None:
+    	    	    	       	    	    user_data = UserData(user=user, last_login=datetime.datetime.now(), proficient_exercises=[], suggested_exercises=[], assigned_exercises=[])
     	    	    	    	    	    	    
-					    if userExercise.exercise not in user_data.proficient_exercises:
-					    	    user_data.proficient_exercises.append(userExercise.exercise)
-					    user_data.need_to_reassess = True
-    	    	    	    	    	    user_data.put()
+				    if userExercise.exercise not in user_data.proficient_exercises:
+				    	    user_data.proficient_exercises.append(userExercise.exercise)
+				    user_data.need_to_reassess = True
+				    user_data.put()
+
+    	    	    	    	    	    
+    	    	    	    	    	    
     	    	    else:
-    	    	    	    userExercise.streak =0
-    	    	    	    
+    	    	    	    userExercise.streak =0    	    	    	    
     	    	    
     	    	    userExercise.put()
     	    	    
     	    	    self.redirect('/exercises?exid='+exid+now_proficient_string)
     	    else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
+    	    	    
+    def get_time(self):
+	time_warp = int(self.request.get('time_warp') or "0")
+	return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+    	    	    
 
 class RegisterCorrectness(webapp.RequestHandler):
 # A POST request is made via AJAX when the user clicks "Check Answer".
@@ -987,11 +1111,16 @@ class RegisterCorrectness(webapp.RequestHandler):
     	    	    key = self.request.get('key')
     	    	    correct = int(self.request.get('correct'))
     	    	    userExercise = db.get(key)
+	    	    userExercise.schedule_review((correct == 1), self.get_time())
     	    	    if (correct==0):
     	    	    	    userExercise.streak =0
     	    	    userExercise.put()
     	    else:
     	    	    self.redirect(users.create_login_url(self.request.uri))
+
+    def get_time(self):
+	time_warp = int(self.request.get('time_warp') or "0")
+	return datetime.datetime.now() + datetime.timedelta(days=time_warp)
     	    	   
 class ViewUsers(webapp.RequestHandler):
 	def get(self):
