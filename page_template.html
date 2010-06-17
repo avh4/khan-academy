@@ -55,16 +55,7 @@ var currentexercise = "{{exid}}";
 {% endblock pagecontent %}
     <P>&nbsp;<P>
     <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
-    <center>
-    	<a href="/reportissue?type=Defect">Report a problem</a> |
-    	<a href="/reportissue?type=Enhancement">Make a suggestion</a> | 
-    	<a href="/reportissue?type=New-Video">Ask for a video</a> | 
-    	<a href="/reportissue?type=Comment">Make a comment</a> | 
-    	<a href="/reportissue?type=Question">Ask a question</a>
-    </center>
-    <center>
-    <p><font size=-2>&copy;2010 Khan Academy</font></p>
-    </center>
+{% include "page_footer.html" %}
   </body>
 </html>
 
