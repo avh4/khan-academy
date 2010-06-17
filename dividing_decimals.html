@@ -9,10 +9,14 @@ var quotient = Math.round(Math.random()*899)+100;
 var dividend = divisor* quotient;
 
 var divisorDec = getRandomInt(1)+1;
-var quotientDec = getRandomInt(2)+1;
-var dividendDec = divisorDec + quotientDec;
-
-
+// Ensure we don't move the decimal point past the first digit
+// since we don't support adding leading zeroes to the dividend.
+// See issue 45: http://code.google.com/p/khanacademy/issues/detail?id=45
+var maxDividendDec = (dividend < 10000) ? 4 : 5; 
+// The dividend decimal point can't be less than the divisor
+// decimal point since we don't support trailing zeroes to the dividend.
+var dividendDec = getRandomIntRange(divisorDec, maxDividendDec);
+var quotientDec = dividendDec - divisorDec;
 
 
 
