@@ -809,7 +809,11 @@ function hide_hints() {
 			if (!elem) 
 				break;
 			KhanAcademy_hint_by_id[id] = elem.innerHTML;
-			elem.innerHTML = "";
+			// We need to keep some text in the element to 
+			// ensure that earlier text doesn't flow strangely.
+			// To see, try removing the text below and visiting
+			// /exercises?exid=linear_inequalities
+			elem.innerHTML = '<span>This hint is hidden.</span>';
 			part++;
 		}
 		if (part == 1) 
