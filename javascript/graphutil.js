@@ -809,11 +809,7 @@ function hide_hints() {
 			if (!elem) 
 				break;
 			KhanAcademy_hint_by_id[id] = elem.innerHTML;
-			// We need to keep some text in the element to 
-			// ensure that earlier text doesn't flow strangely.
-			// To see, try removing the text below and visiting
-			// /exercises?exid=linear_inequalities
-			elem.innerHTML = '<span>This hint is hidden.</span>';
+			elem.innerHTML = '';
 			part++;
 		}
 		if (part == 1) 
@@ -846,9 +842,12 @@ function give_next_step() {
 	{
 		var id = "step"+steps_given+"_"+i;
 		var elem = document.getElementById(id);
-		elem.innerHTML = KhanAcademy_hint_by_id[id];
-		translate(); // Process any ASCII Math -> MathML
-		elem.style.visibility = 'visible';				
+		if (elem) 
+		{
+			elem.innerHTML = KhanAcademy_hint_by_id[id];
+			translate(); // Process any ASCII Math -> MathML
+			elem.style.visibility = 'visible';				
+		}
 	}
 }
 
