@@ -528,17 +528,6 @@ function check_both_answers()
 }
 
 
-
-
-function give_next_step() {
-	steps_given++;
-	if (displaygraph)
-		graph_update();
-	
-	for(var i=1; i<=display_per_step; i++)
-		document.getElementById("step"+steps_given+"_"+i).style.visibility = 'visible';
-}
-
 function array_sum(a) {
 
 	var sum=0;
@@ -547,8 +536,6 @@ function array_sum(a) {
 	}
 	return sum;
 }
-
-
 
 function start_random_problem()
 {
