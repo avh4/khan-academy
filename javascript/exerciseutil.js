@@ -486,6 +486,12 @@ function getRandomIntRange(min, max)
 
 function check_answer()
 {
+	if (selectedchoice === undefined) 
+	{
+			window.alert("Please choose your answer.");
+			return;
+	}
+
 	if (selectedchoice==correctchoice)
 	{
 		if (tries==0 && steps_given==0)
@@ -510,6 +516,12 @@ function check_answer()
 //for problems where the user can give 2 answers
 function check_both_answers()
 {
+	if (selectedchoice === undefined || selectedchoice2 === undefined) 
+	{
+			window.alert("Please choose both answers.");
+			return;
+	}
+
 	if (selectedchoice==correctchoice  && selectedchoice2==correctchoice2)
 	{
 		document.getElementById("nextbutton").style.visibility = 'visible';

@@ -178,7 +178,13 @@ function arraySum(a)
 
 function checkFreeAnswer()
 {
-	var isCorrect = (parseFloat(document.getElementById("answer").value)==parseFloat(correctAnswer));
+	var usersAnswer = parseFloat(document.getElementById("answer").value);
+	if (isNaN(usersAnswer)) 
+	{
+			window.alert("Your answer is not a number.  Please try again.");
+			return;
+	}
+	var isCorrect = (usersAnswer==parseFloat(correctAnswer));
 
 	// Attempt to register the correctness of the answer with the server, before telling the user 
 	// whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
