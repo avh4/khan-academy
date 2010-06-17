@@ -809,8 +809,6 @@ function hide_hints() {
 			if (!elem) 
 				break;
 			KhanAcademy_hint_by_id[id] = elem.innerHTML;
-			if (console) 
-				console.log("%s<-%s", id, elem.innerHTML)
 			elem.innerHTML = "";
 			part++;
 		}
