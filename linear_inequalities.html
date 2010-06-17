@@ -1,52 +1,42 @@
 {% extends "adding_and_subtracting_fractions.html" %}
 {% block maincode %}
 <script language=Javascript1.2><!--
-display_per_step = 3; //the right and left panes of the hint table
+display_per_step = 4; //the right and left panes of the hint table
 
 var selColor = "#AE9CC9";
 var noSelColor = "#333333";
 
 function getEqExpString(string)
 {
-	var selFontString = '<font color='+selColor+' size=4>';
+	var selFontString = '<font color='+selColor+' size=4 style="white-space: nowrap;">';
 	return (selFontString+'`'+string+'`</font>');
 }
 /////////////////////
-
-function write_ineq_step(left, right, ineq)
-{
-	document.write(	'<tr><td align=right>'
-			+get_step_part_string('`'+left+'`', next_step_to_write, 1)
-			+'</td><td align=left>'
-			+get_step_part_string('`'+ineq+right+'`', next_step_to_write, 2)
-			+'</td></tr>');
-	next_step_to_write++;
-}
-
-function ineq_step_header(left, right, ineq)
-{
-	document.write('<center><table border=0 width=100%><tr><td align=right><font face=\"arial\" size=4>`'+
-			left+
-			'</font></td><td align=left><font face=\"arial\" size=4>`'+ineq+right+'`</font></td></tr>');	
-}
 
 function write_ineq_step(explanation, left, right, ineq)
 {
 	document.write(	'<tr><td align=left >'
 			+get_step_part_string('<FONT class=\"explanation\">'+explanation+'</font>', next_step_to_write, 3)
-			+'</td><td align=right >'
+			+'</td><td align=right style="white-space: nowrap;">'
 			+get_step_part_string('`'+left+'`', next_step_to_write, 1)
-			+'</td><td align=left >'
-			+get_step_part_string('`'+ineq+right+'`', next_step_to_write, 2)
+			+'</td><td align=center>'
+			+get_step_part_string('`'+ineq+'`', next_step_to_write, 4)
+			+'</td><td align=left style="white-space: nowrap;">'
+			+get_step_part_string('`'+right+'`', next_step_to_write, 2)
 			+'</td></tr>');
 	next_step_to_write++;
 }
 
 function ineq_step_header(explanation, left, right, ineq)
 {
-	document.write('<center><table border=0><tr><td align=left><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right><font face=\"arial\" size=4>`'+
+	document.write('<center><table border=0><tr><td align=left><font face=\"arial\" size=4>'+
+			explanation+
+			'</font></td><td align=right><font face=\"arial\" size=4 style="white-space: nowrap;">`'+
 			left+
-			'</font></td><td align=left><font face=\"arial\" size=4>`'+ineq+right+'`</font></td></tr>');	
+			'`</font></td><td align=center><font face=\"arial\" size=4>`'+
+			ineq+
+			'`</font></td><td align=left><font face=\"arial\" size=4 style="white-space: nowrap;">`'+
+			right+'`</font></td></tr>');	
 }
 
 ////////////////////////////
@@ -244,8 +234,6 @@ if (get_random()>get_random())
 	inequal = '<';
 	opinequal = '>';
 }
-
-
 
 //figure out the numerator and denominator for the solution
 var numerator = 0;

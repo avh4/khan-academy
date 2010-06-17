@@ -280,24 +280,20 @@ function getLCM(x,y)
 
 function format_fraction(n, d)
 {
-	var gcd = getGCD(n, d);
-	var new_numerator = n/gcd;
-	var new_denominator = d/gcd;
-	if (new_numerator== 0) {
-		return 0;
-	}
-	else if (new_denominator== 1) {
-		return new_numerator;
-	}
-	else if (new_denominator== 0) {
+	if (d == 0)
 		return "`undefined`";
-	}
-	else if (n/d < 0) {
-		return " - "+Math.abs(new_numerator)+"/"+Math.abs(new_denominator);
-	}
-	else {
-		return new_numerator+"/"+new_denominator;
-	}
+	if (n == 0)
+		return "0";
+	var sign = (n/d < 0) ? " - " : "";
+	n = Math.abs(n);
+	d = Math.abs(d);
+	var gcd = getGCD(n, d);
+	n = n/gcd;
+	d = d/gcd;
+	var fraction = sign + n;
+	if (d > 1)
+		fraction = fraction + "/"+d;
+	return fraction;
 }
 
 function format_fraction_with_sign(n, d)
