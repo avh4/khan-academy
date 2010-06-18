@@ -218,7 +218,8 @@ function type2() {
 
 	correctAnswer = Math.round(speed*scale*1000)/1000;
 	correct_answer= "`" + commaFormat(correctAnswer) + "`";
-	for(var i=0; i<10; i++)
+	var nWrongChoices = 5;
+	while (nWrongChoices > 0)
 	{
 	
 		var j = getRandomIntRange(0, sdMeasure.length-1);
@@ -238,10 +239,15 @@ function type2() {
 		}
 	
 		if (tempWrong!=correctAnswer && tempWrong>.001 && tempWrong<1000000)
+		{
 			addWrongChoice('`'+commaFormat(Math.round(tempWrong*1000)/1000)+'`');
+			nWrongChoices--;
+		}
 	
 	}
 	write_step(distanceString);
+	numString = "<span style='white-space: nowrap;'>" + numString + "</span>";
+	denString = "<span style='white-space: nowrap;'>" + denString + "</span>";
 	write_step("<table border=0><tr><td>= </td><td>"+fraction(numString, denString)+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
 	write_step("<table border=0><tr><td>= </td><td>"+correct_answer+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
 }
