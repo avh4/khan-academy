@@ -731,6 +731,93 @@ class CreateEditQuestion(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect(users.create_login_url(self.request.uri))
+    #replicating the functionality described in "get" in "post".  Should clean this up in the future
+    #but I just wanted it to be able to process longer fields (so they wouldn't have to be in the URL).
+    def post(self):
+    	user = users.get_current_user()
+
+        # This if/then clause just makes sure that the user is logged in
+
+        if user:
+            url = users.create_logout_url(self.request.uri)
+            url_linktext = 'Logout'
+
+            # If we are creating a new question, we need the subject
+
+            subject_key = self.request.get('subject_key')
+
+            # If we are editing/updating a previously created question, we need to be passed the key
+
+            question_key = self.request.get('question_key')
+
+            # If question_text is set, then we have to update the question
+
+            question_text = self.request.get('question_text')
+
+            # if true, then update the question and forward to viewquestion
+
+            if question_text:
+                question = db.get(question_key)
+                if question.author == user:  # This here to make sure that someone can't hack someone else's question
+                    question.question_text = question_text
+                    question.correct_choice_text = self.request.get('correct_choice_text')
+                    question.incorrect_1 = self.request.get('incorrect_1')
+                    question.incorrect_2 = self.request.get('incorrect_2')
+                    question.incorrect_3 = self.request.get('incorrect_3')
+                    question.incorrect_4 = self.request.get('incorrect_4')
+                    question.incorrect_5 = self.request.get('incorrect_5')
+                    question.answer_text = self.request.get('answer_text')
+                    question.hint_text = self.request.get('hint_text')
+                    question.not_completed = False
+                    question.put()
+                    self.redirect('/qbrary')
+
+            # If we have a key, then we can retrieve the question; otherwise
+            # need to create a new one
+
+            if question_key:
+                question = db.get(question_key)
+                mode_text = 'Edit Question'
+                button_text = 'Save Updates'
+                message_text = ' '
+            else:
+
+                question = Question(author=user)
+                question.not_completed = True
+                question.subject = db.get(subject_key)
+                question.question_text = ''
+                question.correct_choice_text = ''
+                question.incorrect_1 = ''
+                question.incorrect_2 = ''
+                question.incorrect_3 = ''
+                question.incorrect_4 = ''
+                question.incorrect_5 = ''
+                question.answer_text = ''
+                question.hint_text = ''
+                question.put()
+                mode_text = 'Add Question'
+                button_text = 'Create Question'
+                message_text = 'Step 2: Write the question...'
+
+            bc = breadcrumb(question.subject)
+
+            root = Subject.gql('WHERE parent_subject=:1', None).get()
+            subjects = Subject.gql('WHERE parent_subject = :1', root)
+            greeting = 'user: %s [<a href="%s">sign out</a>]' % (user.nickname(), users.create_logout_url('/'))
+
+            template_values = {
+                'question': question,
+                'breadcrumb': bc,
+                'message_text': message_text,
+                'subjects': subjects,
+                'greeting': greeting,
+                'button_text': button_text,
+                'mode_text': mode_text,
+                }
+            path = os.path.join(os.path.dirname(__file__), 'editquestion.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
 
 
 class CheckAnswer(webapp.RequestHandler):
