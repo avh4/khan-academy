@@ -116,7 +116,7 @@ function type1() {
 
 	write_text("How many "+u2+" are equivalent to "+commaFormat(quant1)+" "+u1+"?");
 	correctAnswer = Math.round(multiplier[pref1]*quant1*1000000/multiplier[pref2])/1000000;
-	correct_answer= commaFormat(Math.round(multiplier[pref1]*quant1*1000000/multiplier[pref2])/1000000);
+	correct_answer= "`" + commaFormat(correctAnswer) + "`";
 	for(var i=-6; i<6; i++)
 	{
 		var possible = Math.round(correctAnswer*Math.pow(10,i)*1000000)/1000000;
@@ -130,7 +130,7 @@ function type1() {
 	if (pref2!=3)
 		write_step("1 "+su+" = "+(1/multiplier[pref2])+" "+u2);
 	write_step(quant1+" "+u1+" x "+commaFormat(multiplier[pref1])+" "+u+"/"+prefixes[pref1]+su+" x "+commaFormat(1/multiplier[pref2])+" "+u2+"/"+su+" = ?");
-	write_step(quant1+" "+u1+" x "+commaFormat(multiplier[pref1])+" "+u+"/"+prefixes[pref1]+su+" x "+commaFormat(1/multiplier[pref2])+" "+u2+"/"+su+" = "+commaFormat(correctAnswer)+" "+u2);
+	write_step(quant1+" "+u1+" x "+commaFormat(multiplier[pref1])+" "+u+"/"+prefixes[pref1]+su+" x "+commaFormat(1/multiplier[pref2])+" "+u2+"/"+su+" = "+correct_answer+" "+u2);
 	
 }
 
@@ -217,16 +217,16 @@ function type2() {
 	distanceString +="</tr></table>";
 
 	correctAnswer = Math.round(speed*scale*1000)/1000;
-	correct_answer = Math.round(speed*scale*1000)/1000;
+	correct_answer= "`" + commaFormat(correctAnswer) + "`";
 	for(var i=0; i<10; i++)
 	{
 	
 		var j = getRandomIntRange(0, sdMeasure.length-1);
 		var k = getRandomIntRange(0, tMeasure.length-1);
-		var tempWrong = dMultiplier[j]*correct_answer;
+		var tempWrong = dMultiplier[j]*correctAnswer;
 
 		if (Math.random()>Math.random())
-			tempWrong = correct_answer/dMultiplier[j];
+			tempWrong = correctAnswer/dMultiplier[j];
 
 		if (Math.random()>Math.random())
 		{
@@ -237,13 +237,13 @@ function type2() {
 			tempWrong = tempWrong / tMultiplier[k];
 		}
 	
-		if (tempWrong!=correct_answer && tempWrong>.001 && tempWrong<1000000)
+		if (tempWrong!=correctAnswer && tempWrong>.001 && tempWrong<1000000)
 			addWrongChoice('`'+commaFormat(Math.round(tempWrong*1000)/1000)+'`');
 	
 	}
 	write_step(distanceString);
 	write_step("<table border=0><tr><td>= </td><td>"+fraction(numString, denString)+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
-	write_step("<table border=0><tr><td>= </td><td>"+commaFormat(correctAnswer)+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
+	write_step("<table border=0><tr><td>= </td><td>"+correct_answer+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
 }
 
 eval("type"+getRandomIntRange(1,2)+"()");  //Randomly choose a problem type
