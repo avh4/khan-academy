@@ -34,13 +34,16 @@ function checkHistory(compareFunction, entryFunction, termFunction, historyLengt
 {
 	entryFunction();	
 	var recentNums = readCookie(currentexercise+'_'+username);
-
 	//alert([recentNums, term1, term2]);
 
 	if (recentNums!=null)
 	{
-	
-		while (cFunction(recentNums))
+		// We only try historyLength times to prevent buggy callers
+		// from generating an infinite loop if their compareFunction
+		// always returns true.  See:
+		// http://code.google.com/p/khanacademy/issues/detail?id=49
+		var tries = 0;
+		while (tries++ < historyLength && compareFunction(recentNums))
 		{
 			//alert([recentNums, term1, term2]);
 			entryFunction();

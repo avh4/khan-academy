@@ -1,6 +1,6 @@
 {% extends "arithmetic_template.html" %}
 {% block maincode %}
-<script language=Javascript1.2><!--
+<script type="text/javascript"><!--
 
 var base = 0;
 var exp = 1;
@@ -18,7 +18,7 @@ var eFunction = function()
 
 var cFunction = function(history)
 {
-	return (history.indexOf(base)!=-1);
+	return (history.split("|").indexOf(base)!=-1);
 }
 
 var tFunction = function()
