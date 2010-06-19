@@ -175,31 +175,25 @@ function arraySum(a)
 	return array_sum(a);
 }
 
-
-function checkFreeAnswer()
+var correctnessRegistered = false;
+function handleCorrectness(isCorrect)
 {
-	var usersAnswer = parseFloat(document.getElementById("answer").value);
-	if (isNaN(usersAnswer)) 
+	if (!correctnessRegistered) 
 	{
-			window.alert("Your answer is not a number.  Please try again.");
-			return;
-	}
-	var isCorrect = (usersAnswer==parseFloat(correctAnswer));
-
-	// Attempt to register the correctness of the answer with the server, before telling the user 
-	// whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
-	// avoid blowing a streak when he gets a wrong answer.  If the attempt to register the correctness fails,
-	// we don't worry about it because they might just be having connectivity problems or need to log in again.
-	// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
-	// but it takes longer and is more noticeable.
-
-	$.post("/registercorrectness", 
-		{
-			key: document.getElementById("key").value,
-			time_warp: document.getElementById("time_warp").value,
-			correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
-		}); // Fire and forget, no callback.
-
+		// Attempt to register the correctness of the answer with the server, before telling the user 
+		// whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
+		// avoid blowing a streak when he gets a wrong answer.  If the attempt to register the correctness fails,
+		// we don't worry about it because they might just be having connectivity problems or need to log in again.
+		// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
+		// but it takes longer and is more noticeable.
+		$.post("/registercorrectness", 
+			{
+				key: document.getElementById("key").value,
+				time_warp: document.getElementById("time_warp").value,
+				correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
+			}); // Fire and forget, no callback.
+		correctnessRegistered = true;		
+	}	
 	if (isCorrect)
 	{
 		
@@ -218,6 +212,19 @@ function checkFreeAnswer()
 		tries++;
 		document.images.feedback.src= incorrect.src;
 	}
+}
+
+function checkFreeAnswer()
+{
+	var usersAnswer = parseFloat(document.getElementById("answer").value);
+	if (isNaN(usersAnswer)) 
+	{
+			window.alert("Your answer is not a number.  Please try again.");
+			return;
+	}
+	var isCorrect = (usersAnswer==parseFloat(correctAnswer));
+
+	handleCorrectness(isCorrect);
 }
 
 function graphFooter()

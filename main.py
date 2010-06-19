@@ -33,10 +33,11 @@ class UserExercise(db.Model):
         return review_interval
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
-        if self.streak + correct < 10:
+        # if the user is not now and never has been proficient, don't schedule a review
+        if (self.streak + correct) < 10 and self.longest_streak < 10:
             return
         review_interval = self.get_review_interval()
-        if correct and self.streak >= 10 and self.last_review != datetime.datetime.min:
+        if correct and self.last_review != datetime.datetime.min:
             time_since_last_review = now - self.last_review
             if time_since_last_review >= review_interval:
                 review_interval = time_since_last_review * 2
@@ -47,7 +48,26 @@ class UserExercise(db.Model):
         else:
             self.last_review = datetime.datetime.min
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
-
+        
+    def set_proficient(self, proficient):
+        if not proficient and self.longest_streak < 10:
+            # Not proficient and never has been so nothing to do
+            return
+        query = UserData.all()
+        query.filter('user =', self.user)
+        user_data = query.get()
+        if user_data is None:
+            user_data = UserData(user=self.user, last_login=datetime.datetime.now(), proficient_exercises=[], suggested_exercises=[], assigned_exercises=[])
+        if proficient:
+            if self.exercise not in user_data.proficient_exercises:
+                    user_data.proficient_exercises.append(self.exercise)
+                    user_data.need_to_reassess = True
+                    user_data.put()
+        else:
+            if self.exercise in user_data.proficient_exercises:
+                    user_data.proficient_exercises.remove(self.exercise)
+                    user_data.need_to_reassess = True
+                    user_data.put()
 
 class Exercise(db.Model):
 
@@ -151,13 +171,16 @@ class ExerciseGraph(object):
     def get_review_exercises(self, now):
 
 # An exercise ex should be reviewed iff all of the following are true:
-#   * It and all of its covering ancestors have are scheduled to have their next review in the past
+#   * ex and all of ex's covering ancestors either
+#      * are scheduled to have their next review in the past, or
+#      * were answered incorrectly on last review (i.e. streak == 0 with proficient == True)
 #   * None of ex's covering ancestors should be reviewed
 #   * The user is proficient at ex
 # The algorithm:
 #   For each exercise:
-#     traverse it's ancestors, computing and storing the most recent successful review if not already done
-#   Select and mark the exercises in which the user is proficient but were last reviewed too long ago as review candidates
+#     traverse it's ancestors, computing and storing the next review time (if not already done), 
+#     using now as the next review time if proficient and streak==0
+#   Select and mark the exercises in which the user is proficient but with next review times in the past as review candidates
 #   For each of those candidates:
 #     traverse it's ancestors, computing and storing whether an ancestor is also a candidate
 #   All exercises that are candidates but do not have ancestors as candidates should be listed for review
@@ -167,6 +190,8 @@ class ExerciseGraph(object):
                 ex.next_review = datetime.datetime.min
                 if ex.user_exercise is not None and ex.user_exercise.last_review > datetime.datetime.min:
                     next_review = ex.user_exercise.last_review + ex.user_exercise.get_review_interval()
+                    if next_review > now and ex.proficient and ex.user_exercise.streak == 0:
+                        next_review = now
                     if next_review > ex.next_review:
                         ex.next_review = next_review
                 for c in ex.coverers:
@@ -186,7 +211,7 @@ class ExerciseGraph(object):
             compute_next_review(ex)
         review_candidates = []
         for ex in self.exercises:
-            if ex.user_exercise is not None and ex.user_exercise.streak >= 10 and ex.next_review < now:
+            if ex.proficient and ex.next_review <= now:
                 ex.is_review_candidate = True
                 review_candidates.append(ex)
             else:
@@ -325,7 +350,6 @@ class ViewExercise(webapp.RequestHandler):
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
-            proficient = self.request.get('proficient')
             time_warp = self.request.get('time_warp')
 
             query = UserExercise.all()
@@ -361,12 +385,25 @@ class ViewExercise(webapp.RequestHandler):
                     )
                 userExercise.put()
 
+            proficient = False
+            endangered = False
+            reviewing = False
+            if exercise.name in user_data.proficient_exercises:
+                proficient = True
+                if (userExercise.last_review > datetime.datetime.min and
+                    userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
+                    reviewing = True
+                if userExercise.streak == 0:
+                    endangered = True
+
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
                 'username': user.nickname(),
                 'points': user_data.points,
                 'proficient': proficient,
+                'endangered': endangered,
+                'reviewing': reviewing,
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': userExercise.key(),
                 'exercise': exercise,
@@ -385,6 +422,9 @@ class ViewExercise(webapp.RequestHandler):
         else:
 
             self.redirect(users.create_login_url(self.request.uri))
+    def get_time(self):
+        time_warp = int(self.request.get('time_warp') or '0')
+        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 
 class ViewVideo(webapp.RequestHandler):
@@ -1143,32 +1183,26 @@ class RegisterAnswer(webapp.RequestHandler):
                 userExercise.total_done = userExercise.total_done + 1
             else:
                 userExercise.total_done = 1
-            now_proficient_string = ''
             userExercise.schedule_review(correct == 1, self.get_time())
             if correct == 1:
                 userExercise.streak = userExercise.streak + 1
                 if userExercise.streak > userExercise.longest_streak:
                     userExercise.longest_streak = userExercise.streak
-                if userExercise.streak >= 10:
-                    now_proficient_string = '&proficient=1'
                 if userExercise.streak == 10:
-                    query = UserData.all()
-                    query.filter('user =', user)
-                    user_data = query.get()
-                    if user_data is None:
-                        user_data = UserData(user=user, last_login=datetime.datetime.now(), proficient_exercises=[], suggested_exercises=[], assigned_exercises=[])
-
-                    if userExercise.exercise not in user_data.proficient_exercises:
-                        user_data.proficient_exercises.append(userExercise.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
+                    userExercise.set_proficient(True)
             else:
-
+                # Can't do the following here because RegisterCorrectness() already
+                # set streak = 0.
+                # if userExercise.streak == 0:
+                    # 2+ in a row wrong -> not proficient
+                    # userExercise.set_proficient(False)
+                
+                # Just in case RegisterCorrectness didn't get called.
                 userExercise.streak = 0
 
             userExercise.put()
 
-            self.redirect('/exercises?exid=' + exid + now_proficient_string)
+            self.redirect('/exercises?exid=' + exid)
         else:
             self.redirect(users.create_login_url(self.request.uri))
 
@@ -1192,6 +1226,9 @@ class RegisterCorrectness(webapp.RequestHandler):
             userExercise = db.get(key)
             userExercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
+                if userExercise.streak == 0:
+                    # 2+ in a row wrong -> not proficient
+                    userExercise.set_proficient(False)
                 userExercise.streak = 0
             userExercise.put()
         else:

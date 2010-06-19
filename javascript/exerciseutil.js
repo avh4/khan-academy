@@ -491,25 +491,8 @@ function check_answer()
 			return;
 	}
 
-	if (selectedchoice==correctchoice)
-	{
-		if (tries==0 && steps_given==0)
-		{
-			document.getElementById("correct").value="1"
-		}
-		document.images.feedback.src = correct.src;
-		//new_question();
-		document.getElementById("nextbutton").style.visibility = 'visible';
-		eraseCookie(notDoneCookie);
-		
-		
-	}
-	else
-	{
-		tries++;
-		document.images.feedback.src= incorrect.src;
-		
-	}
+	var isCorrect = (selectedchoice==correctchoice)
+	handleCorrectness(isCorrect);
 }
 
 //for problems where the user can give 2 answers
@@ -521,21 +504,8 @@ function check_both_answers()
 			return;
 	}
 
-	if (selectedchoice==correctchoice  && selectedchoice2==correctchoice2)
-	{
-		document.getElementById("nextbutton").style.visibility = 'visible';
-		document.images.feedback.src = correct.src;
-		if (tries==0 && steps_given==0)
-		{
-			document.getElementById("correct").value="1"
-		}
-	}
-	else
-	{
-		tries++;
-		document.images.feedback.src= incorrect.src;
-	
-	}
+	var isCorrect = (selectedchoice==correctchoice  && selectedchoice2==correctchoice2);
+	handleCorrectness(isCorrect);
 }
 
 
