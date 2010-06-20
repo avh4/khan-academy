@@ -88,6 +88,29 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
+    
+    def assess_if_necessary(self):
+        if self.need_to_reassess is False:
+            return
+    
+        query = Exercise.all()
+        exercises = query.fetch(200)
+
+        suggested = []
+        proficient = self.proficient_exercises
+        covered_by_proficient = self.proficient_exercises
+        for exercise in exercises:
+            all_prerequisites_covered = True
+            if exercise.name not in covered_by_proficient:
+                for prerequisite in exercise.prerequisites:
+                    if prerequisite not in covered_by_proficient:
+                        all_prerequisites_covered = False
+                        break
+                if all_prerequisites_covered:
+                    suggested.append(exercise.name)
+        self.suggested_exercises = suggested
+        self.need_to_reassess = False
+        self.put()
 
 
 class Video(db.Model):
@@ -614,9 +637,8 @@ class ViewMapExercises(webapp.RequestHandler):
                     )
                 user_data.put()
 
-            if user_data.need_to_reassess is True:
-                self.redirect('/assessuser')
-
+            user_data.assess_if_necessary()
+            
             query = UserExercise.all()
             query.filter('user =', user)
             user_exercises = query.fetch(200)
@@ -706,9 +728,8 @@ class ViewAllExercises(webapp.RequestHandler):
                     )
                 user_data.put()
 
-            if user_data.need_to_reassess is True:
-                self.redirect('/assessuser')
-
+            user_data.assess_if_necessary()
+            
             query = UserExercise.all()
             query.filter('user =', user)
             user_exercises = query.fetch(200)
@@ -997,58 +1018,6 @@ class GraphPage(webapp.RequestHandler):
 
         path = os.path.join(os.path.dirname(__file__), 'graphpage.html')
         self.response.out.write(template.render(path, template_values))
-
-
-class AssessUser(webapp.RequestHandler):
-
-    def noRepeatListMerge(self, a, b):
-        for x in a:
-            if x not in b:
-                b.append(x)
-        return b
-
-    def getCoveredSubjects(self, exercise, exercise_list):
-        covers = exercise.covers
-        for covered_exid in covers:
-            for e in exercise_list:
-                if e.name == covered_exid:
-                    covers = self.noRepeatListMerge(covers, self.getCoveredSubjects(e, exercise_list))
-                    break
-        return covers
-
-    def get(self):
-        user = users.get_current_user()
-        if user:
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-
-            if user_data is None:
-                user_data = UserData(user=user, last_login=datetime.datetime.now(), proficient_exercises=[], suggested_exercises=[], assigned_exercises=[])
-
-            query = Exercise.all()
-            exercises = query.fetch(200)
-
-            suggested = []
-            proficient = user_data.proficient_exercises
-            covered_by_proficient = user_data.proficient_exercises
-            for exercise in exercises:
-                all_prerequisites_covered = True
-                if exercise.name not in covered_by_proficient:
-                    for prerequisite in exercise.prerequisites:
-                        if prerequisite not in covered_by_proficient:
-                            all_prerequisites_covered = False
-                            break
-                    if all_prerequisites_covered:
-                        suggested.append(exercise.name)
-            user_data.suggested_exercises = suggested
-            user_data.need_to_reassess = False
-            user_data.put()
-
-            self.redirect('/')
-        else:
-            self.redirect(users.create_login_url(self.request.uri))
-
 
 class TestAssessUser(webapp.RequestHandler):
 
@@ -1346,7 +1315,6 @@ def main():
         ('/library', ViewVideoLibrary),
         ('/syncvideodata', UpdateVideoData),
         ('/exercises', ViewExercise),
-        ('/assessuser', AssessUser),
         ('/testassess', TestAssessUser),
         ('/editexercise', EditExercise),
         ('/viewexercisevideos', ViewExerciseVideos),
