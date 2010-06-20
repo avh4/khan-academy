@@ -97,8 +97,6 @@ function type1()
 	addWrongChoice('sqrt('+r+')');
 	addWrongChoice(''+getRandomIntRange(1,20));
 	drawFunction = circleFunction;
-	correct_answer = '`'+correct_answer+'`';
-	//problem_footer();	
 }
 
 function type2()  
@@ -124,8 +122,6 @@ function type2()
 	addWrongChoice('sqrt('+r+')');
 	addWrongChoice(''+getRandomIntRange(1,20));
 	drawFunction = circleFunction;
-	correct_answer = '`'+correct_answer+'`';
-	//problem_footer();	
 }
 
 
@@ -151,9 +147,7 @@ function type3()
 	addWrongChoice(4*r);
 	addWrongChoice('sqrt('+r+')');
 	addWrongChoice(''+getRandomIntRange(1,20));
-	correct_answer = '`'+correct_answer+'`';
 	drawFunction = circleFunction;
-	//problem_footer();	
 }
 
 function type4()  
@@ -179,8 +173,6 @@ function type4()
 	addWrongChoice('sqrt('+r+')');
 	addWrongChoice(''+getRandomIntRange(1,20));
 	drawFunction = circleFunction;
-	correct_answer = '`'+correct_answer+'`';
-	//problem_footer();	
 }
 
 function type5()  
@@ -206,8 +198,6 @@ function type5()
 	addWrongChoice('sqrt('+l+')');
 	addWrongChoice(''+getRandomIntRange(1,20));
 	drawFunction = rectFunction;
-	correct_answer = '`'+correct_answer+'`';
-	//problem_footer();	
 }
 
 function type6()  
@@ -234,8 +224,6 @@ function type6()
 	addWrongChoice(''+getRandomIntRange(1,20));
 	addWrongChoice(''+getRandomIntRange(1,20));
 	drawFunction = triangleFunction;
-	correct_answer = '`'+correct_answer+'`';
-	//problem_footer();	
 }
 
 function overline(x)
@@ -278,7 +266,6 @@ var tFunction = function() {
 checkHistory(cFunction, eFunction, tFunction, 4);
 
 eval('type'+problemType+'()');
-
 
 
 //-->
