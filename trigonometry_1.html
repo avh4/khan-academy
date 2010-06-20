@@ -8,7 +8,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 function trigTriangle()
 {
-		
+	var triangle = this;
+	generateNewProblem(function() {
+		triangle.adjLength = getRandomIntRange(3,10);
+		triangle.opLength = getRandomIntRange(3,10);
+		return 	triangle.adjLength + "/" + triangle.opLength;
+	});
 	this.adjLength = getRandomIntRange(3,10);
 	this.opLength = getRandomIntRange(3,10);
 	this.tanValue = formatFraction(this.opLength, this.adjLength);

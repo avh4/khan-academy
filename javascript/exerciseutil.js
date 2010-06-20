@@ -30,6 +30,7 @@ var incorrect = new Image();
 incorrect.src = "/images/face-sad.gif";
 
 
+// Deprecated: Use generateRandomProblem (below) instead.
 function checkHistory(compareFunction, entryFunction, termFunction, historyLength)
 {
 	entryFunction();	
@@ -59,6 +60,35 @@ function checkHistory(compareFunction, entryFunction, termFunction, historyLengt
 
 	recentNums = newTerm+recentNums;
 	createCookie(currentexercise+'_'+username, recentNums.substring(0,historyLength*newTerm.length), 10);
+}
+
+// Calls randomProblemGenerator until it returns a problem id that hasn't been used recently. 
+function generateNewProblem(randomProblemGenerator, historyLength)
+{
+	if (!historyLength)
+		historyLength = 10;
+	id = randomProblemGenerator();	
+	var cookieValue = readCookie(currentexercise+'_'+username);
+	var recentIds = [];
+	if (cookieValue != null)
+		recentIds = cookieValue.split("|");
+	// We only try 10 times to prevent buggy callers
+	// from generating an infinite loop if their randomProblemGenerator
+	// always returns true.  See:
+	// http://code.google.com/p/khanacademy/issues/detail?id=49
+	var tries = 0;
+	while (tries++ < 10 && recentIds.indexOf(id) != -1)
+	{
+		id = randomProblemGenerator();
+	}
+
+	if (recentIds.indexOf(id) == -1)
+	{
+		recentIds.push(id);		
+	}
+	recentIds = recentIds.slice(-historyLength);
+	cookieValue = recentIds.join("|");
+	createCookie(currentexercise+'_'+username, cookieValue, 10);
 }
 
 function createCookie(name,value,days) {
