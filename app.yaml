@@ -2,6 +2,7 @@ application: khanexercises
 version: 1
 runtime: python
 api_version: 1
+default_expiration: "14d"
 
 handlers:
 - url: /stylesheets
