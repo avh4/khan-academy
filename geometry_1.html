@@ -74,9 +74,9 @@ var triangleFunction = function drawTriangle()
 }
 	
 
-function type1()  
+function type1()
 {
-	var r = getRandomIntRange(1,9);
+	var r = getRandomIntRange(2,9);
 	var C = format_first_coefficient(2*r)+'&pi;';
 	toDraw['C']= true;
 	toDraw['r']= true;
@@ -101,7 +101,7 @@ function type1()
 
 function type2()  
 {
-	var r = getRandomIntRange(1,9);
+	var r = getRandomIntRange(2,9);
 	var C = format_first_coefficient(2*r)+'&pi;';
 	toDraw['C']= true;
 	toDraw['r']= true;
@@ -127,7 +127,7 @@ function type2()
 
 function type3()  
 {
-	var r = getRandomIntRange(1,9);
+	var r = getRandomIntRange(2,9);
 	var A = format_first_coefficient(r*r)+'&pi;';
 	toDraw['A']= true;
 	toDraw['r']= true;
@@ -152,7 +152,7 @@ function type3()
 
 function type4()  
 {
-	var r = getRandomIntRange(1,9);
+	var r = getRandomIntRange(2,9);
 	var A = format_first_coefficient(r*r)+'&pi;';
 	toDraw['A']= true;
 	toDraw['r']= true;
@@ -177,7 +177,7 @@ function type4()
 
 function type5()  
 {
-	var w = getRandomIntRange(1,9);
+	var w = getRandomIntRange(2,9);
 	var l = w+getRandomIntRange(1,3);
 	var A = l*w;
 	problem_header();
