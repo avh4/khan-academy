@@ -10,6 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+from google.appengine.api import memcache
 import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
@@ -27,6 +28,23 @@ class UserExercise(db.Model):
     total_done = db.IntegerProperty()
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=86400)
+
+    _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
+    @staticmethod
+    def get_for_user_use_cache(user):
+        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % user.nickname()
+        user_exercises = memcache.get(user_exercises_key)
+        if user_exercises is None:
+            query = UserExercise.all()
+            query.filter('user =', user)
+            user_exercises = query.fetch(200)
+            memcache.set(user_exercises_key, user_exercises)
+        return user_exercises
+    
+    def put(self):
+        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % self.user.nickname()
+        memcache.delete(user_exercises_key)
+        db.Model.put(self)
     
     def get_review_interval(self):
         review_interval = datetime.timedelta(seconds=self.review_interval_secs)
@@ -76,6 +94,20 @@ class Exercise(db.Model):
     covers = db.StringListProperty()
     v_position = db.IntegerProperty()
     h_position = db.IntegerProperty()
+    
+    _EXERCISES_KEY = "Exercise.all()"    
+    @staticmethod
+    def get_all_use_cache():
+        exercises = memcache.get(Exercise._EXERCISES_KEY)
+        if exercises is None:
+            query = Exercise.all().order('h_position')
+            exercises = query.fetch(200)
+            memcache.set(Exercise._EXERCISES_KEY, exercises)
+        return exercises
+
+    def put(self):
+        memcache.delete(Exercise._EXERCISES_KEY)
+        db.Model.put(self)
 
 
 class UserData(db.Model):
@@ -83,35 +115,41 @@ class UserData(db.Model):
     user = db.UserProperty()
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
-    proficient_exercises = db.StringListProperty()
+    proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
+    all_proficient_exercises = db.StringListProperty() # Names of all exercises in which the user is proficient    
     suggested_exercises = db.StringListProperty()
     assigned_exercises = db.StringListProperty()
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
     
-    def assess_if_necessary(self):
-        if self.need_to_reassess is False:
-            return
-    
-        query = Exercise.all()
-        exercises = query.fetch(200)
-
-        suggested = []
-        proficient = self.proficient_exercises
-        covered_by_proficient = self.proficient_exercises
-        for exercise in exercises:
-            all_prerequisites_covered = True
-            if exercise.name not in covered_by_proficient:
-                for prerequisite in exercise.prerequisites:
-                    if prerequisite not in covered_by_proficient:
-                        all_prerequisites_covered = False
-                        break
-                if all_prerequisites_covered:
-                    suggested.append(exercise.name)
-        self.suggested_exercises = suggested
+    def reassess_from_graph(self, ex_graph):
+        all_proficient_exercises = []
+        for ex in ex_graph.get_proficient_exercises():
+            all_proficient_exercises.append(ex.name)
+        suggested_exercises = []
+        for ex in ex_graph.get_suggested_exercises():
+            suggested_exercises.append(ex.name)
+        is_changed = (all_proficient_exercises != self.all_proficient_exercises or 
+                      suggested_exercises != self.suggested_exercises)
+        self.all_proficient_exercises = all_proficient_exercises
+        self.suggested_exercises = suggested_exercises
         self.need_to_reassess = False
-        self.put()
-
+        return is_changed
+    
+    def reassess_if_necessary(self):
+        if not self.need_to_reassess or self.all_proficient_exercises is None:
+            return
+        ex_graph = ExerciseGraph(self)
+        self.reassess_from_graph(ex_graph)
+        
+    def is_proficient_at(self, exid):
+        self.reassess_if_necessary()
+        return (exid in self.all_proficient_exercises)
+        
+    def is_suggested(self, exid):
+        self.reassess_if_necessary()
+        return (exid in self.suggested_exercises)
+    
 
 class Video(db.Model):
 
@@ -172,24 +210,87 @@ class ExercisePlaylist(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, exercises, user_exercises):
+    def __init__(self, user_data):
+#        addition_1 = Exercise(name="addition_1", covers=[], prerequisites=[], v_position = 1, h_position = 1)
+#        addition_1.suggested = addition_1.proficient = False
+#        self.exercises = [addition_1]
+#        self.exercise_by_name = {"addition_1": addition_1}
+#        return
+
+        user_exercises = UserExercise.get_for_user_use_cache(users.get_current_user())
+        exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
-        exercise_by_name = {}
+        self.exercise_by_name = {}        
         for ex in exercises:
-            exercise_by_name[ex.name] = ex
+            self.exercise_by_name[ex.name] = ex
             ex.coverers = []
             ex.user_exercise = None
             ex.next_review = None  # Not set initially
             ex.is_review_candidate = False
             ex.is_ancestor_review_candidate = None  # Not set initially
+            ex.proficient = None # Not set initially
+            ex.suggested = None # Note set initially
+            ex.assigned = False
+            ex.streak = 0
+        for name in user_data.proficient_exercises:
+            ex = self.exercise_by_name.get(name)
+            if ex:
+                ex.proficient = True
+        for name in user_data.assigned_exercises:
+            ex = self.exercise_by_name.get(name)
+            if ex:
+                ex.assigned = True
         for ex in exercises:
             for covered in ex.covers:
-                exercise_by_name[covered].coverers.append(ex)
+                self.exercise_by_name[covered].coverers.append(ex)
             ex.prerequisites_ex = []
             for prereq in ex.prerequisites:
-                ex.prerequisites_ex.append(exercise_by_name[prereq])
-        for ex in user_exercises:
-            exercise_by_name[ex.exercise].user_exercise = ex
+                ex.prerequisites_ex.append(self.exercise_by_name[prereq])
+        for user_ex in user_exercises:
+            ex = self.exercise_by_name.get(user_ex.exercise)
+            if ex:
+                ex.user_exercise = user_ex
+                ex.streak = user_ex.streak
+                ex.longest_streak = user_ex.longest_streak
+                ex.total_done = user_ex.total_done
+                ex.streakwidth = min(200, 20 * ex.streak)
+
+        def compute_proficient(ex):
+            # Consider an exercise proficient if it or a covering ancestor is proficient
+            if ex.proficient is not None:
+                return ex.proficient
+            ex.proficient = False
+            for c in ex.coverers:
+                if compute_proficient(c) is True:
+                    ex.proficient = True
+                    break
+            return ex.proficient
+
+        for ex in exercises:
+            compute_proficient(ex)
+            
+        def compute_suggested(ex):
+            if ex.suggested is not None:
+                return ex.suggested
+            if ex.proficient is True:
+                ex.suggested = False
+                return ex.suggested
+            ex.suggested = True
+            # Don't suggest exs that are covered by suggested exs
+            for c in ex.coverers:
+                if compute_suggested(c) is True:
+                    ex.suggested = False
+                    return ex.suggested
+            # Don't suggest exs if the user isn't proficient in all prereqs
+            for prereq in ex.prerequisites_ex:
+                if not prereq.proficient:
+                    ex.suggested = False
+                    break            
+            return ex.suggested 
+            
+        for ex in exercises:
+            compute_suggested(ex)
+            ex.points = PointCalculator(ex.streak, ex.suggested, ex.proficient)            
 
     def get_review_exercises(self, now):
 
@@ -244,6 +345,23 @@ class ExerciseGraph(object):
             if not compute_is_ancestor_review_candidate(rc):
                 review_exercises.append(rc)
         return review_exercises
+    
+    def get_proficient_exercises(self):
+        proficient_exercises = []
+        for ex in self.exercises:
+            if ex.proficient:
+                proficient_exercises.append(ex)
+        return proficient_exercises
+    
+    def get_suggested_exercises(self):
+        # Mark an exercise as proficient if it or a a covering ancestor is proficient
+        # Select all the exercises where the user is not proficient but the 
+        # user is proficient in all prereqs.
+        suggested_exercises = []
+        for ex in self.exercises:
+            if ex.suggested:
+                suggested_exercises.append(ex)
+        return suggested_exercises        
 
 
 def PointCalculator(streak, suggested, proficient):
@@ -383,6 +501,16 @@ class ViewExercise(webapp.RequestHandler):
             query = UserData.all()
             query.filter('user =', user)
             user_data = query.get()
+            if user_data is None:
+                user_data = UserData(
+                    user=user,
+                    last_login=datetime.datetime.now(),
+                    proficient_exercises=[],
+                    suggested_exercises=[],
+                    assigned_exercises=[],
+                    need_to_reassess=True,
+                    points=0,
+                    )
 
             query = Exercise.all()
             query.filter('name =', exid)
@@ -411,7 +539,7 @@ class ViewExercise(webapp.RequestHandler):
             proficient = False
             endangered = False
             reviewing = False
-            if exercise.name in user_data.proficient_exercises:
+            if user_data.is_proficient_at(exid):
                 proficient = True
                 if (userExercise.last_review > datetime.datetime.min and
                     userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
@@ -621,10 +749,6 @@ class ViewMapExercises(webapp.RequestHandler):
             query.filter('user =', user)
             user_data = query.get()
 
-            knowledge_map_url = '/knowledgemap?'
-            suggested_count = 0
-            proficient_count = 0
-
             if user_data is None:
                 user_data = UserData(
                     user=user,
@@ -635,59 +759,32 @@ class ViewMapExercises(webapp.RequestHandler):
                     need_to_reassess=True,
                     points=0,
                     )
-                user_data.put()
-
-            user_data.assess_if_necessary()
             
-            query = UserExercise.all()
-            query.filter('user =', user)
-            user_exercises = query.fetch(200)
-
-            query = Exercise.all().order('h_position')
-            exercises = query.fetch(200)
-            suggested_exercises = []
-            for exercise in exercises:
+            knowledge_map_url = '/knowledgemap?'
+            
+            def exercises_to_query_params(typeChar, exs):
+                query_params = ''
+                count = 0
+                for ex in exs:
+                    query_params += '&' + typeChar + str(count) + '=' + ex.name
+                    count = count + 1
+                return query_params
+                    
+            ex_graph = ExerciseGraph(user_data)
+            if user_data.reassess_from_graph(ex_graph):
+                user_data.put()
+            for exercise in ex_graph.exercises:
                 exercise.display_name = exercise.name.replace('_', '&nbsp;').capitalize()
-                exercise.proficient = False
-                exercise.suggested = False
-                exercise.assigned = False
-                if exercise.name in user_data.proficient_exercises:
-                    exercise.proficient = True
-                    knowledge_map_url = knowledge_map_url + '&p' + str(proficient_count) + '=' + exercise.name
-                    proficient_count = proficient_count + 1
-                if exercise.name in user_data.assigned_exercises:
-                    exercise.assigned = True
-
-                if exercise.name in user_data.suggested_exercises:
-                    exercise.suggested = True
-                    knowledge_map_url = knowledge_map_url + '&s' + str(suggested_count) + '=' + exercise.name
-                    suggested_count = suggested_count + 1
-                exercise.streak = 0
-                for user_exercise in user_exercises:
-                    if user_exercise.exercise == exercise.name:
-                        exercise.streak = user_exercise.streak
-                        exercise.longest_streak = user_exercise.longest_streak
-                        exercise.total_done = user_exercise.total_done
-                        exercise.points = PointCalculator(exercise.streak, exercise.suggested, exercise.proficient)
-                        break
-                    else:
-                        exercise.points = PointCalculator(0, exercise.suggested, exercise.proficient)
-                exercise.streakwidth = min(200, 20 * exercise.streak)
-
-                if exercise.suggested:
-                    suggested_exercises.append(exercise)
-
-            ex_graph = ExerciseGraph(exercises, user_exercises)
             review_exercises = ex_graph.get_review_exercises(self.get_time())
-            review_count = 0
-            for review_exercise in review_exercises:
-                knowledge_map_url = knowledge_map_url + '&r' + str(review_count) + '=' + review_exercise.name
-                review_count = review_count + 1
+            knowledge_map_url += exercises_to_query_params('r', review_exercises)
+            suggested_exercises = ex_graph.get_suggested_exercises()
+            knowledge_map_url += exercises_to_query_params('s', suggested_exercises)
+            knowledge_map_url += exercises_to_query_params('p', ex_graph.get_proficient_exercises())
 
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
-                'exercises': exercises,
+                'exercises': ex_graph.exercises,
                 'suggested_exercises': suggested_exercises,
                 'review_exercises': review_exercises,
                 'knowledge_map_url': knowledge_map_url,
@@ -726,53 +823,20 @@ class ViewAllExercises(webapp.RequestHandler):
                     need_to_reassess=True,
                     points=0,
                     )
-                user_data.put()
-
-            user_data.assess_if_necessary()
             
-            query = UserExercise.all()
-            query.filter('user =', user)
-            user_exercises = query.fetch(200)
-
-            query = Exercise.all().order('h_position')
-            exercises = query.fetch(200)
-            suggested_exercises = []
-            for exercise in exercises:
+            ex_graph = ExerciseGraph(user_data)
+            if user_data.reassess_from_graph(ex_graph):
+                user_data.put()
+            for exercise in ex_graph.exercises:
                 exercise.display_name = exercise.name.replace('_', ' ').capitalize()
-                exercise.proficient = False
-                exercise.suggested = False
-                exercise.assigned = False
-                if exercise.name in user_data.proficient_exercises:
-                    exercise.proficient = True
 
-                if exercise.name in user_data.assigned_exercises:
-                    exercise.assigned = True
-
-                if exercise.name in user_data.suggested_exercises:
-                    exercise.suggested = True
-
-                exercise.streak = 0
-                for user_exercise in user_exercises:
-                    if user_exercise.exercise == exercise.name:
-                        exercise.streak = user_exercise.streak
-                        exercise.longest_streak = user_exercise.longest_streak
-                        exercise.total_done = user_exercise.total_done
-                        exercise.points = PointCalculator(exercise.streak, exercise.suggested, exercise.proficient)
-                        break
-                    else:
-                        exercise.points = PointCalculator(0, exercise.suggested, exercise.proficient)
-                exercise.streakwidth = min(200, 20 * exercise.streak)
-
-                if exercise.suggested:
-                    suggested_exercises.append(exercise)
-
-            ex_graph = ExerciseGraph(exercises, user_exercises)
             review_exercises = ex_graph.get_review_exercises(self.get_time())
+            suggested_exercises = ex_graph.get_suggested_exercises()
 
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
-                'exercises': exercises,
+                'exercises': ex_graph.exercises,
                 'review_exercises': review_exercises,
                 'suggested_exercises': suggested_exercises,
                 'points': user_data.points,
@@ -783,7 +847,6 @@ class ViewAllExercises(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewexercises.html')
             self.response.out.write(template.render(path, template_values))
         else:
-
             self.redirect(users.create_login_url(self.request.uri))
 
     def get_time(self):
@@ -1019,79 +1082,6 @@ class GraphPage(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'graphpage.html')
         self.response.out.write(template.render(path, template_values))
 
-class TestAssessUser(webapp.RequestHandler):
-
-    def noRepeatListMerge(self, a, b):
-        for x in a:
-            if x not in b:
-                b.append(x)
-        return b
-
-    def getCoveredSubjects(
-        self,
-        exercise,
-        exercise_list,
-        depth,
-        ):
-
-        covers = exercise.covers
-        self.response.out.write('<P>getCoveredSubjects: ' + exercise.name)
-        self.response.out.write('<br>depth: ' + str(depth))
-        self.response.out.write('<br>covered: ' + str(covers))
-        if depth > 4:
-            return covers
-        else:
-
-            for covered_exid in covers:
-                for e in exercise_list:
-                    if e.name == covered_exid:
-                        self.response.out.write('<br>' + e.name + ' covers ' + str(e.covers))
-                        covers = self.noRepeatListMerge(covers, self.getCoveredSubjects(e, exercise_list, depth + 1))
-                        break
-            return covers
-
-    def get(self):
-        self.response.out.write('<html>')
-
-        username = self.request.get('u')
-        self.response.out.write('<P><B>Test Assess</B>, username:' + username)
-        user_data = None
-        query = UserData.all()
-        for entry in query:
-            if entry.user.nickname() == username:
-                user_data = entry
-                break
-
-        query = Exercise.all()
-        exercises = query.fetch(200)
-
-        suggested = []
-        proficient = user_data.proficient_exercises
-        covered_by_proficient = user_data.proficient_exercises
-
-        for exid in proficient:
-            for e in exercises:
-                if e.name == exid:
-                    self.response.out.write('<P>' + e.name + ' covers ' + str(e.covers))
-                    new_covered = self.getCoveredSubjects(e, exercises, 0)
-                    self.response.out.write('<P>New Covered: ' + str(new_covered))
-                    covered_by_proficient = self.noRepeatListMerge(covered_by_proficient, new_covered)
-                    self.response.out.write('<P>Covered by proficient: ' + str(covered_by_proficient))
-                    break
-
-        for exercise in exercises:
-            all_prerequisites_covered = True
-            if exercise.name not in covered_by_proficient:
-                for prerequisite in exercise.prerequisites:
-                    if prerequisite not in covered_by_proficient:
-                        all_prerequisites_covered = False
-                        break
-                if all_prerequisites_covered:
-                    suggested.append(exercise.name)
-        user_data.suggested_exercises = suggested
-        user_data.need_to_reassess = False
-
-
 class AdminViewUser(webapp.RequestHandler):
 
     def get(self):
@@ -1141,8 +1131,10 @@ class RegisterAnswer(webapp.RequestHandler):
             query = UserData.all()
             query.filter('user =', userExercise.user)
             user_data = query.get()
-            suggested = exid in user_data.suggested_exercises
-            proficient = exid in user_data.proficient_exercises
+            
+            suggested = user_data.is_suggested(exid)
+            proficient = user_data.is_proficient_at(exid)
+                
             if user_data.points == None:
                 user_data.points = 0
             user_data.points = user_data.points + PointCalculator(userExercise.streak, suggested, proficient)
@@ -1315,7 +1307,6 @@ def main():
         ('/library', ViewVideoLibrary),
         ('/syncvideodata', UpdateVideoData),
         ('/exercises', ViewExercise),
-        ('/testassess', TestAssessUser),
         ('/editexercise', EditExercise),
         ('/viewexercisevideos', ViewExerciseVideos),
         ('/knowledgemap', KnowledgeMap),
