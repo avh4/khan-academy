@@ -211,8 +211,10 @@
           DEFAULTFAMILY: "serif", DEFAULTWEIGHT: "normal", DEFAULTSTYLE: "normal",
           DELIMITERS: {}, RULECHAR: 0x2D, REMAP: {}
         };
-        MathJax.InputJax.TeX.Definitions.macros.overline[1]  = "002D";
-        MathJax.InputJax.TeX.Definitions.macros.underline[1] = "002D";
+	if (MathJax.InputJax.TeX) {
+          MathJax.InputJax.TeX.Definitions.macros.overline[1]  = "002D";
+          MathJax.InputJax.TeX.Definitions.macros.underline[1] = "002D";
+        }
       }
     },
 
