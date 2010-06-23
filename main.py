@@ -1308,9 +1308,8 @@ class Export(webapp.RequestHandler):
 
 # A singleton shared across requests
 class App(object):
-    # This gets reset every time the app is restarted which is at
-    # least as often as the static files change.
-    start_time = datetime.datetime.now().strftime('%y%m%d%H%M%S')
+    # This gets reset every time the app is uploaded
+    mtime = time.strftime('%y%m%d%H%M%S', time.gmtime(os.stat(__file__).st_mtime))
 
 def main():
     webapp.template.register_template_library('templatefilters')
