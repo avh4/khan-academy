@@ -59,7 +59,7 @@ var Detector = function(){
 		return f;
 	}
 	function test(font){
-		f = debug(font);
+		var f = debug(font);
 		return f[3];
 	}
 	this.detailedTest = debug;
