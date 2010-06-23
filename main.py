@@ -550,6 +550,7 @@ class ViewExercise(webapp.RequestHandler):
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
+                'App' : App,
                 'username': user.nickname(),
                 'points': user_data.points,
                 'proficient': proficient,
@@ -618,7 +619,7 @@ class ViewVideo(webapp.RequestHandler):
                     if videos_in_playlist.video_position == video_playlist.video_position + 1:
                         video_playlist.next_video = videos_in_playlist.video
 
-            template_values = {'video': video, 'video_playlists': video_playlists}
+            template_values = {'App' : App, 'video': video, 'video_playlists': video_playlists}
             path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
             self.response.out.write(template.render(path, template_values))
 
@@ -655,6 +656,7 @@ class ViewExerciseVideos(webapp.RequestHandler):
                 logout_url = users.create_logout_url(self.request.uri)
 
                 template_values = {
+                    'App' : App,
                     'points': user_data.points,
                     'username': user.nickname(),
                     'logout_url': logout_url,
@@ -682,7 +684,7 @@ class ExerciseAdminPage(webapp.RequestHandler):
             for exercise in exercises:
                 exercise.display_name = exercise.name.replace('_', ' ').capitalize()
 
-            template_values = {'exercises': exercises}
+            template_values = {'App' : App, 'exercises': exercises}
 
             path = os.path.join(os.path.dirname(__file__), 'exerciseadmin.html')
             self.response.out.write(template.render(path, template_values))
@@ -715,6 +717,7 @@ class ReportIssue(webapp.RequestHandler):
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
+                'App' : App,
                 'points': user_data.points,
                 'username': user.nickname(),
                 'referer': self.request.headers.get('Referer'),
@@ -784,6 +787,7 @@ class ViewMapExercises(webapp.RequestHandler):
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
+                'App' : App,
                 'exercises': ex_graph.exercises,
                 'suggested_exercises': suggested_exercises,
                 'review_exercises': review_exercises,
@@ -836,6 +840,7 @@ class ViewAllExercises(webapp.RequestHandler):
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
+                'App' : App,
                 'exercises': ex_graph.exercises,
                 'review_exercises': review_exercises,
                 'suggested_exercises': suggested_exercises,
@@ -917,7 +922,7 @@ class KnowledgeMap(webapp.RequestHandler):
 
             logout_url = users.create_logout_url(self.request.uri)
 
-            template_values = {'exercises': exercises, 'logout_url': logout_url, 'map_height': 900}
+            template_values = {'App' : App, 'exercises': exercises, 'logout_url': logout_url, 'map_height': 900}
 
             path = os.path.join(os.path.dirname(__file__), 'knowledgemap.html')
             self.response.out.write(template.render(path, template_values))
@@ -965,6 +970,7 @@ class EditExercise(webapp.RequestHandler):
                         videos.append(playlist_video.video)
 
                 template_values = {
+                    'App' : App,
                     'exercises': exercises,
                     'exercise_playlists': exercise_playlists,
                     'all_playlists': all_playlists,
@@ -1077,7 +1083,7 @@ class GraphPage(webapp.RequestHandler):
     def get(self):
         width = self.request.get('w')
         height = self.request.get('h')
-        template_values = {'width': width, 'height': height}
+        template_values = {'App' : App, 'width': width, 'height': height}
 
         path = os.path.join(os.path.dirname(__file__), 'graphpage.html')
         self.response.out.write(template.render(path, template_values))
@@ -1099,7 +1105,7 @@ class AdminViewUser(webapp.RequestHandler):
                     exercisedata = query.fetch(300)
                     break
 
-            template_values = {'exercise_data': exercisedata, 'user_data': userdata}
+            template_values = {'App' : App, 'exercise_data': exercisedata, 'user_data': userdata}
             path = os.path.join(os.path.dirname(__file__), 'adminviewuser.html')
             self.response.out.write(template.render(path, template_values))
 
@@ -1213,7 +1219,7 @@ class ViewUsers(webapp.RequestHandler):
             self.response.out.write('Users ' + str(count))
         else:
 
-            # template_values = {'users': all_users}
+            # template_values = {'App' : App, 'users': all_users}
 
             # path = os.path.join(os.path.dirname(__file__), 'viewusers.html')
             # self.response.out.write(template.render(path, template_values))
@@ -1281,6 +1287,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
         # Separating out the columns because the formatting is a little different on each column
 
         template_values = {
+            'App' : App,
             'c1': columns[0],
             'c2': columns[1],
             'c3': columns[2],
@@ -1299,6 +1306,11 @@ class Export(webapp.RequestHandler):
         for ex in exercises:
             self.response.out.write(ex)
 
+# A singleton shared across requests
+class App(object):
+    # This gets reset every time the app is restarted which is at
+    # least as often as the static files change.
+    start_time = datetime.datetime.now().strftime('%y%m%d%H%M%S')
 
 def main():
     webapp.template.register_template_library('templatefilters')
