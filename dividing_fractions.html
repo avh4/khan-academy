@@ -14,14 +14,26 @@ while (Math.abs(num2)==Math.abs(den2))
 	den2 = Math.abs(get_random());
 
 
+//This next part allows for the division problem to be expression either with the conventional division sign or as
+//a complex fraction
 
+var open_parentheses = '';
+var division_sign = ' &#247; ';
+var close_parentheses = '';
+
+if (get_random()>get_random())
+{
+	open_parentheses = '(';
+	division_sign = ')/(';
+	close_parentheses = ')';
+}
 //-->
 </script>
 {% endblock maincode %}
 
 {% block maincell %}
 <script language=Javascript1.2><!--
-write_equation(format_not_reduced(num1,den1)+' &#247; '+format_not_reduced(den2,num2)+'= ?');
+write_equation(open_parentheses+format_not_reduced(num1,den1)+division_sign+format_not_reduced(den2,num2)+close_parentheses+'= ?');
 
 write_step(
 		equation_string(format_not_reduced(num1,den1)+
