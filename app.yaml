@@ -17,6 +17,9 @@ handlers:
 - url: /helperpages
   static_dir: helperpages
   
+- url: /MathJax
+  static_dir: MathJax
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin  

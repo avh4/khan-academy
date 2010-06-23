@@ -8,10 +8,31 @@
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script type="text/javascript" src="/javascript/ASCIIMathML.js"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js"></script>
+  <script type="text/javascript" src="/javascript/fontdetect.js"></script>
+  <script type="text/javascript" src="/MathJax/MathJax.js">
+      MathJax.Hub.Config({
+	showProcessingMessages: true,
+	skipStartupTypeset: true,
+        extensions: ["mml2jax.js"],
+	jax: ["input/MathML", "output/HTML-CSS"],
+	"HTML-CSS": {
+		scale: 100,
+		availableFonts:["STIX", "TeX"],
+		preferredFont: "TeX",
+		webFont: "TeX",
+		imageFont: null
+	}
+      });
+  </script>
   <script type="text/javascript" src="/javascript/metautil.js"></script>
   <script type="text/javascript" src="/javascript/exerciseutil.js"></script>
   <script type="text/javascript" src="/javascript/graphutil.js"></script>
 <script language=Javascript1.2><!--
+$(document).ready(function () {
+	KhanAcademy.supportMathML();
+	translate();	
+	drawPictures();
+});
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
 //-->
@@ -20,7 +41,7 @@ var currentexercise = "{{exid}}";
 {% block pagescript %}
 {% endblock pagescript %}
 </head>
-  <body spacing="0" class="tundra" bgcolor=white text="#000000" link="#006699" vlink="#5493B4"  onload="translate(); drawPictures()">
+  <body spacing="0" class="tundra" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
   <table border=0 width=100%>
   	<tr>
   		<td><A href="http://www.khanacademy.org/" border="0"><img src="/images/khan.GIF"></a></td>

@@ -282,3 +282,60 @@ function getResponseProps(response, header){
 	} catch (e) { return new Object() }
 }
 
+KhanAcademy = {
+	supportMathML: function() {
+		// Use MathJax only if the browser doesn't support MathML or
+		// doesn't have reasonable fonts installed
+		if (browserSupportsMathML() && browserHasUsableFont())
+			return;
+		MathJax.Hub.config.skipStartupTypeset = false;
+		ASCIIMathMLTranslate = translate;
+		translate = function() {
+			ASCIIMathMLTranslate();
+			MathJax.Hub.Typeset();
+		};
+		
+		function browserHasUsableFont() {
+			var d = new Detector();
+			var usableFonts = ['STIXNonUnicode', 
+				'STIXSize1', 
+				'STIXGeneral', 
+				'Standard Symbols L', 
+				'DejaVu Sans', 
+				'Cambria Math']; 
+			for (var i = 0; i < usableFonts.length; i++) {
+	 			if (d.test(usableFonts[i])) {
+					return true;
+				}		
+			}
+			return false;
+		}
+		
+		function browserSupportsMathML() {
+			var MathPlayer; 
+			try {
+				new ActiveXObject("MathPlayer.Factory.1"); 
+				MathPlayer = true;
+			} catch(err) {
+				MathPlayer = false
+			};
+			return (($.browser.mozilla && versionAtLeast("1.5")) ||
+                  		($.browser.msie && MathPlayer) ||
+                  		($.browser.opera && versionAtLeast("9.52")));
+				
+			function versionAtLeast(minVersion) {
+				var actualVersion = $.browser.version.split(".");
+				minVersion = minVersion.split(".");
+				while (minVersion.length && actualVersion.length) {
+					var minV = minVersion.shift();
+					var actualV = actualVersion.shift();
+					if (actualV > minV) 
+						return true;
+					if (actualV < minV) 
+						return false;
+				}
+				return false;
+			}
+		}
+	}
+}
