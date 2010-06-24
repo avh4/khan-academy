@@ -42,7 +42,6 @@ checkHistory(cFunction, eFunction, tFunction,2);
 
 
 
-
 eval("type"+problemType+"()");  //Randomly choose a problem type
 
 //eval("type"+getRandomIntRange(1,4)+"()");  //Randomly choose a problem type
@@ -145,12 +144,13 @@ function type4() {
 	C = getRandomIntRange(3,5);
 	A = getRandomIntRange(60,80);
 	D = getRandomIntRange(3,10);
+	
 	B = Math.floor(((C*A)+(100*D))/(C+D));
 	
 
 	correctDec = Math.round(((B*C)-(C*A))/(100-B) * 100)/100;
 	
-	correctAnswer = D;
+	correctAnswer = Math.floor(correctDec);
 	
 	write_text('<b>'+person1+' has an average score of '+A+' after '+C+' tests.  What is the minimum number of tests that '+
 			person1+' has to score a 100 on to get the average score to at least '+B+'?</b>');
@@ -166,7 +166,7 @@ function type4() {
 		if ( (correctDec - Math.floor(correctDec))>0)
 		{
 			write_step(' One cannot take less than one test, so '+person1+' needs to get a 100 on '+
-			D+' tests to get the average to at least '+B+'.');
+			correctAnswer+' tests to get the average to at least '+B+'.');
 		}
 		
 }
