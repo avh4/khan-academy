@@ -9,7 +9,12 @@
   <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/MathJax/MathJax.js?{{App.version}}">
+  {% comment %}
+     We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
+     /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
+     we update MathJax.
+  {% endcomment %}
+  <script type="text/javascript" src="/MathJax-beta2/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
 	skipStartupTypeset: true,

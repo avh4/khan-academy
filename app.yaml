@@ -17,7 +17,10 @@ handlers:
 - url: /helperpages
   static_dir: helperpages
   
-- url: /MathJax
+  # The url below needs to be updated whenever we change/upgrade MathJax.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /MathJax-beta2
   static_dir: MathJax
 
 - url: /remote_api
