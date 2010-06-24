@@ -42,25 +42,13 @@ function pickType(low,high)
 
 function pickNumber(low,high)
 {
-	
-	var notDoneCookie = currentexercise+'_'+username+'_lasttype';
-	
-	var notDoneType = readCookie(notDoneCookie);
-	
-	if (notDoneType==null || notDoneType=='')
-	{
-		notDoneType = ''+getRandomIntRange(low, high);
-	}
-	
-	createCookie(notDoneCookie, notDoneType, 5);
-	a
+	var notDoneType = null;
+	generateNewProblem(function () {
+		notDoneType = getRandomIntRange(low, high);
+		return ''+notDoneType;
+	}, 5);
 	return notDoneType;
 }
-
-
-
-
-
 
 function writeText(text)
 {
