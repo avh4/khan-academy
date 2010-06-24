@@ -151,30 +151,20 @@ var correct_answer = '`x='+format_fraction(intersection[0],intersection[1])+'`';
 var correct_answer2 = '`y='+format_fraction(intersection[2],intersection[3])+'`';
 
 
-//Fill in the choices
-//need to fix it so that the other choices can never be the same as the correct choice
-for (var i=0; i<5; i++)
-{
-	var x_num = intersection[0];
-	var x_den = intersection[1];
-	var y_num = intersection[2];
-	var y_den = intersection[3];
-	var bad_x_num = get_random();
-	var bad_x_den = get_random();
-	var bad_y_num = get_random();
-	var bad_y_den = get_random();
-
-	while (x_num*bad_x_den==x_den*bad_x_num || bad_x_den==0)
-	{
-		bad_x_den = get_random();
+function push_fractions_other_than(num, den, varName, results, count) {
+	while (results.length < count) {
+		var bad_num = get_random();
+		var bad_den = get_random();
+		if (num*bad_den==den*bad_num || bad_den==0) continue;
+		var result = varName + '=' + format_fraction(bad_num, bad_den);
+		if (results.indexOf(result) != -1) continue;
+		results.push(result);
 	}
-	while (y_num*bad_y_den==y_den*bad_y_num || bad_y_den==0)
-	{
-		bad_y_den = get_random();
-	}
-	possibleAnswers.push('x='+format_fraction(bad_x_num, bad_x_den));
-	possibleAnswers2.push('y='+format_fraction(bad_y_num, bad_y_den));
 }
+
+//Fill in the choices
+push_fractions_other_than(intersection[0], intersection[1], "x", possibleAnswers, 5);
+push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers2, 5);
 
 //-->
 </script>
@@ -211,7 +201,6 @@ for (var i=0; i<5; i++)
 		}
 		else
 		{
-			
 			var new_index = Math.round(Math.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
 			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
 			answerChoices2[i]='`'+new_wrong_choice+'`';
