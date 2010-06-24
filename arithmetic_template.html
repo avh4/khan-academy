@@ -4,7 +4,12 @@
   <script type="text/javascript">
   	function submitForm(value)
   	{
-  		document.forms['answerform'].submit();
+		var form = document.forms['answerform'];
+	        if (form.beenSubmitted)
+	            return false;
+	        else 
+	            form.beenSubmitted = true;
+  		form.submit();
   	}
   </script>
 {% endblock pagescript %}
