@@ -376,6 +376,9 @@ def PointCalculator(streak, suggested, proficient):
 class VideoDataTest(webapp.RequestHandler):
 
     def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
         self.response.out.write('<html>')
         videos = Video.all()
         for video in videos:
@@ -403,6 +406,9 @@ class DataStoreTest(webapp.RequestHandler):
 class DeleteVideoPlaylists(webapp.RequestHandler):
 
     def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
         query = VideoPlaylist.all()
 
         all_video_playlists = query.fetch(450)
@@ -412,6 +418,9 @@ class DeleteVideoPlaylists(webapp.RequestHandler):
 class DeleteVideos(webapp.RequestHandler):
 
     def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
         query = Video.all()
 
         all_videos = query.fetch(450)
@@ -421,6 +430,10 @@ class DeleteVideos(webapp.RequestHandler):
 class UpdateVideoData(webapp.RequestHandler):
 
     def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+
         self.response.out.write('<html>')
         yt_service = gdata.youtube.service.YouTubeService()
         playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
@@ -677,21 +690,20 @@ class ViewExerciseVideos(webapp.RequestHandler):
 class ExerciseAdminPage(webapp.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
-        if user:
-            query = Exercise.all().order('h_position')
-            exercises = query.fetch(200)
-
-            for exercise in exercises:
-                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
-
-            template_values = {'App' : App, 'exercises': exercises}
-
-            path = os.path.join(os.path.dirname(__file__), 'exerciseadmin.html')
-            self.response.out.write(template.render(path, template_values))
-        else:
-
+        if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
+            return
+        user = users.get_current_user()
+        query = Exercise.all().order('h_position')
+        exercises = query.fetch(200)
+
+        for exercise in exercises:
+            exercise.display_name = exercise.name.replace('_', ' ').capitalize()
+
+        template_values = {'App' : App, 'exercises': exercises}
+
+        path = os.path.join(os.path.dirname(__file__), 'exerciseadmin.html')
+        self.response.out.write(template.render(path, template_values))
 
 
 class ReportIssue(webapp.RequestHandler):
@@ -937,149 +949,145 @@ class KnowledgeMap(webapp.RequestHandler):
 class EditExercise(webapp.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
-        if user:
-            exercise_name = self.request.get('name')
-            if exercise_name:
-                query = Exercise.all().order('h_position')
-                exercises = query.fetch(200)
-
-                main_exercise = None
-                for exercise in exercises:
-                    exercise.display_name = exercise.name.replace('_', ' ').capitalize()
-                    if exercise.name == exercise_name:
-                        main_exercise = exercise
-
-                query = ExercisePlaylist.all()
-                query.filter('exercise =', main_exercise.key())
-                exercise_playlists = query.fetch(50)
-
-                query = Playlist.all()
-                all_playlists = query.fetch(50)
-
-                query = ExerciseVideo.all()
-                query.filter('exercise =', main_exercise.key())
-                exercise_videos = query.fetch(50)
-
-                videos = []
-
-                playlist_videos = None
-                for exercise_playlist in exercise_playlists:
-                    query = VideoPlaylist.all()
-                    query.filter('playlist =', exercise_playlist.playlist.key())
-                    query.order('video_position')
-                    playlist_videos = query.fetch(200)
-                    for playlist_video in playlist_videos:
-                        videos.append(playlist_video.video)
-
-                template_values = {
-                    'App' : App,
-                    'exercises': exercises,
-                    'exercise_playlists': exercise_playlists,
-                    'all_playlists': all_playlists,
-                    'exercise_videos': exercise_videos,
-                    'playlist_videos': playlist_videos,
-                    'videos': videos,
-                    'main_exercise': main_exercise,
-                    }
-
-                path = os.path.join(os.path.dirname(__file__), 'editexercise.html')
-                self.response.out.write(template.render(path, template_values))
-        else:
-
+        if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
+            return
+        exercise_name = self.request.get('name')
+        if exercise_name:
+            query = Exercise.all().order('h_position')
+            exercises = query.fetch(200)
 
+            main_exercise = None
+            for exercise in exercises:
+                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
+                if exercise.name == exercise_name:
+                    main_exercise = exercise
+
+            query = ExercisePlaylist.all()
+            query.filter('exercise =', main_exercise.key())
+            exercise_playlists = query.fetch(50)
+
+            query = Playlist.all()
+            all_playlists = query.fetch(50)
+
+            query = ExerciseVideo.all()
+            query.filter('exercise =', main_exercise.key())
+            exercise_videos = query.fetch(50)
+
+            videos = []
+
+            playlist_videos = None
+            for exercise_playlist in exercise_playlists:
+                query = VideoPlaylist.all()
+                query.filter('playlist =', exercise_playlist.playlist.key())
+                query.order('video_position')
+                playlist_videos = query.fetch(200)
+                for playlist_video in playlist_videos:
+                    videos.append(playlist_video.video)
+
+            template_values = {
+                'App' : App,
+                'exercises': exercises,
+                'exercise_playlists': exercise_playlists,
+                'all_playlists': all_playlists,
+                'exercise_videos': exercise_videos,
+                'playlist_videos': playlist_videos,
+                'videos': videos,
+                'main_exercise': main_exercise,
+                }
+
+            path = os.path.join(os.path.dirname(__file__), 'editexercise.html')
+            self.response.out.write(template.render(path, template_values))
 
 class UpdateExercise(webapp.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
-        if users.is_current_user_admin():
-            exercise_name = self.request.get('name')
-            if exercise_name:
-                query = Exercise.all()
-                query.filter('name =', exercise_name)
-                exercise = query.get()
-                if not exercise:
-                    exercise = Exercise(name=exercise_name)
-                    exercise.prerequisites = []
-                    exercise.covers = []
-
-                add_prerequisite = self.request.get('add_prerequisite')
-                delete_prerequisite = self.request.get('delete_prerequisite')
-                add_covers = self.request.get('add_covers')
-                delete_covers = self.request.get('delete_covers')
-                v_position = self.request.get('v_position')
-                h_position = self.request.get('h_position')
-
-                add_video = self.request.get('add_video')
-                delete_video = self.request.get('delete_video')
-                add_playlist = self.request.get('add_playlist')
-                delete_playlist = self.request.get('delete_playlist')
-
-                if add_prerequisite:
-                    if add_prerequisite not in exercise.prerequisites:
-                        exercise.prerequisites.append(add_prerequisite)
-                if delete_prerequisite:
-                    if delete_prerequisite in exercise.prerequisites:
-                        exercise.prerequisites.remove(delete_prerequisite)
-                if add_covers:
-                    if add_covers not in exercise.covers:
-                        exercise.covers.append(add_covers)
-                if delete_covers:
-                    if delete_covers in exercise.covers:
-                        exercise.covers.remove(delete_covers)
-                if v_position:
-                    exercise.v_position = int(v_position)
-                if h_position:
-                    exercise.h_position = int(h_position)
-
-                if add_video:
-                    query = ExerciseVideo.all()
-                    query.filter('video =', db.Key(add_video))
-                    query.filter('exercise =', exercise.key())
-                    exercise_video = query.get()
-                    if not exercise_video:
-                        exercise_video = ExerciseVideo()
-                        exercise_video.exercise = exercise
-                        exercise_video.video = db.Key(add_video)
-                        exercise_video.put()
-                if delete_video:
-                    query = ExerciseVideo.all()
-                    query.filter('video =', db.Key(delete_video))
-                    query.filter('exercise =', exercise.key())
-                    exercise_videos = query.fetch(200)
-                    for exercise_video in exercise_videos:
-                        exercise_video.delete()
-
-                if add_playlist:
-                    query = ExercisePlaylist.all()
-                    query.filter('playlist =', db.Key(add_playlist))
-                    query.filter('exercise =', exercise.key())
-                    exercise_playlist = query.get()
-                    if not exercise_playlist:
-                        exercise_playlist = ExercisePlaylist()
-                        exercise_playlist.exercise = exercise
-                        exercise_playlist.playlist = db.Key(add_playlist)
-                        exercise_playlist.put()
-
-                if delete_playlist:
-                    query = ExercisePlaylist.all()
-                    query.filter('playlist =', db.Key(delete_playlist))
-                    query.filter('exercise =', exercise.key())
-                    exercise_playlists = query.fetch(200)
-                    for exercise_playlist in exercise_playlists:
-                        exercise_playlist.delete()
-
-                exercise.put()
-
-                if v_position or h_position:
-                    self.redirect('/admin94040')
-                else:
-                    self.redirect('/editexercise?name=' + exercise_name)
-        else:
+        if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
+            return
+        user = users.get_current_user()
+        exercise_name = self.request.get('name')
+        if exercise_name:
+            query = Exercise.all()
+            query.filter('name =', exercise_name)
+            exercise = query.get()
+            if not exercise:
+                exercise = Exercise(name=exercise_name)
+                exercise.prerequisites = []
+                exercise.covers = []
 
+            add_prerequisite = self.request.get('add_prerequisite')
+            delete_prerequisite = self.request.get('delete_prerequisite')
+            add_covers = self.request.get('add_covers')
+            delete_covers = self.request.get('delete_covers')
+            v_position = self.request.get('v_position')
+            h_position = self.request.get('h_position')
+
+            add_video = self.request.get('add_video')
+            delete_video = self.request.get('delete_video')
+            add_playlist = self.request.get('add_playlist')
+            delete_playlist = self.request.get('delete_playlist')
+
+            if add_prerequisite:
+                if add_prerequisite not in exercise.prerequisites:
+                    exercise.prerequisites.append(add_prerequisite)
+            if delete_prerequisite:
+                if delete_prerequisite in exercise.prerequisites:
+                    exercise.prerequisites.remove(delete_prerequisite)
+            if add_covers:
+                if add_covers not in exercise.covers:
+                    exercise.covers.append(add_covers)
+            if delete_covers:
+                if delete_covers in exercise.covers:
+                    exercise.covers.remove(delete_covers)
+            if v_position:
+                exercise.v_position = int(v_position)
+            if h_position:
+                exercise.h_position = int(h_position)
+
+            if add_video:
+                query = ExerciseVideo.all()
+                query.filter('video =', db.Key(add_video))
+                query.filter('exercise =', exercise.key())
+                exercise_video = query.get()
+                if not exercise_video:
+                    exercise_video = ExerciseVideo()
+                    exercise_video.exercise = exercise
+                    exercise_video.video = db.Key(add_video)
+                    exercise_video.put()
+            if delete_video:
+                query = ExerciseVideo.all()
+                query.filter('video =', db.Key(delete_video))
+                query.filter('exercise =', exercise.key())
+                exercise_videos = query.fetch(200)
+                for exercise_video in exercise_videos:
+                    exercise_video.delete()
+
+            if add_playlist:
+                query = ExercisePlaylist.all()
+                query.filter('playlist =', db.Key(add_playlist))
+                query.filter('exercise =', exercise.key())
+                exercise_playlist = query.get()
+                if not exercise_playlist:
+                    exercise_playlist = ExercisePlaylist()
+                    exercise_playlist.exercise = exercise
+                    exercise_playlist.playlist = db.Key(add_playlist)
+                    exercise_playlist.put()
+
+            if delete_playlist:
+                query = ExercisePlaylist.all()
+                query.filter('playlist =', db.Key(delete_playlist))
+                query.filter('exercise =', exercise.key())
+                exercise_playlists = query.fetch(200)
+                for exercise_playlist in exercise_playlists:
+                    exercise_playlist.delete()
+
+            exercise.put()
+
+            if v_position or h_position:
+                self.redirect('/admin94040')
+            else:
+                self.redirect('/editexercise?name=' + exercise_name)
 
 class GraphPage(webapp.RequestHandler):
 
@@ -1094,6 +1102,9 @@ class GraphPage(webapp.RequestHandler):
 class AdminViewUser(webapp.RequestHandler):
 
     def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
         username = self.request.get('u')
         if username:
 
@@ -1212,23 +1223,16 @@ class RegisterCorrectness(webapp.RequestHandler):
 class ViewUsers(webapp.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
-        if user:
-            query = UserData.all()
-            count = 0
-            for user in query:
-                count = count + 1
-
-            self.response.out.write('Users ' + str(count))
-        else:
-
-            # template_values = {'App' : App, 'users': all_users}
-
-            # path = os.path.join(os.path.dirname(__file__), 'viewusers.html')
-            # self.response.out.write(template.render(path, template_values))
-
+        if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
+            return
+        user = users.get_current_user()
+        query = UserData.all()
+        count = 0
+        for user in query:
+            count = count + 1
 
+        self.response.out.write('Users ' + str(count))
 
 class ViewVideoLibrary(webapp.RequestHandler):
 
