@@ -26,28 +26,22 @@ function roundNumber(n, precision)
 
 function pickType(low,high)
 {
-	
-	notDoneCookie = currentexercise+'_'+username+'_lasttype';
-	
-	notDoneType = readCookie(notDoneCookie);
-	
-	if (notDoneType==null || notDoneType=='')
-	{
+	var notDoneType = null;
+	generateNewProblem(function () {
 		notDoneType = ''+getRandomIntRange(low, high);
-	}
+		return notDoneType;
+	}, (high-low)/2, "type");
 	eval("type"+notDoneType+"()");
-	
-	createCookie(notDoneCookie, notDoneType, 10);
 }
 
 function pickNumber(low,high)
 {
-	var notDoneType = null;
+	var notDoneNum = null;
 	generateNewProblem(function () {
-		notDoneType = getRandomIntRange(low, high);
-		return ''+notDoneType;
-	}, 5);
-	return notDoneType;
+		notDoneNum = getRandomIntRange(low, high);
+		return ''+notDoneNum;
+	}, (high-low)/2, "number");
+	return notDoneNum;
 }
 
 function writeText(text)

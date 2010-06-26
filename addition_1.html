@@ -45,7 +45,7 @@ var cFunction = function(history)
 //This function defines what an entry in the history should look like
 var tFunction = function()
 {
-	return (term1+'+'+term2);
+	return (Math.min(term1,term2)+'+'+Math.max(term1,term2));
 }
 
 

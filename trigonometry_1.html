@@ -14,8 +14,6 @@ function trigTriangle()
 		triangle.opLength = getRandomIntRange(3,10);
 		return 	triangle.adjLength + "/" + triangle.opLength;
 	});
-	this.adjLength = getRandomIntRange(3,10);
-	this.opLength = getRandomIntRange(3,10);
 	this.tanValue = formatFraction(this.opLength, this.adjLength);
 	var squaresSum = Math.pow(this.adjLength,2)+Math.pow(this.opLength,2);
 	var scaleFactor = Math.sqrt(squaresSum);

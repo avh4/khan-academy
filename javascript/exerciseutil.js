@@ -31,64 +31,104 @@ incorrect.src = "/images/face-sad.gif";
 
 
 // Deprecated: Use generateRandomProblem (below) instead.
+// Note: compareFunction is now ignored.  entryFunction must return the same
+// id for all problems that should be considered equivalent.
 function checkHistory(compareFunction, entryFunction, termFunction, historyLength)
 {
-	entryFunction();	
-	var recentNums = readCookie(currentexercise+'_'+username);
-	//alert([recentNums, term1, term2]);
-
-	if (recentNums!=null)
-	{
-		// We only try historyLength times to prevent buggy callers
-		// from generating an infinite loop if their compareFunction
-		// always returns true.  See:
-		// http://code.google.com/p/khanacademy/issues/detail?id=49
-		var tries = 0;
-		while (tries++ < historyLength && compareFunction(recentNums))
-		{
-			//alert([recentNums, term1, term2]);
-			entryFunction();
-		}
-	}
-	else
-	{
-
-		recentNums = '';
-	}
-
-	var newTerm = termFunction() +'|';
-
-	recentNums = newTerm+recentNums;
-	createCookie(currentexercise+'_'+username, recentNums.substring(0,historyLength*newTerm.length), 10);
+	generateNewProblem(function () {
+		entryFunction();
+		return termFunction();
+	}, historyLength/2);
 }
 
 // Calls randomProblemGenerator until it returns a problem id that hasn't been used recently. 
-function generateNewProblem(randomProblemGenerator, historyLength)
+function generateNewProblem(randomProblemGenerator, range, salt)
 {
-	if (!historyLength)
-		historyLength = 10;
-	id = randomProblemGenerator();	
-	var cookieValue = readCookie(currentexercise+'_'+username);
-	var recentIds = [];
-	if (cookieValue != null)
-		recentIds = cookieValue.split("|");
-	// We only try 10 times to prevent buggy callers
-	// from generating an infinite loop if their randomProblemGenerator
-	// always returns true.  See:
-	// http://code.google.com/p/khanacademy/issues/detail?id=49
-	var tries = 0;
-	while (tries++ < 10 && recentIds.indexOf(id) != -1)
-	{
-		id = randomProblemGenerator();
+	/*
+	 * To generate reproducible problems P_0, P_1, P_2, ... with no repeats 
+	 * within R problems:
+	 * 1. Let U(S, {problems_to_avoid}) be a problem generated from seed S that is not 
+	 *    in the set {problems_to_avoid}.  So it is "unique" relative to {problems_to_avoid}.
+	 * 2. Then, we can generate a reproducible sequence of R problems with no
+	 *    repeats given a seed S.  Call those generated problems G(0, S) through G(R-1, S).
+	 *    They can be produced iteratively:
+	 *    G(0, S) = U(S, {})
+	 *    G(j, S) = U(S, {G(0, S),...G(j-1,S)})
+	 * 3. We can use G to compute half of the P_i, by dividing the P_i into groups of R
+	 *    problems and using G to compute every other group.  So:
+	 *    For (i%(2R)) < R, let P_i = G(i%(2R), s(i//(2R)))
+	 *       where "//" is integer division without remainder and
+	 *       s(x) is the seed function that depends only on i through its parameter
+	 *       and ideally ensures that s(x)!=s(y) for all x!=y.  s(x) = x could work.
+	 *       So could s(x) = x+username if we wanted different users to get different
+	 *       problems.
+	 *    That covers half of the problems, specifically the 1st, 3rd, 5th, etc groups 
+	 *    of R problems.
+	 * 4. For the problems in the remaining (even) groups, we need to ensure that they 
+	 *    don't match the problems that are within a distance of R in either the previous
+	 *    or next group.  To do that, we generate the relevant problems from those groups
+	 *    (which requires only knowing the problem numbers) and then use U() to ensure we
+	 *    don't duplicate them.  So:
+	 *    For (i%(2R)) >= R, let P_i = U(s(i//(2R)), {P_j where |j-i| < R})
+	 *    
+	 * From an implementation perspective, to generate P_i:
+	 *   if (i%(2R)) < R):
+	 *     Generate the first problem in its group, number (i//(2R))*2R, and subsequent problems up to
+	 *     and including P_i skipping duplicates.
+	 *   else:
+	 *     Generate the first problem in the next group, number ((i//(2R))+1)*2R, and subsequent problem
+	 *     numbers < i+R, skipping duplicates.
+	 *     Generate all the problems in the previous group, starting with number (i//(2R)-1)*2R, skipping
+	 *     duplicates within that group.
+	 *     Generate the first problem in its group, number (i//(2R))*2R, and subsequent problems up to
+	 *     and including P_i skipping duplicates in that group and in the problems in adjacent groups with
+	 *     numbers within R of i.
+	 */
+	if (!range)
+		range = 10;
+	if (!salt)
+		salt = '';
+	var i = KhanAcademy.problem_number;
+	var R = range;
+	var group = i/R;
+	var problems_to_avoid = [];
+	if (group % 2 == 1) {
+		// generate problems to avoid
+		Math.seedrandom(s(group-1));
+		var prev_group_problems = [];
+		for (var j=0; j<R; j++) {
+			prev_group_problems.push(U(prev_group_problems));			
+		}
+		problems_to_avoid = prev_group_problems.slice(i%R);
+		Math.seedrandom(s(group+1));
+		for (var j=0; j<(i%R); j++) {
+			problems_to_avoid.push(U(problems_to_avoid));			
+		}
 	}
-
-	if (recentIds.indexOf(id) == -1)
-	{
-		recentIds.push(id);		
+	
+	Math.seedrandom(s(group));
+	var p = group*R;
+	while (p <= i) {
+		problems_to_avoid.push(U(problems_to_avoid));
+		p++;
 	}
-	recentIds = recentIds.slice(-historyLength);
-	cookieValue = recentIds.join("|");
-	createCookie(currentexercise+'_'+username, cookieValue, 10);
+	
+	function s(x) {
+		return ''+salt+x;
+	}
+	
+	function U(avoidance_arr) {
+		var id;
+		// We only try 10 times to prevent buggy callers
+		// from generating an infinite loop if their randomProblemGenerator
+		// always returns true.  See:
+		// http://code.google.com/p/khanacademy/issues/detail?id=49
+		var tries = 0;
+		while(tries < 10 && avoidance_arr.indexOf(id = randomProblemGenerator()) != -1) {
+			tries++;			
+		}
+		return id;
+	}
 }
 
 function createCookie(name,value,days) {
@@ -369,7 +409,7 @@ var notDoneType = ''; //This is used by pickType in metautil.js to prevent stude
 var notDoneCookie = '';
 
 
-function record_problem() //sends ajax request to database to record that problem has been done and presents the 'next question' button
+function record_problem() //presents the 'next question' button
 {
 	eraseCookie(notDoneCookie);
 	
@@ -405,41 +445,6 @@ function record_problem() //sends ajax request to database to record that proble
 	}
 	
 	effort = Math.max(effort, 1);
-
-	
-	xmlhttp.open('get', '/problemlog.jsp?e='
-			+currentexercise
-			+'&ts='+timeStamp
-			+'&d='+time
-			+'&h='+steps_given
-			+'&c='+perfectlycorrect
-			+'&np='+(energypoints+effort)
-			+'&streak='+streak
-			+'&mode='+randomMode
-			+'&effort='+effort
-			+'&t='+tries);		
-			
-			
-	xmlhttp.onreadystatechange = setRecorded;
-	xmlhttp.send(null);
-	while (recordedProblem==0)
-	{
-		//do nothing and wait for setRecorded to hit
-	}
-	
-	
-	  
-}
-
-
-function setRecorded() {
-	recordedProblem=1;
-	if (alreadyProficient==0 && streak>=requiredStreak)
-	{
-		alert("Congratulations! "+streak+" in a row! You will now be forwarded to the main page where you can review your updated knowledge map.");
-		window.location = "http://www.khanacademy.org/start.jsp?profex="+currentexercise+"&streak="+streak;
-		alreadyRedirect = 1;
-	}
 }
 
 function processReq() {

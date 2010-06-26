@@ -9,6 +9,7 @@
   <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/seedrandom.js?{{App.version}}"></script>
   {% comment %}
      We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
@@ -40,6 +41,8 @@ $(document).ready(function () {
 });
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
+KhanAcademy.problem_number = "{{total_done}}";
+Math.seedrandom(KhanAcademy.problem_number);
 //-->
 </script>
 

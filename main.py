@@ -567,6 +567,7 @@ class ViewExercise(webapp.RequestHandler):
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
                 'time_warp': time_warp,
+                'total_done': userExercise.total_done,
                 }
 
             path = os.path.join(os.path.dirname(__file__), exid + '.html')
@@ -721,6 +722,8 @@ class ReportIssue(webapp.RequestHandler):
                 'points': user_data.points,
                 'username': user.nickname(),
                 'referer': self.request.headers.get('Referer'),
+                'exid': self.request.get('exid'),
+                'total_done': self.request.get('total_done'),
                 'logout_url': logout_url,
                 }
             issue_type = self.request.get('type')
