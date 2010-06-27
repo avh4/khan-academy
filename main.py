@@ -475,6 +475,7 @@ class UpdateVideoData(webapp.RequestHandler):
             for i in range(0, 4):
                 start_index = i * 50 + 1
                 video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri + '?start-index=' + str(start_index) + '&max-results=50')
+                video_data_list = []
                 for video in video_feed.entry:
 
                     video_id = video.media.player.url.replace('http://www.youtube.com/watch?v=', '')
@@ -495,7 +496,11 @@ class UpdateVideoData(webapp.RequestHandler):
                     if playlist.title.text not in video_data.playlists:
                         video_data.playlists.append(playlist.title.text.decode('windows-1252'))
                     video_data.keywords = video.media.keywords.text.decode('windows-1252')
-                    video_data.put()
+                    video_data.position = video.position
+                    video_data_list.append(video_data)
+                db.put(video_data_list)
+                playlist_videos = []
+                for video_data in video_data_list:                
                     query = VideoPlaylist.all()
                     query.filter('playlist =', playlist_data.key())
                     query.filter('video =', video_data.key())
@@ -503,8 +508,9 @@ class UpdateVideoData(webapp.RequestHandler):
                     if not playlist_video:
                         playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
                     self.response.out.write('<p>Playlist  ' + playlist_video.playlist.title)
-                    playlist_video.video_position = int(video.position.text)
-                    playlist_video.put()
+                    playlist_video.video_position = int(video_data.position.text)
+                    playlist_videos.append(playlist_video)
+                db.put(playlist_videos)
 
 
 class ViewExercise(webapp.RequestHandler):
@@ -1332,7 +1338,7 @@ class App(object):
     # server.
     version = os.environ['CURRENT_VERSION_ID']
 
-def main():
+def real_main():
     webapp.template.register_template_library('templatefilters')
     application = webapp.WSGIApplication([ 
         ('/', ViewAllExercises),
@@ -1380,6 +1386,24 @@ def main():
         ], debug=True)
     run_wsgi_app(application)
 
+def profile_main():
+    # This is the main function for profiling
+    # We've renamed our original main() above to real_main()
+    import cProfile, pstats
+    prof = cProfile.Profile()
+    prof = prof.runctx("real_main()", globals(), locals())
+    print "<pre>"
+    stats = pstats.Stats(prof)
+    stats.sort_stats("cumulative")  # time or cumulative
+    stats.print_stats(80)  # 80 = how many to print
+    # The rest is optional.
+    # stats.print_callees()
+    stats.print_callers()
+    print "</pre>"
+    
+main = real_main
+# Uncomment the following line to enable profiling
+# main = profile_main
 
 if __name__ == '__main__':
     main()
