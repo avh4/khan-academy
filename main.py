@@ -438,15 +438,25 @@ class UpdateVideoData(webapp.RequestHandler):
         yt_service = gdata.youtube.service.YouTubeService()
         playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
 
+        # deletes the specified entities, 10 at a time, to avoid:
+        # http://code.google.com/p/googleappengine/issues/detail?id=3397
+        # when using dev_appserver.py --use_sqlite
+        def delete_entities(ents):
+            start = 0
+            while start < len(ents):
+                end = min(start+10, len(ents))
+                db.delete(ents[start:end])
+                start = end
+                
         # The next two blocks delete all the Videos and VideoPlaylists so that we don't get remnant videos or associations
 
         query = VideoPlaylist.all()
         all_video_playlists = query.fetch(100000)
-        db.delete(all_video_playlists)
+        delete_entities(all_video_playlists)
 
         query = Video.all()
         all_videos = query.fetch(100000)
-        db.delete(all_videos)
+        delete_entities(all_videos)
 
         for playlist in playlist_feed.entry:
             self.response.out.write('<p>Playlist  ' + playlist.id.text)
