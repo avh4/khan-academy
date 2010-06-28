@@ -290,7 +290,8 @@ KhanAcademy = {
 		
 		function browserHasUsableFont() {
 			var d = new Detector();
-			var usableFonts = ['STIXNonUnicode', 
+			var usableFonts = ['cmsy10',
+				'STIXNonUnicode', 
 				'STIXSize1', 
 				'STIXGeneral', 
 				'Standard Symbols L', 
