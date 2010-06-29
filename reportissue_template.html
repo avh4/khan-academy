@@ -21,9 +21,14 @@ function submitForm(value)
         and you can simply vote for it by turning on <b>the star next to it</b> in
         the 
         {% block list_of_issues_link %}<a href="http://code.google.com/p/khanacademy/issues/list?can=2&q=Status:Accepted,Started%20Type:Defect&sort=-stars&colspec=Summary">list of known problems</a>{% endblock list_of_issues_link %}.&nbsp; 
-        Otherwise, just fill in the <b>Summary</b> and <b>Description</b> fields and then click the <b>Submit Issue</b> 
-        button on the 
-        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Defect%20report%20from%20user&labels=Referer-{{referer|urlencode}},Type-Defect,Priority-Medium">new problem form</a>{% endblock new_issue_link %}.&nbsp;
+        Otherwise, please use the following steps to create a new issue in our issue tracking system.&nbsp;
+	<ol>
+		<li>Go to the 
+	        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Defect%20report%20from%20user&labels=Referer-{{referer|urlencode}},Type-Defect,Priority-Medium">new problem form</a>{% endblock new_issue_link %}.&nbsp;
+		</li>
+		<li>Fill in the <b>Summary</b> and <b>Description</b> fields.&nbsp;   <span style="color: red;"/>Note: The information you provide will become public, so do not include any private or confidential information.</span></li>
+		<li>Click the <b>Submit Issue</b> button.</li>
+	</ol>  
         Your submission will show up in the list once we've had a chance to give it a quick review.&nbsp;
         </p>
         <p>If you vote for something or submit something new, you'll get emails as people comment on it.&nbsp;
