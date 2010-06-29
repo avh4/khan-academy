@@ -40,20 +40,6 @@ function type3()
 	initialObjectsToDraw.push(rightAngle);
 	
 	
-	addWrongChoice(simplifiedRoot(Math.abs((Math.pow(hLength,2)+Math.pow(lLength,2)))));
-	addWrongChoice(Math.pow(hLength,2)+Math.pow(lLength,2));
-	addWrongChoice(simplifiedRoot(lLength+hLength));
-	addWrongChoice(simplifiedRoot(hLength-lLength));
-	addWrongChoice(Math.pow(hLength,2)-Math.pow(lLength,2));
-	addWrongChoice(hLength-lLength);
-	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(2))/2');
-	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(2))/2');
-	addWrongChoice(''+(getRandomIntRange(2,4)*2+1)+'sqrt(2)');
-	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(3))/2');
-	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(3))/2');
-	addWrongChoice(''+(getRandomIntRange(2,4)*2+1)+'sqrt(3)');
-	
-	
 	//writeText(lSide.regStr+' is '+lLength+' units long.');
 	writeText(hypot.regStr+' is '+hLength+' units long.');
 	writeText(angle1.regStr+' is 45 degrees.');
@@ -86,6 +72,19 @@ function type3()
 		
 		setCorrectAnswer('('+hLength+'sqrt(2))/2');
 	}
+
+	addWrongChoice(simplifiedRoot(Math.abs((Math.pow(hLength,2)+Math.pow(lLength,2)))));
+	addWrongChoice(Math.pow(hLength,2)+Math.pow(lLength,2));
+	addWrongChoice(simplifiedRoot(lLength+hLength));
+	addWrongChoice(simplifiedRoot(hLength-lLength));
+	addWrongChoice(Math.pow(hLength,2)-Math.pow(lLength,2));
+	addWrongChoice(hLength-lLength);
+	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(2))/2');
+	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(2))/2');
+	addWrongChoice(''+(getRandomIntRange(2,4)*2+1)+'sqrt(2)');
+	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(3))/2');
+	addWrongChoice('('+(getRandomIntRange(2,4)*2+1)+'sqrt(3))/2');
+	addWrongChoice(''+(getRandomIntRange(2,4)*2+1)+'sqrt(3)');
 }
 
 function type4()
