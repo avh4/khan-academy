@@ -23,7 +23,7 @@
  *  limitations under the License.
  */
 
-MathJax.ElementJax.mml = MathJax.ElementJax.Subclass({
+MathJax.ElementJax.mml = MathJax.ElementJax({
   mimeType: "jax/mml"
 },{
   name: "mml",
@@ -94,16 +94,16 @@ MathJax.ElementJax.mml.Augment({
     DUPLICATE: "duplicate",
     INFIXLINBREAKSTYLE: "infixlinebreakstyle"
   },
-  INDENTSTYLE: {
+  INDENTALIGN: {
     LEFT: "left",
     CENTER: "center",
     RIGHT: "right",
     AUTO: "auto",
     ID: "id",
-    INDENTSTYLE: "indentstyle"
+    INDENTALIGN: "indentalign"
   },
-  INDENTOFFSET: {
-    INDENTOFFSET: "indentoffset"
+  INDENTSHIFT: {
+    INDENTSHIFT: "indentshift"
   },
   LINETHICKNESS: {
     THIN: "thin",
@@ -343,6 +343,9 @@ MathJax.ElementJax.mml.Augment({
     isEmbellished: function () {return FALSE},
     Core: function () {return this},
     CoreMO: function () {return this},
+    lineBreak: function () {
+      if (this.isEmbellished()) {return this.CoreMO().lineBreak()} else {return "none"}
+    },
     array: function () {if (this.inferred) {return this.data} else {return [this]}},
     toString: function () {return this.type+"("+this.data.join(",")+")"}
   },{
@@ -353,14 +356,15 @@ MathJax.ElementJax.mml.Augment({
       return TRUE;
     },
     childEmbellished: function () {
-      if (this.data.length === 0) {return FALSE}
-      return this.data[0].isEmbellished();
+      return (this.data[0] && this.data[0].isEmbellished());
     },
     childCore: function () {return this.data[0]},
-    childCoreMO: function () {return this.data[0].CoreMO()},
+    childCoreMO: function () {return (this.data[0] ? this.data[0].CoreMO() : null)},
     setChildTeXclass: function (prev) {
-      prev = this.data[0].setTeXclass(prev);
-      this.updateTeXclass(this.data[0]);
+      if (this.data[0]) {
+        prev = this.data[0].setTeXclass(prev);
+        this.updateTeXclass(this.data[0]);
+      }
       return prev;
     },
     setBaseTeXclasses: function (prev) {
@@ -368,7 +372,7 @@ MathJax.ElementJax.mml.Augment({
       if (this.isEmbellished()) {
         prev = this.data[0].setTeXclass(prev);
         this.updateTeXclass(this.Core());
-      } else {this.data[0].setTeXclass(); prev = this}
+      } else {if (this.data[0]) {this.data[0].setTeXclass()}; prev = this}
       for (var i = 1, m = this.data.length; i < m; i++)
         {if (this.data[i]) {this.data[i].setTeXclass()}}
       return prev;
@@ -431,17 +435,17 @@ MathJax.ElementJax.mml.Augment({
       largeop: MML.AUTO,
       movablelimits: MML.AUTO,
       accent: MML.AUTO,
-      linebreak: MML.AUTO,
+      linebreak: MML.LINEBREAK.AUTO,
       lineleading: MML.INHERIT,
       linebreakstyle: MML.AUTO,
       linebreakmultchar: MML.INHERIT,
-      indentstyle: MML.INHERIT,
-      indentoffset: MML.INHERIT,
+      indentalign: MML.INHERIT,
+      indentshift: MML.INHERIT,
       indenttarget: MML.INHERIT,
-      indentstylefirst: MML.INHERIT,
-      indentoffsetfirst: MML.INHERIT,
-      indentstylelast: MML.INHERIT,
-      indentoffsetlast: MML.INHERIT,
+      indentalignfirst: MML.INHERIT,
+      indentshiftfirst: MML.INHERIT,
+      indentalignlast: MML.INHERIT,
+      indentshiftlast: MML.INHERIT,
       texClass: MML.AUTO
     },
     defaultDef: {
@@ -457,6 +461,16 @@ MathJax.ElementJax.mml.Augment({
       largeop: FALSE,
       movablelimits: FALSE,
       accent: FALSE,
+      linebreak: MML.LINEBREAK.AUTO,
+      lineleading: "1ex",
+      linebreakstyle: "before",
+      indentalign: MML.INDENTALIGN.AUTO,
+      indentshift: "0",
+      indenttarget: "",
+      indentalignfirst: MML.INDENTALIGN.INDENTALIGN,
+      indentshiftfirst: MML.INDENTSHIFT.INDENTSHIFT,
+      indentalignlast: MML.INDENTALIGN.INDENTALIGN,
+      indentshiftlast: MML.INDENTSHIFT.INDENTSHIFT,
       texClass: MML.TEXCLASS.REL // for MML, but TeX sets ORD explicitly
     },
     SPACE_ATTR: {lspace: 0x01, rspace: 0x02, form: 0x04},
@@ -519,6 +533,15 @@ MathJax.ElementJax.mml.Augment({
       return MML.FORM.INFIX;
     },
     isEmbellished: function () {return TRUE},
+    lineBreak: function () {
+      var values = this.getValues("linebreak","linebreakstyle");
+      if (values.linebreak === MML.LINEBREAK.NEWLINE) {
+        if (values.linebreakstyle === MML.LINEBREAKSTYLE.INFIXLINEBREAKSTYLE)
+          {values.linebreakstyle = this.Get("infixlinebreakstyle")}
+        return values.linebreakstyle;
+      }
+      return "none";
+    },
     setTeXclass: function (prev) {
       this.getValues("lspace","rspace"); // sets useMMLspacing
       if (this.useMMLspacing) {this.texClass = MML.TEXCLASS.NONE; return this}
@@ -564,6 +587,10 @@ MathJax.ElementJax.mml.Augment({
       height: "0ex",
       depth: "0ex",
       linebreak: MML.LINEBREAK.AUTO
+    },
+    lineBreak: function () {
+      return (this.Get("linebreak") === MML.LINEBREAK.NEWLINE ?
+                MML.LINEBREAKSTYLE.AFTER : "none");
     }
   });
 
@@ -611,17 +638,18 @@ MathJax.ElementJax.mml.Augment({
     },
     NonSpaceLength: function () {
       var n = 0;
-      for (var i = 0, m = this.data.length; i < m; i++) {if (!this.data[i].isSpacelike()) {n++}}
+      for (var i = 0, m = this.data.length; i < m; i++)
+        {if (this.data[i] && !this.data[i].isSpacelike()) {n++}}
       return n;
     },
     FirstNonSpace: function () {
       for (var i = 0, m = this.data.length; i < m; i++)
-        {if (!this.data[i].isSpacelike()) {return this.data[i]}}
+        {if (this.data[i] && !this.data[i].isSpacelike()) {return this.data[i]}}
       return null;
     },
     LastNonSpace: function () {
       for (var i = this.data.length-1; i >= 0; i--)
-        {if (!this.data[i].isSpacelike()) {return this.data[i]}}
+        {if (this.data[0] && !this.data[i].isSpacelike()) {return this.data[i]}}
       return null;
     },
     Core: function () {
@@ -867,6 +895,15 @@ MathJax.ElementJax.mml.Augment({
   
   MML.msub = MML.msubsup.Subclass({type: "msub"});
   MML.msup = MML.msubsup.Subclass({type: "msup", sub:2, sup:1});
+  MML.mmultiscripts = MML.msubsup.Subclass({
+    type: "mmultiscripts",
+    adjustChild_texprimestyle: function (n) {
+      if (n % 2 === 1) {return TRUE}
+      return this.Get("texprimestyle");
+    }
+  });
+  MML.mprescripts = MML.mbase.Subclass({type: "mprescripts"});
+  MML.none = MML.mbase.Subclass({type: "none"});
   
   MML.munderover = MML.mbase.Subclass({
     type: "munderover",
@@ -915,37 +952,6 @@ MathJax.ElementJax.mml.Augment({
     ACCENTS: ["", "accent", "accentunder"]
   });
 
-  MML.mmultiscripts = MML.mbase.Subclass({
-    type: "mmultiscripts",
-    isEmbellished: MML.mbase.childEmbellished,
-    Core: MML.mbase.childCore,
-    CoreMO: MML.mbase.childCoreMO,
-    defaults: {
-      mathbackground: MML.INHERIT,
-      mathcolor: MML.INHERIT,
-      subscriptshift: MML.AUTO,
-      superscriptshift: MML.AUTO,
-      texClass: MML.AUTO
-    },
-    autoDefault: function (name) {
-      if (name === "texClass")
-        {return (this.isEmbellished() ? this.CoreMO().Get(name) : MML.TEXCLASS.ORD)}
-      // compute this from size of children
-      return 0;
-    },
-    adjustChild_displaystyle: function (n) {
-      if (n > 0) {return FALSE}
-      return this.Get("displaystyle");
-    },
-    adjustChild_scriptlevel: function (n) {
-      var level = this.Get("scriptlevel");
-      if (n > 0) {level++}
-      return level;
-    },
-    adjustChild_texprimestyle: function (n) {return (n === this.base && this.data[this.over])},
-    setTeXclass: MML.mbase.setSeparateTeXclasses
-  });
-
   MML.mtable = MML.mbase.Subclass({
     type: "mtable",
     defaults: {
@@ -982,6 +988,13 @@ MathJax.ElementJax.mml.Augment({
         side: TRUE, minlabelspacing: TRUE, texClass: TRUE, useHeight: 1
       }
     },
+    Append: function () {
+      for (var i = 0, m = arguments.length; i < m; i++) {
+        if (!((arguments[i] instanceof MML.mtr) ||
+              (arguments[i] instanceof MML.mlabeledtr))) {arguments[i] = MML.mtd(arguments[i])}
+      }
+      this.SUPER(arguments).Append.apply(this,arguments);
+    },
     setTeXclass: MML.mbase.setSeparateTeXclasses
   });
 
@@ -999,12 +1012,21 @@ MathJax.ElementJax.mml.Augment({
       mrow: {rowalign: TRUE, columnalign: TRUE, groupalign: TRUE},
       mtable: {rowalign: TRUE, columnalign: TRUE, groupalign: TRUE}
     },
+    Append: function () {
+      for (var i = 0, m = arguments.length; i < m; i++) {
+        if (!(arguments[i] instanceof MML.mtd)) {arguments[i] = MML.mtd(arguments[i])}
+      }
+      this.SUPER(arguments).Append.apply(this,arguments);
+    },
     setTeXclass: MML.mbase.setSeparateTeXclasses
   });
 
   MML.mtd = MML.mbase.Subclass({
     type: "mtd",
     inferRow: TRUE,
+    isEmbellished: MML.mbase.childEmbellished,
+    Core: MML.mbase.childCore,
+    CoreMO: MML.mbase.childCoreMO,
     defaults: {
       mathbackground: MML.INHERIT,
       mathcolor: MML.INHERIT,
@@ -1054,17 +1076,20 @@ MathJax.ElementJax.mml.Augment({
       actiontype: MML.ACTIONTYPE.TOGGLE,
       selection: 1
     },
+    // FIXME: isEmbellished and Core should be keyed to selection
     // FIXME: should base class on selection
     setTeXclass: MML.mbase.setSeparateTeXclasses
   });
   
   MML.semantics = MML.mbase.Subclass({
     type: "semantics",
+    isEmbellished: MML.mbase.childEmbellished,
+    Core: MML.mbase.childCore,
+    CoreMO: MML.mbase.childCoreMO,
     defaults: {
       definitionURL: null,
       encoding: null
     },
-    isEmbellished: MML.mbase.childEmbellished,
     setTeXclass: MML.mbase.setChildTeXclass
   });
   MML.annotation = MML.mbase.Subclass({
@@ -1109,6 +1134,11 @@ MathJax.ElementJax.mml.Augment({
       scriptsizemultiplier: Math.sqrt(1/2),
       scriptminsize: "8px",    // should be 8pt, but that's too big
       infixlinebreakstyle: MML.LINEBREAKSTYLE.BEFORE,
+      lineleading: "1ex",
+      indentshift: "auto",     // use user configuration
+      indentalign: MML.INDENTALIGN.AUTO,
+      indentalignfirst: MML.INDENTALIGN.INDENTALIGN,
+      indentshiftfirst: MML.INDENTSHIFT.INDENTSHIFT,
       decimalseparator: ".",
       texprimestyle: FALSE     // is it in TeX's C' style?
     },

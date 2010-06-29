@@ -25,11 +25,24 @@
   
   MML.mglyph.Augment({
     toHTML: function (span,variant) {
-      var values = this.getValues("src","width","height","valign","alt");
+      var SPAN = span, values = this.getValues("src","width","height","valign","alt"), err;
+      span = this.HTMLcreateSpan(span);
       if (values.src === "") {
-        values = this.getValues("index");
-        variant = this.HTMLgetVariant();
-        if (values.index) {this.HTMLhandleVariant(span,variant,String.fromCharCode(values.index))}
+        var index = this.Get("index");
+        if (index) {
+          variant = this.HTMLgetVariant(); var font = variant.defaultFont;
+          if (font) {
+            font.noStyleChar = true; font.testString = String.fromCharCode(index) + 'ABCabc';
+            if (HTMLCSS.Font.testFont(font)) {
+              this.HTMLhandleVariant(span,variant,String.fromCharCode(index));
+            } else {
+              if (values.alt === "") {values.alt = "Bad font: "+font.family}
+              err = MML.merror(values.alt).With({mathsize:"75%"});
+              this.Append(err); err.toHTML(span); this.data.pop();
+              span.bbox = err.HTMLspanElement().bbox;
+            }
+          }
+        }
       } else {
         if (!this.img) {this.img = MML.mglyph.GLYPH[values.src]}
         if (!this.img) {
@@ -40,14 +53,11 @@
           img.src = values.src;
           MathJax.Hub.RestartAfter(img.onload);
         }
-        var SPAN = span;
         if (this.img.status !== "OK") {
-          var span = HTMLCSS.addElement(span,"span",{className:"merror", style:{fontSize:"75%"}});
-          HTMLCSS.addText(span,"Bad mglyph: "+values.src);
-          span.bbox = {lw:0, w:span.offsetWidth/HTMLCSS.em, h:.8, d:.2};
-          span.bbox.rw = span.bbox.w;
+          err = MML.merror("Bad mglyph: "+values.src).With({mathsize:"75%"});
+          this.Append(err); err.toHTML(span); this.data.pop();
+          span.bbox = err.HTMLspanElement().bbox;
         } else {
-          span = this.HTMLcreateSpan(span);
           img = HTMLCSS.addElement(span,"img",{src:values.src, alt:values.alt, title:values.alt});
           if (values.width)  {
             if (String(values.width).match(/^\s*-?\d+\s*$/)) {values.width += "px"}
@@ -66,17 +76,15 @@
             span.bbox.h -= span.bbox.d;
           }
         }
-        if (variant) {
-          if (!SPAN.bbox) {
-            SPAN.bbox = {w: span.bbox.w, h: span.bbox.h, d: span.bbox.d,
-                         rw: span.bbox.rw, lw: span.bbox.lw};
-          } else {
-            SPAN.bbox.w += span.bbox.w;
-            if (SPAN.bbox.w > SPAN.bbox.rw) {SPAN.bbox.rw = SPAN.bbox.w}
-            if (span.bbox.h > SPAN.bbox.h) {SPAN.bbox.h = span.bbox.h}
-            if (span.bbox.d > SPAN.bbox.d) {SPAN.bbox.d = span.bbox.d}
-          }
-        }
+      }
+      if (!SPAN.bbox) {
+        SPAN.bbox = {w: span.bbox.w, h: span.bbox.h, d: span.bbox.d,
+                     rw: span.bbox.rw, lw: span.bbox.lw};
+      } else if (span.bbox) {
+        SPAN.bbox.w += span.bbox.w;
+        if (SPAN.bbox.w > SPAN.bbox.rw) {SPAN.bbox.rw = SPAN.bbox.w}
+        if (span.bbox.h > SPAN.bbox.h) {SPAN.bbox.h = span.bbox.h}
+        if (span.bbox.d > SPAN.bbox.d) {SPAN.bbox.d = span.bbox.d}
       }
       this.HTMLhandleSpace(span);
       this.HTMLhandleColor(span);

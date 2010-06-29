@@ -24,9 +24,9 @@
  */
 
 (function (TEX) {
-  var TRUE = true, FALSE = false, MML; 
+  var TRUE = true, FALSE = false, MML, NBSP = String.fromCharCode(0xA0); 
   
-  TEX.Stack = MathJax.Object.Subclass({
+  var STACK = MathJax.Object.Subclass({
     Init: function (env) {
       this.global = {};
       this.data = [STACKITEM.start().With({global: this.global})];
@@ -70,7 +70,7 @@
     toString: function () {return "stack[\n  "+this.data.join("\n  ")+"\n]"}
   });
   
-  var STACKITEM = TEX.Stack.Item = MathJax.Object.Subclass({
+  var STACKITEM = STACK.Item = MathJax.Object.Subclass({
     type: "base",
     closeError: "Extra close brace or missing open brace",
     rightError: "Missing \\left or extra \\right",
@@ -252,6 +252,18 @@
     EndRow:   function () {this.table.push(MML.mtr.apply(MML,this.row)); this.row = []},
     EndTable: function () {
       if (this.data.length || this.row.length) {this.EndEntry(); this.EndRow()}
+      this.checkLines();
+    },
+    checkLines: function () {
+      if (this.arraydef.rowlines) {
+        var lines = this.arraydef.rowlines.split(/ /);
+        if (lines.length === this.table.length) {
+          this.arraydef.frame = lines.pop();
+          this.arraydef.rowlines = lines.join(' ');
+        } else if (lines.length < this.table.length -1) {
+          this.arraydef.rowlines += " none";
+        }
+      }
     },
     clearEnv: function () {
       for (var id in this.env) {if (this.env.hasOwnProperty(id)) {delete this.env[id]}}
@@ -276,9 +288,8 @@
   });
   
 
-  var TEXDEF = TEX.Definitions = {};
-  
-  TEX.Startup = function () {
+  var TEXDEF = {};
+  var STARTUP = function () {
     MML = MathJax.ElementJax.mml;
     MathJax.Hub.Insert(TEXDEF,{
   
@@ -786,6 +797,8 @@
         cr:                 'Cr',
         '\\':               'Cr',
         newline:            'Cr',
+        hline:             ['HLine','solid'],
+        hdashline:         ['HLine','dashed'],
 //      noalign:            'HandleNoAlign',
         eqalignno:         ['Matrix',null,null,"right left right",MML.LENGTH.THICKMATHSPACE+" 3em",".5em",'D'],
         leqalignno:        ['Matrix',null,null,"right left right",MML.LENGTH.THICKMATHSPACE+" 3em",".5em",'D'],
@@ -823,6 +836,7 @@
         end:                'End',
 
         newcommand:        ['Extension','newcommand'],
+        renewcommand:      ['Extension','newcommand'],
         newenvironment:    ['Extension','newcommand'],
         def:               ['Extension','newcommand'],
         
@@ -881,6 +895,17 @@
       p_height: 1.2 / .85   // cmex10 height plus depth over .85
 
     });
+    
+    //
+    //  Add macros defined in the configuration
+    //
+    if (this.config.Macros) {
+      var MACROS = this.config.Macros;
+      for (var id in MACROS) {if (MACROS.hasOwnProperty(id)) {
+        if (typeof(MACROS[id]) === "string") {TEXDEF.macros[id] = ['Macro',MACROS[id]]}
+        else {TEXDEF.macros[id] = ["Macro"].concat(MACROS[id])}
+      }}
+    }
   };
   
   /************************************************************************/
@@ -888,7 +913,7 @@
    *   The TeX Parser
    */
 
-  TEX.Parse = MathJax.Object.Subclass({
+  var PARSE = MathJax.Object.Subclass({
     Init: function (string,env) {
       this.string = string; this.i = 0;
       var ENV; if (env) {ENV = {}; for (var id in env) {if (env.hasOwnProperty(id)) {ENV[id] = env[id]}}}
@@ -947,8 +972,11 @@
         if (delim.length === 4) {delim = MML.entity('#x'+delim)} else {delim = MML.chars(delim)}
         this.Push(this.mmlToken(MML.mo(delim).With({fence: FALSE, stretchy: FALSE}).With(def)));
       } else {                                                    // error
-        TEX.Error("Undefined control sequence \\"+name);
+        this.csUndefined("\\"+name);
       }
+    },
+    csUndefined: function (name) {
+      TEX.Error("Undefined control sequence "+name);
     },
 
     /*
@@ -979,7 +1007,7 @@
     /*
      *  Handle tilde and spaces
      */
-    Tilde: function (c) {this.Push(MML.mtext(MML.chars(" ")))},
+    Tilde: function (c) {this.Push(MML.mtext(MML.chars(NBSP)))},
     Space: function (c) {},
     
     /*
@@ -1192,9 +1220,22 @@
     },
     
     TeXAtom: function (name,mclass) {
-      var def = {texClass: mclass};
-      if (mclass == MML.TEXCLASS.OP) {def.movesupsub = def.movablelimits = TRUE}
-      this.Push(MML.TeXAtom(this.ParseArg(name)).With(def));
+      var def = {texClass: mclass}, mml;
+      if (mclass == MML.TEXCLASS.OP) {
+        def.movesupsub = def.movablelimits = TRUE;
+        var arg = this.GetArgument(name);
+        var match = arg.match(/^\s*\\rm\s+([a-zA-Z0-9 ]+)$/);
+        if (match) {
+          mml = this.mmlToken(MML.mo(match[1]).With({
+            movablelimits: TRUE,  movesupsub: TRUE,
+            mathvariant: MML.VARIANT.NORMAL,
+            form: MML.FORM.PREFIX,
+            texClass: MML.TEXCLASS.OP
+          }));
+          mml.useMMLspacing &= ~mml.SPACE_ATTR.form;  // don't count this explicit form setting
+        } else {mml = MML.TeXAtom(TEX.Parse(arg,this.stack.env).mml()).With(def)}
+      } else {mml = MML.TeXAtom(this.ParseArg(name)).With(def)}
+      this.Push(mml);
     },
     
     Strut: function (name) {
@@ -1321,13 +1362,13 @@
       var array = STACKITEM.array().With({
         requireClose: TRUE,
         arraydef: {
-          rowspacing: (vspacing||"3pt"),
+          rowspacing: (vspacing||"4pt"),
           columnspacing: (spacing||"1em")
         }
       });
-      if (open || close)    {array.open = open; array.close = close}
-      if (style === "D")    {array.arraydef.displaystyle = TRUE}
-      if (align != null)    {array.arraydef.columnalign = align}
+      if (open || close) {array.open = open; array.close = close}
+      if (style === "D") {array.arraydef.displaystyle = TRUE}
+      if (align != null) {array.arraydef.columnalign = align}
       this.Push(array);
     },
     
@@ -1337,6 +1378,20 @@
     
     Cr: function (name) {
       this.Push(STACKITEM.cell().With({isCR: TRUE, name: name}));
+    },
+    
+    HLine: function (name,style) {
+      if (style == null) {style = "solid"}
+      var top = this.stack.Top();
+      if (top.type !== "array" || top.data.length) {TEX.Error("Misplaced "+name)}
+      if (top.table.length == 0) {
+        top.arraydef.frame = style;
+      } else {
+        var lines = (top.arraydef.rowlines ? top.arraydef.rowlines.split(/ /) : []);
+        while (lines.length < top.table.length) {lines.push("none")}
+        lines[top.table.length-1] = style;
+        top.arraydef.rowlines = lines.join(' ');
+      }
     },
     
    /************************************************************************/
@@ -1363,19 +1418,26 @@
     
     Array: function (begin,open,close,align,spacing,vspacing,style,raggedHeight) {
       if (!align) {align = this.GetArgument("\\begin{"+begin.name+"}")}
-      var lines = align.replace(/[^clr|]/g,'').replace(/[^|]\|/g,'|').split('').join(' ');
+      var lines = ("c"+align).replace(/[^clr|:]/g,'').replace(/[^|:]([|:])+/g,'$1');
       align = align.replace(/[^clr]/g,'').split('').join(' ');
       align = align.replace(/l/g,'left').replace(/r/g,'right').replace(/c/g,'center');
       var array = STACKITEM.array().With({
         arraydef: {
           columnalign: align,
           columnspacing: (spacing||"1em"),
-          rowspacing: (vspacing||"3pt")
+          rowspacing: (vspacing||"4pt")
         }
       });
-      // FIXME: do something about initial (and terminal?) vertical line
-      if (lines.match(/\|/))
-        {array.arraydef.columnlines = lines.replace(/[^| ]/g,'none').replace(/\|/g,'solid')}
+      if (lines.match(/[|:]/)) {
+        var frame = (lines.charAt(0)+lines.charAt(lines.length-1)).replace(/[^|:]/g,"");
+        if (frame !== "") {
+          array.arraydef.frame = {'|':'solid', ':':'dashed'}[frame.charAt(0)];
+          array.arraydef.framespacing = ".5em .5ex"
+        }
+        lines = lines.substr(1,lines.length-2);
+        array.arraydef.columnlines =
+          lines.split('').join(' ').replace(/[^|: ]/g,'none').replace(/\|/g,'solid').replace(/:/g,'dashed');
+      }
       if (open)  {array.open  = this.convertDelimiter(open)}
       if (close) {array.close = this.convertDelimiter(close)}
       if (style === "D") {array.arraydef.displaystyle = TRUE}
@@ -1553,7 +1615,7 @@
     InternalMath: function (text,level) {
       var def = {displaystyle: FALSE}; if (level != null) {def.scriptlevel = level}
       if (this.stack.env.font) {def.mathvariant = this.stack.env.font}
-      if (!text.match(/\$|\\\(/)) {return [MML.mtext(MML.chars(text)).With(def)]}
+      if (!text.match(/\$|\\\(/)) {return [this.InternalText(text,def)]}
       var i = 0, k = 0, c, match = '';
       var mml = [];
       while (i < text.length) {
@@ -1563,13 +1625,13 @@
             mml.push(MML.TeXAtom(TEX.Parse(text.slice(k,i-1)).mml().With(def)));
             match = ''; k = i;
           } else {
-            if (k < i-1) {mml.push(MML.mtext(MML.chars(text.slice(k,i-1))).With(def))}
+            if (k < i-1) {mml.push(this.InternalText(text.slice(k,i-1),def))}
             match = '$'; k = i;
           }
         } else if (c === '\\') {
           c = text.charAt(i++);
           if (c === '(' && match == '') {
-            if (k < i-2) {mml.push(MML.mtext(MML.chars(text.slice(k,i-2))).With(def))}
+            if (k < i-2) {mml.push(this.InternalText(text.slice(k,i-2),def))}
             match = ')'; k = i;
           } else if (c === ')' && match === ')') {
             mml.push(MML.TeXAtom(TEX.Parse(text.slice(k,i-2)).mml().With(def)));
@@ -1578,8 +1640,12 @@
         }
       }
       if (match !== '') {TEX.Error("Math not terminated in text box")}
-      if (k < text.length) {mml.push(MML.mtext(MML.chars(text.slice(k))).With(def))}
+      if (k < text.length) {mml.push(this.InternalText(text.slice(k),def))}
       return mml;
+    },
+    InternalText: function (text,def) {
+      text = text.replace(/^\s+/,NBSP).replace(/\s+$/,NBSP);
+      return MML.mtext(MML.chars(text)).With(def);
     },
 
     /*
@@ -1617,6 +1683,8 @@
   /************************************************************************/
 
   TEX.Augment({
+    Stack: STACK, Parse: PARSE, Definitions: TEXDEF, Startup: STARTUP,
+    
     Translate: function (script) {
       var mml, math = script.innerHTML.replace(/^\s+/,"").replace(/\s+$/,"");
       if (MathJax.Hub.Browser.isKonqueror)
@@ -1635,7 +1703,10 @@
       if (displaystyle) {mml.root.display = "block"}
       return mml;
     },
-    prefilterMath: function (math,displaystyle,script) {return math},
+    prefilterMath: function (math,displaystyle,script) {
+      // avoid parsing super- and subscript numbers as a unit
+      return math.replace(/([_^]\s*\d)(\d)/g,"$1 $2");
+    },
     formatError: function (err,math,displaystyle,script) {
       return MML.merror(err.message.replace(/\n.*/,""));
     },

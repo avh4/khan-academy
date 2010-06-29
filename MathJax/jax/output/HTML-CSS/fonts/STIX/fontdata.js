@@ -1226,7 +1226,7 @@
     0x5B: [1566,279,459,190,422],      // LEFT SQUARE BRACKET
     0x5C: [1566,279,806,25,781],       // REVERSE SOLIDUS
     0x5D: [1566,279,459,37,269],       // RIGHT SQUARE BRACKET
-    0x5F: [-127,177,1500,0,1000],      // LOW LINE
+    0x5F: [-127,177,1500,0,1500],      // LOW LINE
     0x7B: [1566,279,717,124,531],      // LEFT CURLY BRACKET
     0x7D: [1566,279,717,186,593],      // RIGHT CURLY BRACKET
     0xA0: [0,0,250,0,0],               // NO-BREAK SPACE
@@ -1376,11 +1376,21 @@
 
   MathJax.Hub.Browser.Select({
     MSIE: function (browser) {
-      // MSIE (6, 7, 8) can't access the Spacing Modifier positions?
-      HTMLCSS.FONTDATA.REMAP[0x2C9] = 0xAF; // macron
-      HTMLCSS.FONTDATA.REMAP[0x2CA] = 0xB4; // acute
-      HTMLCSS.FONTDATA.REMAP[0x2CB] = 0x60; // grave
-      HTMLCSS.FONTDATA.REMAP[0x2DA] = 0xB0; // ring above
+      if (!browser.versionAtLeast("8.0") || document.documentMode < 8) {
+        var FONTDATA = HTMLCSS.FONTDATA;
+        // MSIE Can't access the Spacing Modifier positions
+        FONTDATA.REMAP[0x2C9] = 0xAF; // macron
+        FONTDATA.REMAP[0x2CA] = 0xB4; // acute
+        FONTDATA.REMAP[0x2CB] = 0x60; // grave
+        FONTDATA.REMAP[0x2DA] = 0xB0; // ring above
+        // MSIE can't access Greek block
+        FONTDATA.RANGES[5] = FONTDATA.RANGES[4]; FONTDATA.RANGES[4] = FONTDATA.RANGES[3]
+	FONTDATA.RANGES[3] = {name: "greek", low: 0x03B1, high: 0x03F6, offset: "GG",
+	  remap: {0x03F5: 26, 0x03D1: 27, 0x03F0: 28, 0x03D5: 29, 0x03F1: 30, 0x03D6: 31}};
+	FONTDATA.VARIANT["bold"].offsetGG = 0x1D6C2; FONTDATA.VARIANT["bold"].offsetG = 0x1D6A8;
+	FONTDATA.VARIANT["italic"].offsetGG = 0x1D6FC; FONTDATA.VARIANT["italic"].offsetG = 0x1D6E2;
+        FONTDATA.VARIANT["bold-italic"].offsetGG = 0x1D736; FONTDATA.VARIANT["bold-italic"].offsetG = 0x1D71C;
+      }
     }
   });
   

@@ -9,7 +9,7 @@
  *  
  *  ---------------------------------------------------------------------
  *  
- *  Copyright (c) 2009 Design Science, Inc.
+ *  Copyright (c) 2009-2010 Design Science, Inc.
  * 
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@
 if (document.getElementById && document.childNodes && document.createElement) {
 
 if (!window.MathJax) {window.MathJax= {}}
-MathJax.version = "0.9.8";
+MathJax.version = "0.9.8.2";
 
 /**********************************************************/
 
@@ -72,11 +72,9 @@ MathJax.version = "0.9.8";
   
     Init: function (args) {
       var obj = this;
-      if (args.length !== 1 || args[0] !== PROTO) {
-        if (!(obj instanceof args.callee)) {obj = new args.callee(PROTO)}
-        obj.Init.apply(obj,args);
-      }
-      return obj;
+      if (args.length === 1 && args[0] === PROTO) {return obj}
+      if (!(obj instanceof args.callee)) {obj = new args.callee(PROTO)}
+      return obj.Init.apply(obj,args) || obj;
     },
     
     Augment: function (def,classdef) {
@@ -90,11 +88,12 @@ MathJax.version = "0.9.8";
       if (classdef != null) {
         for (id in classdef) {if (classdef.hasOwnProperty(id)) {this[id] = classdef[id]}}
       }
+      return this;
     },
   
     protoFunction: function (id,def) {
       this.prototype[id] = def;
-      if (def instanceof Function) {def.SUPER = this.SUPER.prototype}
+      if (typeof def === "function") {def.SUPER = this.SUPER.prototype}
     },
   
     prototype: {
@@ -239,7 +238,7 @@ MathJax.version = "0.9.8";
     toString: function () {return this.hook.toString.apply(this.hook,arguments)}
   };
   var ISCALLBACK = function (f) {
-    return (f instanceof Function && f.isCallback);
+    return (typeof(f) === "function" && f.isCallback);
   }
   //
   //  Evaluate a string in global context
@@ -277,22 +276,22 @@ MathJax.version = "0.9.8";
   //
   var USING = function (args,i) {
     if (arguments.length > 1) {
-      if (arguments.length === 2 && !(arguments[0] instanceof Function) &&
+      if (arguments.length === 2 && !(typeof arguments[0] === 'function') &&
           arguments[0] instanceof Object && typeof arguments[1] === 'number')
             {args = [].slice.call(args,i)}
       else {args = [].slice.call(arguments,0)}
     }
     if (args instanceof Array && args.length === 1) {args = args[0]}
-    if (args instanceof Function) {
+    if (typeof args === 'function') {
       if (args.execute === CALLBACK.prototype.execute) {return args}
       return CALLBACK({hook: args});
     } else if (args instanceof Array) {
       if (typeof(args[0]) === 'string' && args[1] instanceof Object &&
-                 args[1][args[0]] instanceof Function) {
+                 typeof args[1][args[0]] === 'function') {
         return CALLBACK({hook: args[1][args[0]], object: args[1], data: args.slice(2)});
-      } else if (args[0] instanceof Function) {
+      } else if (typeof args[0] === 'function') {
         return CALLBACK({hook: args[0], data: args.slice(1)});
-      } else if (args[1] instanceof Function) {
+      } else if (typeof args[1] === 'function') {
         return CALLBACK({hook: args[1], object: args[0], data: args.slice(2)});
       }
     } else if (typeof(args) === 'string') {
@@ -886,6 +885,49 @@ MathJax.version = "0.9.8";
 
 /**********************************************************/
 
+MathJax.HTML = {
+  //
+  //  Create an HTML element with given attributes and content.
+  //  The def parameter is an (optional) object containing key:value pairs
+  //  of the attributes and their values, and contents is an (optional)
+  //  array of strings to be inserted as text, or arrays of the form
+  //  [type,def,contents] that describes an HTML element to be inserted
+  //  into the current element.  Thus the contents can describe a complete
+  //  HTML snippet of arbitrary complexity.  E.g.:
+  //  
+  //    MathJax.HTML.Element("span",{id:"mySpan",style{"font-style":"italic"}},[
+  //        "(See the ",["a",{href:"http://www.mathjax.org"},["MathJax home page"]],
+  //        " for more details.)"]);
+  // 
+  Element: function (type,def,contents) {
+    var obj = document.createElement(type);
+    if (def) {
+      if (def.style) {
+        var style = def.style; def.style = {};
+        for (var id in style) {if (style.hasOwnProperty(id))
+          {def.style[id.replace(/-([a-z])/g,this.ucMatch)] = style[id]}}
+      }
+      MathJax.Hub.Insert(obj,def);
+    }
+    if (contents) {
+      for (var i = 0; i < contents.length; i++) {
+        if (contents[i] instanceof Array) {
+          obj.appendChild(this.Element(contents[i][0],contents[i][1],contents[i][2]));
+        } else {
+          obj.appendChild(document.createTextNode(contents[i]));
+        }
+      }
+    }
+    return obj;
+  },
+  ucMatch: function (match,c) {return c.toUpperCase()},
+  addElement: function (span,type,def,contents) {return span.appendChild(this.Element(type,def,contents))},
+  TextNode: function (text) {return document.createTextNode(text)},
+  addText: function (span,text) {return span.appendChild(this.TextNode(text))}
+};
+
+/**********************************************************/
+
 MathJax.Message = {
   log: [{}], current: null,
   textNodeBug: (navigator.vendor === "Apple Computer, Inc." &&
@@ -921,6 +963,15 @@ MathJax.Message = {
   
   Init: function() {
     if (!document.body) {return false}
+    //
+    //  ASCIIMathML replaces the entire page with a copy of itself (@#!#%@!!)
+    //  so check that this.div is still part of the page, otherwise look up
+    //  the copy and use that.
+    //
+    if (this.div && this.div.parentNode == null) {
+      this.div = document.getElementById("MathJax_Message");
+      if (this.div) {this.text = this.div.firstChild}
+    }
     if (!this.div) {
       var frame = document.body;
       if (MathJax.Hub.Browser.isMSIE) {
@@ -934,8 +985,7 @@ MathJax.Message = {
         window.attachEvent("onresize",this.MoveFrame);
         this.MoveFrame();
       }
-      this.div = this.addDiv(frame);
-      this.div.id = "MathJax_Message"; this.div.style.display = "none";
+      this.div = this.addDiv(frame); this.div.style.display = "none";
       this.text = this.div.appendChild(document.createTextNode(""));
     }
     return true;
@@ -943,6 +993,7 @@ MathJax.Message = {
   
   addDiv: function (parent) {
     var div = document.createElement("div");
+    div.id = "MathJax_Message";
     if (parent.firstChild) {parent.insertBefore(div,parent.firstChild)}
       else {parent.appendChild(div)}
     return div;
@@ -958,16 +1009,29 @@ MathJax.Message = {
     frame.style.height = body.clientHeight + 'px';
   },
   
+  filterText: function (text,n) {
+    if (MathJax.Hub.config.messageStyle === "simple") {
+      if (text.match(/^Loading /)) {
+        if (!this.loading) {this.loading = "Loading "}
+        text = this.loading; this.loading += ".";
+      } else if (text.match(/^Processing /)) {
+        if (!this.processing) {this.processing = "Processing "}
+        text = this.processing; this.processing += ".";
+      }
+    }
+    return text;
+  },
+  
   Set: function (text,n,clearDelay) {
     if (this.timer) {clearTimeout(this.timer); delete this.timeout}
     if (n == null) {n = this.log.length; this.log[n] = {}}
-    this.log[n].text = text;
+    this.log[n].text = text; text = this.filterText(text,n);
     if (typeof(this.log[n].next) === "undefined") {
       this.log[n].next = this.current;
       if (this.current != null) {this.log[this.current].prev = n}
       this.current = n;
     }
-    if (this.current === n) {
+    if (this.current === n && MathJax.Hub.config.messageStyle !== "none") {
       if (this.Init()) {
         if (this.textNodeBug) {this.div.innerHTML = text} else {this.text.nodeValue = text}
         this.div.style.display = "";
@@ -987,6 +1051,7 @@ MathJax.Message = {
     if (this.current === n) {
       this.current = this.log[n].next;
       if (this.text) {
+        if (this.div.parentNode == null) {this.Init()} // see ASCIIMathML comments above
         if (this.current == null) {
           if (this.timer) {clearTimeout(this.timer)}
           this.timer = setTimeout(MathJax.CallBack(["Remove",this]),(delay||600));
@@ -1033,8 +1098,11 @@ MathJax.Hub = {
     browser: {},     // browser-specific files to load (by browser name)
     preJax: null,    // pattern to remove from before math script tag
     postJax: null,   // pattern to remove from after math script tag
+    displayAlign: 'center',       // how to align displayed equations (left, center, right)
+    displayIndent: '0',           // indentation for displayed equations (when not centered)
     preRemoveClass: 'MathJax_Preview', // class of objects to remove preceeding math script
     showProcessingMessages: true, // display "Processing math: nn%" messages or not
+    messageStyle: "normal",       // set to "none" or "simple" (for "Loading..." and "Processing...")
     delayStartupUntil: "none",    // set to "onload" to delay setup until the onload handler runs
                                   //  or to a CallBack to wait for before continuing with the startup
     skipStartupTypeset: false,    // set to true to skip PreProcess and Process during startup
@@ -1111,6 +1179,10 @@ MathJax.Hub = {
     }
     // FIXME: check for results of outputJax
     return 0;
+  },
+  
+  Queue: function () {
+    return this.queue.Push.apply(this.queue,arguments);
   },
   
   Typeset: function (element,callback) {
@@ -1217,7 +1289,7 @@ MathJax.Hub = {
         if (!script.MathJax.elementJax || script.MathJax.state === STATE.UPDATE) {
           this.checkScriptSiblings(script);
           result = inputJax[type].Translate(script);
-          if (result instanceof Function) {
+          if (typeof result === 'function') {
             if (result.called) continue; // go back and call Translate() again
             this.RestartAfter(result);
           }
@@ -1230,7 +1302,7 @@ MathJax.Hub = {
         }
         jax.outputJax = outputJax[jax.mimeType][0];
         result = jax.outputJax.Translate(script);
-        if (result instanceof Function) {
+        if (typeof result === 'function') {
           script.MathJax.state = STATE.UPDATE;
           if (result.called) continue; // go back and call Translate() again
           this.RestartAfter(result);
@@ -1259,7 +1331,7 @@ MathJax.Hub = {
   },
   
   elementCallBack: function (element,callback) {
-    if (callback == null && (element instanceof Array || element instanceof Function))
+    if (callback == null && (element instanceof Array || typeof element === 'function'))
       {callback = element; element = document.body}
     else if (element == null) {element = document.body}
     else if (typeof(element) === 'string') {element = document.getElementById(element)}
@@ -1309,7 +1381,7 @@ MathJax.Hub.Startup = {
   //
   Config: function () {
     this.queue.Push(["Post",this.signal,"Begin Config"]);
-    if (this.script.match(/\S/)) {this.queue.Push(this.script+';1')}
+    if (this.script.match(/\S/)) {this.queue.Push(this.script+";\n1;")}
       else {this.queue.Push(["Require",MathJax.Ajax,this.URL("config","MathJax.js")])}
     if (MathJax.userConfig)
       {this.queue.Push(function () {try {MathJax.userConfig()} catch(e) {}})}
@@ -1319,7 +1391,8 @@ MathJax.Hub.Startup = {
         if (config.delayStartupUntil === "onload") {return onload}
         return function () {};
       }, MathJax.Hub.config, this.onload],
-      ["loadArray",this,MathJax.Hub.config.config,"config"],
+      // use a function here since MathJax.Hub.config.config might change in MathJax.js above
+      [function (THIS) {return THIS.loadArray(MathJax.Hub.config.config,"config")},this],
       ["Post",this.signal,"End Config"]
     );
   },
@@ -1444,10 +1517,36 @@ MathJax.Hub.Startup = {
 
   var JAX = MathJax.Object.Subclass({
     require: null, // array of files to load before jax.js is complete
-    Init: function (def) {this.config = {}; HUB.Insert(this,def)},
-    Augment: function (def) {HUB.Insert(this,def)},
+    config: {},
+    //
+    //  Make a subclass and return an instance of it.
+    //  (FIXME: should we replace config with a copy of the constructor's
+    //   config?  Otherwise all subclasses share the same config structure.)
+    //
+    Init: function (def,cdef) {
+      if (arguments.length === 0) {return this}
+      return (this.constructor.Subclass(def,cdef))();
+    },
+    //
+    //  Augment by merging with class definition (not replacing)
+    //
+    Augment: function (def,cdef) {
+      var cObject = this.constructor, ndef = {};
+      if (def != null) {
+        for (var id in def) {if (def.hasOwnProperty(id)) {
+          if (typeof def[id] === "function")
+            {cObject.protoFunction(id,def[id])} else {ndef[id] = def[id]}
+        }}
+        // MSIE doesn't list toString even if it is not native so handle it separately
+        if (def.toString !== cObject.prototype.toString && def.toString !== {}.toString)
+          {cObject.protoFunction('toString',def.toString)}
+      }
+      HUB.Insert(cObject.prototype,ndef);
+      cObject.Augment(null,cdef);
+      return this;
+    },
     Translate: function (element) {
-      this.Translate = this.noTranslate;
+      this.constructor.prototype.Translate = this.noTranslate;
       return AJAX.Require(this.directory+"/jax.js");
     },
     noTranslate: function (element) {
@@ -1517,6 +1616,9 @@ MathJax.Hub.Startup = {
   /***********************************/
 
   BASE.ElementJax = JAX.Subclass({
+    // make a subclass, not an instance
+    Init: function (def,cdef) {return this.constructor.Subclass(def,cdef)},
+    
     inputJax: null,
     outputJax: null,
     inputID: null,
@@ -1531,12 +1633,12 @@ MathJax.Hub.Startup = {
           else {script.firstChild.nodeValue = text}
       } else {try {script.innerHTML = text} catch(err) {script.text = text}}
       script.MathJax.state = this.STATE.UPDATE;
-      HUB.Update(script,callback);
+      return HUB.Update(script,callback);
     },
     Reprocess: function (callback) {
       var script = this.SourceElement();
       script.MathJax.state = this.STATE.UPDATE;
-      HUB.Reprocess(script,callback);
+      return HUB.Reprocess(script,callback);
     },
     Remove: function () {
       this.outputJax.Remove(this);
@@ -1652,7 +1754,7 @@ MathJax.Hub.Startup = {
       var VERSION = new RegExp(
         ".*(Version)/((?:\\d+\\.)+\\d+)|" +                                       // for Safari and Opera10
         ".*("+browser+")"+(browser == "MSIE" ? " " : "/")+"((?:\\d+\\.)*\\d+)|"+  // for one of the main browser
-        "(?:^|\\(| )([a-z][-a-z0-9._: ]+)/((?:\\d+\\.)+\\d+)");                   // for unrecognized browser
+        "(?:^|\\(| )([a-z][-a-z0-9._: ]+|WebKit)/((?:\\d+\\.)+\\d+)");            // for unrecognized browser
       var MATCH = VERSION.exec(AGENT) || ["","","","unknown","0.0"];
       HUB.Browser.name = (MATCH[1] == "Version" ? browser : (MATCH[3] || MATCH[5]));
       HUB.Browser.version = MATCH[2] || MATCH[4] || MATCH[6];
@@ -1680,11 +1782,11 @@ MathJax.Hub.Startup = {
         else if (date >= "20061024") {browser.version = "2.0"}
       }
     },
-    Opera: function (browser) {browser.verion = opera.version()}
+    Opera: function (browser) {browser.version = opera.version()}
   });
   HUB.Browser.Select(MathJax.Message.browsers);
 
-  BASE.CallBack.Queue(
+  HUB.queue = BASE.CallBack.Queue(
     ["Post",STARTUP.signal,"Begin"],
     ["Config",STARTUP],
     ["Styles",STARTUP],

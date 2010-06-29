@@ -130,6 +130,23 @@ MathJax.Hub.Config({
   showProcessingMessages: true,
   
   //
+  //  This value controls the verbosity of the messages in the lower left-hand corner.
+  //  Set it to "none" to eliminate all messages, or set it to "simple" to show
+  //  "Loading..." and "Processing..." rather than showing the full file name and the
+  //  percentage of the mathematics processed.
+  //
+  messageStyle: "normal",
+  
+  //
+  //  These two parameters control the alignment and shifting of displayed equations.
+  //  The first can be "left", "center", or "right", and determines the alignment of
+  //  displayed equations.  When the alignment is not "center", the second determines
+  //  an indentation from the left or right side for the displayed equations.
+  //  
+  displayAlign: "center",
+  displayIndent: "0em",
+  
+  //
   //  Normally MathJax will perform its starup commands (loading of
   //  configuration, styles, jax, and so on) as soon as it can.  If you
   //  expect to be doing additional configuration on the page, however, you
@@ -183,6 +200,34 @@ MathJax.Hub.Config({
     ],
 
     //
+    //  This array lists the names of the tags whose contents should not be
+    //  processed by tex2jax (other than to look for ignore/process classes
+    //  as listed below).  You can add to (or remove from) this list to prevent
+    //  MathJax from processing.
+    //
+    skipTags: ["script","noscript","style","textarea","pre","code"],
+
+    //
+    //  This is the class name of the elements whose contents should not be
+    //  processed by tex2jax (other than to look for the process pattern
+    //  below).  Note that this is a regular expression, and so you need to
+    //  be sure to quote any regexp special characters.  The pattern is
+    //  automatically preceeded by '(^| )(' and followed by ')( |$)', so
+    //  your pattern will have to match full words in the class name.
+    //
+    ignoreClass: "tex2jax_ignore",
+
+    //
+    //  This is the class name of the elements whose contents SHOULD be
+    //  processed by tex2jax.  This is used to turn on processing within
+    //  tags that have been marked as ignored or skipped above.  Note that
+    //  this is a regular expression, and so you need to be sure to quote
+    //  any regexp special characters.  The pattern is automatically
+    //  preceeded by '(^| )(' and followed by ')( |$)', so your pattern
+    //  will have to match full words in the class name.
+    //
+    processClass: "tex2jax_process",
+    //
     //  Set to "true" to allow \$ to produce a dollar without starting in-line
     //  math mode.  If you uncomment the ['$','$'] line above, you should change
     //  this to true so that you can insert plain dollar signs into your documents
@@ -197,12 +242,49 @@ MathJax.Hub.Config({
     processEnvironments: true,
 
     //
-    //  Controls whether tex2jax inserts MathJax_Preview spans so that the TeX
-    //  code is visible until it is processed by MathJax.  Set to "false" to prevent
-    //  the previews from being inserted (the math will simply disappear until it is
-    //  typeset).
+    //  Controls whether tex2jax inserts MathJax_Preview spans to make a
+    //  preview available, and what preview to use.  The default is "TeX",
+    //  which means use the TeX code as the preview (until it is processed
+    //  by MathJax).  Set to "none" to prevent the previews from being
+    //  inserted (the math will simply disappear until it is typeset).  Set
+    //  to an array containing the description of an HTML snippet in
+    //  order to use the same preview for all equations on the page (e.g.,
+    //  you could have it say "[math]" or load an image).
     //  
-    previewTeX: true
+    //  E.g.,     preview: ["[math]"],
+    //  or        preview: [["img",{src: "http://myserver.com/images/mypic.jpg"}]]
+    //  
+    preview: "TeX"
+    
+  },
+  
+  //============================================================================
+  //
+  //  These parameters control the mml2jax preprocessor (when you have included
+  //  "mml2jax.js" in the extensions list above).
+  //
+  mml2jax: {
+    
+    //
+    //  The Id of the element to be processed (defaults to full document)
+    //
+    element: null,
+
+    //
+    //  Controls whether mml2jax inserts MathJax_Preview spans to make a
+    //  preview available, and what preview to use.  The default is
+    //  "alttext", which means use the <math> tag's alttext attribute is
+    //  used as the preview (until it is processed by MathJax), if the tag
+    //  has one.  Set to "none" to prevent the previews from being inserted
+    //  (the math will simply disappear until it is typeset).  Set to an
+    //  array containing the description of an HTML snippet in order to
+    //  use the same preview for all equations on the page (e.g., you could
+    //  have it say "[math]" or load an image).
+    //  
+    //  E.g.,     preview: ["[math]"],
+    //  or        preview: [["img",{src: "http://myserver.com/images/mypic.jpg"}]]
+    //  
+    preview: "alttext"
     
   },
   
@@ -212,13 +294,27 @@ MathJax.Hub.Config({
   //  "jsMath2jax.js" in the extensions list above).
   //
   jsMath2jax: {
+    
     //
-    //  Controls whether jsMath2tex inserts MathJax_Preview elements so that
-    //  the TeX code is visible until it is processed by MathJax.  Set to "false"
-    //  to prevent previews from being inserted (the math will simply disappear
-    //  until it is typeset).
+    //  The Id of the element to be processed (defaults to full document)
     //
-    previewTeX: true
+    element: null,
+
+    //
+    //  Controls whether jsMath2jax inserts MathJax_Preview spans to make a
+    //  preview available, and what preview to use.  The default is "TeX",
+    //  which means use the TeX code as the preview (until it is processed
+    //  by MathJax).  Set to "none" to prevent the previews from being
+    //  inserted (the math will simply disappear until it is typeset).  Set
+    //  to an array containing the description of an HTML snippet in
+    //  order to use the same preview for all equations on the page (e.g.,
+    //  you could have it say "[math]" or load an image).
+    //  
+    //  E.g.,     preview: ["[math]"],
+    //  or        preview: [["img",{src: "http://myserver.com/images/mypic.jpg"}]]
+    //  
+    preview: "TeX"
+    
   },
 
   //============================================================================
@@ -241,7 +337,25 @@ MathJax.Hub.Config({
     //
     //  This is the width to use for the multline environment
     //
-    MultLineWidth: "85%"
+    MultLineWidth: "85%",
+    
+    //
+    //  List of macros to define.  These are of the form
+    //      name: value
+    //  where 'value' is the replacement text for the macro \name.
+    //  The 'value' can also be [value,n] where 'value' is the replacement
+    //  text and 'n' is the number of parameters for the macro.
+    //  Note that backslashes must be doubled in the replacement string.
+    //  
+    //  E.g.,
+    //  
+    //      Macros: {
+    //        RR: '{\\bf R}',
+    //        bold: ['{\\bf #1}', 1]
+    //      }
+    //
+    Macros: {}
+    
   },
 
   //============================================================================
@@ -330,7 +444,18 @@ MathJax.Hub.Config({
     //        }
     //      }
     //
-    styles: {}
+    styles: {},
+    
+    //
+    //  Configuration for <maction> tooltips
+    //    (see also the #MathJax_Tooltip CSS in MathJax/jax/output/HTML-CSS/config.js,
+    //     which can be overriden using the styles values above).
+    //
+    tooltip: {
+      delayPost: 600,          // milliseconds delay before tooltip is posted after mouseover
+      delayClear: 600,         // milliseconds delay before tooltip is cleared after mouseout
+      offsetX: 10, offsetY: 5  // pixels to offset tooltip from mouse position
+    }
   },
   
   //============================================================================
@@ -344,7 +469,12 @@ MathJax.Hub.Config({
     //  The output jax that is to be preferred when both are possible
     //  (set to "MML" for native MathML, "HTML" for MathJax's HTML-CSS output jax).
     //
-    prefer: "HTML"
+    prefer: {
+      MSIE:    "MML",
+      Firefox: "MML",
+      Opera:   "HTML",
+      other:   "HTML"
+    }
   }
 });
 

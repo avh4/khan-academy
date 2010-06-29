@@ -32,44 +32,61 @@
 
 MathJax.Extension.jsMath2jax = {
   config: {
-    previewTeX: true,   // Set to false to prevent preview strings from being inserted
+    element: null,    // The ID of the element to be processed
+                      //   (defaults to full document)
+
+    preview: "TeX"    // Set to "none" to prevent preview strings from being inserted
+                      //   or to an array that specifies an HTML snippet to use for
+                      //   the preview.
   },
   
   PreProcess: function (element) {
     if (!this.configured) {
       MathJax.Hub.Insert(this.config,(MathJax.Hub.config.jsMath2jax||{}));
+      if (this.config.Augment) {MathJax.Hub.Insert(this,this.config.Augment)}
+      if (typeof(this.config.previewTeX) !== "undefined" && !this.config.previewTeX)
+        {this.config.preview = "none"} // backward compatibility for previewTeX parameter
       this.previewClass = MathJax.Hub.config.preRemoveClass;
       this.configured = true;
     }
     if (typeof(element) === "string") {element = document.getElementById(element)}
     if (!element) {element = this.config.element || document.body}
     var span = element.getElementsByTagName("span"), i, m;
-    for (i = 0, m = span.length; i < m; i++)
+    for (i = span.length-1; i >= 0; i--)
       {if (String(span[i].className).match(/\bmath\b/)) {this.ConvertMath(span[i],"")}}
     var div = element.getElementsByTagName("div");
-    for (i = 0, m = div.length; i < m; i++)
+    for (i = div.length-1; i >= 0; i--)
       {if (String(div[i].className).match(/\bmath\b/)) {this.ConvertMath(div[i],"; mode=display")}}
   },
   
   ConvertMath: function (node,mode) {
     var parent = node.parentNode,
-        script = this.CreateMathTag(mode,node.innerHTML);
+        script = this.createMathTag(mode,node.innerHTML);
     if (node.nextSibling) {parent.insertBefore(script,node.nextSibling)}
       else {parent.appendChild(script)}
-    if (this.config.previewTeX) {
-      node.className = String(node.className).replace(/\bmath\b/,this.previewClass);
-    } else {
-      parent.removeChild(node);
+    if (this.config.preview !== "none") {this.createPreview(node)}
+    parent.removeChild(node);
+  },
+  
+  createPreview: function (node) {
+    var preview;
+    if (this.config.preview === "TeX") {preview = [this.filterTeX(node.innerHTML)]}
+    else if (this.config.preview instanceof Array) {preview = this.config.preview}
+    if (preview) {
+      preview = MathJax.HTML.Element("span",{className: MathJax.Hub.config.preRemoveClass},preview);
+      node.parentNode.insertBefore(preview,node);
     }
   },
   
-  CreateMathTag: function (mode,tex) {
+  createMathTag: function (mode,tex) {
     var script = document.createElement("script");
     script.type = "math/tex" + mode;
     if (MathJax.Hub.Browser.isMSIE) {script.text = tex}
       else {script.appendChild(document.createTextNode(tex))}
     return script;
-  }
+  },
+  
+  filterTeX: function (tex) {return tex}
   
 };
 

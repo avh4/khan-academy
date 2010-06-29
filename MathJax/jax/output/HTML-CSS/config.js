@@ -50,11 +50,21 @@ MathJax.OutputJax["HTML-CSS"] = MathJax.OutputJax({
         border:  "1px solid #CC0000",
         padding: "1px 3px",
         "font-family": "serif",
-        "font-style": "italic",
+        "font-style": "normal",
         "font-size":  "90%"
       },
       
-      ".MathJax_Preview": {color: "#888888"}
+      ".MathJax_Preview": {color: "#888888"},
+      
+      "#MathJax_Tooltip": {
+        "background-color": "#FFFFCC",
+        border: "1px solid black",
+        "box-shadow": "2px 2px 5px #AAAAAA",         // Opera 10.5
+        "-webkit-box-shadow": "2px 2px 5px #AAAAAA", // Safari 3 and Chrome
+        "-moz-box-shadow": "2px 2px 5px #AAAAAA",    // Forefox 3.5
+        filter: "progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true')", // IE
+        padding: "3px 4px"
+      }
     }
     
   }

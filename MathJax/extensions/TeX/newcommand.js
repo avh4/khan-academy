@@ -29,6 +29,7 @@ MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
   MathJax.Hub.Insert(TEXDEF,{
     macros: {
       newcommand:     'NewCommand',
+      renewcommand:   'NewCommand',
       newenvironment: 'NewEnvironment',
       def:            'MacroDef'
     }

@@ -775,7 +775,9 @@ function translate() {
   AMprocessNode(AMbody, false);
   if (isIE) { //needed to match size and font of formula to surrounding text
     var frag = document.getElementsByTagName('math');
-    for (var i=0;i<frag.length;i++) frag[i].update()
+    for (var i=0;i<frag.length;i++)
+      if (frag[i].update)
+        frag[i].update();
   }
 }
 

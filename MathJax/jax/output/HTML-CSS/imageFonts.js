@@ -162,7 +162,7 @@
             if (browser.isMac) {return 3}  // Mac Opera scales very nicely
             var H = this.imgDoc.clientHeight, d = Math.floor(15*H/window.innerHeight);
             if (this.imgDoc.clientWidth < this.imgDoc.scrollWidth-d) {H += d}
-            return parseFloat((window.innerHeight/H+.05).toString().replace(/(\.\d)\d+/,"$1"));
+            return parseFloat((window.innerHeight/H).toFixed(1));
           }
         });
       }

@@ -1,6 +1,6 @@
 /*************************************************************
  *
- *  MathJax/extensions/MMLorHTML.js
+ *  MathJax/config/MMLorHTML.js
  *  
  *  Chooses between the NativeMML and HTML-CSS output jax depending
  *  on the capabilities of the browser and configuration settings
@@ -10,6 +10,24 @@
  *  MathJax.  Note that if you include this, you should NOT include
  *  an output jax in the jax array (it will be added for you by
  *  this file).
+ *  
+ *  You can specify the preferred output jax on a global or
+ *  browser-by-browser basis.  To specify it globally, use
+ *  
+ *      MathJax.Hub.Config({
+ *        MMLorHTML: {prefer: "MML"} // or "HTML"
+ *      });
+ *  
+ *  To specify on a browser-by-borwser basis, use
+ *  
+ *      MathJax.Hub.Config({
+ *        MMLorHTML: {prefer: {
+ *          MSIE:    "MML",
+ *          Firefox: "MML",
+ *          Opera:   "HTML",
+ *          other:   "HTML"
+ *        }}
+ *      });
  *
  *  ---------------------------------------------------------------------
  *  
@@ -29,7 +47,9 @@
  */
 
 (function (HUB) {
-  var CONFIG = MathJax.Hub.Insert({prefer: "HTML"},(MathJax.Hub.config.MMLorHTML||{}));
+  var CONFIG = MathJax.Hub.Insert({
+    prefer: {MSIE:"MML", Firefox:"MML", Opera:"HTML", other:"HTML"}
+  },(MathJax.Hub.config.MMLorHTML||{}));
 
   var MINBROWSERVERSION = {
     Firefox: 3.0,
@@ -48,8 +68,13 @@
   var canUseMML = (HUB.Browser.isFirefox && HUB.Browser.versionAtLeast("1.5")) ||
                   (HUB.Browser.isMSIE && MathPlayer) ||
                   (HUB.Browser.isOpera && HUB.Browser.versionAtLeast("9.52"));
+
+  var prefer = (CONFIG.prefer && typeof(CONFIG.prefer) === "object" ? 
+                CONFIG.prefer[MathJax.Hub.Browser]||CONFIG.prefer.other||"HTML" :
+                CONFIG.prefer);   
+
   if (canUseHTML || canUseMML) {
-    if (canUseMML && (CONFIG.prefer === "MML" || !canUseHTML))
+    if (canUseMML && (prefer === "MML" || !canUseHTML))
       {HUB.config.jax.push("output/NativeMML")} else {HUB.config.jax.push("output/HTML-CSS")}
   } else {
     HUB.PreProcess.disabled = true;

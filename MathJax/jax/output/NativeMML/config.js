@@ -39,13 +39,17 @@ MathJax.OutputJax.NativeMML = MathJax.OutputJax({
 });
 MathJax.OutputJax.NativeMML.Register("jax/mml");
 
-if (MathJax.Hub.Browser.isMSIE) {
-  //
-  //  Insert code needed to use MathPlayer for MathML output
-  //
-  document.write('<?xml:namespace prefix="mjx" ns="http://www.w3.org/1998/Math/MathML"?>');
-  document.write('<object id="mathplayer" classid="clsid:32F66A20-7614-11D4-BD11-00104BD3F987"></object>');
-  document.write('<?import namespace="mjx" implementation="#mathplayer"?>');
-}
+(function (browser) {
+  if (browser.isMSIE) {
+    //
+    //  Insert data needed to use MathPlayer for MathML output
+    //
+    document.namespaces.add("mjx","http://www.w3.org/1998/Math/MathML");
+    var mathplayer = document.createElement("object");
+    mathplayer.id = "mathplayer"; mathplayer.classid = "clsid:32F66A20-7614-11D4-BD11-00104BD3F987";
+    document.getElementsByTagName("head")[0].appendChild(mathplayer);
+    document.namespaces.add("mjx").doImport("#mathplayer");
+  }
+})(MathJax.Hub.Browser);
 
 MathJax.OutputJax.NativeMML.loadComplete("config.js");

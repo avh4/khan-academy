@@ -25,14 +25,21 @@
 
 MathJax.Extension.mml2jax = {
   config: {
-    element: null           // The ID of the element to be processed
+    element: null,          // The ID of the element to be processed
                             //   (defaults to full document)
+
+    preview: "alttext"      // Use the <math> element's alttext as the 
+                            //   preview.  Set to "none" for no preview,
+                            //   or set to an array specifying an HTML snippet
+                            //   to use a fixed preview for all math
+
   },
   MMLnamespace: "http://www.w3.org/1998/Math/MathML",
   
   PreProcess: function (element) {
     if (!this.configured) {
       MathJax.Hub.Insert(this.config,(MathJax.Hub.config.mml2jax||{}));
+      if (this.config.Augment) {MathJax.Hub.Insert(this,this.config.Augment)}
       this.configured = true;
     }
     if (typeof(element) === "string") {element = document.getElementById(element)}
@@ -57,12 +64,14 @@ MathJax.Extension.mml2jax = {
     parent.insertBefore(script,math);
     if (this.msieScriptBug) {
       var html = math.outerHTML; var prefix;
-      html = html.replace(/<\?import .*?>/,"").replace(/<(\/?)m:/g,"<$1").replace(/&nbsp;/g,"&#xA0;");
+      html = html.replace(/<\?import .*?>/,"").replace(/<\?xml:namespace .*?\/>/,"");
+      html = html.replace(/<(\/?)m:/g,"<$1").replace(/&nbsp;/g,"&#xA0;");
       script.text = html;
       parent.removeChild(math);
     } else {
       script.appendChild(math);
     }
+    if (this.config.preview !== "none") {this.createPreview(math,script)}
   },
   
   msieProcessMath: function (math) {
@@ -78,14 +87,30 @@ MathJax.Extension.mml2jax = {
       math = math.nextSibling;
       node.parentNode.removeChild(node);
     }
+    if (math && math.nodeName === "/MATH") {math.parentNode.removeChild(math)}
     script.text = mml + "</math>";
+    if (this.config.preview !== "none") {this.createPreview(math,script)}
   },
   toLowerCase: function (string) {
     var parts = string.split(/"/);
     for (var i = 0, m = parts.length; i < m; i += 2) {parts[i] = parts[i].toLowerCase()}
     return parts.join('"');
-  }
+  },
   
+  createPreview: function (math,script) {
+    var preview;
+    if (this.config.preview === "alttext") {
+      var text = math.getAttribute("alttext");
+      if (text != null) {preview = [this.filterText(text)]}
+    } else if (this.config.preview instanceof Array) {preview = this.config.preview}
+    if (preview) {
+      preview = MathJax.HTML.Element("span",{className:MathJax.Hub.config.preRemoveClass},preview);
+      script.parentNode.insertBefore(preview,script);
+    }
+  },
+  
+  filterText: function (text) {return text}
+
 };
 
 MathJax.Hub.Browser.Select({

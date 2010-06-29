@@ -25,32 +25,51 @@
 
 MathJax.Extension.tex2jax = {
   config: {
-    element: null,          // The ID of the element to be processed
-                            //   (defaults to full document)
+    element: null,             // The ID of the element to be processed
+                               //   (defaults to full document)
 
-    inlineMath: [           // The start/stop pairs for in-line math
-      ['$','$'],            //  (comment out any you don't want, or add your own, but
-      ['\\(','\\)']         //  be sure that you don't have an extra comma at the end)
+    inlineMath: [              // The start/stop pairs for in-line math
+      ['$','$'],               //  (comment out any you don't want, or add your own, but
+      ['\\(','\\)']            //  be sure that you don't have an extra comma at the end)
     ],
 
-    displayMath: [          // The start/stop pairs for display math
-      ['$$','$$'],          //  (comment out any you don't want, or add your own, but
-      ['\\[','\\]']         //  be sure that you don't have an extra comma at the end)
+    displayMath: [             // The start/stop pairs for display math
+      ['$$','$$'],             //  (comment out any you don't want, or add your own, but
+      ['\\[','\\]']            //  be sure that you don't have an extra comma at the end)
     ],
 
-    processEscapes: 0,      // set to 1 to allow \$ to produce a dollar without
-                            //   starting in-line math mode
+    skipTags: ["script","noscript","style","textarea","pre","code"],
+                               // The names of the tags whose contents will not be
+                               // scanned for math delimiters
 
-    processEnvironments: 1, // set to 1 to process \begin{xxx}...\end{xxx} outside
-                            //   of math mode
+    ignoreClass: "tex2jax_ignore",    // the class name of elements whose contents should
+                                      // NOT be processed by tex2jax.  Note that this
+                                      // is a regular expression, so be sure to quote any
+                                      // regexp special characters
 
-    previewTeX: 1           // set to 0 to not insert MathJax_Preview spans
+    processClass: "tex2jax_process",  // the class name of elements whose contents SHOULD
+                                      // be processed when they appear inside ones that
+                                      // are ignored.  Note that this is a regular expression,
+                                      // so be sure to quote any regexp special characters
+
+    processEscapes: false,     // set to true to allow \$ to produce a dollar without
+                               //   starting in-line math mode
+
+    processEnvironments: true, // set to true to process \begin{xxx}...\end{xxx} outside
+                               //   of math mode, false to prevent that
+
+    preview: "TeX"             // set to "none" to not insert MathJax_Preview spans
+                               //   or set to an array specifying an HTML snippet
+                               //   to use the same preview for every equation.
 
   },
   
   PreProcess: function (element) {
     if (!this.configured) {
       MathJax.Hub.Insert(this.config,(MathJax.Hub.config.tex2jax||{}));
+      if (this.config.Augment) {MathJax.Hub.Insert(this,this.config.Augment)}
+      if (typeof(this.config.previewTeX) !== "undefined" && !this.config.previewTeX)
+        {this.config.preview = "none"} // backward compatibility for previewTeX parameter
       this.configured = true;
     }
     if (typeof(element) === "string") {element = document.getElementById(element)}
@@ -83,6 +102,9 @@ MathJax.Extension.tex2jax = {
         (config.processEnvironments ? "|\\\\begin\\{([^}]*)\\}" : "") + 
         (config.processEscapes ? "|\\\\*\\\\\\\$" : ""), "g"
     );
+    this.skipTags = new RegExp("^("+config.skipTags.join("|")+")$","i");
+    this.ignoreClass = new RegExp("(^| )("+config.ignoreClass+")( |$)");
+    this.processClass = new RegExp("(^| )("+config.processClass+")( |$)");
   },
   
   patternQuote: function (s) {return s.replace(/([\^$(){}+*?\-|\[\]\:\\])/g,'\\$1')},
@@ -105,10 +127,8 @@ MathJax.Extension.tex2jax = {
         cname = (typeof(element.className) === "undefined" ? "" : element.className);
         tname = (typeof(element.tagName)   === "undefined" ? "" : element.tagName);
         if (typeof(cname) !== "string") {cname = String(cname)} // jsxgraph uses non-string class names!
-        if (element.firstChild && !cname.match(/(^| )MathJax/) &&
-             !tname.match(/^(script|noscript|style|textarea|pre|code)$/i)) {
-          ignore = (ignore || cname.match(/(^| )tex2jax_ignore( |$)/)) &&
-                    !cname.match(/(^| )tex2jax_process( |$)/);
+        if (element.firstChild && !cname.match(/(^| )MathJax/) && !this.skipTags.exec(tname)) {
+          ignore = (ignore || this.ignoreClass.exec(cname)) && !this.processClass.exec(cname);
           this.scanElement(element.firstChild,stop,ignore);
         }
       }
@@ -201,7 +221,7 @@ MathJax.Extension.tex2jax = {
     }
     var TeX = math.nodeValue.substr(search.olen,math.nodeValue.length-search.olen-search.clen);
     math.parentNode.removeChild(math);
-    if (this.config.previewTeX) {this.createMathPreview(search.mode,TeX)}
+    if (this.config.preview !== "none") {this.createPreview(search.mode,TeX)}
     math = this.createMathTag(search.mode,TeX);
     this.search = {}; this.pattern.lastIndex = 0;
     if (CLOSE) {CLOSE.parentNode.removeChild(CLOSE)}
@@ -219,12 +239,14 @@ MathJax.Extension.tex2jax = {
     }
   },
   
-  createMathPreview: function (mode,tex) {
-    var preview = document.createElement("span");
-    preview.className = MathJax.Hub.config.preRemoveClass;
-    preview.appendChild(document.createTextNode(tex));
-    this.insertNode(preview);
-    return preview;
+  createPreview: function (mode,tex) {
+    var preview;
+    if (this.config.preview === "TeX") {preview = [this.filterTeX(tex)]}
+    else if (this.config.preview instanceof Array) {preview = this.config.preview}
+    if (preview) {
+      preview = MathJax.HTML.Element("span",{className:MathJax.Hub.config.preRemoveClass},preview);
+      this.insertNode(preview);
+    }
   },
   
   createMathTag: function (mode,tex) {
@@ -234,7 +256,9 @@ MathJax.Extension.tex2jax = {
       else {script.appendChild(document.createTextNode(tex))}
     this.insertNode(script);
     return script;
-  }
+  },
+  
+  filterTeX: function (tex) {return tex}
   
 };
 

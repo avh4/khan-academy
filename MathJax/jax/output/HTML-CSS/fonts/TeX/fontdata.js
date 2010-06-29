@@ -118,6 +118,74 @@
         0x2A2F: 0xD7                    // cross product
       },
       
+      PLANE1MAP: [
+        [0x1D400,0x1D419, 0x41, MML.VARIANT.BOLD],
+        [0x1D41A,0x1D433, 0x61, MML.VARIANT.BOLD],
+        [0x1D434,0x1D44D, 0x41, MML.VARIANT.ITALIC],
+        [0x1D44E,0x1D467, 0x61, MML.VARIANT.ITALIC],
+        [0x1D468,0x1D481, 0x41, MML.VARIANT.BOLDITALIC],
+        [0x1D482,0x1D49B, 0x61, MML.VARIANT.BOLDITALIC],
+        [0x1D49C,0x1D4B5, 0x41, MML.VARIANT.SCRIPT],
+//      [0x1D4B6,0x1D4CF, 0x61, MML.VARIANT.SCRIPT],
+//      [0x1D4D0,0x1D4E9, 0x41, MML.VARIANT.BOLDSCRIPT],
+//      [0x1D4EA,0x1D503, 0x61, MML.VARIANT.BOLDSCRIPT],
+        [0x1D504,0x1D51D, 0x41, MML.VARIANT.FRAKTUR],
+        [0x1D51E,0x1D537, 0x61, MML.VARIANT.FRAKTUR],
+        [0x1D538,0x1D551, 0x41, MML.VARIANT.DOUBLESTRUCK],
+//      [0x1D552,0x1D56B, 0x61, MML.VARIANT.DOUBLESTRUCK],
+        [0x1D56C,0x1D585, 0x41, MML.VARIANT.BOLDFRAKTUR],
+        [0x1D586,0x1D59F, 0x61, MML.VARIANT.BOLDFRAKTUR],
+        [0x1D5A0,0x1D5B9, 0x41, MML.VARIANT.SANSSERIF],
+        [0x1D5BA,0x1D5D3, 0x61, MML.VARIANT.SANSSERIF],
+        [0x1D5D4,0x1D5ED, 0x41, MML.VARIANT.BOLDSANSSERIF],
+        [0x1D5EE,0x1D607, 0x61, MML.VARIANT.BOLDSANSSERIF],
+        [0x1D608,0x1D621, 0x41, MML.VARIANT.SANSSERIFITALIC],
+        [0x1D622,0x1D63B, 0x61, MML.VARIANT.SANSSERIFITALIC],
+//      [0x1D63C,0x1D655, 0x41, MML.VARIANT.SANSSERIFBOLDITALIC],
+//      [0x1D656,0x1D66F, 0x61, MML.VARIANT.SANSSERIFBOLDITALIC],
+        [0x1D670,0x1D689, 0x41, MML.VARIANT.MONOSPACE],
+        [0x1D68A,0x1D6A3, 0x61, MML.VARIANT.MONOSPACE],
+        
+        [0x1D6A8,0x1D6C1, 0x391, MML.VARIANT.BOLD],
+//      [0x1D6C2,0x1D6E1, 0x3B1, MML.VARIANT.BOLD],
+        [0x1D6E2,0x1D6FA, 0x391, MML.VARIANT.ITALIC],
+        [0x1D6FC,0x1D71B, 0x3B1, MML.VARIANT.ITALIC],
+        [0x1D71C,0x1D734, 0x391, MML.VARIANT.BOLDITALIC],
+        [0x1D736,0x1D755, 0x3B1, MML.VARIANT.BOLDITALIC],
+        [0x1D756,0x1D76E, 0x391, MML.VARIANT.BOLDSANSSERIF],
+//      [0x1D770,0x1D78F, 0x3B1, MML.VARIANT.BOLDSANSSERIF],
+        [0x1D790,0x1D7A8, 0x391, MML.VARIANT.SANSSERIFBOLDITALIC],
+//      [0x1D7AA,0x1D7C9, 0x3B1, MML.VARIANT.SANSSERIFBOLDITALIC],
+        
+        [0x1D7CE,0x1D7D7, 0x30, MML.VARIANT.BOLD],
+//      [0x1D7D8,0x1D7E1, 0x30, MML.VARIANT.DOUBLESTRUCK],
+        [0x1D7E2,0x1D7EB, 0x30, MML.VARIANT.SANSSERIF],
+        [0x1D7EC,0x1D7F5, 0x30, MML.VARIANT.BOLDSANSSERIF],
+        [0x1D7F6,0x1D7FF, 0x30, MML.VARIANT.MONOSPACE]
+      ],
+
+      REMAPGREEK: {
+        0x391: 0x41, 0x392: 0x42, 0x395: 0x45, 0x396: 0x5A,
+        0x397: 0x48, 0x399: 0x49, 0x39A: 0x4B, 0x39C: 0x4D,
+        0x39D: 0x4E, 0x39F: 0x4F, 0x3A1: 0x50, 0x3A2: 0x398,
+        0x3A4: 0x54, 0x3A7: 0x58, 0x3AA: 0x2207,
+        0x3CA: 0x2202, 0x3CB: 0x3F5, 0x3CC: 0x3D1, 0x3CD: 0x3F0,
+        0x3CE: 0x3D5, 0x3CF: 0x3F1, 0x3D0: 0x3D6
+      },
+      
+      RemapPlane1: function (n,variant) {
+        for (var i = 0, m = this.PLANE1MAP.length; i < m; i++) {
+          if (n < this.PLANE1MAP[i][0]) break;
+          if (n <= this.PLANE1MAP[i][1]) {
+            n = n - this.PLANE1MAP[i][0] + this.PLANE1MAP[i][2];
+            if (this.REMAPGREEK[n]) {n = this.REMAPGREEK[n]}
+            variant = this.VARIANT[this.PLANE1MAP[i][3]];
+            break;
+          }
+        }
+        return {n: n, variant: variant};
+      },
+      
       DELIMITERS: {
         0x0028: // (
         {
@@ -322,8 +390,8 @@
   //  Handle error with reversed glyphs for \bigcap and \bigcup in version 1 of fonts
   //
   HTMLCSS.Font.oldLoadComplete = HTMLCSS.Font.loadComplete;
-  HTMLCSS.Font.loadComplete = function (font,n) {
-    if (n != null) {this.oldLoadComplete(font,n)}
+  HTMLCSS.Font.loadComplete = function (font,n,status) {
+    if (n != null) {this.oldLoadComplete(font,n,status)}
     if (font.family === SIZE1 || font.family === SIZE2) {
       if (font.version === 1) {
         HTMLCSS.FONTDATA.VARIANT["-largeOp"].remap = {0x22C2: 0x22C3, 0x22C3: 0x22C2};
@@ -1306,26 +1374,6 @@
     0xE154: [120,0,400,-10,410]        // MJ-TeX: horizontal brace, extender
   };
 
-  HTMLCSS.FONTDATA.FONTS['MathJax_WinChrome'] = {
-    directory: 'WinChrome/Regular',
-    family: 'MathJax_WinChrome',
-    testString: "> T d "+String.fromCharCode(0x23A6)+" "+String.fromCharCode(0x2A00),
-    skew: {
-      0x54: 0.0278,
-      0xE2F0: 0.0319
-    },
-    0x20: [0,0,250,0,0],               // SPACE
-    0x3E: [540,40,778,82,694],         // GREATER-THAN SIGN
-    0x54: [717,69,545,34,834],         // LATIN CAPITAL LETTER T
-    0x64: [694,11,511,100,567],        // LATIN SMALL LETTER D
-    0xA0: [0,0,250,0,0],               // NO-BREAK SPACE
-    0x22C3: [750,250,833,55,777],      // N-ARY UNION
-    0x23A6: [1155,644,667,0,347],      // RIGHT SQUARE BRACKET LOWER CORNER
-    0x2A00: [949,449,1511,56,1454],    // N-ARY CIRCLED DOT OPERATOR
-    0xE2F0: [720,69,644,38,947],       // ??
-    0xE2F1: [587,85,894,95,797]        // ??
-  };
-
   HTMLCSS.FONTDATA.FONTS['MathJax_Main'][0x22EE][0] += 400;  // adjust height for \vdots
   HTMLCSS.FONTDATA.FONTS['MathJax_Main'][0x22F1][0] += 700;  // adjust height for \ddots
   HTMLCSS.FONTDATA.FONTS['MathJax_Size4'][0xE154][0] += 200;  // adjust height for brace extender
@@ -1626,7 +1674,7 @@
               }
             }
           });
-        
+
           HTMLCSS.FONTDATA.FONTS['MathJax_WinChrome'] = {
             directory: 'WinChrome/Regular',
             family: 'MathJax_WinChrome',

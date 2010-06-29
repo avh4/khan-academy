@@ -29,6 +29,7 @@ MathJax.Hub.Insert(
     0x210E: [685,10,576,50,543],       // PLANCK CONSTANT
     0x210F: [685,10,576,50,543],       // stix-/hbar - Planck's over 2pi
     0x2111: [701,25,790,54,735],       // BLACK-LETTER CAPITAL I
+    0x2113: [699,14,500,43,632],       // SCRIPT SMALL L
     0x2115: [676,0,738,75,663],        // stix-mathematical bold oblique double-struck capital N
     0x2116: [691,18,1093,10,1042],     // NUMERO SIGN
     0x2117: [691,19,747,26,721],       // SOUND RECORDING COPYRIGHT

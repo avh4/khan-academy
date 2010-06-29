@@ -282,6 +282,8 @@ KhanAcademy = {
 		if (browserSupportsMathML() && browserHasUsableFont())
 			return;
 		MathJax.Hub.config.skipStartupTypeset = false;
+		checkForMathML = false;
+		showasciiformulaonhover = false;
 		ASCIIMathMLTranslate = translate;
 		translate = function() {
 			ASCIIMathMLTranslate();

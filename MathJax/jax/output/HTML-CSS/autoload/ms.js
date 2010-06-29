@@ -35,6 +35,7 @@
       this.HTMLhandleVariant(span,this.HTMLgetVariant(),values.lquote+text+values.rquote);
       this.HTMLhandleSpace(span);
       this.HTMLhandleColor(span);
+      return span;
     },
     HTMLquoteRegExp: function (string) {
       return string.replace(/([.*+?|{}()\[\]\\])/g,"\\$1");

@@ -27,7 +27,7 @@
  *  
  *  To configure the default font list, use
  *  
- *      MathJax.Hub.Configure({
+ *      MathJax.Hub.Config({
  *        TeX: {
  *          unicode: {
  *            fonts: "STIXGeneral,'Arial Unicode MS'"

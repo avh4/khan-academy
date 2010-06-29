@@ -358,10 +358,26 @@ MathJax.Hub.Register.StartupHook("TeX Jax Ready",function () {
       if (item.type === "stop") {
         var mml = this.mmlData();
         if (this.global.tag) {
-          mml = MML.mtable(MML.mlabeledtr(this.global.tag,MML.mtd(mml)));
-          mml.side = TEX.config.TagSide;
-          mml.minlabelspacing = TEX.config.TagIndent;
-          delete this.global.tag;
+          var row = [this.global.tag,MML.mtd(mml)]; delete this.global.tag;
+          var def = {
+            side: TEX.config.TagSide,
+            minlabelspacing: TEX.config.TagIndent,
+            columnalign: mml.displayAlign
+          };
+          if (mml.displayAlign === MML.INDENTALIGN.LEFT) {
+            def.width = "100%";
+            if (mml.displayIndent && !String(mml.displayIndent).match(/^0+(\.0*)?($|[a-z%])/)) {
+              def.columnwidth = mml.displayIndent + " fit"; def.columnspacing = "0"
+              row = [row[0],MML.mtd(),row[1]];
+            }
+          } else if (mml.displayAlign === MML.INDENTALIGN.RIGHT) {
+            def.width = "100%";
+            if (mml.displayIndent && !String(mml.displayIndent).match(/^0+(\.0*)?($|[a-z%])/)) {
+              def.columnwidth = "fit "+mml.displayIndent; def.columnspacing = "0"
+              row[2] = MML.mtd();
+            }
+          }
+          mml = MML.mtable(MML.mlabeledtr.apply(MML,row)).With(def);
         }
         return STACKITEM.mml(mml);
       }

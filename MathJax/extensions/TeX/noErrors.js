@@ -9,7 +9,7 @@
  *  
  *  To configure this extension, use
  *  
- *      MathJax.Hub.Configure({
+ *      MathJax.Hub.Config({
  *        TeX: {
  *          noErrors: {
  *            inlineDelimiters: ["",""],   // or ["$","$"] or ["\\(","\\)"]
@@ -34,7 +34,7 @@
  *  black border.  If you want it to look as though the TeX is just part of
  *  the paragraph, use
  *
- *      MathJax.Hub.Configure({
+ *      MathJax.Hub.Config({
  *        TeX: {
  *          noErrors: {
  *            inlineDelimiters: ["$","$"],   // or ["",""] or ["\\(","\\)"]
@@ -78,7 +78,9 @@
       style: {
         "font-family": "serif",
         "font-size":   "80%",
+        "text-align":  "left",
         "color":       "black",
+        "padding":     "1px 3px",
         "border":      "1px solid"
       }
     },((MathJax.Hub.config.TeX||{}).noErrors||{}))
@@ -129,23 +131,24 @@ MathJax.Hub.Register.StartupHook("HTML-CSS Jax Ready",function () {
   //
   var math_toHTML = MML.math.prototype.toHTML;
   MML.math.Augment({
-    toHTML: function (span) {
+    toHTML: function (span,node) {
       if (this.data[0] && this.data[0].data[0] && this.data[0].data[0].isError) {
         return this.data[0].data[0].toHTML(span);
       }
-      return math_toHTML.call(this,span);
+      return math_toHTML.call(this,span,node);
     }
   });
   
   //
   //  Override merror toHTML routine so that it puts out the
-  //    TeX code in an inlin-block with line breaks as in the original
+  //    TeX code in an inline-block with line breaks as in the original
   //
   MML.merror.Augment({
     toHTML: function (span) {
+      if (!this.isError) {return MML.mbase.prototype.toHTML.call(this,span)}
       span = this.HTMLcreateSpan(span);
       if (this.multiLine) {span.style.display = "inline-block"}
-      var text = this.data[0].data.join("").split(/\n/);
+      var text = this.data[0].data[0].data.join("").split(/\n/);
       for (var i = 0, m = text.length; i < m; i++) {
         HTMLCSS.addText(span,text[i]);
         if (i !== m-1) {HTMLCSS.addElement(span,"br")}
@@ -159,6 +162,52 @@ MathJax.Hub.Register.StartupHook("HTML-CSS Jax Ready",function () {
         HD.h = x + H; HD.d = H - x;
       }
       span.bbox = {h: HD.h, d: HD.d, w: W, lw: 0, rw: W};
+      return span;
+    }
+  });
+
+  MathJax.Hub.Startup.signal.Post("TeX noErrors Ready");
+});
+
+MathJax.Hub.Register.StartupHook("NativeMML Jax Ready",function () {
+  var MML = MathJax.ElementJax.mml;
+  var CONFIG = MathJax.Extension["TeX/noErrors"].config;
+  
+  //
+  // Override math toNativeMML routine so that error messages
+  //   don't get placed inside math tags.
+  //
+  var math_toNativeMML = MML.math.prototype.toNativeMML;
+  MML.math.Augment({
+    toNativeMML: function (span) {
+      if (this.data[0] && this.data[0].data[0] && this.data[0].data[0].isError) {
+        return this.data[0].data[0].toNativeMML(span);
+      }
+      return math_toNativeMML.call(this,span);
+    }
+  });
+  
+  //
+  //  Override merror toNativeMML routine so that it puts out the
+  //    TeX code in an inline-block with line breaks as in the original
+  //
+  MML.merror.Augment({
+    toNativeMML: function (span) {
+      if (!this.isError) {return MML.mbase.prototype.toNativeMML.call(this,span)}
+      span = span.appendChild(document.createElement("span"));
+      var text = this.data[0].data[0].data.join("").split(/\n/);
+      for (var i = 0, m = text.length; i < m; i++) {
+        span.appendChild(document.createTextNode(text[i]));
+        if (i !== m-1) {span.appendChild(document.createElement("br"))}
+      }
+      if (this.multiLine) {
+        span.style.display = "inline-block";
+        if (m > 1) {span.style.verticalAlign = "middle"}
+      }
+      for (var id in CONFIG.style) {if (CONFIG.style.hasOwnProperty(id)) {
+        var ID = id.replace(/-./g,function (c) {return c.charAt(1).toUpperCase()});
+        span.style[ID] = CONFIG.style[id];
+      }}
       return span;
     }
   });

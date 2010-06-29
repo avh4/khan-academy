@@ -32,6 +32,7 @@ MathJax.Hub.Insert(
     0x210F: [683,10,579,47,547],       // stix-/hbar - Planck's over 2pi
     0x2110: [675,15,897,26,888],       // SCRIPT CAPITAL I
     0x2112: [687,15,946,33,931],       // SCRIPT CAPITAL L
+    0x2113: [687,11,579,48,571],       // SCRIPT SMALL L
     0x2115: [662,0,698,70,628],        // stix-mathematical bold oblique double-struck capital N
     0x2116: [676,14,1012,7,966],       // NUMERO SIGN
     0x2117: [676,14,760,38,722],       // SOUND RECORDING COPYRIGHT
