@@ -1142,10 +1142,10 @@ class AdminViewUser(webapp.RequestHandler):
 class RegisterAnswer(webapp.RequestHandler):
 
     def post(self):
+        exid = self.request.get('exid')
         user = users.get_current_user()
         if user:
             key = self.request.get('key')
-            exid = self.request.get('exid')
             correct = int(self.request.get('correct'))
             start_time = float(self.request.get('start_time'))
 
@@ -1201,7 +1201,8 @@ class RegisterAnswer(webapp.RequestHandler):
 
             self.redirect('/exercises?exid=' + exid)
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            # Redirect to display the problem again which requires authentication
+            self.redirect('/exercises?exid=' + exid)
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
