@@ -951,9 +951,7 @@ class KnowledgeMap(webapp.RequestHandler):
                 exercise.display_name = str(name_list).replace("[u'", "['").replace(", u'", ", '")
                 exercise.prereq_string = str(exercise.prerequisites).replace("[u'", "['").replace(", u'", ", '")
 
-            logout_url = users.create_logout_url(self.request.uri)
-
-            template_values = {'App' : App, 'exercises': exercises, 'logout_url': logout_url, 'map_height': 900}
+            template_values = {'App' : App, 'exercises': exercises, 'map_height': 900}
 
             path = os.path.join(os.path.dirname(__file__), 'knowledgemap.html')
             self.response.out.write(template.render(path, template_values))
