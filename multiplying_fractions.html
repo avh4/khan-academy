@@ -72,10 +72,10 @@ addWrongChoice(format_fraction(num1-num2, getRandomIntRange(2,20)));
 
 if (den2!=num2)
 {
-	possibleAnswers.push(format_fraction(-1*num1*den2,num2*den1));
-	possibleAnswers.push(format_fraction(num1*den2,num2*den1));
+	addWrongChoice(format_fraction(-1*num1*den2,num2*den1));
+	addWrongChoice(format_fraction(num1*den2,num2*den1));
 }
-possibleAnswers.push(format_fraction(-1*num1*num2,den1*den2));
+addWrongChoice(format_fraction(-1*num1*num2,den1*den2));
 
 
 //-->
