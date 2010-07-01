@@ -30,7 +30,7 @@ function pickType(low,high)
 	generateNewProblem(function () {
 		notDoneType = ''+getRandomIntRange(low, high);
 		return notDoneType;
-	}, (high-low)/2, "type");
+	}, Math.floor((high-low)/2), "type");
 	eval("type"+notDoneType+"()");
 }
 
@@ -40,7 +40,7 @@ function pickNumber(low,high)
 	generateNewProblem(function () {
 		notDoneNum = getRandomIntRange(low, high);
 		return ''+notDoneNum;
-	}, (high-low)/2, "number");
+	}, Math.floor((high-low)/2), "number");
 	return notDoneNum;
 }
 

@@ -86,6 +86,7 @@ function generateNewProblem(randomProblemGenerator, range, salt)
 	 */
 	if (!range)
 		range = 10;
+	range = Math.floor(range);
 	if (!salt)
 		salt = '';
 	var i = KhanAcademy.problem_number;
