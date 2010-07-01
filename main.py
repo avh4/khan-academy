@@ -520,6 +520,7 @@ class ViewExercise(webapp.RequestHandler):
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
+            problem_number = self.request.get('problem_number')
             time_warp = self.request.get('time_warp')
 
             query = UserExercise.all()
@@ -564,7 +565,9 @@ class ViewExercise(webapp.RequestHandler):
                     total_done=0,
                     )
                 userExercise.put()
-
+            
+            if not problem_number:
+                problem_number = userExercise.total_done
             proficient = False
             endangered = False
             reviewing = False
@@ -596,7 +599,7 @@ class ViewExercise(webapp.RequestHandler):
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
                 'time_warp': time_warp,
-                'total_done': userExercise.total_done,
+                'problem_number': problem_number,
                 }
 
             path = os.path.join(os.path.dirname(__file__), exid + '.html')
@@ -1145,10 +1148,21 @@ class RegisterAnswer(webapp.RequestHandler):
         if user:
             key = self.request.get('key')
             correct = int(self.request.get('correct'))
+            problem_number = int(self.request.get('problem_number'))
             start_time = float(self.request.get('start_time'))
 
             elapsed_time = int(float(time.time()) - start_time)
 
+            userExercise = db.get(key)
+            userExercise.last_done = datetime.datetime.now()
+            
+            # If a non-admin tries to answer a problem out-of-order, just ignore it and
+            # display the next problem.
+            if problem_number != userExercise.total_done and not users.is_current_user_admin():
+                # Only admins can answer problems out of order
+                self.redirect('/exercises?exid=' + exid)
+                return
+            
             problem_log = ProblemLog()
             problem_log.user = user
             problem_log.exercise = exid
@@ -1158,9 +1172,6 @@ class RegisterAnswer(webapp.RequestHandler):
             problem_log.time_done = datetime.datetime.now()
             problem_log.time_taken = elapsed_time
             problem_log.put()
-
-            userExercise = db.get(key)
-            userExercise.last_done = datetime.datetime.now()
 
             query = UserData.all()
             query.filter('user =', userExercise.user)
