@@ -2,25 +2,24 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 
-var base = getRandomIntRange(-10,10);
+var base = 0;
 var exp = 1;
 var frac_exp = false;
 var exp_string = '';
 
-
-if (Math.abs(base)>1)  //Only do this clause if the base is non-zero
-{
-	exp = getRandomInt(Math.log(260)/Math.log(Math.abs(base)));
-	
-	if (exp==0 || exp==1)
+generateNewProblem(function() {
+	base = getRandomIntRange(-10,10);
+	if (Math.abs(base)>1)  //Only do this clause if the base is non-zero
+	{
 		exp = getRandomInt(Math.log(260)/Math.log(Math.abs(base)));
-}
-else 
-	exp = getRandomInt(6);
-	
-	
-
-
+		
+		if (exp==0 || exp==1)
+			exp = getRandomInt(Math.log(260)/Math.log(Math.abs(base)));
+	}
+	else 
+		exp = getRandomInt(6);
+	return base + "^" + exp;	
+}, 10);
 
 var base_string = base;
 

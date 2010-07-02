@@ -2,20 +2,24 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 //Declare the variables
-var base = nonZeroRandomInt(2,16);
-if (base > 10)
-{
-	var exp = nonZeroRandomInt(2,3);
-}
-else if (base > 4 && base<10)
-{
-	var exp = nonZeroRandomInt(2,4);
-}
-else
-{
-	var exp = nonZeroRandomInt(2,5);
-}
-
+var base;
+var exp;
+generateNewProblem(function () {
+	base = nonZeroRandomInt(2,16);
+	if (base > 10)
+	{
+		exp = nonZeroRandomInt(2,3);
+	}
+	else if (base > 4 && base<10)
+	{
+		exp = nonZeroRandomInt(2,4);
+	}
+	else
+	{
+		exp = nonZeroRandomInt(2,5);
+	}
+	return base + '^' + exp;
+}, 14);
 var num = Math.pow(base,exp);
 var power_string = base;
 for (var i=1; i<exp; i++)
