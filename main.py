@@ -748,6 +748,10 @@ class ReportIssue(webapp.RequestHandler):
 
             logout_url = users.create_logout_url(self.request.uri)
 
+            user_agent = self.request.headers.get('User-Agent')
+            if user_agent is None:
+                user_agent = ''
+            user_agent.replace(',',';') # Commas delimit labels, so we don't want them
             template_values = {
                 'App' : App,
                 'points': user_data.points,
@@ -755,7 +759,7 @@ class ReportIssue(webapp.RequestHandler):
                 'referer': self.request.headers.get('Referer'),
                 'exid': self.request.get('exid'),
                 'problem_number': self.request.get('problem_number'),
-                'user_agent': self.request.headers.get('User-Agent'),
+                'user_agent': user_agent,
                 'logout_url': logout_url,
                 }
             issue_type = self.request.get('type')
