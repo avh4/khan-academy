@@ -754,7 +754,8 @@ class ReportIssue(webapp.RequestHandler):
                 'username': user.nickname(),
                 'referer': self.request.headers.get('Referer'),
                 'exid': self.request.get('exid'),
-                'total_done': self.request.get('total_done'),
+                'problem_number': self.request.get('problem_number'),
+                'user_agent': self.request.headers.get('User-Agent'),
                 'logout_url': logout_url,
                 }
             issue_type = self.request.get('type')
