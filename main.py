@@ -582,6 +582,13 @@ class ViewExercise(webapp.RequestHandler):
                     endangered = True
 
             logout_url = users.create_logout_url(self.request.uri)
+            
+            # Note: if they just need a single problem for review they can just print this page.
+            num_problems_to_print = max(2, 10 - userExercise.streak)
+            
+            # If the user is proficient, assume they want to print a bunch of practice problems.
+            if proficient:
+                num_problems_to_print = 10
 
             template_values = {
                 'App' : App,
@@ -603,6 +610,7 @@ class ViewExercise(webapp.RequestHandler):
                 'streak': userExercise.streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
+                'num_problems_to_print': num_problems_to_print,
                 }
 
             path = os.path.join(os.path.dirname(__file__), exid + '.html')
@@ -735,6 +743,7 @@ class PrintExercise(webapp.RequestHandler):
             exid = self.request.get('exid')
             key = self.request.get('key')
             problem_number = self.request.get('problem_number')
+            num_problems = int(self.request.get('num_problems'))
             time_warp = self.request.get('time_warp')
 
             query = UserExercise.all()
@@ -808,7 +817,7 @@ class PrintExercise(webapp.RequestHandler):
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
                 'time_warp': time_warp,
-                'problem_numbers': range(problem_number, problem_number+10),
+                'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
             
             path = os.path.join(os.path.dirname(__file__), 'print_template.html')
