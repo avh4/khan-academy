@@ -232,6 +232,7 @@ class ExerciseGraph(object):
             ex.suggested = None # Note set initially
             ex.assigned = False
             ex.streak = 0
+            ex.total_done = 0
         for name in user_data.proficient_exercises:
             ex = self.exercise_by_name.get(name)
             if ex:
@@ -256,14 +257,16 @@ class ExerciseGraph(object):
                 ex.streakwidth = min(200, 20 * ex.streak)
 
         def compute_proficient(ex):
-            # Consider an exercise proficient if it or a covering ancestor is proficient
+            # Consider an exercise proficient if it is explicitly proficient or
+            # the user has never missed a problem and a covering ancestor is proficient
             if ex.proficient is not None:
                 return ex.proficient
             ex.proficient = False
-            for c in ex.coverers:
-                if compute_proficient(c) is True:
-                    ex.proficient = True
-                    break
+            if ex.streak == ex.total_done:
+                for c in ex.coverers:
+                    if compute_proficient(c) is True:
+                        ex.proficient = True
+                        break
             return ex.proficient
 
         for ex in exercises:
@@ -575,7 +578,7 @@ class ViewExercise(webapp.RequestHandler):
                 proficient = True
                 if (userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
                     reviewing = True
-                if userExercise.streak == 0:
+                if userExercise.streak == 0 and userExercise.longest_streak >= 10:
                     endangered = True
 
             logout_url = users.create_logout_url(self.request.uri)
