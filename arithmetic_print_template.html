@@ -1,0 +1,78 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <title>Khan Academy</title>
+  
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/seedrandom.js?{{App.version}}"></script>
+  {% comment %}
+     We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
+     /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
+     we update MathJax.
+  {% endcomment %}
+  <script type="text/javascript" src="/MathJax-svn382/MathJax.js">
+      MathJax.Hub.Config({
+	showProcessingMessages: true,
+	skipStartupTypeset: true,
+        extensions: ["mml2jax.js"],
+	jax: ["input/MathML", "output/HTML-CSS"],
+	"HTML-CSS": {
+		scale: 100,
+		availableFonts:["STIX", "TeX"],
+		preferredFont: "TeX",
+		webFont: "TeX",
+		imageFont: null
+	}
+      });
+  </script>
+  <script type="text/javascript" src="/javascript/metautil.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/exerciseutil.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/graphutil.js?{{App.version}}"></script>
+  
+<script language=Javascript1.2><!--
+$(document).ready(function () {
+	KhanAcademy.supportMathML();
+	translate();	
+	drawPictures();
+});
+KhanAcademy.problem_number = "{{problem_number}}";
+Math.seedrandom(KhanAcademy.problem_number);
+//-->
+</script>
+{% block maincode %} {% endblock %}
+</head>
+<body>
+   <table width=100%><tr>
+		<td valign=top width={% block maincellwidth %}80%{% endblock maincellwidth %}>
+		{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
+		</td>
+		{% block graphdisplay %}  {% endblock graphdisplay %}
+		<td valign="top">
+			{% block answergraphdisplay %} {% endblock answergraphdisplay %}
+			<form id="answerform" action="/registeranswer" method="post">
+				{% block answerform %}
+				{% comment %}
+					I don't think we need this stuff??
+				<input type="hidden" id="exid" name="exid" value="{{exid}}">
+				<input type="hidden" id="streak" name="streak" value="{{streak}}">
+				<input type="hidden" id="key" name="key" value="{{key}}">
+				<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
+				<input type="hidden" id="correct" name="correct" value="0">
+				<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
+				<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
+				{% endcomment %}
+				{% block answerarea %}{% endblock answerarea %}
+				{% endblock answerform %}
+			</form>
+		</td>
+	</tr>
+  </table>
+</body>
+<script type="text/javascript"><!--
+hide_hints();
+//--></script>
+</html>
+

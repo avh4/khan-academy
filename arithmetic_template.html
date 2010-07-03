@@ -26,7 +26,10 @@
   						<A href="/viewexercisevideos?exkey={{exercise.key}}">[Watch Videos]</A>
   					{% endif %}
   					</td>
-  					<td bgcolor=#e5ecf9 align=right>&nbsp;&nbsp;|&nbsp;&nbsp;Streak:</td>
+  					<td bgcolor=#e5ecf9 align=right style="white-space:nowrap;">
+  						<A href="/printexercise?exid={{exid}}">Print this exercise</A>
+  						&nbsp;&nbsp;|&nbsp;&nbsp;Streak:
+  					</td>
   					<td bgcolor=#e5ecf9><ul class="unit-rating" style="width:200px;">
   						<li class="current-rating" style="width:{{streakwidth}}px;"></li></ul>
   					</td>

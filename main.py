@@ -585,6 +585,7 @@ class ViewExercise(webapp.RequestHandler):
 
             template_values = {
                 'App' : App,
+                'arithmetic_template': 'arithmetic_template.html',
                 'username': user.nickname(),
                 'points': user_data.points,
                 'proficient': proficient,
@@ -707,6 +708,122 @@ class ViewExerciseVideos(webapp.RequestHandler):
 
             self.redirect(users.create_login_url(self.request.uri))
 
+class PrintProblem(webapp.RequestHandler):
+    
+    def get(self):
+        
+        exid = self.request.get('exid')
+        problem_number = self.request.get('problem_number')
+        
+        template_values = {
+                'App' : App,
+                'arithmetic_template': 'arithmetic_print_template.html',
+                'exid': exid,
+                'extitle': exid.replace('_', ' ').capitalize(),
+                'problem_number': self.request.get('problem_number')
+                }
+        
+        path = os.path.join(os.path.dirname(__file__), exid + '.html')
+        self.response.out.write(template.render(path, template_values))
+        
+class PrintExercise(webapp.RequestHandler):
+
+    def get(self):
+        
+        user = users.get_current_user()
+        if user:
+            exid = self.request.get('exid')
+            key = self.request.get('key')
+            problem_number = self.request.get('problem_number')
+            time_warp = self.request.get('time_warp')
+
+            query = UserExercise.all()
+            query.filter('user =', user)
+            query.filter('exercise =', exid)
+            userExercise = query.get()
+
+            query = UserData.all()
+            query.filter('user =', user)
+            user_data = query.get()
+            if user_data is None:
+                user_data = UserData(
+                    user=user,
+                    last_login=datetime.datetime.now(),
+                    proficient_exercises=[],
+                    suggested_exercises=[],
+                    assigned_exercises=[],
+                    need_to_reassess=True,
+                    points=0,
+                    )
+
+            query = Exercise.all()
+            query.filter('name =', exid)
+            exercise = query.get()
+
+            exercise_videos = None
+            query = ExerciseVideo.all()
+            query.filter('exercise =', exercise.key())
+            exercise_videos = query.fetch(50)
+
+            if not exid:
+                exid = 'addition_1'
+
+            if not userExercise:
+                userExercise = UserExercise(
+                    user=user,
+                    exercise=exid,
+                    streak=0,
+                    longest_streak=0,
+                    first_done=datetime.datetime.now(),
+                    last_done=datetime.datetime.now(),
+                    total_done=0,
+                    )
+                userExercise.put()
+            
+            if not problem_number:
+                problem_number = userExercise.total_done
+            proficient = False
+            endangered = False
+            reviewing = False
+            if user_data.is_proficient_at(exid):
+                proficient = True
+                if (userExercise.last_review > datetime.datetime.min and
+                    userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
+                    reviewing = True
+                if userExercise.streak == 0:
+                    endangered = True
+
+            logout_url = users.create_logout_url(self.request.uri)
+
+            template_values = {
+                'App' : App,
+                'arithmetic_template': 'arithmetic_print_template.html',
+                'username': user.nickname(),
+                'points': user_data.points,
+                'proficient': proficient,
+                'endangered': endangered,
+                'reviewing': reviewing,
+                'cookiename': user.nickname().replace('@', 'at'),
+                'key': userExercise.key(),
+                'exercise': exercise,
+                'exid': exid,
+                'expath': exid + '.html',
+                'start_time': time.time(),
+                'exercise_videos': exercise_videos,
+                'extitle': exid.replace('_', ' ').capitalize(),
+                'streakwidth': userExercise.streak * 20,
+                'logout_url': logout_url,
+                'streak': userExercise.streak,
+                'time_warp': time_warp,
+                'problem_numbers': range(problem_number, 10),
+                }
+            
+            path = os.path.join(os.path.dirname(__file__), 'print_template.html')
+            self.response.out.write(template.render(path, template_values))
+                
+        else:
+
+            self.redirect(users.create_login_url(self.request.uri))
 
 class ExerciseAdminPage(webapp.RequestHandler):
 
@@ -1363,6 +1480,8 @@ def real_main():
         ('/syncvideodata', UpdateVideoData),
         ('/exercises', ViewExercise),
         ('/editexercise', EditExercise),
+        ('/printexercise', PrintExercise),
+        ('/printproblem', PrintProblem),
         ('/viewexercisevideos', ViewExerciseVideos),
         ('/knowledgemap', KnowledgeMap),
         ('/viewexercisesonmap', ViewMapExercises),
