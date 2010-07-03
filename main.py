@@ -808,7 +808,7 @@ class PrintExercise(webapp.RequestHandler):
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
                 'time_warp': time_warp,
-                'problem_numbers': range(problem_number, 10),
+                'problem_numbers': range(problem_number, problem_number+10),
                 }
             
             path = os.path.join(os.path.dirname(__file__), 'print_template.html')
