@@ -573,8 +573,7 @@ class ViewExercise(webapp.RequestHandler):
             reviewing = False
             if user_data.is_proficient_at(exid):
                 proficient = True
-                if (userExercise.last_review > datetime.datetime.min and
-                    userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
+                if (userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
                     reviewing = True
                 if userExercise.streak == 0:
                     endangered = True
