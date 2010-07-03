@@ -15,7 +15,8 @@ import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
 import qbrary
-
+from discussion import comments
+from discussion import qa
 
 class UserExercise(db.Model):
 
@@ -663,7 +664,7 @@ class ViewVideo(webapp.RequestHandler):
                     if videos_in_playlist.video_position == video_playlist.video_position + 1:
                         video_playlist.next_video = videos_in_playlist.video
 
-            template_values = {'App' : App, 'video': video, 'video_playlists': video_playlists}
+            template_values = qa.add_template_values({'App': App, 'video': video, 'video_playlists': video_playlists}, self.request)
             path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
             self.response.out.write(template.render(path, template_values))
 
@@ -1521,6 +1522,16 @@ def real_main():
         ('/checkanswer', qbrary.CheckAnswer),
         ('/sessionaction', qbrary.SessionAction),
         ('/initqbrary', qbrary.InitQbrary),
+
+        # Below are all discussion related pages
+        ('/discussion/addcomment', comments.AddComment),
+        ('/discussion/pagecomments', comments.PageComments),
+
+        ('/discussion/addquestion', qa.AddQuestion),
+        ('/discussion/addanswer', qa.AddAnswer),
+        ('/discussion/answers', qa.Answers),
+        ('/discussion/pagequestions', qa.PageQuestions),
+        ('/discussion/deleteentity', qa.DeleteEntity),
         ], debug=True)
     run_wsgi_app(application)
 

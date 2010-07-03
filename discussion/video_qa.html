@@ -1,0 +1,166 @@
+
+<div class="video_questions">
+    <h3>Questions about this video:</h3>
+
+    <div class="question_form">
+        <form class="questions" name="questions">
+            {% honeypots %}
+            <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+            <div class="question_placeholder">
+                <textarea name="question_text" class="question_text" rows="3" cols="40" 
+                            watermark="Example: Why does Sal use shorthand notation at 5:43?"></textarea>
+            </div>
+            <div class="question_controls_container" style="display:none;">
+                <table class="question_add_controls"><tr>
+                    <td class="controls">
+                        <input class="button question_submit" type="button" value="Ask your question"/>
+                        or <a href="#" class="question_cancel">Cancel</a>
+                    </td>
+                    <td class="chars_remaining">
+                        <span class="chars_remaining_count">500</span> characters left
+                    </td>
+                </tr></table>
+            </div>
+        </form>
+    </div>
+
+    <div class="questions_container">
+    {% block questions %}
+
+        {% for question in questions %}
+            <div class="question_container
+                {% ifequal qa_expand_id question.key.id %}
+                    question_container_expanded
+                {% endifequal %}
+            ">
+                <div class="question">
+                    {% ifnotequal qa_expand_id question.key.id %}
+                        <a class="question_link" href="/video?v={{video.youtube_id}}&qa_page={{ current_page_1_based }}&qa_expand_id={{question.key.id}}" onclick="return false;">
+                    {% endifnotequal %}
+                            <span>{{ question.content|escape|youtube_timestamp_links }}</span>
+                    {% ifnotequal qa_expand_id question.key.id %}
+                        </a>
+                    {% endifnotequal %}
+                </div>
+
+                {% ifnotequal qa_expand_id question.key.id %}
+                    <div class="question_answer_count
+                    {% if not question.answers %}
+                        unanswered
+                    {% endif %}
+                    ">
+                        <table><tr>
+                        <td style="vertical-align: middle;">
+                            <a href="/video?v={{video.youtube_id}}&qa_page={{ current_page_1_based }}&qa_expand_id={{question.key.id}}" onclick="return false;">{{ question.answers|length }} answer{{ question.answers|length|pluralize }}</a>
+                        </td>
+                        <td>
+                            <span class="question_answer_count_add_yours">
+                                <input type="button" class="button add_yours" value="Add yours" />
+                            </span>
+                        </td>
+                        </tr></table>
+                    </div>
+                {% endifnotequal %}
+                
+                <div class="question_sig sig">
+                    {% signature question.author.nickname question.date question.key "asked" %}
+                </div>
+
+                <div class="answers_and_form_container"
+                    {% ifnotequal qa_expand_id question.key.id %}
+                        style="display:none;"
+                    {% endifnotequal %}
+                >
+                    <div class="answers_container">
+                        {% question_answers question.answers %}
+                    </div>
+
+                    <div class="answer_form">
+                        <form class="answers">
+                            {% honeypots %}
+                            <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                            <input type="hidden" name="question_key" value="{{ question.key }}" />
+                            <div class="answer_placeholder">
+                                <textarea name="answer_text" class="answer_text" rows="2" cols="40" watermark="Answer this question"></textarea>
+                            </div>
+                            <div class="answer_controls_container" style="display:none;">
+                                <table class="answer_add_controls"><tr>
+                                    <td class="controls">
+                                        <input class="button answer_submit" type="button" value="Answer this question"/>
+                                        or <a href="#" class="answer_cancel">Cancel</a>
+                                    </td>
+                                    <td class="chars_remaining">
+                                        <span class="chars_remaining_count">500</span> characters left
+                                    </td>
+                                </tr></table>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+
+            {% if not forloop.last %}
+                {% ifequal forloop.counter limit_initially_visible %}
+                    <div class="questions_hidden" style="display:none;">
+                {% endifequal %}
+            {% endif %}
+
+            <div style="overflow:hidden;height:1px;clear:both;">&nbsp;</div>
+        {% endfor %}
+
+        {% if show_page_controls %}
+        <div class="page_controls questions_page_controls">
+            <span>
+                {% ifnotequal current_page_1_based 1 %}
+                    <a href="/video?v={{video.youtube_id}}&qa_page={{ prev_page_1_based }}" class="questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
+                {% endifnotequal %}
+
+                {% for page in pages %}
+                    {% ifequal page current_page_1_based %}
+                        <span class="page_current questions_page_current">{{ page }}</span>
+                    {% else %}
+                        <a href="/video?v={{video.youtube_id}}&qa_page={{ page }}" class="page questions_page" page="{{ page }}">{{ page }}</a>
+                    {% endifequal %}
+                {% endfor %}
+
+                {% ifnotequal current_page_1_based pages_total %}
+                    <a href="/video?v={{video.youtube_id}}&qa_page={{ next_page_1_based }}" class="questions_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
+                {% endifnotequal %}
+            </span>
+        </div>
+        {% endif %}
+
+        {% if questions_hidden %}
+            </div>
+        {% endif %}
+
+    {% endblock %}
+    </div>
+
+    {% if questions_hidden %}
+        <div class="questions_show_more">
+             <a href="/video?v={{video.youtube_id}}&qa_page=1" class="button question_show"><img class="icon" src="/images/balloons.png" />Show more questions</a>
+        </div>
+    {% endif %}
+
+    <div class="sticky_note" style="display:none;">
+        <div class="sticky_note_content">
+            <strong>Ask a question</strong> about this video.  <em>Be as specific as possible!</em>
+            <br/><br/>
+            We suggest referencing particular moments in the video such as "5:28" for context.
+            <br/><br/>
+            <a href="http://localhost:8080/reportissue?type=Defect">Report problems with this video here.</a>
+        </div>
+    </div>
+
+    {% if not user %}
+        <div class="login_note" style="display:none;">
+            <a class="login_link" href="/_ah/login?continue=/video?v={{video.youtube_id}}"><img class="icon" src="/images/key-plus.png"/ >Log in first</a>
+            <span class="login_action"></span>
+        </div>
+    {% endif %}
+
+</div>
+<br/>
+

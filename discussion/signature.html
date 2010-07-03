@@ -1,0 +1,17 @@
+<nobr>
+    {% if date %}
+        {% if verb %}
+            &ndash;{{ author|escape }} {{ verb }} {{ date|timesince_ago }}
+        {% else %}
+            &ndash;{{ author|escape }}, {{ date|timesince_ago }}
+        {% endif %}
+    {% else %}
+        &ndash;{{ author|escape }}
+    {% endif %}
+
+    {% if is_admin %}
+        {% ifnotequal author "Example" %}
+            <span class="admin_tools">(<a href="#" class="admin_delete" key="{{ key }}">delete</a>)</span>
+        {% endifnotequal %}
+    {% endif %}
+</nobr>

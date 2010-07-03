@@ -1,0 +1,11 @@
+{% block answers %}
+    {% for answer in answers %}
+        <div class="answer">
+            {{ answer.content|escape|youtube_timestamp_links }}
+        </div>
+
+        <div class="answer_sig sig">
+            {% signature answer.author.nickname answer.date answer.key "answered" %}
+        </div>
+    {% endfor %}
+{% endblock %}

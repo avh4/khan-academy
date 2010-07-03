@@ -7,6 +7,10 @@
   <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
   <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
   <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css" />
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascript/jquery.watermark.js"></script>
+  <script type="text/javascript" src="/javascript/discussion.js"></script>
 </head>
 <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
   <center><table border=0 width=800 align=center>
@@ -30,10 +34,10 @@
   	<P>
   	<font color="#FFFFFF">{{video.keywords}}</font>
   	<P>
-  	<object width="800" height="480"><param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="800" height="480"></embed></object>
-  	<P>
-  	&nbsp;
-  	<P>
+        <object id="idOVideo" name="idOVideo" width="800" height="480"><param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1"></param><param name="allowFullScreen" value="true"></param><param name="allowScriptAccess" value="always"></param><embed id="idPlayer" name="idPlayer" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480"></embed></object>
+    {% video_comments video comments_page %}
+    {% video_qa video qa_page qa_expand_id %}
+    <br/>
   	{% for video_playlist in video_playlists %}
   	<A name="{{video_playlist.playlist.youtube_id}}"></A>
   	<div class=hdg>&nbsp;<h3>In Playlist: {{video_playlist.playlist.title}}</h3></div>

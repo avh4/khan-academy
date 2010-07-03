@@ -10,6 +10,66 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
+- kind: Comment
+  properties:
+  - name: deleted
+  - name: video
+  - name: date
+    direction: desc
+
+- kind: Comment
+  properties:
+  - name: video
+  - name: date
+    direction: desc
+
+- kind: DiscussAnswer
+  properties:
+  - name: deleted
+  - name: question
+  - name: date
+
+- kind: DiscussAnswer
+  properties:
+  - name: deleted
+  - name: video
+  - name: date
+
+- kind: DiscussAnswer
+  properties:
+  - name: question
+  - name: date
+
+- kind: DiscussAnswer
+  properties:
+  - name: question
+  - name: date
+    direction: desc
+
+- kind: DiscussAnswer
+  properties:
+  - name: video
+  - name: date
+
+- kind: DiscussAnswer
+  properties:
+  - name: video
+  - name: date
+    direction: desc
+
+- kind: DiscussQuestion
+  properties:
+  - name: deleted
+  - name: video
+  - name: date
+    direction: desc
+
+- kind: DiscussQuestion
+  properties:
+  - name: video
+  - name: date
+    direction: desc
+
 - kind: ExerciseVideo
   properties:
   - name: __key__
