@@ -182,18 +182,11 @@ function next_step()
 	}
 </script>
 {% for i in problem_numbers %}
-<table width=100%><tr>
-	<td>{{i}}.</td>
-	<td><iframe id="iframe{{i}}" name="problem{{i}}" frameborder="0" width="100%" height="0" onload="resizeIframe(this)" src="printproblem?exid={{exid}}&problem_number={{i}}"></iframe></td>
+<table width="100%"><tr>
+	<td valign="top">{{i}}.</td>
+	<td><iframe id="problem{{i}}" name="problem{{i}}" frameborder="0" width="100%" height="0" onload="resizeIframe(this)" src="printproblem?exid={{exid}}&problem_number={{i}}"></iframe></td>
 </tr></table>
-<script language=Javascript1.2><!--
-	$('problem{{i}}').load(function() {
-        this.style.height =
-        this.contentWindow.document.body.offsetHeight + 'px';
-    }
-	);
-//-->
-</script>
+<hr/>
 {% endfor %}
 </table>
 {% endblock pagecontent %}
