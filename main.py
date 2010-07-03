@@ -570,7 +570,7 @@ class ViewExercise(webapp.RequestHandler):
                 userExercise.put()
             
             if not problem_number:
-                problem_number = userExercise.total_done
+                problem_number = userExercise.total_done+1
             proficient = False
             endangered = False
             reviewing = False
@@ -781,7 +781,7 @@ class PrintExercise(webapp.RequestHandler):
                 userExercise.put()
             
             if not problem_number:
-                problem_number = userExercise.total_done
+                problem_number = userExercise.total_done+1
             proficient = False
             endangered = False
             reviewing = False
@@ -1275,7 +1275,7 @@ class RegisterAnswer(webapp.RequestHandler):
             
             # If a non-admin tries to answer a problem out-of-order, just ignore it and
             # display the next problem.
-            if problem_number != userExercise.total_done and not users.is_current_user_admin():
+            if problem_number != userExercise.total_done+1 and not users.is_current_user_admin():
                 # Only admins can answer problems out of order
                 self.redirect('/exercises?exid=' + exid)
                 return
