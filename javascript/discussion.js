@@ -1,5 +1,5 @@
 
-function onYouTubePlayerReady(playerId) {
+function onYouTubePlayerReady() {
     Discussion.player = document.getElementById("idPlayer");
 }
 
