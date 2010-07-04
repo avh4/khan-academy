@@ -63,7 +63,7 @@ class AddAnswer(webapp.RequestHandler):
             answer = models.DiscussAnswer()
             answer.author = user
             answer.content = answer_text
-            answer.video = video
+            answer.target = video
             answer.question = question
             db.put(answer)
 
@@ -116,7 +116,7 @@ class AddQuestion(webapp.RequestHandler):
             question = models.DiscussQuestion()
             question.author = user
             question.content = question_text
-            question.video = video
+            question.target = video
             db.put(question)
 
         self.redirect("/discussion/pagequestions?video_key={0}&page=0&questions_hidden={1}".format(video_key, questions_hidden))
@@ -146,8 +146,8 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     limit_per_page = 10
     limit_initially_visible = 3 if questions_hidden else limit_per_page
 
-    question_query = models.DiscussQuestion.gql("WHERE video = :1 AND deleted = :2 ORDER BY date DESC", video, False)
-    answer_query = models.DiscussAnswer.gql("WHERE video = :1 AND deleted = :2 ORDER BY date", video, False)
+    question_query = models.DiscussQuestion.gql("WHERE target = :1 AND deleted = :2 ORDER BY date DESC", video, False)
+    answer_query = models.DiscussAnswer.gql("WHERE target = :1 AND deleted = :2 ORDER BY date", video, False)
 
     count_total = question_query.count()
     questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)

@@ -8,7 +8,7 @@ class Comment(db.Model):
     content = db.StringProperty(multiline=True)
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
-    video = db.ReferenceProperty()
+    target = db.ReferenceProperty()
 
 class DiscussQuestion(db.Model):
 
@@ -16,7 +16,7 @@ class DiscussQuestion(db.Model):
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
-    video = db.ReferenceProperty()
+    target = db.ReferenceProperty()
 
     def __init__(self, *args, **kwargs):
         db.Model.__init__(self, *args, **kwargs)
@@ -28,5 +28,6 @@ class DiscussAnswer(db.Model):
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
-    question = db.ReferenceProperty(DiscussQuestion)
-    video = db.ReferenceProperty()
+    question = db.ReferenceProperty(DiscussQuestion, 
+                    collection_name="question_reference_set") # Avoid any DuplicatePropertyError with the generic target ReferenceProperty
+    target = db.ReferenceProperty()

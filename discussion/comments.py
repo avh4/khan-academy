@@ -60,7 +60,7 @@ class AddComment(webapp.RequestHandler):
             comment = models.Comment()
             comment.author = user
             comment.content = comment_text
-            comment.video = video
+            comment.target = video
             db.put(comment)
 
         self.redirect("/discussion/pagecomments?video_key={0}&page=0&comments_hidden={1}".format(video_key, comments_hidden))
@@ -75,7 +75,7 @@ def video_comments_context(video, page=0, comments_hidden=True):
     limit_per_page = 10
     limit_initially_visible = 3 if comments_hidden else limit_per_page
 
-    comments_query = models.Comment.gql("WHERE video = :1 and deleted = :2 ORDER BY date DESC", video, False)
+    comments_query = models.Comment.gql("WHERE target = :1 and deleted = :2 ORDER BY date DESC", video, False)
     count_total = comments_query.count()
     comments = comments_query.fetch(limit_per_page, (page - 1) * limit_per_page)
 
