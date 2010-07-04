@@ -450,6 +450,13 @@ $(document).ready(Discussion.init);
 $(document).ready(Comments.init);
 $(document).ready(QA.init);
 
+// Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
+// we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm
+// most users b/c it only manifests itself during page unload, but for anybody with IE's "show all errors"
+// enabled, it becomes an annoying source of "Javascript error occurred" popups on unload.
+// So we manually fix up the removeCallback function to be a little more forgiving.
+// See http://www.fusioncharts.com/forum/Topic12189-6-1.aspx#bm12281, http://swfupload.org/forum/generaldiscussion/809,
+// and http://www.longtailvideo.com/support/forums/jw-player/bug-reports/10374/javascript-error-with-embed.
 $(window).unload(
 function() {
     (function($){
