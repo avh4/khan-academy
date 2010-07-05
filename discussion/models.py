@@ -21,11 +21,7 @@ class DiscussQuestion(Feedback):
         self.answers_cache = [] # For caching each question's answers during render
 
 class DiscussAnswer(Feedback):
-
-    def __init__(self, *args, **kwargs):
-        Feedback.__init__(self, *args, **kwargs)
+    pass
 
 class Comment(Feedback):
-
-    def __init__(self, *args, **kwargs):
-        Feedback.__init__(self, *args, **kwargs)
+    pass
