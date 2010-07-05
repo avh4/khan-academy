@@ -63,8 +63,7 @@ class AddAnswer(webapp.RequestHandler):
             answer = models.DiscussAnswer()
             answer.author = user
             answer.content = answer_text
-            answer.target = video
-            answer.question = question
+            answer.targets = [video.key(), question.key()]
             db.put(answer)
 
         self.redirect("/discussion/answers?question_key={0}".format(question_key))
@@ -77,7 +76,7 @@ class Answers(webapp.RequestHandler):
         question = db.get(question_key)
 
         if question:
-            answer_query = models.DiscussAnswer.gql("WHERE question = :1 AND deleted = :2 ORDER BY date", question, False)
+            answer_query = models.DiscussAnswer.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date", question.key(), False)
             template_values = {
                 "answers": answer_query,
                 "is_admin": users.is_current_user_admin()
@@ -116,7 +115,7 @@ class AddQuestion(webapp.RequestHandler):
             question = models.DiscussQuestion()
             question.author = user
             question.content = question_text
-            question.target = video
+            question.targets = [video.key()]
             db.put(question)
 
         self.redirect("/discussion/pagequestions?video_key={0}&page=0&questions_hidden={1}".format(video_key, questions_hidden))
@@ -146,8 +145,8 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     limit_per_page = 10
     limit_initially_visible = 3 if questions_hidden else limit_per_page
 
-    question_query = models.DiscussQuestion.gql("WHERE target = :1 AND deleted = :2 ORDER BY date DESC", video, False)
-    answer_query = models.DiscussAnswer.gql("WHERE target = :1 AND deleted = :2 ORDER BY date", video, False)
+    question_query = models.DiscussQuestion.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date DESC", video.key(), False)
+    answer_query = models.DiscussAnswer.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date", video.key(), False)
 
     count_total = question_query.count()
     questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)
@@ -160,10 +159,10 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     # Just grab all answers for this video and cache in page's questions
     for answer in answer_query:
         # Grab the key only for each answer, don't run a full gql query on the ReferenceProperty
-        question_key = models.DiscussAnswer.question.get_value_for_datastore(answer)
+        question_key = answer.parent()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
-            question.answers.append(answer)
+            question.answers_cache.append(answer)
 
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)

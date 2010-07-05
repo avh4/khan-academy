@@ -45,13 +45,13 @@
 
                 {% ifnotequal qa_expand_id question.key.id %}
                     <div class="question_answer_count
-                    {% if not question.answers %}
+                    {% if not question.answers_cache %}
                         unanswered
                     {% endif %}
                     ">
                         <table><tr>
                         <td style="vertical-align: middle;">
-                            <a href="/video?v={{video.youtube_id}}&qa_page={{ current_page_1_based }}&qa_expand_id={{question.key.id}}" onclick="return false;">{{ question.answers|length }} answer{{ question.answers|length|pluralize }}</a>
+                            <a href="/video?v={{video.youtube_id}}&qa_page={{ current_page_1_based }}&qa_expand_id={{question.key.id}}" onclick="return false;">{{ question.answers_cache|length }} answer{{ question.answers_cache|length|pluralize }}</a>
                         </td>
                         <td>
                             <span class="question_answer_count_add_yours">
@@ -72,7 +72,7 @@
                     {% endifnotequal %}
                 >
                     <div class="answers_container">
-                        {% question_answers question.answers %}
+                        {% question_answers question.answers_cache %}
                     </div>
 
                     <div class="answer_form">
