@@ -70,7 +70,7 @@ def linebreaksbr_ellipsis(content):
         # Place everything after the 3rd <br /> in a hidden span that can be exposed by CSS later, and
         # Append an ellipsis at the cutoff point with a class that can also be controlled by CSS.
         rg_s[max_linebreaks] = "<span class='ellipsisExpand'>&hellip;</span><span class='hiddenExpand'>" + rg_s[max_linebreaks]
-        rg_s[len(rg_s) - 1] += "</span>"
+        rg_s[-1] += "</span>"
 
     # Join the string back up w/ its original <br />'s
     return "<br />".join(rg_s)
