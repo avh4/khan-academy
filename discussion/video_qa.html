@@ -35,7 +35,7 @@
             ">
                 <div class="question">
                     {% ifnotequal qa_expand_id question.key.id %}
-                        <a class="question_link" href="/video?v={{video.youtube_id}}&qa_page={{ current_page_1_based }}&qa_expand_id={{question.key.id}}" onclick="return false;">
+                        <a class="question_link" href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}" onclick="return false;">
                     {% endifnotequal %}
                             <span>{{ question.content|escape|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
                     {% ifnotequal qa_expand_id question.key.id %}
@@ -51,7 +51,7 @@
                     ">
                         <table><tr>
                         <td style="vertical-align: middle;">
-                            <a href="/video?v={{video.youtube_id}}&qa_page={{ current_page_1_based }}&qa_expand_id={{question.key.id}}" onclick="return false;">{{ question.answers_cache|length }} answer{{ question.answers_cache|length|pluralize }}</a>
+                            <a href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}" onclick="return false;">{{ question.answers_cache|length }} answer{{ question.answers_cache|length|pluralize }}</a>
                         </td>
                         <td>
                             <span class="question_answer_count_add_yours">

@@ -137,12 +137,22 @@ class DeleteEntity(webapp.RequestHandler):
 
 def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
 
+    limit_per_page = 10
+
+    if qa_expand_id:
+        # If we're showing an initially expanded question,
+        # make sure we're on the correct page
+        question = models.DiscussQuestion.get_by_id(qa_expand_id)
+        if question:
+            question_preceding_query = models.DiscussQuestion.gql("WHERE targets = :1 AND deleted = :2 AND date > :3 ORDER BY date DESC", video.key(), False, question.date)
+            count_preceding = question_preceding_query.count()
+            page = 1 + (count_preceding / limit_per_page)        
+
     if page > 0:
         questions_hidden = False # Never hide questions if specifying specific page
     else:
         page = 1
 
-    limit_per_page = 10
     limit_initially_visible = 3 if questions_hidden else limit_per_page
 
     question_query = models.DiscussQuestion.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date DESC", video.key(), False)
@@ -188,4 +198,3 @@ def add_template_values(dict, request):
     dict["qa_page"] = int(request.get("qa_page")) if request.get("qa_page") else 0
     dict["qa_expand_id"] = int(request.get("qa_expand_id")) if request.get("qa_expand_id") else -1
     return dict
-
