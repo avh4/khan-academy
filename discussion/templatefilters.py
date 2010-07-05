@@ -53,7 +53,7 @@ def youtube_timestamp_links(content):
     return content
 
 @register.filter
-def linebreaksbr_ellipsis(content):
+def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
 
     # After a specified number of linebreaks, apply span with a CSS class
     # to the rest of the content so it can be optionall hidden or shown
@@ -69,7 +69,7 @@ def linebreaksbr_ellipsis(content):
         # More than max_linebreaks <br />'s were found.
         # Place everything after the 3rd <br /> in a hidden span that can be exposed by CSS later, and
         # Append an ellipsis at the cutoff point with a class that can also be controlled by CSS.
-        rg_s[max_linebreaks] = "<span class='ellipsisExpand'>&hellip;</span><span class='hiddenExpand'>" + rg_s[max_linebreaks]
+        rg_s[max_linebreaks] = "<span class='ellipsisExpand'>{0}</span><span class='hiddenExpand'>{1}".format(ellipsis_content, rg_s[max_linebreaks])
         rg_s[-1] += "</span>"
 
     # Join the string back up w/ its original <br />'s

@@ -358,6 +358,15 @@ var Comments = {
 
     initPages: function() {
         $("a.comments_page").click(function(){ Comments.loadPage($(this).attr("page")); return false; });
+        $("span.ellipsisExpand").click(Comments.expand);
+    },
+
+    expand: function() {
+        var parent = $(this).parents("div.comment");
+        if (!parent.length) return;
+
+        $(this).css("display", "none");
+        $("span.hiddenExpand", parent).removeClass("hiddenExpand");
     },
 
     loadPage: function(page) {
