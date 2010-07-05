@@ -160,6 +160,10 @@
     display: inline;
 }
 
+.video_questions .question_container .hiddenExpand { display: none; }
+.video_questions .question_container_expanded .hiddenExpand { display: inline; }
+.video_questions .question_container_expanded .ellipsisExpand { display: none; }
+
 .video_questions .question_container_hover a, .video_questions .question_container_hover .playYouTube {
     text-decoration: underline;
     color: #DD6900;
