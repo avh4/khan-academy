@@ -1,0 +1,176 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+var mOrig; // if 1, then orig. func. is up-facing
+
+var xOrig;
+var yOrig;
+
+var xShift;
+var yShift;
+
+var gx; // the answer in terms of f(x)
+
+function generate_quadratic_funcs()
+{
+	xOrig = getRandomIntRange(-8,8);
+	yOrig = getRandomIntRange(-8,8);
+	
+	if (xOrig > 0) {
+		xShift = getRandomIntRange(-6, -1);
+	} else {
+		xShift = getRandomIntRange(1, 6);
+	}
+
+	if (yOrig > 0) {
+		yShift = getRandomIntRange(-6, -1);
+	} else {
+		yShift = getRandomIntRange(1, 6);
+	}
+
+	mOrig = getRandomIntRange(-1, 0);
+	if (mOrig == 0) {
+		mOrig = 1;
+	}
+
+	// double minus sign x--c doesn't work for some reason?
+	origFunc = mOrig + "*(x+-1*" + xOrig + ")^2+" + yOrig;
+	flipFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + yOrig;
+	yShiftFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + (yOrig + yShift);
+	finFunc = mOrig + "*-1*(x+-1*" + (xOrig + xShift) + ")^2+" + (yOrig + yShift);
+}
+
+generate_quadratic_funcs();
+
+gx = "-f(x + " + xShift + ") + " + yShift;
+setCorrectAnswer(gx);
+
+addWrongChoice("-f(x + " + yShift + ") + " + yShift);
+
+addWrongChoice("f(x + " + xShift + ") + " + yShift);
+
+addWrongChoice("-f(x - " + xShift + ") + " + yShift);
+addWrongChoice("-f(x + " + xShift + ") - " + yShift);
+addWrongChoice("-f(x - " + xShift + ") - " + yShift);
+
+addWrongChoice("-f(x - " + yShift + ") + " + xShift);
+addWrongChoice("-f(x + " + yShift + ") - " + xShift);
+addWrongChoice("-f(x - " + yShift + ") - " + xShift);
+
+function draw_next_step() {
+	document.getElementById('hint'+steps_given).style.display = 'block';
+	if (steps_given==0)
+	{
+		present.stroke = "purple";
+		present.plot(flipFunc);
+	}
+	if (steps_given==1)
+	{
+		present.stroke = "green";
+		present.plot(yShiftFunc);
+
+		present.marker = "arrow";
+		present.line([xOrig, yOrig], [xOrig, yOrig + yShift]);	
+	}
+	if (steps_given==2)
+	{
+		present.stroke = "blue";
+		present.marker = "arrow";
+		present.line([xOrig, yOrig + yShift], [xOrig + xShift, yOrig + yShift]);
+	}
+	steps_given++;
+}
+
+
+function graph_update() {
+	present.initPicture(-10,10, -10, 10);
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	
+	present.stroke = "#DDDDDD";
+	present.strokewidth = "2";
+	for(var i=-10; i<11; i++)
+	{
+		if (i!=0)
+		{
+			present.line([i,-11], [i,11]);
+			present.line([-11,i], [11,i]);
+			present.text([i, .1], i, below);
+			present.text([0, i], i, right);
+		}
+	}
+	
+	present.axes();
+	
+	present.stroke="red";
+	present.fontstyle="italic";
+	present.fontfill="orange";
+	present.fontstroke="none";
+	present.fontsize="20";
+	
+	// plot original function
+	present.plot(origFunc);
+
+	present.stroke="blue";
+	// plot shifted-reflected function
+	present.plot(finFunc);
+}
+
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<div style="font-family:sans-serif;font-size:16;">
+<font color="red">`f(x)`</font> is graphed in <font color="red">red</font>.<br/>
+<font color="blue">`g(x)`</font> is graphed in <font color="blue">blue</font>.<br/>
+What is <font color="blue">`g(x)`</font> in terms of <font color="red">`f(x)`</font>?
+</div>
+
+<table><tr>
+    <td style="width:560px">
+        <iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
+	</td><td>
+		<!--Based on the code from even and odd functions.
+		Note that here, the hintX numbers X represent number of hints given. 
+		These are steps which are all part of one problem.
+		In even and odd functions, they were different hints for different solutions.-->
+		
+		<div id="hint0" style="font-family:sans-serif;color:purple;font-size:16;display:none;">
+        To get from `f(x)` to `g(x)`, first "flip" `f(x)` by multiplying by -1, giving `-f(x)`.</div>
+        
+        <div id="hint1" style="font-family:sans-serif;color:green;font-size:16;display:none;">
+        <script language=Javascript1.2><!--
+        var yShiftPhrase;
+        if (yShift > 0) {
+			yShiftPhrase = "up " + yShift + " units";
+        } else {
+			yShiftPhrase = "down " + (yShift * -1) + " units";
+        }
+        
+        document.write("Next, shift your flipped function `-f(x)` " + yShiftPhrase +
+                ", giving `-f(x) + " + yShift + "`.");
+        //-->
+		</script></div>
+        <div id="hint2" style="font-family:sans-serif;color:blue;font-size:16;display:none;">
+        <script language=Javascript1.2><!--
+        var xShiftPhrase;
+        if (xShift > 0) {
+			xShiftPhrase = "right " + xShift + " units";
+        } else {
+			xShiftPhrase = "left " + (xShift * -1) + " units";
+        }
+        
+        document.write("Finally, shift the function `-f(x) + " + yShift + "` " + xShiftPhrase +
+                ", giving `" + gx + "`<br/>");
+        document.write("We now know `g(x) = " + gx + "`.");;
+        //-->
+		</script></div>
+    </td>
+</table>
+
+{% endblock maincell %}
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
