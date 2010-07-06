@@ -10,6 +10,15 @@ var yOrig;
 var xShift;
 var yShift;
 
+var flip = getRandomIntRange(0, 1);
+var flipSign;
+
+if (flip) {
+	flipSign = "-";
+} else {
+	flipSign = "";
+}
+
 var gx; // the answer in terms of f(x)
 
 function generate_quadratic_funcs()
@@ -36,34 +45,58 @@ function generate_quadratic_funcs()
 
 	// double minus sign x--c doesn't work for some reason?
 	origFunc = mOrig + "*(x+-1*" + xOrig + ")^2+" + yOrig;
-	flipFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + yOrig;
-	yShiftFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + (yOrig + yShift);
-	finFunc = mOrig + "*-1*(x+-1*" + (xOrig + xShift) + ")^2+" + (yOrig + yShift);
+	if (flip) {
+		flipFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + yOrig;
+		yShiftFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + (yOrig + yShift);
+		finFunc = mOrig + "*-1*(x+-1*" + (xOrig + xShift) + ")^2+" + (yOrig + yShift);
+	} else {
+		yShiftFunc = mOrig + "*(x+-1*" + xOrig + ")^2+" + (yOrig + yShift);
+		finFunc = mOrig + "*(x+-1*" + (xOrig + xShift) + ")^2+" + (yOrig + yShift);
+	}
+}
+
+function nicefy_signs(expr)
+{
+	while (expr.indexOf("+ -") != -1) {
+		expr = expr.replace("+ -", "-");
+	}
+	while (expr.indexOf("- -") != -1) {
+		expr = expr.replace("- -", "+")
+	}
+	return expr;
 }
 
 generate_quadratic_funcs();
 
-gx = "-f(x + " + xShift + ") + " + yShift;
+if (flip) {
+	gx = nicefy_signs("-f(x - " + xShift + ") + " + yShift);
+	addWrongChoice(nicefy_signs("f(x - " + xShift + ") + " + yShift));
+} else {
+	gx = nicefy_signs("f(x - " + xShift + ") + " + yShift);
+	addWrongChoice(nicefy_signs("-f(x - " + xShift + ") + " + yShift));
+}
+
+addWrongChoice(nicefy_signs("-f(x - " + yShift + ") + " + xShift));
+addWrongChoice(nicefy_signs("-f(x + " + yShift + ") - " + xShift));
+addWrongChoice(nicefy_signs("-f(x + " + xShift + ") - " + yShift));
+addWrongChoice(nicefy_signs("-f(x - " + xShift + ") - " + yShift));
+
+addWrongChoice(nicefy_signs("f(x - " + yShift + ") + " + xShift));
+addWrongChoice(nicefy_signs("f(x + " + yShift + ") - " + xShift));
+addWrongChoice(nicefy_signs("f(x + " + xShift + ") - " + yShift));
+addWrongChoice(nicefy_signs("f(x - " + xShift + ") - " + yShift));
+
 setCorrectAnswer(gx);
 
-addWrongChoice("-f(x + " + yShift + ") + " + yShift);
-
-addWrongChoice("f(x + " + xShift + ") + " + yShift);
-
-addWrongChoice("-f(x - " + xShift + ") + " + yShift);
-addWrongChoice("-f(x + " + xShift + ") - " + yShift);
-addWrongChoice("-f(x - " + xShift + ") - " + yShift);
-
-addWrongChoice("-f(x - " + yShift + ") + " + xShift);
-addWrongChoice("-f(x + " + yShift + ") - " + xShift);
-addWrongChoice("-f(x - " + yShift + ") - " + xShift);
-
 function draw_next_step() {
-	document.getElementById('hint'+steps_given).style.display = 'block';
 	if (steps_given==0)
 	{
-		present.stroke = "purple";
-		present.plot(flipFunc);
+		if (flip) {
+			present.stroke = "purple";
+			present.plot(flipFunc);
+		} else {
+			steps_given = 1;
+		}
 	}
 	if (steps_given==1)
 	{
@@ -79,6 +112,7 @@ function draw_next_step() {
 		present.marker = "arrow";
 		present.line([xOrig, yOrig + yShift], [xOrig + xShift, yOrig + yShift]);
 	}
+	document.getElementById('hint'+steps_given).style.display = 'block';
 	steps_given++;
 }
 
@@ -151,8 +185,8 @@ What is <font color="blue">`g(x)`</font> in terms of <font color="red">`f(x)`</f
 			yShiftPhrase = "down " + (yShift * -1) + " units";
         }
         
-        document.write("Next, shift your flipped function `-f(x)` " + yShiftPhrase +
-                ", giving `-f(x) + " + yShift + "`.");
+        document.write(nicefy_signs("Shift your function `" + flipSign + "f(x)` " + yShiftPhrase +
+                ", giving `" + flipSign + "f(x) + " + yShift + "`."));
         //-->
 		</script></div>
         <div id="hint2" style="font-family:sans-serif;color:blue;font-size:16;display:none;">
@@ -164,9 +198,9 @@ What is <font color="blue">`g(x)`</font> in terms of <font color="red">`f(x)`</f
 			xShiftPhrase = "left " + (xShift * -1) + " units";
         }
         
-        document.write("Finally, shift the function `-f(x) + " + yShift + "` " + xShiftPhrase +
-                ", giving `" + gx + "`<br/>");
-        document.write("We now know `g(x) = " + gx + "`.");;
+        document.write(nicefy_signs("Now shift the function `" + flipSign + "f(x) + " + yShift + "` "
+                + xShiftPhrase + ", giving `" + gx + "`<br/>"));
+        document.write("We now know `g(x) = " + nicefy_signs(gx) + "`.");;
         //-->
 		</script></div>
     </td>
