@@ -13,35 +13,9 @@ indexes:
 - kind: Comment
   properties:
   - name: deleted
-  - name: target
-  - name: date
-    direction: desc
-
-- kind: Comment
-  properties:
-  - name: deleted
   - name: targets
   - name: date
     direction: desc
-
-- kind: Comment
-  properties:
-  - name: deleted
-  - name: video
-  - name: date
-    direction: desc
-
-- kind: DiscussAnswer
-  properties:
-  - name: deleted
-  - name: question
-  - name: date
-
-- kind: DiscussAnswer
-  properties:
-  - name: deleted
-  - name: target
-  - name: date
 
 - kind: DiscussAnswer
   properties:
@@ -49,30 +23,10 @@ indexes:
   - name: targets
   - name: date
 
-- kind: DiscussAnswer
-  properties:
-  - name: deleted
-  - name: video
-  - name: date
-
-- kind: DiscussQuestion
-  properties:
-  - name: deleted
-  - name: target
-  - name: date
-    direction: desc
-
 - kind: DiscussQuestion
   properties:
   - name: deleted
   - name: targets
-  - name: date
-    direction: desc
-
-- kind: DiscussQuestion
-  properties:
-  - name: deleted
-  - name: video
   - name: date
     direction: desc
 
