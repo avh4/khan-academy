@@ -29,7 +29,7 @@ class UserExercise(db.Model):
     total_done = db.IntegerProperty()
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=86400)
-
+    
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
     @staticmethod
     def get_for_user_use_cache(user):
@@ -72,11 +72,8 @@ class UserExercise(db.Model):
         if not proficient and self.longest_streak < 10:
             # Not proficient and never has been so nothing to do
             return
-        query = UserData.all()
-        query.filter('user =', self.user)
-        user_data = query.get()
-        if user_data is None:
-            user_data = UserData(user=self.user, last_login=datetime.datetime.now(), proficient_exercises=[], suggested_exercises=[], assigned_exercises=[])
+
+        user_data = UserData.get_or_insert_for(self.user)
         if proficient:
             if self.exercise not in user_data.proficient_exercises:
                     user_data.proficient_exercises.append(self.exercise)
@@ -122,7 +119,50 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
-    
+
+    @staticmethod    
+    def get_or_insert_for(user):
+        # Once we have rekeyed legacy entities,
+        # the next block can just be a call to .get_or_insert()
+        query = UserData.all()
+        query.filter('user =', user)
+        query.order('-points') # Temporary workaround for issue 289
+        user_data = query.get()
+        if user_data is None:
+            user_data = UserData.get_or_insert(
+                key_name=user.nickname(),
+                user=user,
+                last_login=datetime.datetime.now(),
+                proficient_exercises=[],
+                suggested_exercises=[],
+                assigned_exercises=[],
+                need_to_reassess=True,
+                points=0,
+                )
+        return user_data
+
+    def get_or_insert_exercise(self, exid):
+        # Once we have reparented and rekeyed legacy entities,
+        # the next block can just be a call to .get_or_insert()
+        query = UserExercise.all()
+        query.filter('user =', self.user)
+        query.filter('exercise =', exid)
+        query.order('-total_done') # Temporary workaround for issue 289
+        userExercise = query.get()
+        if not userExercise:
+            userExercise = UserExercise.get_or_insert(
+                key_name=exid,
+                parent=self,
+                user=self.user,
+                exercise=exid,
+                streak=0,
+                longest_streak=0,
+                first_done=datetime.datetime.now(),
+                last_done=datetime.datetime.now(),
+                total_done=0,
+                )
+        return userExercise
+        
     def reassess_from_graph(self, ex_graph):
         all_proficient_exercises = []
         for ex in ex_graph.get_proficient_exercises():
@@ -527,24 +567,7 @@ class ViewExercise(webapp.RequestHandler):
             problem_number = self.request.get('problem_number')
             time_warp = self.request.get('time_warp')
 
-            query = UserExercise.all()
-            query.filter('user =', user)
-            query.filter('exercise =', exid)
-            userExercise = query.get()
-
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-            if user_data is None:
-                user_data = UserData(
-                    user=user,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    )
+            user_data = UserData.get_or_insert_for(user)
 
             query = Exercise.all()
             query.filter('name =', exid)
@@ -558,18 +581,7 @@ class ViewExercise(webapp.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            if not userExercise:
-                userExercise = UserExercise(
-                    user=user,
-                    exercise=exid,
-                    streak=0,
-                    longest_streak=0,
-                    first_done=datetime.datetime.now(),
-                    last_done=datetime.datetime.now(),
-                    total_done=0,
-                    )
-                userExercise.put()
-            
+            userExercise = user_data.get_or_insert_exercise(exid)
             if not problem_number:
                 problem_number = userExercise.total_done+1
             proficient = False
@@ -674,22 +686,7 @@ class ViewExerciseVideos(webapp.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-
-            if user_data is None:
-                user_data = UserData(
-                    user=user,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    )
-                user_data.put()
-
+            user_data = UserData.get_or_insert_for(user)
             exkey = self.request.get('exkey')
             if exkey:
                 exercise = Exercise.get(db.Key(exkey))
@@ -747,24 +744,7 @@ class PrintExercise(webapp.RequestHandler):
             num_problems = int(self.request.get('num_problems'))
             time_warp = self.request.get('time_warp')
 
-            query = UserExercise.all()
-            query.filter('user =', user)
-            query.filter('exercise =', exid)
-            userExercise = query.get()
-
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-            if user_data is None:
-                user_data = UserData(
-                    user=user,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    )
+            user_data = UserData.get_or_insert_for(user)
 
             query = Exercise.all()
             query.filter('name =', exid)
@@ -778,17 +758,7 @@ class PrintExercise(webapp.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            if not userExercise:
-                userExercise = UserExercise(
-                    user=user,
-                    exercise=exid,
-                    streak=0,
-                    longest_streak=0,
-                    first_done=datetime.datetime.now(),
-                    last_done=datetime.datetime.now(),
-                    total_done=0,
-                    )
-                userExercise.put()
+            userExercise = user_data.get_or_insert_exercise(exid)
             
             if not problem_number:
                 problem_number = userExercise.total_done+1
@@ -852,21 +822,7 @@ class ReportIssue(webapp.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-
-            if user_data is None:
-                user_data = UserData(
-                    user=user,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    )
-                user_data.put()
+            user_data = UserData.get_or_insert_for(user)
 
             logout_url = users.create_logout_url(self.request.uri)
 
@@ -908,21 +864,7 @@ class ViewMapExercises(webapp.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-
-            if user_data is None:
-                user_data = UserData(
-                    user=user,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    )
+            user_data = UserData.get_or_insert_for(user)
             
             knowledge_map_url = '/knowledgemap?'
             
@@ -974,20 +916,7 @@ class ViewAllExercises(webapp.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:
-            query = UserData.all()
-            query.filter('user =', user)
-            user_data = query.get()
-
-            if user_data is None:
-                user_data = UserData(
-                    user=user,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    )
+            user_data = UserData.get_or_insert_for(user)
             
             ex_graph = ExerciseGraph(user_data)
             if user_data.reassess_from_graph(ex_graph):

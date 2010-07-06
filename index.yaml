@@ -91,6 +91,19 @@ indexes:
   - name: parent_subject
   - name: index
 
+- kind: UserData
+  properties:
+  - name: user
+  - name: points
+    direction: desc
+
+- kind: UserExercise
+  properties:
+  - name: exercise
+  - name: user
+  - name: total_done
+    direction: desc
+
 - kind: Video
   properties:
   - name: __key__
