@@ -27,6 +27,14 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin  
 
+- url: /bulk_update/.*
+  script: ./bulk_update/handler.py
+  login: admin
+
+- url: /admin/.*
+  script: main.py
+  login: admin
+
 - url: .*
   script: main.py
   
