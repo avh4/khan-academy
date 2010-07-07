@@ -12,6 +12,7 @@ td.large{font-size:18px;}
 /* The exercises, classroom, messages etc links at the top of the page */
 a {color:#006699; text-decoration: none;}
 a:hover{ text-decoration: underline; color : #DD6900; }
+#playlist a:visited{ text-decoration: none; color : #581C90; }
 
 .mainmenu		{ font-size : 12px; color : #000000 }
 a.mainmenu		{ text-decoration: none; color : #006699;  }

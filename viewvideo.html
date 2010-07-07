@@ -41,7 +41,7 @@
   	{% for video_playlist in video_playlists %}
   	<A name="{{video_playlist.playlist.youtube_id}}"></A>
   	<div class=hdg>&nbsp;<h3>In Playlist: {{video_playlist.playlist.title}}</h3></div>
-  	<table  border=0 cellspacing=0 cellpadding=3>
+  	<table id="playlist" border=0 cellspacing=0 cellpadding=3>
   	<tr>
 		<td width=33% class="colHeadL" valign="top">{% if video_playlist.previous_video %}<A href="/video?v={{video_playlist.previous_video.youtube_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}{% else %}&nbsp;{% endif %} </A></td> 
 		<td class="colHeadR" width=33%>&nbsp;</td>
