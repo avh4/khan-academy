@@ -58,7 +58,7 @@
     {% if user %}
         <a href="#" class="comment_add"><img class="icon" src="/images/balloon-plus.png" />Add a comment</a>
     {% else %}
-        <a href="/_ah/login?continue=/video?v={{video.youtube_id}}"><img class="icon" src="/images/balloon-plus.png" />Log in to add a comment</a>
+        <a href="{{login_url}}"><img class="icon" src="/images/balloon-plus.png" />Log in to add a comment</a>
     {% endif %}
 
     {% if comments_hidden %}

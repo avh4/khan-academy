@@ -190,7 +190,8 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "qa_expand_id": qa_expand_id
+            "qa_expand_id": qa_expand_id,
+            "login_url": users.create_login_url("/video?v={0}".format(video.youtube_id))
            }
 
 def add_template_values(dict, request):

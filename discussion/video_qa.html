@@ -156,7 +156,7 @@
 
     {% if not user %}
         <div class="login_note" style="display:none;">
-            <a class="login_link" href="/_ah/login?continue=/video?v={{video.youtube_id}}"><img class="icon" src="/images/key-plus.png"/ >Log in first</a>
+            <a class="login_link" href="{{login_url}}"><img class="icon" src="/images/key-plus.png"/ >Log in first</a>
             <span class="login_action"></span>
         </div>
     {% endif %}
