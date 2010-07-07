@@ -100,6 +100,7 @@ var QA = {
         $("a.question_cancel").click(QA.cancelQuestion);
         $("form.questions").submit(function(){return false;});
         $("input.question_submit").click(QA.submitQuestion);
+        $(".sticky_note").mouseover(QA.mouseoverStickyNote).mouseout(QA.mouseoutStickyNote);
 
         $(window).resize(QA.repositionStickyNote);
 
@@ -256,13 +257,16 @@ var QA = {
 
         if (QA.showNeedsLoginNote(this, "to ask your question.")) return false;
 
+        QA.fFocusInQuestionBox = true;
+
         $(".question_controls_container").slideDown("fast");
         QA.updateRemainingQuestion();
         QA.showStickyNote();
     },
 
     blurQuestion: function() {
-        setTimeout(QA.hideStickyNote, 50);
+        QA.fFocusInQuestionBox = false;
+        QA.hideStickyNote();
     },
 
     cancelQuestion: function() {
@@ -314,7 +318,17 @@ var QA = {
     },
 
     hideStickyNote: function() {
-        $(".sticky_note").css("display", "none");
+        if (!QA.fMouseOverStickyNote && !QA.fFocusInQuestionBox)
+            $(".sticky_note").css("display", "none");
+    },
+
+    mouseoverStickyNote: function() {
+        QA.fMouseOverStickyNote = true;
+    },
+
+    mouseoutStickyNote: function() {
+        QA.fMouseOverStickyNote = false;
+        QA.hideStickyNote();
     },
 
     expandAndFocus: function(e) {
