@@ -117,6 +117,6 @@ eval("type"+getRandomIntRange(1,4)+"()");
 {% endblock maincell %}
 
 {% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  name="answer" onkeypress="if (event.keyCode == 13) {checkFreeAnswer(); return false;}"></br>{% endblock answerarea %}
-{% block checkanswer %}checkFreeAnswer(){% endblock checkanswer %}
+{% block checkanswer %}highlight_answer();checkFreeAnswer(){% endblock checkanswer %}
 
 
