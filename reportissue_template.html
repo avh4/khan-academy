@@ -24,7 +24,7 @@ function submitForm(value)
         Otherwise, please use the following steps to create a new issue in our issue tracking system.&nbsp;
 	<ol>
 		<li>Go to the 
-	        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Defect%20report%20from%20user&labels=Referer-{{referer|urlencode}},Type-Defect,Priority-Medium">new problem form</a>{% endblock new_issue_link %}.&nbsp;
+	        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Defect%20report%20from%20user&labels=Referer-{{referer|urlencode}},Type-Defect,{{issues_label|urlencode}}">new problem form</a>{% endblock new_issue_link %}.&nbsp;
 		</li>
 		<li>Fill in the <b>Summary</b> and <b>Description</b> fields.&nbsp;   <span style="color: red;"/>Note: The information you provide will become public, so do not include any private or confidential information.</span></li>
 		<li>Click the <b>Submit Issue</b> button.</li>

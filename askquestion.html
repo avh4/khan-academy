@@ -12,7 +12,7 @@
         If it's not in that list either, please use the following steps to create a new question in our issue tracking system.&nbsp;
 	<ol>
 		<li>Go to the 
-	        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Question%20from%20user&labels=Referer-{{referer|urlencode}},Type-Question,Priority-Medium">new question form</a>{% endblock new_issue_link %}.&nbsp;
+	        {% block new_issue_link %}<a href="http://code.google.com/p/khanacademy/issues/entry?template=Question%20from%20user&labels=Referer-{{referer|urlencode}},Type-Question,{{issue_labels|urlencode}}">new question form</a>{% endblock new_issue_link %}.&nbsp;
 		</li>
 		<li>Fill in the <b>Summary</b> and <b>Description</b> fields.&nbsp; <span style="color: red;"/>Note: The information you provide will become public, so do not include any private or confidential information.</span></li>
 		<li>Click the <b>Submit Issue</b> button.</li>

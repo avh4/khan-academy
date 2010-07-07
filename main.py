@@ -625,6 +625,7 @@ class ViewExercise(webapp.RequestHandler):
                 'time_warp': time_warp,
                 'problem_number': problem_number,
                 'num_problems_to_print': num_problems_to_print,
+                'issue_labels': ('Component-Exercises,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
 
             path = os.path.join(os.path.dirname(__file__), exid + '.html')
@@ -677,7 +678,10 @@ class ViewVideo(webapp.RequestHandler):
                     if videos_in_playlist.video_position == video_playlist.video_position + 1:
                         video_playlist.next_video = videos_in_playlist.video
 
-            template_values = qa.add_template_values({'App': App, 'video': video, 'video_playlists': video_playlists}, self.request)
+            template_values = qa.add_template_values({'App': App, 'video': video,
+                                                      'video_playlists': video_playlists, 
+                                                      'issue_labels': ('Component-Videos,Video-%s' % video_id)}, 
+                                                     self.request)
             path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
             self.response.out.write(template.render(path, template_values))
 
@@ -707,6 +711,7 @@ class ViewExerciseVideos(webapp.RequestHandler):
                     'first_video': exercise_videos[0].video,
                     'extitle': exercise.name.replace('_', ' ').capitalize(),
                     'exercise_videos': exercise_videos,
+                    'issue_labels': ('Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id), 
                     }
 
                 path = os.path.join(os.path.dirname(__file__), 'exercisevideos.html')
@@ -830,14 +835,13 @@ class ReportIssue(webapp.RequestHandler):
             user_agent = self.request.headers.get('User-Agent')
             if user_agent is None:
                 user_agent = ''
-            user_agent.replace(',',';') # Commas delimit labels, so we don't want them
+            user_agent = user_agent.replace(',',';') # Commas delimit labels, so we don't want them
             template_values = {
                 'App' : App,
                 'points': user_data.points,
                 'username': user.nickname(),
                 'referer': self.request.headers.get('Referer'),
-                'exid': self.request.get('exid'),
-                'problem_number': self.request.get('problem_number'),
+                'issue_labels': self.request.get('issue_labels'),
                 'user_agent': user_agent,
                 'logout_url': logout_url,
                 }

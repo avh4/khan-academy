@@ -191,6 +191,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
+            "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             "login_url": users.create_login_url("/video?v=%s" % video.youtube_id)
            }
 
