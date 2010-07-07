@@ -30,15 +30,46 @@
 """ A handler that supports updating many entities in the datastore without hitting
 request timeout limits.
 
-To use:
+To use to re-put (i.e. put without changes):
+
 1. Place this file in: /bulk_update/handler.py
-2. Add the following to your app.yaml:
+
+2. In your main.py:
+
+import bulk_update.handler
+
+def main():
+    application = webapp.WSGIApplication([ 
+        ('/admin/reput', bulk_update.handler.UpdateKind),
+        ])
+    run_wsgi_app(application)
+
+3. Add the following to your app.yaml:
   handlers:
-  - url: /bulk_update/.*
-    script: ./bulk_update/handler.py
+  - url: /admin/.*
+    script: main.py
     login: admin
-3. To re-put (ie. a null update) all the entities of kind ModelClass, visit:
-   /bulk_update/reput?ModelClass
+    
+4. To re-put (ie. a null update) all the entities of kind ModelClass, visit:
+   /admin/reput?ModelClass
+   
+To actually make changes, add the following in main.py:
+
+class MyUpdateKind(bulk_update.handler.UpdateKind):
+    def update(self, entity):
+        entity.attr1 = new_value1
+        entity.attr2 = new_value2
+        ...
+        return True
+
+def main():
+    application = webapp.WSGIApplication([ 
+        ('/admin/myupdate', MyUpdateKind),
+        ])
+    run_wsgi_app(application)
+    
+and then visit /admin/myupdate?ModelClass.
+
 """
 
 import cgi
@@ -133,21 +164,7 @@ class UpdateKind(webapp.RequestHandler):
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
         return db.GqlQuery('select __key__ from %s' % kind)
-
     
     def update(self, entity):
         """Override in subclasses to make changes to an entity"""
         return True
-
-class ReputKind(UpdateKind):
-    pass
-
-def main():
-    application = webapp.WSGIApplication([ 
-        ('/bulk_update/reput', ReputKind),
-        ], debug=True)
-    run_wsgi_app(application)
-
-if __name__ == '__main__':
-    main()
-

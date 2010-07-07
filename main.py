@@ -1430,7 +1430,7 @@ def real_main():
         ('/video', ViewVideo),
         ('/reportissue', ReportIssue),
         ('/export', Export),
-        ('/admin/reput', bulk_update.handler.ReputKind),
+        ('/admin/reput', bulk_update.handler.UpdateKind),
         # These are dangerous, should be able to clean things manually from the remote python shell
         # ('/deletevideos', DeleteVideos),
         # ('/deletevideoplaylists', DeleteVideoPlaylists),        
