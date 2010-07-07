@@ -63,7 +63,7 @@ class AddComment(webapp.RequestHandler):
             comment.targets = [video.key()]
             db.put(comment)
 
-        self.redirect("/discussion/pagecomments?video_key={0}&page=0&comments_hidden={1}".format(video_key, comments_hidden))
+        self.redirect("/discussion/pagecomments?video_key=%s&page=0&comments_hidden=%s" % (video_key, comments_hidden))
 
 def video_comments_context(video, page=0, comments_hidden=True):
 
@@ -95,5 +95,5 @@ def video_comments_context(video, page=0, comments_hidden=True):
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "login_url": users.create_login_url("/video?v={0}".format(video.youtube_id))
+            "login_url": users.create_login_url("/video?v=%s" % video.youtube_id)
            }

@@ -66,7 +66,7 @@ class AddAnswer(webapp.RequestHandler):
             answer.targets = [video.key(), question.key()]
             db.put(answer)
 
-        self.redirect("/discussion/answers?question_key={0}".format(question_key))
+        self.redirect("/discussion/answers?question_key=%s" % question_key)
 
 class Answers(webapp.RequestHandler):
 
@@ -118,7 +118,7 @@ class AddQuestion(webapp.RequestHandler):
             question.targets = [video.key()]
             db.put(question)
 
-        self.redirect("/discussion/pagequestions?video_key={0}&page=0&questions_hidden={1}".format(video_key, questions_hidden))
+        self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
 
 class DeleteEntity(webapp.RequestHandler):
 
@@ -191,7 +191,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
-            "login_url": users.create_login_url("/video?v={0}".format(video.youtube_id))
+            "login_url": users.create_login_url("/video?v=%s" % video.youtube_id)
            }
 
 def add_template_values(dict, request):

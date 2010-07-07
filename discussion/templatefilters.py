@@ -37,7 +37,7 @@ def honeypots():
 @register.filter
 def youtube_timestamp_links(content):
     dict_replaced = {}
-    html_template = "<span class='youTube' seconds='{0}'>{1}</span>"
+    html_template = "<span class='youTube' seconds='%s'>%s</span>"
 
     for match in re.finditer("(\d+:\d{2})", content):
         time = match.group(0)
@@ -46,7 +46,7 @@ def youtube_timestamp_links(content):
             rg_time = time.split(":")
             minutes = int(rg_time[0])
             seconds = int(rg_time[1])
-            html_link = html_template.format((minutes * 60) + seconds, time)
+            html_link = html_template % ((minutes * 60) + seconds, time)
             content = content.replace(time, html_link)
             dict_replaced[time] = True
 
@@ -69,7 +69,7 @@ def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
         # More than max_linebreaks <br />'s were found.
         # Place everything after the 3rd <br /> in a hidden span that can be exposed by CSS later, and
         # Append an ellipsis at the cutoff point with a class that can also be controlled by CSS.
-        rg_s[max_linebreaks] = "<span class='ellipsisExpand'>{0}</span><span class='hiddenExpand'>{1}".format(ellipsis_content, rg_s[max_linebreaks])
+        rg_s[max_linebreaks] = "<span class='ellipsisExpand'>%s</span><span class='hiddenExpand'>%s" % (ellipsis_content, rg_s[max_linebreaks])
         rg_s[-1] += "</span>"
 
     # Join the string back up w/ its original <br />'s
