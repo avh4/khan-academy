@@ -15,6 +15,7 @@ import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
 import qbrary
+import bulk_update.handler
 from discussion import comments
 from discussion import qa
 
@@ -1429,6 +1430,7 @@ def real_main():
         ('/video', ViewVideo),
         ('/reportissue', ReportIssue),
         ('/export', Export),
+        ('/admin/reput', bulk_update.handler.ReputKind),
         # These are dangerous, should be able to clean things manually from the remote python shell
         # ('/deletevideos', DeleteVideos),
         # ('/deletevideoplaylists', DeleteVideoPlaylists),        
