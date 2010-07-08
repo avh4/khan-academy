@@ -207,7 +207,7 @@ function next_step()
 				<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 				<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
 				{% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {highlight_answer(); checkFreeAnswer(); return false;}"></br>{% endblock answerarea %}
-				<br><input type="button" value="Hint" onClick="{% block hintfunction %}next_step(){% endblock hintfunction %}">
+				<br><input type="button" value="Hint" name="hint" onClick="relabel_hint();{% block hintfunction %}next_step(){% endblock hintfunction %}">
 				<input type="button" value="Check Answer" onClick="{% block checkanswer %}highlight_answer();checkFreeAnswer(){% endblock checkanswer %}"></br>
 				<br><img src="/images/blank.gif" name="feedback"><div id="nextbutton" style="position:relative; visibility:hidden;"><input type="button" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()"></div></br>
 				{% endblock answerform %}
@@ -220,6 +220,10 @@ function next_step()
 					if (elForm.answer) elForm.answer.focus();
 				}
 
+				function relabel_hint()
+				{
+					elForm.hint.value = "Next Hint";
+				}
 				function highlight_answer()
 				{
 					elForm.answer.focus();
