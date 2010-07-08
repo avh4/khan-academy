@@ -1,0 +1,141 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+// -- generic trig stuff --
+
+// sin-1 range is first and fourth quadrant
+// tan-1 range is first and fourth quadrant
+// cos-1 range is first and second quadrant
+
+var sinRatios = ['0', '1/2', 'sqrt(2)/2', 'sqrt(3)/2', '1', '-1/2', '-sqrt(2)/2', '-sqrt(3)/2', '-1']; // also usable for cos
+var tanRatios = ['0', 'sqrt(3)/3', '1', 'sqrt(3)', '-sqrt(3)/3', '-1', '-sqrt(3)'];
+
+var sinAngles = [0, 30, 45, 60, 90, -30, -45, -60, -90];
+var cosAngles = [90, 60, 45, 30, 0, 120, 135, 150, 180];
+var tanAngles = [0, 30, 45, 60, -30, -45, -60];
+
+function deg_to_rad(angle)
+{
+	// returns string of radians
+	// it's not really worth working out the string manipulations :P
+	switch (angle) {
+	case 0:
+		return '0';
+	case 30:
+		return 'pi/6';
+	case 45:
+		return 'pi/4';
+	case 60:
+		return 'pi/3';
+	case 90:
+		return 'pi/2';
+	case 180:
+		return 'pi';
+	case -30:
+		return '-pi/6';
+	case -45:
+		return '-pi/4';
+	case -60:
+		return '-pi/3';
+	case -90:
+		return '-pi/2';
+	case 120:
+		return '2pi/3';
+	case 135:
+		return '3pi/4';
+	case 150:
+		return '5pi/6';
+	}
+}
+
+// -- module-specific --
+var curFunc; // curFunc curRatio = ? [it's curAngle]
+var normFunc;
+var curAngle;
+var curRatio;
+
+var range;
+var useRadians = getRandomIntRange(0,1);
+
+var expGens = new Array();
+
+expGens[0] = function() {
+	var idx = getRandomIntRange(0, sinRatios.length - 1);
+	if (useRadians) {
+		range = "`-pi/2 <= theta <= pi/2`";
+	} else {
+		range = "`-90&deg; <= theta <= 90&deg;`";
+	}
+	curRatio = sinRatios[idx];
+	curAngle = sinAngles[idx];
+	curFunc = "sin^-1";
+}
+
+expGens[1] = function() {
+	var idx = getRandomIntRange(0, sinRatios.length - 1);
+	if (useRadians) {
+		range = "`0 <= theta <= pi`";
+	} else {
+		range = "`0&deg; <= theta <= 180&deg;`";
+	}
+	curRatio = sinRatios[idx];
+	curAngle = cosAngles[idx];
+	curFunc = "cos^-1";
+}
+
+expGens[2] = function() {
+	var idx = getRandomIntRange(0, tanRatios.length - 1);
+	if (useRadians) {
+		range = "`-pi/2 < theta < pi/2`";
+	} else {
+		range = "`-90&deg; < theta < 90&deg;`";
+	}
+	curRatio = tanRatios[idx];
+	curAngle = tanAngles[idx];
+	curFunc = "tan^-1";
+}
+
+expGens[getRandomIntRange(0, expGens.length-1)]();
+normFunc = curFunc.substr(0, 3);
+
+if (useRadians) {
+	curAngle = deg_to_rad(curAngle);
+
+	setCorrectAnswer(curAngle);
+
+	for (var i = 0; i < sinAngles.length; i++) {
+		addWrongChoice(deg_to_rad(sinAngles[i]));
+	}
+
+	for (i = 0; i < tanAngles.length; i++) {
+		addWrongChoice(deg_to_rad(tanAngles[i]));
+	}
+} else {
+	curAngle = curAngle + '&deg;';
+	setCorrectAnswer(curAngle);
+
+	for (var i = 0; i < sinAngles.length; i++) {
+		addWrongChoice(sinAngles[i] + '&deg;');
+	}
+
+	for (i = 0; i < tanAngles.length; i++) {
+		addWrongChoice(tanAngles[i] + '&deg;');
+	}
+}
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_equation(curFunc + ' (' + curRatio + ') = ?');
+
+write_step('If `' + curFunc + ' (' + curRatio + ') = theta`, then `' +
+		normFunc + ' theta = ' + curRatio + '` (where ' + range + ').');
+write_step('`' + normFunc + ' (' + curAngle + ') = ' + curRatio + '`, so `' +
+		curFunc + ' (' + curRatio + ') = ' + curAngle + '`');
+//-->
+</script>
+
+{% endblock maincell %}
+
