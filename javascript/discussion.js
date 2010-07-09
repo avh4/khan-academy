@@ -312,14 +312,12 @@ var QA = {
     },
 
     showStickyNote: function() {
-        var target = $("div.question_form");
-        var offset = target.offset();
-        $(".sticky_note").css("top", offset.top - 20).css("left", offset.left + target.width() + 10).css("display", "");
+        $(".sticky_note").slideDown("fast");
     },
 
     hideStickyNote: function() {
         if (!QA.fMouseOverStickyNote && !QA.fFocusInQuestionBox)
-            $(".sticky_note").css("display", "none");
+            $(".sticky_note").slideUp("fast");
     },
 
     mouseoverStickyNote: function() {
