@@ -4,6 +4,18 @@ runtime: python
 api_version: 1
 default_expiration: "14d"
 
+skip_files:
+- ^(.*/)?app\.yaml
+- ^(.*/)?app\.yml
+- ^(.*/)?index\.yaml
+- ^(.*/)?index\.yml
+- ^(.*/)?#.*#
+- ^(.*/)?.*~
+- ^(.*/)?.*\.py[co]
+- ^(.*/)?.*/RCS/.*
+- ^(.*/)?\..*
+- ^(.*/)?sample_data/.*
+
 handlers:
 - url: /stylesheets
   static_dir: stylesheets

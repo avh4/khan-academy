@@ -30,6 +30,11 @@ indexes:
   - name: date
     direction: desc
 
+- kind: Exercise
+  properties:
+  - name: __key__
+    direction: desc
+
 - kind: ExerciseVideo
   properties:
   - name: __key__
