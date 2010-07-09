@@ -11,6 +11,55 @@ import models
 from render import render_block_to_string
 from util import is_honeypot_empty
 
+# Note: MigrateFeedbackEntities is for one-time migration use.
+# This request should only be run once (it is restricted to admins only).
+# Once run and entities are successfully imported, we can delete all DiscussAnswer,
+# DiscussQuestion, and Comment entities from the DB.  We can then remove unnecessary indexes as well.
+#
+# This request handler can be removed once our data migration for issue 337 is finished.
+#
+class MigrateFeedbackEntities(webapp.RequestHandler):
+
+    def get(self):
+        
+        # Must be an admin to migrate
+        if not users.is_current_user_admin():
+            return
+
+        # Migrate all questions
+        questions = models.DiscussQuestion.all()
+        for question in questions:
+            feedback_question = feedback_migration_entity(question, models.FeedbackType.Question)
+            db.put(feedback_question)
+
+            # Get all the answers for each question, migrate to Feedback entities,
+            # and update their targets accordingly.
+            answers = models.DiscussAnswer.gql("WHERE targets = :1", question.key())
+            for answer in answers:
+                feedback_answer = feedback_migration_entity(answer, models.FeedbackType.Answer, feedback_question.key())
+                db.put(feedback_answer)
+
+        # Migrate all comments
+        comments = models.Comment.all()
+        for comment in comments:
+            feedback = feedback_migration_entity(comment, models.FeedbackType.Comment)
+            db.put(feedback)
+
+        self.response.out.write("Migration completed.")
+
+# This function can be removed once our data migration for issue 337 is finished.
+def feedback_migration_entity(source, type, question_target_override=None):
+    feedback = models.Feedback()
+    feedback.author = source.author
+    feedback.content = source.content
+    feedback.date = source.date
+    feedback.deleted = source.deleted
+    feedback.targets = source.targets
+    if question_target_override:
+        feedback.targets[-1] = question_target_override
+    feedback.types = [type]
+    return feedback
+
 class PageQuestions(webapp.RequestHandler):
 
     def get(self):
@@ -60,10 +109,11 @@ class AddAnswer(webapp.RequestHandler):
             if len(answer_text) > 500:
                 answer_text = answer_text[0:500] # max answer length, also limited by client
 
-            answer = models.DiscussAnswer()
+            answer = models.Feedback()
             answer.author = user
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
+            answer.types = [models.FeedbackType.Answer]
             db.put(answer)
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)
@@ -76,7 +126,7 @@ class Answers(webapp.RequestHandler):
         question = db.get(question_key)
 
         if question:
-            answer_query = models.DiscussAnswer.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date", question.key(), False)
+            answer_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models.FeedbackType.Answer, question.key(), False)
             template_values = {
                 "answers": answer_query,
                 "is_admin": users.is_current_user_admin()
@@ -112,10 +162,11 @@ class AddQuestion(webapp.RequestHandler):
             if len(question_text) > 500:
                 question_text = question_text[0:500] # max question length, also limited by client
 
-            question = models.DiscussQuestion()
+            question = models.Feedback()
             question.author = user
             question.content = question_text
             question.targets = [video.key()]
+            question.types = [models.FeedbackType.Question]
             db.put(question)
 
         self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
@@ -142,9 +193,9 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     if qa_expand_id:
         # If we're showing an initially expanded question,
         # make sure we're on the correct page
-        question = models.DiscussQuestion.get_by_id(qa_expand_id)
+        question = models.Feedback.get_by_id(qa_expand_id)
         if question:
-            question_preceding_query = models.DiscussQuestion.gql("WHERE targets = :1 AND deleted = :2 AND date > :3 ORDER BY date DESC", video.key(), False, question.date)
+            question_preceding_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND date > :4 ORDER BY date DESC", models.FeedbackType.Question, video.key(), False, question.date)
             count_preceding = question_preceding_query.count()
             page = 1 + (count_preceding / limit_per_page)        
 
@@ -155,8 +206,8 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
 
     limit_initially_visible = 3 if questions_hidden else limit_per_page
 
-    question_query = models.DiscussQuestion.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date DESC", video.key(), False)
-    answer_query = models.DiscussAnswer.gql("WHERE targets = :1 AND deleted = :2 ORDER BY date", video.key(), False)
+    question_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models.FeedbackType.Question, video.key(), False)
+    answer_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models.FeedbackType.Answer, video.key(), False)
 
     count_total = question_query.count()
     questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)
@@ -172,7 +223,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
         question_key = answer.parent()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
-            question.answers_cache.append(answer)
+            question.children_cache.append(answer)
 
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)

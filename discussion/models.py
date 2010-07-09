@@ -2,23 +2,32 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import db
 
+class FeedbackType:
+    Question="question"
+    Answer="answer"
+    Comment="comment"
+
 class Feedback(db.Model):
     author = db.UserProperty()
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
     targets = db.ListProperty(db.Key)
+    types = db.StringListProperty()
 
     def parent(self):
         if self.targets:
             return self.targets[-1]
         return None
 
-class DiscussQuestion(Feedback):
-
     def __init__(self, *args, **kwargs):
-        Feedback.__init__(self, *args, **kwargs)
-        self.answers_cache = [] # For caching each question's answers during render
+        db.Model.__init__(self, *args, **kwargs)
+        self.children_cache = [] # For caching each question's answers during render
+
+# The following three classes can be removed once our data migration for issue 337 is finished.
+
+class DiscussQuestion(Feedback):
+    pass
 
 class DiscussAnswer(Feedback):
     pass

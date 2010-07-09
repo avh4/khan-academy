@@ -35,6 +35,21 @@ indexes:
   - name: __key__
     direction: desc
 
+- kind: Feedback
+  properties:
+  - name: deleted
+  - name: targets
+  - name: types
+  - name: date
+
+- kind: Feedback
+  properties:
+  - name: deleted
+  - name: targets
+  - name: types
+  - name: date
+    direction: desc
+
 - kind: PlaylistVideo
   properties:
   - name: playlist

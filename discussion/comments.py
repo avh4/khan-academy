@@ -57,10 +57,11 @@ class AddComment(webapp.RequestHandler):
             if len(comment_text) > 300:
                 comment_text = comment_text[0:300] # max comment length, also limited by client
 
-            comment = models.Comment()
+            comment = models.Feedback()
             comment.author = user
             comment.content = comment_text
             comment.targets = [video.key()]
+            comment.types = [models.FeedbackType.Comment]
             db.put(comment)
 
         self.redirect("/discussion/pagecomments?video_key=%s&page=0&comments_hidden=%s" % (video_key, comments_hidden))
@@ -75,7 +76,7 @@ def video_comments_context(video, page=0, comments_hidden=True):
     limit_per_page = 10
     limit_initially_visible = 3 if comments_hidden else limit_per_page
 
-    comments_query = models.Comment.gql("WHERE targets = :1 and deleted = :2 ORDER BY date DESC", video.key(), False)
+    comments_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models.FeedbackType.Comment, video.key(), False)
     count_total = comments_query.count()
     comments = comments_query.fetch(limit_per_page, (page - 1) * limit_per_page)
 
