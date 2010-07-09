@@ -1467,7 +1467,6 @@ def real_main():
         ('/discussion/answers', qa.Answers),
         ('/discussion/pagequestions', qa.PageQuestions),
         ('/discussion/deleteentity', qa.DeleteEntity),
-        ('/discussion/migrateentities', qa.MigrateFeedbackEntities),
         ], debug=True)
     run_wsgi_app(application)
 

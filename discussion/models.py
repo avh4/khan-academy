@@ -23,14 +23,3 @@ class Feedback(db.Model):
     def __init__(self, *args, **kwargs):
         db.Model.__init__(self, *args, **kwargs)
         self.children_cache = [] # For caching each question's answers during render
-
-# The following three classes can be removed once our data migration for issue 337 is finished.
-
-class DiscussQuestion(Feedback):
-    pass
-
-class DiscussAnswer(Feedback):
-    pass
-
-class Comment(Feedback):
-    pass

@@ -11,55 +11,6 @@ import models
 from render import render_block_to_string
 from util import is_honeypot_empty
 
-# Note: MigrateFeedbackEntities is for one-time migration use.
-# This request should only be run once (it is restricted to admins only).
-# Once run and entities are successfully imported, we can delete all DiscussAnswer,
-# DiscussQuestion, and Comment entities from the DB.  We can then remove unnecessary indexes as well.
-#
-# This request handler can be removed once our data migration for issue 337 is finished.
-#
-class MigrateFeedbackEntities(webapp.RequestHandler):
-
-    def get(self):
-        
-        # Must be an admin to migrate
-        if not users.is_current_user_admin():
-            return
-
-        # Migrate all questions
-        questions = models.DiscussQuestion.all()
-        for question in questions:
-            feedback_question = feedback_migration_entity(question, models.FeedbackType.Question)
-            db.put(feedback_question)
-
-            # Get all the answers for each question, migrate to Feedback entities,
-            # and update their targets accordingly.
-            answers = models.DiscussAnswer.gql("WHERE targets = :1", question.key())
-            for answer in answers:
-                feedback_answer = feedback_migration_entity(answer, models.FeedbackType.Answer, feedback_question.key())
-                db.put(feedback_answer)
-
-        # Migrate all comments
-        comments = models.Comment.all()
-        for comment in comments:
-            feedback = feedback_migration_entity(comment, models.FeedbackType.Comment)
-            db.put(feedback)
-
-        self.response.out.write("Migration completed.")
-
-# This function can be removed once our data migration for issue 337 is finished.
-def feedback_migration_entity(source, type, question_target_override=None):
-    feedback = models.Feedback()
-    feedback.author = source.author
-    feedback.content = source.content
-    feedback.date = source.date
-    feedback.deleted = source.deleted
-    feedback.targets = source.targets
-    if question_target_override:
-        feedback.targets[-1] = question_target_override
-    feedback.types = [type]
-    return feedback
-
 class PageQuestions(webapp.RequestHandler):
 
     def get(self):
