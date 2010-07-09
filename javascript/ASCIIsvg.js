@@ -126,7 +126,7 @@ function isSVGavailable() {
   nd.appendChild(document.createTextNode(" images use Internet Explorer 6+"));
   an = myCreateElementXHTML("a");
   an.appendChild(document.createTextNode("Adobe SVGviewer 3.02"));
-  an.setAttribute("href","http://www.adobe.com/svg");
+  an.setAttribute("href","http://download.adobe.com/pub/adobe/magic/svgviewer/win/3.x/3.03/en/SVGView.exe");
   nd.appendChild(an);
   nd.appendChild(document.createTextNode(" or "));
   an = myCreateElementXHTML("a");
