@@ -298,10 +298,19 @@ span.playYouTube:hover {
     color : #DD6900;
 }
 
+table.feedback_list {
+    width: 100%;
+}
+
+table.feedback_list th {
+    text-align: left;
+}
+
 .page_controls { padding: 5px 0; }
 .page_controls img.icon { vertical-align: middle; }
 .questions_container .page_controls { padding-top: 20px; }
 
+a.video:visited{ color : #581C90; }
 span.admin_tools { font-size: 75%; }
 .sig { font-style: italic; padding-left: 7px; color: #898989; }
 img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px;}

@@ -6,10 +6,55 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 from django.utils import simplejson
+from collections import defaultdict
 
 import models
 from render import render_block_to_string
 from util import is_honeypot_empty
+
+# Temporary /discussion/videofeedbacklist URL to list counts of undeleted feedback for each video
+# along with links that change visited/unvisited style whenever new feedback is added.
+#
+# This is not meant to be a permanent piece of UI for the discussion interface, it is a tool
+# for those who want to keep track of feedback while the larger "view all/unanswered/etc questions" interface
+# is built.
+class VideoFeedbackList(webapp.RequestHandler):
+
+    def get(self):
+
+        feedbacks = models.Feedback.gql("WHERE deleted = :1", False)
+
+        dict_videos = {}
+        dict_count_questions = defaultdict(int)
+        dict_count_answers = defaultdict(int)
+        dict_count_comments = defaultdict(int)
+
+        for feedback in feedbacks:
+            video = feedback.first_target()
+
+            if video == None or type(video).__name__ != "Video":
+                continue
+
+            video_key = video.key()
+            dict_videos[video_key] = video
+
+            if feedback.is_type(models.FeedbackType.Question):
+                dict_count_questions[video_key] += 1
+            elif feedback.is_type(models.FeedbackType.Answer):
+                dict_count_answers[video_key] += 1
+            elif feedback.is_type(models.FeedbackType.Comment):
+                dict_count_comments[video_key] += 1
+
+        videos = sorted(dict_videos.values(), key=lambda video: video.playlists[0] + video.title)
+        context = {
+                    "videos": videos,
+                    "dict_count_questions": dict_count_questions,
+                    "dict_count_answers": dict_count_answers,
+                    "dict_count_comments": dict_count_comments
+                  }
+
+        path = os.path.join(os.path.dirname(__file__), 'video_feedback_list.html')
+        self.response.out.write(template.render(path, context))
 
 class PageQuestions(webapp.RequestHandler):
 
@@ -171,7 +216,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     # Just grab all answers for this video and cache in page's questions
     for answer in answer_query:
         # Grab the key only for each answer, don't run a full gql query on the ReferenceProperty
-        question_key = answer.parent()
+        question_key = answer.parent_key()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
             question.children_cache.append(answer)

@@ -15,11 +15,19 @@ class Feedback(db.Model):
     targets = db.ListProperty(db.Key)
     types = db.StringListProperty()
 
-    def parent(self):
+    def __init__(self, *args, **kwargs):
+        db.Model.__init__(self, *args, **kwargs)
+        self.children_cache = [] # For caching each question's answers during render
+
+    def is_type(self, type):
+        return type in self.types
+
+    def parent_key(self):
         if self.targets:
             return self.targets[-1]
         return None
 
-    def __init__(self, *args, **kwargs):
-        db.Model.__init__(self, *args, **kwargs)
-        self.children_cache = [] # For caching each question's answers during render
+    def first_target(self):
+        if self.targets:
+            return db.get(self.targets[0])
+        return None

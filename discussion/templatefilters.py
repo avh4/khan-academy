@@ -80,3 +80,7 @@ def timesince_ago(content):
     if not content:
         return ""
     return re.sub("^0 minutes ago", "just now", timesince(content) + " ago")
+
+@register.filter
+def hash(dict, key):
+    return dict[key]
