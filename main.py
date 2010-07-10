@@ -5,6 +5,8 @@ import os
 import datetime
 import time
 import random
+import urllib
+import logging
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -122,13 +124,26 @@ class UserData(db.Model):
     points = db.IntegerProperty()
 
     @staticmethod    
-    def get_or_insert_for(user):
-        # Once we have rekeyed legacy entities,
-        # the next block can just be a call to .get_or_insert()
+    def get_for_current_user():
+        user = users.get_current_user()
+        if user is not None:
+            user_data = UserData.get_for(user)
+            if user_data is not None:
+                return user_data
+        return UserData()
+
+    @staticmethod    
+    def get_for(user):
         query = UserData.all()
         query.filter('user =', user)
         query.order('-points') # Temporary workaround for issue 289
-        user_data = query.get()
+        return query.get()
+    
+    @staticmethod    
+    def get_or_insert_for(user):
+        # Once we have rekeyed legacy entities,
+        # the next block can just be a call to .get_or_insert()
+        user_data = UserData.get_for(user)
         if user_data is None:
             user_data = UserData.get_or_insert(
                 key_name=user.nickname(),
@@ -192,6 +207,11 @@ class UserData(db.Model):
         self.reassess_if_necessary()
         return (exid in self.suggested_exercises)
     
+    def get_nickname(self):
+        if self.user is not None:
+            return self.user.nickname()
+        else:
+            return None
 
 class Video(db.Model):
 
@@ -646,6 +666,14 @@ class ViewVideo(webapp.RequestHandler):
             query = Video.all()
             query.filter('youtube_id =', video_id)
             video = query.get()
+            if video is None:
+                error_message = "No video found for YouTube ID '%s'" % video_id
+                logging.error(error_message)
+                report_issue_handler = ReportIssue()
+                report_issue_handler.initialize(self.request, self.response)
+                report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % video_id,
+                                                               'message': 'Error: %s' % error_message})
+                return
 
             query = VideoPlaylist.all()
             query.filter('video = ', video)
@@ -826,43 +854,39 @@ class ExerciseAdminPage(webapp.RequestHandler):
 class ReportIssue(webapp.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)
+        issue_type = self.request.get('type')
+        self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
+        
+    def write_response(self, issue_type, extra_template_values):
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
 
-            logout_url = users.create_logout_url(self.request.uri)
-
-            user_agent = self.request.headers.get('User-Agent')
-            if user_agent is None:
-                user_agent = ''
-            user_agent = user_agent.replace(',',';') # Commas delimit labels, so we don't want them
-            template_values = {
-                'App' : App,
-                'points': user_data.points,
-                'username': user.nickname(),
-                'referer': self.request.headers.get('Referer'),
-                'issue_labels': self.request.get('issue_labels'),
-                'user_agent': user_agent,
-                'logout_url': logout_url,
-                }
-            issue_type = self.request.get('type')
-            page = 'reportissue_template.html'
-            if issue_type == 'Defect':
-                page = 'reportproblem.html'
-            elif issue_type == 'Enhancement':
-                page = 'makesuggestion.html'
-            elif issue_type == 'New-Video':
-                page = 'requestvideo.html'
-            elif issue_type == 'Comment':
-                page = 'makecomment.html'
-            elif issue_type == 'Question':
-                page = 'askquestion.html'
-            path = os.path.join(os.path.dirname(__file__), page)
-            self.response.out.write(template.render(path, template_values))
-        else:
-
-            self.redirect(users.create_login_url(self.request.uri))
-
+        user_agent = self.request.headers.get('User-Agent')
+        if user_agent is None:
+            user_agent = ''
+        user_agent = user_agent.replace(',',';') # Commas delimit labels, so we don't want them
+        template_values = {
+            'App' : App,
+            'points': user_data.points,
+            'username': user_data.get_nickname(),
+            'referer': self.request.headers.get('Referer'),
+            'user_agent': user_agent,
+            'logout_url': logout_url,
+            }
+        template_values.update(extra_template_values)
+        page = 'reportissue_template.html'
+        if issue_type == 'Defect':
+            page = 'reportproblem.html'
+        elif issue_type == 'Enhancement':
+            page = 'makesuggestion.html'
+        elif issue_type == 'New-Video':
+            page = 'requestvideo.html'
+        elif issue_type == 'Comment':
+            page = 'makecomment.html'
+        elif issue_type == 'Question':
+            page = 'askquestion.html'
+        path = os.path.join(os.path.dirname(__file__), page)
+        self.response.out.write(template.render(path, template_values))
 
 class ViewMapExercises(webapp.RequestHandler):
 

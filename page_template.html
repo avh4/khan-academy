@@ -53,9 +53,13 @@ Math.seedrandom(KhanAcademy.problem_number);
   	<tr>
   		<td><A href="http://www.khanacademy.org/" border="0"><img src="/images/khan.GIF"></a></td>
   		<td align=right valign=top width=100%>
-  			<span class="mainmenu">Welcome,  <B>{{username}}</b> [<A href="{{logout_url}}">Sign Out</A>] </span>
+  			{% if username %}
+			<span class="mainmenu">Welcome,  <B>{{username}}</b> [<A href="{{logout_url}}">Sign Out</A>] </span>
+			{% endif %}
   			<P>
+  			{% if points %}
   			<h2>Energy Points: {{points}}</h2>
+			{% endif %}
   		</td>
   	</tr>
   	  <tr>

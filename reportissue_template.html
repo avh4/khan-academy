@@ -13,6 +13,11 @@ function submitForm(value)
 {% block pagetitle %}Report an issue{% endblock pagetitle %}
 {% block pagecontent %}
 <div style="padding: 10%;">
+	{% if message %}
+	<p style="color: red;">
+	{{message}}
+	</p>
+	{% endif %}
         <p>{% block have_an_issue %}Have an issue?{% endblock have_an_issue %}&nbsp;
         We want to know about it!&nbsp; 
         </p>
