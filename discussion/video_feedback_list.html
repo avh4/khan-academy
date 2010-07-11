@@ -1,0 +1,55 @@
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<head>
+  <Title>Khan Academy: Video Feedback</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta name="description" content="{{video.description}}" />
+  <meta name="keywords" content="{{video.keywords}}" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
+  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css" />
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascript/jquery.watermark.js"></script>
+  <script type="text/javascript" src="/javascript/discussion.js"></script>
+</head>
+<body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
+  <center><table border=0 width=800 align=center>
+  	<tr>
+  		<td align=left><A href="http://www.khanacademy.org" border="0"><img src="/images/khan.GIF"></a></td>
+  	</tr>
+  	<tr>
+  		<td align=right><span class="mainmenu"><A href="http://www.khanacademy.org">Video Library</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/">Exercises (Requires Login)</A></span></td>
+  	</tr>
+  	<tr>
+  	
+  	<td>
+  	<h2>Video Feedback</h2>
+    <br/><br/>
+    <table class="feedback_list">
+        <tr>
+            <th>Video</th>
+            <th>Questions</th>
+            <th>Answers</th>
+            <th>Comments</th>
+        </tr>
+        {% for video in videos %}
+            <tr>
+                <td>
+                    <a class="video" href="/video?v={{ video.youtube_id }}&{{ dict_count_questions|hash:video.key }}_{{ dict_count_answers|hash:video.key }}_{{ dict_count_comments|hash:video.key }}">
+                        {{ video.playlists.pop|escape }}: {{ video.title }}
+                    </a>
+                </td>
+                <td>{{ dict_count_questions|hash:video.key }}</td>
+                <td>{{ dict_count_answers|hash:video.key }}</td>
+                <td>{{ dict_count_comments|hash:video.key }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+  	</td>
+  	</tr>
+   </table>
+</center>
+<br/><br/>
+{% include "../page_footer.html" %}
+</body>
+</html>
