@@ -729,6 +729,11 @@ class ViewExerciseVideos(webapp.RequestHandler):
                 exercise_videos = query.fetch(50)
 
                 logout_url = users.create_logout_url(self.request.uri)
+                first_video = None
+                issue_labels = None
+                if len(exercise_videos) > 0:
+                    first_video = exercise_videos[0].video
+                    issue_labels = 'Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id
 
                 template_values = {
                     'App' : App,
@@ -736,10 +741,10 @@ class ViewExerciseVideos(webapp.RequestHandler):
                     'username': user.nickname(),
                     'logout_url': logout_url,
                     'exercise': exercise,
-                    'first_video': exercise_videos[0].video,
+                    'first_video': first_video,
                     'extitle': exercise.name.replace('_', ' ').capitalize(),
                     'exercise_videos': exercise_videos,
-                    'issue_labels': ('Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id), 
+                    'issue_labels': issue_labels, 
                     }
 
                 path = os.path.join(os.path.dirname(__file__), 'exercisevideos.html')
@@ -1081,7 +1086,7 @@ class EditExercise(webapp.RequestHandler):
             playlist_videos = None
             for exercise_playlist in exercise_playlists:
                 query = VideoPlaylist.all()
-                query.filter('playlist =', exercise_playlist.playlist.key())
+                query.filter('playlist =', exercise_playlist.playlist)
                 query.order('video_position')
                 playlist_videos = query.fetch(200)
                 for playlist_video in playlist_videos:

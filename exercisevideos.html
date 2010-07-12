@@ -10,15 +10,18 @@ function changeVideo(identifier)
 }
 
 </script>
-
-{% for exercise_video in exercise_videos %}
+{% if first_video %}
+  {% for exercise_video in exercise_videos %}
 	<P>
 	<A href="javascript:changeVideo('{{exercise_video.video.youtube_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
-{% endfor %}
+  {% endfor %}
 <P>
 <div id="vid"></div>
 <script language=Javascript1.2><!--
 changeVideo('{{first_video.youtube_id}}');
 </script>
+{% else %}
+<p>There are no videos for this exercise yet.</p>
+{% endif %}
 <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
 {% endblock pagecontent %}
