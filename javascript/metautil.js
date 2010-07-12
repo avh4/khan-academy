@@ -281,14 +281,24 @@ KhanAcademy = {
 		// doesn't have reasonable fonts installed
 		if (browserSupportsMathML() && browserHasUsableFont())
 			return;
-		MathJax.Hub.config.skipStartupTypeset = false;
 		checkForMathML = false;
 		showasciiformulaonhover = false;
 		ASCIIMathMLTranslate = translate;
 		translate = function() {
+			var hintButton = $('#hint');
+			if (hintButton) {
+				hintButton.attr('disabled', 'disabled');				
+			}
 			ASCIIMathMLTranslate();
-			MathJax.Hub.Typeset();
+			if (hintButton) {
+				if (MathJax.isReady)
+					MathJax.Hub.Typeset(function() {hintButton.removeAttr('disabled');});
+				else
+					hintButton.removeAttr('disabled');				
+			}
 		};
+		// When MathJax has finished starting up, translate the page.
+		MathJax.Hub.Register.StartupHook("End", translate)
 		
 		function browserHasUsableFont() {
 			var d = new Detector();
