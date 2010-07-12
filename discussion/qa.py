@@ -167,6 +167,22 @@ class AddQuestion(webapp.RequestHandler):
 
         self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
 
+class ChangeEntityType(webapp.RequestHandler):
+
+    def post(self):
+
+        # Must be an admin to change types of anything
+        if not users.is_current_user_admin():
+            return
+
+        key = self.request.get("entity_key")
+        target_type = self.request.get("target_type")
+        if key and models.FeedbackType.is_valid(target_type):
+            entity = db.get(key)
+            if entity:
+                entity.types = [target_type]
+                db.put(entity)
+
 class DeleteEntity(webapp.RequestHandler):
 
     def post(self):

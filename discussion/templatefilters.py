@@ -22,12 +22,26 @@ def video_qa(video, page=0, qa_expand_id=None):
     return video_qa_context(video, page, qa_expand_id)
 
 @register.inclusion_tag(("discussion/signature.html", "signature.html"))
-def signature(author, date, key, verb=None):
-    return {"author": author, "date": date, "key": key, "verb": verb, "is_admin": users.is_current_user_admin()}
+def signature(target=None, verb=None):
+    return {
+                "target": target, 
+                "verb": verb, 
+                "is_admin": users.is_current_user_admin()
+            }
+
+@register.inclusion_tag(("discussion/admin_tools.html", "admin_tools.html"))
+def admin_tools(target):
+    return {
+                "target": target,
+                "type_question": models.FeedbackType.Question,
+                "type_comment": models.FeedbackType.Comment,
+                "is_question": target.is_type(models.FeedbackType.Question),
+                "is_comment": target.is_type(models.FeedbackType.Comment)
+            }
 
 @register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))
 def question_answers(answers):
-    return {"answers": answers}
+    return { "answers": answers }
 
 @register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))
 def honeypots():

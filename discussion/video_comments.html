@@ -9,14 +9,14 @@
         {% if not comments %}
             <div class="comment">
                 Thank you, Sal!<br/>
-                <span class="comment_sig sig">{% signature "Example" "" "" %}</span>
+                <span class="comment_sig sig">{% signature %}</span>
             </div>
         {% endif %}
 
         {% for comment in comments %}
             <div class="comment">
                 {{ comment.content|escape|linebreaksbr_ellipsis:" continue&hellip;"|youtube_timestamp_links }}<br/>
-                <span class="comment_sig sig">{% signature comment.author.nickname comment.date comment.key %}</span>
+                <span class="comment_sig sig">{% signature comment %}</span>
             </div>
 
             {% if not forloop.last %}

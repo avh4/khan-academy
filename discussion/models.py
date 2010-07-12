@@ -7,6 +7,12 @@ class FeedbackType:
     Answer="answer"
     Comment="comment"
 
+    @staticmethod    
+    def is_valid(type):
+        return (type == FeedbackType.Question or 
+                type == FeedbackType.Answer or 
+                type == FeedbackType.Comment)
+
 class Feedback(db.Model):
     author = db.UserProperty()
     content = db.TextProperty()

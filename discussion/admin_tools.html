@@ -1,0 +1,15 @@
+<span class="admin_tools">
+    <span class="admin_tools_show">(<a href="#" class="admin_show">mod</a>)</span>
+    <span class="admin_tools_hidden" style="display:none;">
+        mod tools:
+        <a href="#" class="admin_delete" key="{{ target.key }}">delete</a>
+
+        {% if not is_question %}
+            | <a href="#" class="admin_change" target_type="{{ type_question }}" key="{{ target.key }}">change to question</a>
+        {% endif%}
+
+        {% if not is_comment %}
+            | <a href="#" class="admin_change" target_type="{{ type_comment }}" key="{{ target.key }}">change to comment</a>
+        {% endif%}
+    </span>
+</span>

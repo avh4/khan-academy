@@ -7,7 +7,6 @@ var Discussion = {
     player: null,
 
     init: function() {
-        $(".admin_delete").live("click", Discussion.deleteEntity);
         Discussion.prepareYouTubeLinks();
     },
 
@@ -20,28 +19,6 @@ var Discussion = {
     playYouTube: function() {
         var seconds = $(this).attr("seconds");
         if (Discussion.player && seconds) Discussion.player.seekTo(Math.max(0, seconds - 2), true);
-    },
-
-    deleteEntity: function() {
-
-        if (!confirm("Are you sure you want to delete this?")) return false;
-
-        var key = $(this).attr("key");
-        if (!key) return;
-
-        var el = this;
-        $.post("/discussion/deleteentity", 
-                { entity_key: key }, 
-                function(){ Discussion.finishDeleteEntity(el); });
-
-        Discussion.showThrobberOnRight($(this));
-
-        return false;
-    },
-
-    finishDeleteEntity: function(el) {
-        $(el).replaceWith("deleted");
-        Discussion.hideThrobber();
     },
 
     showThrobberOnRight: function(jTarget) {
@@ -83,7 +60,72 @@ var Discussion = {
             $(charCountSelector, parent).html(c);
         }, 1);
     }
-}
+};
+
+var Moderation = {
+
+    init: function() {
+        $(".admin_show").live("click", Moderation.showTools);
+    },
+
+    showTools: function() {
+
+        var parent = $(this).parents(".admin_tools");
+        if (!parent.length) return;
+
+        $(".admin_delete", parent).click(Moderation.deleteEntity);
+        $(".admin_change", parent).click(Moderation.changeEntityType);
+
+        $(".admin_tools_show", parent).css("display", "none");
+        $(".admin_tools_hidden", parent).css("display", "");
+
+        return false;
+    },
+
+    deleteEntity: function() {
+        return Moderation.actionWithConfirmation(this, 
+                "/discussion/deleteentity",
+                null,
+                "Are you sure you want to delete this?",
+                "deleted!");
+    },
+
+    changeEntityType: function() {
+        var target_type = $(this).attr("target_type");
+        if (!target_type) return;
+
+        return Moderation.actionWithConfirmation(this, 
+                "/discussion/changeentitytype",
+                {target_type: target_type},
+                "Are you sure you want to change this to a " + target_type + "?",
+                "changed to " + target_type + "!");
+    },
+
+    actionWithConfirmation: function(el, sUrl, data, sConfirm, sCompleted) {
+
+        if (!confirm(sConfirm)) return false;
+
+        var key = $(el).attr("key");
+        if (!key) return;
+
+        if (!data) data = {};
+        data["entity_key"] = key;
+
+        $.post(sUrl, data, function(){ Moderation.finishedAction(el, sCompleted); });
+
+        Discussion.showThrobberOnRight($(el));
+        return false;
+    },
+
+    finishedAction: function(el, sMsg) {
+        var parent = $(el).parents(".admin_tools_hidden");
+        if (!parent.length) return;
+
+        parent.text(sMsg);
+        Discussion.hideThrobber();
+    }
+
+};
 
 var QA = {
 
@@ -470,6 +512,7 @@ var Comments = {
 $(document).ready(Discussion.init);
 $(document).ready(Comments.init);
 $(document).ready(QA.init);
+$(document).ready(Moderation.init);
 
 // Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
 // we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm
