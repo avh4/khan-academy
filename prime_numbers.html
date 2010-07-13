@@ -16,7 +16,7 @@ function get_factors(nonprime)
 {
     var factorlist = '';
     var maxf = Math.sqrt(nonprime);
-    for (j=1; j<maxf; j++)
+    for (j=1; j<=maxf; j++)
     {
         if (nonprime % j == 0) {
             factorlist += ' and `' + j + '&#215;' + (nonprime / j) + '`';
