@@ -35,6 +35,19 @@ handlers:
 - url: /MathJax-svn382
   static_dir: MathJax
 
+  # The url below needs to be updated whenever we change/upgrade svg-edit.
+  # We use our own version of the svg-editor.html file
+- url: /svg-edit-[^/]*/svg-editor\.html
+  static_files: helperpages/svg-editor.html
+  upload: helperpages/svg-editor.html
+  
+  # All the other svg-editor bits are stock.
+  # The url below needs to be updated whenever we change/upgrade svg-edit.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /svg-edit-2.5
+  static_dir: svg-edit
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin  
