@@ -632,11 +632,6 @@ function equation_string(equation)
 	return ('<p><font face=\"arial\" size=4><center>`'+equation+'`</center></font></p>');
 }
 
-function problem_header()
-{
-	document.write('<table width=100%><tr><td valign=top width=70%>');
-}
-
 //used in lineq.jsp
 function get_eq_step_string(instruction, lside, rside)
 {

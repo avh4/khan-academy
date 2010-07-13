@@ -84,12 +84,6 @@ function writeEquation(e)
 	writeText(equationString(e));
 }
 
-function problemHeader(name)
-{
-	currentexercise = name;
-	problem_header();
-}
-
 function setCorrectAnswer(a)
 {
 	correctAnswer = a+'';
