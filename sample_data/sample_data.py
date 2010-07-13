@@ -41,20 +41,23 @@ def main():
              'ExercisePlaylist', 
              'VideoPlaylist')
     parser = OptionParser(usage="%prog [options] upload|download", 
-                          description="Uploads the sample data to a server or downloads it from the server.  appcfg.py must be in your PATH.")
+                          description="Uploads the sample data to a server or downloads it from the server.")
     parser.add_option("-U", "--url", default="http://localhost:8080/remote_api",
                       help="The location of the remote_api endpoint.")
     parser.add_option("-e", "--email", default="test@example.com",
                       help="The username to use.")
     parser.add_option("-k", "--kinds", default=','.join(kinds),
                       help="The username to use.")
+    parser.add_option("-p", "--python", default=None, help="Path of python executable.")
+    parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
+    
     (options, args) = parser.parse_args()
     if len(args) < 1:
         parser.print_help()
         return
     for kind in options.kinds.split(','):
         filename='%s.data' % kind
-        call_args = ['appcfg.py',
+        call_args = [options.appcfg,
                      '--url=%s' % options.url,
                      '--email=%s' % options.email,
                      '--application=khanexercises',
@@ -62,6 +65,9 @@ def main():
                      '--filename=%s' % filename]
         if options.email == parser.get_option('--email').default:
             call_args.append('--passin')
+        
+        if options.python is not None:
+            call_args.insert(0, options.python)
 
         if args[0] == 'upload':
             call_args.append('upload_data')
