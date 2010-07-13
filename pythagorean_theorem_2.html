@@ -58,6 +58,7 @@ function type3()
 	if (hLength%2==0)
 	{
 		writeGraphicalHint(equationString(' (`'+bSide.colorStr+'`)^2= '+(Math.pow(hLength,2)/2)), [bSide]);
+		writeGraphicalHint(equationString('`'+bSide.colorStr+'`= sqrt('+(Math.pow(hLength,2)/2)+')'), [bSide]);
 		writeGraphicalHint(equationString('`'+bSide.colorStr+'`= '+simplifiedRoot(Math.pow(hLength,2)/2)),[bSide]);
 		
 		setCorrectAnswer(simplifiedRoot(Math.pow(hLength,2)/2));
