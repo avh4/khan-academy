@@ -6,8 +6,8 @@
             &ndash;{{ target.author.nickname|escape }}, {{ target.date|timesince_ago }}
         {% endif %}
 
-        {% if is_admin %}
-            {% admin_tools target %}
+        {% if is_mod %}
+            {% mod_tools target %}
         {% endif %}
     {% else %}
         &ndash;Example

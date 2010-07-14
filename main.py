@@ -1083,6 +1083,7 @@ def real_main():
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
         ('/discussion/videofeedbacklist', qa.VideoFeedbackList),
+        ('/discussion/moderatorlist', qa.ModeratorList),
         ], debug=True)
     run_wsgi_app(application)
 

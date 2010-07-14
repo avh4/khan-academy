@@ -6,9 +6,10 @@ from django import template
 from django.template.defaultfilters import linebreaksbr
 from django.template.defaultfilters import timesince
 
-import models
+import models_discussion
 from comments import video_comments_context
 from qa import video_qa_context
+from util import is_current_user_moderator
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -26,17 +27,17 @@ def signature(target=None, verb=None):
     return {
                 "target": target, 
                 "verb": verb, 
-                "is_admin": users.is_current_user_admin()
+                "is_mod": is_current_user_moderator()
             }
 
-@register.inclusion_tag(("discussion/admin_tools.html", "admin_tools.html"))
-def admin_tools(target):
+@register.inclusion_tag(("discussion/mod_tools.html", "mod_tools.html"))
+def mod_tools(target):
     return {
                 "target": target,
-                "type_question": models.FeedbackType.Question,
-                "type_comment": models.FeedbackType.Comment,
-                "is_question": target.is_type(models.FeedbackType.Question),
-                "is_comment": target.is_type(models.FeedbackType.Comment)
+                "type_question": models_discussion.FeedbackType.Question,
+                "type_comment": models_discussion.FeedbackType.Comment,
+                "is_question": target.is_type(models_discussion.FeedbackType.Question),
+                "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
             }
 
 @register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))

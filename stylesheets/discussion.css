@@ -152,16 +152,16 @@
 	border-color:#D2DDED transparent transparent;
 }
 
-.video_questions .question_container .admin_tools {
+.video_questions .question_container .mod_tools {
     display: none;
 }
 
-.video_questions .question_container_expanded .admin_tools {
+.video_questions .question_container_expanded .mod_tools {
     display: inline;
 }
 
-span.admin_tools { font-size: 75%; }
-span.admin_tools_hidden {
+span.mod_tools { font-size: 75%; }
+span.mod_tools_hidden {
     background-color: #D2DDED;
     padding: 2px 10px;
     -moz-border-radius: 10px;

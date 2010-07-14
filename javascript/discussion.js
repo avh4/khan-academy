@@ -65,19 +65,19 @@ var Discussion = {
 var Moderation = {
 
     init: function() {
-        $(".admin_show").live("click", Moderation.showTools);
+        $(".mod_show").live("click", Moderation.showTools);
     },
 
     showTools: function() {
 
-        var parent = $(this).parents(".admin_tools");
+        var parent = $(this).parents(".mod_tools");
         if (!parent.length) return;
 
-        $(".admin_delete", parent).click(Moderation.deleteEntity);
-        $(".admin_change", parent).click(Moderation.changeEntityType);
+        $(".mod_delete", parent).click(Moderation.deleteEntity);
+        $(".mod_change", parent).click(Moderation.changeEntityType);
 
-        $(".admin_tools_show", parent).css("display", "none");
-        $(".admin_tools_hidden", parent).css("display", "");
+        $(".mod_tools_show", parent).css("display", "none");
+        $(".mod_tools_hidden", parent).css("display", "");
 
         return false;
     },
@@ -118,7 +118,7 @@ var Moderation = {
     },
 
     finishedAction: function(el, sMsg) {
-        var parent = $(el).parents(".admin_tools_hidden");
+        var parent = $(el).parents(".mod_tools_hidden");
         if (!parent.length) return;
 
         parent.text(sMsg);

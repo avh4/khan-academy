@@ -7,10 +7,10 @@ from google.appengine.ext.webapp import template
 
 from django.utils import simplejson
 from collections import defaultdict
-
 import models
+import models_discussion
 from render import render_block_to_string
-from util import is_honeypot_empty
+from util import is_honeypot_empty, is_current_user_moderator
 
 # Temporary /discussion/videofeedbacklist URL to list counts of undeleted feedback for each video
 # along with links that change visited/unvisited style whenever new feedback is added.
@@ -22,7 +22,7 @@ class VideoFeedbackList(webapp.RequestHandler):
 
     def get(self):
 
-        feedbacks = models.Feedback.gql("WHERE deleted = :1", False)
+        feedbacks = models_discussion.Feedback.gql("WHERE deleted = :1", False)
 
         dict_videos = {}
         dict_count_questions = defaultdict(int)
@@ -38,11 +38,11 @@ class VideoFeedbackList(webapp.RequestHandler):
             video_key = video.key()
             dict_videos[video_key] = video
 
-            if feedback.is_type(models.FeedbackType.Question):
+            if feedback.is_type(models_discussion.FeedbackType.Question):
                 dict_count_questions[video_key] += 1
-            elif feedback.is_type(models.FeedbackType.Answer):
+            elif feedback.is_type(models_discussion.FeedbackType.Answer):
                 dict_count_answers[video_key] += 1
-            elif feedback.is_type(models.FeedbackType.Comment):
+            elif feedback.is_type(models_discussion.FeedbackType.Comment):
                 dict_count_comments[video_key] += 1
 
         videos = sorted(dict_videos.values(), key=lambda video: video.playlists[0] + video.title)
@@ -55,6 +55,33 @@ class VideoFeedbackList(webapp.RequestHandler):
 
         path = os.path.join(os.path.dirname(__file__), 'video_feedback_list.html')
         self.response.out.write(template.render(path, context))
+
+class ModeratorList(webapp.RequestHandler):
+
+    def get(self):
+
+        # Must be an admin to change moderators
+        if not users.is_current_user_admin():
+            return
+
+        mods = models.UserData.gql("WHERE moderator = :1", True)
+        path = os.path.join(os.path.dirname(__file__), 'mod_list.html')
+        self.response.out.write(template.render(path, {"mods" : mods}))
+
+    def post(self):
+
+        # Must be an admin to change moderators
+        if not users.is_current_user_admin():
+            return
+
+        user = users.User(self.request.get("user"))
+        user_data = models.UserData.get_for(user)
+
+        if user_data is not None:
+            user_data.moderator = (self.request.get("mod") == "1")
+            db.put(user_data)
+
+        self.redirect("/discussion/moderatorlist")
 
 class PageQuestions(webapp.RequestHandler):
 
@@ -105,11 +132,11 @@ class AddAnswer(webapp.RequestHandler):
             if len(answer_text) > 500:
                 answer_text = answer_text[0:500] # max answer length, also limited by client
 
-            answer = models.Feedback()
+            answer = models_discussion.Feedback()
             answer.author = user
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
-            answer.types = [models.FeedbackType.Answer]
+            answer.types = [models_discussion.FeedbackType.Answer]
             db.put(answer)
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)
@@ -122,10 +149,10 @@ class Answers(webapp.RequestHandler):
         question = db.get(question_key)
 
         if question:
-            answer_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models.FeedbackType.Answer, question.key(), False)
+            answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False)
             template_values = {
                 "answers": answer_query,
-                "is_admin": users.is_current_user_admin()
+                "is_mod": is_current_user_moderator()
             }
             path = os.path.join(os.path.dirname(__file__), 'question_answers.html')
             html = render_block_to_string(path, 'answers', template_values)
@@ -158,11 +185,11 @@ class AddQuestion(webapp.RequestHandler):
             if len(question_text) > 500:
                 question_text = question_text[0:500] # max question length, also limited by client
 
-            question = models.Feedback()
+            question = models_discussion.Feedback()
             question.author = user
             question.content = question_text
             question.targets = [video.key()]
-            question.types = [models.FeedbackType.Question]
+            question.types = [models_discussion.FeedbackType.Question]
             db.put(question)
 
         self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
@@ -171,13 +198,13 @@ class ChangeEntityType(webapp.RequestHandler):
 
     def post(self):
 
-        # Must be an admin to change types of anything
-        if not users.is_current_user_admin():
+        # Must be a moderator to change types of anything
+        if not is_current_user_moderator():
             return
 
         key = self.request.get("entity_key")
         target_type = self.request.get("target_type")
-        if key and models.FeedbackType.is_valid(target_type):
+        if key and models_discussion.FeedbackType.is_valid(target_type):
             entity = db.get(key)
             if entity:
                 entity.types = [target_type]
@@ -187,8 +214,8 @@ class DeleteEntity(webapp.RequestHandler):
 
     def post(self):
 
-        # Must be an admin to delete anything
-        if not users.is_current_user_admin():
+        # Must be a moderator to delete anything
+        if not is_current_user_moderator():
             return
 
         key = self.request.get("entity_key")
@@ -205,9 +232,9 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     if qa_expand_id:
         # If we're showing an initially expanded question,
         # make sure we're on the correct page
-        question = models.Feedback.get_by_id(qa_expand_id)
+        question = models_discussion.Feedback.get_by_id(qa_expand_id)
         if question:
-            question_preceding_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND date > :4 ORDER BY date DESC", models.FeedbackType.Question, video.key(), False, question.date)
+            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND date > :4 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, question.date)
             count_preceding = question_preceding_query.count()
             page = 1 + (count_preceding / limit_per_page)        
 
@@ -218,8 +245,8 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
 
     limit_initially_visible = 3 if questions_hidden else limit_per_page
 
-    question_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models.FeedbackType.Question, video.key(), False)
-    answer_query = models.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models.FeedbackType.Answer, video.key(), False)
+    question_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False)
+    answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, video.key(), False)
 
     count_total = question_query.count()
     questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)
@@ -241,7 +268,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
             "user": users.get_current_user(),
-            "is_admin": users.is_current_user_admin(),
+            "is_mod": is_current_user_moderator(),
             "video": video,
             "questions": questions,
             "count_total": count_total,

@@ -99,6 +99,7 @@ class Exercise(db.Model):
 class UserData(db.Model):
 
     user = db.UserProperty()
+    moderator = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
     proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
@@ -108,7 +109,7 @@ class UserData(db.Model):
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
 
-    @staticmethod    
+    @staticmethod
     def get_for_current_user():
         user = users.get_current_user()
         if user is not None:
@@ -133,6 +134,7 @@ class UserData(db.Model):
             user_data = UserData.get_or_insert(
                 key_name=user.nickname(),
                 user=user,
+                moderator=False,
                 last_login=datetime.datetime.now(),
                 proficient_exercises=[],
                 suggested_exercises=[],
