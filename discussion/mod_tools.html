@@ -2,14 +2,14 @@
     <span class="mod_tools_show">(<a href="#" class="mod_show">mod</a>)</span>
     <span class="mod_tools_hidden" style="display:none;">
         mod tools:
-        <a href="#" class="mod_delete" key="{{ target.key }}">delete</a>
+        <a href="#" class="mod_delete" data-key="{{ target.key }}">delete</a>
 
         {% if not is_question %}
-            | <a href="#" class="mod_change" target_type="{{ type_question }}" key="{{ target.key }}">change to question</a>
+            | <a href="#" class="mod_change" data-target_type="{{ type_question }}" data-key="{{ target.key }}">change to question</a>
         {% endif%}
 
         {% if not is_comment %}
-            | <a href="#" class="mod_change" target_type="{{ type_comment }}" key="{{ target.key }}">change to comment</a>
+            | <a href="#" class="mod_change" data-target_type="{{ type_comment }}" data-key="{{ target.key }}">change to comment</a>
         {% endif%}
     </span>
 </span>

@@ -91,7 +91,7 @@ var Moderation = {
     },
 
     changeEntityType: function() {
-        var target_type = $(this).attr("target_type");
+        var target_type = $(this).attr("data-target_type");
         if (!target_type) return;
 
         return Moderation.actionWithConfirmation(this, 
@@ -105,8 +105,8 @@ var Moderation = {
 
         if (!confirm(sConfirm)) return false;
 
-        var key = $(el).attr("key");
-        if (!key) return;
+        var key = $(el).attr("data-key");
+        if (!key) return false;
 
         if (!data) data = {};
         data["entity_key"] = key;
