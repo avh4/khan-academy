@@ -142,7 +142,6 @@ var QA = {
         $("a.question_cancel").click(QA.cancelQuestion);
         $("form.questions").submit(function(){return false;});
         $("input.question_submit").click(QA.submitQuestion);
-        $(".sticky_note").mouseover(QA.mouseoverStickyNote).mouseout(QA.mouseoutStickyNote);
 
         $(window).resize(QA.repositionStickyNote);
 
@@ -308,11 +307,11 @@ var QA = {
 
     blurQuestion: function() {
         QA.fFocusInQuestionBox = false;
-        QA.hideStickyNote();
     },
 
     cancelQuestion: function() {
         $(".question_text").val("").watermark($(".question_text").attr("watermark"));
+        QA.hideStickyNote();
         $(".question_controls_container").slideUp("fast");
         return false;
     },
@@ -358,17 +357,7 @@ var QA = {
     },
 
     hideStickyNote: function() {
-        if (!QA.fMouseOverStickyNote && !QA.fFocusInQuestionBox)
-            $(".sticky_note").slideUp("fast");
-    },
-
-    mouseoverStickyNote: function() {
-        QA.fMouseOverStickyNote = true;
-    },
-
-    mouseoutStickyNote: function() {
-        QA.fMouseOverStickyNote = false;
-        QA.hideStickyNote();
+        $(".sticky_note").slideUp("fast");
     },
 
     expandAndFocus: function(e) {
