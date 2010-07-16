@@ -134,7 +134,7 @@ var QA = {
     init: function() {
 
         var jQuestionText = $(".question_text");
-        jQuestionText.focus(QA.focusQuestion).blur(QA.blurQuestion);
+        jQuestionText.focus(QA.focusQuestion);
         jQuestionText.change(QA.updateRemainingQuestion).keyup(QA.updateRemainingQuestion);
         jQuestionText.watermark(jQuestionText.attr("watermark"));
 
@@ -298,15 +298,9 @@ var QA = {
 
         if (QA.showNeedsLoginNote(this, "to ask your question.")) return false;
 
-        QA.fFocusInQuestionBox = true;
-
         $(".question_controls_container").slideDown("fast");
         QA.updateRemainingQuestion();
         QA.showStickyNote();
-    },
-
-    blurQuestion: function() {
-        QA.fFocusInQuestionBox = false;
     },
 
     cancelQuestion: function() {
