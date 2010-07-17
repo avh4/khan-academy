@@ -6,7 +6,7 @@
   <meta name="description" content="{{video.description}}" />
   <meta name="keywords" content="{{video.keywords}}" />
 {% else %}
-  <title>Khan Academy: {{video.title}}</title>
+  <title>Khan Academy</title>
 {% endif %}
   <link rel="stylesheet" type="text/css" href="/stylesheets/default.css?{{App.version}}" />
   <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
@@ -15,46 +15,6 @@
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/seedrandom.js?{{App.version}}"></script>
-  {% comment %}
-     We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
-     /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
-     we update MathJax.
-  {% endcomment %}
-  <script type="text/javascript" src="/MathJax-svn382/MathJax.js">
-      MathJax.Hub.Config({
-	showProcessingMessages: true,
-	skipStartupTypeset: true,
-        extensions: ["mml2jax.js"],
-	jax: ["input/MathML", "output/HTML-CSS"],
-	"HTML-CSS": {
-		scale: 100,
-		availableFonts:["STIX", "TeX"],
-		preferredFont: "TeX",
-		webFont: "TeX",
-		imageFont: null
-	}
-      });
-  </script>
-  <script type="text/javascript" src="/javascript/metautil.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/exerciseutil.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/graphutil.js?{{App.version}}"></script>
-<script language=Javascript1.2><!--
-$(document).ready(function () {
-	KhanAcademy.supportMathML();
-	translate();	
-	drawPictures();
-});
-var username = "{{cookiename}}";
-var currentexercise = "{{exid}}";
-KhanAcademy.problem_number = "{{problem_number}}";
-Math.seedrandom(KhanAcademy.problem_number);
-//-->
-</script>
-
 {% block pagescript %}
 {% endblock pagescript %}
 </head>

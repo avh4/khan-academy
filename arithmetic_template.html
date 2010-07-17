@@ -1,17 +1,54 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}Exercise{% endblock pagetitle %}
 {% block pagescript %}
-  <script type="text/javascript">
-  	function submitForm(value)
-  	{
-		var form = document.forms['answerform'];
-	        if (form.beenSubmitted)
-	            return false;
-	        else 
-	            form.beenSubmitted = true;
-  		form.submit();
-  	}
+  <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/seedrandom.js?{{App.version}}"></script>
+  {% comment %}
+     We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
+     /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
+     we update MathJax.
+  {% endcomment %}
+  <script type="text/javascript" src="/MathJax-svn382/MathJax.js">
+      MathJax.Hub.Config({
+	showProcessingMessages: true,
+	skipStartupTypeset: true,
+        extensions: ["mml2jax.js"],
+	jax: ["input/MathML", "output/HTML-CSS"],
+	"HTML-CSS": {
+		scale: 100,
+		availableFonts:["STIX", "TeX"],
+		preferredFont: "TeX",
+		webFont: "TeX",
+		imageFont: null
+	}
+      });
   </script>
+  <script type="text/javascript" src="/javascript/metautil.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/exerciseutil.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/graphutil.js?{{App.version}}"></script>
+  <script type="text/javascript"><!--
+$(document).ready(function () {
+	KhanAcademy.supportMathML();
+	translate();	
+	drawPictures();
+});
+var username = "{{cookiename}}";
+var currentexercise = "{{exid}}";
+KhanAcademy.problem_number = "{{problem_number}}";
+Math.seedrandom(KhanAcademy.problem_number);
+function submitForm(value)
+{
+	var form = document.forms['answerform'];
+	if (form.beenSubmitted)
+		return false;
+	else
+		form.beenSubmitted = true;
+	form.submit();
+}
+// -->
+</script>
 {% endblock pagescript %}
 
 {% block pagesubmenu %}
