@@ -246,6 +246,8 @@ class ViewExercise(webapp.RequestHandler):
 class ViewVideo(webapp.RequestHandler):
 
     def get(self):
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
         video_id = self.request.get('v')
         if video_id:
             query = Video.all()
@@ -291,7 +293,12 @@ class ViewVideo(webapp.RequestHandler):
                     if videos_in_playlist.video_position == video_playlist.video_position + 1:
                         video_playlist.next_video = videos_in_playlist.video
 
-            template_values = qa.add_template_values({'App': App, 'video': video,
+            template_values = qa.add_template_values({'App': App,
+                                                      'points': user_data.points,
+                                                      'username': user_data.get_nickname(),
+                                                      'login_url': users.create_login_url(self.request.uri),
+                                                      'logout_url': logout_url,
+                                                      'video': video,
                                                       'video_playlists': video_playlists, 
                                                       'issue_labels': ('Component-Videos,Video-%s' % video_id)}, 
                                                      self.request)

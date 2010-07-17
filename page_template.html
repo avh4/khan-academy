@@ -1,10 +1,20 @@
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML">
 <head>
-  <title>Khan Academy</title>
+{% if video %}
+  <title>Khan Academy: {{video.title}}</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta name="description" content="{{video.description}}" />
+  <meta name="keywords" content="{{video.keywords}}" />
+{% else %}
+  <title>Khan Academy: {{video.title}}</title>
+{% endif %}
   <link rel="stylesheet" type="text/css" href="/stylesheets/default.css?{{App.version}}" />
   <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
   <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
+  <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css?{{App.version}}">
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}"></script>
+  <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
@@ -54,7 +64,9 @@ Math.seedrandom(KhanAcademy.problem_number);
   		<td><A href="http://www.khanacademy.org/" border="0"><img src="/images/khan.GIF"></a></td>
   		<td align=right valign=top width=100%>
   			{% if username %}
-			<span class="mainmenu">Welcome,  <B>{{username}}</b> [<A href="{{logout_url}}">Sign Out</A>] </span>
+			<span class="mainmenu">Welcome, <B>{{username}}</b> [<a href="{{logout_url}}">Sign Out</a>] </span>
+			{% else %}
+			<span class="mainmenu">[<a href="{{login_url}}">Sign In with your Google Account</a>]</span>
 			{% endif %}
   			<P>
   			{% if points %}
@@ -64,9 +76,7 @@ Math.seedrandom(KhanAcademy.problem_number);
   	</tr>
   	  <tr>
   		<td colspan=2 align=right>
-  		{% block pagemainmenu %}
-  			<span class="mainmenu"><A href="/">Exercises</A>&nbsp;&nbsp;|&nbsp;&nbsp;<A href="/viewexercisesonmap">Knowledge Map</A>&nbsp;</span>
-  		{% endblock pagemainmenu %}
+  			<span class="mainmenu"><a href="http://www.khanacademy.org/">Video Library</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/">Exercise Dashboard</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/viewexercisesonmap">Knowledge Map</a>&nbsp;</span>
   		</td>
   	</tr>
   </table>
