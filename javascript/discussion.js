@@ -373,6 +373,10 @@ var QA = {
         QA.unhover.apply(this);
 
         $(this).addClass("question_container_expanded");
+
+        // If user clicks on a link inside of a question during the expand, don't follow the link.
+        // YouTube API "5:42"-style links will still control the player in this circumstance.
+        if (e) e.preventDefault();
     }
 
 };
