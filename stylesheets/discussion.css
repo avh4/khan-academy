@@ -23,15 +23,14 @@
 }
 
 .video_questions div.question_form .question_text {
-    width:776px;
-	background: #fff url(/images/questionmark.gif) no-repeat 680px center;
-    padding-right: 100px;
+    width: 750px;
+    background: #fff url(/images/questionmark.gif) no-repeat 680px center;
     height: 80px;
     resize: none;
 }
 
 .video_questions div.answer_form .answer_text {
-    width:696px;
+    width: 670px;
 }
 
 .video_questions textarea.watermark { color: #898989; }

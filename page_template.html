@@ -1,63 +1,77 @@
+<!DOCTYPE html>
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML">
-<head>
-{% if video %}
-  <title>Khan Academy: {{video.title}}</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-  <meta name="description" content="{{video.description}}" />
-  <meta name="keywords" content="{{video.keywords}}" />
-{% else %}
-  <title>Khan Academy</title>
-{% endif %}
-  <link rel="stylesheet" type="text/css" href="/stylesheets/default.css?{{App.version}}" />
-  <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
-  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
-  <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css?{{App.version}}">
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-  <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}"></script>
-{% block pagescript %}
-{% endblock pagescript %}
-</head>
-  <body spacing="0" class="tundra" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
-  <table border=0 width=100%>
-  	<tr>
-  		<td><A href="http://www.khanacademy.org/" border="0"><img src="/images/khan.GIF"></a></td>
-  		<td align=right valign=top width=100%>
-  			{% if username %}
-			<span class="mainmenu">Welcome, <B>{{username}}</b> [<a href="{{logout_url}}">Sign Out</a>] </span>
-			{% else %}
-			<span class="mainmenu">[<a href="{{login_url}}">Sign In with your Google Account</a>]</span>
-			{% endif %}
-  			<P>
-  			{% if points %}
-  			<h2>Energy Points: {{points}}</h2>
-			{% endif %}
-  		</td>
-  	</tr>
-  	  <tr>
-  		<td colspan=2 align=right>
-  			<span class="mainmenu"><a href="http://www.khanacademy.org/">Video Library</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/">Exercise Dashboard</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/viewexercisesonmap">Knowledge Map</a>&nbsp;</span>
-  		</td>
-  	</tr>
-  </table>
-  <table width=100% border=0 cellpadding=0 cellspacing=0>
-  				<tr>
-  					<td bgcolor=#3366cc><img width=1 height=1 alt=""></td>
-  				</tr>
-  			</table><table width=100% border=0 cellpadding=2 cellspacing=0><tr><td bgcolor=#e5ecf9 align=left>
-  			{% block pagesubmenu %}
-  			<B>{% block pagetitle %}{% endblock pagetitle %}</B>
-  			{% endblock pagesubmenu %}
-   </td></tr></table>
-
-{% block pagemessage %}
-{% endblock pagemessage %}
-
-{% block pagecontent %}
-{% endblock pagecontent %}
-    <P>&nbsp;<P>
-    <table width=100% border=0 cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img width=1 height=1 alt=""></td></tr></table>
-{% include "page_footer.html" %}
-  </body>
+    <head>
+        {% if video %}<title>Khan Academy: {{video.title}}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <meta name="description" content="{{video.description}}" />
+        <meta name="keywords" content="{{video.keywords}}" />
+        {% else %}<title>Khan Academy</title>
+        {% endif %}
+        <link rel="stylesheet" type="text/css" href="/stylesheets/default.css?{{App.version}}" />
+        <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
+        <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css?{{App.version}}">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+        </script>
+        <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}">
+        </script>
+        <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
+        </script>
+        <script type="text/javascript">
+            // The links in the header and footer should not appear visited.
+            $(function(){
+                var normalColor = $('a:link').css('color');
+                $('header a:visited, footer a:visited').css('color', normalColor);
+            });
+        </script>
+        {% block pagescript %}
+        {% endblock pagescript %}
+    </head>
+    <body>
+        <header>
+            <a id="page_logo" href="http://www.khanacademy.org/"><img src="/images/khan.GIF"></a>
+            <ul id="page_status">
+                {% if username %}
+                <li>
+                    <b>{{username}}</b>
+                </li>
+                {% endif %}
+                {% if points %}
+                <li>
+                    <label id="page_points">
+                        Energy Points: {{points}}
+                    </label>
+                </li>
+                {% endif %} 
+                {% if username %}
+                <li>
+                    <a href="{{logout_url}}">Sign Out</a>
+                </li>
+                {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
+                {% endif %}
+            </ul>
+            <nav id="page_main_nav">
+                <ul>
+                    <li>
+                        <a href="http://www.khanacademy.org/">Video Library</a>
+                    </li>
+                    <li>
+                        <a href="/">Exercise Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/viewexercisesonmap">Knowledge Map</a>
+                    </li>
+                </ul>
+            </nav>
+            <nav id="page_sub_nav">
+                {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
+                {% endblock pagesubmenu %} 
+            </nav>
+            {% block pagemessage %}
+            {% endblock pagemessage %}
+        </header>
+        {% block pagecontent %}
+        {% endblock pagecontent %}
+        {% include "page_footer.html" %}
+    </body>
 </html>
-
