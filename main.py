@@ -60,21 +60,11 @@ class DeleteVideoPlaylists(webapp.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
             return
         query = VideoPlaylist.all()
-
+       
         all_video_playlists = query.fetch(450)
         db.delete(all_video_playlists)
 
 
-class DeleteVideos(webapp.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        query = Video.all()
-
-        all_videos = query.fetch(450)
-        db.delete(all_videos)
 
 
 class UpdateVideoData(webapp.RequestHandler):
@@ -98,15 +88,11 @@ class UpdateVideoData(webapp.RequestHandler):
                 db.delete(ents[start:end])
                 start = end
                 
-        # The next two blocks delete all the Videos and VideoPlaylists so that we don't get remnant videos or associations
+        # The next block deletes all the VideoPlaylists so that we don't get remnant videos or associations
 
         query = VideoPlaylist.all()
         all_video_playlists = query.fetch(100000)
         delete_entities(all_video_playlists)
-
-        query = Video.all()
-        all_videos = query.fetch(100000)
-        delete_entities(all_videos)
 
         for playlist in playlist_feed.entry:
             self.response.out.write('<p>Playlist  ' + playlist.id.text)
@@ -1057,8 +1043,8 @@ def real_main():
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),
         # These are dangerous, should be able to clean things manually from the remote python shell
-        # ('/deletevideos', DeleteVideos),
-        # ('/deletevideoplaylists', DeleteVideoPlaylists),        
+
+        ('/deletevideoplaylists', DeleteVideoPlaylists),        
 
         # Below are all qbrary related pages
         ('/qbrary', qbrary.MainPage),

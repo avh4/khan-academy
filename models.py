@@ -237,6 +237,9 @@ class VideoPlaylist(db.Model):
     playlist = db.ReferenceProperty(Playlist)
     video = db.ReferenceProperty(Video)
     video_position = db.IntegerProperty()
+    live_association = db.BooleanProperty(default = False)  #So we can remove associations without deleting the entry.  We need this so that bulkuploading of VideoPlaylist info has the proper effect.
+
+
 
 
 # Matching between videos and exercises
