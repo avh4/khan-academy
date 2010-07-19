@@ -466,15 +466,9 @@ class ViewMapExercises(webapp.RequestHandler):
         if user:
             user_data = UserData.get_or_insert_for(user)
             
-            knowledge_map_url = '/knowledgemap?'
-            
-            def exercises_to_query_params(typeChar, exs):
-                query_params = ''
-                count = 0
-                for ex in exs:
-                    query_params += '&' + typeChar + str(count) + '=' + ex.name
-                    count = count + 1
-                return query_params
+            knowledge_map_url = '/knowledgemap'
+            if self.request.get('time_warp'):
+                knowledge_map_url += "?" + urllib.urlencode({'time_warp' : self.request.get('time_warp')})
                     
             ex_graph = ExerciseGraph(user_data)
             if user_data.reassess_from_graph(ex_graph):
@@ -482,10 +476,7 @@ class ViewMapExercises(webapp.RequestHandler):
             for exercise in ex_graph.exercises:
                 exercise.display_name = exercise.name.replace('_', '&nbsp;').capitalize()
             review_exercises = ex_graph.get_review_exercises(self.get_time())
-            knowledge_map_url += exercises_to_query_params('r', review_exercises)
             suggested_exercises = ex_graph.get_suggested_exercises()
-            knowledge_map_url += exercises_to_query_params('s', suggested_exercises)
-            knowledge_map_url += exercises_to_query_params('p', ex_graph.get_proficient_exercises())
 
             logout_url = users.create_logout_url(self.request.uri)
 
@@ -562,62 +553,45 @@ class VideolessExercises(webapp.RequestHandler):
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
 
-
 class KnowledgeMap(webapp.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
         if user:
-            query = Exercise.all().order('h_position')
-            exercises = query.fetch(200)
+            user_data = UserData.get_or_insert_for(user)                    
+            ex_graph = ExerciseGraph(user_data)
+            if user_data.reassess_from_graph(ex_graph):
+                user_data.put()
+            for exercise in ex_graph.exercises:
+                exercise.display_name = exercise.name.replace('_', '&nbsp;').capitalize()
+            review_exercises = ex_graph.get_review_exercises(self.get_time())
+            suggested_exercises = ex_graph.get_suggested_exercises()
+            proficient_exercises = ex_graph.get_proficient_exercises()
 
-            proficient_exercises = []
-            suggested_exercises = []
-            review_exercises = []
-
-            proficient_count = 0
-            proficient_exercise = self.request.get('p' + str(proficient_count))
-            while proficient_exercise:
-                proficient_exercises.append(proficient_exercise)
-                proficient_count = proficient_count + 1
-                proficient_exercise = self.request.get('p' + str(proficient_count))
-
-            suggested_count = 0
-            suggested_exercise = self.request.get('s' + str(suggested_count))
-            while suggested_exercise:
-                suggested_exercises.append(suggested_exercise)
-                suggested_count = suggested_count + 1
-                suggested_exercise = self.request.get('s' + str(suggested_count))
-
-            review_count = 0
-            review_exercise = self.request.get('r' + str(review_count))
-            while review_exercise:
-                review_exercises.append(review_exercise)
-                review_count = review_count + 1
-                review_exercise = self.request.get('r' + str(review_count))
-
-            for exercise in exercises:
+            for exercise in ex_graph.exercises:
                 exercise.suggested = False
                 exercise.proficient = False
-                if exercise.name in suggested_exercises:
+                if exercise in suggested_exercises:
                     exercise.suggested = True
-                if exercise.name in proficient_exercises:
+                if exercise in proficient_exercises:
                     exercise.proficient = True
-                if exercise.name in review_exercises:
+                if exercise in review_exercises:
                     exercise.review = True
                 name = exercise.name.capitalize()
                 name_list = name.split('_')
                 exercise.display_name = str(name_list).replace("[u'", "['").replace(", u'", ", '")
                 exercise.prereq_string = str(exercise.prerequisites).replace("[u'", "['").replace(", u'", ", '")
 
-            template_values = {'App' : App, 'exercises': exercises, 'map_height': 900}
+            template_values = {'App' : App, 'exercises': ex_graph.exercises, 'map_height': 900}
 
             path = os.path.join(os.path.dirname(__file__), 'knowledgemap.html')
             self.response.out.write(template.render(path, template_values))
         else:
 
             self.redirect(users.create_login_url(self.request.uri))
-
+    def get_time(self):
+        time_warp = int(self.request.get('time_warp') or '0')
+        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 class EditExercise(webapp.RequestHandler):
 
