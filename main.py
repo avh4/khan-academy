@@ -252,24 +252,12 @@ class ViewVideo(webapp.RequestHandler):
             query.filter('video = ', video)
             video_playlists = query.fetch(5)
 
-            colcount = 0  # used for formating on displayedpage
-            rowcount = 0  # used for formating on displayedpage
             for video_playlist in video_playlists:
                 query = VideoPlaylist.all()
                 query.filter('playlist =', video_playlist.playlist)
                 video_playlist.videos = query.fetch(500)
 
-                video_count = 0  # used for formating on displayedpage
-                rowcount = 0  # used for formating on displayedpage
                 for videos_in_playlist in video_playlist.videos:
-                    video_count = video_count + 1
-                    if video_count % 3 == 0:  # three video titles per row
-                        rowcount = rowcount + 1
-                    if rowcount % 2 == 0:
-                        videos_in_playlist.current_background = 'highlightWhite'
-                    else:
-                        videos_in_playlist.current_background = 'highlightGreyRelated'
-
                     if videos_in_playlist.video_position == video_playlist.video_position:
                         videos_in_playlist.current_video = True
                     else:

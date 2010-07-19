@@ -1,49 +1,59 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}{{video.title}}{% endblock pagetitle %}
 {% block pagecontent %}
-{% if video.description %}
-<P>
-{{video.description}}
-<P>
-{% endif %}
-<B>Playlists:</b>
-{% for video_playlist in video_playlists %}
-	<A href="#{{video_playlist.playlist.youtube_id}}">{{video_playlist.playlist.title}}</A>
-{% endfor %}
-<P>
-<div style="width: 800px; margin-left: auto; margin-right: auto;">
-<object id="idOVideo" name="idOVideo" width="800" height="480"><param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1"></param><param name="allowFullScreen" value="true"></param><param name="allowScriptAccess" value="always"></param><embed id="idPlayer" name="idPlayer" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480"></embed></object>
-{% video_comments video comments_page %}
-{% video_qa video qa_page qa_expand_id %}
-<br/>
-{% for video_playlist in video_playlists %}
-	<A name="{{video_playlist.playlist.youtube_id}}"></A>
-	<div class=hdg>&nbsp;<h3>In Playlist: {{video_playlist.playlist.title}}</h3></div>
-	<table id="playlist" border=0 cellspacing=0 cellpadding=3>
-		<tr>
-			<td width=33% class="colHeadL" valign="top">{% if video_playlist.previous_video %}<A href="/video?v={{video_playlist.previous_video.youtube_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}{% else %}&nbsp;{% endif %} </A></td> 
-			<td class="colHeadR" width=33%>&nbsp;</td>
-			<td align=right width=33% class="colHeadR" valign="top">{% if video_playlist.next_video %}<A href="/video?v={{video_playlist.next_video.youtube_id}}"><B>Next Video:</b> {{video_playlist.next_video.title}}</A>{% else %}&nbsp;{% endif %}</td> 
-		</tr>	
-		<tr>
-		{% for playlist_video_entry in video_playlist.videos %}
-			{% if playlist_video_entry.current_video %}
-			<td class={{playlist_video_entry.current_background}}><B>{{forloop.counter}}. {{playlist_video_entry.video.title}}</B></td>
-			{% else %}
-			<td class={{playlist_video_entry.current_background}}><A href="/video?v={{playlist_video_entry.video.youtube_id}}">{{forloop.counter}}. {{playlist_video_entry.video.title}}</A></td>
-			{% endif%}
-			{% if forloop.counter|divisibleby:3 %}
-				{% if forloop.counter|divisibleby:6 %}
-				</tr><TR>
-				{% else %}
-				</tr><TR class="highlightGreyRelated">
-				{% endif %}
-			{% endif %}
-		{% endfor %}
-		</tr>
-	</table>
-{% endfor %}
-<P>
-<B>Keywords:</B>:{{video.keywords}}
-</div>
-{% endblock pagecontent %}
+<article class="video">
+    {% if video.description %}
+    <p>
+        {{video.description}}
+    </p>
+    {% endif %}
+    <p>
+        <label>
+            <b>Playlists:</b>
+            {% for video_playlist in video_playlists %}<A href="#{{video_playlist.playlist.youtube_id}}">{{video_playlist.playlist.title}}</A>
+            {% endfor %}
+        </label>
+    </p>
+    <div>
+        <object id="idOVideo" name="idOVideo" width="800" height="480">
+            <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
+            </param><param name="allowFullScreen" value="true">
+            </param><param name="allowScriptAccess" value="always">
+            </param>
+            <embed id="idPlayer" name="idPlayer" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
+            </embed>
+        </object>
+        {% video_comments video comments_page %}
+        {% video_qa video qa_page qa_expand_id %}
+        </div>
+        {% for video_playlist in video_playlists %}
+        <details open>
+            <summary id="{{video_playlist.playlist.youtube_id}}">In Playlist: {{video_playlist.playlist.title}}</summary>
+            {% if video_playlist.previous_video %}
+            <label class=video_playlist_prev>
+                <a rel=prev href="/video?v={{video_playlist.previous_video.youtube_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}</a>
+            </label>
+            {% endif %}
+            {% if video_playlist.next_video %}
+            <label class=video_playlist_next>
+                <a rel=next href="/video?v={{video_playlist.next_video.youtube_id}}"><b>Next Video:</b> {{video_playlist.next_video.title}}</a>
+            </label>
+            {% endif %}
+            <div class=video_playlist_container>
+                <ol>
+                    {% for playlist_video_entry in video_playlist.videos %}<li>
+                        {% if playlist_video_entry.current_video %}<strong>{{playlist_video_entry.video.title}}</strong>
+                        {% else %}<a href="/video?v={{playlist_video_entry.video.youtube_id}}">{{playlist_video_entry.video.title}}</a>
+                        {% endif%}
+                    </li>{% endfor %}
+                </ol>
+            </div>
+        </details>
+        {% endfor %}
+        <p id="keywords">
+            <label>
+                <b>Keywords:</b>:{{video.keywords}}
+            </label>
+        </p>
+    </article>
+    {% endblock pagecontent %}
