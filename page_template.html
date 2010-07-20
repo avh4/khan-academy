@@ -17,13 +17,6 @@
         </script>
         <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
         </script>
-        <script type="text/javascript">
-            // The links in the header and footer should not appear visited.
-            $(function(){
-                var normalColor = $('a:link').css('color');
-                $('header a:visited, footer a:visited').css('color', normalColor);
-            });
-        </script>
         {% block pagescript %}
         {% endblock pagescript %}
     </head>
