@@ -56,14 +56,14 @@
     </div>
     
     {% if user %}
-        <a href="#" class="comment_add"><img class="icon" src="/images/balloon-plus.png" />Add a comment</a>
+        <a href="#" class="control comment_add"><img class="icon" src="/images/balloon-plus.png" />Add a comment</a>
     {% else %}
-        <a href="{{login_url}}"><img class="icon" src="/images/balloon-plus.png" />Log in to add a comment</a>
+        <a href="{{login_url}}" class="control"><img class="icon" src="/images/balloon-plus.png" />Log in to add a comment</a>
     {% endif %}
 
     {% if comments_hidden %}
         <span class="comments_show_more">
-             <a href="/video?v={{video.youtube_id}}&comments_page=1" class="comment_show"><img class="icon" src="/images/balloons.png" />Show more</a>
+             <a href="/video?v={{video.youtube_id}}&comments_page=1" class="comment_show control"><img class="icon" src="/images/balloons.png" />Show more</a>
         </span>
     {% endif %}
 
@@ -78,7 +78,7 @@
                 </td>
                 <td class="controls">
                     <input class="button comment_submit" type="button" value="Comment"/>
-                    or <a href="#" class="comment_cancel">Cancel</a>
+                    or <a href="#" class="control comment_cancel">Cancel</a>
                 </td>
             </tr></table>
         </form>

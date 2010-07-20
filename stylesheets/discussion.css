@@ -178,12 +178,14 @@ span.mod_tools_hidden {
     cursor: pointer;
 }
 .video_comments span.ellipsisExpand:hover {
-    text-decoration: underline;
-    color : #DD6900;
+    color : #00F;
 }
 
 .video_questions .question_container_hover a, .video_questions .question_container_hover .playYouTube {
-    text-decoration: underline;
+    color: #00F;
+}
+
+.video_questions .question_container_hover div.question_answer_count a {
     color: #DD6900;
 }
 
@@ -272,6 +274,7 @@ input.button:hover, a.button:hover {
 a.button {
     font-size: 11px;
     font-family: Lucida Grande;
+    text-decoration: none;
 }
 
 a.page, span.page_current {
@@ -288,6 +291,7 @@ a.page, span.page_current {
 	box-shadow: 0px 0px 1px rgba(0,0,0,0.25);
     background-color: #CCCCCC;
     color: #141414;
+    text-decoration: none;
 }
 a.page:hover, span.page_current {
     background-color: #006699;
@@ -300,10 +304,10 @@ span.playYouTube {
     background:url('/images/play.png') no-repeat right center;
     color:#006699;
     cursor: pointer;
+    text-decoration: underline;
 }
 span.playYouTube:hover {
-    text-decoration: underline;
-    color : #DD6900;
+    color : #00F;
 }
 
 table.feedback_list {
@@ -314,12 +318,14 @@ table.feedback_list th {
     text-align: left;
 }
 
-.page_controls { padding: 5px 0; }
+img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: white; }
 .page_controls img.icon { vertical-align: middle; }
+.button img.icon { background: transparent; }
+
+.page_controls { padding: 5px 0; }
 .questions_container .page_controls { padding-top: 20px; }
 
-a.video:visited{ color : #581C90; }
 .sig { font-style: italic; padding-left: 7px; color: #898989; }
-img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px;}
 img.throbber { position: absolute; }
 form { display: inline; }
+a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
