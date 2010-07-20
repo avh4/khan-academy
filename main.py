@@ -54,17 +54,30 @@ class DataStoreTest(webapp.RequestHandler):
 
 
 class DeleteVideoPlaylists(webapp.RequestHandler):
-
+# Deletes at most 200 Video-Playlist associations that are no longer live.  Should be run every-now-and-then to make sure the table doesn't get too big
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
         query = VideoPlaylist.all()
-       
-        all_video_playlists = query.fetch(450)
-        db.delete(all_video_playlists)
+        all_video_playlists = query.fetch(200)
+        video_playlists_to_delete = []
+        for video_playlist in all_video_playlists:
+            if video_playlist.live_association != True:
+                video_playlists_to_delete.append(video_playlist)
+        db.delete(video_playlists_to_delete)
 
 
+class KillLiveAssociations(webapp.RequestHandler):
+    def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+        query = VideoPlaylist.all()
+        all_video_playlists = query.fetch(100000)
+        for video_playlist in all_video_playlists:
+            video_playlist.live_association = False
+        db.put(all_video_playlists)
 
 
 class UpdateVideoData(webapp.RequestHandler):
@@ -88,11 +101,12 @@ class UpdateVideoData(webapp.RequestHandler):
                 db.delete(ents[start:end])
                 start = end
                 
-        # The next block deletes all the VideoPlaylists so that we don't get remnant videos or associations
-
+        # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
         query = VideoPlaylist.all()
         all_video_playlists = query.fetch(100000)
-        delete_entities(all_video_playlists)
+        for video_playlist in all_video_playlists:
+            video_playlist.live_association = False
+            video_playlist.put()
 
         for playlist in playlist_feed.entry:
             self.response.out.write('<p>Playlist  ' + playlist.id.text)
@@ -144,6 +158,7 @@ class UpdateVideoData(webapp.RequestHandler):
                     if not playlist_video:
                         playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
                     self.response.out.write('<p>Playlist  ' + playlist_video.playlist.title)
+                    playlist_video.live_association = True
                     playlist_video.video_position = int(video_data.position.text)
                     playlist_videos.append(playlist_video)
                 db.put(playlist_videos)
@@ -248,13 +263,18 @@ class ViewVideo(webapp.RequestHandler):
                                                                'message': 'Error: %s' % error_message})
                 return
 
-            query = VideoPlaylist.all()
-            query.filter('video = ', video)
+            
+            query = db.GqlQuery("SELECT * FROM VideoPlaylist WHERE video = :1 AND live_association = TRUE", video)
+            #query = VideoPlaylist.all()
+            #query.filter('video = ', video)
+            #query.filter('live_association = ', True) 
             video_playlists = query.fetch(5)
 
             for video_playlist in video_playlists:
-                query = VideoPlaylist.all()
-                query.filter('playlist =', video_playlist.playlist)
+                query = VideoPlaylist.gql("WHERE playlist = :1 AND live_association = TRUE", video_playlist.playlist)
+                #query = VideoPlaylist.all()
+                #query.filter('playlist =', video_playlist.playlist)
+                #query.filter('live_association = ', True) 
                 video_playlist.videos = query.fetch(500)
 
                 for videos_in_playlist in video_playlist.videos:
@@ -894,6 +914,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
 
     def get(self):
         colOne = []
+        colOne.append('Algebra 1 Worked Examples')
         colOne.append('Algebra 1')
         colOne.append('Algebra')
         colOne.append('California Standards Test: Algebra I')
@@ -941,6 +962,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
                 playlist = query.get()
                 query = VideoPlaylist.all()
                 query.filter('playlist =', playlist)
+                query.filter('live_association = ', False) #need to change this to true once I'm done with all of my hacks
                 query.order('video_position')
                 playlist_videos = query.fetch(500)
                 self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
@@ -1006,7 +1028,8 @@ def real_main():
         ('/admin/reput', bulk_update.handler.UpdateKind),
         # These are dangerous, should be able to clean things manually from the remote python shell
 
-        ('/deletevideoplaylists', DeleteVideoPlaylists),        
+        ('/deletevideoplaylists', DeleteVideoPlaylists), 
+        ('/killliveassociations', KillLiveAssociations),
 
         # Below are all qbrary related pages
         ('/qbrary', qbrary.MainPage),
