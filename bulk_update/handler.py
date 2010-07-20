@@ -51,7 +51,7 @@ def main():
     login: admin
     
 4. To re-put (ie. a null update) all the entities of kind ModelClass, visit:
-   /admin/reput?ModelClass
+   /admin/reput?kind=ModelClass
    
 To actually make changes, add the following in main.py:
 
