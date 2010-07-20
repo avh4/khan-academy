@@ -271,7 +271,7 @@ class ViewVideo(webapp.RequestHandler):
             video_playlists = query.fetch(5)
 
             for video_playlist in video_playlists:
-                query = VideoPlaylist.gql("WHERE playlist = :1 AND live_association = TRUE", video_playlist.playlist)
+                query = VideoPlaylist.gql("WHERE playlist = :1 AND live_association = TRUE ORDER BY video_position", video_playlist.playlist)
                 #query = VideoPlaylist.all()
                 #query.filter('playlist =', video_playlist.playlist)
                 #query.filter('live_association = ', True) 
