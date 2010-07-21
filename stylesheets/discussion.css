@@ -178,11 +178,11 @@ span.mod_tools_hidden {
     cursor: pointer;
 }
 .video_comments span.ellipsisExpand:hover {
-    color : #00F;
+    color : #DD6900;
 }
 
 .video_questions .question_container_hover a, .video_questions .question_container_hover .playYouTube {
-    color: #00F;
+    color: #DD6900;
 }
 
 .video_questions .question_container_hover div.question_answer_count a {
@@ -307,7 +307,7 @@ span.playYouTube {
     text-decoration: underline;
 }
 span.playYouTube:hover {
-    color : #00F;
+    color : #DD6900;
 }
 
 table.feedback_list {
@@ -329,3 +329,4 @@ img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px
 img.throbber { position: absolute; }
 form { display: inline; }
 a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
+a.control:hover { color: #DD6900; }
