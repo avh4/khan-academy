@@ -17,6 +17,12 @@
         </script>
         <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
         </script>
+	<script type="text/javascript">
+		// The browser can do script, so restyle the links that use script.
+		$(document).ready(function() {
+			$('a[onclick], a[href="#"], a.control').addClass('can_script');
+		});
+	</script>
         {% block pagescript %}
         {% endblock pagescript %}
     </head>

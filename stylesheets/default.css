@@ -19,6 +19,21 @@ a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
     color: #DD6900;;
 }
 
+/*
+ * Don't display links with href=# to non-scripting users, since they will only be confusing.
+ */
+a[href="#"] {
+    display: none;
+}
+
+/* The can_script class is added by javascript in page_template.html to links that can 
+ * take advantage of scripting.  To be sure, add the "control" class to your link. */
+a.can_script:link, a.can_script:visited {
+    display: inline;
+    text-decoration: none;
+    border-bottom: dotted 1px #069;
+}
+
 p {
     margin: 3px;
     padding: 0;
