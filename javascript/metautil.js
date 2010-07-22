@@ -270,29 +270,40 @@ function getResponseProps(response, header){
 }
 
 KhanAcademy = {
-	supportMathML: function() {
+	onMathMLSupportReady: function(callbackWhenReady) {
+		ASCIIMathMLTranslate = translate;
+		translate = function(callback) {
+			ASCIIMathMLTranslate();
+			if (callback && callback.call)
+				callback.call();
+		};
 		// Use MathJax only if the browser doesn't support MathML or
 		// doesn't have reasonable fonts installed
-		if (browserSupportsMathML() && browserHasUsableFont())
-			return;
+		if (browserSupportsMathML() && browserHasUsableFont()) {
+			callbackWhenReady.call();
+			return;			
+		}
 		checkForMathML = false;
 		showasciiformulaonhover = false;
-		ASCIIMathMLTranslate = translate;
-		translate = function() {
+		translate = function(callback) {
 			var hintButton = $('#hint');
 			if (hintButton) {
 				hintButton.attr('disabled', 'disabled');				
 			}
 			ASCIIMathMLTranslate();
-			if (hintButton) {
-				if (MathJax.isReady)
-					MathJax.Hub.Typeset(function() {hintButton.removeAttr('disabled');});
-				else
-					hintButton.removeAttr('disabled');				
+			function enableHintAndMakeCallback() {
+				if (hintButton)
+					hintButton.removeAttr('disabled');
+				if (callback && callback.call)
+					callback.call();
 			}
+			if (MathJax.isReady)
+				MathJax.Hub.Typeset(enableHintAndMakeCallback);
+			else
+				enableHintAndMakeCallback();
 		};
 		// When MathJax has finished starting up, translate the page.
-		MathJax.Hub.Register.StartupHook("End", translate)
+		MathJax.Hub.Register.StartupHook("End", callbackWhenReady);
 		
 		function browserHasUsableFont() {
 			var d = new Detector();

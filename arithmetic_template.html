@@ -13,6 +13,7 @@
   <script type="text/javascript" src="/MathJax-svn382/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
+	delayStartupUntil: "onload",
 	skipStartupTypeset: true,
         extensions: ["mml2jax.js"],
 	jax: ["input/MathML", "output/HTML-CSS"],
@@ -30,9 +31,10 @@
   <script type="text/javascript" src="/javascript/graphutil.js?{{App.version}}"></script>
   <script type="text/javascript"><!--
 $(document).ready(function () {
-	KhanAcademy.supportMathML();
-	translate();	
-	drawPictures();
+	KhanAcademy.onMathMLSupportReady(function() {
+		translate();	
+		drawPictures();		
+	});
 });
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";

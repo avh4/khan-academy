@@ -16,6 +16,7 @@
   <script type="text/javascript" src="/MathJax-svn382/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
+	delayStartupUntil: "onload",
 	skipStartupTypeset: true,
         extensions: ["mml2jax.js"],
 	jax: ["input/MathML", "output/HTML-CSS"],
@@ -34,9 +35,25 @@
   
 <script language=Javascript1.2><!--
 $(document).ready(function () {
-	KhanAcademy.supportMathML();
-	translate();	
-	drawPictures();
+	var iframe = null;
+	if (parent) 
+		iframe = parent.document.getElementById("problem{{problem_number}}");
+	function resizeIframe() {
+		if (!iframe)
+			return;
+		var iframeWindow = null;
+		if (parent.document.frames)
+			iframeWindow = parent.document.frames[iframe.id];
+		else
+			iframeWindow = iframe.contentWindow;
+		var body = iframeWindow.document.body;
+		iframe.height = body.scrollHeight + (body.offsetHeight - body.clientHeight);
+	}
+	function translateAndResize() {
+		translate(resizeIframe);
+		drawPictures();
+	}
+	KhanAcademy.onMathMLSupportReady(translateAndResize);
 });
 KhanAcademy.problem_number = "{{problem_number}}";
 Math.seedrandom(KhanAcademy.problem_number);

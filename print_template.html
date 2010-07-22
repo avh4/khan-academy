@@ -31,18 +31,10 @@
     <td bgcolor=#ffffff><img width=1 height=20 alt=""></td>
   </tr>
 </table>
-<script type="text/javascript">
-	function resizeIframe(iframe) {
-		if (document.frames)
-    			iframe.height = document.frames[iframe.id].document.body.scrollHeight;
-		else
-			iframe.height = iframe.contentWindow.document.body.scrollHeight;		
-	}
-</script>
 {% for i in problem_numbers %}
 <table width="100%"><tr>
 	<td valign="top">{{i}}.</td>
-	<td><iframe id="problem{{i}}" name="problem{{i}}" frameborder="0" width="100%" height="0" onload="resizeIframe(this)" src="printproblem?exid={{exid}}&problem_number={{i}}"></iframe></td>
+	<td><iframe id="problem{{i}}" name="problem{{i}}" frameborder="0" width="100%" height="0" src="printproblem?exid={{exid}}&problem_number={{i}}"></iframe></td>
 </tr></table>
 <hr/>
 {% endfor %}
