@@ -731,7 +731,8 @@ function AMprocessNode(n, linebreaks) {
   var mtch, str, arr;
   if (n.childNodes.length == 0 && (n.nodeType!=8 || linebreaks) &&
     n.parentNode.nodeName!="textarea" && n.parentNode.nodeName!="TEXTAREA" &&
-    n.parentNode.nodeName!="pre" && n.parentNode.nodeName!="PRE") {
+    n.parentNode.nodeName!="pre" && n.parentNode.nodeName!="PRE" &&
+    n.parentNode.nodeName!="script" && n.parentNode.nodeName!="SCRIPT") {
     str = n.nodeValue;
     if (!(str == null)) {
       str = str.replace(/\r\n\r\n/g,"\n\n");
