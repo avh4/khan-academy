@@ -365,7 +365,7 @@ class PrintExercise(webapp.RequestHandler):
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
-            problem_number = int(self.request.get('problem_number'))
+            problem_number = int(self.request.get('problem_number') or '0')
             num_problems = int(self.request.get('num_problems'))
             time_warp = self.request.get('time_warp')
 
