@@ -272,6 +272,27 @@ function next_step()
 <script type="text/javascript"><!--
 hide_hints();
 $(document).ready(function() {
+	function hideScratchPad() {
+		$('#scratch_pad_hide').css('display', 'none');			
+		$('#scratch_pad_show').css('display', 'inline');
+		$('#svgedit').css('display', 'none');
+		$('#question_area').css('min-height', 'auto');
+	}
+	function showScratchPad() {
+		$('#scratch_pad_show').css('display', 'none');
+		$('#scratch_pad_hide').css('display', 'inline');
+		$('#question_area').css('min-height', '400px');
+		var svgedit = $('#svgedit');
+		svgedit.css('display', 'block');
+		if (!svgedit.attr('src')) {
+			/*
+			NOTE 1: app.yaml redirects svg-editor.html to our custom version in /helperpages/svg-editor.html.
+			NOTE 2: To avoid caching issues, the svg-edit version number below needs to be updated here and 
+			in app.yaml whenever we update svg-edit.
+			*/
+			svgedit.attr('src', '/svg-edit-2.5/svg-editor.html');				
+		}
+	}
 	function getUrlVars(){
 		var vars = [], hash;
 		var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
@@ -284,32 +305,11 @@ $(document).ready(function() {
 		return vars;
 	}
 
+	hideScratchPad();
 	if (getUrlVars()['enable_scratch_pad'] || $.browser.mozilla && $.browser.version.substr(0, 3) >= "1.8")
 	{
-		function showScratchPad() {
-			$('#scratch_pad_show').css('display', 'none');
-			$('#scratch_pad_hide').css('display', 'inline');
-			$('#question_area').css('min-height', '400px');
-			var svgedit = $('#svgedit');
-			svgedit.css('display', 'block');
-			if (!svgedit.attr('src')) {
-				/*
-				NOTE 1: app.yaml redirects svg-editor.html to our custom version in /helperpages/svg-editor.html.
-				NOTE 2: To avoid caching issues, the svg-edit version number below needs to be updated here and 
-				in app.yaml whenever we update svg-edit.
-				*/
-				svgedit.attr('src', '/svg-edit-2.5/svg-editor.html');				
-			}
-		}
-		function hideScratchPad() {
-			$('#scratch_pad_hide').css('display', 'none');			
-			$('#scratch_pad_show').css('display', 'inline');
-			$('#svgedit').css('display', 'none');
-			$('#question_area').css('min-height', 'auto');
-		}
 		$('#scratch_pad_show').click(showScratchPad);
 		$('#scratch_pad_hide').click(hideScratchPad);
-		hideScratchPad();
 		$('#scratch_pad_toggle').css('display', 'block');
 	}	
 });
