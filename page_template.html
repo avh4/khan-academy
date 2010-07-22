@@ -18,6 +18,13 @@
         <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
         </script>
 	<script type="text/javascript">
+		// Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+		(function () {
+			var html5elements = ['header', 'footer', 'nav', 'article'];
+			for (var i=0; i< html5elements.length; i++) {
+				document.createElement(html5elements[i]);
+			}			
+		})();
 		// The browser can do script, so restyle the links that use script.
 		$(document).ready(function() {
 			$('a[onclick], a[href="#"], a.control').addClass('can_script');
