@@ -298,7 +298,7 @@ KhanAcademy = {
 					callback.call();
 			}
 			if (MathJax.isReady)
-				MathJax.Hub.Typeset(enableHintAndMakeCallback);
+				MathJax.Hub.Queue(["Typeset",MathJax.Hub,null,enableHintAndMakeCallback]);
 			else
 				enableHintAndMakeCallback();
 		};

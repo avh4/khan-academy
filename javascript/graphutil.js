@@ -845,10 +845,10 @@ function give_next_step() {
 		if (elem) 
 		{
 			elem.innerHTML = KhanAcademy_hint_by_id[id];
-			translate(); // Process any ASCII Math -> MathML
 			elem.style.visibility = 'visible';				
 		}
 	}
+	translate(); // Process any ASCII Math -> MathML
 }
 
 
