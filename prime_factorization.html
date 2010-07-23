@@ -1,0 +1,184 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var number = getRandomIntRange(10, 100);
+var factors = new Array();
+var primefs = new Array();
+var primefzn;
+
+var allprimes = new Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
+
+var treeYLevel = 15;
+var treeX = 2;
+var factorX = treeX;
+   
+var ySpace = 2.5;
+var xSpace = 1.5;
+
+var i = 0;
+
+function find_factors(x)
+{
+    if (inArray(x, allprimes)) {
+        if (primefzn == null) {
+            primefzn = x.toString();
+        } else {
+            primefzn = primefzn + "&times;" + x;
+        }
+        return;
+    }
+    var maxf = Math.sqrt(x);
+    for (j=2; j<=maxf; j++)
+    {
+        if (x % j == 0) {
+            factors.push(j);
+            find_factors(j);
+            
+            factors.push(x / j);
+            find_factors(x / j);
+            return;
+        }
+    }
+}
+
+factors.push(number);
+find_factors(number);
+setCorrectAnswer(primefzn);
+
+var wrongChoice = "";
+for (var l=0; l<3; l++)
+{
+    var twos = getRandomIntRange(1, 3);
+    var threes = getRandomIntRange(0, 2);
+    for (var m=0; m<twos; m++)
+    {
+        wrongChoice = wrongChoice + "&times;2";
+    }
+    for (m=0; m<threes; m++)
+    {
+        wrongChoice = wrongChoice + "&times;3";
+    }
+    addWrongChoice(wrongChoice.substring(7));
+    wrongChoice = "";
+}
+for (l=0; l<3; l++)
+{
+    twos = getRandomIntRange(0, 2);
+    var smallprimes = getRandomIntRange(1, 3);
+    
+    for (m=0; m<twos; m++)
+    {
+        wrongChoice = wrongChoice + "&times;2";
+    }
+    
+    var primeidx = getRandomIntRange(0, 2);
+    for (m=0; m<smallprimes; m++)
+    {
+        wrongChoice = wrongChoice + "&times;" + allprimes[primeidx];
+        primeidx = getRandomIntRange(primeidx + 1, 4);
+    }
+    addWrongChoice(wrongChoice.substring(7));
+    wrongChoice = "";
+}
+if (factors.length > 3) {
+    addWrongChoice(factors[1] + "&times;" + factors[2]);
+    if (factors.length > 5) {
+        addWrongChoice(factors[1] + "&times;" + factors[3] + "&times;" + factors[4]);
+    }
+}
+
+function draw_factor_row() {
+    // i odd - left branch
+    // i even - right branch
+    
+    for (;i<factors.length; i++)
+    {
+        if (i % 2 != 0) { // left branch, also prime
+            factorX = treeX - xSpace;
+            primefs.push([factorX, treeYLevel]);
+        } else {
+            factorX = treeX + xSpace;
+        }
+        present.line([treeX, treeYLevel + ySpace - 1], [factorX, treeYLevel]);
+        present.text([factorX, treeYLevel], factors[i], below, "factor" + i);
+        if (i % 2 == 0) { // on the next iteration, we'll be a row down
+            present.text([treeX, treeYLevel], "x", below, "factor" + i + "times");
+            treeYLevel -= ySpace;
+            treeX += xSpace;
+            i++;
+            return;
+        }
+    }
+}
+function draw_factorization()
+{
+    present.stroke = "green";
+    present.fontfill = "green";
+    present.fontfamily = "sans-serif";
+    present.fontsize = 20;
+    if (inArray(factors[0], allprimes)) {
+        present.circle([factorX + xSpace, treeYLevel + ySpace - 0.6], 0.5, "factorcircle" + primefs[k]);
+    } else {
+        for (var k=0; k < primefs.length; k++)
+        {
+            present.circle([primefs[k][0], primefs[k][1]-0.6], 0.5, "factorcircle" + primefs[k]);
+        }
+    }
+    present.text([0, treeYLevel], "The factorization is: " + primefzn.replace(/&times;/g, ' x '), aboveright, "factorization"); 
+}
+function graph_update() {
+
+    present.setBorder(0);
+
+    present.initPicture(0, 16, 0, 16);
+    present.stroke = "black";
+    present.fontstyle = "normal"
+    present.fontsize = 24;
+    
+    present.text([factorX + xSpace, treeYLevel], factors[0], below, "factor0");
+    
+    treeYLevel -= ySpace;
+    treeX += xSpace;
+    
+    i=1;
+    draw_factor_row();
+}
+function draw_next_step()
+{
+	if (steps_given==0)
+	{
+	    document.getElementById('hint0').style.display = 'block';
+	}
+	else if (steps_given==1)
+	{
+		document.getElementById('present').style.display = 'block';
+	}
+	else if (i < factors.length)
+	{
+	    draw_factor_row();
+	}
+	else
+	{
+        primefs.push([factorX, treeYLevel + ySpace]); // last factor on the right
+        
+	    draw_factorization();
+	}
+	steps_given++;
+}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+
+write_text('What is the prime factorization of `' + number + '`?');
+//-->
+</script>
+<br>
+<div id="hint0" style="display:none;font-family:sans-serif;font-size:14pt">Let's do a factorization tree!</div>
+<iframe id="present" name="present" style="display:none" frameborder=0 src="/graphpage.html?w=500&h=500" height="530" width="100%"></iframe>
+{% endblock maincell %}
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
