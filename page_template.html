@@ -25,15 +25,16 @@
 				document.createElement(html5elements[i]);
 			}			
 		})();
-		// The browser can do script, so restyle the links that use script.
-		$(document).ready(function() {
-			$('a[onclick], a[href="#"], a.control').addClass('can_script');
-		});
 	</script>
         {% block pagescript %}
         {% endblock pagescript %}
     </head>
     <body>
+	{% comment %}
+	Make script-requiring elements visible.
+	{% endcomment %}
+	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
+	
         <header>
             <a id="page_logo" href="http://www.khanacademy.org/"><img src="/images/khan.GIF"></a>
             <ul id="page_status">

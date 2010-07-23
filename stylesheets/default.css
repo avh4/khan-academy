@@ -20,16 +20,17 @@ a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
 }
 
 /*
- * Don't display links with href=# to non-scripting users, since they will only be confusing.
+ * Hide links with href=# and other script-requiring elements from non-scripting users, 
+ * since they will only be confusing.  They will be made visible by script.
  */
-a[href="#"] {
-    display: none;
+a[href="#"], .requires_script {
+    visibility: hidden;
 }
 
-/* The can_script class is added by javascript in page_template.html to links that can 
- * take advantage of scripting.  To be sure, add the "control" class to your link. */
-a.can_script:link, a.can_script:visited {
-    display: inline;
+/*
+ * Give script-using links a dotted underline when they are visible.
+ */
+a[onclick]:link, a[href="#"]:link, a.uses_script:link, a[onclick]:visited, a[href="#"]:visited, a.uses_script:visited {
     text-decoration: none;
     border-bottom: dotted 1px #069;
 }
