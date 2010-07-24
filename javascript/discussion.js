@@ -374,6 +374,11 @@ var QA = {
 
         $(this).addClass("question_container_expanded");
 
+        var id = $(".question", this).attr("data-question_id");
+        $.post("/discussion/expandquestion", 
+                {qa_expand_id: id}, 
+                function(){ /* Fire and forget */ });
+
         // If user clicks on a link inside of a question during the expand, don't follow the link.
         // YouTube API "5:42"-style links will still control the player in this circumstance.
         if (e) e.preventDefault();

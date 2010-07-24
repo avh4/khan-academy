@@ -40,6 +40,12 @@ indexes:
   - name: date
     direction: desc
 
+- kind: FeedbackNotification
+  properties:
+  - name: user
+  - name: date
+    direction: desc
+
 - kind: PlaylistVideo
   properties:
   - name: playlist

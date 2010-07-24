@@ -40,7 +40,7 @@
             <ul id="page_status">
                 {% if username %}
                 <li>
-                    <b>{{username}}</b>
+                    {% username_and_notification username %}
                 </li>
                 {% endif %}
                 {% if points %}

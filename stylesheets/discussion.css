@@ -151,7 +151,7 @@
 	border-color:#D2DDED transparent transparent;
 }
 
-.video_questions .question_container .mod_tools {
+.video_questions .question_container .mod_tools, .video_question_notifications .mod_tools {
     display: none;
 }
 
@@ -321,6 +321,7 @@ table.feedback_list th {
 img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: white; }
 .page_controls img.icon { vertical-align: middle; }
 .button img.icon { background: transparent; }
+#page_sub_nav img.icon { background: #E5ECF9; }
 
 .page_controls { padding: 5px 0; }
 .questions_container .page_controls { padding-top: 20px; }
@@ -330,3 +331,28 @@ img.throbber { position: absolute; }
 form { display: inline; }
 a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
 a.control:hover { color: #DD6900; }
+
+span.username_and_notification_shift { position:relative; left: 12px; }
+
+a.notification_link {
+    text-decoration: none;
+    border-bottom: 0;
+}
+
+a.notification_link span.notification_bubble {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    top: 9px;
+    left: -12px;
+    background: url('/images/brightness-low.png') no-repeat;
+    text-align: center;
+    font-size: 11px;
+    padding-top: 2px;
+    
+    /* X-browser inline-block support */
+    display:-moz-inline-stack;
+    display:inline-block;
+    zoom:1;
+    *display:inline;
+}

@@ -18,10 +18,12 @@ import gdata.alt.appengine
 import qbrary
 import bulk_update.handler
 
+from app import App
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator
 
 from discussion import comments
 from discussion import qa
+from discussion import notification
 
 class VideoDataTest(webapp.RequestHandler):
 
@@ -287,6 +289,11 @@ class ViewVideo(webapp.RequestHandler):
                     if videos_in_playlist.video_position == video_playlist.video_position + 1:
                         video_playlist.next_video = videos_in_playlist.video
 
+            # If a QA question is being expanded, we want to clear notifications for its
+            # answers before we render page_template so the notification icon shows
+            # its updated count. 
+            notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
+
             template_values = qa.add_template_values({'App': App,
                                                       'points': user_data.points,
                                                       'username': user_data.get_nickname(),
@@ -298,7 +305,6 @@ class ViewVideo(webapp.RequestHandler):
                                                      self.request)
             path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
             self.response.out.write(template.render(path, template_values))
-
 
 class ViewExerciseVideos(webapp.RequestHandler):
 
@@ -991,15 +997,6 @@ class Export(webapp.RequestHandler):
         for ex in exercises:
             self.response.out.write(ex)
 
-# A singleton shared across requests
-class App(object):
-    # This gets reset every time a new version is deployed on
-    # a live server.  It has the form major.minor where major
-    # is the version specified in app.yaml and minor auto-generated
-    # during the deployment process.  Minor is always 1 on a dev
-    # server.
-    version = os.environ['CURRENT_VERSION_ID']
-
 def real_main():
     webapp.template.register_template_library('templatefilters')
     application = webapp.WSGIApplication([ 
@@ -1055,12 +1052,15 @@ def real_main():
         ('/discussion/pagecomments', comments.PageComments),
 
         ('/discussion/addquestion', qa.AddQuestion),
+        ('/discussion/expandquestion', qa.ExpandQuestion),
         ('/discussion/addanswer', qa.AddAnswer),
         ('/discussion/answers', qa.Answers),
         ('/discussion/pagequestions', qa.PageQuestions),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
         ('/discussion/videofeedbacklist', qa.VideoFeedbackList),
+        ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
+        ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),
         ], debug=True)
     run_wsgi_app(application)

@@ -33,7 +33,19 @@ class Feedback(db.Model):
             return self.targets[-1]
         return None
 
+    def parent(self):
+        return db.get(self.parent_key())
+
+    def children_keys(self):
+        keys = db.Query(Feedback, keys_only=True)
+        keys.filter("targets = ", self.key())
+        return keys
+
     def first_target(self):
         if self.targets:
             return db.get(self.targets[0])
         return None
+
+class FeedbackNotification(db.Model):
+    feedback = db.ReferenceProperty(Feedback)
+    user = db.UserProperty()
