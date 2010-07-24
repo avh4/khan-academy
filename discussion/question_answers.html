@@ -1,7 +1,13 @@
 {% block answers %}
     {% for answer in answers %}
         <div class="answer">
-            {{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}
+            {% if standalone %}
+                <a href="/video?v={{video.youtube_id}}&qa_expand_id={{answer.parent.key.id}}#q_{{answer.parent.key.id}}">
+                    {{ answer.content|truncatewords:5|escape|linebreaksbr }}
+                </a>
+            {% else %}
+                {{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}
+            {% endif %}
         </div>
 
         <div class="answer_sig sig">

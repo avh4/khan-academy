@@ -40,14 +40,15 @@
     {% block questions %}
 
         {% for question in questions %}
+            <a name="q_{{question.key.id}}" />
             <div class="question_container
                 {% ifequal qa_expand_id question.key.id %}
                     question_container_expanded
                 {% endifequal %}
             ">
-                <div class="question">
+                <div class="question" data-question_id="{{ question.key.id }}">
                     {% ifnotequal qa_expand_id question.key.id %}
-                        <a class="question_link" href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}" onclick="return false;">
+                        <a class="question_link" href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
                     {% endifnotequal %}
                             <span>{{ question.content|escape|urlize|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
                     {% ifnotequal qa_expand_id question.key.id %}
@@ -63,7 +64,7 @@
                     ">
                         <table><tr>
                         <td style="vertical-align: middle;">
-                            <a href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
+                            <a href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
                         </td>
                         <td>
                             <span class="question_answer_count_add_yours">

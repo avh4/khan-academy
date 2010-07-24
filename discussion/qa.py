@@ -9,6 +9,7 @@ from django.utils import simplejson
 from collections import defaultdict
 import models
 import models_discussion
+import notification
 from render import render_block_to_string
 from util import is_honeypot_empty, is_current_user_moderator
 
@@ -83,6 +84,11 @@ class ModeratorList(webapp.RequestHandler):
 
         self.redirect("/discussion/moderatorlist")
 
+class ExpandQuestion(webapp.RequestHandler):
+
+    def post(self):
+        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
+
 class PageQuestions(webapp.RequestHandler):
 
     def get(self):
@@ -138,6 +144,8 @@ class AddAnswer(webapp.RequestHandler):
             answer.targets = [video.key(), question.key()]
             answer.types = [models_discussion.FeedbackType.Answer]
             db.put(answer)
+
+            notification.new_answer_for_video_question(video, question, answer)
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)
 
@@ -236,7 +244,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
         if question:
             question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND date > :4 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, question.date)
             count_preceding = question_preceding_query.count()
-            page = 1 + (count_preceding / limit_per_page)        
+            page = 1 + (count_preceding / limit_per_page)
 
     if page > 0:
         questions_hidden = False # Never hide questions if specifying specific page
@@ -289,4 +297,5 @@ def add_template_values(dict, request):
     dict["comments_page"] = int(request.get("comments_page")) if request.get("comments_page") else 0
     dict["qa_page"] = int(request.get("qa_page")) if request.get("qa_page") else 0
     dict["qa_expand_id"] = int(request.get("qa_expand_id")) if request.get("qa_expand_id") else -1
+
     return dict

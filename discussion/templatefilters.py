@@ -44,6 +44,15 @@ def mod_tools(target):
 def question_answers(answers):
     return { "answers": answers }
 
+@register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))
+def standalone_answers(video, dict_answers):
+    return { "answers": dict_answers[video.key()], "video": video, "standalone": True }
+
+@register.inclusion_tag(("discussion/username_and_notification.html", "username_and_notification.html"))
+def username_and_notification(username):
+    count = models_discussion.FeedbackNotification.gql("WHERE user = :1", users.get_current_user()).count()
+    return { "username": username, "count": count }
+
 @register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))
 def honeypots():
     # Honeypots are used to attact spam bots

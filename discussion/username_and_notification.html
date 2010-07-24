@@ -1,0 +1,23 @@
+
+<span 
+    {% if count %}
+    class="username_and_notification_shift"
+    {% endif %}
+>
+    <b>{{username}}</b>
+
+    <a class="notification_link" href="/discussion/videofeedbacknotificationlist"
+        {% if count %}
+            title="{{ count }} new answers to your questions"
+        {% else %}
+            title="No new answers to your questions"
+        {% endif %}
+    >
+        {% if count %}
+            <img src="/images/email.png" class="icon" />
+            <span class="notification_bubble">{{ count }}</span>
+        {% else %}
+            <img src="/images/email-gray.png" class="icon" />
+        {% endif %}
+    </a>
+</span>
