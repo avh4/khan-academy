@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML">
 <head>
   <title>Khan Academy</title>
@@ -47,7 +48,8 @@ $(document).ready(function () {
 		else
 			iframeWindow = iframe.contentWindow;
 		var body = iframeWindow.document.body;
-		iframe.height = body.scrollHeight + (body.offsetHeight - body.clientHeight);
+		iframe.width = body.scrollWidth;
+		iframe.height = body.scrollHeight;
 	}
 	function translateAndResize() {
 		translate(resizeIframe);
