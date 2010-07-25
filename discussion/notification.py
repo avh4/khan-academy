@@ -5,8 +5,6 @@ from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
-from django.contrib.syndication.feeds import Feed
-
 from app import App
 import models
 import models_discussion
