@@ -181,7 +181,15 @@ span.mod_tools_hidden {
     color : #DD6900;
 }
 
-.video_questions .question_container_hover a, .video_questions .question_container_hover .playYouTube {
+.video_questions .question_container a:visited, 
+.video_questions .question_answer_count a:visited {
+    color: #069;
+}
+
+.video_questions .question_container_hover a, 
+.video_questions .question_container_hover a:visited,
+.video_questions .question_container_hover .question_answer_count a:visited,
+.video_questions .question_container_hover .playYouTube {
     color: #DD6900;
 }
 
