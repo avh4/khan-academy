@@ -185,6 +185,14 @@ span.mod_tools_hidden {
     color: #DD6900;
 }
 
+.video_questions .question_container .playYouTube {
+    border-bottom: 0;
+}
+
+.video_questions .question_container_expanded .playYouTube {
+    border-bottom: dotted 1px #069;
+}
+
 .video_questions .question_container_hover div.question_answer_count a {
     color: #DD6900;
 }
@@ -304,7 +312,6 @@ span.playYouTube {
     background:url('/images/play.png') no-repeat right center;
     color:#006699;
     cursor: pointer;
-    text-decoration: underline;
 }
 span.playYouTube:hover {
     color : #DD6900;
