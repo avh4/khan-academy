@@ -194,12 +194,6 @@ class UserData(db.Model):
         self.reassess_if_necessary()
         return (exid in self.suggested_exercises)
     
-    def get_nickname(self):
-        if self.user is not None:
-            return self.user.nickname()
-        else:
-            return None
-
 class Video(db.Model):
 
     youtube_id = db.StringProperty()

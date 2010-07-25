@@ -249,6 +249,7 @@ class ViewExercise(webapp.RequestHandler):
 class ViewVideo(webapp.RequestHandler):
 
     def get(self):
+        user = users.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         video_id = self.request.get('v')
@@ -296,7 +297,7 @@ class ViewVideo(webapp.RequestHandler):
 
             template_values = qa.add_template_values({'App': App,
                                                       'points': user_data.points,
-                                                      'username': user_data.get_nickname(),
+                                                      'username': user and user.nickname() or "",
                                                       'login_url': users.create_login_url(self.request.uri),
                                                       'logout_url': logout_url,
                                                       'video': video,
@@ -455,6 +456,7 @@ class ReportIssue(webapp.RequestHandler):
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
         
     def write_response(self, issue_type, extra_template_values):
+        user = users.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
 
@@ -465,7 +467,7 @@ class ReportIssue(webapp.RequestHandler):
         template_values = {
             'App' : App,
             'points': user_data.points,
-            'username': user_data.get_nickname(),
+            'username': user and user.nickname() or "",
             'referer': self.request.headers.get('Referer'),
             'user_agent': user_agent,
             'logout_url': logout_url,

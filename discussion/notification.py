@@ -47,7 +47,7 @@ class VideoFeedbackNotificationList(webapp.RequestHandler):
         context = {
                     "App": App,
                     "points": user_data.points,
-                    "username": user_data.get_nickname(),
+                    "username": user.nickname(),
                     "email": user.email(),
                     "login_url": users.create_login_url(self.request.uri),
                     "logout_url": users.create_logout_url(self.request.uri),
