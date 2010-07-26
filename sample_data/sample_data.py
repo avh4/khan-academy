@@ -47,7 +47,7 @@ def main():
     parser.add_option("-e", "--email", default="test@example.com",
                       help="The username to use.")
     parser.add_option("-k", "--kinds", default=','.join(kinds),
-                      help="The username to use.")
+                      help="The comma separated list of kinds.")
     parser.add_option("-p", "--python", default=None, help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
     
