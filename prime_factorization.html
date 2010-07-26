@@ -46,7 +46,7 @@ find_factors(number);
 setCorrectAnswer(primefzn);
 
 var wrongChoice = "";
-for (var l=0; l<3; l++)
+while (possibleAnswers.length < 3)
 {
     var twos = getRandomIntRange(1, 3);
     var threes = getRandomIntRange(0, 2);
@@ -61,7 +61,7 @@ for (var l=0; l<3; l++)
     addWrongChoice(wrongChoice.substring(7));
     wrongChoice = "";
 }
-for (l=0; l<3; l++)
+while (possibleAnswers.length < 6)
 {
     twos = getRandomIntRange(0, 2);
     var smallprimes = getRandomIntRange(1, 3);
