@@ -101,6 +101,7 @@ function submitForm(value)
 	<a id="scratch_pad_hide" href="#" style="display: none;">Hide scratch pad</a>
 </div>
 <div>
+	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; float: left; width: 65%;">
 {% block maincode %}
 <script language=Javascript1.2><!--
 
@@ -223,7 +224,6 @@ function next_step()
 //-->
 </script>
 {% endblock maincode %}
-	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; float: left; width: 65%;">
 		{% comment %}
 		We use a table here just because existing graphdisplay blocks create a table cell.
 		{% endcomment %}
