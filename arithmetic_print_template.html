@@ -61,34 +61,75 @@ KhanAcademy.problem_number = "{{problem_number}}";
 Math.seedrandom(KhanAcademy.problem_number);
 //-->
 </script>
-{% block maincode %} {% endblock %}
 </head>
 <body>
-   <table width=100%><tr>
-		<td valign=top width={% block maincellwidth %}80%{% endblock maincellwidth %}>
+<div>
+	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; display: inline-block; vertical-align: top; width: 65%;">
+{% block maincode %}
+{% endblock maincode %}
+		{% comment %}
+		We use a table here just because existing graphdisplay blocks create a table cell.
+		{% endcomment %}
+		<table style='float: right;'><tr>
+		{% block graphdisplay %}  {% endblock graphdisplay %}			
+		</tr></table>
 		{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
-		</td>
-		{% block graphdisplay %}  {% endblock graphdisplay %}
-		<td valign="top">
-			{% block answergraphdisplay %} {% endblock answergraphdisplay %}
-			<form id="answerform" action="/registeranswer" method="post">
-				{% block answerform %}
-				{% comment %}
-					I don't think we need this stuff??
-				<input type="hidden" id="exid" name="exid" value="{{exid}}">
-				<input type="hidden" id="streak" name="streak" value="{{streak}}">
-				<input type="hidden" id="key" name="key" value="{{key}}">
-				<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
-				<input type="hidden" id="correct" name="correct" value="0">
-				<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
-				<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-				{% endcomment %}
-				{% block answerarea %}{% endblock answerarea %}
-				{% endblock answerform %}
-			</form>
-		</td>
-	</tr>
-  </table>
+	</div>
+	<div id='answer_area' style="display: inline-block; padding: 1em;">
+		{% block answergraphdisplay %} {% endblock answergraphdisplay %}
+		<form id="answerform" action="/registeranswer" method="post">
+			{% block answerform %}
+			{% comment %}
+				I don't think we need this stuff??
+			<input type="hidden" id="exid" name="exid" value="{{exid}}">
+			<input type="hidden" id="streak" name="streak" value="{{streak}}">
+			<input type="hidden" id="key" name="key" value="{{key}}">
+			<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
+			<input type="hidden" id="correct" name="correct" value="0">
+			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
+			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
+			{% endcomment %}
+			{% block answerarea %}{% endblock answerarea %}
+			{% endblock answerform %}
+		</form>
+		<script language=Javascript1.2><!--
+			var elForm = document.forms['answerform'];
+			if (elForm)
+			{
+				elForm.reset();
+				if (elForm.answer) elForm.answer.focus();
+			}
+			function relabel_hint()
+			{
+				elForm.hint.value = "Next Hint";
+			}
+			function evaluate_hint()
+			{
+				confirmed = true;
+				confirmation_text = 'One-time warning: Using a hint will erase your streak.\nAre you sure you want to continue?'
+				cookie_name = "exercise_hint_warning";
+				cookie_value = '1'
+				cookie_length = 365; //days
+				
+				if(readCookie(cookie_name) != cookie_value) 
+					confirmed = false;
+				
+				if(confirmed || confirm(confirmation_text))
+				{
+					relabel_hint();
+					{% block hintfunction %}next_step(){% endblock hintfunction %};		
+				}
+				
+				createCookie(cookie_name,cookie_value,cookie_length);
+			}
+			function highlight_answer()
+			{
+				elForm.answer.focus();
+				elForm.answer.select();
+			}
+		//--></script>
+	</div>
+</div>
 </body>
 <script type="text/javascript"><!--
 hide_hints();
