@@ -85,7 +85,10 @@ function type6() {
 	write_step(equation_string('x+'+A/100+'x='+B));
 	write_step(equation_string((100+A)/100+'x='+B));
 	write_step(equation_string('x='+B+'/'+((100+A)/100)));
-	write_step(equation_string('x='+C));
+	write_step(equation_string('x='+C) 
+		+ 'So ' + pronoun1 + ' had ' + C 
+		+ ' dollars last year.&nbsp; <strong>However, we need to know how much <em>' 
+		+ pronoun1 + ' has made over the past year</em></strong>.');
 	write_step('If '+pronoun1+' had '+C+' dollars last year and now has '+B+
 			' dollars this year, then '+pronoun1+' has made '+B+'-'+C+'=<B>'+correctAnswer+
 			'</B> dollars over the course of the year.');
