@@ -308,7 +308,7 @@ $(document).ready(function() {
 	}
 
 	hideScratchPad();
-	if (getUrlVars()['enable_scratch_pad'] || $.browser.mozilla && $.browser.version.substr(0, 3) >= "1.8")
+	if (!$.browser.msie)
 	{
 		$('#scratch_pad_show').click(showScratchPad);
 		$('#scratch_pad_hide').click(hideScratchPad);
