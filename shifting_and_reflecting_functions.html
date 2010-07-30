@@ -46,9 +46,9 @@ function generate_quadratic_funcs()
 	// double minus sign x--c doesn't work for some reason?
 	origFunc = mOrig + "*(x+-1*" + xOrig + ")^2+" + yOrig;
 	if (flip) {
-		flipFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + yOrig;
-		yShiftFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + (yOrig + yShift);
-		finFunc = mOrig + "*-1*(x+-1*" + (xOrig + xShift) + ")^2+" + (yOrig + yShift);
+		flipFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + (-yOrig);
+		yShiftFunc = mOrig + "*-1*(x+-1*" + xOrig + ")^2+" + ((-yOrig) + yShift);
+		finFunc = mOrig + "*-1*(x+-1*" + (xOrig + xShift) + ")^2+" + ((-yOrig) + yShift);
 	} else {
 		yShiftFunc = mOrig + "*(x+-1*" + xOrig + ")^2+" + (yOrig + yShift);
 		finFunc = mOrig + "*(x+-1*" + (xOrig + xShift) + ")^2+" + (yOrig + yShift);
@@ -104,13 +104,13 @@ function draw_next_step() {
 		present.plot(yShiftFunc);
 
 		present.marker = "arrow";
-		present.line([xOrig, yOrig], [xOrig, yOrig + yShift]);	
+		present.line([xOrig, (flip?-yOrig:yOrig)], [xOrig, (flip?-yOrig:yOrig) + yShift]);	
 	}
 	if (steps_given==2)
 	{
 		present.stroke = "blue";
 		present.marker = "arrow";
-		present.line([xOrig, yOrig + yShift], [xOrig + xShift, yOrig + yShift]);
+		present.line([xOrig, (flip?-yOrig:yOrig) + yShift], [xOrig + xShift, (flip?-yOrig:yOrig) + yShift]);
 	}
 	document.getElementById('hint'+steps_given).style.display = 'block';
 	steps_given++;
