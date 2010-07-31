@@ -32,7 +32,7 @@ function generate_quadratic_funcs()
 		xShift = getRandomIntRange(1, 6);
 	}
 
-	if (yOrig > 0) {
+	if ((yOrig > 0 && !flip) || (yOrig < 0 && flip)) {
 		yShift = getRandomIntRange(-6, -1);
 	} else {
 		yShift = getRandomIntRange(1, 6);
@@ -58,10 +58,10 @@ function generate_quadratic_funcs()
 function nicefy_signs(expr)
 {
 	while (expr.indexOf("+ -") != -1) {
-		expr = expr.replace("+ -", "-");
+		expr = expr.replace("+ -", "- ");
 	}
 	while (expr.indexOf("- -") != -1) {
-		expr = expr.replace("- -", "+")
+		expr = expr.replace("- -", "+ ")
 	}
 	return expr;
 }
@@ -70,9 +70,13 @@ generate_quadratic_funcs();
 
 if (flip) {
 	gx = nicefy_signs("-f(x - " + xShift + ") + " + yShift);
-	addWrongChoice(nicefy_signs("f(x - " + xShift + ") + " + yShift));
 } else {
 	gx = nicefy_signs("f(x - " + xShift + ") + " + yShift);
+}
+setCorrectAnswer(gx);
+if (flip) {
+	addWrongChoice(nicefy_signs("f(x - " + xShift + ") + " + yShift));
+} else {
 	addWrongChoice(nicefy_signs("-f(x - " + xShift + ") + " + yShift));
 }
 
@@ -85,8 +89,6 @@ addWrongChoice(nicefy_signs("f(x - " + yShift + ") + " + xShift));
 addWrongChoice(nicefy_signs("f(x + " + yShift + ") - " + xShift));
 addWrongChoice(nicefy_signs("f(x + " + xShift + ") - " + yShift));
 addWrongChoice(nicefy_signs("f(x - " + xShift + ") - " + yShift));
-
-setCorrectAnswer(gx);
 
 function draw_next_step() {
 	if (steps_given==0)
