@@ -43,11 +43,11 @@ The entire video library is shown below.  Just click on a category or video titl
 <P>
 	<table width=100% border=0>
 	<tr><td align=center>
-	{% for column in playlist_names %}
-		{% for playlist_name in column %}
+
+		{% for playlist_name in all_topics %}
 			<A href="#{{playlist_name}}">{{playlist_name}}</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 		{% endfor %}
-	{% endfor %}
+	
 	</td>
 	</tr>
 	<table width=100% border=0>
@@ -71,10 +71,14 @@ The entire video library is shown below.  Just click on a category or video titl
 			<A href="/gmat.jsp"  target="sub_videos"  >[More]</A>
 		<P>
 		{% for playlist_videos in c1 %}
+
 			{% for playlist_video in playlist_videos %}
 			{% if forloop.first %}
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
+			
+			{{playlist_video.playlist.description}}
+			
 			{% endif %}
 			<br><A href="http://khanexercises.appspot.com/video?v={{playlist_video.video.youtube_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
@@ -85,6 +89,7 @@ The entire video library is shown below.  Just click on a category or video titl
 			{% if forloop.first %}
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
+			{{playlist_video.playlist.description}}
 			{% endif %}
 			<br><A href="http://khanexercises.appspot.com/video?v={{playlist_video.video.youtube_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
@@ -96,6 +101,7 @@ The entire video library is shown below.  Just click on a category or video titl
 			{% if forloop.first %}
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
+			{{playlist_video.playlist.description}}
 			{% endif %}
 			<br><A href="http://khanexercises.appspot.com/video?v={{playlist_video.video.youtube_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
@@ -106,6 +112,7 @@ The entire video library is shown below.  Just click on a category or video titl
 			{% if forloop.first %}
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
+			{{playlist_video.playlist.description}}
 			{% endif %}
 			<br><A href="http://khanexercises.appspot.com/video?v={{playlist_video.video.youtube_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
