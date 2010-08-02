@@ -1015,10 +1015,36 @@ class Export(webapp.RequestHandler):
         for ex in exercises:
             self.response.out.write(ex)
 
+class ViewHomePage(webapp.RequestHandler):
+
+    def get(self):
+        template_values = {
+            }
+        path = os.path.join(os.path.dirname(__file__), 'homepage.html')
+        self.response.out.write(template.render(path, template_values))
+        
+        
+class ViewFAQ(webapp.RequestHandler):
+
+    def get(self):
+    	user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
+        self.response.out.write(template.render(path, template_values))
+
 def real_main():
     webapp.template.register_template_library('templatefilters')
     application = webapp.WSGIApplication([ 
-        ('/', ViewAllExercises),
+        ('/', ViewHomePage),
+        ('/frequently-asked-questions', ViewFAQ),
         ('/exercisedashboard', ViewAllExercises),
         ('/library', ViewVideoLibrary),
         ('/syncvideodata', UpdateVideoData),
