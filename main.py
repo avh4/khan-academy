@@ -1024,6 +1024,15 @@ class ViewHomePage(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
         
         
+class ViewNewHomePage(webapp.RequestHandler):
+
+    def get(self):
+        template_values = {
+            }
+        path = os.path.join(os.path.dirname(__file__), 'newhomepage.html')
+        self.response.out.write(template.render(path, template_values))
+        
+        
 class ViewFAQ(webapp.RequestHandler):
 
     def get(self):
@@ -1044,6 +1053,7 @@ def real_main():
     webapp.template.register_template_library('templatefilters')
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
+        ('/newhomepage', ViewNewHomePage),
         ('/frequently-asked-questions', ViewFAQ),
         ('/exercisedashboard', ViewAllExercises),
         ('/library', ViewVideoLibrary),
@@ -1064,7 +1074,9 @@ def real_main():
         ('/graphpage.html', GraphPage),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
+        (r'/vid/(.*)/', ViewVideo),
         ('/video', ViewVideo),
+        
         ('/reportissue', ReportIssue),
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),
