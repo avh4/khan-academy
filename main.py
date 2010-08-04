@@ -1029,7 +1029,7 @@ class ViewNewHomePage(webapp.RequestHandler):
     def get(self):
         template_values = {
             }
-        path = os.path.join(os.path.dirname(__file__), 'newhomepage.html')
+        path = os.path.join(os.path.dirname(__file__), 'videocatalog.html')
         self.response.out.write(template.render(path, template_values))
         
         
