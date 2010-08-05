@@ -132,10 +132,7 @@ function isSVGavailable() {
   an.setAttribute("href",
     "http://www.chapman.edu/~jipsen/svg/svgenabledmozillafirefox.html");
   nd.appendChild(an);
-  if (navigator.appName.slice(0,8)=="Netscape") 
-    if (window['SVGElement']) return null;
-    else return nd;
-  else if (navigator.appName.slice(0,9)=="Microsoft")
+  if (navigator.appName.slice(0,9)=="Microsoft")
     try	{
       var oSVG=eval("new ActiveXObject('Adobe.SVGCtl.3');");
         return null;
