@@ -50,7 +50,7 @@ handlers:
   # The url below needs to be updated whenever we change/upgrade svg-edit.
   # Unfortunately, we can't use a regex due to a GAE bug:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /svg-edit-2.5
+- url: /svg-edit-2.5-khan-100804
   static_dir: svg-edit
 
 - url: /remote_api
