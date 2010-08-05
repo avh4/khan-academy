@@ -840,17 +840,21 @@ function give_next_step() {
 	//graph_update();
 	for(var i=1; i<=display_per_step; i++)
 	{
-		var id = "step"+steps_given+"_"+i;
-		var elem = document.getElementById(id);
-		if (elem) 
-		{
-			elem.innerHTML = KhanAcademy_hint_by_id[id];
-			elem.style.visibility = 'visible';				
-		}
+		show_step(i);
 	}
 	translate(); // Process any ASCII Math -> MathML
 }
 
+function show_step(i)
+{
+	var id = "step"+steps_given+"_"+i;
+	var elem = document.getElementById(id);
+	if (elem) 
+	{
+		elem.innerHTML = KhanAcademy_hint_by_id[id];
+		elem.style.visibility = 'visible';				
+	}
+}
 
 function randomRotation()
 {

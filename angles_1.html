@@ -425,7 +425,7 @@ var supAngles = function supplementaryAngles(ruleArray, valueHash) //Assumes tha
 	
 	valueHash[answer]= {value: (180 -  in1), reason: new Array()};
 	valueHash[answer].reason.push('Solve for '+writeVariable(answer)+' using '+writeVariable(input1));
-	valueHash[answer].reason.push(writeVariable(answer)+' and '+writeVariable(input1)+' are <A href=\"javascript:popup(\'def/supplementary.html\')\">supplementary</a>');
+	valueHash[answer].reason.push(writeVariable(answer)+' and '+writeVariable(input1)+' are supplementary');
 	valueHash[answer].reason.push(writeVariable(answer)+'+'+writeVariable(input1)+'=180');
 	valueHash[answer].reason.push('Since '+writeVariable(input1, in1)+', '+writeVariable(answer,(180 - in1)));
 	
@@ -806,7 +806,7 @@ function draw_next_step() {
 	drawVariable(explanationStack[steps_given][0]);
 	steps_given++;
 	for(var i=1; i<=display_per_step; i++)
-		document.getElementById("step"+steps_given+"_"+i).style.visibility = 'visible';
+		show_step(i);
 }
 
 
@@ -821,8 +821,9 @@ function graph_update() {
 		yMax = Math.max(yMax, points[key].coor[1]);
 	}
 	
-	
-	present.initPicture(xMin,xMax, yMin, yMax);
+	var xPadding = 0.05*(xMax - xMin);
+	var yPadding = 0.05*(yMax - yMin);
+	present.initPicture(xMin-xPadding, xMax+xPadding, yMin-yPadding, yMax+yPadding);
 	present.fontstyle = "normal";
 	present.fontsize = "10";
 	present.stroke = "#AAAAAA";
