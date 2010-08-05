@@ -110,13 +110,11 @@ function myCreateElementXHTML(t) {
 }
 
 function isSVGavailable() {
+  if (document.implementation.hasFeature 
+      && document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1")) {
+    return null;
+  }
   var ua = navigator.userAgent;
-  if (ua.match("AppleWebKit")) {
-    return null;
-  }
-  if (navigator.appName.slice(0,5)=="Opera") {
-    return null;
-  }
   var nd = myCreateElementXHTML("center");
   nd.appendChild(document.createTextNode("To view the "));
   var an = myCreateElementXHTML("a");
