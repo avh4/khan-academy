@@ -202,6 +202,7 @@ class Video(db.Model):
     description = db.TextProperty()
     playlists = db.StringListProperty()
     keywords = db.StringProperty()
+    readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
 
 
 class Playlist(db.Model):
@@ -210,6 +211,7 @@ class Playlist(db.Model):
     url = db.StringProperty()
     title = db.StringProperty()
     description = db.TextProperty()
+    readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
 
 
 class ProblemLog(db.Model):

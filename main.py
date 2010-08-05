@@ -82,6 +82,41 @@ class KillLiveAssociations(webapp.RequestHandler):
         db.put(all_video_playlists)
 
 
+class UpdateVideoReadableNames(webapp.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
+
+    def get(self):
+    	if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+        query = Video.all()
+        all_videos = query.fetch(100000)
+        for video in all_videos:
+            potential_id = video.title.replace(' ','-')
+            potential_id = potential_id.replace('(','-')
+            potential_id = potential_id.replace(')','-')
+            potential_id = potential_id.replace('!','')
+            potential_id = potential_id.replace('?','')
+            potential_id = potential_id.replace(':','-')
+            potential_id = potential_id.replace(',','')
+            potential_id = potential_id.replace('/','-')
+            potential_id = potential_id.replace('.','-')
+            potential_id = potential_id.replace("'","")
+            potential_id = potential_id.lower()
+            number_to_add = 0
+            current_id = potential_id
+            while True:
+                query = Video.all()
+                query.filter('readable_id=', current_id)
+                if (query.get() is None): #id is unique so use it and break out
+                    video.readable_id = current_id
+                    video.put()
+                    break;
+                else: # id is not unique so will have to go through loop again
+                    number_to_add+=1
+                    current_id = potential_id+'-'+number_to_add
+                        
+
+
 class UpdateVideoData(webapp.RequestHandler):
 
     def get(self):
@@ -252,17 +287,24 @@ class ViewVideo(webapp.RequestHandler):
         user = users.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
-        video_id = self.request.get('v')
-        if video_id:
+        #video_id = self.request.get('v')
+        
+        path = self.request.path
+        readable_id  = path.rpartition('/')[2]
+        
+        
+        
+        if readable_id:
             query = Video.all()
-            query.filter('youtube_id =', video_id)
+            #query.filter('youtube_id =', video_id)
+            query.filter('readable_id =', readable_id)
             video = query.get()
             if video is None:
-                error_message = "No video found for YouTube ID '%s'" % video_id
+                error_message = "No video found for ID '%s'" % readable_id
                 logging.error(error_message)
                 report_issue_handler = ReportIssue()
                 report_issue_handler.initialize(self.request, self.response)
-                report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % video_id,
+                report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
                                                                'message': 'Error: %s' % error_message})
                 return
 
@@ -303,7 +345,7 @@ class ViewVideo(webapp.RequestHandler):
                                                       'logout_url': logout_url,
                                                       'video': video,
                                                       'video_playlists': video_playlists, 
-                                                      'issue_labels': ('Component-Videos,Video-%s' % video_id)}, 
+                                                      'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                      self.request)
             path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
             self.response.out.write(template.render(path, template_values))
@@ -988,7 +1030,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
                 query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
                 query.order('video_position')
                 playlist_videos = query.fetch(500)
-                self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
+                #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
                 new_column.append(playlist_videos)
             columns.append(new_column)
 
@@ -1048,6 +1090,61 @@ class ViewFAQ(webapp.RequestHandler):
                                                   
         path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
         self.response.out.write(template.render(path, template_values))
+        
+
+class ViewSAT(webapp.RequestHandler):
+
+    def get(self):
+    	user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        playlist_title = "SAT Preparation"
+        query = Playlist.all()
+        query.filter('title =', playlist_title)
+        playlist = query.get()
+        query = VideoPlaylist.all()
+        query.filter('playlist =', playlist)
+        query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+        query.order('video_position')
+        playlist_videos = query.fetch(500)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'videos': playlist_videos,
+                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'sat.html')
+        self.response.out.write(template.render(path, template_values))
+
+class ViewGMAT(webapp.RequestHandler):
+
+    def get(self):
+    	user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        playlist_title = "SAT Preparation"
+        query = Playlist.all()
+        query.filter('title =', playlist_title)
+        playlist = query.get()
+        query = VideoPlaylist.all()
+        query.filter('playlist =', playlist)
+        query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+        query.order('video_position')
+        playlist_videos = query.fetch(500)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'videos': playlist_videos,
+                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
+        self.response.out.write(template.render(path, template_values))
+
+
 
 def real_main():
     webapp.template.register_template_library('templatefilters')
@@ -1058,6 +1155,7 @@ def real_main():
         ('/exercisedashboard', ViewAllExercises),
         ('/library', ViewVideoLibrary),
         ('/syncvideodata', UpdateVideoData),
+        ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
         ('/editexercise', EditExercise),
         ('/printexercise', PrintExercise),
@@ -1074,8 +1172,10 @@ def real_main():
         ('/graphpage.html', GraphPage),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
-        (r'/vid/(.*)/', ViewVideo),
+        ('/video/.*', ViewVideo),
         ('/video', ViewVideo),
+        ('/sat', ViewSAT),
+        ('/gmat', ViewGMAT),
         
         ('/reportissue', ReportIssue),
         ('/export', Export),

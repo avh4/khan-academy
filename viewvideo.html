@@ -6,6 +6,7 @@
     <p>
         {{video.description}}
     </p>
+   
     {% endif %}
     <p>
         <label>
@@ -31,19 +32,19 @@
             <summary id="{{video_playlist.playlist.youtube_id}}">In Playlist: {{video_playlist.playlist.title}}</summary>
             {% if video_playlist.previous_video %}
             <label class=video_playlist_prev>
-                <a rel=prev href="/video?v={{video_playlist.previous_video.youtube_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}</a>
+                <a rel=prev href="/video/{{video_playlist.previous_video.readable_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}</a>
             </label>
             {% endif %}
             {% if video_playlist.next_video %}
             <label class=video_playlist_next>
-                <a rel=next href="/video?v={{video_playlist.next_video.youtube_id}}"><b>Next Video:</b> {{video_playlist.next_video.title}}</a>
+                <a rel=next href="/video/{{video_playlist.next_video.readable_id}}"><b>Next Video:</b> {{video_playlist.next_video.title}}</a>
             </label>
             {% endif %}
             <div class=video_playlist_container>
                 <ol>
                     {% for playlist_video_entry in video_playlist.videos %}<li>
                         {% if playlist_video_entry.current_video %}<strong>{{playlist_video_entry.video.title}}</strong>
-                        {% else %}<a href="/video?v={{playlist_video_entry.video.youtube_id}}">{{playlist_video_entry.video.title}}</a>
+                        {% else %}<a href="/video/{{playlist_video_entry.video.readable_id}}">{{playlist_video_entry.video.title}}</a>
                         {% endif%}
                     </li>{% endfor %}
                 </ol>
