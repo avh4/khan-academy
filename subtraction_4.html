@@ -269,19 +269,19 @@ function getFontString(text, font)
 	return ('<FONT class=\"'+font+'\">'+text+'</FONT>');
 }
 
-document.write('<table width=100%><tr><td valign=top width=80%><table width=100%><tr><td valign=top align=left><div ID=\"hintbox\">'+getFontString('Hint: ', 'inv')+'</div></td><td><img height=100 width=1></td></tr></table><center><table cellpadding=0 cellspacing=0><tr>');
+document.write('<table width=100%><tr><td valign=top width=80%><table width=100%><tr><td valign=top align=left><div ID=\"hintbox\">'+getFontString('&nbsp;', 'inv')+'</div></td><td><img height=100 width=1></td></tr></table><center><table cellpadding=0 cellspacing=0><tr>');
 
 for (var cols=0; cols<topNumberDigits; cols++)
 {
 	var index = topNumberDigits-1-cols;
-	document.write('<td align=center><div ID=\"2_'+index+'\">'+getFontString('0','doubleDigInv')+'</div></td>');
+	document.write('<td align=center><div ID=\"2_'+index+'\">'+getFontString('&nbsp;','doubleDigInv')+'</div></td>');
 }
 document.write('</tr><tr>');
 
 for (var cols=0; cols<topNumberDigits; cols++)
 {
 	var index = topNumberDigits-1-cols;
-	document.write('<td align=center><div ID=\"1_'+index+'\">'+getFontString('0','doubleDigInv')+'</div></td>');
+	document.write('<td align=center><div ID=\"1_'+index+'\">'+getFontString('&nbsp;','doubleDigInv')+'</div></td>');
 }
 document.write('</tr><tr>');
 for (var cols=0; cols<topNumberDigits; cols++)
@@ -308,7 +308,7 @@ document.write('</tr><tr>');
 for (var cols=0; cols<topNumberDigits; cols++)
 {
 	var index = topNumberDigits-1-cols;
-	document.write('<td class=answer><div ID=\"-2_'+index+'\">'+getFontString('0','inv')+'</div></td>');
+	document.write('<td class=answer><div ID=\"-2_'+index+'\">'+getFontString('&nbsp;','inv')+'</div></td>');
 }
 document.write('</tr></table></center></td></tr></table>');
 
