@@ -231,36 +231,6 @@ function randomIndices(length)
 
 }
 
-function popup(url)
-{
-	window.open(url,
-		"definition",
-		"height=300,width=300,status=no,scrollbars=no, directories=no, resizeable=no, titlebar=no, toolbar=no,menubar=no,location=no");
-}
-
-function popVideo(url)
-{
-	window.open(url,
-		"video",
-		"height=500,width=450,status=no,scrollbars=no, directories=no, resizeable=no, titlebar=no, toolbar=no,menubar=no,location=no");
-}
-
-
-function popClassroom()
-{
-	window.open('http://www.khanacademy.org/classroom.jsp',
-		"classroom",
-		"height=620,width=715,status=no,scrollbars=no, directories=no, resizeable=no, titlebar=no, toolbar=no,menubar=no,location=no");
-}
-
-function popExercise(exid)
-{
-	window.open('http://www.khanacademy.org/exercises/'+exid.substr(0,1)+'/'+exid+'.jsp?nomenu=1',
-		"Exercise Sample",
-		"height=620,width=715,status=no,scrollbars=yes, directories=no, resizeable=yes, titlebar=no, toolbar=no,menubar=no,location=no");
-}
-
-
 function format_coefficient(number)
 {
 	if (number==1) {
