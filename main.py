@@ -7,6 +7,7 @@ import time
 import random
 import urllib
 import logging
+import re
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -91,17 +92,9 @@ class UpdateVideoReadableNames(webapp.RequestHandler):  #Makes sure every video 
         query = Video.all()
         all_videos = query.fetch(100000)
         for video in all_videos:
-            potential_id = video.title.replace(' ','-')
-            potential_id = potential_id.replace('(','-')
-            potential_id = potential_id.replace(')','-')
-            potential_id = potential_id.replace('!','')
-            potential_id = potential_id.replace('?','')
-            potential_id = potential_id.replace(':','-')
-            potential_id = potential_id.replace(',','')
-            potential_id = potential_id.replace('/','-')
-            potential_id = potential_id.replace('.','-')
-            potential_id = potential_id.replace("'","")
-            potential_id = potential_id.lower()
+            potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
+            if video.readable_id == potential_id: # id is unchanged
+                continue
             number_to_add = 0
             current_id = potential_id
             while True:
@@ -110,7 +103,7 @@ class UpdateVideoReadableNames(webapp.RequestHandler):  #Makes sure every video 
                 if (query.get() is None): #id is unique so use it and break out
                     video.readable_id = current_id
                     video.put()
-                    break;
+                    break
                 else: # id is not unique so will have to go through loop again
                     number_to_add+=1
                     current_id = potential_id+'-'+number_to_add
@@ -290,7 +283,7 @@ class ViewVideo(webapp.RequestHandler):
         #video_id = self.request.get('v')
         
         path = self.request.path
-        readable_id  = path.rpartition('/')[2]
+        readable_id  = urllib.unquote(path.rpartition('/')[2])
         
         
         
