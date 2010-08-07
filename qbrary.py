@@ -249,7 +249,8 @@ class ChangePublished(webapp.RequestHandler):
                 else:
                     question.published = True
                 question.put()
-            self.redirect(redirect_url)
+#            self.redirect(redirect_url)
+            self.redirect('/qbrary')
         else:
             self.redirect(users.create_login_url(self.request.uri))
 
@@ -435,107 +436,134 @@ class Rating(webapp.RequestHandler):
                 self.response.out.write(template.render(path, template_values))
 
 
+class PreviewQuestion(webapp.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            question_key = self.request.get('question_key')
+            self.redirect('/answerquestion?question_key=' + question_key + '&preview_mode=True')
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+
+
 class AnswerQuestion(webapp.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
         if user:
             subject_key = self.request.get('subject_key')
+            question_key = self.request.get('question_key')
+            preview_mode = self.request.get('preview_mode')
+            question = None
+            subject = None
+
+            root = Subject.gql('WHERE parent_subject=:1', None).get()
+            subjects = Subject.gql('WHERE parent_subject = :1', root)
+            greeting = 'user: %s [<a href="%s">sign out</a>]' % (user.nickname(), users.create_logout_url('/'))
+
             if subject_key:
-                root = Subject.gql('WHERE parent_subject=:1', None).get()
-                subjects = Subject.gql('WHERE parent_subject = :1', root)
-                greeting = 'user: %s [<a href="%s">sign out</a>]' % (user.nickname(), users.create_logout_url('/'))
-
-                                # get all questions that are in some subtopic of given subject
-
+                # get all questions that are in some subtopic of given subject
                 subject = db.get(subject_key)
                 children = getBottomLevelChildren(subject)
                 questions = []
                 for subj in children:
                     questions.extend(Question.gql('WHERE subject=:1 and published =:2', subj, True))
-
+                    
+                # pick a random question 
                 if len(questions) > 0:
                     question = random.choice(questions)
+                    
+            elif question_key:
+                # lookup question with given key (for preview functionality)
+                question = db.get(question_key)
+                subject = question.subject
 
-                    untested_warning = QuestionAnswerer.gql('WHERE question=:1', question).count() < 5  # TODO: clean this up
+            if question:
+                untested_warning = QuestionAnswerer.gql('WHERE question=:1', question).count() < 5  # TODO: clean this up
 
-                    answerer_question = QuestionAnswerer.gql('WHERE answerer=:1 and question=:2', user, question).get()
+                answerer_question = QuestionAnswerer.gql('WHERE answerer=:1 and question=:2', user, question).get()
 
-                                        # check if current user has answered the question before
-                                        # create new QuestionAnswerer entry if they haven't
+                # check if current user has answered the question before
+                # create new QuestionAnswerer entry if they haven't
 
-                    if not answerer_question:
-                        answerer_question = QuestionAnswerer()
-                        answerer_question.answerer = user
-                        answerer_question.question = question
-                        answerer_question.difficulty_rating = 0
-                        answerer_question.quality_rating = 0
-                        answerer_question.importance_rating = 0
-                        answerer_question.difficulty_width = 0
-                        answerer_question.quality_width = 0
-                        answerer_question.importance_width = 0
-                        answerer_question.put()
+                if not answerer_question:
+                    answerer_question = QuestionAnswerer()
+                    answerer_question.answerer = user
+                    answerer_question.question = question
+                    answerer_question.difficulty_rating = 0
+                    answerer_question.quality_rating = 0
+                    answerer_question.importance_rating = 0
+                    answerer_question.difficulty_width = 0
+                    answerer_question.quality_width = 0
+                    answerer_question.importance_width = 0
+                    answerer_question.put()
+                # need to randomly take out 4 of the incorrect choices
 
-                    # need to randomly take out 4 of the incorrect choices
+                correct_index = random.randint(0, 4)
+                all_incorrect_indices = [1, 2, 3, 4, 5]
+                question_ordering = random.sample(all_incorrect_indices, 4)
+                question_ordering.insert(correct_index, 0)
 
-                    correct_index = random.randint(0, 4)
-                    all_incorrect_indices = [1, 2, 3, 4, 5]
-                    question_ordering = random.sample(all_incorrect_indices, 4)
-                    question_ordering.insert(correct_index, 0)
+                # by this point, question_ordering is an array with 5 indices, and holds 0 (correct answer) along with 4 of (1..5) in a random order, eg [4,0,3,1,2]
 
-                    # by this point, question_ordering is an array with 5 indices, and holds 0 (correct answer) along with 4 of (1..5) in a random order, eg [4,0,3,1,2]
+                choices = []
+                for question_index in question_ordering:
+                    if question_index == 0:
+                        choices.append(question.correct_choice_text)
+                    if question_index == 1:
+                        choices.append(question.incorrect_1)
+                    if question_index == 2:
+                        choices.append(question.incorrect_2)
+                    if question_index == 3:
+                        choices.append(question.incorrect_3)
+                    if question_index == 4:
+                        choices.append(question.incorrect_4)
+                    if question_index == 5:
+                        choices.append(question.incorrect_5)
 
-                    choices = []
-                    for question_index in question_ordering:
-                        if question_index == 0:
-                            choices.append(question.correct_choice_text)
-                        if question_index == 1:
-                            choices.append(question.incorrect_1)
-                        if question_index == 2:
-                            choices.append(question.incorrect_2)
-                        if question_index == 3:
-                            choices.append(question.incorrect_3)
-                        if question_index == 4:
-                            choices.append(question.incorrect_4)
-                        if question_index == 5:
-                            choices.append(question.incorrect_5)
+                # create an answer session for this question
+                # todo: need to set the choice_* fields
 
-                    # create an answer session for this question
-                    # todo: need to set the choice_* fields
+                qa_session = QuestionAnswerSession()
+                qa_session.answerer = user
+                qa_session.question = question
+                qa_session.total_attempts = 0
+                qa_session.choice_0 = question_ordering[0]
+                qa_session.choice_1 = question_ordering[1]
+                qa_session.choice_2 = question_ordering[2]
+                qa_session.choice_3 = question_ordering[3]
+                qa_session.choice_4 = question_ordering[4]
+                qa_session.put()
+                
+                publish_button_text = 'Publish Question'
+                if question.published == True:
+                    publish_button_text = 'Unpublish Question'
+                
+                template_values = {
+                    'subject': subject,
+                    'subjects': subjects,
+                    'greeting': greeting,
+                    'user_question': answerer_question,
+                    'correct_index': correct_index,
+                    'choice0': choices[0],
+                    'choice1': choices[1],
+                    'choice2': choices[2],
+                    'choice3': choices[3],
+                    'choice4': choices[4],
+                    'question': question,
+                    'session_key': str(qa_session.key()),
+                    'untested_warning': untested_warning,
+                    'preview_mode': preview_mode,
+                    'question_key': question_key,
+                    'publish_button_text' : publish_button_text
+                    }
 
-                    qa_session = QuestionAnswerSession()
-                    qa_session.answerer = user
-                    qa_session.question = question
-                    qa_session.total_attempts = 0
-                    qa_session.choice_0 = question_ordering[0]
-                    qa_session.choice_1 = question_ordering[1]
-                    qa_session.choice_2 = question_ordering[2]
-                    qa_session.choice_3 = question_ordering[3]
-                    qa_session.choice_4 = question_ordering[4]
-                    qa_session.put()
-
-                    template_values = {
-                        'subject': subject,
-                        'subjects': subjects,
-                        'greeting': greeting,
-                        'user_question': answerer_question,
-                        'correct_index': correct_index,
-                        'choice0': choices[0],
-                        'choice1': choices[1],
-                        'choice2': choices[2],
-                        'choice3': choices[3],
-                        'choice4': choices[4],
-                        'question': question,
-                        'session_key': str(qa_session.key()),
-                        'untested_warning': untested_warning,
-                        }
-
-                    path = os.path.join(os.path.dirname(__file__), 'answerquestion.html')
-                    self.response.out.write(template.render(path, template_values))
-                else:
-                    template_values = {'subject': subject, 'subjects': subjects, 'greeting': greeting}
-                    path = os.path.join(os.path.dirname(__file__), 'noquestion.html')
-                    self.response.out.write(template.render(path, template_values))
+                path = os.path.join(os.path.dirname(__file__), 'answerquestion.html')
+                self.response.out.write(template.render(path, template_values))
+            else:
+                template_values = {'subject': subject, 'subjects': subjects, 'greeting': greeting}
+                path = os.path.join(os.path.dirname(__file__), 'noquestion.html')
+                self.response.out.write(template.render(path, template_values))
         else:
             self.redirect(users.create_login_url(self.request.uri))
 
@@ -691,7 +719,7 @@ class CreateEditQuestion(webapp.RequestHandler):
             if question_key:
                 question = db.get(question_key)
                 mode_text = 'Edit Question'
-                button_text = 'Save Updates'
+                button_text = 'Save Updates and Preview'
                 message_text = ' '
             else:
 
@@ -709,7 +737,7 @@ class CreateEditQuestion(webapp.RequestHandler):
                 question.hint_text = ''
                 question.put()
                 mode_text = 'Add Question'
-                button_text = 'Create Question'
+                button_text = 'Create Question and Preview'
                 message_text = 'Step 2: Write the question...'
 
             bc = breadcrumb(question.subject)
@@ -769,8 +797,8 @@ class CreateEditQuestion(webapp.RequestHandler):
                     question.answer_text = self.request.get('answer_text')
                     question.hint_text = self.request.get('hint_text')
                     question.not_completed = False
-                    question.put()
-                    self.redirect('/qbrary')
+                    new_question_key = question.put()
+                    self.redirect('/previewquestion?question_key=' + str(new_question_key))
 
             # If we have a key, then we can retrieve the question; otherwise
             # need to create a new one
@@ -885,6 +913,7 @@ application = webapp.WSGIApplication([
     ('/pickquestiontopic', PickQuestionTopic),
     ('/pickquiztopic', PickQuizTopic),
     ('/answerquestion', AnswerQuestion),
+    ('/previewquestion', PreviewQuestion),
     ('/rating', Rating),
     ('/viewquestion', ViewQuestion),
     ('/editquestion', CreateEditQuestion),

@@ -1187,6 +1187,7 @@ def real_main():
         ('/pickquestiontopic', qbrary.PickQuestionTopic),
         ('/pickquiztopic', qbrary.PickQuizTopic),
         ('/answerquestion', qbrary.AnswerQuestion),
+        ('/previewquestion', qbrary.PreviewQuestion),
         ('/rating', qbrary.Rating),
         ('/viewquestion', qbrary.ViewQuestion),
         ('/editquestion', qbrary.CreateEditQuestion),

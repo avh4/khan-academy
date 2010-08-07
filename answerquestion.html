@@ -140,6 +140,16 @@
 			function(result) { session_action_callback(result); });
     }
     
+    function handle_publish_button_clicked()
+    {
+        window.location = '/changepublished?question_key={{question_key}}';
+    }
+    
+    function handle_edit_button_clicked()
+    {
+        window.location = '/editquestion?question_key={{question_key}}';
+    }
+    
     function session_action_callback(result)
     {
         if (result == "next_button_clicked") {
@@ -152,10 +162,21 @@
     {
    		document.getElementById("warning_untested_msg").style.visibility = "{{untested_warning}}" == "True" ? "visible" : "hidden";
     }
+
+    function show_preview_and_publish_button_if_needed()
+    {
+   		document.getElementById("preview_and_publish_tr").style.visibility = "{{preview_mode}}" == "True" ? "visible" : "hidden";
+    }
+
+    function handle_page_load()
+    {
+        show_warning_if_needed();
+        show_preview_and_publish_button_if_needed();
+    }    
     
     </script>
   </head>
-  <body onload="show_warning_if_needed()">	
+  <body onload="handle_page_load()">	
   	<table width=100%>
 	<tr>
   		<td valign=top align=left rowspan=2><A href="/"><img src="/images/logo.gif" width=150 height=100></A></td>
@@ -195,6 +216,13 @@
     </tr>
     <tr id="warning_untested_msg" style="visibility:hidden">
     	<td bgcolor=#ff8877 align=left><B>Warning:</B> This question has not been fully tested and may contain mistakes or incorrect information.</td>
+    </tr>
+    <tr id="preview_and_publish_tr" style="visibility:hidden">
+        <td bgcolor=#00ffff align=left>
+            Note: you are previewing this question.
+            <input id="publish_button" type="button" value="{{publish_button_text}}" onClick="handle_publish_button_clicked()"/>
+            <input id="edit_button" type="button" value="Edit Question" onClick="handle_edit_button_clicked()"/>
+        </td>
     </tr>
 </table><table width=100% border=0 cellpadding=0 cellspacing=0>
   <tr>
