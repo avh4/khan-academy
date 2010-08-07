@@ -93,6 +93,16 @@ function setCorrectAnswer(a)
 
 function mathFormat(e)
 {
+	// Make it a string
+	e = e + ''; 
+	// If it is already ASCIIMath, leave it alone
+	if (e.length > 0 && e.charAt(0) == '`')
+		return e;
+	// Normalize the formatting if it is an integer
+	var intVal = parseInt(e);
+	if (!isNaN(intVal))
+		e = format_fraction(intVal,1);
+	// Make it ASCIIMath
 	return	'`'+e+'`';
 }
 

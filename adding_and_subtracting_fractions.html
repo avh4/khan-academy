@@ -76,12 +76,13 @@ addWrongChoice(format_fraction((num1*com_den/den1)-(num2*com_den/den2),com_den))
 			{
 				answerChoices[i]='`'+definiteWrongAnswers[definiteWrongIndices.pop()]+'`';
 			}
-			else
+			else if (possibleWrongIndices.length>0)
 			{
 				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
 			}
+			else
+				continue;
 		}
-
 		document.write('<br/><span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
 
 	}

@@ -157,13 +157,19 @@ function eraseCookie(name) {
 	createCookie(name,"",-1);
 }
 
-
+function equivInArray(target, arr) {
+	for (var i = 0; i < arr.length; i++) {
+		if (mathFormat(target) == mathFormat(arr[i]))
+			return true;
+	}
+	return false;
+}
 
 //To add a choice; assumes correct_answer is already defined
 function addWrongChoice(choice)
 {
-	if(choice!=correct_answer && '`'+choice+'`'!=correct_answer)
-		if(!inArray(choice, possibleAnswers) && !inArray(choice, definiteWrongAnswers))
+	if(mathFormat(choice) != mathFormat(correct_answer))
+		if(!equivInArray(choice, possibleAnswers) && !equivInArray(choice, definiteWrongAnswers))
 			possibleAnswers.push(choice);
 }
 
