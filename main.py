@@ -536,7 +536,7 @@ class ViewMapExercises(webapp.RequestHandler):
             if user_data.reassess_from_graph(ex_graph):
                 user_data.put()
             for exercise in ex_graph.exercises:
-                exercise.display_name = exercise.name.replace('_', '&nbsp;').capitalize()
+                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
             review_exercises = ex_graph.get_review_exercises(self.get_time())
             suggested_exercises = ex_graph.get_suggested_exercises()
 
@@ -625,7 +625,7 @@ class KnowledgeMap(webapp.RequestHandler):
             if user_data.reassess_from_graph(ex_graph):
                 user_data.put()
             for exercise in ex_graph.exercises:
-                exercise.display_name = exercise.name.replace('_', '&nbsp;').capitalize()
+                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
             review_exercises = ex_graph.get_review_exercises(self.get_time())
             suggested_exercises = ex_graph.get_suggested_exercises()
             proficient_exercises = ex_graph.get_proficient_exercises()

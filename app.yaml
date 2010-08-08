@@ -53,6 +53,12 @@ handlers:
 - url: /svg-edit-2.5-khan-100804
   static_dir: svg-edit
 
+  # The url below needs to be updated whenever we change/upgrade Jit.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /Jit-2.0.0a
+  static_dir: Jit
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin  
