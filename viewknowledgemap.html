@@ -1,81 +1,85 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}<A href="/">Exercise Home</A>: My Knowledge Map {% endblock pagetitle %}
-{% block pagescript %}
-<!--[if IE]><script type='text/javascript' src='/Jit-2.0.0a/Extras/excanvas.js'></script><![endif]-->
-<script type='text/javascript' src='/Jit-2.0.0a/jit.js'></script>
+{% block pagescript %}<!--[if IE]><script type='text/javascript' src='/Jit-2.0.0a/Extras/excanvas.js'></script><![endif]-->
+<script type='text/javascript' src='/Jit-2.0.0a/jit.js'>
+</script>
 <style>
-	
-.jit-autoadjust-label, .node {
-/*
- 	font-family: sans-serif;
- */
-}
-
-.tip {
-	background-color: white;
-	width: 15em;
-}
-.tip dl {
-	margin-left: 1em;
-	margin-right; 1em;
-}
-.tip dt {
-	font-weight: bold;
-	float: left;
-	margin-right: 0.5em;
-}
-.tip dt:after {
-	content: ":";
-}
+    
+    table#exercises {
+        display: none;
+    }
+    
+    #kmap {
+        position: relative;
+        cursor: all-scroll;
+        cursor: -moz-grab;
+        width: 100%;
+        height: 400px;
+        background-color: #000000;
+        overflow: hidden;
+    }
+    
+    .jit-autoadjust-label, .node {
+        /*
+         font-family: sans-serif;
+         */
+    }
+    
+    .tip {
+        background-color: white;
+        width: 15em;
+    }
+    
+    .tip dl {
+        margin-left: 1em;
+        margin-right;
+        1em;
+    }
+    
+    .tip dt {
+        font-weight: bold;
+        float: left;
+        margin-right: 0.5em;
+    }
+    
+    .tip dt:after {
+        content: ":";
+    }
 </style>
 <script>
-    var labelType, useGradients, nativeTextSupport, animate;
-    
-    (function() {
-      var ua = navigator.userAgent,
-          iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i),
-          typeOfCanvas = typeof HTMLCanvasElement,
-          nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'),
-          textSupport = nativeCanvasSupport 
-            && (typeof document.createElement('canvas').getContext('2d').fillText == 'function');
-      //I'm setting this based on the fact that ExCanvas provides text support for IE
-      //and that as of today iPhone/iPad current text support is lame
-      labelType = (!nativeCanvasSupport || (textSupport && !iStuff))? 'Native' : 'HTML';
-      nativeTextSupport = labelType == 'Native';
-      useGradients = nativeCanvasSupport;
-      animate = !(iStuff || !nativeCanvasSupport);
-    })();
-    
-    var Log = {
-      elem: false,
-      write: function(text){
-        if (!this.elem) 
-          this.elem = document.getElementById('log');
-        this.elem.innerHTML = text;
-        this.elem.style.left = (500 - this.elem.offsetWidth / 2) + 'px';
-      }
-    };
-    
-    $(function () {
-    	$jit.ST.Plot.NodeTypes.implement({  
-    		'rectangleWithOtherParents': {  
-    			'render': function(node, canvas) {  
-    				$jit.ST.Plot.NodeTypes.prototype.rectangle.render.call(this, node, canvas);
-    				if (node.data && node.data.otherParents) {
-    					var otherParents = node.data.otherParents;
-    					for (var i = 0; i < otherParents.length; i++) {
-    					       var orn = this.getOrientation(),
-    					           parent = this.viz.graph.getNode(otherParents[i]), 
-    					           child = node,
-    					           dim = 5;
-    						adj = new $jit.Graph.Adjacence(child, parent, null, this.viz.config.Edge, this.viz.config.Label);
-    						this.plotLine(adj, canvas, false);
-    					}
-    				}
-    			},  
-    			'contains': $jit.ST.Plot.NodeTypes.prototype.rectangle.contains
-    		}  
-    	});  
+    $(function(){
+    	// Boilerplate stuff to allow JIT to support IE and iP* devices.
+        var labelType, useGradients, nativeTextSupport, animate;
+        var ua = navigator.userAgent, iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i), typeOfCanvas = typeof HTMLCanvasElement, nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'), textSupport = nativeCanvasSupport &&
+        (typeof document.createElement('canvas').getContext('2d').fillText == 'function');
+        //I'm setting this based on the fact that ExCanvas provides text support for IE
+        //and that as of today iPhone/iPad current text support is lame
+        labelType = (!nativeCanvasSupport || (textSupport && !iStuff)) ? 'Native' : 'HTML';
+        nativeTextSupport = labelType == 'Native';
+        useGradients = nativeCanvasSupport;
+        animate = !(iStuff || !nativeCanvasSupport);
+        
+	// The SpaceTree (ST) does not support diplaying a Directed Acyclic Graph (DAG), so we fake it by making a tree using
+	// only the first prereq as a module's real parent, and storing the other parents as extra data in the node.
+	// Then we use the following special node rendering implementation to draw the edges to those extra parents
+	// when we draw a node.
+        $jit.ST.Plot.NodeTypes.implement({
+            'rectangleWithOtherParents': {
+                'render': function(node, canvas){
+                    $jit.ST.Plot.NodeTypes.prototype.rectangle.render.call(this, node, canvas);
+                    if (node.data && node.data.otherParents) {
+                        var otherParents = node.data.otherParents;
+                        for (var i = 0; i < otherParents.length; i++) {
+                            var orn = this.getOrientation(), parent = this.viz.graph.getNode(otherParents[i]), child = node, dim = 5;
+                            adj = new $jit.Graph.Adjacence(child, parent, null, this.viz.config.Edge, this.viz.config.Label);
+                            this.plotLine(adj, canvas, false);
+                        }
+                    }
+                },
+                'contains': $jit.ST.Plot.NodeTypes.prototype.rectangle.contains
+            }
+        });
+	
         //Create a new ST instance
         var st = new $jit.ST({
             //id of viz container element
@@ -84,155 +88,193 @@
             duration: 10,
             //set animation transition type
             transition: $jit.Trans.Quart.easeInOut,
-            //set distance between node and its children
-    	levelsToShow: 70,
-    	orientation: 'left',
-    	constrained: false,
+            levelsToShow: 70,
+            orientation: 'left',
+            constrained: false,
             //enable panning
             Navigation: {
-              enable:true,
-              panning:true,
-    	  zooming: 20
+                enable: true,
+                panning: true,
+                zooming: 20
             },
             //set node and edge styles
-            //set overridable=true for styling individual
-            //nodes or edges
-        Node: {
-          overridable: true,
-          type: 'rectangleWithOtherParents',
-          autoHeight: true,
-          autoWidth: false
-        },
-        Edge: {
-          overridable: true,
-          color: '#CCCCCC',
-          lineWidth: 3,
-          type: 'bezier'
-        },
-        Label: {
-          overridable: true
-        },
-	Tips: {
-	  enable: true,
-	  onShow: function(tipDiv, node) {
-	  	tipDiv.innerHTML = node.data.tipHTML;
-	  }
-	  
-	},
-            onBeforeCompute: function(node){
-                Log.write("loading " + node.name);
+            Node: {
+                overridable: true,
+                type: 'rectangleWithOtherParents',
+                autoHeight: true,
+                autoWidth: false
+            },
+            Edge: {
+                overridable: true,
+                color: '#CCCCCC',
+                lineWidth: 3,
+                type: 'bezier'
+            },
+            Label: {
+                overridable: true
+            },
+            Tips: {
+                enable: true,
+                onShow: function(tipDiv, node){
+                    tipDiv.innerHTML = node.data.tipHTML;
+                }
+                
             },
             
-            onAfterCompute: function(){
-                Log.write("done");
-            },
-            
-            //This method is called on DOM label creation.
-            //Use this method to add event handlers and styles to
-            //your node.
             onCreateLabel: function(label, node){
-                label.id = node.id;            
+                label.id = node.id;
                 label.innerHTML = node.name;
                 label.onclick = function(){
-			window.location = node.data.url;
+                    window.location = node.data.url;
                 };
-                //set label styles
                 var style = label.style;
                 style.width = node.data.$width + 'px';
                 style.cursor = 'pointer';
                 style.color = '#333';
-                style.textAlign= 'center';
+                style.textAlign = 'center';
             },
-	    onPlaceLabel: function(label, node) {
-		var width = st.canvas.scaleOffsetX * node.data.$width;
-		var height = st.canvas.scaleOffsetY * node.data.$height;
-		var left = label.offsetLeft + (node.data.$width - width)/2;
-		var top = label.offsetTop + (node.data.$height - height)/2;
-	    	label.style.width = width + "px";
-		label.style.left = left + "px";
-		label.style.top = top + "px";
-		var extraScale = 1;
-		do {
-		    	label.style.fontSize = Math.round(st.canvas.scaleOffsetX * extraScale * 100) + "%";
-	                label.innerHTML = node.name;
-			extraScale = extraScale * 0.9;	
-		} while (extraScale > 0.5 && (label.offsetHeight > height+1 || label.offsetWidth > width+1));
-	    }	        
+            onPlaceLabel: function(label, node){
+                var width = st.canvas.scaleOffsetX * node.data.$width;
+                var height = st.canvas.scaleOffsetY * node.data.$height;
+                var left = label.offsetLeft + (node.data.$width - width) / 2;
+                var top = label.offsetTop + (node.data.$height - height) / 2;
+                label.style.width = width + "px";
+                label.style.left = left + "px";
+                label.style.top = top + "px";
+                var extraScale = 1;
+                do {
+                    label.style.fontSize = Math.round(st.canvas.scaleOffsetX * extraScale * 100) + "%";
+                    label.innerHTML = node.name;
+                    extraScale = extraScale * 0.9;
+                }
+                while (extraScale > 0.5 && (label.offsetHeight > height + 1 || label.offsetWidth > width + 1));
+            }
         });
-      var nodes = {};
-      {% for exercise in exercises %}
-    	  nodes["{{ exercise.name }}"] = {
-    		"id": "{{ exercise.name }}",
-    		"name": "{{ exercise.display_name }}",
-    		"data": {
-			"tipHTML": "<dl>"
-				+"<dt>Streak<dd>{{ exercise.streak }}"
-				+'<dt>Longest Streak<dd>{{ exercise.longest_streak|default:"0" }}'
-				+"<dt>Points/problem<dd>{{ exercise.points }}"
-				+"</dl>",
-			"url": "/exercises?exid={{exercise.name}}",
-    	  {% if exercise.proficient %}"$color": "#EDE275",{% endif %}
-    	  {% if exercise.suggested %}"$color": "#FBB917",{% endif %}
-    	  {% if exercise.review %}"$color": "#FF9999",{% endif %}
-    			"otherParents": []
-    		},  
-    		"children": []
-    	  };
-      {% endfor %}
-      
-      {% for exercise in exercises %}
-    	  {% for prereq in exercise.prerequisites %}
-    		{% if forloop.first %}
-    			nodes["{{ prereq }}"].children.push(nodes["{{ exercise.name }}"]);
-    		{% else %}
-    			nodes["{{ exercise.name }}"].data.otherParents.push("{{ prereq }}");
-    		{% endif %}
-    	  {% endfor %}
-      {% endfor %}
-        //load json data
+	
+	// Build the graph from the hidden exercise table
+	// First create a hash of nodes, one per exercise.
+        var nodes = {};
+        $("tr[data-id]").each(function(){
+            elem = $(this);
+            var node = {
+                "id": elem.attr("data-id"),
+                "name": elem.attr("data-name"),
+                "data": {
+                    "otherParents": [],
+                    "tipHTML": "<dl>" +
+                    "<dt>Streak<dd>" +
+                    elem.attr("data-streak") +
+                    "<dt>Longest Streak<dd>" +
+                    elem.attr("data-longest_streak") +
+                    "<dt>Points/problem<dd>" +
+                    elem.attr("data-points") +
+                    "</dl>",
+                    "url": "/exercises?exid=" + elem.attr("data-id"),
+                },
+                "children": []
+            };
+            switch (elem.attr("data-status")) {
+                case "Proficient":
+                    node.data.$color = "#EDE275";
+                    break;
+                case "Suggested":
+                    node.data.$color = "#FBB917";
+                    break;
+                case "Review":
+                    node.data.$color = "#FF9999";
+                    break;
+            }
+            nodes[elem.attr("data-id")] = node;
+        });
+        
+	// Connect the nodes
+        $("tr[data-id]").each(function(){
+            var elem = $(this);
+            elem.find("li[data-prereq]").each(function(i){
+                var prereq_elem = $(this);
+		// To convert the DAG to a tree we are only a normal child of our first prereq.
+		// All other prereqs, get listed as our "other parents".
+                if (i == 0) {
+                    nodes[prereq_elem.attr("data-prereq")].children.push(nodes[elem.attr("data-id")]);
+                }
+                else {
+                    nodes[elem.attr("data-id")].data.otherParents.push(prereq_elem.attr("data-prereq"));
+                }
+            });
+        });
+        // load the graph
         st.loadJSON(nodes["addition_1"]);
+	// layout nodes
         st.compute();
-        //optional: make a translation of the tree
-//        st.geom.translate(new $jit.Complex(-200, 0), "current");
-        //emulate a click on the root node.
+        // emulate a click on the root node.
         st.onClick(st.root);
+	
+	// Move the canvas so that the previously centered root node is flush with the left edge
+	var rootX = st.canvas.getSize().width/2;
+	var rootWidth = st.graph.getNode("addition_1").data.$width;
+        st.canvas.translate(-rootX+rootWidth/2, 0);
         //end
     
     });
-    
-    
 </script>
 {% endblock pagescript %}
 {% block pagecontent%}
-<P>
-    <div style="position:relative;">
-        <div id="intro" style="position:absolute; visibility:visible;">
-            <center>
-                <table border=0 width=95%>
-                    <tr>
-                        <td>
-                            The yellow modules are those that you have already become proficient in.&nbsp;  The red modules are those that I suggest you review.&nbsp; 
-                            The orange modules are the new modules that I suggest you work on.&nbsp; Click on a module to do a focused practice on that module. 
-                        </td>
-                    </tr>
-                </table>
-            </center>
-        </div>
-    </div>
-    <table width=100% border=0 cellpadding=0 cellspacing=0>
+<article id="knowledge_map">
+    <table id="exercises">
         <tr>
-            <td bgcolor=#ffffff>
-                <img width=1 height=5 alt="">
+            <th>
+                Energy Points
+            </th>
+            <th>
+                Exercise
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Longest Streak
+            </th>
+            <th>
+                Current Streak
+            </th>
+            <th>
+                Prerequisites
+            </th>
+        </tr>
+        {% for exercise in exercises %}
+        <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default:"0" }}' data-streak='{{ exercise.streak }}'>
+            <td class="points">
+                {{ exercise.points }}
+            </td>
+            <td class="name">
+                <a href="/exercises?exid={{exercise.name}}">{{ exercise.display_name }}</a>
+            </td>
+            <td class="status">
+                {{ exercise.status }}
+            </td>
+            <td class="longest_streak">
+                {{ exercise.longest_streak|default:"0" }}
+            </td>
+            <td class="streak">
+                {{ exercise.streak }}
+            </td>
+            <td class="prereqs">
+                <ul>
+                    {% for prereq in exercise.prerequisites_ex %}
+                    <li data-prereq="{{ prereq.name }}">
+                        <a href="/exercises?exid={{prereq.name }}">{{ prereq.display_name }}</a>
+                    </li>
+                    {% endfor %} 
+                </ul>
             </td>
         </tr>
+        {% endfor %}
     </table>
-    <br>
-    &nbsp;
-    </br>
-    <center>
-        <div id="kmap" style="position: relative; cursor: all-scroll; cursor: -moz-grab; width: 95%; height:400px; background-color: #000000; overflow: hidden;">
-        </div>
-    </center>
-    <div id="log" style="display: none;">
+    <p>
+        The yellow modules are those that you have already become proficient in.&nbsp;  The red modules are those that I suggest you review.&nbsp; 
+        The orange modules are the new modules that I suggest you work on.&nbsp; Click on a module to do a focused practice on that module. 
+    </p>
+    <div id="kmap">
     </div>
-    {% endblock pagecontent %}
+</article>
+{% endblock pagecontent %}
