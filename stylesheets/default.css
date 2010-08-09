@@ -91,7 +91,7 @@ nav {
 
 #page_sub_nav {
     background-color: #e5ecf9;
-    padding: .2em;
+    text-indent: .2em;
 }
 
 header ul, footer ul {
