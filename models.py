@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.api import memcache
 
 from google.appengine.ext import db
+import cajole
 
 class UserExercise(db.Model):
 
@@ -80,6 +81,31 @@ class Exercise(db.Model):
     covers = db.StringListProperty()
     v_position = db.IntegerProperty()
     h_position = db.IntegerProperty()
+
+    # Teachers contribute raw html with embedded CSS and JS
+    # and we sanitize it with Caja before displaying it to
+    # students.
+    author = db.UserProperty()
+    raw_html = db.TextProperty()
+    last_modified = db.DateTimeProperty()    
+    safe_html = db.TextProperty()
+    safe_js = db.TextProperty()
+    last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
+    sanitizer_used = db.StringProperty()
+    
+    _CURRENT_SANITIZER = "http://caja.appspot.com/"
+    def ensure_sanitized(self):
+        if self.last_sanitized >= self.last_modified and self.sanitizer_used == Exercise._CURRENT_SANITIZER:
+            return
+        cajoled = cajole.cajole(self.raw_html)
+        if 'error' in cajoled:
+            raise Exception(cajoled['html'])
+        self.safe_html = db.Text(cajoled['html'])
+        self.safe_js = db.Text(cajoled['js'])
+        self.last_sanitized = datetime.datetime.now()
+        self.sanitizer = Exercise._CURRENT_SANITIZER
+        self.put()
+        
     
     _EXERCISES_KEY = "Exercise.all()"    
     @staticmethod

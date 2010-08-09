@@ -31,8 +31,9 @@
 
 			<form id="addexercise" action="/updateexercise" method="get">
 				<INPUT type="text" name="name" size="40">
-				<input type="text" name="v_position"  value="0" size='3'>
-				<input type="text" name="h_position"  value="0" size='3'>
+				<input type="hidden" name="v_position"  value="0">
+				<input type="hidden" name="h_position"  value="0">
+				<textarea name="raw_html"></textarea>
 				<input type="button" value="Add Exercise" onClick="submitForm()"></div></br>
 			</form>
 			<script language=Javascript1.2><!--

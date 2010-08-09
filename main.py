@@ -263,8 +263,12 @@ class ViewExercise(webapp.RequestHandler):
                 'num_problems_to_print': num_problems_to_print,
                 'issue_labels': ('Component-Exercises,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
+            template_file = exid + '.html'
+            if exercise.raw_html is not None:
+                exercise.ensure_sanitized()
+                template_file = 'caja_template.html'
 
-            path = os.path.join(os.path.dirname(__file__), exid + '.html')
+            path = os.path.join(os.path.dirname(__file__), template_file)
             self.response.out.write(template.render(path, template_values))
         else:
 
@@ -686,6 +690,12 @@ class UpdateExercise(webapp.RequestHandler):
                 exercise = Exercise(name=exercise_name)
                 exercise.prerequisites = []
                 exercise.covers = []
+                exercise.author = user
+                raw_html = self.request.get('raw_html')
+                if raw_html:
+                    exercise.raw_html = db.Text(raw_html)
+                    exercise.last_modified = datetime.datetime.now()
+                    exercise.ensure_sanitized()
 
             add_prerequisite = self.request.get('add_prerequisite')
             delete_prerequisite = self.request.get('delete_prerequisite')
@@ -1101,6 +1111,7 @@ class ViewGMAT(webapp.RequestHandler):
 
 def real_main():
     webapp.template.register_template_library('templatefilters')
+    webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
         ('/newhomepage', ViewNewHomePage),
