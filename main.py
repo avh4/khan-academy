@@ -292,8 +292,11 @@ class ViewVideo(webapp.RequestHandler):
             query = Video.all()
             query.filter('youtube_id =', video_id)
             video = query.get()
-            readable_id = video_id # Its a lie but it simplifies the rest of the code
-        elif readable_id:
+            readable_id = video.readable_id
+            self.redirect("/video/"+urllib.quote(readable_id), True);
+            return
+        
+        if readable_id:
             query = Video.all()
             query.filter('readable_id =', readable_id)
             video = query.get()
