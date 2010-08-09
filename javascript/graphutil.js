@@ -237,11 +237,11 @@ function graphRightAngle(p1,vertex, p2) //p1 should be counter clockwise from p2
 	this.rotate = function(axisPoint, degrees)
 	{
 		var rads = degrees*Math.PI/180;
-		for(k in this.allPoints)
+		for(var k=0; k < this.allPoints.length; k++)
 		{
 			var curPoint = this.allPoints[k];
 			var curLabelPosition = curPoint.labelPosition;
-			curPoint.labelPosition = posArray[(posArray.indexOf(curLabelPosition)+Math.floor(degrees/45))%posArray.length];
+			curPoint.labelPosition = posArray[($.inArray(curLabelPosition,posArray)+Math.floor(degrees/45))%posArray.length];
 			var distance = getDistance(axisPoint, curPoint);
 			var curAngle = Math.atan2(curPoint.y-axisPoint.y, curPoint.x-axisPoint.x);
 		
@@ -261,7 +261,7 @@ function graphRightAngle(p1,vertex, p2) //p1 should be counter clockwise from p2
 	
 	this.scale = function(factor)
 	{
-		for(k in this.allPoints)
+		for(var k=0; k<this.allPoints.length; k++)
 		{
 			var curPoint = this.allPoints[k];
 			var distance = getDistance(this.center, curPoint);
@@ -277,7 +277,7 @@ function graphRightAngle(p1,vertex, p2) //p1 should be counter clockwise from p2
 	
 	this.shift = function(xShift, yShift)
 	{
-		for(k in this.allPoints)
+		for(var k=0; k<this.allPoints.length; k++)
 		{
 			var curPoint = this.allPoints[k];
 			curPoint.x += xShift;
@@ -332,11 +332,11 @@ function congruentLabel(line1, line2, markers)
 	
 	this.drawInColor = function()
 	{
-		for(k in this.labels1)
+		for(var k=0; k<this.labels1.length; k++)
 		{
 			this.labels1[k].drawInOtherColor(this.color);	
 		}
-		for(k in this.labels2)
+		for(var k=0; k<this.labels2.length; k++)
 		{
 			this.labels2[k].drawInOtherColor(this.color);	
 		}
@@ -344,11 +344,11 @@ function congruentLabel(line1, line2, markers)
 	
 	this.draw = function()
 	{
-		for(k in this.labels1)
+		for(var k=0; k<this.labels1.length; k++)
 		{
 			this.labels1[k].draw();	
 		}
-		for(k in this.labels2)
+		for(var k=0; k<this.labels2.length; k++)
 		{
 			this.labels2[k].draw();	
 		}
@@ -583,11 +583,11 @@ function graphTriangle(left, top, right)
 	{
 		var rads = degrees*Math.PI/180;
 	
-		for(k in this.allPoints)
+		for(var k=0; k<this.allPoints.length; k++)
 		{
 			var curPoint = this.allPoints[k];
 			var curLabelPosition = curPoint.labelPosition;
-			curPoint.labelPosition = posArray[(posArray.indexOf(curLabelPosition)+Math.floor(degrees/45))%posArray.length];
+			curPoint.labelPosition = posArray[($.inArray(curLabelPosition, posArray)+Math.floor(degrees/45))%posArray.length];
 			var distance = getDistance(axisPoint, curPoint);
 			var curAngle = Math.atan2(curPoint.y-axisPoint.y, curPoint.x-axisPoint.x);
 		
@@ -607,7 +607,7 @@ function graphTriangle(left, top, right)
 	
 	this.scale = function(factor)
 	{
-		for(k in this.allPoints)
+		for(var k=0; k<this.allPoints.length; k++)
 		{
 			var curPoint = this.allPoints[k];
 			var distance = getDistance(this.center, curPoint);
@@ -623,7 +623,7 @@ function graphTriangle(left, top, right)
 	
 	this.shift = function(xShift, yShift)
 	{
-		for(k in this.allPoints)
+		for(var k=0; k<this.allPoints.length; k++)
 		{
 			var curPoint = this.allPoints[k];
 			curPoint.x += xShift;
@@ -824,14 +824,14 @@ function give_next_step() {
 	var justDrawn = graphicalHints[steps_given];
 	if (justDrawn)
 	{
-		for(k in justDrawn)
+		for(var k=0; k<justDrawn.length; k++)
 			justDrawn[k].draw();
 	}
 	steps_given++;
 	var toDraw = graphicalHints[steps_given];
 	if (toDraw)
 	{
-		for(k in toDraw)
+		for(var k=0; k<toDraw.length; k++)
 			toDraw[k].drawInColor();
 	}
 	
@@ -876,7 +876,7 @@ function rotateGraph(degrees) {
 	
 	
 	
-	for(k in pointRegister)
+	for(var k=0; k<pointRegister.length; k++)
 	{
 		var curPoint = pointRegister[k];
 		dimensionMax = Math.max(dimensionMax, Math.max(curPoint.x, curPoint.y));
@@ -887,11 +887,11 @@ function rotateGraph(degrees) {
 	var rads = degrees*Math.PI/180;
 	var centerPoint = new graphPoint(center, center, above);
 	
-	for(k in pointRegister)
+	for(var k=0; k<pointRegister.length; k++)
 	{
 		var curPoint = pointRegister[k];
 		var curLabelPosition = curPoint.labelPosition;
-		curPoint.labelPosition = posArray[(posArray.indexOf(curLabelPosition)+Math.floor(degrees/45))%posArray.length];
+		curPoint.labelPosition = posArray[($.inArray(curLabelPosition,posArray)+Math.floor(degrees/45))%posArray.length];
 		var distance = getDistance(centerPoint, curPoint);
 		var curAngle = Math.atan2(curPoint.y-centerPoint.y, curPoint.x-centerPoint.x);
 		
@@ -912,7 +912,7 @@ function rotateGraph(degrees) {
 	
 	if (flip)
 	{
-		for(k in angleRegister)
+		for(var k=0; k<angleRegister.length; k++)
 		{
 			var curAngle = angleRegister[k];
 			
@@ -940,7 +940,7 @@ function initGraph() {
 	var xMin = 0;
 	var yMin = 0;
 	
-	for(k in pointRegister)
+	for(var k=0; k < pointRegister.length; k++)
 	{
 		var curPoint = pointRegister[k];
 		xMax = Math.max(xMax, curPoint.x);
@@ -971,7 +971,7 @@ function initGraph() {
 	//var margin = .25*(dimensionMax - dimensionMin);
 	present.strokewidth = "2";
 	//present.initPicture(dimensionMin-margin,dimensionMax+margin, dimensionMin-margin,dimensionMax+margin);
-	for(k in initialObjectsToDraw)
+	for(var k=0; k < initialObjectsToDraw.length; k++)
 	{
 		initialObjectsToDraw[k].draw();
 	}
@@ -982,7 +982,6 @@ function initGraph() {
 function graph_update() {
 	
 	initGraph();
-
 }
 
 

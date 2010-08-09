@@ -2,18 +2,6 @@ var correctAnswer = null;
 var correct_answer = null;
 var comparisonFunction = function eq(a,b) { return a==b; }
 
-// Provide Array.indexOf() implementation if one doesn't exist.
-//returns -1 if not found
-if (!Array.prototype.indexOf) {
-        Array.prototype.indexOf = function(val, fromIndex) {
-                if (typeof(fromIndex) != 'number') fromIndex = 0;
-                for (var index = fromIndex,len = this.length; index < len; 
-index++)
-                        if (this[index] === val) return index;
-                return -1;
-        }
-}
-
 //Returns n rounded to "precision" places behind the decimal point
 function roundNumber(n, precision)
 {

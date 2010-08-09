@@ -125,7 +125,7 @@ function generateNewProblem(randomProblemGenerator, range, salt)
 		// always returns true.  See:
 		// http://code.google.com/p/khanacademy/issues/detail?id=49
 		var tries = 0;
-		while(tries < 10 && avoidance_arr.indexOf(id = randomProblemGenerator()) != -1) {
+		while(tries < 10 && $.inArray(id = randomProblemGenerator(), avoidance_arr) != -1) {
 			tries++;			
 		}
 		return id;
