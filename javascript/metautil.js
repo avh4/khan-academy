@@ -87,9 +87,13 @@ function mathFormat(e)
 	if (e.length > 0 && e.charAt(0) == '`')
 		return e;
 	// Normalize the formatting if it is an integer
-	var intVal = parseInt(e);
-	if (!isNaN(intVal))
-		e = format_fraction(intVal,1);
+	var intRe = /^ *[+-]? *(0|[1-9][0-9]*) *$/;
+	if (intRe.test(e)) {
+		var intVal = parseInt(e);
+		if (!isNaN(intVal)) {
+			e = format_fraction(parseInt(e),1);			
+		}
+	}
 	// Make it ASCIIMath
 	return	'`'+e+'`';
 }
