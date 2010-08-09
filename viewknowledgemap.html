@@ -19,6 +19,14 @@
         overflow: hidden;
     }
     
+    .fullscreen {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
     .jit-autoadjust-label, .node {
         /*
          font-family: sans-serif;
@@ -48,7 +56,7 @@
 </style>
 <script>
     $(function(){
-    	// Boilerplate stuff to allow JIT to support IE and iP* devices.
+        // Boilerplate stuff to allow JIT to support IE and iP* devices.
         var labelType, useGradients, nativeTextSupport, animate;
         var ua = navigator.userAgent, iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i), typeOfCanvas = typeof HTMLCanvasElement, nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'), textSupport = nativeCanvasSupport &&
         (typeof document.createElement('canvas').getContext('2d').fillText == 'function');
@@ -59,10 +67,10 @@
         useGradients = nativeCanvasSupport;
         animate = !(iStuff || !nativeCanvasSupport);
         
-	// The SpaceTree (ST) does not support diplaying a Directed Acyclic Graph (DAG), so we fake it by making a tree using
-	// only the first prereq as a module's real parent, and storing the other parents as extra data in the node.
-	// Then we use the following special node rendering implementation to draw the edges to those extra parents
-	// when we draw a node.
+        // The SpaceTree (ST) does not support diplaying a Directed Acyclic Graph (DAG), so we fake it by making a tree using
+        // only the first prereq as a module's real parent, and storing the other parents as extra data in the node.
+        // Then we use the following special node rendering implementation to draw the edges to those extra parents
+        // when we draw a node.
         $jit.ST.Plot.NodeTypes.implement({
             'rectangleWithOtherParents': {
                 'render': function(node, canvas){
@@ -79,7 +87,7 @@
                 'contains': $jit.ST.Plot.NodeTypes.prototype.rectangle.contains
             }
         });
-	
+        
         //Create a new ST instance
         var st = new $jit.ST({
             //id of viz container element
@@ -150,9 +158,9 @@
                 while (extraScale > 0.5 && (label.offsetHeight > height + 1 || label.offsetWidth > width + 1));
             }
         });
-	
-	// Build the graph from the hidden exercise table
-	// First create a hash of nodes, one per exercise.
+        
+        // Build the graph from the hidden exercise table
+        // First create a hash of nodes, one per exercise.
         var nodes = {};
         $("tr[data-id]").each(function(){
             elem = $(this);
@@ -187,13 +195,13 @@
             nodes[elem.attr("data-id")] = node;
         });
         
-	// Connect the nodes
+        // Connect the nodes
         $("tr[data-id]").each(function(){
             var elem = $(this);
             elem.find("li[data-prereq]").each(function(i){
                 var prereq_elem = $(this);
-		// To convert the DAG to a tree we are only a normal child of our first prereq.
-		// All other prereqs, get listed as our "other parents".
+                // To convert the DAG to a tree we are only a normal child of our first prereq.
+                // All other prereqs, get listed as our "other parents".
                 if (i == 0) {
                     nodes[prereq_elem.attr("data-prereq")].children.push(nodes[elem.attr("data-id")]);
                 }
@@ -204,17 +212,28 @@
         });
         // load the graph
         st.loadJSON(nodes["addition_1"]);
-	// layout nodes
+        // layout nodes
         st.compute();
         // emulate a click on the root node.
         st.onClick(st.root);
-	
-	// Move the canvas so that the previously centered root node is flush with the left edge
-	var rootX = st.canvas.getSize().width/2;
-	var rootWidth = st.graph.getNode("addition_1").data.$width;
-        st.canvas.translate(-rootX+rootWidth/2, 0);
+        
+        // Move the canvas so that the previously centered root node is flush with the left edge
+        var rootX = st.canvas.getSize().width / 2;
+        var rootWidth = st.graph.getNode("addition_1").data.$width;
+        st.canvas.translate(-rootX + rootWidth / 2, 0);
         //end
-    
+        
+        // Make the map fullscreen when in fullscreen mode.
+        $(window).resize(function(){
+            var kmap = $("#kmap");
+            if (window.fullScreen) {
+                kmap.addClass("fullscreen");
+            }
+            else {
+                kmap.removeClass("fullscreen");
+            }
+            st.canvas.resize(kmap.width(), kmap.height());
+        });
     });
 </script>
 {% endblock pagescript %}
