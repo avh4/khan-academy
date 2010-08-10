@@ -1,10 +1,6 @@
-<html>
-  <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-  </head>
-  <body>
+{% extends "qbrary_page_template.html" %}
+{% block pagetitle %}<B>View Subject</B>{% endblock pagetitle %}
+    
+{% block pagecontent %}
 	{{ tree }}
-	
-  </body>
-</html>
-
+{% endblock pagecontent %}

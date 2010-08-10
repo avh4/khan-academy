@@ -1,81 +1,15 @@
-<html>
-  <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/stylesheet.css" />
-    <script>
-    function addQuestion(drop_down)
-    {
-    	var selected_subject = drop_down.selectedIndex;
-	var subject_key = drop_down[selected_subject].value;
-	window.location = "/pickquestiontopic?subject_key="+subject_key
-    }
+{% extends "qbrary_page_template.html" %}
+{% block pagetitle %}<B>Manage Question</B>{% endblock pagetitle %}
     
-    function practiceQuestion(drop_down)
-    {
-    	var selected_subject = drop_down.selectedIndex;
-	var subject_key = drop_down[selected_subject].value;
-	window.location = "/pickquiztopic?subject_key="+subject_key
-    }
-    
-    </script>
-  </head>
-
-  <body>
-  <table width=100%>
-  <tr>
-  	<td valign=top align=left rowspan=2><A href="/"><img src="/images/logo.gif" width=150 height=100></A></td>
-  	<td valign=top align=right><h4>{{greeting}}</H4>
-	
-	
-	</td>
-  </tr>
-  <tr>
-  	<td valign=center align=right> 
-	<b>
-	 <A href="/qbrary">Manage Questions</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-	 <SELECT id="add_question" onchange="practiceQuestion(this)">
-			<OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
-			{% for subject in subjects %}
-				<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
-			{% endfor %}
-	 </SELECT>
-	 &nbsp;&nbsp;|&nbsp;&nbsp;
-	 <SELECT id="add_question" onchange="addQuestion(this)">
-			<OPTION VALUE="0" SELECTED>Add a question in...</OPTION>
-				{% for subject in subjects %}
-					<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
-				{% endfor %}
-	</SELECT>
-	</b>
-	
-	</td>
-  </tr>
-  
-  </table>
-  <P>
- <table width=100% border=0 cellpadding=0 cellspacing=0>
-  <tr>
-    <td bgcolor=#003399><img width=1 height=1 alt=""></td>
-  </tr>
-</table><table width=100% border=0 cellpadding=2 cellspacing=0>
-   <tr>
-    <td bgcolor=#e5ecf9 align=left><B>Manage Questions</B></td>
-
-  </tr>
-</table><table width=100% border=0 cellpadding=0 cellspacing=0>
-  <tr>
-    <td bgcolor=#ffffff><img width=1 height=5 alt=""></td>
-  </tr>
-</table>
+{% block pagecontent %}
 <table>
 <tr>
-<td bgcolor=#ffffff><img width=5 height=5 alt=""></td>
-<td>To create a question, select a topic from the "Add a question in..." dropdown at the top right.  Newly created
+<td><P>To create a question, select a topic from the "Add a question in..." dropdown at the top right.  Newly created
 questions will be listed in your "Unpublished Questions" below.  Once you feel that the question is ready to
 be answered by other people, you can publish it by clicking "[publish]".  It will then be listed
 in your published questions.  Any innappropriate content will be flagged and removed and could result in
-you losing your Khan Academy account entirely.
-<P>
-To start practicing questions, select the subject from the "Practice questions in..." dropdown
+you losing your Khan Academy account entirely.</P>
+<P>To start practicing questions, select the subject from the "Practice questions in..." dropdown.</P>
 </td></tr></table>
     <P>
     <div class=hdg>&nbsp;<h3>Published Questions</h3></div>
@@ -117,6 +51,4 @@ To start practicing questions, select the subject from the "Practice questions i
 	</tr>
     {% endfor %}
     </table>
-  </body>
-</html>
-
+{% endblock pagecontent %}

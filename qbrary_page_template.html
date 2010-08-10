@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+    <head>
+        {% if video %}<title>Khan Academy: {{video.title}}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <meta name="description" content="{{video.description}}" />
+        <meta name="keywords" content="{{video.keywords}}" />
+        {% else %}<title>Khan Academy</title>
+        {% endif %}
+	<link rel="shortcut icon" href="/images/favicon.ico">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/default.css?{{App.version}}" />
+        <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
+        <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
+        <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css?{{App.version}}">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+        </script>
+        <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}">
+        </script>
+        <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
+        </script>
+	<script type="text/javascript">
+		// Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+		(function () {
+			var html5elements = ['header', 'footer', 'nav', 'article'];
+			for (var i=0; i< html5elements.length; i++) {
+				document.createElement(html5elements[i]);
+			}			
+		})();
+		
+        function addQuestion(drop_down)
+        {
+            var selected_subject = drop_down.selectedIndex;
+            var subject_key = drop_down[selected_subject].value;
+            window.location = "/pickquestiontopic?subject_key="+subject_key
+        }
+        
+        function practiceQuestion(drop_down)
+        {
+            var selected_subject = drop_down.selectedIndex;
+            var subject_key = drop_down[selected_subject].value;
+            window.location = "/pickquiztopic?subject_key="+subject_key
+        }
+		
+	</script>
+        {% block pagescript %}
+        {% endblock pagescript %}
+    </head>
+    <body>
+	{% comment %}
+	Make script-requiring elements visible.
+	{% endcomment %}
+	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
+	
+        <header>
+            <a id="page_logo" href="/"><img src="/images/khan.GIF"/></a><img src="/images/logo.gif" width="150" height="100"/>
+            <ul id="page_status">
+                {% if username %}
+                <li>
+                    {% username_and_notification username %}
+                </li>
+                {% endif %}
+                {% if points %}
+                <li>
+                    <label id="page_points">
+                        Energy Points: {{points}}
+                    </label>
+                </li>
+                {% endif %} 
+                {% if username %}
+                <li>
+                    <a href="{{logout_url}}">Sign Out</a>
+                </li>
+                {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
+                {% endif %}
+            </ul>
+            <nav id="page_main_nav">
+                <ul>
+                    <li>
+                        <A href="/qbrary">Manage Questions</a>
+                    </li>
+                    <li>
+                        <SELECT id="add_question" onchange="practiceQuestion(this)">
+                            <OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
+                            {% for subject in subjects %}
+                                <OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
+                            {% endfor %}
+                        </SELECT>
+                    </li>
+                    <li>
+                        <SELECT id="add_question" onchange="addQuestion(this)">
+                            <OPTION VALUE="0" SELECTED>Add a question in...</OPTION>
+                                {% for subject in subjects %}
+                                    <OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
+                                {% endfor %}
+                        </SELECT>
+                    </li>
+                </ul>
+            </nav>
+            <nav id="page_sub_nav">
+                {% block pagesubmenu %}{% block pagetitle %}{% endblock pagetitle %}
+                {% endblock pagesubmenu %} 
+            </nav>
+            {% block pagemessage %}
+            {% endblock pagemessage %}
+        </header>
+        {% block pagecontent %}
+        {% endblock pagecontent %}
+        {% include "page_footer.html" %}
+    </body>
+</html>

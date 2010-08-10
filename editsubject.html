@@ -1,8 +1,6 @@
-<html>
-  <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-  </head>
-  <body>
+{% extends "qbrary_page_template.html" %}
+{% block pagetitle %}<B>Edit Subject</B>{% endblock pagetitle %}
+{% block pagecontent %}
   <H3>Edit Subject: {{ subject.name }}</h3>
   	{% for b in breadcrumb %}
 		<A href="/editsubject?subject_key={{ b.key }}">{{ b.name }}</A>:
@@ -29,6 +27,4 @@
 	{% endfor %}
 	<P>
 	{{ tree }}
-  </body>
-</html>
-
+{% endblock pagecontent %}

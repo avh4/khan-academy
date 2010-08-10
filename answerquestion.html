@@ -1,27 +1,7 @@
-<html>
-  <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/stylesheet.css" >
-    <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
-    <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css" />
-    <script type="text/javascript" language="javascript" src="/javascript/behavior.js"></script>
-    <script type="text/javascript" language="javascript" src="/javascript/rating.js"></script>
-    <script type="text/javascript" language="javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-
-    <script>
-    function addQuestion(drop_down)
-    {
-    	var selected_subject = drop_down.selectedIndex;
-	var subject_key = drop_down[selected_subject].value;
-	window.location = "/pickquestiontopic?subject_key="+subject_key
-    }
-    
-    function practiceQuestion(drop_down)
-    {
-    	var selected_subject = drop_down.selectedIndex;
-	var subject_key = drop_down[selected_subject].value;
-	window.location = "/pickquiztopic?subject_key="+subject_key
-    }
-    
+{% extends "qbrary_page_template.html" %}
+{% block pagetitle %}<B>Quiz Question</B> (author: {{question.author}}){% endblock pagetitle %}
+{% block pagescript %}
+<script>
     var correct_choice = {{correct_index}};
     var current_choice = -1;
     var correct = new Image();
@@ -174,46 +154,11 @@
         show_preview_and_publish_button_if_needed();
     }    
     
-    </script>
-  </head>
-  <body onload="handle_page_load()">	
-  	<table width=100%>
-	<tr>
-  		<td valign=top align=left rowspan=2><A href="/"><img src="/images/logo.gif" width=150 height=100></A></td>
-		<td valign=top align=right><h4>{{greeting}}</H4></td>
-	</tr>
-	<tr>
-  		<td valign=center align=right> 
-		<b>
-		<A href="/qbrary">Manage Questions</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-		<SELECT id="add_question" onchange="practiceQuestion(this)">
-			<OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
-			{% for subject in subjects %}
-				<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
-			{% endfor %}
-		</SELECT>
-		&nbsp;&nbsp;|&nbsp;&nbsp;
-		<SELECT id="add_question" onchange="addQuestion(this)">
-			<OPTION VALUE="0" SELECTED>Add a question in...</OPTION>
-				{% for subject in subjects %}
-					<OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
-				{% endfor %}
-		</SELECT>
-		</b>
-	
-		</td>
-	</tr>
-  
-  </table>
-  <P>
- <table width=100% border=0 cellpadding=0 cellspacing=0>
-  <tr>
-    <td bgcolor=#003399><img width=1 height=1 alt=""></td>
-  </tr>
-</table><table width=100% border=0 cellpadding=2 cellspacing=0>
-	<tr>
-		<td bgcolor=#e5ecf9 align=left><B>Quiz Question</B> (author: {{question.author}})</td>
-    </tr>
+</script>
+{% endblock pagescript %}
+    
+{% block pagecontent %}
+<table width=100% border=0 cellpadding=2 cellspacing=0>
     <tr id="warning_untested_msg" style="visibility:hidden">
     	<td bgcolor=#ff8877 align=left><B>Warning:</B> This question has not been fully tested and may contain mistakes or incorrect information.</td>
     </tr>
@@ -321,6 +266,4 @@
 	<script language="Javascript1.2"><!--
 		document.answerform.reset();
 	</script>	
-   </body>
-</html>
-
+{% endblock pagecontent %}
