@@ -54,25 +54,8 @@
         <header>
             <a id="page_logo" href="/"><img src="/images/khan.GIF"/></a><img src="/images/logo.gif" width="150" height="100"/>
             <ul id="page_status">
-                {% if username %}
-                <li>
-                    {% username_and_notification username %}
-                </li>
-                {% endif %}
-                {% if points %}
-                <li>
-                    <label id="page_points">
-                        Energy Points: {{points}}
-                    </label>
-                </li>
-                {% endif %} 
-                {% if username %}
-                <li>
-                    <a href="{{logout_url}}">Sign Out</a>
-                </li>
-                {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
-                {% endif %}
-            </ul>
+	      {{ greeting }}
+	    </ul>
             <nav id="page_main_nav">
                 <ul>
                     <li>
