@@ -1170,6 +1170,7 @@ def real_main():
         ('/checkanswer', qbrary.CheckAnswer),
         ('/sessionaction', qbrary.SessionAction),
         ('/initqbrary', qbrary.InitQbrary),
+        ('/viewauthors', qbrary.ViewAuthors),
 
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),

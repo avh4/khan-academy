@@ -597,6 +597,30 @@ class ViewQuestion(webapp.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
 
 
+class ViewAuthors(webapp.RequestHandler):
+    
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            questions = Question.gql('')
+            author_questions_dict = dict()
+            for question in questions:
+                if question.author.nickname() in author_questions_dict:
+                    author_questions_dict[question.author.nickname()].append(question.question_text)
+                else:
+                    author_questions_dict[question.author.nickname()] = [question.question_text]
+
+            template_values = {
+                'author_questions_dict': author_questions_dict,
+                'greeting': "boo",
+                'current_url': self.request.uri
+                }
+            path = os.path.join(os.path.dirname(__file__), 'viewauthors.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+        
+
 class PickQuestionTopic(webapp.RequestHandler):
 
     def get(self):
@@ -921,6 +945,7 @@ application = webapp.WSGIApplication([
     ('/checkanswer', CheckAnswer),
     ('/sessionaction', SessionAction),
     ('/initqbrary', InitQbrary),
+    ('/viewauthors', ViewAuthors),
     ('/sign', Guestbook),
     ], debug=True)
 
