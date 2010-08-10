@@ -1,6 +1,8 @@
 {% extends "qbrary_page_template.html" %}
 {% block pagetitle %}<B>Quiz Question</B> (author: {{question.author}}){% endblock pagetitle %}
 {% block pagescript %}
+<script type="text/javascript" src="/javascript/rating.js?{{App.version}}">
+</script>
 <script>
     var correct_choice = {{correct_index}};
     var current_choice = -1;
