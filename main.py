@@ -678,6 +678,9 @@ class EditExercise(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
 
 class UpdateExercise(webapp.RequestHandler):
+    
+    def post(self):
+        self.get()
 
     def get(self):
         if not users.is_current_user_admin():
