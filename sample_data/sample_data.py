@@ -28,7 +28,7 @@
 
 """ Wrapper for uploading/downloading all the system-wide data """
 
-import os
+import os, platform, sys
 import subprocess
 from optparse import OptionParser
 
@@ -48,7 +48,10 @@ def main():
                       help="The username to use.")
     parser.add_option("-k", "--kinds", default=','.join(kinds),
                       help="The comma separated list of kinds.")
-    parser.add_option("-p", "--python", default=None, help="Path of python executable.")
+    if platform.system() == "Windows":
+            call_args.insert(0, sys.executable)
+
+    parser.add_option("-p", "--python", default=(sys.executable if platform.system() == "Windows" else None), help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
     
     (options, args) = parser.parse_args()
