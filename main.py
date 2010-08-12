@@ -947,8 +947,8 @@ class ViewVideoLibrary(webapp.RequestHandler):
         colOne.append('Banking and Money')
         colOne.append('Venture Capital and Capital Markets')
         colOne.append('Finance')
-        colOne.append('Valuation and Investing')
         colOne.append('Credit Crisis')
+        colOne.append('Valuation and Investing')
         colOne.append('Geithner Plan')
         
         colTwo = []
