@@ -24,7 +24,7 @@
 			var html5elements = ['header', 'footer', 'nav', 'article'];
 			for (var i=0; i< html5elements.length; i++) {
 				document.createElement(html5elements[i]);
-			}			
+			}
 		})();
 	</script>
         {% block pagescript %}
@@ -35,7 +35,7 @@
 	Make script-requiring elements visible.
 	{% endcomment %}
 	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
-	
+
         <header>
             <a id="page_logo" href="/"><img src="/images/khan.GIF"></a>
             <ul id="page_status">
@@ -50,7 +50,7 @@
                         Energy Points: {{points}}
                     </label>
                 </li>
-                {% endif %} 
+                {% endif %}
                 {% if username %}
                 <li>
                     <a href="{{logout_url}}">Sign Out</a>
@@ -69,11 +69,14 @@
                     <li>
                         <a href="/viewexercisesonmap">Knowledge Map</a>
                     </li>
+                    <li>
+                        <a href="/individualreport">Progress Report</a>
+                    </li>
                 </ul>
             </nav>
             <nav id="page_sub_nav">
                 {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
-                {% endblock pagesubmenu %} 
+                {% endblock pagesubmenu %}
             </nav>
             {% block pagemessage %}
             {% endblock pagemessage %}

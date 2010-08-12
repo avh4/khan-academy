@@ -1114,6 +1114,149 @@ class ViewGMAT(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
+class ViewCoaches(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            user_data = UserData.get_or_insert_for(user)
+            logout_url = users.create_logout_url(self.request.uri)
+
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,
+                'coaches': user_data.coaches
+                }
+
+            path = os.path.join(os.path.dirname(__file__), 'viewcoaches.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+          
+        
+class RegisterCoach(webapp.RequestHandler):
+    
+    def post(self):
+        user = users.get_current_user()
+        if user is None:
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+
+        user_data = UserData.get_or_insert_for(user)
+        coach_email = self.request.get('coach')            
+        user_data.coaches.append(coach_email)
+        user_data.put()
+        self.redirect("/coaches")
+            
+
+class UnregisterCoach(webapp.RequestHandler):
+
+    def post(self):
+        user = users.get_current_user()
+        if user is None:
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+        user_data = UserData.get_or_insert_for(user)
+        coach_email = self.request.get('coach')
+        if coach_email and coach_email in user_data.coaches:
+            user_data.coaches.remove(coach_email)
+            user_data.put()
+
+        self.redirect("/coaches") 
+
+class ViewIndividualReport(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        student = user
+        if user:
+            student_email = self.request.get('student_email')
+            if student_email:
+            	#logging.info("user is a coach trying to look at data for student")
+                student = users.User(email=student_email)
+                user_data = UserData.get_or_insert_for(student)
+                if user.email() not in user_data.coaches:
+                    raise Exception('Student '+ student_email + ' does not have you as their coach')
+            else:
+                #logging.info("user is a student looking at their own report")
+                user_data = UserData.get_or_insert_for(user)                                   
+            logout_url = users.create_logout_url(self.request.uri)   
+
+            ex_graph = ExerciseGraph(user_data, user=student)
+            for exercise in ex_graph.exercises:
+                exercise.display_name = exercise.name.replace('_', ' ').capitalize()            
+            proficient_exercises = []
+            #proficient_exercises = ex_graph.get_proficient_exercises()
+            self.compute_report(student, proficient_exercises)
+            suggested_exercises = ex_graph.get_suggested_exercises()
+            self.compute_report(student, suggested_exercises)
+            review_exercises = ex_graph.get_review_exercises(self.get_time())
+            self.compute_report(student, review_exercises)
+                   
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,
+                'proficient_exercises': proficient_exercises,
+                'suggested_exercises': suggested_exercises,
+                'review_exercises': review_exercises,                
+                }
+
+            path = os.path.join(os.path.dirname(__file__), 'viewindividualreport.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+
+    def compute_report(self, user, exercises):
+            for exercise in exercises:
+                #logging.info(exercise.name)             
+                total_correct = 0
+                correct_of_last_ten = 0
+                problems = ProblemLog.all().filter('user =', user).filter('exercise =', exercise.name).order("-time_done")
+                exercise.total_done = problems.count()
+                problem_num = 0
+                for problem in problems:
+                    #logging.info("problem.time_done: " + str(problem.time_done) + " " + str(problem.correct))
+                    if problem.correct:
+                        total_correct += 1
+                        if problem_num < 10:
+                            correct_of_last_ten += 1
+                    problem_num += 1
+                #logging.info("total_done: " + str(exercise.total_done))
+                #logging.info("total_correct: " + str(total_correct))
+                #logging.info("correct_of_last_ten: " + str(correct_of_last_ten))
+                if exercise.total_done > 0:
+	                exercise.percent_correct = "%.0f%%" % (100.0*total_correct/exercise.total_done,)
+                else:
+	                exercise.percent_correct = "0%"	        
+                exercise.percent_of_last_ten = "%.0f%%" % (100.0*correct_of_last_ten/10,)
+                
+    def get_time(self):
+        time_warp = int(self.request.get('time_warp') or '0')
+        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+        
+
+class ViewStudents(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            user_data = UserData.get_or_insert_for(user)
+            logout_url = users.create_logout_url(self.request.uri)
+
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,
+                'students': user_data.get_students()
+                }
+
+            path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+
 
 def real_main():
     webapp.template.register_template_library('templatefilters')
@@ -1149,6 +1292,13 @@ def real_main():
         ('/reportissue', ReportIssue),
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),
+
+        ('/coaches', ViewCoaches),
+        ('/registercoach', RegisterCoach),  
+        ('/unregistercoach', UnregisterCoach),          
+        ('/individualreport', ViewIndividualReport), 
+        ('/students', ViewStudents), 
+        
         # These are dangerous, should be able to clean things manually from the remote python shell
 
         ('/deletevideoplaylists', DeleteVideoPlaylists), 

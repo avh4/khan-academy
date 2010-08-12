@@ -1,0 +1,70 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Individual Report{% endblock pagetitle %}
+{% block pagecontent %}
+
+<p>&nbsp;</p>
+
+{% if proficient_exercises %}
+<div class=hdg>&nbsp;<h3>Proficient Modules</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL" width="100%">Exercise</td><td class="colHeadL" nowrap>Current Streak</td><td class="colHeadL" nowrap>Longest Streak</td><td class="colHeadL" nowrap>Total Done</td><td class="colHeadL" nowrap>% Correct</td><td class="colHeadL" nowrap>% of last 10</td></tr>
+{% for exercise in proficient_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+		<td>{{exercise.display_name}}</td>
+		<td>{{exercise.streak}}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td>{{exercise.total_done}}</td>
+		<td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td>
+		</tr>
+{% endfor %}
+</table><br>
+{% endif %}
+
+{% if review_exercises %}
+<div class=hdg>&nbsp;<h3>Review Modules</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL" width="100%">Exercise</td><td class="colHeadL" nowrap>Current Streak</td><td class="colHeadL" nowrap>Longest Streak</td><td class="colHeadL" nowrap>Total Done</td><td class="colHeadL" nowrap>% Correct</td><td class="colHeadL" nowrap>% of last 10</td></tr>
+{% for exercise in review_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+		<td>{{exercise.display_name}}</td>
+		<td>{{exercise.streak}}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td>{{exercise.total_done}}</td>
+		<td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td>
+		</tr>
+{% endfor %}
+</table><br>
+{% endif %}
+
+{% if suggested_exercises %}
+<div class=hdg>&nbsp;<h3>Suggested Modules</h3></div>
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL" width="100%">Exercise</td><td class="colHeadL" nowrap>Current Streak</td><td class="colHeadL" nowrap>Longest Streak</td><td class="colHeadL" nowrap>Total Done</td><td class="colHeadL" nowrap>% Correct</td><td class="colHeadL" nowrap>% of last 10</td></tr>
+{% for exercise in suggested_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+		<td>{{exercise.display_name}}</td>
+		<td>{{exercise.streak}}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td>{{exercise.total_done}}</td>
+		<td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td>
+		</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% endblock pagecontent %}

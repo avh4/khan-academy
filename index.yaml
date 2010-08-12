@@ -59,6 +59,13 @@ indexes:
   - name: playlist
   - name: video_position
 
+- kind: ProblemLog
+  properties:
+  - name: exercise
+  - name: user
+  - name: time_done
+    direction: desc
+
 - kind: Subject
   properties:
   - name: parent_subject

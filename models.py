@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import datetime
+import datetime, logging
 from google.appengine.api import users
 from google.appengine.api import memcache
 
 from google.appengine.ext import db
 import cajole
+
 
 class UserExercise(db.Model):
 
@@ -134,7 +135,8 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
-
+    coaches = db.StringListProperty()
+    
     @staticmethod
     def get_for_current_user():
         user = users.get_current_user()
@@ -167,6 +169,7 @@ class UserData(db.Model):
                 assigned_exercises=[],
                 need_to_reassess=True,
                 points=0,
+                coaches=[]
                 )
         return user_data
 
@@ -219,6 +222,14 @@ class UserData(db.Model):
     def is_suggested(self, exid):
         self.reassess_if_necessary()
         return (exid in self.suggested_exercises)
+    
+    def get_students(self):
+        coach_email = self.user.email()
+        query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
+        students = []
+        for student in query:
+            students.append(student.user.email())
+        return students
     
 class Video(db.Model):
 
@@ -283,14 +294,13 @@ class ExercisePlaylist(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data):
+    def __init__(self, user_data, user=users.get_current_user()):
 #        addition_1 = Exercise(name="addition_1", covers=[], prerequisites=[], v_position = 1, h_position = 1)
 #        addition_1.suggested = addition_1.proficient = False
 #        self.exercises = [addition_1]
 #        self.exercise_by_name = {"addition_1": addition_1}
 #        return
-
-        user_exercises = UserExercise.get_for_user_use_cache(users.get_current_user())
+        user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
         self.exercise_by_name = {}        

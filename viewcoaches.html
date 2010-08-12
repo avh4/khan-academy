@@ -1,0 +1,35 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Coaches{% endblock pagetitle %}
+{% block pagecontent %}
+
+<p>
+Enter the email address of your coach to allow them to view all of your performance data on the Khan Academy,
+and to allow them to assign modules to you.
+</p>
+<p>
+<form action="/registercoach" method="post">
+<input type="text" name="coach">
+<input type="submit" value="Register Coach">
+</form>
+</p>
+
+{% if coaches %}
+<form action="/unregistercoach" method="post">
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL">Coach</td><td width=100% class="colHeadL">Unregister</td></tr>
+{% for coach in coaches %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+
+		<td>{{coach}}</td>
+		<td><input type="checkbox" name="coach" value="{{coach}}"></td>
+		</tr>
+{% endfor %}
+</table>
+<p><input type="submit" value="Unregister Coach"></p>
+</form>
+{% endif %}
+{% endblock pagecontent %}

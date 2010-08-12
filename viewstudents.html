@@ -1,0 +1,18 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Students{% endblock pagetitle %}
+{% block pagecontent %}
+
+<table border=0 cellspacing=0 cellpadding=3>
+<tr><td class="colHeadL">Student</td></tr>
+{% for student in students %}
+		{% if forloop.counter|divisibleby:2 %}
+		<TR class="highlightWhite" >
+		{% else %}
+		<TR class="highlightGreyRelated">
+		{% endif %}
+
+		<td><a href="/individualreport?student_email={{student}}">{{student}}</a></td>
+		</tr>
+{% endfor %}
+</table>
+{% endblock pagecontent %}
