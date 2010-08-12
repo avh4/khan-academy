@@ -1093,24 +1093,18 @@ class ViewGMAT(webapp.RequestHandler):
     	user = users.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
-        playlist_title = "SAT Preparation"
-        query = Playlist.all()
-        query.filter('title =', playlist_title)
-        playlist = query.get()
-        query = VideoPlaylist.all()
-        query.filter('playlist =', playlist)
-        query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
-        query.order('video_position')
-        playlist_videos = query.fetch(500)
+        problem_solving = VideoPlaylist.get_query_for_playlist_title("GMAT: Problem Solving")
+        data_sufficiency = VideoPlaylist.get_query_for_playlist_title("GMAT Data Sufficiency")
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'videos': playlist_videos,
+                                                  'data_sufficiency': data_sufficiency,
+                                                  'problem_solving': problem_solving,
                                                   'login_url': users.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
+        path = os.path.join(os.path.dirname(__file__), 'gmat.html')
         self.response.out.write(template.render(path, template_values))
 
 

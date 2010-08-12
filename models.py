@@ -273,7 +273,16 @@ class VideoPlaylist(db.Model):
     live_association = db.BooleanProperty(default = False)  #So we can remove associations without deleting the entry.  We need this so that bulkuploading of VideoPlaylist info has the proper effect.
 
 
-
+    @staticmethod
+    def get_query_for_playlist_title(playlist_title):
+        query = Playlist.all()
+        query.filter('title =', playlist_title)
+        playlist = query.get()
+        query = VideoPlaylist.all()
+        query.filter('playlist =', playlist)
+        query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+        query.order('video_position')
+        return query
 
 # Matching between videos and exercises
 
