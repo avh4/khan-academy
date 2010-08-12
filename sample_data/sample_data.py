@@ -48,8 +48,6 @@ def main():
                       help="The username to use.")
     parser.add_option("-k", "--kinds", default=','.join(kinds),
                       help="The comma separated list of kinds.")
-    if platform.system() == "Windows":
-            call_args.insert(0, sys.executable)
 
     parser.add_option("-p", "--python", default=(sys.executable if platform.system() == "Windows" else None), help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
