@@ -1,6 +1,32 @@
 <HEAD>
+<!-- For ChartBeat analytics START -->
+<script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+<!-- For ChartBeat analytics END -->
 <TITLE>Khan Academy</TITLE>
 <link rel="stylesheet" href="/stylesheets/stylesheet.css?{{App.version}}">
+
+<!-- New, faster Google Analytics async tag START -->
+<script type="text/javascript">
+var _sf_async_config={uid:10894,domain:"khanacademy.org"};
+(function(){
+  function loadChartbeat() {
+    window._sf_endpt=(new Date()).getTime();
+    var e = document.createElement('script');
+    e.setAttribute('language', 'javascript');
+    e.setAttribute('type', 'text/javascript');
+    e.setAttribute('src',
+       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
+       "static.chartbeat.com/js/chartbeat.js");
+    document.body.appendChild(e);
+  }
+  var oldonload = window.onload;
+  window.onload = (typeof window.onload != 'function') ?
+     loadChartbeat : function() { oldonload(); loadChartbeat(); };
+})();
+
+</script>
+<!-- New, faster Google Analytics async tag END -->
+
 </HEAD>
 
 <body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
@@ -17,7 +43,7 @@
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post">
 			<input type="hidden" name="cmd" value="_s-xclick">
 			<input type="hidden" name="hosted_button_id" value="2439291">
-			<input type="image" src="/images/paypal-donate.png" border="0" name="submit" alt="">
+			<input onclick="_gaq.push(['_trackEvent', 'Click', 'Paypal-Button-Homepage']);" type="image" src="/images/paypal-donate.png" border="0" name="submit" alt="">
 		</form>
 		
 		<a rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/us/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-sa/3.0/us/88x31.png" /></a>
@@ -175,13 +201,26 @@ The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a w
 </td>
 </tr>
 </table>
+
+<!-- For ChartBeat analytics START -->
 <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+var _sf_async_config={uid:10894,domain:"khanacademy.org"};
+(function(){
+  function loadChartbeat() {
+    window._sf_endpt=(new Date()).getTime();
+    var e = document.createElement('script');
+    e.setAttribute('language', 'javascript');
+    e.setAttribute('type', 'text/javascript');
+    e.setAttribute('src',
+       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
+       "static.chartbeat.com/js/chartbeat.js");
+    document.body.appendChild(e);
+  }
+  var oldonload = window.onload;
+  window.onload = (typeof window.onload != 'function') ?
+     loadChartbeat : function() { oldonload(); loadChartbeat(); };
+})();
 </script>
-<script type="text/javascript">
-try {
-var pageTracker = _gat._getTracker("UA-6742635-1");
-pageTracker._trackPageview();
-} catch(err) {}</script>
+<!-- For ChartBeat analytics END -->
+
 </body>
