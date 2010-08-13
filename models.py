@@ -303,12 +303,9 @@ class ExercisePlaylist(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data, user=users.get_current_user()):
-#        addition_1 = Exercise(name="addition_1", covers=[], prerequisites=[], v_position = 1, h_position = 1)
-#        addition_1.suggested = addition_1.proficient = False
-#        self.exercises = [addition_1]
-#        self.exercise_by_name = {"addition_1": addition_1}
-#        return
+    def __init__(self, user_data, user=None):
+        if user is None:
+            user = users.get_current_user()
         user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
