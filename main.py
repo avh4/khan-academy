@@ -1194,7 +1194,8 @@ class ViewIndividualReport(webapp.RequestHandler):
                 'logout_url': logout_url,
                 'proficient_exercises': proficient_exercises,
                 'suggested_exercises': suggested_exercises,
-                'review_exercises': review_exercises,                
+                'review_exercises': review_exercises,  
+                'student': student.nickname(),                
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewindividualreport.html')
@@ -1252,6 +1253,105 @@ class ViewStudents(webapp.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
 
 
+class ReportCell:
+    def __init__(self, data="", color="white", align="left"):
+        self.data = data
+        self.color = color
+        self.align = align
+        
+        
+class ViewClassReport(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        if user:
+            logout_url = users.create_logout_url(self.request.uri)   
+            user_data = UserData.get_or_insert_for(user)  
+            students = user_data.get_students()
+            exercises = self.get_class_exercises(students)
+            table_headers = []            
+            table_headers.append("Name")
+            working_total_row = []
+            help_total_row = []
+            proficient_total_row = []
+            for exercise in exercises:
+                table_headers.append(exercise.replace('_', ' ').capitalize()) 
+                working_total_row.append(0)
+                help_total_row.append(0)
+                proficient_total_row.append(0)                
+            table_data = []
+            for student_email in students:   
+                row = []
+                student = users.User(email=student_email)
+                student_data = UserData.get_or_insert_for(student)
+                row.append(ReportCell(data=student.nickname()))
+                i = 0
+                for exercise in exercises:
+                    if exercise in student_data.all_proficient_exercises:
+                        row.append(ReportCell(color="lightgreen"))
+                        proficient_total_row[i] += 1
+                    elif exercise in student_data.suggested_exercises:
+                        if self.needs_help(student, exercise):
+                            row.append(ReportCell(color="red"))
+                            help_total_row[i] += 1
+                        else:
+                            row.append(ReportCell(color="lightblue"))
+                            working_total_row[i] += 1
+                    else:
+                        row.append(ReportCell())
+                    i += 1
+                table_data.append(row) 
+            row = [ReportCell("Total students working")]
+            for count in working_total_row:
+                row.append(ReportCell(data=count, align="center"))
+            table_data.append(row) 
+
+            row = [ReportCell("Total students needing help")]
+            for count in help_total_row:
+                row.append(ReportCell(data=count, align="center"))
+            table_data.append(row) 
+            
+            row = [ReportCell("Total proficient students")]
+            for count in proficient_total_row:
+                row.append(ReportCell(data=count, align="center"))
+            table_data.append(row) 
+            
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,
+                'table_headers': table_headers,
+                'table_data': table_data,
+                }
+            path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+        
+    def get_class_exercises(self, students):
+            exercise_dict = {}
+            for student_email in students:           
+                student = users.User(email=student_email)
+                student_data = UserData.get_or_insert_for(student)
+                user_exercises = UserExercise.get_for_user_use_cache(student)
+                for user_exercise in user_exercises:
+                    if user_exercise.exercise not in exercise_dict:
+                        exercise_dict[user_exercise.exercise] = 1
+            results = []
+            exercises = Exercise.get_all_use_cache()            
+            for exercise in exercises:
+                if exercise.name in exercise_dict:
+                    results.append(exercise.name)
+            return results  
+            
+    def needs_help(self, student, exercise):
+        user_exercises = UserExercise.get_for_user_use_cache(student)
+        for user_exercise in user_exercises:        
+            if user_exercise.exercise == exercise and user_exercise.total_done > 30:
+                return True
+        return False
+        
+        
 def real_main():
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -1292,6 +1392,7 @@ def real_main():
         ('/unregistercoach', UnregisterCoach),          
         ('/individualreport', ViewIndividualReport), 
         ('/students', ViewStudents), 
+        ('/classreport', ViewClassReport),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 

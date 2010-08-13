@@ -1,0 +1,21 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Class Report{% endblock pagetitle %}
+{% block pagecontent %}
+
+<p>&nbsp;</p>
+
+<table border=0 cellspacing=3 cellpadding=0>
+<tr>
+{% for header in table_headers %}
+        <td class="colHeadL">{{header}}</td>
+{% endfor %}
+</tr>
+{% for row in table_data %}
+		<tr>
+		{% for cell in row %}
+		    <td bgcolor="{{cell.color}}" align="{{cell.align}}">{{cell.data}}</td>
+		{% endfor %}
+		</tr>
+{% endfor %}
+</table><br>
+{% endblock pagecontent %}
