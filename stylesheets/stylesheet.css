@@ -9,10 +9,28 @@ h3{font-size:12px; line-height:18px;}
 td{font-size:12px;}
 td.large{font-size:18px;}
 
+/* Links in the header and footer don't change color when visited. */
+a:link, header a:visited, footer a:visited {
+    color: #777;
+}
+
+a:visited {
+    color: #766;
+}
+
+a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
+    color: #999;
+}
+
+
+
+
+
+
 #playlist a:visited{ text-decoration: none; color : #581C90; }
 
 .mainmenu		{ font-size : 12px; color : #000000 }
-a.mainmenu		{ text-decoration: none; color : #006699;  }
+a.mainmenu		{ text-decoration: underline; color : #ccc;  }
 a.mainmenu:hover{ text-decoration: underline; color : #DD6900; }
 
 
@@ -20,9 +38,9 @@ a.mainmenu:hover{ text-decoration: underline; color : #DD6900; }
 img {border-style: none;}
 
 
-div.hdg    {background-color:#E6F8DD; border-top:1px solid #80C65A;}
-tr.hdgr td {background-color:#E6F8DD; border-top:1px solid #80C65A;}
-tr.hdg     {background-color:#E6F8DD;}
+div.hdg    {background-color:#ffffff; border-bottom:2px solid #80C65A;}
+tr.hdgr td {background-color:#ffffff; border-bottom:2px solid #80C65A;}
+tr.hdg     {background-color:#ffffff;}
 
 td.hdg     {border-top:1px solid #80C65A;}
 

@@ -1029,8 +1029,15 @@ class Export(webapp.RequestHandler):
 class ViewHomePage(webapp.RequestHandler):
 
     def get(self):
-        template_values = {
-            }
+        user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
         self.response.out.write(template.render(path, template_values))
         
@@ -1038,10 +1045,115 @@ class ViewHomePage(webapp.RequestHandler):
 class ViewNewHomePage(webapp.RequestHandler):
 
     def get(self):
+    	all_topics_list = []
+    	 
+    	 
+    	basicMath = []
+    	basicMath.append('Arithmetic')
+    	basicMath.append('Developmental Math')
+    	basicMath.append('Pre-algebra')
+    	 
+    	algebra = []
+    	colTwo.append('Algebra I Worked Examples')
+        colTwo.append('ck12.org Algebra 1 Examples')
+        colTwo.append('Algebra')
+        colTwo.append('California Standards Test: Algebra I')
+        colTwo.append('California Standards Test: Algebra II')
+        colTwo.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+        
+        geometryTrig = []
+    	colOne.append('Geometry')
+        colOne.append('California Standards Test: Geometry')
+        colThree.append('Trigonometry')
+        
+        calculusBeyond = []
+        colThree.append('Precalculus')
+        colThree.append('Calculus')
+        colThree.append('Differential Equations')
+        colFour.append('Linear Algebra')
+        
+        
+        
+        science = []
+        colOne.append('Chemistry')
+        
+        
+        
+        
+        
+        colOne = []
+        
+
+        
+        colOne.append('Brain Teasers')
+        colOne.append('Current Economics')
+        colOne.append('Banking and Money')
+        colOne.append('Venture Capital and Capital Markets')
+        colOne.append('Finance')
+        colOne.append('Credit Crisis')
+        colOne.append('Valuation and Investing')
+        colOne.append('Geithner Plan')
+        
+
+       
+       
+
+        colThree = []
+        colThree.append('Biology')
+        
+        colThree.append('Statistics')
+        colThree.append('Probability')
+        
+
+        colFour = []
+        colFour.append('Khan Academy-Related Talks and Interviews')
+        colFour.append('History')
+        colFour.append('Organic Chemistry')
+        
+        colFour.append('Physics')
+        colFour.append('Paulson Bailout')
+        
+        all_topics_list.extend(colOne)
+        all_topics_list.extend(colTwo)
+        all_topics_list.extend(colThree)
+        all_topics_list.extend(colFour)
+        all_topics_list.sort()
+        	
+        
+
+        cols = [colOne, colTwo, colThree, colFour]
+
+        columns = []
+        for column in cols:
+            new_column = []
+            for playlist_title in column:
+                query = Playlist.all()
+                query.filter('title =', playlist_title)
+                playlist = query.get()
+                query = VideoPlaylist.all()
+                query.filter('playlist =', playlist)
+                query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+                query.order('video_position')
+                playlist_videos = query.fetch(500)
+                #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
+                new_column.append(playlist_videos)
+            columns.append(new_column)
+
+        # Separating out the columns because the formatting is a little different on each column
+
         template_values = {
+            'App' : App,
+            'c1': columns[0],
+            'c2': columns[1],
+            'c3': columns[2],
+            'c4': columns[3],
+            'playlist_names': cols,
+            'all_topics': all_topics_list,
             }
-        path = os.path.join(os.path.dirname(__file__), 'videocatalog.html')
+        path = os.path.join(os.path.dirname(__file__), 'newhomepage.html')
         self.response.out.write(template.render(path, template_values))
+        
+        
         
         
 class ViewFAQ(webapp.RequestHandler):

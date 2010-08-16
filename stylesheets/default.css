@@ -8,11 +8,11 @@ body {
 
 /* Links in the header and footer don't change color when visited. */
 a:link, header a:visited, footer a:visited {
-    color: #069;
+    color: #777;
 }
 
 a:visited {
-    color: #609;
+    color: #766;
 }
 
 a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
@@ -70,6 +70,8 @@ footer > * {
     float: left;
 }
 
+
+
 #page_status {
     float: right;
 }
@@ -82,11 +84,23 @@ nav {
 }
 
 #page_main_nav ul {
+
+    position: absolute;
+    top:35px;
+    right:0;
+}
+
+#social_media_nav {
     float: right;
 }
 
-#page_sub_nav, footer {
-    border-top: solid 1px #3366cc;
+#page_sub_nav {
+    /*border-top: solid 1px #3366cc;*/
+    border-bottom:2px solid #80C65A;
+}
+
+footer {
+    border-top:2px solid #80C65A;
 }
 
 #page_sub_nav {
