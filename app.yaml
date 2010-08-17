@@ -34,8 +34,9 @@ handlers:
 - url: /helperpages
   static_dir: helperpages
   
-- url: /downloads
-  static_dir: downloads
+- url: /downloads/(.*)
+  static_files: downloads/\1
+  upload: downloads/(.*)
   
   # The url below needs to be updated whenever we change/upgrade MathJax.
   # Unfortunately, we can't use a regex due to a GAE bug:
