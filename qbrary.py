@@ -212,12 +212,51 @@ class DeleteSubject(webapp.RequestHandler):
         subject_key = self.request.get('subject_key')
         subject = db.get(subject_key)
         redirect_url = self.request.get('redirect')
+        logging.error("current user = " + str(user))
+
         if user:
             if user == subject.author:
-                subject.delete()
+                subject = db.get(subject_key)
+                self.delete_subject(subject)
+
             self.redirect(redirect_url)
         else:
             self.redirect(users.create_login_url(self.request.uri))
+
+    def delete_subject(self, subject):
+        logging.error("delete_subject subject_key = " + str(subject.key()))
+
+        child_subjects = Subject.gql('WHERE parent_subject=:1', subject)
+        for child_subject in child_subjects:
+            self.delete_subject(child_subject)
+
+        self.delete_questions_for_subject(subject)
+        subject.delete()        
+
+    def delete_questions_for_subject(self, subject):
+        questions = Question.gql('WHERE parent_subject=:1', subject)
+        for cur_question in questions:
+            self.delete_question_dependencies_for_question(cur_question)
+            cur_question.delete()
+            
+    def delete_question_dependecies_for_question(self, question):
+        qa = QuestionAnswerer.gql('WHERE question=:1', question)
+        for cur_qa in qa:
+            cur_qa.delete()
+
+        qa_sessions = QuestionAnswerSession.gql('WHERE question=:1', question)
+        for cur_qa_session in qa_sessions:
+            self.delete_session_dependencies_for_session(cur_qa_session)
+            cur_qa_session.delete()
+
+    def delete_session_dependencies_for_session(self, session):
+        qas_attempts = QuestionAnswerSessionAttempt.gql('WHERE session=:1', session)
+        for cur_qas_att in qas_attempts:
+            cur_qas_att.delete()
+
+        qas_actions = QuestionAnswerSessionAction.gql('WHERE session=:1', session)
+        for cur_qas_action in qas_actions:
+            cur_qas_action.delete()
 
 
 class DeleteQuestion(webapp.RequestHandler):

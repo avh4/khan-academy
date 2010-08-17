@@ -1,5 +1,17 @@
 {% extends "qbrary_page_template.html" %}
 {% block pagetitle %}<B>Edit Subject</B>{% endblock pagetitle %}
+{% block pagescript %}
+<script>
+  function delete_subject_confirm(subject_name, subject_key)
+  {
+     var res = window.confirm("Do you really want to delete the subject: " + subject_name + "?  This is an irreversible delete of all sub-subjects, questions and question/answer metadata.");  
+     if (res) {
+        window.location = "/deletesubject?subject_key=" + subject_key + "&redirect={{redirect_url}}";
+     }
+  }
+</script>
+{% endblock pagescript %}
+
 {% block pagecontent %}
   <H3>Edit Subject: {{ subject.name }}</h3>
   	{% for b in breadcrumb %}
@@ -19,10 +31,11 @@
 		<input type="text" name="child_name">
 		<input type="submit" value="Add Sub-Topic">
 	</form>
+	<p>
 	{% for entry in subtopics %}
 			{{ entry.index }} {{ entry.name }}
                         <a href="/editsubject?subject_key={{ entry.key }}" >edit</a> | 
-                        <a href="/deletesubject?subject_key={{ entry.key }}&redirect={{redirect_url}}" >delete</a>
+                        <a href="#" onclick="delete_subject_confirm('{{entry.name}}', '{{entry.key}}'); return false;" >delete</a>
 			<br />
 	{% endfor %}
 	<P>
