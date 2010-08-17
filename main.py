@@ -697,8 +697,9 @@ class UpdateExercise(webapp.RequestHandler):
                 exercise.prerequisites = []
                 exercise.covers = []
                 exercise.author = user
+                path = os.path.join(os.path.dirname(__file__), exercise_name + '.html')
                 raw_html = self.request.get('raw_html')
-                if raw_html:
+                if not os.path.exists(path) and raw_html:
                     exercise.raw_html = db.Text(raw_html)
                     exercise.last_modified = datetime.datetime.now()
                     exercise.ensure_sanitized()
