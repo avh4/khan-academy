@@ -26,14 +26,19 @@
     }
     function check_field(fieldID)
     {
-        var elem = document.getElementById(fieldID);
-        if (elem.value.trim() == "")
+        var data = eval("CKEDITOR.instances."+fieldID+".getData()");
+        if (data.trim() == "")
         {
             document.getElementById("incomplete_warning_div").style.visibility = "visible";
+            eval("CKEDITOR.instances."+fieldID+".focus()");
             document.getElementById("cke_" + fieldID).style.backgroundColor = "red";
             return false;
         }
-        return true;
+        else
+        {
+            document.getElementById("cke_" + fieldID).style.backgroundColor = "";
+            return true;
+        }
     }
 </script>
 
