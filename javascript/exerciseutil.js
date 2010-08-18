@@ -91,23 +91,23 @@ function generateNewProblem(randomProblemGenerator, range, salt)
 		salt = '';
 	var i = KhanAcademy.problem_number;
 	var R = range;
-	var group = i/R;
+	var group = Math.floor(i/R);
 	var problems_to_avoid = [];
 	if (group % 2 == 1) {
 		// generate problems to avoid
-		Math.seedrandom(s(group-1));
+		KhanAcademy.seedRandom(s(group-1));
 		var prev_group_problems = [];
 		for (var j=0; j<R; j++) {
 			prev_group_problems.push(U(prev_group_problems));			
 		}
 		problems_to_avoid = prev_group_problems.slice(i%R);
-		Math.seedrandom(s(group+1));
+		KhanAcademy.seedRandom(s(group+1));
 		for (var j=0; j<(i%R); j++) {
 			problems_to_avoid.push(U(problems_to_avoid));			
 		}
 	}
 	
-	Math.seedrandom(s(group));
+	KhanAcademy.seedRandom(s(group));
 	var p = group*R;
 	while (p <= i) {
 		problems_to_avoid.push(U(problems_to_avoid));

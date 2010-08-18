@@ -275,7 +275,7 @@ KhanAcademy = {
     random: Math.random, // Initialized so that it can work before seedRandom is called.
     
     seedRandom: function(seed) {
-        var mathRandom = Math.random;
+        var mathRandom = Math.prototype.random;
         Math.seedrandom(seed);
         KhanAcademy.random = Math.random;
         Math.random = mathRandom;
