@@ -5,21 +5,21 @@
 var selColor = "#AE9CC9";
 var noSelColor = "#333333";
 
-var correctX = Math.round(Math.random()*18)-9;
-var correctY = Math.round(Math.random()*18)-9;
+var correctX = Math.round(KhanAcademy.random()*18)-9;
+var correctY = Math.round(KhanAcademy.random()*18)-9;
 var wrongAnswers = new Array();
 
 setCorrectAnswer('('+correctX+','+correctY+')');
 
 for(var i=0; i<6; i++)
 {
-	var x = Math.round(Math.random()*18)-9;
-	var y = Math.round(Math.random()*18)-9;
+	var x = Math.round(KhanAcademy.random()*18)-9;
+	var y = Math.round(KhanAcademy.random()*18)-9;
 	
 	while (x==correctX && y==correctY)
 	{
-		x = Math.round(Math.random()*18)-9;
-		y = Math.round(Math.random()*18)-9;
+		x = Math.round(KhanAcademy.random()*18)-9;
+		y = Math.round(KhanAcademy.random()*18)-9;
 	}
 		
 	wrongAnswers.push([x,y]);

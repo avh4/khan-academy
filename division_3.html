@@ -4,12 +4,12 @@
 var counter = 0;
 var selectedArray = new Array();
 var answer = 0; 
-var divisor = Math.round(Math.random()*8)+1;
-var quotient = Math.round(Math.random()*990)+9;
+var divisor = Math.round(KhanAcademy.random()*8)+1;
+var quotient = Math.round(KhanAcademy.random()*990)+9;
 var dividend = divisor* quotient;
 var remainder = 0;
 var is_remainder_problem = false;
-if (divisor>1 && Math.random()<.3)  //<30% (27%) chance that this will be a remainder problem
+if (divisor>1 && KhanAcademy.random()<.3)  //<30% (27%) chance that this will be a remainder problem
 {
 	is_remainder_problem = true;
 	remainder = getRandomIntRange(1,divisor-1);

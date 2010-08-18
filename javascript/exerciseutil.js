@@ -209,9 +209,9 @@ function inArray(item, a)
 //get_random() returns a non-zero random number between -10 and 10
 function get_random()
 {
-	var ranNum=Math.round(Math.random()*20)-10; 
+	var ranNum=Math.round(KhanAcademy.random()*20)-10; 
 	while (ranNum==0) {
-		ranNum=Math.round(Math.random()*20)-10;
+		ranNum=Math.round(KhanAcademy.random()*20)-10;
 	}
 	return ranNum;
 }
@@ -228,7 +228,7 @@ function randomIndices(length)
 	{
 		var epsilon = .99;
 		var maxVal = startArray.length-1;
-		var index = Math.round(Math.random()*(maxVal+epsilon) - epsilon/2);
+		var index = Math.round(KhanAcademy.random()*(maxVal+epsilon) - epsilon/2);
 		
 		endArray.push(startArray.splice(index,1)[0]);
 	}
@@ -485,14 +485,14 @@ function getNextColor()
 function getRandomInt(max)
 {
 	var epsilon = .9;
-	return Math.round(Math.random()*(max+epsilon) - epsilon/2);
+	return Math.round(KhanAcademy.random()*(max+epsilon) - epsilon/2);
 }
 
 function getRandomIntRange(min, max)
 {
 	var epsilon = .9;
 	var x = Math.abs(max-min);
-	return (min+Math.round(Math.random()*(x+epsilon) - epsilon/2));
+	return (min+Math.round(KhanAcademy.random()*(x+epsilon) - epsilon/2));
 }
 
 function check_answer()
@@ -643,7 +643,7 @@ function perfect_square_factor(n)  //only factors numbers up to 625
 function problem_footer()
 {
 	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
-	correctchoice = Math.round(Math.random()*4.98-.49);
+	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
 	if (displaygraph)
 	{
 		document.write('</td><td valign=\"top\"><embed align=\"left\" width=260 height=260 src=\"/d.svg\" script=\'graph_update()\'><form name=\"answerform\">');
@@ -675,7 +675,7 @@ function problem_footer()
 				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
 			}
 			/****
-			var new_index = Math.round(Math.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
+			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
 			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0];
 			answerChoices[i]='`'+new_wrong_choice+'`';
 			*****/
@@ -695,8 +695,8 @@ function problem_footer()
 function double_answer_footer()
 {
 	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
-	correctchoice = Math.round(Math.random()*4.98-.49);
-	correctchoice2 = Math.round(Math.random()*4.98-.49); //every variable with a 2 is for the second set of choices
+	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
+	correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
 	if (displaygraph)
 	{
 		document.write('</td><td valign=\"top\"><embed align\"right\" width=200 height=200 src=\"d.svg\" script=\'graph_update()\'><form name=\"answerform\">');
@@ -718,7 +718,7 @@ function double_answer_footer()
 		else
 		{
 			
-			var new_index = Math.round(Math.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
+			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
 			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0]
 			answerChoices[i]='`'+new_wrong_choice+'`';
 		}
@@ -729,7 +729,7 @@ function double_answer_footer()
 		else
 		{
 			
-			var new_index = Math.round(Math.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
+			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
 			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
 			answerChoices2[i]='`'+new_wrong_choice+'`';
 		}

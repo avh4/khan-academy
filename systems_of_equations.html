@@ -175,8 +175,8 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 
 <script language=Javascript1.2><!--
 	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
-	correctchoice = Math.round(Math.random()*4.98-.49);
-	correctchoice2 = Math.round(Math.random()*4.98-.49); //every variable with a 2 is for the second set of choices
+	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
+	correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
 	
 	
 	//Fill in the choices
@@ -191,7 +191,7 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 		else
 		{
 			
-			var new_index = Math.round(Math.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
+			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
 			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0]
 			answerChoices[i]='`'+new_wrong_choice+'`';
 		}
@@ -201,7 +201,7 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 		}
 		else
 		{
-			var new_index = Math.round(Math.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
+			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
 			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
 			answerChoices2[i]='`'+new_wrong_choice+'`';
 		}

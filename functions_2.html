@@ -2,8 +2,8 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 
-var currentY = Math.round(Math.random()*10)-5;
-var gY = Math.round(Math.random()*10)-7;
+var currentY = Math.round(KhanAcademy.random()*10)-5;
+var gY = Math.round(KhanAcademy.random()*10)-7;
 var functionPath =new Array();
 var gPath = new Array();
 functionPath.push([-11, currentY]);
@@ -34,10 +34,10 @@ for(var i=-10; i<11; i++)
 }
 
 
-var correctX = Math.round(Math.random()*18)-9;
+var correctX = Math.round(KhanAcademy.random()*18)-9;
 var correctY = functionPath[correctX+11][1];
 
-var correctGX = Math.round(Math.random()*18)-9;
+var correctGX = Math.round(KhanAcademy.random()*18)-9;
 var correctGY = gPath[correctGX+11][1];
 
 var fCoef = get_random();
@@ -50,11 +50,11 @@ correctAnswer = correct_answer;
 
 for(var i=0; i<6; i++)
 {
-	var y = Math.round(Math.random()*18)-9;
+	var y = Math.round(KhanAcademy.random()*18)-9;
 	
 	while (y==correct_answer)
 	{
-		y = Math.round(Math.random()*18)-9;
+		y = Math.round(KhanAcademy.random()*18)-9;
 	}
 	possibleAnswers.push(y);
 }

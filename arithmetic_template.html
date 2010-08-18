@@ -39,7 +39,7 @@ $(document).ready(function () {
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
 KhanAcademy.problem_number = "{{problem_number}}";
-Math.seedrandom(KhanAcademy.problem_number);
+KhanAcademy.seedRandom(KhanAcademy.problem_number);
 function submitForm(value)
 {
 	var form = document.forms['answerform'];

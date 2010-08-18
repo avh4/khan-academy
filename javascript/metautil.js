@@ -226,7 +226,7 @@ function graphicalFooter()
 {
 
 	correct_answer = mathFormat(correct_answer);
-	correctchoice = Math.round(Math.random()*4.98-.49);
+	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
 
 	//Fill in the choices
 	//need to fix it so that the other choices can never be the same as the correct choice
@@ -272,6 +272,13 @@ function getResponseProps(response, header){
 }
 
 KhanAcademy = {
+    seedRandom: function(seed) {
+        var mathRandom = Math.random;
+        Math.seedrandom(seed);
+        KhanAcademy.random = Math.random;
+        Math.random = mathRandom;
+    },
+    
 	onMathMLSupportReady: function(callbackWhenReady) {
 		ASCIIMathMLTranslate = translate;
 		translate = function(callback) {

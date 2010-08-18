@@ -54,7 +54,7 @@ function initConditions(x, depth)
 		{
 			var maxVal = 14;
 			var epsilon = .99;
-			var val = Math.round(Math.random()*(maxVal-1+epsilon) - epsilon/2);
+			var val = Math.round(KhanAcademy.random()*(maxVal-1+epsilon) - epsilon/2);
 			var newValue = Math.round(variables[x].seed-maxVal/2+val);
 			initHash[x] = {value: newValue, reason: new Array()};
 			initCond.push([x,newValue]);
@@ -716,7 +716,7 @@ function assignRandom(x)
 			maxVal = 5;
 		}
 		var epsilon = .99;
-		var val = Math.round(Math.random()*(maxVal-1+epsilon) - epsilon/2);
+		var val = Math.round(KhanAcademy.random()*(maxVal-1+epsilon) - epsilon/2);
 		var newValue = Math.round(variables[x].seed-maxVal/2+val);
 
 		valueTable[x] = {value: newValue, reason: new Array()};
@@ -753,7 +753,7 @@ function randomIndices(length)
 	{
 		var epsilon = .99;
 		var maxVal = startArray.length-1;
-		var index = Math.round(Math.random()*(maxVal+epsilon) - epsilon/2);
+		var index = Math.round(KhanAcademy.random()*(maxVal+epsilon) - epsilon/2);
 		
 		endArray.push(startArray.splice(index,1)[0]);
 	}
@@ -790,7 +790,7 @@ function findRulesWithVariable(v)
 function randomArrayEntry(a) //returns a random entry from the array a
 {
 	var epsilon = .99;
-	var index = Math.round(Math.random()*(a.length-1+epsilon) - epsilon/2);
+	var index = Math.round(KhanAcademy.random()*(a.length-1+epsilon) - epsilon/2);
 	return a[index];
 }
 
@@ -1286,7 +1286,7 @@ var points = {};
 var rules;
 var variables = {};
 
-if (Math.random()>Math.random())
+if (KhanAcademy.random()>KhanAcademy.random())
 	type=2;
 
 
@@ -1330,7 +1330,7 @@ function printHash(x)
 function randomArraySplice(a) //Takes a random element out of the array and returns it
 {
 	var epsilon = .99;
-	var index = Math.round(Math.random()*(a.length-1+epsilon) - epsilon/2);
+	var index = Math.round(KhanAcademy.random()*(a.length-1+epsilon) - epsilon/2);
 	return ((a.splice(index, 1))[0]);
 }
 
