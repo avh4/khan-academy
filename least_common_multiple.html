@@ -20,19 +20,27 @@ function unselStr(string)
 	return (selFontString+string+'`</font>`');
 }
 
-var A = getRandomIntRange(1,10);
-var B = getRandomIntRange(1,10);
+var A, B, C;
 
-while (B==A)
-{
-	B=getRandomIntRange(1,10);
-}
-
-
-var C = getRandomIntRange(1,5);
-
-B = B*C;
-A = A*C;	
+generateNewProblem(function() {
+    A = getRandomIntRange(1,10);
+    B = getRandomIntRange(1,10);
+    
+    while (B==A)
+    {
+    	B=getRandomIntRange(1,10);
+    }
+    
+    
+    C = getRandomIntRange(1,5);
+    
+    B = B*C;
+    A = A*C;
+    if (A < B) 
+        return A+","+B
+    else
+        return B+","+A
+});
 
 setCorrectAnswer(getLCM(A,B));
 
