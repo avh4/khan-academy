@@ -8,19 +8,19 @@
     {
         var foundError = false;
 
-        if (check_field("question_text") == false)
-            foundError = true;
-        if (check_field("correct_choice_text") == false)
+        if (check_field("answer_text") == false)
             foundError = true;
         if (check_field("hint_text") == false)
             foundError = true;
-        if (check_field("answer_text") == false)
-            foundError = true;
 
         var i;
-        for (i = 1; i < 6; i++)
+        for (i = 5; i > 0; i--)
             if (check_field("incorrect_"+i) == false)
                 foundError = true;
+        if (check_field("correct_choice_text") == false)
+            foundError = true;
+        if (check_field("question_text") == false)
+            foundError = true;
  
         return !foundError;
     }
