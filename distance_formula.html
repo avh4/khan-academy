@@ -1,0 +1,129 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+
+{% block maincode %}
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+var x1 = getRandomIntRange(-9, 9);
+var y1 = getRandomIntRange(-9, 9);
+
+var x2 = getRandomIntRange(-9, 9);
+var y2 = getRandomIntRange(-9, 9);
+writeText('Find the distance between the points <span style="color:green">(' + x1 + ', ' + y1 +
+            ')</span> and <span style="color:purple">(' + x2 + ', ' + y2 + ')</span>.');
+
+correctAnswer = simplifiedRoot(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+setCorrectAnswer(correctAnswer);
+
+addWrongChoice(Math.abs(x1 - x2));
+addWrongChoice(Math.abs(y1 - y2));
+
+addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) + Math.abs(y1 - y2)));
+addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
+
+addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2)));
+addWrongChoice(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2));
+
+addWrongChoice(Math.abs(x1 - x2) + Math.abs(y1 - y2));
+addWrongChoice(Math.abs(x1 - x2) * Math.abs(y1 - y2));
+addWrongChoice(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+// all distances should be positive
+// we're not testing integer subtraction here
+if ((x2 - x1) > 0) {
+	write_step('<span style="color:blue">Change in `x`</span>: `<span style="color:purple">' +
+        x2 + '</span> - <span style="color:green">' + x1 + '</span> = ' +
+		'<span style="color:blue">' + (x2 - x1) + '</span>`');
+} else {
+	write_step('<span style="color:blue">Change in `x`</span>: `<span style="color:green">' +
+        x1 + '</span> - <span style="color:purple">' + x2 + '</span> = ' +
+		'<span style="color:blue">' + (x1 - x2) + '</span>`');
+}
+
+if ((y2 - y1) > 0) {
+	write_step('<span style="color:orange">Change in `y`</span>: `<span style="color:purple">' +
+        y2 + '</span> - <span style="color:green">' + y1 + '</span> = ' + 
+		'<span style="color:orange">' + (y2 - y1) + '</span>`');
+} else {
+	write_step('<span style="color:orange">Change in `y`</span>: `<span style="color:green">' +
+        y1 + '</span> - <span style="color:purple">' + y2 + '</span> = ' +
+		'<span style="color:orange">' + (y1 - y2) + '</span>`');
+}
+
+write_step('The distance is just the <span style="color:red">length of the hypotenuse</span> of this right triangle.');
+
+write_step('By the Pythagorean Theorem, <span style="color:red">that length</span> is equal to: ' +
+			'<p>`sqrt( ' + Math.abs(x2 - x1) + '^2 + ' + Math.abs(y2 - y1) + '^2 ) = `</p>' + 
+			'<p>`sqrt(' + (Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) + ') = `</p>' +
+			'<p style="color:red">`' + correctAnswer + '`</p>');
+			
+function graph_update() {
+	present.initPicture(-10,10, -10, 10);
+	
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	
+	present.stroke = "#DDDDDD";
+	present.strokewidth = "2";
+	for(var i=-10; i<11; i++)
+	{
+		if (i!=0)
+		{
+			present.line([i,-11], [i,11]);
+			present.line([-11,i], [11,i]);
+			present.text([i, .1], i, below);
+			present.text([0, i], i, right);
+		}
+	}
+	present.axes();
+	
+	present.fontsize = "15";
+	present.fontfamily = "sans-serif";
+	present.fontstyle = "bold";
+	
+	present.ASdot([x1, y1], 3, "green", "green");
+	present.fontfill = "green";
+	present.text([x1, y1], "(" + x1 + ", " + y1 + ")", aboveright);
+	
+	present.ASdot([x2, y2], 3, "purple", "purple");
+	present.fontfill = "purple";
+	present.text([x2, y2], "(" + x2 + ", " + y2 + ")", aboveright);
+    
+}
+
+function draw_next_step() {
+	if (steps_given==0) // x distance
+	{
+		present.stroke = "blue";
+		present.fontfill = "blue";
+		present.line([x1, y1], [x2, y1]);
+		present.text([(x1 + x2)/2, y1], Math.abs(x2 - x1), above);
+	}
+	if (steps_given==1) // y distance
+	{
+		present.stroke = "orange";
+		present.fontfill = "orange";
+		present.line([x2, y1], [x2, y2]);
+		present.text([x2, (y1 + y2)/2], Math.abs(y2 - y1), left);
+	}
+	if (steps_given==2)
+	{
+		present.stroke = "red";
+		present.line([x1, y1], [x2, y2]);
+	}
+	if (steps_given==3)
+	{
+		present.fontfill = "red";
+		present.text([(x1+x2)/2, (y1+y2)/2], correctAnswer, above);
+	}
+	give_next_step();
+}
+//-->
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="420" width="420"></iframe></td>
+{% endblock graphdisplay %}
+
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
