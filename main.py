@@ -1523,7 +1523,77 @@ class RetargetFeedback(bulk_update.handler.UpdateKind):
             return True
         else:
             return False
+
+class DeleteStaleVideoPlaylists(bulk_update.handler.UpdateKind):
+    def get_keys_query(self, kind):
+        """Returns a keys-only query to get the keys of the entities to update"""
+        return db.GqlQuery('select __key__ from VideoPlaylist')
+
+    def use_transaction(self):
+        return False
     
+    def update(self, video_playlist):
+        if video_playlist.live_association == True:
+            logging.debug("Keeping VideoPlaylist %s", video_playlist.key().id())
+            return False
+        logging.info("Deleting stale VideoPlaylist %s", video_playlist.key().id())
+        video_playlist.delete()
+        return False
+
+class DeleteStaleVideos(bulk_update.handler.UpdateKind):
+    def get_keys_query(self, kind):
+        """Returns a keys-only query to get the keys of the entities to update"""
+        return db.GqlQuery('select __key__ from Video')
+
+    def use_transaction(self):
+        return False
+    
+    def update(self, video):
+        query = ExerciseVideo.all()
+        query.filter('video =', video)
+        referrer = query.get()
+        if referrer is not None:
+            logging.debug("Keeping Video %s.  It is still referenced by ExerciseVideo %s", video.key().id(), referrer.key().id())
+            return False
+        query = VideoPlaylist.all()
+        query.filter('video =', video)
+        referrer = query.get()
+        if referrer is not None:
+            logging.debug("Keeping Video %s.  It is still referenced by VideoPlaylist %s", video.key().id(), referrer.key().id())
+            return False
+        logging.info("Deleting stale Video %s", video.key().id())
+        video.delete()
+        return False
+
+
+class FixVideoRef(bulk_update.handler.UpdateKind):
+    def use_transaction(self):
+        return False
+    
+    def update(self, entity):
+        orig_video = entity.video
+
+        if orig_video == None or type(orig_video).__name__ != "Video":
+            return False
+        readable_id = orig_video.readable_id
+        query = Video.all()
+        query.filter('readable_id =', readable_id)
+        # The database currently contains multiple Video objects for a particular
+        # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
+        # changed and our code was producing youtube_ids that ended with '_player'.
+        # This hack gets the most recent valid Video object.
+        key_id = 0
+        for v in query:
+            if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
+                video = v
+                key_id = v.key().id()
+        # End of hack
+        if video is not None and video.key() != orig_video.key():
+            logging.info("Retargeting %s %s from Video %s to Video %s", type(entity), entity.key().id(), orig_video.key().id(), video.key().id())
+            entity.video = video
+            return True
+        else:
+            return False
             
 def real_main():
     webapp.template.register_template_library('templatefilters')
@@ -1561,6 +1631,9 @@ def real_main():
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
+        ('/admin/fixvideoref', FixVideoRef),
+        ('/admin/deletestalevideoplaylists', DeleteStaleVideoPlaylists),
+        ('/admin/deletestalevideos', DeleteStaleVideos),
 
         ('/coaches', ViewCoaches),
         ('/registercoach', RegisterCoach),  
