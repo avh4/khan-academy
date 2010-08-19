@@ -1,6 +1,7 @@
-#Sat Jul 17 12:43:37 PDT 2010
+#Thu Aug 19 10:27:22 PDT 2010
 eclipse.preferences.version=1
 encoding//bulk_update/handler.py=utf-8
+encoding//discussion/models_discussion.py=utf-8
 encoding/main.py=utf-8
 encoding/models.py=utf-8
 encoding/qbrary.py=utf-8
