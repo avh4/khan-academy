@@ -8,6 +8,7 @@ import random
 import urllib
 import logging
 import re
+from urlparse import urlparse
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -158,8 +159,7 @@ class UpdateVideoData(webapp.RequestHandler):
                 video_data_list = []
                 for video in video_feed.entry:
 
-                    video_id = video.media.player.url.replace('http://www.youtube.com/watch?v=', '')
-                    video_id = video_id.replace('&feature=youtube_gdata', '')
+                    video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0]
                     query = Video.all()
                     query.filter('youtube_id =', video_id.decode('windows-1252'))
                     video_data = query.get()
