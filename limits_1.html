@@ -1,0 +1,287 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+
+{% block maincode %}
+{% endblock maincode %}
+
+{% block maincell %}
+<style>
+table.limit td {
+	font-size: 100%;
+    border: 1px solid black;
+	border-spacing: 0;
+    padding: 4px;
+}
+
+table.limit tr {
+    border: 1px solid black;
+}
+</style>
+<script language=Javascript1.2><!--
+var functions = new Array();
+
+// zeros are a pain to deal with
+// returns -5 to 5 not including 0
+function get_random_nonzero(min, max) {
+	if (!min) min = -5;
+	if (!max) max = 5;
+    return (getRandomIntRange(0, 1) ? getRandomIntRange(min, -1) : getRandomIntRange(1, max))
+}
+
+function nicefy_signs(expr)
+{
+	while (expr.indexOf("+ -") != -1) {
+		expr = expr.replace("+ -", "- ");
+	}
+	while (expr.indexOf("- -") != -1) {
+		expr = expr.replace("- -", "+ ")
+	}
+	return expr;
+}
+
+function truncate_to_max(num, digits) {
+	return parseFloat(num.toFixed(digits));
+}
+
+var a; // lim x->a
+
+var l_limtoa;
+var r_limtoa;
+var limtoa;
+
+var a;
+
+var curFunc; // the actual f(x), without the discontinuity
+var curExp; // what we're taking the limit of (f(x) with discontinuity)
+
+functions[0] = function() {
+	// lim (quadratic)(line) / line
+	// lim (q_lcoef*x^2)(x+cons) / (x+cons)
+	var q_lcoef = get_random_nonzero(-3, 3);
+	
+	// calculate the upper edge of the graph so we get a visible f(a)
+	var edge = Math.floor(Math.sqrt(Math.abs(10 / q_lcoef)));
+    var l_cons = get_random_nonzero(-1 * edge, edge);
+	
+	var quadratic = '' + q_lcoef + 'x^2';
+	var line = nicefy_signs('(x + ' + l_cons + ')');
+	
+	curFunc = function(x) {
+		return truncate_to_max(q_lcoef * Math.pow(x, 2), 4);
+	}
+	
+	a = -1 * l_cons;
+	limtoa = curFunc(a);
+	l_limtoa = limtoa;
+	r_limtoa = limtoa;
+	
+	setCorrectAnswer(limtoa);
+	addWrongChoice(0);
+	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(q_lcoef);
+	addWrongChoice(l_cons);
+	addWrongChoice(curFunc(0));
+	addWrongChoice('`does not exist`');
+	
+	return '(' + quadratic + line + ')/' + line;
+}
+
+functions[1] = function() {
+	// lim abs_coef|x+abs_cons|/x+abs_cons
+	
+	abs_coef = get_random_nonzero(-5, 5);
+	abs_cons = get_random_nonzero(-7, 7);
+	
+	a = abs_cons * -1;
+	
+	curFunc = function(x) {
+		if (x + abs_cons > 0) return abs_coef;
+		else return abs_coef * -1;
+	}
+	
+	limtoa = "`does not exist`";
+	l_limtoa = abs_coef * -1;
+	r_limtoa = abs_coef;
+	
+	setCorrectAnswer(limtoa);
+	addWrongChoice(0);
+	addWrongChoice(a);
+	addWrongChoice(abs_cons);
+	addWrongChoice(abs_coef * abs_coef);
+	addWrongChoice(abs_coef * abs_coef * -1);
+	addWrongChoice(abs_coef);
+	addWrongChoice(abs_coef * -1);
+	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(get_random_nonzero(-3, 3));
+	
+	return nicefy_signs('(' + abs_coef + '|x + ' + abs_cons + '|)/ (x + ' + abs_cons + ')');
+}
+
+functions[2] = function() {
+	// lim	{ l_coef*x + l_cons if x != a
+	//		{ d_cons if x = a
+	
+	var l_coef = get_random_nonzero(-3, 3);
+	var l_cons = get_random_nonzero(-4, 4);
+	
+	d_cons = get_random_nonzero(-7, 7);
+	
+	if (l_coef > 0) { // positive-slope lines have normal min and max
+		a = get_random_nonzero(Math.ceil((-10 - l_cons)/l_coef), Math.floor((10 - l_cons)/l_coef));
+	} else {
+		a = get_random_nonzero(Math.floor((10 - l_cons)/l_coef), Math.ceil((-10 - l_cons)/l_coef));
+	}
+	
+	d_line = nicefy_signs(l_coef + 'x + ' + l_cons);
+	
+	curFunc = function(x) {
+		return l_coef * x + l_cons;
+	}
+	
+	limtoa = curFunc(a);
+	l_limtoa = limtoa;
+	r_limtoa = limtoa;
+	
+	setCorrectAnswer(limtoa);
+	addWrongChoice(d_cons);
+	addWrongChoice(l_coef);
+	addWrongChoice(a);
+	addWrongChoice(format_fraction(l_cons * -1, l_coef));
+	addWrongChoice(0);
+	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice('`does not exist`');
+	
+	return 'f(x)` where `f(x) ={(' + d_line + ',if x!=' + a + '),(' + d_cons + ',if x=' + a + '):}';
+}
+
+functions[3] = function() {
+	// normal quadratic
+	// q_lcoef*x^2 + q_cons
+	var q_lcoef = get_random_nonzero(-3, 3);
+	q_cons = get_random_nonzero(-3, 3);
+	
+	var edge = Math.floor(Math.sqrt(Math.abs((10 - q_cons) / q_lcoef)));
+    a = get_random_nonzero(-1 * edge, edge);
+	
+	curFunc = function(x) {
+		return q_lcoef * Math.pow(x, 2) + q_cons;
+	}
+	
+	limtoa = curFunc(a);
+	l_limtoa = limtoa;
+	r_limtoa = limtoa;
+	
+	setCorrectAnswer(limtoa);
+	addWrongChoice(0);
+	addWrongChoice(curFunc(0));
+	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(q_cons);
+	addWrongChoice(q_cons * -1);
+	addWrongChoice('`does not exist`');
+	
+	return nicefy_signs(q_lcoef + 'x^2 + ' + q_cons);
+}
+curExp = functions[getRandomIntRange(0, functions.length - 1)]();
+
+write_text('`lim_(x->' + a + ') ' + curExp + ' =` ?');
+
+write_step('What happens as we approach `x=' + a + '` from the left?');
+write_step(
+	'<table class="limit">' +
+	'<tr><td>`x`</td><td>' + (a - 0.1) + '</td><td>' + (a - 0.01) + '</td><td>' + (a - 0.001) + '</td></tr>' +
+	'<tr><td>`f(x)`</td><td>' + curFunc(a - 0.1).toFixed(4) + '</td><td>' + curFunc(a - 0.01).toFixed(4) + '</td><td>' + curFunc(a - 0.001).toFixed(4) + '</td></tr>' +
+	'</table>' +
+	'It looks like `f(x)` is approaching ' + l_limtoa + ' from the left.');
+	
+write_step('When we approach `x=' + a + '` from the right, we get:' +
+	'<table class="limit">' +
+	'<tr><td>`x`</td><td>' + (a + 0.1) + '</td><td>' + (a + 0.01) + '</td><td>' + (a + 0.001) + '</td></tr>' +
+	'<tr><td>`f(x)`</td><td>' + curFunc(a + 0.1).toFixed(4) + '</td><td>' + curFunc(a + 0.01).toFixed(4) + '</td><td>' + curFunc(a + 0.001).toFixed(4) + '</td></tr>' +
+	'</table>' +
+	'Looks like `f(x)` is approaching ' + r_limtoa + ' from the right.');
+
+if (l_limtoa != r_limtoa) {
+	write_step('The limit as we approach from the left doesn\'t match the limit as we approach from the right, so `lim_(x->' + a + ') ' + curExp + '` doesn\'t exist.');
+} else {
+	write_step('So `lim_(x->' + a + ') ' + curExp + '=' + limtoa + '`');
+}
+
+function graph_update() {
+	present.initPicture(-10,10, -10, 10);
+	
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	
+	present.stroke = "#DDDDDD";
+	present.strokewidth = "2";
+	for(var i=-10; i<11; i++)
+	{
+		if (i!=0)
+		{
+			present.line([i,-11], [i,11]);
+			present.line([-11,i], [11,i]);
+			present.text([i, .1], i, below);
+			present.text([0, i], i, right);
+		}
+	}
+	present.axes();
+	
+	present.fontsize = "15";
+	present.fontfamily = "sans-serif";
+	present.fontstyle = "bold";
+	
+	present.stroke = "blue";
+	if (typeof abs_coef != 'undefined') { // absolute value function requires manual drawing to look right
+		present.line([-11, abs_coef * -1], [-1 * abs_cons, abs_coef * -1])
+		present.line([-1 * abs_cons, abs_coef], [11, abs_coef]);
+		
+		present.ASdot([-1 * abs_cons, -1 * abs_coef], 4, "black", "white");
+		present.ASdot([-1 * abs_cons, abs_coef], 4, "black", "white");
+	} else if (typeof d_line != 'undefined') { // so does piecewise
+		present.plot(d_line);
+		
+		present.ASdot([a, limtoa], 4, "black", "white");
+		present.ASdot([a, d_cons], 4, "blue", "blue");
+	} else {
+		present.plot(curExp);
+		if (typeof q_cons == 'undefined') present.ASdot([a, limtoa], 4, "black", "white");
+	}
+	
+    
+}
+
+function draw_next_step() {
+	if (steps_given==0) // approaching from the left
+	{
+		present.stroke = "orange";
+		present.marker = "arrow";
+		if (a > 0) present.line([0, 0], [a, 0]);
+		else present.line([a + a, 0], [a, 0]);
+	}
+	if (steps_given==1) // looks like it's approaching y
+	{
+		present.stroke = "purple";
+		present.line([a, 0], [a, l_limtoa]);
+	}
+	if (steps_given==2) // approaching from the right
+	{
+		present.stroke = "green";
+		present.marker = "arrow";
+		if (a > 0) present.line([a + a, 0], [a, 0]);
+		else present.line([0, 0], [a, 0]);
+		
+		present.stroke = "purple";
+		present.line([a, 0], [a, r_limtoa]);
+	}
+	give_next_step();
+}
+//-->
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="420" width="420"></iframe></td>
+{% endblock graphdisplay %}
+
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
