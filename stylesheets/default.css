@@ -8,11 +8,11 @@ body {
 
 /* Links in the header and footer don't change color when visited. */
 a:link, header a:visited, footer a:visited {
-    color: #777;
+    color: #069;
 }
 
 a:visited {
-    color: #766;
+    color: #609;
 }
 
 a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
@@ -83,11 +83,11 @@ nav {
     margin: 0;
 }
 
-#page_main_nav ul {
-
-    position: absolute;
-    top:35px;
-    right:0;
+#page_main_nav {
+    width: auto;
+    clear: right;
+    float: right;
+    margin-top: 2em;
 }
 
 #social_media_nav {
