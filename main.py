@@ -1491,7 +1491,40 @@ class ViewClassReport(webapp.RequestHandler):
                 return True
         return False
         
-        
+class RetargetFeedback(bulk_update.handler.UpdateKind):
+    def get_keys_query(self, kind):
+        """Returns a keys-only query to get the keys of the entities to update"""
+        return db.GqlQuery('select __key__ from Feedback')
+
+    def use_transaction(self):
+        return False
+    
+    def update(self, feedback):
+        orig_video = feedback.first_target()
+
+        if orig_video == None or type(orig_video).__name__ != "Video":
+            return False
+        readable_id = orig_video.readable_id
+        query = Video.all()
+        query.filter('readable_id =', readable_id)
+        # The database currently contains multiple Video objects for a particular
+        # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
+        # changed and our code was producing youtube_ids that ended with '_player'.
+        # This hack gets the most recent valid Video object.
+        key_id = 0
+        for v in query:
+            if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
+                video = v
+                key_id = v.key().id()
+        # End of hack
+        if video is not None and video.key() != orig_video.key():
+            logging.info("Retargeting Feedback %s from Video %s to Video %s", feedback.key().id(), orig_video.key().id(), video.key().id())
+            feedback.targets[0] = video.key()
+            return True
+        else:
+            return False
+    
+            
 def real_main():
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -1527,6 +1560,7 @@ def real_main():
         ('/reportissue', ReportIssue),
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),
+        ('/admin/retargetfeedback', RetargetFeedback),
 
         ('/coaches', ViewCoaches),
         ('/registercoach', RegisterCoach),  
