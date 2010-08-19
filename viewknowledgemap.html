@@ -79,7 +79,7 @@
                         var otherParents = node.data.otherParents;
                         for (var i = 0; i < otherParents.length; i++) {
                             var orn = this.getOrientation(), parent = this.viz.graph.getNode(otherParents[i]), child = node, dim = 5;
-                            adj = new $jit.Graph.Adjacence(child, parent, null, this.viz.config.Edge, this.viz.config.Label);
+                            adj = new $jit.Graph.Adjacence(parent, child, null, this.viz.config.Edge, this.viz.config.Label);
                             this.plotLine(adj, canvas, false);
                         }
                     }
@@ -88,6 +88,28 @@
             }
         });
         
+        $jit.ST.Plot.EdgeTypes.implement({
+            'bezierParentToChild': function(adj, canvas) {
+                    var orn = this.getOrientation(adj), nodeFrom = adj.nodeFrom, nodeTo = adj.nodeTo, begin = this.viz.geom.getEdge(nodeFrom, 'begin', orn), end = this.viz.geom.getEdge(nodeTo, 'end', orn), dim = adj.getData('dim'), ctx = canvas.getCtx();
+                    ctx.beginPath();
+                    ctx.moveTo(begin.x, begin.y);
+                    switch (orn) {
+                        case "left":
+                            ctx.bezierCurveTo(begin.x + dim, begin.y, end.x - dim, end.y, end.x, end.y);
+                            break;
+                        case "right":
+                            ctx.bezierCurveTo(begin.x - dim, begin.y, end.x + dim, end.y, end.x, end.y);
+                            break;
+                        case "top":
+                            ctx.bezierCurveTo(begin.x, begin.y + dim, end.x, end.y - dim, end.x, end.y);
+                            break;
+                        case "bottom":
+                            ctx.bezierCurveTo(begin.x, begin.y - dim, end.x, end.y + dim, end.x, end.y);
+                            break;
+                    }
+                    ctx.stroke();
+            }
+        });       
         //Create a new ST instance
         var st = new $jit.ST({
             //id of viz container element
@@ -116,7 +138,7 @@
                 overridable: true,
                 color: '#CCCCCC',
                 lineWidth: 3,
-                type: 'bezier'
+                type: 'bezierParentToChild'
             },
             Label: {
                 overridable: true
