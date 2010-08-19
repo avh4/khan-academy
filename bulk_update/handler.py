@@ -119,13 +119,16 @@ class UpdateKind(webapp.RequestHandler):
         deadline = datetime.datetime.now() + datetime.timedelta(seconds=25)
         try:
             for key in query:
-                def update_txn():
+                def do_update():
                     e = db.get(key)
                     if self.update(e):
                         e.put()
                     if datetime.datetime.now() > deadline:
                         raise DeadlineExceededError
-                db.run_in_transaction(update_txn)
+                if self.use_transaction():
+                    db.run_in_transaction(do_update)
+                else:
+                    do_update()
                 new_cursor = query.cursor()
                 count = count + 1
             self.set_in_progress(False)
@@ -167,4 +170,8 @@ class UpdateKind(webapp.RequestHandler):
     
     def update(self, entity):
         """Override in subclasses to make changes to an entity"""
+        return True
+
+    def use_transaction(self):
+        """Override in subclasses to not run each update in a transaction"""
         return True
