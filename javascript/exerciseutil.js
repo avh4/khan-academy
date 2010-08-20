@@ -92,25 +92,26 @@ function generateNewProblem(randomProblemGenerator, range, salt)
 	var i = KhanAcademy.problem_number;
 	var R = range;
 	var group = Math.floor(i/R);
-	var problems_to_avoid = [];
+	var prev_group_problems = [];
+	var next_group_problems = [];
 	if (group % 2 == 1) {
 		// generate problems to avoid
 		KhanAcademy.seedRandom(s(group-1));
-		var prev_group_problems = [];
 		for (var j=0; j<R; j++) {
 			prev_group_problems.push(U(prev_group_problems));			
 		}
-		problems_to_avoid = prev_group_problems.slice(i%R);
 		KhanAcademy.seedRandom(s(group+1));
 		for (var j=0; j<(i%R); j++) {
-			problems_to_avoid.push(U(problems_to_avoid));			
+			next_group_problems.push(U(next_group_problems));			
 		}
 	}
 	
 	KhanAcademy.seedRandom(s(group));
 	var p = group*R;
+	var current_group_problems = [];
 	while (p <= i) {
-		problems_to_avoid.push(U(problems_to_avoid));
+		var problems_to_avoid = current_group_problems.concat(prev_group_problems.slice(p%R), next_group_problems.slice(0,p%R));
+		current_group_problems.push(U(problems_to_avoid));
 		p++;
 	}
 	
