@@ -1566,6 +1566,32 @@ class DeleteStaleVideos(bulk_update.handler.UpdateKind):
         return False
 
 
+class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
+    def get_keys_query(self, kind):
+        """Returns a keys-only query to get the keys of the entities to update"""
+        return db.GqlQuery('select __key__ from Playlist')
+
+    def use_transaction(self):
+        return False
+    
+    def update(self, playlist):
+        query = ExercisePlaylist.all()
+        query.filter('playlist =', playlist)
+        referrer = query.get()
+        if referrer is not None:
+            logging.debug("Keeping Playlist %s.  It is still referenced by ExercisePlaylist %s", playlist.key().id(), referrer.key().id())
+            return False
+        query = VideoPlaylist.all()
+        query.filter('playlist =', playlist)
+        referrer = query.get()
+        if referrer is not None:
+            logging.debug("Keeping Playlist %s.  It is still referenced by VideoPlaylist %s", playlist.key().id(), referrer.key().id())
+            return False
+        logging.info("Deleting stale Playlist %s", playlist.key().id())
+        playlist.delete()
+        return False
+
+
 class FixVideoRef(bulk_update.handler.UpdateKind):
     def use_transaction(self):
         return False
@@ -1591,6 +1617,34 @@ class FixVideoRef(bulk_update.handler.UpdateKind):
         if video is not None and video.key() != orig_video.key():
             logging.info("Retargeting %s %s from Video %s to Video %s", type(entity), entity.key().id(), orig_video.key().id(), video.key().id())
             entity.video = video
+            return True
+        else:
+            return False
+            
+class FixPlaylistRef(bulk_update.handler.UpdateKind):
+    def use_transaction(self):
+        return False
+    
+    def update(self, entity):
+        orig_playlist = entity.playlist
+
+        if orig_playlist == None or type(orig_playlist).__name__ != "Playlist":
+            return False
+        youtube_id = orig_playlist.youtube_id
+        query = Playlist.all()
+        query.filter('youtube_id =', youtube_id)
+        # The database currently contains multiple Playlist objects for a particular
+        # playlist.  Some are old.
+        # This hack gets the most recent valid Playlist object.
+        key_id = 0
+        for p in query:
+            if p.key().id() > key_id:
+                playlist = p
+                key_id = p.key().id()
+        # End of hack
+        if playlist is not None and playlist.key() != orig_playlist.key():
+            logging.info("Retargeting %s %s from Playlist %s to Playlist %s", type(entity), entity.key().id(), orig_playlist.key().id(), playlist.key().id())
+            entity.playlist = playlist
             return True
         else:
             return False
@@ -1634,6 +1688,8 @@ def real_main():
         ('/admin/fixvideoref', FixVideoRef),
         ('/admin/deletestalevideoplaylists', DeleteStaleVideoPlaylists),
         ('/admin/deletestalevideos', DeleteStaleVideos),
+        ('/admin/fixplaylistref', FixPlaylistRef),
+        ('/admin/deletestaleplaylists', DeleteStalePlaylists),
 
         ('/coaches', ViewCoaches),
         ('/registercoach', RegisterCoach),  
