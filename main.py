@@ -148,6 +148,7 @@ class UpdateVideoData(webapp.RequestHandler):
             playlist_data = query.get()
             if not playlist_data:
                 playlist_data = Playlist(youtube_id=playlist_id)
+                self.response.out.write('<p><strong>Creating Playlist: ' + playlist.title.text + '</strong>')
             playlist_data.url = playlist_uri
             playlist_data.title = playlist.title.text
             playlist_data.description = playlist.description.text
@@ -165,6 +166,7 @@ class UpdateVideoData(webapp.RequestHandler):
                     video_data = query.get()
                     if not video_data:
                         video_data = Video(youtube_id=video_id.decode('windows-1252'))
+                        self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('windows-1252') + '</strong>')
                         video_data.playlists = []
                     video_data.title = video.media.title.text.decode('windows-1252')
                     video_data.url = video.media.player.url.decode('windows-1252')
@@ -187,7 +189,9 @@ class UpdateVideoData(webapp.RequestHandler):
                     playlist_video = query.get()
                     if not playlist_video:
                         playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
-                    self.response.out.write('<p>Playlist  ' + playlist_video.playlist.title)
+                        self.response.out.write('<p><strong>Creating VideoPlaylist(' + playlist_data.title + ',' + video_data.title + ')</strong>')
+                    else:
+                        self.response.out.write('<p>Updating VideoPlaylist(' + playlist_video.playlist.title + ',' + playlist_video.video.title + ')')
                     playlist_video.live_association = True
                     playlist_video.video_position = int(video_data.position.text)
                     playlist_videos.append(playlist_video)
