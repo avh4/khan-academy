@@ -43,7 +43,9 @@ setCorrectAnswer(format_fraction((num1*com_den/den1)+(num2*com_den/den2),com_den
 addWrongChoice(format_fraction(num1+num2,den1+den2));
 addWrongChoice(format_fraction(num1+num2,com_den));
 addWrongChoice(format_fraction(num1-num2,com_den));
-addWrongChoice(format_fraction(com_den, (num1*com_den/den1)+(num2*com_den/den2)));
+var wrong_den = (num1*com_den/den1)+(num2*com_den/den2);
+if (wrong_den != 0)
+    addWrongChoice(format_fraction(com_den, wrong_den));
 addWrongChoice(format_fraction(-1*(num1*com_den/den1)+(num2*com_den/den2),com_den));
 addWrongChoice(format_fraction(num1*num2,den2*den1));
 addWrongChoice(format_fraction((num1*com_den/den1)-(num2*com_den/den2),com_den));
