@@ -28,12 +28,10 @@ var answer = 0;
 //This is the comparison function that makes sure that current random entries haven't been given recently
 var eFunction = function()
 {
-    term1 = term2 = 1;
-	while(term1>=0 && term2>=0 || term1==0)
-	{
+    do {
 		term1 = getRandomInt(18)-9;
 		term2 = getRandomInt(18)-9;
-	}
+	} while(term1>=0 && term2>=0 || term1==0);
 }
 
 

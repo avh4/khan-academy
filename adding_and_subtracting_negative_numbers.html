@@ -32,14 +32,12 @@ var textY =300;
 //This is the comparison function that makes sure that current random entries haven't been given recently
 var eFunction = function()
 {
-
-	while(term1>=0 && term2>=0 && answer>=0)
-	{
+    do {
 		term1 = getRandomInt(18)-9;
 		term2 = getRandomInt(18)-9;
 		operator = Math.pow(-1,getRandomInt(4));  //Will either be 1 or -1
 		answer = term1+operator*term2;
-	}
+	} while(term1>=0 && term2>=0 && answer>=0)
 }
 
 
