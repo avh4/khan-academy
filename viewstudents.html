@@ -2,6 +2,12 @@
 {% block pagetitle %}Students{% endblock pagetitle %}
 {% block pagecontent %}
 
+<br><p>To enable viewing your list of students, they should each log in and click on the <a href="coaches">Enter a coach ID</a>
+link here or on the bottom of the page.  After they enter your email address and click the "Register Coach" button,
+you'll see links to their progress reports below, as well as a <a href="/classreport">class report</a>.
+</p><br>
+{% if students|length_is:"0" %}
+{% else %}
 <table border=0 cellspacing=0 cellpadding=3>
 <tr><td class="colHeadL">Student</td></tr>
 {% for student in students %}
@@ -15,4 +21,6 @@
 		</tr>
 {% endfor %}
 </table>
+{% endif %}
+<br>
 {% endblock pagecontent %}

@@ -1397,16 +1397,17 @@ class ViewStudents(webapp.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
 
 
-class ReportCell:
-    def __init__(self, data="", color="white", align="left"):
-        self.data = data
-        self.color = color
-        self.align = align
+
         
         
 class ViewClassReport(webapp.RequestHandler):
-
+        
     def get(self):
+        class ReportCell:
+            def __init__(self, data="", css_class=""):
+                self.data = data
+                self.css_class = css_class
+            
         user = users.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)   
@@ -1432,32 +1433,32 @@ class ViewClassReport(webapp.RequestHandler):
                 i = 0
                 for exercise in exercises:
                     if exercise in student_data.all_proficient_exercises:
-                        row.append(ReportCell(color="lightgreen"))
+                        row.append(ReportCell(css_class="proficient"))
                         proficient_total_row[i] += 1
                     elif exercise in student_data.suggested_exercises:
                         if self.needs_help(student, exercise):
-                            row.append(ReportCell(color="red"))
+                            row.append(ReportCell(css_class="needs_help"))
                             help_total_row[i] += 1
                         else:
-                            row.append(ReportCell(color="lightblue"))
+                            row.append(ReportCell(css_class="working"))
                             working_total_row[i] += 1
                     else:
                         row.append(ReportCell())
                     i += 1
                 table_data.append(row) 
-            row = [ReportCell("Total students working")]
+            row = [ReportCell("Total students working (but not proficient):")]
             for count in working_total_row:
-                row.append(ReportCell(data=count, align="center"))
+                row.append(ReportCell(data=count, css_class="number"))
             table_data.append(row) 
 
-            row = [ReportCell("Total students needing help")]
+            row = [ReportCell("Total students needing help:")]
             for count in help_total_row:
-                row.append(ReportCell(data=count, align="center"))
+                row.append(ReportCell(data=count, css_class="number"))
             table_data.append(row) 
             
-            row = [ReportCell("Total proficient students")]
+            row = [ReportCell("Total proficient students:")]
             for count in proficient_total_row:
-                row.append(ReportCell(data=count, align="center"))
+                row.append(ReportCell(data=count, css_class="number"))
             table_data.append(row) 
             
             template_values = {

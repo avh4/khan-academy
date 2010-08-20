@@ -334,7 +334,7 @@ DIV.titlebox
 /*used in add2.jsp*/
 TD.answer     {border-top:3px solid #666666;}
 
-TD.colHeadL
+TD.colHeadL, TH.colHeadL
 {
     BORDER-RIGHT: #fff 1px solid;
     PADDING-RIGHT: 5px;

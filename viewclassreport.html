@@ -1,21 +1,37 @@
 {% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+td.proficient { background-color:lightgreen; }
+td.needs_help { background-color:red; }
+td.working { background-color:lightblue; }
+td.number { text-align:center }
+</style>
+{% endblock pagescript %}
 {% block pagetitle %}Class Report{% endblock pagetitle %}
 {% block pagecontent %}
 
-<p>&nbsp;</p>
+<br><p>To enable viewing this class report, each of your students should log in and click on the <a href="coaches">Enter a coach ID</a>
+link here or on the bottom of the page.  After they enter your email address and click the "Register Coach" button,
+you'll be able to see their progress below, and in more detail via the <a href="/students">students</a> page.
+</p><br>
 
+{% if table_data|length_is:"3" %}
+{% else %}
 <table border=0 cellspacing=3 cellpadding=0>
 <tr>
 {% for header in table_headers %}
-        <td class="colHeadL">{{header}}</td>
+        <th class="colHeadL">{{header}}</th>
 {% endfor %}
 </tr>
 {% for row in table_data %}
 		<tr>
 		{% for cell in row %}
-		    <td bgcolor="{{cell.color}}" align="{{cell.align}}">{{cell.data}}</td>
+		    <td class="{{cell.css_class}}">{{cell.data}}</td>
 		{% endfor %}
 		</tr>
 {% endfor %}
-</table><br>
+</table>
+{% endif %}
+<br>
 {% endblock pagecontent %}
+
