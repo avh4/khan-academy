@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML">
     <head>
-        {% if video %}<title>Khan Academy: {{video.title}}</title>
+        <!-- For ChartBeat analytics START -->
+        <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
+        <!-- For ChartBeat analytics END -->
+        {% if video %}<title>{{video.title}} | Khan Academy</title>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
@@ -24,70 +27,94 @@
 			var html5elements = ['header', 'footer', 'nav', 'article'];
 			for (var i=0; i< html5elements.length; i++) {
 				document.createElement(html5elements[i]);
-			}			
+			}
 		})();
-		
-        function addQuestion(drop_down)
-        {
-            var selected_subject = drop_down.selectedIndex;
-            var subject_key = drop_down[selected_subject].value;
-            window.location = "/pickquestiontopic?subject_key="+subject_key
-        }
-        
-        function practiceQuestion(drop_down)
-        {
-            var selected_subject = drop_down.selectedIndex;
-            var subject_key = drop_down[selected_subject].value;
-            window.location = "/pickquiztopic?subject_key="+subject_key
-        }
-		
 	</script>
         {% block pagescript %}
         {% endblock pagescript %}
+
+	<!-- New, faster Google Analytics async tag START -->
+	<script type="text/javascript">
+	
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-6742635-1']);
+	  _gaq.push(['_setDomainName', '.khanacademy.org']);
+	  _gaq.push(['_trackPageview']);
+	
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	
+	</script>
+	<!-- New, faster Google Analytics async tag END -->
+
     </head>
     <body>
 	{% comment %}
 	Make script-requiring elements visible.
 	{% endcomment %}
 	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
-	
+
         <header>
-            <a id="page_logo" href="/"><img src="/images/khan.GIF"/></a><img src="/images/logo.gif" width="150" height="100"/>
+            <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png"></a>
+            
             <ul id="page_status">
 	      {{ greeting }}
-	    </ul>
+            </ul>
+            
             <nav id="page_main_nav">
                 <ul>
                     <li>
-                        <A href="/qbrary">Manage Questions</a>
+                        <a href="/qbrary">Manage Questions</a>
                     </li>
                     <li>
-                        <SELECT id="add_question" onchange="practiceQuestion(this)">
-                            <OPTION VALUE="0" SELECTED>Practice questions in...</OPTION>
-                            {% for subject in subjects %}
-                                <OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
-                            {% endfor %}
-                        </SELECT>
+                        <a href="/pickquestiontopic?subject_key=ag1raGFuZXhlcmNpc2VzchALEgdTdWJqZWN0GIbt1wEM">Add Question</a>
                     </li>
                     <li>
-                        <SELECT id="add_question" onchange="addQuestion(this)">
-                            <OPTION VALUE="0" SELECTED>Add a question in...</OPTION>
-                                {% for subject in subjects %}
-                                    <OPTION VALUE="{{ subject.key }}">{{subject.name}}</OPTION>
-                                {% endfor %}
-                        </SELECT>
+                        <a href="/pickquiztopic?subject_key=ag1raGFuZXhlcmNpc2VzchALEgdTdWJqZWN0GIbt1wEM">Practice Questions</a>
+                    </li>
+                    <li>
+                        <a href="/exercisedashboard">Exercise Dashboard</a>
                     </li>
                 </ul>
             </nav>
             <nav id="page_sub_nav">
-                {% block pagesubmenu %}{% block pagetitle %}{% endblock pagetitle %}
-                {% endblock pagesubmenu %} 
+                {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
+                {% endblock pagesubmenu %}
+                
             </nav>
+           
+            
             {% block pagemessage %}
+            
             {% endblock pagemessage %}
         </header>
         {% block pagecontent %}
         {% endblock pagecontent %}
         {% include "page_footer.html" %}
+
+	<!-- For ChartBeat analytics START -->
+	<script type="text/javascript">
+	var _sf_async_config={uid:10894,domain:"khanacademy.org"};
+	(function(){
+	  function loadChartbeat() {
+	    window._sf_endpt=(new Date()).getTime();
+	    var e = document.createElement('script');
+	    e.setAttribute('language', 'javascript');
+	    e.setAttribute('type', 'text/javascript');
+	    e.setAttribute('src',
+	       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
+	       "static.chartbeat.com/js/chartbeat.js");
+	    document.body.appendChild(e);
+	  }
+	  var oldonload = window.onload;
+	  window.onload = (typeof window.onload != 'function') ?
+	     loadChartbeat : function() { oldonload(); loadChartbeat(); };
+	})();
+	</script>
+	<!-- For ChartBeat analytics END -->
+
     </body>
 </html>
