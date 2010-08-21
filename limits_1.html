@@ -35,6 +35,9 @@ function nicefy_signs(expr)
 	while (expr.indexOf("- -") != -1) {
 		expr = expr.replace("- -", "+ ")
 	}
+	while (expr.indexOf("^1") != -1) {
+		expr = expr.replace("^1", "")
+	}
 	return expr;
 }
 
