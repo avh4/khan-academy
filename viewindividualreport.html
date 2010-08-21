@@ -1,60 +1,67 @@
 {% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#individual_report caption {
+    margin-top: 1.5em;
+    padding: 3px;
+    text-align: left;
+    font-weight: bold;
+    font-size:12px; 
+    line-height:18px;
+}
+#individual_report table {    
+    border-top: 2px solid #80C65A;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+#individual_report td, #individual_report th {
+    padding: 3px;
+}
+#individual_report th {
+    BORDER-RIGHT: #fff 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-TOP: #fff 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-SIZE: 11px;
+    PADDING-BOTTOM: 4px;
+    VERTICAL-ALIGN: bottom;
+    COLOR: #333;
+    LINE-HEIGHT: 13px;
+    PADDING-TOP: 4px;
+    BORDER-BOTTOM: #ccc 1px solid;
+    FONT-FAMILY: arial,helvetica,sans-serif;
+    BACKGROUND-COLOR: #d2dded    
+}
+#individual_report th {
+    white-space: nowrap;
+}
+#individual_report th:first-child {
+    width: 100%;
+    text-align: left;
+}
+#individual_report tr.even_row td {
+    background-color:#FFFFFF; 
+}
+#individual_report tr.odd_row td {
+    background-color:#EFEFEF;    
+}
+
+</style>
+{% endblock pagescript %}
 {% block pagetitle %}Individual Report for {{student}}{% endblock pagetitle %}
 {% block pagecontent %}
-
-<p>&nbsp;</p>
-
+<article id="individual_report">    
 {% if proficient_exercises %}
-<div class=hdg>&nbsp;<h3>Proficient Modules</h3></div>
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL" width="100%">Exercise</td><td class="colHeadL" nowrap>Current Streak</td><td class="colHeadL" nowrap>Longest Streak</td><td class="colHeadL" nowrap>Total Done</td><td class="colHeadL" nowrap>% Correct</td><td class="colHeadL" nowrap>% of last 10</td></tr>
+<table>
+<caption>
+Proficient Modules    
+</caption>
+<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><th>% Correct</th><th>% of last 10</th></tr>
 {% for exercise in proficient_exercises %}
 		{% if forloop.counter|divisibleby:2 %}
-		<TR class="highlightWhite" >
+		<tr class="even_row" >
 		{% else %}
-		<TR class="highlightGreyRelated">
-		{% endif %}
-		<td>{{exercise.display_name}}</td>
-		<td>{{exercise.streak}}</td>
-		<td>{{exercise.longest_streak}}</td>
-		<td>{{exercise.total_done}}</td>
-		<td>{{exercise.percent_correct}}</td>
-		<td>{{exercise.percent_of_last_ten}}</td>
-		</tr>
-{% endfor %}
-</table><br>
-{% endif %}
-
-{% if review_exercises %}
-<div class=hdg>&nbsp;<h3>Review Modules</h3></div>
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL" width="100%">Exercise</td><td class="colHeadL" nowrap>Current Streak</td><td class="colHeadL" nowrap>Longest Streak</td><td class="colHeadL" nowrap>Total Done</td><td class="colHeadL" nowrap>% Correct</td><td class="colHeadL" nowrap>% of last 10</td></tr>
-{% for exercise in review_exercises %}
-		{% if forloop.counter|divisibleby:2 %}
-		<TR class="highlightWhite" >
-		{% else %}
-		<TR class="highlightGreyRelated">
-		{% endif %}
-		<td>{{exercise.display_name}}</td>
-		<td>{{exercise.streak}}</td>
-		<td>{{exercise.longest_streak}}</td>
-		<td>{{exercise.total_done}}</td>
-		<td>{{exercise.percent_correct}}</td>
-		<td>{{exercise.percent_of_last_ten}}</td>
-		</tr>
-{% endfor %}
-</table><br>
-{% endif %}
-
-{% if suggested_exercises %}
-<div class=hdg>&nbsp;<h3>Suggested Modules</h3></div>
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL" width="100%">Exercise</td><td class="colHeadL" nowrap>Current Streak</td><td class="colHeadL" nowrap>Longest Streak</td><td class="colHeadL" nowrap>Total Done</td><td class="colHeadL" nowrap>% Correct</td><td class="colHeadL" nowrap>% of last 10</td></tr>
-{% for exercise in suggested_exercises %}
-		{% if forloop.counter|divisibleby:2 %}
-		<TR class="highlightWhite" >
-		{% else %}
-		<TR class="highlightGreyRelated">
+		<tr class="odd_row">
 		{% endif %}
 		<td>{{exercise.display_name}}</td>
 		<td>{{exercise.streak}}</td>
@@ -67,4 +74,50 @@
 </table>
 {% endif %}
 
+{% if review_exercises %}
+<table>
+<caption>
+Review Modules    
+</caption>
+<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><th>% Correct</th><th>% of last 10</th></tr>
+{% for exercise in review_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<tr class="even_row" >
+		{% else %}
+		<tr class="odd_row">
+		{% endif %}
+		<td>{{exercise.display_name}}</td>
+		<td>{{exercise.streak}}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td>{{exercise.total_done}}</td>
+		<td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td>
+		</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% if suggested_exercises %}
+<table>
+<caption>
+Suggested Modules    
+</caption>
+<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><th>% Correct</th><th>% of last 10</th></tr>
+{% for exercise in suggested_exercises %}
+		{% if forloop.counter|divisibleby:2 %}
+		<tr class="even_row" >
+		{% else %}
+		<tr class="odd_row">
+		{% endif %}
+		<td>{{exercise.display_name}}</td>
+		<td>{{exercise.streak}}</td>
+		<td>{{exercise.longest_streak}}</td>
+		<td>{{exercise.total_done}}</td>
+		<td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td>
+		</tr>
+{% endfor %}
+</table>
+{% endif %}
+</article>
 {% endblock pagecontent %}
