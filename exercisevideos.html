@@ -1,12 +1,12 @@
 {% extends "page_template.html" %}
 {% block pagetitle%}<A href="/exercises?exid={{exercise.name}}">{{extitle}}</A> : Videos{% endblock pagetitle %}
 {% block pagecontent %}
-<script language=Javascript1.2><!--
+<script language=Javascript1.2>
 function changeVideo(identifier)
 {
 	document.getElementById("vid").innerHTML = '<object width="873" height="525"><param name="movie" value="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="873" height="525"></embed></object>';
-	
-	
+
+
 }
 
 </script>
@@ -17,7 +17,7 @@ function changeVideo(identifier)
   {% endfor %}
 <P>
 <div id="vid"></div>
-<script language=Javascript1.2><!--
+<script language=Javascript1.2>
 changeVideo('{{first_video.youtube_id}}');
 </script>
 {% else %}
