@@ -45,7 +45,27 @@ function getNextLabel()
 	return pointLabels[nextPointIndex];
 }
 
-
+function initPlane()
+{
+	present.initPicture(-10,10, -10, 10);
+	
+	present.fontstyle = "normal";
+	present.fontsize = "10";
+	
+	present.stroke = "#DDDDDD";
+	present.strokewidth = "2";
+	for(var i=-10; i<11; i++)
+	{
+		if (i!=0)
+		{
+			present.line([i,-11], [i,11]);
+			present.line([-11,i], [11,i]);
+			present.text([i, .1], i, below);
+			present.text([0, i], i, right);
+		}
+	}
+	present.axes();
+}
 function graphPoint(x,y, labelPosition)
 {
 	

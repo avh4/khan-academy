@@ -28,7 +28,7 @@ functions[0] = function() {
 	
 	n_coefs = new Array();
 	for (var i = n_order; i > 0; i--) {
-		n_coefs[i] = get_random_nonzero(-3, 3);
+		n_coefs[i] = nonZeroRandomInt(-3, 3);
 		num = num + n_coefs[i] + 'x^' + i + ' + ';
 		
 		if (i == high_order) {
@@ -42,7 +42,7 @@ functions[0] = function() {
 	
 	d_coefs = new Array();
 	for (var i = d_order; i > 0; i--) {
-		d_coefs[i] = get_random_nonzero(-3, 3);
+		d_coefs[i] = nonZeroRandomInt(-3, 3);
 		denom = denom + d_coefs[i] + 'x^' + i + ' + ';
 		
 		if (i == high_order) {
@@ -94,8 +94,8 @@ functions[1] = function() {
 	funcType = 5;
 	
 	// c / (x + b)
-	c = get_random_nonzero(-7, 7);
-	b = get_random_nonzero(-7, 7);
+	c = nonZeroRandomInt(-7, 7);
+	b = nonZeroRandomInt(-7, 7);
 	
 	curFunc = function(x) {
 		return c / (x + b);
@@ -128,8 +128,8 @@ functions[2] = function() {
 	funcType = 6;
 	
 	// c / |x + b|
-	var c = get_random_nonzero(-7, 7);
-	var b = get_random_nonzero(-7, 7);
+	var c = nonZeroRandomInt(-7, 7);
+	var b = nonZeroRandomInt(-7, 7);
 	
 	curFunc = function(x) {
 		return c / Math.abs(x + b);

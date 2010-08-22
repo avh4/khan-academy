@@ -19,14 +19,6 @@ table.limit tr {
 <script language=Javascript1.2><!--
 var functions = new Array();
 
-// zeros are a pain to deal with
-// returns -5 to 5 not including 0
-function get_random_nonzero(min, max) {
-	if (!min) min = -5;
-	if (!max) max = 5;
-    return (getRandomIntRange(0, 1) ? getRandomIntRange(min, -1) : getRandomIntRange(1, max))
-}
-
 function nicefy_signs(expr)
 {
 	while (expr.indexOf("+ -") != -1) {
@@ -64,11 +56,11 @@ functions[0] = function() {
 	
 	// lim (quadratic)(line) / line
 	// lim (q_lcoef*x^2)(x+cons) / (x+cons)
-	var q_lcoef = get_random_nonzero(-3, 3);
+	var q_lcoef = nonZeroRandomInt(-3, 3);
 	
 	// calculate the upper edge of the graph so we get a visible f(a)
 	var edge = Math.floor(Math.sqrt(Math.abs(10 / q_lcoef)));
-    var l_cons = get_random_nonzero(-1 * edge, edge);
+    var l_cons = nonZeroRandomInt(-1 * edge, edge);
 	
 	var quadratic = '' + q_lcoef + 'x^2';
 	var line = nicefy_signs('(x + ' + l_cons + ')');
@@ -84,8 +76,8 @@ functions[0] = function() {
 	
 	setCorrectAnswer(limtoa);
 	addWrongChoice(0);
-	addWrongChoice(get_random_nonzero(-3, 3));
-	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
 	addWrongChoice(q_lcoef);
 	addWrongChoice(l_cons);
 	addWrongChoice(curFunc(0));
@@ -99,8 +91,8 @@ functions[1] = function() {
 	
 	// lim abs_coef|x+abs_cons|/x+abs_cons
 	
-	abs_coef = get_random_nonzero(-5, 5);
-	abs_cons = get_random_nonzero(-7, 7);
+	abs_coef = nonZeroRandomInt(-5, 5);
+	abs_cons = nonZeroRandomInt(-7, 7);
 	
 	a = abs_cons * -1;
 	
@@ -121,8 +113,8 @@ functions[1] = function() {
 	addWrongChoice(abs_coef * abs_coef * -1);
 	addWrongChoice(abs_coef);
 	addWrongChoice(abs_coef * -1);
-	addWrongChoice(get_random_nonzero(-3, 3));
-	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
 	
 	return nicefy_signs('(' + abs_coef + '|x + ' + abs_cons + '|)/ (x + ' + abs_cons + ')');
 }
@@ -133,15 +125,15 @@ functions[2] = function() {
 	// lim	{ l_coef*x + l_cons if x != a
 	//		{ d_cons if x = a
 	
-	var l_coef = get_random_nonzero(-3, 3);
-	var l_cons = get_random_nonzero(-4, 4);
+	var l_coef = nonZeroRandomInt(-3, 3);
+	var l_cons = nonZeroRandomInt(-4, 4);
 	
-	d_cons = get_random_nonzero(-7, 7);
+	d_cons = nonZeroRandomInt(-7, 7);
 	
 	if (l_coef > 0) { // positive-slope lines have normal min and max
-		a = get_random_nonzero(Math.ceil((-10 - l_cons)/l_coef), Math.floor((10 - l_cons)/l_coef));
+		a = nonZeroRandomInt(Math.ceil((-10 - l_cons)/l_coef), Math.floor((10 - l_cons)/l_coef));
 	} else {
-		a = get_random_nonzero(Math.floor((10 - l_cons)/l_coef), Math.ceil((-10 - l_cons)/l_coef));
+		a = nonZeroRandomInt(Math.floor((10 - l_cons)/l_coef), Math.ceil((-10 - l_cons)/l_coef));
 	}
 	
 	d_line = nicefy_signs(l_coef + 'x + ' + l_cons);
@@ -160,8 +152,8 @@ functions[2] = function() {
 	addWrongChoice(a);
 	addWrongChoice(format_fraction(l_cons * -1, l_coef));
 	addWrongChoice(0);
-	addWrongChoice(get_random_nonzero(-3, 3));
-	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
 	addWrongChoice('`does not exist`');
 	
 	return 'f(x)` where `f(x) ={(' + d_line + ',if x!=' + a + '),(' + d_cons + ',if x=' + a + '):}';
@@ -172,11 +164,11 @@ functions[3] = function() {
 	
 	// normal quadratic
 	// q_lcoef*x^2 + q_cons
-	var q_lcoef = get_random_nonzero(-3, 3);
-	q_cons = get_random_nonzero(-3, 3);
+	var q_lcoef = nonZeroRandomInt(-3, 3);
+	q_cons = nonZeroRandomInt(-3, 3);
 	
 	var edge = Math.floor(Math.sqrt(Math.abs((10 - q_cons) / q_lcoef)));
-    a = get_random_nonzero(-1 * edge, edge);
+    a = nonZeroRandomInt(-1 * edge, edge);
 	
 	curFunc = function(x) {
 		return q_lcoef * Math.pow(x, 2) + q_cons;
@@ -189,7 +181,7 @@ functions[3] = function() {
 	setCorrectAnswer(limtoa);
 	addWrongChoice(0);
 	addWrongChoice(curFunc(0));
-	addWrongChoice(get_random_nonzero(-3, 3));
+	addWrongChoice(nonZeroRandomInt(-3, 3));
 	addWrongChoice(q_cons);
 	addWrongChoice(q_cons * -1);
 	addWrongChoice('`does not exist`');
@@ -226,24 +218,7 @@ if (l_limtoa != r_limtoa) {
 {% endblock hints %}
 
 function graph_update() {
-	present.initPicture(-10,10, -10, 10);
-	
-	present.fontstyle = "normal";
-	present.fontsize = "10";
-	
-	present.stroke = "#DDDDDD";
-	present.strokewidth = "2";
-	for(var i=-10; i<11; i++)
-	{
-		if (i!=0)
-		{
-			present.line([i,-11], [i,11]);
-			present.line([-11,i], [11,i]);
-			present.text([i, .1], i, below);
-			present.text([0, i], i, right);
-		}
-	}
-	present.axes();
+	initPlane();
 	
 	present.fontsize = "15";
 	present.fontfamily = "sans-serif";

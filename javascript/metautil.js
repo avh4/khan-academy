@@ -8,6 +8,17 @@ function roundNumber(n, precision)
 	return Math.round(n*Math.pow(10,precision))/Math.pow(10,precision);	
 }
 
+function nicefySigns(expr)
+{
+	while (expr.indexOf("+ -") != -1) {
+		expr = expr.replace("+ -", "- ");
+	}
+	while (expr.indexOf("- -") != -1) {
+		expr = expr.replace("- -", "+ ")
+	}
+	return expr;
+}
+
 //Randomly choose a problem type
 
 
@@ -30,6 +41,17 @@ function pickNumber(low,high)
 		return ''+notDoneNum;
 	}, Math.floor((high-low)/2), "number");
 	return notDoneNum;
+}
+
+function nicefySigns(expr)
+{
+	while (expr.indexOf("+ -") != -1) {
+		expr = expr.replace("+ -", "- ");
+	}
+	while (expr.indexOf("- -") != -1) {
+		expr = expr.replace("- -", "+ ")
+	}
+	return expr;
 }
 
 function writeText(text)
@@ -98,12 +120,13 @@ function mathFormat(e)
 	return	'`'+e+'`';
 }
 
-function nonZeroRandomInt(l,h)
+function nonZeroRandomInt(min,max)
 {
-	var i = getRandomIntRange(l,h);
-	while (i==0)
-		i = getRandomIntRange(l,h);
-	return i;
+	if (!min) min = -5;
+	if (!max) max = 5;
+    return (getRandomIntRange(0, 1) ?
+		getRandomIntRange(min, -1) :
+		getRandomIntRange(1, max))
 }
 
 function problemFooter()
