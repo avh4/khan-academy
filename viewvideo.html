@@ -17,11 +17,9 @@
     <div>
         <object id="idOVideo" name="idOVideo" width="800" height="480">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
-            </param><param name="allowFullScreen" value="true">
-            </param><param name="allowScriptAccess" value="always">
-            </param>
+            <param name="allowFullScreen" value="true">
+            <param name="allowScriptAccess" value="always">
             <embed id="idPlayer" name="idPlayer" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
-            </embed>
         </object>
         {% video_comments video comments_page %}
         {% video_qa video qa_page qa_expand_id %}
