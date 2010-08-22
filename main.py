@@ -265,7 +265,7 @@ class ViewExercise(webapp.RequestHandler):
                 'time_warp': time_warp,
                 'problem_number': problem_number,
                 'num_problems_to_print': num_problems_to_print,
-                'issue_labels': ('Component-Exercises,Exercise-%s,Problem-%s' % (exid, problem_number))
+                'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
             template_file = exid + '.html'
             if exercise.raw_html is not None:
