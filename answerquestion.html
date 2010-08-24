@@ -1,8 +1,10 @@
 {% extends "qbrary_page_template.html" %}
 {% block pagetitle %}<B>Quiz Question</B> (author: {{question.author}}){% endblock pagetitle %}
 {% block pagescript %}
-<script type="text/javascript" src="/javascript/rating.js?{{App.version}}">
-</script>
+<script type="text/javascript" src="/javascript/rating.js?{{App.version}}"></script>
+<script type="text/javascript" src="/javascript/html4-defs.js"></script>
+<script type="text/javascript" src="/javascript/html-sanitizer.js"></script>
+
 <script>
     var correct_choice = {{correct_index}};
     var current_choice = -1;
@@ -156,6 +158,14 @@
         show_preview_and_publish_button_if_needed();
     }    
     
+    function urlX(url) { if (/^https?:\/\//.test(url)) { return url }}
+    function idX(id) { return "ka_sanitized_" + id }
+
+    function print_sanitized(str)
+    {
+        document.write(html_sanitize(str, urlX, idX));
+    }
+
     window.onload = handle_page_load;
     
 </script>
@@ -184,22 +194,22 @@
 	<td valign=top width=70%>
 		<font face="arial" size=3><font face="arial" size=3><script language="JavaScript" type="text/javascript"><!--document.write(unescape({{question.question_text}}))//-->
 			</script></font>
-		<div id="question" style="position:relative;">{{question.question_text}}</div>
+		<div id="question" style="position:relative;"><script>print_sanitized("{{question.question_text|escapejs}}")</script></div>
 		&nbsp;<P>&nbsp;<P>
-		<div id="hint" style="position:relative; visibility:hidden;"><b>Hint:</b> {{question.hint_text}}</div>
+		<div id="hint" style="position:relative; visibility:hidden;"><b>Hint:</b> <script>print_sanitized("{{question.hint_text|escapejs}}")</script></div>
 		&nbsp;<P>&nbsp;<P>
-		<div id="explanation" style="position:relative; visibility:hidden;"><b>Answer Explanation:</b> {{question.answer_text}}</div>
+		<div id="explanation" style="position:relative; visibility:hidden;"><b>Answer Explanation:</b> <script>print_sanitized("{{question.answer_text|escapejs}}")</script></div>
 		</font>
 	</td>
 	<td>
 	<td valign="top">
 		<form name="answerform">
 		<table border="0">
-		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(0)"></input></td><td valign=top>{{choice0}}</td></tr>
-		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(1)"></input></td><td valign=top>{{choice1}}</td></tr>
-		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(2)"></input></td><td valign=top>{{choice2}}</td></tr>
-		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(3)"></input></td><td valign=top>{{choice3}}</td></tr>
-		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(4)"></input></td><td valign=top>{{choice4}}</td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(0)"></input></td><td valign=top><script>print_sanitized("{{choice0|escapejs}}")</script></td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(1)"></input></td><td valign=top><script>print_sanitized("{{choice1|escapejs}}")</script></td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(2)"></input></td><td valign=top><script>print_sanitized('{{choice2|escapejs}}')</script></td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(3)"></input></td><td valign=top><script>print_sanitized('{{choice3|escapejs}}')</script></td></tr>
+		<tr><td valign=top><input type="radio" name="select_answer" onClick="set_choice(4)"></input></td><td valign=top><script>print_sanitized('{{choice4|escapejs}}')</script></td></tr>
 		</table>	
 		
 		<P>

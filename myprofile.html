@@ -1,6 +1,19 @@
 {% extends "qbrary_page_template.html" %}
 {% block pagetitle %}<B>Manage Question</B>{% endblock pagetitle %}
-    
+{% block pagescript %}
+<script type="text/javascript" src="/javascript/html4-defs.js"></script>
+<script type="text/javascript" src="/javascript/html-sanitizer.js"></script>
+<script>
+    function urlX(url) { if (/^https?:\/\//.test(url)) { return url }}
+    function idX(id) { return "ka_sanitized_" + id }
+
+    function print_sanitized(str)
+    {
+        document.write(html_sanitize(str, urlX, idX));
+    }
+</script>
+{% endblock pagescript %}
+
 {% block pagecontent %}
 <table>
 <tr>
@@ -24,7 +37,7 @@ you losing your Khan Academy account entirely.</P>
     {% for question in published %}
     	<tr class={% cycle 'highlighWhite','highlightGreyRelated' %}>
 	<td>{{question.subject.name}}</td>
-    	<td>{{question.question_text|striptags|smart_truncate:75}}</td> 
+    	<td><script>print_sanitized("{{question.question_text|striptags|smart_truncate:75|escapejs}}")</script></td> 
 	<td><A HREF="/editquestion?question_key={{ question.key }}">[edit]</A></td>
 	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[unpublish]</A></td>
 	<td><A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A></td>
@@ -44,7 +57,7 @@ you losing your Khan Academy account entirely.</P>
     {% for question in notpublished %}
     	<tr class={% cycle 'highlighWhite','highlightGreyRelated' %}>
     	<td>{{question.subject.name}}</td>
-    	<td>{{question.question_text|smart_truncate:75}}</td> 
+    	<td><script>print_sanitized("{{question.question_text|striptags|smart_truncate:75|escapejs}}")</script></td> 
 	<td><A HREF="/editquestion?question_key={{ question.key }}">[edit]</A></td>
 	<td><A HREF="/changepublished?question_key={{ question.key }}&redirect={{current_url}}">[publish]</A>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 	<td><A HREF="/deletequestion?question_key={{ question.key }}&redirect={{current_url}}">[delete]</A></td>
