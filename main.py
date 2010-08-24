@@ -955,6 +955,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
         colOne = []
         colOne.append('Chemistry')
         colOne.append('Arithmetic')
+        colOne.append('Developmental Math')
         colOne.append('Pre-algebra')
         colOne.append('Geometry')
         colOne.append('California Standards Test: Geometry')
@@ -1062,45 +1063,14 @@ class ViewNewHomePage(webapp.RequestHandler):
 
     def get(self):
     	all_topics_list = []
-    	 
-    	 
-    	basicMath = []
-    	basicMath.append('Arithmetic')
-    	basicMath.append('Developmental Math')
-    	basicMath.append('Pre-algebra')
-    	 
-    	algebra = []
-    	colTwo.append('Algebra I Worked Examples')
-        colTwo.append('ck12.org Algebra 1 Examples')
-        colTwo.append('Algebra')
-        colTwo.append('California Standards Test: Algebra I')
-        colTwo.append('California Standards Test: Algebra II')
-        colTwo.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
-        
-        geometryTrig = []
-    	colOne.append('Geometry')
-        colOne.append('California Standards Test: Geometry')
-        colThree.append('Trigonometry')
-        
-        calculusBeyond = []
-        colThree.append('Precalculus')
-        colThree.append('Calculus')
-        colThree.append('Differential Equations')
-        colFour.append('Linear Algebra')
-        
-        
-        
-        science = []
-        colOne.append('Chemistry')
-        
-        
-        
-        
-        
+    	    
         colOne = []
-        
-
-        
+        colOne.append('Chemistry')
+        colOne.append('Arithmetic')
+        colOne.append('Developmental Math')
+        colOne.append('Pre-algebra')
+        colOne.append('Geometry')
+        colOne.append('California Standards Test: Geometry')
         colOne.append('Brain Teasers')
         colOne.append('Current Economics')
         colOne.append('Banking and Money')
@@ -1110,22 +1080,29 @@ class ViewNewHomePage(webapp.RequestHandler):
         colOne.append('Valuation and Investing')
         colOne.append('Geithner Plan')
         
-
-       
+        colTwo = []
+        colTwo.append('Algebra I Worked Examples')
+        colTwo.append('ck12.org Algebra 1 Examples')
+        colTwo.append('Algebra')
+        colTwo.append('California Standards Test: Algebra I')
+        colTwo.append('California Standards Test: Algebra II')
+        colTwo.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
        
 
         colThree = []
         colThree.append('Biology')
-        
+        colThree.append('Trigonometry')
+        colThree.append('Precalculus')
         colThree.append('Statistics')
         colThree.append('Probability')
-        
+        colThree.append('Calculus')
+        colThree.append('Differential Equations')
 
         colFour = []
         colFour.append('Khan Academy-Related Talks and Interviews')
         colFour.append('History')
         colFour.append('Organic Chemistry')
-        
+        colFour.append('Linear Algebra')
         colFour.append('Physics')
         colFour.append('Paulson Bailout')
         
@@ -1166,7 +1143,7 @@ class ViewNewHomePage(webapp.RequestHandler):
             'playlist_names': cols,
             'all_topics': all_topics_list,
             }
-        path = os.path.join(os.path.dirname(__file__), 'newhomepage.html')
+        path = os.path.join(os.path.dirname(__file__), 'videolibrarytabs.html')
         self.response.out.write(template.render(path, template_values))
         
         

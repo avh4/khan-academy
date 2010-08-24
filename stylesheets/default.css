@@ -70,7 +70,9 @@ footer > * {
     float: left;
 }
 
-
+#page_social {
+    float: right;
+}
 
 #page_status {
     float: right;
