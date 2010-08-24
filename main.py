@@ -1687,6 +1687,7 @@ def real_main():
 
         # Below are all qbrary related pages
         ('/qbrary', qbrary.IntroPage),
+        ('/worldhistory', qbrary.IntroPage),
         ('/managequestions', qbrary.ManageQuestions),
         ('/subjectmanager', qbrary.SubjectManager),
         ('/editsubject', qbrary.CreateEditSubject),
