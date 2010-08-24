@@ -1686,7 +1686,8 @@ def real_main():
         ('/killliveassociations', KillLiveAssociations),
 
         # Below are all qbrary related pages
-        ('/qbrary', qbrary.MainPage),
+        ('/qbrary', qbrary.IntroPage),
+        ('/managequestions', qbrary.ManageQuestions),
         ('/subjectmanager', qbrary.SubjectManager),
         ('/editsubject', qbrary.CreateEditSubject),
         ('/viewsubject', qbrary.ViewSubject),

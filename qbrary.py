@@ -294,7 +294,15 @@ class ChangePublished(webapp.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
 
 
-class MainPage(webapp.RequestHandler):
+class IntroPage(webapp.RequestHandler):
+
+    def get(self):
+        # note: don't require login to view the intro page
+        path = os.path.join(os.path.dirname(__file__), 'qbraryintro.html')
+        self.response.out.write(template.render(path, None))
+        
+
+class ManageQuestions(webapp.RequestHandler):
 
     def get(self):
 
@@ -970,7 +978,8 @@ class Guestbook(webapp.RequestHandler):
 
 
 application = webapp.WSGIApplication([
-    ('/', MainPage),
+    ('/', IntroPage),
+    ('/managequestions', ManageQuestions),
     ('/subjectmanager', SubjectManager),
     ('/editsubject', CreateEditSubject),
     ('/viewsubject', ViewSubject),
