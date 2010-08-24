@@ -742,10 +742,6 @@ class SubjectManager(webapp.RequestHandler):
 class CreateEditQuestion(webapp.RequestHandler):
 
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         user = users.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
@@ -833,10 +829,6 @@ class CreateEditQuestion(webapp.RequestHandler):
     #replicating the functionality described in "get" in "post".  Should clean this up in the future
     #but I just wanted it to be able to process longer fields (so they wouldn't have to be in the URL).
     def post(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
     	user = users.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
