@@ -1,22 +1,7 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 	<link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.3/jquery-ui.min.js"></script>
-	<script type="text/javascript">
-		$(function(){
-
-			// Accordion
-			$("#accordion").accordion({ header: "h3" });
-
-			// Tabs
-			$('#tabs-outer').tabs( {width: "100%"});
-			$('#tabs-inner').tabs();
-
-
-			
-			
-		});
-	</script>
+	
 <!-- For ChartBeat analytics START -->
 <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
 <!-- For ChartBeat analytics END -->
@@ -41,79 +26,77 @@
 {% block pagecontent %}
 
             
-<table>
-<tr>
-<td>
 
-
- <br>
-  <P>
 
 <P>
 <iframe align=right src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>
-            	The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  
+            	            	The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  
             	    	    Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured by YouTube video views per day and unique
             	    	    users per month.  We are complementing this ever-growing library with user-paced exercises--developed as an <A href="http://code.google.com/p/khanacademy/">open source project</A>--allowing the Khan Academy to become the free classroom for the World.
+            	    	    <A href="/frequently-asked-questions"><b>Learn more about the Khan Academy and Salman Khan...</b></A>
         <P>
 <h3><A href="/exercisedashboard"><B>Log in to the Khan Academy web application for user-paced practice and instruction</B></A></h3>
 
 <P>
-<div id="tabs-outer">
-            <ul>
-            	<li><a href="#overview"><span>Library Overview</span></a></li>
-                <li><a href="#math"><span>Math</span></a></li>
-                <li><a href="#science"><span>Science</span></a></li>
-                <li><a href="#finance"><span>Finance</span></a></li>
-                <li><a href="#other"><span>Everything Else</span></a></li>
-            </ul>
-            <div id="overview">
-            	<object width="560" height="340"><param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="560" height="340"></embed></object>
-            </div>
-            <div id="math">
-            		<A href="#Arithmetic">Arithmetic</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+	<object width="560" height="340" align="right"><param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="560" height="340"></embed></object>
+	<h3>Math</h3><P>
+	<ul> 
+			<A href="#Arithmetic">Arithmetic</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#Pre-algebra">Pre-algebra</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Algebra">Algebra</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Algebra I Worked Examples">Algebra I Worked Examples</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#California Standards Test: Algebra I">California Standards Test: Algebra I</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#ck12.org Algebra 1 Examples">ck12.org Algebra 1 Examples</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#California Standards Test: Algebra II">California Standards Test: Algebra II</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#MA Tests for Education Licensure (MTEL) -Pre-Alg">MA Tests for Education Licensure (MTEL) -Pre-Alg</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Precalculus">Precalculus</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Probability">Probability</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Statistics">Statistics</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#Geometry">Geometry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#California Standards Test: Geometry">California Standards Test: Geometry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Trigonometry">Trigonometry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Calculus">Calculus</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Differential Equations">Differential Equations</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#Linear Algebra">Linear Algebra</A>&nbsp;&nbsp;&nbsp;&nbsp;
-            
-            </div>
-            <div id="science">
-            		<A href="#Biology">Biology</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+	</ul>
+	<P>
+	<h3>Science</h3><P>
+	<ul>
+			<A href="#Biology">Biology</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#Chemistry">Chemistry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Organic Chemistry">Organic Chemistry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Physics">Physics</A>&nbsp;&nbsp;&nbsp;&nbsp;
-            
-            </div>
-            <div id="finance">
-            		<A href="#Finance">Finance</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+	</ul>
+	<h3>Other Stuff ...</h3><P>
+	<ul>
+
+			<A href="#Khan Academy-Related Talks and Interviews">Khan Academy-Related Talks and Interviews</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<A href="#History">History</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<A href="#Brain Teasers">Brain Teasers</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<A href="#Finance">Finance</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Banking and Money">Banking and Money</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#Credit Crisis">Credit Crisis</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Current Economics">Current Economics</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Geithner Plan">Geithner Plan</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Paulson Bailout">Paulson Bailout</A>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<A href="#Valuation and Investing">Valuation and Investing</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
 			<A href="#Venture Capital and Capital Markets">Venture Capital and Capital Markets</A>&nbsp;&nbsp;&nbsp;&nbsp;
-            
-            </div>
-            <div id="other">
-            		<A href="#Khan Academy-Related Talks and Interviews">Khan Academy-Related Talks and Interviews</A>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<A href="#History">History</A>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<A href="#Brain Teasers">Brain Teasers</A>&nbsp;&nbsp;|&nbsp;&nbsp;
-            
-            </div>
-            	</div>
+		
+			
+
+	</ul>
+
+<P>
+
 	
 
 	<table width=100% border=0>
@@ -185,9 +168,7 @@
 		{% endfor %}
 	</td></tr></table>
 
-</td>
-</tr>
-</table>
+
 
 <!-- For ChartBeat analytics START -->
 <script type="text/javascript">
