@@ -30,13 +30,18 @@ a[href="#"], .requires_script {
 /*
  * Give script-using links a dotted underline when they are visible.
  */
+a[onclick]:link, 
 a[href="#"]:link, 
 a.uses_script:link, 
+a[onclick]:visited, 
 a[href="#"]:visited, 
 a.uses_script:visited {
     text-decoration: none;
     border-bottom: dotted 1px #069;
 }
+
+
+
 
 a[onclick]:link:hover, a[onclick]:link:focus,
 a[onclick]:visited:hover, a[onclick]:visited:focus,
@@ -194,3 +199,29 @@ article.video ol {
 article.video p#keywords {
     clear: both;
 }
+
+#visitors  {
+ margin-left:50px;
+  
+}
+
+#visitors a {
+	color:green;
+	text-decoration: none;
+
+}
+
+#visitors a:hover {
+	text-decoration: underline;
+	color: #DD6900;
+
+}
+
+a:visited.google-analytics-link-track, 
+a:link.google-analytics-link-track
+ { /*these GA click tracking links have onclick= JS tags -- need to undo the dotted border style that applies to these by default */
+    border-bottom: none;
+    text-decoration: underline;
+}
+
+
