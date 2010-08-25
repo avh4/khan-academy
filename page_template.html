@@ -60,6 +60,7 @@
         <header>
             <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png"></a>
            
+           
             <ul id="page_status">
             	
                 {% if username %}
@@ -102,7 +103,7 @@
                         <a href="/frequently-asked-questions">About Khan Academy</a>
                     </li>
                     <li>
-                        <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291">Donate</A>
+                        <a onclick="_gaq.push(['_trackEvent', 'Click', 'Donate-Link-Paypal-Header']);" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" >Donate</a>
                     </li>
                 </ul>
             </nav>
@@ -114,10 +115,10 @@
             <nav>
 		    <ul id="page_social">
 			<li>
-			    <A href="http://twitter.com/khanacademy"><img src="/images/twitter-16.jpg">Follow</A>
+			    <A onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy"><img src="/images/twitter-16.jpg">Follow</A>
 			</li>
 			<li>
-			    <A href="http://www.facebook.com/khanacademy"><img src="/images/facebook-16.jpg">Join</A>
+			    <A onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy"><img src="/images/facebook-16.jpg">Join</A>
 			</li>
 		    
 		    </ul>

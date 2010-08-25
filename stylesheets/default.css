@@ -30,10 +30,8 @@ a[href="#"], .requires_script {
 /*
  * Give script-using links a dotted underline when they are visible.
  */
-a[onclick]:link, 
 a[href="#"]:link, 
 a.uses_script:link, 
-a[onclick]:visited, 
 a[href="#"]:visited, 
 a.uses_script:visited {
     text-decoration: none;
