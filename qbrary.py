@@ -13,6 +13,101 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
 
+# Note: this class adapted from: http://github.com/Arachnid/aetycoon/blob/master/__init__.py#L496
+class ChoiceProperty(db.IntegerProperty):
+  """A property for efficiently storing choices made from a finite set.
+
+  This works by mapping each choice to an integer.  The choices must be hashable
+  (so that they can be efficiently mapped back to their corresponding index).
+
+  Example usage:
+
+  >>> class ChoiceModel(db.Model):
+  ...   a_choice = ChoiceProperty(enumerate(['red', 'green', 'blue']))
+  ...   b_choice = ChoiceProperty([(0,None), (1,'alpha'), (4,'beta')])
+
+  You interact with choice properties using the choice values:
+
+  >>> model = ChoiceModel(a_choice='green')
+  >>> model.a_choice
+  'green'
+  >>> model.b_choice == None
+  True
+  >>> model.b_choice = 'beta'
+  >>> model.b_choice
+  'beta'
+  >>> model.put() # doctest: +ELLIPSIS
+  datastore_types.Key.from_path(u'ChoiceModel', ...)
+
+  >>> model2 = ChoiceModel.all().get()
+  >>> model2.a_choice
+  'green'
+  >>> model.b_choice
+  'beta'
+
+  To get the int representation of a choice, you may use either access the
+  choice's corresponding attribute or use the c2i method:
+  >>> green = ChoiceModel.a_choice.GREEN
+  >>> none = ChoiceModel.b_choice.c2i(None)
+  >>> (green == 1) and (none == 0)
+  True
+
+  The int representation of a choice is needed to filter on a choice property:
+  >>> ChoiceModel.gql("WHERE a_choice = :1", green).count()
+  1
+  """
+  def __init__(self, choices, make_choice_attrs=True, *args, **kwargs):
+    """Constructor.
+
+    Args:
+      choices: A non-empty list of 2-tuples of the form (id, choice). id must be
+        the int to store in the database.  choice may be any hashable value.
+      make_choice_attrs: If True, the uppercase version of each string choice is
+        set as an attribute whose value is the choice's int representation.
+    """
+    super(ChoiceProperty, self).__init__(*args, **kwargs)
+    self.index_to_choice = dict(choices)
+    self.choice_to_index = dict((c,i) for i,c in self.index_to_choice.iteritems())
+    if make_choice_attrs:
+      for i,c in self.index_to_choice.iteritems():
+        if isinstance(c, basestring):
+          setattr(self, c.upper(), i)
+
+  def get_choices(self):
+    """Gets a list of values which may be assigned to this property."""
+    return self.choice_to_index.keys()
+
+  def c2i(self, choice):
+    """Converts a choice to its datastore representation."""
+    return self.choice_to_index[choice]
+
+  def __get__(self, model_instance, model_class):
+    if model_instance is None:
+      return self
+    index = super(ChoiceProperty, self).__get__(model_instance, model_class)
+    return self.index_to_choice[index]
+
+  def __set__(self, model_instance, value):
+      if (value == None):
+          return
+
+      try:
+          index = self.c2i(value)
+      except KeyError:
+          raise db.BadValueError('Property %s must be one of the allowed choices: %s' %
+                                 (self.name, self.get_choices()))
+      super(ChoiceProperty, self).__set__(model_instance, index)
+
+  def get_value_for_datastore(self, model_instance):
+    # just use the underlying value from the parent
+    return super(ChoiceProperty, self).__get__(model_instance, model_instance.__class__)
+
+  def make_value_from_datastore(self, value):
+    if value is None:
+      return None
+    return self.index_to_choice[value]
+
+
 class Greeting(db.Model):
 
     author = db.UserProperty()
@@ -64,6 +159,7 @@ class QuestionAnswerer(db.Model):
     difficulty_width = db.IntegerProperty()  # used for the pixel width of the actual stars
     quality_rating = db.RatingProperty()
     quality_width = db.IntegerProperty()  # used for the pixel width of the actual stars
+    flag = ChoiceProperty(enumerate(['inappropriate', 'spam', 'miscategorized']))
 
 
 class QuestionAnswerSession(db.Model):
@@ -88,15 +184,15 @@ class QuestionAnswerSessionAttempt(db.Model):
     was_correct = db.BooleanProperty()
 
 
-class QuestionAnswerSessionActionTypes(db.Model):
-
-    type = db.StringProperty()
+#class QuestionAnswerSessionActionTypes(db.Model):
+#    type = db.StringProperty()
 
 
 class QuestionAnswerSessionAction(db.Model):
 
     session = db.ReferenceProperty(QuestionAnswerSession)
-    action = db.ReferenceProperty(QuestionAnswerSessionActionTypes)
+#    action = db.ReferenceProperty(QuestionAnswerSessionActionTypes)
+    action = ChoiceProperty(enumerate(['hint_button_clicked', 'explain_button_clicked', 'next_button_clicked']))
     timestamp = db.DateTimeProperty(auto_now_add=True)  # set auto_now_add to True so that it's auto set on insert
 
 
@@ -194,7 +290,7 @@ def getBottomLevelChildren(subj):
             output.extend(getBottomLevelChildren(topic))
     return output
 
-
+"""
 class InitQbrary(webapp.RequestHandler):
 
     def get(self):
@@ -203,7 +299,7 @@ class InitQbrary(webapp.RequestHandler):
             new_action = QuestionAnswerSessionActionTypes()
             new_action.type = action_type
             new_action.put()
-
+"""
 
 class DeleteSubject(webapp.RequestHandler):
 
@@ -952,16 +1048,26 @@ class SessionAction(webapp.RequestHandler):
         session_key = self.request.get('session_key')
 
         qa_session = db.get(db.Key(session_key))
-        qa_action_type = QuestionAnswerSessionActionTypes.gql('WHERE type=:1', action_type).get()
 
-    # record a new question answer action
-
+        # record a new question answer action
         qa_session_action = QuestionAnswerSessionAction()
         qa_session_action.session = qa_session
-        qa_session_action.action = qa_action_type
+        qa_session_action.action = action_type
         qa_session_action.put()
 
         self.response.out.write(action_type)
+
+
+class FlagQuestion(webapp.RequestHandler):
+    def post(self):
+        question_answerer_key = self.request.get('question_answerer_key')
+        flag_type = self.request.get('flag_type')
+        
+        question_answerer = db.get(question_answerer_key)
+        question_answerer.flag = flag_type
+        question_answerer.put()
+
+        self.response.out.write(flag_type)
 
 
 class Guestbook(webapp.RequestHandler):
@@ -996,7 +1102,7 @@ application = webapp.WSGIApplication([
     ('/addquestion', CreateEditQuestion),
     ('/checkanswer', CheckAnswer),
     ('/sessionaction', SessionAction),
-    ('/initqbrary', InitQbrary),
+    ('/flagquestion', FlagQuestion),
     ('/viewauthors', ViewAuthors),
     ('/sign', Guestbook),
     ], debug=True)

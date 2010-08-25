@@ -151,6 +151,21 @@
     {
    		document.getElementById("preview_and_publish_tr").style.visibility = "{{preview_mode}}" == "True" ? "visible" : "hidden";
     }
+    
+    function send_flag(flag_type)
+    {
+        document.getElementById("flag_div").innerHTML = "Flagging...";
+    
+		$.post("/flagquestion", 
+                {"question_answerer_key" : '{{user_question.key}}',
+    			 "flag_type" : flag_type}, 
+                 function(result) { flag_callback(result); });	    
+    }
+    
+    function flag_callback(result)
+    {
+         document.getElementById("flag_div").innerHTML = "Thanks for flagging";
+    }
 
     function handle_page_load()
     {
@@ -163,6 +178,7 @@
 
     function print_sanitized(str)
     {
+        // use caja html sanitizer to protect against XSS
         document.write(html_sanitize(str, urlX, idX));
     }
 
@@ -213,9 +229,10 @@
 		</table>	
 		
 		<P>
-<table width=150px><tr><td>
+<table width=150px><tr><td align=center>
 <div class="highlightHeader">Rate this question</div><div class="highlightBox">
 	<table width=150px>
+<!--
 	<tr>
 		<td align=right>Quality:</td>
 		<td align=left>
@@ -230,9 +247,10 @@
 		</ul></div>
 		</td>
 	</tr>
+-->
 	<tr>
-		<td align=right>Importance:</td>
-		<td align=left>
+<!--		<td align=right>Importance:</td> -->
+		<td align=center>
 		<div id="importance_div_{{user_question.key}}">
 		<ul id="importance_ul_{{user_question.key}}" class="unit-rating" style="width:100px;">
 		<li class="current-rating" style="width:{{user_question.importance_width}}px;">Currently {{user_question.importance_rating}}/5</li>
@@ -244,6 +262,7 @@
 		</ul></div>
 		</td>
 	</tr>
+<!--
 	<tr>
 		<td align=right>Difficulty:</td>
 		<td align=left>
@@ -257,6 +276,21 @@
 		<li><a href="#" title="Very high difficulty" class="r5-unit" onclick="difficultyReq('{{user_question.key}}',5);return false;">5</a></li>
 		</ul></div>
 		</td>
+	</tr>
+-->
+	</table>
+</div>
+<br />
+<div class="highlightHeader">Flag this question</div><div class="highlightBox" id="flag_div">
+	<table width=150px>
+	<tr>
+	  <td><a href="#" title="Inappropriate" onclick="send_flag('inappropriate')">Inappropriate</a></td>
+	</tr>
+	<tr>
+      <td><a href="#" title="Spam" onclick="send_flag('spam')">Spam</a></td>
+	</tr>
+	<tr>
+      <td><a href="#" title="Miscategorized" onclick="send_flag('miscategorized')">Miscategorized</a></td>
 	</tr>
 	</table>
 </div>
@@ -279,5 +313,5 @@
   
 	<script language="Javascript1.2"><!--
 		document.answerform.reset();
-	</script>	
+	</script> //-->	
 {% endblock pagecontent %}

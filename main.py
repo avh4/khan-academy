@@ -1705,7 +1705,7 @@ def real_main():
         ('/addquestion', qbrary.CreateEditQuestion),
         ('/checkanswer', qbrary.CheckAnswer),
         ('/sessionaction', qbrary.SessionAction),
-        ('/initqbrary', qbrary.InitQbrary),
+        ('/flagquestion', qbrary.FlagQuestion),
         ('/viewauthors', qbrary.ViewAuthors),
 
         # Below are all discussion related pages
