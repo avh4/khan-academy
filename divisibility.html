@@ -60,7 +60,7 @@ while(i <= multiCount)
     if(1 != answerPoolBool[k])                      //checks to see if the digit has been used
     {
         answer = answer * answerPool[k];            //if not, multiply it in
-        answerPoolBool[k]=1                         //and mark it as being used
+        answerPoolBool[k]=1;                         //and mark it as being used
         if(i == multiCount)                         //if this was the final opeartion
         {
             if((answer != num1) && (answer != num2))  //make sure it doesn't equall the originall numbers
@@ -77,14 +77,14 @@ while(i <= multiCount)
 setCorrectAnswer(answer);                             //set the correct answer
 
 find_factors(answer);                                 //find factors of the answer for use in hints
-answerFactors = primefzn                              //assign factors to answerFactors array
+answerFactors = primefzn;                              //assign factors to answerFactors array
 primefzn = null;                                      //destroy reference
 
 find_factors(num1 * num2);                            //find factors of the numbers product
 combinedFactors = primefzn;                           //find their combined factors
 primefzn = null;                                      //destroy reference
 
-multiCount--;;                                         //decrease multiCount by one to make wrong answers smaller
+multiCount--;                                         //decrease multiCount by one to make wrong answers smaller
 while(possibleAnswers.length<=5)                      //number of wrong answers generated
 {
     k++;
@@ -98,7 +98,7 @@ while(possibleAnswers.length<=5)                      //number of wrong answers 
         if(1 != answerPoolBool[j])                       //if not in use
         {
             wrongAnswer = wrongAnswer * answerPool[j];    //multiply it in
-            answerPoolBool[j]=1                           //mark it as in use
+            answerPoolBool[j]=1;                           //mark it as in use
             i++;                                          //and iterate
         }
     }
@@ -107,7 +107,7 @@ while(possibleAnswers.length<=5)                      //number of wrong answers 
     {   //make sure it isn't in the answer pool and make sute it is prime
         primeMultiplier = getRandomIntRange(2, 11);
     }
-    wrongAnswer = wrongAnswer * primeMultiplier //multiply the prime number in
+    wrongAnswer = wrongAnswer * primeMultiplier; //multiply the prime number in
     if(wrongAnswer == num1 || wrongAnswer == num2) //if the wrong answer equalls one of the original numbers
     {
         wrongAnswer--;    //decrement it by one
@@ -168,12 +168,12 @@ function draw_next_step()
 	if (steps_given>=1)
 	{
 	    document.getElementById('hint1').style.display = 'block';
-	    document.getElementById('hint1').innerHTML = "<li>Prime factorization of " + num1 + " is: " + num1Factors + "</li>";
+	    document.getElementById('hint1').innerHTML = "<li>The prime factorization of " + num1 + " is: " + num1Factors + "</li>";
 	}
 	if (steps_given>=2)
 	{
 		  document.getElementById('hint2').style.display = 'block';
-		  document.getElementById('hint2').innerHTML = "<li>Prime factorization of " + num2 + " is: " + num2Factors + "</li>";
+		  document.getElementById('hint2').innerHTML = "<li>The prime factorization of " + num2 + " is: " + num2Factors + "</li>";
 	}
 	if (steps_given>=3)
 	{
@@ -195,7 +195,7 @@ function draw_next_step()
 
 {% block maincell %}
 <script language=Javascript1.2><!--
-write_text('All Numbers divisible by both `' + num1 + '` and `' + num2 + '` are also divisible by which of the following?');
+write_text('All numbers divisible by both `' + num1 + '` and `' + num2 + '` are also divisible by which of the following?');
 /**** Debug outputs ******
 write_text('Number 1 factors: ' + num1Factors);
 write_text('Number 2 factors: ' + num2Factors);
