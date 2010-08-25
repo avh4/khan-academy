@@ -1,0 +1,95 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Charts for {{ exercise_name }}{% endblock pagetitle %}
+{% block pagecontent %}
+{% if not problems %}
+<p>{{student}} hasn't done any problems for {{exercise_name}}</p>
+{% else %}{% ifequal num_problems 1 %}
+<p>{{student}} has done only one problem for {{exercise_name}}</p>
+{% else %}{% ifequal num_problems 2 %}
+<p>{{student}} has done only two problems for {{exercise_name}}</p>
+{% else %}
+<script type="text/javascript" src="javascript/protovis-r3.2.js"></script>
+    <script type="text/javascript+protovis">
+var problems = [
+{% for problem in problems %}
+  { problem_num: {{forloop.counter}}, time_taken: {{problem.time_taken}}, moving_average: {{problem.moving_average}}, correct: {{problem.correct}} },
+{% endfor %}
+];
+      var w = 300,
+          h = 200,
+          x = pv.Scale.linear(0, {{num_problems}}).range(0, w),
+          y = pv.Scale.linear(0, {{max_time_taken}}).range(0, h),
+          padding = 60;
+
+      var vis = new pv.Panel()
+          .width(w)
+          .height(h)
+          .right(padding)
+          .left(padding)
+          .top(padding)
+          .bottom(padding);
+
+      /* Y-axis. */
+      vis.add(pv.Rule)
+          .bottom(-.5)
+        .add(pv.Rule)
+          .data(pv.range(0, {{max_time_taken}}, {{y_axis_interval}}))
+          .bottom(y)
+          .strokeStyle("grey")
+        .anchor("right").add(pv.Label)
+          .visible(function() !(this.index % 2))
+          .text(function(s) s + (s ? "" : " seconds"));
+
+      /* Time taken to do a problem
+      vis.add(pv.Area)
+          .data(problems)
+          .interpolate("step-after")
+          .segmented(true)
+          .bottom(0)
+          .height(function(d) y(d.time_taken))
+          .left(function(d) x(d.problem_num))
+          .fillStyle(function(d) d.correct == 1 ? "lightblue" : "red")
+          .strokeStyle("#999")
+        .add(pv.Rule);*/
+
+      vis.add(pv.Bar)
+		  .data(problems)
+		  .bottom(0)
+		  .width(w/{{num_problems}})
+		  .height(function(d) y(d.time_taken))
+          .fillStyle(function(d) d.correct == 1 ? "lightblue" : "red")
+          .strokeStyle("grey")
+          .lineWidth(1)
+          .left(function() this.index * w/{{num_problems}});
+
+      /* Moving average */
+      vis.add(pv.Area)
+          .data(problems.filter(function(d) d.moving_average))
+          .left(function(d) x(d.problem_num))
+          .bottom(0)
+          .height(function(d) y(d.moving_average))
+          .fillStyle(null)
+
+          /*.data(problems)
+          .interpolate("step-after")
+          .bottom(0)
+          .height(function(d) y(d.time_taken))
+          .left(function(d) x(d.problem_num))
+          .interpolate("basis")*/
+
+        .anchor("top").add(pv.Line)
+          .lineWidth(1)
+          .strokeStyle("green");
+
+      vis.add(pv.Label)
+          .bottom(-15)
+          .left(0)
+          .text("Problems Done (oldest to most recent)");
+
+      vis.render();
+    </script>
+{% endifequal %}
+{% endifequal %}
+{% endif %}
+{% endblock pagecontent %}
+

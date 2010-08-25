@@ -38,18 +38,18 @@
 
 	<!-- New, faster Google Analytics async tag START -->
 	<script type="text/javascript">
-	
+
 	  var _gaq = _gaq || [];
 	  _gaq.push(['_setAccount', 'UA-6742635-1']);
 	  _gaq.push(['_setDomainName', '.khanacademy.org']);
 	  _gaq.push(['_trackPageview']);
-	
+
 	  (function() {
 	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 	  })();
-	
+
 	</script>
 	<!-- New, faster Google Analytics async tag END -->
 
@@ -70,7 +70,7 @@
 
            
             <ul id="page_status">
-            	
+
                 {% if username %}
                 <li>
                     {% username_and_notification username %}
@@ -90,7 +90,7 @@
                 {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
                 {% endif %}
             </ul>
-            
+
             <nav id="page_main_nav">
                 <ul>
                     <li>
@@ -118,7 +118,7 @@
             <nav id="page_sub_nav">
                 {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
                 {% endblock pagesubmenu %}
-                
+
             </nav>
             <nav>
 		    <ul id="page_social">
@@ -133,7 +133,7 @@
 	    </nav>
             
             {% block pagemessage %}
-            
+
             {% endblock pagemessage %}
         </header>
         {% block pagecontent %}

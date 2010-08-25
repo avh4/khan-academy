@@ -64,6 +64,12 @@ indexes:
   - name: exercise
   - name: user
   - name: time_done
+
+- kind: ProblemLog
+  properties:
+  - name: exercise
+  - name: user
+  - name: time_done
     direction: desc
 
 - kind: Subject

@@ -8,7 +8,9 @@ import random
 import urllib
 import logging
 import re
+import itertools
 from urlparse import urlparse
+from collections import deque
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -1317,6 +1319,7 @@ class ViewIndividualReport(webapp.RequestHandler):
                 'suggested_exercises': suggested_exercises,
                 'review_exercises': review_exercises,  
                 'student': student.nickname(),                
+                'student_email': student_email,                  
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewindividualreport.html')
@@ -1381,9 +1384,10 @@ class ViewClassReport(webapp.RequestHandler):
         
     def get(self):
         class ReportCell:
-            def __init__(self, data="", css_class=""):
+            def __init__(self, data="", css_class="", link=""):
                 self.data = data
                 self.css_class = css_class
+                self.link = link
             
         user = users.get_current_user()
         if user:
@@ -1409,15 +1413,16 @@ class ViewClassReport(webapp.RequestHandler):
                 row.append(ReportCell(data=student.nickname()))
                 i = 0
                 for exercise in exercises:
+                    link = "/charts?student_email="+student_email+"&exercise_name="+exercise 
                     if exercise in student_data.all_proficient_exercises:
-                        row.append(ReportCell(css_class="proficient"))
+                        row.append(ReportCell(css_class="proficient", link=link))
                         proficient_total_row[i] += 1
                     elif exercise in student_data.suggested_exercises:
                         if self.needs_help(student, exercise):
-                            row.append(ReportCell(css_class="needs_help"))
+                            row.append(ReportCell(css_class="needs_help", link=link))
                             help_total_row[i] += 1
                         else:
-                            row.append(ReportCell(css_class="working"))
+                            row.append(ReportCell(css_class="working", link=link))
                             working_total_row[i] += 1
                     else:
                         row.append(ReportCell())
@@ -1472,7 +1477,89 @@ class ViewClassReport(webapp.RequestHandler):
             if user_exercise.exercise == exercise and user_exercise.total_done > 30:
                 return True
         return False
-        
+
+class ViewCharts(webapp.RequestHandler):
+     
+    def moving_average(self, iterable, n=3):
+        # moving_average([40, 30, 50, 46, 39, 44]) --> 40.0 42.0 45.0 43.0
+        # http://en.wikipedia.org/wiki/Moving_average
+        it = iter(iterable)
+        d = deque(itertools.islice(it, n-1))
+        d.appendleft(0)
+        s = sum(d)
+        for elem in it:
+            s += elem - d.popleft()
+            d.append(elem)
+            yield s / float(n)    
+                
+    def get(self):
+        user = users.get_current_user()
+        student = user
+        if user:
+            student_email = self.request.get('student_email')
+            if student_email:
+            	#logging.info("user is a coach trying to look at data for student")
+                student = users.User(email=student_email)
+                user_data = UserData.get_or_insert_for(student)
+                if user.email() not in user_data.coaches:
+                    raise Exception('Student '+ student_email + ' does not have you as their coach')
+            else:
+                #logging.info("user is a student looking at their own report")
+                user_data = UserData.get_or_insert_for(user)   
+                
+            logout_url = users.create_logout_url(self.request.uri)
+            exercise_name = self.request.get('exercise_name')
+            if not exercise_name:
+                exercise_name = "addition_1"
+
+            problems = ProblemLog.all().filter('user =', student).filter('exercise =', exercise_name).order("time_done")            
+            num_problems = problems.count()
+            max_time_taken = 0            
+            class Problem:
+                def __init__(self, time_taken, moving_average, correct):
+                    self.time_taken = time_taken
+                    self.moving_average = moving_average
+                    if correct:
+                        self.correct = 1
+                    else:
+                        self.correct = 0
+            time_taken_list = []
+            problem_list = []
+            for problem in problems:  
+                time_taken_list.append(problem.time_taken)
+                if problem.time_taken > max_time_taken:
+                    max_time_taken = problem.time_taken
+                problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
+                #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
+            y_axis_interval = max_time_taken/10
+            averages = []                
+            for average in self.moving_average(time_taken_list):
+                averages.append(int(average))
+            #logging.info("averages: " + str(averages))
+            for i in range(len(problem_list)):
+                problem = problem_list[i]
+                if i > 1:
+                    problem.moving_average = averages[i-2]
+                #logging.info(str(problem.time_taken) + " " + str(problem.moving_average) + " " + str(problem.correct))                            
+                
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,
+                'exercise_name': exercise_name.replace('_', ' ').capitalize(),
+                'problems': problem_list,
+                'num_problems': num_problems,
+                'max_time_taken': max_time_taken,
+                'y_axis_interval': y_axis_interval,
+                'student': student.nickname()
+                }
+
+            path = os.path.join(os.path.dirname(__file__), 'viewcharts.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(users.create_login_url(self.request.uri))
+            
+            
 class RetargetFeedback(bulk_update.handler.UpdateKind):
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
@@ -1679,6 +1766,7 @@ def real_main():
         ('/individualreport', ViewIndividualReport), 
         ('/students', ViewStudents), 
         ('/classreport', ViewClassReport),
+        ('/charts', ViewCharts),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 
