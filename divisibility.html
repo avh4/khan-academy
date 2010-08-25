@@ -1,0 +1,216 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var allprimes = new Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
+var steps_given = 1;                  //variable to keep track of the number of hints given
+                                
+var num1 = 0;                        //variable that holds the first number of the problem
+var num2 = 0;                        //variable that holds the second number of the problem
+var num1Factors = new Array();       //array that holds the prime factorization of the first number
+var num2Factors = new Array();       //array that holds the prime factorization of the second number
+
+var tempNumPool = new Array();       //temporary array for holding the half of the answer pool
+var answerPool = new Array();        //array that holds the prime factors of both numbers and is used to generate correct and incorrect answers
+var answerPoolBool;                  //array to use with answerPool to simulate 2d array, each element is a bit setting of true or false
+
+var factors = new Array();          //array for use in the supporting function that fins prime factors
+var primefzn;                       //variable for holding the prime factorization
+
+var answer = 1;                     //variable that holds the correct answer
+var wrongAnswer = 1;                //variable that holds the incorrect answers
+var answerFactors = new Array();    //array that holds the factorization of the answer
+var combinedFactors = new Array();  //array that holds the combined factors of the original numbers in the problem
+
+var i = 0;                          //multi use counter
+var k = 0;                          //multi use counter
+var j = 0;                          //multi use counter
+var multiCount = 0;                 //keeps track of the number of multiplications to use when generating answers
+
+var primeMultiplier = 1;            //holds a prime number not contained within the answer pool
+
+/***************************** Start of main code *********************************/
+num1 = getRandomIntRange(4, 16);    //generate random numbers for the problem.  A max of 21 must be maintained.  Values over 21 can generate factors greater than one digit.
+num2 = getRandomIntRange(4, 16);    //This would break the current implementation and require switching from simple arrays to lists of objects.  I figured this was ok given
+while(contains(allprimes, num1))   //we want to keep numbers small for the users anyway.  The while loops will generate numbers over and over until a non prime number is
+{                                   //generated.  This is to keep the factorizations interesting, and more than just 1Xnum1.
+    num1 = getRandomIntRange(4, 16);
+}
+
+while((contains(allprimes, num2)) || (num2 == num1))  //same loop as above, just with the second number.
+{
+    num2 = getRandomIntRange(4, 16);
+}
+
+find_factors(num1);               //We find the factors of num1 which are stored in primefzn
+num1Factors = primefzn;           //We assign the factors to num1Factors
+primefzn = null;                  //Destroy the reference to the value, failure to do so will cause the array to keep growing
+answerPool = tempNumPool;         //set the first list of available digits for multiplication to the answerpool
+
+find_factors(num2);               //Find factors of num2
+num2Factors = primefzn;           //assign the factors to num2Factors
+primefzn = null;                  //Destroy reference
+answerPool = answerPool + tempNumPool;          //Append the available digits into the answerpool.
+answerPoolBool = new Array(answerPool.length);  //initialize the array to act as a bool field in a 2d array
+
+i = 0;  //initialize i=0 for use in the while loop
+multiCount=Math.floor(answerPool.length/2);     //will use half of the available pool in generating answers
+while(i <= multiCount)
+{
+    k = getRandomIntRange(0,answerPool.length - 1); //use random element of the answerpool
+    if(1 != answerPoolBool[k])                      //checks to see if the digit has been used
+    {
+        answer = answer * answerPool[k];            //if not, multiply it in
+        answerPoolBool[k]=1                         //and mark it as being used
+        if(i == multiCount)                         //if this was the final opeartion
+        {
+            if((answer != num1) && (answer != num2))  //make sure it doesn't equall the originall numbers
+            {
+                i++;                                 //if not then iterate and exit normally
+            }
+        }
+        else
+        {
+            i++;                                      //isn't the final operation, continue
+        }
+    } 
+}
+setCorrectAnswer(answer);                             //set the correct answer
+
+find_factors(answer);                                 //find factors of the answer for use in hints
+answerFactors = primefzn                              //assign factors to answerFactors array
+primefzn = null;                                      //destroy reference
+
+find_factors(num1 * num2);                            //find factors of the numbers product
+combinedFactors = primefzn;                           //find their combined factors
+primefzn = null;                                      //destroy reference
+
+multiCount--;;                                         //decrease multiCount by one to make wrong answers smaller
+while(possibleAnswers.length<=5)                      //number of wrong answers generated
+{
+    k++;
+    i=0;                                              //sets i to zero for each loop
+    j=0;                                              //sets j to zero for each loop
+    wrongAnswer = 1;                                  //sets wrongAnswer to 1 for each loop
+    answerPoolBool = new Array(answerPool.length);    //reinitializes answerPoolBool for each loop
+    while(i < multiCount)
+    {
+        j = getRandomIntRange(0,answerPool.length - 1);  //pick a random element
+        if(1 != answerPoolBool[j])                       //if not in use
+        {
+            wrongAnswer = wrongAnswer * answerPool[j];    //multiply it in
+            answerPoolBool[j]=1                           //mark it as in use
+            i++;                                          //and iterate
+        }
+    }
+    primeMultiplier = getRandomIntRange(2, 11);           //get a number
+    while((contains(answerPool, primeMultiplier)) || (!contains(allprimes, primeMultiplier)))
+    {   //make sure it isn't in the answer pool and make sute it is prime
+        primeMultiplier = getRandomIntRange(2, 11);
+    }
+    wrongAnswer = wrongAnswer * primeMultiplier //multiply the prime number in
+    if(wrongAnswer == num1 || wrongAnswer == num2) //if the wrong answer equalls one of the original numbers
+    {
+        wrongAnswer--;    //decrement it by one
+    }
+    addWrongChoice(wrongAnswer);  //add the wrong choice to the list of them
+    if(20 < k)
+    {
+        break;
+    }
+}
+
+/***************************** End of main code *********************************/
+
+/***************************** Start of supporting functions *********************************/
+function contains(a, obj) 
+{
+    var i = a.length;
+    while (i--) 
+    {
+        if (a[i] == obj) 
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+function find_factors(x)
+{
+    if (inArray(x, allprimes)) 
+    {
+        if (primefzn == null) 
+        {
+            primefzn = x.toString();
+            tempNumPool = x.toString();
+        } else 
+        {
+            primefzn = primefzn + "&times;" + x;
+            tempNumPool = tempNumPool + x;
+        }
+        return;
+    }
+    var maxf = Math.sqrt(x);
+    for (j=2; j<=maxf; j++)
+    {
+        if (x % j == 0) {
+            factors.push(j);
+            find_factors(j);
+            
+            factors.push(x / j);
+            find_factors(x / j);
+            return;
+        }
+    }
+}
+function draw_next_step()
+{
+	if (steps_given>=1)
+	{
+	    document.getElementById('hint1').style.display = 'block';
+	    document.getElementById('hint1').innerHTML = "<li>Prime factorization of " + num1 + " is: " + num1Factors + "</li>";
+	}
+	if (steps_given>=2)
+	{
+		  document.getElementById('hint2').style.display = 'block';
+		  document.getElementById('hint2').innerHTML = "<li>Prime factorization of " + num2 + " is: " + num2Factors + "</li>";
+	}
+	if (steps_given>=3)
+	{
+		  document.getElementById('hint3').style.display = 'block';
+		  document.getElementById('hint3').innerHTML = "<li>So, any number divisible by both must have " + combinedFactors + " as part of its own prime factorization.</li>";
+	}
+	if (steps_given>=4)
+	{
+		  document.getElementById('hint4').style.display = 'block';
+		  document.getElementById('hint4').innerHTML = "<li>The prime factorization of " + answer + " is " + answerFactors + " so it is divisible into any number that has " + combinedFactors + " as part of its factorization.</li>";
+	}
+	steps_given++;
+}
+/***************************** End of supporting functions *********************************/
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+write_text('All Numbers divisible by both `' + num1 + '` and `' + num2 + '` are also divisible by which of the following?');
+/**** Debug outputs ******
+write_text('Number 1 factors: ' + num1Factors);
+write_text('Number 2 factors: ' + num2Factors);
+write_text('Answer Pool: ' + answerPool);
+write_text('Answer: ' + answer);
+***********************/
+//-->
+</script>
+<br />
+<ul>
+<div id="hint1" style="display:none;font-family:sans-serif;font-size:12pt">Hint 1</div>
+<div id="hint2" style="display:none;font-family:sans-serif;font-size:12pt">Hint 2</div>
+<div id="hint3" style="display:none;font-family:sans-serif;font-size:12pt">Hint 3</div>
+<div id="hint4" style="display:none;font-family:sans-serif;font-size:12pt">Hint 4</div>
+</ul>
+
+{% endblock maincell %}
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
