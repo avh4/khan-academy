@@ -1,0 +1,197 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+
+{% block maincode %}
+<script language=Javascript1.2><!--
+// Special derivatives
+
+fofx = '';
+dfofx = '';
+
+wrongs = [];
+
+funcGens = [];
+
+funcGens[0] = function() {
+    // power rule to pad the questions (ripped off from power_rule.html)
+    var x = 'x';
+    var high_deg = getRandomIntRange(2, 6);
+    var low_deg = getRandomIntRange(-2, 1);
+    var coefs = [];
+	
+    wrongs[0] = ''; // doesn't decrement exponents
+    wrongs[1] = ''; // increments negative exponents
+    wrongs[2] = ''; // reversed signs on all terms
+    wrongs[3] = ''; // doesn't multiply coefficients
+    wrongs[4] = ''; // doesn't multiply coefficients + doesn't decrement exponents
+
+    for (var i = high_deg; i >= low_deg; i--) {
+        coefs[i] = getRandomIntRange(-7, 7);
+        
+        if (coefs[i] != 0) {
+            if (i == 0) { // constant, derivative is 0
+                fofx = fofx + ' + ' + coefs[i];
+                
+                wrongs[0] = wrongs[0] + ' + ' + coefs[i];
+                wrongs[3] = wrongs[3] + ' + ' + coefs[i];
+                wrongs[4] = wrongs[4] + ' + ' + coefs[i];
+                // dfofx doesn't include this term's derivative (0)
+            } else if (i == 1) { // x^1, derivative is x^0 (constant)
+                fofx = fofx + ' + ' + coefs[i] + x;
+                
+                dfofx = dfofx + ' + ' + coefs[i];
+            } else if (i == 2) { // x^2, derivative is x
+                fofx = fofx + ' + ' + coefs[i] + x + '^2';
+                
+                dfofx = dfofx + ' + ' + (coefs[i] * i) + x;
+                wrongs[0] = wrongs[0] + ' + ' + (coefs[i] * i) + x + '^2';
+                wrongs[1] = wrongs[1] + ' + ' + (coefs[i] * i) + x; // same as normal
+                wrongs[2] = wrongs[2] + ' + ' + (coefs[i] * i * -1) + x;
+                wrongs[3] = wrongs[3] + ' + ' + coefs[i] + x;
+                wrongs[4] = wrongs[4] + ' + ' + coefs[i] + x + '^2';
+            } else if (i < 0) { // x^power, derivative is power*x^(power-1) when power is -
+                fofx = fofx + ' + ' + coefs[i] + x + '^' + i;
+                    
+                dfofx = dfofx + ' + ' + (coefs[i] * i) + x +'^' + (i - 1);
+                wrongs[0] = wrongs[0] + ' + ' + (coefs[i] * i) + x + '^' + i;
+                if (i == -1) {
+                    wrongs[1] = wrongs[1] + ' + ' + (coefs[i] * i); // x^-1+1 = x^0 = constant
+                } else {
+                    wrongs[1] = wrongs[1] + ' + ' + (coefs[i] * i) + x + '^' + (i + 1); // adds rather than subtracting from i
+                }
+                wrongs[2] = wrongs[2] + ' + ' + (coefs[i] * i * -1) + x +'^' + (i - 1);
+                wrongs[3] = wrongs[3] + ' + ' + coefs[i] + x + '^' + (i - 1);
+                wrongs[4] = wrongs[4] + ' + ' + coefs[i] + x + '^' + i;
+            } else { // x^power, derivative is power*x^(power-1) when power is +
+                fofx = fofx + ' + ' + coefs[i] + x + '^' + i;
+                    
+                dfofx = dfofx + ' + ' + (coefs[i] * i) + x +'^' + (i - 1);
+                wrongs[0] = wrongs[0] + ' + ' + (coefs[i] * i) + x + '^' + i;
+                wrongs[1] = wrongs[1] + ' + ' + (coefs[i] * i) + x + '^' + (i - 1); // same as normal
+                wrongs[2] = wrongs[2] + ' + ' + (coefs[i] * i * -1) + x + '^' + (i - 1);
+                wrongs[3] = wrongs[3] + ' + ' + coefs[i] + x + '^' + (i - 1);
+                wrongs[4] = wrongs[4] + ' + ' + coefs[i] + x + '^' + i;
+            }
+        }
+    }
+	    
+    fofx = nicefySigns(fofx.substring(2));
+    dfofx = nicefySigns(dfofx.substring(2));
+	for (var i = 0; i < wrongs.length; i++) {
+        wrongs[i] = nicefySigns(wrongs[i].substring(2));
+    }
+}
+
+funcGens[1] = function() {
+    fofx = 'sin x';
+    dfofx = 'cos x';
+    
+    wrongs[0] = '-sin x';
+    wrongs[1] = 'csc x';
+    wrongs[2] = 'sec x';
+    wrongs[3] = 'tan x';
+    wrongs[4] = '-sec x';
+    wrongs[5] = '-cos x';
+}
+
+funcGens[2] = function() {
+    fofx = 'cos x';
+    dfofx = '-sin x';
+    
+    wrongs[0] = 'sin x';
+    wrongs[1] = 'csc x';
+    wrongs[2] = 'sec x';
+    wrongs[3] = 'tan x';
+    wrongs[4] = '-sec x';
+    wrongs[5] = '-cos x';
+}
+
+funcGens[3] = function() {
+    fofx = 'tan x';
+    dfofx = 'sec^2 x';
+    
+    wrongs[0] = 'sin x';
+    wrongs[1] = 'csc x';
+    wrongs[2] = 'sec x';
+    wrongs[3] = 'tan x';
+    wrongs[4] = '-sec x';
+    wrongs[5] = '-cos x';
+}
+
+funcGens[4] = function() {
+    fofx = 'csc x';
+    dfofx = '-csc x cot x';
+    
+    wrongs[0] = 'csc x cot x';
+    wrongs[1] = 'csc x tan x';
+    wrongs[2] = '-csc x tan x';
+    wrongs[3] = 'sec x tan x';
+    wrongs[4] = 'sec x cot x';
+    wrongs[5] = '-sec x tan x';
+    wrongs[6] = '-sec x cot x';
+}
+
+funcGens[5] = function() {
+    fofx = 'sec x';    
+    dfofx = 'sec x tan x';
+    
+    wrongs[0] = 'sec x cot x';
+    wrongs[1] = 'csc x tan x';
+    wrongs[2] = 'csc x cot x';
+    wrongs[3] = 'sec^2 x';
+    wrongs[4] = 'csc^2 x';
+    wrongs[5] = '-sec x tan x';
+}
+
+funcGens[6] = function() {
+    fofx = 'cot x';
+    dfofx = '-csc^2 x';
+    
+    wrongs[0] = 'csc x cot x';
+    wrongs[1] = 'sec x cot x';
+    wrongs[2] = '-sec^2 x';
+    wrongs[3] = 'csc^2 x';
+    wrongs[4] = 'sec^2 x';
+    wrongs[5] = 'sec x tan x';
+}
+
+funcGens[7] = function() {
+    fofx = 'e^x';
+    dfofx = 'e^x';
+    
+    wrongs[0] = 'x*e^(x-1)';
+    wrongs[1] = '1/x';
+    wrongs[2] = 'x*e^x';
+    wrongs[3] = 'e^(x-1)';
+    wrongs[4] = '(e-x)^x';
+    wrongs[5] = 'e/x';
+}
+
+funcGens[8] = function() {
+    fofx = 'ln x';
+    dfofx = '1/x';
+    
+    wrongs[0] = '1/(ln x)';
+    wrongs[1] = 'e^x';
+    wrongs[2] = '1/(e^x)';
+    wrongs[3] = 'ln x';
+    wrongs[4] = '1/(x^2)';
+    wrongs[5] = 'x';
+}
+
+funcGens[getRandomInt(funcGens.length-1)]();
+
+setCorrectAnswer(dfofx);
+for (var i = 0; i < wrongs.length; i++) {
+    addWrongChoice(wrongs[i]);
+}
+
+write_text('`d/dx (' + fofx + ')`');
+write_step('`d/dx (' + fofx + ') = ' + dfofx + '`');
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+{% endblock maincell %}
+
+{% block maincellwidth %}70%{% endblock maincellwidth %}
