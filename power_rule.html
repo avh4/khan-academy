@@ -1,0 +1,144 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+
+{% block maincode %}
+<script language=Javascript1.2><!--
+// Power rule!
+
+high_deg = getRandomIntRange(2, 6);
+low_deg = getRandomIntRange(-2, 1);
+
+coefs = new Array();
+
+if (getRandomInt(2)==0) {
+	x = 'b';
+} else {
+	x = 'x';
+}
+
+notations = [
+		['y', 'dy/d'+x],
+		['f('+x+')', 'f\'('+x+')'],
+		['y', 'y\''],
+		['f('+x+')', 'd/(d'+x+') f('+x+')'],
+		['a', 'a\''],
+		['a', 'da/(d'+x+')']
+			];
+
+ddx = 'd/(d'+x+')'; // for all the hints, not the question/answer
+
+n_idx = getRandomInt(notations.length-1);
+
+n_fx = notations[n_idx][0];
+n_dfx = notations[n_idx][1];
+
+fofx = '';
+dfofx = '';
+
+wrong1 = ''; // doesn't decrement expontnets
+wrong2 = ''; // increments negative exponents
+wrong3 = ''; // reversed signs on all terms
+wrong4 = ''; // doesn't multiply coefficients
+wrong5 = ''; // doesn't multiply coefficients + doesn't decrement exponents
+
+for (var i = high_deg; i >= low_deg; i--) {
+	coefs[i] = getRandomIntRange(-7, 7);
+	
+	if (coefs[i] != 0) {
+		if (i == 0) { // constant, derivative is 0
+			fofx = fofx + ' + ' + coefs[i];
+			
+			wrong1 = wrong1 + ' + ' + coefs[i];
+			wrong4 = wrong4 + ' + ' + coefs[i];
+			wrong5 = wrong5 + ' + ' + coefs[i];
+			// dfofx doesn't include this term's derivative (0)
+		} else if (i == 1) { // x^1, derivative is x^0 (constant)
+			fofx = fofx + ' + ' + coefs[i] + x;
+			
+			dfofx = dfofx + ' + ' + coefs[i];
+			wrong1 = wrong1 + ' + ' + coefs[i] + x;
+			wrong2 = wrong2 + ' + ' + coefs[i]; // same as normal
+			wrong3 = wrong3 + ' + ' + coefs[i]*-1;
+			wrong4 = wrong4 + ' + ' + coefs[i];
+			wrong5 = wrong5 + ' + ' + coefs[i] + x;
+		} else if (i == 2) { // x^2, derivative is x
+			fofx = fofx + ' + ' + coefs[i] + x + '^2';
+			
+			dfofx = dfofx + ' + ' + (coefs[i] * i) + x;
+			wrong1 = wrong1 + ' + ' + (coefs[i] * i) + x + '^2';
+			wrong2 = wrong2 + ' + ' + (coefs[i] * i) + x; // same as normal
+			wrong3 = wrong3 + ' + ' + (coefs[i] * i * -1) + x;
+			wrong4 = wrong4 + ' + ' + coefs[i] + x;
+			wrong5 = wrong5 + ' + ' + coefs[i] + x + '^2';
+		} else if (i < 0) { // x^power, derivative is power*x^(power-1) when power is -
+			fofx = fofx + ' + ' + coefs[i] + x + '^' + i;
+				
+			dfofx = dfofx + ' + ' + (coefs[i] * i) + x +'^' + (i - 1);
+			wrong1 = wrong1 + ' + ' + (coefs[i] * i) + x + '^' + i;
+			if (i == -1) {
+				wrong2 = wrong2 + ' + ' + (coefs[i] * i); // x^-1+1 = x^0 = constant
+			} else {
+				wrong2 = wrong2 + ' + ' + (coefs[i] * i) + x + '^' + (i + 1); // adds rather than subtracting from i
+			}
+			wrong3 = wrong3 + ' + ' + (coefs[i] * i * -1) + x +'^' + (i - 1);
+			wrong4 = wrong4 + ' + ' + coefs[i] + x + '^' + (i - 1);
+			wrong5 = wrong5 + ' + ' + coefs[i] + x + '^' + i;
+		} else { // x^power, derivative is power*x^(power-1) when power is +
+			fofx = fofx + ' + ' + coefs[i] + x + '^' + i;
+				
+			dfofx = dfofx + ' + ' + (coefs[i] * i) + x +'^' + (i - 1);
+			wrong1 = wrong1 + ' + ' + (coefs[i] * i) + x + '^' + i;
+			wrong2 = wrong2 + ' + ' + (coefs[i] * i) + x + '^' + (i - 1); // same as normal
+			wrong3 = wrong3 + ' + ' + (coefs[i] * i * -1) + x + '^' + (i - 1);
+			wrong4 = wrong4 + ' + ' + coefs[i] + x + '^' + (i - 1);
+			wrong5 = wrong5 + ' + ' + coefs[i] + x + '^' + i;
+		}
+	}
+}
+fofx = nicefySigns(fofx.substring(2));
+dfofx = nicefySigns(dfofx.substring(2));
+
+wrong1 = nicefySigns(wrong1.substring(2));
+wrong2 = nicefySigns(wrong2.substring(2));
+wrong3 = nicefySigns(wrong3.substring(2));
+wrong4 = nicefySigns(wrong4.substring(2));
+wrong5 = nicefySigns(wrong5.substring(2));
+
+setCorrectAnswer(dfofx);
+addWrongChoice(wrong1);
+addWrongChoice(wrong2);
+addWrongChoice(wrong3);
+addWrongChoice(wrong4);
+addWrongChoice(wrong5);
+
+write_text('`'+n_fx+' = ' + fofx + '`');
+write_text('`'+n_dfx+' = ?`');
+
+write_step('`'+ddx+' A'+x+'^n = n*A'+x+'^(n-1)`');
+write_step('Let\'s find the derivative of each term and then add them together.');
+for (var i = high_deg; i >= low_deg; i--) {
+	if (coefs[i] != 0) {
+		if (i == 0) { // constant, derivative is 0
+			write_step('`'+ddx+'('+coefs[i]+') = 0*' + coefs[i] + x +'^(0 - 1) = 0');
+			
+			// dfofx doesn't include this term's derivative (0)
+		} else if (i == 1) { // x^1, derivative is x^0 (constant)
+			write_step('`'+ddx+'('+coefs[i]+x+') = 1*' + coefs[i] + x +'^(1 - 1) = '+coefs[i]+'`');
+		} else if (i == 2) { // x^2, derivative is x
+			write_step('`'+ddx+'('+coefs[i]+x+'^'+i+') = '+i+'*'+coefs[i]+x+'^('+i+'-1) = '+
+						(i*coefs[i])+x+'`');
+		} else { // x^power, derivative is power*x^(power-1)
+			write_step('`'+ddx+'('+coefs[i]+x+'^'+i+') = '+i+'*'+coefs[i]+x+'^('+i+'-1) = '+
+						(i*coefs[i])+x+'^'+(i-1)+'`');
+		}
+	}
+}
+
+write_step('`'+n_dfx+' = '+ddx+'('+fofx+') = '+dfofx+'`');
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+{% endblock maincell %}
+
+{% block maincellwidth %}70%{% endblock maincellwidth %}
