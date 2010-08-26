@@ -11,6 +11,17 @@ import re
 import itertools
 from urlparse import urlparse
 from collections import deque
+
+import django.conf
+django.conf.settings.configure(
+    DEBUG=False,
+    TEMPLATE_DEBUG=False,
+    TEMPLATE_LOADERS=(
+      'django.template.loaders.filesystem.load_template_source',
+    ),
+    TEMPLATE_DIRS=(os.path.dirname(__file__),)
+)
+
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -1718,6 +1729,31 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
         else:
             return False
             
+class ViewInfoPage(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+        # Get the corresponding page from the info site
+        path = urllib.unquote(self.request.path.rpartition('/')[2])
+        scraped = urllib.urlopen('http://info.khanacademy.org/' + path).read()
+        # Convert it to a template that extends page_template.html
+        scraped = '{% extends "page_template.html" %}' + scraped
+        scraped = scraped.replace('<td id="sites-canvas-wrapper">', '{% block pagecontent %}')
+        scraped = scraped.replace('</td> \n<td id="sites-chrome-sidebar-right" class="sites-layout-sidebar-right">', '{% endblock pagecontent %}')
+
+        # Render the template
+        t = template.Template(scraped)
+        c = template.Context(template_values)        
+        self.response.out.write(t.render(c))
+
 def real_main():
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -1749,6 +1785,7 @@ def real_main():
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
         ('/downloads', ViewDownloads),
+        ('/info/.*', ViewInfoPage),
         
         ('/reportissue', ReportIssue),
         ('/export', Export),
