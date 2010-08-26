@@ -28,6 +28,11 @@ indexes:
   - name: __key__
     direction: desc
 
+- kind: ExercisePlaylist
+  properties:
+  - name: __key__
+    direction: desc
+
 - kind: ExerciseVideo
   properties:
   - name: __key__
@@ -52,6 +57,11 @@ indexes:
   properties:
   - name: user
   - name: date
+    direction: desc
+
+- kind: Playlist
+  properties:
+  - name: __key__
     direction: desc
 
 - kind: PlaylistVideo
