@@ -1543,6 +1543,8 @@ class ViewCharts(webapp.RequestHandler):
                 problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
                 #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
             y_axis_interval = max_time_taken/10
+            if y_axis_interval == 0:
+                y_axis_interval = max_time_taken/10.0
             averages = []                
             for average in self.moving_average(time_taken_list):
                 averages.append(int(average))
