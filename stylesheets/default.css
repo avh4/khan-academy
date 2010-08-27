@@ -75,12 +75,6 @@ footer > * {
     white-space: nowrap;
 }
 
-#page_fb_like {
-    display: block;
-    clear: left;
-    margin-left: 1em;
-}
-
 #page_visitors {
     position: absolute;
     left: 20px;
@@ -99,6 +93,19 @@ footer > * {
 
 }
 
+#page_fb_like {
+    display: block;
+    clear: both;
+    margin-left: 1em;
+}
+
+#page_top_nav {
+    margin-left: 300px;
+    margin-right: 0;
+    height: 95px;
+    position: relative;
+}
+
 #page_status {
     float: right;
 }
@@ -111,10 +118,13 @@ nav {
 }
 
 #page_main_nav {
-    width: auto;
-    clear: right;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+#page_main_nav ul {
     float: right;
-    margin-top: 55px;
 }
 
 #page_sub_nav {

@@ -68,55 +68,53 @@
                     </span>
                 <iframe id="page_fb_like" src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>                                
             </div>
-           
-
-           
-            <ul id="page_status">
-
-                {% if username %}
-                <li>
-                    {% username_and_notification username %}
-                </li>
-                {% endif %}
-                {% if points %}
-                <li>
-                    <label id="page_points">
-                        Energy Points: {{points}}
-                    </label>
-                </li>
-                {% endif %}
-                {% if username %}
-                <li>
-                    <a href="{{logout_url}}">Sign Out</a>
-                </li>
-                {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
-                {% endif %}
-            </ul>
-
-            <nav id="page_main_nav">
-                <ul>
-                    <li>
-                        <a href="/">Video Library</a>
-                    </li>
-                    <li>
-                        <a href="/exercisedashboard">Exercise Dashboard</a>
-                    </li>
+            <div id="page_top_nav">
+                <ul id="page_status">
+    
                     {% if username %}
                     <li>
-                        <a href="/viewexercisesonmap">Knowledge Map</a>
-                    </li>
-                    <li>
-                        <a href="/individualreport">Progress Report</a>
+                        {% username_and_notification username %}
                     </li>
                     {% endif %}
+                    {% if points %}
                     <li>
-                        <a href="/frequently-asked-questions">About Khan Academy</a>
+                        <label id="page_points">
+                            Energy Points: {{points}}
+                        </label>
                     </li>
+                    {% endif %}
+                    {% if username %}
                     <li>
-                        <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Donate-Link-Paypal-Header']);" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" >Donate</a>
+                        <a href="{{logout_url}}">Sign Out</a>
                     </li>
+                    {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
+                    {% endif %}
                 </ul>
-            </nav>
+                <nav id="page_main_nav">
+                    <ul>
+                        <li>
+                            <a href="/">Video Library</a>
+                        </li>
+                        <li>
+                            <a href="/exercisedashboard">Exercise Dashboard</a>
+                        </li>
+                        {% if username %}
+                        <li>
+                            <a href="/viewexercisesonmap">Knowledge Map</a>
+                        </li>
+                        <li>
+                            <a href="/individualreport">Progress Report</a>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <a href="/frequently-asked-questions">About Khan Academy</a>
+                        </li>
+                        <li>
+                            <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Donate-Link-Paypal-Header']);" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" >Donate</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
             <nav id="page_sub_nav">
                 {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
                 {% endblock pagesubmenu %}
