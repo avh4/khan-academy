@@ -98,7 +98,7 @@ find_factors(answer);
 answerFactors = primefzn;                                     //find their combined factors
 primefzn = null;   
 
-find_factors(num1 * num2);                                    //find factors of the numbers product
+find_factors(findLCM(num1, num2));                            //find factors of the numbers product
 combinedFactors = primefzn;                                   //find their combined factors
 primefzn = null;                                              //destroy reference
 
