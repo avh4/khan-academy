@@ -2,153 +2,137 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 var allprimes = new Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
-var steps_given = 1;                  //variable to keep track of the number of hints given
+var steps_given = 1;                                                //variable to keep track of the number of hints given
                                 
-var num1 = 0;                        //variable that holds the first number of the problem
-var num2 = 0;                        //variable that holds the second number of the problem
-var num1Factors = new Array();       //array that holds the prime factorization of the first number
-var num2Factors = new Array();       //array that holds the prime factorization of the second number
+var num1 = 0;                                                      //variable that holds the first number of the problem
+var num2 = 0;                                                      //variable that holds the second number of the problem
+var num1Factors = new Array();                                    //array that holds the prime factorization of the first number
+var num2Factors = new Array();                                    //array that holds the prime factorization of the second number
 
-var tempNumPool = new Array();       //temporary array for holding the half of the answer pool
-var answerPool = new Array();        //array that holds the prime factors of both numbers and is used to generate correct and incorrect answers
-var answerPoolBool;                  //array to use with answerPool to simulate 2d array, each element is a bit setting of true or false
+var tempNumPool = new Array();                                    //temporary array for holding the half of the answer pool
+var answerPool = new Array();                                     //array that holds the prime factors of both numbers and is used to generate correct and incorrect answers
+var answerPoolBool;                                               //array to use with answerPool to simulate 2d array, each element is a bit setting of true or false
 
-var factors = new Array();          //array for use in the supporting function that fins prime factors
-var primefzn;                       //variable for holding the prime factorization
+var factors = new Array();                                        //array for use in the supporting function that fins prime factors
+var primefzn;                                                     //variable for holding the prime factorization
 
-var answer = 1;                     //variable that holds the correct answer
-var tempAnswer = 1;                 //variable that holds a temporary form of the answer
-var wrongAnswer = 1;                //variable that holds the incorrect answers
-var answerFactors = new Array();    //array that holds the factorization of the answer
-var combinedFactors = new Array();  //array that holds the combined factors of the original numbers in the problem
+var answer = 1;                                                   //variable that holds the correct answer
+var wrongAnswer = 1;                                              //variable that holds the incorrect answers
+var answerFactors = new Array();                                  //array that holds the factorization of the answer
+var combinedFactors = new Array();                                //array that holds the combined factors of the original numbers in the problem
 
-var i = 0;                          //multi use counter
-var j = 0;                          //multi use counter
-var k = 0;                          //multi use counter
-var l = 0;                          //multi use counter
+var i = 0;                                                        //multi use counter
+var j = 0;                                                        //multi use counter
+var k = 0;                                                        //multi use counter
+var l = 0;                                                        //multi use counter
 
-var multiCount = 0;                 //keeps track of the number of multiplications to use when generating answers
-var primeMultiplier = 1;            //holds a prime number not contained within the answer pool
-var lcd;                            //Holds the lowest common divisor of the two numbers
-var lcdCount = 0;                   //holds the number of itmes the LCDoccurs
+var multiCount = 0;                                               //keeps track of the number of multiplications to use when generating answers
+var primeMultiplier = 1;                                          //holds a prime number not contained within the answer pool
+var lcd;                                                          //Holds the lowest common divisor of the two numbers
+var lcdCount = 0;                                                 //holds the number of itmes the LCDoccurs
 
 /***************************** Start of main code *********************************/
-num1 = getRandomIntRange(4, 16);    //generate random numbers for the problem.  A max of 21 must be maintained.  Values over 21 can generate factors greater than one digit.
-num2 = getRandomIntRange(4, 16);    //This would break the current implementation and require switching from simple arrays to lists of objects.  I figured this was ok given
-while(contains(allprimes, num1))   //we want to keep numbers small for the users anyway.  The while loops will generate numbers over and over until a non prime number is
-{                                   //generated.  This is to keep the factorizations interesting, and more than just 1Xnum1.
+
+num1 = getRandomIntRange(4, 16);                                  //generate random numbers for the problem.  A max of 21 must be maintained.  Values over 21 can generate factors greater than one digit.
+num2 = getRandomIntRange(4, 16);                                  //This would break the current implementation and require switching from simple arrays to lists of objects.  I figured this was ok given
+while(contains(allprimes, num1))                                 //we want to keep numbers small for the users anyway.  The while loops will generate numbers over and over until a non prime number is
+{                                                                 //generated.  This is to keep the factorizations interesting, and more than just 1Xnum1.
     num1 = getRandomIntRange(4, 16);
 }
 
-while((contains(allprimes, num2)) || (num2 == num1))  //same loop as above, just with the second number.
+while((contains(allprimes, num2)) || (num2 == num1))            //same loop as above, just with the second number.
 {
     num2 = getRandomIntRange(4, 16);
 }
 
-find_factors(num1);               //We find the factors of num1 which are stored in primefzn
-num1Factors = primefzn;           //We assign the factors to num1Factors
-primefzn = null;                  //Destroy the reference to the value, failure to do so will cause the array to keep growing
-answerPool = tempNumPool;         //set the first list of available digits for multiplication to the answerpool
+find_factors(num1);                                             //We find the factors of num1 which are stored in primefzn
+num1Factors = primefzn;                                         //We assign the factors to num1Factors
+primefzn = null;                                               //Destroy the reference to the value, failure to do so will cause the array to keep growing in subsequent uses
+answerPool = tempNumPool;                                       //set the first list of available digits for multiplication to the answerpool
 
-find_factors(num2);               //Find factors of num2
-num2Factors = primefzn;           //assign the factors to num2Factors
-primefzn = null;                  //Destroy reference
-answerPool = answerPool + tempNumPool;          //Append the available digits into the answerpool.
+find_factors(num2);                                             //Find factors of num2
+num2Factors = primefzn;                                         //assign the factors to num2Factors
+primefzn = null;                                               //Destroy reference
+answerPool = answerPool + tempNumPool;                          //Append the available digits into the answerpool.
 
 answer = findLCM(num1, num2);
-//if answer == one of the original numbers, then there exists some combination of least factors that offers a third solution
-if( (answer == num1) || (answer == num2) )      //same as modulus compare given nature of LCM, but more efficient
-{
-    for(i=0;i<allprimes.length;++i)             //find least common divisor
-    {
-        if((num1%allprimes[i] == 0) && (num2%allprimes[i] == 0))
-        {
-            lcd = allprimes[i];                 //capture the LCD
-            break;
-        }
-    }
-    
-    for(i = 0;i<answerPool.length;i++)          //iterate through answer pool
-    {
-        if(lcd == answerPool[i])                //count occurence of least common divisor
-        {
-            lcdCount++;
-        }
-    }
+find_factors(answer);
+answerFactors = tempNumPool;
+primefzn = null;
 
-    if(answer == num1)                                //determine wheter to check against num1 or num2
-    {
-        for(i = 0;i<=lcdCount;i++)                   //multiply lcd until it is not less than original answer
-        {
-            if(tempAnswer < num1)
-            {
-                tempAnswer = tempAnswer * lcd;
-            }
-            else
-            {
-                tempAnswer = tempAnswer/lcd;        //then dividce by lcd once and break
-                break;
-            }
-        }
-    }
-    else
-    {
-        for(i = 0;i<=lcdCount;i++)                   //multiply lcd until it is not less than original answer
-        {
-            if(tempAnswer < num2)
-            {
-                tempAnswer = tempAnswer * lcd;
-            }
-            else
-            {
-                tempAnswer = tempAnswer/lcd;        //then dividce by lcd once and break
-                break;
-            }
-        }
-    }
-    answer = tempAnswer;                          //the answer will be the LCD multiplied by the number of occurences of it
-}
-setCorrectAnswer(answer);                             //set the correct answer
-
-find_factors(answer);                                 //find factors of the answer for use in hints
-answerFactors = primefzn;                              //assign factors to answerFactors array
-primefzn = null;                                      //destroy reference
-
-find_factors(num1 * num2);                            //find factors of the numbers product
-combinedFactors = primefzn;                           //find their combined factors
-primefzn = null;                                      //destroy reference
-
-answerPoolBool = new Array(answerPool.length);         //initialize the array to act as a bool field in a 2d array
-multiCount=Math.floor(answerPool.length/2);            //will use half of the available pool in generating answers
-//multiCount--;                                        //increase or decrease multicount to make larger and smaller wrong answers respectively
-while(possibleAnswers.length<=5)                      //number of wrong answers generated
+i = 0;
+k = 0;
+answer = 1;
+multiCount = getRandomIntRange(1, answerFactors.length);
+answerPoolBool = new Array(answerFactors.length);
+while(i < multiCount)
 {
     k++;
-    i=0;                                              //sets i to zero for each loop
-    j=0;                                              //sets j to zero for each loop
-    wrongAnswer = 1;                                  //sets wrongAnswer to 1 for each loop
-    answerPoolBool = new Array(answerPool.length);    //reinitializes answerPoolBool for each loop
-    while(i < multiCount)
+    j = getRandomIntRange(0,answerFactors.length - 1);         //pick a random element
+    if(1 != answerPoolBool[j])                                 //if not in use
     {
-        j = getRandomIntRange(0,answerPool.length - 1);  //pick a random element
-        if(1 != answerPoolBool[j])                       //if not in use
+        answer = answer * answerFactors[j];                    //multiply it in
+        answerPoolBool[j]=1;                                   //mark it as in use
+        i++;                                                   //and iterate
+        if( (i >= multiCount) && ((answer == num1) || (answer == num2)) )
         {
-            wrongAnswer = wrongAnswer * answerPool[j];    //multiply it in
-            answerPoolBool[j]=1;                           //mark it as in use
-            i++;                                          //and iterate
+            i--;                                               //If the final operation results in the original numbers, roll back iterator
         }
     }
-    primeMultiplier = getRandomIntRange(2, 11);           //get a number
+    if(20 <= k)                                               //if after 20 trys it cannot get a non-original number, multiply two together and break;
+    {                                                         //specifically 12 and 6, and 8 and 16 will have this problem and need this break
+        
+        j = getRandomIntRange(0,answerFactors.length - 1);
+        k = getRandomIntRange(0,answerFactors.length - 1);
+        while(j == k)                                         //loop to make sure we grab different factors
+        {
+            k = getRandomIntRange(0,answerFactors.length - 1);
+        }
+        answer = answerFactors[j] * answerFactors[k];
+        break;
+    }
+}
+setCorrectAnswer(answer);                                     //set the correct answer
+
+find_factors(answer); 
+answerFactors = primefzn;                                     //find their combined factors
+primefzn = null;   
+
+find_factors(num1 * num2);                                    //find factors of the numbers product
+combinedFactors = primefzn;                                   //find their combined factors
+primefzn = null;                                              //destroy reference
+
+answerPoolBool = new Array(answerPool.length);                //initialize the array to act as a bool field in a 2d array
+multiCount=Math.floor(answerPool.length/2);                   //will use half of the available pool in generating answers
+multiCount--;                                                 //increase or decrease multicount to make larger and smaller wrong answers respectively
+while(possibleAnswers.length<=5)                              //number of wrong answers generated
+{
+    k++;
+    i=0;                                                      //sets i to zero for each loop
+    j=0;                                                      //sets j to zero for each loop
+    wrongAnswer = 1;                                          //sets wrongAnswer to 1 for each loop
+    answerPoolBool = new Array(answerPool.length);            //reinitializes answerPoolBool for each loop
+    while(i < multiCount)
+    {
+        j = getRandomIntRange(0,answerPool.length - 1);       //pick a random element
+        if(1 != answerPoolBool[j])                            //if not in use
+        {
+            wrongAnswer = wrongAnswer * answerPool[j];        //multiply it in
+            answerPoolBool[j]=1;                              //mark it as in use
+            i++;                                              //and iterate
+        }
+    }
+    primeMultiplier = getRandomIntRange(2, 11);               //get a number
     while((contains(answerPool, primeMultiplier)) || (!contains(allprimes, primeMultiplier)))
-    {   //make sure it isn't in the answer pool and make sute it is prime
+    {                                                         //make sure it isn't in the answer pool and make sute it is prime
         primeMultiplier = getRandomIntRange(2, 11);
     }
-    wrongAnswer = wrongAnswer * primeMultiplier; //multiply the prime number in
-    if(wrongAnswer == num1 || wrongAnswer == num2) //if the wrong answer equalls one of the original numbers
+    wrongAnswer = wrongAnswer * primeMultiplier;              //multiply the prime number in
+    if(wrongAnswer == num1 || wrongAnswer == num2)            //if the wrong answer equalls one of the original numbers
     {
-        wrongAnswer--;    //decrement it by one
+        wrongAnswer--;                                        //decrement it by one
     }
-    addWrongChoice(wrongAnswer);  //add the wrong choice to the list of them
+    addWrongChoice(wrongAnswer);                            //add the wrong choice to the list of them
     if(40 < k)
     {
         break;
@@ -252,12 +236,12 @@ function draw_next_step()
 {% block maincell %}
 <script language=Javascript1.2><!--
 write_text('All Numbers divisible by both `' + num1 + '` and `' + num2 + '` are also divisible by which of the following?');
-/******** debug outputs
+/******** debug/testing outputs
 write_text('Number 1 factors: ' + num1Factors);
 write_text('Number 2 factors: ' + num2Factors);
 write_text('Answer Pool: ' + answerPool);
 write_text('Answer: ' + answer);
-***********/
+***************/
 //-->
 </script>
 <br />
