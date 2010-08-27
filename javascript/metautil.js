@@ -8,21 +8,7 @@ function roundNumber(n, precision)
 	return Math.round(n*Math.pow(10,precision))/Math.pow(10,precision);	
 }
 
-function nicefySigns(expr)
-{
-	while (expr.indexOf("+ -") != -1) {
-		expr = expr.replace("+ -", "- ");
-	}
-	while (expr.indexOf("- -") != -1) {
-		expr = expr.replace("- -", "+ ")
-	}
-	return expr;
-}
-
 //Randomly choose a problem type
-
-
-
 function pickType(low,high)
 {
 	var notDoneType = null;
@@ -120,13 +106,12 @@ function mathFormat(e)
 	return	'`'+e+'`';
 }
 
-function nonZeroRandomInt(min,max)
+function nonZeroRandomInt(l,h)
 {
-	if (!min) min = -5;
-	if (!max) max = 5;
-    return (getRandomIntRange(0, 1) ?
-		getRandomIntRange(min, -1) :
-		getRandomIntRange(1, max))
+	var i = getRandomIntRange(l,h);
+	while (i==0)
+		i = getRandomIntRange(l,h);
+	return i;
 }
 
 function problemFooter()
