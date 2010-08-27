@@ -1290,8 +1290,8 @@ class UnregisterCoach(webapp.RequestHandler):
         if coach_email and coach_email in user_data.coaches:
             user_data.coaches.remove(coach_email)
             user_data.put()
-
         self.redirect("/coaches") 
+
 
 class ViewIndividualReport(webapp.RequestHandler):
 
@@ -1386,9 +1386,6 @@ class ViewStudents(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect(users.create_login_url(self.request.uri))
-
-
-
         
         
 class ViewClassReport(webapp.RequestHandler):
@@ -1489,6 +1486,7 @@ class ViewClassReport(webapp.RequestHandler):
                 return True
         return False
 
+
 class ViewCharts(webapp.RequestHandler):
      
     def moving_average(self, iterable, n=3):
@@ -1504,6 +1502,14 @@ class ViewCharts(webapp.RequestHandler):
             yield s / float(n)    
                 
     def get(self):
+        class Problem:
+            def __init__(self, time_taken, moving_average, correct):
+                self.time_taken = time_taken
+                self.moving_average = moving_average
+                if correct:
+                    self.correct = 1
+                else:
+                    self.correct = 0
         user = users.get_current_user()
         student = user
         if user:
@@ -1523,38 +1529,48 @@ class ViewCharts(webapp.RequestHandler):
             if not exercise_name:
                 exercise_name = "addition_1"
 
+            problem_list = []
+            max_time_taken = 0  
+            y_axis_interval = 1
+            seconds_ranges = []
             problems = ProblemLog.all().filter('user =', student).filter('exercise =', exercise_name).order("time_done")            
             num_problems = problems.count()
-            max_time_taken = 0            
-            class Problem:
-                def __init__(self, time_taken, moving_average, correct):
-                    self.time_taken = time_taken
-                    self.moving_average = moving_average
-                    if correct:
-                        self.correct = 1
-                    else:
-                        self.correct = 0
-            time_taken_list = []
-            problem_list = []
-            for problem in problems:  
-                time_taken_list.append(problem.time_taken)
-                if problem.time_taken > max_time_taken:
-                    max_time_taken = problem.time_taken
-                problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
-                #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
-            y_axis_interval = max_time_taken/10
-            if y_axis_interval == 0:
-                y_axis_interval = max_time_taken/10.0
-            averages = []                
-            for average in self.moving_average(time_taken_list):
-                averages.append(int(average))
-            #logging.info("averages: " + str(averages))
-            for i in range(len(problem_list)):
-                problem = problem_list[i]
-                if i > 1:
-                    problem.moving_average = averages[i-2]
-                #logging.info(str(problem.time_taken) + " " + str(problem.moving_average) + " " + str(problem.correct))                            
-                
+            if num_problems > 2:
+          
+                time_taken_list = []
+                for problem in problems:  
+                    time_taken_list.append(problem.time_taken)
+                    if problem.time_taken > max_time_taken:
+                        max_time_taken = problem.time_taken
+                    problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
+                    #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
+                y_axis_interval = max_time_taken/5
+                if y_axis_interval == 0:
+                    y_axis_interval = max_time_taken/5.0            
+                #logging.info("time_taken_list: " + str(time_taken_list))                                   
+                #logging.info("max_time_taken: " + str(max_time_taken))
+                #logging.info("y_axis_interval: " + str(y_axis_interval))
+
+                averages = []   
+                for average in self.moving_average(time_taken_list):
+                    averages.append(int(average))
+                #logging.info("averages: " + str(averages))
+                for i in range(len(problem_list)):
+                    problem = problem_list[i]
+                    if i > 1:
+                        problem.moving_average = averages[i-2]
+                    #logging.info(str(problem.time_taken) + " " + str(problem.moving_average) + " " + str(problem.correct))                            
+
+                range_size = self.get_range_size(num_problems, time_taken_list)
+                #logging.info("range_size: " + str(range_size))  
+                seconds_ranges = self.get_seconds_ranges(range_size)
+                for problem in problem_list:
+                    self.place_problem(problem, seconds_ranges)
+                for seconds_range in seconds_ranges:
+                    seconds_range.get_range_string(range_size)
+                    seconds_range.get_percentages(num_problems)
+                    #logging.info("seconds_range: " + str(seconds_range))  
+
             template_values = {
                 'App' : App,
                 'username': user.nickname(),
@@ -1564,15 +1580,69 @@ class ViewCharts(webapp.RequestHandler):
                 'num_problems': num_problems,
                 'max_time_taken': max_time_taken,
                 'y_axis_interval': y_axis_interval,
-                'student': student.nickname()
+                'student': student.nickname(),
+                'seconds_ranges': seconds_ranges,
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewcharts.html')
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect(users.create_login_url(self.request.uri))
-            
-            
+
+    def get_range_size(self, num_problems, time_taken_list):
+        range_size = 0
+        pct_under_top_range = 0
+        while pct_under_top_range < 0.8:
+            range_size += 1
+            #logging.info("range_size: " + str(range_size))
+            #logging.info("range_size*10: " + str(range_size*10))
+            num_under_top_range = 0
+            for time_taken in time_taken_list:
+                if time_taken < range_size*10:
+                    num_under_top_range += 1
+            #logging.info("num_under_top_range: " + str(num_under_top_range))
+            pct_under_top_range = 1.0*num_under_top_range/num_problems
+            #logging.info("pct_under_top_range: " + str(pct_under_top_range))
+        return range_size
+        
+    def get_seconds_ranges(self, range_size):
+        class SecondsRange:
+            def __init__(self, lower_bound, upper_bound):
+                self.lower_bound = lower_bound
+                self.upper_bound = upper_bound
+                self.num_correct = 0
+                self.num_incorrect = 0
+                self.pct_correct = 0
+                self.pct_incorrect = 0
+            def get_range_string(self, range_size):
+                if self.upper_bound is None:
+                    self.range_string = "%s+" % (self.lower_bound,)
+                elif range_size == 1:
+                    self.range_string = "%s" % (self.lower_bound,)                    
+                else:
+                    self.range_string = "%s-%s" % (self.lower_bound, self.upper_bound)
+            def get_percentages(self, num_problems):
+                self.pct_correct = 100.0*self.num_correct/num_problems
+                self.pct_incorrect = 100.0*self.num_incorrect/num_problems                
+            def __repr__(self):
+                return self.range_string + " correct: " + str(self.pct_correct) + " incorrect: " + str(self.pct_incorrect)
+                
+        seconds_ranges = []
+        for lower_bound in range(0, range_size*9, range_size): 
+            seconds_ranges.append(SecondsRange(lower_bound, lower_bound+range_size-1))
+        seconds_ranges.append(SecondsRange(range_size*9, None))
+        return seconds_ranges
+
+    def place_problem(self, problem, seconds_ranges):
+        for seconds_range in seconds_ranges:
+            if problem.time_taken >= seconds_range.lower_bound and \
+                (seconds_range.upper_bound is None or problem.time_taken <= seconds_range.upper_bound):
+                if problem.correct:
+                    seconds_range.num_correct += 1
+                else:
+                    seconds_range.num_incorrect += 1
+                    
+                    
 class RetargetFeedback(bulk_update.handler.UpdateKind):
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
