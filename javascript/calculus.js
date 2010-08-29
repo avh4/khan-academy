@@ -1,3 +1,10 @@
+trigFuncs = ["sin", "cos", "tan"];
+dTrigFuncdx = {
+	"sin": "cos",
+	"cos": "-sin",
+	"tan": "sec^2"
+	};
+
 function polyCoefs(low_deg, high_deg)
 {
 	var coefs = [];
@@ -186,7 +193,10 @@ function cleanExp(expr, x)
 	
 	expr = nicefySigns(expr.substring(2));
 	while (expr.indexOf(" 1"+x) != -1) {
-		expr = expr.replace(" 1"+x, x)
+		expr = expr.replace(" 1"+x, x);
+	}
+	while (expr.indexOf("-1"+x) != -1) {
+		expr = expr.replace("-1"+x, "-"+x);
 	}
 	
 	return expr;
