@@ -556,6 +556,22 @@ class ReportIssue(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), page)
         self.response.out.write(template.render(path, template_values))
 
+class ProvideFeedback(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+
+        template_values = {
+            'App' : App,
+            'points': user_data.points,
+            'username': user and user.nickname() or "",
+            'logout_url': logout_url,
+            }
+        path = os.path.join(os.path.dirname(__file__), "provide_feedback.html")
+        self.response.out.write(template.render(path, template_values))
+
 class ViewAllExercises(webapp.RequestHandler):
 
     def get(self):
@@ -1858,8 +1874,9 @@ def real_main():
         ('/gmat', ViewGMAT),
         ('/downloads', ViewDownloads),
         ('/info/.*', ViewInfoPage),
-        
         ('/reportissue', ReportIssue),
+        ('/provide-feedback', ProvideFeedback),
+        
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
