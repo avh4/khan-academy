@@ -1833,7 +1833,7 @@ class ViewInfoPage(webapp.RequestHandler):
         path = urllib.unquote(self.request.path.rpartition('/')[2])
         scraped = urllib.urlopen('http://info.khanacademy.org/' + path).read()
         # Convert it to a template that extends page_template.html
-        scraped = '{% extends "page_template.html" %}' + scraped
+        scraped = '{% extends "info_page_template.html" %}' + scraped
         scraped = scraped.replace('<td id="sites-canvas-wrapper">', '{% block pagecontent %}')
         scraped = scraped.replace('</td> \n<td id="sites-chrome-sidebar-right" class="sites-layout-sidebar-right">', '{% endblock pagecontent %}')
 
