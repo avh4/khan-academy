@@ -50,11 +50,11 @@ correctAnswer = correct_answer;
 
 for(var i=0; i<6; i++)
 {
-	var y = Math.round(KhanAcademy.random()*18)-9;
+	var y = Math.round(KhanAcademy.random()*200)-100;
 	
-	while (y==correct_answer)
+	while ((y==correct_answer) || ($.inArray(y, possibleAnswers) != -1))
 	{
-		y = Math.round(KhanAcademy.random()*18)-9;
+		y = Math.round(KhanAcademy.random()*200)-100;
 	}
 	possibleAnswers.push(y);
 }
