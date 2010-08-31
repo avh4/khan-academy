@@ -63,8 +63,10 @@
         <header>
             <div id="page_brand">
                 <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png?{{App.version}}" alt="Khan Academy"></a>
-                    <span id="page_visitors">	
-                    	<!-- Content will get populated by jquery call to chartbeat API below; if call fails no visible impact to user -->
+                    <span id="page_visitors">
+                        <span id="page_num_visitors">
+                            <!-- Content will get populated by jquery call to chartbeat API below; if call fails no visible impact to user -->
+                        </span> people learning right now
                     </span>
                 <iframe id="page_fb_like" src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;ref=Like-Button-Top-Header-Left&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>                                
             </div>
@@ -162,14 +164,11 @@
 	<!-- ChartBeat API - get # of users online now BEGIN -->
 
    <script type="text/javascript">
-
-
    	$.getJSON("http://api.chartbeat.com/summize/?host=khanacademy.org&apikey=3942b962aed430a5fbb67fdf29e3a436&jsonp=?",
-		function(data){
-						
-						$('#page_visitors').append('<a href="http://chartbeat.com/dashboard2/?url=khanacademy.org&k=032eb5f1ea0b68a948634d6af8a6ee8e#" style="font-size:14px"> <B>' 
-						+ addCommas(data.people) + '</B> people learning right now</a>');
-					   });
+        function(data){
+            $('#page_num_visitors').append(addCommas(data.people));
+            $('#page_visitors').css('display', 'inline');
+    });
 	</script>
 
 	<!-- ChartBeat API - get # of users online now END -->

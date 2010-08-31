@@ -79,18 +79,17 @@ footer > * {
     position: absolute;
     left: 20px;
     top: 40px;
+    font-size:14px;
+    display: none; /* hidden until AJAX call to chartbeat gets the number */
 }
 
-#page_visitors a {
+#page_num_visitors {
+    font-weight: bold;
+}
+
+#page_visitors {
 	color:green;
 	text-decoration: none;
-
-}
-
-#page_visitors a:hover {
-	text-decoration: underline;
-	color: #DD6900;
-
 }
 
 #page_fb_like {
