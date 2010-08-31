@@ -1,0 +1,121 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+
+{% block maincode %}
+<script type="text/javascript" src="/javascript/calculus.js?{{App.version}}"></script>
+<script language=Javascript1.2><!--
+// Product rule
+
+function format_product_derivative(fu, du_dx, fv, dv_dx, fw, dw_dx) {
+	if (fw) {
+		return '(' + du_dx + ')*(' + fv + ')*(' + fw + 
+					') + (' + fu + ')*(' + dv_dx + ')*(' + fw + 
+					') + (' + fu + ')*(' + fv + ')*(' + dw_dx + ')';
+	} else {
+		return '(' + du_dx + ')*(' + fv + 
+					') + (' + fu + ')*(' + dv_dx + ')';
+	}
+}
+
+var notation = funcNotation();
+
+if (getRandomInt(2) == 0) {
+	// three-part product rule has a 1/3 chance of showing up
+	var u = funcGens[getRandomInt(funcGens.length-1)]('x');
+	var v = funcGens[getRandomInt(funcGens.length-1)]('x');
+	var w = funcGens[getRandomInt(funcGens.length-1)]('x');
+	
+	write_text('`'+notation.fofx+' = (' + u.fofx + ')*(' + v.fofx + ')*(' + w.fofx + ')`');
+	write_text('`'+notation.dfofx+' = ?');
+	
+	write_step('<p>By the product rule:</p>' +
+				'<p>`'+notation.dfofx+' = d/dx[`<span style="color:blue">`' + u.fofx + '`</span>`]*(' + v.fofx + ')*(' + w.fofx +
+					') + (' + u.fofx + ')*d/dx[`<span style="color:red">`' + v.fofx + '`</span>`]*(' + w.fofx +
+					') + (' + u.fofx + ')*(' + v.fofx + ')*d/dx[`<span style="color:purple">`' + w.fofx + '`</span>`]`</p>');
+	
+	write_step('<p>`d/dx[`<span style="color:blue">`' + u.fofx + '`</span>`] = ' +
+				'`<span style="color:blue">`' + u.dfofx + '`</span></p>' +
+				'<p>`d/dx[`<span style="color:red">`' + v.fofx + '`</span>`] = ' +
+				'`<span style="color:red">`' + v.dfofx + '`</span></p>' +
+				'<p>`d/dx[`<span style="color:purple">`' + w.fofx + '`</span>`] = ' +
+				'`<span style="color:purple">`' + w.dfofx + '`</span></p>');
+	
+	derivative = format_product_derivative(u.fofx, u.dfofx, v.fofx, v.dfofx, w.fofx, w.dfofx);
+	
+	write_step('<p>So:</p>' +
+				'<p>`'+notation.dfofx+' = (`<span style="color:blue">`' + u.dfofx + '`</span>`)*(' + v.fofx + ')*(' + w.fofx + 
+					') + (' + u.fofx + ')*(`<span style="color:red">`' + v.dfofx + '`</span>`)*(' + w.fofx + 
+					') + (' + u.fofx + ')*(' + v.fofx + ')*(`<span style="color:purple">`' + w.dfofx + '`</span>`)`</p>');
+	
+	setCorrectAnswer(derivative);
+	
+	addWrongChoice(format_product_derivative(u.dfofx, u.fofx, v.fofx, v.dfofx, w.fofx, w.dfofx));
+	addWrongChoice(format_product_derivative(u.fofx, u.dfofx, v.fofx, v.dfofx, w.dfofx, w.fofx));
+	
+	for (var i = 0; i < 3; i++) {
+		addWrongChoice(format_product_derivative(
+			u.fofx, u.wrongs[getRandomInt(u.wrongs.length - 1)],
+			v.fofx, v.wrongs[getRandomInt(v.wrongs.length - 1)],
+			w.fofx, w.wrongs[getRandomInt(w.wrongs.length - 1)]
+			));
+	}
+	
+	for (var i = 0; i < 3; i++) {
+		addWrongChoice(format_product_derivative(
+			u.wrongs[getRandomInt(u.wrongs.length - 1)], u.fofx,
+			v.fofx, v.wrongs[getRandomInt(v.wrongs.length - 1)],
+			w.fofx, w.wrongs[getRandomInt(w.wrongs.length - 1)]
+			));
+	}
+	
+} else {
+	var u = funcGens[getRandomInt(funcGens.length-1)]('x');
+	var v = funcGens[getRandomInt(funcGens.length-1)]('x');
+	
+	write_text('`'+notation.fofx+' = (' + u.fofx + ')*(' + v.fofx + ')`');
+	write_text('`'+notation.dfofx+' = ?');
+	
+	write_step('<p>By the product rule:</p>' +
+				'<p>`'+notation.dfofx+' = d/dx[`<span style="color:blue">`' + u.fofx + '`</span>`]*(' + v.fofx + 
+					') + (' + u.fofx + ')*d/dx[`<span style="color:red">`' + v.fofx + '`</span>`]`</p>');
+	
+	write_step('<p>`d/dx[`<span style="color:blue">`' + u.fofx + '`</span>`] = ' +
+				'`<span style="color:blue">`' + u.dfofx + '`</span></p>' +
+				'<p>`d/dx[`<span style="color:red">`' + v.fofx + '`</span>`] = ' +
+				'`<span style="color:red">`' + v.dfofx + '`</span></p>');
+	
+	derivative = format_product_derivative(u.fofx, u.dfofx, v.fofx, v.dfofx);
+	
+	write_step('<p>So:</p>' +
+				'<p>`'+notation.dfofx+' = (`<span style="color:blue">`' + u.dfofx + '`</span>`)*(' + v.fofx + 
+					') + (' + u.fofx + ')*(`<span style="color:red">`' + v.dfofx + '`</span>`)`</p>');
+	
+	setCorrectAnswer(derivative);
+	
+	addWrongChoice(format_product_derivative(u.dfofx, u.fofx, v.fofx, v.dfofx));
+	addWrongChoice(format_product_derivative(u.fofx, u.dfofx, v.dfofx, v.fofx));
+	
+	for (var i = 0; i < 3; i++) {
+		addWrongChoice(format_product_derivative(
+			u.fofx, u.wrongs[getRandomInt(u.wrongs.length - 1)],
+			v.fofx, v.wrongs[getRandomInt(v.wrongs.length - 1)]
+			));
+	}
+	
+	for (var i = 0; i < 3; i++) {
+		addWrongChoice(format_product_derivative(
+			u.wrongs[getRandomInt(u.wrongs.length - 1)], u.fofx,
+			v.fofx, v.wrongs[getRandomInt(v.wrongs.length - 1)]
+			));
+	}
+}
+
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+{% endblock maincell %}
+
+{% block maincellwidth %}70%{% endblock maincellwidth %}

@@ -201,3 +201,108 @@ function cleanExp(expr, x)
 	
 	return expr;
 }
+
+function funcNotation(x)
+{
+	if (!x) x = 'x';
+	
+	notations = [
+		['y', 'dy/d'+x],
+		['f('+x+')', 'f\'('+x+')'],
+		['g('+x+')', 'g\'('+x+')'],
+		['y', 'y\''],
+		['f('+x+')', 'd/(d'+x+') f('+x+')'],
+		['a', 'a\''],
+		['a', 'da/(d'+x+')']
+			];
+	n_idx = getRandomInt(notations.length-1);
+	return {
+		fofx: notations[n_idx][0],
+		dfofx: notations[n_idx][1]
+		}
+}
+
+funcGens = [];
+
+funcGens[0] = function(x) {
+    // power rule, polynomials
+    var high_deg = getRandomIntRange(2, 4);
+    var low_deg = getRandomIntRange(0, 2);
+    var coefs = polyCoefs(low_deg, high_deg);
+	
+	return { fofx: polyExp(low_deg, high_deg, coefs, x),
+			dfofx: dPolydx(low_deg, high_deg, coefs, x),
+			wrongs: [
+				dPolydx_wrong1(low_deg, high_deg, coefs, x),
+				dPolydx_wrong2(low_deg, high_deg, coefs, x),
+				dPolydx_wrong3(low_deg, high_deg, coefs, x),
+				dPolydx_wrong4(low_deg, high_deg, coefs, x),
+				dPolydx_wrong5(low_deg, high_deg, coefs, x),
+				] };
+}
+
+funcGens[1] = function(x) {
+	// random trig func
+	var idx = getRandomInt(2); // 0 - 2 in trig funcs
+	var wrongs = [];
+	
+	wrongs[0] = 'sin ' + x;
+    wrongs[1] = 'csc ' + x;
+    wrongs[2] = 'sec ' + x;
+    wrongs[3] = 'tan ' + x;
+    wrongs[4] = '-sec ' + x;
+    wrongs[5] = '-cos ' + x;
+	
+	return { fofx: trigFuncs[idx] + ' ' + x,
+			dfofx: dTrigFuncdx[trigFuncs[idx]] + ' ' + x,
+			wrongs: wrongs };
+}
+
+funcGens[2] = function(x) {
+	// basic x^power, simplified version of polynomials in [0]
+	// kept this around mainly for easy wrong answer generation
+	var high_deg = getRandomIntRange(2, 6);
+    var low_deg = high_deg;
+	
+    var coefs = [];
+	coefs[high_deg] = 1;
+	
+	return { fofx: polyExp(low_deg, high_deg, coefs, x),
+			dfofx: dPolydx(low_deg, high_deg, coefs, x),
+			wrongs: [
+				dPolydx_wrong1(low_deg, high_deg, coefs, x),
+				dPolydx_wrong2(low_deg, high_deg, coefs, x),
+				dPolydx_wrong3(low_deg, high_deg, coefs, x),
+				dPolydx_wrong4(low_deg, high_deg, coefs, x),
+				dPolydx_wrong5(low_deg, high_deg, coefs, x),
+				] };
+}
+
+funcGens[3] = function(x) {
+	// ln x and e^x, combined in one because these should not be too likely
+	var wrongs = [];
+	
+	if (getRandomInt(1)) {
+		wrongs[0] = '1/(ln '+x+')';
+	    wrongs[1] = 'e^' + x;
+	    wrongs[2] = '1/(e^'+ x + ')';
+	    wrongs[3] = 'ln '+x;
+	    wrongs[4] = '1/('+x+'^2)';
+	    wrongs[5] = x;
+		
+		return { fofx: "ln " + x,
+				dfofx: "1/" + x,
+				wrongs: wrongs };
+	} else {
+		wrongs[0] = x + '*e^('+x+'-1)';
+	    wrongs[1] = '1/'+ x;
+	    wrongs[2] = x+'*e^'+x+'';
+	    wrongs[3] = 'e^('+x+'-1)';
+	    wrongs[4] = '(e-'+x+')^'+x;
+	    wrongs[5] = 'e/' + x;
+		
+		return { fofx: "e^"+ x,
+				dfofx: "e^"+ x,
+				wrongs: wrongs };
+	}
+}

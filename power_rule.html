@@ -16,21 +16,12 @@ if (getRandomInt(2)==0) {
 	x = 'x';
 }
 
-notations = [
-		['y', 'dy/d'+x],
-		['f('+x+')', 'f\'('+x+')'],
-		['y', 'y\''],
-		['f('+x+')', 'd/(d'+x+') f('+x+')'],
-		['a', 'a\''],
-		['a', 'da/(d'+x+')']
-			];
-
 ddx = 'd/(d'+x+')'; // for all the hints, not the question/answer
 
-n_idx = getRandomInt(notations.length-1);
+notation = funcNotation(x);
 
-n_fx = notations[n_idx][0];
-n_dfx = notations[n_idx][1];
+n_fx = notation.fofx;
+n_dfx = notation.dfofx;
 
 fofx = polyExp(low_deg, high_deg, coefs, x);
 dfofx = dPolydx(low_deg, high_deg, coefs, x);
