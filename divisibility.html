@@ -33,10 +33,10 @@ var lcdCount = 0;                                                 //holds the nu
 
 /***************************** Start of main code *********************************/
 
-num1 = getRandomIntRange(4, 16);                                  //generate random numbers for the problem.  A max of 21 must be maintained.  Values over 21 can generate factors greater than one digit.
-num2 = getRandomIntRange(4, 16);                                  //This would break the current implementation and require switching from simple arrays to lists of objects.  I figured this was ok given
-while(contains(allprimes, num1))                                 //we want to keep numbers small for the users anyway.  The while loops will generate numbers over and over until a non prime number is
-{                                                                 //generated.  This is to keep the factorizations interesting, and more than just 1Xnum1.
+num1 = getRandomIntRange(4, 16);                                  //generate random numbers for the problem.  A max of 21 must be maintained.
+num2 = getRandomIntRange(4, 16);                                  
+while(contains(allprimes, num1))                                 
+{                                                                 
     num1 = getRandomIntRange(4, 16);
 }
 
@@ -45,19 +45,32 @@ while((contains(allprimes, num2)) || (num2 == num1))            //same loop as a
     num2 = getRandomIntRange(4, 16);
 }
 
+tempNumPool = new Array();
 find_factors(num1);                                             //We find the factors of num1 which are stored in primefzn
 num1Factors = primefzn;                                         //We assign the factors to num1Factors
 primefzn = null;                                               //Destroy the reference to the value, failure to do so will cause the array to keep growing in subsequent uses
-answerPool = tempNumPool;                                       //set the first list of available digits for multiplication to the answerpool
+for(i=0;i<tempNumPool.length;++i)                              //set the first list of available digits for multiplication to the answerpool
+{
+    answerPool.push(tempNumPool[i]);
+}
 
+tempNumPool = new Array();
 find_factors(num2);                                             //Find factors of num2
 num2Factors = primefzn;                                         //assign the factors to num2Factors
 primefzn = null;                                               //Destroy reference
-answerPool = answerPool + tempNumPool;                          //Append the available digits into the answerpool.
+for(i=0;i<tempNumPool.length;++i)                              //Append the available digits into the answerpool.
+{
+    answerPool.push(tempNumPool[i]);
+}
 
+tempNumPool = new Array();
 answer = findLCM(num1, num2);
 find_factors(answer);
-answerFactors = tempNumPool;
+for(i=0;i<tempNumPool.length;++i)
+{
+    answerFactors.push(tempNumPool[i]);
+}
+
 primefzn = null;
 
 i = 0;
@@ -182,11 +195,11 @@ function find_factors(x)
         if (primefzn == null) 
         {
             primefzn = x.toString();
-            tempNumPool = x.toString();
+            tempNumPool.push(x);
         } else 
         {
             primefzn = primefzn + "&times;" + x;
-            tempNumPool = tempNumPool + x;
+            tempNumPool.push(x);
         }
         return;
     }
