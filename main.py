@@ -107,6 +107,7 @@ class UpdateVideoReadableNames(webapp.RequestHandler):  #Makes sure every video 
         all_videos = query.fetch(100000)
         for video in all_videos:
             potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
+            potential_id = re.sub('-+$', '', potential_id)  # remove any trailing dashes (see issue 1140)
             if video.readable_id == potential_id: # id is unchanged
                 continue
             number_to_add = 0
@@ -314,6 +315,7 @@ class ViewVideo(webapp.RequestHandler):
             return
         
         if readable_id:
+            readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
             query = Video.all()
             query.filter('readable_id =', readable_id)
             # The following should just be:
