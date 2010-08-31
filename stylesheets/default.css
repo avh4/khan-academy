@@ -110,6 +110,11 @@ footer > * {
     float: right;
 }
 
+#page_social_links {
+    clear: right;
+    float: right;
+}
+
 nav {
     display: block;
     clear: both;
