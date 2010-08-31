@@ -310,7 +310,7 @@ class ViewVideo(webapp.RequestHandler):
             query.filter('youtube_id =', video_id)
             video = query.get()
             readable_id = video.readable_id
-            self.redirect("/video/"+urllib.quote(readable_id), True);
+            self.redirect("/video/"+urllib.quote(readable_id), True)
             return
         
         if readable_id:
@@ -1210,6 +1210,12 @@ class ViewDownloads(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'downloads.html')
         self.response.out.write(template.render(path, template_values))
 
+class ViewHowToHelp(webapp.RequestHandler):
+
+    def get(self):
+        self.redirect("/frequently-asked-questions#how-to-help", True)
+        return
+
 
 class ViewSAT(webapp.RequestHandler):
 
@@ -1873,6 +1879,7 @@ def real_main():
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
         ('/downloads', ViewDownloads),
+        ('/info/how-to-help', ViewHowToHelp),
         ('/info/.*', ViewInfoPage),
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),

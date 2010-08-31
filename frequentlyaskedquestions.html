@@ -4,19 +4,24 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.3/jquery-ui.min.js"></script>
 	<script type="text/javascript">
 		$(function(){
-
-			// Accordion
-			$("#accordion").accordion({ header: "h3" });
-
 			// Tabs
-			$('#tabs-outer').tabs( {width: "100%"});
-			$('#tabs-inner').tabs();
-
-
-			
-			
+			var tabs = $('#tabs-outer').tabs( {width: "100%"});
+            $("a[href='#how-to-help']").click(function() {
+                tabs.tabs('select', '#how-to-help');
+                return false;
+            });
+            $("a[href='#faq']").click(function() {
+                tabs.tabs('select', '#faq');
+                return false;
+            });
 		});
 	</script>
+    <style>
+        p { 
+            margin-top: 1ex;
+            margin-bottom: 1ex;
+        }        
+    </style>
 {% endblock pagescript %}
 {% block pagetitle %}About Us{% endblock pagetitle %}
 {% block pagecontent %}
@@ -32,6 +37,7 @@
 <ul>
 	<li><A href="#press"><span>Interviews and Talks</span></a></li>
 	<li><A href="#faq"><span>Frequently Asked Questions</span></a></li>
+	<li><A href="#how-to-help"><span>How to Help</span></a></li>
 </ul>
 <div id="press">
 
@@ -39,7 +45,7 @@ The Khan Academy is all about using video to explain the world, so what better w
 the Khan Academy than through videos.  If you watch four or five of the videos below, you should have
 a pretty good idea of how we got started and how we hope to empower everyone, everywhere with
 a free, world-class education.  If you don't have a broadband connection or aren't someplace nice
-to watch a video, try out the "Frequently Asked Questions" tab to better understand our motivations.
+to watch a video, try out the <a href="#faq">Frequently Asked Questions</a> tab to better understand our motivations.
 
 <P>
 
@@ -288,26 +294,63 @@ mystery of the Universe, then I'm the same religion as you.
 <P>
 <h2>How can I/you help?</h2>
 <P>
-The biggest thing is getting the word out.  The students who use the site seem to really get
-excited by how quickly and deeply they can learn from it.  Right now (5/2010), there
-are about 200,000 students using the site per month; no reason why it shouldn't be 20
-million!
-<P>
-If you like to code or work on user interface design, you might be able to help on <A href="http://code.google.com/p/khanacademy/">the Khan Academy applications
-which we are doing as an open source project</A> 
-<P>
-If you want to be more actively involved and know a foreign language, translating the videos
-would be huge!  Even better, if you know some topic deeply, are a good, down-to-earth teacher, AND
-know a foreign language, you could re-teach some subset of the videos!
-<P>
-If you're an expert (especially at something that I'm unlikely to be able to learn in the next 5 years) and
-want to become a minor education celebrity (but a major one in your field), make a handful of videos and point me to them.  
-If they gel with the style--conversational while focused on intuition and rigor--of the current library, it might make
-sense for you make a playlist or two (with all credit going to you of course).
-
-<P>
-
+See the <a href="#how-to-help">How to Help</a> tab.
 </div>
+<div id="how-to-help">
+<p>
+    The biggest thing is getting the word out.&nbsp; The students who use the site seem to really get
+    excited by how quickly and deeply they can learn from it.&nbsp; Right now (5/2010), there
+    are about 200,000 students using the site per month; no reason why it shouldn't be 20
+    million!
+</p>
+<p>
+    Other simple things you can do include answering questions in the Q&amp;A section below videos you watch.&nbsp; 
+    You can also report problems, including video mistakes, using the "Report a problem" link at
+    the bottom of the page where you see the problem.
+</p>
+<p>
+    If you want to be more actively involved you could 
+    <a href="http://code.google.com/p/khanacademy/issues/detail?id=122">transcribe or caption videos</a>.&nbsp; 
+    If you know a foreign language, <a href="http://code.google.com/p/khanacademy/issues/detail?id=717">translating the videos</a>
+    would be huge!  Even better, if you know some topic deeply, are a good, down-to-earth teacher, AND 
+    know a foreign language, you could <a href="http://code.google.com/p/khanacademy/issues/detail?id=718">re-teach</a>
+    some subset of the videos!
+</p>
+<p>
+    If you're an expert (especially at something that Sal's unlikely to be able to learn in the next 5 years) and 
+    want to become a minor education celebrity (but a major one in your field), make a handful of videos and
+    <a href="http://code.google.com/p/khanacademy/issues/detail?id=718">contribute them</a>.&nbsp;
+    If they gel with the style--conversational while focused on intuition and rigor--of the current library, it might make
+    sense for you make a playlist or two (with all credit going to you of course).
+</p>
+<p>
+    If you like to write code, you can help with 
+    <a href="http://groups.google.com/group/khanacademy-developers/web/getting-started-with-the-code">the Khan Academy 
+    web application which we are developing as an open source project</a>.
+</p>
+<p>
+    And of course, you can always 
+    <a href="https://www.paypal.com/us/cgi-bin/webscr?cmd=_flow&amp;SESSION=MyXW-bBfeHO-JYU92RvrqENxZ15MKIZ1XINWEQszo67OVSCK-pIxUXHiYwu&amp;dispatch=5885d80a13c0db1f8e263663d3faee8d66edfb0b39be7838c6fe2b48d77d66ee" rel="nofollow">donate money</a>.
+    The Khan Academy is a not-for-profit 501(c)(3) organization.&nbsp;
+</p>
+<p>
+    If you have an idea for how your organization can help make Khan 
+    Academy better, please tell us about it by sending an email to the <i>publicly accessible</i>
+    <a href="mailto:khan-academy-support-offers@googlegroups.com">Khan Academy Support Offers</a>
+    group.&nbsp; Although we don't have time to reply
+    to individual messages, we do read your messages whenever we get a
+    chance.&nbsp; Please be as clear and concise as possible about what you are
+    proposing and what, if anything, you would expect in return (e.g. a
+    link to your site, or access to anonymized data, financial
+    compensation, etc.).&nbsp; If you don't hear from us right away, it might
+    mean that we don't see a good fit, or it might mean that we just don't 
+    have the time and resources to pursue working with you right away.&nbsp;
+    Either way, we sincerely appreciate you taking the time to contact us.&nbsp;
+    Please note that your messages 
+    will be publicly accessible, so <b style="color:rgb(0, 0, 0)">don't post private or confidential information</b>.
+</p>
+</div>
+
 </div>
 
 </td>
