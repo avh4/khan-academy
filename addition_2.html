@@ -15,10 +15,10 @@ var selectedArray = new Array();
 
 
 
-var topNumberDigits =2;
-
-var bottomNumberDigits =1; //Has to be at least one less than topNumberDigits
-
+{% block addition_settings %}
+var topNumberDigits = 2;
+var bottomNumberDigits = 1; // has to be at least one less than topNumberDigits
+{% endblock addition_settings %}
 
 var answer = 0; 
 
