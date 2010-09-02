@@ -17,43 +17,46 @@ var selectedArray = new Array();
 
 {% block addition_settings %}
 var topNumberDigits = 2;
-var bottomNumberDigits = 1; // has to be at least one less than topNumberDigits
+var bottomNumberDigits = (get_random(9) < 1 ? 2 : 1); // must be less than or equal to topNumberDigits
 {% endblock addition_settings %}
 
 var answer = 0; 
 
-for (var i=0; i<(topNumberDigits-1); i++)
+for (var i=0; i<topNumberDigits; i++)
 {
-	topNumber.push(get_random(9));
-	carryArray.push(0);
-	if (i<bottomNumberDigits)
-	{
-		if (i<(bottomNumberDigits-1))
-		{
-			bottomNumber.push(get_random(9));
-		}
-		else
-		{
-			bottomNumber.push(get_random(8)+1);
-		}
-	}
-	else
-	{
-		bottomNumber.push(0);
-	}
-	//alert("ans:"+correctAnswer+" Digit:"+bottomNumber[i]+" Place:"+(10^i));
-	answer+=bottomNumber[i]*Math.pow(10,i);
-	//alert("ans:"+correctAnswer+" Digit:"+topNumber[i]+" Place:"+(10^i));
-	answer+=topNumber[i]*Math.pow(10,i);
-	
-}
-topNumber.push(get_random(8)+1);
+  if (topNumberDigits-1 == i)
+  {
+    topNumber.push(get_random(8)+1);
+  }
+  else
+  {   
+    topNumber.push(get_random(9));
+  }
+  answer += topNumber[i]*Math.pow(10,i);
 
-answer+=topNumber[topNumberDigits-1]*Math.pow(10,(topNumberDigits-1));
-//alert(correctAnswer);
-bottomNumber.push(0);
-carryArray.push(0);
+  carryArray.push(0);
+}
+
+for (var i=0; i<bottomNumberDigits; i++)
+{
+  if (bottomNumberDigits-1 == i)
+  {
+    bottomNumber.push(get_random(8)+1);
+  }
+  else
+  {   
+    bottomNumber.push(get_random(9));
+  }
+  answer += bottomNumber[i]*Math.pow(10,i);
+}
+
+for (var i=0; i < (topNumberDigits - bottomNumberDigits); i++)
+{
+  bottomNumber.push(0);
+}
+
 setCorrectAnswer(answer);
+
 
 function next_step()
 {
@@ -151,19 +154,17 @@ for (var cols=0; cols<topNumberDigits; cols++)
 	var index = topNumberDigits-1-cols;
 	document.write('<td><div ID=\"1_'+index+'\">'+getFontString(topNumber[index], 'noSel')+'</div></td>');
 }
-document.write('</tr><tr><td></td><td>'+getFontString('+', 'noSel')+'</td>');
-	
-for (var cols=0; cols<topNumberDigits-1; cols++)
+document.write('</tr><tr><td>'+getFontString('+', 'noSel')+'</td>');
+
+for (var i=0; i < (topNumberDigits - bottomNumberDigits); i++)
 {
-	if (cols< (topNumberDigits-1-bottomNumberDigits))
-	{
-		document.write('<td></td>');
-	}
-	else
-	{
-		var index = bottomNumberDigits -1 - (cols - (topNumberDigits-1-bottomNumberDigits));
-		document.write('<td><div ID=\"2_'+index+'\">'+getFontString(bottomNumber[index], 'noSel')+'</div></td>');
-	}
+  document.write("<td></td>");
+}
+
+for (var cols=0; cols<bottomNumberDigits; cols++)
+{
+	var index = bottomNumberDigits-1-cols;
+	document.write('<td><div ID=\"2_'+index+'\">'+getFontString(bottomNumber[index], 'noSel')+'</div></td>');
 }
 
 document.write('</tr><tr><td class=answer><div ID=\"extra\"></td>');
