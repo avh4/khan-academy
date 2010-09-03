@@ -1,0 +1,124 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+<style>
+    #overview {
+        padding: 1ex 1em 1ex 1em;
+        display: inline;
+    }
+    
+    #overview #overview_video, #overview #overview_video embed {
+        float: left;
+        width: 320;
+        height: 205;
+        padding: 1ex;
+    }
+    #video_library_toc {
+        float: left;
+        clear: none;
+        width: auto;
+        padding: 1ex 1em 1ex 1em;
+    }
+    #video_library_toc > ul {
+        margin-left: 0;
+        padding-left: 0;
+    }
+    #video_library_toc ul {
+        margin-left: 0;
+        padding-left: 1em;
+    }
+    
+    nav#video_library_toc li:before {
+        content: "";
+    }
+    
+    #video_library {
+        clear: both;
+    }
+    #video_library section {
+        padding-left: 0em;
+    }
+    #video_library section h1 {
+        font-size: larger;
+    }
+    #video_library .subtopics {
+        border-left: solid 1px black;
+        padding-left: 0em;
+        margin-left: 1em;
+        clear: left;
+    }
+    #video_library .subtopics h1 {
+        display: block;
+        float: left;
+        margin-right: auto;
+        margin-left: 0;
+        padding-left: 1em;
+        border-top: solid 1px black;
+    }
+    #video_library .subtopics p, #video_library .subtopics ol {
+        clear: left;
+    }
+    #video_library li {
+        display: inline;
+    }
+    #video_library li:after {
+        content: ", ";
+    }
+    #video_library li:last-child:after {
+        content: "";
+    }
+</style>
+<script src="javascript/jstree/jquery.jstree.js?{{App.version}}"></script>
+<script>
+    $(function() {
+        $('#video_library_toc')
+            .bind('loaded.jstree', function (event, data) {
+                data.inst.open_all();
+
+                $('#video_library_toc > ul > li > ul > li > ul > li').each(function() {
+                    data.inst.close_node(this);
+                });
+            })
+            .jstree({
+                core : {
+                    html_titles : true
+                },
+                plugins : ['html_data', 'themeroller']
+            });
+    });
+</script>
+{% endblock pagescript %}
+{% block pagetitle %}{% endblock pagetitle %}
+{% block pagecontent %}
+<nav id="video_library_toc">
+    <ul>
+        {% for node in toc %}
+        <li>
+        {{ node }}
+        </li>
+        {% endfor %}
+    </ul>
+</nav>
+<article id="overview">
+    <p>
+        The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.&nbsp;
+        <object id="overview_video">
+            <param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1">
+            </param><param name="allowFullScreen" value="true">
+            </param><param name="allowscriptaccess" value="always">
+            </param>
+            <embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true">
+            </embed>
+        </object>
+        Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured 
+        by YouTube video views per day and unique users per month.&nbsp;  We are complementing this ever-growing library with user-paced
+        exercises--developed as an <A href="http://code.google.com/p/khanacademy/">open source project</A>--allowing the Khan Academy to
+        become the free classroom for the World.&nbsp; <A href="/frequently-asked-questions"><b>Learn more about the Khan Academy and Salman Khan...</b></A>
+    </p>
+</article>
+<article id="video_library">
+    {% for node in contents %}
+    {{ node }}
+    {% endfor %}
+</article>
+{% endblock pagecontent %}

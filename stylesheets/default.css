@@ -163,7 +163,7 @@ nav ul li:first-child:before, header ul li:first-child:before, footer ul li:firs
     content: "";
 }
 
-article {
+article, section {
     display: block;
 }
 

@@ -21,7 +21,7 @@ django.conf.settings.configure(
     ),
     TEMPLATE_DIRS=(os.path.dirname(__file__),)
 )
-
+from django.template.loader import render_to_string
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -39,6 +39,7 @@ from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog
 from discussion import comments
 from discussion import qa
 from discussion import notification
+from discussion import render
 
 class VideoDataTest(webapp.RequestHandler):
 
@@ -977,12 +978,171 @@ class ViewUsers(webapp.RequestHandler):
 
         self.response.out.write('Users ' + str(count))
 
+class ViewVideoLibrary2(webapp.RequestHandler):
+
+
+    def get(self):
+        def get_playlist(playlist_title):
+            query = Playlist.all()
+            query.filter('title =', playlist_title)
+            playlist = query.get()
+            query = VideoPlaylist.all()
+            query.filter('playlist =', playlist)
+            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+            query.order('video_position')
+            playlist_videos = query.fetch(500)
+            videos = []
+            for playlist_video in playlist_videos:
+                videos.append(playlist_video.video)
+            
+            return { 
+                    'title': playlist_title,
+                    'description': playlist.description,
+                    'videos': videos
+                    }
+        
+        tree = {
+                'title': "Videos by Topic",
+                'children': 
+                [
+                 {
+                  'title': "Math",
+                  'children': [
+                                get_playlist('Arithmetic'),
+                                get_playlist('Developmental Math'),
+                                {
+                                 'title': 'Pre-algebra',
+                                 'children': [
+                                                get_playlist('Pre-algebra'),
+                                                get_playlist('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+                                              ]
+                                },
+                                {
+                                 'title': 'Geometry',
+                                 'children': [
+                                                get_playlist('Geometry'),
+                                                get_playlist('California Standards Test: Geometry'),
+                                              ]
+                                },
+#                                ]
+#                  }
+#                 ]
+#                }
+        
+                                {
+                                 'title': 'Algebra',
+                                 'children': [
+                                                get_playlist('Algebra'),
+                                                get_playlist('Algebra I Worked Examples'),
+                                                get_playlist('ck12.org Algebra 1 Examples'),
+                                                get_playlist('California Standards Test: Algebra I'),
+                                                get_playlist('California Standards Test: Algebra II'),
+                                              ]
+                                },
+                                get_playlist('Trigonometry'),
+                                get_playlist('Precalculus'),
+                                get_playlist('Calculus'),
+                                get_playlist('Differential Equations'),
+                                get_playlist('Linear Algebra'),
+                                get_playlist('Probability'),
+                                get_playlist('Statistics'),
+                               ]
+                  },
+                 {
+                  'title': "Science",
+                  'children': [
+                                {
+                                 'title': 'Chemistry',
+                                 'children': [
+                                                get_playlist('Chemistry'),
+                                                get_playlist('Organic Chemistry'),
+                                              ]
+                                },
+                                get_playlist('Biology'),
+                                get_playlist('Physics'),
+                               ]
+                  },
+                  get_playlist('History'),
+                 {
+                  'title': "Economics",
+                  'children': [
+                                get_playlist('Finance'),
+                                get_playlist('Valuation and Investing'),
+                                get_playlist('Banking and Money'),
+                                get_playlist('Venture Capital and Capital Markets'),
+                                {
+                                 'title': 'Current Economics',
+                                 'children': [
+                                                get_playlist('Current Economics'),
+                                                get_playlist('Credit Crisis'),
+                                                get_playlist('Paulson Bailout'),
+                                                get_playlist('Geithner Plan'),
+                                              ]
+                                },
+                               ]
+                  },
+                 {
+                  'title': "Other",
+                  'children': [
+                                 {
+                                  'title': "Test Preparation",
+                                  'children': [
+                                                get_playlist('SAT Preparation'),
+                                                get_playlist('GMAT: Problem Solving'),
+                                                get_playlist('GMAT Data Sufficiency'),
+                                               ]
+                                  },
+                                  get_playlist('Brain Teasers'),
+                                  get_playlist('Khan Academy-Related Talks and Interviews'),
+                               ]
+                  },
+                 ]
+                }
+        
+        def get_activities(node):
+            videos = node.get('videos', [])
+            activities = {}
+            for v in videos:
+                activities[v.readable_id] = v
+            for child in node.get('children', []):
+                activities.update(get_activities(child))
+            node['num_activities'] = len(activities)
+            return activities
+        
+        tree['num_activities'] = len(get_activities(tree))
+                
+        def iterator(nodes, depth, topic_template_path, playlist_template_path = None):
+            if playlist_template_path is None:
+                playlist_template_path = topic_template_path
+            for node in nodes:
+                template_values = node.copy()
+                if node.get('videos'):
+                    yield render_to_string(playlist_template_path, template_values)
+                else:
+                    children = iterator(node['children'], depth+1, topic_template_path, playlist_template_path)
+                    template_values.update({
+                                            'children': children
+                                            })
+                    html = render_to_string(topic_template_path, template_values)
+                    yield html
+
+        template_values = {
+            'App' : App,
+            'toc': iterator([tree], 0,
+                             os.path.join(os.path.dirname(__file__), 'videolibrary_toc.html')),
+            'contents': iterator([tree], 0,
+                             os.path.join(os.path.dirname(__file__), 'videolibrary_topic.html'), 
+                             os.path.join(os.path.dirname(__file__), 'videolibrary_playlist.html')),
+            }
+        path = os.path.join(os.path.dirname(__file__), 'videolibrary2.html')
+        self.response.out.write(template.render(path, template_values))
+
 class ViewVideoLibrary(webapp.RequestHandler):
 
 
     def get(self):
-    	all_topics_list = []
-    	    
+        all_topics_list = []
+            
         colOne = []
         colOne.append('Chemistry')
         colOne.append('Arithmetic')
@@ -1030,7 +1190,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
         all_topics_list.extend(colThree)
         all_topics_list.extend(colFour)
         all_topics_list.sort()
-        	
+            
         
 
         cols = [colOne, colTwo, colThree, colFour]
@@ -1064,8 +1224,7 @@ class ViewVideoLibrary(webapp.RequestHandler):
             }
         path = os.path.join(os.path.dirname(__file__), 'videolibrary.html')
         self.response.out.write(template.render(path, template_values))
-
-
+        
 class Export(webapp.RequestHandler):
 
     def get(self):
@@ -1859,6 +2018,7 @@ def real_main():
         ('/frequently-asked-questions', ViewFAQ),
         ('/exercisedashboard', ViewAllExercises),
         ('/library', ViewVideoLibrary),
+        ('/library2', ViewVideoLibrary2),
         ('/syncvideodata', UpdateVideoData),
         ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
