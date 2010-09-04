@@ -996,6 +996,7 @@ class ViewVideoLibrary2(webapp.RequestHandler):
                 videos.append(playlist_video.video)
             
             return { 
+                    'id': playlist_title+"_playlist",
                     'title': playlist_title,
                     'description': playlist.description,
                     'videos': videos
@@ -1017,13 +1018,6 @@ class ViewVideoLibrary2(webapp.RequestHandler):
                                                 get_playlist('MA Tests for Education Licensure (MTEL) -Pre-Alg')
                                               ]
                                 },
-                                {
-                                 'title': 'Geometry',
-                                 'children': [
-                                                get_playlist('Geometry'),
-                                                get_playlist('California Standards Test: Geometry'),
-                                              ]
-                                },
 #                                ]
 #                  }
 #                 ]
@@ -1039,13 +1033,20 @@ class ViewVideoLibrary2(webapp.RequestHandler):
                                                 get_playlist('California Standards Test: Algebra II'),
                                               ]
                                 },
+                                get_playlist('Probability'),
+                                get_playlist('Statistics'),
+                                {
+                                 'title': 'Geometry',
+                                 'children': [
+                                                get_playlist('Geometry'),
+                                                get_playlist('California Standards Test: Geometry'),
+                                              ]
+                                },
                                 get_playlist('Trigonometry'),
                                 get_playlist('Precalculus'),
                                 get_playlist('Calculus'),
                                 get_playlist('Differential Equations'),
                                 get_playlist('Linear Algebra'),
-                                get_playlist('Probability'),
-                                get_playlist('Statistics'),
                                ]
                   },
                  {
@@ -1116,6 +1117,8 @@ class ViewVideoLibrary2(webapp.RequestHandler):
                 playlist_template_path = topic_template_path
             for node in nodes:
                 template_values = node.copy()
+                if template_values.get('id') is None:
+                    template_values['id'] = template_values['title']
                 if node.get('videos'):
                     yield render_to_string(playlist_template_path, template_values)
                 else:
