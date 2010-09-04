@@ -26,6 +26,7 @@ funcGens[0] = function() {
     wrongs[2] = dPolydx_wrong3(low_deg, high_deg, coefs); // reversed signs on all terms
     wrongs[3] = dPolydx_wrong4(low_deg, high_deg, coefs); // doesn't multiply coefficients
     wrongs[4] = dPolydx_wrong5(low_deg, high_deg, coefs); // doesn't multiply coefficients + doesn't decrement exponents
+	wrongs[5] = dfofx; // quick workaround because generateNewProblem overwrites wrongs[] several times
 }
 
 funcGens[1] = function() {
@@ -73,8 +74,7 @@ funcGens[4] = function() {
     wrongs[2] = '-csc x tan x';
     wrongs[3] = 'sec x tan x';
     wrongs[4] = 'sec x cot x';
-    wrongs[5] = '-sec x tan x';
-    wrongs[6] = '-sec x cot x';
+    wrongs[5] = '-sec x cot x';
 }
 
 funcGens[5] = function() {
@@ -125,9 +125,13 @@ funcGens[8] = function() {
     wrongs[5] = 'x';
 }
 
-funcGens[getRandomInt(funcGens.length-1)]();
+generateNewProblem(function() {
+	funcGens[getRandomInt(funcGens.length-1)]();
+	return fofx;
+}, 10);
 
 setCorrectAnswer(dfofx);
+
 for (var i = 0; i < wrongs.length; i++) {
     addWrongChoice(wrongs[i]);
 }
