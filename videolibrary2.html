@@ -60,12 +60,13 @@
     }
     #video_library li {
         display: inline;
+        white-space: nowrap;
     }
     #video_library li:after {
-        content: ", ";
+        content: "] ";
     }
-    #video_library li:last-child:after {
-        content: "";
+    #video_library li:before {
+        content: "[";
     }
 </style>
 <script src="javascript/jstree/jquery.jstree.js?{{App.version}}"></script>
