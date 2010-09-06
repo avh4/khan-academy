@@ -1500,9 +1500,8 @@ class ViewIndividualReport(webapp.RequestHandler):
             ex_graph = ExerciseGraph(user_data, user=student)
             for exercise in ex_graph.exercises:
                 exercise.display_name = exercise.name.replace('_', ' ').capitalize()            
-            proficient_exercises = []
-            #proficient_exercises = ex_graph.get_proficient_exercises()
-            self.compute_report(student, proficient_exercises)
+            proficient_exercises = ex_graph.get_proficient_exercises()
+            self.compute_report(student, proficient_exercises, dummy_values=True)
             suggested_exercises = ex_graph.get_suggested_exercises()
             self.compute_report(student, suggested_exercises)
             review_exercises = ex_graph.get_review_exercises(self.get_time())
@@ -1524,29 +1523,32 @@ class ViewIndividualReport(webapp.RequestHandler):
         else:
             self.redirect(users.create_login_url(self.request.uri))
 
-    def compute_report(self, user, exercises):
+    def compute_report(self, user, exercises, dummy_values=False):
             for exercise in exercises:
                 #logging.info(exercise.name)             
-                total_correct = 0
-                correct_of_last_ten = 0
-                problems = ProblemLog.all().filter('user =', user).filter('exercise =', exercise.name).order("-time_done")
-                exercise.total_done = problems.count()
-                problem_num = 0
-                for problem in problems:
-                    #logging.info("problem.time_done: " + str(problem.time_done) + " " + str(problem.correct))
-                    if problem.correct:
-                        total_correct += 1
-                        if problem_num < 10:
-                            correct_of_last_ten += 1
-                    problem_num += 1
-                #logging.info("total_done: " + str(exercise.total_done))
-                #logging.info("total_correct: " + str(total_correct))
-                #logging.info("correct_of_last_ten: " + str(correct_of_last_ten))
-                if exercise.total_done > 0:
-	                exercise.percent_correct = "%.0f%%" % (100.0*total_correct/exercise.total_done,)
+                if dummy_values:
+                    exercise.percent_correct = "-"
+                    exercise.percent_of_last_ten = "-"                    
                 else:
-	                exercise.percent_correct = "0%"	        
-                exercise.percent_of_last_ten = "%.0f%%" % (100.0*correct_of_last_ten/10,)
+                    total_correct = 0
+                    correct_of_last_ten = 0
+                    problems = ProblemLog.all().filter('user =', user).filter('exercise =', exercise.name).order("-time_done")
+                    problem_num = 0
+                    for problem in problems:
+                        #logging.info("problem.time_done: " + str(problem.time_done) + " " + str(problem.correct))
+                        if problem.correct:
+                            total_correct += 1
+                            if problem_num < 10:
+                                correct_of_last_ten += 1
+                        problem_num += 1
+                    #logging.info("total_done: " + str(exercise.total_done))
+                    #logging.info("total_correct: " + str(total_correct))
+                    #logging.info("correct_of_last_ten: " + str(correct_of_last_ten))
+                    if exercise.total_done > 0:
+	                    exercise.percent_correct = "%.0f%%" % (100.0*total_correct/exercise.total_done,)
+                    else:
+	                    exercise.percent_correct = "0%"	        
+                    exercise.percent_of_last_ten = "%.0f%%" % (100.0*correct_of_last_ten/10,)
                 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -1730,6 +1732,8 @@ class ViewCharts(webapp.RequestHandler):
                         max_time_taken = problem.time_taken
                     problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
                     #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
+                if max_time_taken > 120:
+                    max_time_taken = 120
                 y_axis_interval = max_time_taken/5
                 if y_axis_interval == 0:
                     y_axis_interval = max_time_taken/5.0            
