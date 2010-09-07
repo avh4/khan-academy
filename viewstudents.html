@@ -1,26 +1,70 @@
 {% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#students p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+#students table {
+    border-top: 2px solid #80C65A;
+    border-spacing: 0;
+    border-collapse: collapse;
+    margin-bottom: 1.5em;
+}
+#students td, #students th {
+    padding: 3px;
+}
+#students th {
+    BORDER-RIGHT: #fff 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-TOP: #fff 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-SIZE: 11px;
+    PADDING-BOTTOM: 4px;
+    VERTICAL-ALIGN: bottom;
+    COLOR: #333;
+    LINE-HEIGHT: 13px;
+    PADDING-TOP: 4px;
+    BORDER-BOTTOM: #ccc 1px solid;
+    FONT-FAMILY: arial,helvetica,sans-serif;
+    BACKGROUND-COLOR: #d2dded
+}
+#students th:first-child {
+    width: 100%;
+    text-align: left;
+}
+#students tr.even_row td {
+    background-color:#FFFFFF;
+}
+#students tr.odd_row td {
+    background-color:#EFEFEF;
+}
+</style>
+{% endblock pagescript %}
 {% block pagetitle %}Students{% endblock pagetitle %}
 {% block pagecontent %}
 
-<br><p>To enable viewing your list of students, they should each log in and click on the <a href="coaches">Enter a coach ID</a>
+
+<article id="students">
+<p>To enable viewing your list of students, they should each log in and click on the <a href="coaches">Enter a coach ID</a>
 link here or on the bottom of the page.  After they enter your email address and click the "Register Coach" button,
 you'll see links to their progress reports below, as well as a <a href="/classreport">class report</a>.
-</p><br>
+</p>
+
 {% if students|length_is:"0" %}
 {% else %}
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL">Student</td></tr>
+<table>
+<tr><th>Student</th></tr>
 {% for student in students %}
 		{% if forloop.counter|divisibleby:2 %}
-		<TR class="highlightWhite" >
+		<tr class="even_row">
 		{% else %}
-		<TR class="highlightGreyRelated">
+		<tr class="odd_row">
 		{% endif %}
-
 		<td><a href="/individualreport?student_email={{student}}">{{student}}</a></td>
 		</tr>
 {% endfor %}
 </table>
 {% endif %}
-<br>
+</article>
 {% endblock pagecontent %}

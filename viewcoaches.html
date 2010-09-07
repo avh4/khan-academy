@@ -1,7 +1,45 @@
 {% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#coaches p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+#coaches table {
+    border-top: 2px solid #80C65A;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+#coaches td, #coaches th {
+    padding: 3px;
+}
+#coaches th {
+    BORDER-RIGHT: #fff 1px solid;
+    PADDING-RIGHT: 5px;
+    BORDER-TOP: #fff 1px solid;
+    PADDING-LEFT: 5px;
+    FONT-SIZE: 11px;
+    PADDING-BOTTOM: 4px;
+    VERTICAL-ALIGN: bottom;
+    COLOR: #333;
+    LINE-HEIGHT: 13px;
+    PADDING-TOP: 4px;
+    BORDER-BOTTOM: #ccc 1px solid;
+    FONT-FAMILY: arial,helvetica,sans-serif;
+    BACKGROUND-COLOR: #d2dded
+}
+#coaches tr.even_row td {
+    background-color:#FFFFFF;
+}
+#coaches tr.odd_row td {
+    background-color:#EFEFEF;
+}
+</style>
+{% endblock pagescript %}
 {% block pagetitle %}Coaches{% endblock pagetitle %}
 {% block pagecontent %}
 
+<article id="coaches">
 <p>
 Enter the email address of your coach to allow them to view all of your performance data on the Khan Academy,
 and to allow them to assign modules to you.
@@ -15,13 +53,13 @@ and to allow them to assign modules to you.
 
 {% if coaches %}
 <form action="/unregistercoach" method="post">
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL">Coach</td><td width=100% class="colHeadL">Unregister</td></tr>
+<table>
+<tr><th>Coach</th><th>Unregister</th></tr>
 {% for coach in coaches %}
 		{% if forloop.counter|divisibleby:2 %}
-		<TR class="highlightWhite" >
+		<tr class="even_row" >
 		{% else %}
-		<TR class="highlightGreyRelated">
+		<tr class="odd_row">
 		{% endif %}
 
 		<td>{{coach}}</td>
@@ -32,4 +70,5 @@ and to allow them to assign modules to you.
 <p><input type="submit" value="Unregister Coach"></p>
 </form>
 {% endif %}
+</article>
 {% endblock pagecontent %}
