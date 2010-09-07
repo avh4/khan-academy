@@ -34,6 +34,8 @@ import qbrary
 import bulk_update.handler
 
 from app import App
+if os.environ["SERVER_SOFTWARE"].startswith('Development'):
+    App.is_dev_server = True
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator
 
 from discussion import comments

@@ -4,7 +4,14 @@
   <title>Khan Academy</title>
   
   <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    {# Support offline use with dev appserver #}
+    {% if App.is_dev_server %}
+    <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}">
+    </script>
+    {% else %}
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+    </script>
+    {% endif %}
   <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>

@@ -15,8 +15,14 @@
         <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
         <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
         <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css?{{App.version}}">
+		{# Support offline use with dev appserver #}
+		{% if App.is_dev_server %}
+        <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}">
+        </script>
+		{% else %}
         <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
         </script>
+		{% endif %}
         <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}">
         </script>
         <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
