@@ -3,13 +3,18 @@
 {% block generateequation %}
 
 //generate the left and right terms for the first degree linear equations
-var left_x_coefficients= new Array();
-var right_x_coefficients= new Array();
-var left_constants = new Array();
-var right_constants = new Array();
+var left_x_coefficients;
+var right_x_coefficients;
+var left_constants;
+var right_constants;
 
 function generateExercise()
 {
+        left_x_coefficients= new Array();
+        right_x_coefficients= new Array();
+        left_constants = new Array();
+        right_constants = new Array();
+
 	left_x_coefficients[0]= get_random();
 	right_x_coefficients[0]= get_random();
 	left_constants[0]= get_random();
