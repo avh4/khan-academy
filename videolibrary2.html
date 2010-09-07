@@ -18,7 +18,7 @@
         clear: none;
         width: auto;
         padding: 1ex 1em 1ex 1em;
-		border: none;
+        border: none;
     }
     #video_library_toc > ul {
         margin-left: 0;
@@ -28,7 +28,10 @@
         margin-left: 0;
         padding-left: 1em;
     }
-    
+    #video_library_toc a:link, #video_library_toc a:visited {
+        color:#006699;
+        text-decoration: underline;
+    }
     nav#video_library_toc li:before {
         content: "";
     }
@@ -66,12 +69,22 @@
         margin-left: 0;
         padding-left: 1em;
     }
+    #video_library .subtopics {
+        *padding-top: 1em; /* Reasonable spacing in IE7 */
+        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
+    }
+    #video_library .subtopics .playlist_container {
+        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
+    }
     #video_library ol li {
         display: inline-block;
         width: 25ex;
         vertical-align: top;
         padding: .5ex 2ex 0ex 0ex;
         border-top: dotted 1px #ccc;
+        zoom:1; /* For inline-block in IE7 */
+        *display: inline; /* For inline-block in IE7 */
+        _height: 1em; /* For inline-block in IE6 */
     }
     
     #video_library ol li:before {
@@ -83,6 +96,7 @@
         counter-reset: video;
         padding: 0ex 0em 0ex 0em;
         display: inline;
+        *margin-left: 0; /* Prevents indenting first line in IE7 */
     }
     
 </style>
@@ -101,7 +115,11 @@
                 core : {
                     html_titles : true
                 },
-                plugins : ['html_data', 'themeroller']
+                themes: {
+                    theme: 'classic',
+                    icons: false
+                },
+                plugins: ['html_data', 'themes']
             });
     });
 </script>
