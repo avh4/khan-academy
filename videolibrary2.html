@@ -18,6 +18,7 @@
         clear: none;
         width: auto;
         padding: 1ex 1em 1ex 1em;
+		border: none;
     }
     #video_library_toc > ul {
         margin-left: 0;
@@ -60,20 +61,30 @@
         margin-bottom: 0;
         border-top: solid 1px black;
     }
-    #video_library .subtopics p, #video_library .subtopics ol {
+    #video_library .subtopics p, #video_library .subtopics .playlist_container {
         clear: left;
-        padding-left: 1ex;
+        margin-left: 0;
+        padding-left: 1em;
     }
-    #video_library li {
+    #video_library ol li {
+        display: inline-block;
+        width: 25ex;
+        vertical-align: top;
+        padding: .5ex 2ex 0ex 0ex;
+        border-top: dotted 1px #ccc;
+    }
+    
+    #video_library ol li:before {
+        content: counter(video) ". ";
+        counter-increment: video;
+    }
+    
+    #video_library ol {
+        counter-reset: video;
+        padding: 0ex 0em 0ex 0em;
         display: inline;
-        white-space: nowrap;
     }
-    #video_library li:after {
-        content: "] ";
-    }
-    #video_library li:before {
-        content: "[";
-    }
+    
 </style>
 <script src="javascript/jstree/jquery.jstree.js?{{App.version}}"></script>
 <script>

@@ -1,9 +1,11 @@
 <section>
     <h1 id="{{id|slugify}}">{{title|escape}} ({{num_activities}} videos)</h1>
     <p>{{description|escape}}</p>
+	<div class="playlist_container">
     <ol>
-        {% for video in videos %}
-            <li><a href="/video/{{video.readable_id}}">{{video.title|escape}}</a></li>
-        {% endfor %}
+        {% for video in videos %}<li>
+            	<a href="/video/{{video.readable_id}}">{{video.title|escape}}</a>
+		</li>{% endfor %}
     </ol>
+	</div>
 </section>
