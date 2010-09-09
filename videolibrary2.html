@@ -8,12 +8,20 @@
         display: block;
     }
     
-    #overview #overview_video, #overview #overview_video embed {
+    #overview #overview_video, #overview embed {
         float: left;
         width: 320;
-        height: 205;
-        padding: 1ex;
+        height: 205;        
     }
+    
+    #overview #overview_video {
+        margin: 1ex;
+    }
+    
+    #overview embed {
+        *margin: 1ex; /* Fixes spacing under IE6 and IE7 */ 
+    }
+    
     #search_and_browse {
         float: left;
         clear: none;
@@ -46,6 +54,7 @@
     }
     #video_library section h1 {
         font-size: larger;
+        clear: left;
     }
     #video_library .subtopics {
         border-left: solid 1px black;
@@ -119,7 +128,16 @@
     }
     
     .search_highlight a {
+/*
         background-color: yellow;
+*/  
+    }
+    
+    #video_library a.toggler:before {
+        content: "+";
+    }
+    #video_library a.toggler.open:before {
+        content: "\2212"; /* minus sign */
     }
     
 </style>
@@ -143,37 +161,49 @@
                 },
                 plugins: ['html_data', 'themes']
             });
+
         $('#search_string').keypress(function(e) {
             if (e.which == 13) search();
         });
         $('#search_button').click(search);
+        $('#search_and_browse button[type=reset]').click(function() {
+            $('#search_string').val('');
+            search(); /* Searching for nothing, shows everything. */
+        });
         
         function search() {
             var s = $('#search_string').val();
             $('.search_highlight').removeClass('search_highlight');
-            if (s.length > 0) {
-                // Construct a RegExp that will match strings containing words begininning with
-                // the search string (case-insensitive)
-                var escapedSearchString = s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
-                var re = new RegExp("\\b"+escapedSearchString, "i");
+            // Construct a RegExp that will match strings containing words begininning with
+            // the search string (case-insensitive)
+            var escapedSearchString = s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+            var re = new RegExp("\\b"+escapedSearchString, "i");
+            
+            // Hide all the sections and videos initially
+            $('#video_library section, #video_library li').addClass('not_found');
+            
+            // Highlight the videos whose title or keywords match the RegExp, and stop hiding
+            // those videos and their containing sections
+            $('#video_library li')
+                .filter(function() {return re.test($(this).text()) || re.test($(this).attr('data-keywords'));})
+                .addClass('search_highlight')
+                .parents().andSelf().removeClass('not_found');
                 
-                // Hide all the sections and videos initially
-                $('#video_library section, #video_library li').addClass('not_found');
-                
-                // Highlight the videos whose title or keywords match the RegExp, and stop hiding
-                // those videos and their containing sections
-                $('#video_library li')
-                    .filter(function() {return re.test($(this).text()) || re.test($(this).attr('data-keywords'));})
-                    .addClass('search_highlight')
-                    .parents().andSelf().removeClass('not_found');
-                    
-                // Set the focus to the first matching video
-                $('#video_library .search_highlight a').first().focus();
-            }
-            else {
-                $('#video_library *').removeClass('not_found');                
-            }
+            // Set the focus to the first matching video
+            $('#video_library .search_highlight a').first().focus();
         }
+        
+        // Force the subtopics divs to go past the floated headings they contain so that
+        // the vertical line doesn't disappear when all subtopics are collapsed.
+        $("#video_library .subtopics").append("<div style='clear: both;'></div>");
+        
+        $("#video_library h1").prepend("<a href='#' class='toggler open' title='Collapse/Expand'></a>&nbsp;");
+        // Clicking a heading causes the section to collapse/expand.
+        $("#video_library .toggler").click(function(e) {
+            $(this).parent().siblings().toggle();
+            $(this).toggleClass("open");
+            e.preventDefault();
+        });
     });
 </script>
 {% endblock pagescript %}
@@ -183,6 +213,7 @@
 <p>
     <label>Keyword: <input id="search_string" type="text"></input></label>
     <button id="search_button" type="button">Search</button>
+    <button type="reset">Reset</button>
 </p>      
 <nav id="video_library_toc">
     <ul>
@@ -195,16 +226,16 @@
 </nav>
 </div>
 <article id="overview">
+    <object id="overview_video">
+        <param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1">
+        </param><param name="allowFullScreen" value="true">
+        </param><param name="allowscriptaccess" value="always">
+        </param>
+        <embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true">
+        </embed>
+    </object>
     <p>
         The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.&nbsp;
-        <object id="overview_video">
-            <param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1">
-            </param><param name="allowFullScreen" value="true">
-            </param><param name="allowscriptaccess" value="always">
-            </param>
-            <embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true">
-            </embed>
-        </object>
         Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured 
         by YouTube video views per day and unique users per month.&nbsp;  We are complementing this ever-growing library with user-paced
         exercises--developed as an <A href="http://code.google.com/p/khanacademy/">open source project</A>--allowing the Khan Academy to
