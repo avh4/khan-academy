@@ -150,10 +150,12 @@
                 $('#video_library_toc > ul > li > ul > li').each(function() {
                     data.inst.close_node(this);
                 });
+                $('#video_library_toc').show();
             })
             .jstree({
                 core : {
-                    html_titles : true
+                    html_titles : true,
+                    animation: 0
                 },
                 themes: {
                     theme: 'classic',
@@ -209,42 +211,8 @@
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
-<div id="search_and_browse">    
-<p>
-    <label>Keyword: <input id="search_string" type="text"></input></label>
-    <button id="search_button" type="button">Search</button>
-    <button type="reset">Reset</button>
-</p>      
-<nav id="video_library_toc">
-    <ul>
-        {% for node in toc %}
-        <li>
-        {{ node }}
-        </li>
-        {% endfor %}
-    </ul>
-</nav>
-</div>
-<article id="overview">
-    <object id="overview_video">
-        <param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1">
-        </param><param name="allowFullScreen" value="true">
-        </param><param name="allowscriptaccess" value="always">
-        </param>
-        <embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true">
-        </embed>
-    </object>
-    <p>
-        The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.&nbsp;
-        Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured 
-        by YouTube video views per day and unique users per month.&nbsp;  We are complementing this ever-growing library with user-paced
-        exercises--developed as an <A href="http://code.google.com/p/khanacademy/">open source project</A>--allowing the Khan Academy to
-        become the free classroom for the World.&nbsp; <A href="/frequently-asked-questions"><b>Learn more about the Khan Academy and Salman Khan...</b></A>
-    </p>
-</article>
-<article id="video_library">
-    {% for node in contents %}
-    {{ node }}
-    {% endfor %}
-</article>
+{% include "homepage_content.html" %}
+<script>
+$('#video_library_toc').hide();
+</script>
 {% endblock pagecontent %}

@@ -980,7 +980,7 @@ class ViewUsers(webapp.RequestHandler):
 
         self.response.out.write('Users ' + str(count))
 
-class ViewVideoLibrary2(webapp.RequestHandler):
+class GenerateHomepageContent(webapp.RequestHandler):
 
 
     def get(self):
@@ -1134,7 +1134,7 @@ class ViewVideoLibrary2(webapp.RequestHandler):
                              os.path.join(os.path.dirname(__file__), 'videolibrary_topic.html'), 
                              os.path.join(os.path.dirname(__file__), 'videolibrary_playlist.html')),
             }
-        path = os.path.join(os.path.dirname(__file__), 'videolibrary2.html')
+        path = os.path.join(os.path.dirname(__file__), 'homepage_content_template.html')
         self.response.out.write(template.render(path, template_values))
 
 class ViewVideoLibrary(webapp.RequestHandler):
@@ -2022,7 +2022,7 @@ def real_main():
         ('/frequently-asked-questions', ViewFAQ),
         ('/exercisedashboard', ViewAllExercises),
         ('/library', ViewVideoLibrary),
-        ('/library2', ViewVideoLibrary2),
+        ('/homepage_content', GenerateHomepageContent),
         ('/syncvideodata', UpdateVideoData),
         ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
