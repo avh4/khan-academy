@@ -22,7 +22,7 @@
         *margin: 1ex; /* Fixes spacing under IE6 and IE7 */ 
     }
     
-    #search_and_browse {
+    #video_library_toc {
         float: left;
         clear: none;
         width: auto;
@@ -57,7 +57,7 @@
         clear: left;
     }
     #video_library .subtopics {
-        border-left: solid 1px black;
+        border-left: 2px solid #80C65A;
         padding-left: 0em;
         margin-left: 1em;
         clear: left;
@@ -72,7 +72,7 @@
         margin-left: 0;
         padding-bottom: 0;
         margin-bottom: 0;
-        border-top: solid 1px black;
+        border-top: 2px solid #80C65A;
     }
     #video_library .subtopics p, #video_library .subtopics .playlist_container {
         clear: left;
@@ -97,9 +97,18 @@
         _height: 1em; /* For inline-block in IE6 */
     }
     
+    #video_library ol li a {
+        display: block;
+        margin-left: 2.5em;
+    }
+    
     #video_library ol li:before {
         content: counter(video) ". ";
         counter-increment: video;
+        text-align: right;
+        width: 2em;
+        display: block;
+        float: left;
     }
     
     #video_library ol {

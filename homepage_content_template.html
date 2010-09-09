@@ -1,9 +1,3 @@
-<div id="search_and_browse">    
-<p>
-    <label>Keyword: <input id="search_string" type="text"></input></label>
-    <button id="search_button" type="button">Search</button>
-    <button type="reset">Reset</button>
-</p>      
 <nav id="video_library_toc">
     <ul>
         {% for node in toc %}
@@ -13,7 +7,6 @@
         {% endfor %}
     </ul>
 </nav>
-</div>
 <article id="overview">
     <object id="overview_video">
         <param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1">
@@ -32,6 +25,11 @@
     </p>
 </article>
 <article id="video_library">
+<p>
+    <label>Keyword: <input id="search_string" type="text"></input></label>
+    <button id="search_button" type="button">Filter</button>
+    <button type="reset">Show All</button>
+</p>      
     {% for node in contents %}
     {{ node }}
     {% endfor %}
