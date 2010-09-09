@@ -1085,20 +1085,15 @@ class ViewVideoLibrary2(webapp.RequestHandler):
                                ]
                   },
                  {
-                  'title': "Other",
+                  'title': "Test Preparation",
                   'children': [
-                                 {
-                                  'title': "Test Preparation",
-                                  'children': [
-                                                get_playlist('SAT Preparation'),
-                                                get_playlist('GMAT: Problem Solving'),
-                                                get_playlist('GMAT Data Sufficiency'),
-                                               ]
-                                  },
-                                  get_playlist('Brain Teasers'),
-                                  get_playlist('Khan Academy-Related Talks and Interviews'),
+                                get_playlist('SAT Preparation'),
+                                get_playlist('GMAT: Problem Solving'),
+                                get_playlist('GMAT Data Sufficiency'),
                                ]
                   },
+                  get_playlist('Brain Teasers'),
+                  get_playlist('Khan Academy-Related Talks and Interviews'),
                  ]
                 }
         

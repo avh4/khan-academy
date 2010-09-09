@@ -3,7 +3,7 @@
     <p>{{description|escape}}</p>
 	<div class="playlist_container">
     <ol>
-        {% for video in videos %}<li>
+        {% for video in videos %}<li data-keywords="{{video.keywords|escape}}">
             	<a href="/video/{{video.readable_id}}">{{video.title|escape}}</a>
 		</li>{% endfor %}
     </ol>

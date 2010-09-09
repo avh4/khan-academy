@@ -1,10 +1,11 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 <link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+<script src="javascript/jstree/jquery.jstree.js?{{App.version}}"></script>
 <style>
     #overview {
         padding: 1ex 1em 1ex 1em;
-        display: inline;
+        display: block;
     }
     
     #overview #overview_video, #overview #overview_video embed {
@@ -13,7 +14,7 @@
         height: 205;
         padding: 1ex;
     }
-    #video_library_toc {
+    #search_and_browse {
         float: left;
         clear: none;
         width: auto;
@@ -99,15 +100,36 @@
         *margin-left: 0; /* Prevents indenting first line in IE7 */
     }
     
+    section.not_found {
+        display: none !important;
+    }    
+
+    li.not_found {
+        width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;     
+    }
+
+    li.not_found a {
+        display: none !important;        
+    }
+
+    #video_library ol li.not_found:before {
+        content: "" !important;
+    }
+    
+    .search_highlight a {
+        background-color: yellow;
+    }
+    
 </style>
-<script src="javascript/jstree/jquery.jstree.js?{{App.version}}"></script>
 <script>
     $(function() {
         $('#video_library_toc')
             .bind('loaded.jstree', function (event, data) {
                 data.inst.open_all();
 
-                $('#video_library_toc > ul > li > ul > li > ul > li').each(function() {
+                $('#video_library_toc > ul > li > ul > li').each(function() {
                     data.inst.close_node(this);
                 });
             })
@@ -121,11 +143,47 @@
                 },
                 plugins: ['html_data', 'themes']
             });
+        $('#search_string').keypress(function(e) {
+            if (e.which == 13) search();
+        });
+        $('#search_button').click(search);
+        
+        function search() {
+            var s = $('#search_string').val();
+            $('.search_highlight').removeClass('search_highlight');
+            if (s.length > 0) {
+                // Construct a RegExp that will match strings containing words begininning with
+                // the search string (case-insensitive)
+                var escapedSearchString = s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+                var re = new RegExp("\\b"+escapedSearchString, "i");
+                
+                // Hide all the sections and videos initially
+                $('#video_library section, #video_library li').addClass('not_found');
+                
+                // Highlight the videos whose title or keywords match the RegExp, and stop hiding
+                // those videos and their containing sections
+                $('#video_library li')
+                    .filter(function() {return re.test($(this).text()) || re.test($(this).attr('data-keywords'));})
+                    .addClass('search_highlight')
+                    .parents().andSelf().removeClass('not_found');
+                    
+                // Set the focus to the first matching video
+                $('#video_library .search_highlight a').first().focus();
+            }
+            else {
+                $('#video_library *').removeClass('not_found');                
+            }
+        }
     });
 </script>
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
+<div id="search_and_browse">    
+<p>
+    <label>Keyword: <input id="search_string" type="text"></input></label>
+    <button id="search_button" type="button">Search</button>
+</p>      
 <nav id="video_library_toc">
     <ul>
         {% for node in toc %}
@@ -135,6 +193,7 @@
         {% endfor %}
     </ul>
 </nav>
+</div>
 <article id="overview">
     <p>
         The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.&nbsp;
