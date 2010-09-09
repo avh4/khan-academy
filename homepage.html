@@ -6,12 +6,16 @@
     #overview {
         padding: 1ex 1em 1ex 1em;
         display: block;
+        float: right;
+        min-width: 320px;
+        max-width: 640px;
+        _width: 640px; /* In case IE6 doesn't understand min-width/max-width */        
     }
     
     #overview #overview_video, #overview embed {
         float: left;
-        width: 320;
-        height: 205;        
+        width: 320px;
+        height: 205px;        
     }
     
     #overview #overview_video {
@@ -23,11 +27,14 @@
     }
     
     #video_library_toc {
-        float: left;
+        display: inline-block;
         clear: none;
         width: auto;
         padding: 1ex 1em 1ex 1em;
         border: none;
+        zoom:1; /* For inline-block in IE7 */
+        *display: inline; /* For inline-block in IE7 */
+        _height: 1em; /* For inline-block in IE6 */
     }
     #video_library_toc > ul {
         margin-left: 0;
@@ -46,7 +53,6 @@
     }
     
     #video_library {
-        clear: both;
         margin: 1em;
     }
     #video_library section {
@@ -177,7 +183,7 @@
             if (e.which == 13) search();
         });
         $('#search_button').click(search);
-        $('#search_and_browse button[type=reset]').click(function() {
+        $('#video_library button[type=reset]').click(function() {
             $('#search_string').val('');
             search(); /* Searching for nothing, shows everything. */
         });
