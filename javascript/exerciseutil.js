@@ -547,24 +547,6 @@ function write_step(text)
 	next_step_to_write++;
 }
 
-//this is used in lineq.jsp
-function write_table_step(left, right)
-{
-	document.write(	'<tr><td align=right>'
-			+get_step_part_string('`'+left+'`', next_step_to_write, 1)
-			+'</td><td align=left class=\"nobr\"><nobr>'
-			+get_step_part_string('`='+right+'`', next_step_to_write, 2)
-			+'</nobr></td></tr>');
-	next_step_to_write++;
-}
-
-function table_step_header(left, right)
-{
-	document.write('<center><table border=0 width=100%><tr><td><img src="/images/blank.gif" height=1 width=200"></td><td><img src="/images/blank.gif" height=1 width=200"></td></tr><tr><td align=right><font face=\"arial\" size=4>`'+
-			left+
-			'</font></td><td align=left class=\"nobr\"><nobr><font face=\"arial\" size=4 class=\"nobr\">`='+right+'`</font></nobr></td></tr>');	
-}
-
 function write_table_step(explanation, left, right)
 {
 	document.write(	'<tr><td align=left class=\"nobr\">'
@@ -579,7 +561,7 @@ function write_table_step(explanation, left, right)
 
 function table_step_header(explanation, left, right)
 {
-	document.write('<center><table border=0><tr><td><img src="/images/blank.gif" height=1 width=200"></td><td><img src="/images/blank.gif" height=1 width=200"></td><td><img src="/images/blank.gif" height=1 width=200"></td></tr><tr><td align=left><font face=\"arial\" size=4  class=\"nobr\">'+explanation+'</font></td><td align=right><font face=\"arial\" size=4>`'+
+	document.write('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
 			left+
 			'</font></td><td align=left class=\"nobr\"><nobr><font face=\"arial\" size=4  class=\"nobr\">`='+right+'`</font></nobr></td></tr>');	
 }
