@@ -20,20 +20,14 @@
         margin: 1ex;
     }
     
-    #overview embed {
-        *margin: 1ex; /* Fixes spacing under IE6 and IE7 */ 
-    }
-    
     #video_library_toc {
         display: inline-block;
         clear: none;
         width: auto;
         padding: 1ex 1em 1ex 1em;
         border: none;
-        zoom:1; /* For inline-block in IE7 */
-        *display: inline; /* For inline-block in IE7 */
-        _height: 1em; /* For inline-block in IE6 */
     }
+    
     #video_library_toc > ul {
         margin-left: 0;
         padding-left: 0;
@@ -85,13 +79,7 @@
         clear: left;
         margin-left: 0;
         padding-left: 1em;
-    }
-    #video_library .subtopics {
-        *padding-top: 1em; /* Reasonable spacing in IE7 */
-        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
-    }
-    #video_library .subtopics .playlist_container {
-        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
+        position: relative;
     }
     #video_library ol li {
         display: inline-block;
@@ -99,11 +87,16 @@
         vertical-align: top;
         padding: .5ex 2ex 0ex 0ex;
         border-top: dotted 1px #ccc;
-        zoom:1; /* For inline-block in IE7 */
-        *display: inline; /* For inline-block in IE7 */
-        _height: 1em; /* For inline-block in IE6 */
     }
     
+    #video_library ol li.even {
+        background-color: #EFEFEF;
+    }
+
+    #video_library ol li.odd {
+        background-color: #FFFFFF;
+    }
+
     #video_library ol li a {
         display: block;
         margin-left: 2.5em;
@@ -122,7 +115,6 @@
         counter-reset: video;
         padding: 0ex 0em 0ex 0em;
         display: inline;
-        *margin-left: 0; /* Prevents indenting first line in IE7 */
     }
     
     section.not_found {
@@ -157,7 +149,33 @@
     }
     
 </style>
-<script>
+<!--[if IE]>
+<style>
+    #overview embed {
+        *margin: 1ex; /* Fixes spacing under IE6 and IE7 */ 
+    }    
+    #video_library_toc {
+        display: inline; /* Collapse/expand broken even in IE8 when this is inline-block. */
+        zoom: 1.0;
+    }
+    #video_library ol li {
+        *display: inline; /* For inline-block in IE7 */
+        *zoom: 1.0; /* For inline-block in IE7 */
+        _height: 3em; /* For inline-block in IE6 */
+    }
+    #video_library .subtopics {
+        *padding-top: 1em; /* Reasonable spacing in IE7 */
+        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
+    }
+    #video_library .subtopics .playlist_container {
+        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
+    }
+    #video_library ol {
+        *margin-left: 0; /* Prevents indenting first line in IE7 */
+    }     
+</style> 
+<![endif]-->
+<script>    
     $(function() {
         $('#video_library_toc')
             .bind('loaded.jstree', function (event, data) {
@@ -224,6 +242,97 @@
             $(this).toggleClass("open");
             e.preventDefault();
         });
+        
+        color_ols();
+        function color_ols(){
+            var reflowed = get_reflowed();
+
+            if (reflowed.length > 0) {
+                $(reflowed).each(uncolor_rows);
+                $(reflowed).each(color_rows);
+/*
+                $("#video_library").queue(function(next){
+                    window.alert("Done reflowing");
+                    next();
+                });
+*/
+            }
+            $("#video_library").delay(50).queue(function(next){
+                color_ols();
+                next();
+            });
+            function get_reflowed(){
+                var reflowed = [];
+                $("#video_library ol").each(function(){
+                    var ol = $(this);
+                    if (is_reflowed(ol)) {
+                        reflowed.push(this);
+                    }
+                    function is_reflowed(){
+                        var last_child = ol.data('last-child');
+                        if (!last_child) 
+                            return true;
+                        var old_lcp = ol.data('last-child-position');
+                        var new_lcp = last_child.position();
+                        if (!old_lcp || Math.abs(new_lcp.top - old_lcp.top) > 1 || Math.abs(new_lcp.left - old_lcp.left) > 1) {
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+                return reflowed;
+            }
+            function uncolor_rows(){
+                var ol = $(this);
+                // Quickly clear our CSS since it is no longer valid
+                $("#video_library").delay(1).queue(function(next){
+                    ol.children().css('height', 'auto').removeClass('even odd');
+                    next();
+                });
+            }
+            
+            function color_rows(){
+                var ol = $(this);
+                $("#video_library").delay(1).queue(function(next){
+                    update();
+                    next();
+                });
+                                
+                function update(){
+                    var row = [], position_top, last_position_top, max_height, is_even = true;
+                    var children = ol.children();
+                    children.each(function(i){
+                        position_top = this.offsetTop;
+                        if (i == 0) 
+                            new_row();
+                        if (position_top > last_position_top + 5) {
+                            new_row();
+                            last_position_top = position_top;
+                        }
+                        /* Note: li.height() is too slow on IE8, so we use this.offsetHeight instead. */
+                        max_height = Math.max(max_height, this.offsetHeight);
+                        row.push(this);
+                    });
+                    new_row();
+                    var last_child = ol.data('last-child');
+                    if (!last_child) {
+                        last_child = children.last();
+                        ol.data('last-child', last_child);
+                    }
+                    ol.data('last-child-position', last_child.position());
+                    function new_row(){
+                        if (row.length) {
+                            max_height = Math.round(max_height);
+                            $(row).css('height', Math.round(max_height)).addClass(is_even ? "even" : "odd");
+                            is_even = !is_even;
+                        }
+                        last_position_top = position_top;
+                        row = [];
+                        max_height = 0;
+                    }
+                }
+            }
+        }
     });
 </script>
 {% endblock pagescript %}
