@@ -54,6 +54,10 @@
     
     #video_library {
         margin: 1em;
+        clear: both;
+    }
+    #video_library label {
+        font-weight: bolder;
     }
     #video_library section {
         padding-left: 0em;
@@ -207,6 +211,8 @@
                 .parents().andSelf().removeClass('not_found');
                 
             // Set the focus to the first matching video
+            var scrollTop = $("#search_string").offset().top;
+            window.scrollTo(0, scrollTop);
             $('#video_library .search_highlight a').first().focus();
         }
         
