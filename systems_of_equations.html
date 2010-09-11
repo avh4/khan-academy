@@ -157,7 +157,7 @@ function push_fractions_other_than(num, den, varName, results, count) {
 		var bad_den = get_random();
 		if (num*bad_den==den*bad_num || bad_den==0) continue;
 		var result = varName + '=' + format_fraction(bad_num, bad_den);
-		if (results.indexOf(result) != -1) continue;
+		if ($.inArray(result, results) != -1) continue;
 		results.push(result);
 	}
 }
