@@ -11,6 +11,47 @@ function getEqExpString(string)
 	var selFontString = '<font color='+selColor+' size=4 style="white-space: nowrap;">';
 	return (selFontString+'`'+string+'`</font>');
 }
+
+function preDisplay(displayChoicesArray, correctChoiceIndex)
+{
+    // sort answerChoices to make sure that similarly looking answers don't follow each other,
+    // for example x>5 should not be followed by x<5 (issue #575)
+    // 1. Find similar item that next to each other (like x>5 followed up x<5)
+    // 2. Get first or second similar item (make sure we don't pickup correctchoice)
+    // 3. Move the the item one position apart up or down based on the item index (while preventing changing correctchoice index)
+    for (var i=0; i<4; i++)
+    {
+        var answer = displayChoicesArray[i].replace(/>|</g, '');
+        var nextAnswer = displayChoicesArray[i+1].replace(/>|</g, '');
+        if (answer == nextAnswer)
+        {
+            var similarItemIndex;
+            var candidatePos1;
+            var candidatePos2;
+
+            // don't change correctchoice index to avoid change probability
+            if (i != correctChoiceIndex)
+            {
+                similarItemIndex = i;
+                candidatePos1 = (similarItemIndex + 3) % 5;
+                candidatePos2 = (similarItemIndex + 4) % 5;
+            }
+            else
+            {
+                similarItemIndex = i+1;
+                candidatePos1 = (similarItemIndex + 1) % 5;
+                candidatePos2 = (similarItemIndex + 2) % 5;
+            }
+
+            // don't change correctchoice index to avoid change probability
+            var newSimilarItemIndex = correctChoiceIndex != candidatePos1 ?  candidatePos1 : candidatePos2;
+
+            var tmp = displayChoicesArray[similarItemIndex];
+            displayChoicesArray[similarItemIndex] = displayChoicesArray[newSimilarItemIndex];
+            displayChoicesArray[newSimilarItemIndex] = tmp;
+        }
+    }
+}
 /////////////////////
 
 function write_ineq_step(explanation, left, right, ineq)
@@ -300,4 +341,3 @@ else
 </script>
 
 {% endblock maincell %}
-

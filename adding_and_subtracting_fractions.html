@@ -60,15 +60,14 @@ addWrongChoice(format_fraction((num1*com_den/den1)-(num2*com_den/den2),com_den))
 <script language=Javascript1.2><!--
 	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
 
-	
 	//Fill in the choices
 	//need to fix it so that the other choices can never be the same as the correct choice
-	
+
 	var possibleWrongIndices=randomIndices(possibleAnswers.length);
 	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
 	for (var i=0; i<5; i++)
 	{
-		if (i==correctchoice) 
+		if (i==correctchoice)
 		{
 			answerChoices[i]='`'+correct_answer+'`';
 		}
@@ -85,9 +84,19 @@ addWrongChoice(format_fraction((num1*com_den/den1)-(num2*com_den/den2),com_den))
 			else
 				continue;
 		}
-		document.write('<br/><span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
-
 	}
+
+    // if you need to rearrange order or answers implement preDisplay function in derived html
+    if (window.preDisplay)
+    {
+        preDisplay(answerChoices, correctchoice);
+    }
+
+	for (i=0; i<answerChoices.length; i++)
+    {
+		document.write('<br/><span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
+    }
+
 //-->
 </script>
 {% endblock answerarea %}
