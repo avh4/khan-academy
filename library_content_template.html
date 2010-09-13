@@ -21,11 +21,11 @@
 			<A href="/gmat"  target="sub_videos"  >[More]</A>
 		<P>
 		</div>
-		{% for playlist_videos in c1 %}
+		{% for playlist_data in c1 %}
 
-			{% for playlist_video in playlist_videos %}
+            <div data-topic="{{playlist_data.topic}}">
+			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
-            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			
@@ -37,10 +37,10 @@
             </div>
 		{% endfor %}
 	</td><td valign=top>
-		{% for playlist_videos in c2 %}
-			{% for playlist_video in playlist_videos %}
+		{% for playlist_data in c2 %}
+            <div data-topic="{{playlist_data.topic}}">
+			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
-            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			{{playlist_video.playlist.description}}
@@ -51,10 +51,10 @@
 		{% endfor %}
 	
 	</td><td valign=top>
-		{% for playlist_videos in c3 %}
-			{% for playlist_video in playlist_videos %}
+		{% for playlist_data in c3 %}
+            <div data-topic="{{playlist_data.topic}}">
+			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
-            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			{{playlist_video.playlist.description}}
@@ -64,10 +64,10 @@
             </div>
 		{% endfor %}
 	</td><td valign=top>
-		{% for playlist_videos in c4 %}
-			{% for playlist_video in playlist_videos %}
+		{% for playlist_data in c4 %}
+            <div data-topic="{{playlist_data.topic}}">
+			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
-            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			{{playlist_video.playlist.description}}

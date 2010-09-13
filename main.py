@@ -1147,9 +1147,9 @@ class GenerateLibraryContent(webapp.RequestHandler):
         colOne.append('Arithmetic')
         colOne.append('Developmental Math')
         colOne.append('Pre-algebra')
-        colOne.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+        colOne.append(('MA Tests for Education Licensure (MTEL) -Pre-Alg', 'Pre-algebra'))
         colOne.append('Geometry')
-        colOne.append('California Standards Test: Geometry')
+        colOne.append(('California Standards Test: Geometry', 'Geometry'))
         colOne.append('Current Economics')
         colOne.append('Banking and Money')
         colOne.append('Venture Capital and Capital Markets')
@@ -1160,10 +1160,10 @@ class GenerateLibraryContent(webapp.RequestHandler):
         
         colTwo = []
         colTwo.append('Algebra')
-        colTwo.append('Algebra I Worked Examples')
-        colTwo.append('ck12.org Algebra 1 Examples')
-        colTwo.append('California Standards Test: Algebra I')
-        colTwo.append('California Standards Test: Algebra II')
+        colTwo.append(('Algebra I Worked Examples', 'Algebra'))
+        colTwo.append(('ck12.org Algebra 1 Examples', 'Algebra'))
+        colTwo.append(('California Standards Test: Algebra I', 'Algebra'))
+        colTwo.append(('California Standards Test: Algebra II', 'Algebra'))
         colTwo.append('Brain Teasers')
        
 
@@ -1198,6 +1198,10 @@ class GenerateLibraryContent(webapp.RequestHandler):
         for column in cols:
             new_column = []
             for playlist_title in column:
+                topic = playlist_title
+                if type(playlist_title) == type(tuple()):
+                    topic = playlist_title[1]
+                    playlist_title = playlist_title[0]
                 query = Playlist.all()
                 query.filter('title =', playlist_title)
                 playlist = query.get()
@@ -1206,8 +1210,13 @@ class GenerateLibraryContent(webapp.RequestHandler):
                 query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
                 query.order('video_position')
                 playlist_videos = query.fetch(500)
+                playlist_data = {
+                                 'title': playlist_title,
+                                 'topic': topic,
+                                 'videos': playlist_videos
+                                 }
                 #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
-                new_column.append(playlist_videos)
+                new_column.append(playlist_data)
             columns.append(new_column)
 
         # Separating out the columns because the formatting is a little different on each column
