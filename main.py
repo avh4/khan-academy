@@ -1147,9 +1147,9 @@ class GenerateLibraryContent(webapp.RequestHandler):
         colOne.append('Arithmetic')
         colOne.append('Developmental Math')
         colOne.append('Pre-algebra')
-        colOne.append(('MA Tests for Education Licensure (MTEL) -Pre-Alg', 'Pre-algebra'))
+        colOne.append(('Pre-algebra', 'MA Tests for Education Licensure (MTEL) -Pre-Alg'))
         colOne.append('Geometry')
-        colOne.append(('California Standards Test: Geometry', 'Geometry'))
+        colOne.append(('Geometry', 'California Standards Test: Geometry'))
         colOne.append('Current Economics')
         colOne.append('Banking and Money')
         colOne.append('Venture Capital and Capital Markets')
@@ -1160,10 +1160,10 @@ class GenerateLibraryContent(webapp.RequestHandler):
         
         colTwo = []
         colTwo.append('Algebra')
-        colTwo.append(('Algebra I Worked Examples', 'Algebra'))
-        colTwo.append(('ck12.org Algebra 1 Examples', 'Algebra'))
-        colTwo.append(('California Standards Test: Algebra I', 'Algebra'))
-        colTwo.append(('California Standards Test: Algebra II', 'Algebra'))
+        colTwo.append(('Algebra', 'Algebra I Worked Examples'))
+        colTwo.append(('Algebra', 'ck12.org Algebra 1 Examples'))
+        colTwo.append(('Algebra', 'California Standards Test: Algebra I'))
+        colTwo.append(('Algebra', 'California Standards Test: Algebra II'))
         colTwo.append('Brain Teasers')
        
 
@@ -1197,11 +1197,12 @@ class GenerateLibraryContent(webapp.RequestHandler):
         columns = []
         for column in cols:
             new_column = []
-            for playlist_title in column:
-                topic = playlist_title
-                if type(playlist_title) == type(tuple()):
-                    topic = playlist_title[1]
-                    playlist_title = playlist_title[0]
+            for topics in column:
+                playlist_title = topic = topics
+                subtopic = ""
+                if type(topics) == type(tuple()):
+                    topic = topics[0]
+                    playlist_title = subtopic = topics[1]
                 query = Playlist.all()
                 query.filter('title =', playlist_title)
                 playlist = query.get()
@@ -1213,6 +1214,7 @@ class GenerateLibraryContent(webapp.RequestHandler):
                 playlist_data = {
                                  'title': playlist_title,
                                  'topic': topic,
+                                 'subtopic': subtopic,
                                  'videos': playlist_videos
                                  }
                 #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')

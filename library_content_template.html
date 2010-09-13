@@ -23,7 +23,7 @@
 		</div>
 		{% for playlist_data in c1 %}
 
-            <div data-topic="{{playlist_data.topic}}">
+            <div data-topic="{{playlist_data.topic}}" data-subtopic="{{playlist_data.subtopic}}">
 			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
 			<P>
@@ -38,7 +38,7 @@
 		{% endfor %}
 	</td><td valign=top>
 		{% for playlist_data in c2 %}
-            <div data-topic="{{playlist_data.topic}}">
+            <div data-topic="{{playlist_data.topic}}" data-subtopic="{{playlist_data.subtopic}}">
 			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
 			<P>
@@ -52,7 +52,7 @@
 	
 	</td><td valign=top>
 		{% for playlist_data in c3 %}
-            <div data-topic="{{playlist_data.topic}}">
+            <div data-topic="{{playlist_data.topic}}" data-subtopic="{{playlist_data.subtopic}}">
 			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
 			<P>
@@ -65,7 +65,7 @@
 		{% endfor %}
 	</td><td valign=top>
 		{% for playlist_data in c4 %}
-            <div data-topic="{{playlist_data.topic}}">
+            <div data-topic="{{playlist_data.topic}}" data-subtopic="{{playlist_data.subtopic}}">
 			{% for playlist_video in playlist_data.videos %}
 			{% if forloop.first %}
 			<P>
