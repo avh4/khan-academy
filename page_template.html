@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:mml="http://www.w3.org/1998/Math/MathML">
+<html xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
+      xmlns:fb="http://www.facebook.com/2008/fbml">
     <head>
         <!-- For ChartBeat analytics START -->
         <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
@@ -8,12 +9,19 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
+        {% else %}<title>Khan Academy</title>
+        {% endif %}
         <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -->
         <meta property="fb:page_id" content="159403248441" />
         <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights END -->
-
-        {% else %}<title>Khan Academy</title>
-        {% endif %}
+        <meta property="og:title" content="The Khan Academy"/>
+        <meta property="og:type" content="non_profit"/>
+        <meta property="og:url" content="http://www.khanacademy.org/"/>
+        <meta property="og:image" content="http://www.khanacademy.org/images/handtreehorizontal_facebook.png"/>
+        <meta property="og:site_name" content="khanacademy.org"/>
+        <meta property="fb:admins" content="718859633,159403248441"/>
+        <meta property="og:description"
+              content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
 	<link rel="shortcut icon" href="/images/favicon.ico">
         <link rel="stylesheet" type="text/css" href="/stylesheets/default.css?{{App.version}}" />
         <link rel="stylesheet" type="text/css" href="/stylesheets/rating.css?{{App.version}}" />
@@ -72,13 +80,12 @@
 
         <header>
             <div id="page_brand">
-                <a id="page_logo" href="/"><img src="/images/colorhandtree.png?{{App.version}}" alt="Khan Academy"></a>
+                <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png?{{App.version}}" alt="Khan Academy"></a>
                     <span id="page_visitors">
                         <span id="page_num_visitors">
                             <!-- Content will get populated by jquery call to chartbeat API below; if call fails no visible impact to user -->
                         </span>&nbsp;people learning right now
                     </span>
-                    
                 <iframe id="page_fb_like" src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;ref=Like-Button-Top-Header-Left&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>                                
             </div>
             <div id="page_top_nav">

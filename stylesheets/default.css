@@ -98,10 +98,10 @@ footer > * {
 
 #page_fb_like {
     display: block;
-    clear: both; 
+    clear: both;
     position: absolute;
     left: 110px;
-    top: 70px;
+    top: 70px;    
 }
 
 #page_top_nav {

@@ -1,5 +1,5 @@
 application: khanexercises
-version: 404
+version: 402
 runtime: python
 api_version: 1
 default_expiration: "14d"
