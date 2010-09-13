@@ -1374,7 +1374,7 @@ class RegisterCoach(webapp.RequestHandler):
             return
 
         user_data = UserData.get_or_insert_for(user)
-        coach_email = self.request.get('coach')            
+        coach_email = self.request.get('coach').lower()            
         user_data.coaches.append(coach_email)
         user_data.put()
         self.redirect("/coaches")
@@ -1389,9 +1389,13 @@ class UnregisterCoach(webapp.RequestHandler):
             return
         user_data = UserData.get_or_insert_for(user)
         coach_email = self.request.get('coach')
-        if coach_email and coach_email in user_data.coaches:
-            user_data.coaches.remove(coach_email)
-            user_data.put()
+        if coach_email:
+            if coach_email in user_data.coaches:
+                user_data.coaches.remove(coach_email)
+                user_data.put()
+            elif coach_email.lower() in user_data.coaches:
+                user_data.coaches.remove(coach_email.lower())
+                user_data.put()                
         self.redirect("/coaches") 
 
 
@@ -1406,7 +1410,7 @@ class ViewIndividualReport(webapp.RequestHandler):
             	#logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches:
+                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own report")
@@ -1622,7 +1626,7 @@ class ViewCharts(webapp.RequestHandler):
             	#logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches:
+                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own report")

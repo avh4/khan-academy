@@ -224,11 +224,18 @@ class UserData(db.Model):
         return (exid in self.suggested_exercises)
     
     def get_students(self):
-        coach_email = self.user.email()
+        coach_email = self.user.email()   
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
         students = []
         for student in query:
-            students.append(student.user.email())
+            students.append(student.user.email().lower())
+        if coach_email.lower() != coach_email:
+            students_set = set(students)
+            query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email.lower())
+            for student in query:
+                student_email = student.user.email().lower()
+        	if student_email not in students_set:
+        		students.append(student_email)
         return students
     
 class Video(db.Model):
