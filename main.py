@@ -1147,9 +1147,9 @@ class GenerateLibraryContent(webapp.RequestHandler):
         colOne.append('Arithmetic')
         colOne.append('Developmental Math')
         colOne.append('Pre-algebra')
+        colOne.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
         colOne.append('Geometry')
         colOne.append('California Standards Test: Geometry')
-        colOne.append('Brain Teasers')
         colOne.append('Current Economics')
         colOne.append('Banking and Money')
         colOne.append('Venture Capital and Capital Markets')
@@ -1159,12 +1159,12 @@ class GenerateLibraryContent(webapp.RequestHandler):
         colOne.append('Geithner Plan')
         
         colTwo = []
+        colTwo.append('Algebra')
         colTwo.append('Algebra I Worked Examples')
         colTwo.append('ck12.org Algebra 1 Examples')
-        colTwo.append('Algebra')
         colTwo.append('California Standards Test: Algebra I')
         colTwo.append('California Standards Test: Algebra II')
-        colTwo.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+        colTwo.append('Brain Teasers')
        
 
         colThree = []

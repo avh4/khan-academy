@@ -1,6 +1,23 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
     <link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
+<style>
+    #video_library_toc {
+        display: inline;
+    }
+    .highlighted {
+        background-color: #fbfba8;;
+    }
+</style>
+<script>
+    $(function () {
+       $("#video_library_toc a").click(function() {
+          var topic = $(this).attr("href").substr(1);
+          $(".highlighted").removeClass("highlighted");
+          $("div[data-topic="+topic+"]").addClass("highlighted");
+       });
+    });
+</script>
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
@@ -19,6 +36,7 @@
 <P>
 
     <object width="560" height="340" align="right"><param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="560" height="340"></embed></object>
+    <div id="video_library_toc">
     <h3>Math</h3><P>
     <ul> 
             <A href="#Arithmetic">Arithmetic</A>&nbsp;&nbsp;|&nbsp;&nbsp;
@@ -73,7 +91,7 @@
             
 
     </ul>
-
+    </div>
 <P>
 {% include "library_content.html" %}
 {% endblock pagecontent %}

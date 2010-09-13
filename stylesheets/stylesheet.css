@@ -20,7 +20,7 @@ a.mainmenu:hover{ text-decoration: underline; color : #DD6900; }
 img {border-style: none;}
 
 
-div.hdg    {background-color:#ffffff; border-bottom:2px solid #80C65A;}
+div.hdg    {border-bottom:2px solid #80C65A;}
 tr.hdgr td {background-color:#ffffff; border-bottom:2px solid #80C65A;}
 tr.hdg     {background-color:#ffffff;}
 

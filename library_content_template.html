@@ -2,7 +2,7 @@
 	
 	<tr><td valign=top width=25%>
 		
-		
+		<div data-topic="SAT Preparation">
 		<div class="hdg"><A name="SAT Preparation"></a><h3>SAT Preparation</h3></div>
 		<BR>
 			<img src="http://ecx.images-amazon.com/images/I/5193F7Z7DFL._SS75_.jpg" align=left>
@@ -10,6 +10,8 @@
 			in "The Offical SAT Study Guide" by the College Board in 100+ videos ...
 			<A href="/sat"   target="sub_videos">[More]</A>
 		<P>
+		</div>
+        <div data-topic="GMAT Preparation">
 		<div class="hdg"><A name="GMAT Preparation"></a><h3>GMAT Preparation</h3></div>
 		<BR>
 			
@@ -18,10 +20,12 @@
 			in "The Official Guide for GMAT Review" by the GMAC in 100+ videos below. ...
 			<A href="/gmat"  target="sub_videos"  >[More]</A>
 		<P>
+		</div>
 		{% for playlist_videos in c1 %}
 
 			{% for playlist_video in playlist_videos %}
 			{% if forloop.first %}
+            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			
@@ -30,39 +34,46 @@
 			{% endif %}
 			<br><A href="/video/{{playlist_video.video.readable_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
+            </div>
 		{% endfor %}
 	</td><td valign=top>
 		{% for playlist_videos in c2 %}
 			{% for playlist_video in playlist_videos %}
 			{% if forloop.first %}
+            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			{{playlist_video.playlist.description}}
 			{% endif %}
 			<br><A href="/video/{{playlist_video.video.readable_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
+            </div>
 		{% endfor %}
 	
 	</td><td valign=top>
 		{% for playlist_videos in c3 %}
 			{% for playlist_video in playlist_videos %}
 			{% if forloop.first %}
+            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			{{playlist_video.playlist.description}}
 			{% endif %}
 			<br><A href="/video/{{playlist_video.video.readable_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
+            </div>
 		{% endfor %}
 	</td><td valign=top>
 		{% for playlist_videos in c4 %}
 			{% for playlist_video in playlist_videos %}
 			{% if forloop.first %}
+            <div data-topic="{{playlist_video.playlist.title}}">
 			<P>
 			<div class="hdg"><A name="{{playlist_video.playlist.title}}"></A><h3>{{playlist_video.playlist.title}}</h3></div>
 			{{playlist_video.playlist.description}}
 			{% endif %}
 			<br><A href="/video/{{playlist_video.video.readable_id}}">{{playlist_video.video.title}}</A>
 			{% endfor %}
+            </div>
 		{% endfor %}
 	</td></tr></table>
