@@ -1936,6 +1936,37 @@ class ViewInfoPage(webapp.RequestHandler):
         c = template.Context(template_values)        
         self.response.out.write(t.render(c))
 
+class ViewArticle(webapp.RequestHandler):
+
+    def get(self):
+        user = users.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        video = None
+        path = self.request.path
+        readable_id  = urllib.unquote(path.rpartition('/')[2])
+        
+        article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
+        if readable_id == "fortune":
+        	article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
+        	
+        
+        
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'article_url': article_url,
+                                                  'logout_url': logout_url,
+                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
+                                                 self.request)
+
+        path = os.path.join(os.path.dirname(__file__), 'article.html')
+        
+        self.response.out.write(template.render(path, template_values))
+        	
+
+
 def real_main():
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -2015,6 +2046,7 @@ def real_main():
         ('/sessionaction', qbrary.SessionAction),
         ('/flagquestion', qbrary.FlagQuestion),
         ('/viewauthors', qbrary.ViewAuthors),
+        ('/press/.*', ViewArticle),
 
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),
