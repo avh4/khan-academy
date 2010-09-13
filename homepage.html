@@ -1,345 +1,79 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
-<link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
-<script src="javascript/jstree/jquery.jstree.js?{{App.version}}"></script>
-<style>
-    #overview {
-        padding: 1ex 1em 1ex 1em;
-        display: block;
-        float: right;
-        width: 400px;
-    }
-    
-    #overview #overview_video, #overview embed {
-        float: left;
-        width: 400px;
-        height: 250px;      
-    }
-    
-    #overview #overview_video {
-        margin: 1ex;
-    }
-    
-    #video_library_toc {
-        display: inline-block;
-        clear: none;
-        width: auto;
-        padding: 1ex 1em 1ex 1em;
-        border: none;
-    }
-    
-    #video_library_toc > ul {
-        margin-left: 0;
-        padding-left: 0;
-    }
-    #video_library_toc ul {
-        margin-left: 0;
-        padding-left: 1em;
-    }
-    #video_library_toc a:link, #video_library_toc a:visited {
-        color:#006699;
-        text-decoration: underline;
-    }
-    nav#video_library_toc li:before {
-        content: "";
-    }
-    
-    #video_library {
-        margin: 1em;
-    }
-    #video_library label {
-        font-weight: bolder;
-    }
-    #video_library section {
-        padding-left: 0em;
-    }
-    #video_library section h1 {
-        font-size: larger;
-        clear: left;
-    }
-    #video_library .subtopics {
-        border-left: 2px solid #80C65A;
-        padding-left: 0em;
-        margin-left: 1em;
-        clear: left;
-    }
-    #video_library .subtopics h1 {
-        padding-left: 1ex;
-    }
-    #video_library .subtopics h1 {
-        display: block;
-        float: left;
-        margin-right: auto;
-        margin-left: 0;
-        padding-bottom: 0;
-        margin-bottom: 0;
-        border-top: 2px solid #80C65A;
-    }
-    #video_library .subtopics p, #video_library .subtopics .playlist_container {
-        clear: left;
-        margin-left: 0;
-        padding-left: 1em;
-        position: relative;
-    }
-    #video_library ol li {
-        display: inline-block;
-        width: 25ex;
-        vertical-align: top;
-        padding: .5ex 2ex 0ex 0ex;
-        border-top: dotted 1px #ccc;
-    }
-    
-    #video_library ol li.even {
-        background-color: #EFEFEF;
-    }
-
-    #video_library ol li.odd {
-        background-color: #FFFFFF;
-    }
-
-    #video_library ol li a {
-        display: block;
-        margin-left: 2.5em;
-    }
-    
-    #video_library ol li:before {
-        content: counter(video) ". ";
-        counter-increment: video;
-        text-align: right;
-        width: 2em;
-        display: block;
-        float: left;
-    }
-    
-    #video_library ol {
-        counter-reset: video;
-        padding: 0ex 0em 0ex 0em;
-        display: inline;
-    }
-    
-    section.not_found {
-        display: none !important;
-    }    
-
-    li.not_found {
-        width: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;     
-    }
-
-    li.not_found a {
-        display: none !important;        
-    }
-
-    #video_library ol li.not_found:before {
-        content: "" !important;
-    }
-    
-    .search_highlight a {
-/*
-        background-color: yellow;
-*/  
-    }
-    
-    #video_library a.toggler:before {
-        content: "+";
-    }
-    #video_library a.toggler.open:before {
-        content: "\2212"; /* minus sign */
-    }
-    
-</style>
-<!--[if IE]>
-<style>
-    #overview embed {
-        *margin: 1ex; /* Fixes spacing under IE6 and IE7 */ 
-    }    
-    #video_library_toc {
-        display: inline; /* Collapse/expand broken even in IE8 when this is inline-block. */
-        zoom: 1.0;
-    }
-    #video_library ol li {
-        *display: inline; /* For inline-block in IE7 */
-        *zoom: 1.0; /* For inline-block in IE7 */
-        _height: 3em; /* For inline-block in IE6 */
-    }
-    #video_library .subtopics {
-        *padding-top: 1em; /* Reasonable spacing in IE7 */
-        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
-    }
-    #video_library .subtopics .playlist_container {
-        *margin-bottom: 1em; /* Reasonable spacing in IE7 */
-    }
-    #video_library ol {
-        *margin-left: 0; /* Prevents indenting first line in IE7 */
-    }     
-</style> 
-<![endif]-->
-<script>    
-    $(function() {
-        $('#video_library_toc')
-            .bind('loaded.jstree', function (event, data) {
-                data.inst.open_all();
-
-                $('#video_library_toc > ul > li > ul > li').each(function() {
-                    data.inst.close_node(this);
-                });
-                $('#video_library_toc').show();
-            })
-            .jstree({
-                core : {
-                    html_titles : true,
-                    animation: 0
-                },
-                themes: {
-                    theme: 'classic',
-                    icons: false
-                },
-                plugins: ['html_data', 'themes']
-            });
-
-        $('#search_string').keypress(function(e) {
-            if (e.which == 13) search();
-        });
-        $('#search_button').click(search);
-        $('#video_library button[type=reset]').click(function() {
-            $('#search_string').val('');
-            search(); /* Searching for nothing, shows everything. */
-        });
-        
-        function search() {
-            var s = $('#search_string').val();
-            $('.search_highlight').removeClass('search_highlight');
-            // Construct a RegExp that will match strings containing words begininning with
-            // the search string (case-insensitive)
-            var escapedSearchString = s.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
-            var re = new RegExp("\\b"+escapedSearchString, "i");
-            
-            // Hide all the sections and videos initially
-            $('#video_library section, #video_library li').addClass('not_found');
-            
-            // Highlight the videos whose title or keywords match the RegExp, and stop hiding
-            // those videos and their containing sections
-            $('#video_library li')
-                .filter(function() {return re.test($(this).text()) || re.test($(this).attr('data-keywords'));})
-                .addClass('search_highlight')
-                .parents().andSelf().removeClass('not_found');
-                
-            // Set the focus to the first matching video
-            var scrollTop = $("#search_string").offset().top;
-            window.scrollTo(0, scrollTop);
-            $('#video_library .search_highlight a').first().focus();
-        }
-        
-        // Force the subtopics divs to go past the floated headings they contain so that
-        // the vertical line doesn't disappear when all subtopics are collapsed.
-        $("#video_library .subtopics").append("<div style='clear: both;'></div>");
-        
-        $("#video_library h1").prepend("<a href='#' class='toggler open' title='Collapse/Expand'></a>&nbsp;");
-        // Clicking a heading causes the section to collapse/expand.
-        $("#video_library .toggler").click(function(e) {
-            $(this).parent().siblings().toggle();
-            $(this).toggleClass("open");
-            e.preventDefault();
-        });
-        
-        color_ols();
-        function color_ols(){
-            var reflowed = get_reflowed();
-
-            if (reflowed.length > 0) {
-                $(reflowed).each(uncolor_rows);
-                $(reflowed).each(color_rows);
-/*
-                $("#video_library").queue(function(next){
-                    window.alert("Done reflowing");
-                    next();
-                });
-*/
-            }
-            $("#video_library").delay(50).queue(function(next){
-                color_ols();
-                next();
-            });
-            function get_reflowed(){
-                var reflowed = [];
-                $("#video_library ol").each(function(){
-                    var ol = $(this);
-                    if (is_reflowed(ol)) {
-                        reflowed.push(this);
-                    }
-                    function is_reflowed(){
-                        var last_child = ol.data('last-child');
-                        if (!last_child) 
-                            return true;
-                        var old_lcp = ol.data('last-child-position');
-                        var new_lcp = last_child.position();
-                        if (!old_lcp || Math.abs(new_lcp.top - old_lcp.top) > 1 || Math.abs(new_lcp.left - old_lcp.left) > 1) {
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-                return reflowed;
-            }
-            function uncolor_rows(){
-                var ol = $(this);
-                // Quickly clear our CSS since it is no longer valid
-                $("#video_library").delay(1).queue(function(next){
-                    ol.children().css('height', 'auto').removeClass('even odd');
-                    next();
-                });
-            }
-            
-            function color_rows(){
-                var ol = $(this);
-                $("#video_library").delay(1).queue(function(next){
-                    update();
-                    next();
-                });
-                                
-                function update(){
-                    var row = [], position_top, last_position_top, max_height, is_even = true;
-                    var children = ol.children();
-                    children.each(function(i){
-                        position_top = this.offsetTop;
-                        if (i == 0) 
-                            new_row();
-                        if (position_top > last_position_top + 5) {
-                            new_row();
-                            last_position_top = position_top;
-                        }
-                        /* Note: li.height() is too slow on IE8, so we use this.offsetHeight instead. */
-                        max_height = Math.max(max_height, this.offsetHeight);
-                        row.push(this);
-                    });
-                    new_row();
-                    var last_child = ol.data('last-child');
-                    if (!last_child) {
-                        last_child = children.last();
-                        ol.data('last-child', last_child);
-                    }
-                    ol.data('last-child-position', last_child.position());
-                    function new_row(){
-                        if (row.length) {
-                            max_height = Math.round(max_height);
-                            $(row).css('height', Math.round(max_height)).addClass(is_even ? "even" : "odd");
-                            is_even = !is_even;
-                        }
-                        last_position_top = position_top;
-                        row = [];
-                        max_height = 0;
-                    }
-                }
-            }
-        }
-    });
-</script>
+    <link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
-{% include "homepage_content.html" %}
-<script>
-$('#video_library_toc').hide();
-</script>
+
+            
+
+
+<P>
+                                The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  
+                            Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured by YouTube video views per day and unique
+                            users per month.  We are complementing this ever-growing library with user-paced exercises--developed as an <A href="http://code.google.com/p/khanacademy/">open source project</A>--allowing the Khan Academy to become the free classroom for the World.
+                            <A href="/frequently-asked-questions"><b>Learn more about the Khan Academy and Salman Khan...</b></A>
+        <P>
+<h3><A href="/exercisedashboard"><B>Log in to the Khan Academy web application for user-paced practice and instruction</B></A></h3>
+
+<P>
+
+    <object width="560" height="340" align="right"><param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="560" height="340"></embed></object>
+    <h3>Math</h3><P>
+    <ul> 
+            <A href="#Arithmetic">Arithmetic</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#Pre-algebra">Pre-algebra</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Algebra">Algebra</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Algebra I Worked Examples">Algebra I Worked Examples</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#California Standards Test: Algebra I">California Standards Test: Algebra I</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#ck12.org Algebra 1 Examples">ck12.org Algebra 1 Examples</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#California Standards Test: Algebra II">California Standards Test: Algebra II</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#MA Tests for Education Licensure (MTEL) -Pre-Alg">MA Tests for Education Licensure (MTEL) -Pre-Alg</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Precalculus">Precalculus</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Probability">Probability</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Statistics">Statistics</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#Geometry">Geometry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#California Standards Test: Geometry">California Standards Test: Geometry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Trigonometry">Trigonometry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Calculus">Calculus</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Differential Equations">Differential Equations</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#Linear Algebra">Linear Algebra</A>&nbsp;&nbsp;&nbsp;&nbsp;
+
+    </ul>
+    <P>
+    <h3>Science</h3><P>
+    <ul>
+            <A href="#Biology">Biology</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#Chemistry">Chemistry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Organic Chemistry">Organic Chemistry</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Physics">Physics</A>&nbsp;&nbsp;&nbsp;&nbsp;
+    </ul>
+    <h3>Other Stuff ...</h3><P>
+    <ul>
+
+            <A href="#Khan Academy-Related Talks and Interviews">Khan Academy-Related Talks and Interviews</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#History">History</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Brain Teasers">Brain Teasers</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Finance">Finance</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Banking and Money">Banking and Money</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#Credit Crisis">Credit Crisis</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Current Economics">Current Economics</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Geithner Plan">Geithner Plan</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Paulson Bailout">Paulson Bailout</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <A href="#Valuation and Investing">Valuation and Investing</A>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+            <A href="#Venture Capital and Capital Markets">Venture Capital and Capital Markets</A>&nbsp;&nbsp;&nbsp;&nbsp;
+        
+            
+
+    </ul>
+
+<P>
+{% include "library_content.html" %}
 {% endblock pagecontent %}
