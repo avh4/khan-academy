@@ -1153,96 +1153,69 @@ class GenerateLibraryContent(webapp.RequestHandler):
 
     def get(self):
         all_topics_list = []
-            
-        colOne = []
-        colOne.append('Chemistry')
-        colOne.append('Arithmetic')
-        colOne.append('Developmental Math')
-        colOne.append('Pre-algebra')
-        colOne.append(('Pre-algebra', 'MA Tests for Education Licensure (MTEL) -Pre-Alg'))
-        colOne.append('Geometry')
-        colOne.append(('Geometry', 'California Standards Test: Geometry'))
-        colOne.append('Current Economics')
-        colOne.append('Banking and Money')
-        colOne.append('Venture Capital and Capital Markets')
-        colOne.append('Finance')
-        colOne.append('Credit Crisis')
-        colOne.append('Valuation and Investing')
-        colOne.append('Geithner Plan')
-        
-        colTwo = []
-        colTwo.append('Algebra')
-        colTwo.append(('Algebra', 'Algebra I Worked Examples'))
-        colTwo.append(('Algebra', 'ck12.org Algebra 1 Examples'))
-        colTwo.append(('Algebra', 'California Standards Test: Algebra I'))
-        colTwo.append(('Algebra', 'California Standards Test: Algebra II'))
-        colTwo.append('Brain Teasers')
-       
 
-        colThree = []
-        colThree.append('Biology')
-        colThree.append('Trigonometry')
-        colThree.append('Precalculus')
-        colThree.append('Statistics')
-        colThree.append('Probability')
-        colThree.append('Calculus')
-        colThree.append('Differential Equations')
+	all_topics_list.append('Arithmetic')
+        all_topics_list.append('Chemistry')
+        all_topics_list.append('Developmental Math')
+        all_topics_list.append('Pre-algebra')
+        all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+        all_topics_list.append('Geometry')
+        all_topics_list.append('California Standards Test: Geometry')
+        all_topics_list.append('Current Economics')
+        all_topics_list.append('Banking and Money')
+        all_topics_list.append('Venture Capital and Capital Markets')
+        all_topics_list.append('Finance')
+        all_topics_list.append('Credit Crisis')
+        all_topics_list.append('Valuation and Investing')
+        all_topics_list.append('Geithner Plan')
+        all_topics_list.append('Algebra')
+        all_topics_list.append('Algebra I Worked Examples')
+        all_topics_list.append('ck12.org Algebra 1 Examples')
+        all_topics_list.append('California Standards Test: Algebra I')
+        all_topics_list.append('California Standards Test: Algebra II')
+        all_topics_list.append('Brain Teasers')
+        all_topics_list.append('Biology')
+        all_topics_list.append('Trigonometry')
+        all_topics_list.append('Precalculus')
+        all_topics_list.append('Statistics')
+        all_topics_list.append('Probability')
+        all_topics_list.append('Calculus')
+        all_topics_list.append('Differential Equations')
 
-        colFour = []
-        colFour.append('Khan Academy-Related Talks and Interviews')
-        colFour.append('History')
-        colFour.append('Organic Chemistry')
-        colFour.append('Linear Algebra')
-        colFour.append('Physics')
-        colFour.append('Paulson Bailout')
-        
-        all_topics_list.extend(colOne)
-        all_topics_list.extend(colTwo)
-        all_topics_list.extend(colThree)
-        all_topics_list.extend(colFour)
+        all_topics_list.append('Khan Academy-Related Talks and Interviews')
+        all_topics_list.append('History')
+        all_topics_list.append('Organic Chemistry')
+        all_topics_list.append('Linear Algebra')
+        all_topics_list.append('Physics')
+        all_topics_list.append('Paulson Bailout')
         all_topics_list.sort()
             
-        
 
-        cols = [colOne, colTwo, colThree, colFour]
-
-        columns = []
-        for column in cols:
-            new_column = []
-            for topics in column:
-                playlist_title = topic = topics
-                subtopic = ""
-                if type(topics) == type(tuple()):
-                    topic = topics[0]
-                    playlist_title = subtopic = topics[1]
-                query = Playlist.all()
-                query.filter('title =', playlist_title)
-                playlist = query.get()
-                query = VideoPlaylist.all()
-                query.filter('playlist =', playlist)
-                query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
-                query.order('video_position')
-                playlist_videos = query.fetch(500)
-                playlist_data = {
-                                 'title': playlist_title,
-                                 'topic': topic,
-                                 'subtopic': subtopic,
-                                 'videos': playlist_videos
-                                 }
-                #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
-                new_column.append(playlist_data)
-            columns.append(new_column)
+	all_playlists = []
+	for topics in all_topics_list:
+	    playlist_title = topic = topics
+		
+	    query = Playlist.all()
+	    query.filter('title =', playlist_title)
+	    playlist = query.get()
+	    query = VideoPlaylist.all()
+	    query.filter('playlist =', playlist)
+	    query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+	    query.order('video_position')
+	    playlist_videos = query.fetch(500)
+	    playlist_data = {
+				 'title': playlist_title,
+				 'topic': topic,
+				 'videos': playlist_videos
+				 }
+		#self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
+	    all_playlists.append(playlist_data)
 
         # Separating out the columns because the formatting is a little different on each column
 
         template_values = {
             'App' : App,
-            'c1': columns[0],
-            'c2': columns[1],
-            'c3': columns[2],
-            'c4': columns[3],
-            'playlist_names': cols,
-            'all_topics': all_topics_list,
+            'all_playlists': all_playlists,
             }
         path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
         self.response.out.write(template.render(path, template_values))

@@ -11,9 +11,9 @@ a:link, header a:visited, footer a:visited {
     color: #069;
 }
 
-a:visited {
+/*a:visited {
     color: #609;
-}
+}*/
 
 a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
     color: #DD6900;
@@ -30,16 +30,20 @@ a[href="#"], .requires_script {
 /*
  * Give script-using links a dotted underline when they are visible.
  */
+ 
+ /***
 a[onclick]:link, 
 a[href="#"]:link, 
 a.uses_script:link, 
 a[onclick]:visited, 
 a[href="#"]:visited, 
+
+
 a.uses_script:visited {
     text-decoration: none;
     border-bottom: dotted 1px #069;
 }
-
+******/
 
 
 
@@ -248,4 +252,204 @@ a:link.google-analytics-link-track
     text-decoration: underline;
 }
 
+/***************For All-videos page******************/
 
+/* General styles file */
+
+
+/* Typography */
+
+a {
+	text-decoration: none;
+	font-weight: bold;
+	color: #069;
+	}
+
+
+
+
+
+
+
+
+
+/* Clear Floated Elements
+----------------------------------------------------------------------------------------------------*/
+
+/* http://sonspring.com/journal/clearing-floats */
+
+.clear {
+	clear: both;
+	display: block;
+	overflow: hidden;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+}
+
+	
+
+
+#library {
+	margin-top: 30px;
+}
+	#library #library-search {
+		text-align: right;
+		padding-top: 2px;	
+	}
+	#library #library-search #videosearch {
+		color: #204E93;
+		color:grey;
+		height:20px;
+		width:390px;
+		padding: 2px 2px 2px 18px;
+		font-size:12px;
+		background: url(Search-icon.png) no-repeat 2px 1px #fff;
+		border: 1px solid #ddd;
+	}
+	#library #library-nav {
+		border: 1px solid #ccc;
+		position: relative;
+		z-index: 1;
+	}
+		#library #library-nav #library-nav-links {
+			margin: 0;
+			padding: 0;
+			border: 1px solid #fff;
+			border-bottom: none;
+		}
+			#library #library-nav-links li {
+				text-align: left;
+				padding: 5px 15px;
+				text-shadow: 1px 1px 0 #fff;
+				position: relative;
+				border-right: 1px solid #fff;
+				border-left: 1px solid #ccc;
+				list-style: none;
+				float: left;	
+			}
+				#library #library-nav-links li.first {
+					border-left: none;
+				}
+				#library #library-nav-links li.last {
+					border-right: none;
+				}
+
+			#library #library-nav-links a.selected {
+				color: #000;
+				text-shadow: 1px 1px 1px #ccc;
+				cursor: text;
+			}
+			#library #library-nav-links a.selected:after {
+				/* creates the smaller  triangle */
+				content:"\00a0";
+				display:block; /* reduce the damage in FF3.0 */
+				position:absolute;
+				bottom:-12px; /* value = - border-top-width - border-bottom-width */
+				left:10px; /* value = (:before left) + (:before border-left) - (:after border-left) */
+				width:20px;
+				height:11px;
+				background: url(library-nav-nipple.png);
+				z-index: 10;				
+			}
+			#library #library-nav-links .video-count, #library #library-content #library-sub-nav #list-of-lists .video-count {
+				font-size: 90%;
+				padding-left: 4px;
+				color: #999;
+			}
+			
+	#library #library-content {
+		background-color: #fff;
+		border: 1px solid #ccc;
+		border-top: 0;
+		padding: 10px;
+	}
+		#library #library-content #library-sub-nav {
+			display: none;
+			background: url(bg_texture.png);
+			left: -5px;
+			padding-left 5px;
+			width: 21em;
+			border-right: 1px solid #ccc;
+			border-bottom: 1px solid #ccc;
+			box-shadow: 1px 1px 2px #ddd;
+			-moz-box-shadow: 1px 1px 2px #ddd;
+			-webkit-box-shadow: 1px 1px 2px #ddd;
+		}
+			#library #library-content #library-sub-nav #list-of-lists {
+				text-shadow: 1px 1px 0 #fff;
+				list-style: none;
+				margin: 15px 0 0;
+				padding: 0;
+			}
+				#library #library-content #library-sub-nav #list-of-lists li {
+					margin: 0;
+					padding: 0 5px .9em 15px;
+					line-height: normal;
+				}
+					#library #library-content #library-sub-nav #list-of-lists li a {
+						font-weight: normal;
+						position: relative;	
+						line-height: 80%;
+					}
+					#library #library-content #library-sub-nav #list-of-lists li a.selected {
+						color: #000;
+						cursor: text;
+						text-shadow: 1px 1px 1px #ccc;
+					}
+					#library #library-content #library-sub-nav #list-of-lists li a.selected:after {
+						/* creates the smaller  triangle */
+						content:"\00a0";
+						display:block; /* reduce the damage in FF3.0 */
+						position:absolute;
+						bottom:2px; /* value = - border-top-width - border-bottom-width */
+						left:253px; /* value = (:before left) + (:before border-left) - (:after border-left) */
+						width:8px;
+						height:14px;
+						background: url(nipple-right.png) no-repeat;
+						z-index: 10;				
+					}
+					#library #library-content #library-sub-nav #list-of-lists li.category {
+						font-weight: bold;
+						margin-top: 5px;
+						color: #666;	
+					}
+					#library #library-content #library-sub-nav #list-of-lists li.all-vids a {
+						font-weight: bold;
+					}
+		#library #library-content #library-content-main {
+			padding: 7px 0 5px;
+		}
+			#library #library-content #library-content-main h2 {
+				margin-top: 0;
+				margin-bottom: .9em;
+				color: #333;
+			}
+			#library #library-content #library-content-main h2.playlist-heading {
+				color: #666;
+				margin-bottom: 0;
+			}
+			#library #library-content #library-content-main p.playlist-desc {
+				color: #555;
+				margin: 0 0 10px;
+				line-height: 1.2em;
+			}
+			#library #library-content #library-content-main a.video-link {
+				font-weight: normal;	
+				line-height: 1.2em;
+				height: 15px;
+				width: 220px;
+				display: block;
+				float: left;
+				overflow: hidden;
+				background: url(/images/playnav.png) no-repeat 0 3px;
+				padding: 0 2px 0 13px;
+			}
+			#library #library-content #library-content-main a.video-link:hover {
+				background-image: url(/images/play-dark.png);
+			}
+
+
+
+
+/**************end of elements for all-videos page*********************/
