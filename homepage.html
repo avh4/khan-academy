@@ -22,9 +22,10 @@
 <script>
     $(function () {
        $("#video_library_toc a").click(function() {
-          var topic = $(this).attr("href").substr(1);
           $(".highlighted").removeClass("highlighted");
-          $("div[data-topic="+topic+"], div[data-subtopic="+topic+"]").addClass("highlighted");
+          var topic = $(this).attr("href").substr(1);
+          if (topic.length > 0)
+            $("div[data-topic="+topic+"], div[data-subtopic="+topic+"]").addClass("highlighted");
        });
     });
     
