@@ -8,6 +8,10 @@
 {% else %}{% ifequal num_problems 2 %}
 <p>{{student}} has done only two problems for {{exercise_name}}</p>
 {% else %}
+<p>The charts below show {{student}}'s progress on the {{exercise_name}} exercise.  The first one has a bar for each problem
+done, with it's height showing how many second were taken to complete it.  The blue bars denote a problem answered correctly,
+the red incorrectly. A chart with blue bars that get smaller shows increasing proficiency in the exercise.
+</p>
 <script type="text/javascript" src="javascript/protovis-r3.2.js"></script>
 <script type="text/javascript+protovis">
 var problems = [

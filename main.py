@@ -1511,7 +1511,7 @@ class ViewClassReport(webapp.RequestHandler):
                 row = []
                 student = users.User(email=student_email)
                 student_data = UserData.get_or_insert_for(student)
-                row.append(ReportCell(data=student.nickname()))
+                row.append(ReportCell(data='<a href="/individualreport?student_email=%s">%s</a>' % (student_email, student.nickname()) ))
                 i = 0
                 for exercise in exercises:
                     link = "/charts?student_email="+student_email+"&exercise_name="+exercise 
@@ -1735,9 +1735,9 @@ class ViewCharts(webapp.RequestHandler):
                 if problem.correct:
                     seconds_range.num_correct += 1
                 else:
-                    seconds_range.num_incorrect += 1
-                    
-                    
+                    seconds_range.num_incorrect += 1                   
+
+
 class RetargetFeedback(bulk_update.handler.UpdateKind):
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
