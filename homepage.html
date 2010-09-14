@@ -2,9 +2,6 @@
 {% block pagescript %}
     <link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
 <style>
-    #video_library_toc {
-        display: inline;
-    }
     .highlighted {
         background-color: #edffa4;
     }
@@ -74,7 +71,8 @@ The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a w
 
 </td></tr></table>
 <P>
-<div><h2>Browse videos by topic:</h2>
+<div id="video_library_toc">
+<h2>Browse videos by topic:</h2>
 <ul class="menu" id="menu">
 	<li><a href="#" class="menulink">Math</a>
 		<ul>
