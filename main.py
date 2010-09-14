@@ -27,6 +27,8 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
+
 import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
@@ -42,6 +44,16 @@ from discussion import comments
 from discussion import qa
 from discussion import notification
 from discussion import render
+
+# Monkey patch webapp.RequestHandler to display a reasonable error message during scheduled maintenance
+orig_handle_exception = webapp.RequestHandler.handle_exception
+def new_handle_exception(self, e, *args):
+    if type(e) is CapabilityDisabledError:
+        self.response.out.write("<p>The site is temporarily down for maintenance.  Please try again at the start of the next hour.  We apologize for the inconvenience.</p>")
+        return
+    else:
+        return orig_handle_exception(self, e, args)
+webapp.RequestHandler.handle_exception = new_handle_exception
 
 class VideoDataTest(webapp.RequestHandler):
 
@@ -1967,7 +1979,7 @@ class ViewArticle(webapp.RequestHandler):
         	
 
 
-def real_main():
+def real_main():    
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
@@ -2018,6 +2030,7 @@ def real_main():
         ('/students', ViewStudents), 
         ('/classreport', ViewClassReport),
         ('/charts', ViewCharts),
+        ('/press/.*', ViewArticle),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 
@@ -2046,7 +2059,6 @@ def real_main():
         ('/sessionaction', qbrary.SessionAction),
         ('/flagquestion', qbrary.FlagQuestion),
         ('/viewauthors', qbrary.ViewAuthors),
-        ('/press/.*', ViewArticle),
 
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),
