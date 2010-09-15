@@ -1,3 +1,7 @@
+/* 
+ * This is TinyDropdown by Michael Leigeber (http://www.leigeber.com/2008/11/drop-down-menu/).  
+ * He released it under the CC-by 3.0 license (http://creativecommons.org/licenses/by/3.0/us/).
+ */
 var menu=function(){
 	var t=15,z=50,s=6,a;
 	function dd(n){this.n=n; this.h=[]; this.c=[]}
