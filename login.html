@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- Based on jQuery OpenID Plugin 1.1 Copyright 2009 Jarrett Vance http://jvance.com/pages/jQueryOpenIdPlugin.xhtml.  
+     Licensed under CC-by 3.0. -->
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <title>Khan Academy Login</title>
+        <link rel="stylesheet" type="text/css" media="screen" href="/javascript/jQueryOpenIdPlugin/openid.css?{{App.version}}" />
+        {# Support offline use with dev appserver #}
+        {% if App.is_dev_server %}
+        <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}">
+        </script>
+        {% else %}
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
+        </script>
+        {% endif %}
+        <script type="text/javascript" src="/javascript/jQueryOpenIdPlugin/jquery.openid.js?{{App.version}}">
+        </script>
+        <script type="text/javascript">
+        $(function () {
+           $("form.openid:eq(0)").openid(); 
+        });            
+        </script>
+</head>
+<body>
+	<h1>Login with</h1>
+<form class="openid" method="post" action="/login?login_url={{login_url|urlencode}}"> 
+  <div><ul class="providers"> 
+  <li class="direct" title="Google"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/googleW.png" alt="icon" /><span>https://www.google.com/accounts/o8/id</span></li> 
+  <li class="domainname" title="Google Apps domain name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 
+  <li class="direct" title="Yahoo"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/yahooW.png" alt="icon" /><span>http://yahoo.com/</span></li> 
+  <li class="username" title="AOL screen name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/aolW.png" alt="icon" /><span>http://openid.aol.com/<strong>username</strong></span></li> 
+  <li class="username" title="MyOpenID user name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/myopenid.png" alt="icon" /><span>http://<strong>username</strong>.myopenid.com/</span></li> 
+  <li class="username" title="Flickr user name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/flickr.png" alt="icon" /><span>http://flickr.com/<strong>username</strong>/</span></li> 
+  <li class="username" title="Technorati user name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/technorati.png" alt="icon" /><span>http://technorati.com/people/technorati/<strong>username</strong>/</span></li> 
+  <li class="username" title="Wordpress blog name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/wordpress.png" alt="icon" /><span>http://<strong>username</strong>.wordpress.com</span></li> 
+  <li class="username" title="Blogger blog name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/blogger.png" alt="icon" /><span>http://<strong>username</strong>.blogspot.com/</span></li> 
+  <li class="username" title="LiveJournal blog name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/livejournal.png" alt="icon" /><span>http://<strong>username</strong>.livejournal.com</span></li> 
+  <li class="username" title="ClaimID user name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/claimid.png" alt="icon" /><span>http://claimid.com/<strong>username</strong></span></li> 
+  <li class="username" title="Vidoop user name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/vidoop.png" alt="icon" /><span>http://<strong>username</strong>.myvidoop.com/</span></li> 
+  <li class="username" title="Verisign user name"> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/verisign.png" alt="icon" /><span>http://<strong>username</strong>.pip.verisignlabs.com/</span></li> 
+  <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" /> 
+  <span><strong>http://{your-openid-url}</strong></span></li> 
+  </ul></div> 
+  <fieldset id="username_fields"> 
+  <label for="openid_username">Enter your <span>Provider user name</span></label> 
+  <div><span></span><input type="text" name="openid_username" /><span></span> 
+  <input type="submit" value="Login" /></div> 
+  </fieldset> 
+  <fieldset id="domainname_fields"> 
+  <label for="openid_domainname">Enter your <span>Provider domain name</span></label> 
+  <div><span></span><input type="text" name="openid_domainname" /><span></span> 
+  <input type="submit" value="Login" /></div> 
+  </fieldset> 
+  <fieldset  id="identifier_fields"> 
+  <label for="openid_identifier">Enter your <a class="openid_logo" href="http://openid.net">OpenID</a></label> 
+  <div><input type="text" name="openid_identifier" /> 
+  <input type="submit" value="Login" /></div> 
+  </fieldset> 
+</form>
+</body>
+</html>

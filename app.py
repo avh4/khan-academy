@@ -1,4 +1,5 @@
 import os
+from google.appengine.api import users
 
 # A singleton shared across requests
 class App(object):
@@ -8,3 +9,8 @@ class App(object):
     # during the deployment process.  Minor is always 1 on a dev
     # server.
     version = os.environ['CURRENT_VERSION_ID']
+    if os.environ["SERVER_SOFTWARE"].startswith('Development'):
+        is_dev_server = True
+    if not users.create_login_url('/').startswith('https://www.google.com/accounts/ServiceLogin'):
+        accepts_openid = True
+        

@@ -36,8 +36,7 @@ import qbrary
 import bulk_update.handler
 
 from app import App
-if os.environ["SERVER_SOFTWARE"].startswith('Development'):
-    App.is_dev_server = True
+
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator
 
 from discussion import comments
@@ -1950,8 +1949,26 @@ class ViewArticle(webapp.RequestHandler):
         
         self.response.out.write(template.render(path, template_values))
         	
+class Login(webapp.RequestHandler):
 
+    def get(self):
+        return self.post()
 
+    def post(self):
+        login_url = self.request.get('login_url')
+        openid_identifier = self.request.get('openid_identifier')
+        result = urlparse(login_url)
+        cont = cgi.parse_qs(result.query)['continue'][0]
+        if openid_identifier is not None and len(openid_identifier) > 0:
+            self.redirect(users.create_login_url(cont, federated_identity = openid_identifier))            
+        else:
+            path = os.path.join(os.path.dirname(__file__), 'login.html')
+            template_values = {
+                               'App': App,
+                               'login_url': login_url                               
+                               }
+            self.response.out.write(template.render(path, template_values))
+            
 def real_main():    
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -2004,6 +2021,7 @@ def real_main():
         ('/classreport', ViewClassReport),
         ('/charts', ViewCharts),
         ('/press/.*', ViewArticle),
+        ('/login', Login),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 

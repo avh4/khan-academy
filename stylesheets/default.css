@@ -119,6 +119,10 @@ footer > * {
     float: right;
 }
 
+#page_login_options * {
+    vertical-align: middle;
+}
+
 #page_social_links {
     clear: right;
     float: right;

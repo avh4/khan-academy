@@ -6,7 +6,7 @@ form.openid ul { text-align:center; list-style-type:none; display:inline;}
 form.openid ul li {float:left; padding:4px}
 form.openid ul li span {padding:0 1em 0 3px}
 form.openid fieldset {clear:both; padding:1em 0}
-form.openid div+fieldset {display:none}
+form.openid #username_fields, form.openid #domainname_fields {display:none}
 form.openid label {display:block; font-weight:bold; font-size:larger; margin-bottom:.5em}
 input[name=openid_username] {width:8em}
 input[name=openid_identifier] {width:18em}

@@ -107,7 +107,18 @@
                     <li>
                         <a href="{{logout_url}}">Sign Out</a>
                     </li>
-                    {% else %}<a href="{{login_url}}">Sign In with your Google Account</a>
+                    {% else %}
+                    <li id="page_login_options">
+                        <a href="{{login_url}}"><img style="border:outset 2px; padding: 1px;" src="/images/login-with-google-button.png" alt="Login with Google"></a>
+                        {% if App.accepts_openid %}
+                        <!-- <a href="/login?service=facebook&login_url={{login_url|urlencode}}"><img src="/images/login-with-facebook-button.png" alt="Login with Facebook"></a> -->
+                        [<a href="/login?service=other&login_url={{login_url|urlencode}}">more login choices...</a>]
+                        {% endif %}
+                    </li>
+<!--                    
+  <div><ul class="providers">
+</form>
+-->                    
                     {% endif %}
                 </ul>
                 <ul id="page_social_links">
