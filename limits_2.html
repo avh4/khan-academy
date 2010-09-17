@@ -54,10 +54,15 @@ functions[0] = function() {
 	denom = nicefy_signs(denom.substring(0, denom.length - 2));
 	rdenom = nicefy_signs(rdenom.substring(0, rdenom.length - 2));
 	
-	if (getRandomIntRange(0, 1)) { // 50% chance of -inf rather than inf
+	if (getRandomIntRange(0, 1)) { // 50% chance of approaching -inf rather than inf
 		a = 'oo';
 		if (n_order > d_order) {
-			limtoa = 'oo';
+			// check signs of coefficients
+			if (n_coefs[n_order] * d_coefs[d_order] > 0) {
+				limtoa = 'oo';
+			} else {
+				limtoa = '-oo';
+			}
 		} else if (d_order > n_order) {
 			limtoa = 0;
 		} else {
@@ -66,7 +71,11 @@ functions[0] = function() {
 	} else {
 		a = '-oo';
 		if (n_order > d_order) {
-			limtoa = '-oo';
+			if (n_coefs[n_order] * d_coefs[d_order] > 0) {
+				limtoa = '-oo';
+			} else {
+				limtoa = 'oo';
+			}
 		} else if (d_order > n_order) {
 			limtoa = 0;
 		} else {
