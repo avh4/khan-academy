@@ -86,7 +86,7 @@ footer > * {
 #page_visitors {
     position: absolute;
     left: 140px;
-    top: 55px;
+    top: 35px;
     font-size:14px;
     display: none; /* hidden until AJAX call to chartbeat gets the number */
 }
@@ -105,7 +105,7 @@ footer > * {
     clear: both;
     position: absolute;
     left: 110px;
-    top: 70px;    
+    top: 53px;    
 }
 
 #page_top_nav {
