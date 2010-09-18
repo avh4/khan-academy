@@ -12,6 +12,7 @@ import models_discussion
 import notification
 from render import render_block_to_string
 from util import is_honeypot_empty, is_current_user_moderator
+import app
 
 # Temporary /discussion/videofeedbacklist URL to list counts of undeleted feedback for each video
 # along with links that change visited/unvisited style whenever new feedback is added.
@@ -19,7 +20,7 @@ from util import is_honeypot_empty, is_current_user_moderator
 # This is not meant to be a permanent piece of UI for the discussion interface, it is a tool
 # for those who want to keep track of feedback while the larger "view all/unanswered/etc questions" interface
 # is built.
-class VideoFeedbackList(webapp.RequestHandler):
+class VideoFeedbackList(app.RequestHandler):
 
     def get(self):
 
@@ -57,7 +58,7 @@ class VideoFeedbackList(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'video_feedback_list.html')
         self.response.out.write(template.render(path, context))
 
-class ModeratorList(webapp.RequestHandler):
+class ModeratorList(app.RequestHandler):
 
     def get(self):
 
@@ -84,12 +85,12 @@ class ModeratorList(webapp.RequestHandler):
 
         self.redirect("/discussion/moderatorlist")
 
-class ExpandQuestion(webapp.RequestHandler):
+class ExpandQuestion(app.RequestHandler):
 
     def post(self):
         notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
 
-class PageQuestions(webapp.RequestHandler):
+class PageQuestions(app.RequestHandler):
 
     def get(self):
 
@@ -112,14 +113,14 @@ class PageQuestions(webapp.RequestHandler):
 
         return
 
-class AddAnswer(webapp.RequestHandler):
+class AddAnswer(app.RequestHandler):
 
     def post(self):
 
-        user = users.get_current_user()
+        user = app.get_current_user()
 
         if not user:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
             return
 
         if not is_honeypot_empty(self.request):
@@ -149,7 +150,7 @@ class AddAnswer(webapp.RequestHandler):
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)
 
-class Answers(webapp.RequestHandler):
+class Answers(app.RequestHandler):
 
     def get(self):
 
@@ -169,14 +170,14 @@ class Answers(webapp.RequestHandler):
 
         return
 
-class AddQuestion(webapp.RequestHandler):
+class AddQuestion(app.RequestHandler):
 
     def post(self):
 
-        user = users.get_current_user()
+        user = app.get_current_user()
 
         if not user:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
             return
 
         if not is_honeypot_empty(self.request):
@@ -202,7 +203,7 @@ class AddQuestion(webapp.RequestHandler):
 
         self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
 
-class ChangeEntityType(webapp.RequestHandler):
+class ChangeEntityType(app.RequestHandler):
 
     def post(self):
 
@@ -218,7 +219,7 @@ class ChangeEntityType(webapp.RequestHandler):
                 entity.types = [target_type]
                 db.put(entity)
 
-class DeleteEntity(webapp.RequestHandler):
+class DeleteEntity(app.RequestHandler):
 
     def post(self):
 
@@ -275,7 +276,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": users.get_current_user(),
+            "user": app.get_current_user(),
             "is_mod": is_current_user_moderator(),
             "video": video,
             "questions": questions,
@@ -290,7 +291,7 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
-            "login_url": users.create_login_url("/video?v=%s" % video.youtube_id)
+            "login_url": app.create_login_url("/video?v=%s" % video.youtube_id)
            }
 
 def add_template_values(dict, request):

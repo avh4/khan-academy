@@ -27,15 +27,16 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
-from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
 import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
 import qbrary
 import bulk_update.handler
+import facebook
 
 from app import App
+import app
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator
 
@@ -44,17 +45,7 @@ from discussion import qa
 from discussion import notification
 from discussion import render
 
-# Monkey patch webapp.RequestHandler to display a reasonable error message during scheduled maintenance
-orig_handle_exception = webapp.RequestHandler.handle_exception
-def new_handle_exception(self, e, *args):
-    if type(e) is CapabilityDisabledError:
-        self.response.out.write("<p>The site is temporarily down for maintenance.  Please try again at the start of the next hour.  We apologize for the inconvenience.</p>")
-        return
-    else:
-        return orig_handle_exception(self, e, args)
-webapp.RequestHandler.handle_exception = new_handle_exception
-
-class VideoDataTest(webapp.RequestHandler):
+class VideoDataTest(app.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
@@ -66,12 +57,12 @@ class VideoDataTest(webapp.RequestHandler):
             self.response.out.write('<P>Title: ' + video.title)
 
 
-class DataStoreTest(webapp.RequestHandler):
+class DataStoreTest(app.RequestHandler):
 
     def get(self):
         if users.is_current_user_admin():
             self.response.out.write('<html>')
-            user = users.get_current_user()
+            user = app.get_current_user()
             if user:
                 problems_done = ProblemLog.all()
                 for problem in problems_done:
@@ -84,7 +75,7 @@ class DataStoreTest(webapp.RequestHandler):
 # Setting this up to make sure the old Video-Playlist associations are flushed before the bulk upload from the local datastore (with the new associations)
 
 
-class DeleteVideoPlaylists(webapp.RequestHandler):
+class DeleteVideoPlaylists(app.RequestHandler):
 # Deletes at most 200 Video-Playlist associations that are no longer live.  Should be run every-now-and-then to make sure the table doesn't get too big
     def get(self):
         if not users.is_current_user_admin():
@@ -99,7 +90,7 @@ class DeleteVideoPlaylists(webapp.RequestHandler):
         db.delete(video_playlists_to_delete)
 
 
-class KillLiveAssociations(webapp.RequestHandler):
+class KillLiveAssociations(app.RequestHandler):
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
@@ -111,7 +102,7 @@ class KillLiveAssociations(webapp.RequestHandler):
         db.put(all_video_playlists)
 
 
-class UpdateVideoReadableNames(webapp.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
+class UpdateVideoReadableNames(app.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
 
     def get(self):
     	if not users.is_current_user_admin():
@@ -139,7 +130,7 @@ class UpdateVideoReadableNames(webapp.RequestHandler):  #Makes sure every video 
                         
 
 
-class UpdateVideoData(webapp.RequestHandler):
+class UpdateVideoData(app.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
@@ -226,10 +217,10 @@ class UpdateVideoData(webapp.RequestHandler):
                 db.put(playlist_videos)
 
 
-class ViewExercise(webapp.RequestHandler):
+class ViewExercise(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
@@ -304,16 +295,16 @@ class ViewExercise(webapp.RequestHandler):
             self.response.out.write(template.render(path, template_values))
         else:
 
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 
-class ViewVideo(webapp.RequestHandler):
+class ViewVideo(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         video = None
@@ -383,7 +374,7 @@ class ViewVideo(webapp.RequestHandler):
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url,
                                                   'video': video,
                                                   'video_playlists': video_playlists, 
@@ -392,10 +383,10 @@ class ViewVideo(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
         self.response.out.write(template.render(path, template_values))
 
-class ViewExerciseVideos(webapp.RequestHandler):
+class ViewExerciseVideos(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
             exkey = self.request.get('exkey')
@@ -429,9 +420,9 @@ class ViewExerciseVideos(webapp.RequestHandler):
                 self.response.out.write(template.render(path, template_values))
         else:
 
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
 
-class PrintProblem(webapp.RequestHandler):
+class PrintProblem(app.RequestHandler):
     
     def get(self):
         
@@ -449,11 +440,11 @@ class PrintProblem(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), exid + '.html')
         self.response.out.write(template.render(path, template_values))
         
-class PrintExercise(webapp.RequestHandler):
+class PrintExercise(app.RequestHandler):
 
     def get(self):
         
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
@@ -513,15 +504,15 @@ class PrintExercise(webapp.RequestHandler):
                 
         else:
 
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
 
-class ExerciseAdminPage(webapp.RequestHandler):
+class ExerciseAdminPage(app.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
-        user = users.get_current_user()
+        user = app.get_current_user()
         query = Exercise.all().order('h_position')
         exercises = query.fetch(200)
 
@@ -534,14 +525,14 @@ class ExerciseAdminPage(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-class ReportIssue(webapp.RequestHandler):
+class ReportIssue(app.RequestHandler):
 
     def get(self):
         issue_type = self.request.get('type')
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
         
     def write_response(self, issue_type, extra_template_values):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
 
@@ -572,10 +563,10 @@ class ReportIssue(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), page)
         self.response.out.write(template.render(path, template_values))
 
-class ProvideFeedback(webapp.RequestHandler):
+class ProvideFeedback(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
 
@@ -588,10 +579,10 @@ class ProvideFeedback(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), "provide_feedback.html")
         self.response.out.write(template.render(path, template_values))
 
-class ViewAllExercises(webapp.RequestHandler):
+class ViewAllExercises(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
             
@@ -619,14 +610,14 @@ class ViewAllExercises(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewexercises.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 
-class VideolessExercises(webapp.RequestHandler):
+class VideolessExercises(app.RequestHandler):
 
     def get(self):
         query = Exercise.all().order('h_position')
@@ -639,10 +630,10 @@ class VideolessExercises(webapp.RequestHandler):
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
 
-class KnowledgeMap(webapp.RequestHandler):
+class KnowledgeMap(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)                    
             ex_graph = ExerciseGraph(user_data)
@@ -678,13 +669,13 @@ class KnowledgeMap(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewknowledgemap.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
             
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
-class EditExercise(webapp.RequestHandler):
+class EditExercise(app.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
@@ -737,7 +728,7 @@ class EditExercise(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'editexercise.html')
             self.response.out.write(template.render(path, template_values))
 
-class UpdateExercise(webapp.RequestHandler):
+class UpdateExercise(app.RequestHandler):
     
     def post(self):
         self.get()
@@ -746,7 +737,7 @@ class UpdateExercise(webapp.RequestHandler):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
-        user = users.get_current_user()
+        user = app.get_current_user()
         exercise_name = self.request.get('name')
         if exercise_name:
             query = Exercise.all()
@@ -837,7 +828,7 @@ class UpdateExercise(webapp.RequestHandler):
             else:
                 self.redirect('/editexercise?name=' + exercise_name)
 
-class GraphPage(webapp.RequestHandler):
+class GraphPage(app.RequestHandler):
 
     def get(self):
         width = self.request.get('w')
@@ -847,7 +838,7 @@ class GraphPage(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'graphpage.html')
         self.response.out.write(template.render(path, template_values))
 
-class AdminViewUser(webapp.RequestHandler):
+class AdminViewUser(app.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
@@ -871,11 +862,11 @@ class AdminViewUser(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'adminviewuser.html')
             self.response.out.write(template.render(path, template_values))
 
-class RegisterAnswer(webapp.RequestHandler):
+class RegisterAnswer(app.RequestHandler):
 
     def post(self):
         exid = self.request.get('exid')
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             key = self.request.get('key')
             correct = int(self.request.get('correct'))
@@ -949,7 +940,7 @@ class RegisterAnswer(webapp.RequestHandler):
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 
-class RegisterCorrectness(webapp.RequestHandler):
+class RegisterCorrectness(app.RequestHandler):
 
 # A POST request is made via AJAX when the user clicks "Check Answer".
 # This allows us to reset the user's streak if the answer was wrong.  If we wait
@@ -957,7 +948,7 @@ class RegisterCorrectness(webapp.RequestHandler):
 # by just reloading the page.
 
     def post(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             key = self.request.get('key')
             correct = int(self.request.get('correct'))
@@ -970,20 +961,20 @@ class RegisterCorrectness(webapp.RequestHandler):
                 userExercise.streak = 0
             userExercise.put()
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 
-class ViewUsers(webapp.RequestHandler):
+class ViewUsers(app.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
-        user = users.get_current_user()
+        user = app.get_current_user()
         query = UserData.all()
         count = 0
         for user in query:
@@ -991,7 +982,7 @@ class ViewUsers(webapp.RequestHandler):
 
         self.response.out.write('Users ' + str(count))
 
-class GenerateHomepageContent(webapp.RequestHandler):
+class GenerateHomepageContent(app.RequestHandler):
 
 
     def get(self):
@@ -1148,7 +1139,7 @@ class GenerateHomepageContent(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'homepage_content_template.html')
         self.response.out.write(template.render(path, template_values))
 
-class GenerateLibraryContent(webapp.RequestHandler):
+class GenerateLibraryContent(app.RequestHandler):
 
     def get(self):
         all_topics_list = []
@@ -1219,7 +1210,7 @@ class GenerateLibraryContent(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
         self.response.out.write(template.render(path, template_values))
         
-class Export(webapp.RequestHandler):
+class Export(app.RequestHandler):
 
     def get(self):
         query = Exercise.all()
@@ -1227,64 +1218,64 @@ class Export(webapp.RequestHandler):
         for ex in exercises:
             self.response.out.write(ex)
 
-class ViewHomePage(webapp.RequestHandler):
+class ViewHomePage(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
         self.response.out.write(template.render(path, template_values))
         
-class ViewFAQ(webapp.RequestHandler):
+class ViewFAQ(app.RequestHandler):
 
     def get(self):
-    	user = users.get_current_user()
+    	user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
         path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
         self.response.out.write(template.render(path, template_values))
         
-class ViewDownloads(webapp.RequestHandler):
+class ViewDownloads(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
         path = os.path.join(os.path.dirname(__file__), 'downloads.html')
         self.response.out.write(template.render(path, template_values))
 
-class ViewHowToHelp(webapp.RequestHandler):
+class ViewHowToHelp(app.RequestHandler):
 
     def get(self):
         self.redirect("/frequently-asked-questions#how-to-help", True)
         return
 
 
-class ViewSAT(webapp.RequestHandler):
+class ViewSAT(app.RequestHandler):
 
     def get(self):
-    	user = users.get_current_user()
+    	user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         playlist_title = "SAT Preparation"
@@ -1300,17 +1291,17 @@ class ViewSAT(webapp.RequestHandler):
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'videos': playlist_videos,
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
         path = os.path.join(os.path.dirname(__file__), 'sat.html')
         self.response.out.write(template.render(path, template_values))
 
-class ViewGMAT(webapp.RequestHandler):
+class ViewGMAT(app.RequestHandler):
 
     def get(self):
-    	user = users.get_current_user()
+    	user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         problem_solving = VideoPlaylist.get_query_for_playlist_title("GMAT: Problem Solving")
@@ -1320,7 +1311,7 @@ class ViewGMAT(webapp.RequestHandler):
                                                   'username': user and user.nickname() or "",
                                                   'data_sufficiency': data_sufficiency,
                                                   'problem_solving': problem_solving,
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
@@ -1328,10 +1319,10 @@ class ViewGMAT(webapp.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-class ViewCoaches(webapp.RequestHandler):
+class ViewCoaches(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
             logout_url = users.create_logout_url(self.request.uri)
@@ -1346,15 +1337,15 @@ class ViewCoaches(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewcoaches.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
           
         
-class RegisterCoach(webapp.RequestHandler):
+class RegisterCoach(app.RequestHandler):
     
     def post(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user is None:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
             return
 
         user_data = UserData.get_or_insert_for(user)
@@ -1364,12 +1355,12 @@ class RegisterCoach(webapp.RequestHandler):
         self.redirect("/coaches")
             
 
-class UnregisterCoach(webapp.RequestHandler):
+class UnregisterCoach(app.RequestHandler):
 
     def post(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user is None:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
             return
         user_data = UserData.get_or_insert_for(user)
         coach_email = self.request.get('coach')
@@ -1383,10 +1374,10 @@ class UnregisterCoach(webapp.RequestHandler):
         self.redirect("/coaches") 
 
 
-class ViewIndividualReport(webapp.RequestHandler):
+class ViewIndividualReport(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         student = user
         if user:
             student_email = self.request.get('student_email')
@@ -1425,7 +1416,7 @@ class ViewIndividualReport(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewindividualreport.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
 
     def compute_report(self, user, exercises, dummy_values=False):
             for exercise in exercises:
@@ -1459,10 +1450,10 @@ class ViewIndividualReport(webapp.RequestHandler):
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
         
 
-class ViewStudents(webapp.RequestHandler):
+class ViewStudents(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
             logout_url = users.create_logout_url(self.request.uri)
@@ -1477,10 +1468,10 @@ class ViewStudents(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
         
         
-class ViewClassReport(webapp.RequestHandler):
+class ViewClassReport(app.RequestHandler):
         
     def get(self):
         class ReportCell:
@@ -1489,7 +1480,7 @@ class ViewClassReport(webapp.RequestHandler):
                 self.css_class = css_class
                 self.link = link
             
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)   
             user_data = UserData.get_or_insert_for(user)  
@@ -1553,7 +1544,7 @@ class ViewClassReport(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
         
     def get_class_exercises(self, students):
             exercise_dict = {}
@@ -1579,7 +1570,7 @@ class ViewClassReport(webapp.RequestHandler):
         return False
 
 
-class ViewCharts(webapp.RequestHandler):
+class ViewCharts(app.RequestHandler):
      
     def moving_average(self, iterable, n=3):
         # moving_average([40, 30, 50, 46, 39, 44]) --> 40.0 42.0 45.0 43.0
@@ -1602,7 +1593,7 @@ class ViewCharts(webapp.RequestHandler):
                     self.correct = 1
                 else:
                     self.correct = 0
-        user = users.get_current_user()
+        user = app.get_current_user()
         student = user
         if user:
             student_email = self.request.get('student_email')
@@ -1681,7 +1672,7 @@ class ViewCharts(webapp.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewcharts.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(users.create_login_url(self.request.uri))
+            self.redirect(app.create_login_url(self.request.uri))
 
     def get_range_size(self, num_problems, time_taken_list):
         range_size = 0
@@ -1895,16 +1886,16 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
         else:
             return False
             
-class ViewInfoPage(webapp.RequestHandler):
+class ViewInfoPage(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'logout_url': logout_url}, 
                                                   self.request)
         # Get the corresponding page from the info site
@@ -1920,10 +1911,10 @@ class ViewInfoPage(webapp.RequestHandler):
         c = template.Context(template_values)        
         self.response.out.write(t.render(c))
 
-class ViewArticle(webapp.RequestHandler):
+class ViewArticle(app.RequestHandler):
 
     def get(self):
-        user = users.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         video = None
@@ -1939,7 +1930,7 @@ class ViewArticle(webapp.RequestHandler):
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
-                                                  'login_url': users.create_login_url(self.request.uri),
+                                                  'login_url': app.create_login_url(self.request.uri),
                                                   'article_url': article_url,
                                                   'logout_url': logout_url,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
@@ -1949,23 +1940,23 @@ class ViewArticle(webapp.RequestHandler):
         
         self.response.out.write(template.render(path, template_values))
         	
-class Login(webapp.RequestHandler):
+class Login(app.RequestHandler):
 
     def get(self):
         return self.post()
 
     def post(self):
-        login_url = self.request.get('login_url')
+        cont = self.request.get('continue')
+        if not App.accepts_openid and App.facebook_app_secret is None:
+            self.redirect(users.create_login_url(cont))
         openid_identifier = self.request.get('openid_identifier')
-        result = urlparse(login_url)
-        cont = cgi.parse_qs(result.query)['continue'][0]
         if openid_identifier is not None and len(openid_identifier) > 0:
             self.redirect(users.create_login_url(cont, federated_identity = openid_identifier))            
         else:
             path = os.path.join(os.path.dirname(__file__), 'login.html')
             template_values = {
                                'App': App,
-                               'login_url': login_url                               
+                               'continue': cont                              
                                }
             self.response.out.write(template.render(path, template_values))
             

@@ -41,7 +41,6 @@
         </script>
         <script type="text/javascript" src="/javascript/pageutil.js?{{App.version}}">
         </script>
-
 	<script type="text/javascript">
 		// Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
 		(function () {
@@ -73,9 +72,37 @@
 
     </head>
     <body>
-	{% comment %}
-	Make script-requiring elements visible.
-	{% endcomment %}
+    {% if App.facebook_app_id %}
+    {# Start Facebook connect stuff #}
+    <div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
+                 xfbml: true});
+        FB.Event.subscribe('auth.login', function(response) {
+            window.location.reload();
+        });
+        FB.getLoginStatus(function(response) {
+           if (response.session) {
+            $('#page_logout').click(function(e) {
+                FB.logout(function() { window.location.reload(); });
+                e.preventDefault();
+                return false;
+            });
+           } 
+        });
+      };
+      (function() {
+        var e = document.createElement('script'); e.async = true;
+        e.src = document.location.protocol +
+          '//connect.facebook.net/en_US/all.js';
+        document.getElementById('fb-root').appendChild(e);
+      }());
+    </script>
+    {# End Facebook connect stuff #}
+    {% endif %}
+
+	{# Make script-requiring elements visible. #}
 	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
 
         <header>
@@ -105,14 +132,16 @@
                     {% endif %}
                     {% if username %}
                     <li>
-                        <a href="{{logout_url}}">Sign Out</a>
+                        <a id="page_logout" href="{{logout_url}}">Logout</a>
                     </li>
                     {% else %}
                     <li id="page_login_options">
-                        <a href="{{login_url}}"><img style="border:outset 2px; padding: 1px;" src="/images/login-with-google-button.png" alt="Login with Google"></a>
+                        <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id"><img style="border:outset 2px; padding: 1px;" src="/images/login-with-google-button.png" alt="Login with Google"></a>
+                        {% if App.facebook_app_secret %}
+                        <fb:login-button></fb:login-button>
+                        {% endif %}
                         {% if App.accepts_openid %}
-                        <!-- <a href="/login?service=facebook&login_url={{login_url|urlencode}}"><img src="/images/login-with-facebook-button.png" alt="Login with Facebook"></a> -->
-                        [<a href="/login?service=other&login_url={{login_url|urlencode}}">more login choices...</a>]
+                        [<a href="{{login_url}}">more login choices...</a>]
                         {% endif %}
                     </li>
 <!--                    

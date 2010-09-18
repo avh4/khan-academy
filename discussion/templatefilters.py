@@ -11,6 +11,8 @@ from comments import video_comments_context
 from qa import video_qa_context
 from util import is_current_user_moderator
 
+import app
+
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
 
@@ -50,7 +52,7 @@ def standalone_answers(video, dict_answers):
 
 @register.inclusion_tag(("discussion/username_and_notification.html", "username_and_notification.html"))
 def username_and_notification(username):
-    count = models_discussion.FeedbackNotification.gql("WHERE user = :1", users.get_current_user()).count()
+    count = models_discussion.FeedbackNotification.gql("WHERE user = :1", app.get_current_user()).count()
     return { "username": username, "count": count }
 
 @register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))

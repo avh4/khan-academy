@@ -22,11 +22,37 @@
         </script>
 </head>
 <body>
-	<h1>Login with</h1>
-<form class="openid" method="post" action="/login?login_url={{login_url|urlencode}}"> 
+    {% if App.facebook_app_id %}
+    {# Start Facebook connect stuff #}
+    <div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
+                 xfbml: true});
+        FB.Event.subscribe('auth.login', function(response) {
+            window.location.href = '{{continue|escape}}';
+        });
+      };
+      (function() {
+        var e = document.createElement('script'); e.async = true;
+        e.src = document.location.protocol +
+          '//connect.facebook.net/en_US/all.js';
+        document.getElementById('fb-root').appendChild(e);
+      }());
+    </script>
+    {# End Facebook connect stuff #}
+    {% endif %}
+	<h1>Login to the Khan Academy</h1>
+    <p>If you have an account with one of the following services, just click on it's logo to login to the Khan Academy:</p>
+<form class="openid" method="post" action="/login?continue={{continue|urlencode}}"> 
   <div><ul class="providers"> 
   <li class="direct" title="Google"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/googleW.png" alt="icon" /><span>https://www.google.com/accounts/o8/id</span></li> 
+        <img src="/javascript/jQueryOpenIdPlugin/images/googleW.png" alt="icon" /><span>https://www.google.com/accounts/o8/id</span></li>
+  {% if App.facebook_app_secret %}
+  <li title="Facebook"> 
+        <fb:login-button></fb:login-button>
+  {% endif %}
+  {% if App.accepts_openid %} 
   <li class="domainname" title="Google Apps domain name"> 
         <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 
   <li class="direct" title="Yahoo"> 
@@ -51,7 +77,8 @@
         <img src="/javascript/jQueryOpenIdPlugin/images/vidoop.png" alt="icon" /><span>http://<strong>username</strong>.myvidoop.com/</span></li> 
   <li class="username" title="Verisign user name"> 
         <img src="/javascript/jQueryOpenIdPlugin/images/verisign.png" alt="icon" /><span>http://<strong>username</strong>.pip.verisignlabs.com/</span></li> 
-  <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" /> 
+  <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" />
+  {% endif %} 
   <span><strong>http://{your-openid-url}</strong></span></li> 
   </ul></div> 
   <fieldset id="username_fields"> 

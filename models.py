@@ -6,7 +6,7 @@ from google.appengine.api import memcache
 
 from google.appengine.ext import db
 import cajole
-
+import app
 
 class UserExercise(db.Model):
 
@@ -139,7 +139,7 @@ class UserData(db.Model):
     
     @staticmethod
     def get_for_current_user():
-        user = users.get_current_user()
+        user = app.get_current_user()
         if user is not None:
             user_data = UserData.get_for(user)
             if user_data is not None:
@@ -312,7 +312,7 @@ class ExerciseGraph(object):
 
     def __init__(self, user_data, user=None):
         if user is None:
-            user = users.get_current_user()
+            user = app.get_current_user()
         user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
