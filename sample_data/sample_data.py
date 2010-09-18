@@ -51,6 +51,7 @@ def main():
 
     parser.add_option("-p", "--python", default=(sys.executable if platform.system() == "Windows" else None), help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
+    parser.add_option("-A", "--application", default=None, help="GAE application name")
     
     (options, args) = parser.parse_args()
     if len(args) < 1:
@@ -61,9 +62,11 @@ def main():
         call_args = [options.appcfg,
                      '--url=%s' % options.url,
                      '--email=%s' % options.email,
-                     '--application=khanexercises',
                      '--kind=%s' % kind,
                      '--filename=%s' % filename]
+        if options.application is not None:
+            call_args.append('--application=%s' % options.application)
+
         if options.email == parser.get_option('--email').default:
             call_args.append('--passin')
         
