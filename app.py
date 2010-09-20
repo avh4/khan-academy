@@ -32,6 +32,7 @@ class App(object):
     # facebook_app_id = '134747889904159' 
     if os.environ["SERVER_SOFTWARE"].startswith('Development'):
         is_dev_server = True
+    accepts_openid = False
     if not users.create_login_url('/').startswith('https://www.google.com/accounts/ServiceLogin'):
         accepts_openid = True
         
