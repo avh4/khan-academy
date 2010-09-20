@@ -1947,20 +1947,23 @@ class Login(app.RequestHandler):
 
     def post(self):
         cont = self.request.get('continue')
-        if not App.accepts_openid:
-            self.redirect(users.create_login_url(cont))
-            return
         openid_identifier = self.request.get('openid_identifier')
         if openid_identifier is not None and len(openid_identifier) > 0:
-            self.redirect(users.create_login_url(cont, federated_identity = openid_identifier))
+            if App.accepts_openid:
+                self.redirect(users.create_login_url(cont, federated_identity = openid_identifier))
+                return
+            self.redirect(users.create_login_url(cont))
             return
-        else:
-            path = os.path.join(os.path.dirname(__file__), 'login.html')
-            template_values = {
-                               'App': App,
-                               'continue': cont                              
-                               }
-            self.response.out.write(template.render(path, template_values))
+                    
+        if App.facebook_app_secret is None:
+            self.redirect(users.create_login_url(cont))
+            return
+        path = os.path.join(os.path.dirname(__file__), 'login.html')
+        template_values = {
+                           'App': App,
+                           'continue': cont                              
+                           }
+        self.response.out.write(template.render(path, template_values))
             
 def real_main():    
     webapp.template.register_template_library('templatefilters')
