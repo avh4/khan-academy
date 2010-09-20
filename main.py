@@ -1947,11 +1947,13 @@ class Login(app.RequestHandler):
 
     def post(self):
         cont = self.request.get('continue')
-        if not App.accepts_openid and App.facebook_app_secret is None:
+        if not App.accepts_openid:
             self.redirect(users.create_login_url(cont))
+            return
         openid_identifier = self.request.get('openid_identifier')
         if openid_identifier is not None and len(openid_identifier) > 0:
-            self.redirect(users.create_login_url(cont, federated_identity = openid_identifier))            
+            self.redirect(users.create_login_url(cont, federated_identity = openid_identifier))
+            return
         else:
             path = os.path.join(os.path.dirname(__file__), 'login.html')
             template_values = {
