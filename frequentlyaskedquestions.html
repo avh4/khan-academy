@@ -6,8 +6,12 @@
 		$(function(){
 			// Tabs
 			var tabs = $('#tabs-outer').tabs( {width: "100%"});
-            $("a[href='#how-to-help']").click(function() {
+            $("a[href='#how-to-help'], a[href='/frequently-asked-questions#how-to-help']").click(function() {
                 tabs.tabs('select', '#how-to-help');
+                return false;
+            });
+            $("a[href='#translation']").click(function() {
+                tabs.tabs('select', '#translation');
                 return false;
             });
             $("a[href='#faq']").click(function() {
@@ -320,9 +324,9 @@ See the <a href="#how-to-help">How to Help</a> tab.
 <p>
     If you want to be more actively involved you could 
     <a href="http://code.google.com/p/khanacademy/issues/detail?id=122">transcribe or caption videos</a>.&nbsp; 
-    If you know a foreign language, <a href="http://code.google.com/p/khanacademy/issues/detail?id=717">translating the videos</a>
+    If you know a foreign language, <a href="#translation">translating the videos</a>
     would be huge!  Even better, if you know some topic deeply, are a good, down-to-earth teacher, AND 
-    know a foreign language, you could <a href="http://code.google.com/p/khanacademy/issues/detail?id=718">re-teach</a>
+    know a foreign language, you could <a href="#translation">re-teach</a>
     some subset of the videos!
 </p>
 <p>
@@ -383,7 +387,7 @@ forces.  The best way to move forward would be to dub or re-do one of the follow
     <li><A href="http://www.khanacademy.org/video/introduction-to-evolution-and-natural-selection">Biology: Introduction to Evolution and Natural Selection</A></li>
             
 </ul>
-Then email the link to <b>translations@khanacademy.org</b> .
+Then email the link to <b><a href="mailto:translations@khanacademy.org">translations@khanacademy.org</a></b> .
 In your email, include a bit about your background (education, occupation, etc.) and your sense of how many videos you could do and how long you think it would take. If you are a good fit, we'll
 coordinate with you on how best to move forward!
 <P>
