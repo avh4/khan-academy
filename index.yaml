@@ -1,4 +1,21 @@
 indexes:
+
+- kind: StemmedIndex
+  ancestor: yes
+
+- kind: StemmedIndex
+  properties:
+  - name: parent_kind
+  - name: phrases
+
+- kind: LiteralIndex
+  ancestor: yes
+
+- kind: LiteralIndex
+  properties:
+  - name: parent_kind
+  - name: phrases
+
 - kind: VideoPlaylist
   properties:
   - name: live_association
@@ -80,6 +97,11 @@ indexes:
   - name: exercise
   - name: user
   - name: time_done
+    direction: desc
+
+- kind: StemmedIndex
+  properties:
+  - name: __key__
     direction: desc
 
 - kind: Subject

@@ -107,6 +107,7 @@ footer > * {
     margin-right: 0;
     height: 95px;
     position: relative;
+    min-width: 480px;
 }
 
 #page_status {
@@ -117,9 +118,30 @@ footer > * {
     vertical-align: middle;
 }
 
+#page_search {
+    display: block;
+    float: right;
+    margin-top: 0.2em;
+    padding-top: 0;
+    padding-right: 1em;
+}
+
+#page_search input {
+    background:url("/images/Search-icon.png") no-repeat scroll 2px 1px #FFFFFF;
+    border:1px solid #DDDDDD;
+    color:grey;
+    font-size:12px;
+    padding:2px 2px 2px 18px;
+    width: 20em;
+}
+
 #page_social_links {
     clear: right;
     float: right;
+}
+
+#page_social_links {
+    white-space: nowrap; /* For IE7 */
 }
 
 nav {

@@ -35,6 +35,9 @@ import qbrary
 import bulk_update.handler
 import facebook
 
+from search import Searchable
+import search
+
 from app import App
 import app
 
@@ -172,7 +175,9 @@ class UpdateVideoData(app.RequestHandler):
             playlist_data.title = playlist.title.text
             playlist_data.description = playlist.description.text
             playlist_data.put()
-
+            playlist_data.index()
+            playlist_data.indexed_title_changed()
+            
             for i in range(0, 4):
                 start_index = i * 50 + 1
                 video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri + '?start-index=' + str(start_index) + '&max-results=50')
@@ -200,6 +205,10 @@ class UpdateVideoData(app.RequestHandler):
                     video_data.position = video.position
                     video_data_list.append(video_data)
                 db.put(video_data_list)
+                for video_data in video_data_list:
+                    video_data.index()
+                    video_data.indexed_title_changed()
+
                 playlist_videos = []
                 for video_data in video_data_list:                
                     query = VideoPlaylist.all()
@@ -1965,6 +1974,25 @@ class Login(app.RequestHandler):
                            }
         self.response.out.write(template.render(path, template_values))
             
+class Search(app.RequestHandler):
+
+    def get(self):
+        query = self.request.get('page_search_query')
+        template_values = { 'page_search_query': query }
+        query = query.strip()
+        query_too_short = None 
+        if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
+            template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
+            self.render_template("searchresults.html", template_values)
+            return
+        playlists = Playlist.search(query, limit=50)
+        videos = Video.search(query, limit=50)
+        template_values.update({
+                           'playlists': playlists,
+                           'videos': videos,
+                           })
+        self.render_template("searchresults.html", template_values)
+            
 def real_main():    
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -1999,6 +2027,7 @@ def real_main():
         ('/info/.*', ViewInfoPage),
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),
+        ('/search', Search),
         
         ('/export', Export),
         ('/admin/reput', bulk_update.handler.UpdateKind),

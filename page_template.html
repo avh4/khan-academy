@@ -49,6 +49,19 @@
 				document.createElement(html5elements[i]);
 			}
 		})();
+        
+        // Configure the search form
+        $(function() {
+           $('#page_search input').focus(function() { 
+                if (this.value == 'Search for a video') {
+                    this.value = '';
+                }
+            }).blur(function() {
+                if (this.value == '') {
+                    this.value = 'Search for a video';
+                }
+            });
+        });
 	</script>
         {% block pagescript %}
         {% endblock pagescript %}
@@ -150,6 +163,9 @@
 -->                    
                     {% endif %}
                 </ul>
+                <form id="page_search" action="/search">
+                    <input type="text" name="page_search_query" value='{{page_search_query|default:"Search for a video"|escape}}'>
+                </form>
                 <ul id="page_social_links">
                     <li>
             		    <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy">Join us on <img src="/images/facebook-16.jpg" alt="Facebook" title="Facebook"></a>

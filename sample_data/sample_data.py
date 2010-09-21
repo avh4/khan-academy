@@ -39,7 +39,10 @@ def main():
              'Playlist', 
              'ExerciseVideo', 
              'ExercisePlaylist', 
-             'VideoPlaylist')
+             'VideoPlaylist',
+             'StemmedIndex',
+             'LiteralIndex'
+             )
     parser = OptionParser(usage="%prog [options] upload|download", 
                           description="Uploads the sample data to a server or downloads it from the server.")
     parser.add_option("-U", "--url", default="http://localhost:8080/remote_api",
@@ -51,7 +54,7 @@ def main():
 
     parser.add_option("-p", "--python", default=(sys.executable if platform.system() == "Windows" else None), help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
-    parser.add_option("-A", "--application", default=None, help="GAE application name")
+    parser.add_option("-A", "--application", default='khanexercises', help="GAE application name")
     
     (options, args) = parser.parse_args()
     if len(args) < 1:

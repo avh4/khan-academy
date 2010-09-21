@@ -1,0 +1,68 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Search Results for {{page_search_query|escape}} | Khan Academy {% endblock pagetitle %}
+{% block pagescript %}
+<style>
+    .error {
+        width: 100%;
+        text-align: center;
+        font-size: large;
+        font-weight: bolder;
+        background-color: #fcc;
+    }
+    .search_results {
+        margin-left: 4em;
+        margin-right: 4em;
+    }
+    
+    .search_results section {
+        margin-top: 1em;
+    }
+    .search_results h1 {
+        font-size: large;
+        font-weight: bold;
+    }
+    .search_results dl {
+        margin-left: 2em;
+    }
+    .search_results dt {
+        font-size: large;
+    }
+    .search_results dd {
+        margin-left: 0;
+        margin-bottom: 1em;
+    }
+</style>
+{% endblock pagescript %}
+{% block pagemessage %}
+    {% if query_too_short %}
+    <div class="error">
+        Search terms must contain at least {{query_too_short}} letters.
+    </div>
+    {% endif %}
+{% endblock pagemessage %}
+{% block pagecontent %}
+<article class="search_results">
+    {% if playlists %}
+    <section class="playlists">
+        <h1>Playlists</h1>
+        <dl>
+        {% for playlist in playlists %}
+            {% if playlist.description %}
+            <dt><a href="/#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a></dt><dd>{{playlist.description|escape}}</dd>
+            {% endif %}
+        {% endfor %}        
+        </dl>
+    </section>
+    {% endif %}
+    {% if videos %}
+    <section class="videos">
+        <h1>Videos</h1>
+        <dl>
+        {% for video in videos %}
+            <dt><a href="/video/{{video.readable_id|urlencode}}">{{video.title|escape}}</a></dt><dd>{{video.description|default:""|escape}}</dd>
+        {% endfor %}        
+        </dl>
+    </section>
+    {% endif %}
+</article>
+{% endblock pagecontent %}

@@ -4,8 +4,12 @@ import urllib
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 import facebook
+
+
+from models import UserData
 
 try:
     import secrets
@@ -35,7 +39,9 @@ class App(object):
     accepts_openid = False
     if not users.create_login_url('/').startswith('https://www.google.com/accounts/ServiceLogin'):
         accepts_openid = True
-        
+    if is_dev_server:
+        accepts_openid = False # Change to True when we plan to support it on the live server.
+
 """Returns app.get_current_user() if not None, or a faked User based on the
 user's Facebook account if the user has one, or None.
 """
@@ -91,5 +97,18 @@ class RequestHandler(webapp.RequestHandler):
         else:
             return webapp.RequestHandler.handle_exception(self, e, args)
 
-
-    
+    def render_template(self, template_name, template_values):
+        template_values['App'] = App
+        template_values['points'] = None
+        template_values['username'] = ""
+        user = get_current_user()
+        if user is not None:
+            template_values['username'] = user.nickname()            
+        user_data = UserData.get_for(user)
+        if user_data is not None:
+            template_values['points'] = user_data.points
+        template_values['login_url'] = create_login_url(self.request.uri)
+        template_values['logout_url'] = users.create_logout_url(self.request.uri)
+        path = os.path.join(os.path.dirname(__file__), template_name)
+        self.response.out.write(template.render(path, template_values))
+        

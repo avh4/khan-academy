@@ -7,6 +7,7 @@ from google.appengine.api import memcache
 from google.appengine.ext import db
 import cajole
 import app
+from search import Searchable
 
 class UserExercise(db.Model):
 
@@ -238,7 +239,7 @@ class UserData(db.Model):
         		students.append(student_email)
         return students
     
-class Video(db.Model):
+class Video(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
     url = db.StringProperty()
@@ -247,16 +248,20 @@ class Video(db.Model):
     playlists = db.StringListProperty()
     keywords = db.StringProperty()
     readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
+    INDEX_ONLY = ['title', 'keywords', 'description']
+    INDEX_TITLE_FROM_PROP = 'title'
+    INDEX_USES_MULTI_ENTITIES = False
 
-
-class Playlist(db.Model):
+class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
     url = db.StringProperty()
     title = db.StringProperty()
     description = db.TextProperty()
     readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
-
+    INDEX_ONLY = ['title', 'description']
+    INDEX_TITLE_FROM_PROP = 'title'
+    INDEX_USES_MULTI_ENTITIES = False
 
 class ProblemLog(db.Model):
 
