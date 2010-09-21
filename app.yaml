@@ -4,7 +4,6 @@ runtime: python
 api_version: 1
 default_expiration: "14d"
 
-
 skip_files:
 - ^(.*/)?app\.yaml
 - ^(.*/)?app\.yml
@@ -70,9 +69,8 @@ handlers:
   static_dir: Jit
 
 - url: /remote_api
-  script: remote_api.py
-#  We need to check for admin dynamically in remote_api.py to support OpenID auth
-#  login: admin  
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin  
 
 - url: /admin/.*
   script: main.py
