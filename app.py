@@ -1,6 +1,7 @@
 import os
 import Cookie
 import urllib
+import logging
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -66,9 +67,12 @@ def get_facebook_profile():
         profile = memcache.get(memcache_key)
         if profile is not None:
             return profile
-        graph = facebook.GraphAPI(cookie["access_token"])
-        profile = graph.get_object("me")
-        memcache.set(memcache_key, profile)
+        try:
+            graph = facebook.GraphAPI(cookie["access_token"])
+            profile = graph.get_object("me")
+            memcache.set(memcache_key, profile)
+        except facebook.GraphAPIError, error:
+            logging.debug("Ignoring %s.  Assuming access_token is no longer valid." % error)
         return profile
 
     if App.facebook_app_secret is None:
