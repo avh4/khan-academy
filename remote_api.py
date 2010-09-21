@@ -19,7 +19,7 @@ class ApiCallHandler(handler.ApiCallHandler):
       # We probably don't need to check both is_users.current_user_admin() 
       # and handler.ApiCallHandler.CheckIsAdmin(self) below, but since we don't have any
       # control over handler.ApiCallHandler.CheckIsAdmin(self), we are being extra careful.
-      return users.is_current_user_admin() and handler.ApiCallHandler.CheckIsAdmin(self)
+      return App.is_dev_server or (users.is_current_user_admin() and handler.ApiCallHandler.CheckIsAdmin(self))
     login_cookie = self.request.cookies.get('dev_appserver_login', '')
     match = cookie_re.search(login_cookie)
     if (match and match.group(1) == App.remote_api_secret
