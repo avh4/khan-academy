@@ -1999,6 +1999,7 @@ def real_main():
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
         ('/frequently-asked-questions', ViewFAQ),
+        ('/about', ViewFAQ),
         ('/exercisedashboard', ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
         ('/syncvideodata', UpdateVideoData),
