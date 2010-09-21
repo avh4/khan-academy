@@ -31,9 +31,8 @@ class App(object):
     facebook_app_id = secrets.facebook_app_id
     facebook_app_secret = secrets.facebook_app_secret
     remote_api_secret = secrets.remote_api_secret
-
-    # brettletest.appspot.com
-    # facebook_app_id = '134747889904159' 
+    
+    is_dev_server = False
     if os.environ["SERVER_SOFTWARE"].startswith('Development'):
         is_dev_server = True
     accepts_openid = False
