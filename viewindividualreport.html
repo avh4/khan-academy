@@ -52,13 +52,13 @@
 {% block pagetitle %}Individual Report for {{student}}{% endblock pagetitle %}
 {% block pagecontent %}
 <article id="individual_report">
-{% if proficient_exercises %}
+{% if suggested_exercises %}
 <table>
 <caption>
-Proficient Modules
+Suggested Modules
 </caption>
-<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><!--th>% Correct</th><th>% of last 10</th--></tr>
-{% for exercise in proficient_exercises %}
+<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><th>% Correct</th><th>% of last 10</th></tr>
+{% for exercise in suggested_exercises %}
 		{% if forloop.counter|divisibleby:2 %}
 		<tr class="even_row" >
 		{% else %}
@@ -68,8 +68,8 @@ Proficient Modules
 		<td>{{exercise.streak}}</td>
 		<td>{{exercise.longest_streak}}</td>
 		<td>{{exercise.total_done}}</td>
-		<!--td>{{exercise.percent_correct}}</td>
-		<td>{{exercise.percent_of_last_ten}}</td-->
+		<td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td>
 		</tr>
 {% endfor %}
 </table>
@@ -98,13 +98,13 @@ Review Modules
 </table>
 {% endif %}
 
-{% if suggested_exercises %}
+{% if proficient_exercises %}
 <table>
 <caption>
-Suggested Modules
+Proficient Modules
 </caption>
-<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><th>% Correct</th><th>% of last 10</th></tr>
-{% for exercise in suggested_exercises %}
+<tr><th>Exercise</th><th>Current Streak</th><th>Longest Streak</th><th>Total Done</th><!--th>% Correct</th><th>% of last 10</th--></tr>
+{% for exercise in proficient_exercises %}
 		{% if forloop.counter|divisibleby:2 %}
 		<tr class="even_row" >
 		{% else %}
@@ -114,8 +114,8 @@ Suggested Modules
 		<td>{{exercise.streak}}</td>
 		<td>{{exercise.longest_streak}}</td>
 		<td>{{exercise.total_done}}</td>
-		<td>{{exercise.percent_correct}}</td>
-		<td>{{exercise.percent_of_last_ten}}</td>
+		<!--td>{{exercise.percent_correct}}</td>
+		<td>{{exercise.percent_of_last_ten}}</td-->
 		</tr>
 {% endfor %}
 </table>

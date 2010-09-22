@@ -1,20 +1,57 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<HTML>
- <HEAD>
-  <TITLE>Index of /downloads</TITLE>
- </HEAD>
- <BODY>
-<H1>Index of /downloads</H1>
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style type="text/css">
+#downloads p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+</style>
+{% endblock pagescript %}
+{% block pagetitle %}Downloads{% endblock pagetitle %}
+{% block pagecontent %}
 
-<HR>
+<article id="downloads">
+<p>Here are some options for downloading Khan Academy videos and exercises for use offline,
+or in instances where youtube is blocked.</p>
+<p>Videos</p>
+<ul>
+<li><a href="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=391034778">
+Khan Academy</a> on iTunes U.</li>
+<li><a href="http://www.archive.org/details/KhanAcademy">Khan Academy on archive.org</a>
+Compressed playlist packages in flv format, current as of July 2010.
+</li>
+<li><a href="http://mujica.org/khan/">Khan Academy on a Stick</a>
+Math and Science lectures from khanacademy.org, as available on September 2010.
+</li>
+<li><a href="http://itunes.apple.com/us/app/khan-academy-a-classroom-in/id361975619?mt=8">
+Khan Academy: A Classroom In Your Pocket</a> by Irynsoft.
+An app for the ipod/iphone/ipad.</li>
+<li><a href="http://code.google.com/p/khanacademy/issues/detail?id=191">Downloadable Material issue</a>
+on code.google.com.  Check here for updates.
+</li>
+</ul>
 
-<A HREF="/downloads/MortgageCalculator.xlsx">MortgageCalculator.xlsx</A> <br>  
-<A HREF="/downloads/NormalDistribution.xls">NormalDistribution.xls</A> <br>  
-<A HREF="/downloads/NormalIntro.xls">NormalIntro.xls</A> <br>  
-<A HREF="/downloads/buyrent.xls">buyrent.xls</A> <br>  
-<A HREF="/downloads/cupcakes.xls">cupcakes.xls</A> <br>
-<A HREF="/downloads/cupcakes.xlsx">cupcakes.xlsx</A>  <br>
+<p>Exercises</p>
+<ul>
+<li><a href="http://michelsens.net/zips/Khan+Academy.zip">Downloadable exercises</a> for windows.
+A packaged up development server.  Unzip and click on run.bat, which will start up the server and
+load the exercise dashboard in your browser.  Wait a few seconds after you click it and refresh
+the page, the server takes a bit to start up.
+</li>
+<li><a href="http://code.google.com/p/khanacademy/issues/detail?id=4">Offline use issue</a>
+on code.google.com.  Check here for updates.
+</li>
+</ul>
 
-
-</BODY></HTML>
+<p>Here are a few spreadsheets that go with the videos.</p>
+<ul>
+<li><A HREF="/downloads/MortgageCalculator.xlsx">MortgageCalculator.xlsx</A></li>
+<li><A HREF="/downloads/NormalDistribution.xls">NormalDistribution.xls</A></li>
+<li><A HREF="/downloads/NormalIntro.xls">NormalIntro.xls</A></li>
+<li><A HREF="/downloads/buyrent.xls">buyrent.xls</A></li>
+<li><A HREF="/downloads/cupcakes.xls">cupcakes.xls</A></li>
+<li><A HREF="/downloads/cupcakes.xlsx">cupcakes.xlsx</A></li>
+</ul>
+</article>
+{% endblock pagecontent %}
 

@@ -49,10 +49,10 @@
 				document.createElement(html5elements[i]);
 			}
 		})();
-        
+
         // Configure the search form
         $(function() {
-           $('#page_search input').focus(function() { 
+           $('#page_search input').focus(function() {
                 if (this.value == 'Search for a video') {
                     this.value = '';
                 }
@@ -102,7 +102,7 @@
                 e.preventDefault();
                 return false;
             });
-           } 
+           }
         });
       };
       (function() {
@@ -126,11 +126,11 @@
                             <!-- Content will get populated by jquery call to chartbeat API below; if call fails no visible impact to user -->
                         </span>&nbsp;people learning right now
                     </span>
-                <iframe id="page_fb_like" src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;ref=Like-Button-Top-Header-Left&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>                                
+                <iframe id="page_fb_like" src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;ref=Like-Button-Top-Header-Left&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>
             </div>
             <div id="page_top_nav">
                 <ul id="page_status">
-    
+
                     {% if username %}
                     <li>
                         {% username_and_notification username %}
@@ -157,10 +157,10 @@
                         [<a href="{{login_url}}">more login choices...</a>]
                         {% endif %}
                     </li>
-<!--                    
+<!--
   <div><ul class="providers">
 </form>
--->                    
+-->
                     {% endif %}
                 </ul>
                 <form id="page_search" action="/search">
@@ -169,7 +169,7 @@
                 <ul id="page_social_links">
                     <li>
             		    <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy">Join us on <img src="/images/facebook-16.jpg" alt="Facebook" title="Facebook"></a>
-            		</li>                    
+            		</li>
                 	<li>
             		    <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy">Follow us on <img src="/images/twitter-16.jpg" alt="Twitter" title="Twitter"></a>
                     </li>
@@ -191,6 +191,9 @@
                         </li>
                         {% endif %}
                         <li>
+                            <a href="/downloads">Download</a>
+                        </li>
+                        <li>
                             <a href="/about">About Us</a>
                         </li>
                         <li>
@@ -205,7 +208,7 @@
 
             </nav>
 	    </nav>
-            
+
             {% block pagemessage %}
 
             {% endblock pagemessage %}
