@@ -3,13 +3,13 @@
 			<div id="library-content-main">
 			{% for playlist_data in all_playlists %}
 				<A NAME="{{playlist_data.title}}"></A>
-				<h2 class='playlist-heading'>{{playlist_data.title}}</h2>
+				<h2 class='playlist-heading'>{{playlist_data.title|escape}}</h2>
 				
 				{% for playlist_video in playlist_data.videos %}
 					{% if forloop.first %}
-						<p class='playlist-desc'>{{playlist_video.playlist.description}}</p>
+						<p class='playlist-desc'>{{playlist_video.playlist.description|escape}}</p>
 					{% endif %}
-					<A href="/video/{{playlist_video.video.readable_id}}"  class='video-link'>{{playlist_video.video.title}}</A>
+					<A href="/video/{{playlist_video.video.readable_id}}{% if playlist_video.is_in_multiple_playlists %}?playlist={{playlist_video.playlist.title|urlencode}}{% endif %}" title="{{playlist_video.video.title|escape}}" class='video-link'>{{playlist_video.video.title|escape}}</A>
 				{% endfor %}
 				<div class="clear"></div>
 				<P></P>

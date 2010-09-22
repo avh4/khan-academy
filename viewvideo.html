@@ -1,5 +1,34 @@
 {% extends "page_template.html" %}
-{% block pagetitle %}{{video.title}}{% endblock pagetitle %}
+{% block pagescript %}
+<style>
+    .breadcrumbs_nav {
+        font-weight: bold;
+    }
+</style>
+<script>
+    $(function() {
+       $('#video_selector select option[selected]').attr('selected', true);
+       $('#video_selector select').change(function() {
+          $('#video_selector').submit(); 
+       });
+       $('#video_selector button').hide();
+    });
+</script>
+{% endblock pagescript %}
+{% block pagesubmenu %}
+<nav class="breadcrumbs_nav">
+        <a href="/">All videos</a> &#187; 
+        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> &#187; 
+    <form id="video_selector">
+        <select name="v">
+            {% for v in videos %}
+            <option {{v.selected|default:""}} value="{{v.youtube_id}}">{{v.title|escape}}</option>            
+            {% endfor %}
+        </select>
+        <button type="submit">Go</button>
+    </form>
+</nav>
+{% endblock pagesubmenu %}
 {% block pagecontent %}
 <article class="video">
     {% if video.description %}
@@ -7,14 +36,27 @@
         {{video.description}}
     </p>
     {% endif %}
-    <p>
+    <p id="playlists">
         <label>
             <b>Playlists:</b>
-            {% for video_playlist in video_playlists %}<A href="#{{video_playlist.playlist.youtube_id}}">{{video_playlist.playlist.title}}</A>
+            {% for p in playlists %}
+            <a href="/?video={{video.readable_id|urlencode}}#{{p.title|urlencode}}">{{p.title|escape}}</a>
             {% endfor %}
         </label>
     </p>
     <div>
+        <nav class="prev_next_nav">
+            {% if previous_video %}
+            <label class=video_playlist_prev>
+                <a rel=prev href="/video/{{previous_video.readable_id}}"><b>Previous Video:</b> {{previous_video.title}}</a>
+            </label>
+            {% endif %}
+            {% if next_video %}
+            <label class=video_playlist_next>
+                <a rel=next href="/video/{{next_video.readable_id}}"><b>Next Video:</b> {{next_video.title}}</a>
+            </label>
+            {% endif %}
+        </nav>
         <object id="idOVideo" name="idOVideo" width="800" height="480">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
             <param name="allowFullScreen" value="true">
@@ -24,34 +66,5 @@
         {% video_comments video comments_page %}
         {% video_qa video qa_page qa_expand_id %}
         </div>
-        {% for video_playlist in video_playlists %}
-        <details open>
-            <summary id="{{video_playlist.playlist.youtube_id}}">In Playlist: {{video_playlist.playlist.title}}</summary>
-            {% if video_playlist.previous_video %}
-            <label class=video_playlist_prev>
-                <a rel=prev href="/video?v={{video_playlist.previous_video.youtube_id}}"><b>Previous Video:</b> {{video_playlist.previous_video.title}}</a>
-            </label>
-            {% endif %}
-            {% if video_playlist.next_video %}
-            <label class=video_playlist_next>
-                <a rel=next href="/video?v={{video_playlist.next_video.youtube_id}}"><b>Next Video:</b> {{video_playlist.next_video.title}}</a>
-            </label>
-            {% endif %}
-            <div class=video_playlist_container>
-                <ol>
-                    {% for playlist_video_entry in video_playlist.videos %}<li>
-                        {% if playlist_video_entry.current_video %}<strong>{{playlist_video_entry.video.title}}</strong>
-                        {% else %}<a href="/video?v={{playlist_video_entry.video.youtube_id}}">{{playlist_video_entry.video.title}}</a>
-                        {% endif%}
-                    </li>{% endfor %}
-                </ol>
-            </div>
-        </details>
-        {% endfor %}
-        <p id="keywords">
-            <label>
-                <b>Keywords:</b>:{{video.keywords}}
-            </label>
-        </p>
     </article>
-    {% endblock pagecontent %}
+{% endblock pagecontent %}

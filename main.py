@@ -108,7 +108,7 @@ class KillLiveAssociations(app.RequestHandler):
 class UpdateVideoReadableNames(app.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
 
     def get(self):
-    	if not users.is_current_user_admin():
+        if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
         query = Video.all()
@@ -310,7 +310,7 @@ class ViewExercise(app.RequestHandler):
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 
-class ViewVideo(app.RequestHandler):
+class OldViewVideo(app.RequestHandler):
 
     def get(self):
         user = app.get_current_user()
@@ -391,6 +391,107 @@ class ViewVideo(app.RequestHandler):
                                                  self.request)
         path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
         self.response.out.write(template.render(path, template_values))
+
+class ViewVideo(app.RequestHandler):
+
+    def get(self):
+        video = None
+        video_id = self.request.get('v')
+        playlist_id = self.request.get('playlist')
+        path = self.request.path
+        readable_id  = urllib.unquote(path.rpartition('/')[2])
+        if video_id: # Support for old links
+            query = Video.all()
+            query.filter('youtube_id =', video_id)
+            video = query.get()
+            readable_id = video.readable_id
+            self.redirect("/video/"+urllib.quote(readable_id), True)
+            return
+        
+        if readable_id:
+            readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
+            query = Video.all()
+            query.filter('readable_id =', readable_id)
+            # The following should just be:
+            # video = query.get()
+            # but the database currently contains multiple Video objects for a particular
+            # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
+            # changed and our code was producing youtube_ids that ended with '_player'.
+            # This hack gets the most recent valid Video object.
+            key_id = 0
+            for v in query:
+                if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
+                    video = v
+                    key_id = v.key().id()
+            # End of hack
+            
+        if video is None:
+            error_message = "No video found for ID '%s'" % readable_id
+            logging.error(error_message)
+            report_issue_handler = ReportIssue()
+            report_issue_handler.initialize(self.request, self.response)
+            report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
+                                                           'message': 'Error: %s' % error_message})
+            return
+        
+        playlist = None
+        if playlist_id is not None and len(playlist_id) > 0:
+            query = Playlist.all().filter('title =', playlist_id)
+            key_id = 0
+            for p in query:
+                if p.key().id() > key_id and not p.youtube_id.endswith('_player'):
+                    playlist = p
+                    key_id = p.key().id()
+        
+        query = VideoPlaylist.all()
+        query.filter('video =', video)
+        query.filter('live_association =', True)
+        video_playlists = query.fetch(5)
+        playlists = []
+        video_position = None
+        for video_playlist in video_playlists:
+            p = video_playlist.playlist
+            if (playlist is not None and p.youtube_id == playlist.youtube_id) or (playlist is None and video_position is None):
+                p.selected = 'selected'
+                video_position = video_playlist.video_position
+            playlists.append(p)
+        
+        if playlist is None:
+            playlist = playlists[0]
+        
+        
+        query = VideoPlaylist.all()
+        query.filter('playlist =', playlist)
+        query.filter('live_association = ', True) 
+        query.order('video_position')
+        video_playlists = query.fetch(500)
+        videos = []
+        previous_video = None
+        next_video = None
+        for video_playlist in video_playlists:
+            v = video_playlist.video
+            videos.append(v)
+            if v.youtube_id == video.youtube_id:
+                v.selected = 'selected'
+            if video_playlist.video_position == video_position - 1:
+                previous_video = v
+            if video_playlist.video_position == video_position + 1:
+                next_video = v
+
+        # If a QA question is being expanded, we want to clear notifications for its
+        # answers before we render page_template so the notification icon shows
+        # its updated count. 
+        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
+
+        template_values = qa.add_template_values({'playlist': playlist,
+                                                  'playlists': playlists,
+                                                  'video': video,
+                                                  'videos': videos,
+                                                  'previous_video': previous_video,
+                                                  'next_video': next_video,
+                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
+                                                 self.request)
+        self.render_template('viewvideo.html', template_values)
 
 class ViewExerciseVideos(app.RequestHandler):
 
@@ -1153,7 +1254,7 @@ class GenerateLibraryContent(app.RequestHandler):
     def get(self):
         all_topics_list = []
 
-	all_topics_list.append('Arithmetic')
+        all_topics_list.append('Arithmetic')
         all_topics_list.append('Chemistry')
         all_topics_list.append('Developmental Math')
         all_topics_list.append('Pre-algebra')
@@ -1188,30 +1289,34 @@ class GenerateLibraryContent(app.RequestHandler):
         all_topics_list.append('Physics')
         all_topics_list.append('Paulson Bailout')
         all_topics_list.sort()
+ 
+
+        all_playlists = []
+        for topics in all_topics_list:
+            playlist_title = topic = topics
             
-
-	all_playlists = []
-	for topics in all_topics_list:
-	    playlist_title = topic = topics
-		
-	    query = Playlist.all()
-	    query.filter('title =', playlist_title)
-	    playlist = query.get()
-	    query = VideoPlaylist.all()
-	    query.filter('playlist =', playlist)
-	    query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
-	    query.order('video_position')
-	    playlist_videos = query.fetch(500)
-	    playlist_data = {
-				 'title': playlist_title,
-				 'topic': topic,
-				 'videos': playlist_videos
-				 }
-		#self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
-	    all_playlists.append(playlist_data)
-
+            query = Playlist.all()
+            query.filter('title =', playlist_title)
+            playlist = query.get()
+            query = VideoPlaylist.all()
+            query.filter('playlist =', playlist)
+            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+            query.order('video_position')
+            playlist_videos = []
+            for pv in query.fetch(500):
+                playlist_videos.append(pv)
+                v = pv.video
+                if len(VideoPlaylist.all().filter('video =', pv.video).filter('live_association = ', True).fetch(2)) > 1:
+                    pv.is_in_multiple_playlists = True
+            playlist_data = {
+                     'title': playlist_title,
+                     'topic': topic,
+                     'videos': playlist_videos
+                     }
+            #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
+            all_playlists.append(playlist_data)
+    
         # Separating out the columns because the formatting is a little different on each column
-
         template_values = {
             'App' : App,
             'all_playlists': all_playlists,
@@ -1245,7 +1350,7 @@ class ViewHomePage(app.RequestHandler):
 class ViewFAQ(app.RequestHandler):
 
     def get(self):
-    	user = app.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
@@ -1284,7 +1389,7 @@ class ViewHowToHelp(app.RequestHandler):
 class ViewSAT(app.RequestHandler):
 
     def get(self):
-    	user = app.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         playlist_title = "SAT Preparation"
@@ -1310,7 +1415,7 @@ class ViewSAT(app.RequestHandler):
 class ViewGMAT(app.RequestHandler):
 
     def get(self):
-    	user = app.get_current_user()
+        user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         problem_solving = VideoPlaylist.get_query_for_playlist_title("GMAT: Problem Solving")
@@ -1391,7 +1496,7 @@ class ViewIndividualReport(app.RequestHandler):
         if user:
             student_email = self.request.get('student_email')
             if student_email:
-            	#logging.info("user is a coach trying to look at data for student")
+                #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
                 if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
@@ -1449,9 +1554,9 @@ class ViewIndividualReport(app.RequestHandler):
                     #logging.info("total_correct: " + str(total_correct))
                     #logging.info("correct_of_last_ten: " + str(correct_of_last_ten))
                     if exercise.total_done > 0:
-	                    exercise.percent_correct = "%.0f%%" % (100.0*total_correct/exercise.total_done,)
+                        exercise.percent_correct = "%.0f%%" % (100.0*total_correct/exercise.total_done,)
                     else:
-	                    exercise.percent_correct = "0%"	        
+                        exercise.percent_correct = "0%"            
                     exercise.percent_of_last_ten = "%.0f%%" % (100.0*correct_of_last_ten/10,)
                 
     def get_time(self):
@@ -1607,7 +1712,7 @@ class ViewCharts(app.RequestHandler):
         if user:
             student_email = self.request.get('student_email')
             if student_email:
-            	#logging.info("user is a coach trying to look at data for student")
+                #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
                 if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
@@ -1932,8 +2037,8 @@ class ViewArticle(app.RequestHandler):
         
         article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
         if readable_id == "fortune":
-        	article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-        	
+            article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
+            
         
         
         template_values = qa.add_template_values({'App': App,
@@ -1948,7 +2053,7 @@ class ViewArticle(app.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'article.html')
         
         self.response.out.write(template.render(path, template_values))
-        	
+            
 class Login(app.RequestHandler):
 
     def get(self):
