@@ -36,27 +36,24 @@
     }
     .prev_next_nav {
         display: block;
-        position: relative;
         margin-top: 2em;
-        text-align: center;
+        padding-bottom: .5ex;
     }
     #prev_video {
         display: block;
         float: left;
         margin-right: 1em;
         text-align: left;
-        width: 30%;
     }
     #playlists {
-        display: inline-block;
-        width: 30%;
+        display: block;
+        float: left;
     }
     #next_video {
         display: block;
         float: right;
         margin-left: 1em;
         text-align: right;
-        width: 30%;
     }
 
 </style>
@@ -138,14 +135,6 @@ $(function(){
                 <a rel=next href="/video/{{next_video.readable_id}}"><b>Next Video:</b> {{next_video.title}}</a>
             </label>
             {% endif %}
-            {% if playlists %}
-            <label id="playlists">
-                <b>Related Playlists:</b>
-                {% for p in playlists %}
-                <a href="/?video={{video.readable_id|urlencode}}#{{p.title|urlencode}}">{{p.title|escape}}</a>
-                {% endfor %}
-            </label>
-            {% endif %}
         </nav>
         <object id="idOVideo" name="idOVideo" width="800" height="480">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
@@ -154,6 +143,14 @@ $(function(){
             <param name="wmode" value="transparent">
             <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
         </object>
+        {% if playlists %}
+        <label id="playlists">
+            <b>Related Playlists:</b>
+            {% for p in playlists %}
+            <a href="/?video={{video.readable_id|urlencode}}#{{p.title|urlencode}}">{{p.title|escape}}</a>
+            {% endfor %}
+        </label>
+        {% endif %}
         {% video_comments video comments_page %}
         {% video_qa video qa_page qa_expand_id %}
         </div>
