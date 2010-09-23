@@ -33,7 +33,32 @@
     }
     #video_dropdown a:link:hover, #video_dropdown a:link:focus, #video_dropdown a:visited:hover, #video_dropdown a:visited:focus {
         color: #DD6900;
-    }    
+    }
+    .prev_next_nav {
+        display: block;
+        position: relative;
+        margin-top: 2em;
+        text-align: center;
+    }
+    #prev_video {
+        display: block;
+        float: left;
+        margin-right: 1em;
+        text-align: left;
+        width: 30%;
+    }
+    #playlists {
+        display: inline-block;
+        width: 30%;
+    }
+    #next_video {
+        display: block;
+        float: right;
+        margin-left: 1em;
+        text-align: right;
+        width: 30%;
+    }
+
 </style>
 {% if App.is_dev_server %}
 <script src="/javascript/jquery-ui.js?{{App.version}}"></script>
@@ -94,33 +119,31 @@ $(function(){
             </ol>
         </div>
     </span>
+    {% if video.description %}
+        : {{video.description|escape}}
+    {% endif %}
 </nav>
 {% endblock pagesubmenu %}
 {% block pagecontent %}
 <article class="video">
-    {% if video.description %}
-    <p>
-        {{video.description}}
-    </p>
-    {% endif %}
-    <p id="playlists">
-        <label>
-            <b>Playlists:</b>
-            {% for p in playlists %}
-            <a href="/?video={{video.readable_id|urlencode}}#{{p.title|urlencode}}">{{p.title|escape}}</a>
-            {% endfor %}
-        </label>
-    </p>
     <div>
         <nav class="prev_next_nav">
             {% if previous_video %}
-            <label class=video_playlist_prev>
+            <label id="prev_video">
                 <a rel=prev href="/video/{{previous_video.readable_id}}"><b>Previous Video:</b> {{previous_video.title}}</a>
             </label>
             {% endif %}
             {% if next_video %}
-            <label class=video_playlist_next>
+            <label id="next_video">
                 <a rel=next href="/video/{{next_video.readable_id}}"><b>Next Video:</b> {{next_video.title}}</a>
+            </label>
+            {% endif %}
+            {% if playlists %}
+            <label id="playlists">
+                <b>Related Playlists:</b>
+                {% for p in playlists %}
+                <a href="/?video={{video.readable_id|urlencode}}#{{p.title|urlencode}}">{{p.title|escape}}</a>
+                {% endfor %}
             </label>
             {% endif %}
         </nav>

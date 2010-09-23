@@ -453,12 +453,10 @@ class ViewVideo(app.RequestHandler):
             p = video_playlist.playlist
             if (playlist is not None and p.youtube_id == playlist.youtube_id) or (playlist is None and video_position is None):
                 p.selected = 'selected'
+                playlist = p
                 video_position = video_playlist.video_position
-            playlists.append(p)
-        
-        if playlist is None:
-            playlist = playlists[0]
-        
+            else:
+                playlists.append(p)
         
         query = VideoPlaylist.all()
         query.filter('playlist =', playlist)
@@ -477,6 +475,9 @@ class ViewVideo(app.RequestHandler):
                 previous_video = v
             if video_playlist.video_position == video_position + 1:
                 next_video = v
+
+        if video.description == video.title:
+            video.description = None
 
         # If a QA question is being expanded, we want to clear notifications for its
         # answers before we render page_template so the notification icon shows
