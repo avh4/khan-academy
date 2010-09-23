@@ -1,18 +1,75 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
+<link rel="stylesheet" type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css?{{App.version}}">
 <style>
     .breadcrumbs_nav {
         font-weight: bold;
     }
+    #video_dropdown {
+        display: none;
+        text-indent: 0;
+    }
+    #video_dropdown .ui-button {
+        display: block;
+    }
+    #video_menu {
+        position: relative; 
+    }
+    #video_dropdown ol {
+        max-height: 20em;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    #video_dropdown li {
+        white-space: nowrap;
+    }
+    #video_dropdown .ui-button-text, #video_dropdown .ui-menu-item a {
+        font-weight: normal;
+        line-height: inherit;
+        padding: 0px 25px 0px 1ex;
+    }
+    #video_dropdown a:visited {
+        color: #DD6900;
+    }
+    #video_dropdown a:link:hover, #video_dropdown a:link:focus, #video_dropdown a:visited:hover, #video_dropdown a:visited:focus {
+        color: #DD6900;
+    }    
 </style>
+{% if App.is_dev_server %}
+<script src="/javascript/jquery-ui.js?{{App.version}}"></script>
+{% else %}
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js"></script>
+{% endif %}
+<script src="/javascript/jquery.ui.menu.js?{{App.version}}"></script>
 <script>
-    $(function() {
-       $('#video_selector select option[selected]').attr('selected', true);
-       $('#video_selector select').change(function() {
-          $('#video_selector').submit(); 
-       });
-       $('#video_selector button').hide();
+$(function(){
+    $('#video_selector').hide();
+    $('#video_dropdown').css('display', 'inline-block');
+    var menu = $('#video_dropdown ol').menu();
+
+    // Set the width explicitly before positioning it absolutely to satisfy IE7.
+    menu.width(menu.width()).hide().css('position', 'absolute');
+    
+    menu.bind("menuselect", function(e, ui){
+        window.location.href = ui.item.children('a').attr('href');
     });
+    $(document).bind("click focusin", function(e){
+        if ($(e.target).closest("#video_dropdown").length == 0) {
+            menu.hide();            
+        }
+    });
+    var button = $('#video_dropdown > a').button({
+        icons: {
+            secondary: 'ui-icon-triangle-1-s'
+        }
+    }).show().click(function(e){
+        if (menu.css('display') == 'none')
+            menu.show().menu("activate", e, $('#video_dropdown li[data-selected=selected]')).focus();
+        else
+            menu.hide();
+        e.preventDefault();
+    });
+});
 </script>
 {% endblock pagescript %}
 {% block pagesubmenu %}
@@ -27,6 +84,16 @@
         </select>
         <button type="submit">Go</button>
     </form>
+    <span id="video_dropdown">
+        <a href="/video/{{video.readable_id}}">{{video.title|escape}}</a>
+        <div id="video_menu">
+            <ol>
+                {% for v in videos %}
+                <li data-selected='{{v.selected|default:""}}'><a href="/video/{{v.readable_id}}">{{v.title|escape}}</a></li>            
+                {% endfor %}
+            </ol>
+        </div>
+    </span>
 </nav>
 {% endblock pagesubmenu %}
 {% block pagecontent %}
@@ -61,7 +128,8 @@
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
             <param name="allowFullScreen" value="true">
             <param name="allowScriptAccess" value="always">
-            <embed id="idPlayer" name="idPlayer" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
+            <param name="wmode" value="transparent">
+            <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
         </object>
         {% video_comments video comments_page %}
         {% video_qa video qa_page qa_expand_id %}
