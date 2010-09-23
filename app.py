@@ -2,6 +2,7 @@ import os
 import Cookie
 import urllib
 import logging
+import unicodedata
 from google.appengine.ext import webapp
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -51,10 +52,13 @@ def get_current_user():
         return appengine_user
     profile = get_facebook_profile()
     if profile is not None:
+        # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
+        name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+        
         # We create a fake user, substituting the user's Facebook uid for their email 
-        # and their name for their OpenID identififier since Facebook isn't an
+        # and their name for their OpenID identifier since Facebook isn't an
         # OpenID provider at the moment, and GAE displays the OpenID identifier as the nickname().
-        return users.User("http://facebookid.khanacademy.org/"+profile["id"], federated_identity = profile["name"])
+        return users.User("http://facebookid.khanacademy.org/"+profile["id"], federated_identity = name)
     
     return None
 
