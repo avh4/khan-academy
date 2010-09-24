@@ -8,16 +8,30 @@
 			var tabs = $('#tabs-outer').tabs( {width: "100%"});
             $("a[href='#how-to-help'], a[href='/frequently-asked-questions#how-to-help']").click(function() {
                 tabs.tabs('select', '#how-to-help');
+                window.scrollTo(0,0);
+                return false;
+            });
+            $("a[href='#credits'], a[href='/about#credits']").click(function() {
+                tabs.tabs('select', '#credits');
+                window.scrollTo(0,0);
                 return false;
             });
             $("a[href='#translation']").click(function() {
                 tabs.tabs('select', '#translation');
+                window.scrollTo(0,0);
                 return false;
             });
             $("a[href='#faq']").click(function() {
                 tabs.tabs('select', '#faq');
+                window.scrollTo(0,0);
                 return false;
             });
+            var url = window.location.href;
+            var hashIndex = url.indexOf('#');
+            if (hashIndex != -1) {
+                tabs.tabs('select', url.slice(hashIndex));
+                window.scrollTo(0,0);
+            }
 		});
 	</script>
     <style>
@@ -27,6 +41,17 @@
         }
         #meetup {
             float: right;
+        }
+        #credits dl {
+            margin-left: 2em;
+        }
+        #credits dt {
+            font-weight: bold;
+            float: left;
+            margin-right: 1ex;
+        }
+        #credits dd:before {
+            content: "- ";
         }
     </style>
 {% endblock pagescript %}
@@ -46,6 +71,7 @@
 	<li><A href="#faq"><span>Frequently Asked Questions</span></a></li>
 	<li><A href="#how-to-help"><span>How to Help</span></a></li>
 	<li><A href="#translation"><span>Translation Project</span></a></li>
+    <li><A href="#credits"><span>Credits</span></a></li>
 </ul>
 <div id="press">
 
@@ -395,6 +421,80 @@ coordinate with you on how best to move forward!
 We look forward to educating the world with you!
 
 </div>
+
+<div id="credits">
+    <section>
+        <h1>Salman Khan</h1>
+        <p>
+            Sal created all of the teaching videos currently in the library as well as most of the exercises. 
+            He also built the first two versions of this website.  These are obviously huge contributions, 
+            but his greatest contribution was his decision to make it all open source.  This led to a large number of...
+        </p>
+    </section>
+    <section>
+        <h1>Volunteers</h1>
+        <p>Sal and the rest of the Khan Academy community would like to thank the following people 
+        who recently volunteered their time, energy, and expertise (in alphabetical order):</p>
+        <dl>
+            <dt>abarwale</dt><dd>Closed captioning.</dd>
+            <dt>abhishekmishra3</dt><dd>Closed captioning.</dd>
+            <dt>Kelkar Amol</dt><dd>Closed captioning.</dd>
+            <dt>Maneesh Arora</dt><dd>Website analytics, Facebook integration, user interface mockups.</dd>
+            <dt>blowingdandelions</dt><dd>Closed captioning.</dd>
+            <dt>Bill Bonner</dt><dd>Divisibility and scientific notation exercise modules, issue triage.</dd>
+            <dt>Dean Brettle</dt><dd>Release management, exercise scratch pad, periodic exercise review, Facebook login, 
+            video viewing page.</dd>
+            <dt>Robert Conrad</dt><dd>Patch to warn students that the hint button resets streaks.</dd>
+            <dt>gulickh</dt><dd>Closed captioning.</dd>
+            <dt>HamiDjoukouMi</dt><dd>Dutch translation of videos.</dd>
+            <dt>Karen Hubert</dt><dd>Closed captioning.</dd>
+            <dt>Ben Kamens</dt><dd>Video discussion code.</dd>
+            <dt>Vishal Kapur</dt><dd>Qbrary (not yet released).</dd>
+            <dt>KhanAcademyEnEspanol</dt><dd>Spanish translation of videos.</dd>
+            <dt>Michael Malione</dt><dd>Common Core standards research.</dd>
+            <dt>John Michelsen</dt><dd>Progress reports/charts, teacher tools, standalone server.</dd>
+            <dt>Bilal Musharraf</dt><dd>Urdu translation of videos.</dd>
+            <dt>Srinivas Panguluri</dt><dd>Bug fixes and exercise module refactoring.</dd>
+            <dt>Omar Rizwan</dt><dd>16 exercise modules covering topics in trigonometry, precalculus, and calculus, among others.</dd>
+            <dt>Jason Rosoff</dt><dd>User interface mockups.</dd>
+            <dt>Jahanzeb Sherwani</dt><dd>Qbrary (not yet released).</dd>
+            <dt>jmvankeuren</dt><dd>Closed captioning.</dd>
+            <dt>Harley Witt</dt><dd>Issue triage and video discussion moderation.</dd>
+        </dl>
+        <p>If you've recently helped out as a volunteer and we've accidentally left you off the 
+        above list, please <a href="/reportissue?type=Defect&issue_labels=Component-Code">let us know</a>.  
+        If you want to volunteer, please see <a href="#how-to-help">how to help</a>.</p>
+    </section>
+    <section>
+        <h1>Open Source Software</h1>
+        <p>We develop the Khan Academy as an open source project and we incorporate components developed
+        by many other open source projects.  We'd like to thank the following projects for making such 
+        useful components available under open source licenses (in alphabetical order):</p>
+        <dl>
+            <dt><a href="http://www1.chapman.edu/~jipsen/mathml/asciimath.html">ASCIIMathML</a> and <a href="http://www1.chapman.edu/~jipsen/svg/asciisvg.html">ASCIIsvg</a></dt><dd>Used for writing exercise modules.</dd>
+            <dt><a href="http://www.djangoproject.com/">Django</a></dt><dd>Used for templating.</dd>
+            <dt><a href="http://www.lalit.org/lab/jsoncookies">fontdetect.js</a></dt><dd>Used for detecting MathML fonts.</dd>
+            <dt><a href="http://code.google.com/p/googleappengine/">Google App Engine SDK</a></dt><dd>Used for the standalone app that can be used to
+            do the exercises while offline.</dd>
+            <dt><a href="http://thejit.org/">JavaScript Infovis Toolkit (Jit)</a></dt><dd>Used for the Knowledge Map.</dd>
+            <dt><a href="http://jquery.com/">JQuery</a> and <a href="http://jqueryui.com/">JQuery UI</a></dt><dd>Used for Javascript programming.</dd>
+            <dt><a href="http://jquery-watermark.googlecode.com/">jquery.watermark.js</a></dt><dd>Used for watermarks used by video discussion code.</dd>
+            <dt><a href="http://www.mathjax.org/">MathJax</a></dt><dd>Used for displaying math formulas on browsers that don't support MathML.</dd>
+            <dt><a href="http://vis.stanford.edu/protovis/">Protovis</a></dt><dd>Used for charting.</dd>
+            <dt><a href="http://www.python.org/">Python</a></dt><dd>Used for server-side programming.</dd>
+            <dt><a href="http://www.billkatz.com/2009/6/Simple-Full-Text-Search-for-App-Engine">Simple Full Text Search for App Engine</a></dt><dd>Used for video searching.</dd>
+            <dt><a href="http://davidbau.com/archives/2010/01/30/random_seeds_coded_hints_and_quintillions.html">seedrandom.js</a></dt><dd>Used for reproducible exercise problems.</dd>
+            <dt><a href="http://code.google.com/p/svg-edit/">svg-edit</a></dt><dd>Used for the exercises scratch pad.</dd>
+            <dt><a href="http://www.leigeber.com/2008/11/drop-down-menu/">TinyDropdown</a></dt><dd>Used for the video browsing menus.</dd>
+        </dl>
+    </section>
+    <section>
+        <h1>Donors</h1>
+        <p>Last, but certainly not least, we'd like to thank everyone who has <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291">donated money</a>.  Your donations allow 
+        the Khan Academy to continue to produce high-quality educational resources that are free for all.</p>
+    </section>
+</div>
+
 </div>
 
 </td>
@@ -403,7 +503,7 @@ We look forward to educating the world with you!
 </table>
 
 </center>
- {% endblock pagecontent %}
+{% endblock pagecontent %}
 
 
 
