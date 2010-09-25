@@ -9,7 +9,7 @@
 					{% if forloop.first %}
 						<p class='playlist-desc'>{{playlist_video.playlist.description|escape}}</p>
 					{% endif %}
-					<A href="/video/{{playlist_video.video.readable_id}}{% if playlist_video.is_in_multiple_playlists %}?playlist={{playlist_video.playlist.title|urlencode}}{% endif %}" title="{{playlist_video.video.title|escape}}" class='video-link'>{{playlist_video.video.title|escape}}</A>
+					<A href="/video/{{playlist_video.video.readable_id}}?playlist={{playlist_video.playlist.title|urlencode}}" title="{{playlist_video.video.title|escape}}" class='video-link'>{{playlist_video.video.title|escape}}</A>
 				{% endfor %}
 				<div class="clear"></div>
 				<P></P>

@@ -251,6 +251,25 @@ class Video(Searchable, db.Model):
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
+    
+    @staticmethod
+    def get_for_readable_id(readable_id):
+        video = None
+        query = Video.all()
+        query.filter('readable_id =', readable_id)
+        # The following should just be:
+        # video = query.get()
+        # but the database currently contains multiple Video objects for a particular
+        # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
+        # changed and our code was producing youtube_ids that ended with '_player'.
+        # This hack gets the most recent valid Video object.
+        key_id = 0
+        for v in query:
+            if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
+                video = v
+                key_id = v.key().id()
+        # End of hack
+        return video
 
 class Playlist(Searchable, db.Model):
 

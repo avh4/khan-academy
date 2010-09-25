@@ -395,37 +395,8 @@ class OldViewVideo(app.RequestHandler):
 class ViewVideo(app.RequestHandler):
 
     def get(self):
-        video = None
-        video_id = self.request.get('v')
-        playlist_id = self.request.get('playlist')
-        path = self.request.path
-        readable_id  = urllib.unquote(path.rpartition('/')[2])
-        if video_id: # Support for old links
-            query = Video.all()
-            query.filter('youtube_id =', video_id)
-            video = query.get()
-            readable_id = video.readable_id
-            self.redirect("/video/"+urllib.quote(readable_id), True)
-            return
-        
-        if readable_id:
-            readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
-            query = Video.all()
-            query.filter('readable_id =', readable_id)
-            # The following should just be:
-            # video = query.get()
-            # but the database currently contains multiple Video objects for a particular
-            # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
-            # changed and our code was producing youtube_ids that ended with '_player'.
-            # This hack gets the most recent valid Video object.
-            key_id = 0
-            for v in query:
-                if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
-                    video = v
-                    key_id = v.key().id()
-            # End of hack
-            
-        if video is None:
+
+        def report_missing_video(readable_id):
             error_message = "No video found for ID '%s'" % readable_id
             logging.error(error_message)
             report_issue_handler = ReportIssue()
@@ -433,15 +404,84 @@ class ViewVideo(app.RequestHandler):
             report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
                                                            'message': 'Error: %s' % error_message})
             return
-        
+
+        # This method displays a video in the context of a particular playlist.
+        # To do that we first need to find the appropriate playlist.  If we aren't 
+        # given the playlist title in a query param, we need to find a playlist that
+        # the video is a part of.  That requires finding the video, given it readable_id
+        # or, to support old URLs, it's youtube_id.
+        video = None
         playlist = None
-        if playlist_id is not None and len(playlist_id) > 0:
-            query = Playlist.all().filter('title =', playlist_id)
+        video_id = self.request.get('v')
+        playlist_title = self.request.get('playlist')
+        path = self.request.path
+        readable_id  = urllib.unquote(path.rpartition('/')[2])
+        readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
+        
+        # If either the readable_id or playlist title is missing, 
+        # redirect to the canonical URL that contains them 
+        redirect_to_canonical_url = False
+        if video_id: # Support for old links
+            query = Video.all()
+            query.filter('youtube_id =', video_id)
+            video = query.get()
+            readable_id = video.readable_id
+            redirect_to_canonical_url = True
+
+        if playlist_title is not None and len(playlist_title) > 0:
+            query = Playlist.all().filter('title =', playlist_title)
             key_id = 0
             for p in query:
                 if p.key().id() > key_id and not p.youtube_id.endswith('_player'):
                     playlist = p
                     key_id = p.key().id()
+
+        # If a playlist_title wasn't specified or the specified playlist wasn't found
+        # use the first playlist for the requested video.
+        if playlist is None:
+            # Get video by readable_id just to get the first playlist for the video
+            video = Video.get_for_readable_id(readable_id)
+            if video is None:
+                report_missing_video(readable_id)
+                return
+            query = VideoPlaylist.all()
+            query.filter('video =', video)
+            query.filter('live_association =', True)
+            playlist = query.get().playlist
+            redirect_to_canonical_url = True
+        
+        if redirect_to_canonical_url:
+            self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
+            return
+            
+        # If we got here, we have a readable_id and a playlist_title, so we can display
+        # the playlist and the video in it that has the readable_id.  Note that we don't 
+        # query the Video entities for one with the requested readable_id because in some
+        # cases there are multiple Video objects in the datastore with the same readable_id
+        # (e.g. there are 2 "Order of Operations" videos).           
+            
+        query = VideoPlaylist.all()
+        query.filter('playlist =', playlist)
+        query.filter('live_association = ', True) 
+        query.order('video_position')
+        video_playlists = query.fetch(500)
+        videos = []
+        previous_video = None
+        next_video = None
+        for video_playlist in video_playlists:
+            v = video_playlist.video
+            videos.append(v)
+            if v.readable_id == readable_id:
+                v.selected = 'selected'
+                video = v
+            elif video is None:
+                previous_video = v
+            elif next_video is None:
+                next_video = v
+
+        if video is None:
+            report_missing_video(readable_id)
+            return
         
         query = VideoPlaylist.all()
         query.filter('video =', video)
@@ -458,23 +498,6 @@ class ViewVideo(app.RequestHandler):
             else:
                 playlists.append(p)
         
-        query = VideoPlaylist.all()
-        query.filter('playlist =', playlist)
-        query.filter('live_association = ', True) 
-        query.order('video_position')
-        video_playlists = query.fetch(500)
-        videos = []
-        previous_video = None
-        next_video = None
-        for video_playlist in video_playlists:
-            v = video_playlist.video
-            videos.append(v)
-            if v.youtube_id == video.youtube_id:
-                v.selected = 'selected'
-            if video_playlist.video_position == video_position - 1:
-                previous_video = v
-            if video_playlist.video_position == video_position + 1:
-                next_video = v
 
         if video.description == video.title:
             video.description = None
