@@ -74,30 +74,30 @@ write_step(equation_string(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2
 if (A1*B2+B1*A2==0)
 {
 	write_step(equation_string(firstCoef(A1*A2)+'x^2'+constant(B1*B2)));
-	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+constant(B1*B2));
-	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+constant(-1*B1*B2));
-	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+constant(-1*B1*B2));
-	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B2));
-	possibleAnswers.push(firstCoef(A1*A1)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B1));
-	setCorrectAnswer(firstCoef(A1*A2)+'x^2'+constant(B1*B2));
+    setCorrectAnswer(firstCoef(A1*A2)+'x^2'+constant(B1*B2));
+	addWrongChoice(firstCoef(-1*A1*A2)+'x^2'+constant(B1*B2));
+	addWrongChoice(firstCoef(A1*A2)+'x^2'+constant(-1*B1*B2));
+	addWrongChoice(firstCoef(-1*A1*A2)+'x^2'+constant(-1*B1*B2));
+	addWrongChoice(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B2));
+	addWrongChoice(firstCoef(A1*A1)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B1));
 
 }
 else
 {
 
-	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+constant(B1*B2));
-	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+constant(B1*B2));
-	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+constant(-1*B1*B2));
-	possibleAnswers.push(firstCoef(-1*A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2));
-	possibleAnswers.push(firstCoef(A1+A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(-1*B1*B2));
-	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B2));
-	possibleAnswers.push(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*A1+B1*A2)+'x'+constant(B1*B2));
+    setCorrectAnswer(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2));
+	addWrongChoice(firstCoef(A1*A2)+'x^2'+constant(B1*B2));
+	addWrongChoice(firstCoef(-1*A1*A2)+'x^2'+constant(B1*B2));
+	addWrongChoice(firstCoef(A1*A2)+'x^2'+constant(-1*B1*B2));
+	addWrongChoice(firstCoef(-1*A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2));
+	addWrongChoice(firstCoef(A1+A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(-1*B1*B2));
+	addWrongChoice(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B2));
+	addWrongChoice(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*A1+B1*A2)+'x'+constant(B1*B2));
 	if (A1!=A2)
 	{
-		possibleAnswers.push(firstCoef(A1*A1)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B1));
-		possibleAnswers.push(firstCoef(A1*A1)+'x^2'+format_coefficient(A1+B2+B1+A2)+'x'+constant(B1*B2));
+		addWrongChoice(firstCoef(A1*A1)+'x^2'+format_coefficient(A1*B2-B1*A2)+'x'+constant(B1*B1));
+		addWrongChoice(firstCoef(A1*A1)+'x^2'+format_coefficient(A1+B2+B1+A2)+'x'+constant(B1*B2));
 	}
-	setCorrectAnswer(firstCoef(A1*A2)+'x^2'+format_coefficient(A1*B2+B1*A2)+'x'+constant(B1*B2));
 }
 
 //-->
