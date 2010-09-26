@@ -136,16 +136,19 @@ class AddAnswer(app.RequestHandler):
         question = db.get(question_key)
 
         if answer_text and video and question:
-            if len(answer_text) > 500:
-                answer_text = answer_text[0:500] # max answer length, also limited by client
 
             answer = models_discussion.Feedback()
             answer.author = user
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
             answer.types = [models_discussion.FeedbackType.Answer]
-            db.put(answer)
 
+            # We don't limit answer.content length, which means we're vulnerable to
+            # RequestTooLargeErrors being thrown if somebody submits a POST over the GAE
+            # limit of 1MB per entity.  This is *highly* unlikely for a legitimate piece of feedback,
+            # and we're choosing to crash in this case until someone legitimately runs into this.
+            # See Issue 841.
+            db.put(answer)
             notification.new_answer_for_video_question(video, question, answer)
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)

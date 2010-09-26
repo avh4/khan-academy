@@ -153,7 +153,7 @@ var QA = {
         $("a.questions_page").click(function(){ QA.loadPage($(this).attr("page")); return false; });
         $(".question_container").mouseover(QA.hover).mouseout(QA.unhover).click(QA.expand);
         $(".add_yours").click(QA.expandAndFocus);
-        $(".answer_text").focus(QA.focusAnswer).change(QA.updateRemainingAnswer).keyup(QA.updateRemainingAnswer).watermark($(".answer_text").attr("watermark"));
+        $(".answer_text").focus(QA.focusAnswer).watermark($(".answer_text").attr("watermark"));
         $("a.answer_cancel").click(QA.cancelAnswer);
         $("input.answer_submit").click(QA.submitAnswer);
     },
@@ -258,13 +258,6 @@ var QA = {
                                         ".question_add_controls .chars_remaining_count");
     },
 
-    updateRemainingAnswer: function() {
-        Discussion.updateRemaining(500, ".answer_text", 
-                                        ".answer_add_controls .chars_remaining",
-                                        ".answer_add_controls .chars_remaining_count",
-                                        QA.getQuestionParent(this));
-    },
-
     disable: function() {
         $(".question_text, .question_submit, .answer_text, .answer_submit").attr("disabled", "disabled");
     },
@@ -326,7 +319,6 @@ var QA = {
         if (!parent.length) return;
 
         $(".answer_controls_container", parent).slideDown("fast");
-        QA.updateRemainingAnswer.apply(this);
     },
 
     hover: function() {
