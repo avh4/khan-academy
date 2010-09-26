@@ -8,6 +8,10 @@
 
         {% if is_mod %}
             {% mod_tools target %}
+        {% else %}
+            {% if is_author %}
+                {% author_tools target %}
+            {% endif %}
         {% endif %}
     {% else %}
         &ndash;Example

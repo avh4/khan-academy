@@ -29,7 +29,8 @@ def signature(target=None, verb=None):
     return {
                 "target": target, 
                 "verb": verb, 
-                "is_mod": is_current_user_moderator()
+                "is_mod": is_current_user_moderator(),
+                "is_author": target and target.author == app.get_current_user()
             }
 
 @register.inclusion_tag(("discussion/mod_tools.html", "mod_tools.html"))
@@ -40,6 +41,12 @@ def mod_tools(target):
                 "type_comment": models_discussion.FeedbackType.Comment,
                 "is_question": target.is_type(models_discussion.FeedbackType.Question),
                 "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
+            }
+
+@register.inclusion_tag(("discussion/author_tools.html", "author_tools.html"))
+def author_tools(target):
+    return {
+                "target": target,
             }
 
 @register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))

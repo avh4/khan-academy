@@ -223,16 +223,18 @@ class DeleteEntity(app.RequestHandler):
 
     def post(self):
 
-        # Must be a moderator to delete anything
-        if not is_current_user_moderator():
+        user = app.get_current_user()
+        if not user:
             return
 
         key = self.request.get("entity_key")
         if key:
             entity = db.get(key)
             if entity:
-                entity.deleted = True
-                db.put(entity)
+                # Must be a moderator or author of entity to delete
+                if is_current_user_moderator() or entity.author == user:
+                    entity.deleted = True
+                    db.put(entity)
 
 def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
 
