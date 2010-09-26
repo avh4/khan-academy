@@ -66,15 +66,14 @@ var Moderation = {
 
     init: function() {
         $(".mod_show").live("click", Moderation.showTools);
+        $(".mod_tools .mod_delete").live("click", Moderation.deleteEntity);
+        $(".mod_tools .mod_change").live("click", Moderation.changeEntityType);
     },
 
     showTools: function() {
 
         var parent = $(this).parents(".mod_tools");
         if (!parent.length) return;
-
-        $(".mod_delete", parent).click(Moderation.deleteEntity);
-        $(".mod_change", parent).click(Moderation.changeEntityType);
 
         $(".mod_tools_show", parent).css("display", "none");
         $(".mod_tools_hidden", parent).css("display", "");
