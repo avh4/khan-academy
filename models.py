@@ -229,12 +229,12 @@ class UserData(db.Model):
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
         students = []
         for student in query:
-            students.append(student.user.email().lower())
+            students.append(student.user.email())
         if coach_email.lower() != coach_email:
             students_set = set(students)
             query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email.lower())
             for student in query:
-                student_email = student.user.email().lower()
+                student_email = student.user.email()
         	if student_email not in students_set:
         		students.append(student_email)
         return students
