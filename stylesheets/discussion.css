@@ -298,6 +298,12 @@ input.button:hover, a.button:hover {
     color: #ffffff;
     text-decoration: none;
 }
+
+input.buttonDisabled, input.buttonDisabled:hover {
+    background: #ddd;
+    color: gray;
+}
+
 a.button {
     font-size: 11px;
     font-family: Lucida Grande;

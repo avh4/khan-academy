@@ -50,12 +50,20 @@ var Discussion = {
                 return;
             };
 
-            if (c < 0) c = 0;
-
-            if (c == 0)
+            if (c <= 0)
                 $(charsSelector, parent).addClass("chars_remaining_none");
             else
                 $(charsSelector, parent).removeClass("chars_remaining_none");
+
+            // Disable submit buttons within form so user can't submit and lose clipped content.
+            var jForm = $(textSelector, parent).parents("form");
+            if (jForm.length)
+            {
+                if (c < 0)
+                    $("input[type=button]", jForm).addClass("buttonDisabled").attr("disabled", "disabled");
+                else
+                    $("input[type=button]", jForm).removeClass("buttonDisabled").removeAttr("disabled");
+            }
             
             $(charCountSelector, parent).html(c);
         }, 1);
