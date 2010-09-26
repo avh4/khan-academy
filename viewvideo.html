@@ -19,14 +19,23 @@
         max-height: 20em;
         overflow-y: auto;
         overflow-x: hidden;
+        list-style: outside decimal;
     }
     #video_dropdown li {
         white-space: nowrap;
+        margin-left: 3em;
+        font-weight: normal;
+    }
+    #video_dropdown li[data-selected=selected] a {
+        font-weight: bold;
     }
     #video_dropdown .ui-button-text, #video_dropdown .ui-menu-item a {
         font-weight: normal;
         line-height: inherit;
         padding: 0px 25px 0px 1ex;
+    }
+    #video_dropdown .ui-menu-item a {
+        padding: 0px 25px 0px 0px;
     }
     #video_dropdown a:visited {
         color: #DD6900;
