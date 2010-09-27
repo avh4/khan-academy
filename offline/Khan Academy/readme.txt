@@ -1,0 +1,10 @@
+Here's a first version of the Khan Academy website for offline use.
+http://michelsens.net/zips/Khan+Academy.zip
+
+Unzip it and click on run.bat, which will start up the server and load the local version of the 
+Khan Academy homepage in your browser.  Wait a few seconds and refresh the page, the server takes 
+a bit to start up.  
+
+Next go to the download_scripts directory, and click on the playlist that you want to download.
+Once the script is complete, the videos in that playlist will work when you click on them in the 
+browser.  
