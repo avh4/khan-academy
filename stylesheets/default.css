@@ -453,13 +453,23 @@ a:link.google-analytics-link-track
 				margin: 0 0 10px;
 				line-height: 1.2em;
 			}
+            #library #library-content #library-content-main ol {
+                list-style: decimal outside;
+                margin-left: 0;
+                padding-left: 0;
+            }
+            #library #library-content #library-content-main li {
+                display: list-item;
+                float: left;
+                margin-left: 3em;
+                color: #666666;
+            }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
 				line-height: 1.2em;
 				height: 15px;
 				width: 220px;
-				display: block;
-				float: left;
+                display: block;
 				overflow: hidden;
 				background: url(/images/playnav.png) no-repeat 0 3px;
 				padding: 0 2px 0 13px;
