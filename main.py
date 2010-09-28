@@ -1329,9 +1329,6 @@ class GenerateLibraryContent(app.RequestHandler):
             playlist_videos = []
             for pv in query.fetch(500):
                 playlist_videos.append(pv)
-                v = pv.video
-                if len(VideoPlaylist.all().filter('video =', pv.video).filter('live_association = ', True).fetch(2)) > 1:
-                    pv.is_in_multiple_playlists = True
             playlist_data = {
                      'title': playlist_title,
                      'topic': topic,
