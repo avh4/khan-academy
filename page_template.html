@@ -20,6 +20,7 @@
         <meta property="og:image" content="http://www.khanacademy.org/images/handtreehorizontal_facebook.png"/>
         <meta property="og:site_name" content="khanacademy.org"/>
         <meta property="fb:admins" content="100000121497109,718859633"/> {# That's Sal and Dean #}
+        <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
         <meta property="og:description"
               content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
         <link rel="shortcut icon" href="/images/favicon.ico">
@@ -127,7 +128,7 @@
                             <!-- Content will get populated by jquery call to chartbeat API below; if call fails no visible impact to user -->
                         </span>&nbsp;people learning right now
                     </span>
-                <iframe id="page_fb_like" src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fwww.khanacademy.org&amp;layout=standard&amp;show_faces=false&amp;width=280&amp;action=like&amp;font=arial&amp;colorscheme=light&amp;ref=Like-Button-Top-Header-Left&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:280px; height:35px;" allowTransparency="true"></iframe>
+                <fb:like id="page_fb_like" href="http://www.khanacademy.org" show_faces="false" width="280" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
             </div>
             <div id="page_top_nav">
                 <ul id="page_status">
@@ -208,7 +209,6 @@
                 {% endblock pagesubmenu %}
 
             </nav>
-	    </nav>
 
             {% block pagemessage %}
 
