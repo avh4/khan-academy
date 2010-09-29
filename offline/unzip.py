@@ -16,6 +16,10 @@
     
 
     By Doug Tolton
+    
+    Note from Dean:  According to http://code.activestate.com/recipes/252508-file-unzip/,
+    this is licensed under the open source PSF License:
+    http://www.opensource.org/licenses/PythonSoftFoundation.php
 """
 
 import sys
