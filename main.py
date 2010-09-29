@@ -1312,6 +1312,7 @@ class GenerateLibraryContent(app.RequestHandler):
         all_topics_list.append('Linear Algebra')
         all_topics_list.append('Physics')
         all_topics_list.append('Paulson Bailout')
+        all_topics_list.append('CAHSEE Example Problems')
         all_topics_list.sort()
  
 
