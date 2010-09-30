@@ -163,10 +163,13 @@ $(function(){
             </p>
         </div>
 {% if App.offline_mode %}
-        <script src='/videos/AC_RunActiveContent.js' language='javascript'></script>
-        <script language='javascript'>
-        AC_FL_RunContent('codebase', 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0', 'width', '800', 'height', '480', 'src', ((!DetectFlashVer(9, 0, 0) && DetectFlashVer(8, 0, 0)) ? 'OSplayer' : '/videos/OSplayer'), 'pluginspage', 'http://www.macromedia.com/go/getflashplayer', 'id', 'idOVideo', 'allowFullScreen', 'true', 'allowScriptAccess', 'always', 'movie', ((!DetectFlashVer(9, 0, 0) && DetectFlashVer(8, 0, 0)) ? 'OSplayer' : '/videos/OSplayer'), 'FlashVars', 'movie={{video_path}}&volume=100');
-        </script>
+        <object id="idOVideo" name="idOVideo" width="800" height="480">
+            <param name="movie" value="/videos/OSplayer.swf?movie={{video_path}}&volume=100">
+            <param name="allowFullScreen" value="true">
+            <param name="allowScriptAccess" value="always">
+            <param name="wmode" value="transparent">
+            <embed id="idPlayer" name="idPlayer" wmode="transparent" src="/videos/OSplayer.swf?movie={{video_path}}&volume=100" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
+        </object>
 {% else %}
         <object id="idOVideo" name="idOVideo" width="800" height="480">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">

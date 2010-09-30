@@ -169,5 +169,5 @@ if __name__ == "__main__":
     create_download_scripts()
     zip_directory(revision)
     sys.exit()
-    #TODO: upload it somewhere                                       
+    #TODO: upload it http://code.google.com/p/khanacademy/downloads/list ?                                     
                                        
