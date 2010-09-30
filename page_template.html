@@ -55,12 +55,12 @@
         // Configure the search form
         $(function() {
            $('#page_search input').focus(function() {
-                if (this.value == 'Search for a video') {
+                if (this.value == 'Search for a video or playlist') {
                     this.value = '';
                 }
             }).blur(function() {
                 if (this.value == '') {
-                    this.value = 'Search for a video';
+                    this.value = 'Search for a video or playlist';
                 }
             });
         });
@@ -166,7 +166,7 @@
                     {% endif %}
                 </ul>
                 <form id="page_search" action="/search">
-                    <input type="text" name="page_search_query" value='{{page_search_query|default:"Search for a video"|escape}}'>
+                    <input type="text" name="page_search_query" value='{{page_search_query|default:"Search for a video or playlist"|escape}}'>
                 </form>
                 <ul id="page_social_links">
                     <li>
