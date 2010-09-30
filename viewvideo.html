@@ -13,7 +13,7 @@
         display: block;
     }
     #video_menu {
-        position: relative; 
+        position: relative;
     }
     #video_dropdown ol {
         max-height: 20em;
@@ -90,13 +90,13 @@ $(function(){
 
     // Set the width explicitly before positioning it absolutely to satisfy IE7.
     menu.width(menu.width()).hide().css('position', 'absolute');
-    
+
     menu.bind("menuselect", function(e, ui){
         window.location.href = ui.item.children('a').attr('href');
     });
     $(document).bind("click focusin", function(e){
         if ($(e.target).closest("#video_dropdown").length == 0) {
-            menu.hide();            
+            menu.hide();
         }
     });
     var button = $('#video_dropdown > a').button({
@@ -115,12 +115,12 @@ $(function(){
 {% endblock pagescript %}
 {% block pagesubmenu %}
 <nav class="breadcrumbs_nav">
-        <a href="/">All videos</a> &#187; 
-        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> &#187; 
+        <a href="/">All videos</a> &#187;
+        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> &#187;
     <form id="video_selector">
         <select name="v">
             {% for v in videos %}
-            <option {{v.selected|default:""}} value="{{v.youtube_id}}">{{v.title|escape}}</option>            
+            <option {{v.selected|default:""}} value="{{v.youtube_id}}">{{v.title|escape}}</option>
             {% endfor %}
         </select>
         <button type="submit">Go</button>
@@ -130,7 +130,7 @@ $(function(){
         <div id="video_menu">
             <ol>
                 {% for v in videos %}
-                <li data-selected='{{v.selected|default:""}}'><a href="/video/{{v.readable_id}}?playlist={{playlist.title|urlencode}}">{{v.title|escape}}</a></li>            
+                <li data-selected='{{v.selected|default:""}}'><a href="/video/{{v.readable_id}}?playlist={{playlist.title|urlencode}}">{{v.title|escape}}</a></li>
                 {% endfor %}
             </ol>
         </div>
@@ -158,10 +158,16 @@ $(function(){
         <div id="youtube_blocked">
             <p>
                 Your browser can not contact <a href="http://www.youtube.com/">YouTube</a> to display the video.
-                Your internet service provider (e.g. your school or company) may be blocking access.  To work around this issue, 
+                Your internet service provider (e.g. your school or company) may be blocking access.  To work around this issue,
                 please use one of the <a href="/downloads">options for downloading the videos</a>.
             </p>
         </div>
+{% if App.offline_mode %}
+        <script src='/videos/AC_RunActiveContent.js' language='javascript'></script>
+        <script language='javascript'>
+        AC_FL_RunContent('codebase', 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0', 'width', '800', 'height', '480', 'src', ((!DetectFlashVer(9, 0, 0) && DetectFlashVer(8, 0, 0)) ? 'OSplayer' : '/videos/OSplayer'), 'pluginspage', 'http://www.macromedia.com/go/getflashplayer', 'id', 'idOVideo', 'allowFullScreen', 'true', 'allowScriptAccess', 'always', 'movie', ((!DetectFlashVer(9, 0, 0) && DetectFlashVer(8, 0, 0)) ? 'OSplayer' : '/videos/OSplayer'), 'FlashVars', 'movie={{video_path}}&volume=100');
+        </script>
+{% else %}
         <object id="idOVideo" name="idOVideo" width="800" height="480">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
             <param name="allowFullScreen" value="true">
@@ -169,6 +175,7 @@ $(function(){
             <param name="wmode" value="transparent">
             <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
         </object>
+{% endif %}
         {% if playlists %}
         <label id="playlists">
             <b>Related Playlists:</b>

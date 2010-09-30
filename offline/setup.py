@@ -54,6 +54,9 @@ def get_khanacademy_code():
             if "Checked out revision" in line:
                 revision = "r" + line.split()[-1][:-1]
     print "At revision", revision
+    os.chdir(code_dir + "/khanacademy-read-only")
+    replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
+    replace_in_file("app.yaml", "#offline placeholder", "- url: /videos\n  static_dir: ../../videos")    
     return revision
     
     
@@ -71,9 +74,19 @@ def copy_python25():
         shutil.copytree(python_dir, "Python25")
         
 
+def download_7zip():
+    os.chdir(code_dir)
+    if not os.path.exists("7za.exe"):
+        print "downloading 7zip"   
+        urlretrieve("http://downloads.sourceforge.net/project/sevenzip/7-Zip/4.65/7za465.zip", "7za465.zip")
+        un = unzip()
+        un.extract("7za465.zip", ".")    
+        os.remove("7za465.zip")     
+
+    
 def upload_sample_data(): 
-    # clear the datastore
-    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" -c "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
+    #--use_sqlite is giving "ReferenceProperty failed to be resolved" for library_content
+    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
     subprocess.Popen(command)
     print "uploading sample data" 
     os.chdir(code_dir + "/khanacademy-read-only/sample_data/")
@@ -97,7 +110,38 @@ def generate_library_content():
     os.chdir(code_dir + "/khanacademy-read-only")
     urlretrieve("http://localhost:8080/library_content", "library_content.html")
     
+
+def generate_video_mapping():
+    print "generating video_mapping.py"
+    os.chdir(code_dir)
+    urlretrieve("http://localhost:8080/video_mapping", "video_mapping.py")
     
+
+def remove_bulkloader_logs():
+    sd_dir = code_dir + "/khanacademy-read-only/sample_data"
+    for filename in os.listdir(sd_dir):
+        if filename.startswith("bulkloader"):
+            os.remove(sd_dir + "/" + filename)
+    
+
+def create_download_scripts():
+    sys.path.append(code_dir)
+    from video_mapping import video_mapping  
+
+    playlists = video_mapping.keys()
+    playlists.sort()
+
+    for playlist in playlists:
+        file = open(ka_dir + "/download_scripts/download_" + playlist + ".bat", "w")
+        file.write('"%~dp0/../code/Python25/python.exe" "%~dp0/../code/download.py" ' + playlist)    
+        file.close()
+
+    file = open(ka_dir + "/download_scripts/download_ALL.bat", "w")
+    for playlist in playlists:
+        file.write('call "download_' + playlist + '.bat"\n')
+    file.close()
+
+
 def zip_directory(revision):
     print "zipping Khan Academy" 
     os.chdir(offline_dir)
@@ -112,14 +156,17 @@ def zip_directory(revision):
                  traceback.print_exc()
 
             
-if __name__ == "__main__":                     
-
+if __name__ == "__main__":  
     download_appengine("google_appengine_1.3.7.zip")
     revision = get_khanacademy_code()
     copy_python25()
+    download_7zip()
     upload_sample_data()
     copy_datastore()
     generate_library_content()
+    generate_video_mapping()
+    remove_bulkloader_logs()
+    create_download_scripts()
     zip_directory(revision)
     sys.exit()
     #TODO: upload it somewhere                                       

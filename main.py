@@ -11,6 +11,7 @@ import re
 import itertools
 from urlparse import urlparse
 from collections import deque
+from pprint import pformat
 
 import django.conf
 django.conf.settings.configure(
@@ -392,6 +393,27 @@ class OldViewVideo(app.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
         self.response.out.write(template.render(path, template_values))
 
+
+def get_mangled_playlist_name(orig_playlist_name):
+    return orig_playlist_name.replace(" ", "").replace(":", "-")
+    
+
+def get_mangled_playlist_name_for_archiveorg(orig_playlist_name):
+    words = orig_playlist_name.split()
+    new_words = []           
+    for word in words:
+	new_word = word[0]
+	for i in range(1, len(word)):
+	    new_word += word[i].lower()
+	new_words.append(new_word)
+    playlist_name = "".join(new_words)                                        
+    for char in " :()":
+	playlist_name = playlist_name.replace(char, "")      
+    if playlist_name == "History":
+	playlist_name = "history"
+    return playlist_name
+    
+    
 class ViewVideo(app.RequestHandler):
 
     def get(self):
@@ -489,6 +511,8 @@ class ViewVideo(app.RequestHandler):
         video_playlists = query.fetch(5)
         playlists = []
         video_position = None
+        video_folder = ""
+        i = 0         
         for video_playlist in video_playlists:
             p = video_playlist.playlist
             if (playlist is not None and p.youtube_id == playlist.youtube_id) or (playlist is None and video_position is None):
@@ -497,7 +521,10 @@ class ViewVideo(app.RequestHandler):
                 video_position = video_playlist.video_position
             else:
                 playlists.append(p)
-        
+            if i == 0:
+                video_folder = get_mangled_playlist_name(video_playlist.playlist.title)
+            i += 1
+        video_path = "/videos/" + video_folder + "/" + video.readable_id + ".flv"        
 
         if video.description == video.title:
             video.description = None
@@ -511,6 +538,7 @@ class ViewVideo(app.RequestHandler):
                                                   'playlists': playlists,
                                                   'video': video,
                                                   'videos': videos,
+                                                  'video_path': video_path,                                                                                                     
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
@@ -1345,6 +1373,70 @@ class GenerateLibraryContent(app.RequestHandler):
             }
         path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
         self.response.out.write(template.render(path, template_values))
+
+
+class GenerateVideoMapping(app.RequestHandler):
+
+    def get(self):
+        all_topics_list = []
+        all_topics_list.append('Arithmetic')
+        all_topics_list.append('Chemistry')
+        all_topics_list.append('Developmental Math')
+        all_topics_list.append('Pre-algebra')
+        all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+        all_topics_list.append('Geometry')
+        all_topics_list.append('California Standards Test: Geometry')
+        all_topics_list.append('Current Economics')
+        all_topics_list.append('Banking and Money')
+        all_topics_list.append('Venture Capital and Capital Markets')
+        all_topics_list.append('Finance')
+        all_topics_list.append('Credit Crisis')
+        all_topics_list.append('Valuation and Investing')
+        all_topics_list.append('Geithner Plan')
+        all_topics_list.append('Algebra')
+        all_topics_list.append('Algebra I Worked Examples')
+        all_topics_list.append('ck12.org Algebra 1 Examples')
+        all_topics_list.append('California Standards Test: Algebra I')
+        all_topics_list.append('California Standards Test: Algebra II')
+        all_topics_list.append('Brain Teasers')
+        all_topics_list.append('Biology')
+        all_topics_list.append('Trigonometry')
+        all_topics_list.append('Precalculus')
+        all_topics_list.append('Statistics')
+        all_topics_list.append('Probability')
+        all_topics_list.append('Calculus')
+        all_topics_list.append('Differential Equations')
+        all_topics_list.append('Khan Academy-Related Talks and Interviews')
+        all_topics_list.append('History')
+        all_topics_list.append('Organic Chemistry')
+        all_topics_list.append('Linear Algebra')
+        all_topics_list.append('Physics')
+        all_topics_list.append('Paulson Bailout')
+        all_topics_list.append('SAT Preparation')        
+        all_topics_list.append('GMAT: Problem Solving')
+        all_topics_list.append('GMAT Data Sufficiency')        
+        all_topics_list.append('CAHSEE Example Problems')        
+        all_topics_list.append('Singapore Math')        
+        all_topics_list.sort()
+ 
+        video_mapping = {}
+        for playlist_title in all_topics_list:            
+            query = Playlist.all()
+            query.filter('title =', playlist_title)
+            playlist = query.get()
+            query = VideoPlaylist.all()
+            query.filter('playlist =', playlist)
+            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+            query.order('video_position')
+            playlist_name = get_mangled_playlist_name(playlist_title)
+            playlist = []   
+            video_mapping[playlist_name] = playlist
+            for pv in query.fetch(500):
+                v = pv.video
+                filename = v.title.replace(":", "").replace(",", ".")
+                playlist.append((filename, v.youtube_id, v.readable_id)) 
+        self.response.out.write("video_mapping = " + pformat(video_mapping))
+        
         
 class Export(app.RequestHandler):
 
@@ -2119,7 +2211,8 @@ class Search(app.RequestHandler):
                            'videos': videos,
                            })
         self.render_template("searchresults.html", template_values)
-            
+                    
+                        
 def real_main():    
     webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
@@ -2173,6 +2266,8 @@ def real_main():
         ('/students', ViewStudents), 
         ('/classreport', ViewClassReport),
         ('/charts', ViewCharts),
+        ('/video_mapping', GenerateVideoMapping),
+        
         ('/press/.*', ViewArticle),
         ('/login', Login),
         

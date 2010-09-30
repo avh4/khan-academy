@@ -42,7 +42,9 @@ class App(object):
         accepts_openid = True
     if is_dev_server:
         accepts_openid = False # Change to True when we plan to support it on the live server.
-
+    offline_mode = False
+    
+    
 """Returns app.get_current_user() if not None, or a faked User based on the
 user's Facebook account if the user has one, or None.
 """
