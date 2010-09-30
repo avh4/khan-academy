@@ -1,15 +1,15 @@
 {% extends "qbrary_page_template.html" %}
-{% block pagetitle %}<B>Welcome to KhanAcademy World History!</B>{% endblock pagetitle %}
+{% block pagetitle %}<B>Welcome to Khan Academy {{subject.name}}!</B>{% endblock pagetitle %}
 
 {% block pagecontent %}
 <table>
 <tr>
 <td>
 <P>
-<h2>Learn World History at Khan Academy:</h2>
+<h2>Learn {{subject.name}} at Khan Academy:</h2>
 <ul>
-<li><h3><a href="/pickquiztopic?subject_key=ag1raGFuZXhlcmNpc2VzchALEgdTdWJqZWN0GIbt1wEM">Practice World History questions</a></h3></li>
-<li><h3><a href="/pickquestiontopic?subject_key=ag1raGFuZXhlcmNpc2VzchALEgdTdWJqZWN0GIbt1wEM">Add a new World History question</a></h3></li>
+<li><h3><a href="/answerquestion?subject_key={{subject.key}}">Practice {{subject.name}} questions</a></h3></li>
+<li><h3><a href="/addquestion?subject_key={{subject.key}}">Add a new {{subject.name}} question</a></h3></li>
 </ul> 
 </P>
 </td></tr></table>

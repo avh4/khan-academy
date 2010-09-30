@@ -395,8 +395,31 @@ class IntroPage(app.RequestHandler):
 
     def get(self):
         # note: don't require login to view the intro page
-        path = os.path.join(os.path.dirname(__file__), 'qbraryintro.html')
-        self.response.out.write(template.render(path, None))
+        subs = Subject.gql('WHERE parent_subject=:1', None)
+
+        # We need at least the root subject
+
+        if subs.count() < 1:
+            path = os.path.join(os.path.dirname(__file__), 'qbraryempty.html')
+            self.response.out.write(template.render(path, None))
+        else:
+            root = subs[0]
+
+            # select all of the children of the root subject to
+            subjects = Subject.gql('WHERE parent_subject = :1', root)
+    
+            # select all of the questions that the user has created
+            if subjects.count() < 1:
+                path = os.path.join(os.path.dirname(__file__), 'qbraryempty.html')
+                self.response.out.write(template.render(path, None))
+            else:
+                subject = subjects[0]
+                template_values = {
+                    'subject': subject,
+                    }
+        
+                path = os.path.join(os.path.dirname(__file__), 'qbraryintro.html')
+                self.response.out.write(template.render(path, template_values))
         
 
 class ManageQuestions(app.RequestHandler):
