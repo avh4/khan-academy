@@ -2195,7 +2195,7 @@ class Login(app.RequestHandler):
             
 class Search(app.RequestHandler):
 
-    def get(self):
+    def get(self):        
         query = self.request.get('page_search_query')
         template_values = { 'page_search_query': query }
         query = query.strip()
@@ -2204,17 +2204,20 @@ class Search(app.RequestHandler):
             template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
             self.render_template("searchresults.html", template_values)
             return
-        playlists = Playlist.search(query, limit=50)
-        videos = Video.search(query, limit=50)
+        searched_phrases = []
+        playlists = Playlist.search(query, limit=50, searched_phrases_out=searched_phrases)
+        videos = Video.search(query, limit=50, searched_phrases_out=searched_phrases)
         template_values.update({
                            'playlists': playlists,
                            'videos': videos,
+                           'searched_phrases': searched_phrases
                            })
         self.render_template("searchresults.html", template_values)
                     
                         
 def real_main():    
     webapp.template.register_template_library('templatefilters')
+    webapp.template.register_template_library('templatetags')    
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),

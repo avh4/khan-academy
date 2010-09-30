@@ -5,6 +5,9 @@
 # Copyright (c) 2009 William T. Katz
 # Website/Contact: http://www.billkatz.com
 # 
+# 30-Sep-2010: Dean Brettle (dean@brettle.com) added searched_phrases_out argument to 
+# Searchable.search() and Searchable.full_text_search()
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to 
 # deal in the Software without restriction, including without limitation 
@@ -257,7 +260,8 @@ class Searchable(object):
     def full_text_search(phrase, limit=10, 
                          kind=None, 
                          stemming=INDEX_STEMMING,
-                         multi_word_literal=INDEX_MULTI_WORD):
+                         multi_word_literal=INDEX_MULTI_WORD,
+                         searched_phrases_out=[]):
         """Queries search indices for phrases using a merge-join.
         
         Args:
@@ -293,6 +297,7 @@ class Searchable(object):
             for phrase in search_phrases:
                 if stemming:
                     phrase = stemmer.stemWord(phrase)
+                searched_phrases_out.append(phrase)
                 query = query.filter('phrases =', phrase)
             if kind:
                 query = query.filter('parent_kind =', kind)
@@ -305,6 +310,7 @@ class Searchable(object):
                 keywords = stemmer.stemWords(keywords)
             query = klass.all(keys_only=True)
             for keyword in keywords:
+                searched_phrases_out.append(phrase)
                 query = query.filter('phrases =', keyword)
             if kind:
                 query = query.filter('parent_kind =', kind)
@@ -398,7 +404,7 @@ class Searchable(object):
         return phrases
 
     @classmethod
-    def search(cls, phrase, limit=10, keys_only=False):
+    def search(cls, phrase, limit=10, keys_only=False, searched_phrases_out=[]):
         """Queries search indices for phrases using a merge-join.
         
         Use of this class method lets you easily restrict searches to a kind
@@ -408,6 +414,8 @@ class Searchable(object):
             phrase: Search phrase (string)
             limit: Number of entities or keys to return.
             keys_only: If True, return only keys with title of parent entity.
+            searched_phrases_out: An optional array to which the actual phrases 
+            searched for (after stemming, etc) will be appended.
         
         Returns:
             A list.  If keys_only is True, the list holds (key, title) tuples.
@@ -416,7 +424,8 @@ class Searchable(object):
         key_list = Searchable.full_text_search(
                         phrase, limit=limit, kind=cls.kind(),
                         stemming=cls.INDEX_STEMMING, 
-                        multi_word_literal=cls.INDEX_MULTI_WORD)
+                        multi_word_literal=cls.INDEX_MULTI_WORD,
+                        searched_phrases_out=searched_phrases_out)
         if keys_only:
             logging.debug("key_list: %s", key_list)
             return key_list

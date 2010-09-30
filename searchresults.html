@@ -34,6 +34,9 @@
     .search_results dd .keywords {
         font-style: italic;
     }
+    .search_results .highlight {
+        font-weight: bold;
+    }
 </style>
 {% endblock pagescript %}
 {% block pagemessage %}
@@ -51,7 +54,7 @@
         <dl>
         {% for playlist in playlists %}
             {% if playlist.description %}
-            <dt><a href="/#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a></dt><dd>{{playlist.description|escape}}</dd>
+            <dt><a href="/#{{playlist.title|urlencode}}">{% highlight searched_phrases playlist.title %}</a></dt><dd>{% highlight searched_phrases playlist.description %}</dd>
             {% endif %}
         {% endfor %}        
         </dl>
@@ -62,13 +65,13 @@
         <h1>Videos</h1>
         <dl>
         {% for video in videos %}
-            <dt><a href="/video/{{video.readable_id|urlencode}}">{{video.title|escape}}</a></dt>
+            <dt><a href="/video/{{video.readable_id|urlencode}}">{% highlight searched_phrases video.title %}</a></dt>
             <dd>
             {% if video.description %}
-            <p class="description">{{video.description|escape}}</p>
+            <p class="description">{% highlight searched_phrases video.description %}</p>
             {% endif %}
             {% if video.keywords %}
-            <p>Keywords: <span class="keywords">{{video.keywords|escape}}</span></p>
+            <p>Keywords: <span class="keywords">{% highlight searched_phrases video.keywords %}</span></p>
             {% endif %}
             </dd>
         {% endfor %}        
