@@ -59,29 +59,30 @@
 
         <header>
             <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png"></a>
-            
-            <ul id="page_status">
-	      {{ greeting }}
-            </ul>
-            
-            <nav id="page_main_nav">
-                <ul>
-                    <li>
-                        <a href="/worldhistory">Add/Practice Questions</a>
-                    </li>
-                    <li>
-                        <a href="/managequestions">Manage Questions</a>
-                    </li>
-                    <li>
-                        <a href="/exercisedashboard">Exercise Dashboard</a>
-                    </li>
+            <div style="position:relative">
+                <ul id="page_status">
+              {{ greeting }}
                 </ul>
-            </nav>
-            <nav id="page_sub_nav">
-                {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
-                {% endblock pagesubmenu %}
                 
-            </nav>
+                <nav id="page_main_nav">
+                    <ul>
+                        <li>
+                            <a href="/worldhistory">Add/Practice Questions</a>
+                        </li>
+                        <li>
+                            <a href="/managequestions">Manage Questions</a>
+                        </li>
+                        <li>
+                            <a href="/exercisedashboard">Exercise Dashboard</a>
+                        </li>
+                    </ul>
+                </nav>
+                <nav id="page_sub_nav">
+                    {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
+                    {% endblock pagesubmenu %}
+                    
+                </nav>
+            </div>
            
             
             {% block pagemessage %}
