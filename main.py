@@ -291,6 +291,7 @@ class ViewExercise(app.RequestHandler):
                 'streakwidth': userExercise.streak * 20,
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
+                'longest_streak': userExercise.longest_streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
                 'num_problems_to_print': num_problems_to_print,
@@ -657,6 +658,7 @@ class PrintExercise(app.RequestHandler):
                 'streakwidth': userExercise.streak * 20,
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
+                'longest_streak': userExercise.longest_streak,
                 'time_warp': time_warp,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
