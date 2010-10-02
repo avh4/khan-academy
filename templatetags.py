@@ -34,3 +34,5 @@ class HighlightNode(template.Node):
 
 register.tag(highlight)
 
+webapp.template.register_template_library('discussion.templatetags')
+
