@@ -213,7 +213,7 @@ function handleCorrectness(isCorrect)
 
 function checkFreeAnswer()
 {
-	var usersAnswer = parseFloat(document.getElementById("answer").value);
+	var usersAnswer = parseFloatStrict(document.getElementById("answer").value);
 	if (isNaN(usersAnswer)) 
 	{
 			window.alert("Your answer is not a number.  Please try again.");
@@ -222,6 +222,33 @@ function checkFreeAnswer()
 	var isCorrect = (usersAnswer==parseFloat(correctAnswer));
 
 	handleCorrectness(isCorrect);
+}
+
+function parseFloatStrict(val)
+{
+    if (val)
+    {
+        // parseFloat never uses comma as decimal separator.
+        // If we want to allow commas for other locales, we can detect and replace
+        // with periods.
+        // See http://stackoverflow.com/questions/2085275/what-is-the-decimal-separator-symbol-in-javascript
+        var reComma = /,/g;
+        val = val.replace(reComma, "");
+        val = $.trim(val);
+
+        if (!isNumericStrict(val)) return NaN;
+    }
+
+    return parseFloat(val);
+}
+
+// See http://stackoverflow.com/questions/18082/validate-numbers-in-javascript-isnumeric
+// for explanation of this non-regex implementation,
+// and http://dl.dropbox.com/u/35146/js/tests/isNumber.html for extensive unit tests against
+// this implementation.
+function isNumericStrict(val)
+{
+    return !isNaN(parseFloat(val)) && isFinite(val);
 }
 
 function graphFooter()
