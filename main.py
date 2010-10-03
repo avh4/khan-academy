@@ -513,7 +513,6 @@ class ViewVideo(app.RequestHandler):
         playlists = []
         video_position = None
         video_folder = ""
-        i = 0         
         for video_playlist in video_playlists:
             p = video_playlist.playlist
             if (playlist is not None and p.youtube_id == playlist.youtube_id) or (playlist is None and video_position is None):
@@ -522,10 +521,7 @@ class ViewVideo(app.RequestHandler):
                 video_position = video_playlist.video_position
             else:
                 playlists.append(p)
-            if i == 0:
-                video_folder = get_mangled_playlist_name(video_playlist.playlist.title)
-            i += 1
-        video_path = "/videos/" + video_folder + "/" + video.readable_id + ".flv"        
+        video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv"        
 
         if video.description == video.title:
             video.description = None
@@ -1494,7 +1490,7 @@ class ViewDownloads(app.RequestHandler):
                                                   
         path = os.path.join(os.path.dirname(__file__), 'downloads.html')
         self.response.out.write(template.render(path, template_values))
-
+        
 class ViewHowToHelp(app.RequestHandler):
 
     def get(self):
