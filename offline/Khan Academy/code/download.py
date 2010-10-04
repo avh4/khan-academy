@@ -83,13 +83,14 @@ if ao_playlist_name:
                         print "video not found in datastore, deleting:", filename 
                         os.remove(filename)
 
-os.chdir(cwd + "/../code")
+os.chdir(cwd + "/../code/Python25")
+folder = "../../videos/" + playlist
 if not os.path.exists(folder):
     os.mkdir(folder)
 for title, youtube_id, readable_id in videos:
     if os.path.exists(folder + '/' + readable_id + ".flv"):
         print "already downloaded", readable_id
     else:
-        os.system('/Python25/python.exe youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
+        os.system('python.exe ../youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
 
                          
