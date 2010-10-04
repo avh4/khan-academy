@@ -45,8 +45,8 @@ def get_khanacademy_code():
         output = subprocess.Popen(['svn', 'update'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
         revision = ""    
         for line in output.split("\n"):
-            if "At revision" in line:
-                revision = "r" + line.split()[-1][:-1]    
+            if "At revision" in line or "Updated to revision" in line:
+                revision = "r" + line.split()[-1][:-1]
     else:
         print "checking out khanacademy-read-only"
         output = subprocess.Popen(['svn', 'checkout', 'http://khanacademy.googlecode.com/svn/trunk/', 'khanacademy-read-only'], 
@@ -57,7 +57,7 @@ def get_khanacademy_code():
     if revision:
         print "At revision", revision
     else:
-        print output
+        print "output:\n" + output
     os.chdir(code_dir + "/khanacademy-read-only")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
     replace_in_file("app.yaml", "#offline placeholder", "- url: /videos\n  static_dir: ../../videos")    
