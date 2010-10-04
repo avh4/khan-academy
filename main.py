@@ -398,22 +398,6 @@ class OldViewVideo(app.RequestHandler):
 def get_mangled_playlist_name(orig_playlist_name):
     return orig_playlist_name.replace(" ", "").replace(":", "-")
     
-
-def get_mangled_playlist_name_for_archiveorg(orig_playlist_name):
-    words = orig_playlist_name.split()
-    new_words = []           
-    for word in words:
-	new_word = word[0]
-	for i in range(1, len(word)):
-	    new_word += word[i].lower()
-	new_words.append(new_word)
-    playlist_name = "".join(new_words)                                        
-    for char in " :()":
-	playlist_name = playlist_name.replace(char, "")      
-    if playlist_name == "History":
-	playlist_name = "history"
-    return playlist_name
-    
     
 class ViewVideo(app.RequestHandler):
 

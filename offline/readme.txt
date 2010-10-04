@@ -7,6 +7,11 @@ and can be uploaded to http://code.google.com/p/khanacademy/downloads/list.
 To download the videos from youtube, run download_ALL.bat in the download_scripts
 directory, or one of the playlist versions.
 
+You can then run setup.py again (or any compression program) to create a file with 
+whatever set of lessons are in the videos directory.  Be sure to delete any 7z archives 
+in the download_scripts directory that aren't needed.
+
+TODO:
 Once you have downloaded a playlist, you can upload it to archive.org using the script
 upload_zipped_playlists.py.  You can upload individual videos to archive.org using
 upload_individual_videos.py.

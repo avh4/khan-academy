@@ -1,4 +1,4 @@
-import sys, urllib, os
+import sys, urllib, os, traceback
 from video_mapping import video_mapping
         
         
@@ -59,29 +59,34 @@ archive_org_url = "http://www.archive.org/download/KhanAcademy/"
 ao_playlist_name = playlist_mapping.get(playlist)
 
 if ao_playlist_name:
-    download_filename = ao_playlist_name + ".7z"
-    if not os.path.exists(download_filename):
-        urlfile = urllib.urlopen(archive_org_url + download_filename)
-        print "downloading", archive_org_url + download_filename
-        urlretrieve(urlfile, download_filename)
+    try:
+        download_filename = ao_playlist_name + ".7z"
+        if not os.path.exists(download_filename):
+            urlfile = urllib.urlopen(archive_org_url + download_filename)
+            print "downloading", archive_org_url + download_filename
+            urlretrieve(urlfile, download_filename)
 
-    if not os.path.exists(folder): 
-        os.chdir("../code")
-        os.system('7za.exe e ../download_scripts/'+download_filename+' -o' + folder)
-        os.chdir(folder)        
-        filename_mapping = {}
-        for title, youtube_id, readable_id in videos:
-            filename_mapping[title + ".flv"] = readable_id + ".flv"
-        for filename in os.listdir("."):
-            items = filename.split(".")
-            if len(items) > 1:
-                ext = items[-1]        
-                if ext == "flv":  
-                    if filename in filename_mapping:
-                        os.rename(filename, filename_mapping[filename])
-                    else:
-                        print "video not found in datastore, deleting:", filename 
-                        os.remove(filename)
+        if not os.path.exists(folder): 
+            os.chdir("../code")
+            os.system('7za.exe e ../download_scripts/'+download_filename+' -o' + folder)
+            os.chdir(folder)        
+            filename_mapping = {}
+            for title, youtube_id, readable_id in videos:
+                for char in "?": # " :()"
+                    title = title.replace(char, "")
+                filename_mapping[title + ".flv"] = readable_id + ".flv"
+            for filename in os.listdir("."):
+                items = filename.split(".")
+                if len(items) > 1:
+                    ext = items[-1]        
+                    if ext == "flv":  
+                        if filename in filename_mapping:
+                            os.rename(filename, filename_mapping[filename])
+                        else:
+                            print "video not found in datastore, deleting:", filename 
+                            os.remove(filename)
+    except:
+        traceback.print_exc()
 
 os.chdir(cwd + "/../code/Python25")
 folder = "../../videos/" + playlist

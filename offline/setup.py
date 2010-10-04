@@ -7,7 +7,7 @@ from unzip import unzip
 offline_dir = os.getcwd()
 ka_dir = offline_dir + "/Khan Academy"
 code_dir = ka_dir + "/code"
-    
+
     
 def replace_in_file(filename, oldstring, newstring):
     try:
@@ -38,6 +38,7 @@ def download_appengine(appengine_zip):
 def get_khanacademy_code():
     revision = ""  
     os.chdir(code_dir)
+    output = ""
     if os.path.exists("khanacademy-read-only"): 
         print "updating code"
         os.chdir(code_dir + "/khanacademy-read-only")
@@ -53,7 +54,10 @@ def get_khanacademy_code():
         for line in output.split("\n"):
             if "Checked out revision" in line:
                 revision = "r" + line.split()[-1][:-1]
-    print "At revision", revision
+    if revision:
+        print "At revision", revision
+    else:
+        print output
     os.chdir(code_dir + "/khanacademy-read-only")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
     replace_in_file("app.yaml", "#offline placeholder", "- url: /videos\n  static_dir: ../../videos")    

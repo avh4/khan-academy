@@ -1,5 +1,5 @@
 Here's a first version of the Khan Academy website for offline use.
-http://michelsens.net/zips/Khan+Academy.zip
+http://code.google.com/p/khanacademy/downloads/list
 
 Unzip it and click on run.bat, which will start up the server and load the local version of the 
 Khan Academy homepage in your browser.  Wait a few seconds and refresh the page, the server takes 
