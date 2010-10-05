@@ -35,7 +35,7 @@
 		});
 	</script>
     <style>
-        p { 
+        p {
             margin-top: 1ex;
             margin-bottom: 1ex;
         }
@@ -82,9 +82,46 @@ a free, world-class education.  If you don't have a broadband connection or aren
 to watch a video, try out the <a href="#faq">Frequently Asked Questions</a> tab to better understand our motivations.
 
 <P>
-
-
 <A name="techawards"></A>
+
+{% if App.offline_mode %}
+		<script type="text/javascript" src="/videos/swfobject.js"></script>
+		<script type="text/javascript">
+		swfobject.registerObject("idOVideo", "9.0.0", "");
+		</script>
+<object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/p6l8-1kHUsA&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/p6l8-1kHUsA&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+</P>
+<P>
+
+<P><A name="NEWSHOUR"></A>
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/pbs-newshour-on-the-khan-academy.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/pbs-newshour-on-the-khan-academy.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+<A name="gates"></A>
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/bill-gates-talks-about-the-khan-academy-at-aspen-ideas-festival-2010.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/bill-gates-talks-about-the-khan-academy-at-aspen-ideas-festival-2010.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+<P><A name="CNN"></A>
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-on-cnn.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-on-cnn.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+
+<P>
+<A name="GEL"></A>
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-speaks-at-gel--good-experience-live--conference.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-speaks-at-gel--good-experience-live--conference.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+<A name="OVERVIEW"></A>
+<object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-talk-at-the-mit-club-of-northern-california.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-talk-at-the-mit-club-of-northern-california.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-interview-with-mixergy-com.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-interview-with-mixergy-com.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-talk-at-castilleja-school-on-january-5th--2010.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-talk-at-castilleja-school-on-january-5th--2010.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
+<P>
+<object width="320" height="263"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-interview-with-npr-s-all-things-considered-on-12-28-2009.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/salman-khan-interview-with-npr-s-all-things-considered-on-12-28-2009.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="320" height="263"></embed></object>
+
+<object width="320" height="263"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/sal-khan-interview-with-it-conversations---january-31-2010.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/KhanAcademy-RelatedTalksandInterviews/sal-khan-interview-with-it-conversations---january-31-2010.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="320" height="263"></embed></object>
+
+{% else %}
+
 <object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/p6l8-1kHUsA&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/p6l8-1kHUsA&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
 </P>
 <P>
@@ -104,7 +141,7 @@ to watch a video, try out the <a href="#faq">Frequently Asked Questions</a> tab 
 <P>
 <A name="OVERVIEW"></A>
 <object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/dsFQ9kM1qDs&hl=en_US&fs=1&hd=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
-<P>	
+<P>
 
 <object width="640" height="385"><param name="movie" value="http://www.youtube.com/v/1C7FH7El35w&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/1C7FH7El35w&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>
 <P>
@@ -115,6 +152,8 @@ to watch a video, try out the <a href="#faq">Frequently Asked Questions</a> tab 
 <object width="320" height="263"><param name="movie" value="http://www.youtube.com/v/po3DAsr6mDE&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/po3DAsr6mDE&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="320" height="263"></embed></object>
 
 <object width="320" height="263"><param name="movie" value="http://www.youtube.com/v/1uf_DeazfZg&hl=en_US&fs=1&rel=0&hd=1&border=0"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/1uf_DeazfZg&hl=en_US&fs=1&rel=0&hd=1&border=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="320" height="263"></embed></object>
+
+{% endif %}
 <P>
 </div>
 <div id="faq">
@@ -122,7 +161,7 @@ to watch a video, try out the <a href="#faq">Frequently Asked Questions</a> tab 
 <h2>Why are you doing this project?</h2><P>
 I (Sal) can't imagine a better use of my (or anyone's) time.  <P>
 
-With just a computer and a pen-tablet-mouse, one can educate the world!  Even better, 
+With just a computer and a pen-tablet-mouse, one can educate the world!  Even better,
 the content never goes old.  My (or your) great-great-great grandchildren could
 learn from the very same videos!
 <p>
@@ -132,22 +171,22 @@ There are some obvious distinctions.  With over 1600 videos, it is easily the mo
 Internet allowing learners to know that they can fill in almost any of their "gaps" with the content on this site.  The content
 is made in digestible 10-20 minute chunks especially purposed for viewing on the computer as opposed to being a longer video
 of a conventional "physical" lecture.  The conversational style of the videos is the tonal antithesis of what people traditionally
-associate with math and science instruction. The less obvious distinctions are, however, what make the site hard to reproduce.  
+associate with math and science instruction. The less obvious distinctions are, however, what make the site hard to reproduce.
 <P>
-I teach the way that I wish I was taught. 
+I teach the way that I wish I was taught.
 The lectures are coming from me, an actual human being who is fascinated by
-the world around him. The concepts are conveyed as they are understood by me, not as they are written in a textbook developed 
-by an educational bureaucracy.  Viewers know that it is the labor of love of one somewhat quirky and determined man who has 
+the world around him. The concepts are conveyed as they are understood by me, not as they are written in a textbook developed
+by an educational bureaucracy.  Viewers know that it is the labor of love of one somewhat quirky and determined man who has
 a passion
-for learning and teaching. 
+for learning and teaching.
 I don't think any corporate or governmental effort--regardless of how much money is thrown at the problem--can reproduce this.
 <P>
-A lot of my own educational experience was spent frustrated with how information was conveyed in textbooks and lectures.  
+A lot of my own educational experience was spent frustrated with how information was conveyed in textbooks and lectures.
 There would
 be connections in the subject matter that standard curricula would ignore despite the fact that they make the content easier
-to understand, enjoy, and RETAIN.  I felt like fascinating and INTUITIVE concepts were almost intentionally being butchered into 
-pages and pages of sleep-inducing text and monotonic, scripted lectures.  I saw otherwise intelligent peers memorizing 
-steps and formulas for the next exam without any sense of the intuition or big picture, 
+to understand, enjoy, and RETAIN.  I felt like fascinating and INTUITIVE concepts were almost intentionally being butchered into
+pages and pages of sleep-inducing text and monotonic, scripted lectures.  I saw otherwise intelligent peers memorizing
+steps and formulas for the next exam without any sense of the intuition or big picture,
 only to forget everything within a matter of weeks.
 These videos are my expression of how the concepts
 should have been expressed in the first place, all while not compromising rigor or comprehensiveness.
@@ -158,11 +197,11 @@ should have been expressed in the first place, all while not compromising rigor 
 <P>
 The simple answer is none.  I believe that someone who truly understands the core concepts will thrive
 academically regardless of the curricular context.  To take it a step further, I believe that someone who
-experiences the joy and satisfaction of true understanding will never again be satisfied with the superficial 
+experiences the joy and satisfaction of true understanding will never again be satisfied with the superficial
 type of learning that
 most students have grown accustomed to.  The Khan Academy is about placing deep understanding above anything else.
 <P>
-With that said, there are concepts covered on national examinations that any student needs to be exposed to in order to 
+With that said, there are concepts covered on national examinations that any student needs to be exposed to in order to
 be competitive.  That is why I try to cover all topics that would appear on A.P. test, SATs, and other
 standardized test.  Taking it a step further, there are several hundred videos devoted to SAT, GMAT and other standardized
 test problems.  I also believe that, because of the granular nature of the 10 minute videos,  the content
@@ -172,11 +211,11 @@ can be mapped to almost any state's or nation's standards.
 <P>
 <img style="float: right;" src="/images/attention.GIF" width="350">My background is in math, computer science, and investment management, so I think you can
 imagine that no one is more obsessed with data and analytics than me.  The chart to the right is provided by YouTube.  It can be
-used to determine if and/or when viewers' attention falls off at a certain point of a video.  I can then go back and try to identify 
+used to determine if and/or when viewers' attention falls off at a certain point of a video.  I can then go back and try to identify
 (and possibly fix) what happened at that point in the video.
 <P style="clear: right;">
 This next chart <img style="float: right;" src="/images/averagechart.GIF" width="350">
-shows the average (black line) progress of a cohort of 30 rising 8th graders on the Khan Academy software over a 6-week period.  
+shows the average (black line) progress of a cohort of 30 rising 8th graders on the Khan Academy software over a 6-week period.
 The horizontal axis is "days working on the site" and the vertical axis is "modules completed."  The green lines show one standard
 deviation above and below the mean.  This chart exemplifies both the level of data we are capturing and also highlights the importance
 of individualized, self-paced instruction and real-time assessment.  The purple line shows a student
@@ -190,29 +229,29 @@ the focus of my life. I receive hundreds of letter and comments a week.  Many ar
 reach the level of being genuinely inspiring.  Here is a letter I received from a YouTube user in September 2009 (I bolded some
 of the text):
 <ul>
-Mr. Khan, 
+Mr. Khan,
 <P>
-No teacher has ever done me any good--this may sound harsh but I mean it quite literally. 
-I was force fed medication to keep me from talking and chastised for not speaking out when called on. 
-Where I am from blacks are not welcomed with open arms into schools--my mother and her sisters had to go to a 
-small shack two hours from home when they went to school. 
-About five years ago my family collected enough money to move from where i was born, so that I 
-could have a chance at having an education and living a real life. 
-But without a real mastery of elementary math I was slow to progress. 
+No teacher has ever done me any good--this may sound harsh but I mean it quite literally.
+I was force fed medication to keep me from talking and chastised for not speaking out when called on.
+Where I am from blacks are not welcomed with open arms into schools--my mother and her sisters had to go to a
+small shack two hours from home when they went to school.
+About five years ago my family collected enough money to move from where i was born, so that I
+could have a chance at having an education and living a real life.
+But without a real mastery of elementary math I was slow to progress.
 
 <P>
-I am now in college and learning more than I ever have in my life. 
-<b>But an inadequate math background has been holding me back</b>. 
-I found the Kahn Academy in June of 2009, right after I completed Math 141 ( a college algebra course). 
-<b>I have spent the entire summer on your youtube page.</b> 
-And I just wanted to thank you for everything you are doing. 
-You are a Godsend. Last week I tested for a math placement exam and I am now in Honors Math 200. 
-<b>No question was answered incorrectly.</b> 
-My placement test holder was so impressed by the breadth of my knowledge of math that he said I should be in Linear algebra. 
+I am now in college and learning more than I ever have in my life.
+<b>But an inadequate math background has been holding me back</b>.
+I found the Kahn Academy in June of 2009, right after I completed Math 141 ( a college algebra course).
+<b>I have spent the entire summer on your youtube page.</b>
+And I just wanted to thank you for everything you are doing.
+You are a Godsend. Last week I tested for a math placement exam and I am now in Honors Math 200.
+<b>No question was answered incorrectly.</b>
+My placement test holder was so impressed by the breadth of my knowledge of math that he said I should be in Linear algebra.
 <P>
-Mr. Khan, I can say without any doubt that you have changed my life and the lives of everyone in my family. 
+Mr. Khan, I can say without any doubt that you have changed my life and the lives of everyone in my family.
 <P>
-I wish you and the Khan Academy the best of luck, 
+I wish you and the Khan Academy the best of luck,
 </ul>
 
 
@@ -226,12 +265,12 @@ the more advanced math track for 7th grade.  Nadia was clearly a very bright gir
 I made a deal with her.  I'd remotely tutor her for an hour after work as long as she was
 willing to do any extra work I gave her.
 <P>
-I began remotely tutoring Nadia in August of 2004.  She was 
+I began remotely tutoring Nadia in August of 2004.  She was
 in New Orleans--where I also grew up-- so we used a telephone to talk and Yahoo Doodle
 as a shared notepad.  Nadia ended up catching up and getting ahead of her class
-so I started tutoring her brothers, Arman and Ali, as well. Eventually, word got around 
+so I started tutoring her brothers, Arman and Ali, as well. Eventually, word got around
 and I was remotely tutoring and handful of cousins and family friends.  Scheduling
-around my work, their soccer practice, and the different time zones became a little 
+around my work, their soccer practice, and the different time zones became a little
 ridiculous, so I started to make YouTube videos for them to watch in their own time, at
 their own pace.
 <P>
@@ -246,9 +285,9 @@ lines of code later (much of which has made the software adaptive)
 <P>
 <h2>How did you have the time to do this while working full-time?</h2>
 <P>
-My wife was doing her residency--in internal medicine-- from 2005 to 2008, so there were 
+My wife was doing her residency--in internal medicine-- from 2005 to 2008, so there were
 many nights/weekends where she was working and I would have felt guilty doing
-anything less productive.  I also try to watch very little television.  On top of that, 
+anything less productive.  I also try to watch very little television.  On top of that,
 I was working at an investment fund that had me working 5am to 2pm (we were working
 East Coat hours from California) so my afternoons were free (although I did go to bed at 9).
 <P>
@@ -258,7 +297,7 @@ Is there any other way to access the content?</h2>
 <P>
 I am working on having the content mirrored somewhere other than YouTube.  In the meantime,
 partner not-for-profit organizations are making the content available outside of YouTube.
-<A href="http://k16bridge.org/">The Lewis Center for Educational Research</A> which is 
+<A href="http://k16bridge.org/">The Lewis Center for Educational Research</A> which is
 affiliated with NASA is bringing the content into community colleges and charter schools
 around the country.  <A href="http://www.worldpossible.org">World Possible</A> is creating
 offline snapshots of the content to distribute in rural, developing regions with limited
@@ -280,7 +319,7 @@ would agree that there is no better way to educate and enlighten the world, they
 hesitate to email me (sal  'at' khanacademy 'dot' org) :)
 <P>
 Khan Academy is a IRS-recognized 501c3 not-for-profit organization.  My goal is to make
-it self-sustaining in the next five years.  
+it self-sustaining in the next five years.
 
 <P>
 <h2>Are you interested in turning this into a business?  Maybe with some VC funding?</h2>
@@ -288,25 +327,25 @@ it self-sustaining in the next five years.
 I've been approached several times, but it just didn't feel right. When I'm 80, I want
 to feel that I helped give access to a world-class education to billions of students around the
 world. Sounds a lot better than starting a business that educates some subset of the developed world that
-can pay $19.95/month and eventually selling it to some text book company or something.  
+can pay $19.95/month and eventually selling it to some text book company or something.
 I already have a beautiful wife, a hilarious son, two hondas and a decent house.  What else does a man need?
 <P>
-With that said, if you are a social venture capitalist and are looking to deploy capital with 
+With that said, if you are a social venture capitalist and are looking to deploy capital with
 the highest possible social return per dollar invested, we should talk.   I think you'll find that there is no
-more measurable, scalable and high impact way to educate the world.  
+more measurable, scalable and high impact way to educate the world.
 <P>
 <h2>Did you do all of the videos?</h2>
 <P>
 As of today (8/14/2010), yes.  All 1600+ videos have been made by me.  Volunteers have begun to translate the videos
-into other languages.  <A href="http://www.youtube.com/user/KhanAcademyEspanol">Here is the Khan Academy en espanol</A>.  
+into other languages.  <A href="http://www.youtube.com/user/KhanAcademyEspanol">Here is the Khan Academy en espanol</A>.
 Hope to have other channels in the not-too-far-off future!
 <P>
 <h2>What topics do you plan to cover?</h2>
 
 <P>
-My goal is to cover everything.  Yes, everything!  Most of k-12 math has already been done (although I do need 
+My goal is to cover everything.  Yes, everything!  Most of k-12 math has already been done (although I do need
 to make 20 or 30 more elementary math videos).  My goal really is to keep making videos until the day I die (which will hopefully
-not be for at least another 50 or 60 years).  Should give me time to make several tens of thousands of videos in pretty 
+not be for at least another 50 or 60 years).  Should give me time to make several tens of thousands of videos in pretty
 much every subject.
 <P>
 <h2>What is the long-term goal for the Khan Academy?</h2>
@@ -326,7 +365,7 @@ Microsoft Paint (Free).
 <P>
 I was born and raised in New Orleans, Lousiana.  My mother was born in Calcutta, India.  My father was born in Barisal, Bangladesh.
 <P>
-If you believe in trying to make the best of the finite number of years we have on this planet 
+If you believe in trying to make the best of the finite number of years we have on this planet
 (while not making it any worse for anyone else), think that pride and self-righteousness are the cause of most conflict and negativity,
 and are humbled by the vastness and
 mystery of the Universe, then I'm the same religion as you.
@@ -341,40 +380,40 @@ See the <a href="#how-to-help">How to Help</a> tab.
     The biggest thing is getting the word out.&nbsp; The students who use the site seem to really get
     excited by how quickly and deeply they can learn from it.&nbsp; Right now (5/2010), there
     are about 200,000 students using the site per month; no reason why it shouldn't be 20
-    million!  One way to get the word out is to organize a meetup. 
+    million!  One way to get the word out is to organize a meetup.
 </p>
 <p>
-    Other simple things you can do include answering questions in the Q&amp;A section below videos you watch.&nbsp; 
+    Other simple things you can do include answering questions in the Q&amp;A section below videos you watch.&nbsp;
     You can also report problems, including video mistakes, using the "Report a problem" link at
     the bottom of the page where you see the problem.
 </p>
 <p>
-    If you want to be more actively involved you could 
-    <a href="http://code.google.com/p/khanacademy/issues/detail?id=122">transcribe or caption videos</a>.&nbsp; 
+    If you want to be more actively involved you could
+    <a href="http://code.google.com/p/khanacademy/issues/detail?id=122">transcribe or caption videos</a>.&nbsp;
     If you know a foreign language, <a href="#translation">translating the videos</a>
-    would be huge!  Even better, if you know some topic deeply, are a good, down-to-earth teacher, AND 
+    would be huge!  Even better, if you know some topic deeply, are a good, down-to-earth teacher, AND
     know a foreign language, you could <a href="#translation">re-teach</a>
     some subset of the videos!
 </p>
 <p>
-    If you're an expert (especially at something that Sal's unlikely to be able to learn in the next 5 years) and 
+    If you're an expert (especially at something that Sal's unlikely to be able to learn in the next 5 years) and
     want to become a minor education celebrity (but a major one in your field), make a handful of videos and
     <a href="http://code.google.com/p/khanacademy/issues/detail?id=718">contribute them</a>.&nbsp;
     If they gel with the style--conversational while focused on intuition and rigor--of the current library, it might make
     sense for you to make a playlist or two (with all credit going to you of course).
 </p>
 <p>
-    If you like to write code, you can help with 
-    <a href="http://groups.google.com/group/khanacademy-developers/web/getting-started-with-the-code">the Khan Academy 
+    If you like to write code, you can help with
+    <a href="http://groups.google.com/group/khanacademy-developers/web/getting-started-with-the-code">the Khan Academy
     web application which we are developing as an open source project</a>.
 </p>
 <p>
-    And of course, you can always 
+    And of course, you can always
     <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" rel="nofollow">donate money</a>.
     The Khan Academy is a not-for-profit 501(c)(3) organization.&nbsp;
 </p>
 <p>
-    If you have an idea for how your organization can help make Khan 
+    If you have an idea for how your organization can help make Khan
     Academy better, please tell us about it by sending an email to the <i>publicly accessible</i>
     <a href="mailto:khan-academy-support-offers@googlegroups.com">Khan Academy Support Offers</a>
     group.&nbsp; Although we don't have time to reply
@@ -383,17 +422,17 @@ See the <a href="#how-to-help">How to Help</a> tab.
     proposing and what, if anything, you would expect in return (e.g. a
     link to your site, or access to anonymized data, financial
     compensation, etc.).&nbsp; If you don't hear from us right away, it might
-    mean that we don't see a good fit, or it might mean that we just don't 
+    mean that we don't see a good fit, or it might mean that we just don't
     have the time and resources to pursue working with you right away.&nbsp;
     Either way, we sincerely appreciate you taking the time to contact us.&nbsp;
-    Please note that your messages 
+    Please note that your messages
     will be publicly accessible, so <b style="color:rgb(0, 0, 0)">don't post private or confidential information</b>.
 </p>
 </div>
 <div id="translation">
 <h2>Help Educate the World!</h2><P>
 Our mission is to provide a free, world-class education to anyone, anywhere.  With that said, Sal only speaks English (and very barely passable Bengali) which can
-only reach 400 million of the 6 billion people on this planet (don't think English is spoken much off the planet).  With your help, we might be able to 
+only reach 400 million of the 6 billion people on this planet (don't think English is spoken much off the planet).  With your help, we might be able to
 reach the other 5.6 billion people.  Let's translate the Khan Academy into all of the world's languages!
 <P>
 If you feel that you are capable of dubbing a video or even re-doing videos in a non-English language, here's a chance to become a hero and minor celebrity to your
@@ -407,12 +446,12 @@ If you are as excited about this as we think you should be and can convey that e
 forces.  The best way to move forward would be to dub or re-do one of the following videos and upload it someplace (like YouTube or Vimeo):
 <ul>
     <li><A href="http://www.khanacademy.org/video/algebra--solving-inequalities">Mathematics:Solving Inequalities</A></li>
-            
+
     <li><A href=" http://www.khanacademy.org/video/introduction-to-the-atom">Chemistry:Introduction to the Atom</A></li>
     <li><A href="http://www.khanacademy.org/video/newton-s-third-law-of-motion">Physics:Newton's Third Law of Motion</A></li>
-            
+
     <li><A href="http://www.khanacademy.org/video/introduction-to-evolution-and-natural-selection">Biology: Introduction to Evolution and Natural Selection</A></li>
-            
+
 </ul>
 Then email the link to <b><a href="mailto:translations@khanacademy.org">translations@khanacademy.org</a></b> .
 In your email, include a bit about your background (education, occupation, etc.) and your sense of how many videos you could do and how long you think it would take. If you are a good fit, we'll
@@ -426,14 +465,14 @@ We look forward to educating the world with you!
     <section>
         <h1>Salman Khan</h1>
         <p>
-            Sal created all of the teaching videos currently in the library as well as most of the exercises. 
-            He also built the first two versions of this website.  These are obviously huge contributions, 
+            Sal created all of the teaching videos currently in the library as well as most of the exercises.
+            He also built the first two versions of this website.  These are obviously huge contributions,
             but his greatest contribution was his decision to make it all open source.  This led to a large number of...
         </p>
     </section>
     <section>
         <h1>Volunteers</h1>
-        <p>Sal and the rest of the Khan Academy community would like to thank the following people 
+        <p>Sal and the rest of the Khan Academy community would like to thank the following people
         who recently volunteered their time, energy, and expertise (in alphabetical order):</p>
         <dl>
             <dt>abarwale</dt><dd>Closed captioning.</dd>
@@ -442,7 +481,7 @@ We look forward to educating the world with you!
             <dt>Maneesh Arora</dt><dd>Website analytics, Facebook integration, user interface mockups.</dd>
             <dt>blowingdandelions</dt><dd>Closed captioning.</dd>
             <dt>Bill Bonner</dt><dd>Divisibility and scientific notation exercise modules, issue triage.</dd>
-            <dt>Dean Brettle</dt><dd>Release management, exercise scratch pad, periodic exercise review, Facebook login, 
+            <dt>Dean Brettle</dt><dd>Release management, exercise scratch pad, periodic exercise review, Facebook login,
             video viewing page.</dd>
             <dt>Robert Conrad</dt><dd>Patch to warn students that the hint button resets streaks.</dd>
             <dt>gulickh</dt><dd>Closed captioning.</dd>
@@ -461,14 +500,14 @@ We look forward to educating the world with you!
             <dt>Max Van Keuren</dt><dd>Closed captioning.</dd>
             <dt>Harley Witt</dt><dd>Issue triage and video discussion moderation.</dd>
         </dl>
-        <p>If you've recently helped out as a volunteer and we've accidentally left you off the 
-        above list, please <a href="/reportissue?type=Defect&issue_labels=Component-Code">let us know</a>.  
+        <p>If you've recently helped out as a volunteer and we've accidentally left you off the
+        above list, please <a href="/reportissue?type=Defect&issue_labels=Component-Code">let us know</a>.
         If you want to volunteer, please see <a href="#how-to-help">how to help</a>.</p>
     </section>
     <section>
         <h1>Open Source Software</h1>
         <p>We develop the Khan Academy as an open source project and we incorporate components developed
-        by many other open source projects.  We'd like to thank the following projects for making such 
+        by many other open source projects.  We'd like to thank the following projects for making such
         useful components available under open source licenses (in alphabetical order):</p>
         <dl>
             <dt><a href="http://www1.chapman.edu/~jipsen/mathml/asciimath.html">ASCIIMathML</a> and <a href="http://www1.chapman.edu/~jipsen/svg/asciisvg.html">ASCIIsvg</a></dt><dd>Used for writing exercise modules.</dd>
@@ -490,7 +529,7 @@ We look forward to educating the world with you!
     </section>
     <section>
         <h1>Donors</h1>
-        <p>Last, but certainly not least, we'd like to thank everyone who has <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291">donated money</a>.  Your donations allow 
+        <p>Last, but certainly not least, we'd like to thank everyone who has <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291">donated money</a>.  Your donations allow
         the Khan Academy to continue to produce high-quality educational resources that are free for all.</p>
     </section>
 </div>
