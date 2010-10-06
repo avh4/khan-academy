@@ -496,7 +496,6 @@ class ViewVideo(app.RequestHandler):
         video_playlists = query.fetch(5)
         playlists = []
         video_position = None
-        video_folder = ""
         for video_playlist in video_playlists:
             p = video_playlist.playlist
             if (playlist is not None and p.youtube_id == playlist.youtube_id) or (playlist is None and video_position is None):
@@ -546,7 +545,10 @@ class ViewExerciseVideos(app.RequestHandler):
                 if len(exercise_videos) > 0:
                     first_video = exercise_videos[0].video
                     issue_labels = 'Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id
-
+                for exercise_video in exercise_videos:
+                    video = exercise_video.video
+                    video.video_folder = get_mangled_playlist_name(video.playlists[0])  
+                    
                 template_values = {
                     'App' : App,
                     'points': user_data.points,

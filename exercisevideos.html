@@ -1,27 +1,56 @@
 {% extends "page_template.html" %}
 {% block pagetitle%}<A href="/exercises?exid={{exercise.name}}">{{extitle}}</A> : Videos{% endblock pagetitle %}
 {% block pagecontent %}
-<script language=Javascript1.2>
-function changeVideo(identifier)
-{
-	document.getElementById("vid").innerHTML = '<object width="873" height="525"><param name="movie" value="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="873" height="525"></embed></object>';
 
+{% if App.offline_mode %}
 
-}
+    <script type="text/javascript" src="/videos/swfobject.js"></script>
+    <script type="text/javascript">
+    swfobject.registerObject("idOVideo", "9.0.0", "");
 
-</script>
-{% if first_video %}
-  {% for exercise_video in exercise_videos %}
-	<P>
-	<A href="javascript:changeVideo('{{exercise_video.video.youtube_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
-  {% endfor %}
-<P>
-<div id="vid"></div>
-<script language=Javascript1.2>
-changeVideo('{{first_video.youtube_id}}');
-</script>
+    function changeVideo(video_folder, readable_id)
+    {
+    	document.getElementById("vid").innerHTML = '<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/' + video_folder + '/' + readable_id + '.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/' + video_folder + '/' + readable_id + '.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>';
+    }
+    </script>
+    {% if first_video %}
+      {% for exercise_video in exercise_videos %}
+    	<P>
+    	<A href="javascript:changeVideo('{{exercise_video.video.video_folder}}', '{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
+      {% endfor %}
+    <P>
+    <div id="vid"></div>
+    <script language=Javascript1.2>
+    changeVideo('{{first_video.video_folder}}', '{{first_video.readable_id}}');
+    </script>
+    {% else %}
+    <p>There are no videos for this exercise yet.</p>
+    {% endif %}
+    <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
+
 {% else %}
-<p>There are no videos for this exercise yet.</p>
+
+    <script language=Javascript1.2>
+    function changeVideo(identifier)
+    {
+    	document.getElementById("vid").innerHTML = '<object width="873" height="525"><param name="movie" value="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="873" height="525"></embed></object>';
+    }
+    </script>
+    {% if first_video %}
+      {% for exercise_video in exercise_videos %}
+    	<P>
+    	<A href="javascript:changeVideo('{{exercise_video.video.youtube_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
+      {% endfor %}
+    <P>
+    <div id="vid"></div>
+    <script language=Javascript1.2>
+    changeVideo('{{first_video.youtube_id}}');
+    </script>
+    {% else %}
+    <p>There are no videos for this exercise yet.</p>
+    {% endif %}
+    <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
+
 {% endif %}
-<A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
+
 {% endblock pagecontent %}
