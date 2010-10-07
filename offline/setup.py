@@ -34,7 +34,7 @@ def download_appengine(appengine_zip):
         replace_in_file("google_appengine/google/appengine/tools/dev_appserver.py", 
             "MAX_RUNTIME_RESPONSE_SIZE = 10 << 20", "MAX_RUNTIME_RESPONSE_SIZE = 10 << 22") 
         replace_in_file("google_appengine/google/appengine/tools/dev_appserver_main.py", 
-            "http_server.serve_forever()", "os.system('start http://localhost:8080'); http_server.serve_forever()")             
+            "http_server.serve_forever()", "import webbrowser; webbrowser.open('http://localhost:8080'); http_server.serve_forever()")             
             
 
 def get_khanacademy_code():
