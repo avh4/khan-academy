@@ -30,19 +30,19 @@
         <div class="page_controls comments_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video?v={{video.youtube_id}}&comments_page={{ prev_page_1_based }}" class="comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
+                    <a href="/video/{{video.readable_id}}?comments_page={{ prev_page_1_based }}" class="comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
                 {% endifnotequal %}
 
                 {% for page in pages %}
                     {% ifequal page current_page_1_based %}
                         <span class="page_current comments_page_current">{{ page }}</span>
                     {% else %}
-                        <a href="/video?v={{video.youtube_id}}&comments_page={{ page }}" class="page comments_page" page="{{ page }}">{{ page }}</a>
+                        <a href="/video/{{video.readable_id}}?comments_page={{ page }}" class="page comments_page" page="{{ page }}">{{ page }}</a>
                     {% endifequal %}
                 {% endfor %}
 
                 {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video?v={{video.youtube_id}}&comments_page={{ next_page_1_based }}" class="comments_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
+                    <a href="/video/{{video.readable_id}}?comments_page={{ next_page_1_based }}" class="comments_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
                 {% endifnotequal %}
             </span>
         </div>
@@ -63,7 +63,7 @@
 
     {% if comments_hidden %}
         <span class="comments_show_more">
-             <a href="/video?v={{video.youtube_id}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="/images/balloons.png" />Show more</a>
+             <a href="/video/{{video.readable_id}}?comments_page=1" class="comment_show control uses_script"><img class="icon" src="/images/balloons.png" />Show more</a>
         </span>
     {% endif %}
 

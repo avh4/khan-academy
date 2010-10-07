@@ -2293,6 +2293,7 @@ def real_main():
         ('/discussion/addquestion', qa.AddQuestion),
         ('/discussion/expandquestion', qa.ExpandQuestion),
         ('/discussion/addanswer', qa.AddAnswer),
+        ('/discussion/editentity', qa.EditEntity),
         ('/discussion/answers', qa.Answers),
         ('/discussion/pagequestions', qa.PageQuestions),
         ('/discussion/deleteentity', qa.DeleteEntity),

@@ -1,17 +1,22 @@
 {% block answers %}
     {% for answer in answers %}
-        <div class="answer">
-            {% if standalone %}
-                <a href="/video?v={{video.youtube_id}}&qa_expand_id={{answer.parent.key.id}}#q_{{answer.parent.key.id}}">
-                    {{ answer.content|truncatewords:5|escape|linebreaksbr }}
-                </a>
-            {% else %}
-                {{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}
-            {% endif %}
-        </div>
+        <div class="answer_container">
+            <input type="hidden" name="entity_key" value="{{ answer.key }}" />
+            <div class="answer">
+                {% if standalone %}
+                    <a href="/video/{{video.readable_id}}?qa_expand_id={{answer.parent.key.id}}#q_{{answer.parent.key.id}}">
+                        {{ answer.content|truncatewords:5|escape|linebreaksbr }}
+                    </a>
+                {% else %}
+                    <span>{{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
+                {% endif %}
+            </div>
 
-        <div class="answer_sig sig">
-            {% signature answer "answered" %}
+            <div class="answer_sig sig">
+                {% signature answer "answered" %}
+            </div>
+
+            {% feedback_controls_answer "Edit this answer" answer %}
         </div>
     {% endfor %}
 {% endblock %}

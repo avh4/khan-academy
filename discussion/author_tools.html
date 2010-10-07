@@ -1,5 +1,9 @@
 <span class="mod_tools">
     <span class="mod_tools_hidden">
+        {% if editable %}
+            <a href="#" class="control mod_edit" data-key="{{ target.key }}">edit</a>
+            | 
+        {% endif %}
         <a href="#" class="control mod_delete" data-key="{{ target.key }}">delete</a>
     </span>
 </span>

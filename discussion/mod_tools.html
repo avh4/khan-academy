@@ -2,7 +2,8 @@
     <span class="control mod_tools_show">(<a href="#" class="control mod_show">mod</a>)</span>
     <span class="mod_tools_hidden" style="display:none;">
         mod tools:
-        <a href="#" class="control mod_delete" data-key="{{ target.key }}">delete</a>
+        <a href="#" class="control mod_edit" data-key="{{ target.key }}">edit</a>
+        | <a href="#" class="control mod_delete" data-key="{{ target.key }}">delete</a>
 
         {% if not is_question %}
             | <a href="#" class="control mod_change" data-target_type="{{ type_question }}" data-key="{{ target.key }}">change to question</a>

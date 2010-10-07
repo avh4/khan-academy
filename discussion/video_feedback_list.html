@@ -35,7 +35,7 @@
         {% for video in videos %}
             <tr>
                 <td>
-                    <a class="video" href="/video?v={{ video.youtube_id }}&{{ dict_count_questions|hash:video.key }}_{{ dict_count_answers|hash:video.key }}_{{ dict_count_comments|hash:video.key }}">
+                    <a class="video" href="/video/{{ video.readable_id }}?{{ dict_count_questions|hash:video.key }}_{{ dict_count_answers|hash:video.key }}_{{ dict_count_comments|hash:video.key }}">
                         {{ video.playlists.pop|escape }}: {{ video.title }}
                     </a>
                 </td>

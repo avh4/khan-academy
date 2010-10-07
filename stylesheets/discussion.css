@@ -12,8 +12,8 @@
 .video_comments .comments_show_more { padding-left: 6px; }
 .video_comments a.comment_add { outline: none; }
 
-.video_questions div.question_form .question_text, 
-.video_questions div.answer_form .answer_text {
+.video_questions .question_text, 
+.video_questions .answer_text {
     padding: 10px;
     border: 1px solid #898989;
     -moz-border-radius: 10px;
@@ -22,14 +22,14 @@
     outline: none;
 }
 
-.video_questions div.question_form .question_text {
+.video_questions .question_text {
     width: 750px;
     background: #fff url(/images/questionmark.gif) no-repeat 680px center;
     height: 80px;
     resize: none;
 }
 
-.video_questions div.answer_form .answer_text {
+.video_questions .answer_text {
     width: 670px;
 }
 

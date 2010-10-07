@@ -1,0 +1,21 @@
+<div class="{{ feedback_type }}_controls_container" style="display:none;">
+    <table class="{{ feedback_type }}_add_controls"><tr>
+        <td class="controls">
+
+        {% if target %}
+            <input name="entity_key" type="hidden" value="{{ target.key }}"/>
+        {% endif %}
+
+            <input class="button {{ feedback_type }}_submit" type="button" value="{{ button_label }}"/>
+            or <a href="#" class="{{ feedback_type }}_cancel control">Cancel</a>
+        </td>
+
+        {% if show_chars_remaining %}
+            <td class="chars_remaining">
+                <span class="chars_remaining_count">500</span> characters left
+            </td>
+        {% endif %}
+
+    </tr></table>
+</div>
+

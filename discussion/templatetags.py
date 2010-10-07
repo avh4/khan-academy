@@ -43,6 +43,7 @@ def mod_tools(target):
 def author_tools(target):
     return {
                 "target": target,
+                "editable": not target.is_type(models_discussion.FeedbackType.Comment)
             }
 
 @register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))
@@ -57,6 +58,24 @@ def standalone_answers(video, dict_answers):
 def username_and_notification(username):
     count = models_discussion.FeedbackNotification.gql("WHERE user = :1", app.get_current_user()).count()
     return { "username": username, "count": count }
+
+@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+def feedback_controls_question(button_label, target=None):
+    return {
+                "feedback_type": models_discussion.FeedbackType.Question,
+                "button_label": button_label,
+                "show_chars_remaining": True,
+                "target": target
+            }
+
+@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+def feedback_controls_answer(button_label, target=None):
+    return {
+                "feedback_type": models_discussion.FeedbackType.Answer,
+                "button_label": button_label,
+                "show_chars_remaining": False,
+                "target": target
+            }
 
 @register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))
 def honeypots():

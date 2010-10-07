@@ -74,6 +74,7 @@ var Moderation = {
 
     init: function() {
         $(".mod_show").live("click", Moderation.showTools);
+        $(".mod_tools .mod_edit").live("click", Moderation.editEntity);
         $(".mod_tools .mod_delete").live("click", Moderation.deleteEntity);
         $(".mod_tools .mod_change").live("click", Moderation.changeEntityType);
     },
@@ -95,6 +96,11 @@ var Moderation = {
                 null,
                 "Are you sure you want to delete this?",
                 "deleted!");
+    },
+
+    editEntity: function() {
+        QA.edit(this);
+        return false;
     },
 
     changeEntityType: function() {
@@ -146,9 +152,10 @@ var QA = {
         jQuestionText.watermark(jQuestionText.attr("watermark"));
 
         $("a.question_show").click(QA.showQuestions);
-        $("a.question_cancel").click(QA.cancelQuestion);
         $("form.questions").submit(function(){return false;});
-        $("input.question_submit").click(QA.submitQuestion);
+
+        $("input.question_submit, input.answer_submit").live("click", QA.submit);
+        $(".question_cancel, .answer_cancel").live("click", QA.cancel);
 
         $(window).resize(QA.repositionStickyNote);
 
@@ -162,47 +169,44 @@ var QA = {
         $(".question_container").mouseover(QA.hover).mouseout(QA.unhover).click(QA.expand);
         $(".add_yours").click(QA.expandAndFocus);
         $(".answer_text").focus(QA.focusAnswer).watermark($(".answer_text").attr("watermark"));
-        $("a.answer_cancel").click(QA.cancelAnswer);
-        $("input.answer_submit").click(QA.submitAnswer);
     },
 
-   submitQuestion: function() {
+   submit: function() {
 
-        var jText = $(".question_text");
+        var parent = QA.getQAParent(this);
+        if (!parent.length) return;
+
+        var type = $(parent).is(".answer_container") ? "answer" : "question";
+
+        var jText = $("." + type + "_text", parent);
 
         if (!$.trim(jText.val()).length) return;
         if (jText.val() == jText.attr("watermark")) return;
 
         var fQuestionsHidden = $("div.questions_hidden").length && !$("div.questions_hidden").is(":visible");
-        var data_suffix = "&questions_hidden=" + (fQuestionsHidden ? "1" : "0");
-        $.post("/discussion/addquestion", 
-                $("form.questions").serialize() + data_suffix, 
-                QA.finishSubmitQuestion);
+        var data_suffix = "&page=" + QA.page + "&questions_hidden=" + (fQuestionsHidden ? "1" : "0");
+
+        var sUrl = "/discussion/add" + type;
+        var jData = $("form." + type, parent);
+
+        var fxnCallback = type == "question" ? QA.finishSubmitQuestion : QA.finishSubmitAnswer;
+
+        if (QA.isInsideExistingQA(this))
+        {
+            sUrl = "/discussion/editentity";
+            jData = $("textarea:first, input[name=entity_key]:first", parent);
+        }
+
+        $.post(sUrl, 
+                jData.serialize() + data_suffix, 
+                function(data) {fxnCallback(data, jText[0]);});
 
         QA.disable();
-        Discussion.showThrobberOnRight($(".question_cancel"));
+        Discussion.showThrobberOnRight($("." + type + "_cancel", parent));
     },
 
-   submitAnswer: function() {
-
-        var parent = QA.getQuestionParent(this);
-        if (!parent.length) return;
-
-        var jText = $(".answer_text", parent);
-
-        if (!$.trim(jText.val()).length) return;
-        if (jText.val() == jText.attr("watermark")) return;
-
-        $.post("/discussion/addanswer", 
-                $("form.answers", parent).serialize(), 
-                function(data) {QA.finishSubmitAnswer(data, jText[0]);});
-
-        QA.disable();
-        Discussion.showThrobberOnRight($(".answer_cancel", parent));
-    },
-
-    finishSubmitQuestion: function(data) {
-        setTimeout(QA.cancelQuestion, 1);
+    finishSubmitQuestion: function(data, el) {
+        setTimeout(function(){QA.cancel.apply(el)}, 1);
         QA.finishLoadPage(data);
         QA.enable();
     },
@@ -215,7 +219,7 @@ var QA = {
         try { eval("var dict_json = " + data); }
         catch(e) { return; }
 
-        setTimeout(function(){QA.cancelAnswer.apply(el)}, 1);
+        setTimeout(function(){QA.cancel.apply(el)}, 1);
         $(".answers_container", parent).html(dict_json.html);
         Discussion.prepareYouTubeLinks();
         Discussion.hideThrobber();
@@ -256,8 +260,20 @@ var QA = {
         return false;
     },
 
+    getQAParent: function(el) {
+        var parentAnswer = $(el).parents("div.answer_container");
+        if (parentAnswer.length) return parentAnswer;
+        return QA.getQuestionParent(el);
+    },
+
     getQuestionParent: function(el) {
         return $(el).parents("div.question_container");
+    },
+
+    isInsideExistingQA: function(el) {
+        var parent = QA.getQAParent(el);
+        if (!parent.length) return false;
+        return $(".sig", parent).length > 0;
     },
 
     updateRemainingQuestion: function() {
@@ -267,11 +283,13 @@ var QA = {
     },
 
     disable: function() {
-        $(".question_text, .question_submit, .answer_text, .answer_submit").attr("disabled", "disabled");
+        $(".question_text, .answer_text").attr("disabled", "disabled");
+        $(".question_submit, .answer_submit").addClass("buttonDisabled").attr("disabled", "disabled");
     },
 
     enable: function() {
-        $(".question_text, .question_submit, .answer_text, .answer_submit").removeAttr("disabled");
+        $(".question_text, .answer_text").removeAttr("disabled");
+        $(".question_submit, .answer_submit").removeClass("buttonDisabled").removeAttr("disabled");
     },
 
     showNeedsLoginNote: function(el, sMsg) {
@@ -294,28 +312,74 @@ var QA = {
         return false;
     },
 
+    edit: function(el) {
+        var parent = QA.getQAParent(el);
+
+        if (!parent.length) return;
+
+        var type = $(parent).is(".answer_container") ? "answer" : "question";
+
+        var jEntity = $("." + type, parent);
+        var jControls = $("." + type + "_controls_container", parent);
+        var jSignature = $("." + type + "_sig", parent);
+
+        if (!jEntity.length || !jControls.length || !jSignature.length) return;
+
+        jEntity.addClass(type + "_placeholder").removeClass(type);
+        jSignature.css("display", "none");
+        jControls.slideDown();
+
+        // Build up a textarea with plaintext content
+        var jTextarea = $("<textarea name='" + type + "_text' class='" + type + "_text' rows=2 cols=40></textarea>");
+
+        // Replace BRs with newlines.  Must use {newline} placeholder instead of \n b/c IE
+        // doesn't preserve newline content when asking for .text() content below.
+        var reBR = /<br>/gi;
+        var reBRReverse = /{newline}/g;
+        var jContent = $("<div>").html(jEntity.html().replace(reBR, "{newline}"));
+
+        // Remove any artificially inserted ellipsis
+        $(".ellipsisExpand", jContent).remove();
+
+        // Fill, insert, then focus textarea
+        jTextarea.val($.trim(jContent.text().replace(reBRReverse, "\n")));
+        $("span", jEntity).first().css("display", "none").after(jTextarea);
+
+        setTimeout(function(){jTextarea.focus();}, 1);
+    },
+
     focusQuestion: function() {
 
         if (QA.showNeedsLoginNote(this, "to ask your question.")) return false;
 
-        $(".question_controls_container").slideDown("fast");
+        var parent = QA.getQAParent(this);
+        if (!parent.length) return;
+
+        $(".question_controls_container", parent).slideDown("fast");
         QA.updateRemainingQuestion();
         QA.showStickyNote();
     },
 
-    cancelQuestion: function() {
-        $(".question_text").val("").watermark($(".question_text").attr("watermark"));
-        QA.hideStickyNote();
-        $(".question_controls_container").slideUp("fast");
-        return false;
-    },
-
-    cancelAnswer: function() {
-        var parent = QA.getQuestionParent(this);
+    cancel: function() {
+        var parent = QA.getQAParent(this);
         if (!parent.length) return;
 
-        $(".answer_text", parent).val("").watermark($(".answer_text").attr("watermark"));
-        $(".answer_controls_container", parent).slideUp("fast");
+        var type = $(parent).is(".answer_container") ? "answer" : "question";
+
+        $("." + type + "_text", parent).val("").watermark($("." + type + "_text").attr("watermark"));
+
+        if (type == "question") QA.hideStickyNote();
+
+        $("." + type + "_controls_container", parent).slideUp("fast");
+
+        if (QA.isInsideExistingQA(this))
+        {
+            $("textarea", parent).first().remove();
+            $("span", parent).first().css("display", "");
+            $("." + type + "_placeholder", parent).addClass(type).removeClass(type + "_placeholder");
+            $("." + type + "_sig", parent).slideDown("fast");
+        }
+
         return false;
     },
 
@@ -323,7 +387,7 @@ var QA = {
 
         if (QA.showNeedsLoginNote(this, "to answer this question.")) return false;
 
-        var parent = QA.getQuestionParent(this);
+        var parent = QA.getQAParent(this);
         if (!parent.length) return;
 
         $(".answer_controls_container", parent).slideDown("fast");
@@ -355,7 +419,7 @@ var QA = {
 
     expandAndFocus: function(e) {
 
-        var parent = QA.getQuestionParent(this);
+        var parent = QA.getQAParent(this);
         if (!parent.length) return;
 
         QA.expand.apply(parent[0], [e, function(){$(".answer_text", parent).focus();}]);

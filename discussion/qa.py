@@ -101,11 +101,12 @@ class PageQuestions(app.RequestHandler):
             pass
 
         video_key = self.request.get("video_key")
+        qa_expand_id = int(self.request.get("qa_expand_id")) if self.request.get("qa_expand_id") else -1
         video = db.get(video_key)
 
         if video:
             questions_hidden = (self.request.get("questions_hidden") == "1")
-            template_values = video_qa_context(video, page, None, questions_hidden)
+            template_values = video_qa_context(video, page, qa_expand_id, questions_hidden)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
@@ -205,6 +206,40 @@ class AddQuestion(app.RequestHandler):
             db.put(question)
 
         self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
+
+class EditEntity(app.RequestHandler):
+
+    def post(self):
+
+        user = app.get_current_user()
+        if not user:
+            return
+
+        key = self.request.get("entity_key")
+        text = self.request.get("question_text") or self.request.get("answer_text")
+
+        if key and text:
+            feedback = db.get(key)
+            if feedback:
+                if is_current_user_moderator() or feedback.author == user:
+
+                    feedback.content = text
+                    db.put(feedback)
+
+                    # Redirect to appropriate list of entities depending on type of 
+                    # feedback entity being edited.
+                    if feedback.is_type(models_discussion.FeedbackType.Question):
+
+                        questions_hidden = self.request.get("questions_hidden")
+                        page = self.request.get("page")
+                        video = feedback.first_target()
+                        self.redirect("/discussion/pagequestions?video_key=%s&page=%s&qa_expand_id=%s&questions_hidden=%s" % 
+                                        (video.key(), page, feedback.key().id(), questions_hidden))
+
+                    elif feedback.is_type(models_discussion.FeedbackType.Answer):
+
+                        question = feedback.parent()
+                        self.redirect("/discussion/answers?question_key=%s" % question.key())
 
 class ChangeEntityType(app.RequestHandler):
 

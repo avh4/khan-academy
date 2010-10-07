@@ -14,43 +14,36 @@
         </div>
     </div>
 
-    <div class="question_form">
-        <form class="questions" name="questions">
-            {% honeypots %}
-            <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
-            <div class="question_placeholder requires_script">
-                <textarea name="question_text" class="question_text" rows="3" cols="40" 
-                            watermark="Example: Why does Sal use shorthand notation at 5:43?"></textarea>
-            </div>
-            <div class="question_controls_container" style="display:none;">
-                <table class="question_add_controls"><tr>
-                    <td class="controls">
-                        <input class="button question_submit" type="button" value="Ask your question"/>
-                        or <a href="#" class="question_cancel control">Cancel</a>
-                    </td>
-                    <td class="chars_remaining">
-                        <span class="chars_remaining_count">500</span> characters left
-                    </td>
-                </tr></table>
-            </div>
-        </form>
+    <div class="question_container">
+        <div class="question_form">
+            <form class="question" name="questions">
+                {% honeypots %}
+                <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                <div class="question_placeholder requires_script">
+                    <textarea name="question_text" class="question_text" rows="3" cols="40" 
+                                watermark="Example: Why does Sal use shorthand notation at 5:43?"></textarea>
+                </div>
+                {% feedback_controls_question "Ask your question" %}
+           </form>
+        </div>
     </div>
 
     <div class="questions_container">
     {% block questions %}
 
         {% for question in questions %}
-            <a name="q_{{question.key.id}}" />
+            <a name="q_{{question.key.id}}"></a>
             <div class="question_container
                 {% ifequal qa_expand_id question.key.id %}
                     question_container_expanded
                 {% endifequal %}
             ">
+                <input type="hidden" name="entity_key" value="{{ question.key }}" />
                 <div class="question" data-question_id="{{ question.key.id }}">
                     {% ifnotequal qa_expand_id question.key.id %}
-                        <a class="question_link" href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
+                        <a class="question_link" href="/video/{{video.readable_id}}?qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
                     {% endifnotequal %}
-                            <span>{{ question.content|escape|urlize|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
+                            <span>{{ question.content|escape|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
                     {% ifnotequal qa_expand_id question.key.id %}
                         </a>
                     {% endifnotequal %}
@@ -64,7 +57,7 @@
                     ">
                         <table><tr>
                         <td style="vertical-align: middle;">
-                            <a href="/video?v={{video.youtube_id}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
+                            <a href="/video/{{video.readable_id}}?qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
                         </td>
                         <td>
                             <span class="question_answer_count_add_yours">
@@ -79,6 +72,8 @@
                     {% signature question "asked" %}
                 </div>
 
+                {% feedback_controls_question "Edit this question" question %}
+
                 <div class="answers_and_form_container"
                     {% ifnotequal qa_expand_id question.key.id %}
                         style="display:none;"
@@ -88,23 +83,18 @@
                         {% question_answers question.children_cache %}
                     </div>
 
-                    <div class="answer_form">
-                        <form class="answers">
-                            {% honeypots %}
-                            <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
-                            <input type="hidden" name="question_key" value="{{ question.key }}" />
-                            <div class="answer_placeholder">
-                                <textarea name="answer_text" class="answer_text" rows="2" cols="40" watermark="Answer this question"></textarea>
-                            </div>
-                            <div class="answer_controls_container" style="display:none;">
-                                <table class="answer_add_controls"><tr>
-                                    <td class="controls">
-                                        <input class="button answer_submit" type="button" value="Answer this question"/>
-                                        or <a href="#" class="control answer_cancel">Cancel</a>
-                                    </td>
-                                </tr></table>
-                            </div>
-                        </form>
+                    <div class="answer_container">
+                        <div class="answer_form">
+                            <form class="answer">
+                                {% honeypots %}
+                                <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                                <input type="hidden" name="question_key" value="{{ question.key }}" />
+                                <div class="answer_placeholder">
+                                    <textarea name="answer_text" class="answer_text" rows="2" cols="40" watermark="Answer this question"></textarea>
+                                </div>
+                                {% feedback_controls_answer "Answer this question" %}
+                            </form>
+                        </div>
                     </div>
 
                 </div>
@@ -123,19 +113,19 @@
         <div class="page_controls questions_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video?v={{video.youtube_id}}&qa_page={{ prev_page_1_based }}" class="questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
+                    <a href="/video/{{video.readable_id}}?qa_page={{ prev_page_1_based }}" class="questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
                 {% endifnotequal %}
 
                 {% for page in pages %}
                     {% ifequal page current_page_1_based %}
                         <span class="page_current questions_page_current">{{ page }}</span>
                     {% else %}
-                        <a href="/video?v={{video.youtube_id}}&qa_page={{ page }}" class="page questions_page" page="{{ page }}">{{ page }}</a>
+                        <a href="/video/{{video.readable_id}}?qa_page={{ page }}" class="page questions_page" page="{{ page }}">{{ page }}</a>
                     {% endifequal %}
                 {% endfor %}
 
                 {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video?v={{video.youtube_id}}&qa_page={{ next_page_1_based }}" class="questions_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
+                    <a href="/video/{{video.readable_id}}?qa_page={{ next_page_1_based }}" class="questions_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
                 {% endifnotequal %}
             </span>
         </div>
@@ -150,7 +140,7 @@
 
     {% if questions_hidden %}
         <div class="questions_show_more question_placeholder">
-             <a href="/video?v={{video.youtube_id}}&qa_page=1" class="button question_show"><img class="icon" src="/images/balloons.png" />Show more questions</a>
+             <a href="/video/{{video.readable_id}}?qa_page=1" class="button question_show"><img class="icon" src="/images/balloons.png" />Show more questions</a>
         </div>
     {% endif %}
 
