@@ -383,59 +383,6 @@ a:link.google-analytics-link-track
 		border-top: 0;
 		padding: 10px;
 	}
-		#library #library-content #library-sub-nav {
-			display: none;
-			background: url(bg_texture.png);
-			left: -5px;
-			padding-left 5px;
-			width: 21em;
-			border-right: 1px solid #ccc;
-			border-bottom: 1px solid #ccc;
-			box-shadow: 1px 1px 2px #ddd;
-			-moz-box-shadow: 1px 1px 2px #ddd;
-			-webkit-box-shadow: 1px 1px 2px #ddd;
-		}
-			#library #library-content #library-sub-nav #list-of-lists {
-				text-shadow: 1px 1px 0 #fff;
-				list-style: none;
-				margin: 15px 0 0;
-				padding: 0;
-			}
-				#library #library-content #library-sub-nav #list-of-lists li {
-					margin: 0;
-					padding: 0 5px .9em 15px;
-					line-height: normal;
-				}
-					#library #library-content #library-sub-nav #list-of-lists li a {
-						font-weight: normal;
-						position: relative;	
-						line-height: 80%;
-					}
-					#library #library-content #library-sub-nav #list-of-lists li a.selected {
-						color: #000;
-						cursor: text;
-						text-shadow: 1px 1px 1px #ccc;
-					}
-					#library #library-content #library-sub-nav #list-of-lists li a.selected:after {
-						/* creates the smaller  triangle */
-						content:"\00a0";
-						display:block; /* reduce the damage in FF3.0 */
-						position:absolute;
-						bottom:2px; /* value = - border-top-width - border-bottom-width */
-						left:253px; /* value = (:before left) + (:before border-left) - (:after border-left) */
-						width:8px;
-						height:14px;
-						background: url(nipple-right.png) no-repeat;
-						z-index: 10;				
-					}
-					#library #library-content #library-sub-nav #list-of-lists li.category {
-						font-weight: bold;
-						margin-top: 5px;
-						color: #666;	
-					}
-					#library #library-content #library-sub-nav #list-of-lists li.all-vids a {
-						font-weight: bold;
-					}
 		#library #library-content #library-content-main {
 			padding: 7px 0 5px;
 		}
@@ -454,23 +401,19 @@ a:link.google-analytics-link-track
 				line-height: 1.2em;
 			}
             #library #library-content #library-content-main ol {
-                list-style: decimal outside;
+                list-style: none none;
                 margin-left: 0;
                 padding-left: 0;
             }
             #library #library-content #library-content-main li {
                 display: list-item;
-                float: left;
-                margin-left: 3em;
+                overflow: hidden;
+                text-overflow: elipsis;
                 color: #666666;
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-				line-height: 1.2em;
-				height: 1.2em;
-				width: 220px;
                 display: block;
-				overflow: hidden;
 				background: url(/images/playnav.png) no-repeat 0 3px;
 				padding: 0 2px 0 13px;
 			}

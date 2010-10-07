@@ -1,20 +1,14 @@
 <div id="library">
-		<div id="library-content" >
-			<div id="library-content-main">
-			{% for playlist_data in all_playlists %}
-				<A NAME="{{playlist_data.title}}"></A>
-				<h2 class='playlist-heading'>{{playlist_data.title|escape}}</h2>
+        <div id="library-content" >
+            <div id="library-content-main">
+            {% for playlist_data in all_playlists %}
+                <A NAME="{{playlist_data.title}}"></A>
+                <h2 class='playlist-heading'>{{playlist_data.title|escape}}</h2>
                 <p class='playlist-desc'>{{playlist_video.playlist.description|escape}}</p>
-                <ol>				
-				{% for playlist_video in playlist_data.videos %}<li>
-				    <A href="/video/{{playlist_video.video.readable_id}}?playlist={{playlist_video.playlist.title|urlencode}}" title="{{playlist_video.video.title|escape}}" class='video-link'>{{playlist_video.video.title|escape}}</A>
-                    </li>{% endfor %}
-                </ol>
-				<div class="clear"></div>
-				<P></P>
-			{% endfor %}
-			</div>
-		</div>
+                {% column_major_sorted_videos playlist_data.videos %}
+                <div class="clear"></div>
+                <P></P>
+            {% endfor %}
+            </div>
+        </div>
 </div>
-	
-
