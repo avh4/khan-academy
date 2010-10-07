@@ -24,7 +24,7 @@ def find_column_index(content, column_index_list):
     for index, column_breakpoint in enumerate(column_index_list):
         if (content < column_breakpoint):
             return index
-    return len(quartile_list)
+    return len(column_index_list)
 
 def column_height(list_item_index, column_breakpoints):
     height = list_item_index

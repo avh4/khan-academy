@@ -408,12 +408,12 @@ a:link.google-analytics-link-track
             #library #library-content #library-content-main li {
                 display: list-item;
                 overflow: hidden;
-                text-overflow: elipsis;
+                text-overflow: ellipsis;
+                white-space: nowrap;
                 color: #666666;
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-                display: block;
 				background: url(/images/playnav.png) no-repeat 0 3px;
 				padding: 0 2px 0 13px;
 			}

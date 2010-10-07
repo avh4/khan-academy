@@ -36,19 +36,14 @@ class HighlightNode(template.Node):
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
 
     items_in_column = len(videos) / num_cols
-    remainder_indices = range(0, len(videos) % num_cols)
+    remainder = len(videos) % num_cols
     link_height = font_size * 1.5 
-    column_indices = [(items_in_column * multiplier) for multiplier in range(1, num_cols + 1)]
-    
-    for remainder_index in remainder_indices:
-        column_indices[remainder_index] += 1
-        for i, v in enumerate(column_indices):
-            if i > remainder_index:
-                column_indices[i] += 1
+    # Calculate the column indexes (tops of columns). Since video lists won't divide evenly, distribute
+    # the remainder to the left-most columns first, and correctly increment the indices for remaining columns
+    column_indices = [(items_in_column * multiplier + (multiplier if multiplier <= remainder else remainder)) for multiplier in range(1, num_cols + 1)]
         
     return {
                "videos": videos,
-               "items_in_column": items_in_column,
                "column_width": column_width,
                "column_width_plus_gutter": column_width + gutter,
                "font_size": font_size,
