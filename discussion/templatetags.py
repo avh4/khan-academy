@@ -65,7 +65,8 @@ def feedback_controls_question(button_label, target=None):
                 "feedback_type": models_discussion.FeedbackType.Question,
                 "button_label": button_label,
                 "show_chars_remaining": True,
-                "target": target
+                "target": target,
+                "hidden": True
             }
 
 @register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
@@ -74,7 +75,18 @@ def feedback_controls_answer(button_label, target=None):
                 "feedback_type": models_discussion.FeedbackType.Answer,
                 "button_label": button_label,
                 "show_chars_remaining": False,
-                "target": target
+                "target": target,
+                "hidden": True
+            }
+
+@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+def feedback_controls_comment(button_label, target=None):
+    return {
+                "feedback_type": models_discussion.FeedbackType.Comment,
+                "button_label": button_label,
+                "show_chars_remaining": True,
+                "target": target,
+                "hidden": False
             }
 
 @register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))

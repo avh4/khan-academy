@@ -166,7 +166,7 @@ var QA = {
     initPagesAndQuestions: function() {
         $("form.answers").submit(function(){return false;});
         $("a.questions_page").click(function(){ QA.loadPage($(this).attr("page")); return false; });
-        $(".question_container").mouseover(QA.hover).mouseout(QA.unhover).click(QA.expand);
+        $(".questions_container .question_container").mouseover(QA.hover).mouseout(QA.unhover).click(QA.expand);
         $(".add_yours").click(QA.expandAndFocus);
         $(".answer_text").focus(QA.focusAnswer).watermark($(".answer_text").attr("watermark"));
     },

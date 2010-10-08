@@ -72,15 +72,7 @@
             {% honeypots %}
             <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
             <textarea name="comment_text" class="comment_text" rows="3" cols="40"></textarea><br/>
-            <table class="comment_add_controls"><tr>
-                <td class="chars_remaining">
-                    <span class="chars_remaining_count">500</span> characters left
-                </td>
-                <td class="controls">
-                    <input class="button comment_submit" type="button" value="Comment"/>
-                    or <a href="#" class="control comment_cancel">Cancel</a>
-                </td>
-            </tr></table>
+            {% feedback_controls_comment "Comment" %}
         </form>
     </div>
 </div>
