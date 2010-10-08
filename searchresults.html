@@ -1,5 +1,5 @@
 {% extends "page_template.html" %}
-{% block pagetitle %}Search Results for {{page_search_query|escape}}{% endblock pagetitle %}
+{% block pagetitle %}{% if page_search_query %}Search Results for {{page_search_query|escape}}{% else %}Search{% endif %}{% endblock pagetitle %}
 {% block pagescript %}
 <style>
     .error {
@@ -13,7 +13,14 @@
         margin-left: 4em;
         margin-right: 4em;
     }
-    
+    .search_results form {
+        display: block;
+        margin: 1em;
+        text-align: center;
+    }
+    .search_results form * {
+        font-size: large;
+    }
     .search_results section {
         margin-top: 1em;
     }
@@ -48,6 +55,11 @@
 {% endblock pagemessage %}
 {% block pagecontent %}
 <article class="search_results">
+    <form action="/search">
+        <input type="text" name="page_search_query" value='{{page_search_query|escape}}'>
+        <button type="submit">Search</button>
+    </form>
+
     {% if playlists %}
     <section class="playlists">
         <h1>Playlists</h1>

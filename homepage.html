@@ -64,7 +64,13 @@
 <table border=0 cellpadding=2 cellspacing=0 align=right bgcolor="black" >
 <tr>
 <td rowspan=2 width=200 height=200>
-	<iframe align=right class="youtube-player" type="text/html" width="249" height="200" src="http://www.youtube.com/embed/p6l8-1kHUsA" frameborder="0"></iframe>
+    <object id="idOVideo" name="idOVideo" width="249" height="200">
+        <param name="movie" value="http://www.youtube.com/v/p6l8-1kHUsA&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
+        <param name="allowFullScreen" value="true">
+        <param name="allowScriptAccess" value="always">
+        <param name="wmode" value="transparent">
+        <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/p6l8-1kHUsA&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="249" height="200">
+    </object>
 </td>
 <td width=200>
 	<A href="/press/fortune"><img src="/images/splashthumbnails/fortune_thumbnail.png" align=right></a>
@@ -87,7 +93,7 @@
 <P>
 <table cellpadding=2 border=0>
 <tr><td>
-<div><h2>Browse 1800+ videos by topic:</h2>
+<div id="browse"><h2>Browse 1800+ videos by topic:</h2>
 <ul class="menu" id="menu">
 	<li><a href="#" class="menulink">Math</a>
 		<ul>

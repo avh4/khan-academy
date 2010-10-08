@@ -90,7 +90,7 @@ footer > * {
 }
 
 #page_visitors {
-	color: #9db63a;
+	color: #8ebe4f;
 	text-decoration: none;
 }
 
@@ -107,7 +107,7 @@ footer > * {
     margin-right: 0;
     height: 95px;
     position: relative;
-    min-width: 480px;
+    min-width: 55ex;
 }
 
 #page_status {
@@ -120,6 +120,7 @@ footer > * {
 
 #page_search {
     display: block;
+    clear: right;
     float: right;
     margin-top: 0.2em;
     padding-top: 0;
@@ -152,12 +153,11 @@ nav {
 }
 
 #page_main_nav {
-    position: absolute;
-    bottom: 0;
-    right: 0;
+    clear: none;
+    float: left;
 }
 
-#page_main_nav ul {
+#page_main_nav ul.page_links {
     float: right;
 }
 
@@ -180,16 +180,16 @@ header ul, footer ul {
     padding: .2em 1em .2em 1em;
 }
 
-nav ul li, header ul li, footer ul li {
+nav ul.page_links li, header ul.page_links li, footer ul.page_links li {
     display: inline;
     white-space: nowrap;
 }
 
-nav ul li:before, header ul li:before, footer ul li:before {
+nav ul.page_links li:before, header ul.page_links li:before, footer ul.page_links li:before {
     content: "|";
 }
 
-nav ul li:first-child:before, header ul li:first-child:before, footer ul li:first-child:before {
+nav ul.page_links li:first-child:before, header ul.page_links li:first-child:before, footer ul.page_links li:first-child:before {
     content: "";
 }
 

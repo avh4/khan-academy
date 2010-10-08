@@ -2185,7 +2185,8 @@ class Search(app.RequestHandler):
         query = query.strip()
         query_too_short = None 
         if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
-            template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
+            if len(query) > 0:
+                template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
             self.render_template("searchresults.html", template_values)
             return
         searched_phrases = []
