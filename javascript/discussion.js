@@ -151,7 +151,6 @@ var QA = {
         jQuestionText.change(QA.updateRemainingQuestion).keyup(QA.updateRemainingQuestion);
         jQuestionText.watermark(jQuestionText.attr("watermark"));
 
-        $("a.question_show").click(QA.showQuestions);
         $("form.questions").submit(function(){return false;});
 
         $("input.question_submit, input.answer_submit").live("click", QA.submit);
@@ -183,8 +182,7 @@ var QA = {
         if (!$.trim(jText.val()).length) return;
         if (jText.val() == jText.attr("watermark")) return;
 
-        var fQuestionsHidden = $("div.questions_hidden").length && !$("div.questions_hidden").is(":visible");
-        var data_suffix = "&page=" + QA.page + "&questions_hidden=" + (fQuestionsHidden ? "1" : "0");
+        var data_suffix = "&page=" + QA.page;
 
         var sUrl = "/discussion/add" + type;
         var jData = $("form." + type, parent);
@@ -252,12 +250,6 @@ var QA = {
         QA.initPagesAndQuestions();
         Discussion.hideThrobber();
         Discussion.prepareYouTubeLinks();
-    },
-
-    showQuestions: function() {
-        $("div.questions_hidden").slideDown("fast");
-        $(".questions_show_more").css("display", "none");
-        return false;
     },
 
     getQAParent: function(el) {

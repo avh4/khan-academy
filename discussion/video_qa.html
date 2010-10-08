@@ -100,16 +100,11 @@
                 </div>
             </div>
 
-            {% if not forloop.last %}
-                {% ifequal forloop.counter limit_initially_visible %}
-                    <div class="questions_hidden" style="display:none;">
-                {% endifequal %}
-            {% endif %}
-
             <div class="clearFloat">&nbsp;</div>
         {% endfor %}
 
         {% if show_page_controls %}
+        <h3>More questions about this video:</h3>
         <div class="page_controls questions_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
@@ -131,18 +126,8 @@
         </div>
         {% endif %}
 
-        {% if questions_hidden %}
-            </div>
-        {% endif %}
-
     {% endblock %}
     </div>
-
-    {% if questions_hidden %}
-        <div class="questions_show_more question_placeholder">
-             <a href="/video/{{video.readable_id}}?qa_page=1" class="button question_show"><img class="icon" src="/images/balloons.png" />Show more questions</a>
-        </div>
-    {% endif %}
 
     {% if not user %}
         <div class="login_note" style="display:none;">

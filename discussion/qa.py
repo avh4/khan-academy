@@ -105,8 +105,7 @@ class PageQuestions(app.RequestHandler):
         video = db.get(video_key)
 
         if video:
-            questions_hidden = (self.request.get("questions_hidden") == "1")
-            template_values = video_qa_context(video, page, qa_expand_id, questions_hidden)
+            template_values = video_qa_context(video, page, qa_expand_id)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
@@ -190,7 +189,6 @@ class AddQuestion(app.RequestHandler):
             return
 
         question_text = self.request.get("question_text")
-        questions_hidden = self.request.get("questions_hidden")
         video_key = self.request.get("video_key")
         video = db.get(video_key)
 
@@ -205,7 +203,7 @@ class AddQuestion(app.RequestHandler):
             question.types = [models_discussion.FeedbackType.Question]
             db.put(question)
 
-        self.redirect("/discussion/pagequestions?video_key=%s&page=0&questions_hidden=%s" % (video_key, questions_hidden))
+        self.redirect("/discussion/pagequestions?video_key=%s&page=0" % video_key)
 
 class EditEntity(app.RequestHandler):
 
@@ -230,11 +228,10 @@ class EditEntity(app.RequestHandler):
                     # feedback entity being edited.
                     if feedback.is_type(models_discussion.FeedbackType.Question):
 
-                        questions_hidden = self.request.get("questions_hidden")
                         page = self.request.get("page")
                         video = feedback.first_target()
-                        self.redirect("/discussion/pagequestions?video_key=%s&page=%s&qa_expand_id=%s&questions_hidden=%s" % 
-                                        (video.key(), page, feedback.key().id(), questions_hidden))
+                        self.redirect("/discussion/pagequestions?video_key=%s&page=%s&qa_expand_id=%s" % 
+                                        (video.key(), page, feedback.key().id()))
 
                     elif feedback.is_type(models_discussion.FeedbackType.Answer):
 
@@ -274,9 +271,9 @@ class DeleteEntity(app.RequestHandler):
                     entity.deleted = True
                     db.put(entity)
 
-def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
+def video_qa_context(video, page=0, qa_expand_id=None):
 
-    limit_per_page = 10
+    limit_per_page = 5
 
     if qa_expand_id:
         # If we're showing an initially expanded question,
@@ -287,12 +284,8 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
             count_preceding = question_preceding_query.count()
             page = 1 + (count_preceding / limit_per_page)
 
-    if page > 0:
-        questions_hidden = False # Never hide questions if specifying specific page
-    else:
+    if page <= 0:
         page = 1
-
-    limit_initially_visible = 3 if questions_hidden else limit_per_page
 
     question_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False)
     answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, video.key(), False)
@@ -321,8 +314,6 @@ def video_qa_context(video, page=0, qa_expand_id=None, questions_hidden=True):
             "video": video,
             "questions": questions,
             "count_total": count_total,
-            "questions_hidden": count_page > limit_initially_visible,
-            "limit_initially_visible": limit_initially_visible,
             "pages": range(1, pages_total + 1),
             "pages_total": pages_total,
             "prev_page_1_based": page - 1,

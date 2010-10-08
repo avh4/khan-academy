@@ -31,7 +31,6 @@
 
 .video_questions textarea.watermark { color: #898989; }
 
-.video_questions .questions_show_more { padding-top: 10px; }
 .video_questions div.question_controls_container { padding-top: 3px; }
 .video_questions div.question_sig { padding: 3px 0 0 30px; }
 
@@ -356,7 +355,6 @@ img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px
 #page_sub_nav img.icon { background: #E5ECF9; }
 
 .page_controls { padding: 5px 0; }
-.questions_container .page_controls { padding-top: 20px; }
 
 .sig { font-style: italic; padding-left: 7px; color: #898989; }
 img.throbber { position: absolute; }
