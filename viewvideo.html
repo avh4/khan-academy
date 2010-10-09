@@ -156,19 +156,13 @@ $(function(){
             {% endif %}
         </nav>
         <div id="youtube_blocked">
-            <p>
-                Your browser cannot contact <a href="http://www.youtube.com/">YouTube</a> to display the video.
-                Your internet service provider (e.g. your school or company) may be blocking access.  To work around this issue,
-                please use one of the <a href="/downloads">options for downloading the videos</a>.
-            </p>
-        </div>
-{% if App.offline_mode %}
+{% if available_from_archiveorg or App.offline_mode %}
 		<script type="text/javascript" src="/videos/swfobject.js"></script>
 		<script type="text/javascript">
-		swfobject.registerObject("idOVideo", "9.0.0", "");
+		swfobject.registerObject("flvVideo", "9.0.0", "");
 		</script>
 		<div>
-			<object id="idOVideo" name="idOVideo" width="640" height="360">
+			<object id="flvVideo" name="flvVideo" width="640" height="360">
 				<param name="movie" value="/videos/OSplayer.swf?movie={{video_path}}&volume=100" />
             	<param name="allowFullScreen" value="true">
             	<param name="allowScriptAccess" value="always">
@@ -185,6 +179,13 @@ $(function(){
 			</object>
 		</div>
 {% else %}
+            <p>
+                Your browser cannot contact <a href="http://www.youtube.com/">YouTube</a> to display the video.
+                Your internet service provider (e.g. your school or company) may be blocking access.  To work around this issue,
+                please use one of the <a href="/downloads">options for downloading the videos</a>.
+            </p>
+{% endif %}
+        </div>
         <object id="idOVideo" name="idOVideo" width="800" height="480">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
             <param name="allowFullScreen" value="true">
@@ -192,7 +193,6 @@ $(function(){
             <param name="wmode" value="transparent">
             <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
         </object>
-{% endif %}
         {% if playlists %}
         <label id="playlists">
             <b>Related Playlists:</b>

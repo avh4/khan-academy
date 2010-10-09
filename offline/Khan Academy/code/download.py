@@ -10,9 +10,9 @@ playlist_mapping = {
     "BrainTeasers": "BrainTeasers",
     'CAHSEEExampleProblems': "CahseeExampleProblems",
     "Calculus": "Calculus",
-    'CaliforniaStandardsTest-AlgebraI': "CaliforniaStandardsTestAlgebraI",
-    'CaliforniaStandardsTest-AlgebraII': "CaliforniaStandardsTestAlgebraIi",
-    "CaliforniaStandardsTest-Geometry": "CaliforniaStandardsTestGeometry",
+    'CaliforniaStandardsTestAlgebraI': "CaliforniaStandardsTestAlgebraI",
+    'CaliforniaStandardsTestAlgebraII': "CaliforniaStandardsTestAlgebraIi",
+    "CaliforniaStandardsTestGeometry": "CaliforniaStandardsTestGeometry",
     "Chemistry": "Chemistry",
     "CreditCrisis": "CreditCrisis",
     "CurrentEconomics": "CurrentEconomics",
@@ -21,9 +21,9 @@ playlist_mapping = {
     "GeithnerPlan": "GeithnerPlan",
     "Geometry": "Geometry",
     "GMATDataSufficiency": "GmatDataSufficiency",
-    'GMAT-ProblemSolving': "GmatProblemSolving",
+    'GMATProblemSolving': "GmatProblemSolving",
     "LinearAlgebra": "LinearAlgebra",
-    'MATestsforEducationLicensure(MTEL)-Pre-Alg': "MaTestsForEducationLicensuremtel-pre-alg",
+    'MATestsforEducationLicensureMTEL-Pre-Alg': "MaTestsForEducationLicensuremtel-pre-alg",
     "PaulsonBailout": "PaulsonBailout",
     "Physics": "Physics",
     "Pre-algebra": "Pre-algebra",
@@ -68,7 +68,7 @@ if ao_playlist_name:
 
         if not os.path.exists(folder): 
             os.chdir("../code")
-            os.system('7za.exe e ../download_scripts/'+download_filename+' -o' + folder)
+            os.system('7za e ../download_scripts/'+download_filename+' -o' + folder)
             os.chdir(folder)        
             filename_mapping = {}
             for title, youtube_id, readable_id in videos:
@@ -96,6 +96,6 @@ for title, youtube_id, readable_id in videos:
     if os.path.exists(folder + '/' + readable_id + ".flv"):
         print "already downloaded", readable_id
     else:
-        os.system('python.exe ../youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
+        os.system('python ../youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
 
                          

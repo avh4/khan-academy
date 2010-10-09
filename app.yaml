@@ -17,7 +17,8 @@ skip_files:
 - ^(.*/)?sample_data/.*
 
 handlers:
-#offline placeholder
+- url: /videos
+  static_dir: offline/Khan Academy/videos
   
 - url: /stylesheets
   static_dir: stylesheets

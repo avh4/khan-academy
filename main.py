@@ -395,10 +395,14 @@ class OldViewVideo(app.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
 
-def get_mangled_playlist_name(orig_playlist_name):
-    return orig_playlist_name.replace(" ", "").replace(":", "-")
+def get_mangled_playlist_name(playlist_name):
+    for char in " :()":
+        playlist_name = playlist_name.replace(char, "")
+    return playlist_name
     
-    
+
+uploaded_playlists = ["Algebra", "Algebra I Worked Examples", "Arithmetic", "Banking and Money", "Chemistry"]    
+
 class ViewVideo(app.RequestHandler):
 
     def get(self):
@@ -504,8 +508,14 @@ class ViewVideo(app.RequestHandler):
                 video_position = video_playlist.video_position
             else:
                 playlists.append(p)
-        video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv"        
-
+        if App.offline_mode:
+            video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+        else:
+            video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+        available_from_archiveorg = False
+        if playlist_title in uploaded_playlists:
+            available_from_archiveorg = True
+        
         if video.description == video.title:
             video.description = None
 
@@ -518,7 +528,8 @@ class ViewVideo(app.RequestHandler):
                                                   'playlists': playlists,
                                                   'video': video,
                                                   'videos': videos,
-                                                  'video_path': video_path,                                                                                                     
+                                                  'video_path': video_path,
+                                                  'available_from_archiveorg': available_from_archiveorg,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
@@ -1317,7 +1328,6 @@ class GenerateLibraryContent(app.RequestHandler):
         all_topics_list.append('Probability')
         all_topics_list.append('Calculus')
         all_topics_list.append('Differential Equations')
-
         all_topics_list.append('Khan Academy-Related Talks and Interviews')
         all_topics_list.append('History')
         all_topics_list.append('Organic Chemistry')
@@ -1389,7 +1399,7 @@ class GenerateVideoMapping(app.RequestHandler):
         all_topics_list.append('Statistics')
         all_topics_list.append('Probability')
         all_topics_list.append('Calculus')
-        all_topics_list.append('Differential Equations')
+        all_topics_list.append('Differential Equations')        
         all_topics_list.append('Khan Academy-Related Talks and Interviews')
         all_topics_list.append('History')
         all_topics_list.append('Organic Chemistry')

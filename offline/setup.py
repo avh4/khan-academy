@@ -62,7 +62,7 @@ def get_khanacademy_code():
         print "output:\n" + output
     os.chdir(code_dir + "/khanacademy-read-only")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
-    replace_in_file("app.yaml", "#offline placeholder", "- url: /videos\n  static_dir: ../../videos")    
+    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")    
     return revision
     
     
