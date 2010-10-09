@@ -103,14 +103,19 @@ footer > * {
 }
 
 #page_top_nav {
-    margin-left: 400px;
     margin-right: 0;
-    height: 95px;
     position: relative;
     min-width: 55ex;
 }
 
+#page_auth {
+    float: right;
+    display: block;
+}
+
 #page_status {
+    display: block;
+    clear: right;
     float: right;
 }
 
@@ -120,8 +125,8 @@ footer > * {
 
 #page_search {
     display: block;
-    clear: right;
     float: right;
+    clear: right;
     margin-top: 0.2em;
     padding-top: 0;
     padding-right: 1em;
@@ -155,6 +160,7 @@ nav {
 #page_main_nav {
     clear: none;
     float: left;
+    *min-width: 45ex;
 }
 
 #page_main_nav ul.page_links {

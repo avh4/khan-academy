@@ -143,7 +143,27 @@
                     </span>
                 <fb:like id="page_fb_like" href="http://www.khanacademy.org" show_faces="false" width="280" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
             </div>
-            <div id="page_top_nav">
+            <ul class="page_links" id="page_auth">
+
+                {% if username %}
+                <li>
+                    {% username_and_notification username %}
+                </li>
+                <li>
+                    <a id="page_logout" href="{{logout_url}}">Logout</a>
+                </li>
+                {% else %}
+                <li id="page_login_options">
+                    <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id"><img style="border:outset 2px; padding: 1px;" src="/images/login-with-google-button.png" alt="Login with Google"></a>
+                    {% if App.facebook_app_secret %}
+                    <fb:login-button></fb:login-button>
+                    {% endif %}
+                    {% if App.accepts_openid %}
+                    [<a href="{{login_url}}">more login choices...</a>]
+                    {% endif %}
+                </li>
+                {% endif %}
+            </ul>
                 <nav class="css-menu" id="page_main_nav">
                     <ul>
                         <li>
@@ -229,38 +249,15 @@
                         </li>
                     </ul>
                 </nav>
+            <div id="page_top_nav">
                 <ul class="page_links" id="page_status">
-
-                    {% if username %}
-                    <li>
-                        {% username_and_notification username %}
-                    </li>
-                    {% endif %}
+    
                     {% if points %}
                     <li>
                         <label id="page_points">
                             Energy Points: {{points}}
                         </label>
                     </li>
-                    {% endif %}
-                    {% if username %}
-                    <li>
-                        <a id="page_logout" href="{{logout_url}}">Logout</a>
-                    </li>
-                    {% else %}
-                    <li id="page_login_options">
-                        <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id"><img style="border:outset 2px; padding: 1px;" src="/images/login-with-google-button.png" alt="Login with Google"></a>
-                        {% if App.facebook_app_secret %}
-                        <fb:login-button></fb:login-button>
-                        {% endif %}
-                        {% if App.accepts_openid %}
-                        [<a href="{{login_url}}">more login choices...</a>]
-                        {% endif %}
-                    </li>
-<!--
-  <div><ul class="providers">
-</form>
--->
                     {% endif %}
                 </ul>
                 <ul class="page_links" id="page_social_links">
