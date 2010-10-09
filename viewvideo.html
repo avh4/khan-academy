@@ -193,6 +193,9 @@ $(function(){
             <param name="wmode" value="transparent">
             <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
         </object>
+{% if available_from_archiveorg %}
+        <a href="{{video_path}}">Download this video</a>
+{% endif %}
         {% if playlists %}
         <label id="playlists">
             <b>Related Playlists:</b>

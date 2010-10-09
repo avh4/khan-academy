@@ -401,7 +401,9 @@ def get_mangled_playlist_name(playlist_name):
     return playlist_name
     
 
-uploaded_playlists = ["Algebra", "Algebra I Worked Examples", "Arithmetic", "Banking and Money", "Chemistry"]    
+uploaded_playlists = ["Algebra", "Algebra I Worked Examples", "Arithmetic", 
+    "Banking and Money", "Biology", "Brain Teasers", 
+    "CAHSEE Example Problems", "Calculus", "California Standards Test: Algebra I", "Chemistry"]    
 
 class ViewVideo(app.RequestHandler):
 
