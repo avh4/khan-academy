@@ -1661,8 +1661,8 @@ class ViewIndividualReport(app.RequestHandler):
                     #logging.info("total_done: " + str(exercise.total_done))
                     #logging.info("total_correct: " + str(total_correct))
                     #logging.info("correct_of_last_ten: " + str(correct_of_last_ten))
-                    if exercise.total_done > 0:
-                        exercise.percent_correct = "%.0f%%" % (100.0*total_correct/exercise.total_done,)
+                    if problem_num > 0:
+                        exercise.percent_correct = "%.0f%%" % (100.0*total_correct/problem_num,)
                     else:
                         exercise.percent_correct = "0%"            
                     exercise.percent_of_last_ten = "%.0f%%" % (100.0*correct_of_last_ten/10,)
