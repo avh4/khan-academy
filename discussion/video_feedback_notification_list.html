@@ -12,8 +12,8 @@
     {% if videos %}
         {% for video in videos %}
             <div class="video_questions video_question_notifications">
-                <strong><a href="/video?v={{video.youtube_id}}">{{video.title|escape}}</a></strong>
-                {% standalone_answers video dict_answers %}
+                <strong><a href="/video/{{video.readable_id}}?playlist={{video.first_playlist.title|urlencode}}">{{video.title|escape}}</a></strong>
+                {% standalone_answers video video.first_playlist dict_answers %}
             </div>
         {% endfor %}
     {% else %}

@@ -51,8 +51,8 @@ def question_answers(answers):
     return { "answers": answers }
 
 @register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))
-def standalone_answers(video, dict_answers):
-    return { "answers": dict_answers[video.key()], "video": video, "standalone": True }
+def standalone_answers(video, playlist, dict_answers):
+    return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
 
 @register.inclusion_tag(("discussion/username_and_notification.html", "username_and_notification.html"))
 def username_and_notification(username):

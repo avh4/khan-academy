@@ -8,7 +8,7 @@
     {% for answer in answers %}
     <item>
         <title>Question: {{ answer.parent.content|truncatewords:5|escape }}</title>
-        <link>http://khanexercises.appspot.com/video?v={{ answer.first_target.youtube_id }}&amp;qa_expand_id={{ answer.parent.key.id }}#q_{{ answer.parent.key.id}}</link>
+        <link>http://khanexercises.appspot.com/video/{{ answer.first_target.readable_id }}?playlist={{answer.first_target.first_playlist.title|urlencode}}&amp;qa_expand_id={{ answer.parent.key.id }}#q_{{ answer.parent.key.id}}</link>
         <guid>{{ answer.key }}</guid>
         <pubDate>{{ answer.date }}</pubDate>
         <description>Answer: {{ answer.content|escape }}</description>

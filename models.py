@@ -271,6 +271,12 @@ class Video(Searchable, db.Model):
         # End of hack
         return video
 
+    def first_playlist(self):
+        query = VideoPlaylist.all()
+        query.filter('video =', self)
+        query.filter('live_association =', True)
+        return query.get().playlist
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()

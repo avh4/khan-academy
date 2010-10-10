@@ -459,10 +459,7 @@ class ViewVideo(app.RequestHandler):
             if video is None:
                 report_missing_video(readable_id)
                 return
-            query = VideoPlaylist.all()
-            query.filter('video =', video)
-            query.filter('live_association =', True)
-            playlist = query.get().playlist
+            playlist = video.first_playlist()
             redirect_to_canonical_url = True
         
         if redirect_to_canonical_url:

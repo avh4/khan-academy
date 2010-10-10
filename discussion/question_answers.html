@@ -4,7 +4,7 @@
             <input type="hidden" name="entity_key" value="{{ answer.key }}" />
             <div class="answer">
                 {% if standalone %}
-                    <a href="/video/{{video.readable_id}}?qa_expand_id={{answer.parent.key.id}}#q_{{answer.parent.key.id}}">
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{answer.parent.key.id}}#q_{{answer.parent.key.id}}">
                         {{ answer.content|truncatewords:5|escape|linebreaksbr }}
                     </a>
                 {% else %}
