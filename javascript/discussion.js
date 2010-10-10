@@ -193,6 +193,8 @@ var QA = {
         {
             sUrl = "/discussion/editentity";
             jData = $("textarea:first, input[name=entity_key]:first", parent);
+            var jPlaylist = $("#playlist_key:first");
+            jData = jData.add(jPlaylist);
         }
 
         $.post(sUrl, 
@@ -234,6 +236,7 @@ var QA = {
         $.get("/discussion/pagequestions", 
                 {
                     video_key: $("#video_key").val(), 
+                    playlist_key: $("#playlist_key").val(),
                     page: page
                 }, 
                 QA.finishLoadPage);
@@ -480,6 +483,7 @@ var Comments = {
         $.get("/discussion/pagecomments", 
                 {
                     video_key: $("#video_key").val(), 
+                    playlist_key: $("#playlist_key").val(),
                     page: page
                 }, 
                 Comments.finishLoadPage);

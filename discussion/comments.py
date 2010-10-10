@@ -23,11 +23,13 @@ class PageComments(app.RequestHandler):
             pass
 
         video_key = self.request.get("video_key")
+        playlist_key = self.request.get("playlist_key")
         video = db.get(video_key)
+        playlist = db.get(playlist_key)
 
         if video:
             comments_hidden = (self.request.get("comments_hidden") == "1")
-            template_values = video_comments_context(video, page, comments_hidden)
+            template_values = video_comments_context(video, playlist, page, comments_hidden)
             path = os.path.join(os.path.dirname(__file__), 'video_comments.html')
 
             html = render_block_to_string(path, 'comments', template_values)
@@ -52,6 +54,7 @@ class AddComment(app.RequestHandler):
         comment_text = self.request.get("comment_text")
         comments_hidden = self.request.get("comments_hidden")
         video_key = self.request.get("video_key")
+        playlist_key = self.request.get("playlist_key")
         video = db.get(video_key)
 
         if comment_text and video:
@@ -65,9 +68,9 @@ class AddComment(app.RequestHandler):
             comment.types = [models_discussion.FeedbackType.Comment]
             db.put(comment)
 
-        self.redirect("/discussion/pagecomments?video_key=%s&page=0&comments_hidden=%s" % (video_key, comments_hidden))
+        self.redirect("/discussion/pagecomments?video_key=%s&playlist_key=%s&page=0&comments_hidden=%s" % (video_key, playlist_key, comments_hidden))
 
-def video_comments_context(video, page=0, comments_hidden=True):
+def video_comments_context(video, playlist, page=0, comments_hidden=True):
 
     if page > 0:
         comments_hidden = False # Never hide questions if specifying specific page
@@ -87,6 +90,7 @@ def video_comments_context(video, page=0, comments_hidden=True):
             "user": app.get_current_user(),
             "is_mod": is_current_user_moderator(),
             "video": video,
+            "playlist": playlist,
             "comments": comments,
             "count_total": count_total,
             "comments_hidden": count_page > limit_initially_visible,

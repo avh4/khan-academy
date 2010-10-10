@@ -19,6 +19,7 @@
             <form class="question" name="questions">
                 {% honeypots %}
                 <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
                 <div class="question_placeholder requires_script">
                     <textarea name="question_text" class="question_text" rows="3" cols="40" 
                                 watermark="Example: Why does Sal use shorthand notation at 5:43?"></textarea>
@@ -41,7 +42,7 @@
                 <input type="hidden" name="entity_key" value="{{ question.key }}" />
                 <div class="question" data-question_id="{{ question.key.id }}">
                     {% ifnotequal qa_expand_id question.key.id %}
-                        <a class="question_link" href="/video/{{video.readable_id}}?qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
+                        <a class="question_link" href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
                     {% endifnotequal %}
                             <span>{{ question.content|escape|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
                     {% ifnotequal qa_expand_id question.key.id %}
@@ -57,7 +58,7 @@
                     ">
                         <table><tr>
                         <td style="vertical-align: middle;">
-                            <a href="/video/{{video.readable_id}}?qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
+                            <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
                         </td>
                         <td>
                             <span class="question_answer_count_add_yours">
@@ -88,6 +89,7 @@
                             <form class="answer">
                                 {% honeypots %}
                                 <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                                <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
                                 <input type="hidden" name="question_key" value="{{ question.key }}" />
                                 <div class="answer_placeholder">
                                     <textarea name="answer_text" class="answer_text" rows="2" cols="40" watermark="Answer this question"></textarea>
@@ -108,19 +110,19 @@
         <div class="page_controls questions_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video/{{video.readable_id}}?qa_page={{ prev_page_1_based }}" class="questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ prev_page_1_based }}" class="questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
                 {% endifnotequal %}
 
                 {% for page in pages %}
                     {% ifequal page current_page_1_based %}
                         <span class="page_current questions_page_current">{{ page }}</span>
                     {% else %}
-                        <a href="/video/{{video.readable_id}}?qa_page={{ page }}" class="page questions_page" page="{{ page }}">{{ page }}</a>
+                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ page }}" class="page questions_page" page="{{ page }}">{{ page }}</a>
                     {% endifequal %}
                 {% endfor %}
 
                 {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video/{{video.readable_id}}?qa_page={{ next_page_1_based }}" class="questions_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ next_page_1_based }}" class="questions_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
                 {% endifnotequal %}
             </span>
         </div>

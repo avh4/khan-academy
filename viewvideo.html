@@ -204,8 +204,8 @@ $(function(){
             {% endfor %}
         </label>
         {% endif %}
-        {% video_comments video comments_page %}
-        {% video_qa video qa_page qa_expand_id %}
+        {% video_comments video playlist comments_page %}
+        {% video_qa video playlist qa_page qa_expand_id %}
         </div>
     </article>
 {% endblock pagecontent %}

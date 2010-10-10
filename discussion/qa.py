@@ -101,11 +101,13 @@ class PageQuestions(app.RequestHandler):
             pass
 
         video_key = self.request.get("video_key")
+        playlist_key = self.request.get("playlist_key")
         qa_expand_id = int(self.request.get("qa_expand_id")) if self.request.get("qa_expand_id") else -1
         video = db.get(video_key)
+        playlist = db.get(playlist_key)
 
         if video:
-            template_values = video_qa_context(video, page, qa_expand_id)
+            template_values = video_qa_context(video, playlist, page, qa_expand_id)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
@@ -190,6 +192,7 @@ class AddQuestion(app.RequestHandler):
 
         question_text = self.request.get("question_text")
         video_key = self.request.get("video_key")
+        playlist_key = self.request.get("playlist_key")
         video = db.get(video_key)
 
         if question_text and video:
@@ -203,7 +206,7 @@ class AddQuestion(app.RequestHandler):
             question.types = [models_discussion.FeedbackType.Question]
             db.put(question)
 
-        self.redirect("/discussion/pagequestions?video_key=%s&page=0" % video_key)
+        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=0" % (video_key, playlist_key))
 
 class EditEntity(app.RequestHandler):
 
@@ -214,6 +217,7 @@ class EditEntity(app.RequestHandler):
             return
 
         key = self.request.get("entity_key")
+        playlist_key = self.request.get("playlist_key")
         text = self.request.get("question_text") or self.request.get("answer_text")
 
         if key and text:
@@ -230,8 +234,8 @@ class EditEntity(app.RequestHandler):
 
                         page = self.request.get("page")
                         video = feedback.first_target()
-                        self.redirect("/discussion/pagequestions?video_key=%s&page=%s&qa_expand_id=%s" % 
-                                        (video.key(), page, feedback.key().id()))
+                        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=%s&qa_expand_id=%s" % 
+                                        (video.key(), playlist_key, page, feedback.key().id()))
 
                     elif feedback.is_type(models_discussion.FeedbackType.Answer):
 
@@ -271,7 +275,7 @@ class DeleteEntity(app.RequestHandler):
                     entity.deleted = True
                     db.put(entity)
 
-def video_qa_context(video, page=0, qa_expand_id=None):
+def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
 
     limit_per_page = 5
 
@@ -312,6 +316,7 @@ def video_qa_context(video, page=0, qa_expand_id=None):
             "user": app.get_current_user(),
             "is_mod": is_current_user_moderator(),
             "video": video,
+            "playlist": playlist,
             "questions": questions,
             "count_total": count_total,
             "pages": range(1, pages_total + 1),

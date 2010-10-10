@@ -13,12 +13,12 @@ import app
 register = webapp.template.create_template_register()
 
 @register.inclusion_tag("discussion/video_comments.html")
-def video_comments(video, page=0):
-    return video_comments_context(video, page)
+def video_comments(video, playlist, page=0):
+    return video_comments_context(video, playlist, page)
 
 @register.inclusion_tag("discussion/video_qa.html")
-def video_qa(video, page=0, qa_expand_id=None):
-    return video_qa_context(video, page, qa_expand_id)
+def video_qa(video, playlist, page=0, qa_expand_id=None):
+    return video_qa_context(video, playlist, page, qa_expand_id)
 
 @register.inclusion_tag(("discussion/signature.html", "signature.html"))
 def signature(target=None, verb=None):
