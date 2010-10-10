@@ -1843,6 +1843,10 @@ class ViewCharts(app.RequestHandler):
             else:
                 #logging.info("user is a student looking at their own report")
                 user_data = UserData.get_or_insert_for(user)   
+
+            name = user_data.user.nickname()
+            if student_email != user_data.user.nickname():
+                name = name + " (%s)" % student_email
                 
             logout_url = users.create_logout_url(self.request.uri)
             exercise_name = self.request.get('exercise_name')
@@ -1902,7 +1906,7 @@ class ViewCharts(app.RequestHandler):
                 'num_problems': num_problems,
                 'max_time_taken': max_time_taken,
                 'y_axis_interval': y_axis_interval,
-                'student': student.nickname(),
+                'student': name,
                 'seconds_ranges': seconds_ranges,
                 }
 

@@ -1,14 +1,14 @@
 {% extends "page_template.html" %}
-{% block pagetitle %}Charts for {{ exercise_name }} for {{student}}{% endblock pagetitle %}
+{% block pagetitle %}Charts for {{ exercise_name|escape }} for {{student|escape}}{% endblock pagetitle %}
 {% block pagecontent %}
 {% if not problems %}
-<p>{{student}} hasn't done any problems for {{exercise_name}}</p>
+<p>{{student|escape}} hasn't done any problems for {{exercise_name|escape}}</p>
 {% else %}{% ifequal num_problems 1 %}
-<p>{{student}} has done only one problem for {{exercise_name}}</p>
+<p>{{student|escape}} has done only one problem for {{exercise_name|escape}}</p>
 {% else %}{% ifequal num_problems 2 %}
-<p>{{student}} has done only two problems for {{exercise_name}}</p>
+<p>{{student|escape}} has done only two problems for {{exercise_name|escape}}</p>
 {% else %}
-<p>The charts below show {{student}}'s progress on the {{exercise_name}} exercise.  The first one has a bar for each problem
+<p>The charts below show progress for {{student|escape}} on the {{exercise_name|escape}} exercise.  The first one has a bar for each problem
 done, with it's height showing how many second were taken to complete it.  The blue bars denote a problem answered correctly,
 the red incorrectly. A chart with blue bars that get smaller shows increasing proficiency in the exercise.
 </p>
