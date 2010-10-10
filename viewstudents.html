@@ -61,7 +61,7 @@ you'll see links to their progress reports below, as well as a <a href="/classre
 		{% else %}
 		<tr class="odd_row">
 		{% endif %}
-		<td><a href="/individualreport?student_email={{student}}">{{student}}</a></td>
+		<td><a href="/individualreport?student_email={{student.email}}">{{student.name}}</a></td>
 		</tr>
 {% endfor %}
 </table>

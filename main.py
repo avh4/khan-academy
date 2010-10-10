@@ -403,7 +403,9 @@ def get_mangled_playlist_name(playlist_name):
 
 uploaded_playlists = ["Algebra", "Algebra I Worked Examples", "Arithmetic", 
     "Banking and Money", "Biology", "Brain Teasers", 
-    "CAHSEE Example Problems", "Calculus", "California Standards Test: Algebra I", "Chemistry"]    
+    "CAHSEE Example Problems", "Calculus", 
+    "California Standards Test: Algebra I", "California Standards Test: Algebra II", "California Standards Test: Geometry",
+    "Chemistry"]    
 
 class ViewVideo(app.RequestHandler):
 
@@ -1681,12 +1683,23 @@ class ViewStudents(app.RequestHandler):
         if user:
             user_data = UserData.get_or_insert_for(user)
             logout_url = users.create_logout_url(self.request.uri)
+            
+            student_emails = user_data.get_students()
+            students = []
+            for student_email in student_emails:   
+                student = users.User(email=student_email)
+                student_data = UserData.get_or_insert_for(student)
+                student_data.user.email = student_email
+                student_data.user.name = student_data.user.nickname()    
+                if student_email != student_data.user.nickname():
+                   student_data.user.name += " (%s)" % student_email                                       
+                students.append(student_data.user)
 
             template_values = {
                 'App' : App,
                 'username': user.nickname(),
                 'logout_url': logout_url,
-                'students': user_data.get_students()
+                'students': students,
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
@@ -1725,7 +1738,10 @@ class ViewClassReport(app.RequestHandler):
                 row = []
                 student = users.User(email=student_email)
                 student_data = UserData.get_or_insert_for(student)
-                row.append(ReportCell(data='<a href="/individualreport?student_email=%s">%s</a>' % (student_email, student.nickname()) ))
+                name = student_data.user.nickname()
+                if student_email != student_data.user.nickname():
+                    name = name + " (%s)" % student_email
+                row.append(ReportCell(data='<a href="/individualreport?student_email=%s">%s</a>' % (student_email, name) ))
                 i = 0
                 for exercise in exercises:
                     link = "/charts?student_email="+student_email+"&exercise_name="+exercise 
