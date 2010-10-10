@@ -62,13 +62,8 @@ header, footer {
 }
 
 footer {
+    height: 25px;
     clear: both;
-}
-
-footer > * {
-    margin-left: 1em;
-    margin-right: 1em;
-    text-align: center;
 }
 
 #page_brand  {
@@ -191,9 +186,33 @@ nav ul.page_links li, header ul.page_links li, footer ul.page_links li {
     white-space: nowrap;
 }
 
-nav ul.page_links li:before, header ul.page_links li:before, footer ul.page_links li:before {
+nav ul.page_links li:before, header ul.page_links li:before {
     content: "|";
 }
+
+footer ul.page_links {
+    float: left;
+    padding: 7px;
+}
+
+footer ul.page_links li {
+    padding-right: 8px;
+}
+
+footer ul.page_links .link_separator{
+    border-left: 1px solid black;
+    padding-left: 10px;
+}
+
+footer div {
+    float: right;
+    padding: 7px;
+}
+
+footer div img {
+    border: 0px;
+}
+
 
 nav ul.page_links li:first-child:before, header ul.page_links li:first-child:before, footer ul.page_links li:first-child:before {
     content: "";
