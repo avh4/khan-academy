@@ -401,11 +401,31 @@ def get_mangled_playlist_name(playlist_name):
     return playlist_name
     
 
-uploaded_playlists = ["Algebra", "Algebra I Worked Examples", "Arithmetic", 
-    "Banking and Money", "Biology", "Brain Teasers", 
-    "CAHSEE Example Problems", "Calculus", 
-    "California Standards Test: Algebra I", "California Standards Test: Algebra II", "California Standards Test: Geometry",
-    "Chemistry"]    
+uploaded_playlists = [
+    "Algebra", 
+    "Algebra I Worked Examples", 
+    "Arithmetic", 
+    "Banking and Money", 
+    "Biology", 
+    "Brain Teasers", 
+    "CAHSEE Example Problems", 
+    "Calculus", 
+    "California Standards Test: Algebra I", 
+    "California Standards Test: Algebra II", 
+    "California Standards Test: Geometry",
+    "Chemistry", 
+    "ck12.org Algebra 1 Examples", 
+    "Credit Crisis", 
+    "Current Economics",
+    "Differential Equations", 
+    "Finance", 
+    "Geithner Plan", 
+    "Geometry", 
+    "GMAT Data Sufficiency",
+    "GMAT: Problem Solving",
+    "History",
+    "Khan Academy-Related Talks and Interviews",
+]    
 
 class ViewVideo(app.RequestHandler):
 

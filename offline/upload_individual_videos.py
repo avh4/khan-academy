@@ -38,6 +38,7 @@ if __name__ == "__main__":
     # documented here: http://en.wikipedia.org/wiki/YouTube
     
     # write the meta data files needed for uploading to archive.org
+    # http://www.archive.org/help/contrib-advanced.php
     cwd = os.getcwd()
     write_meta_files('Algebra', 'This is the original Algebra playlist on the Khan Academy and is where Sal continues to add videos that are not done for some other organization. It starts from very basic algebra and works its way through algebra II. This is the best algebra playlist to start at if you\'ve never seen algebra before. Once you get your feet wet, you may want to try some of the videos in the "Algebra I Worked Examples" playlist.')
     write_meta_files('Algebra I Worked Examples', '180 Worked Algebra I examples (problems written by the Monterey Institute of Technology and Education). You should look at the "Algebra" playlist if you\'ve never seen algebra before or if you want instruction on topics in Algebra II. Use this playlist to see a ton of example problems in every topic in the California Algebra I Standards. If you can do all of these problems on your own, you should probably test out of Algebra I (seriously).')
