@@ -1624,6 +1624,10 @@ class ViewIndividualReport(app.RequestHandler):
             self.compute_report(student, suggested_exercises)
             review_exercises = ex_graph.get_review_exercises(self.get_time())
             self.compute_report(student, review_exercises)
+            
+            name = app.get_nickname_for(student)
+            if student.email() != name:
+                name = name + " (%s)" % student.email()
                    
             template_values = {
                 'App' : App,
@@ -1632,7 +1636,7 @@ class ViewIndividualReport(app.RequestHandler):
                 'proficient_exercises': proficient_exercises,
                 'suggested_exercises': suggested_exercises,
                 'review_exercises': review_exercises,  
-                'student': student.nickname(),                
+                'student': name,                
                 'student_email': student_email,                  
                 }
 
@@ -1686,9 +1690,8 @@ class ViewStudents(app.RequestHandler):
             for student_email in student_emails:   
                 student = users.User(email=student_email)
                 student_data = UserData.get_or_insert_for(student)
-                student_data.user.email = student_email
-                student_data.user.name = student_data.user.nickname()    
-                if student_email != student_data.user.nickname():
+                student_data.user.name = app.get_nickname_for(student_data.user) 
+                if student_email != student_data.user.name:
                    student_data.user.name += " (%s)" % student_email                                       
                 students.append(student_data.user)
 
@@ -1735,8 +1738,8 @@ class ViewClassReport(app.RequestHandler):
                 row = []
                 student = users.User(email=student_email)
                 student_data = UserData.get_or_insert_for(student)
-                name = student_data.user.nickname()
-                if student_email != student_data.user.nickname():
+                name = app.get_nickname_for(student_data.user)
+                if student_email != name:
                     name = name + " (%s)" % student_email
                 row.append(ReportCell(data='<a href="/individualreport?student_email=%s">%s</a>' % (student_email, name) ))
                 i = 0
@@ -1844,9 +1847,9 @@ class ViewCharts(app.RequestHandler):
                 #logging.info("user is a student looking at their own report")
                 user_data = UserData.get_or_insert_for(user)   
 
-            name = user_data.user.nickname()
-            if student_email != user_data.user.nickname():
-                name = name + " (%s)" % student_email
+            name = app.get_nickname_for(user_data.user)
+            if user_data.user.email() != name:
+                name = name + " (%s)" % user_data.user.email()
                 
             logout_url = users.create_logout_url(self.request.uri)
             exercise_name = self.request.get('exercise_name')

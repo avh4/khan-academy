@@ -44,7 +44,8 @@ class App(object):
         accepts_openid = False # Change to True when we plan to support it on the live server.
     offline_mode = False
     
-    
+FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
+
 """Returns app.get_current_user() if not None, or a faked User based on the
 user's Facebook account if the user has one, or None.
 """
@@ -60,10 +61,22 @@ def get_current_user():
         # We create a fake user, substituting the user's Facebook uid for their email 
         # and their name for their OpenID identifier since Facebook isn't an
         # OpenID provider at the moment, and GAE displays the OpenID identifier as the nickname().
-        return users.User("http://facebookid.khanacademy.org/"+profile["id"], federated_identity = name)
+        return users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"], federated_identity = name)
     
     return None
 
+def get_nickname_for(user):
+    email = user.email()
+    if not email.startswith(FACEBOOK_ID_EMAIL_PREFIX):
+        return user.nickname()
+    id = email.replace(FACEBOOK_ID_EMAIL_PREFIX, "")
+    graph = facebook.GraphAPI()
+    profile = graph.get_object(id)
+    # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
+    name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+    return name
+    
+    
 def get_facebook_profile():
     def get_profile_from_cookie(cookie):
         expires = int(cookie["expires"])
