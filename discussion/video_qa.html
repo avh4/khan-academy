@@ -43,11 +43,14 @@
                 <div class="question" data-question_id="{{ question.key.id }}">
                     {% ifnotequal qa_expand_id question.key.id %}
                         <a class="question_link" href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
-                    {% endifnotequal %}
                             <span>{{ question.content|escape|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
-                    {% ifnotequal qa_expand_id question.key.id %}
                         </a>
                     {% endifnotequal %}
+                    <span
+                    {% ifnotequal qa_expand_id question.key.id %}
+                        class="question_content_urlized" style="display:none;"
+                    {% endifnotequal %}
+                    >{{ question.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
                 </div>
 
                 {% ifnotequal qa_expand_id question.key.id %}

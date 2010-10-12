@@ -424,7 +424,9 @@ var QA = {
     expand: function(e, fxnCallback) {
         if ($(this).is(".question_container_expanded")) return;
 
-        $(".question a.question_link", this).replaceWith($(".question a.question_link span", this).first());
+        var jContentUrlized = $(".question span.question_content_urlized", this);
+        $(".question a.question_link", this).replaceWith(jContentUrlized);
+        jContentUrlized.css("display", "");
         $(".question_answer_count", this).css("display", "none");
         $(".answers_and_form_container", this).slideDown("fast", fxnCallback);
 
