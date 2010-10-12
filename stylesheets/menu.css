@@ -67,7 +67,7 @@
     padding-bottom: .25ex;
     font-weight: bold;
     z-index: 1;
-    cursor: default;
+    cursor: pointer;
     border-left: solid 1px #9a8f87;
 }
 
@@ -76,7 +76,13 @@
 }
 
 .css-menu > ul > li:hover,
-.css-menu > ul > li > a:hover,
+.css-menu > ul > li > a:hover {
+    color: black;
+    cursor: pointer;
+}
+
+.css-menu.noscript > ul > li:hover,
+.css-menu.noscript > ul > li > a:hover,
 .css-menu > ul > li.css-menu-js-hover
  {
     z-index: 5;
@@ -104,8 +110,8 @@
 
 /*======================== 2ND LEVEL MENU DEFINITIONS ========================*/
 
-.css-menu > ul > li:hover > ul,
-.css-menu > ul > li > a:hover > ul,
+.css-menu.noscript > ul > li:hover > ul,
+.css-menu.noscript > ul > li > a:hover > ul,
 .css-menu > ul > li.css-menu-js-hover > ul
 {                           /* 2nd level drop-down box */
     display:block;

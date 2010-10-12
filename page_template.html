@@ -64,6 +64,28 @@
                         this.value = 'Search for a video or playlist';
                     }
                 });
+                
+                // Make the CSS-only menus click-activated
+                var active_menu = undefined;
+                $('.noscript').removeClass('noscript');
+                $('.css-menu > ul > li').click(function() {
+                    if (active_menu) {
+                        active_menu.removeClass('css-menu-js-hover');
+                    }
+                    if ($(this) == active_menu) {
+                        active_menu = undefined
+                    }
+                    else {
+                        active_menu = $(this);
+                        $(this).addClass('css-menu-js-hover');                        
+                    }
+                });
+                $(document).bind("click focusin", function(e){
+                    if ($(e.target).closest(".css-menu").length == 0 && active_menu) {
+                        active_menu.removeClass('css-menu-js-hover');
+                        active_menu = undefined;
+                    }
+                });
                 // Make the CSS-only menus keyboard-accessible            
                 $('.css-menu a').focus(function(e){
                     $(e.target).addClass('css-menu-js-hover').closest(".css-menu > ul > li").addClass('css-menu-js-hover');
@@ -164,7 +186,7 @@
                 </li>
                 {% endif %}
             </ul>
-                <nav class="css-menu" id="page_main_nav">
+                <nav class="css-menu noscript" id="page_main_nav">
                     <ul>
                         <li>
                             Watch Videos
