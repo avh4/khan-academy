@@ -18,7 +18,15 @@ var Discussion = {
 
     playYouTube: function() {
         var seconds = $(this).attr("seconds");
-        if (Discussion.player && seconds) Discussion.player.seekTo(Math.max(0, seconds - 2), true);
+        if (Discussion.player && seconds)
+        {
+            Discussion.player.seekTo(Math.max(0, seconds - 2), true);
+
+            // If user has scrolled below the youtube video, scroll to top of video
+            // when a play link is clicked.
+            var yTop = $(Discussion.player).offset().top - 2;
+            if ($(window).scrollTop() > yTop) $(window).scrollTop(yTop);
+        }
     },
 
     showThrobberOnRight: function(jTarget) {
