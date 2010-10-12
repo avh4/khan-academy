@@ -278,6 +278,8 @@ class ViewExercise(app.RequestHandler):
                 'arithmetic_template': 'arithmetic_template.html',
                 'username': user.nickname(),
                 'points': user_data.points,
+                'needs_help': userExercise.needs_help,
+                'coaches': user_data.coaches,
                 'proficient': proficient,
                 'endangered': endangered,
                 'reviewing': reviewing,
@@ -425,6 +427,8 @@ uploaded_playlists = [
     "GMAT: Problem Solving",
     "History",
     "Khan Academy-Related Talks and Interviews",
+    "Linear Algebra",
+    "MA Tests for Education Licensure (MTEL) -Pre-Alg",
 ]    
 
 class ViewVideo(app.RequestHandler):
@@ -1089,6 +1093,9 @@ class RegisterAnswer(app.RequestHandler):
                 userExercise.total_done = userExercise.total_done + 1
             else:
                 userExercise.total_done = 1
+            if not proficient and userExercise.total_done > 30:
+                userExercise.needs_help = True
+          
             userExercise.schedule_review(correct == 1, self.get_time())
             if correct == 1:
                 userExercise.streak = userExercise.streak + 1
@@ -1825,7 +1832,7 @@ class ViewClassReport(app.RequestHandler):
     def needs_help(self, student, exercise):
         user_exercises = UserExercise.get_for_user_use_cache(student)
         for user_exercise in user_exercises:        
-            if user_exercise.exercise == exercise and user_exercise.total_done > 30:
+            if user_exercise.exercise == exercise and user_exercise.needs_help:
                 return True
         return False
 
