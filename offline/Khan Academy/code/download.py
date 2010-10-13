@@ -96,6 +96,11 @@ for title, youtube_id, readable_id in videos:
     if os.path.exists(folder + '/' + readable_id + ".flv"):
         print "already downloaded", readable_id
     else:
+        #first try archive.org, download speed is faster
+            #urlfile = urllib.urlopen(archive_org_url + download_filename)
+            #print "downloading", archive_org_url + download_filename
+            #urlretrieve(urlfile, download_filename)
+            
         os.system('python ../youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
 
                          

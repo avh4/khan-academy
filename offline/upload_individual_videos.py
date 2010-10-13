@@ -73,6 +73,7 @@ if __name__ == "__main__":
     write_meta_files('Precalculus', 'Non-trigonometry pre-calculus topics. Solid understanding of all of the topics in the "Algebra" playlist should make this playlist pretty digestible.')    
     write_meta_files('Probability', 'Basic probability. Should have a reasonable grounding in basic algebra before watching')    
     write_meta_files('SAT Preparation', 'I am going to work through every problem in the College Board "Official SAT Study Guide." You should take the practice tests on your own, grade them and then use these videos to understand the problems you didn\'t get or review. Have fun!')
+    write_meta_files("Singapore Math", "We will (eventually) do all of the lectures in the Singapore Math curriculum (which we like). You can follow along through the workbooks available at singaporemath.com")        
     write_meta_files('Statistics', 'Introduction to statistics. Will eventually cover all of the major topics in a first-year statistics course (not there yet!)')    
     write_meta_files('Trigonometry', 'Videos on trigonometry. Watch the "Geometry" playlist first if you have trouble understanding the topics covered here.')    
     write_meta_files("Valuation and Investing", "Building blocks and case studies on the financial analysis and valuation of public equities.")

@@ -1,4 +1,4 @@
-import os, zipfile, sys, traceback, shutil, subprocess
+import os, zipfile, sys, traceback, shutil, subprocess, time
 from os.path import join
 from urllib import urlretrieve
 from unzip import unzip
@@ -35,6 +35,7 @@ def download_appengine(appengine_zip):
             "MAX_RUNTIME_RESPONSE_SIZE = 10 << 20", "MAX_RUNTIME_RESPONSE_SIZE = 10 << 22") 
         replace_in_file("google_appengine/google/appengine/tools/dev_appserver_main.py", 
             "http_server.serve_forever()", "import webbrowser; webbrowser.open('http://localhost:8080'); http_server.serve_forever()")             
+        replace_in_file("google_appengine/google/appengine/tools/bulkloader.py", "self.num_threads = arg_dict['num_threads']", "self.num_threads = 5")             
             
 
 def get_khanacademy_code():
@@ -94,6 +95,8 @@ def upload_sample_data():
     #--use_sqlite is giving "ReferenceProperty failed to be resolved" for library_content
     command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
     subprocess.Popen(command)
+    print "giving time for server to start" 
+    time.sleep(20)
     print "uploading sample data" 
     os.chdir(code_dir + "/khanacademy-read-only/sample_data/")
     os.system("sample_data.py upload --appcfg=../../google_appengine/appcfg.py")
