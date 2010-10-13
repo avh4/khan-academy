@@ -44,6 +44,8 @@ def urlretrieve(urlfile, fpath):
     f = open(fpath, "wb")
     while 1:
         data = urlfile.read(chunk)
+        if data[:6] == "<html>":
+            raise Exception("video not available")
         if not data:
             break
         f.write(data)
@@ -55,15 +57,15 @@ cwd = os.getcwd()
 playlist = sys.argv[1]
 videos = video_mapping[playlist]
 folder = "../videos/" + playlist
-archive_org_url = "http://www.archive.org/download/KhanAcademy/"
+archive_org_url = "http://www.archive.org/download/KhanAcademy"
 ao_playlist_name = playlist_mapping.get(playlist)
 
 if ao_playlist_name:
     try:
         download_filename = ao_playlist_name + ".7z"
         if not os.path.exists(download_filename):
-            urlfile = urllib.urlopen(archive_org_url + download_filename)
-            print "downloading", archive_org_url + download_filename
+            urlfile = urllib.urlopen(archive_org_url + "/" + download_filename)
+            print "downloading", archive_org_url + "/" + download_filename
             urlretrieve(urlfile, download_filename)
 
         if not os.path.exists(folder): 
@@ -96,11 +98,14 @@ for title, youtube_id, readable_id in videos:
     if os.path.exists(folder + '/' + readable_id + ".flv"):
         print "already downloaded", readable_id
     else:
-        #first try archive.org, download speed is faster
-            #urlfile = urllib.urlopen(archive_org_url + download_filename)
-            #print "downloading", archive_org_url + download_filename
-            #urlretrieve(urlfile, download_filename)
-            
-        os.system('python ../youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
+        #first try archive.org, download speed is faster  
+        try:
+            url = archive_org_url + "_" + playlist + "/" + readable_id + ".flv"
+            urlfile = urllib.urlopen(url)
+            print "downloading", url
+            urlretrieve(urlfile, folder + "/" + readable_id + ".flv")
+        except:        
+            traceback.print_exc()
+            os.system('python ../youtube-dl.py -f 34 -icw -o "' + folder + '/' + readable_id + '.flv" http://www.youtube.com/watch?v=' + youtube_id)
 
                          
