@@ -20,7 +20,6 @@ class UserExercise(db.Model):
     total_done = db.IntegerProperty()
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=86400)
-    needs_help = db.BooleanProperty(default=False)
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
     @staticmethod
@@ -171,7 +170,7 @@ class UserData(db.Model):
                 assigned_exercises=[],
                 need_to_reassess=True,
                 points=0,
-                coaches=[],
+                coaches=[]
                 )
         return user_data
 
