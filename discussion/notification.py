@@ -6,6 +6,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 from app import App
+from app import get_nickname_for
 import app
 import models
 import models_discussion
@@ -46,7 +47,7 @@ class VideoFeedbackNotificationList(app.RequestHandler):
         context = {
                     "App": App,
                     "points": user_data.points,
-                    "username": user.nickname(),
+                    "username": get_nickname_for(user),
                     "email": user.email(),
                     "login_url": app.create_login_url(self.request.uri),
                     "logout_url": users.create_logout_url(self.request.uri),

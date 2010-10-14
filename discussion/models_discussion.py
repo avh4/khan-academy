@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import db
 
+from app import get_nickname_for
+
 class FeedbackType:
     Question="question"
     Answer="answer"
@@ -45,6 +47,9 @@ class Feedback(db.Model):
         if self.targets:
             return db.get(self.targets[0])
         return None
+
+    def author_nickname(self):
+        return get_nickname_for(self.author)
 
 class FeedbackNotification(db.Model):
     feedback = db.ReferenceProperty(Feedback)

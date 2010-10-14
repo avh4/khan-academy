@@ -1,9 +1,9 @@
 <nobr>
     {% if target %}
         {% if verb %}
-            &ndash;{{ target.author.nickname|escape }} {{ verb }} {{ target.date|timesince_ago }}
+            &ndash;{{ target.author_nickname|escape }} {{ verb }} {{ target.date|timesince_ago }}
         {% else %}
-            &ndash;{{ target.author.nickname|escape }}, {{ target.date|timesince_ago }}
+            &ndash;{{ target.author_nickname|escape }}, {{ target.date|timesince_ago }}
         {% endif %}
 
         {% if is_mod %}
