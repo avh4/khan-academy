@@ -157,15 +157,17 @@ def zip_directory(revision):
     zip = zipfile.ZipFile("KhanAcademy-" + revision + ".zip", "w")
     for root, dirs, files in os.walk(ka_dir):
          for fileName in files:
-             #print join(root,fileName)
-             zipDir = root[len(offline_dir)+1:]
-             try:
-                 zip.write(join(root,fileName), join(zipDir,fileName), zipfile.ZIP_DEFLATED)
-             except:
-                 traceback.print_exc()
-
-            
+             if not ".svn" in join(root,fileName):
+                 #print join(root,fileName)
+                 zipDir = root[len(offline_dir)+1:]
+                 try:
+                     zip.write(join(root,fileName), join(zipDir,fileName), zipfile.ZIP_DEFLATED)
+                 except:
+                     traceback.print_exc()
+                     
+                 
 if __name__ == "__main__":  
+
     download_appengine("google_appengine_1.3.7.zip")
     revision = get_khanacademy_code()
     copy_python25()
