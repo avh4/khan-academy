@@ -1767,10 +1767,10 @@ class ViewClassReport(app.RequestHandler):
                 i = 0
                 for exercise in exercises:
                     link = "/charts?student_email="+student_email+"&exercise_name="+exercise 
-                    if exercise in student_data.all_proficient_exercises:
+                    if student_data.is_proficient_at(exercise):
                         row.append(ReportCell(css_class="proficient", link=link))
                         proficient_total_row[i] += 1
-                    elif exercise in student_data.suggested_exercises:
+                    elif student_data.is_suggested(exercise):
                         if self.needs_help(student, exercise):
                             row.append(ReportCell(css_class="needs_help", link=link))
                             help_total_row[i] += 1
