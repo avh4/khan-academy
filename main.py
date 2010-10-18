@@ -1722,6 +1722,7 @@ class ViewStudents(app.RequestHandler):
                 'username': user.nickname(),
                 'logout_url': logout_url,
                 'students': students,
+                'coach_id': user_data.user.email(),
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
@@ -1796,12 +1797,15 @@ class ViewClassReport(app.RequestHandler):
                 row.append(ReportCell(data=count, css_class="number"))
             table_data.append(row) 
             
+            
+            
             template_values = {
                 'App' : App,
                 'username': user.nickname(),
                 'logout_url': logout_url,
                 'table_headers': table_headers,
                 'table_data': table_data,
+                'coach_id': user_data.user.email(),
                 }
             path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
             self.response.out.write(template.render(path, template_values))
