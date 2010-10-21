@@ -23,6 +23,7 @@ django.conf.settings.configure(
     TEMPLATE_DIRS=(os.path.dirname(__file__),)
 )
 from django.template.loader import render_to_string
+from django.utils import simplejson as json
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -1457,12 +1458,134 @@ class GenerateVideoMapping(app.RequestHandler):
         
 class Export(app.RequestHandler):
 
-    def get(self):
-        query = Exercise.all()
-        exercises = query.fetch(50)
-        for ex in exercises:
-            self.response.out.write(ex)
+    def datetime_to_str(self, datetime):
+        return datetime.strftime('%Y-%m-%d %H:%M:%S')
+        
+    def get(self):       
+        user = app.get_current_user()
+        if user:
+            user_data = UserData.get_for_current_user()
+            user_data_dict = {'moderator': user_data.moderator,
+                       'joined': self.datetime_to_str(user_data.joined),     
+                       'last_login': self.datetime_to_str(user_data.last_login),
+                       'proficient_exercises': user_data.proficient_exercises,
+                       'all_proficient_exercises': user_data.all_proficient_exercises,
+                       'suggested_exercises': user_data.suggested_exercises,
+                       'assigned_exercises': user_data.assigned_exercises,
+                       'need_to_reassess': user_data.need_to_reassess,
+                       'points': user_data.points,
+                       'coaches': user_data.coaches,
+                       }
+            
+            user_exercises = []
+            for ue in UserExercise.all().filter('user =', user):
+                ue_dict = {'exercise': ue.exercise,
+                           'streak': ue.streak,
+                           'longest_streak': ue.longest_streak,
+                           'first_done': self.datetime_to_str(ue.first_done),
+                           'last_done': self.datetime_to_str(ue.last_done),
+                           'total_done': ue.total_done,
+                           'last_review': self.datetime_to_str(ue.last_review),
+                           'review_interval_secs': ue.review_interval_secs,                       
+                }
+                user_exercises.append(ue_dict)            
+    
+            problems = []
+            for problem in ProblemLog.all().filter('user =', user):
+                problem_dict = {'exercise': problem.exercise,
+                                'correct': problem.correct,
+                                'time_done': self.datetime_to_str(problem.time_done),
+                                'time_taken': problem.time_taken,                 
+                }        
+                problems.append(problem_dict)    
+            
+            export_dict = {'UserData': user_data_dict,
+                           'UserExercise': user_exercises,
+                           'ProblemLog': problems}
+            self.response.out.write(json.dumps(export_dict, sort_keys=True, indent=4))
+        else:
+            self.redirect(app.create_login_url(self.request.uri))
 
+
+class ImportUserData(app.RequestHandler):
+
+    def datetime_from_str(self, text):    
+        return datetime.datetime.strptime(text, '%Y-%m-%d %H:%M:%S')  
+    
+    def post(self):  
+        user = app.get_current_user()
+        if not user:
+            self.response.out.write("please login first")        
+        elif App.is_dev_server:
+            file_contents = self.request.POST.get('userdata').file.read()
+            import_dict = json.loads(file_contents)
+            user_data_dict = import_dict['UserData']
+            user_exercises = import_dict['UserExercise']
+            problems = import_dict['ProblemLog']
+            
+            user_data = UserData.get_or_insert_for(user)
+            user_data.moderator = user_data_dict['moderator']
+            user_data.joined = self.datetime_from_str(user_data_dict['joined'])
+            user_data.last_login = self.datetime_from_str(user_data_dict['last_login'])
+            user_data.proficient_exercises = user_data_dict['proficient_exercises']
+            user_data.all_proficient_exercises = user_data_dict['all_proficient_exercises']
+            user_data.suggested_exercises = user_data_dict['suggested_exercises']
+            user_data.assigned_exercises = user_data_dict['assigned_exercises']
+            user_data.need_to_reassess = user_data_dict['need_to_reassess']
+            user_data.points = user_data_dict['points']          
+            user_data.coaches = user_data_dict['coaches']
+            user_data.put()
+
+            for user_exercise in UserExercise.all().filter('user =', user):
+                user_exercise.delete()
+            for ue in user_exercises:
+                UserExercise.get_or_insert(
+                    key_name = ue['exercise'],
+                    parent = user_data,
+                    user = user,
+                    exercise = ue['exercise'],
+                    streak = ue['streak'],
+                    longest_streak = ue['longest_streak'],
+                    first_done = self.datetime_from_str(ue['first_done']),
+                    last_done = self.datetime_from_str(ue['last_done']),
+                    total_done = ue['total_done'],
+                    last_review = self.datetime_from_str(ue['last_review']),
+                    review_interval_secs = ue['review_interval_secs'],
+                )
+
+            for problem in ProblemLog.all().filter('user =', user):
+                problem.delete()
+            for problem in problems:
+                problem_log = ProblemLog()
+                problem_log.user = user
+                problem_log.exercise = problem['exercise']
+                problem_log.correct = problem['correct']
+                problem_log.time_done = self.datetime_from_str(problem['time_done'])
+                problem_log.time_taken = problem['time_taken']
+                problem_log.put()        
+                
+            self.redirect('/individualreport')
+        else:
+            self.response.out.write("import is not supported on the live site")
+               
+
+class ViewImport(app.RequestHandler):
+
+    def get(self):  
+        user = app.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': app.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'import.html')
+        self.response.out.write(template.render(path, template_values))  
+        
+            
 class ViewHomePage(app.RequestHandler):
 
     def get(self):
@@ -1795,9 +1918,7 @@ class ViewClassReport(app.RequestHandler):
             row = [ReportCell("Total proficient students:")]
             for count in proficient_total_row:
                 row.append(ReportCell(data=count, css_class="number"))
-            table_data.append(row) 
-            
-            
+            table_data.append(row)                       
             
             template_values = {
                 'App' : App,
@@ -2297,6 +2418,8 @@ def real_main():
         ('/search', Search),
         
         ('/export', Export),
+        ('/import', ViewImport),
+        ('/importuserdata', ImportUserData),
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
         ('/admin/fixvideoref', FixVideoRef),
