@@ -63,7 +63,9 @@ def get_khanacademy_code():
         print "output:\n" + output
     os.chdir(code_dir + "/khanacademy-read-only")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
-    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")    
+    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")  
+    os.chdir(ka_dir)
+    replace_in_file("readme.txt", "{{version_number}}", revision)        
     return revision
     
     
@@ -92,8 +94,7 @@ def download_7zip():
 
     
 def upload_sample_data(): 
-    #--use_sqlite is giving "ReferenceProperty failed to be resolved" for library_content
-    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
+    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --use_sqlite --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
     subprocess.Popen(command)
     print "giving time for server to start" 
     time.sleep(20)
