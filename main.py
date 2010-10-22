@@ -1594,10 +1594,14 @@ class ViewHomePage(app.RequestHandler):
         user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
+        
+        movie_youtube_id =   random.choice(['p6l8-1kHUsA', 'UuMTSU9DcqQ'])
+        
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': app.create_login_url(self.request.uri),
+                                                  'video_id': movie_youtube_id,
                                                   'logout_url': logout_url}, 
                                                   self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
