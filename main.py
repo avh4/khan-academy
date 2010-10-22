@@ -1597,11 +1597,29 @@ class ViewHomePage(app.RequestHandler):
         
         movie_youtube_id =   random.choice(['p6l8-1kHUsA', 'UuMTSU9DcqQ'])
         
+        image_and_link_list = ['<A href="/press/fortune"><img src="/images/splashthumbnails/fortune_thumbnail.png" align=right></a>',
+        		      	'<A href="/frequently-asked-questions#GEL"><img src="/images/splashthumbnails/gel_thumbnail.png" align=right></a>',
+        		      	'<A href="/frequently-asked-questions#translation"><img src="/images/splashthumbnails/translation_thumbnail.png" align=right></a>',
+        		       '<A href="/frequently-asked-questions#NEWSHOUR"><img src="/images/splashthumbnails/pbs_thumbnail.png" align=right></a>',
+        		       '<A href="/frequently-asked-questions#OVERVIEW"><img src="/images/splashthumbnails/overview_thumbnail.png" align=right></a>']
+        		       
+        random.shuffle(image_and_link_list)
+        		       
+        link1 = image_and_link_list[0]
+        link2 = image_and_link_list[1]
+        link3 = image_and_link_list[2]
+        link4 = image_and_link_list[3]
+        
+        
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': app.create_login_url(self.request.uri),
                                                   'video_id': movie_youtube_id,
+                                                  'link1': link1,
+                                                  'link2': link2,
+                                                  'link3': link3,
+                                                  'link4': link4,
                                                   'logout_url': logout_url}, 
                                                   self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
