@@ -264,7 +264,7 @@ class ViewExercise(app.RequestHandler):
                     reviewing = True
                 if userExercise.streak == 0 and userExercise.longest_streak >= 10:
                     endangered = True
-
+                   
             logout_url = users.create_logout_url(self.request.uri)
             
             # Note: if they just need a single problem for review they can just print this page.
@@ -279,9 +279,11 @@ class ViewExercise(app.RequestHandler):
                 'arithmetic_template': 'arithmetic_template.html',
                 'username': user.nickname(),
                 'points': user_data.points,
+                'coaches': user_data.coaches,
                 'proficient': proficient,
                 'endangered': endangered,
                 'reviewing': reviewing,
+                'struggling': user_data.is_struggling_with(exid),
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': userExercise.key(),
                 'exercise': exercise,
@@ -1895,7 +1897,7 @@ class ViewClassReport(app.RequestHandler):
                         row.append(ReportCell(css_class="proficient", link=link))
                         proficient_total_row[i] += 1
                     elif student_data.is_suggested(exercise):
-                        if self.needs_help(student, exercise):
+                        if student_data.is_struggling_with(exercise):
                             row.append(ReportCell(css_class="needs_help", link=link))
                             help_total_row[i] += 1
                         else:
@@ -1947,14 +1949,7 @@ class ViewClassReport(app.RequestHandler):
             for exercise in exercises:
                 if exercise.name in exercise_dict:
                     results.append(exercise.name)
-            return results  
-            
-    def needs_help(self, student, exercise):
-        user_exercises = UserExercise.get_for_user_use_cache(student)
-        for user_exercise in user_exercises:        
-            if user_exercise.exercise == exercise and user_exercise.total_done > 30:
-                return True
-        return False
+            return results            
 
 
 class ViewCharts(app.RequestHandler):

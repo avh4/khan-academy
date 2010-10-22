@@ -75,6 +75,7 @@ class UserExercise(db.Model):
                     user_data.proficient_exercises.remove(self.exercise)
                     user_data.need_to_reassess = True
                     user_data.put()
+        
 
 class Exercise(db.Model):
 
@@ -219,7 +220,17 @@ class UserData(db.Model):
     def is_proficient_at(self, exid):
         self.reassess_if_necessary()
         return (exid in self.all_proficient_exercises)
-        
+
+    def is_struggling_with(self, exid):
+        if self.is_proficient_at(exid):
+            return False
+        else:
+            userExercise = UserExercise.all().filter('user =', self.user).filter('exercise =', exid).get()              
+            if userExercise.total_done > 30 and userExercise.longest_streak < 10:
+                return True
+            else:
+                return False
+            
     def is_suggested(self, exid):
         self.reassess_if_necessary()
         return (exid in self.suggested_exercises)
