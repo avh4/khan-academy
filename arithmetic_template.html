@@ -97,7 +97,11 @@ function submitForm(value)
 			{% if struggling %}
 				<div class=hdg style="padding: 1em;"><h3>
 				Are you having trouble with this exercise?&nbsp;  You've done more than 30 problems now but
-				haven't gotten 10 in a row right yet.&nbsp; Why don't you ask
+				haven't gotten 10 in a row right yet.&nbsp;  Why don't you
+  				{% if exercise_videos %}
+  					watch the <A href="/viewexercisevideos?exkey={{exercise.key}}">video</A> again, or
+  				{% endif %}
+				ask
 				{% if coaches|length_is:"0" %}
 				    someone
 				{% else %}
