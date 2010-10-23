@@ -384,7 +384,7 @@ class OldViewVideo(app.RequestHandler):
         # answers before we render page_template so the notification icon shows
         # its updated count. 
         notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
-
+                
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
@@ -403,34 +403,7 @@ def get_mangled_playlist_name(playlist_name):
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
     
-
-uploaded_playlists = [
-    "Algebra", 
-    "Algebra I Worked Examples", 
-    "Arithmetic", 
-    "Banking and Money", 
-    "Biology", 
-    "Brain Teasers", 
-    "CAHSEE Example Problems", 
-    "Calculus", 
-    "California Standards Test: Algebra I", 
-    "California Standards Test: Algebra II", 
-    "California Standards Test: Geometry",
-    "Chemistry", 
-    "ck12.org Algebra 1 Examples", 
-    "Credit Crisis", 
-    "Current Economics",
-    "Differential Equations", 
-    "Finance", 
-    "Geithner Plan", 
-    "Geometry", 
-    "GMAT Data Sufficiency",
-    "GMAT: Problem Solving",
-    "History",
-    "Khan Academy-Related Talks and Interviews",
-    "Linear Algebra",
-    "MA Tests for Education Licensure (MTEL) -Pre-Alg",
-]    
+ 
 
 class ViewVideo(app.RequestHandler):
 
@@ -538,10 +511,12 @@ class ViewVideo(app.RequestHandler):
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
             video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
-        available_from_archiveorg = False
-        if playlist_title in uploaded_playlists:
-            available_from_archiveorg = True
-        
+
+        exercise_video = ExerciseVideo.all().filter('video =', video).get()
+        exercise = None
+        if exercise_video:
+            exercise = exercise_video.exercise.name
+                            
         if video.description == video.title:
             video.description = None
 
@@ -555,7 +530,7 @@ class ViewVideo(app.RequestHandler):
                                                   'video': video,
                                                   'videos': videos,
                                                   'video_path': video_path,
-                                                  'available_from_archiveorg': available_from_archiveorg,
+                                                  'exercise': exercise,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
@@ -1084,7 +1059,7 @@ class RegisterAnswer(app.RequestHandler):
             
             suggested = user_data.is_suggested(exid)
             proficient = user_data.is_proficient_at(exid)
-                
+                                
             if user_data.points == None:
                 user_data.points = 0
             user_data.points = user_data.points + PointCalculator(userExercise.streak, suggested, proficient)
@@ -1109,8 +1084,7 @@ class RegisterAnswer(app.RequestHandler):
                     # userExercise.set_proficient(False)
                 
                 # Just in case RegisterCorrectness didn't get called.
-                userExercise.streak = 0
-
+                userExercise.streak = 0                           
             userExercise.put()
 
             self.redirect('/exercises?exid=' + exid)
