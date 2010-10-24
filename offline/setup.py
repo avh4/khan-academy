@@ -94,7 +94,8 @@ def download_7zip():
 
     
 def upload_sample_data(): 
-    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --use_sqlite --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
+    # --use_sqlite giving intermittent errors
+    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
     subprocess.Popen(command)
     print "giving time for server to start" 
     time.sleep(20)
