@@ -451,6 +451,17 @@ a:link.google-analytics-link-track
 			}
 
 
+ul.ui-autocomplete .ui-menu-item a {
+    font-size: 0.8em;
+    white-space: nowrap;
+    padding: 0;
+    cursor: pointer;
+}
+
+ul.ui-autocomplete .ui-menu-item a span.playlist {
+    color: #898989;
+    font-style: italic;
+}
 
 
 /**************end of elements for all-videos page*********************/

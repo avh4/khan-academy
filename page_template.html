@@ -30,14 +30,17 @@
         <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
         <link rel="stylesheet" type="text/css" href="/stylesheets/discussion.css?{{App.version}}">
         <link rel="stylesheet" type="text/css" href="/stylesheets/menu.css?{{App.version}}" />
+        <link rel="stylesheet" type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css?{{App.version}}">
 		{# Support offline use with dev appserver #}
 		{% if App.is_dev_server %}
-        <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}">
-        </script>
+        <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}"></script>
+        <script type="text/javascript" src="/javascript/jquery-ui.js?{{App.version}}"></script>
 		{% else %}
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
-        </script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js"></script>
 		{% endif %}
+
+        <script type="text/javascript" src="/javascript/jquery.ui.menu.js?{{App.version}}"></script>
         <script type="text/javascript" src="/javascript/jquery.watermark.js?{{App.version}}">
         </script>
         <script type="text/javascript" src="/javascript/discussion.js?{{App.version}}">
@@ -64,7 +67,9 @@
                         this.value = 'Search for a video or playlist';
                     }
                 });
-                
+
+                initAutocomplete();
+
                 // Make the CSS-only menus click-activated
                 var active_menu = undefined;
                 $('.noscript').removeClass('noscript');

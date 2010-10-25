@@ -1,6 +1,5 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
-<link rel="stylesheet" type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css?{{App.version}}">
 <style>
     .breadcrumbs_nav {
         font-weight: bold;
@@ -73,12 +72,6 @@
         padding-top: 1em;
     }
 </style>
-{% if App.is_dev_server %}
-<script src="/javascript/jquery-ui.js?{{App.version}}"></script>
-{% else %}
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js"></script>
-{% endif %}
-<script src="/javascript/jquery.ui.menu.js?{{App.version}}"></script>
 <script>
 $(function(){
     $('<img width=0 height=0>').error(function() {

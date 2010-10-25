@@ -36,6 +36,7 @@ import gdata.alt.appengine
 import qbrary
 import bulk_update.handler
 import facebook
+import autocomplete
 
 from search import Searchable
 import search
@@ -2407,6 +2408,7 @@ def real_main():
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),
         ('/search', Search),
+        ('/autocomplete', autocomplete.Autocomplete),
         
         ('/export', Export),
         ('/import', ViewImport),
