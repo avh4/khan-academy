@@ -58,6 +58,12 @@ handlers:
   static_files: helperpages/svg-editor.html
   upload: helperpages/svg-editor.html
   
+  # Make sure we serve the svg files with the correct mime-type.
+- url: /svg-edit-[^/]*/(.*)\.svg
+  static_files: svg-edit/\1.svg
+  upload: svg-edit/(.*)\.svg
+  mime_type: image/svg+xml
+
   # All the other svg-editor bits are stock.
   # The url below needs to be updated whenever we change/upgrade svg-edit.
   # Unfortunately, we can't use a regex due to a GAE bug:
