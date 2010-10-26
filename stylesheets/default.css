@@ -130,10 +130,17 @@ footer {
 #page_search input {
     background:url("/images/Search-icon.png") no-repeat scroll 2px 1px #FFFFFF;
     border:1px solid #DDDDDD;
-    color:grey;
     font-size:12px;
     padding:2px 2px 2px 18px;
     width: 20em;
+}
+
+#page_search input.placeholder {
+    color: #898989;
+}
+
+#page_search input.ui-autocomplete-loading {
+    background-image: url("/images/throbber.gif")
 }
 
 #page_social_links {

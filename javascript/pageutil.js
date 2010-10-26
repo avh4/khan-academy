@@ -34,28 +34,33 @@ function initAutocomplete()
             $.getJSON("/autocomplete", {"q": req.term}, function(data) {
 
                 var matches = [];
-                var reMatch = null;
-                
-                // Try to find the "scent" of the match.  If regexp fails
-                // to compile for any input reason, ignore.
-                try {
-                    reMatch = new RegExp("(" + data.query + ")", "i");
-                }
-                catch(e) {
-                    reMatch = null;
-                }
 
-                // Add playlist and video matches to list of autocomplete suggestions
-                for (var ix = 0; ix < data.playlists.length; ix++)
+                if (data != null)
                 {
-                    addAutocompleteMatchToList(matches, data.playlists[ix], true, reMatch);
-                }
-                for (var ix = 0; ix < data.videos.length; ix++)
-                {
-                    addAutocompleteMatchToList(matches, data.videos[ix], false, reMatch);
+                    var reMatch = null;
+                    
+                    // Try to find the "scent" of the match.  If regexp fails
+                    // to compile for any input reason, ignore.
+                    try {
+                        reMatch = new RegExp("(" + data.query + ")", "i");
+                    }
+                    catch(e) {
+                        reMatch = null;
+                    }
+
+                    // Add playlist and video matches to list of autocomplete suggestions
+                    for (var ix = 0; ix < data.playlists.length; ix++)
+                    {
+                        addAutocompleteMatchToList(matches, data.playlists[ix], true, reMatch);
+                    }
+                    for (var ix = 0; ix < data.videos.length; ix++)
+                    {
+                        addAutocompleteMatchToList(matches, data.videos[ix], false, reMatch);
+                    }
                 }
 
                 fxnCallback(matches);
+
             });
         },
         focus: function() {
@@ -64,6 +69,32 @@ function initAutocomplete()
         select: function(e, ui) {
             window.location = ui.item.value;
             return false;
+        },
+        open: function(e, ui) {
+            var jelMenu = $(autocompleteWidget.data("autocomplete").menu.element);
+            var jelInput = $(this);
+
+            var pxRightMenu = jelMenu.offset().left + jelMenu.outerWidth();
+            var pxRightInput = jelInput.offset().left + jelInput.outerWidth();
+
+            if (pxRightMenu > pxRightInput)
+            {
+                // Keep right side of search input and autocomplete menu aligned
+                jelMenu.offset({
+                                    left: pxRightInput - jelMenu.outerWidth(), 
+                                    top: jelMenu.offset().top
+                                });
+            }
+        }
+    }).bind("keydown.autocomplete", function(e) {
+        if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.NUMPAD_ENTER)
+        {
+            if (!autocompleteWidget.data("autocomplete").selectedItem)
+            {
+                // If enter is pressed and no item is selected, default autocomplete behavior
+                // is to do nothing.  We don't want this behavior, we want to fall back to search.
+                $(this.form).submit();
+            }
         }
     });
 
