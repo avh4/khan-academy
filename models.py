@@ -226,7 +226,7 @@ class UserData(db.Model):
             return False
         else:
             userExercise = UserExercise.all().filter('user =', self.user).filter('exercise =', exid).get()              
-            if userExercise.total_done > 30 and userExercise.longest_streak < 10:
+            if userExercise and userExercise.total_done > 30 and userExercise.longest_streak < 10:
                 return True
             else:
                 return False

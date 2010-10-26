@@ -1436,7 +1436,11 @@ class GenerateVideoMapping(app.RequestHandler):
 class Export(app.RequestHandler):
 
     def datetime_to_str(self, datetime):
-        return datetime.strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            str = datetime.strftime('%Y-%m-%d %H:%M:%S')
+        except:
+            str = ""
+        return str
         
     def get(self):       
         user = app.get_current_user()
