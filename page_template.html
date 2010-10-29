@@ -55,7 +55,7 @@
                     document.createElement(html5elements[i]);
                 }
             })();
-            
+
             $(function(){
                 // Configure the search form
                 $('#page_search input').placeholder();
@@ -73,7 +73,7 @@
                     }
                     else {
                         active_menu = $(this);
-                        $(this).addClass('css-menu-js-hover');                        
+                        $(this).addClass('css-menu-js-hover');
                     }
                 });
                 $(document).bind("click focusin", function(e){
@@ -82,7 +82,7 @@
                         active_menu = undefined;
                     }
                 });
-                // Make the CSS-only menus keyboard-accessible            
+                // Make the CSS-only menus keyboard-accessible
                 $('.css-menu a').focus(function(e){
                     $(e.target).addClass('css-menu-js-hover').closest(".css-menu > ul > li").addClass('css-menu-js-hover');
                 }).blur(function(e){
@@ -195,7 +195,7 @@
                                 </li>
                                 <li>
                                     <a href="/downloads">Download</a>
-                                </li>                                
+                                </li>
                             </ul>
                         </li>
                         <li>
@@ -209,6 +209,9 @@
                                 </li>
                                 <li>
                                     <a href="/individualreport">View Progress Report</a>
+                                </li>
+                                <li>
+                                    <a href="/progresschart">View Progress Chart</a>
                                 </li>
                                 <li>
                                     <a href="/coaches">Add a Coach</a>
@@ -231,7 +234,7 @@
                                             <a href="/about#credits">Credits</a>
                                         </li>
                                     </ul>
-                                </li>                            
+                                </li>
                                 <li>
                                     <p>Coaching Tools</p>
                                     <ul>
@@ -263,7 +266,7 @@
                                         </li>
                                         <li>
                                             <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Donate-Link-Paypal']);" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" >Donate</a>
-                                        </li>                                        
+                                        </li>
                                         <li>
                                             <a href="/frequently-asked-questions#how-to-help">Help in Other Ways</a>
                                         </li>
@@ -275,7 +278,7 @@
                 </nav>
             <div id="page_top_nav">
                 <ul class="page_links" id="page_status">
-    
+
                     {% if points %}
                     <li>
                         <label id="page_points">
@@ -288,7 +291,7 @@
                     <li>
                         <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Donate-Link-Paypal']);" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" >Donate</a>
                     </li>
-                    <li> Follow Us on 
+                    <li> Follow Us on
                         <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Youtube-Subscribe-Header']);" href="http://www.youtube.com/khanacademy"><img src="/images/youtube-16.jpg" alt="YouTube" title="YouTube"></a>
                         <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy"><img src="/images/facebook-16.jpg" alt="Facebook" title="Facebook"></a>
                         <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy"><img src="/images/twitter-16.jpg" alt="Twitter" title="Twitter"></a>

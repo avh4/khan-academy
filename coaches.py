@@ -148,6 +148,61 @@ class ViewIndividualReport(app.RequestHandler):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)      
             
+
+class ViewProgressChart(app.RequestHandler):
+
+    def get(self):    
+        class ExerciseData:
+            def __init__(self, name, exid, days_until_proficient):
+                self.name = name
+                self.exid = exid
+                self.days_until_proficient = days_until_proficient
+                
+        user = app.get_current_user()
+        student = user
+        if user:
+            student_email = self.request.get('student_email')
+            if student_email:
+                #logging.info("user is a coach trying to look at data for student")
+                student = users.User(email=student_email)
+                user_data = UserData.get_or_insert_for(student)
+                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                    raise Exception('Student '+ student_email + ' does not have you as their coach')
+            else:
+                #logging.info("user is a student looking at their own report")
+                user_data = UserData.get_or_insert_for(user)                  
+            logout_url = users.create_logout_url(self.request.uri)   
+
+            user_exercises = []
+            max_days = None
+            #logging.info("user_data.joined: " + str(user_data.joined))
+            for ue in UserExercise.all().filter('user =', user_data.user).filter('proficient_date >', None).order('proficient_date'):
+                days_until_proficient = (ue.proficient_date - user_data.joined).days   
+                #logging.info(ue.exercise + ": " + str(ue.proficient_date))
+                #logging.info("delta: " + str(ue.proficient_date - user_data.joined))
+                data = ExerciseData(ue.exercise.replace('_', ' ').capitalize(), ue.exercise, days_until_proficient)
+                user_exercises.append(data)
+                max_days = days_until_proficient
+            
+            name = app.get_nickname_for(student)
+            if student.email() != name:
+                name = name + " (%s)" % student.email()
+                   
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,  
+                'student': name,                
+                'student_email': student_email,   
+                'user_exercises': user_exercises,
+                'max_days': max_days,
+                }
+
+            path = os.path.join(os.path.dirname(__file__), 'viewprogresschart.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(app.create_login_url(self.request.uri))  
+            
             
 class ViewStudents(app.RequestHandler):
 
@@ -214,7 +269,7 @@ class ViewClassReport(app.RequestHandler):
                 name = app.get_nickname_for(student_data.user)
                 if student_email != name:
                     name = name + " (%s)" % student_email
-                row.append(ReportCell(data='<a href="/individualreport?student_email=%s">%s</a>' % (student_email, name) ))
+                row.append(ReportCell(data='<a href="/progresschart?student_email=%s">%s</a>' % (student_email, name) ))
                 i = 0
                 for exercise in exercises:
                     link = "/charts?student_email="+student_email+"&exercise_name="+exercise 
@@ -278,7 +333,7 @@ class ViewClassReport(app.RequestHandler):
 
 
 class ViewCharts(app.RequestHandler):
-     
+
     def moving_average(self, iterable, n=3):
         # moving_average([40, 30, 50, 46, 39, 44]) --> 40.0 42.0 45.0 43.0
         # http://en.wikipedia.org/wiki/Moving_average
@@ -322,15 +377,21 @@ class ViewCharts(app.RequestHandler):
             exercise_name = self.request.get('exercise_name')
             if not exercise_name:
                 exercise_name = "addition_1"
-
+              
+            userExercise = user_data.get_or_insert_exercise(exercise_name)
+            needs_proficient_date = False
+            if user_data.is_proficient_at(exercise_name) and not userExercise.proficient_date:
+                needs_proficient_date = True                 
+        
             problem_list = []
             max_time_taken = 0  
             y_axis_interval = 1
             seconds_ranges = []
             problems = ProblemLog.all().filter('user =', student).filter('exercise =', exercise_name).order("time_done")            
-            num_problems = problems.count()
-            if num_problems > 2:
-          
+            num_problems = problems.count()                           
+            correct_in_a_row = 0
+            proficient_date = None
+            if num_problems > 2:          
                 time_taken_list = []
                 for problem in problems:  
                     time_taken_list.append(problem.time_taken)
@@ -338,6 +399,19 @@ class ViewCharts(app.RequestHandler):
                         max_time_taken = problem.time_taken
                     problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
                     #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
+                                        
+                    if needs_proficient_date:
+                        if problem.correct:
+                            correct_in_a_row += 1
+                        else:
+                            correct_in_a_row = 0
+                        if correct_in_a_row == 10:
+                            proficient_date = problem.time_done
+                    
+                if needs_proficient_date and proficient_date:                    
+                    userExercise.proficient_date = proficient_date 
+                    userExercise.put()                        
+                    
                 if max_time_taken > 120:
                     max_time_taken = 120
                 y_axis_interval = max_time_taken/5

@@ -1078,6 +1078,7 @@ class RegisterAnswer(app.RequestHandler):
                     userExercise.longest_streak = userExercise.streak
                 if userExercise.streak == 10:
                     userExercise.set_proficient(True)
+                    userExercise.proficient_date = datetime.datetime.now()                    
             else:
                 # Can't do the following here because RegisterCorrectness() already
                 # set streak = 0.
@@ -1469,6 +1470,7 @@ class Export(app.RequestHandler):
                            'total_done': ue.total_done,
                            'last_review': self.datetime_to_str(ue.last_review),
                            'review_interval_secs': ue.review_interval_secs,                       
+                           'proficient_date': self.datetime_to_str(ue.proficient_date),                       
                 }
                 user_exercises.append(ue_dict)            
     
@@ -1491,9 +1493,12 @@ class Export(app.RequestHandler):
 
 class ImportUserData(app.RequestHandler):
 
-    def datetime_from_str(self, text):    
-        return datetime.datetime.strptime(text, '%Y-%m-%d %H:%M:%S')  
-    
+    def datetime_from_str(self, text): 
+        try:
+            return datetime.datetime.strptime(text, '%Y-%m-%d %H:%M:%S') 
+        except:
+            return None  
+
     def post(self):  
         user = app.get_current_user()
         if not user:
@@ -1521,19 +1526,22 @@ class ImportUserData(app.RequestHandler):
             for user_exercise in UserExercise.all().filter('user =', user):
                 user_exercise.delete()
             for ue in user_exercises:
-                UserExercise.get_or_insert(
-                    key_name = ue['exercise'],
-                    parent = user_data,
-                    user = user,
-                    exercise = ue['exercise'],
-                    streak = ue['streak'],
-                    longest_streak = ue['longest_streak'],
-                    first_done = self.datetime_from_str(ue['first_done']),
-                    last_done = self.datetime_from_str(ue['last_done']),
-                    total_done = ue['total_done'],
-                    last_review = self.datetime_from_str(ue['last_review']),
-                    review_interval_secs = ue['review_interval_secs'],
-                )
+                user_exercise = UserExercise()
+                user_exercise.key_name = ue['exercise']
+                user_exercise.parent = user_data
+                user_exercise.user = user
+                user_exercise.exercise = ue['exercise']
+                user_exercise.streak = ue['streak']
+                user_exercise.longest_streak = ue['longest_streak']
+                user_exercise.first_done = self.datetime_from_str(ue['first_done'])
+                user_exercise.last_done = self.datetime_from_str(ue['last_done'])
+                user_exercise.total_done = ue['total_done']
+                last_review = self.datetime_from_str(ue['last_review'])
+                if last_review:
+                    user_exercise.last_review = last_review
+                user_exercise.review_interval_secs = ue['review_interval_secs']
+                user_exercise.proficient_date = self.datetime_from_str(ue['proficient_date'])
+                user_exercise.put()
 
             for problem in ProblemLog.all().filter('user =', user):
                 problem.delete()
@@ -2006,6 +2014,7 @@ def real_main():
         ('/registercoach', coaches.RegisterCoach),  
         ('/unregistercoach', coaches.UnregisterCoach),          
         ('/individualreport', coaches.ViewIndividualReport),
+        ('/progresschart', coaches.ViewProgressChart),        
         ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
         ('/charts', coaches.ViewCharts),
