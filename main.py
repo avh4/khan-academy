@@ -1628,6 +1628,22 @@ class ViewFAQ(app.RequestHandler):
                                                   
         path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
         self.response.out.write(template.render(path, template_values))
+
+class Donate(app.RequestHandler):
+
+    def get(self):
+        user = app.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': app.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'donate.html')
+        self.response.out.write(template.render(path, template_values))
         
 class ViewDownloads(app.RequestHandler):
 
@@ -1967,6 +1983,7 @@ def real_main():
         ('/', ViewHomePage),
         ('/frequently-asked-questions', ViewFAQ),
         ('/about', ViewFAQ),
+        ('/donate', Donate),
         ('/exercisedashboard', ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
         ('/video_mapping', GenerateVideoMapping),        

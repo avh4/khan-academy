@@ -1,0 +1,49 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+	p { margin-bottom: 1em; }
+    dl { margin-left: 2em; }
+    dt { 
+        float: left;
+        clear: left; 
+        font-weight: bold;
+        padding-right: 1ex;
+    } 
+    dt:after { content: ":"; } 
+    dd {
+        padding: 0 0 0.5em 1em;
+    }
+</style>
+{% endblock pagescript %}
+{% block pagetitle %}Donate{% endblock pagetitle %}
+{% block pagecontent %}
+<div style="padding: 2%;">
+    <p>
+    <h1>Help us create the world's totally free virtual school</h1><p>
+    We believe everyone in the world should have access to a high quality education, and we are feverishly
+    trying to do our part to make this a reality.  
+    <p>
+    If you think we're on to something, or Khan Academy has helped you personally -- we would welcome any support 
+    you can provide. Help us make a difference!
+
+    <h1>Where does my money go?</h1><p>
+    Your money supports our people and technology, and helps us:
+    <ul>
+	<li>Keep the site running, totally free</li>
+    	<li>Create more high-quality content</li>
+    	<li>Develop interactive assessment exercises, to complement the video library</li>
+    	<li>Improve our website and create the best free, online educational experience possible </li>
+    	<li>Explore other wacky ideas we have on the future of education and how 
+    	we think learning should be done!</li>
+    </ul>
+    We are a nonprofit, and are totally reliant on donations like yours to keep us running. 
+    Your gifts are tax-deductable.
+    <p>
+    <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Donate-Link-Paypal']);" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2439291" >
+    <h1>Donate now via Pay Pal</h1><p>
+    <img src="/images/paypal-donate.png">
+    </a>
+    <p>
+    <p><i>Thanks for your support!</i></p>
+</div>
+{% endblock pagecontent %}
