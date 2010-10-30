@@ -1358,6 +1358,7 @@ class GenerateLibraryContent(app.RequestHandler):
             playlist_data = {
                      'title': playlist_title,
                      'topic': topic,
+                     'playlist': playlist,
                      'videos': playlist_videos
                      }
             #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')

@@ -4,7 +4,7 @@
             {% for playlist_data in all_playlists %}
                 <A NAME="{{playlist_data.title}}"></A>
                 <h2 class='playlist-heading'>{{playlist_data.title|escape}}</h2>
-                <p class='playlist-desc'>{{playlist_video.playlist.description|escape}}</p>
+                <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
                 {% column_major_sorted_videos playlist_data.videos %}
                 <div class="clear"></div>
                 <P></P>
