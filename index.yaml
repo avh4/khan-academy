@@ -134,6 +134,11 @@ indexes:
 
 - kind: VideoPlaylist
   properties:
+  - name: live_association
+  - name: video_position
+
+- kind: VideoPlaylist
+  properties:
   - name: playlist
   - name: video_position
 

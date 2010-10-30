@@ -1339,29 +1339,48 @@ class GenerateLibraryContent(app.RequestHandler):
         all_topics_list.append('Paulson Bailout')
         all_topics_list.append('CAHSEE Example Problems')
         all_topics_list.sort()
- 
 
         all_playlists = []
-        for topics in all_topics_list:
-            playlist_title = topic = topics
-            
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
-            query.order('video_position')
-            playlist_videos = []
-            for pv in query.fetch(500):
-                playlist_videos.append(pv)
+
+        dict_videos = {}
+        dict_playlists = {}
+        dict_playlists_by_title = {}
+        dict_video_playlists = {}
+
+        for video in Video.all():
+            dict_videos[video.key()] = video
+
+        for playlist in Playlist.all():
+            dict_playlists[playlist.key()] = playlist
+            if playlist.title in all_topics_list:
+                dict_playlists_by_title[playlist.title] = playlist
+
+        for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
+            playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
+            video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
+
+            video = dict_videos[video_key]
+            playlist = dict_playlists[playlist_key]
+            fast_video_playlist_dict = {"video":video, "playlist":playlist}
+
+            if dict_video_playlists.has_key(playlist_key):
+                dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
+            else:
+                dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
+
+        for topic in all_topics_list:
+
+            playlist = dict_playlists_by_title[topic]
+            playlist_key = playlist.key()
+            playlist_videos = dict_video_playlists[playlist_key]
+
             playlist_data = {
-                     'title': playlist_title,
+                     'title': topic,
                      'topic': topic,
                      'playlist': playlist,
                      'videos': playlist_videos
                      }
-            #self.response.out.write(' ' + str(len(playlist_videos)) + ' retrieved for ' + playlist_title + ' ')
+
             all_playlists.append(playlist_data)
     
         # Separating out the columns because the formatting is a little different on each column
