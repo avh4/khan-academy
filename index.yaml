@@ -122,6 +122,11 @@ indexes:
   - name: total_done
     direction: desc
 
+- kind: UserExercise
+  properties:
+  - name: user
+  - name: proficient_date
+
 - kind: Video
   properties:
   - name: __key__
