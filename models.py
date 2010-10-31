@@ -9,6 +9,26 @@ import cajole
 import app
 from search import Searchable
 
+# Setting stores per-application key-value pairs
+# for app-wide settings that must be synchronized
+# across all GAE instances.
+class Setting(db.Model):
+
+    value = db.StringProperty()
+
+    @staticmethod
+    def cached_library_content_date(val = None):
+        if val is None:
+            setting = Setting.get_by_key_name("cached_library_content_date")
+            if setting is not None:
+                return setting.value
+            return None
+        else:
+            setting = Setting.get_or_insert("cached_library_content_date")
+            setting.value = val
+            setting.put()
+            return setting.value
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()

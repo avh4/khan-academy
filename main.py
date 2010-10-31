@@ -24,6 +24,7 @@ from django.template.loader import render_to_string
 from django.utils import simplejson as json
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
+from google.appengine.api import memcache
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
@@ -34,6 +35,7 @@ import gdata.alt.appengine
 import qbrary
 import bulk_update.handler
 import facebook
+import cachepy
 import autocomplete
 import coaches
 
@@ -43,7 +45,7 @@ import search
 from app import App
 import app
 
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator, Setting
 
 from discussion import comments
 from discussion import qa
@@ -1302,95 +1304,133 @@ class GenerateHomepageContent(app.RequestHandler):
 class GenerateLibraryContent(app.RequestHandler):
 
     def get(self):
-        all_topics_list = []
+        library_content_html(force_refresh=True)
+        self.response.out.write("Library content regenerated")
 
-        all_topics_list.append('Arithmetic')
-        all_topics_list.append('Chemistry')
-        all_topics_list.append('Developmental Math')
-        all_topics_list.append('Pre-algebra')
-        all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
-        all_topics_list.append('Geometry')
-        all_topics_list.append('California Standards Test: Geometry')
-        all_topics_list.append('Current Economics')
-        all_topics_list.append('Banking and Money')
-        all_topics_list.append('Venture Capital and Capital Markets')
-        all_topics_list.append('Finance')
-        all_topics_list.append('Credit Crisis')
-        all_topics_list.append('Valuation and Investing')
-        all_topics_list.append('Geithner Plan')
-        all_topics_list.append('Algebra')
-        all_topics_list.append('Algebra I Worked Examples')
-        all_topics_list.append('ck12.org Algebra 1 Examples')
-        all_topics_list.append('California Standards Test: Algebra I')
-        all_topics_list.append('California Standards Test: Algebra II')
-        all_topics_list.append('Brain Teasers')
-        all_topics_list.append('Biology')
-        all_topics_list.append('Trigonometry')
-        all_topics_list.append('Precalculus')
-        all_topics_list.append('Statistics')
-        all_topics_list.append('Probability')
-        all_topics_list.append('Calculus')
-        all_topics_list.append('Differential Equations')
-        all_topics_list.append('Khan Academy-Related Talks and Interviews')
-        all_topics_list.append('History')
-        all_topics_list.append('Organic Chemistry')
-        all_topics_list.append('Linear Algebra')
-        all_topics_list.append('Physics')
-        all_topics_list.append('Paulson Bailout')
-        all_topics_list.append('CAHSEE Example Problems')
-        all_topics_list.sort()
+def library_content_html(force_refresh = False):
 
-        all_playlists = []
+    cache_key = "library_content_html"
+    cache_content_date = Setting.cached_library_content_date()
 
-        dict_videos = {}
-        dict_playlists = {}
-        dict_playlists_by_title = {}
-        dict_video_playlists = {}
+    if not force_refresh:
 
-        for video in Video.all():
-            dict_videos[video.key()] = video
+        # Ask for in-memory cache of generated HTML first
+        cached_result = cachepy.get(cache_key)
+        if cached_result and cached_result["date"] == cache_content_date:
+            return cached_result["html"]
 
-        for playlist in Playlist.all():
-            dict_playlists[playlist.key()] = playlist
-            if playlist.title in all_topics_list:
-                dict_playlists_by_title[playlist.title] = playlist
+        # Ask for memcached cache of generated HTML next
+        cached_result = memcache.get(cache_key, namespace=App.version)
+        if cached_result and cached_result["date"] == cache_content_date:
+            # If memcache found generated HTML, reprime in-memory cache
+            cachepy.set(cache_key, cached_result)
+            return cached_result["html"]
 
-        for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
-            playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
-            video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
+    # No cache found -- regenerate HTML
 
-            video = dict_videos[video_key]
-            playlist = dict_playlists[playlist_key]
-            fast_video_playlist_dict = {"video":video, "playlist":playlist}
+    all_topics_list = []
 
-            if dict_video_playlists.has_key(playlist_key):
-                dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
-            else:
-                dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
+    all_topics_list.append('Arithmetic')
+    all_topics_list.append('Chemistry')
+    all_topics_list.append('Developmental Math')
+    all_topics_list.append('Pre-algebra')
+    all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+    all_topics_list.append('Geometry')
+    all_topics_list.append('California Standards Test: Geometry')
+    all_topics_list.append('Current Economics')
+    all_topics_list.append('Banking and Money')
+    all_topics_list.append('Venture Capital and Capital Markets')
+    all_topics_list.append('Finance')
+    all_topics_list.append('Credit Crisis')
+    all_topics_list.append('Valuation and Investing')
+    all_topics_list.append('Geithner Plan')
+    all_topics_list.append('Algebra')
+    all_topics_list.append('Algebra I Worked Examples')
+    all_topics_list.append('ck12.org Algebra 1 Examples')
+    all_topics_list.append('California Standards Test: Algebra I')
+    all_topics_list.append('California Standards Test: Algebra II')
+    all_topics_list.append('Brain Teasers')
+    all_topics_list.append('Biology')
+    all_topics_list.append('Trigonometry')
+    all_topics_list.append('Precalculus')
+    all_topics_list.append('Statistics')
+    all_topics_list.append('Probability')
+    all_topics_list.append('Calculus')
+    all_topics_list.append('Differential Equations')
+    all_topics_list.append('Khan Academy-Related Talks and Interviews')
+    all_topics_list.append('History')
+    all_topics_list.append('Organic Chemistry')
+    all_topics_list.append('Linear Algebra')
+    all_topics_list.append('Physics')
+    all_topics_list.append('Paulson Bailout')
+    all_topics_list.append('CAHSEE Example Problems')
+    all_topics_list.sort()
 
-        for topic in all_topics_list:
+    all_playlists = []
 
-            playlist = dict_playlists_by_title[topic]
-            playlist_key = playlist.key()
-            playlist_videos = dict_video_playlists[playlist_key]
+    dict_videos = {}
+    dict_playlists = {}
+    dict_playlists_by_title = {}
+    dict_video_playlists = {}
 
-            playlist_data = {
-                     'title': topic,
-                     'topic': topic,
-                     'playlist': playlist,
-                     'videos': playlist_videos
-                     }
+    for video in Video.all():
+        dict_videos[video.key()] = video
 
-            all_playlists.append(playlist_data)
-    
-        # Separating out the columns because the formatting is a little different on each column
-        template_values = {
-            'App' : App,
-            'all_playlists': all_playlists,
-            }
-        path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
-        self.response.out.write(template.render(path, template_values))
+    for playlist in Playlist.all():
+        dict_playlists[playlist.key()] = playlist
+        if playlist.title in all_topics_list:
+            dict_playlists_by_title[playlist.title] = playlist
 
+    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
+        playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
+        video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
+
+        video = dict_videos[video_key]
+        playlist = dict_playlists[playlist_key]
+        fast_video_playlist_dict = {"video":video, "playlist":playlist}
+
+        if dict_video_playlists.has_key(playlist_key):
+            dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
+        else:
+            dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
+
+    for topic in all_topics_list:
+
+        playlist = dict_playlists_by_title[topic]
+        playlist_key = playlist.key()
+        playlist_videos = dict_video_playlists[playlist_key]
+
+        playlist_data = {
+                 'title': topic,
+                 'topic': topic,
+                 'playlist': playlist,
+                 'videos': playlist_videos
+                 }
+
+        all_playlists.append(playlist_data)
+
+    # Separating out the columns because the formatting is a little different on each column
+    template_values = {
+        'App' : App,
+        'all_playlists': all_playlists,
+        }
+    path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
+    html = template.render(path, template_values)
+
+    cache_content_date = str(datetime.datetime.now())
+    result = {"html": html, "date": cache_content_date}
+
+    # Set cache of generated HTML in memory
+    cachepy.set(cache_key, result)
+
+    # Set cache of generated HTML in memcache
+    if not memcache.set(cache_key, result, namespace=App.version):
+        logging.error("Memcache set failed for %s" % cache_key)
+
+    # Set shared date of last generated content
+    Setting.cached_library_content_date(cache_content_date)
+
+    return html
 
 class GenerateVideoMapping(app.RequestHandler):
 
@@ -1618,6 +1658,8 @@ class ViewHomePage(app.RequestHandler):
         link3 = image_and_link_list[2]
         link4 = image_and_link_list[3]
         
+        # Get pregenerated library content from in-memory cache or memcache
+        library_content = library_content_html()
         
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
@@ -1628,6 +1670,7 @@ class ViewHomePage(app.RequestHandler):
                                                   'link2': link2,
                                                   'link3': link3,
                                                   'link4': link4,
+                                                  'library_content': library_content,
                                                   'logout_url': logout_url}, 
                                                   self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
