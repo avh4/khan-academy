@@ -127,126 +127,7 @@ function submitForm(value)
 <div>
 	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; float: left; width: 65%; min-width: 610px;">
 {% block maincode %}
-<script language=Javascript1.2><!--
 
-var term1 = 0;
-var term2 = 0;
-var term1color = getNextColor();
-var term2color = getNextColor();
-var hintsGiven = 0;
-var xSpacing =65;
-var ySpacing = 60;
-var xMax = 400;
-var xMin = 0;
-var yMax = 300;
-var yMin = 0;
-var leftMargin = 50;
-var circlePos = leftMargin/2;
-var circleCount = 1;
-var standardSize = 75;
-var smallSize = 17;
-
-
-
-//This function is used to generate the random entries
-var eFunction = function()
-{
-	term1 = getRandomInt(9);
-	term2 = getRandomInt(9);
-
-	while (term1+term2<10)
-	{
-		term1 = getRandomInt(9);
-		term2 = getRandomInt(9);
-	}
-}
-
-
-//This is the comparison function that makes sure that current random entries haven't been given recently
-var cFunction = function(history)
-{
-	return (history.indexOf(term1+'+'+term2)!=-1 || history.indexOf(term2+'+'+term1)!=-1);
-}
-
-
-//This function defines what an entry in the history should look like
-var tFunction = function()
-{
-	return (Math.min(term1,term2)+'+'+Math.max(term1,term2));
-}
-
-
-//This checks the history and regenerates random numbers if the current ones have already been used recently
-checkHistory(cFunction, eFunction, tFunction,10);
-
-
-
-
-function graph_update()
-{
-	present.initPicture(xMin,xMax,yMin);
-	present.fontfill = nColor;
-	present.fontsize = standardSize;
-	present.fontstyle = "normal";
-	present.fontfamily = "Arial";
-
-	present.text([leftMargin,200], term1, above, 'term1');
-
-	present.text([leftMargin+xSpacing,200], '+', above);
-	present.text([leftMargin+2*xSpacing,200], term2, above, 'term2');
-	present.text([leftMargin+3*xSpacing,200], '=', above);
-	present.text([leftMargin+4*xSpacing,200], '?', above, 'sum');
-	setCorrectAnswer(term1+term2);
-
-}
-
-
-function drawCircles(num, color, startX)
-{
-	present.strokewidth=3;
-	present.stroke=color;
-	present.fontfill=color;
-	var radius = 10;
-	//var row = 0;
-	var perRow = 3;//getRandomInt(3)+1;
-	var curX = startX;
-	var curY = 0;
-	for(var i=0; i<num; i++)
-	{
-
-		curX = startX+(i%perRow)*(2*radius+5);
-		curY = 185- Math.floor(i/perRow)*(2*radius+5);
-		present.circle([curX,curY], radius, startX+'_'+i);
-
-	}
-}
-
-function next_step()
-{
-	if (hintsGiven==0)
-	{
-		present.fontfill = term1color;
-		present.text([leftMargin,200], term1, above, 'term1');
-		drawCircles(term1, term1color, leftMargin/2);
-	}
-	else if (hintsGiven==1)
-	{
-		present.fontfill = term2color;
-		present.text([leftMargin+2*xSpacing,200], term2, above, 'term2');
-		drawCircles(term2, term2color, leftMargin/2+2*xSpacing);
-	}
-	else
-	{
-		//fontfill = nColor;
-		//text([leftMargin+4*xSpacing,100], correctAnswer, above, 'sum');
-
-	}
-	hintsGiven++;
-	steps_given++;
-}
-
-//-->
-</script>
 {% endblock maincode %}
 		{% comment %}
 		We use a table here just because existing graphdisplay blocks create a table cell.
@@ -268,13 +149,21 @@ function next_step()
 			<input type="hidden" id="correct" name="correct" value="0">
 			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-			{% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {highlight_answer(); checkFreeAnswer(); return false;}"></br>{% endblock answerarea %}
+			{% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"></br>{% endblock answerarea %}
 			<br><input id="hint" type="button" value="Hint" name="hint" onClick="evaluate_hint();">
-			<input type="button" value="Check Answer" onClick="{% block checkanswer %}highlight_answer();checkFreeAnswer(){% endblock checkanswer %}"></br>
+			<input type="button" value="Check Answer" onClick="check_answer_block()"></br>
 			<br><img src="/images/blank.gif" name="feedback"><div id="nextbutton" style="position:relative; visibility:hidden;"><input type="button" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()"></div></br>
 			{% endblock answerform %}
 		</form>
 		<script language=Javascript1.2><!--
+			// some modules already have a check_answer...
+			function check_answer_block() {
+				{% block checkanswer %}
+				highlight_answer();
+				checkFreeAnswer();
+				{% endblock checkanswer %}
+			}
+			
 			var elForm = document.forms['answerform'];
 			if (elForm)
 			{

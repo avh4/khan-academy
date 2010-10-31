@@ -1,0 +1,84 @@
+{% extends "arithmetic_template.html" %}
+
+{% block maincell %}
+<script type="text/javascript" src="/javascript/kinematics.js?{{App.version}}"></script>
+<script language=Javascript1.2><!--
+
+/***
+Kinematics equations
+Provides the student with 3 of 5 kinematics variables and asks to solve for an unknown.
+***/
+
+// unknown is an unknown
+// solving is the unknown we're actually solving for in this problem
+var unknown, solving, motion;
+
+function rollUnknowns() {
+	do {
+		unknown = kvars[getRandomInt(kvars.length-1)];
+		solving = kvars[getRandomInt(kvars.length-1)];
+	} while (solving == unknown)
+}
+
+rollUnknowns();
+
+var rint = getRandomInt(5);
+if (rint == 0) {
+	// 1/6 chance of constant velocity problem
+	motion = randomConstantMotion();
+	
+	// if you don't have d and/or t for a constant velocity problem,
+	// you are screwed
+	while ( (unknown == "d" && solving == "t") ||
+			(unknown == "t" && solving == "d") ) {
+		rollUnknowns();
+	}
+} else if (rint > 3) {
+	// 2/6 chance of freefall problem
+	motion = randomFreefallMotion();
+} else {
+	// 3/6 chance of random-accel problem
+	motion = randomAccelMotion();
+}
+
+write_text("<p>Solve for `" + solving + "` to the nearest tenth.</p><p>Make sure you select the proper units. You may do arithmetic with a calculator.</p>");
+printMotion(motion, [unknown, solving]);
+
+hintWithNo[unknown](motion, solving);
+//-->
+</script>
+
+{% endblock maincell %}
+
+{% block answerarea %}
+<br>Answer:
+<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer(); return false;}">
+<select id="answerunit">
+  <option value=""></option>
+  <option value="m">m</option>
+  <option value="s">s</option>
+  <option value="m/s">m/s</option>
+  <option value="m/(s^2)">m/s^2</option>
+</select></br>
+{% endblock answerarea %}
+
+{% block checkanswer %}
+// Answer checking is slightly more lenient here.
+// We allow +-0.1 error...
+highlight_answer();
+
+var usersAnswer = parseFloatStrict(document.getElementById("answer").value);
+var usersAnswerUnit = document.getElementById("answerunit").value;
+if (isNaN(usersAnswer)) 
+{
+		window.alert("Your answer is not a number.  Please try again.");
+		return;
+}
+var isCorrect = (  (Math.abs(usersAnswer - motion[solving]) < 0.1)
+				&& (usersAnswerUnit == kunits[solving]) );
+
+handleCorrectness(isCorrect);
+{% endblock checkanswer %}
+
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}
+
