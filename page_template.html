@@ -89,6 +89,39 @@
                     $(e.target).removeClass('css-menu-js-hover').closest(".css-menu > ul > li").removeClass('css-menu-js-hover');
                 });
             });
+            
+            
+            
+            //Javascript for estimating the cumulative video views in real-time
+            function addCommas(nStr)
+	    {
+	        nStr += '';
+		x = nStr.split('.');
+		x1 = x[0];
+		x2 = x.length > 1 ? '.' + x[1] : '';
+		var rgx = /(\d+)(\d{3})/;
+		while (rgx.test(x1)) {
+		    x1 = x1.replace(rgx, '$1' + ',' + '$2');
+		}
+		return x1 + x2;
+	    }
+		
+		
+	    
+	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
+	    var seedTotalViews = 28402468
+	    var seedDailyViews = 100000;
+	    
+	    var currentTime = new Date();
+	    var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
+	    var viewsPerSecond = seedDailyViews/24/3600
+	    var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+	    
+	    var totalViewsString = addCommas(""+estimatedTotalViews);
+
+
+            
+            
         </script>
         {% block pagescript %}
         {% endblock pagescript %}
@@ -156,8 +189,8 @@
                 <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png?{{App.version}}" alt="Khan Academy"></a>
                     <span id="page_visitors">
                         <span id="page_num_visitors">
-                            <!-- Content will get populated by jquery call to chartbeat API below; if call fails no visible impact to user -->
-                        </span>&nbsp;people learning right now
+                            <!-- Content will get populated by javacript at end of page -->
+                        </span>&nbsp;lessons delivered
                     </span>
                 <fb:like id="page_fb_like" href="http://www.khanacademy.org" show_faces="false" width="280" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
             </div>
@@ -339,11 +372,9 @@
 	<!-- ChartBeat API - get # of users online now BEGIN -->
 
    <script type="text/javascript">
-   	$.getJSON("http://api.chartbeat.com/summize/?host=khanacademy.org&apikey=3942b962aed430a5fbb67fdf29e3a436&jsonp=?",
-        function(data){
-            $('#page_num_visitors').append(addCommas(data.people));
+   	
+            $('#page_num_visitors').append(totalViewsString);
             $('#page_visitors').css('display', 'inline');
-    });
 	</script>
 
 	<!-- ChartBeat API - get # of users online now END -->
