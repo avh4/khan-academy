@@ -2,13 +2,20 @@
 {% block pagetitle %}Progress chart for {{student|escape}}{% endblock pagetitle %}
 {% block pagecontent %}
 
+{% if not user_exercises %}
+<p>{{student|escape}} does not have a proficient date for any exercises. If some show up on the <a href="/classreport">class report</a> page, click on the green squares to get them to show up here.</p>
+{% else %}{% ifequal num_exercises 1 %}
+<p>{{student|escape}} has only one exercise with a proficient date. If others show up on the <a href="/classreport">class report</a> page, click on the green squares to get them to show up here.</p>
+{% else %}{% ifequal num_exercises 2 %}
+<p>{{student|escape}} has only two exercises with a proficient date. If others show up on the <a href="/classreport">class report</a> page, click on the green squares to get them to show up here.</p>
+{% else %}
 <p>The chart below shows {{student|escape}}'s progress on the exercises.</p>
 
 <script type="text/javascript" src="javascript/protovis-r3.2.js"></script>
 <!--script type="text/javascript" src="javascript/jquery.tipsy.js"></script-->
 <script type="text/javascript+protovis">
 var data = [
-{% for user_exercise in user_exercises %}{ exercise_num: {{forloop.counter}}, name: '{{user_exercise.name}}', exid: '{{user_exercise.exid}}', days_until_proficient: {{user_exercise.days_until_proficient}} },
+{% for user_exercise in user_exercises %}{ exercise_num: {{forloop.counter}}, name: '{{user_exercise.name}}', exid: '{{user_exercise.exid}}', days_until_proficient: {{user_exercise.days_until_proficient}}, proficient_date: '{{user_exercise.proficient_date}}' },
 {% endfor %}];
 
 /* Chart dimensions and scales. */
@@ -23,8 +30,8 @@ var w = 800,
 var vis = new pv.Panel()
     .width(w)
     .height(h)
-    .right(padding)
-    .left(padding+10)
+    .right(padding+50)
+    .left(padding)
     .top(padding)
     .bottom(padding)
     .events("all")
@@ -36,7 +43,7 @@ vis.add(pv.Rule)
     .bottom(function(d) Math.round(y(d)) - .5)
     .strokeStyle(function(d) d ? "#eee" : "#000")
   .anchor("left").add(pv.Label)
-    .text(function(d) d);
+    .text(function(d) y.tickFormat(d));
 
 /* X-ticks. */
 vis.add(pv.Rule)
@@ -80,7 +87,7 @@ vis.add(pv.Dot)
     .size(0)
   .anchor("right").add(pv.Label)
     .visible(function() this.anchorTarget().active() == this.index)
-    .text(function(d) d.name);
+    .text(function(d) d.name + " on " + d.proficient_date);
 
 /* An invisible bar to capture events without flickering (commented out)
 vis.add(pv.Bar)
@@ -113,6 +120,9 @@ vis.add(pv.Label)
 
 vis.render();
 </script>
+{% endifequal %}
+{% endifequal %}
+{% endif %}
 
 {% endblock pagecontent %}
 

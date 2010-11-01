@@ -153,10 +153,11 @@ class ViewProgressChart(app.RequestHandler):
 
     def get(self):    
         class ExerciseData:
-            def __init__(self, name, exid, days_until_proficient):
+            def __init__(self, name, exid, days_until_proficient, proficient_date):
                 self.name = name
                 self.exid = exid
                 self.days_until_proficient = days_until_proficient
+                self.proficient_date = proficient_date
                 
         user = app.get_current_user()
         student = user
@@ -175,14 +176,17 @@ class ViewProgressChart(app.RequestHandler):
 
             user_exercises = []
             max_days = None
+            num_exercises = 0
             #logging.info("user_data.joined: " + str(user_data.joined))
             for ue in UserExercise.all().filter('user =', user_data.user).filter('proficient_date >', None).order('proficient_date'):
                 days_until_proficient = (ue.proficient_date - user_data.joined).days   
                 #logging.info(ue.exercise + ": " + str(ue.proficient_date))
                 #logging.info("delta: " + str(ue.proficient_date - user_data.joined))
-                data = ExerciseData(ue.exercise.replace('_', ' ').capitalize(), ue.exercise, days_until_proficient)
+                proficient_date = ue.proficient_date.strftime('%m/%d/%Y')
+                data = ExerciseData(ue.exercise.replace('_', ' ').capitalize(), ue.exercise, days_until_proficient, proficient_date)
                 user_exercises.append(data)
                 max_days = days_until_proficient
+                num_exercises += 1
             
             name = app.get_nickname_for(student)
             if student.email() != name:
@@ -196,6 +200,7 @@ class ViewProgressChart(app.RequestHandler):
                 'student_email': student_email,   
                 'user_exercises': user_exercises,
                 'max_days': max_days,
+                'num_exercises': num_exercises,
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewprogresschart.html')
