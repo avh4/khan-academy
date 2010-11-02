@@ -76,6 +76,7 @@
 $(function(){
     $('<img width=0 height=0>').error(function() {
        $("#youtube_blocked").show();
+       $("#idOVideo").hide();
     }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
     $('#video_selector').hide();
     $('#video_dropdown').css('display', 'inline-block');
