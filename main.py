@@ -1647,7 +1647,7 @@ class ViewHomePage(app.RequestHandler):
         
         image_and_link_list = ['<A href="/press/fortune"><img src="/images/splashthumbnails/fortune_thumbnail.png" align=right></a>',
         		      	'<A href="/about#GEL"><img src="/images/splashthumbnails/gel_thumbnail.png" align=right></a>',
-        		      	'<A href="/how-to-help#translation"><img src="/images/splashthumbnails/translation_thumbnail.png" align=right></a>',
+        		      	'<A href="/getinvolved#translation"><img src="/images/splashthumbnails/translation_thumbnail.png" align=right></a>',
         		       '<A href="/about#NEWSHOUR"><img src="/images/splashthumbnails/pbs_thumbnail.png" align=right></a>',
         		       '<A href="/about#OVERVIEW"><img src="/images/splashthumbnails/overview_thumbnail.png" align=right></a>']
         		       
