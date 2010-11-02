@@ -297,7 +297,7 @@ article.video p#keywords {
     clear: both;
 }
 
-a.download_video {
+span.video_extra_links {
     float: left;
 }
 

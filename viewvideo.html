@@ -179,10 +179,12 @@ $(function(){
             <param name="wmode" value="transparent">
             <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
         </object>
-        <a href="{{video_path}}" class="download_video">Download</a>
+        <span class="video_extra_links"><nobr>
+        <a href="{{video_path}}">Download</a>
         {% if exercise %}
-            &nbsp;|&nbsp;<a href="/exercises?exid={{exercise}}">Exercises</a>
-        {% endif %}
+            | <a href="/exercises?exid={{exercise}}">Exercises</a>
+            {% endif %}
+        </nobr></span>
         {% if playlists %}
         <label id="playlists">
             <b>Related Playlists:</b>
