@@ -205,11 +205,14 @@ function submitForm(value)
 <script type="text/javascript"><!--
 hide_hints();
 $(document).ready(function() {
+    const scratchpad_cookie_name = "show_scratchpad";
+                                                           
 	function hideScratchPad() {
 		$('#scratch_pad_hide').css('display', 'none');
 		$('#scratch_pad_show').css('display', 'inline');
 		$('#svgedit').css('display', 'none');
 		$('#question_area').css('min-height', 'auto');
+        createCookie(scratchpad_cookie_name,"false",365);
 	}
 	function showScratchPad() {
 		$('#scratch_pad_show').css('display', 'none');
@@ -225,6 +228,7 @@ $(document).ready(function() {
 			*/
 			svgedit.attr('src', '/svg-edit-2.5-khan-100827/svg-editor.html');
 		}
+        createCookie(scratchpad_cookie_name,"true",365);
 	}
 	function getUrlVars(){
 		var vars = [], hash;
@@ -238,13 +242,18 @@ $(document).ready(function() {
 		return vars;
 	}
 
-	hideScratchPad();
 	if (!$.browser.msie)
 	{
 		$('#scratch_pad_show').click(showScratchPad);
 		$('#scratch_pad_hide').click(hideScratchPad);
 		$('#scratch_pad_toggle').css('display', 'block');
 	}
+    	
+    if(readCookie(scratchpad_cookie_name) == "true") 
+        showScratchPad();
+    else
+        hideScratchPad();
+    
 });
 //--></script>
 {% endblock pagecontent %}
