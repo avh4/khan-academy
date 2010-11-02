@@ -1646,10 +1646,10 @@ class ViewHomePage(app.RequestHandler):
         movie_youtube_id =   random.choice(['p6l8-1kHUsA', 'UuMTSU9DcqQ'])
         
         image_and_link_list = ['<A href="/press/fortune"><img src="/images/splashthumbnails/fortune_thumbnail.png" align=right></a>',
-        		      	'<A href="/frequently-asked-questions#GEL"><img src="/images/splashthumbnails/gel_thumbnail.png" align=right></a>',
-        		      	'<A href="/frequently-asked-questions#translation"><img src="/images/splashthumbnails/translation_thumbnail.png" align=right></a>',
-        		       '<A href="/frequently-asked-questions#NEWSHOUR"><img src="/images/splashthumbnails/pbs_thumbnail.png" align=right></a>',
-        		       '<A href="/frequently-asked-questions#OVERVIEW"><img src="/images/splashthumbnails/overview_thumbnail.png" align=right></a>']
+        		      	'<A href="/about#GEL"><img src="/images/splashthumbnails/gel_thumbnail.png" align=right></a>',
+        		      	'<A href="/how-to-help#translation"><img src="/images/splashthumbnails/translation_thumbnail.png" align=right></a>',
+        		       '<A href="/about#NEWSHOUR"><img src="/images/splashthumbnails/pbs_thumbnail.png" align=right></a>',
+        		       '<A href="/about#OVERVIEW"><img src="/images/splashthumbnails/overview_thumbnail.png" align=right></a>']
         		       
         random.shuffle(image_and_link_list)
         		       
@@ -1679,6 +1679,11 @@ class ViewHomePage(app.RequestHandler):
 class ViewFAQ(app.RequestHandler):
 
     def get(self):
+        self.redirect("/about#faq", True)
+        return
+
+class ViewAboutUs(app.RequestHandler):
+    def get(self):
         user = app.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
@@ -1689,7 +1694,22 @@ class ViewFAQ(app.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'frequentlyaskedquestions.html')
+        path = os.path.join(os.path.dirname(__file__), 'aboutus.html')
+        self.response.out.write(template.render(path, template_values))
+
+class ViewGetInvolved(app.RequestHandler):
+    def get(self):
+        user = app.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': app.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'getinvolved.html')
         self.response.out.write(template.render(path, template_values))
 
 class Donate(app.RequestHandler):
@@ -1707,7 +1727,8 @@ class Donate(app.RequestHandler):
                                                   
         path = os.path.join(os.path.dirname(__file__), 'donate.html')
         self.response.out.write(template.render(path, template_values))
-        
+
+
 class ViewDownloads(app.RequestHandler):
 
     def get(self):
@@ -1727,7 +1748,7 @@ class ViewDownloads(app.RequestHandler):
 class ViewHowToHelp(app.RequestHandler):
 
     def get(self):
-        self.redirect("/frequently-asked-questions#how-to-help", True)
+        self.redirect("/getinvolved", True)
         return
 
 
@@ -2045,7 +2066,8 @@ def real_main():
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
         ('/frequently-asked-questions', ViewFAQ),
-        ('/about', ViewFAQ),
+        ('/about', ViewAboutUs),
+        ('/getinvolved', ViewGetInvolved),
         ('/donate', Donate),
         ('/exercisedashboard', ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
