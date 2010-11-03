@@ -472,3 +472,24 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 
 /**************end of elements for all-videos page*********************/
+
+#tabs-table, #tabs-table td.content {
+    width: 100%;
+}
+
+#tabs-table td.facebook-right-panel {
+    width: 200px;
+    vertical-align: top;
+}
+
+#tabs-container {
+    text-align: center;
+    width: 100%;
+}
+
+#tabs-outer {
+    text-align: left;
+    width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}

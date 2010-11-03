@@ -1,64 +1,5 @@
-{% extends "page_template.html" %}
-{% block pagescript %}
-	<link type="text/css" href="/stylesheets/custom-theme/jquery-ui-1.8.4.custom.css" rel="stylesheet" />
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.3/jquery-ui.min.js"></script>
-	<script type="text/javascript">
-		$(function(){
-			// Tabs
-			var tabs = $('#tabs-outer').tabs( {width: "100%"});
-            $("a[href='#contactus'], a[href='/aboutus#contactus']").click(function() {
-                tabs.tabs('select', '#contactus');
-                window.scrollTo(0,0);
-                return false;
-            });
-            $("a[href='#leadership']").click(function() {
-                tabs.tabs('select', '#leadership');
-                window.scrollTo(0,0);
-                return false;
-            });
-            $("a[href='#faq']").click(function() {
-                tabs.tabs('select', '#faq');
-                window.scrollTo(0,0);
-                return false;
-            });
-            var url = window.location.href;
-            var hashIndex = url.indexOf('#');
-            if (hashIndex != -1) {
-                tabs.tabs('select', url.slice(hashIndex));
-                window.scrollTo(0,0);
-            }
-		});
-	</script>
-    <style>
-        p {
-            margin: 1ex 0;
-        }
-        #meetup {
-            float: right;
-        }
-        #credits dl {
-            margin-left: 2em;
-        }
-        #credits dt {
-            font-weight: bold;
-            float: left;
-            margin-right: 1ex;
-        }
-        #credits dd:before {
-            content: "- ";
-        }
-    </style>
-{% endblock pagescript %}
-{% block pagetitle %}About Us{% endblock pagetitle %}
-{% block pagecontent %}
-
-<P>
-<iframe align=right src="http://www.facebook.com/plugins/likebox.php?id=159403248441&amp;width=200&amp;connections=10&amp;stream=false&amp;header=true&amp;height=287" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:200px; height:287px;" allowTransparency="true"></iframe>
-<table width=800 border=0 align=center>
-<tr>
-<td>
-
-<div id="tabs-outer">
+{% extends "about_template.html" %}
+{% block aboutcontent %}
 <ul>
 	<li><A href="#press"><span>Interviews and Talks</span></a></li>
 	<li><A href="#leadership"><span>Leadership Team</span></a></li>
@@ -469,16 +410,5 @@ We love hearing from you!
 
 </div>
 
-
-</div>
-
-</td>
-</tr>
-
-</table>
-
-{% endblock pagecontent %}
-
-
-
+{% endblock aboutcontent %}
 
