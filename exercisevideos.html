@@ -1,56 +1,88 @@
 {% extends "page_template.html" %}
 {% block pagetitle%}<A href="/exercises?exid={{exercise.name}}">{{extitle}}</A> : Videos{% endblock pagetitle %}
+{% block pagescript %}
+<style>
+    #youtube_blocked {
+        display: none;
+        color: red;
+        font-weight: bold;
+        clear: both;
+        padding-top: 1em;
+    }
+</style>
+<script type="text/javascript">
+    function changeVideo(identifier)
+    {
+    	document.getElementById("idOVideo_div").innerHTML = '<object id="idOVideo" name="idOVideo" width="800" height="480"><param name="movie" value="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="transparent"><embed src="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="800" height="480"></embed></object>';
+    }
+
+    function changeFlvVideo(video_folder, readable_id)
+    {
+    	html = '<object id="flvVideo" name="flvVideo" width="800" height="480"><param name="movie" value="/videos/OSplayer.swf?movie={{video_path}}' + video_folder + '/' + readable_id + '.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie={{video_path}}' + video_folder + '/' + readable_id + '.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="800" height="480"></embed></object>';
+    	//alert(html);
+    	document.getElementById("flvVideo_div").innerHTML = html;
+    	swfobject.registerObject("flvVideo", "9.0.0", "");
+    }
+
+$(function(){
+    $('<img width=0 height=0>').error(function() {
+       $("#youtube_ok").hide();
+       $("#youtube_blocked").show();
+    }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
+});
+</script>
+{% endblock pagescript %}
 {% block pagecontent %}
 
-{% if App.offline_mode %}
-
-    <script type="text/javascript" src="/videos/swfobject.js"></script>
-    <script type="text/javascript">
-    swfobject.registerObject("idOVideo", "9.0.0", "");
-
-    function changeVideo(video_folder, readable_id)
-    {
-    	document.getElementById("vid").innerHTML = '<object width="640" height="385"><param name="movie" value="/videos/OSplayer.swf?movie=/videos/' + video_folder + '/' + readable_id + '.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie=/videos/' + video_folder + '/' + readable_id + '.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="640" height="385"></embed></object>';
-    }
-    </script>
+<div id="youtube_blocked">
     {% if first_video %}
       {% for exercise_video in exercise_videos %}
     	<P>
-    	<A href="javascript:changeVideo('{{exercise_video.video.video_folder}}', '{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
+    	<A href="javascript:changeFlvVideo('{{exercise_video.video.video_folder}}', '{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
       {% endfor %}
     <P>
-    <div id="vid"></div>
-    <script language=Javascript1.2>
-    changeVideo('{{first_video.video_folder}}', '{{first_video.readable_id}}');
-    </script>
+            <script type="text/javascript" src="/videos/swfobject.js"></script>
+            <script type="text/javascript">
+            swfobject.registerObject("flvVideo", "9.0.0", "");
+            </script>
+            <div id="flvVideo_div">
+                <object id="flvVideo" name="flvVideo" width="640" height="360">
+                    <param name="movie" value="/videos/OSplayer.swf?movie={{video_path}}{{first_video.video_folder}}/{{first_video.readable_id}}.flv&volume=100" />
+                    <param name="allowFullScreen" value="true">
+                    <param name="allowScriptAccess" value="always">
+                    <object type="application/x-shockwave-flash" data="/videos/OSplayer.swf?movie={{video_path}}{{first_video.video_folder}}/{{first_video.readable_id}}.flv&volume=100" width="640" height="360">
+                    <div>
+                        <h1>Alternative content</h1>
+                        <p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p>
+                    </div>
+                    </object>
+                </object>
+            </div>
     {% else %}
     <p>There are no videos for this exercise yet.</p>
     {% endif %}
-    <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
-
-{% else %}
-
-    <script language=Javascript1.2>
-    function changeVideo(identifier)
-    {
-    	document.getElementById("vid").innerHTML = '<object width="873" height="525"><param name="movie" value="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="873" height="525"></embed></object>';
-    }
-    </script>
+</div>
+<div id="youtube_ok">
     {% if first_video %}
       {% for exercise_video in exercise_videos %}
     	<P>
     	<A href="javascript:changeVideo('{{exercise_video.video.youtube_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
       {% endfor %}
     <P>
-    <div id="vid"></div>
-    <script language=Javascript1.2>
-    changeVideo('{{first_video.youtube_id}}');
-    </script>
+    <div id="idOVideo_div">
+        <object id="idOVideo" name="idOVideo" width="800" height="480">
+            <param name="movie" value="http://www.youtube.com/v/{{first_video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
+            <param name="allowFullScreen" value="true">
+            <param name="allowScriptAccess" value="always">
+            <param name="wmode" value="transparent">
+            <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{first_video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="800" height="480">
+        </object>
+    </div>
     {% else %}
     <p>There are no videos for this exercise yet.</p>
     {% endif %}
-    <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
+</div>
 
-{% endif %}
+<A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
 
 {% endblock pagecontent %}

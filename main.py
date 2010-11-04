@@ -564,18 +564,24 @@ class ViewExerciseVideos(app.RequestHandler):
                 for exercise_video in exercise_videos:
                     video = exercise_video.video
                     video.video_folder = get_mangled_playlist_name(video.playlists[0])  
-                    
+
+                if App.offline_mode:
+                    video_path = "/videos/" 
+                else:
+                    video_path = "http://www.archive.org/download/KhanAcademy_"
+            
                 template_values = {
                     'App' : App,
                     'points': user_data.points,
                     'username': user.nickname(),
                     'logout_url': logout_url,
                     'exercise': exercise,
+                    'video_path': video_path,                    
                     'first_video': first_video,
                     'extitle': exercise.name.replace('_', ' ').capitalize(),
                     'exercise_videos': exercise_videos,
                     'issue_labels': issue_labels, 
-                    }
+                    }   
 
                 path = os.path.join(os.path.dirname(__file__), 'exercisevideos.html')
                 self.response.out.write(template.render(path, template_values))
