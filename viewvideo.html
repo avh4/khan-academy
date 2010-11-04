@@ -66,7 +66,7 @@
 
     #youtube_blocked {
         visibility: hidden;
-        position: relative;
+        position: absolute;
         left: -9999px;
         color: red;
         font-weight: bold;
@@ -77,7 +77,7 @@
 <script>
 $(function(){
     $('<img width=0 height=0>').error(function() {
-       $("#youtube_blocked").css("visibility", "visible").css("left", "0px");
+       $("#youtube_blocked").css("visibility", "visible").css("left", "0px").css("position", "relative");
        $("#idOVideo").hide();
     }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
     $('#video_selector').hide();
