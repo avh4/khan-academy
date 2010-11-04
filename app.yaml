@@ -20,6 +20,9 @@ handlers:
 - url: /videos
   static_dir: offline/Khan Academy/videos
   
+- url: /flvplayer
+  static_dir: flvplayer
+
 - url: /stylesheets
   static_dir: stylesheets
   

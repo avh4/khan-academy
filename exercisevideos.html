@@ -3,7 +3,9 @@
 {% block pagescript %}
 <style>
     #youtube_blocked {
-        display: none;
+        visibility: hidden;
+        position: relative;
+        left: -9999px;
         color: red;
         font-weight: bold;
         clear: both;
@@ -16,47 +18,35 @@
     	document.getElementById("idOVideo_div").innerHTML = '<object id="idOVideo" name="idOVideo" width="800" height="480"><param name="movie" value="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="transparent"><embed src="http://www.youtube.com/v/'+identifier+'&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="800" height="480"></embed></object>';
     }
 
-    function changeFlvVideo(video_folder, readable_id)
+    function changeFlvVideo(readable_id)
     {
-    	html = '<object id="flvVideo" name="flvVideo" width="800" height="480"><param name="movie" value="/videos/OSplayer.swf?movie={{video_path}}' + video_folder + '/' + readable_id + '.flv&volume=100"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="/videos/OSplayer.swf?movie={{video_path}}' + video_folder + '/' + readable_id + '.flv&volume=100" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="800" height="480"></embed></object>';
-    	//alert(html);
-    	document.getElementById("flvVideo_div").innerHTML = html;
-    	swfobject.registerObject("flvVideo", "9.0.0", "");
+        $("#flvVideo_div").html(dictAlternateEmbeds[readable_id]);
     }
 
 $(function(){
     $('<img width=0 height=0>').error(function() {
        $("#youtube_ok").hide();
-       $("#youtube_blocked").show();
+       $("#youtube_blocked").css("visibility", "visible").css("left", "0px");
     }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
 });
 </script>
 {% endblock pagescript %}
 {% block pagecontent %}
 
+<script>var dictAlternateEmbeds = {};</script>
+
 <div id="youtube_blocked">
     {% if first_video %}
       {% for exercise_video in exercise_videos %}
-    	<P>
-    	<A href="javascript:changeFlvVideo('{{exercise_video.video.video_folder}}', '{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
+      <P>
+        <script>
+            dictAlternateEmbeds['{{exercise_video.video.readable_id}}'] = '{% filter escapejs %}{% flv_player_embed video_path 800 480 exercise_video.video %}{% endfilter %}';
+        </script>
+    	<A href="javascript:changeFlvVideo('{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
       {% endfor %}
     <P>
-            <script type="text/javascript" src="/videos/swfobject.js"></script>
-            <script type="text/javascript">
-            swfobject.registerObject("flvVideo", "9.0.0", "");
-            </script>
             <div id="flvVideo_div">
-                <object id="flvVideo" name="flvVideo" width="640" height="360">
-                    <param name="movie" value="/videos/OSplayer.swf?movie={{video_path}}{{first_video.video_folder}}/{{first_video.readable_id}}.flv&volume=100" />
-                    <param name="allowFullScreen" value="true">
-                    <param name="allowScriptAccess" value="always">
-                    <object type="application/x-shockwave-flash" data="/videos/OSplayer.swf?movie={{video_path}}{{first_video.video_folder}}/{{first_video.readable_id}}.flv&volume=100" width="640" height="360">
-                    <div>
-                        <h1>Alternative content</h1>
-                        <p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p>
-                    </div>
-                    </object>
-                </object>
+                {% flv_player_embed video_path 800 480 first_video %}
             </div>
     {% else %}
     <p>There are no videos for this exercise yet.</p>
