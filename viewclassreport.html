@@ -41,20 +41,18 @@
 link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_id}}</b> to enter next to the "Register Coach" button.
 After they register your id, you'll be able to see their progress below, and via the <a href="/students">students</a> page.
 </p>
-<p>
-Click on a cell in the table below to see charts of the student's progress in the exercise. Green means the student is proficient, blue means they are working on it,
-and red means they need help (they've done more than 30 problems without getting 10 in a row right).
-</p>
 
 {% if table_data|length_is:"3" %}
 {% else %}
-<table>
-<tr>
-{% for header in table_headers %}
+  <p>Click on a cell in the table below to see charts of the student's progress in the exercise. Green means the student is proficient, blue means they are working on it,
+  and red means they need help (they've done more than 30 problems without getting 10 in a row right).</p>
+  <table>
+  <tr>
+  {% for header in table_headers %}
         <th>{{header}}</th>
-{% endfor %}
-</tr>
-{% for row in table_data %}
+  {% endfor %}
+  </tr>
+  {% for row in table_data %}
 		<tr>
 		{% for cell in row %}
 		    <td class="{{cell.css_class}}"
@@ -62,8 +60,8 @@ and red means they need help (they've done more than 30 problems without getting
 		    >{{cell.data}}</td>
 		{% endfor %}
 		</tr>
-{% endfor %}
-</table>
+  {% endfor %}
+  </table>
 {% endif %}
 </article>
 {% endblock pagecontent %}
