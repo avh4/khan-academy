@@ -1455,6 +1455,7 @@ class GenerateVideoMapping(app.RequestHandler):
         all_topics_list.append('Venture Capital and Capital Markets')
         all_topics_list.append('Finance')
         all_topics_list.append('Credit Crisis')
+        all_topics_list.append('Currency')        
         all_topics_list.append('Valuation and Investing')
         all_topics_list.append('Geithner Plan')
         all_topics_list.append('Algebra')
