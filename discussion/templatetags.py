@@ -6,9 +6,10 @@ from django import template
 import models_discussion
 from comments import video_comments_context
 from qa import video_qa_context
-from util import is_current_user_moderator
+from util_discussion import is_current_user_moderator
 
 import app
+import util
 
 register = webapp.template.create_template_register()
 
@@ -26,7 +27,7 @@ def signature(target=None, verb=None):
                 "target": target, 
                 "verb": verb, 
                 "is_mod": is_current_user_moderator(),
-                "is_author": target and target.author == app.get_current_user()
+                "is_author": target and target.author == util.get_current_user()
             }
 
 @register.inclusion_tag(("discussion/mod_tools.html", "mod_tools.html"))
@@ -56,7 +57,7 @@ def standalone_answers(video, playlist, dict_answers):
 
 @register.inclusion_tag(("discussion/username_and_notification.html", "username_and_notification.html"))
 def username_and_notification(username):
-    count = models_discussion.FeedbackNotification.gql("WHERE user = :1", app.get_current_user()).count()
+    count = models_discussion.FeedbackNotification.gql("WHERE user = :1", util.get_current_user()).count()
     return { "username": username, "count": count }
 
 @register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))

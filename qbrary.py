@@ -13,6 +13,8 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
 import app
+import util
+import request_handler
 
 # Note: this class adapted from: http://github.com/Arachnid/aetycoon/blob/master/__init__.py#L496
 class ChoiceProperty(db.IntegerProperty):
@@ -292,7 +294,7 @@ def getBottomLevelChildren(subj):
     return output
 
 """
-class InitQbrary(app.RequestHandler):
+class InitQbrary(request_handler.RequestHandler):
 
     def get(self):
         action_types = ['hint_button_clicked', 'explain_button_clicked', 'next_button_clicked']
@@ -302,10 +304,10 @@ class InitQbrary(app.RequestHandler):
             new_action.put()
 """
 
-class DeleteSubject(app.RequestHandler):
+class DeleteSubject(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         subject_key = self.request.get('subject_key')
         subject = db.get(subject_key)
         redirect_url = self.request.get('redirect')
@@ -318,7 +320,7 @@ class DeleteSubject(app.RequestHandler):
 
             self.redirect(redirect_url)
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
     def delete_subject(self, subject):
         logging.error("delete_subject subject_key = " + str(subject.key()))
@@ -356,10 +358,10 @@ class DeleteSubject(app.RequestHandler):
             cur_qas_action.delete()
 
 
-class DeleteQuestion(app.RequestHandler):
+class DeleteQuestion(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         question_key = self.request.get('question_key')
         question = db.get(question_key)
         redirect_url = self.request.get('redirect')
@@ -368,13 +370,13 @@ class DeleteQuestion(app.RequestHandler):
                 question.delete()
             self.redirect(redirect_url)
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class ChangePublished(app.RequestHandler):
+class ChangePublished(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         question_key = self.request.get('question_key')
         question = db.get(question_key)
         redirect_url = self.request.get('redirect')
@@ -388,10 +390,10 @@ class ChangePublished(app.RequestHandler):
 #            self.redirect(redirect_url)
             self.redirect('/qbrary')
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class IntroPage(app.RequestHandler):
+class IntroPage(request_handler.RequestHandler):
 
     def get(self):
         # note: don't require login to view the intro page
@@ -422,11 +424,11 @@ class IntroPage(app.RequestHandler):
                 self.response.out.write(template.render(path, template_values))
         
 
-class ManageQuestions(app.RequestHandler):
+class ManageQuestions(request_handler.RequestHandler):
 
     def get(self):
 
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
 
             # Do a SQL query to select the root subject (it has no parent)
@@ -466,17 +468,17 @@ class ManageQuestions(app.RequestHandler):
             self.response.out.write(template.render(path, template_values))
         else:
 
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class CreateEditSubject(app.RequestHandler):
+class CreateEditSubject(request_handler.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user = app.get_current_user()
+        user = util.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
 
@@ -539,13 +541,13 @@ class CreateEditSubject(app.RequestHandler):
                 self.response.out.write(template.render(path, template_values))
         else:
 
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class ViewSubject(app.RequestHandler):
+class ViewSubject(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             subject_key = self.request.get('subject_key')
             if subject_key:
@@ -555,13 +557,13 @@ class ViewSubject(app.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'viewsubject.html')
                 self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class Rating(app.RequestHandler):
+class Rating(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             user_question_key = self.request.get('key')
             difrating = self.request.get('difrating')
@@ -607,20 +609,20 @@ class Rating(app.RequestHandler):
                 self.response.out.write(template.render(path, template_values))
 
 
-class PreviewQuestion(app.RequestHandler):
+class PreviewQuestion(request_handler.RequestHandler):
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             question_key = self.request.get('question_key')
             self.redirect('/answerquestion?question_key=' + question_key + '&preview_mode=True')
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class AnswerQuestion(app.RequestHandler):
+class AnswerQuestion(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             subject_key = self.request.get('subject_key')
             question_key = self.request.get('question_key')
@@ -736,13 +738,13 @@ class AnswerQuestion(app.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'noquestion.html')
                 self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class ViewQuestion(app.RequestHandler):
+class ViewQuestion(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
 
@@ -765,13 +767,13 @@ class ViewQuestion(app.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'viewquestion.html')
                 self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class ViewAuthors(app.RequestHandler):
+class ViewAuthors(request_handler.RequestHandler):
     
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             questions = Question.gql('')
             author_questions_dict = dict()
@@ -789,13 +791,13 @@ class ViewAuthors(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewauthors.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
         
 
-class PickQuestionTopic(app.RequestHandler):
+class PickQuestionTopic(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             root = Subject.gql('WHERE parent_subject=:1', None).get()
             subjects = Subject.gql('WHERE parent_subject = :1', root)
@@ -814,13 +816,13 @@ class PickQuestionTopic(app.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'pickquestiontopic.html')
                 self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class PickQuizTopic(app.RequestHandler):
+class PickQuizTopic(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             subject_key = self.request.get('subject_key')
             if subject_key:
@@ -839,13 +841,13 @@ class PickQuizTopic(app.RequestHandler):
                 path = os.path.join(os.path.dirname(__file__), 'pickquiztopic.html')
                 self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class SubjectManager(app.RequestHandler):
+class SubjectManager(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
 
@@ -864,13 +866,13 @@ class SubjectManager(app.RequestHandler):
 
             self.redirect('/editsubject?subject_key=' + root.key().__str__())
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class CreateEditQuestion(app.RequestHandler):
+class CreateEditQuestion(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
 
@@ -953,11 +955,11 @@ class CreateEditQuestion(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'editquestion.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
     #replicating the functionality described in "get" in "post".  Should clean this up in the future
     #but I just wanted it to be able to process longer fields (so they wouldn't have to be in the URL).
     def post(self):
-    	user = app.get_current_user()
+    	user = util.get_current_user()
 
         # This if/then clause just makes sure that the user is logged in
 
@@ -1040,10 +1042,10 @@ class CreateEditQuestion(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'editquestion.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
 
-class CheckAnswer(app.RequestHandler):
+class CheckAnswer(request_handler.RequestHandler):
 
     def post(self):
         answer_chosen_index = self.request.get('answer_chosen_index')
@@ -1065,7 +1067,7 @@ class CheckAnswer(app.RequestHandler):
         self.response.out.write('Recorded attempt for session: ' + session_key)
 
 
-class SessionAction(app.RequestHandler):
+class SessionAction(request_handler.RequestHandler):
 
     def post(self):
         action_type = self.request.get('action_type')
@@ -1082,7 +1084,7 @@ class SessionAction(app.RequestHandler):
         self.response.out.write(action_type)
 
 
-class FlagQuestion(app.RequestHandler):
+class FlagQuestion(request_handler.RequestHandler):
     def post(self):
         question_answerer_key = self.request.get('question_answerer_key')
         flag_type = self.request.get('flag_type')
@@ -1094,13 +1096,13 @@ class FlagQuestion(app.RequestHandler):
         self.response.out.write(flag_type)
 
 
-class Guestbook(app.RequestHandler):
+class Guestbook(request_handler.RequestHandler):
 
     def post(self):
         greeting = Greeting()
 
-        if app.get_current_user():
-            greeting.author = app.get_current_user()
+        if util.get_current_user():
+            greeting.author = util.get_current_user()
 
         greeting.content = self.request.get('content')
         greeting.put()

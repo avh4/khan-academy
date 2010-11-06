@@ -6,19 +6,22 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 from app import App
-from app import get_nickname_for
+from util import get_nickname_for
 import app
+import util
+import util_discussion
+import request_handler
 import models
 import models_discussion
 
-class VideoFeedbackNotificationList(app.RequestHandler):
+class VideoFeedbackNotificationList(request_handler.RequestHandler):
 
     def get(self):
 
-        user = app.get_current_user()
+        user = util.get_current_user()
 
         if not user:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
             return
 
         answers = feedback_answers_for_user(user)
@@ -49,7 +52,7 @@ class VideoFeedbackNotificationList(app.RequestHandler):
                     "points": user_data.points,
                     "username": get_nickname_for(user),
                     "email": user.email(),
-                    "login_url": app.create_login_url(self.request.uri),
+                    "login_url": util.create_login_url(self.request.uri),
                     "logout_url": users.create_logout_url(self.request.uri),
                     "videos": videos,
                     "dict_answers": dict_answers
@@ -58,7 +61,7 @@ class VideoFeedbackNotificationList(app.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'video_feedback_notification_list.html')
         self.response.out.write(template.render(path, context))
 
-class VideoFeedbackNotificationFeed(app.RequestHandler):
+class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
 
     def get(self):
 
@@ -120,7 +123,7 @@ def new_answer_for_video_question(video, question, answer):
 
 def clear_question_answers_for_current_user(s_question_id):
 
-    user = app.get_current_user()
+    user = util.get_current_user()
     if not user:
         return
 

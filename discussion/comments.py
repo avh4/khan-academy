@@ -9,10 +9,12 @@ from django.utils import simplejson
 
 import models_discussion
 from render import render_block_to_string
-from util import is_honeypot_empty, is_current_user_moderator
+from util_discussion import is_honeypot_empty, is_current_user_moderator
 import app
+import util
+import request_handler
 
-class PageComments(app.RequestHandler):
+class PageComments(request_handler.RequestHandler):
 
     def get(self):
 
@@ -36,14 +38,14 @@ class PageComments(app.RequestHandler):
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
             self.response.out.write(json)
 
-class AddComment(app.RequestHandler):
+class AddComment(request_handler.RequestHandler):
 
     def post(self):
 
-        user = app.get_current_user()
+        user = util.get_current_user()
 
         if not user:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
             return
 
         if not is_honeypot_empty(self.request):
@@ -87,7 +89,7 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
     count_page = len(comments)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": app.get_current_user(),
+            "user": util.get_current_user(),
             "is_mod": is_current_user_moderator(),
             "video": video,
             "playlist": playlist,
@@ -101,5 +103,5 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "login_url": app.create_login_url("/video?v=%s" % video.youtube_id)
+            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }

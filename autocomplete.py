@@ -3,6 +3,7 @@ from google.appengine.api import memcache
 
 import app
 from app import App
+import request_handler
 from models import Video, Playlist
 
 from django.utils import simplejson
@@ -13,7 +14,7 @@ MAX_RESULTS_PER_TYPE = 10
 VIDEO_TITLE_MEMCACHE_KEY = "video_title_dicts"
 PLAYLIST_TITLE_MEMCACHE_KEY = "playlist_title_dicts"
 
-class Autocomplete(app.RequestHandler):
+class Autocomplete(request_handler.RequestHandler):
 
     def get(self):
 

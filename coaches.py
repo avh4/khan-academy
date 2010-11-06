@@ -10,14 +10,16 @@ from google.appengine.api import users
 
 from app import App
 import app
+import util
+import request_handler
 
 from models import UserExercise, Exercise, UserData, ProblemLog, ExerciseGraph
 
 
-class ViewCoaches(app.RequestHandler):
+class ViewCoaches(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
             logout_url = users.create_logout_url(self.request.uri)
@@ -32,15 +34,15 @@ class ViewCoaches(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewcoaches.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
             
             
-class RegisterCoach(app.RequestHandler):
+class RegisterCoach(request_handler.RequestHandler):
     
     def post(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user is None:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
             return
 
         user_data = UserData.get_or_insert_for(user)
@@ -50,12 +52,12 @@ class RegisterCoach(app.RequestHandler):
         self.redirect("/coaches")
             
 
-class UnregisterCoach(app.RequestHandler):
+class UnregisterCoach(request_handler.RequestHandler):
 
     def post(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user is None:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
             return
         user_data = UserData.get_or_insert_for(user)
         coach_email = self.request.get('coach')
@@ -69,10 +71,10 @@ class UnregisterCoach(app.RequestHandler):
         self.redirect("/coaches") 
 
 
-class ViewIndividualReport(app.RequestHandler):
+class ViewIndividualReport(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         student = user
         if user:
             student_email = self.request.get('student_email')
@@ -97,7 +99,7 @@ class ViewIndividualReport(app.RequestHandler):
             review_exercises = ex_graph.get_review_exercises(self.get_time())
             self.compute_report(student, review_exercises)
             
-            name = app.get_nickname_for(student)
+            name = util.get_nickname_for(student)
             if student.email() != name:
                 name = name + " (%s)" % student.email()
                    
@@ -115,7 +117,7 @@ class ViewIndividualReport(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewindividualreport.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
     def compute_report(self, user, exercises, dummy_values=False):
             for exercise in exercises:
@@ -149,7 +151,7 @@ class ViewIndividualReport(app.RequestHandler):
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)      
             
 
-class ViewProgressChart(app.RequestHandler):
+class ViewProgressChart(request_handler.RequestHandler):
 
     def get(self):    
         class ExerciseData:
@@ -159,7 +161,7 @@ class ViewProgressChart(app.RequestHandler):
                 self.days_until_proficient = days_until_proficient
                 self.proficient_date = proficient_date
                 
-        user = app.get_current_user()
+        user = util.get_current_user()
         student = user
         if user:
             student_email = self.request.get('student_email')
@@ -188,7 +190,7 @@ class ViewProgressChart(app.RequestHandler):
                 max_days = days_until_proficient
                 num_exercises += 1
             
-            name = app.get_nickname_for(student)
+            name = util.get_nickname_for(student)
             if student.email() != name:
                 name = name + " (%s)" % student.email()
                    
@@ -206,13 +208,13 @@ class ViewProgressChart(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewprogresschart.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))  
+            self.redirect(util.create_login_url(self.request.uri))  
             
             
-class ViewStudents(app.RequestHandler):
+class ViewStudents(request_handler.RequestHandler):
 
     def get(self):
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
             logout_url = users.create_logout_url(self.request.uri)
@@ -222,7 +224,7 @@ class ViewStudents(app.RequestHandler):
             for student_email in student_emails:   
                 student = users.User(email=student_email)
                 student_data = UserData.get_or_insert_for(student)
-                student_data.user.name = app.get_nickname_for(student_data.user) 
+                student_data.user.name = util.get_nickname_for(student_data.user) 
                 if student_email != student_data.user.name:
                    student_data.user.name += " (%s)" % student_email                                       
                 students.append(student_data.user)
@@ -238,10 +240,10 @@ class ViewStudents(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
         
         
-class ViewClassReport(app.RequestHandler):
+class ViewClassReport(request_handler.RequestHandler):
         
     def get(self):
         class ReportCell:
@@ -250,7 +252,7 @@ class ViewClassReport(app.RequestHandler):
                 self.css_class = css_class
                 self.link = link
             
-        user = app.get_current_user()
+        user = util.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)   
             user_data = UserData.get_or_insert_for(user)  
@@ -271,7 +273,7 @@ class ViewClassReport(app.RequestHandler):
                 row = []
                 student = users.User(email=student_email)
                 student_data = UserData.get_or_insert_for(student)
-                name = app.get_nickname_for(student_data.user)
+                name = util.get_nickname_for(student_data.user)
                 if student_email != name:
                     name = name + " (%s)" % student_email
                 row.append(ReportCell(data='<a href="/progresschart?student_email=%s">%s</a>' % (student_email, name) ))
@@ -318,7 +320,7 @@ class ViewClassReport(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
         
     def get_class_exercises(self, students):
             exercise_dict = {}
@@ -337,7 +339,7 @@ class ViewClassReport(app.RequestHandler):
             return results            
 
 
-class ViewCharts(app.RequestHandler):
+class ViewCharts(request_handler.RequestHandler):
 
     def moving_average(self, iterable, n=3):
         # moving_average([40, 30, 50, 46, 39, 44]) --> 40.0 42.0 45.0 43.0
@@ -360,7 +362,7 @@ class ViewCharts(app.RequestHandler):
                     self.correct = 1
                 else:
                     self.correct = 0
-        user = app.get_current_user()
+        user = util.get_current_user()
         student = user
         if user:
             student_email = self.request.get('student_email')
@@ -374,7 +376,7 @@ class ViewCharts(app.RequestHandler):
                 #logging.info("user is a student looking at their own report")
                 user_data = UserData.get_or_insert_for(user)   
 
-            name = app.get_nickname_for(user_data.user)
+            name = util.get_nickname_for(user_data.user)
             if user_data.user.email() != name:
                 name = name + " (%s)" % user_data.user.email()
                 
@@ -462,7 +464,7 @@ class ViewCharts(app.RequestHandler):
             path = os.path.join(os.path.dirname(__file__), 'viewcharts.html')
             self.response.out.write(template.render(path, template_values))
         else:
-            self.redirect(app.create_login_url(self.request.uri))
+            self.redirect(util.create_login_url(self.request.uri))
 
     def get_range_size(self, num_problems, time_taken_list):
         range_size = 0
