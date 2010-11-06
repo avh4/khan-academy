@@ -22,11 +22,18 @@ def get_facebook_nickname(user):
 
     email = user.email()
 
+    memcache_key = "facebook_nickname_%s" % email
+    name = memcache.get(memcache_key)
+    if name is not None:
+        return name
+
     id = email.replace(FACEBOOK_ID_EMAIL_PREFIX, "")
     graph = facebook.GraphAPI()
     profile = graph.get_object(id)
     # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
     name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+
+    memcache.set(memcache_key, name, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
 
     return name
 
