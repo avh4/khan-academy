@@ -1,4 +1,4 @@
-{% extends "arithmetic_template.html" %}
+{% extends arithmetic_template %}
 
 {% block maincell %}
 <script type="text/javascript" src="/javascript/kinematics.js?{{App.version}}"></script>
@@ -12,13 +12,6 @@ Provides the student with 3 of 5 kinematics variables and asks to solve for an u
 // unknown is an unknown
 // solving is the unknown we're actually solving for in this problem
 var unknown, solving, motion;
-
-function rollUnknowns() {
-	do {
-		unknown = kvars[getRandomInt(kvars.length-1)];
-		solving = kvars[getRandomInt(kvars.length-1)];
-	} while (solving == unknown)
-}
 
 rollUnknowns();
 
@@ -52,7 +45,7 @@ hintWithNo[unknown](motion, solving);
 
 {% block answerarea %}
 <br>Answer:
-<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer(); return false;}">
+<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
 <select id="answerunit">
   <option value=""></option>
   <option value="m">m</option>

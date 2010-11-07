@@ -114,6 +114,12 @@ function nonZeroRandomInt(l,h)
 	return i;
 }
 
+function randomMember(arr)
+{
+	// I should have done this a _long_ time ago -- Omar
+	return arr[getRandomInt(arr.length-1)];
+}
+
 function problemFooter()
 {
 	while (possibleAnswers.length<6)

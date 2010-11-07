@@ -9,6 +9,13 @@ kunits = {
 // number of decimal places to show
 var_places = 1;
 
+function rollUnknowns() {
+	do {
+		unknown = kvars[getRandomInt(kvars.length-1)];
+		solving = kvars[getRandomInt(kvars.length-1)];
+	} while (solving == unknown)
+}
+
 function randomFreefallMotion()
 {
 	// d = v0t + 1/2at^2
