@@ -207,7 +207,7 @@ function funcNotation(x)
 	if (!x) x = 'x';
 	
 	notations = [
-		['y', 'dy/d'+x],
+		['y', 'dy/(d'+x+')'],
 		['f('+x+')', 'f\'('+x+')'],
 		['g('+x+')', 'g\'('+x+')'],
 		['y', 'y\''],
