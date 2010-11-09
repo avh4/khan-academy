@@ -167,14 +167,13 @@ def zip_directory(revision):
                  except:
                      traceback.print_exc()
                      
-def delete_readme():
-    # delete readme.txt so {{version_number}} can be replaced with a new revision number the next time setup.py is run
+def revert_readme():
     os.chdir(ka_dir)    
-    os.remove("readme.txt")        
+    replace_in_file("readme.txt", revision, "{{version_number}}")        
     
 
 if __name__ == "__main__":  
-
+    
     download_appengine("google_appengine_1.3.7.zip")
     revision = get_khanacademy_code()
     copy_python25()
@@ -186,7 +185,7 @@ if __name__ == "__main__":
     remove_bulkloader_logs()
     create_download_scripts()
     zip_directory(revision)
-    delete_readme()
+    revert_readme()
     sys.exit()
     #TODO: upload it http://code.google.com/p/khanacademy/downloads/list ?                                     
                                        

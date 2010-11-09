@@ -59,6 +59,7 @@ def write_all_meta_files():
     write_meta_files("Chemistry", "Videos on chemistry (roughly covering a first-year high school or college course).")
     write_meta_files('ck12.org Algebra 1 Examples', "Select problems from ck12.org's Algebra 1 FlexBook (Open Source Textbook). This is a good playlist to review if you want to make sure you have a good understanding of all of the major topics in Algebra I.")
     write_meta_files("Credit Crisis", "Videos on the causes and effects of the credit crisis/crunch.")
+    write_meta_files("Currency", "Videos about currency exchange and currency markets.")
     write_meta_files("Current Economics", "Discussions of economic topics and how they relate to current events.")
     write_meta_files("Developmental Math", "Worked developmental math examples from the Monterey Institute.  These start pretty basic and would prepare a student for the Algebra I worked examples")
     write_meta_files('Differential Equations', 'Topics covered in a first year course in differential equations. Need to understand basic differentiation and integration from Calculus playlist before starting here.')    
