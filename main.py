@@ -10,6 +10,7 @@ import logging
 import re
 from urlparse import urlparse
 from pprint import pformat
+import copy
 
 import django.conf
 django.conf.settings.configure(
@@ -1315,6 +1316,46 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         library_content_html(force_refresh=True)
         self.response.out.write("Library content regenerated")
 
+
+all_topics_list = []
+all_topics_list.append('Arithmetic')
+all_topics_list.append('Chemistry')
+all_topics_list.append('Developmental Math')
+all_topics_list.append('Pre-algebra')
+all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
+all_topics_list.append('Geometry')
+all_topics_list.append('California Standards Test: Geometry')
+all_topics_list.append('Current Economics')
+all_topics_list.append('Banking and Money')
+all_topics_list.append('Venture Capital and Capital Markets')
+all_topics_list.append('Finance')
+all_topics_list.append('Credit Crisis')
+all_topics_list.append('Currency')
+all_topics_list.append('Valuation and Investing')
+all_topics_list.append('Geithner Plan')
+all_topics_list.append('Algebra')
+all_topics_list.append('Algebra I Worked Examples')
+all_topics_list.append('ck12.org Algebra 1 Examples')
+all_topics_list.append('California Standards Test: Algebra I')
+all_topics_list.append('California Standards Test: Algebra II')
+all_topics_list.append('Brain Teasers')
+all_topics_list.append('Biology')
+all_topics_list.append('Trigonometry')
+all_topics_list.append('Precalculus')
+all_topics_list.append('Statistics')
+all_topics_list.append('Probability')
+all_topics_list.append('Calculus')
+all_topics_list.append('Differential Equations')
+all_topics_list.append('Khan Academy-Related Talks and Interviews')
+all_topics_list.append('History')
+all_topics_list.append('Organic Chemistry')
+all_topics_list.append('Linear Algebra')
+all_topics_list.append('Physics')
+all_topics_list.append('Paulson Bailout')
+all_topics_list.append('CAHSEE Example Problems')
+all_topics_list.sort()
+    
+    
 def library_content_html(force_refresh = False):
 
     cache_key = "library_content_html"
@@ -1335,45 +1376,6 @@ def library_content_html(force_refresh = False):
             return cached_result["html"]
 
     # No cache found -- regenerate HTML
-
-    all_topics_list = []
-
-    all_topics_list.append('Arithmetic')
-    all_topics_list.append('Chemistry')
-    all_topics_list.append('Developmental Math')
-    all_topics_list.append('Pre-algebra')
-    all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
-    all_topics_list.append('Geometry')
-    all_topics_list.append('California Standards Test: Geometry')
-    all_topics_list.append('Current Economics')
-    all_topics_list.append('Banking and Money')
-    all_topics_list.append('Venture Capital and Capital Markets')
-    all_topics_list.append('Finance')
-    all_topics_list.append('Credit Crisis')
-    all_topics_list.append('Currency')
-    all_topics_list.append('Valuation and Investing')
-    all_topics_list.append('Geithner Plan')
-    all_topics_list.append('Algebra')
-    all_topics_list.append('Algebra I Worked Examples')
-    all_topics_list.append('ck12.org Algebra 1 Examples')
-    all_topics_list.append('California Standards Test: Algebra I')
-    all_topics_list.append('California Standards Test: Algebra II')
-    all_topics_list.append('Brain Teasers')
-    all_topics_list.append('Biology')
-    all_topics_list.append('Trigonometry')
-    all_topics_list.append('Precalculus')
-    all_topics_list.append('Statistics')
-    all_topics_list.append('Probability')
-    all_topics_list.append('Calculus')
-    all_topics_list.append('Differential Equations')
-    all_topics_list.append('Khan Academy-Related Talks and Interviews')
-    all_topics_list.append('History')
-    all_topics_list.append('Organic Chemistry')
-    all_topics_list.append('Linear Algebra')
-    all_topics_list.append('Physics')
-    all_topics_list.append('Paulson Bailout')
-    all_topics_list.append('CAHSEE Example Problems')
-    all_topics_list.sort()
 
     all_playlists = []
 
@@ -1440,54 +1442,20 @@ def library_content_html(force_refresh = False):
     Setting.cached_library_content_date(cache_content_date)
 
     return html
+    
 
 class GenerateVideoMapping(request_handler.RequestHandler):
 
     def get(self):
-        all_topics_list = []
-        all_topics_list.append('Arithmetic')
-        all_topics_list.append('Chemistry')
-        all_topics_list.append('Developmental Math')
-        all_topics_list.append('Pre-algebra')
-        all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
-        all_topics_list.append('Geometry')
-        all_topics_list.append('California Standards Test: Geometry')
-        all_topics_list.append('Current Economics')
-        all_topics_list.append('Banking and Money')
-        all_topics_list.append('Venture Capital and Capital Markets')
-        all_topics_list.append('Finance')
-        all_topics_list.append('Credit Crisis')
-        all_topics_list.append('Currency')        
-        all_topics_list.append('Valuation and Investing')
-        all_topics_list.append('Geithner Plan')
-        all_topics_list.append('Algebra')
-        all_topics_list.append('Algebra I Worked Examples')
-        all_topics_list.append('ck12.org Algebra 1 Examples')
-        all_topics_list.append('California Standards Test: Algebra I')
-        all_topics_list.append('California Standards Test: Algebra II')
-        all_topics_list.append('Brain Teasers')
-        all_topics_list.append('Biology')
-        all_topics_list.append('Trigonometry')
-        all_topics_list.append('Precalculus')
-        all_topics_list.append('Statistics')
-        all_topics_list.append('Probability')
-        all_topics_list.append('Calculus')
-        all_topics_list.append('Differential Equations')        
-        all_topics_list.append('Khan Academy-Related Talks and Interviews')
-        all_topics_list.append('History')
-        all_topics_list.append('Organic Chemistry')
-        all_topics_list.append('Linear Algebra')
-        all_topics_list.append('Physics')
-        all_topics_list.append('Paulson Bailout')
-        all_topics_list.append('SAT Preparation')        
-        all_topics_list.append('GMAT: Problem Solving')
-        all_topics_list.append('GMAT Data Sufficiency')        
-        all_topics_list.append('CAHSEE Example Problems')        
-        all_topics_list.append('Singapore Math')        
-        all_topics_list.sort()
+        topics = copy.copy(all_topics_list)
+        topics.append('SAT Preparation')        
+        topics.append('GMAT: Problem Solving')
+        topics.append('GMAT Data Sufficiency')        
+        topics.append('Singapore Math')        
+        topics.sort()
  
         video_mapping = {}
-        for playlist_title in all_topics_list:            
+        for playlist_title in topics:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -1504,7 +1472,32 @@ class GenerateVideoMapping(request_handler.RequestHandler):
                 playlist.append((filename, v.youtube_id, v.readable_id)) 
         self.response.out.write("video_mapping = " + pformat(video_mapping))            
     
-  
+
+
+class YoutubeVideoList(request_handler.RequestHandler):
+
+    def get(self):
+        topics = copy.copy(all_topics_list)
+        topics.append('SAT Preparation')        
+        topics.append('GMAT: Problem Solving')
+        topics.append('GMAT Data Sufficiency')        
+        topics.append('Singapore Math')        
+        topics.sort()
+ 
+        video_mapping = {}
+        for playlist_title in topics:            
+            query = Playlist.all()
+            query.filter('title =', playlist_title)
+            playlist = query.get()
+            query = VideoPlaylist.all()
+            query.filter('playlist =', playlist)
+            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+            query.order('video_position')
+            for pv in query.fetch(500):
+                v = pv.video
+                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n') 
+        
+        
 class Export(request_handler.RequestHandler):
 
     def datetime_to_str(self, datetime):
@@ -2081,7 +2074,8 @@ def real_main():
         ('/donate', Donate),
         ('/exercisedashboard', ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
-        ('/video_mapping', GenerateVideoMapping),        
+        ('/video_mapping', GenerateVideoMapping),  
+        ('/youtube_list', YoutubeVideoList),                 
         ('/syncvideodata', UpdateVideoData),
         ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
