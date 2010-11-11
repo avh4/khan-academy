@@ -1748,6 +1748,24 @@ class ViewDownloads(request_handler.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'downloads.html')
         self.response.out.write(template.render(path, template_values))
         
+
+class ViewStore(request_handler.RequestHandler):
+
+    def get(self):
+        user = util.get_current_user()
+        user_data = UserData.get_for_current_user()
+        logout_url = users.create_logout_url(self.request.uri)
+        template_values = qa.add_template_values({'App': App,
+                                                  'points': user_data.points,
+                                                  'username': user and user.nickname() or "",
+                                                  'login_url': util.create_login_url(self.request.uri),
+                                                  'logout_url': logout_url}, 
+                                                  self.request)
+                                                  
+        path = os.path.join(os.path.dirname(__file__), 'store.html')
+        self.response.out.write(template.render(path, template_values))
+        
+        
 class ViewHowToHelp(request_handler.RequestHandler):
 
     def get(self):
@@ -2098,6 +2116,7 @@ def real_main():
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
         ('/downloads', ViewDownloads),
+        ('/store', ViewStore),        
         ('/info/how-to-help', ViewHowToHelp),
         ('/info/.*', ViewInfoPage),
         ('/reportissue', ReportIssue),
