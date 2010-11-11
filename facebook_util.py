@@ -29,11 +29,14 @@ def get_facebook_nickname(user):
 
     id = email.replace(FACEBOOK_ID_EMAIL_PREFIX, "")
     graph = facebook.GraphAPI()
-    profile = graph.get_object(id)
-    # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
-    name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
 
-    memcache.set(memcache_key, name, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
+    try:
+        profile = graph.get_object(id)
+        # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
+        name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+        memcache.set(memcache_key, name, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
+    except facebook.GraphAPIError:
+        name = email
 
     return name
 
