@@ -117,3 +117,98 @@ function initAutocomplete()
         this._trigger("selected", e, { item: this.active });
     }
 }
+
+function onYouTubePlayerReady(playerID) {
+    var player = document.getElementById("idPlayer");
+    if (!player) player = document.getElementById("idOVideo");
+
+    Discussion.player = player;
+    VideoStats.player = player;
+}
+
+function onYouTubePlayerStateChange(state) {
+    VideoStats.playerStateChange(state);
+}
+
+var VideoStats = {
+
+    dPercentGranularity: 0.1,
+    dPercentLastSaved: 0.0,
+    fSaving: false,
+    player: null,
+
+    getSecondsWatched: function() {
+        if (!this.player) return 0;
+        return this.player.getCurrentTime();
+    },
+
+    getPercentWatched: function() {
+        if (!this.player) return 0.0;
+
+        var duration = this.player.getDuration();
+        if (!duration || duration <= 0) return 0.0;
+
+        return this.getSecondsWatched() / duration;
+    },
+
+    startLoggingProgress: function() {
+        // Every 10 seconds check to see if we've crossed over our percent
+        // granularity logging boundary
+        setInterval(function(){VideoStats.saveIfChanged();}, 10000);
+
+        // Listen to state changes in player to detect final end of video
+        this.listenToPlayerStateChange();
+    },
+
+    listenToPlayerStateChange: function() {
+        if (this.player)
+        {
+            // YouTube player is ready, add event listener
+            this.player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
+        }
+        else
+        {
+            // YouTube player isn't ready yet, try again soon
+            setTimeout(function(){VideoStats.listenToPlayerStateChange();}, 1000);
+        }
+    },
+
+    playerStateChange: function(state) {
+        // YouTube's "ended" state
+        if (state == 0)
+        {
+            this.saveIfChanged();
+        }
+    },
+
+    saveIfChanged: function() {
+
+        var percent = this.getPercentWatched();
+        if (percent > this.dPercentLastSaved && 
+                (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
+        {
+            // Either video was finished or another 10% has been watched
+            this.save();
+        }
+
+    },
+
+    save: function() {
+
+        if (this.fSaving) return;
+
+        this.fSaving = true;
+        var percent = this.getPercentWatched();
+
+        $.post("/logvideoprogress", 
+                {
+                    video_key: $("#video_key").val(),
+                    percent_watched: percent,
+                    seconds_watched: this.getSecondsWatched()
+                },
+                function () { 
+                    VideoStats.fSaving = false;
+                    VideoStats.dPercentLastSaved = percent;
+                });
+    }
+};

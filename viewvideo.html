@@ -107,6 +107,11 @@ $(function(){
         e.preventDefault();
     });
 });
+
+{% if user %}
+    $(function(){VideoStats.startLoggingProgress();});
+{% endif %}
+
 </script>
 {% endblock pagescript %}
 {% block pagesubmenu %}
@@ -156,7 +161,7 @@ $(function(){
             {% flv_player_embed video_path %}
         </div>
 
-        <object id="idOVideo" name="idOVideo" width="800" height="480">
+        <object id="idOVideo" name="idOVideo" width="800" height="480" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
             <param name="movie" value="http://www.youtube.com/v/{{video.youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
             <param name="allowFullScreen" value="true">
             <param name="allowScriptAccess" value="always">

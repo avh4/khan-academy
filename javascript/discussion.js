@@ -1,8 +1,4 @@
 
-function onYouTubePlayerReady() {
-    Discussion.player = document.getElementById("idPlayer");
-}
-
 var Discussion = {
     player: null,
 

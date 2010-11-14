@@ -48,7 +48,7 @@ import app
 import util
 import request_handler
 
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator, Setting
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator, Setting, UserVideo
 
 from discussion import comments
 from discussion import qa
@@ -536,6 +536,7 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'video': video,
                                                   'videos': videos,
                                                   'video_path': video_path,
+                                                  'user': util.get_current_user(),
                                                   'exercise': exercise,
                                                   'exercise_videos': exercise_videos,
                                                   'previous_video': previous_video,
@@ -543,6 +544,44 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
         self.render_template('viewvideo.html', template_values)
+
+class LogVideoProgress(request_handler.RequestHandler):
+    
+    def post(self):
+
+        user = util.get_current_user()
+
+        if user:
+
+            video_key = self.request.get("video_key")
+            video = db.get(video_key)
+
+            if video:
+
+                user_video = UserVideo.get_or_insert(
+                            key_name = user.email() + ":" + video.youtube_id,
+                            user = user,
+                            video = video
+                        )
+                user_video.last_watched = datetime.datetime.now()
+
+                seconds_watched = 0
+                try:
+                    seconds_watched = int(float(self.request.get("seconds_watched")))
+                except ValueError:
+                    pass # Ignore if we can't parse
+
+                percent_watched = 0.0
+                try:
+                    percent_watched = float(self.request.get("percent_watched"))
+                except ValueError:
+                    pass # Ignore if we can't parse
+
+                if seconds_watched > user_video.seconds_watched:
+                    user_video.seconds_watched = seconds_watched
+                    user_video.percent_watched = percent_watched
+
+                user_video.put()
 
 class ViewExerciseVideos(request_handler.RequestHandler):
 
@@ -2113,6 +2152,7 @@ def real_main():
         ('/registercorrectness', RegisterCorrectness),
         ('/video/.*', ViewVideo),
         ('/video', ViewVideo),
+        ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
         ('/downloads', ViewDownloads),

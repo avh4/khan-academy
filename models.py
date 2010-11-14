@@ -321,6 +321,13 @@ class Playlist(Searchable, db.Model):
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
 
+class UserVideo(db.Model):
+    user = db.UserProperty()
+    video = db.ReferenceProperty(Video)
+    percent_watched = db.FloatProperty(default = 0.0) # 0.0 to 1.0
+    seconds_watched = db.IntegerProperty(default = 0)
+    last_watched = db.DateTimeProperty(auto_now_add = True)
+
 class ProblemLog(db.Model):
 
     user = db.UserProperty()
@@ -328,7 +335,6 @@ class ProblemLog(db.Model):
     correct = db.BooleanProperty()
     time_done = db.DateTimeProperty()
     time_taken = db.IntegerProperty()
-
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and
