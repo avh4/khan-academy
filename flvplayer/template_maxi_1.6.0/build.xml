@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<project name="FLV Player" basedir=".">
+
+    <property name="mtasc.dir" value="${basedir}/mtasc" />
+
+    <target name="template_default" depends="setup" description="Build template_default">
+    	<property name="template.dir" value="${basedir}/template_default" />
+    	<exec executable="cp" failonerror="true">
+			<arg line="${basedir}/base/player.swf ${template.dir}/player_flv.swf"/>
+    	</exec>
+        <exec executable="${mtasc.dir}/${mtasc.exe}" failonerror="false">
+            <arg line="-version 7 -v -keep -strict -main
+            	-cp ${basedir}/classes 
+            	-swf ${template.dir}/player_flv.swf 
+            	${template.dir}/TemplateDefault.as"/>
+        </exec>
+    </target>
+	
+    <target name="template_mini" depends="setup" description="Build template_mini">
+    	<property name="template.dir" value="${basedir}/template_mini" />
+    	<exec executable="cp" failonerror="true">
+			<arg line="${basedir}/base/player.swf ${template.dir}/player_flv_mini.swf"/>
+    	</exec>
+        <exec executable="${mtasc.dir}/${mtasc.exe}" failonerror="false">
+            <arg line="-version 7 -v -keep -strict -main
+            	-cp ${basedir}/classes 
+            	-swf ${template.dir}/player_flv_mini.swf 
+            	${template.dir}/TemplateMini.as"/>
+        </exec>
+    </target>
+    
+    <target name="template_maxi" depends="setup" description="Build template_maxi">
+    	<property name="template.dir" value="${basedir}/template_maxi" />
+    	<exec executable="cp" failonerror="true">
+			<arg line="${basedir}/base/player.swf ${template.dir}/player_flv_maxi.swf"/>
+    	</exec>
+        <exec executable="${mtasc.dir}/${mtasc.exe}" failonerror="false">
+            <arg line="-version 8 -v -keep -main
+            	-cp ${basedir}/classes 
+            	-cp ${template.dir} 
+            	-swf ${template.dir}/player_flv_maxi.swf 
+            	${template.dir}/TemplateMaxi.as"/>
+        </exec>
+    </target>
+    
+    <target name="template_js" depends="setup" description="Build template_js">
+    	<property name="template.dir" value="${basedir}/template_js" />
+    	<exec executable="cp" failonerror="true">
+			<arg line="${basedir}/base/player.swf ${template.dir}/player_flv_js.swf"/>
+    	</exec>
+        <exec executable="${mtasc.dir}/${mtasc.exe}" failonerror="false">
+            <arg line="-version 8 -v -keep -strict -main
+            	-cp ${basedir}/classes 
+            	-swf ${template.dir}/player_flv_js.swf 
+            	${template.dir}/TemplateJS.as"/>
+        </exec>
+    </target>
+    
+    <target name="template_multi" depends="setup" description="Build template_multi">
+    	<property name="template.dir" value="${basedir}/template_multi" />
+    	<exec executable="cp" failonerror="true">
+			<arg line="${basedir}/base/player.swf ${template.dir}/player_flv_multi.swf"/>
+    	</exec>
+        <exec executable="${mtasc.dir}/${mtasc.exe}" failonerror="false">
+            <arg line="-version 7 -v -keep -strict -main
+            	-cp ${basedir}/classes 
+            	-cp ${template.dir} 
+            	-swf ${template.dir}/player_flv_multi.swf 
+            	${template.dir}/TemplateMulti.as"/>
+        </exec>
+    </target>
+	
+	
+	<!-- Configuration -->
+    <target name="setup" depends="os-props,win,not-win" />
+
+    <target name="os-props">
+        <condition property="windows">
+            <os family="windows" />
+        </condition>
+    </target>
+
+    <target name="win" if="windows">
+        <property name="mtasc.exe" value="mtasc.exe" />
+    </target>
+
+    <target name="not-win" unless="windows">
+        <property name="mtasc.exe" value="mtasc" />
+    </target>
+
+</project>

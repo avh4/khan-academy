@@ -136,17 +136,18 @@ var VideoStats = {
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
+    fAlternativePlayer: false,
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
-        return this.player.getCurrentTime();
+        return this.player.getCurrentTime() || 0;
     },
 
     getPercentWatched: function() {
-        if (!this.player) return 0.0;
+        if (!this.player) return 0;
 
-        var duration = this.player.getDuration();
-        if (!duration || duration <= 0) return 0.0;
+        var duration = this.player.getDuration() || 0;
+        if (duration <= 0) return 0;
 
         return this.getSecondsWatched() / duration;
     },
@@ -163,8 +164,11 @@ var VideoStats = {
     listenToPlayerStateChange: function() {
         if (this.player)
         {
-            // YouTube player is ready, add event listener
-            this.player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
+            if (!this.fAlternativePlayer)
+            {
+                // YouTube player is ready, add event listener
+                this.player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
+            }
         }
         else
         {
@@ -210,5 +214,22 @@ var VideoStats = {
                     VideoStats.fSaving = false;
                     VideoStats.dPercentLastSaved = percent;
                 });
+    },
+
+    prepareAlternativePlayer: function() {
+
+        this.player = $("#flvPlayer").get(0);
+        if (!this.player) return;
+
+        // Simulate the necessary YouTube APIs for the alternative player
+        this.player.getDuration = function() { return VideoStats.cachedDuration; };
+        this.player.getCurrentTime = function() { return VideoStats.cachedCurrentTime; };
+
+        this.fAlternativePlayer = true;
+    },
+
+    cacheStats: function(time, duration) {
+        this.cachedCurrentTime = parseFloat(time);
+        this.cachedDuration = parseFloat(duration);
     }
 };

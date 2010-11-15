@@ -79,6 +79,7 @@ $(function(){
     $('<img width=0 height=0>').error(function() {
        $("#youtube_blocked").css("visibility", "visible").css("left", "0px").css("position", "relative");
        $("#idOVideo").hide();
+       VideoStats.prepareAlternativePlayer(); // If YouTube is hidden, use the flv player for statistics
     }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
     $('#video_selector').hide();
     $('#video_dropdown').css('display', 'inline-block');
