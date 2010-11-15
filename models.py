@@ -9,6 +9,7 @@ import cajole
 import app
 import util
 from search import Searchable
+from app import App
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -135,15 +136,15 @@ class Exercise(db.Model):
     _EXERCISES_KEY = "Exercise.all()"    
     @staticmethod
     def get_all_use_cache():
-        exercises = memcache.get(Exercise._EXERCISES_KEY)
+        exercises = memcache.get(Exercise._EXERCISES_KEY, namespace=App.version)
         if exercises is None:
             query = Exercise.all().order('h_position')
             exercises = query.fetch(200)
-            memcache.set(Exercise._EXERCISES_KEY, exercises)
+            memcache.set(Exercise._EXERCISES_KEY, exercises, namespace=App.version)
         return exercises
 
     def put(self):
-        memcache.delete(Exercise._EXERCISES_KEY)
+        memcache.delete(Exercise._EXERCISES_KEY, namespace=App.version)
         db.Model.put(self)
 
 
