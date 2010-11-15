@@ -303,7 +303,10 @@ function next_step()
 	//uncolorNumbers();
 	explanationTerms = [];
 	steps_given++;
-	if(divided==false) 
+	if (steps_given == 1) {
+		writeExp('The *' + (is_remainder_problem ? 'remainder' : 'quotient') + '* is the answer.', nColor);
+	}
+	else if(divided==false) 
 	{
 		
 		if(curDividend==null)  //We're just getting started
