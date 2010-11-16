@@ -615,6 +615,7 @@ class ViewExerciseVideos(request_handler.RequestHandler):
                 template_values = {
                     'App' : App,
                     'points': user_data.points,
+                    'user': user,
                     'username': user.nickname(),
                     'logout_url': logout_url,
                     'exercise': exercise,

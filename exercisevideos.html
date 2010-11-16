@@ -13,20 +13,31 @@
     }
 </style>
 <script type="text/javascript">
-    function changeVideo(readable_id)
-    {
-        $("#idOVideo_div").html(dictYouTubeEmbeds[readable_id]);
-    }
 
-    function changeFlvVideo(readable_id)
-    {
-        $("#flvVideo_div").html(dictAlternateEmbeds[readable_id]);
-    }
+function changeVideo(key, fFlvVideo)
+{
+    if (fFlvVideo)
+        $("#flvVideo_div").html(dictAlternateEmbeds[key]);
+    else
+        $("#idOVideo_div").html(dictYouTubeEmbeds[key]);
+
+    $("#video_key").val(key);
+{% if user %}
+    VideoStats.player = null;
+    VideoStats.prepareAlternativePlayer();
+    VideoStats.startLoggingProgress();
+{% endif %}
+}
+
+{% if user %}
+    $(function(){VideoStats.startLoggingProgress();});
+{% endif %}
 
 $(function(){
     $('<img width=0 height=0>').error(function() {
        $("#youtube_ok").hide();
        $("#youtube_blocked").css("visibility", "visible").css("left", "0px").css("position", "relative");
+       VideoStats.prepareAlternativePlayer(); // If YouTube is hidden, use the flv player for statistics
     }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
 });
 </script>
@@ -43,10 +54,10 @@ $(function(){
       {% for exercise_video in exercise_videos %}
       <P>
         <script>
-            dictYouTubeEmbeds['{{exercise_video.video.readable_id}}'] = '{% filter escapejs %}{% youtube_player_embed exercise_video.video.youtube_id %}{% endfilter %}';
-            dictAlternateEmbeds['{{exercise_video.video.readable_id}}'] = '{% filter escapejs %}{% flv_player_embed video_path 800 480 exercise_video.video %}{% endfilter %}';
+            dictYouTubeEmbeds['{{exercise_video.video.key}}'] = '{% filter escapejs %}{% youtube_player_embed exercise_video.video.youtube_id %}{% endfilter %}';
+            dictAlternateEmbeds['{{exercise_video.video.key}}'] = '{% filter escapejs %}{% flv_player_embed video_path 800 480 exercise_video.video %}{% endfilter %}';
         </script>
-    	<A href="javascript:changeFlvVideo('{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
+    	<A href="javascript:changeVideo('{{exercise_video.video.key}}', true)"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
       {% endfor %}
     <P>
             <div id="flvVideo_div">
@@ -60,7 +71,7 @@ $(function(){
     {% if first_video %}
       {% for exercise_video in exercise_videos %}
     	<P>
-    	<A href="javascript:changeVideo('{{exercise_video.video.readable_id}}')"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
+    	<A href="javascript:changeVideo('{{exercise_video.video.key}}', false)"> [{{exercise_video.video.title}}] </a> &nbsp;&nbsp;
       {% endfor %}
     <P>
     <div id="idOVideo_div">
@@ -71,6 +82,7 @@ $(function(){
     {% endif %}
 </div>
 
+<input type="hidden" id="video_key" value="{{ first_video.key }}" />
 <A href="/exercises?exid={{exercise.name}}">Back to {{extitle}}</A>
 
 {% endblock pagecontent %}

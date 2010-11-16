@@ -136,7 +136,10 @@ var VideoStats = {
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
+    fIntervalStarted: false,
     fAlternativePlayer: false,
+    cachedDuration: 0, // For use by alternative FLV player
+    cachedCurrentTime: 0, // For use by alternative FLV player
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
@@ -153,21 +156,33 @@ var VideoStats = {
     },
 
     startLoggingProgress: function() {
-        // Every 10 seconds check to see if we've crossed over our percent
-        // granularity logging boundary
-        setInterval(function(){VideoStats.saveIfChanged();}, 10000);
+
+        this.dPercentLastSaved = 0;
+        this.cachedDuration = 0;
+        this.cachedCurrentTime = 0;
 
         // Listen to state changes in player to detect final end of video
         this.listenToPlayerStateChange();
+
+        if (!this.fIntervalStarted)
+        {
+            // Every 10 seconds check to see if we've crossed over our percent
+            // granularity logging boundary
+            setInterval(function(){VideoStats.saveIfChanged();}, 10000);
+            this.fIntervalStarted = true;
+        }
     },
 
     listenToPlayerStateChange: function() {
         if (this.player)
         {
-            if (!this.fAlternativePlayer)
+            if (!this.fAlternativePlayer && !this.player.fStateChangeHookAttached)
             {
                 // YouTube player is ready, add event listener
                 this.player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
+
+                // Multiple calls should be idempotent
+                this.player.fStateChangeHookAttached = true;
             }
         }
         else
