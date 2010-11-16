@@ -336,6 +336,8 @@ class ProblemLog(db.Model):
     correct = db.BooleanProperty()
     time_done = db.DateTimeProperty()
     time_taken = db.IntegerProperty()
+    problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
+    hint_used = db.BooleanProperty(default = False)
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and

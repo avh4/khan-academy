@@ -204,6 +204,9 @@ function handleCorrectness(isCorrect)
 		{
 			document.getElementById("correct").value="1"
 		}
+
+        $("#hint_used").val(steps_given == 0 ? "0" : "1");
+
 		document.getElementById("nextbutton").style.visibility = 'visible';
 		document.images.feedback.src = correct.src;
 		eraseCookie(notDoneCookie);

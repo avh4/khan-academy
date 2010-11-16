@@ -1083,6 +1083,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             correct = int(self.request.get('correct'))
             problem_number = int(self.request.get('problem_number'))
             start_time = float(self.request.get('start_time'))
+            hint_used = int(self.request.get('hint_used')) == 1
 
             elapsed_time = int(float(time.time()) - start_time)
 
@@ -1104,6 +1105,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 problem_log.correct = True
             problem_log.time_done = datetime.datetime.now()
             problem_log.time_taken = elapsed_time
+            problem_log.problem_number = problem_number
+            problem_log.hint_used = hint_used
             problem_log.put()
 
             query = UserData.all()
