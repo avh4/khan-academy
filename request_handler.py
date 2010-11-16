@@ -9,6 +9,19 @@ from app import App
 from models import UserData
 
 class RequestHandler(webapp.RequestHandler):
+
+    def request_string(self, key):
+        return self.request.get(key)
+
+    def request_int(self, key):
+        return int(self.request_string(key))
+
+    def request_float(self, key):
+        return float(self.request_string(key))
+
+    def request_bool(self, key):
+        return self.request_int(key) == 1
+
     def handle_exception(self, e, *args):
         if type(e) is CapabilityDisabledError:
             self.response.out.write("<p>The site is temporarily down for maintenance.  Please try again at the start of the next hour.  We apologize for the inconvenience.</p>")

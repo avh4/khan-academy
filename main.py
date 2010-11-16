@@ -1076,14 +1076,14 @@ class AdminViewUser(request_handler.RequestHandler):
 class RegisterAnswer(request_handler.RequestHandler):
 
     def post(self):
-        exid = self.request.get('exid')
+        exid = self.request_string('exid')
         user = util.get_current_user()
         if user:
-            key = self.request.get('key')
-            correct = int(self.request.get('correct'))
-            problem_number = int(self.request.get('problem_number'))
-            start_time = float(self.request.get('start_time'))
-            hint_used = int(self.request.get('hint_used')) == 1
+            key = self.request_string('key')
+            correct = self.request_bool('correct')
+            problem_number = self.request_int('problem_number')
+            start_time = self.request_float('start_time')
+            hint_used = self.request_bool('hint_used')
 
             elapsed_time = int(float(time.time()) - start_time)
 
@@ -1101,7 +1101,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             problem_log.user = user
             problem_log.exercise = exid
             problem_log.correct = False
-            if correct == 1:
+            if correct:
                 problem_log.correct = True
             problem_log.time_done = datetime.datetime.now()
             problem_log.time_taken = elapsed_time
@@ -1125,8 +1125,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 userExercise.total_done = userExercise.total_done + 1
             else:
                 userExercise.total_done = 1
-            userExercise.schedule_review(correct == 1, self.get_time())
-            if correct == 1:
+            userExercise.schedule_review(correct, self.get_time())
+            if correct:
                 userExercise.streak = userExercise.streak + 1
                 if userExercise.streak > userExercise.longest_streak:
                     userExercise.longest_streak = userExercise.streak
