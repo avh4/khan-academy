@@ -10,7 +10,6 @@ import logging
 import re
 from urlparse import urlparse
 from pprint import pformat
-import copy
 
 import django.conf
 django.conf.settings.configure(
@@ -22,7 +21,6 @@ django.conf.settings.configure(
     TEMPLATE_DIRS=(os.path.dirname(__file__),)
 )
 from django.template.loader import render_to_string
-from django.utils import simplejson as json
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -39,6 +37,7 @@ import facebook
 import cachepy
 import autocomplete
 import coaches
+import api
 
 from search import Searchable
 import search
@@ -1357,47 +1356,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
 
     def get(self):
         library_content_html(force_refresh=True)
-        self.response.out.write("Library content regenerated")
-
-
-all_topics_list = []
-all_topics_list.append('Arithmetic')
-all_topics_list.append('Chemistry')
-all_topics_list.append('Developmental Math')
-all_topics_list.append('Pre-algebra')
-all_topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
-all_topics_list.append('Geometry')
-all_topics_list.append('California Standards Test: Geometry')
-all_topics_list.append('Current Economics')
-all_topics_list.append('Banking and Money')
-all_topics_list.append('Venture Capital and Capital Markets')
-all_topics_list.append('Finance')
-all_topics_list.append('Credit Crisis')
-all_topics_list.append('Currency')
-all_topics_list.append('Valuation and Investing')
-all_topics_list.append('Geithner Plan')
-all_topics_list.append('Algebra')
-all_topics_list.append('Algebra I Worked Examples')
-all_topics_list.append('ck12.org Algebra 1 Examples')
-all_topics_list.append('California Standards Test: Algebra I')
-all_topics_list.append('California Standards Test: Algebra II')
-all_topics_list.append('Brain Teasers')
-all_topics_list.append('Biology')
-all_topics_list.append('Trigonometry')
-all_topics_list.append('Precalculus')
-all_topics_list.append('Statistics')
-all_topics_list.append('Probability')
-all_topics_list.append('Calculus')
-all_topics_list.append('Differential Equations')
-all_topics_list.append('Khan Academy-Related Talks and Interviews')
-all_topics_list.append('History')
-all_topics_list.append('Organic Chemistry')
-all_topics_list.append('Linear Algebra')
-all_topics_list.append('Physics')
-all_topics_list.append('Paulson Bailout')
-all_topics_list.append('CAHSEE Example Problems')
-all_topics_list.sort()
-    
+        self.response.out.write("Library content regenerated")  
     
 def library_content_html(force_refresh = False):
 
@@ -1432,7 +1391,7 @@ def library_content_html(force_refresh = False):
 
     for playlist in Playlist.all():
         dict_playlists[playlist.key()] = playlist
-        if playlist.title in all_topics_list:
+        if playlist.title in util.topics_list:
             dict_playlists_by_title[playlist.title] = playlist
 
     for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
@@ -1448,7 +1407,7 @@ def library_content_html(force_refresh = False):
         else:
             dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
 
-    for topic in all_topics_list:
+    for topic in util.topics_list:
 
         playlist = dict_playlists_by_title[topic]
         playlist_key = playlist.key()
@@ -1489,22 +1448,15 @@ def library_content_html(force_refresh = False):
 
 class GenerateVideoMapping(request_handler.RequestHandler):
 
-    def get(self):
-        topics = copy.copy(all_topics_list)
-        topics.append('SAT Preparation')        
-        topics.append('GMAT: Problem Solving')
-        topics.append('GMAT Data Sufficiency')        
-        topics.append('Singapore Math')        
-        topics.sort()
- 
+    def get(self): 
         video_mapping = {}
-        for playlist_title in topics:            
+        for playlist_title in util.all_topics_list:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
             query = VideoPlaylist.all()
             query.filter('playlist =', playlist)
-            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+            query.filter('live_association = ', True)
             query.order('video_position')
             playlist_name = get_mangled_playlist_name(playlist_title)
             playlist = []   
@@ -1514,222 +1466,23 @@ class GenerateVideoMapping(request_handler.RequestHandler):
                 filename = v.title.replace(":", "").replace(",", ".")
                 playlist.append((filename, v.youtube_id, v.readable_id)) 
         self.response.out.write("video_mapping = " + pformat(video_mapping))            
-    
-
-
+        
+        
 class YoutubeVideoList(request_handler.RequestHandler):
 
     def get(self):
-        topics = copy.copy(all_topics_list)
-        topics.append('SAT Preparation')        
-        topics.append('GMAT: Problem Solving')
-        topics.append('GMAT Data Sufficiency')        
-        topics.append('Singapore Math')        
-        topics.sort()
- 
         video_mapping = {}
-        for playlist_title in topics:            
+        for playlist_title in util.all_topics_list:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
             query = VideoPlaylist.all()
             query.filter('playlist =', playlist)
-            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
+            query.filter('live_association = ', True)
             query.order('video_position')
             for pv in query.fetch(500):
                 v = pv.video
-                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n') 
-        
-        
-class Export(request_handler.RequestHandler):
-
-    def datetime_to_str(self, datetime):
-        try:
-            str = datetime.strftime('%Y-%m-%d %H:%M:%S')
-        except:
-            str = ""
-        return str
-        
-    def get(self):  
-        user = util.get_current_user()
-        student = user
-        if user:
-            student_email = self.request.get('student_email')
-            if student_email:
-                #logging.info("user is a coach trying to look at data for student")
-                student = users.User(email=student_email)
-                user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
-                    raise Exception('Student '+ student_email + ' does not have you as their coach')
-            else:
-                #logging.info("user is a student looking at their own data")
-                user_data = UserData.get_or_insert_for(user)  
-                                                
-            user_data_dict = {
-                       'email': user_data.user.email(),
-                       'moderator': user_data.moderator,
-                       'joined': self.datetime_to_str(user_data.joined),     
-                       'last_login': self.datetime_to_str(user_data.last_login),
-                       'proficient_exercises': user_data.proficient_exercises,
-                       'all_proficient_exercises': user_data.all_proficient_exercises,
-                       'suggested_exercises': user_data.suggested_exercises,
-                       'assigned_exercises': user_data.assigned_exercises,
-                       'need_to_reassess': user_data.need_to_reassess,
-                       'points': user_data.points,
-                       'coaches': user_data.coaches,
-                       }
-            
-            user_exercises = []
-            for ue in UserExercise.all().filter('user =', student):
-                ue_dict = {'exercise': ue.exercise,
-                           'streak': ue.streak,
-                           'longest_streak': ue.longest_streak,
-                           'first_done': self.datetime_to_str(ue.first_done),
-                           'last_done': self.datetime_to_str(ue.last_done),
-                           'total_done': ue.total_done,
-                           'last_review': self.datetime_to_str(ue.last_review),
-                           'review_interval_secs': ue.review_interval_secs,                       
-                           'proficient_date': self.datetime_to_str(ue.proficient_date),                       
-                }
-                user_exercises.append(ue_dict)            
-    
-            user_videos = []
-            for uv in UserVideo.all().filter('user =', student):
-                uv_dict = {'video': uv.video.youtube_id,
-                           'percent_watched': uv.percent_watched,
-                           'seconds_watched': uv.seconds_watched,
-                           'last_watched': self.datetime_to_str(uv.last_watched),        
-                }
-                user_videos.append(uv_dict)  
-                
-            problems = []
-            for problem in ProblemLog.all().filter('user =', student):
-                problem_dict = {'exercise': problem.exercise,
-                                'correct': problem.correct,
-                                'time_done': self.datetime_to_str(problem.time_done),
-                                'time_taken': problem.time_taken,                 
-                }        
-                problems.append(problem_dict)    
-            
-            export_dict = {'UserData': user_data_dict,
-                           'UserExercise': user_exercises,
-                           'ProblemLog': problems,
-                           'UserVideo': user_videos}
-            self.response.out.write(json.dumps(export_dict, indent=4))
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
-
-
-class ImportUserData(request_handler.RequestHandler):
-
-    def datetime_from_str(self, text): 
-        try:
-            return datetime.datetime.strptime(text, '%Y-%m-%d %H:%M:%S') 
-        except:
-            return None  
-            
-    def get_video(self, youtube_id):
-        return Video.all().filter('youtube_id =', youtube_id).get()
-        
-    def post(self):  
-        user = util.get_current_user()
-        student = user        
-        if not user:
-            self.response.out.write("please login first")        
-        elif App.is_dev_server:
-            student_email = self.request.get('student_email')
-            if student_email:
-                logging.info("user is a coach trying to look at data for student")
-                student = users.User(email=student_email)
-                user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
-                    raise Exception('Student '+ student_email + ' does not have you as their coach')
-            else:
-                logging.info("user is a student looking at their own data")
-                user_data = UserData.get_or_insert_for(user)  
-                                
-            file_contents = self.request.POST.get('userdata').file.read()
-            import_dict = json.loads(file_contents)
-            user_data_dict = import_dict['UserData']
-            user_exercises = import_dict['UserExercise']
-            problems = import_dict['ProblemLog']
-            user_videos = import_dict['UserVideo']
-            
-            user_data.moderator = user_data_dict['moderator']
-            user_data.joined = self.datetime_from_str(user_data_dict['joined'])
-            user_data.last_login = self.datetime_from_str(user_data_dict['last_login'])
-            user_data.proficient_exercises = user_data_dict['proficient_exercises']
-            user_data.all_proficient_exercises = user_data_dict['all_proficient_exercises']
-            user_data.suggested_exercises = user_data_dict['suggested_exercises']
-            user_data.assigned_exercises = user_data_dict['assigned_exercises']
-            user_data.need_to_reassess = user_data_dict['need_to_reassess']
-            user_data.points = user_data_dict['points']          
-            user_data.coaches = user_data_dict['coaches']
-            user_data.put()
-
-            for user_exercise in UserExercise.all().filter('user =', student):
-                user_exercise.delete()
-            for ue in user_exercises:
-                user_exercise = UserExercise()
-                user_exercise.key_name = ue['exercise']
-                user_exercise.parent = user_data
-                user_exercise.user = student
-                user_exercise.exercise = ue['exercise']
-                user_exercise.streak = ue['streak']
-                user_exercise.longest_streak = ue['longest_streak']
-                user_exercise.first_done = self.datetime_from_str(ue['first_done'])
-                user_exercise.last_done = self.datetime_from_str(ue['last_done'])
-                user_exercise.total_done = ue['total_done']
-                last_review = self.datetime_from_str(ue['last_review'])
-                if last_review:
-                    user_exercise.last_review = last_review
-                user_exercise.review_interval_secs = ue['review_interval_secs']
-                user_exercise.proficient_date = self.datetime_from_str(ue['proficient_date'])
-                user_exercise.put()
-
-            for user_video in UserVideo.all().filter('user =', student):
-                user_video.delete()
-            for uv in user_videos:
-                user_video = UserVideo()
-                user_video.user = student
-                user_video.video = self.get_video(uv["video"])
-                user_video.percent_watched = uv["percent_watched"]
-                user_video.seconds_watched = uv["seconds_watched"]
-                user_video.last_watched = self.datetime_from_str(uv["last_watched"])  
-                user_video.put()
-                                
-            for problem in ProblemLog.all().filter('user =', student):
-                problem.delete()
-            for problem in problems:
-                problem_log = ProblemLog()
-                problem_log.user = student
-                problem_log.exercise = problem['exercise']
-                problem_log.correct = problem['correct']
-                problem_log.time_done = self.datetime_from_str(problem['time_done'])
-                problem_log.time_taken = problem['time_taken']
-                problem_log.put()        
-                
-            self.redirect('/individualreport?student_email='+student.email())
-        else:
-            self.response.out.write("import is not supported on the live site")
-               
-
-class ViewImport(request_handler.RequestHandler):
-
-    def get(self):  
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'student_email' : self.request.get('student_email'),
-                                                  'logout_url': logout_url}, 
-                                                  self.request)
-
-        path = os.path.join(os.path.dirname(__file__), 'import.html')
-        self.response.out.write(template.render(path, template_values))  
+                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')       
         
             
 class ViewHomePage(request_handler.RequestHandler):
@@ -2186,7 +1939,7 @@ def real_main():
         ('/exercisedashboard', ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
         ('/video_mapping', GenerateVideoMapping),  
-        ('/youtube_list', YoutubeVideoList),                 
+        ('/youtube_list', YoutubeVideoList),                   
         ('/syncvideodata', UpdateVideoData),
         ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
@@ -2218,9 +1971,6 @@ def real_main():
         ('/search', Search),
         ('/autocomplete', autocomplete.Autocomplete),
         
-        ('/export', Export),
-        ('/import', ViewImport),
-        ('/importuserdata', ImportUserData),
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
         ('/admin/fixvideoref', FixVideoRef),
@@ -2237,6 +1987,13 @@ def real_main():
         ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
         ('/charts', coaches.ViewCharts),
+
+        ('/api/export', api.Export),
+        ('/api/import', api.ViewImport),
+        ('/api/importuserdata', api.ImportUserData),
+        ('/api/playlists', api.Playlists),          
+        ('/api/playlistvideos', api.PlaylistVideos), 
+
         
         ('/press/.*', ViewArticle),
         ('/login', Login),

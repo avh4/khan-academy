@@ -11,10 +11,10 @@
 {% block pagecontent %}
 
 <article id="import">
-<p>To export and import user data to a development server, visit /export and save the results to a file.
+<p>To export and import user data to a development server, visit /api/export and save the results to a file.
 Then choose that file below, and click "Import".  The data of the user you're logged in as
 will be replaced with the data in the file.
-<form enctype="multipart/form-data" action="/importuserdata?student_email={{student_email}}" method="post">
+<form enctype="multipart/form-data" action="/api/importuserdata?student_email={{student_email}}" method="post">
 <input type="file" name="userdata" />
 <input type="submit" value="Import"/>
 </form>
