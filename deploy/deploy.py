@@ -1,0 +1,47 @@
+
+import re
+import subprocess
+import os
+
+def popen_results(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    return proc.communicate()[0]
+
+def svn_st():
+
+    output = popen_results(['svn', 'st', '-q', '--ignore-externals'])
+    return len(output) > 0
+
+def svn_up():
+
+    version = -1
+    pattern = re.compile("^At revision (\\d+).$")
+
+    output = popen_results(['svn', 'up'])
+    lines = output.split("\n")
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            version = int(match.groups()[0])
+
+    return version
+
+def deploy(version):
+    print "Deploying version " + str(version)
+    os.system("appcfg.py -V " + str(version) + " update .")
+
+def main():
+
+    if svn_st():
+        print "Local changes found in this directory, canceling deploy."
+        return
+
+    version = svn_up()
+    if version <= 0:
+        print "Could not find version in 'svn up' output"
+        return
+
+    deploy(version)
+
+if __name__ == "__main__":
+    main()
