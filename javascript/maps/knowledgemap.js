@@ -6,6 +6,12 @@ var KnowledgeMap = {
     dictEdges: [],
     widthPoints: 200,
     heightPoints: 120,
+    colors: {
+        blue: "#0080C9",
+        green: "#8EBE4F",
+        red: "#FF0000",
+        gray: "#CCCCCC"
+    },
     latLngHome: new google.maps.LatLng(0.471, 0.9846),
     latLngBounds: null,
     options: {
@@ -67,6 +73,15 @@ var KnowledgeMap = {
         rg[rg.length] = target;
     },
 
+    nodeStatusCount: function(status) {
+        var c = 0;
+        for (var ix = 1; ix < arguments.length; ix++)
+        {
+            if (arguments[ix].status == status) c++;
+        }
+        return c;
+    },
+
     drawEdge: function(nodeSource, nodeTarget) {
 
         var coordinates = [
@@ -74,12 +89,38 @@ var KnowledgeMap = {
             nodeTarget.latLng
         ];
 
+        var countProficient = this.nodeStatusCount("Proficient", nodeSource, nodeTarget);
+        var countSuggested = this.nodeStatusCount("Suggested", nodeSource, nodeTarget);
+        var countReview = this.nodeStatusCount("Review", nodeSource, nodeTarget);
+
+        var color = this.colors.gray;
+        var weight = 2.0;
+
+        if (countProficient == 2)
+        {
+            color = this.colors.blue;
+            weight = 5.0;
+        }
+        else if (countProficient == 1 && countSuggested == 1)
+        {
+            color = this.colors.green;
+            weight = 5.0;
+        }
+        else if (countReview > 0)
+        {
+            color = this.colors.red;
+            weight = 5.0;
+        }
+
         var line = new google.maps.Polyline({
             path: coordinates,
-            strokeColor: "#E5ECF9",
+            strokeColor: color,
             strokeOpacity: 1.0,
-            strokeWeight: 3
+            strokeWeight: weight,
+            clickable: false
         });
+
+        window.poly = line;
 
         line.setMap(this.map);
     },
@@ -93,10 +134,22 @@ var KnowledgeMap = {
             (node.h_position - 1) * offset
         );
 
-        var icon = (node.status == "Proficient") ? "/images/full-star.png" : "/images/empty-star.png";
-        var labelClass = "nodeLabel nodeLabel" + node.status;
+        var icon = "/images/empty-star.png";
+        switch (node.status)
+        {
+            case "Proficient":
+                icon = "/images/full-star.png";
+                break;
+            case "Suggested":
+                icon = "/images/green-star.png";
+                break;
+            case "Review":
+                icon = "/images/red-star.png";
+                break;
+        }
 
         var markerImage = new google.maps.MarkerImage(icon, null, null, new google.maps.Point(12, 14), null);
+        var labelClass = "nodeLabel nodeLabel" + node.status;
 
         var marker = new MarkerWithLabel({
             position: node.latLng,
