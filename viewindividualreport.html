@@ -1,6 +1,10 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 <style>
+#individual_report p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
 #individual_report caption {
     margin-top: 1.5em;
     padding: 3px;
@@ -49,7 +53,7 @@
 
 </style>
 {% endblock pagescript %}
-{% block pagetitle %}Individual Report for {{student}}{% endblock pagetitle %}
+{% block pagetitle %}Individual Report for {{student|escape}}{% endblock pagetitle %}
 {% block pagecontent %}
 <article id="individual_report">
 {% if suggested_exercises %}
@@ -64,7 +68,7 @@ Suggested Modules
 		{% else %}
 		<tr class="odd_row">
 		{% endif %}
-		<td><a href="/charts?student_email={{student_email}}&exercise_name={{exercise.name}}">{{exercise.display_name}}</a></td>
+		<td><a href="/charts?student_email={{student_email|urlencode}}&exercise_name={{exercise.name}}">{{exercise.display_name}}</a></td>
 		<td>{{exercise.streak}}</td>
 		<td>{{exercise.longest_streak}}</td>
 		<td>{{exercise.total_done}}</td>
@@ -87,7 +91,7 @@ Review Modules
 		{% else %}
 		<tr class="odd_row">
 		{% endif %}
-		<td><a href="/charts?student_email={{student_email}}&exercise_name={{exercise.name}}">{{exercise.display_name}}</a></td>
+		<td><a href="/charts?student_email={{student_email|urlencode}}&exercise_name={{exercise.name}}">{{exercise.display_name}}</a></td>
 		<td>{{exercise.streak}}</td>
 		<td>{{exercise.longest_streak}}</td>
 		<td>{{exercise.total_done}}</td>
@@ -110,7 +114,7 @@ Proficient Modules
 		{% else %}
 		<tr class="odd_row">
 		{% endif %}
-		<td><a href="/charts?student_email={{student_email}}&exercise_name={{exercise.name}}">{{exercise.display_name}}</a></td>
+		<td><a href="/charts?student_email={{student_email|urlencode}}&exercise_name={{exercise.name}}">{{exercise.display_name}}</a></td>
 		<td>{{exercise.streak}}</td>
 		<td>{{exercise.longest_streak}}</td>
 		<td>{{exercise.total_done}}</td>

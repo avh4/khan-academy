@@ -61,7 +61,7 @@ well as a <a href="/classreport">class report</a>.</p>
 		{% else %}
 		<tr class="odd_row">
 		{% endif %}
-		<td><a href="/individualreport?student_email={{student.email}}">{{student.name}}</a></td>
+		<td><a href="/individualreport?student_email={{student.email|urlencode}}">{{student.name|escape}}</a></td>
 		</tr>
 {% endfor %}
 </table>
