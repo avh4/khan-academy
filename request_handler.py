@@ -14,11 +14,17 @@ class RequestHandler(webapp.RequestHandler):
         return self.request.get(key)
 
     def request_int(self, key):
-        return int(self.request_string(key))
+        try:
+            return int(self.request_string(key))
+        except:
+            return -1
 
     def request_float(self, key):
-        return float(self.request_string(key))
-
+        try:        
+            return float(self.request_string(key))
+        except:
+            return -1.0
+            
     def request_bool(self, key):
         return self.request_int(key) == 1
 

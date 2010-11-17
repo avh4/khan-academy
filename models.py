@@ -150,7 +150,7 @@ class Exercise(db.Model):
 
 class UserData(db.Model):
 
-    user = db.UserProperty()
+    user = db.UserProperty()       
     moderator = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()

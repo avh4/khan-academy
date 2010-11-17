@@ -89,9 +89,9 @@
                     $(e.target).removeClass('css-menu-js-hover').closest(".css-menu > ul > li").removeClass('css-menu-js-hover');
                 });
             });
-            
-            
-            
+
+
+
             //Javascript for estimating the cumulative video views in real-time
             function addCommas(nStr)
 	    {
@@ -105,23 +105,23 @@
 		}
 		return x1 + x2;
 	    }
-		
-		
-	    
+
+
+
 	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
 	    var seedTotalViews = 28402468
 	    var seedDailyViews = 100000;
-	    
+
 	    var currentTime = new Date();
 	    var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
 	    var viewsPerSecond = seedDailyViews/24/3600
 	    var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
-	    
+
 	    var totalViewsString = addCommas(""+estimatedTotalViews);
 
 
-            
-            
+
+
         </script>
         {% block pagescript %}
         {% endblock pagescript %}
@@ -151,7 +151,7 @@
 
     </head>
     <body>
-    {% if App.facebook_app_id %}
+    {% if not username and App.facebook_app_id %}
     {# Start Facebook connect stuff #}
     <div id="fb-root"></div>
     <script>
@@ -303,7 +303,7 @@
                                         <li>
                                             <a href="/about#contactus">Contact Us</a>
                                         </li>
-                          
+
                                     </ul>
                                 </li>
                             </ul>
@@ -373,7 +373,7 @@
 	<!-- ChartBeat API - get # of users online now BEGIN -->
 
    <script type="text/javascript">
-   	
+
             $('#page_num_visitors').append(totalViewsString);
             $('#page_visitors').css('display', 'inline');
 	</script>

@@ -1,6 +1,7 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}Charts for {{ exercise_name|escape }} for {{student|escape}}{% endblock pagetitle %}
 {% block pagecontent %}
+
 {% if not problems %}
 <p>{{student|escape}} hasn't done any problems for {{exercise_name|escape}}</p>
 {% else %}{% ifequal num_problems 1 %}

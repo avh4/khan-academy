@@ -38,7 +38,7 @@
 {% block pagecontent %}
 <article id="class_report">
 <p>To enable viewing this class report, each of your students should log in and click on the <a href="coaches">Add a Coach</a>
-link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_id}}</b> to enter next to the "Register Coach" button.
+link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_id|escape}}</b> to enter next to the "Register Coach" button.
 After they register your id, you'll be able to see their progress below, and via the <a href="/students">students</a> page.
 </p>
 
