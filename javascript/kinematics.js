@@ -6,6 +6,13 @@ kunits = {
 	"a": "m/(s^2)",
 	"t": "s"
 }
+kunits_disp = {
+	"d": "\\text{m}",
+	"v_0": "\\text{m}/\\text{s}",
+	"v": "\\text{m}/\\text{s}",
+	"a": "\\text{m}/(\\text{s}^2)",
+	"t": "\\text{s}"
+}
 // number of decimal places to show
 var_places = 1;
 
@@ -74,12 +81,12 @@ function randomAccelMotion()
 function u(kvar, variable) {
 	// This function will take kvar[] as a motion array,
 	// and it will also take kvar as a kinematic variable and place the
-	// unit for the variable type.
+	// (ASCIIMathML-formatted) unit for the variable type.
 	if (kvar["d"]) {
 		// if kvar is the array
-		return roundNumber(kvar[variable], var_places) + " " + kunits[variable];
+		return roundNumber(kvar[variable], var_places) + "\\ " + kunits_disp[variable];
 	} else {
-		return roundNumber(kvar, var_places) + " " + kunits[variable];
+		return roundNumber(kvar, var_places) + "\\ " + kunits_disp[variable];
 	}
 }
 
@@ -123,7 +130,7 @@ hintWithNo = { // we have 2 unknowns, so we're solving for one "with no" of the 
 			
 			case "v":
 			write_step("`(d + (1/2)at^2)/t = v`");
-			write_step("`("+u(motion,"d")+" + (1/2)+("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v`");
+			write_step("`("+u(motion,"d")+" + (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v`");
 			write_step("`"+u(motion,"v")+" = v`");
 			break;
 			
@@ -153,7 +160,7 @@ hintWithNo = { // we have 2 unknowns, so we're solving for one "with no" of the 
 			
 			case "v_0":
 			write_step("`(d - (1/2)at^2)/t = v_0`");
-			write_step("`("+u(motion,"d")+" - (1/2)+("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v_0`");
+			write_step("`("+u(motion,"d")+" - (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v_0`");
 			write_step("`"+u(motion,"v_0")+" = v_0`");
 			break;
 			
@@ -177,7 +184,7 @@ hintWithNo = { // we have 2 unknowns, so we're solving for one "with no" of the 
 		write_step("`d = (1/2)(v_0 + v)t`");
 		switch(solving) {
 			case "d":
-			write_step("`d = (1/2)("+u(motion,"v_0")+" + "+u(motion,"t")+")("+u(motion,"t")+")`");
+			write_step("`d = (1/2)("+u(motion,"v_0")+" + "+u(motion,"v")+")("+u(motion,"t")+")`");
 			write_step("`d = "+u(motion,"d"));
 			break;
 			
