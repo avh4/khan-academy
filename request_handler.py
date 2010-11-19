@@ -10,23 +10,32 @@ from models import UserData
 
 class RequestHandler(webapp.RequestHandler):
 
-    def request_string(self, key):
-        return self.request.get(key)
+    def request_string(self, key, default = ''):
+        return self.request.get(key, default_value=default)
 
-    def request_int(self, key):
+    def request_int(self, key, default = None):
         try:
             return int(self.request_string(key))
-        except:
-            return -1
+        except ValueError:
+            if default is not None:
+                return default
+            else:
+                raise # No value available and no default supplied, raise error
 
-    def request_float(self, key):
+    def request_float(self, key, default = None):
         try:        
             return float(self.request_string(key))
-        except:
-            return -1.0
-            
-    def request_bool(self, key):
-        return self.request_int(key) == 1
+        except ValueError:
+            if default is not None:
+                return default
+            else:
+                raise # No value available and no default supplied, raise error
+
+    def request_bool(self, key, default = None):
+        if default is None:
+            return self.request_int(key) == 1
+        else:
+            return self.request_int(key, 1 if default else 0) == 1
 
     def handle_exception(self, e, *args):
         if type(e) is CapabilityDisabledError:

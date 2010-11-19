@@ -1082,7 +1082,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             correct = self.request_bool('correct')
             problem_number = self.request_int('problem_number')
             start_time = self.request_float('start_time')
-            hint_used = self.request_bool('hint_used')
+            hint_used = self.request_bool('hint_used', default=False)
 
             elapsed_time = int(float(time.time()) - start_time)
 
@@ -1902,7 +1902,7 @@ class Login(request_handler.RequestHandler):
                            'continue': cont                              
                            }
         self.response.out.write(template.render(path, template_values))
-            
+
 class Search(request_handler.RequestHandler):
 
     def get(self):        
