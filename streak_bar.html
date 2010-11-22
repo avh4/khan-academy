@@ -1,0 +1,12 @@
+<div class="streak-bar" title="Current streak: {{ streak }}, Longest streak: {{ longest_streak }}">
+    <div class="longest-streak">
+        <div class="current-streak">
+            <ul class="unit-rating" style="width:{{ streak_max_width }}px;">
+                <li class="current-rating" style="width:{{ streak_width }}px;"></li>
+                <li class="streak-icon" style="width:{{ streak_icon_width }}px;"></li>
+                <li class="best-label" style="width:{{ longest_streak_width }}px;">{% if longest_streak %}{{ longest_streak }}&nbsp;{% endif %}</li>
+                <li class="current-label" style="width:{{ streak_width }}px;">{% if streak %}{{ streak }}&nbsp;{% endif %}</li>
+            </ul>
+        </div>
+    </div>
+</div>

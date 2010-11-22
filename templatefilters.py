@@ -11,6 +11,10 @@ def smart_truncate(content, length=100, suffix='...'):
     else:
         return content[:length].rsplit(' ', 1)[0]+suffix
 
+@register.filter
+def greater_than(x, y):
+    return x > y
+
 def mod(content, i):
     return content % i
 

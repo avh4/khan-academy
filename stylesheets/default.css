@@ -51,6 +51,11 @@ a.uses_script:visited:hover, a.uses_script:visited:focus
     border-color: #DD6900;
 }
 
+img {
+    -ms-interpolation-mode: bicubic;
+    /* Fix IE image scaling so that it isn't crappy */
+}
+
 p {
     margin: 3px;
     padding: 0;
@@ -164,6 +169,16 @@ nav {
     float: left;
     *min-width: 45ex;
 }
+
+#page_main_nav li#do-exercises:after {
+        content: "";
+    }
+    #page_main_nav li#do-exercises a {
+        color: white;
+    }
+    #page_main_nav li#do-exercises a:hover {
+        color: black;
+    }
 
 #page_main_nav ul.page_links {
     float: right;
@@ -472,6 +487,229 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 
 /**************end of elements for all-videos page*********************/
+
+.exercise_message {
+    padding: 1em;
+    border: 1px solid silver;
+    border-top: 0px;
+    background-color: #E5ECF9;
+    margin: 0 20px;
+}
+
+/* Exercise Dashboard styles */
+
+#container {
+    width: 960px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+}
+    #container #dashboard-drawer {
+        position: absolute;
+        width: 360px;
+        height: 800px;
+        overflow: scroll;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        padding-top: 10px;
+        z-index: 1;
+        -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+        -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+        box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
+    }
+    #container #dashboard-drawer h3 .subheader {
+        font-weight: normal;
+    }
+    
+    #container #dashboard-header {
+        background: #D5DDF3;
+        border-width: 0 1px 1px 1px;
+        border-color: #ddd;
+        border-style: solid;
+        height: 27px;
+        padding: 5px;
+        position: relative;
+        z-index: 0;
+    }
+    #container #dashboard-header #collapse-drawer {
+        position: absolute;
+        right: 0;
+        border: none;
+    }
+    #container #dashboard-header #expand-drawer {
+        position: absolute;
+        left: 0;
+        border: none;
+    }
+
+    #container #dashboard-header #dashboard-title {
+        background: #E8ECF9;
+        border-right: 1px solid #bbb;
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        width: 349px;
+        margin: -5px;
+        padding: 5px;
+        position: absolute;
+        -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+        -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+        box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
+        z-index: 1;       
+    }
+    #container #dashboard-header #dashboard-nav {
+        float: right;
+        font-weight: bold;
+        position: relative;
+        top: 4px;
+    }
+    #container #dashboard-header #dashboard-nav span.selected a {
+        border: none;
+        color: #333;
+        cursor: default;
+    }
+    #container #dashboard-map {
+        width: 960px;
+    }
+
+    #container #dashboard-map #map-canvas {
+        height: 100%;
+        left: 360px;
+        margin-left: 0;
+        margin-right: 360px;
+    }
+
+.exercise-badge {
+    background: #eee;
+    margin-bottom: 5px;
+    margin-left: 1px;
+    position: relative;
+    width: 340px;
+    height: 80px;
+    cursor: pointer;
+    border: 1px dotted #fff;
+}
+    .exercise-badge:hover, .exercise-badge-hover {
+        -webkit-box-shadow: 0 0 3px #666;
+        -moz-box-shadow: 0 0 3px #666;
+        box-shadow: 0 0 3px #666;
+        border: 1px solid #aaa;
+    }
+    .exercise-badge .energy-points-badge {
+        background: url(/images/energy-points-badge.png) no-repeat;
+        width: 52px;
+        height: 37px;
+        text-align: center;
+        padding-top: 5px;
+        color: white;
+        font-weight: bold;
+        text-shadow: 0px -1px 0px #666;
+        position: absolute;
+        left: 287px;
+        top: 5px;
+    }
+    .exercise-badge .exercise-title {
+        font-weight: bold;
+        position: absolute;
+        left: 87px;
+        top: 8px;
+        font-size: larger;
+        width: 190px;
+    }
+        .exercise-badge .exercise-title a {
+            text-decoration: none;
+            color: #006699;
+        }
+        .exercise-badge .exercise-title a:hover {
+            color: #006699;
+        }
+    .streak-bar {
+        background: url(/images/streak-meter-empty.png) no-repeat;
+        width: 255px;
+        height: 30px;
+    }
+    .exercise-badge .streak-bar {
+         position: absolute;
+         left: 85px;
+         bottom: 3px;
+    }
+    
+#container h3 {
+    font-size: 16px;
+    color: #333;
+    text-shadow: 1px 1px 1px #ccc;
+}
+/* End of Exercise Dashboard styles */
+
+/* Individual Exercise Styles */
+
+#container #dashboard-header.single-exercise {
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+#container #dashboard-header.single-exercise a#dashboard-breadcrumb {
+    text-decoration: none;
+    position: relative;
+    top: 5px;
+}
+.exercise-badge.single-exercise {
+    background: background:#e5ecf9;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-bottom: 1px solid #bbb;
+    cursor: auto;
+    height: auto;
+    margin: 0;
+    width: auto;
+    
+    -webkit-box-shadow: 0 1px 3px #ccc;
+    -moz-box-shadow: 0 1px 3px #ccc;
+    box-shadow: 0 1px 3px #ccc;
+}
+    .exercise-badge.single-exercise:hover {
+        -webkit-box-shadow: 0 1px 3px #ccc;
+        -moz-box-shadow: 0 1px 3px #ccc;
+        box-shadow: 0 1px 3px #ccc;
+    }
+
+.exercise-badge.single-exercise .proficient-badge {
+    padding: 3px 3px 0 3px;
+}
+    .exercise-badge.single-exercise .proficient-badge img {
+        width: 60px;
+        height: 62px;
+    }
+
+.exercise-badge.single-exercise .energy-points-badge {
+    left: auto;
+    right: 5px;
+    top: 18px;
+}
+.exercise-badge.single-exercise .exercise-title {
+    font-size:18px;
+    top: 6px;
+    left: 70px;
+    width: 550px;
+}
+.exercise-badge.single-exercise .streak-bar {
+    bottom: auto;
+    left: auto;
+    top: 18px;
+    right: 60px;
+}
+.exercise-badge.single-exercise .related-videos {
+    bottom: 7px;
+    left: 70px;
+    position: absolute;
+    width: 550px;
+}
+#extras.single-exercise {
+    text-align: left;
+    margin-top: 6px;
+    padding-left: 3px;
+}
+/* End of Individual Exercise Styles */
 
 #tabs-table, #tabs-table td.content {
     width: 100%;

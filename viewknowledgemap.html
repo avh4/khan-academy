@@ -1,8 +1,12 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}<A href="/">Exercise Home</A>: My Knowledge Map {% endblock pagetitle %}
-{% block pagescript %}<!--[if IE]><script type='text/javascript' src='/Jit-2.0.0a/Extras/excanvas.js'></script><![endif]-->
+{% block pagescript %}
+
+
+<!--[if IE]><script type='text/javascript' src='/Jit-2.0.0a/Extras/excanvas.js'></script><![endif]-->
 <script type='text/javascript' src='/Jit-2.0.0a/jit-yc.js'>
 </script>
+
 <style>
     
     table#exercises {
@@ -180,11 +184,10 @@
                 while (extraScale > 0.5 && (label.offsetHeight > height + 1 || label.offsetWidth > width + 1));
             }
         });
-        
         // Build the graph from the hidden exercise table
         // First create a hash of nodes, one per exercise.
         var nodes = {};
-        $("tr[data-id]").each(function(){
+        $("#exercises tr[data-id]").each(function(){
             elem = $(this);
             var node = {
                 "id": elem.attr("data-id"),
@@ -218,7 +221,7 @@
         });
         
         // Connect the nodes
-        $("tr[data-id]").each(function(){
+        $("#exercises tr[data-id]").each(function(){
             var elem = $(this);
             elem.find("li[data-prereq]").each(function(i){
                 var prereq_elem = $(this);
@@ -283,7 +286,7 @@
             </th>
         </tr>
         {% for exercise in exercises %}
-        <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default:"0" }}' data-streak='{{ exercise.streak }}'>
+        <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default:"0" }}' data-streak='{{ exercise.streak }}' data-h_position='{{ exercise.h_position }}' data-v_position='{{ exercise.v_position }}'>
             <td class="points">
                 {{ exercise.points }}
             </td>
@@ -315,6 +318,10 @@
         The yellow modules are those that you have already become proficient in.&nbsp;  The red modules are those that I suggest you review.&nbsp; 
         The orange modules are the new modules that I suggest you work on.&nbsp; Click on a module to do a focused practice on that module. 
     </p>
+
+    {% knowledgemap_embed exercises map_coords %}
+
+    <br/><br/>
     <div id="kmap">
     </div>
 </article>

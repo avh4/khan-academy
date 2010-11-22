@@ -248,3 +248,92 @@ var VideoStats = {
         this.cachedDuration = parseFloat(duration);
     }
 };
+
+var Drawer = {
+
+    init: function() {
+
+        $('#show-all-exercises').click(function() {Drawer.toggleAllExercises(); return false;});
+
+        $('#dashboard-drawer .exercise-badge').click( function() {
+            window.location = $(".exercise-title a", this).attr("href");
+            return false;
+        });
+        
+        $('.toggle-drawer').click(function() {Drawer.toggle(); return false;});
+
+        $(window).resize(function(){Drawer.resize();});
+        this.resize();
+
+        if (window.KnowledgeMap)
+        {
+            $(".exercise-badge").hover(
+                    function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
+                    function(){KnowledgeMap.onBadgeMouseout.apply(this);}
+            );
+        }
+    },
+
+    toggleAllExercises: function() {
+
+        var fVisible = $('#all-exercises').is(':visible');
+
+        if (fVisible)
+        {
+            $('#all-exercises').slideUp(500);
+            $('#show-all-exercises').html('Show All');
+        }
+        else
+        {
+            $('#all-exercises').slideDown(500);
+            $('#show-all-exercises').html('Hide All');
+        }
+
+        $.post("/saveexpandedallexercises", {
+            "expanded": fVisible ? "0" : "1"
+        }); // Fire and forget
+    },
+
+    isExpanded: function() {
+        var sCSSLeft = $("#dashboard-drawer").css("left").toLowerCase();
+        return sCSSLeft == "0px" || sCSSLeft == "auto" || sCSSLeft == "";
+    },
+
+    toggle: function() {
+
+        if (this.fToggling) return;
+
+        var fExpanded = this.isExpanded();
+
+        var jelDrawer = $("#dashboard-drawer");
+        var leftDrawer = fExpanded ? -1 * (jelDrawer.width() + 20) : 0;
+        
+        var jelTitle = $("#dashboard-title");
+        var leftTitle = fExpanded ? -1 * (jelTitle.width() +10 ): 5;
+        
+        jelTitle.animate({left: leftTitle}, 500);
+
+        this.fToggling = true;
+        jelDrawer.animate({left: leftDrawer}, 500, function() {Drawer.fToggling = false;});
+
+        if (window.KnowledgeMap)
+        {
+            var leftMap = (fExpanded ? 0 : 360);
+            $("#map-canvas").animate({marginRight: leftMap + "px", left: leftMap + "px"}, 
+                    500,
+                    function() {
+                        google.maps.event.trigger(KnowledgeMap.map, 'resize');
+                    }
+            );
+        }
+    },
+
+    resize: function() {
+        var jel = $("#dashboard-drawer, #dashboard-map");
+        var yTop = jel.offset().top;
+        jel.height($(window).height() - yTop - $("#footer").height() - 20);
+
+        if (window.KnowledgeMap && KnowledgeMap.map)
+            google.maps.event.trigger(KnowledgeMap.map, 'resize');
+    }
+}

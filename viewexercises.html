@@ -1,6 +1,10 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
-  <script type="text/javascript">
+<style>
+    /* Temporary styles to fit new dashboard into old template, will be removed when new template is dropped in. */
+    #page_sub_nav b {display: none;}}
+</style>
+<script type="text/javascript">
   	function submitForm(value)
   	{
   		document.forms['addexercise'].submit();
@@ -23,83 +27,82 @@
             $(".proficientTrue").css('display', 'table-row');
 		}
 	}
-  </script>
+	
+    $(function(){Drawer.init();});
+
+</script>
 {% endblock pagescript %}
 {% block pagetitle %}Exercise Dashboard{% endblock pagetitle %}
 {% block pagecontent %}
-<ul>
-<p>
-Welcome to the Alpha release of the Khan Academy Exercise Application.&nbsp;  In order for it to work properly,
-you should be using the latest version of your browser, preferably <A href="http://www.getfirefox.com/">Firefox</A>.
-</p>
-<p>
-The two advantages of this one are that 1) it should be much faster and 2) it allows you to skip around modules
-and only suggests what you should work on (the suggestions change as you get streaks of 10 questions in a module
-correct).&nbsp; Let us know if you have any problems.
-</p>
--The Khan Academy team
-</ul>
-{% if review_exercises %}
-<div class=hdg>&nbsp;<h3>Review Exercises</h3></div>
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>
-{% for exercise in review_exercises %}
-	<tr class="{% cycle highlightWhite,highlightGreyRelated %}">
-		<td>{{exercise.points}}</td>
-		<td><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></td>
-		<td>{% if exercise.proficient %}<img src="/images/face-smiley.gif" height=20 width=20>{% endif %}</td>
-		<td>{{exercise.longest_streak}}</td>
-		<td>
-			<ul class="unit-rating" style="width:200px;">
-				<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li>
-			</ul>
-		</td>
-	</tr>
-{% endfor %}
-</table><br>
-{% endif %}
-<div class=hdg>&nbsp;<h3>Suggested Exercises</h3></div>
-<table border=0 cellspacing=0 cellpadding=3>
-<tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>
-{% for exercise in suggested_exercises %}
-	<tr class="{% cycle highlightWhite,highlightGreyRelated %}">
-		<td>{{exercise.points}}</td>
-		<td><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></td>
-		<td>{% if exercise.proficient %}<img src="/images/face-smiley.gif" height=20 width=20>{% endif %}</td>
-		<td>{{exercise.longest_streak}}</td>
-		<td>
-			<ul class="unit-rating" style="width:200px;">
-				<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li>
-			</ul>
-		</td>
-	</tr>
-{% endfor %}
-</table><br>
-<table width="100%" cellpadding="0" cellspacing="0">
-	<tr class="hdg">
-		<td width="50%">
-			<h3>All Exercises</h3>
-		</td>
-		<td width="50%" align="right">
-			<input id="allExercisesCheckbox" type="checkbox" onclick="hideProficient('allExercisesTable', 'allExercisesCheckbox')"/>
-			<font size="1">Hide Proficient Exercises</font>
-		</td>
-	</tr>
-</table>
-<table border=0 cellspacing=0 cellpadding=3 id="allExercisesTable">
-<tr><td class="colHeadL">Energy&nbsp;Points</td><td width=100% class="colHeadL">Exercise</td><td class="colHeadL">Proficient?</td><td class="colHeadL">Longest&nbsp;Streak</td><td class="colHeadL">Current Streak</td></tr>
-{% for exercise in exercises %}
-	<tr class="{% cycle highlightWhite,highlightGreyRelated %} proficient{{ exercise.proficient }}">
-		<td>{{exercise.points}}</td>
-		<td><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></td>
-		<td>{% if exercise.proficient %}<img src="/images/face-smiley.gif" height=20 width=20>{% endif %}</td>
-		<td>{{exercise.longest_streak}}</td>
-		<td>
-			<ul class="unit-rating" style="width:200px;">
-				<li class="current-rating" style="width:{{exercise.streakwidth}}px;"></li>
-			</ul>
-		</td>
-	</tr>
-{% endfor %}
-</table>
+<div id="background">
+<div id="container">
+    <div id="dashboard-header">
+        <div id="dashboard-nav">
+            <span class="selected"><a href="#">Knowledge Map{% if App.offline_mode %} (<em>not supported in offline mode</em>){% endif %}</a></span> |
+            <span class="menu"><a href="/individualreport">Report</a></span> | 
+            <span class="menu"><a href="/progresschart">Progress Chart</a></span>
+        </div>
+        <div id="dashboard-title">Exercises <a href="#" id="collapse-drawer" class="toggle-drawer"><img src="/images/expand-left.png" width="25" height="25"/></a></div>
+            <a href="#" id="expand-drawer" class="toggle-drawer"><img src="/images/expand-right.png" width="25" height="25" /></a>
+        </div>
+    <div id="dashboard-drawer">
+       <h3>Suggested Exercises</h3>
+        <hr />
+        {% if review_exercises %}
+        {% for exercise in review_exercises %}
+            <div class="exercise-badge" data-id="{{exercise.name}}">
+                <div class="proficient-badge"><img src="/images/proficient-badge-review.png" height=80 width=76></div>
+        		<div class="energy-points-badge">{{exercise.points}}</div>
+        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+
+                {% streak_bar exercise %}
+            </div>
+        {% endfor %}
+        {% endif %}
+        {% for exercise in suggested_exercises %}
+            <div class="exercise-badge" data-id="{{exercise.name}}">
+                <div class="proficient-badge">{% if not exercise.proficient %}<img src="/images/proficient-badge-suggested.png" height=80 width=76>{% endif %}</div>
+        		<div class="energy-points-badge">{{exercise.points}}</div>
+        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+        		
+                {% streak_bar exercise %}
+            </div>
+        {% endfor %}
+        <br>
+        {% if recent_exercises %}
+            <h3>Recent Exercises</h3>
+            <hr />
+            {% for exercise in recent_exercises %}
+                <div class="exercise-badge" data-id="{{exercise.name}}">
+                    <div class="proficient-badge">{% if not exercise.proficient %}<img src="/images/proficient-badge-not-started.png" height=80 width=76>{% else %}<img src="/images/proficient-badge-complete.png" height=80 width=76>{% endif %}</div>
+                    <div class="energy-points-badge">{{exercise.points}}</div>
+                    <div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+
+                    {% streak_bar exercise %}
+                </div>
+            {% endfor %}
+            <br/>
+        {% endif %}
+        <h3>All Exercises
+            <span class="subheader">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
+        </h3>
+        <hr />
+        <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
+        {% for exercise in exercises %}
+            <div class="exercise-badge" data-id="{{exercise.name}}">
+                <div class="proficient-badge">{% if not exercise.proficient %}<img src="/images/proficient-badge-not-started.png" height=80 width=76>{% else %}<img src="/images/proficient-badge-complete.png" height=80 width=76>{% endif %}</div>
+        		<div class="energy-points-badge">{{exercise.points}}</div>
+        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+        		
+                {% streak_bar exercise %}
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+
+    <div id="dashboard-map">
+        {% knowledgemap_embed exercises map_coords %}
+    </div>
+</div>
+</div>
 {% endblock pagecontent %}

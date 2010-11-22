@@ -161,6 +161,8 @@ class UserData(db.Model):
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
     coaches = db.StringListProperty()
+    map_coords = db.StringProperty()
+    expanded_all_exercises = db.BooleanProperty(default=False)
     
     @staticmethod
     def get_for_current_user():
@@ -422,7 +424,7 @@ class ExerciseGraph(object):
                 ex.streak = user_ex.streak
                 ex.longest_streak = user_ex.longest_streak
                 ex.total_done = user_ex.total_done
-                ex.streakwidth = min(200, 20 * ex.streak)
+                ex.last_done = user_ex.last_done
 
         def compute_proficient(ex):
             # Consider an exercise proficient if it is explicitly proficient or
@@ -532,7 +534,15 @@ class ExerciseGraph(object):
         for ex in self.exercises:
             if ex.suggested:
                 suggested_exercises.append(ex)
-        return suggested_exercises        
+        return suggested_exercises
+
+    def get_recent_exercises(self, n_recent=2):
+        recent_exercises = sorted(self.exercises, reverse=True,
+                key=lambda ex: ex.last_done if hasattr(ex, "last_done") else datetime.datetime.min)
+        
+        recent_exercises = recent_exercises[0:n_recent]
+
+        return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
 
 def PointCalculator(streak, suggested, proficient):
     points = 5 + max(streak, 10)

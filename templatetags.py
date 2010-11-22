@@ -62,6 +62,47 @@ def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
         video_path = video_path + exercise_video.video_folder + "/" + exercise_video.readable_id + ".flv"
     return {"video_path": video_path, "width": width, "height": height}
 
+@register.inclusion_tag("knowledgemap_embed.html")
+def knowledgemap_embed(exercises, map_coords):
+    return {"exercises": exercises, "map_coords": map_coords}
+
+@register.inclusion_tag("related_videos.html")
+def related_videos(exercise_videos):
+    return {"exercise_videos": exercise_videos}
+
+@register.inclusion_tag("exercise_message.html")
+def exercise_message(coaches, endangered, reviewing, proficient, struggling):
+    return {
+            "coaches": coaches,
+            "endangered": endangered,
+            "reviewing": reviewing,
+            "proficient": proficient,
+            "struggling": struggling
+            }
+
+@register.inclusion_tag("streak_bar.html")
+def streak_bar(exercise):
+
+    streak = exercise.streak
+    longest_streak = 0
+
+    if hasattr(exercise, "longest_streak"):
+        longest_streak = exercise.longest_streak
+
+    streak_max_width = 250
+    streak_width = min(streak_max_width, (streak_max_width / 10) * streak)
+    longest_streak_width = min(streak_max_width, (streak_max_width / 10) * longest_streak)
+    streak_icon_width = min(streak_max_width - 2, max(43, streak_width))
+
+    return {
+            "streak": streak,
+            "longest_streak": longest_streak,
+            "streak_width": streak_width, 
+            "longest_streak_width": longest_streak_width, 
+            "streak_max_width": streak_max_width,
+            "streak_icon_width": streak_icon_width
+            }
+
 register.tag(highlight)
 
 webapp.template.register_template_library('discussion.templatetags')

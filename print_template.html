@@ -14,14 +14,11 @@
   					</td>
   					<td bgcolor=#e5ecf9 align=right style="white-space:nowrap;">
   						<A href="/exercises?exid={{exid}}">Do this exercise</A>
-  						&nbsp;&nbsp;|&nbsp;&nbsp;Streak:
+  						&nbsp;&nbsp;
   					</td>
-  					<td bgcolor=#e5ecf9><ul class="unit-rating" style="width:200px;">
-  						<li class="current-rating" style="width:{{streakwidth}}px;"></li></ul>
+                    <td bgcolor=#e5ecf9>
+                        {% streak_bar user_exercise %}
   					</td>
-                    <td bgcolor=#e5ecf9 style="padding-right:1em;">
-                        &nbsp;&nbsp;|&nbsp;&nbsp;<nobr>Longest Streak: {{longest_streak}}</nobr>
-                    </td>
   				</tr>
   			</table>
 {% endblock pagesubmenu %}

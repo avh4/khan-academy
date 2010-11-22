@@ -1,6 +1,10 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}Exercise{% endblock pagetitle %}
 {% block pagescript %}
+<style>
+    /* Temporary styles to fit new exercises into old template, will be removed when new template is dropped in. */
+    #page_sub_nav b {display: none;}}
+</style>
   <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
@@ -53,76 +57,47 @@ function submitForm(value)
 </script>
 {% endblock pagescript %}
 
-{% block pagesubmenu %}
-  			<table border=0 width="100%" cellpadding=0 cellspacing=0>
-  				<tr>
-  					<td bgcolor=#e5ecf9 align=left width="100%"><B><A href="/exercisedashboard">Exercises </a>: {{extitle}}</B>
-  					{% if exercise_videos %}
-  						<A href="/viewexercisevideos?exkey={{exercise.key}}">[Watch Videos]</A>
-  					{% endif %}
-  					</td>
-  					<td bgcolor=#e5ecf9 align=right style="white-space:nowrap;">
-  						<A href="/printexercise?exid={{exid}}&num_problems={{num_problems_to_print}}">Print next {{num_problems_to_print}} problems</A>
-  						&nbsp;&nbsp;|&nbsp;&nbsp;Streak:
-  					</td>
-  					<td bgcolor=#e5ecf9><ul class="unit-rating" style="width:200px;">
-  						<li class="current-rating" style="width:{{streakwidth}}px;"></li></ul>
-  					</td>
-                    <td bgcolor=#e5ecf9 style="padding-right:1em;">
-                        &nbsp;&nbsp;|&nbsp;&nbsp;<nobr>Longest Streak: {{longest_streak}}</nobr>
-                    </td>
-  				</tr>
-  			</table>
-{% endblock pagesubmenu %}
-
-{% block pagemessage %}
-{% if endangered %}
-	<div class=hdg style="padding: 1em;"><h3>
-	Uh oh.&nbsp;  You missed a problem in an exercise that you'd previously mastered.&nbsp;
-	If you get this problem right without any hints, I'll assume you're still proficient.
-	</h3></div>
-{% else %}
-	{% if reviewing %}
-		<div class=hdg style="padding: 1em;"><h3>
-		You haven't done an exercise that covers this in a while.&nbsp;  Let's see if you still remember how to do it.
-		</h3></div>
-	{% else %}
-		{% if proficient %}
-			<div class=hdg style="padding: 1em;"><h3>
-			I, the website, think you're pretty good at this!&nbsp;<BR>
-			If you're in the mood, you might want to go to the main <A href='/exercisedashboard'>exercises page</a> and see if I've
-			suggested any other exercises.
-		</h3></div>
-		{% else %}
-			{% if struggling %}
-				<div class=hdg style="padding: 1em;"><h3>
-				Are you having trouble with this exercise?&nbsp;  You've done more than 30 problems now but
-				haven't gotten 10 in a row right yet.&nbsp;  Why don't you
-  				{% if exercise_videos %}
-  					watch the <A href="/viewexercisevideos?exkey={{exercise.key}}">video</A> again, or
-  				{% endif %}
-				ask
-				{% if coaches|length_is:"0" %}
-				    someone
-				{% else %}
-					{% if coaches|length_is:"1" %}
-				        your <a href="coaches">coach</a>
-					{% else %}
-	   			        one of your <a href="coaches">coaches</a>
-					{% endif %}
-				{% endif %}
-				for help?
-				</h3></div>
-			{% endif %}
-		{% endif %}
-	{% endif %}
-{% endif %}
-{% endblock pagemessage %}
-
 {% block pagecontent %}
-<div id="scratch_pad_toggle" style="display: none;">
-	<a id="scratch_pad_show" href="#" style="display: none;">Show scratch pad</a>
-	<a id="scratch_pad_hide" href="#" style="display: none;">Hide scratch pad</a>
+<div id="container">
+    <div id="dashboard-header" class="single-exercise">
+        <div id="dashboard-nav">
+            <span class="menu"><a href="/exercisedashboard">Knowledge Map{% if App.offline_mode %} (<em>not supported in offline mode</em>){% endif %}</a></span> |
+            <span class="menu"><a href="/individualreport">Report</a></span> | 
+            <span class="menu"><a href="/progresschart">Progress Chart</a></span>
+        </div>
+        <a href="/exercisedashboard" id="dashboard-breadcrumb">&laquo; Exercise Dashboard</a>
+    </div>
+    
+    <div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
+        <div class="proficient-badge">
+            {% if reviewing %}
+                <img src="/images/proficient-badge-review.png" height=80 width=76>
+            {% else %}{% if suggested %}
+                <img src="/images/proficient-badge-suggested.png" height=80 width=76>
+            {% else %}{% if proficient %}
+                <img src="/images/proficient-badge-complete.png" height=80 width=76>
+            {% else %}
+                <img src="/images/proficient-badge-not-started.png" height=80 width=76>
+            {% endif %}{% endif %}{% endif %}
+        </div>
+		<div class="energy-points-badge">{{exercise_points}}</div>
+		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{extitle}}</A></div>
+		{% streak_bar user_exercise %}
+		<div class="related-videos">
+            {% related_videos exercise_videos %}
+        </div>  
+    </div>
+
+    {% if endangered or reviewing or proficient or struggling %}
+        {% exercise_message coaches endangered reviewing proficient struggling %}
+    {% endif %}
+    
+<div id="extras" class="single-exercise">
+    <div id="scratch_pad_toggle" style="display: none;">
+    	<a id="scratch_pad_show" href="#" style="display: none;">Show scratch pad</a>
+    	<a id="scratch_pad_hide" href="#" style="display: none;">Hide scratch pad</a>
+    </div>
+    | <A href="/printexercise?exid={{exid}}&num_problems={{num_problems_to_print}}">Print next {{num_problems_to_print}} problems</A>
 </div>
 <div>
 	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; float: left; width: 65%; min-width: 610px;">
@@ -247,7 +222,7 @@ $(document).ready(function() {
 	{
 		$('#scratch_pad_show').click(showScratchPad);
 		$('#scratch_pad_hide').click(hideScratchPad);
-		$('#scratch_pad_toggle').css('display', 'block');
+		$('#scratch_pad_toggle').css('display', 'inline');
 	}
 
     if(readCookie(scratchpad_cookie_name) == "true")
@@ -257,5 +232,6 @@ $(document).ready(function() {
 
 });
 //--></script>
+</div>
 {% endblock pagecontent %}
 

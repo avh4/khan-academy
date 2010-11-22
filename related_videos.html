@@ -1,0 +1,20 @@
+
+{% if exercise_videos %}
+Related videos:
+    {% for exercise_video in exercise_videos %}
+        <a href="/video/{{exercise_video.video.readable_id}}">{{exercise_video.video.title|escape}}</a>{% if not forloop.last %},{% endif %}
+
+        {% if not forloop.last %}
+            {% ifequal forloop.counter 3 %}
+                <a href="#" id="related_videos_more" 
+                    onclick="$('#related_videos_hidden').show();$('#related_videos_more').hide();return false;">more...</a>
+                <div id="related_videos_hidden" style="display:none;">
+            {% endifequal %}
+        {% else %}
+            {% if forloop.counter|greater_than:3 %}
+                </div>
+            {% endif %}
+        {% endif %}
+
+    {% endfor %}
+{% endif %}

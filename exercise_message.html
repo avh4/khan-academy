@@ -1,0 +1,35 @@
+<div class="exercise_message">
+{% if endangered %}
+	Uh oh.&nbsp;  You missed a problem in an exercise that you'd previously mastered.&nbsp;
+	If you get this problem right without any hints, I'll assume you're still proficient.
+{% else %}
+	{% if reviewing %}
+		You haven't done an exercise that covers this in a while.&nbsp;  Let's see if you still remember how to do it.
+	{% else %}
+		{% if proficient %}
+			I, the website, think you're pretty good at this!&nbsp;<BR>
+			If you're in the mood, you might want to go to the main <A href='/exercisedashboard'>exercises page</a> and see if I've
+			suggested any other exercises.
+		{% else %}
+			{% if struggling %}
+				Are you having trouble with this exercise?&nbsp;  You've done more than 30 problems now but
+				haven't gotten 10 in a row right yet.&nbsp;  Why don't you
+  				{% if exercise_videos %}
+  					watch the related videos again, or
+  				{% endif %}
+				ask
+				{% if coaches|length_is:"0" %}
+				    someone
+				{% else %}
+					{% if coaches|length_is:"1" %}
+				        your <a href="coaches">coach</a>
+					{% else %}
+	   			        one of your <a href="coaches">coaches</a>
+					{% endif %}
+				{% endif %}
+				for help?
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endif %}
+</div>

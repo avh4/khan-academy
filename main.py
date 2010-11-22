@@ -38,6 +38,7 @@ import cachepy
 import autocomplete
 import coaches
 import api
+import knowledgemap
 
 from search import Searchable
 import search
@@ -262,12 +263,15 @@ class ViewExercise(request_handler.RequestHandler):
             proficient = False
             endangered = False
             reviewing = False
+            suggested = user_data.is_suggested(exid)
             if user_data.is_proficient_at(exid):
                 proficient = True
                 if (userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
                     reviewing = True
                 if userExercise.streak == 0 and userExercise.longest_streak >= 10:
                     endangered = True
+            struggling = user_data.is_struggling_with(exid)
+            exercise_points = PointCalculator(userExercise.streak, suggested, proficient)
                    
             logout_url = users.create_logout_url(self.request.uri)
             
@@ -283,11 +287,13 @@ class ViewExercise(request_handler.RequestHandler):
                 'arithmetic_template': 'arithmetic_template.html',
                 'username': user.nickname(),
                 'points': user_data.points,
+                'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
                 'proficient': proficient,
                 'endangered': endangered,
                 'reviewing': reviewing,
-                'struggling': user_data.is_struggling_with(exid),
+                'struggling': struggling,
+                'suggested': suggested,
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': userExercise.key(),
                 'exercise': exercise,
@@ -295,10 +301,9 @@ class ViewExercise(request_handler.RequestHandler):
                 'start_time': time.time(),
                 'exercise_videos': exercise_videos,
                 'extitle': exid.replace('_', ' ').capitalize(),
-                'streakwidth': min(userExercise.streak, 10) * 20,
+                'user_exercise': userExercise,
                 'logout_url': logout_url,
                 'streak': userExercise.streak,
-                'longest_streak': userExercise.longest_streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
                 'num_problems_to_print': num_problems_to_print,
@@ -701,10 +706,8 @@ class PrintExercise(request_handler.RequestHandler):
                 'start_time': time.time(),
                 'exercise_videos': exercise_videos,
                 'extitle': exid.replace('_', ' ').capitalize(),
-                'streakwidth': min(userExercise.streak, 10) * 20,
+                'user_exercise': userExercise,
                 'logout_url': logout_url,
-                'streak': userExercise.streak,
-                'longest_streak': userExercise.longest_streak,
                 'time_warp': time_warp,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
@@ -802,18 +805,37 @@ class ViewAllExercises(request_handler.RequestHandler):
             for exercise in ex_graph.exercises:
                 exercise.display_name = exercise.name.replace('_', ' ').capitalize()
 
+            recent_exercises = ex_graph.get_recent_exercises()
             review_exercises = ex_graph.get_review_exercises(self.get_time())
             suggested_exercises = ex_graph.get_suggested_exercises()
+            proficient_exercises = ex_graph.get_proficient_exercises()
+
+            for exercise in ex_graph.exercises:
+                exercise.suggested = False
+                exercise.proficient = False
+                exercise.status = ""
+                if exercise in suggested_exercises:
+                    exercise.suggested = True
+                    exercise.status = "Suggested"
+                if exercise in proficient_exercises:
+                    exercise.proficient = True
+                    exercise.status = "Proficient"
+                if exercise in review_exercises:
+                    exercise.review = True
+                    exercise.status = "Review"
 
             logout_url = users.create_logout_url(self.request.uri)
 
             template_values = {
                 'App' : App,
                 'exercises': ex_graph.exercises,
+                'recent_exercises': recent_exercises,
                 'review_exercises': review_exercises,
                 'suggested_exercises': suggested_exercises,
                 'points': user_data.points,
                 'username': user.nickname(),
+                'expanded_all_exercises': user_data.expanded_all_exercises,
+                'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
                 'logout_url': logout_url,
                 }
 
@@ -872,6 +894,7 @@ class KnowledgeMap(request_handler.RequestHandler):
             template_values = {'App' : App, 
                                'exercises': ex_graph.exercises,
                                'points': user_data.points,
+                               'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
                                'username': user.nickname(),
                                'logout_url': logout_url,
                                }
@@ -1970,6 +1993,8 @@ def real_main():
         ('/provide-feedback', ProvideFeedback),
         ('/search', Search),
         ('/autocomplete', autocomplete.Autocomplete),
+        ('/savemapcoords', knowledgemap.SaveMapCoords),
+        ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
