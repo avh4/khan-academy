@@ -59,7 +59,7 @@ var KnowledgeMap = {
         this.map.mapTypes.set('knowledge', knowledgeMapType);
         this.map.setMapTypeId('knowledge');
 
-        if (false && latInit && lngInit && zoomInit)
+        if (latInit && lngInit && zoomInit)
         {
             this.map.setCenter(new google.maps.LatLng(latInit, lngInit));
             this.map.setZoom(zoomInit);
