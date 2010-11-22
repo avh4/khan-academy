@@ -89,10 +89,10 @@ def streak_bar(exercise):
     if hasattr(exercise, "longest_streak"):
         longest_streak = exercise.longest_streak
 
-    streak_max_width = 250
-    streak_width = min(streak_max_width, (streak_max_width / 10) * streak)
-    longest_streak_width = min(streak_max_width, (streak_max_width / 10) * longest_streak)
-    streak_icon_width = min(streak_max_width - 2, max(43, streak_width))
+    streak_max_width = 228
+    streak_width = min(streak_max_width, int((streak_max_width / 10.0) * streak))
+    longest_streak_width = min(streak_max_width, int((streak_max_width / 10.0) * longest_streak))
+    streak_icon_width = min(streak_max_width - 2, max(43, streak_width)) # 43 is width of streak icon
 
     return {
             "streak": streak,

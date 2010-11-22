@@ -318,7 +318,7 @@ var Drawer = {
 
         if (window.KnowledgeMap)
         {
-            var leftMap = (fExpanded ? 0 : 360);
+            var leftMap = (fExpanded ? 0 : 340);
             $("#map-canvas").animate({marginRight: leftMap + "px", left: leftMap + "px"}, 
                     500,
                     function() {

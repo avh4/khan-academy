@@ -506,7 +506,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
     #container #dashboard-drawer {
         position: absolute;
-        width: 360px;
+        width: 340px;
         height: 800px;
         overflow: scroll;
         overflow-x: hidden;
@@ -548,7 +548,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         color: #333;
         font-size: 24px;
         font-weight: bold;
-        width: 349px;
+        width: 329px;
         margin: -5px;
         padding: 5px;
         position: absolute;
@@ -574,9 +574,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
     #container #dashboard-map #map-canvas {
         height: 100%;
-        left: 360px;
+        left: 340px;
         margin-left: 0;
-        margin-right: 360px;
+        margin-right: 340px;
     }
 
 .exercise-badge {
@@ -584,7 +584,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     margin-bottom: 5px;
     margin-left: 1px;
     position: relative;
-    width: 340px;
+    width: 320px;
     height: 80px;
     cursor: pointer;
     border: 1px dotted #fff;
@@ -605,7 +605,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-weight: bold;
         text-shadow: 0px -1px 0px #666;
         position: absolute;
-        left: 287px;
+        left: 267px;
         top: 5px;
     }
     .exercise-badge .exercise-title {
@@ -614,7 +614,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         left: 87px;
         top: 8px;
         font-size: larger;
-        width: 190px;
+        width: 170px;
     }
         .exercise-badge .exercise-title a {
             text-decoration: none;
@@ -625,7 +625,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         }
     .streak-bar {
         background: url(/images/streak-meter-empty.png) no-repeat;
-        width: 255px;
+        width: 228px;
         height: 30px;
     }
     .exercise-badge .streak-bar {
