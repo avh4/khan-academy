@@ -865,48 +865,7 @@ class VideolessExercises(request_handler.RequestHandler):
 class KnowledgeMap(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)                    
-            ex_graph = ExerciseGraph(user_data)
-            if user_data.reassess_from_graph(ex_graph):
-                user_data.put()
-            review_exercises = ex_graph.get_review_exercises(self.get_time())
-            suggested_exercises = ex_graph.get_suggested_exercises()
-            proficient_exercises = ex_graph.get_proficient_exercises()
-
-            for exercise in ex_graph.exercises:
-                exercise.suggested = False
-                exercise.proficient = False
-                exercise.status = ""
-                if exercise in suggested_exercises:
-                    exercise.suggested = True
-                    exercise.status = "Suggested"
-                if exercise in proficient_exercises:
-                    exercise.proficient = True
-                    exercise.status = "Proficient"
-                if exercise in review_exercises:
-                    exercise.review = True
-                    exercise.status = "Review"
-                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
-
-            logout_url = users.create_logout_url(self.request.uri)
-            template_values = {'App' : App, 
-                               'exercises': ex_graph.exercises,
-                               'points': user_data.points,
-                               'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
-                               'username': user.nickname(),
-                               'logout_url': logout_url,
-                               }
-
-            path = os.path.join(os.path.dirname(__file__), 'viewknowledgemap.html')
-            self.response.out.write(template.render(path, template_values))
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
-            
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+        self.redirect("/exercisedashboard")
 
 class EditExercise(request_handler.RequestHandler):
 
