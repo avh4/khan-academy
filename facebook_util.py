@@ -4,6 +4,7 @@ import logging
 import unicodedata
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.api import urlfetch
 
 from app import App
 import facebook
@@ -35,7 +36,7 @@ def get_facebook_nickname(user):
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
         memcache.set(memcache_key, name, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
-    except facebook.GraphAPIError:
+    except (facebook.GraphAPIError, urlfetch.DownloadError):
         name = email
 
     return name
@@ -68,7 +69,7 @@ def get_facebook_profile():
             graph = facebook.GraphAPI(cookie["access_token"])
             profile = graph.get_object("me")
             memcache.set(memcache_key, profile, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
-        except facebook.GraphAPIError, error:
+        except (facebook.GraphAPIError, urlfetch.DownloadError), error:
             logging.debug("Ignoring %s.  Assuming access_token is no longer valid." % error)
         return profile
 
