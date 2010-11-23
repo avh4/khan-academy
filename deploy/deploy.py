@@ -38,7 +38,7 @@ def main():
 
     version = svn_up()
     if version <= 0:
-        print "Could not find version in 'svn up' output"
+        print "Could not find version in 'svn up' output."
         return
 
     deploy(version)
