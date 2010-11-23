@@ -2,6 +2,7 @@ import re
 import cgi
 from google.appengine.ext import webapp
 from django import template
+from app import App
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -64,7 +65,7 @@ def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
 
 @register.inclusion_tag("knowledgemap_embed.html")
 def knowledgemap_embed(exercises, map_coords):
-    return {"exercises": exercises, "map_coords": map_coords}
+    return {"App": App, "exercises": exercises, "map_coords": map_coords}
 
 @register.inclusion_tag("related_videos.html")
 def related_videos(exercise_videos):
