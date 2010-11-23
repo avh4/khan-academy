@@ -15,7 +15,7 @@ def svn_st():
 def svn_up():
 
     version = -1
-    pattern = re.compile("^(At|Updated to) revision (\\d+)$")
+    pattern = re.compile("^(At|Updated to) revision (\\d+)\.$")
 
     output = popen_results(['svn', 'up'])
     lines = output.split("\n")
