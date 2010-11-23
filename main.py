@@ -448,6 +448,7 @@ class ViewVideo(request_handler.RequestHandler):
             query.filter('youtube_id =', video_id)
             video = query.get()
             readable_id = video.readable_id
+            playlist = video.first_playlist()
             redirect_to_canonical_url = True
 
         if playlist_title is not None and len(playlist_title) > 0:
