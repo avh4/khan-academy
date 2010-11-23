@@ -708,10 +708,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     color: #333;
     display: block;
     font-size: 10px;
-    height: 100%;
     padding: 52px 0 0 1px;
     text-decoration: none;
-    width: 100%;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
     background-image: url(/images/dashboard-icon-active.png);
