@@ -18,7 +18,7 @@ var KnowledgeMap = {
         suggested: "/images/node-suggested.png",
         normal: "/images/node-not-started.png"
     },
-    latLngHome: new google.maps.LatLng(-0.51665, 0.763734),
+    latLngHome: new google.maps.LatLng(-0.629254, 0.730775),
     latMin: 90,
     latMax: -90,
     lngMin: 180,
@@ -59,7 +59,7 @@ var KnowledgeMap = {
         this.map.mapTypes.set('knowledge', knowledgeMapType);
         this.map.setMapTypeId('knowledge');
 
-        if (false && latInit && lngInit && zoomInit)
+        if (latInit && lngInit && zoomInit)
         {
             this.map.setCenter(new google.maps.LatLng(latInit, lngInit));
             this.map.setZoom(zoomInit);
