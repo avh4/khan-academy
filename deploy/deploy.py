@@ -15,14 +15,14 @@ def svn_st():
 def svn_up():
 
     version = -1
-    pattern = re.compile("^At revision (\\d+).$")
+    pattern = re.compile("^(At|Updated to) revision (\\d+).$")
 
     output = popen_results(['svn', 'up'])
     lines = output.split("\n")
     for line in lines:
         match = pattern.match(line)
         if match:
-            version = int(match.groups()[0])
+            version = int(match.groups()[1])
 
     return version
 
