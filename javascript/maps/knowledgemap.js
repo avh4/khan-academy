@@ -23,7 +23,7 @@ var KnowledgeMap = {
     latMax: -90,
     lngMin: 180,
     lngMax: -180,
-    nodeSpacing: {lat: 0.38, lng: 0.378},
+    nodeSpacing: {lat: 0.392, lng: 0.35},
     latLngBounds: null,
     reZoom: /nodeLabelZoom(\d)+/g,
     reHighlight: /nodeLabelHighlight/g,
@@ -59,7 +59,7 @@ var KnowledgeMap = {
         this.map.mapTypes.set('knowledge', knowledgeMapType);
         this.map.setMapTypeId('knowledge');
 
-        if (latInit && lngInit && zoomInit)
+        if (false && latInit && lngInit && zoomInit)
         {
             this.map.setCenter(new google.maps.LatLng(latInit, lngInit));
             this.map.setZoom(zoomInit);
@@ -160,7 +160,7 @@ var KnowledgeMap = {
 
         var color = this.colors.gray;
         var weight = 1.0;
-        var opacity = 0.25;
+        var opacity = 0.48;
 
         if (countProficient == 2)
         {
@@ -245,7 +245,7 @@ var KnowledgeMap = {
         if (!this.iconCache) this.iconCache = {};
         if (!this.iconCache[iconUrl + "@" + zoom])
         {
-            var size = (1 / (this.options.maxZoom - zoom + 1)) * 100;
+            var size = (1 / (this.options.maxZoom - zoom + 1)) * 80;
             var url = iconUrl;
 
             if (zoom == this.options.minZoom)
@@ -279,8 +279,8 @@ var KnowledgeMap = {
         if (!this.labelAnchorCache) this.labelAnchorCache = {};
         if (!this.labelAnchorCache[zoom])
         {
-            var offset = -1 * (55 / (this.options.maxZoom - zoom + 1));
-            this.labelAnchorCache[zoom] = new google.maps.Point(40, offset);
+            var offset = -1 * (45 / (this.options.maxZoom - zoom + 1));
+            this.labelAnchorCache[zoom] = new google.maps.Point(zoom == 8 ? 30 : 40, offset);
         }
         return this.labelAnchorCache[zoom];
     },
