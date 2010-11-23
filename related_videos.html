@@ -2,7 +2,7 @@
 {% if exercise_videos %}
 Related videos:
     {% for exercise_video in exercise_videos %}
-        <a href="/video/{{exercise_video.video.readable_id}}">{{exercise_video.video.title|escape}}</a>{% if not forloop.last %},{% endif %}
+        <a href="/video?v={{exercise_video.video.youtube_id}}">{{exercise_video.video.title|escape}}</a>{% if not forloop.last %},{% endif %}
 
         {% if not forloop.last %}
             {% ifequal forloop.counter 3 %}
