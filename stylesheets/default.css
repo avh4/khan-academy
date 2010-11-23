@@ -647,12 +647,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border: 1px solid #ccc;
     border-top: none;
 }
-
-#container #dashboard-header.single-exercise a#dashboard-breadcrumb {
-    text-decoration: none;
-    position: relative;
-    top: 5px;
-}
 .exercise-badge.single-exercise {
     background: background:#e5ecf9;
     border: 1px solid #ccc;
@@ -660,8 +654,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border-bottom: 1px solid #bbb;
     cursor: auto;
     height: auto;
-    margin: 0;
-    width: auto;
+    margin: 0 0 0 70px;
+    width: 888px;
     
     -webkit-box-shadow: 0 1px 3px #ccc;
     -moz-box-shadow: 0 1px 3px #ccc;
@@ -705,9 +699,38 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     width: 550px;
 }
 #extras.single-exercise {
-    text-align: left;
+    text-align: right;
     margin-top: 6px;
     padding-left: 3px;
+}
+#back-to-dashboard.single-exercise a#dashboard-breadcrumb {
+    background: transparent url(/images/dashboard-icon-inactive.png) no-repeat 9px 7px;
+    color: #333;
+    display: block;
+    font-size: 10px;
+    height: 100%;
+    padding: 52px 0 0 1px;
+    text-decoration: none;
+    width: 100%;
+}
+#back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
+    background-image: url(/images/dashboard-icon-active.png);
+    color: #E35D04;
+}
+#back-to-dashboard.single-exercise {
+    background-color: #EEE;
+    border-bottom: 1px solid #bbb;
+    border-left: 1px solid #bbb;
+    color: #666;
+    float: left;
+    font-size: 11px;
+    height: 68px;
+    padding-left: 3px;
+    width: 67px;
+    
+    -webkit-box-shadow: #CCC 0px 1px 3px;
+    -moz-box-shadow: #CCC 0px 1px 3px;
+    box-shadow: #CCC 0px 1px 3px;
 }
 /* End of Individual Exercise Styles */
 

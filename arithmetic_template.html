@@ -59,15 +59,7 @@ function submitForm(value)
 
 {% block pagecontent %}
 <div id="container">
-    <div id="dashboard-header" class="single-exercise">
-        <div id="dashboard-nav">
-            <span class="menu"><a href="/exercisedashboard">Knowledge Map{% if App.offline_mode %} (<em>not supported in offline mode</em>){% endif %}</a></span> |
-            <span class="menu"><a href="/individualreport">Report</a></span> | 
-            <span class="menu"><a href="/progresschart">Progress Chart</a></span>
-        </div>
-        <a href="/exercisedashboard" id="dashboard-breadcrumb">&laquo; Exercise Dashboard</a>
-    </div>
-    
+<div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
     <div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
         <div class="proficient-badge">
             {% if reviewing %}
@@ -85,7 +77,7 @@ function submitForm(value)
 		{% streak_bar user_exercise %}
 		<div class="related-videos">
             {% related_videos exercise_videos %}
-        </div>  
+        </div>
     </div>
 
     {% if endangered or reviewing or proficient or struggling %}
