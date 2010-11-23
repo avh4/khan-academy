@@ -158,13 +158,19 @@
       window.fbAsyncInit = function() {
         FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
                  xfbml: true});
-        FB.Event.subscribe('auth.login', function(response) {
-            window.location.reload();
-        });
+
+        {% if not username %}
+            FB.Event.subscribe('auth.login', function(response) {
+                window.location.reload();
+            });
+        {% endif %}
+
         FB.getLoginStatus(function(response) {
            if (response.session) {
             $('#page_logout').click(function(e) {
-                FB.logout(function() { window.location.reload(); });
+                FB.logout(function() { 
+                    window.location = $("#page_logout").attr("href"); 
+                });
                 e.preventDefault();
                 return false;
             });
