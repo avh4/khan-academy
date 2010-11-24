@@ -502,8 +502,17 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     width: 960px;
     margin: 0 auto;
     overflow: hidden;
-    position: relative;
+    position: relative; 
 }
+    #container.dashboard {
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        width: 970px;
+        
+        -webkit-box-shadow: 0 1px 3px #ccc;
+        -moz-box-shadow: 0 1px 3px #ccc;
+        box-shadow: 0 1px 3px #ccc;
+    }
     #container #dashboard-drawer {
         position: absolute;
         width: 340px;
@@ -511,7 +520,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         overflow: scroll;
         overflow-x: hidden;
         overflow-y: scroll;
-        padding-top: 10px;
+        padding: 10px 5px 0 5px;
         z-index: 1;
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
@@ -548,7 +557,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         color: #333;
         font-size: 24px;
         font-weight: bold;
-        width: 329px;
+        width: 339px;
         margin: -5px;
         padding: 5px;
         position: absolute;
@@ -574,7 +583,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         cursor: default;
     }
     #container #dashboard-map {
-        width: 960px;
+        width: 970px;
     }
 
     #container #dashboard-map #map-canvas {
@@ -706,7 +715,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #extras.single-exercise {
     text-align: right;
     margin-top: 6px;
-    padding-left: 3px;
+    padding-right: 3px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
     background: transparent url(/images/dashboard-icon-inactive.png) no-repeat 9px 7px;
