@@ -30,7 +30,7 @@ class Export(request_handler.RequestHandler):
         student = user
         if user:
             student_email = self.request.get('student_email')
-            if student_email:
+            if student_email and student_email != user.email():
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
@@ -115,7 +115,7 @@ class ImportUserData(request_handler.RequestHandler):
             self.response.out.write("please login first")        
         elif App.is_dev_server:
             student_email = self.request.get('student_email')
-            if student_email:
+            if student_email and student_email != user.email():
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)

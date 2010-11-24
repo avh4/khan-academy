@@ -4,7 +4,9 @@ import datetime
 import itertools
 from collections import deque
 from pprint import pformat
-
+from math import sqrt
+    
+from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 
@@ -16,6 +18,64 @@ import request_handler
 from models import UserExercise, Exercise, UserData, ProblemLog, ExerciseGraph
 
 
+def meanstdv(x):
+    n, mean, std = len(x), 0, 0
+    for a in x:
+	mean = mean + a
+    mean = mean / float(n)
+    for a in x:
+	std = std + (a - mean)**2
+    std = sqrt(std / float(n-1))
+    return mean, std
+    
+    
+class Class(db.Model):
+
+    coach = db.StringProperty()
+    blacklist = db.StringListProperty()
+
+    def compute_stats(self, student_data, date):
+        student = student_data.user
+        key = self.coach + ":" + date.strftime('%Y-%m-%d')
+        day_stats = DayStats.get_or_insert(key, class_ref=self, avg_modules_completed=1.0, standard_deviation=0.0) 
+        student_stats = StudentStats.get_or_insert(key+":"+student.email(), day_stats=day_stats, student=student) 
+            
+        student_stats.modules_completed = len(student_data.all_proficient_exercises) + 1       
+        student_stats.put()   
+        modules_completed_list = []
+        for student_stats in StudentStats.all().filter('day_stats =', day_stats):
+           modules_completed_list.append(student_stats.modules_completed)
+        if len(modules_completed_list) > 1:
+            logging.info("modules_completed_list: " + str(modules_completed_list))
+            day_stats.avg_modules_completed, day_stats.standard_deviation = meanstdv(modules_completed_list) 
+            logging.info("day_stats.avg_modules_completed: " + str(day_stats.avg_modules_completed))
+            logging.info("day_stats.standard_deviation: " + str(day_stats.standard_deviation)) 
+            day_stats.put()
+            
+    def get_stats_for_period(self, joined_date, start_date, end_date):
+        stats = []
+        for day_stats in DayStats.all().filter('class_ref =', self).filter('date >=', start_date).filter('date <=', end_date):
+            day_stats.days_until_proficient = (day_stats.date - joined_date.date()).days  
+            stats.append(day_stats)
+        return stats
+
+
+class DayStats(db.Model):
+
+    class_ref = db.ReferenceProperty(Class)
+    date = db.DateProperty(auto_now_add = True)    
+    avg_modules_completed = db.FloatProperty(default = 1.0)
+    standard_deviation = db.FloatProperty(default = 0.0)
+
+    
+class StudentStats(db.Model):
+
+    day_stats = db.ReferenceProperty(DayStats)    
+    student = db.UserProperty()
+    modules_completed = db.IntegerProperty(default = 0)
+    
+    
+    
 class ViewCoaches(request_handler.RequestHandler):
 
     def get(self):
@@ -67,7 +127,7 @@ class UnregisterCoach(request_handler.RequestHandler):
                 user_data.put()
             elif coach_email.lower() in user_data.coaches:
                 user_data.coaches.remove(coach_email.lower())
-                user_data.put()                
+                user_data.put()          
         self.redirect("/coaches") 
 
 
@@ -78,7 +138,7 @@ class ViewIndividualReport(request_handler.RequestHandler):
         student = user
         if user:
             student_email = self.request.get('student_email')
-            if student_email:
+            if student_email and student_email != user.email():
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
@@ -165,7 +225,7 @@ class ViewProgressChart(request_handler.RequestHandler):
         student = user
         if user:
             student_email = self.request.get('student_email')
-            if student_email:
+            if student_email and student_email != user.email():
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
@@ -177,10 +237,16 @@ class ViewProgressChart(request_handler.RequestHandler):
             logout_url = users.create_logout_url(self.request.uri)   
 
             user_exercises = []
+            init_days = None
             max_days = None
             num_exercises = 0
+            start_date = None
+            end_date = None
             #logging.info("user_data.joined: " + str(user_data.joined))
             for ue in UserExercise.all().filter('user =', user_data.user).filter('proficient_date >', None).order('proficient_date'):
+                if num_exercises == 0:
+                    init_days = (ue.proficient_date - user_data.joined).days  
+                    start_date = ue.proficient_date
                 days_until_proficient = (ue.proficient_date - user_data.joined).days   
                 #logging.info(ue.exercise + ": " + str(ue.proficient_date))
                 #logging.info("delta: " + str(ue.proficient_date - user_data.joined))
@@ -188,7 +254,11 @@ class ViewProgressChart(request_handler.RequestHandler):
                 data = ExerciseData(ue.exercise.replace('_', ' ').capitalize(), ue.exercise, days_until_proficient, proficient_date)
                 user_exercises.append(data)
                 max_days = days_until_proficient
-                num_exercises += 1
+                end_date = ue.proficient_date
+                num_exercises += 1               
+               
+            #class_data = Class.get_or_insert(user.email(), coach=user.email()) 
+            #stats = class_data.get_stats_for_period(user_data.joined, start_date, end_date)
             
             name = util.get_nickname_for(student)
             if student.email() != name:
@@ -201,8 +271,10 @@ class ViewProgressChart(request_handler.RequestHandler):
                 'student': name,                
                 'student_email': student_email,   
                 'user_exercises': user_exercises,
+                'init_days': init_days,
                 'max_days': max_days,
                 'num_exercises': num_exercises,
+                #'stats': stats,
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewprogresschart.html')
@@ -366,7 +438,7 @@ class ViewCharts(request_handler.RequestHandler):
         student = user
         if user:
             student_email = self.request.get('student_email')
-            if student_email:
+            if student_email and student_email != user.email():
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
