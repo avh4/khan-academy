@@ -11,6 +11,8 @@ import app
 import util
 import request_handler
 
+import coaches
+
 from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video
         
 from discussion import qa
@@ -34,7 +36,9 @@ class Export(request_handler.RequestHandler):
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                if users.is_current_user_admin():
+                    pass # allow admin to export anyone's data
+                elif user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own data")
@@ -144,6 +148,34 @@ class ImportUserData(request_handler.RequestHandler):
             user_data.coaches = user_data_dict['coaches']
             user_data.put()
 
+            proficient_dates = {}    
+            correct_in_a_row = {}
+            for problem in ProblemLog.all().filter('user =', student):
+                problem.delete()
+            for problem in problems:
+                problem_log = ProblemLog()
+                problem_log.user = student
+                problem_log.exercise = problem['exercise']
+                problem_log.time_done = self.datetime_from_str(problem['time_done'])
+                problem_log.correct = problem['correct']
+                if problem_log.correct:
+                    if problem_log.exercise not in correct_in_a_row:
+                        correct_in_a_row[problem_log.exercise] = 1                    
+                    else:
+                        correct_in_a_row[problem_log.exercise] += 1                    
+                    if not problem_log.exercise in proficient_dates and correct_in_a_row[problem_log.exercise] == 10:
+                        proficient_dates[problem_log.exercise] = problem_log.time_done
+                        #for coach in user_data.coaches:
+                        #    logging.info("class_data.compute_stats: " + coach)
+                        #    class_data = coaches.Class.get_or_insert(coach, coach=coach)     
+                        #    class_data.compute_stats(user_data, problem_log.time_done.date())                                                  
+                problem_log.time_taken = problem['time_taken']
+                if problem.has_key('problem_number'):
+                    problem_log.problem_number = problem['problem_number']
+                if problem.has_key('hint_used'):                    
+                    problem_log.hint_used = problem['hint_used']               
+                problem_log.put()  
+                
             for user_exercise in UserExercise.all().filter('user =', student):
                 user_exercise.delete()
             for ue in user_exercises:
@@ -161,7 +193,10 @@ class ImportUserData(request_handler.RequestHandler):
                 if last_review:
                     user_exercise.last_review = last_review
                 user_exercise.review_interval_secs = ue['review_interval_secs']
-                user_exercise.proficient_date = self.datetime_from_str(ue['proficient_date'])
+                if user_exercise.exercise in proficient_dates:
+                    user_exercise.proficient_date = proficient_dates[user_exercise.exercise]   
+                else:
+                    user_exercise.proficient_date = self.datetime_from_str(ue['proficient_date'])
                 user_exercise.put()
 
             for user_video in UserVideo.all().filter('user =', student):
@@ -173,22 +208,7 @@ class ImportUserData(request_handler.RequestHandler):
                 user_video.percent_watched = uv["percent_watched"]
                 user_video.seconds_watched = uv["seconds_watched"]
                 user_video.last_watched = self.datetime_from_str(uv["last_watched"])  
-                user_video.put()
-                                
-            for problem in ProblemLog.all().filter('user =', student):
-                problem.delete()
-            for problem in problems:
-                problem_log = ProblemLog()
-                problem_log.user = student
-                problem_log.exercise = problem['exercise']
-                problem_log.correct = problem['correct']
-                problem_log.time_done = self.datetime_from_str(problem['time_done'])
-                problem_log.time_taken = problem['time_taken']
-                if problem.has_key('problem_number'):
-                    problem_log.problem_number = problem['problem_number']
-                if problem.has_key('hint_used'):                    
-                    problem_log.hint_used = problem['hint_used']               
-                problem_log.put()        
+                user_video.put()                                    
                 
             self.redirect('/individualreport?student_email='+student.email())
         else:
