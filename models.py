@@ -162,7 +162,7 @@ class UserData(db.Model):
     points = db.IntegerProperty()
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()
-    expanded_all_exercises = db.BooleanProperty(default=False)
+    expanded_all_exercises = db.BooleanProperty(default=True)
     
     @staticmethod
     def get_for_current_user():
