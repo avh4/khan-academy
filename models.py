@@ -47,7 +47,7 @@ class UserExercise(db.Model):
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
     @staticmethod
     def get_for_user_use_cache(user):
-        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % user.nickname()
+        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
         user_exercises = memcache.get(user_exercises_key)
         if user_exercises is None:
             query = UserExercise.all()
@@ -57,7 +57,7 @@ class UserExercise(db.Model):
         return user_exercises
     
     def put(self):
-        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % self.user.nickname()
+        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % self.user.email()
         memcache.delete(user_exercises_key)
         db.Model.put(self)
     
