@@ -501,6 +501,8 @@ class ViewVideo(request_handler.RequestHandler):
             if (playlist is None or p.youtube_id == playlist.youtube_id):
                 p.selected = 'selected'
                 playlist = p
+                playlists.remove(p)
+                break
 
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
