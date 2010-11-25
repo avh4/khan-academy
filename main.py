@@ -480,17 +480,10 @@ class ViewVideo(request_handler.RequestHandler):
         # cases there are multiple Video objects in the datastore with the same readable_id
         # (e.g. there are 2 "Order of Operations" videos).           
             
-        query = VideoPlaylist.all()
-        query.filter('playlist =', playlist)
-        query.filter('live_association = ', True) 
-        query.order('video_position')
-        video_playlists = query.fetch(500)
-        videos = []
+        videos = VideoPlaylist.get_cached_videos_for_playlist(playlist)
         previous_video = None
         next_video = None
-        for video_playlist in video_playlists:
-            v = video_playlist.video
-            videos.append(v)
+        for v in videos:
             if v.readable_id == readable_id:
                 v.selected = 'selected'
                 video = v
@@ -503,20 +496,12 @@ class ViewVideo(request_handler.RequestHandler):
             report_missing_video(readable_id)
             return
         
-        query = VideoPlaylist.all()
-        query.filter('video =', video)
-        query.filter('live_association =', True)
-        video_playlists = query.fetch(5)
-        playlists = []
-        video_position = None
-        for video_playlist in video_playlists:
-            p = video_playlist.playlist
-            if (playlist is not None and p.youtube_id == playlist.youtube_id) or (playlist is None and video_position is None):
+        playlists = VideoPlaylist.get_cached_playlists_for_video(video)
+        for p in playlists:
+            if (playlist is None or p.youtube_id == playlist.youtube_id):
                 p.selected = 'selected'
                 playlist = p
-                video_position = video_playlist.video_position
-            else:
-                playlists.append(p)
+
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:

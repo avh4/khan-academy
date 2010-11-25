@@ -353,6 +353,51 @@ class VideoPlaylist(db.Model):
     video_position = db.IntegerProperty()
     live_association = db.BooleanProperty(default = False)  #So we can remove associations without deleting the entry.  We need this so that bulkuploading of VideoPlaylist info has the proper effect.
 
+    _VIDEO_PLAYLIST_KEY_FORMAT = "VideoPlaylist_Videos_for_Playlist_%s"
+    _PLAYLIST_VIDEO_KEY_FORMAT = "VideoPlaylist_Playlists_for_Video_%s"
+
+    @staticmethod
+    def get_cached_videos_for_playlist(playlist, limit=500):
+
+        key = VideoPlaylist._VIDEO_PLAYLIST_KEY_FORMAT % playlist.key()
+        namespace = str(App.version) + "_" + str(Setting.cached_library_content_date())
+
+        videos = memcache.get(key, namespace=namespace)
+
+        if videos is None:
+            videos = []
+            query = VideoPlaylist.all()
+            query.filter('playlist =', playlist)
+            query.filter('live_association = ', True)
+            query.order('video_position')
+            video_playlists = query.fetch(limit)
+            for video_playlist in video_playlists:
+                videos.append(video_playlist.video)
+
+            memcache.set(key, videos, namespace=namespace)
+
+        return videos
+
+    @staticmethod
+    def get_cached_playlists_for_video(video, limit=5):
+
+        key = VideoPlaylist._PLAYLIST_VIDEO_KEY_FORMAT % video.key()
+        namespace = str(App.version) + "_" + str(Setting.cached_library_content_date())
+
+        playlists = memcache.get(key, namespace=namespace)
+
+        if playlists is None:
+            playlists = []
+            query = VideoPlaylist.all()
+            query.filter('video =', video)
+            query.filter('live_association = ', True)
+            video_playlists = query.fetch(limit)
+            for video_playlist in video_playlists:
+                playlists.append(video_playlist.playlist)
+
+            memcache.set(key, playlists, namespace=namespace)
+
+        return playlists
 
     @staticmethod
     def get_query_for_playlist_title(playlist_title):
