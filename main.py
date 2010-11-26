@@ -12,14 +12,19 @@ from urlparse import urlparse
 from pprint import pformat
 
 import django.conf
-django.conf.settings.configure(
-    DEBUG=False,
-    TEMPLATE_DEBUG=False,
-    TEMPLATE_LOADERS=(
-      'django.template.loaders.filesystem.load_template_source',
-    ),
-    TEMPLATE_DIRS=(os.path.dirname(__file__),)
-)
+
+try:
+    django.conf.settings.configure(
+        DEBUG=False,
+        TEMPLATE_DEBUG=False,
+        TEMPLATE_LOADERS=(
+          'django.template.loaders.filesystem.load_template_source',
+        ),
+        TEMPLATE_DIRS=(os.path.dirname(__file__),)
+    )
+except EnvironmentError:
+    pass
+
 from django.template.loader import render_to_string
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
