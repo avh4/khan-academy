@@ -1,6 +1,7 @@
 import logging
 import os
 import datetime
+import urllib
 
 from django.utils import simplejson as json
 from google.appengine.ext.webapp import template
@@ -123,7 +124,9 @@ class ImportUserData(request_handler.RequestHandler):
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                if users.is_current_user_admin():
+                    pass # allow admin to import to anyone's account                
+                elif user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own data")
@@ -133,7 +136,7 @@ class ImportUserData(request_handler.RequestHandler):
             import_dict = json.loads(file_contents)
             user_data_dict = import_dict['UserData']
             user_exercises = import_dict['UserExercise']
-            problems = import_dict['ProblemLog']
+            problems_unsorted = import_dict['ProblemLog']
             user_videos = import_dict['UserVideo']
             
             user_data.moderator = user_data_dict['moderator']
@@ -152,6 +155,8 @@ class ImportUserData(request_handler.RequestHandler):
             correct_in_a_row = {}
             for problem in ProblemLog.all().filter('user =', student):
                 problem.delete()
+            problems = sorted(problems_unsorted, key=lambda k: self.datetime_from_str(k['time_done']))
+            
             for problem in problems:
                 problem_log = ProblemLog()
                 problem_log.user = student
@@ -165,8 +170,7 @@ class ImportUserData(request_handler.RequestHandler):
                         correct_in_a_row[problem_log.exercise] += 1                    
                     if not problem_log.exercise in proficient_dates and correct_in_a_row[problem_log.exercise] == 10:
                         proficient_dates[problem_log.exercise] = problem_log.time_done
-                        #for coach in user_data.coaches:
-                        #    logging.info("class_data.compute_stats: " + coach)
+                        #for coach in user_data.coaches:                            
                         #    class_data = coaches.Class.get_or_insert(coach, coach=coach)     
                         #    class_data.compute_stats(user_data, problem_log.time_done.date())                                                  
                 problem_log.time_taken = problem['time_taken']
@@ -234,9 +238,22 @@ class ViewImport(request_handler.RequestHandler):
         
         
 class Playlists(request_handler.RequestHandler):
-    def get(self):         
-        self.response.out.write(json.dumps(util.all_topics_list, indent=4))
-        
+
+    def get(self): 
+        playlists = []   
+        for playlist_title in util.all_topics_list:            
+            query = Playlist.all()
+            query.filter('title =', playlist_title)
+            playlist = query.get()
+            playlist_dict = {'youtube_id':  playlist.youtube_id,
+                             'youtube_url': playlist.url,
+                             'title': playlist.title, 
+                             'description': playlist.description,
+                             'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist_title),)
+                            } 
+            playlists.append(playlist_dict) 
+        self.response.out.write(json.dumps(playlists, indent=4))        
+                        
 
 class PlaylistVideos(request_handler.RequestHandler):
 
@@ -253,21 +270,13 @@ class PlaylistVideos(request_handler.RequestHandler):
         for pv in query.fetch(500):
             v = pv.video
             video_dict = {'youtube_id':  v.youtube_id,
-                          'url': v.url,
+                          'youtube_url': v.url,
                           'title': v.title, 
                           'description': v.description,
-                          #'playlists': v.playlists,
                           'keywords': v.keywords,                         
                           'readable_id': v.readable_id,
+                          'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title))
                          }                         
-            videos.append(video_dict) 
-
-        playlist_dict = {'youtube_id':  playlist.youtube_id,
-                         'url': playlist.url,
-                         'title': playlist.title, 
-                         'description': playlist.description,
-                         #'readable_id': playlist.readable_id,
-                         'videos': videos,
-                        }                         
-        self.response.out.write(json.dumps(playlist_dict, indent=4))        
+            videos.append(video_dict)                        
+        self.response.out.write(json.dumps(videos, indent=4))        
         
