@@ -1,20 +1,20 @@
-kvars = ["d", "v_0", "v", "a", "t"];
+kvars = ["d", "v_i", "v_f", "a", "t"];
 kunits = {
 	"d": "m",
-	"v_0": "m/s",
-	"v": "m/s",
+	"v_i": "m/s",
+	"v_f": "m/s",
 	"a": "m/(s^2)",
 	"t": "s"
 }
 kunits_disp = {
 	"d": "\\text{m}",
-	"v_0": "\\text{m}/\\text{s}",
-	"v": "\\text{m}/\\text{s}",
+	"v_i": "\\text{m}/\\text{s}",
+	"v_f": "\\text{m}/\\text{s}",
 	"a": "\\text{m}/(\\text{s}^2)",
 	"t": "\\text{s}"
 }
 // number of decimal places to show
-var_places = 1;
+var_places = 2;
 
 function rollUnknowns() {
 	do {
@@ -25,7 +25,7 @@ function rollUnknowns() {
 
 function randomFreefallMotion()
 {
-	// d = v0t + 1/2at^2
+	// d = v_it + 1/2at^2
 	// 0 = 1/2at^2 + v0t - d
 	// [ -v0 +/- sqrt(v0^2 + 2ad) ] / a
 	
@@ -37,8 +37,8 @@ function randomFreefallMotion()
 	
 	return {
 		d: disp,
-		v_0: v_init, 
-		v: v_final,
+		v_i: v_init, 
+		v_f: v_final,
 		a: accel,
 		t: time
 	};
@@ -53,8 +53,8 @@ function randomConstantMotion()
 	
 	return {
 		d: disp,
-		v_0: veloc, 
-		v: veloc,
+		v_i: veloc, 
+		v_f: veloc,
 		a: accel,
 		t: time
 	};
@@ -71,8 +71,8 @@ function randomAccelMotion()
 	
 	return {
 		d: disp,
-		v_0: v_init, 
-		v: v_final,
+		v_i: v_init, 
+		v_f: v_final,
 		a: accel,
 		t: time
 	};
@@ -92,146 +92,146 @@ function u(kvar, variable) {
 
 hintWithNo = { // we have 2 unknowns, so we're solving for one "with no" of the other
 	d: function(motion, solving) {
-		// v = v0 + at
-		write_step("`v = v_0 + at`");
+		// v_f = v0 + at
+		write_step("`v_f = v_i + a*t`");
 		switch (solving) {
-			case "v":
-			write_step("`v = " + u(motion,"v_0") + " + (" + u(motion,"a") + ")(" + u(motion,"t") + ")`");
-			write_step("`v = " + u(motion,"v") + "`");
+			case "v_f":
+			write_step("`v_f = " + u(motion,"v_i") + " + (" + u(motion,"a") + ")(" + u(motion,"t") + ")`");
+			write_step("`v_f = " + u(motion,"v_f") + "`");
 			break;
 			
-			case "v_0":
-			write_step("`v - at = v_0`");
-			write_step("`"+u(motion,"v")+" - ("+u(motion,"a")+")("+u(motion,"t")+") = v_0`");
-			write_step("`"+u(motion,"v_0")+" = v_0`");
+			case "v_i":
+			write_step("`v_f - at = v_i`");
+			write_step("`"+u(motion,"v_f")+" - ("+u(motion,"a")+")("+u(motion,"t")+") = v_i`");
+			write_step("`"+u(motion,"v_i")+" = v_i`");
 			break;
 			
 			case "a":
-			write_step("`(v - v_0)/t = a`");
-			write_step("`("+u(motion,"v")+" - "+u(motion,"v_0")+")/("+u(motion,"t")+") = a`");
+			write_step("`(v_f - v_i)/t = a`");
+			write_step("`("+u(motion,"v_f")+" - "+u(motion,"v_i")+")/("+u(motion,"t")+") = a`");
 			write_step("`"+u(motion,"a")+" = a`");
 			break;
 			
 			case "t":
-			write_step("`(v - v_0)/a = t`");
-			write_step("`("+u(motion,"v")+" - "+u(motion,"v_0")+")/("+u(motion,"a")+") = t`");
+			write_step("`(v_f - v_i)/a = t`");
+			write_step("`("+u(motion,"v_f")+" - "+u(motion,"v_i")+")/("+u(motion,"a")+") = t`");
 			write_step("`"+u(motion,"t")+" = t`");
 			break;
 		}
 	},
-	v_0: function(motion, solving) {
-		// d = vt - (1/2)at^2
-		write_step("`d = vt - (1/2)at^2`");
+	v_i: function(motion, solving) {
+		// d = v_ft - (1/2)at^2
+		write_step("`d = v_f*t - (1/2)a*t^2`");
 		switch(solving) {
 			case "d":
-			write_step("`d = ("+u(motion,"v")+")("+u(motion,"t")+") - (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2");
+			write_step("`d = ("+u(motion,"v_f")+")("+u(motion,"t")+") - (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2");
 			write_step("`d = "+u(motion,"d"));
 			break;
 			
-			case "v":
-			write_step("`(d + (1/2)at^2)/t = v`");
-			write_step("`("+u(motion,"d")+" + (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v`");
-			write_step("`"+u(motion,"v")+" = v`");
+			case "v_f":
+			write_step("`(d + (1/2)a*t^2)/t = v_f`");
+			write_step("`("+u(motion,"d")+" + (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v_f`");
+			write_step("`"+u(motion,"v_f")+" = v_f`");
 			break;
 			
 			case "a":
-			write_step("`(d - vt)/(-(1/2)t^2) = a`");
-			write_step("`("+u(motion,"d")+" - ("+u(motion,"v")+")("+u(motion,"t")+"))/(-(1/2)("+u(motion,"t")+")^2) = a`");
+			write_step("`(d - v_f*t)/(-(1/2)t^2) = a`");
+			write_step("`("+u(motion,"d")+" - ("+u(motion,"v_f")+")("+u(motion,"t")+"))/(-(1/2)("+u(motion,"t")+")^2) = a`");
 			write_step("`"+u(motion,"a")+" = a`");
 			break;
 			
 			case "t":
-			write_step("`0 = -(1/2)at^2 + vt - d`");
+			write_step("`0 = -(1/2)a*t^2 + v_f*t - d`");
 			write_step("<p>By the quadratic formula:</p>" +
-						"<p>`t = (-v +- sqrt(v^2 - 2ad))/(-a)`</p>");
-			write_step("`t = (-"+u(motion,"v")+" +- sqrt(("+u(motion,"v")+")^2 - 2("+u(motion,"a")+")("+u(motion,"d")+")))/(-"+u(motion,"a")+")`");
+						"<p>`t = (-v_f +- sqrt(v_f^2 - 2a*d))/(-a)`</p>");
+			write_step("`t = (-"+u(motion,"v_f")+" +- sqrt(("+u(motion,"v_f")+")^2 - 2("+u(motion,"a")+")("+u(motion,"d")+")))/(-"+u(motion,"a")+")`");
 			write_step("`t = "+u(motion,"t")+"`");
 			break;
 		}
 	},
-	v: function(motion, solving) {
-		// d = v0t + (1/2)at^2
-		write_step("`d = v_0t + (1/2)at^2`");
+	v_f: function(motion, solving) {
+		// d = v_it + (1/2)at^2
+		write_step("`d = v_i*t + (1/2)a*t^2`");
 		switch(solving) {
 			case "d":
-			write_step("`d = ("+u(motion,"v_0")+")("+u(motion,"t")+") + (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2");
+			write_step("`d = ("+u(motion,"v_i")+")("+u(motion,"t")+") + (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2");
 			write_step("`d = "+u(motion,"d"));
 			break;
 			
-			case "v_0":
-			write_step("`(d - (1/2)at^2)/t = v_0`");
-			write_step("`("+u(motion,"d")+" - (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v_0`");
-			write_step("`"+u(motion,"v_0")+" = v_0`");
+			case "v_i":
+			write_step("`(d - (1/2)a*t^2)/t = v_i`");
+			write_step("`("+u(motion,"d")+" - (1/2)("+u(motion,"a")+")("+u(motion,"t")+")^2)/("+u(motion,"t")+") = v_i`");
+			write_step("`"+u(motion,"v_i")+" = v_i`");
 			break;
 			
 			case "a":
-			write_step("`(d - v_0t)/((1/2)t^2) = a`");
-			write_step("`("+u(motion,"d")+" - ("+u(motion,"v_0")+")("+u(motion,"t")+"))/((1/2)("+u(motion,"t")+")^2) = a`");
+			write_step("`(d - v_i*t)/((1/2)t^2) = a`");
+			write_step("`("+u(motion,"d")+" - ("+u(motion,"v_i")+")("+u(motion,"t")+"))/((1/2)("+u(motion,"t")+")^2) = a`");
 			write_step("`"+u(motion,"a")+" = a`");
 			break;
 			
 			case "t":
-			write_step("`0 = (1/2)at^2 + v_0t - d`");
+			write_step("`0 = (1/2)a*t^2 + v_i*t - d`");
 			write_step("<p>By the quadratic formula:</p>" +
-						"<p>`t = (-v_0 +- sqrt(v_0^2 + 2ad))/a`</p>");
-			write_step("`t = (-"+u(motion,"v_0")+" +- sqrt(("+u(motion,"v_0")+")^2 + 2("+u(motion,"a")+")("+u(motion,"d")+")))/("+u(motion,"a")+")`");
+						"<p>`t = (-v_i +- sqrt(v_i^2 + 2a*d))/a`</p>");
+			write_step("`t = (-"+u(motion,"v_i")+" +- sqrt(("+u(motion,"v_i")+")^2 + 2("+u(motion,"a")+")("+u(motion,"d")+")))/("+u(motion,"a")+")`");
 			write_step("`t = "+u(motion,"t")+"`");
 			break;
 		}
 	},
 	a: function(motion, solving) {
 		// d = (1/2)(v0 + v)t
-		write_step("`d = (1/2)(v_0 + v)t`");
+		write_step("`d = (1/2)(v_i + v_f)t`");
 		switch(solving) {
 			case "d":
-			write_step("`d = (1/2)("+u(motion,"v_0")+" + "+u(motion,"v")+")("+u(motion,"t")+")`");
+			write_step("`d = (1/2)("+u(motion,"v_i")+" + "+u(motion,"v_f")+")("+u(motion,"t")+")`");
 			write_step("`d = "+u(motion,"d"));
 			break;
 			
-			case "v_0":
-			write_step("`2d/t - v = v_0`");
-			write_step("`2("+u(motion,"d")+")/("+u(motion,"t")+") - "+u(motion,"v")+" = v_0`");
-			write_step("`"+u(motion,"v_0")+" = v_0`");
+			case "v_i":
+			write_step("`(2d)/t - v_f = v_i`");
+			write_step("`(2("+u(motion,"d")+"))/("+u(motion,"t")+") - "+u(motion,"v_f")+" = v_i`");
+			write_step("`"+u(motion,"v_i")+" = v_i`");
 			break;
 			
-			case "v":
-			write_step("`(2d)/t - v_0 = v`");
-			write_step("`(2("+u(motion,"d")+"))/("+u(motion,"t")+") - "+u(motion,"v_0")+" = v`");
-			write_step("`"+u(motion,"v")+" = v`");
+			case "v_f":
+			write_step("`(2d)/t - v_i = v_f`");
+			write_step("`(2("+u(motion,"d")+"))/("+u(motion,"t")+") - "+u(motion,"v_i")+" = v_f`");
+			write_step("`"+u(motion,"v_f")+" = v_f`");
 			break;
 			
 			case "t":
-			write_step("`(2d)/(v_0 + v) = t`");
-			write_step("`(2("+u(motion,"d")+"))/("+u(motion,"v_0")+" + "+u(motion,"v")+") = t`");
+			write_step("`(2d)/(v_i + v_f) = t`");
+			write_step("`(2("+u(motion,"d")+"))/("+u(motion,"v_i")+" + "+u(motion,"v_f")+") = t`");
 			write_step("`"+u(motion,"t")+" = t`");
 			break;
 		}
 	},
 	t: function(motion, solving) {
 		// v^2 = v0^2 + 2ad
-		write_step("`v^2 = v_0^2 + 2ad`");
+		write_step("`v_f^2 = v_i^2 + 2a*d`");
 		switch(solving) {
 			case "d":
-			write_step("`(v^2 - v_0^2)/(2a) = d`");
-			write_step("`(("+u(motion,"v")+")^2 - ("+u(motion,"v_0")+")^2)/(2("+u(motion,"a")+")) = d`");
+			write_step("`(v_f^2 - v_i^2)/(2a) = d`");
+			write_step("`(("+u(motion,"v_f")+")^2 - ("+u(motion,"v_i")+")^2)/(2("+u(motion,"a")+")) = d`");
 			write_step("`"+u(motion,"d")+" = d`");
 			break;
 			
-			case "v_0":
-			write_step("`+-sqrt(v^2 - 2ad) = v_0`");
-			write_step("`+-sqrt(("+u(motion,"v")+")^2 - 2("+u(motion,"a")+")("+u(motion,"d")+")) = v_0`");
-			write_step("`"+u(motion,"v_0")+" = v_0`");
+			case "v_i":
+			write_step("`+-sqrt(v_f^2 - 2ad) = v_i`");
+			write_step("`+-sqrt(("+u(motion,"v_f")+")^2 - 2("+u(motion,"a")+")("+u(motion,"d")+")) = v_i`");
+			write_step("`"+u(motion,"v_i")+" = v_i`");
 			break;
 			
-			case "v":
-			write_step("`v = +-sqrt(v_0^2 + 2ad)`");
-			write_step("`v = +-sqrt(("+u(motion,"v_0")+")^2 + 2("+u(motion,"a")+")("+u(motion,"d")+"))`");
-			write_step("`"+u(motion,"v")+" = v`");
+			case "v_f":
+			write_step("`v_f = +-sqrt(v_i^2 + 2a*d)`");
+			write_step("`v_f = +-sqrt(("+u(motion,"v_i")+")^2 + 2("+u(motion,"a")+")("+u(motion,"d")+"))`");
+			write_step("`"+u(motion,"v_f")+" = v_f`");
 			break;
 			
 			case "a":
-			write_step("`(v^2 - v_0^2)/(2d) = a`");
-			write_step("`(("+u(motion,"v")+")^2 - ("+u(motion,"v_0")+")^2)/(2("+u(motion,"d")+")) = a`");
+			write_step("`(v_f^2 - v_i^2)/(2d) = a`");
+			write_step("`(("+u(motion,"v_f")+")^2 - ("+u(motion,"v_i")+")^2)/(2("+u(motion,"d")+")) = a`");
 			write_step("`"+u(motion,"a")+" = a`");
 			break;
 		}
@@ -244,38 +244,38 @@ function addWrongChoicesFor(motion, variable)
 		case "d":
 		addWrongChoice(u(motion.d*-1, "d"));
 		
-		addWrongChoice(u(motion.v_0 * t - (1/2)*motion.a*motion.t*motion.t, "d"));
-		addWrongChoice(u(motion.v * t + (1/2)*motion.a*motion.t*motion.t, "d"));
-		addWrongChoice(u(motion.v * t * -1 - (1/2)*motion.a*motion.t*motion.t, "d"));
+		addWrongChoice(u(motion.v_i * motion.t - (1/2)*motion.a*motion.t*motion.t, "d"));
+		addWrongChoice(u(motion.v_f * motion.t + (1/2)*motion.a*motion.t*motion.t, "d"));
+		addWrongChoice(u(motion.v_f * motion.t * -1 - (1/2)*motion.a*motion.t*motion.t, "d"));
 		
-		addWrongChoice(u(motion.a * t + (1/2)*motion.a*motion.t*motion.t, "d"));
-		addWrongChoice(u(motion.a * t, "d"));
+		addWrongChoice(u(motion.a * motion.t + (1/2)*motion.a*motion.t*motion.t, "d"));
+		addWrongChoice(u(motion.a * motion.t, "d"));
 		break;
 		
-		case "v_0":
-		addWrongChoice(u((motion.d + (1/2)*motion.a*motion.t*motion.t)/motion.t, "v_0"));
-		addWrongChoice(u((motion.d + (1/2)*motion.a*motion.t*motion.t), "v_0"));
+		case "v_i":
+		addWrongChoice(u((motion.d + (1/2)*motion.a*motion.t*motion.t)/motion.t, "v_i"));
+		addWrongChoice(u((motion.d + (1/2)*motion.a*motion.t*motion.t), "v_i"));
 		
-		addWrongChoice(u((motion.d - (1/2)*motion.a*motion.t*motion.t), "v_0"));
+		addWrongChoice(u((motion.d - (1/2)*motion.a*motion.t*motion.t), "v_i"));
 		
-		addWrongChoice(u( ((2*motion.d) / motion.t) + motion.v, "v_0"));
-		addWrongChoice(u( ((2*motion.d) + motion.v)/motion.t, "v_0"));
+		addWrongChoice(u( ((2*motion.d) / motion.t) + motion.v_f, "v_i"));
+		addWrongChoice(u( ((2*motion.d) + motion.v_f)/motion.t, "v_i"));
 		break;
 		
-		case "v":
-		addWrongChoice(u((motion.d - (1/2)*motion.a*motion.t*motion.t)/motion.t, "v"));
-		addWrongChoice(u((motion.d - (1/2)*motion.a*motion.t)/motion.t, "v"));
+		case "v_f":
+		addWrongChoice(u((motion.d - (1/2)*motion.a*motion.t*motion.t)/motion.t, "v_f"));
+		addWrongChoice(u((motion.d - (1/2)*motion.a*motion.t)/motion.t, "v_f"));
 		break;
 		
 		case "a":
 		addWrongChoice(u(
-			(Math.sqrt(Math.pow(motion.v_0, 2) + 2*motion.a*motion.d) + motion.v_0)/motion.a, "a"));
+			(Math.sqrt(Math.pow(motion.v_i, 2) + 2*motion.a*motion.d) + motion.v_i)/motion.a, "a"));
 		addWrongChoice(u(motion.a * -1, "a"));
 		break;
 		
 		case "t":
-		addWrongChoice(u((motion.v + motion.v_0)/motion.a, "t"));
-		addWrongChoice(u((-1*motion.v + motion.v_0)/motion.a, "t"));
+		addWrongChoice(u((motion.v_f + motion.v_i)/motion.a, "t"));
+		addWrongChoice(u((-1*motion.v_f + motion.v_i)/motion.a, "t"));
 	}
 }
 
