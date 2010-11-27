@@ -40,6 +40,7 @@ topics_list.append('Linear Algebra')
 topics_list.append('Physics')
 topics_list.append('Paulson Bailout')
 topics_list.append('CAHSEE Example Problems')
+topics_list.append('Cosmology and Astronomy')
 topics_list.sort()
 
 all_topics_list = copy.copy(topics_list)
