@@ -23,7 +23,7 @@ def write_meta_files(playlist, description):
   <description>%s</description> 
   <creator>Salman Khan</creator>
   <production_company>Khan Academy</production_company>  
-  <licenseurl>http://creativecommons.org/licenses/by-sa/3.0/us/</licenseurl>
+  <licenseurl>http://creativecommons.org/licenses/by-nc-sa/3.0/us/</licenseurl>
 </metadata>""" % (playlist_id, playlist, description)
         file = open("KhanAcademy_" + playlist_id + "_meta.xml", "w")
         file.write(data)
@@ -58,6 +58,7 @@ def write_all_meta_files():
     write_meta_files("California Standards Test: Geometry", "Sal does the 80 problems from the released questions from the California Standards Test for Geometry. Test at http://www.cde.ca.gov/ta/tg/sr/documents/rtqgeom.pdf . Basic understanding of Algebra I necessary.")
     write_meta_files("Chemistry", "Videos on chemistry (roughly covering a first-year high school or college course).")
     write_meta_files('ck12.org Algebra 1 Examples', "Select problems from ck12.org's Algebra 1 FlexBook (Open Source Textbook). This is a good playlist to review if you want to make sure you have a good understanding of all of the major topics in Algebra I.")
+    write_meta_files("Cosmology and Astronomy", "Videos attempting to grasp a little bit about our Universe")    
     write_meta_files("Credit Crisis", "Videos on the causes and effects of the credit crisis/crunch.")
     write_meta_files("Currency", "Videos about currency exchange and currency markets.")
     write_meta_files("Current Economics", "Discussions of economic topics and how they relate to current events.")
