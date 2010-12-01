@@ -92,7 +92,7 @@ function submitForm(value)
     | <A href="/printexercise?exid={{exid}}&num_problems={{num_problems_to_print}}">Print next {{num_problems_to_print}} problems</A>
 </div>
 <div>
-	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; float: left; width: 65%; min-width: 610px;">
+	<div id='question_area'>
 {% block maincode %}
 
 {% endblock maincode %}
@@ -105,9 +105,10 @@ function submitForm(value)
 		{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
 		<iframe id="svgedit" name="svgedit" width="100%" height="100%" allowtransparency="true" style="background-color: transparent; position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; border:none;"></iframe>
 	</div>
-	<div id='answer_area' style="display: inline-block; padding: 1em;">
+	<div id="answer_area">
+	   <form id="answerform" action="/registeranswer" method="post">
+	   <div class="info-box">
 		{% block answergraphdisplay %} {% endblock answergraphdisplay %}
-		<form id="answerform" action="/registeranswer" method="post">
 			{% block answerform %}
 			<input type="hidden" id="exid" name="exid" value="{{exid}}">
 			<input type="hidden" id="streak" name="streak" value="{{streak}}">
@@ -117,12 +118,15 @@ function submitForm(value)
 			<input type="hidden" id="hint_used" name="hint_used" value="0" />
 			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-			{% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"></br>{% endblock answerarea %}
-			<br><input id="hint" type="button" value="Hint" name="hint" onClick="evaluate_hint();">
-			<input type="button" value="Check Answer" onClick="check_answer_block()"></br>
-			<br><img src="/images/blank.gif" name="feedback"><div id="nextbutton" style="position:relative; visibility:hidden;"><input type="button" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()"></div></br>
+			{% block answerarea %}<span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">{% endblock answerarea %}
+			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
+			<div id="check-answer-results" style="display: none;">
+                <img src="/images/blank.gif" name="feedback" id="feedback">
+                <div id="nextbutton" class="button" style="position:relative; display: none;">
+                    <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()">
+                </div>
+            </div>
 			{% endblock answerform %}
-		</form>
 		<script language=Javascript1.2><!--
 			// some modules already have a check_answer...
 			function check_answer_block() {
@@ -167,6 +171,16 @@ function submitForm(value)
 				elForm.answer.select();
 			}
 		//--></script>
+        </div>
+        <div class="info-box">
+            <span class="info-box-header">Need Help?</span>
+            <span class="info-box-subheader">Watch a video</span>
+            {% related_videos exercise_videos %}
+            <span class="info-box-subheader">Get a hint</span>
+            <p>A hint will help you solve the problem, but <em>it will reset your streak</em>.</p>
+            <input id="hint" type="button" class="button orange" value="I'd like a hint" name="hint" onClick="evaluate_hint();">
+        </div>
+        </form>
 	</div>
 </div>
 <div style="clear: both;"></div>

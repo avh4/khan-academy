@@ -447,7 +447,7 @@ function processReq() {
 
 function check_free_answer()
 {
-	//alert(correctAnswer);
+	// alert(correctAnswer);
 	if (document.answerform.answer.value==correctAnswer)
 	{
 		document.images.feedback.src = correct.src;
@@ -456,17 +456,13 @@ function check_free_answer()
 			document.getElementById("correct").value="1"
 		}
 		//new_question();
-		document.getElementById("nextbutton").style.visibility = 'visible';
-		
-		
+		$("#check-answer-results").show();
 	}
 	else
 	{
-		
 		tries++;
 		document.images.feedback.src= incorrect.src;
-		record_problem();
-		
+		record_problem();	
 	}
 }
 

@@ -207,7 +207,9 @@ function handleCorrectness(isCorrect)
 
         $("#hint_used").val(steps_given == 0 ? "0" : "1");
 
-		document.getElementById("nextbutton").style.visibility = 'visible';
+		$("#check-answer-results").show();
+		$("#check-answer-results #nextbutton").show();
+		$("#check-answer-button").hide();
 		document.images.feedback.src = correct.src;
 		eraseCookie(notDoneCookie);
 		document.forms['answerform'].correctnextbutton.focus()
@@ -216,6 +218,7 @@ function handleCorrectness(isCorrect)
 	{
 		
 		tries++;
+		$("#check-answer-results").show();
 		document.images.feedback.src= incorrect.src;
 	}
 }

@@ -44,7 +44,7 @@ function slope(num)
 	translate();
 	//text([-11, 9], eqString(), right, 'eqstring');
 	present.plot(f, 'graph');
-	checkAnswer()
+	checkAnswer();
 }
 
 function intercept(num)
@@ -56,7 +56,7 @@ function intercept(num)
 	translate();
 	//text([-11, 9], eqString(), right, 'eqstring');
 	present.plot(f, 'graph');
-	checkAnswer()
+	checkAnswer();
 }
 function formatFraction(n, d, sign)
 {
@@ -134,7 +134,7 @@ function checkAnswer()
 	
 	if (r2(curSlopeNum/curSlopeDen)==r2(correctSlope) && r2(curIntNum/curIntDen)==r2(correctIntercept))
 	{
-		document.getElementById("nextbutton").style.visibility = 'visible';
+		$("#check-answer-results").show();
 		document.images.feedback.src = correct.src;
 	}
 }
@@ -152,16 +152,13 @@ what the slope and y-intercept do to a line.<P>
 {% block answerform %}
 		<table border=0>
 		<tr>
-		<td colspan="2"><img src="/images/blank.gif" width="250" height="2"></td>
-		</tr>
-		<td>
+		<td colspan="2">
 		<DIV ID="equation"><script language=Javascript1.2><!-- 
 
 		document.write(eqString());
 
 		//-->
 		</script></DIV></td>
-		<td><img src="/images/blank.gif" width="2" height="150"></td>
 		</tr>
 		</table>
 		<input type="hidden" name="exid" value="{{exid}}">
@@ -172,11 +169,13 @@ what the slope and y-intercept do to a line.<P>
 		<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 		<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
 		<div style="text-align: left;">
-		<nobr><input type="button" value="-" onClick="slope(-1)">Slope<input type="button" value="+" onClick="slope(+1)">&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type="button" value="-" onClick="intercept(-1)">Y-Intercept<input type="button" value="+" onClick="intercept(+1)"></nobr><br>
+		<nobr><input type="button" class="button" value="-" onClick="slope(-1)">Slope<input type="button" class="button" value="+" onClick="slope(+1)">&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" class="button" value="-" onClick="intercept(-1)">Y-Intercept<input type="button" class="button" value="+" onClick="intercept(+1)"></nobr><br>
 		</div>
-		<img src="/images/blank.gif" name="feedback"><div id="nextbutton" style="position:relative; visibility:hidden;">
-		<input type="button" value="Correct! Next Question..." onClick="submitForm()"></div>
+		<div id="check-answer-results" style="display: none;">
+		  <img src="/images/blank.gif" name="feedback" id="feedback"><div id="nextbutton" style="position:relative;">
+		  <input type="button" class="button green" value="Correct! Next Question..." onClick="submitForm()"></div>
+		</div>
 
 
 {% endblock answerform %}

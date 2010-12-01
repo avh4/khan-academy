@@ -714,7 +714,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 #extras.single-exercise {
     text-align: right;
-    margin-top: 6px;
+    margin: 6px 0 10px;
     padding-right: 3px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
@@ -744,6 +744,89 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -moz-box-shadow: #CCC 0px 1px 3px;
     box-shadow: #CCC 0px 1px 3px;
 }
+#question_area {
+    margin-bottom: 10px;
+    position: relative;
+    padding: 0;
+    float: left;
+    width: 625px;
+}
+#answer_area {
+    float: right;
+    max-width: 330px;
+    min-width: 240px;
+}
+    #answer_area .info-box {
+        background: #eee;
+        border: 1px solid #ccc;
+        border-bottom: 1px solid #aaa;
+        color: #333;
+        margin-bottom: 10px;
+        padding: 10px;
+        
+        box-shadow: 0 1px 2px #ccc;
+        -moz-box-shadow: 0 1px 2px #ccc;
+        -webkit-box-shadow: 0 1px 2px #ccc;
+    }
+    #answer_area .info-box table {
+        border-collapse: collapse;
+    }
+    #answer_area .info-box .info-box-header, #answer_area .info-box .info-box-subheader {
+        color: #777;
+        display: block;
+        font-size: 18px;
+        line-height: 150%;
+        font-weight: bold;
+        text-shadow: 0 1px 0 #fff;
+    }
+    #answer_area .info-box .info-box-subheader {
+        line-height: 200%;
+        font-size: 14px;
+        color: #333;
+    }
+    #answer_area .info-box .related-videos-title {
+        display: none;
+    }
+    #answer_area .info-box #check-answer-results #feedback {
+        padding: 10px 0 5px;
+    }
+    #answer_area input.button {
+        background-color: #CCCCCC;
+        border-top: 1px solid #D2D2D2;
+        border-left: 1px solid #D2D2D2;        
+        border-right: 1px solid #ACACAC;
+        border-bottom: 1px solid #ACACAC;
+        color: #333;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 5px;
+        padding: 2px 5px;
+        
+        -webkit-border-radius: 0;
+        -moz-border-radius: 0;
+        border-radius: 0;
+        
+        box-shadow: 0 1px 2px #666;
+        -webkit-box-shadow: 0 1px 2px #666;
+        -moz-box-shadow: 0 1px 2px #666;
+    }
+        #answer_area input.button.green {
+            background-color: #73982C;
+            border-top: 1px solid #83A445;
+            border-left: 1px solid #83A445;
+            border-bottom: 1px solid #618125;
+            border-right: 1px solid #618125;
+        }
+        #answer_area input.button.orange {
+            background-color: #E35D04;
+            border-top: 1px solid #E67022;
+            border-left: 1px solid #E67022;
+            border-right: 1px solid #C04F03;
+            border-bottom: 1px solid #C04F03;
+        }
+    #answer_area input.button:hover {
+        color: #000;
+    }
 /* End of Individual Exercise Styles */
 
 #tabs-table, #tabs-table td.content {
