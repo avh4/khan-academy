@@ -71,7 +71,7 @@ handlers:
   # The url below needs to be updated whenever we change/upgrade svg-edit.
   # Unfortunately, we can't use a regex due to a GAE bug:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /svg-edit-2.5-khan-100827
+- url: /svg-edit-2.5-khan-113010
   static_dir: svg-edit
 
   # The url below needs to be updated whenever we change/upgrade Jit.
