@@ -242,7 +242,7 @@ writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span sty
 {% endblock maincell %}
 {% block answerarea %}
 
-
+<span class="info-box-header">Answer</span>
 <script language=Javascript1.2><!--
     // slightly modified multiple-choice code
     // - only 3 choices
@@ -269,7 +269,7 @@ writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span sty
 			}
 		}
 
-		document.write('<br/><span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
+		document.write('<span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" class="select-choice" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
 
 	}
 //-->

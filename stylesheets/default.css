@@ -749,11 +749,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: relative;
     padding: 0;
     float: left;
-    width: 625px;
+    width: 655px;
 }
 #answer_area {
     float: right;
-    max-width: 330px;
+    max-width: 300px;
     min-width: 240px;
 }
     #answer_area .info-box {
@@ -826,6 +826,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         }
     #answer_area input.button:hover {
         color: #000;
+    }
+    #answer_area .info-box .select-choice {
+        margin: 5px 0 10px;
     }
 /* End of Individual Exercise Styles */
 

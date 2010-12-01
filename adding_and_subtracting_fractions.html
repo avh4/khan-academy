@@ -56,7 +56,7 @@ addWrongChoice(format_fraction((num1*com_den/den1)-(num2*com_den/den2),com_den))
 {% endblock maincell %}
 {% block answerarea %}
 
-
+<span class="info-box-header">Answer</span>
 <script language=Javascript1.2><!--
 	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
 
@@ -94,7 +94,7 @@ addWrongChoice(format_fraction((num1*com_den/den1)-(num2*com_den/den2),com_den))
 
 	for (i=0; i<answerChoices.length; i++)
     {
-		document.write('<br/><span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
+		document.write('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
     }
 
 //-->
