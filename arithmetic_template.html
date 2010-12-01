@@ -195,6 +195,7 @@ $(document).ready(function() {
 		$('#svgedit').css('display', 'none');
 		$('#question_area').css('min-height', 'auto').css('padding-top', '0');
         createCookie(scratchpad_cookie_name,"false",365);
+        return false;
 	}
 	function showScratchPad() {
 		$('#scratch_pad_show').css('display', 'none');
@@ -211,6 +212,7 @@ $(document).ready(function() {
 			svgedit.attr('src', '/svg-edit-2.5-khan-113010/svg-editor.html');
 		}
         createCookie(scratchpad_cookie_name,"true",365);
+        return false;
 	}
 	function getUrlVars(){
 		var vars = [], hash;
