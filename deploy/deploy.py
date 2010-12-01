@@ -27,7 +27,7 @@ def svn_up():
 
 def deploy(version):
     print "Deploying version " + str(version)
-    os.system("appcfg.py -V " + str(version) + " update .")
+    os.system("appcfg.py -V ka" + str(version) + " update .")
 
 def main():
 
