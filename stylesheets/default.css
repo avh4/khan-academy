@@ -790,7 +790,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     #answer_area .info-box #check-answer-results #feedback {
         padding: 10px 0 5px;
     }
-    #answer_area input.button {
+    .exercise.button, #answer_area input.button {
         background-color: #CCCCCC;
         border-top: 1px solid #D2D2D2;
         border-left: 1px solid #D2D2D2;        
@@ -801,6 +801,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-weight: bold;
         margin-top: 5px;
         padding: 2px 5px;
+        position: relative;
+        top: -1px;
         
         -webkit-border-radius: 0;
         -moz-border-radius: 0;
@@ -810,21 +812,21 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-box-shadow: 0 1px 2px #666;
         -moz-box-shadow: 0 1px 2px #666;
     }
-        #answer_area input.button.green {
+        .exercise.button.green, #answer_area input.button.green {
             background-color: #73982C;
             border-top: 1px solid #83A445;
             border-left: 1px solid #83A445;
             border-bottom: 1px solid #618125;
             border-right: 1px solid #618125;
         }
-        #answer_area input.button.orange {
+        .exercise.button.orange, #answer_area input.button.orange {
             background-color: #E35D04;
             border-top: 1px solid #E67022;
             border-left: 1px solid #E67022;
             border-right: 1px solid #C04F03;
             border-bottom: 1px solid #C04F03;
         }
-    #answer_area input.button:hover {
+    .exercise.button:hover, #answer_area input.button:hover {
         color: #000;
     }
     #answer_area .info-box .select-choice {
