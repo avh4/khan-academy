@@ -69,7 +69,7 @@ function submitForm(value)
 		{% streak_bar user_exercise %}
 		<div class="related-content">
             {% if exercise.summative %}
-                {% related_exercises covered_exercises %}
+                Get 10 streaks to complete this challenge.
             {% else %}
                 {% related_videos exercise_videos %}
             {% endif %}
@@ -172,8 +172,15 @@ function submitForm(value)
         </div>
         <div class="info-box">
             <span class="info-box-header">Need Help?</span>
+
             <span class="info-box-subheader">Watch a video</span>
             {% related_videos exercise_videos %}
+
+            {% if exercise.summative %}
+                <span class="info-box-subheader">Prepare for this challenge</span>
+                <a href="/exercises?exid={{exercise_non_summative.name|escape}}">Practice more problems like this one</a>.
+            {% endif %}
+
             <span class="info-box-subheader">Get a hint</span>
             <p>A hint will help you solve the problem, but <em>it will reset your streak</em>.</p>
             <input id="hint" type="button" class="button orange" value="I'd like a hint" name="hint" onClick="evaluate_hint();">

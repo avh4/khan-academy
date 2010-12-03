@@ -642,6 +642,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         width: 228px;
         height: 30px;
     }
+    .streak-bar-challenge {
+        background: url(/images/streak-meter-empty-challenge.png) no-repeat;
+    }
     .exercise-badge .streak-bar {
          position: absolute;
          left: 85px;

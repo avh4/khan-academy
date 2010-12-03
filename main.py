@@ -259,7 +259,6 @@ class ViewExercise(request_handler.RequestHandler):
 
             exercise_non_summative = exercise.non_summative_exercise(user_data)
             exercise_videos = exercise_non_summative.related_videos()
-            covered_exercises = exercise.summative_children()
 
             userExercise = user_data.get_or_insert_exercise(exid)
 
@@ -272,7 +271,7 @@ class ViewExercise(request_handler.RequestHandler):
             struggling = user_data.is_struggling_with(exid)
             endangered = proficient and userExercise.streak == 0 and userExercise.longest_streak >= exercise.required_streak()
 
-            exercise_points = PointCalculator(exercise, userExercise.streak, suggested, proficient)
+            exercise_points = PointCalculator(exercise, userExercise, suggested, proficient)
                    
             logout_url = users.create_logout_url(self.request.uri)
             
@@ -305,7 +304,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'exid': exid,
                 'start_time': time.time(),
                 'exercise_videos': exercise_videos,
-                'covered_exercises': covered_exercises,
+                'exercise_non_summative': exercise_non_summative,
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'user_exercise': userExercise,
                 'logout_url': logout_url,
@@ -1089,7 +1088,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                                 
             if user_data.points == None:
                 user_data.points = 0
-            user_data.points = user_data.points + PointCalculator(userExercise.get_exercise(), userExercise.streak, suggested, proficient)
+            user_data.points = user_data.points + PointCalculator(userExercise.get_exercise(), userExercise, suggested, proficient)
             user_data.put()
 
             if userExercise.total_done:
@@ -1112,7 +1111,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                     # userExercise.set_proficient(False)
                 
                 # Just in case RegisterCorrectness didn't get called.
-                userExercise.streak = 0                           
+                userExercise.reset_streak()
             userExercise.put()
 
             self.redirect('/exercises?exid=' + exid)
@@ -1143,7 +1142,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
                 if userExercise.streak == 0:
                     # 2+ in a row wrong -> not proficient
                     userExercise.set_proficient(False)
-                userExercise.streak = 0
+                userExercise.reset_streak()
             userExercise.put()
         else:
             self.redirect(util.create_login_url(self.request.uri))

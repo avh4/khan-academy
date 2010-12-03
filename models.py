@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import datetime, logging
+import math
 from google.appengine.api import users
 from google.appengine.api import memcache
 
@@ -68,6 +69,12 @@ class UserExercise(db.Model):
 
     def required_streak(self):
         return self.get_exercise().required_streak()
+
+    def reset_streak(self):
+        if self.get_exercise().summative:
+            self.streak = (self.streak / 10) * 10 # Reset streak to latest 10 milestone
+        else:
+            self.streak = 0
 
     def struggling_threshold(self):
         return self.get_exercise().struggling_threshold()
@@ -141,10 +148,10 @@ class Exercise(db.Model):
         return self.name.replace('_', ' ').capitalize()
 
     def required_streak(self):
-        if not self.summative:
-            return 10
+        if self.summative:
+            return 10 * len(self.covers)
         else:
-            return 7 * len(self.covers)
+            return 10
 
     def struggling_threshold(self):
         return 3 * self.required_streak()
@@ -526,6 +533,7 @@ class ExerciseGraph(object):
             ex.suggested = None # Not set initially
             ex.assigned = False
             ex.streak = 0
+            ex.longest_streak = 0
             ex.total_done = 0
         for name in user_data.proficient_exercises:
             ex = self.exercise_by_name.get(name)
@@ -587,7 +595,7 @@ class ExerciseGraph(object):
             
         for ex in exercises:
             compute_suggested(ex)
-            ex.points = PointCalculator(ex, ex.streak, ex.suggested, ex.proficient)            
+            ex.points = PointCalculator(ex, ex, ex.suggested, ex.proficient)            
 
     def get_review_exercises(self, now):
 
@@ -675,11 +683,26 @@ class ExerciseGraph(object):
 
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
 
-def PointCalculator(exercise, streak, suggested, proficient):
-    points = 5 + max(streak, exercise.required_streak())
+def PointCalculator(exercise, user_exercise, suggested, proficient):
+
+    points = 1
+    
+    required_streak = exercise.required_streak()
+    degrade_threshold = required_streak + 15
+
+    if user_exercise.longest_streak <= required_streak:
+        points = 15
+    elif user_exercise.longest_streak < degrade_threshold:
+        points = degrade_threshold - user_exercise.longest_streak
+    
     if suggested:
         points = points * 3
+
+    if exercise.summative:
+        points = points * 1.25
+
     if not proficient:
         points = points * 5
-    return points
+
+    return int(math.ceil(points))
 

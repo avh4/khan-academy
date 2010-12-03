@@ -1,5 +1,6 @@
 import re
 import cgi
+import math
 from google.appengine.ext import webapp
 from django import template
 from app import App
@@ -71,10 +72,6 @@ def knowledgemap_embed(exercises, map_coords):
 def related_videos(exercise_videos):
     return {"exercise_videos": exercise_videos}
 
-@register.inclusion_tag("related_exercises.html")
-def related_exercises(covered_exercises):
-    return {"covered_exercises": covered_exercises}
-
 @register.inclusion_tag("exercise_icon.html")
 def exercise_icon(exercise):
     s_prefix = "proficient-badge"
@@ -105,25 +102,37 @@ def exercise_message(exercise, coaches, endangered, reviewing, proficient, strug
             }
 
 @register.inclusion_tag("streak_bar.html")
-def streak_bar(exercise):
+def streak_bar(user_exercise):
 
-    streak = exercise.streak
+    streak = user_exercise.streak
     longest_streak = 0
 
-    if hasattr(exercise, "longest_streak"):
-        longest_streak = exercise.longest_streak
+    if hasattr(user_exercise, "longest_streak"):
+        longest_streak = user_exercise.longest_streak
 
     streak_max_width = 228
 
-    streak_width = min(streak_max_width, int((streak_max_width / float(exercise.required_streak())) * streak))
-    longest_streak_width = min(streak_max_width, int((streak_max_width / float(exercise.required_streak())) * longest_streak))
+    streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * streak))
+    longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * longest_streak))
     streak_icon_width = min(streak_max_width - 2, max(43, streak_width)) # 43 is width of streak icon
 
     width_required_for_label = 20
     show_streak_label = streak_width > width_required_for_label
     show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - streak_width) > width_required_for_label
 
+    extra_class = ""
+
+    summative = False
+    if hasattr(user_exercise, "summative"):
+        summative = user_exercise.summative
+    else:
+        summative = user_exercise.get_exercise().summative
+
+    if summative:
+        extra_class = "streak-bar-challenge"
+
     return {
+            "extra_class": extra_class,
             "streak": streak,
             "longest_streak": longest_streak,
             "streak_width": streak_width, 
