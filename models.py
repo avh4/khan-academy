@@ -9,6 +9,7 @@ from google.appengine.ext import db
 import cajole
 import app
 import util
+import consts
 from search import Searchable
 from app import App
 
@@ -72,7 +73,8 @@ class UserExercise(db.Model):
 
     def reset_streak(self):
         if self.get_exercise().summative:
-            self.streak = (self.streak / 10) * 10 # Reset streak to latest 10 milestone
+            # Reset streak to latest 10 milestone
+            self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
         else:
             self.streak = 0
 
@@ -149,9 +151,9 @@ class Exercise(db.Model):
 
     def required_streak(self):
         if self.summative:
-            return 10 * len(self.covers)
+            return consts.REQUIRED_STREAK * len(self.covers)
         else:
-            return 10
+            return consts.REQUIRED_STREAK
 
     def struggling_threshold(self):
         return 3 * self.required_streak()
@@ -685,24 +687,24 @@ class ExerciseGraph(object):
 
 def PointCalculator(exercise, user_exercise, suggested, proficient):
 
-    points = 1
+    points = consts.EXERCISE_POINTS_BASE
     
     required_streak = exercise.required_streak()
-    degrade_threshold = required_streak + 15
+    degrade_threshold = required_streak + consts.DEGRADING_EXERCISES_AFTER_STREAK
 
     if user_exercise.longest_streak <= required_streak:
-        points = 15
+        points = consts.INCOMPLETE_EXERCISE_POINTS_BASE
     elif user_exercise.longest_streak < degrade_threshold:
         points = degrade_threshold - user_exercise.longest_streak
     
-    if suggested:
-        points = points * 3
-
     if exercise.summative:
-        points = points * 1.25
+        points = points * consts.SUMMATIVE_EXERCISE_MULTIPLIER
+
+    if suggested:
+        points = points * consts.SUGGESTED_EXERCISE_MULTIPLIER
 
     if not proficient:
-        points = points * 5
+        points = points * consts.INCOMPLETE_EXERCISE_MULTIPLIER
 
     return int(math.ceil(points))
 
