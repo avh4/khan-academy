@@ -25,7 +25,6 @@ body {
 #svg_editor #tools_top #selected_panel .toolset > *,
 #svg_editor #tools_top #multiselected_panel > *,
 #svg_editor #tools_left .tool_button,
-#svg_editor #tools_left .tool_text,
 #svg_editor #copyright {
 	display: none;
 }
@@ -33,6 +32,7 @@ body {
 #svg_editor #tools_top #selected_panel .toolset #tool_delete,
 #svg_editor #tools_top #multiselected_panel #tool_delete_multi,
 #svg_editor #tools_left #tool_select,
+#svg_editor #tools_left .tool_text,
 #svg_editor #tools_left #tool_fhpath {
 	display: block;
 }
@@ -103,6 +103,7 @@ div#svg_editor div#workarea {
 
 div#svg_editor div#tools_top {
     left: 24px;
+    z-index: 2;
 }
 
 div#svg_editor div#tools_bottom {
