@@ -7,18 +7,20 @@ var bottomNumber = new Array();
 var carryArray = new Array();
 var selectedArray = new Array();
 var topNumberDigits =3;
-var bottomNumberDigits =3; //Has to be at least one less than topNumberDigits
+var bottomNumberDigits =3;
 var answer = 0;
 
 var topDecPosition = 0;
 var botDecPosition = 0;
+
+// Ensure at least one of the two numbers has a decimal
 while (0 == topDecPosition && 0 == botDecPosition)
 {
-	// At least one of the two numbers must have a decimal
 	topDecPosition = get_random(topNumberDigits);
 	botDecPosition = get_random(bottomNumberDigits);
 }
 
+// Generate top and bottom numbers
 for (var i=0; i<(topNumberDigits-1); i++)
 {
 	topNumber.push(get_random(9));
@@ -41,8 +43,6 @@ for (var i=0; i<(topNumberDigits-1); i++)
 }
 topNumber.push(get_random(8)+1);
 bottomNumber.push(get_random(8)+1);
-
-
 
 var digits = {};
 var totalRows = 2*bottomNumberDigits+5;
@@ -73,11 +73,6 @@ for(var i=0; i<bottomNumberDigits; i++)
 }
 
 answer = answer / Math.pow(10, topDecPosition+botDecPosition);
-
-var curBottomDigit = 0;
-var curTopDigit = 0;
-var curSumDigit = 0;
-var curAddCol = 0;
 
 
 
@@ -313,6 +308,12 @@ function getValue(row, col)
 var drewZero = false;
 var toCrossOut = new Array();  //These are carried digits that need to crossed out before moving on
 
+var curBottomDigit = 0;
+var curTopDigit = 0;
+var curSumDigit = 0;
+var curAddCol = 0;
+
+// Show the next hint
 function next_step()
 {
 	uncolorNumbers();
@@ -432,6 +433,13 @@ function next_step()
 	}
 	else
 	{
+        // Fill in any additional 0's between decimal point and current answer
+        while (curAddCol < (topDecPosition + botDecPosition)) {
+            createEntry(botNumRow-2-bottomNumberDigits, curAddCol, 0);
+            drawDigit(botNumRow-2-bottomNumberDigits, curAddCol, null);
+            curAddCol++;
+        }
+
 		present.fontfill = "#dd6633";
 		present.text(getCoor(botNumRow-2-bottomNumberDigits, topDecPosition+botDecPosition-.5), '.', above);
 		present.fontfill = nColor;
