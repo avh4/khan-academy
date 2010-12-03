@@ -660,6 +660,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 /* Individual Exercise Styles */
 
+#container.single-exercise {
+    overflow: visible;
+}
 #container #dashboard-header.single-exercise {
     border: 1px solid #ccc;
     border-top: none;
