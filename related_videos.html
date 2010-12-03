@@ -1,6 +1,6 @@
 
 {% if exercise_videos %}
-<span class="related-videos-title">Related videos:</span>
+<span class="related-content-title">Related videos:</span>
     {% for exercise_video in exercise_videos %}
         <a href="/video?v={{exercise_video.video.youtube_id}}">{{exercise_video.video.title|escape}}</a>{% if not forloop.last %},{% endif %}
 

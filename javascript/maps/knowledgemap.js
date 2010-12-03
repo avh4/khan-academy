@@ -13,10 +13,17 @@ var KnowledgeMap = {
         gray: "#FFFFFF"
     },
     icons: {
-        proficient: "/images/node-complete.png",
-        review: "/images/node-review.png",
-        suggested: "/images/node-suggested.png",
-        normal: "/images/node-not-started.png"
+            Exercise: {
+                    Proficient: "/images/node-complete.png",
+                    Review: "/images/node-review.png",
+                    Suggested: "/images/node-suggested.png",
+                    Normal: "/images/node-not-started.png"
+                      },
+            Summative: {
+                    Normal: "images/node-challenge-not-started.png",
+                    Proficient: "images/node-challenge-complete.png",
+                    Suggested: "images/node-challenge-suggested.png"
+                       }
     },
     latLngHome: new google.maps.LatLng(-0.629254, 0.730775),
     latMin: 90,
@@ -75,7 +82,7 @@ var KnowledgeMap = {
 
         google.maps.event.addListener(this.map, "center_changed", function(){KnowledgeMap.onCenterChange();});
         google.maps.event.addListener(this.map, "zoom_changed", function(){KnowledgeMap.onZoomChange();});
-        google.maps.event.addListener(this.map, "idle", function(){KnowledgeMap.saveMapCoords();});
+        google.maps.event.addListener(this.map, "idle", function(){KnowledgeMap.onIdle();});
 
         this.giveNasaCredit();
     },
@@ -98,24 +105,29 @@ var KnowledgeMap = {
                 "h_position": jel.attr("data-h_position"),
                 "v_position": jel.attr("data-v_position"),
                 "status": jel.attr("data-status"),
+                "summative": jel.attr("data-summative") == "True",
                 "url": "/exercises?exid=" + jel.attr("data-id")
             });
         });
 
         $("table.hidden_knowledge_map tr[data-id]").each(function(){
             var jel = $(this);
+            var source = jel.attr("data-id");
+            var summative = jel.attr("data-summative") == "True";
             jel.find("li[data-prereq]").each(function(i) {
-                var source = jel.attr("data-id");
                 var target = $(this).attr("data-prereq");
-                KnowledgeMap.addEdge(source, target);
+                KnowledgeMap.addEdge(source, target, summative);
             });
         });
     },
 
     layoutGraph: function() {
+
+        var zoom = this.map.getZoom();
+
         for (var key in this.dictNodes)
         {
-            this.drawMarker(this.dictNodes[key]);
+            this.drawMarker(this.dictNodes[key], zoom);
         }
 
         for (var key in this.dictEdges)
@@ -123,7 +135,7 @@ var KnowledgeMap = {
             var rgTargets = this.dictEdges[key];
             for (var ix = 0; ix < rgTargets.length; ix++)
             {
-                this.drawEdge(this.dictNodes[key], this.dictNodes[rgTargets[ix]]);
+                this.drawEdge(this.dictNodes[key], rgTargets[ix], zoom);
             }
         }
     },
@@ -132,10 +144,10 @@ var KnowledgeMap = {
         this.dictNodes[node.id] = node;
     },
 
-    addEdge: function(source, target) {
+    addEdge: function(source, target, summative) {
         if (!this.dictEdges[source]) this.dictEdges[source] = [];
         var rg = this.dictEdges[source];
-        rg[rg.length] = target;
+        rg[rg.length] = {"target": target, "summative": summative};
     },
 
     nodeStatusCount: function(status) {
@@ -147,7 +159,9 @@ var KnowledgeMap = {
         return c;
     },
 
-    drawEdge: function(nodeSource, nodeTarget) {
+    drawEdge: function(nodeSource, edgeTarget, zoom) {
+
+        var nodeTarget = this.dictNodes[edgeTarget.target];
 
         var coordinates = [
             nodeSource.latLng,
@@ -181,20 +195,17 @@ var KnowledgeMap = {
             opacity = 1.0;
         }
 
-        var line = new google.maps.Polyline({
+        edgeTarget.line = new google.maps.Polyline({
             path: coordinates,
             strokeColor: color,
             strokeOpacity: opacity,
             strokeWeight: weight,
-            clickable: false
+            clickable: false,
+            map: this.getMapForEdge(edgeTarget, zoom)
         });
-
-        window.poly = line;
-
-        line.setMap(this.map);
     },
 
-    drawMarker: function(node) {
+    drawMarker: function(node, zoom) {
 
         var lat = -1 * (node.h_position - 1) * this.nodeSpacing.lat;
         var lng = (node.v_position - 1) * this.nodeSpacing.lng;
@@ -206,61 +217,63 @@ var KnowledgeMap = {
         if (lng < this.lngMin) this.lngMin = lng;
         if (lng > this.lngMax) this.lngMax = lng;
 
-        var iconUrl = this.icons.normal;
-        switch (node.status)
-        {
-            case "Proficient":
-                iconUrl = this.icons.proficient;
-                break;
-            case "Suggested":
-                iconUrl = this.icons.suggested;
-                break;
-            case "Review":
-                iconUrl = this.icons.review;
-                break;
-        }
+        var iconSet = this.icons[node.summative ? "Summative" : "Exercise"];
+        var iconUrl = iconSet[node.status];
+        if (!iconUrl) iconUrl = iconSet.Normal;
 
         var labelClass = "nodeLabel nodeLabel" + node.status;
-        var zoom = this.map.getZoom();
+        if (node.summative) labelClass += " nodeLabelSummative";
+
+        node.iconUrl = iconUrl;
 
         var marker = new MarkerWithLabel({
             position: node.latLng,
             map: this.map,
-            icon: this.getMarkerIcon(iconUrl, zoom),
+            icon: this.getMarkerIcon(node, zoom),
             flat: true,
             labelContent: node.name,
-            labelAnchor: this.getLabelAnchor(zoom),
-            labelClass: this.getLabelClass(labelClass, zoom)
+            labelAnchor: this.getLabelAnchor(node, zoom),
+            labelClass: this.getLabelClass(labelClass, zoom),
+            visible: (!node.summative || zoom == this.options.minZoom),
+            zIndex: node.summative ? 2 : 1
         });
 
         node.marker = marker;
-        node.iconUrl = iconUrl;
 
         google.maps.event.addListener(marker, "click", function(){KnowledgeMap.onNodeClick(node);});
         google.maps.event.addListener(marker, "mouseover", function(){KnowledgeMap.onNodeMouseover(node);});
         google.maps.event.addListener(marker, "mouseout", function(){KnowledgeMap.onNodeMouseout(node);});
     },
 
-    getMarkerIcon: function(iconUrl, zoom) {
+    getMapForEdge: function(edge, zoom) {
+        return ((zoom == this.options.minZoom) == edge.summative) ? this.map : null;
+    },
+
+    getMarkerIcon: function(node, zoom) {
+
+        var iconUrl = node.iconUrl;
+        var iconUrlCacheKey = iconUrl + "@" + zoom;
+
         if (!this.iconCache) this.iconCache = {};
-        if (!this.iconCache[iconUrl + "@" + zoom])
+        if (!this.iconCache[iconUrlCacheKey])
         {
-            var size = (1 / (this.options.maxZoom - zoom + 1)) * 80;
+            var zoomBase = node.summative ? this.options.minZoom + 1 : this.options.maxZoom;
+            var size = (1 / (zoomBase - zoom + 1)) * 80;
             var url = iconUrl;
 
-            if (zoom == this.options.minZoom)
+            if (!node.summative && zoom <= this.options.minZoom)
             {
-                size = 15;
+                size = 10;
                 url = iconUrl.replace(".png", "-star.png");
             }
 
-            this.iconCache[iconUrl + "@" + zoom] = new google.maps.MarkerImage(url, 
+            this.iconCache[iconUrlCacheKey] = new google.maps.MarkerImage(url, 
                     null, 
                     null, 
                     new google.maps.Point(size / 2, size / 2), 
                     new google.maps.Size(size, size));
         }
-        return this.iconCache[iconUrl+ "@" + zoom];
+        return this.iconCache[iconUrlCacheKey];
     },
 
     getLabelClass: function(classOrig, zoom, highlight) {
@@ -275,14 +288,17 @@ var KnowledgeMap = {
         return classOrig;
     },
 
-    getLabelAnchor: function(zoom) {
+    getLabelAnchor: function(node, zoom) {
+        var key = zoom + (node.summative ? "-summative" : "");
+
         if (!this.labelAnchorCache) this.labelAnchorCache = {};
-        if (!this.labelAnchorCache[zoom])
+        if (!this.labelAnchorCache[key])
         {
-            var offset = -1 * (45 / (this.options.maxZoom - zoom + 1));
-            this.labelAnchorCache[zoom] = new google.maps.Point(zoom == 8 ? 30 : 40, offset);
+            var zoomBase = node.summative ? this.options.minZoom + 1 : this.options.maxZoom;
+            var offset = -1 * (45 / (zoomBase - zoom + 1));
+            this.labelAnchorCache[key] = new google.maps.Point(zoom == 8 ? 30 : 40, offset);
         }
-        return this.labelAnchorCache[zoom];
+        return this.labelAnchorCache[key];
     },
 
     highlightNode: function(node, highlight) {
@@ -292,7 +308,7 @@ var KnowledgeMap = {
     },
 
     onNodeClick: function(node) {
-        if (this.map.getZoom() <= this.options.minZoom)
+        if (!node.summative && this.map.getZoom() <= this.options.minZoom)
         {
             // Zoom on node
             this.map.setCenter(node.latLng);
@@ -340,17 +356,36 @@ var KnowledgeMap = {
         {
             var node = this.dictNodes[key];
             var marker = node.marker;
-            marker.setIcon(this.getMarkerIcon(node.iconUrl, zoom));
-            marker.labelAnchor = this.getLabelAnchor(zoom);
+
+            if (node.summative)
+                marker.setVisible(!node.summative || zoom == this.options.minZoom);
+
+            marker.setIcon(this.getMarkerIcon(node, zoom));
+            marker.labelAnchor = this.getLabelAnchor(node, zoom);
             marker.labelClass = this.getLabelClass(marker.labelClass, zoom);
             marker.label.setStyles();
         }
+
+        for (var key in this.dictEdges)
+        {
+            var rgTargets = this.dictEdges[key];
+            for (var ix = 0; ix < rgTargets.length; ix++)
+            {
+                var line = rgTargets[ix].line;
+                var map = this.getMapForEdge(rgTargets[ix], zoom);
+                if (line.getMap() != map) line.setMap(map);
+            }
+        }
     },
 
-    saveMapCoords: function(dt) {
+    onIdle: function() {
 
         if (!this.fCenterChanged && !this.fZoomChanged)
             return;
+
+        // Panning by 0 pixels forces a redraw of our map's markers
+        // in case they aren't being rendered at the correct size.
+        KnowledgeMap.map.panBy(0, 0);
 
         var center = this.map.getCenter();
         $.post("/savemapcoords", {

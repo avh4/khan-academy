@@ -254,38 +254,38 @@ class ViewExercise(request_handler.RequestHandler):
             query.filter('name =', exid)
             exercise = query.get()
 
-            exercise_videos = None
-            query = ExerciseVideo.all()
-            query.filter('exercise =', exercise.key())
-            exercise_videos = query.fetch(50)
-
             if not exid:
                 exid = 'addition_1'
 
+            exercise_non_summative = exercise.non_summative_exercise(user_data)
+            exercise_videos = exercise_non_summative.related_videos()
+            covered_exercises = exercise.summative_children()
+
             userExercise = user_data.get_or_insert_exercise(exid)
+
             if not problem_number:
                 problem_number = userExercise.total_done+1
-            proficient = False
-            endangered = False
-            reviewing = False
-            suggested = user_data.is_suggested(exid)
-            if user_data.is_proficient_at(exid):
-                proficient = True
-                if (userExercise.last_review + userExercise.get_review_interval() <= self.get_time()):
-                    reviewing = True
-                if userExercise.streak == 0 and userExercise.longest_streak >= 10:
-                    endangered = True
+
+            proficient = exercise.proficient = user_data.is_proficient_at(exid)
+            suggested = exercise.suggested = user_data.is_suggested(exid)
+            reviewing = exercise.review = user_data.is_reviewing(exid, self.get_time())
             struggling = user_data.is_struggling_with(exid)
-            exercise_points = PointCalculator(userExercise.streak, suggested, proficient)
+            endangered = proficient and userExercise.streak == 0 and userExercise.longest_streak >= exercise.required_streak()
+
+            exercise_points = PointCalculator(exercise, userExercise.streak, suggested, proficient)
                    
             logout_url = users.create_logout_url(self.request.uri)
             
             # Note: if they just need a single problem for review they can just print this page.
-            num_problems_to_print = max(2, 10 - userExercise.streak)
+            num_problems_to_print = max(2, exercise.required_streak() - userExercise.streak)
             
             # If the user is proficient, assume they want to print a bunch of practice problems.
             if proficient:
-                num_problems_to_print = 10
+                num_problems_to_print = exercise.required_streak()
+
+            # We can't currently print summative exercises.
+            if exercise.summative:
+                num_problems_to_print = 0
 
             template_values = {
                 'App' : App,
@@ -305,6 +305,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'exid': exid,
                 'start_time': time.time(),
                 'exercise_videos': exercise_videos,
+                'covered_exercises': covered_exercises,
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'user_exercise': userExercise,
                 'logout_url': logout_url,
@@ -314,7 +315,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'num_problems_to_print': num_problems_to_print,
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
-            template_file = exid + '.html'
+            template_file = exercise_non_summative.name + '.html'
             if exercise.raw_html is not None:
                 exercise.ensure_sanitized()
                 template_file = 'caja_template.html'
@@ -722,9 +723,6 @@ class ExerciseAdminPage(request_handler.RequestHandler):
         query = Exercise.all().order('h_position')
         exercises = query.fetch(200)
 
-        for exercise in exercises:
-            exercise.display_name = exercise.name.replace('_', ' ').capitalize()
-
         template_values = {'App' : App, 'exercises': exercises}
 
         path = os.path.join(os.path.dirname(__file__), 'exerciseadmin.html')
@@ -795,8 +793,6 @@ class ViewAllExercises(request_handler.RequestHandler):
             ex_graph = ExerciseGraph(user_data)
             if user_data.reassess_from_graph(ex_graph):
                 user_data.put()
-            for exercise in ex_graph.exercises:
-                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
 
             recent_exercises = ex_graph.get_recent_exercises()
             review_exercises = ex_graph.get_review_exercises(self.get_time())
@@ -806,6 +802,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             for exercise in ex_graph.exercises:
                 exercise.suggested = False
                 exercise.proficient = False
+                exercise.review = False
                 exercise.status = ""
                 if exercise in suggested_exercises:
                     exercise.suggested = True
@@ -873,7 +870,6 @@ class EditExercise(request_handler.RequestHandler):
 
             main_exercise = None
             for exercise in exercises:
-                exercise.display_name = exercise.name.replace('_', ' ').capitalize()
                 if exercise.name == exercise_name:
                     main_exercise = exercise
 
@@ -933,6 +929,7 @@ class UpdateExercise(request_handler.RequestHandler):
                 exercise.prerequisites = []
                 exercise.covers = []
                 exercise.author = user
+                exercise.summative = self.request_bool("summative", default=False)
                 path = os.path.join(os.path.dirname(__file__), exercise_name + '.html')
                 raw_html = self.request.get('raw_html')
                 if not os.path.exists(path) and raw_html:
@@ -1092,7 +1089,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                                 
             if user_data.points == None:
                 user_data.points = 0
-            user_data.points = user_data.points + PointCalculator(userExercise.streak, suggested, proficient)
+            user_data.points = user_data.points + PointCalculator(userExercise.get_exercise(), userExercise.streak, suggested, proficient)
             user_data.put()
 
             if userExercise.total_done:
@@ -1104,7 +1101,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 userExercise.streak = userExercise.streak + 1
                 if userExercise.streak > userExercise.longest_streak:
                     userExercise.longest_streak = userExercise.streak
-                if userExercise.streak == 10:
+                if userExercise.streak == userExercise.get_exercise().required_streak():
                     userExercise.set_proficient(True)
                     userExercise.proficient_date = datetime.datetime.now()                    
             else:

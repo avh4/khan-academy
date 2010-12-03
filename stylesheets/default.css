@@ -706,7 +706,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     top: 18px;
     right: 66px;
 }
-.exercise-badge.single-exercise .related-videos {
+.exercise-badge.single-exercise .related-content {
     bottom: 7px;
     left: 70px;
     position: absolute;
@@ -784,7 +784,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-size: 14px;
         color: #333;
     }
-    #answer_area .info-box .related-videos-title {
+    #answer_area .info-box .related-content-title {
         display: none;
     }
     #answer_area .info-box #check-answer-results #feedback {

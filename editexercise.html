@@ -10,7 +10,8 @@
 
 {% block pagecontent %}
   <div class=hdg><h3><A href="/admin94040">Edit Exercise</A>: {{main_exercise.display_name}}</h3></div>
-   Use this page to modify exercise dependencies and associations with videos.
+  Use this page to modify exercise dependencies and associations.
+
   <P>
   <B>Prerequisites</B> are exercise modules that the user should become proficient in before starting on this exercise.
   <P>
@@ -18,6 +19,11 @@
   "Adding and Subtracting Fractions" makes a student practice negative and positive numbers so "Adding and
   Subtracting Negative and Positive Numbers" would be "covered" by it.
   <P>
+
+    {% if main_exercise.summative %}
+        <strong>NOTE: Summative exercises</strong> will generate problems from all "covered" exercises.
+    {% endif %}
+
   <div class=hdg><h3>Prerequisite and Covered Modules</h3></div>
   <table border=0 cellspacing=0 cellpadding=3 width=100%>
   <tr><td class="colHeadL" width=50%>Prerequisites</td><td class="colHeadL">Covers</td></tr>
@@ -33,6 +39,8 @@
   </td>
   </tr>
   </table>
+
+  {% if not main_exercise.summative %}
   <P>&nbsp;<P>
    <div class=hdg><h3>Playlists and Videos</h3></div>
   <table border=0 cellspacing=0 cellpadding=3 width=100%>
@@ -50,6 +58,8 @@
   </tr>
   </table>
   <P>&nbsp;<P>
+  {% endif %}
+
 <div class=hdg><h3>All Exercises</h3></div>
 <table border=0 cellspacing=0 width=100%>
 <TR class="highlightWhited">
@@ -70,6 +80,8 @@
 </tr>
 </table>
 <P>&nbsp;<P>
+
+{% if not main_exercise.summative %}
 <div class=hdg><h3>All Playlists</h3></div>
 <table border=0 cellspacing=0 width=100%>
 <TR class="highlightWhited">
@@ -107,4 +119,16 @@
 {% endfor %}
 </tr>
 </table>
+{% endif %}
+
+<div class="hdg"><h3>Map Position</h3></div>
+<div>
+    <form method="POST" action="/updateexercise">
+        <input type="hidden" name="name" value="{{main_exercise.name|escape}}"/>
+        h_position: <input type="text" name="h_position" value="{{main_exercise.h_position}}"/><br/>
+        v_position: <input type="text" name="v_position" value="{{main_exercise.v_position}}"/><br/>
+        <input type="submit" value="Update map position"/>
+    </form>
+</div>
+
 {% endblock pagecontent %}

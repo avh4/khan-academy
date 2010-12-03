@@ -10,8 +10,8 @@
 			<h2>Nice work!</h2><br />You're proficient in this topic. <a href="/exercisedashboard" class="exercise button green">Choose a new exercise</a> to earn more points, or you can do more problems to increase your streak. 
 		{% else %}
 			{% if struggling %}
-				Are you having trouble with this exercise?&nbsp;  You've done more than 30 problems now but
-				haven't gotten 10 in a row right yet.&nbsp;  Why don't you
+            Are you having trouble with this exercise?&nbsp;  You've done more than {{ exercise.struggling_threshold }} problems now but
+            haven't gotten {{ exercise.required_streak }} in a row right yet.&nbsp;  Why don't you
   				{% if exercise_videos %}
   					watch the related videos again, or
   				{% endif %}

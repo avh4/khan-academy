@@ -53,6 +53,13 @@ $(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_co
         border: 1px solid #aaa;
         background-color: black;
     }
+    .nodeLabelSummative {
+        visibility: visible;
+        font-size: 12px;
+        background-color: black;
+        z-index: 1000;
+        position: relative;
+    }
 </style>
 
 <article id="knowledge_map">
@@ -78,7 +85,7 @@ $(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_co
             </th>
         </tr>
         {% for exercise in exercises %}
-        <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default:"0" }}' data-streak='{{ exercise.streak }}' data-h_position='{{ exercise.h_position }}' data-v_position='{{ exercise.v_position }}'>
+        <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default:"0" }}' data-streak='{{ exercise.streak }}' data-h_position='{{ exercise.h_position }}' data-v_position='{{ exercise.v_position }}' data-summative='{{ exercise.summative }}'>
             <td class="points">
                 {{ exercise.points }}
             </td>

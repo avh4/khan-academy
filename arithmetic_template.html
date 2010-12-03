@@ -60,28 +60,24 @@ function submitForm(value)
 {% block pagecontent %}
 <div id="container" class="single-exercise">
 <div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
-    <div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
-        <div class="proficient-badge">
-            {% if reviewing %}
-                <img src="/images/proficient-badge-review.png" height=80 width=76>
-            {% else %}{% if suggested %}
-                <img src="/images/proficient-badge-suggested.png" height=80 width=76>
-            {% else %}{% if proficient %}
-                <img src="/images/proficient-badge-complete.png" height=80 width=76>
-            {% else %}
-                <img src="/images/proficient-badge-not-started.png" height=80 width=76>
-            {% endif %}{% endif %}{% endif %}
-        </div>
+<div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
+
+        {% exercise_icon exercise %}
+
 		<div class="energy-points-badge">{{exercise_points}}</div>
-		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{extitle}}</A></div>
+		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name|escape}}</A></div>
 		{% streak_bar user_exercise %}
-		<div class="related-videos">
-            {% related_videos exercise_videos %}
+		<div class="related-content">
+            {% if exercise.summative %}
+                {% related_exercises covered_exercises %}
+            {% else %}
+                {% related_videos exercise_videos %}
+            {% endif %}
         </div>
     </div>
 
     {% if endangered or reviewing or proficient or struggling %}
-        {% exercise_message coaches endangered reviewing proficient struggling %}
+        {% exercise_message exercise coaches endangered reviewing proficient struggling %}
     {% endif %}
     
 <div id="extras" class="single-exercise">
@@ -89,7 +85,9 @@ function submitForm(value)
     	<a id="scratch_pad_show" href="#" style="display: none;">Show scratch pad</a>
     	<a id="scratch_pad_hide" href="#" style="display: none;">Hide scratch pad</a>
     </div>
-    | <A href="/printexercise?exid={{exid}}&num_problems={{num_problems_to_print}}">Print next {{num_problems_to_print}} problems</A>
+    {% if num_problems_to_print %}
+        | <A href="/printexercise?exid={{exid}}&num_problems={{num_problems_to_print}}">Print next {{num_problems_to_print}} problems</A>
+    {% endif %}
 </div>
 <div>
 	<div id='question_area'>

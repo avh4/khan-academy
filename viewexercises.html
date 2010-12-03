@@ -50,7 +50,7 @@
         {% if review_exercises %}
         {% for exercise in review_exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
-                <div class="proficient-badge"><img src="/images/proficient-badge-review.png" height=80 width=76></div>
+                {% exercise_icon exercise %}
         		<div class="energy-points-badge">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
 
@@ -60,7 +60,7 @@
         {% endif %}
         {% for exercise in suggested_exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
-                <div class="proficient-badge">{% if not exercise.proficient %}<img src="/images/proficient-badge-suggested.png" height=80 width=76>{% endif %}</div>
+                {% exercise_icon exercise %}
         		<div class="energy-points-badge">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
         		
@@ -73,7 +73,7 @@
             <hr />
             {% for exercise in recent_exercises %}
                 <div class="exercise-badge" data-id="{{exercise.name}}">
-                    <div class="proficient-badge">{% if not exercise.proficient %}<img src="/images/proficient-badge-not-started.png" height=80 width=76>{% else %}<img src="/images/proficient-badge-complete.png" height=80 width=76>{% endif %}</div>
+                    {% exercise_icon exercise %}
                     <div class="energy-points-badge">{{exercise.points}}</div>
                     <div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
 
@@ -89,10 +89,9 @@
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
         {% for exercise in exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
-                <div class="proficient-badge">{% if not exercise.proficient %}<img src="/images/proficient-badge-not-started.png" height=80 width=76>{% else %}<img src="/images/proficient-badge-complete.png" height=80 width=76>{% endif %}</div>
+                {% exercise_icon exercise %}
         		<div class="energy-points-badge">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
-        		
                 {% streak_bar exercise %}
             </div>
         {% endfor %}

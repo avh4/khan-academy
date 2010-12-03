@@ -45,7 +45,7 @@ After they register your id, you'll be able to see their progress below, and via
 {% if table_data|length_is:"3" %}
 {% else %}
   <p>Click on a cell in the table below to see charts of the student's progress in the exercise. Green means the student is proficient, blue means they are working on it,
-  and red means they need help (they've done more than 30 problems without getting 10 in a row right).</p>
+  and red means they need help (they've done a lot of problems without getting a streak of correct answers).</p>
   <table>
   <tr>
   {% for header in table_headers %}

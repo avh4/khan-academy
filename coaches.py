@@ -150,8 +150,6 @@ class ViewIndividualReport(request_handler.RequestHandler):
             logout_url = users.create_logout_url(self.request.uri)   
 
             ex_graph = ExerciseGraph(user_data, user=student)
-            for exercise in ex_graph.exercises:
-                exercise.display_name = exercise.name.replace('_', ' ').capitalize()            
             proficient_exercises = ex_graph.get_proficient_exercises()
             self.compute_report(student, proficient_exercises, dummy_values=True)
             suggested_exercises = ex_graph.get_suggested_exercises()

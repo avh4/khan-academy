@@ -71,9 +71,32 @@ def knowledgemap_embed(exercises, map_coords):
 def related_videos(exercise_videos):
     return {"exercise_videos": exercise_videos}
 
+@register.inclusion_tag("related_exercises.html")
+def related_exercises(covered_exercises):
+    return {"covered_exercises": covered_exercises}
+
+@register.inclusion_tag("exercise_icon.html")
+def exercise_icon(exercise):
+    s_prefix = "proficient-badge"
+    if exercise.summative:
+        s_prefix = "challenge"
+
+    src = ""
+    if exercise.review:
+        src = "/images/proficient-badge-review.png" # No reviews for summative exercises yet
+    elif exercise.suggested:
+        src = "/images/%s-suggested.png" % s_prefix
+    elif exercise.proficient:
+        src = "/images/%s-complete.png" % s_prefix
+    else:
+        src = "/images/%s-not-started.png" % s_prefix
+
+    return {"src": src}
+
 @register.inclusion_tag("exercise_message.html")
-def exercise_message(coaches, endangered, reviewing, proficient, struggling):
+def exercise_message(exercise, coaches, endangered, reviewing, proficient, struggling):
     return {
+            "exercise": exercise,
             "coaches": coaches,
             "endangered": endangered,
             "reviewing": reviewing,
@@ -91,9 +114,14 @@ def streak_bar(exercise):
         longest_streak = exercise.longest_streak
 
     streak_max_width = 228
-    streak_width = min(streak_max_width, int((streak_max_width / 10.0) * streak))
-    longest_streak_width = min(streak_max_width, int((streak_max_width / 10.0) * longest_streak))
+
+    streak_width = min(streak_max_width, int((streak_max_width / float(exercise.required_streak())) * streak))
+    longest_streak_width = min(streak_max_width, int((streak_max_width / float(exercise.required_streak())) * longest_streak))
     streak_icon_width = min(streak_max_width - 2, max(43, streak_width)) # 43 is width of streak icon
+
+    width_required_for_label = 20
+    show_streak_label = streak_width > width_required_for_label
+    show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - streak_width) > width_required_for_label
 
     return {
             "streak": streak,
@@ -101,7 +129,9 @@ def streak_bar(exercise):
             "streak_width": streak_width, 
             "longest_streak_width": longest_streak_width, 
             "streak_max_width": streak_max_width,
-            "streak_icon_width": streak_icon_width
+            "streak_icon_width": streak_icon_width,
+            "show_streak_label": show_streak_label,
+            "show_longest_streak_label": show_longest_streak_label
             }
 
 register.tag(highlight)
