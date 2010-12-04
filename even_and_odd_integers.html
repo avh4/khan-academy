@@ -1,0 +1,232 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+
+{% block maincode %}
+<script>
+/*
+/exercises?exid=even_and_odd_integers
+
+This module implements Sal's video spec for "Even and Odd Integers"
+http://www.youtube.com/watch?v=bJy65zbc7mc
+
+a, b, c, and d are variables
+Each variable can be multiplied by a number,
+has an operation (+,=, or *) associated with it,
+and is even or odd.
+
+First, decide how many we are going to use.
+We want from 1 up to a maximum of 3.
+*/
+
+function Variable(name, number, operation, parity, explanation) {
+    this.name = name;
+    this.number = number;
+    this.operation = operation;
+    this.parity = parity; // even or odd
+    this.explanation = explanation
+}
+
+function Expression(text, parity, explanation) {
+    this.text = text;
+    this.parity = parity; // even or odd
+    this.explanation = explanation
+}
+
+function get_parity(number)
+{
+	if (number % 2 == 0) {
+		return "even";
+	}
+	else {
+		return "odd";
+	}
+}
+
+function get_opposite_parity(parity)
+{
+	if (parity == "odd") {
+		return "even";
+	}
+	else {
+		return "odd";
+	}
+}
+
+function get_parity_result(operation, parity1, parity2)
+{
+    if (operation == "*") {
+        if (parity1 == "odd" && parity2 == "odd") {
+    	    return "odd";
+        }
+        else {
+    	    return "even";
+        }
+    }
+    else { //"+" or "-"
+        if (parity1 == "even" && parity2 == "even") {
+    	    return "even";
+        }
+        else if (parity1 == "odd" && parity2 == "odd") {
+    	    return "even";
+        }
+        else {
+    	    return "odd";
+        }
+    }
+}
+
+function get_parity_explanation(operation, parity1, parity2)
+{
+    if (operation == "*") {
+        if (parity1 == "odd" && parity2 == "odd") {
+    	    return " is odd, since an odd times an odd is odd";
+        }
+        else {
+    	    return " is even, since an even times anything is even";
+        }
+    }
+    else { //"+" or "-"
+        text_operation = "plus";
+        if (operation == "-") {
+            text_operation = "minus";
+        }
+        if (parity1 == "even" && parity2 == "even") {
+    	    return " is even, since an even " + text_operation + " an even is even";
+        }
+        else if (parity1 == "odd" && parity2 == "odd") {
+    	    return " is even, since an odd " + text_operation + " an odd is even";
+        }
+        else {
+    	    return " is odd, since an even " + text_operation + " an odd is odd";
+        }
+    }
+}
+
+var numVariables = getRandomIntRange(1,3);
+
+var variables = [];
+var operations = new Array("+", "-", "*");
+var parities = new Array("even", "odd");
+var expression = "";
+var expression_stack = []
+
+for (var i=0; i<numVariables; i++) {
+    var name = "abcd".charAt(i);
+    var number = getRandomIntRange(1, 10);
+    if (number == 1) {
+        number = "";
+    }
+    var operation = randomFromArray(operations);
+    var parity = randomFromArray(parities);
+
+    var explanation = get_parity_explanation("*", get_parity(number), parity);
+    variables[i] = new Variable(name, number, operation, parity, explanation);
+    write_text(name + " is " + parity);
+    if (i != 0) {
+        expression += operation;
+    }
+    expression += number + name;
+
+    variable_and_const_parity = get_parity_result("*", get_parity(number), parity);
+    expression_parity = variable_and_const_parity;
+    expression_explanation = get_parity_explanation("*", get_parity(number), parity);
+    if (i != 0) {
+        last_expression = expression_stack[expression_stack.length-1];
+        expression_parity = get_parity_result(operation, last_expression.parity, variable_and_const_parity);
+        expression_explanation = get_parity_explanation(operation, last_expression.parity, variable_and_const_parity);
+    }
+
+    var e = new Expression(expression, expression_parity, expression_explanation);
+    expression_stack.push(e);
+
+    if (i != 0 && i != numVariables-1) {
+        expression = "(" + expression + ")";
+    }
+}
+
+write_text("&nbsp;");
+write_text(expression + " is ?");
+write_text("&nbsp;");
+
+for (var i=0; i<expression_stack.length; i++) {
+    if (i != 0) {
+        var v = variables[i];
+        write_step(v.number + "" + v.name + e.explanation);
+    }
+    var e = expression_stack[i];
+    write_step(e.text + e.explanation);
+}
+
+last_expression = expression_stack[expression_stack.length-1];
+setCorrectAnswer(last_expression.parity);
+addWrongChoice(get_opposite_parity(last_expression.parity));
+
+
+
+/*
+notes from the spec video
+
+write_text("n is even and m is odd:");
+write_text("n*m is ?");
+//write_text("n+m is ?");
+//write_text("n-m is ?");
+
+write_step("An even times an odd is even");
+write_step("An even times anything is even");
+
+//write_step("An odd times an odd is odd");
+
+//write_text("n is odd, m is odd:");
+//write_text("4*n + m is ?");
+//write_step("4*n is even because 4 is even, and an even times anything is even");
+//write_step("4*n + m is odd since 4m is even and m is odd, and and odd plus and even is odd");
+
+//write_text("n is odd, m is even, p is odd:");
+//write_text("((n*p)-m)+p is ?");
+//write_step("n*p is even since an even times anything is even")
+//write_step("n*p-m is even since it is an even minus an even")
+//write_step("(n*p-m)+p is odd since it's an even plus an odd")
+
+// ideal implementation
+// when you press hint, highlight expression and give hint
+// hint again, highlist more and give hint
+
+setCorrectAnswer("Even");
+addWrongChoice("Odd");
+*/
+
+</script>
+{% endblock maincode %}
+{% block answerarea %}
+
+<span class="info-box-header">Answer</span>
+<script>
+    // modifed from even_and_odd_functions
+
+    // slightly modified multiple-choice code
+    // - only 2 choices
+    // - doesn't mathize the choice text
+	correctchoice = getRandomIntRange(0,1);
+
+	var possibleWrongIndices=randomIndices(possibleAnswers.length);
+	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
+	for (var i=0; i<2; i++)
+	{
+		if (i==correctchoice)
+		{
+			answerChoices[i]=correct_answer;
+		}
+		else
+		{
+			if (definiteWrongIndices.length>0)
+			{
+				answerChoices[i]=definiteWrongAnswers[definiteWrongIndices.pop()];
+			}
+			else
+			{
+				answerChoices[i]=possibleAnswers[possibleWrongIndices.pop()];
+			}
+		}
+		document.write('<span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" class="select-choice" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
+	}
+</script>
+{% endblock answerarea %}
