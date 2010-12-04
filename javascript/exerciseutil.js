@@ -206,7 +206,6 @@ function inArray(item, a)
 	return false;
 }
 
-
 //get_random() returns a non-zero random number between -10 and 10
 function get_random()
 {
@@ -490,6 +489,12 @@ function getRandomIntRange(min, max)
 	var epsilon = .9;
 	var x = Math.abs(max-min);
 	return (min+Math.round(KhanAcademy.random()*(x+epsilon) - epsilon/2));
+}
+
+function randomFromArray(a)
+{
+	var index = getRandomIntRange(0, a.length-1);
+	return a[index];
 }
 
 function check_answer()
