@@ -9,8 +9,8 @@ CHALLENGE_STREAK_BARRIER = 10
 # before energy points bottom out for the exercise
 DEGRADING_EXERCISES_AFTER_STREAK = 15
 
-# Minimum number of energy points available for a problem
-EXERCISE_POINTS_BASE = 1
+# Minimum number of energy points available for a correct problem
+EXERCISE_POINTS_BASE = 5
 
 # Minimum number of energy points available for a problem in an unfinished exercise
 INCOMPLETE_EXERCISE_POINTS_BASE = 15

@@ -687,7 +687,7 @@ class ExerciseGraph(object):
 
 def PointCalculator(exercise, user_exercise, suggested, proficient):
 
-    points = consts.EXERCISE_POINTS_BASE
+    points = 0
     
     required_streak = exercise.required_streak()
     degrade_threshold = required_streak + consts.DEGRADING_EXERCISES_AFTER_STREAK
@@ -697,6 +697,9 @@ def PointCalculator(exercise, user_exercise, suggested, proficient):
     elif user_exercise.longest_streak < degrade_threshold:
         points = degrade_threshold - user_exercise.longest_streak
     
+    if (points < consts.EXERCISE_POINTS_BASE):
+        points = consts.EXERCISE_POINTS_BASE
+
     if exercise.summative:
         points = points * consts.SUMMATIVE_EXERCISE_MULTIPLIER
 
