@@ -11,10 +11,10 @@ import facebook
 
 FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
 
-# Force cached facebook info expiration at least once every 30 days,
+# Force cached facebook info expiration at least once every 20 days,
 # even though memcache will probably have cleared before then due to external
 # memory pressure.
-FACEBOOK_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 30
+FACEBOOK_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 20
 
 def is_facebook_email(email):
     return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
