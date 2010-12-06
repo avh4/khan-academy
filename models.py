@@ -389,6 +389,7 @@ class Video(Searchable, db.Model):
     description = db.TextProperty()
     playlists = db.StringListProperty()
     keywords = db.StringProperty()
+    duration = db.IntegerProperty(default = 0)
     readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
