@@ -1,6 +1,7 @@
 import re
 import subprocess
 import os
+import optparse
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -31,9 +32,16 @@ def deploy(version):
 
 def main():
 
-    if svn_st():
-        print "Local changes found in this directory, canceling deploy."
-        return
+    parser = optparse.OptionParser()
+    parser.add_option('-f', '--force',
+        action="store_true", dest="force",
+        help="Force deploy even with local changes", default=False)
+    options, args = parser.parse_args()
+
+    if not options.force:
+        if svn_st():
+            print "Local changes found in this directory, canceling deploy."
+            return
 
     version = svn_up()
     if version <= 0:
