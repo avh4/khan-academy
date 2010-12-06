@@ -325,8 +325,17 @@ class ViewClassReport(request_handler.RequestHandler):
         user = util.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)   
-            user_data = UserData.get_or_insert_for(user)  
-            students = user_data.get_students()
+
+            user_coach = user
+
+            if users.is_current_user_admin():
+                # Site administrators can view other coaches' data
+                coach_email = self.request_string("coach")
+                if len(coach_email) > 0:
+                    user_coach = users.User(email=coach_email)
+
+            coach_user_data = UserData.get_or_insert_for(user_coach)  
+            students = coach_user_data.get_students()
             exercises = self.get_class_exercises(students)
             table_headers = []            
             table_headers.append("Name")
@@ -385,7 +394,7 @@ class ViewClassReport(request_handler.RequestHandler):
                 'logout_url': logout_url,
                 'table_headers': table_headers,
                 'table_data': table_data,
-                'coach_id': user_data.user.email(),
+                'coach_id': coach_user_data.user.email(),
                 }
             path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
             self.response.out.write(template.render(path, template_values))
