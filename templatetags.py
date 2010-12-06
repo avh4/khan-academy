@@ -4,6 +4,7 @@ import math
 from google.appengine.ext import webapp
 from django import template
 from app import App
+import consts
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -70,7 +71,7 @@ def knowledgemap_embed(exercises, map_coords):
 
 @register.inclusion_tag("related_videos.html")
 def related_videos(exercise_videos):
-    return {"exercise_videos": exercise_videos}
+    return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE}
 
 @register.inclusion_tag("exercise_icon.html")
 def exercise_icon(exercise):

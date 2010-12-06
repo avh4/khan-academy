@@ -26,6 +26,7 @@ except EnvironmentError:
     pass
 
 from django.template.loader import render_to_string
+from django.utils import simplejson
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -44,6 +45,7 @@ import autocomplete
 import coaches
 import api
 import knowledgemap
+import consts
 
 from search import Searchable
 import search
@@ -52,8 +54,9 @@ from app import App
 import app
 import util
 import request_handler
+import points
 
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, PointCalculator, Setting, UserVideo
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo
 
 from discussion import comments
 from discussion import qa
@@ -260,7 +263,6 @@ class ViewExercise(request_handler.RequestHandler):
 
             exercise_non_summative = exercise.non_summative_exercise(user_data)
             exercise_videos = exercise_non_summative.related_videos()
-
             userExercise = user_data.get_or_insert_exercise(exid)
 
             if not problem_number:
@@ -272,7 +274,7 @@ class ViewExercise(request_handler.RequestHandler):
             struggling = user_data.is_struggling_with(exid)
             endangered = proficient and userExercise.streak == 0 and userExercise.longest_streak >= exercise.required_streak()
 
-            exercise_points = PointCalculator(exercise, userExercise, suggested, proficient)
+            exercise_points = points.ExercisePointCalculator(exercise, userExercise, suggested, proficient)
                    
             logout_url = users.create_logout_url(self.request.uri)
             
@@ -445,7 +447,7 @@ class ViewVideo(request_handler.RequestHandler):
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
         readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
-        
+ 
         # If either the readable_id or playlist title is missing, 
         # redirect to the canonical URL that contains them 
         redirect_to_canonical_url = False
@@ -475,7 +477,7 @@ class ViewVideo(request_handler.RequestHandler):
                 return
             playlist = video.first_playlist()
             redirect_to_canonical_url = True
-        
+ 
         if redirect_to_canonical_url:
             self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
             return
@@ -501,7 +503,7 @@ class ViewVideo(request_handler.RequestHandler):
         if video is None:
             report_missing_video(readable_id)
             return
-        
+
         playlists = VideoPlaylist.get_cached_playlists_for_video(video)
         for p in playlists:
             if (playlist is None or p.youtube_id == playlist.youtube_id):
@@ -524,6 +526,11 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
+        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
+        awarded_points = 0
+        if user_video is not None:
+            awarded_points = user_video.points()
+
         # If a QA question is being expanded, we want to clear notifications for its
         # answers before we render page_template so the notification icon shows
         # its updated count. 
@@ -535,6 +542,8 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'videos': videos,
                                                   'video_path': video_path,
                                                   'user': util.get_current_user(),
+                                                  'video_points_base': consts.VIDEO_POINTS_BASE,
+                                                  'awarded_points': awarded_points,
                                                   'exercise': exercise,
                                                   'exercise_videos': exercise_videos,
                                                   'previous_video': previous_video,
@@ -548,6 +557,8 @@ class LogVideoProgress(request_handler.RequestHandler):
     def post(self):
 
         user = util.get_current_user()
+        video_points_total = 0
+        points_total = 0
 
         if user:
 
@@ -556,30 +567,45 @@ class LogVideoProgress(request_handler.RequestHandler):
 
             if video:
 
-                user_video = UserVideo.get_or_insert(
-                            key_name = user.email() + ":" + video.youtube_id,
-                            user = user,
-                            video = video
-                        )
+                user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
+
+                video_points_previous = points.VideoPointCalculator(user_video)
+
                 user_video.last_watched = datetime.datetime.now()
 
                 seconds_watched = 0
                 try:
+                    # Seconds watched is restricted by both the scrubber's position
+                    # and the amount of time spent on the video page
+                    # so we know how *much* of each video each student has watched
                     seconds_watched = int(float(self.request.get("seconds_watched")))
                 except ValueError:
                     pass # Ignore if we can't parse
 
-                percent_watched = 0.0
+                last_second_watched = 0
                 try:
-                    percent_watched = float(self.request.get("percent_watched"))
+                    last_second_watched = int(float(self.request.get("last_second_watched")))
                 except ValueError:
                     pass # Ignore if we can't parse
 
-                if seconds_watched > user_video.seconds_watched:
-                    user_video.seconds_watched = seconds_watched
-                    user_video.percent_watched = percent_watched
+                if last_second_watched > user_video.last_second_watched:
+                    user_video.last_second_watched = last_second_watched
 
+                user_video.seconds_watched += seconds_watched
+                user_video.duration = video.duration
                 user_video.put()
+
+                video_points_total = points.VideoPointCalculator(user_video)
+                video_points_received = video_points_total - video_points_previous
+
+                user_data = UserData.get_or_insert_for(user)
+                user_data.add_points(video_points_received)
+                user_data.put()
+
+                points_total = user_data.points
+
+        json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
+        self.response.out.write(json)
 
 class ViewExerciseVideos(request_handler.RequestHandler):
 
@@ -1087,9 +1113,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             suggested = user_data.is_suggested(exid)
             proficient = user_data.is_proficient_at(exid)
                                 
-            if user_data.points == None:
-                user_data.points = 0
-            user_data.points = user_data.points + PointCalculator(userExercise.get_exercise(), userExercise, suggested, proficient)
+            user_data.add_points(points.ExercisePointCalculator(userExercise.get_exercise(), userExercise, suggested, proficient))
             user_data.put()
 
             if userExercise.total_done:

@@ -168,7 +168,9 @@ $(function(){
         {% youtube_player_embed video.youtube_id %}
 
         <span class="video_extra_links"><nobr>
-        <div class="video-energy-points">0/300</div>
+        {% if user %}
+        <div class="video-energy-points"><span class="video-energy-points-current">{{ awarded_points }}</span>/{{ video_points_base }}</div>
+        {% endif %}
         <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
         {% if exercise %}
             | <a href="/exercises?exid={{exercise}}">Exercises</a>

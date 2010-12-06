@@ -140,16 +140,23 @@ var VideoStats = {
     fAlternativePlayer: false,
     cachedDuration: 0, // For use by alternative FLV player
     cachedCurrentTime: 0, // For use by alternative FLV player
+    dtPageLoad: null,
+    fWindowHasFocus: false,
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
         return this.player.getCurrentTime() || 0;
     },
 
+    getSecondsWatchedRestrictedByPageTime: function() {
+        var secondsPageTime = ((new Date()) - this.dtPageLoad) / 1000.0;
+        return Math.min(secondsPageTime, this.getSecondsWatched());
+    },
+
     getPercentWatched: function() {
         if (!this.player) return 0;
 
-        var duration = this.player.getDuration() || 0;
+        var duration = this.player.getDuration() || 0
         if (duration <= 0) return 0;
 
         return this.getSecondsWatched() / duration;
@@ -160,6 +167,11 @@ var VideoStats = {
         this.dPercentLastSaved = 0;
         this.cachedDuration = 0;
         this.cachedCurrentTime = 0;
+        this.dtPageLoad = new Date();
+
+        this.fWindowHasFocus = true;
+        $(window).focus(function(){ VideoStats.fWindowHasFocus = true; });
+        $(window).blur(function(){ VideoStats.fWindowHasFocus = false; });
 
         // Listen to state changes in player to detect final end of video
         this.listenToPlayerStateChange();
@@ -202,6 +214,12 @@ var VideoStats = {
 
     saveIfChanged: function() {
 
+        if (!this.fWindowHasFocus)
+        {
+            // Only save current stats if the video viewing window has focus
+            return;
+        }
+
         var percent = this.getPercentWatched();
         if (percent > this.dPercentLastSaved && 
                 (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
@@ -222,13 +240,24 @@ var VideoStats = {
         $.post("/logvideoprogress", 
                 {
                     video_key: $("#video_key").val(),
-                    percent_watched: percent,
-                    seconds_watched: this.getSecondsWatched()
+                    last_second_watched: this.getSecondsWatched(),
+                    seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
                 },
-                function () { 
-                    VideoStats.fSaving = false;
-                    VideoStats.dPercentLastSaved = percent;
-                });
+                function (data) { VideoStats.finishSave(data, percent); });
+    },
+
+    finishSave: function(data, percent) {
+        VideoStats.fSaving = false;
+        VideoStats.dPercentLastSaved = percent;
+
+        try { eval("var dict_json = " + data); }
+        catch(e) { return; }
+
+        if (dict_json.video_points && dict_json.points)
+        {
+            $(".video-energy-points-current").text(dict_json.video_points);
+            $("#page_top_nav .energy-points-badge").text(dict_json.points);
+        }
     },
 
     prepareAlternativePlayer: function() {

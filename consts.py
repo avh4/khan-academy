@@ -24,3 +24,5 @@ SUGGESTED_EXERCISE_MULTIPLIER = 3
 # Multiplier for energy points in non-proficient exercise problems
 INCOMPLETE_EXERCISE_MULTIPLIER = 5
 
+# Base energy points awarded for watching an entire video
+VIDEO_POINTS_BASE = 750

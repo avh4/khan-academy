@@ -76,8 +76,8 @@ class Export(request_handler.RequestHandler):
             user_videos = []
             for uv in UserVideo.all().filter('user =', student):
                 uv_dict = {'video': uv.video.youtube_id,
-                           'percent_watched': uv.percent_watched,
                            'seconds_watched': uv.seconds_watched,
+                           'last_second_watched': uv.last_second_watched,
                            'last_watched': self.datetime_to_str(uv.last_watched),        
                 }
                 user_videos.append(uv_dict)  
@@ -209,7 +209,7 @@ class ImportUserData(request_handler.RequestHandler):
                 user_video = UserVideo()
                 user_video.user = student
                 user_video.video = self.get_video(uv["video"])
-                user_video.percent_watched = uv["percent_watched"]
+                user_video.last_second_watched = uv["last_second_watched"]
                 user_video.seconds_watched = uv["seconds_watched"]
                 user_video.last_watched = self.datetime_from_str(uv["last_watched"])  
                 user_video.put()                                    

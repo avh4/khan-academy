@@ -4,7 +4,7 @@
     <ul id="related-video-list">
     {% for exercise_video in exercise_videos %}
         <li>
-            <a href="/video?v={{exercise_video.video.youtube_id}}">{{exercise_video.video.title|escape}}</a><div class="video-energy-points">0/300</div><div class="clear"></div>{% if not forloop.last %}<span class="separator">,</span>{% endif %}
+        <a href="/video?v={{exercise_video.video.youtube_id}}">{{exercise_video.video.title|escape}}</a><div class="video-energy-points">{{ exercise_video.video.current_user_video.points }}/{{ video_points_base }}</div><div class="clear"></div>{% if not forloop.last %}<span class="separator">,</span>{% endif %}
         </li>
 
         {% if not forloop.last %}

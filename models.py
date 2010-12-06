@@ -10,6 +10,7 @@ import cajole
 import app
 import util
 import consts
+import points
 from search import Searchable
 from app import App
 
@@ -380,6 +381,11 @@ class UserData(db.Model):
         	if student_email not in students_set:
         		students.append(student_email)
         return students
+
+    def add_points(self, points):
+        if self.points == None:
+            self.points = 0
+        self.points += points
     
 class Video(Searchable, db.Model):
 
@@ -420,6 +426,9 @@ class Video(Searchable, db.Model):
         query.filter('live_association =', True)
         return query.get().playlist
 
+    def current_user_video(self):
+        return UserVideo.get_for_video_and_user(self, util.get_current_user())
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
@@ -432,11 +441,44 @@ class Playlist(Searchable, db.Model):
     INDEX_USES_MULTI_ENTITIES = False
 
 class UserVideo(db.Model):
+
+    @staticmethod
+    def get_key_name(video, user):
+        return user.email() + ":" + video.youtube_id
+
+    @staticmethod
+    def get_for_video_and_user(video, user, insert_if_missing=False):
+
+        if not user:
+            return None
+
+        key = UserVideo.get_key_name(video, user)
+
+        if insert_if_missing:
+            return UserVideo.get_or_insert(
+                        key_name = key,
+                        user = user,
+                        video = video,
+                        duration = video.duration)
+        else:
+            return UserVideo.get_by_key_name(key)
+
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
-    percent_watched = db.FloatProperty(default = 0.0) # 0.0 to 1.0
+
+    # Farthest second in video watched
+    last_second_watched = db.IntegerProperty(default = 0)
+
+    # Number of seconds actually spent watching this video, regardless of jumping around to various
+    # scrubber positions. This value can exceed the total duration of the video if it is watched
+    # many times, and it doesn't necessarily match the percent wached.
     seconds_watched = db.IntegerProperty(default = 0)
+
     last_watched = db.DateTimeProperty(auto_now_add = True)
+    duration = db.IntegerProperty(default = 0)
+
+    def points(self):
+        return points.VideoPointCalculator(self)
 
 class ProblemLog(db.Model):
 
@@ -616,7 +658,7 @@ class ExerciseGraph(object):
             
         for ex in exercises:
             compute_suggested(ex)
-            ex.points = PointCalculator(ex, ex, ex.suggested, ex.proficient)            
+            ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
 
     def get_review_exercises(self, now):
 
@@ -703,30 +745,3 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
-
-def PointCalculator(exercise, user_exercise, suggested, proficient):
-
-    points = 0
-    
-    required_streak = exercise.required_streak()
-    degrade_threshold = required_streak + consts.DEGRADING_EXERCISES_AFTER_STREAK
-
-    if user_exercise.longest_streak <= required_streak:
-        points = consts.INCOMPLETE_EXERCISE_POINTS_BASE
-    elif user_exercise.longest_streak < degrade_threshold:
-        points = degrade_threshold - user_exercise.longest_streak
-    
-    if (points < consts.EXERCISE_POINTS_BASE):
-        points = consts.EXERCISE_POINTS_BASE
-
-    if exercise.summative:
-        points = points * consts.SUMMATIVE_EXERCISE_MULTIPLIER
-
-    if suggested:
-        points = points * consts.SUGGESTED_EXERCISE_MULTIPLIER
-
-    if not proficient:
-        points = points * consts.INCOMPLETE_EXERCISE_MULTIPLIER
-
-    return int(math.ceil(points))
-
