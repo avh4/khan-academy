@@ -33,9 +33,15 @@ def deploy(version):
 def main():
 
     parser = optparse.OptionParser()
+
     parser.add_option('-f', '--force',
         action="store_true", dest="force",
         help="Force deploy even with local changes", default=False)
+
+    parser.add_option('-v', '--version',
+        action="store", dest="version",
+        help="Override the deployed version identifier", default="")
+
     options, args = parser.parse_args()
 
     if not options.force:
@@ -47,6 +53,9 @@ def main():
     if version <= 0:
         print "Could not find version in 'svn up' output."
         return
+
+    if len(options.version) > 0:
+        version = options.version
 
     deploy(version)
 
