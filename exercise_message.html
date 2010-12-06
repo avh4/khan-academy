@@ -1,4 +1,4 @@
-<div class="exercise_message">
+<div class="exercise_message" style="display:none;">
 {% if endangered %}
 	Uh oh.&nbsp;  You missed a problem in an exercise that you'd previously mastered.&nbsp;
 	If you get this problem right without any hints, I'll assume you're still proficient.
@@ -31,3 +31,4 @@
 	{% endif %}
 {% endif %}
 </div>
+<script>$(window).load(function(){$(".exercise_message").slideDown();});</script>
