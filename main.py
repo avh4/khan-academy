@@ -569,6 +569,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
 
+                seconds_watched_previous = user_video.seconds_watched
                 video_points_previous = points.VideoPointCalculator(user_video)
 
                 user_video.last_watched = datetime.datetime.now()
@@ -591,7 +592,11 @@ class LogVideoProgress(request_handler.RequestHandler):
                 if last_second_watched > user_video.last_second_watched:
                     user_video.last_second_watched = last_second_watched
 
-                user_video.seconds_watched += seconds_watched
+                seconds_watched_received = seconds_watched - seconds_watched_previous
+
+                if seconds_watched_received > 0:
+                    user_video.seconds_watched += seconds_watched_received
+
                 user_video.duration = video.duration
                 user_video.put()
 
@@ -599,7 +604,10 @@ class LogVideoProgress(request_handler.RequestHandler):
                 video_points_received = video_points_total - video_points_previous
 
                 user_data = UserData.get_or_insert_for(user)
-                user_data.add_points(video_points_received)
+
+                if video_points_received > 0:
+                    user_data.add_points(video_points_received)
+
                 user_data.put()
 
                 points_total = user_data.points
