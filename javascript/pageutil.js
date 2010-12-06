@@ -275,7 +275,12 @@ var VideoStats = {
     },
 
     cacheStats: function(time, duration) {
-        this.cachedCurrentTime = parseFloat(time);
+
+        // Only update current time if it exists, not if video finished
+        // and scrubber went back to 0.
+        var currentTime = parseFloat(time);
+        if (currentTime) this.cachedCurrentTime = currentTime;
+
         this.cachedDuration = parseFloat(duration);
     }
 };

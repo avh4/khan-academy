@@ -102,7 +102,7 @@ class TemplateMaxi extends TemplateMaxiBase
 		});
 		Stage.addListener(stageListener);
 
-        setInterval(this, "jsSendStats", 5000);
+        setInterval(this, "jsSendStats", 500);
 	}
 	/**
 	 * Lancé par mtasc
