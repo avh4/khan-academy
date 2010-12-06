@@ -167,6 +167,7 @@ class UpdateVideoData(request_handler.RequestHandler):
                 
         # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
         query = VideoPlaylist.all()
+        all_video_playlists = []
         for video_playlist in query:
             video_playlist.live_association = False
             all_video_playlists.append(video_playlist)
