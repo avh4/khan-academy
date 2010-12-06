@@ -267,7 +267,7 @@ class ViewExercise(request_handler.RequestHandler):
 
             proficient = exercise.proficient = user_data.is_proficient_at(exid)
             suggested = exercise.suggested = user_data.is_suggested(exid)
-            reviewing = exercise.review = user_data.is_reviewing(exid, self.get_time())
+            reviewing = exercise.review = user_data.is_reviewing(exid, userExercise, self.get_time())
             struggling = user_data.is_struggling_with(exid)
             endangered = proficient and userExercise.streak == 0 and userExercise.longest_streak >= exercise.required_streak()
 

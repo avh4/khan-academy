@@ -284,13 +284,19 @@ class UserData(db.Model):
         return user_data
 
     def get_or_insert_exercise(self, exid):
-        # Once we have reparented and rekeyed legacy entities,
-        # the next block can just be a call to .get_or_insert()
-        query = UserExercise.all()
-        query.filter('user =', self.user)
-        query.filter('exercise =', exid)
-        query.order('-total_done') # Temporary workaround for issue 289
-        userExercise = query.get()
+
+        userExercise = UserExercise.get_by_key_name(exid, parent=self)
+
+        if not userExercise:
+            # There are some old entities lying around that don't have keys.
+            # We have to check for them here, but once we have reparented and rekeyed legacy entities,
+            # this entire function can just be a call to .get_or_insert()
+            query = UserExercise.all()
+            query.filter('user =', self.user)
+            query.filter('exercise =', exid)
+            query.order('-total_done') # Temporary workaround for issue 289
+            userExercise = query.get()
+
         if not userExercise:
             userExercise = UserExercise.get_or_insert(
                 key_name=exid,
@@ -303,6 +309,7 @@ class UserData(db.Model):
                 last_done=datetime.datetime.now(),
                 total_done=0,
                 )
+
         return userExercise
         
     def reassess_from_graph(self, ex_graph):
@@ -329,7 +336,16 @@ class UserData(db.Model):
         self.reassess_if_necessary()
         return (exid in self.all_proficient_exercises)
 
-    def is_reviewing(self, exid, time):
+    def is_reviewing(self, exid, user_exercise, time):
+
+        # Short circuit out of full review check if not proficient or review time hasn't come around yet
+
+        if not self.is_proficient_at(exid):
+            return False
+
+        if user_exercise.last_review + user_exercise.get_review_interval() > time:
+            return False
+
         ex_graph = ExerciseGraph(self)
         review_exercise_names = map(lambda exercise: exercise.name, ex_graph.get_review_exercises(time))
         return (exid in review_exercise_names)
