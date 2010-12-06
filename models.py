@@ -64,9 +64,11 @@ class UserExercise(db.Model):
         db.Model.put(self)
 
     def get_exercise(self):
-        query = Exercise.all()
-        query.filter('name =', self.exercise)
-        return query.get()
+        if not hasattr(self, "cached_exercise"):
+            query = Exercise.all()
+            query.filter('name =', self.exercise)
+            self.cached_exercise = query.get()
+        return self.cached_exercise
 
     def required_streak(self):
         return self.get_exercise().required_streak()
