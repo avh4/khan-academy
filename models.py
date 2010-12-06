@@ -426,8 +426,12 @@ class Video(Searchable, db.Model):
         query.filter('live_association =', True)
         return query.get().playlist
 
-    def current_user_video(self):
-        return UserVideo.get_for_video_and_user(self, util.get_current_user())
+    def current_user_points(self):
+        user_video = UserVideo.get_for_video_and_user(self, util.get_current_user())
+        if user_video:
+            return points.VideoPointCalculator(user_video)
+        else:
+            return 0
 
 class Playlist(Searchable, db.Model):
 
