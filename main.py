@@ -144,7 +144,6 @@ class UpdateVideoReadableNames(request_handler.RequestHandler):  #Makes sure eve
                     number_to_add+=1
                     current_id = potential_id+'-'+number_to_add                       
         
-
 class UpdateVideoData(request_handler.RequestHandler):
 
     def get(self):
@@ -168,10 +167,10 @@ class UpdateVideoData(request_handler.RequestHandler):
                 
         # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
         query = VideoPlaylist.all()
-        all_video_playlists = query.fetch(100000)
-        for video_playlist in all_video_playlists:
+        for video_playlist in query:
             video_playlist.live_association = False
-            video_playlist.put()
+            all_video_playlists.append(video_playlist)
+        db.put(all_video_playlists)
 
         for playlist in playlist_feed.entry:
             self.response.out.write('<p>Playlist  ' + playlist.id.text)
