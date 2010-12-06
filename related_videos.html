@@ -1,14 +1,19 @@
 
 {% if exercise_videos %}
 <span class="related-content-title">Related videos:</span>
+    <ul id="related-video-list">
     {% for exercise_video in exercise_videos %}
-        <a href="/video?v={{exercise_video.video.youtube_id}}">{{exercise_video.video.title|escape}}</a>{% if not forloop.last %},{% endif %}
+        <li>
+            <a href="/video?v={{exercise_video.video.youtube_id}}">{{exercise_video.video.title|escape}}</a><div class="video-energy-points">0/300</div><div class="clear"></div>{% if not forloop.last %}<span class="separator">,</span>{% endif %}
+        </li>
 
         {% if not forloop.last %}
             {% ifequal forloop.counter 3 %}
-                <a href="#" id="related_videos_more" 
-                    onclick="$(this).siblings('#related_videos_hidden').show();$(this).hide();return false;">more...</a>
-                <span id="related_videos_hidden" style="display:none;">
+                <li>
+                    <a href="#" id="related_videos_more" 
+                        onclick="$(this).siblings('#related_videos_hidden').show();$(this).hide();return false;">more...</a>
+                </li>
+                    <span id="related_videos_hidden" style="display:none;">    
             {% endifequal %}
         {% else %}
             {% if forloop.counter|greater_than:3 %}
@@ -17,4 +22,5 @@
         {% endif %}
 
     {% endfor %}
+    </ul>
 {% endif %}

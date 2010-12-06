@@ -174,7 +174,10 @@ function submitForm(value)
             <span class="info-box-header">Need Help?</span>
 
             <span class="info-box-subheader">Watch a video</span>
-            {% related_videos exercise_videos %}
+            <span class="info-box-sub-description">Watching videos <strong>does not</strong> reset your streak.</span>
+            <div id="related-video-list">
+                {% related_videos exercise_videos %}
+            </div>
 
             {% if exercise.summative %}
                 <span class="info-box-subheader">Prepare for this challenge</span>
@@ -182,7 +185,7 @@ function submitForm(value)
             {% endif %}
 
             <span class="info-box-subheader">Get a hint</span>
-            <p>A hint will help you solve the problem, but <em>it will reset your streak</em>.</p>
+            <span class="info-box-sub-description">Getting a hint <strong>will</strong> reset your streak!</span>
             <input id="hint" type="button" class="button orange" value="I'd like a hint" name="hint" onClick="evaluate_hint();">
         </div>
         </form>

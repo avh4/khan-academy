@@ -168,10 +168,11 @@ $(function(){
         {% youtube_player_embed video.youtube_id %}
 
         <span class="video_extra_links"><nobr>
-        <a href="{{video_path}}">Download</a>
+        <div class="video-energy-points">0/300</div>
+        <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
         {% if exercise %}
             | <a href="/exercises?exid={{exercise}}">Exercises</a>
-            {% endif %}
+            {% endif %}</span>
         </nobr></span>
         {% if playlists %}
         <label id="playlists">

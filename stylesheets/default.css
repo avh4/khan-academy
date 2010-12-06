@@ -118,6 +118,11 @@ footer {
     clear: right;
     float: right;
 }
+#page_status #page_points {
+    float:right;
+    padding-top: 5px;
+    padding-right: 7px;
+}
 
 #page_login_options * {
     vertical-align: middle;
@@ -315,7 +320,14 @@ article.video p#keywords {
 span.video_extra_links {
     float: left;
 }
-
+span.video_extra_links span.extra-link-bar {
+    position: relative;
+    top: 5px;
+    padding-left: 5px;
+}
+span.video_extra_links div.video-energy-points {
+    float: left;
+}
 a:visited.google-analytics-link-track, 
 a:link.google-analytics-link-track
  { /*these GA click tracking links have onclick= JS tags -- need to undo the dotted border style that applies to these by default */
@@ -718,6 +730,28 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: absolute;
     width: 520px;
 }
+    .exercise-badge.single-exercise .related-content .related-content-title {
+        float: left;
+        margin-right: 3px;
+    }
+    .exercise-badge.single-exercise .related-content .clear {
+        display: none;
+    }
+    .exercise-badge.single-exercise .related-content .video-energy-points {
+        display: none;
+    }
+    .exercise-badge.single-exercise .related-content ul#related-video-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: inline;
+    }
+        .exercise-badge.single-exercise .related-content ul#related-video-list li {
+            float: left;
+        }
+        .exercise-badge.single-exercise .related-content ul#related-video-list li span.separator {
+            padding-right: 5px;
+        }
 #extras.single-exercise {
     text-align: right;
     margin: 6px 0 10px;
@@ -769,6 +803,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         color: #333;
         margin-bottom: 10px;
         padding: 10px;
+        position: relative;
+        z-index: -1;
         
         box-shadow: 0 1px 2px #ccc;
         -moz-box-shadow: 0 1px 2px #ccc;
@@ -793,6 +829,48 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     #answer_area .info-box .related-content-title {
         display: none;
     }
+    #answer_area .info-box #related-video-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+        #answer_area .info-box #related-video-list li {
+            display: block;
+            margin-bottom: 5px;
+        }
+        #answer_area .info-box #related-video-list a {
+            display: block;
+            float: left;
+            padding-top: 4px;
+        }
+        #answer_area .info-box #related-video-list .separator {
+            display: none;
+        }
+        /* Energy points badge look. Should be used wherever we display energy points */
+        #answer_area .info-box #related-video-list .video-energy-points,
+        .video_extra_links .video-energy-points,
+        #page_status .energy-points-badge {
+            background: #0080C9;
+            border-right: 2px solid #00659E;
+            border-top: 2px solid #2994D2;
+            border-left: 2px solid #2994D2;
+            border-bottom: 2px solid #00659E;
+            float: right;
+            text-align: center;
+            padding: 3px 5px 2px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0px -1px 0px #666;
+        }
+    #answer_area .info-box .info-box-sub-description {
+        display: block;
+        color: #777;
+        margin-bottom: 10px;
+    }
+        #answer_area .info-box .info-box-sub-description strong {
+            color: #444;
+            font-style: italic;
+        }
     #answer_area .info-box #check-answer-results #feedback {
         padding: 10px 0 5px;
     }
