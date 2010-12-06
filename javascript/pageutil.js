@@ -140,7 +140,7 @@ var VideoStats = {
     fAlternativePlayer: false,
     cachedDuration: 0, // For use by alternative FLV player
     cachedCurrentTime: 0, // For use by alternative FLV player
-    dtPageLoad: null,
+    dtSinceSave: null,
     fWindowHasFocus: false,
 
     getSecondsWatched: function() {
@@ -149,7 +149,7 @@ var VideoStats = {
     },
 
     getSecondsWatchedRestrictedByPageTime: function() {
-        var secondsPageTime = ((new Date()) - this.dtPageLoad) / 1000.0;
+        var secondsPageTime = ((new Date()) - this.dtSinceSave) / 1000.0;
         return Math.min(secondsPageTime, this.getSecondsWatched());
     },
 
@@ -167,7 +167,7 @@ var VideoStats = {
         this.dPercentLastSaved = 0;
         this.cachedDuration = 0;
         this.cachedCurrentTime = 0;
-        this.dtPageLoad = new Date();
+        this.dtSinceSave = new Date();
 
         this.fWindowHasFocus = true;
         $(window).focus(function(){ VideoStats.fWindowHasFocus = true; });
@@ -244,6 +244,8 @@ var VideoStats = {
                     seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
                 },
                 function (data) { VideoStats.finishSave(data, percent); });
+
+        this.dtSinceSave = new Date();
     },
 
     finishSave: function(data, percent) {
