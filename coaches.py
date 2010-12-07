@@ -142,7 +142,7 @@ class ViewIndividualReport(request_handler.RequestHandler):
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                if (not users.is_current_user_admin()) and user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own report")
@@ -227,7 +227,7 @@ class ViewProgressChart(request_handler.RequestHandler):
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                if (not users.is_current_user_admin()) and user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own report")
@@ -449,7 +449,7 @@ class ViewCharts(request_handler.RequestHandler):
                 #logging.info("user is a coach trying to look at data for student")
                 student = users.User(email=student_email)
                 user_data = UserData.get_or_insert_for(student)
-                if user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                if (not users.is_current_user_admin()) and user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
                     raise Exception('Student '+ student_email + ' does not have you as their coach')
             else:
                 #logging.info("user is a student looking at their own report")
