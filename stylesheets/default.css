@@ -729,10 +729,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     right: 66px;
 }
 .exercise-badge.single-exercise .related-content {
-    bottom: 7px;
+    top: 30px;
     left: 70px;
     position: absolute;
-    width: 520px;
+    width: 535px;
 }
     .exercise-badge.single-exercise .related-content .related-content-title {
         float: left;
