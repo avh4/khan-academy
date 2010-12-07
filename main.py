@@ -289,6 +289,9 @@ class ViewExercise(request_handler.RequestHandler):
             if exercise.summative:
                 num_problems_to_print = 0
 
+            # When viewing a problem out-of-order, show read-only view
+            read_only = problem_number != (userExercise.total_done + 1)
+
             template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_template.html',
@@ -314,6 +317,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'streak': userExercise.streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
+                'read_only': read_only,
                 'num_problems_to_print': num_problems_to_print,
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }

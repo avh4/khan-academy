@@ -76,8 +76,10 @@ function submitForm(value)
         </div>
     </div>
 
-    {% if endangered or reviewing or proficient or struggling %}
-        {% exercise_message exercise coaches endangered reviewing proficient struggling %}
+    {% if not read_only %}
+        {% if endangered or reviewing or proficient or struggling %}
+            {% exercise_message exercise coaches endangered reviewing proficient struggling %}
+        {% endif %}
     {% endif %}
     
 <div id="extras" class="single-exercise">
@@ -85,10 +87,11 @@ function submitForm(value)
     	<a id="scratch_pad_show" href="#" style="display: none;">Show scratch pad</a>
     	<a id="scratch_pad_hide" href="#" style="display: none;">Hide scratch pad</a>
     </div>
-    {% if num_problems_to_print %}
+    {% if not read_only and num_problems_to_print %}
         | <A href="/printexercise?exid={{exid}}&num_problems={{num_problems_to_print}}">Print next {{num_problems_to_print}} problems</A>
     {% endif %}
 </div>
+
 <div>
 	<div id='question_area'>
 {% block maincode %}
@@ -108,6 +111,15 @@ function submitForm(value)
 	   <div class="info-box">
 		{% block answergraphdisplay %} {% endblock answergraphdisplay %}
 			{% block answerform %}
+
+            {% if read_only %}
+                <span class="info-box-header">Problem #{{ problem_number }}</span>
+                <span class="info-box-subheader">You are viewing a problem in {{ exercise.display_name|escape }}.</span>
+                <span class="info-box-sub-description">To see the solution, 
+                    <input class="button orange" type="button" value="show the next hint." onclick="evaluate_hint(true);"/></span>
+                <span class="info-box-sub-description">To work on problems like this, <a href="/exercises?exid={{ exid }}">start this exercise</a>.</span>
+            {% else %}
+
 			<input type="hidden" id="exid" name="exid" value="{{exid}}">
 			<input type="hidden" id="streak" name="streak" value="{{streak}}">
 			<input type="hidden" id="key" name="key" value="{{key}}">
@@ -116,7 +128,8 @@ function submitForm(value)
 			<input type="hidden" id="hint_used" name="hint_used" value="0" />
 			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-			{% block answerarea %}<span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">{% endblock answerarea %}
+            {% block answerarea %}<span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">{% endblock answerarea %}
+
 			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
 			<div id="check-answer-results" style="display: none;">
                 <img src="/images/blank.gif" name="feedback" id="feedback">
@@ -124,6 +137,7 @@ function submitForm(value)
                     <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()">
                 </div>
             </div>
+            {% endif %}
 			{% endblock answerform %}
 		<script language=Javascript1.2><!--
 			// some modules already have a check_answer...
@@ -142,9 +156,9 @@ function submitForm(value)
 			}
 			function relabel_hint()
 			{
-				elForm.hint.value = "Next Hint";
+				if (elForm && elForm.hint) elForm.hint.value = "Next Hint";
 			}
-			function evaluate_hint()
+			function evaluate_hint(fSkipConfirmation)
 			{
 				confirmed = true;
 				confirmation_text = 'One-time warning: Using a hint will erase your streak.\nAre you sure you want to continue?'
@@ -153,7 +167,9 @@ function submitForm(value)
 				cookie_length = 365; //days
 
 				if(readCookie(cookie_name) != cookie_value)
-					confirmed = false;
+                    confirmed = false;
+
+                confirmed = confirmed || fSkipConfirmation
 
 				if(confirmed || confirm(confirmation_text))
 				{
@@ -161,7 +177,8 @@ function submitForm(value)
 					{% block hintfunction %}next_step(){% endblock hintfunction %};
 				}
 
-				createCookie(cookie_name,cookie_value,cookie_length);
+                if (!fSkipConfirmation)
+    				createCookie(cookie_name,cookie_value,cookie_length);
 			}
 			function highlight_answer()
 			{
@@ -184,9 +201,11 @@ function submitForm(value)
                 <a href="/exercises?exid={{exercise_non_summative.name|escape}}">Practice more problems like this one</a>.
             {% endif %}
 
+            {% if not read_only %}
             <span class="info-box-subheader">Get a hint</span>
             <span class="info-box-sub-description">Getting a hint <strong>will</strong> reset your streak!</span>
             <input id="hint" type="button" class="button orange" value="I'd like a hint" name="hint" onClick="evaluate_hint();">
+            {% endif %}
         </div>
         </form>
 	</div>

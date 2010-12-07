@@ -27,7 +27,14 @@ var chart;
                             lineWidth: 1
                         },
                         series: {
-                            showInLegend: false
+                            showInLegend: false,
+                            point: {
+                                events: {
+                                    click: function() {
+                                        window.location = '/exercises?exid={{ exid|escapejs }}&problem_number=' + this.x;
+                                    }
+                                }
+                            }
                     }
                     },
 					title: {
@@ -61,9 +68,10 @@ var chart;
 					},
 					tooltip: {
 						formatter: function() {
-                                       return '<b>Problem ' + this.point.x + ' - ' + (this.point.correct ? "Correct" : "Incorrect") +
+                            return '<b><a style="color:blue;" href="/exercises?exid={{ exid|escapejs }}&problem_number=' + this.point.x + '">Problem ' + this.point.x + '</a> - ' + (this.point.correct ? "Correct" : "Incorrect") +
                                            '</b><br/>' + 
-                                           'Seconds used: ' + this.point.time_taken;
+                                       'Seconds used: ' + this.point.time_taken + '<br/><br/>' +
+                                       '<em>Click the graph to view this problem</em>.';
 						}
 					},
 					legend: {
