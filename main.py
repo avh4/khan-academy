@@ -1125,7 +1125,6 @@ class RegisterAnswer(request_handler.RequestHandler):
                 userExercise.total_done = userExercise.total_done + 1
             else:
                 userExercise.total_done = 1
-            userExercise.schedule_review(correct, self.get_time())
             if correct:
                 userExercise.streak = userExercise.streak + 1
                 if userExercise.streak > userExercise.longest_streak:

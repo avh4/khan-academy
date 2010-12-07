@@ -44,7 +44,7 @@ class UserExercise(db.Model):
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty()
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
-    review_interval_secs = db.IntegerProperty(default=86400)
+    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * 3)) # Default 3 days until review
     proficient_date = db.DateTimeProperty()
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
