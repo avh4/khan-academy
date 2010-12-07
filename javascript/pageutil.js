@@ -257,7 +257,9 @@ var VideoStats = {
 
         if (dict_json.video_points && dict_json.points)
         {
-            $(".video-energy-points-current").text(dict_json.video_points);
+            var jelPoints = $(".video-energy-points");
+            jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
+            $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
             $("#page_top_nav .energy-points-badge").text(dict_json.points);
         }
     },

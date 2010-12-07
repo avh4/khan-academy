@@ -169,7 +169,7 @@ $(function(){
 
         <span class="video_extra_links"><nobr>
         {% if user %}
-        <div class="video-energy-points"><span class="video-energy-points-current">{{ awarded_points }}</span>/{{ video_points_base }}</div>
+            {% possible_points_badge awarded_points video_points_base %}
         {% endif %}
         <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
         {% if exercise %}

@@ -846,7 +846,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             display: block;
             float: left;
             padding: 4px 0 0 2px;
-            max-width: 225px;
+            max-width: 200px;
             overflow: hidden;
             text-overflow: ellipsis;
         }

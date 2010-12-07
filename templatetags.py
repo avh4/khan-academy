@@ -102,6 +102,10 @@ def exercise_message(exercise, coaches, endangered, reviewing, proficient, strug
             "struggling": struggling
             }
 
+@register.inclusion_tag("possible_points_badge.html")
+def possible_points_badge(points, possible_points):
+    return {"points": points, "possible_points": possible_points}
+
 @register.inclusion_tag("streak_bar.html")
 def streak_bar(user_exercise):
 
