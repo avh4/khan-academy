@@ -9,6 +9,7 @@ from math import sqrt
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
+from django.utils import simplejson
 
 from app import App
 import app
@@ -208,7 +209,44 @@ class ViewIndividualReport(request_handler.RequestHandler):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)      
             
+class ViewSharedPoints(request_handler.RequestHandler):
 
+    def get(self):
+
+        user = util.get_current_user()
+
+        if user:
+
+            logout_url = users.create_logout_url(self.request.uri)
+            user_coach = None
+
+            coach_email = self.request_string("coach")
+            if len(coach_email) > 0:
+                user_coach = users.User(email=coach_email)
+                if user_coach:
+                    user_data = UserData.get_or_insert_for(user_coach)
+
+            if self.request_bool("update", default=False):
+                points = 0
+                if user_data:
+                    students_data = user_data.get_students_data()
+                    for student_data in students_data:
+                        points += student_data.points
+                json = simplejson.dumps({"points": points})
+                self.response.out.write(json)
+            else:
+                template_values = {
+                        'App' : App,
+                        'username': user.nickname(),
+                        'logout_url': logout_url,  
+                        'user_coach': user_coach,
+                        'coach_email': coach_email
+                        }
+                path = os.path.join(os.path.dirname(__file__), 'viewsharedpoints.html')
+                self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(util.create_login_url(self.request.uri))  
+        
 class ViewProgressChart(request_handler.RequestHandler):
 
     def get(self):    
@@ -532,6 +570,7 @@ class ViewCharts(request_handler.RequestHandler):
                 'username': user.nickname(),
                 'logout_url': logout_url,
                 'exercise_name': exercise_name.replace('_', ' ').capitalize(),
+                'exid': exercise_name,
                 'problems': problem_list,
                 'num_problems': num_problems,
                 'max_time_taken': max_time_taken,

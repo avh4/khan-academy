@@ -1986,6 +1986,7 @@ def real_main():
         ('/unregistercoach', coaches.UnregisterCoach),          
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        
+        ('/sharedpoints', coaches.ViewSharedPoints),        
         ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
         ('/charts', coaches.ViewCharts),

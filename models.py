@@ -366,21 +366,23 @@ class UserData(db.Model):
     def is_suggested(self, exid):
         self.reassess_if_necessary()
         return (exid in self.suggested_exercises)
-    
-    def get_students(self):
+
+    def get_students_data(self):
         coach_email = self.user.email()   
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
-        students = []
-        for student in query:
-            students.append(student.user.email())
+        students_data = []
+        for student_data in query:
+            students_data.append(student_data)
         if coach_email.lower() != coach_email:
-            students_set = set(students)
+            students_set = set(map(lambda student_data: student_data.key().id_or_name(), students_data))
             query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email.lower())
-            for student in query:
-                student_email = student.user.email()
-        	if student_email not in students_set:
-        		students.append(student_email)
-        return students
+            for student_data in query:
+        	    if student_data.key().id_or_name() not in students_set:
+        		    students_data.append(student_data)
+        return students_data
+   
+    def get_students(self):
+        return map(lambda student_data: student_data.user.email(), self.get_students_data())
 
     def add_points(self, points):
         if self.points == None:
