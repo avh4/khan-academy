@@ -856,6 +856,14 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         #answer_area .info-box #related-video-list .separator {
             display: none;
         }
+        #answer_area .info-box #related-video-list .related-videos-more {
+            float: none;
+            clear:both;
+        }
+            #answer_area .info-box #related-video-list .related-videos-more a {
+                float: none;
+                display: inline;
+            }
         /* Energy points badge look. Should be used wherever we display energy points */
         #answer_area .info-box #related-video-list .video-energy-points,
         .video_extra_links .video-energy-points,
