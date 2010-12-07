@@ -11,118 +11,84 @@
 {% else %}
 <p>The chart below shows {{student|escape}}'s progress on the exercises.</p>
 
-<script type="text/javascript" src="javascript/protovis-r3.2.js"></script>
-<!--script type="text/javascript" src="javascript/jquery.tipsy.js"></script-->
-<script type="text/javascript+protovis">
-var data = [
-{% for user_exercise in user_exercises %}{ exercise_num: {{forloop.counter}}, name: '{{user_exercise.name}}', exid: '{{user_exercise.exid}}', days_until_proficient: {{user_exercise.days_until_proficient}}, proficient_date: '{{user_exercise.proficient_date}}' },
-{% endfor %}];
+<script type="text/javascript" src="javascript/highcharts/highcharts.js"></script>
+<script>
 
-/* Chart dimensions and scales. */
-var w = 800,
-    h = 400,
-    x = pv.Scale.linear(0, {{max_days}}).range(0, w),
-    y = pv.Scale.linear(data, function(d) d.exercise_num).range(0, h),
-    padding = 100,
-    i = -1;
+var chart;
+			$(document).ready(function() {
+				chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'highchart',
+						defaultSeriesType: 'scatter',
+						marginRight: 130,
+						marginBottom: 100
+					},
+                    plotOptions: {
+                        scatter: {
+                            dashStyle: 'Solid',
+                            lineWidth: 1
+                        },
+                        series: {
+                            showInLegend: false
+                    }
+                    },
+					title: {
+                        text: "{{ student|escapejs }}",
+						x: -20 //center
+					},
+					subtitle: {
+						text: 'Exercise Progress Over Time',
+						x: -20
+					},
+					xAxis: {
+						title: {
+							text: 'Days working on the site'
+						},
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					yAxis: {
+						title: {
+							text: 'Modules Completed'
+						},
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					tooltip: {
+						formatter: function() {
+				                return '<b>' + this.point.name + '</b><br/>' + this.point.dt;
+						}
+					},
+					legend: {
+						layout: 'vertical',
+						align: 'right',
+						verticalAlign: 'top',
+						x: -10,
+						y: 100,
+						borderWidth: 0
+					},
+                    series: [{data:[
+                            {% for user_exercise in user_exercises %}
+                            { dt: '{{ user_exercise.proficient_date|escapejs }}', name: '{{ user_exercise.name|escapejs }}', x: {{ user_exercise.days_until_proficient }}, y: {{forloop.counter}} }
+                            {% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                            ]}]
+				});
+			});
 
-/* The root panel. */
-var vis = new pv.Panel()
-    .width(w)
-    .height(h)
-    .right(padding+50)
-    .left(padding)
-    .top(padding)
-    .bottom(padding)
-    .events("all")
-    .event("mousemove", pv.Behavior.point());
-
-/* Y-ticks. */
-vis.add(pv.Rule)
-    .data(y.ticks())
-    .bottom(function(d) Math.round(y(d)) - .5)
-    .strokeStyle(function(d) d ? "#eee" : "#000")
-  .anchor("left").add(pv.Label)
-    .text(function(d) y.tickFormat(d));
-
-/* X-ticks. */
-vis.add(pv.Rule)
-    .data(x.ticks())
-    .left(function(d) Math.round(x(d)) - .5)
-    .strokeStyle(function(d) d ? "#eee" : "#000")
-  .anchor("bottom").add(pv.Label)
-    .text(function(d) x.tickFormat(d));
-
-/* The line. */
-var line = vis.add(pv.Line)
-    .data(data)
-    .left(function(d) x(d.days_until_proficient))
-    .bottom(function(d) y(d.exercise_num))
-    .lineWidth(2);
-
-/* The mouseover dots and label. (commented out)
-line.add(pv.Dot)
-    .visible(function() i >= 0)
-    .data(function() [data[i]])
-    .fillStyle(function() line.strokeStyle())
-    .strokeStyle("#000")
-    .size(20)
-    .lineWidth(1)
-  .add(pv.Dot)
-    .left(10)
-    .bottom(10)
-  .anchor("right").add(pv.Label)
-    .text(function(d) d.name);*/
-
-/* The mouseover dots and label.*/
-vis.add(pv.Dot)
-    .def("active", -1)
-    .data(data)
-    .left(function(d) x(d.days_until_proficient))
-    .bottom(function(d) y(d.exercise_num))
-    .fillStyle(function() this.strokeStyle().alpha(.2))
-    .event("point", function() this.active(this.index).parent)
-    .event("unpoint", function() this.active(-1).parent)
-    //.event("mouseover", pv.Behavior.tipsy({gravity: "w", fade: true}))
-    .size(0)
-  .anchor("right").add(pv.Label)
-    .visible(function() this.anchorTarget().active() == this.index)
-    .text(function(d) d.name + " on " + d.proficient_date);
-
-/* An invisible bar to capture events without flickering (commented out)
-vis.add(pv.Bar)
-    .fillStyle("rgba(0,0,0,.001)")
-    .event("mouseout", function() {
-        i = -1;
-        return vis;
-      })
-    .event("mousemove", function() {
-        var mx = x.invert(vis.mouse().x);
-        i = pv.search(data.map(function(d) d.days_until_proficient), mx);
-        i = i < 0 ? (-i - 2) : i;
-        return vis;
-      });*/
-
-vis.add(pv.Label)
-    .bottom(200)
-    .left(-80)
-    .text("Modules");
-
-vis.add(pv.Label)
-    .bottom(190)
-    .left(-80)
-    .text("Completed");
-
-vis.add(pv.Label)
-    .bottom(-30)
-    .left(350)
-    .text("Days working on the site");
-
-vis.render();
 </script>
 {% endifequal %}
 {% endifequal %}
 {% endif %}
 
+<div id="highchart"></div>
+
 {% endblock pagecontent %}
+
 

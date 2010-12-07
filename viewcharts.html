@@ -9,142 +9,93 @@
 {% else %}{% ifequal num_problems 2 %}
 <p>{{student|escape}} has done only two problems for {{exercise_name|escape}}</p>
 {% else %}
-<p>The charts below show progress for {{student|escape}} on the {{exercise_name|escape}} exercise.  The first one has a bar for each problem
-done, with it's height showing how many seconds were taken to complete it.  The blue bars denote a problem answered correctly,
-the red incorrectly. A chart with blue bars that get smaller shows increasing proficiency in the exercise.
-</p>
-<script type="text/javascript" src="javascript/protovis-r3.2.js"></script>
-<script type="text/javascript+protovis">
-var problems = [
-{% for problem in problems %}{ problem_num: {{forloop.counter}}, time_taken: {{problem.time_taken}}, moving_average: {{problem.moving_average}}, correct: {{problem.correct}} },
-{% endfor %}];
-var w = 300,
-    h = 200,
-    x = pv.Scale.linear(0, {{num_problems}}).range(0, w),
-    y = pv.Scale.linear(0, {{max_time_taken}}).range(0, h),
-    padding = 60;
+<script type="text/javascript" src="javascript/highcharts/highcharts.js"></script>
 
-var vis = new pv.Panel()
-    .width(w)
-    .height(h)
-    .right(padding)
-    .left(padding+10)
-    .top(padding)
-    .bottom(padding);
-
-/* Y-axis. */
-vis.add(pv.Rule)
-    .bottom(-.5)
-  .add(pv.Rule)
-    .data(pv.range(0, {{max_time_taken}}, {{y_axis_interval}}))
-    .bottom(y)
-    .strokeStyle("grey")
-  .anchor("left").add(pv.Label)
-
-vis.add(pv.Label)
-    .left(-40)
-    .top(110)
-    .textAlign("center")
-    .text("seconds");
-
-/* Time taken to do a problem*/
-vis.add(pv.Bar)
-    .data(problems)
-    .bottom(0)
-    .width(w/{{num_problems}})
-    .height(function(d) y(d.time_taken))
-    .fillStyle(function(d) d.correct == 1 ? "lightblue" : "red")
-    .strokeStyle("grey")
-    .lineWidth(1)
-    .left(function() this.index * w/{{num_problems}});
-
-/* Moving average */
-vis.add(pv.Area)
-    .data(problems.filter(function(d) d.moving_average))
-    .left(function(d) x(d.problem_num))
-    .bottom(0)
-    .height(function(d) y(d.moving_average))
-    .fillStyle(null)
-  .anchor("top").add(pv.Line)
-    .lineWidth(1)
-    .strokeStyle("green");
-
-vis.add(pv.Label)
-    .bottom(-15)
-    .left(0)
-    .text("Problems Done (oldest to most recent)");
-
-vis.render();
+<script>
+var chart;
+			$(document).ready(function() {
+				chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'highchart_problems',
+						defaultSeriesType: 'column',
+						marginRight: 130,
+						marginBottom: 100
+					},
+                    plotOptions: {
+                        scatter: {
+                            dashStyle: 'Solid',
+                            lineWidth: 1
+                        },
+                        series: {
+                            showInLegend: false
+                    }
+                    },
+					title: {
+                        text: "{{ exercise_name|escapejs }}",
+						x: -20 //center
+					},
+					subtitle: {
+                        text: '{{ student|escapejs }}',
+						x: -20
+					},
+					xAxis: {
+						title: {
+							text: 'Problem #'
+						},
+                        tickInterval: 1,
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					yAxis: {
+						title: {
+							text: 'Time Used (seconds)'
+						},
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					tooltip: {
+						formatter: function() {
+                                       return '<b>Problem ' + this.point.x + ' - ' + (this.point.correct ? "Correct" : "Incorrect") +
+                                           '</b><br/>' + 
+                                           'Seconds used: ' + this.point.time_taken;
+						}
+					},
+					legend: {
+						layout: 'vertical',
+						align: 'right',
+						verticalAlign: 'top',
+						x: -10,
+						y: 100,
+						borderWidth: 0
+					},
+                    series: [{data:[
+                            {% for problem in problems %}
+                            { 
+                                correct: {{ problem.correct }}, 
+                                time_taken: {{ problem.time_taken }},
+                                name: '{{ user_exercise.name|escapejs }}', 
+                                x: {{ forloop.counter }}, 
+                                y: {{ problem.time_taken }},
+                                color: '{% if problem.correct %}lightBlue{% else %}red{% endif %}'
+                            }
+                            {% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                            ]}]
+				});
+			});
 </script>
 
-<script type="text/javascript+protovis">
-var data = [
-{% for seconds_range in seconds_ranges %}{ seconds_range: "{{seconds_range.range_string}}", pct_correct: {{seconds_range.pct_correct}}, pct_incorrect: {{seconds_range.pct_incorrect}},},
-{% endfor %}];
-
-var values = ["pct_correct", "pct_incorrect"];
-
-var w = 300,
-    h = 200,
-    x = pv.Scale.ordinal(data, function(d) d.seconds_range).splitBanded(0, w),
-    y = pv.Scale.linear(0, 100).range(0, h),
-    fill = pv.colors("lightblue", "red");
-
-var vis = new pv.Panel()
-    .width(w)
-    .height(h)
-    .right(130)
-    .left(0)
-    .top(5)
-    .bottom(padding);
-
-vis.add(pv.Rule)
-    .data(y.ticks(5))
-    .bottom(y)
-    .strokeStyle("grey")
-  .anchor("right").add(pv.Label)
-    .textMargin(6)
-    .text(function(d) d + "%");
-
-vis.add(pv.Label)
-    .right(-80)
-    .top(100)
-    .textAlign("center")
-    .text("percentage correct");
-
-vis.add(pv.Label)
-    .right(-80)
-    .top(110)
-    .textAlign("center")
-    .text("and incorrect");
-
-vis.add(pv.Layout.Stack)
-    .layers(values)
-    .values(data)
-    .x(function(d) x(d.seconds_range))
-    .y(function(d, t) y(d[t]))
-  .layer.add(pv.Bar)
-    .antialias(false)
-    .width(x.range().band)
-    .fillStyle(fill.by(pv.parent))
-    .strokeStyle(function() this.fillStyle().darker())
-    .lineWidth(1)
-  .anchor("bottom").add(pv.Label)
-    .visible(function() !this.parent.index)
-    .textBaseline("top")
-    .textMargin(5)
-    .text(function(d) d.seconds_range);
-
-vis.add(pv.Label)
-    .bottom(-30)
-    .left(120)
-    .text("seconds ranges");
-
-vis.render();
-</script>
+<div id="highchart_problems"></div>
 
 {% endifequal %}
 {% endifequal %}
 {% endif %}
+
 {% endblock pagecontent %}
 
