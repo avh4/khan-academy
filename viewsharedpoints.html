@@ -81,7 +81,10 @@ var chart;
 					},
 					xAxis: {
                         type: 'datetime',
-						tickPixelInterval: 150
+						tickPixelInterval: 150,
+                        labels: {
+                            enabled: false
+                        }
 					},
 					yAxis: {
 						title: {
@@ -96,8 +99,7 @@ var chart;
 					},
                     tooltip: {
                         formatter: function() {
-				                return '<b>'+ this.point.y +' Energy Points per Minute</b><br/>'+
-                                'Rolling Average at ' + Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x);
+				                return '<b>'+ this.point.y +' Energy Points per Minute (Rolling Average)</b>';
 						}
 					},
 					legend: {
