@@ -118,7 +118,7 @@ function submitForm(value)
                 <span class="info-box-sub-description">To see the solution, 
                     <input class="button orange" type="button" value="show the next hint." onclick="evaluate_hint(true);"/></span>
                 <span class="info-box-sub-description">To work on problems like this, <a href="/exercises?exid={{ exid }}">start this exercise</a>.</span>
-            {% else %}
+            {% endif %}
 
 			<input type="hidden" id="exid" name="exid" value="{{exid}}">
 			<input type="hidden" id="streak" name="streak" value="{{streak}}">
@@ -128,8 +128,13 @@ function submitForm(value)
 			<input type="hidden" id="hint_used" name="hint_used" value="0" />
 			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-            {% block answerarea %}<span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">{% endblock answerarea %}
+            {% block answerarea %}
+                {% if not read_only %}
+                <span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+                {% endif %}
+            {% endblock answerarea %}
 
+            {% if not read_only %}
 			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
 			<div id="check-answer-results" style="display: none;">
                 <img src="/images/blank.gif" name="feedback" id="feedback">
