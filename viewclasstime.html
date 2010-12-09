@@ -95,7 +95,13 @@
                     {% for data in student_data %}
                     '{{ data|hash:"name"|escapejs }}<br/>(<em>{{ data|hash:"total_minutes"|escapejs }} min. total</em>)'{% if not forloop.last %},{% endif %}
                     {% endfor %}
-                    ]
+                    ],
+                    labels: {
+                        align: 'left',
+                        x: -5,
+                        y: 10,
+                        rotation: 45
+                    }
                 },
                 yAxis: {
                     title: {

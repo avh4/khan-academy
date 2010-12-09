@@ -597,7 +597,7 @@ class ViewClassTime(request_handler.RequestHandler):
                 'classtime': classtime,
                 'timezone_offset': self.timezone_offset,
                 'coach_email': user_coach.email(),
-                'width': (150 * len(student_data)) + 150,
+                'width': (80 * len(student_data)) + 150,
                 'student_data': student_data,
                 }
             path = os.path.join(os.path.dirname(__file__), 'viewclasstime.html')
