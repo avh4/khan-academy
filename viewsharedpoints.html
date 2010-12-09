@@ -8,7 +8,7 @@
         $("#reports-jump-menu #page-changer #submit").hide();
         $("#reports-jump-menu #page-changer select").val("sharedpoints");
         $("#reports-jump-menu #page-changer select").change( function() {
-            window.location = $("#reports-jump-menu #page-changer select option:selected").val();
+            window.location = $("#reports-jump-menu #page-changer select option:selected").val() + "?coach={{coach_email|escapejs}}"
         });
     }
     );

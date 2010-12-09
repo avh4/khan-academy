@@ -8,7 +8,7 @@
         $("#reports-jump-menu #page-changer #submit").hide();
         $("#reports-jump-menu #page-changer select").val("classtime");
         $("#reports-jump-menu #page-changer select").change( function() {
-            window.location = $("#reports-jump-menu #page-changer select option:selected").val();
+            window.location = $("#reports-jump-menu #page-changer select option:selected").val() + "?coach={{coach_email|escapejs}}"
         });
     }
     );
@@ -35,7 +35,7 @@
 <h4>Daily Activity Report</h4>
 {% if not student_data %}
     <p>To enable viewing this class report, each of your students should log in and click on the <a href="coaches">Add a Coach</a>
-    link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_id|escape}}</b> to enter next to the "Register Coach" button.
+    link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_email|escape}}</b> to enter next to the "Register Coach" button.
     After they register your id, you'll be able to see their progress below, and via the <a href="/students">students</a> page.
     </p>
 {% else %}

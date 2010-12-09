@@ -1,37 +1,6 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 <style type="text/css">
-#class_report p {
-    margin-top: 1.2em;
-    margin-bottom: 1.2em;
-}
-#class_report table {
-    margin-top: 1.2em;
-    margin-bottom: 1.2em;
-    border-spacing: 3px;
-}
-#class_report td, #class_report th {
-    padding: 0px;
-}
-#class_report th {
-    BORDER-RIGHT: #fff 1px solid;
-    PADDING-RIGHT: 5px;
-    BORDER-TOP: #fff 1px solid;
-    PADDING-LEFT: 5px;
-    FONT-SIZE: 11px;
-    PADDING-BOTTOM: 4px;
-    VERTICAL-ALIGN: bottom;
-    COLOR: #333;
-    LINE-HEIGHT: 13px;
-    PADDING-TOP: 4px;
-    BORDER-BOTTOM: #ccc 1px solid;
-    FONT-FAMILY: arial,helvetica,sans-serif;
-    BACKGROUND-COLOR: #d2dded
-}
-#class_report td.proficient { background-color:lightgreen; }
-#class_report td.needs_help { background-color:red; }
-#class_report td.working { background-color:lightblue; }
-#class_report td.number { text-align:center }
 #page_sub_nav b { display: none; }
 </style>
 <script type="text/javascript">
@@ -39,7 +8,7 @@
         $("#reports-jump-menu #page-changer #submit").hide();
         $("#reports-jump-menu #page-changer select").val("classreport");
         $("#reports-jump-menu #page-changer select").change( function() {
-            window.location = $("#reports-jump-menu #page-changer select option:selected").val();
+            window.location = $("#reports-jump-menu #page-changer select option:selected").val() + "?coach={{coach_email|escapejs}}";
         });
     }
     );
@@ -129,7 +98,7 @@
     </script>
     {% else %}
     <p>To enable viewing this class report, each of your students should log in and click on the <a href="coaches">Add a Coach</a>
-    link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_id|escape}}</b> to enter next to the "Register Coach" button.
+    link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_email|escape}}</b> to enter next to the "Register Coach" button.
     After they register your id, you'll be able to see their progress below, and via the <a href="/students">students</a> page.
     </p>
     {% endif %}

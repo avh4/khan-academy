@@ -241,7 +241,7 @@ class ViewSharedPoints(request_handler.RequestHandler):
                         'username': user.nickname(),
                         'logout_url': logout_url,  
                         'user_coach': user_coach,
-                        'coach_email': user_coach.email()
+                        'coach_email': user_coach.email(),
                         }
                 path = os.path.join(os.path.dirname(__file__), 'viewsharedpoints.html')
                 self.response.out.write(template.render(path, template_values))
@@ -343,7 +343,7 @@ class ViewStudents(request_handler.RequestHandler):
                 'username': user.nickname(),
                 'logout_url': logout_url,
                 'students': students,
-                'coach_id': user_data.user.email(),
+                'coach_email': user_data.user.email(),
                 }
 
             path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
@@ -761,7 +761,7 @@ class ViewClassReport(request_handler.RequestHandler):
                 'logout_url': logout_url,
                 'exercises': exercises_found,
                 'exercise_data': exercise_data,
-                'coach_id': coach_user_data.user.email(),
+                'coach_email': coach_user_data.user.email(),
                 'students': students,
                 }
             path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
