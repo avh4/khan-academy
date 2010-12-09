@@ -3,15 +3,15 @@
 {% block pagecontent %}
 
 {% if not user_exercises %}
-<p>{{student|escape}} does not have a proficient date for any exercises. If some show up on the <a href="/classreport">class report</a> page, click on the green squares to get them to show up here.</p>
+<p>{{student|escape}} does not have a proficient date for any exercises.</p>
 {% else %}{% ifequal num_exercises 1 %}
-<p>{{student|escape}} has only one exercise with a proficient date. If others show up on the <a href="/classreport">class report</a> page, click on the green squares to get them to show up here.</p>
+<p>{{student|escape}} has only one exercise with a proficient date.</p>
 {% else %}{% ifequal num_exercises 2 %}
-<p>{{student|escape}} has only two exercises with a proficient date. If others show up on the <a href="/classreport">class report</a> page, click on the green squares to get them to show up here.</p>
+<p>{{student|escape}} has only two exercises with a proficient date.</p>
 {% else %}
 <p>The chart below shows {{student|escape}}'s progress on the exercises.</p>
 
-<script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+<script type="text/javascript" src="{% if not App.offline_mode %}http://statickhan.appspot.com{% endif %}/javascript/highcharts.js?{{App.version}}"></script>
 <script>
 
 var chart;

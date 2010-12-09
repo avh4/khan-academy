@@ -5,7 +5,7 @@
 {% if not problems %}
 <p>{{student|escape}} needs to do a few more problems in {{exercise_name|escape}} before we can start displaying this graph.</p>
 {% else %}
-<script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+<script type="text/javascript" src="{% if not App.offline_mode %}http://statickhan.appspot.com{% endif %}/javascript/highcharts.js?{{App.version}}"></script>
 
 <script>
 var chart;
@@ -65,7 +65,7 @@ var chart;
 					tooltip: {
 						formatter: function() {
                             return '<b><a style="color:blue;" href="/exercises?exid={{ exid|escapejs }}&problem_number=' + this.point.x + '">Problem ' + this.point.x + '</a> - ' + (this.point.correct ? "Correct" : "Incorrect") +
-                                           '</b><br/>' + 
+                                           '</b><br/>' +
                                        'Seconds used: ' + this.point.time_taken + '<br/><br/>' +
                                        '<em>Click the graph to view this problem</em>.';
 						}
@@ -80,11 +80,11 @@ var chart;
 					},
                     series: [{data:[
                             {% for problem in problems %}
-                            { 
-                                correct: {{ problem.correct }}, 
+                            {
+                                correct: {{ problem.correct }},
                                 time_taken: {{ problem.time_taken }},
-                                name: '{{ user_exercise.name|escapejs }}', 
-                                x: {{ forloop.counter }}, 
+                                name: '{{ user_exercise.name|escapejs }}',
+                                x: {{ forloop.counter }},
                                 y: {{ problem.time_taken }},
                                 color: '{% if problem.correct %}lightBlue{% else %}red{% endif %}'
                             }

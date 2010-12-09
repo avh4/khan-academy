@@ -2,9 +2,9 @@
 {% block pagetitle %}Shared energy points{% endblock pagetitle %}
 {% block pagecontent %}
 
-<script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+<script type="text/javascript" src="{% if not App.offline_mode %}http://statickhan.appspot.com{% endif %}/javascript/highcharts.js?{{App.version}}"></script>
 <script>
-    
+
 var updateInterval = 5000;
 var movingAverageInterval = 60000;
 var cPointsPerAverage = movingAverageInterval / updateInterval;
