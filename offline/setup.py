@@ -92,6 +92,19 @@ def download_7zip():
         un.extract("7za465.zip", ".")    
         os.remove("7za465.zip")     
 
+
+def download_highcharts():
+    os.chdir(code_dir)
+    if not os.path.exists("khanacademy-read-only/javascript/highcharts.js"):
+        print "downloading highcharts"   
+        urlretrieve("http://highcharts.com/downloads/zips/Highcharts-2.1.1.zip", "Highcharts-2.1.1.zip")
+        zf = zipfile.ZipFile("Highcharts-2.1.1.zip")
+        file = open(code_dir+"/khanacademy-read-only/javascript/highcharts.js", 'wb')
+        file.write(zf.read("js/highcharts.js"))
+        file.close()   
+        zf.close()
+        os.remove("Highcharts-2.1.1.zip") 
+             
     
 def upload_sample_data(): 
     # --use_sqlite giving intermittent errors
@@ -173,11 +186,11 @@ def revert_readme():
     
 
 if __name__ == "__main__":  
-    
     download_appengine("google_appengine_1.3.7.zip")
     revision = get_khanacademy_code()
     copy_python25()
     download_7zip()
+    download_highcharts()
     upload_sample_data()
     copy_datastore()
     generate_library_content()
