@@ -262,7 +262,7 @@ class ViewExercise(request_handler.RequestHandler):
                 exid = 'addition_1'
 
             exercise_non_summative = exercise.non_summative_exercise(user_data)
-            exercise_videos = exercise_non_summative.related_videos()
+            exercise_videos = exercise_non_summative.related_videos().fetch(10)
             userExercise = user_data.get_or_insert_exercise(exid)
 
             if not problem_number:

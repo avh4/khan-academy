@@ -195,11 +195,13 @@ function submitForm(value)
         <div class="info-box">
             <span class="info-box-header">Need Help?</span>
 
-            <span class="info-box-subheader">Watch a video</span>
-            <span class="info-box-sub-description">Watching videos <strong>does not</strong> reset your streak.</span>
-            <div id="related-video-list">
-                {% related_videos exercise_videos %}
-            </div>
+            {% if exercise_videos %}
+                <span class="info-box-subheader">Watch a video</span>
+                <span class="info-box-sub-description">Watching videos <strong>does not</strong> reset your streak.</span>
+                <div id="related-video-list">
+                    {% related_videos exercise_videos %}
+                </div>
+            {% endif %}
 
             {% if exercise.summative %}
                 <span class="info-box-subheader">Prepare for this challenge</span>
