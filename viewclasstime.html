@@ -1,11 +1,43 @@
 {% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#page_sub_nav b { display: none; }
+</style>
+<script type="text/javascript">
+    $(function() {
+        $("#reports-jump-menu #page-changer #submit").hide();
+        $("#reports-jump-menu #page-changer select").val("classtime");
+        $("#reports-jump-menu #page-changer select").change( function() {
+            window.location = $("#reports-jump-menu #page-changer select option:selected").val();
+        });
+    }
+    );
+</script>
+{% endblock pagescript %}
 {% block pagetitle %}Class Time{% endblock pagetitle %}
 {% block pagecontent %}
-
+<div id="report-page-content">
+    <div id="reports-nav">
+        <div id="reports-jump-menu">
+            <label>View Report:</label>
+            <form id="page-changer" action="" method="post">
+                <select class="report-select">
+                    <option value="classreport" selected="true">Student Progress Report</option>
+                    <option value="classtime">Daily Activity Report</option>
+                    <option value="sharedpoints">Class Energy Points per Minute</option>
+                </select>
+                <input type="submit" value="Go" id="submit" />
+            </form>
+        </div>
+        <h3>Class Reports</h3>
+    </div>
 <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
-
+<h4>Daily Activity Report</h4>
 {% if not student_data %}
-    You have no students!
+    <p>To enable viewing this class report, each of your students should log in and click on the <a href="coaches">Add a Coach</a>
+    link here or on the bottom of the page.  You'll need to give them the coach id <b>{{coach_id|escape}}</b> to enter next to the "Register Coach" button.
+    After they register your id, you'll be able to see their progress below, and via the <a href="/students">students</a> page.
+    </p>
 {% else %}
 
     <script>
@@ -120,7 +152,7 @@
         <div style="text-align:center;">
             <input style="font-size:30px;font-weight:bold;text-align:center;" type="text" id="targetDatepicker" value="{{ classtime.today_formatted|escape }}"/>
             <br/>
-            <h3>Classroom Exercises and Video Activity</h3>
+            <h4>Classroom Exercises and Video Activity</h4>
         </div>
         {% if not classtime.rows %}
             <div style="padding:10px;text-align:center;font-weight:bold;">Classroom activity was pretty silent on this date...</div>
@@ -129,6 +161,6 @@
         {% endif %}
     </div>
 {% endif %}
-
+</div>
 {% endblock pagecontent %}
 

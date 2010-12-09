@@ -938,6 +938,38 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 /* Teacher Dashboard/Report Styles */
 
+#report-page-content {
+    font-size: 13px;
+    padding: 5px;
+}
+
+#report-page-content h3 {
+    font-size: 150%;
+    color: #555;
+}
+#report-page-content h4 {
+    font-size: 125%;
+    color: #444;
+    margin: 1em 0;
+}
+
+#reports-nav {
+    background-color: #ccc;
+    border-bottom: 1px solid #aaa;
+    text-shadow: 0 1px 0 #eee;
+    margin: -5px;
+    padding: 5px;
+}
+
+#reports-nav #reports-jump-menu {
+    color: #444;
+    float:right;
+    font-weight: bold;
+}
+#reports-nav #reports-jump-menu select {
+    position: relative;
+    top: -1px;
+}
 #module-progress {
     display: block;
     margin: 0 50px 20px 0;
@@ -978,8 +1010,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #module-progress td.struggling,
 #module-progress td.started {
     cursor: pointer;
-    background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .2)), to(rgba(255, 255, 255,.1)));
-    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .2), rgba(255, 255, 255,.1));
+    background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .25)), to(rgba(255, 255, 255,.1)));
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .4), rgba(255, 255, 255,.1));
 }
 #module-progress td.proficient {
     background-color: #80C65A;
@@ -995,7 +1027,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 #module-progress .exercise-info-hover {
     background: #fff;
-    border: 1px solid #bbb;
+    border: 1px solid #999;
     cursor: pointer;
     position: absolute;
     padding: 5px;
@@ -1006,9 +1038,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -moz-border-radius: 5px;
     border-radius: 5px;
     
-    -webkit-box-shadow: 1px 1px 3px #ccc;
-    -moz-box-shadow: 1px 1px 3px #ccc;
-    box-shadow: 1px 1px 3px #ccc;
+    -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, .35);
+    -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, .35);
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, .35);
 }
 #module-progress td.student-email {
     color: #555;
