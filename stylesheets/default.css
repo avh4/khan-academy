@@ -960,6 +960,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
 }
+#module-progress th#students-header {
+    -webkit-border-bottom-left-radius: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-bottom-left-radius: 3px;
+}
 #module-progress th div {
     min-width: 100px;
 }
@@ -974,6 +979,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #module-progress td.started {
     cursor: pointer;
     background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .2)), to(rgba(255, 255, 255,.1)));
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .2), rgba(255, 255, 255,.1));
 }
 #module-progress td.proficient {
     background-color: #80C65A;
@@ -993,7 +999,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     cursor: pointer;
     position: absolute;
     padding: 5px;
-    width: 150px;
+    min-width: 150px;
     z-index: 10;
     
     -webkit-border-radius: 5px;
@@ -1003,6 +1009,30 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -webkit-box-shadow: 1px 1px 3px #ccc;
     -moz-box-shadow: 1px 1px 3px #ccc;
     box-shadow: 1px 1px 3px #ccc;
+}
+#module-progress td.student-email {
+    color: #555;
+    vertical-align: bottom;
+    font-size: 90%;
+    font-weight: bold;
+    background-color: #CCC;
+    border: 1px solid #bbb;
+    border-bottom: 1px solid #999;
+    padding: 3px;
+    text-shadow: 0 1px 0 #EEE;
+    
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-bottom-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-bottomleft: 3px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+#module-progress td.student-email a {
+    text-decoration: none;
+}
+#module-progress td.student-email a:hover {
+    text-decoration: underline;
 }
 /* End of teacher Dashboard Styles */
 

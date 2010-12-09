@@ -53,7 +53,7 @@ After they register your id, you'll be able to see their progress below, and via
     <tr>
         {% for exercise in exercises %}
             {% if forloop.first %}
-                <th>Students</th>
+                <th id="students-header">Students</th>
             {% endif %}
             {% for student_email in exercise_data|hash:exercise %}
                 {% if forloop.first %}
