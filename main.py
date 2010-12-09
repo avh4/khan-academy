@@ -56,7 +56,7 @@ import util
 import request_handler
 import points
 
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, VideoLog
 
 from discussion import comments
 from discussion import qa
@@ -610,6 +610,12 @@ class LogVideoProgress(request_handler.RequestHandler):
                     user_data.add_points(video_points_received)
 
                 user_data.put()
+
+                video_log = VideoLog()
+                video_log.user = user
+                video_log.video = video
+                video_log.seconds_watched = seconds_watched
+                video_log.put()
 
                 points_total = user_data.points
 
@@ -1993,6 +1999,7 @@ def real_main():
         ('/sharedpoints', coaches.ViewSharedPoints),        
         ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
+        ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
 
         ('/api/export', api.Export),

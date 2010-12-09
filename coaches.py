@@ -2,9 +2,10 @@ import logging
 import os
 import datetime
 import itertools
+import copy
 from collections import deque
 from pprint import pformat
-from math import sqrt
+from math import sqrt, ceil
     
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
@@ -16,7 +17,7 @@ import app
 import util
 import request_handler
 
-from models import UserExercise, Exercise, UserData, ProblemLog, ExerciseGraph
+from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, ExerciseGraph
 from django.template.defaultfilters import escape
 
 def meanstdv(x):
@@ -350,6 +351,263 @@ class ViewStudents(request_handler.RequestHandler):
         else:
             self.redirect(util.create_login_url(self.request.uri))
         
+class ClassTime:
+    def __init__(self):
+        self.rows = []
+        self.height = 0
+        self.student_totals = {}
+
+    def update_student_total(self, chunk):
+        if not self.student_totals.has_key(chunk.student.email()):
+            self.student_totals[chunk.student.email()] = 0
+        self.student_totals[chunk.student.email()] += chunk.minutes_spent()
+
+    def get_student_total(self, student_email):
+        if self.student_totals.has_key(student_email):
+            return self.student_totals[student_email]
+        return 0
+
+    def today_formatted(self):
+        return self.today.strftime("%d/%m/%Y")
+
+    def drop_into_column(self, chunk, column):
+
+        chunks_split = chunk.split_schoolday()
+        if chunks_split is not None:
+            for chunk_after_split in chunks_split:
+                if chunk_after_split is not None:
+                    self.drop_into_column(chunk_after_split, column)
+            return
+
+        ix = 0
+        height = len(self.rows)
+        while ix < height:
+            if column >= len(self.rows[ix].chunks) or self.rows[ix].chunks[column] is None:
+                break
+            ix += 1
+
+        if ix >= height:
+            self.rows.append(ClassTimeRow())
+
+        while len(self.rows[ix].chunks) <= column:
+            self.rows[ix].chunks.append(None)
+
+        self.rows[ix].chunks[column] = chunk
+
+        self.update_student_total(chunk)
+
+    def balance(self):
+        width = 0
+        height = len(self.rows)
+        for ix in range(0, height):
+            if len(self.rows[ix].chunks) > width:
+                width = len(self.rows[ix].chunks)
+
+        for ix in range(0, height):
+            while len(self.rows[ix].chunks) < width:
+                self.rows[ix].chunks.append(None)
+
+class ClassTimeRow:
+    def __init__(self):
+        self.chunks = []
+
+class ClassTimeChunk:
+
+    SCHOOLDAY_START_HOURS = 8 # 8am
+    SCHOOLDAY_END_HOURS = 16 # 3pm
+
+    def __init__(self):
+        self.student = None
+        self.start = None
+        self.end = None
+        self.activities = []
+        self.cached_activity_class = None
+
+    def minutes_spent(self):
+        timespan = self.end - self.start
+        return float(timespan.seconds + (timespan.days * 24 * 3600)) / 60.0
+
+    def activity_class(self):
+
+        if self.cached_activity_class is not None:
+            return self.cached_activity_class
+
+        has_exercise = False
+        has_video = False
+
+        for activity in self.activities:
+            has_exercise = has_exercise or type(activity) == ProblemLog
+            has_video = has_video or type(activity) == VideoLog
+
+        if has_exercise and has_video:
+            self.cached_activity_class = "exercise_video"
+        elif has_exercise:
+            self.cached_activity_class = "exercise"
+        elif has_video:
+            self.cached_activity_class = "video"
+
+        return self.cached_activity_class
+
+    def schoolday_start(self):
+        return datetime.datetime(
+                year = self.start.year, 
+                month = self.start.month, 
+                day=self.start.day, 
+                hour=ClassTimeChunk.SCHOOLDAY_START_HOURS)
+
+    def schoolday_end(self):
+        return datetime.datetime(
+                year = self.start.year, 
+                month = self.start.month, 
+                day=self.start.day, 
+                hour=ClassTimeChunk.SCHOOLDAY_END_HOURS)
+
+    def during_schoolday(self):
+        return self.start >= self.schoolday_start() and self.end <= self.schoolday_end()
+
+    def split_schoolday(self):
+
+        school_start = self.schoolday_start()
+        school_end = self.schoolday_end()
+
+        pre_schoolday = None
+        schoolday = None
+        post_schoolday = None
+
+        if self.start < school_start and self.end > school_start:
+            pre_schoolday = copy.copy(self)
+            pre_schoolday.end = school_start
+
+            schoolday = copy.copy(self)
+            schoolday.start = school_start
+
+        if self.start < school_end and self.end > school_end:
+            post_schoolday = copy.copy(self)
+            post_schoolday.start = school_end
+
+            if schoolday is None:
+                schoolday = copy.copy(self)
+                schoolday.start = self.start
+
+            schoolday.end = school_end
+
+        if pre_schoolday is not None or schoolday is not None or post_schoolday is not None:
+            return [pre_schoolday, schoolday, post_schoolday]
+
+        return None
+
+    def description(self):
+        class_activity = self.activity_class()
+
+        desc = "~%.0f minutes"
+        if class_activity == "exercise_video":
+            desc = "~%.0f minutes of exercises and video"
+        elif class_activity == "exercise":
+            desc = "~%.0f minutes of exercises"
+        elif class_activity == "video":
+            desc = "~%.0f minutes of video"
+
+        desc = ("<b>%s</b> - <b>%s</b>" % (self.start.strftime("%I:%M%p"), self.end.strftime("%I:%M%p"))) + "<br/><br/>" + desc
+
+        return desc % self.minutes_spent()
+
+class ViewClassTime(request_handler.RequestHandler):
+
+    def get(self):
+        user = util.get_current_user()
+        if user:
+            logout_url = users.create_logout_url(self.request.uri)
+            timezone_offset = self.request_int("timezone_offset", default=0)
+            user_coach = user
+
+            if users.is_current_user_admin():
+                # Site administrators can view other coaches' data
+                coach_email = self.request_string("coach")
+                if len(coach_email) > 0:
+                    user_coach = users.User(email=coach_email)
+
+            coach_user_data = UserData.get_or_insert_for(user_coach)
+            student_emails = coach_user_data.get_students()
+
+            classtime = self.get_class_time_activity(student_emails, timezone_offset)
+
+            student_data = []
+            for student_email in student_emails:
+                student_data.append({
+                    "name": util.get_nickname_for(users.User(email=student_email)),
+                    "total_minutes": "~%.0f" % classtime.get_student_total(student_email)
+                    })
+
+            template_values = {
+                'App' : App,
+                'username': user.nickname(),
+                'logout_url': logout_url,
+                'classtime': classtime,
+                'timezone_offset': timezone_offset,
+                'coach_email': user_coach.email(),
+                'student_data': student_data,
+                }
+            path = os.path.join(os.path.dirname(__file__), 'viewclasstime.html')
+            self.response.out.write(template.render(path, template_values))
+        else:
+            self.redirect(util.create_login_url(self.request.uri))
+
+    def get_class_time_activity(self, student_emails, timezone_offset):
+
+        column = 0
+
+        timezone_adjustment = datetime.timedelta(minutes = timezone_offset)
+        def tz_adj(dt):
+            return dt + timezone_adjustment
+
+        classtime = ClassTime()
+
+        today = tz_adj(datetime.datetime.now())
+        classtime.today = datetime.datetime(today.year, today.month, today.day)
+        tomorrow = classtime.today + datetime.timedelta(days = 1)
+
+        for student_email in student_emails:
+            student = users.User(email=student_email)
+
+            problem_logs = ProblemLog.get_for_user_and_day(student)
+            video_logs = VideoLog.get_for_user_and_day(student)
+
+            problem_and_video_logs = []
+
+            for problem_log in problem_logs:
+                problem_and_video_logs.append(problem_log)
+            for video_log in video_logs:
+                problem_and_video_logs.append(video_log)
+
+            problem_and_video_logs = sorted(problem_and_video_logs, key=lambda log: log.time_started())
+
+            chunk_current = None
+            chunk_delta = datetime.timedelta(minutes = 30) # 30 minutes of downtime = new chunk
+
+            for activity in problem_and_video_logs:
+
+                if chunk_current is not None and tz_adj(activity.time_started()) > (chunk_current.end + chunk_delta):
+                    classtime.drop_into_column(chunk_current, column)
+                    chunk_current.description()
+                    chunk_current = None
+
+                if chunk_current is None:
+                    chunk_current = ClassTimeChunk()
+                    chunk_current.student = student
+                    chunk_current.start = max(tz_adj(activity.time_started()), classtime.today)
+                    chunk_current.end = min(tz_adj(activity.time_ended()), tomorrow)
+
+                chunk_current.activities.append(activity)
+                chunk_current.end = min(tz_adj(activity.time_ended()), tomorrow)
+
+            if chunk_current is not None:
+                classtime.drop_into_column(chunk_current, column)
+                chunk_current.description()
+
+            column += 1
+
+        classtime.balance()
+        return classtime
         
 class ViewClassReport(request_handler.RequestHandler):
         
@@ -391,8 +649,6 @@ class ViewClassReport(request_handler.RequestHandler):
 
                 student_data = class_exercises[student_email]["student_data"]
                 name = util.get_nickname_for(student_data.user)
-                if student_email != name:
-                    name = name + " (%s)" % student_email
                 i = 0
 
                 for exercise in exercises_found:

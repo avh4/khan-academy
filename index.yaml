@@ -99,6 +99,11 @@ indexes:
   - name: time_done
     direction: desc
 
+- kind: ProblemLog
+  properties:
+  - name: user
+  - name: time_done
+
 - kind: StemmedIndex
   properties:
   - name: __key__
@@ -131,6 +136,11 @@ indexes:
   properties:
   - name: __key__
     direction: desc
+
+- kind: VideoLog
+  properties:
+  - name: user
+  - name: time_watched
 
 - kind: VideoPlaylist
   properties:

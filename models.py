@@ -486,6 +486,32 @@ class UserVideo(db.Model):
     def points(self):
         return points.VideoPointCalculator(self)
 
+class VideoLog(db.Model):
+    user = db.UserProperty()
+    video = db.ReferenceProperty(Video)
+    time_watched = db.DateTimeProperty(auto_now_add = True)
+    seconds_watched = db.IntegerProperty(default = 0)
+
+    @staticmethod
+    def get_for_user_and_day(user):
+        query = VideoLog.all()
+        query.filter('user =', user)
+
+        today_date = datetime.date.today()
+        today = datetime.datetime(today_date.year, today_date.month, today_date.day)
+        tomorrow = today + datetime.timedelta(days = 1)
+        query.filter('time_watched <=', tomorrow)
+        query.filter('time_watched >=', today)
+        query.order('time_watched')
+
+        return query
+
+    def time_started(self):
+        return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
+
+    def time_ended(self):
+        return self.time_watched
+
 class ProblemLog(db.Model):
 
     user = db.UserProperty()
@@ -495,6 +521,26 @@ class ProblemLog(db.Model):
     time_taken = db.IntegerProperty()
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     hint_used = db.BooleanProperty(default = False)
+
+    @staticmethod
+    def get_for_user_and_day(user):
+        query = ProblemLog.all()
+        query.filter('user =', user)
+
+        today_date = datetime.date.today()
+        today = datetime.datetime(today_date.year, today_date.month, today_date.day)
+        tomorrow = today + datetime.timedelta(days = 1)
+        query.filter('time_done <=', tomorrow)
+        query.filter('time_done >=', today)
+        query.order('time_done')
+
+        return query
+
+    def time_started(self):
+        return self.time_done - datetime.timedelta(seconds = self.time_taken)
+
+    def time_ended(self):
+        return self.time_done
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and

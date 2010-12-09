@@ -1,0 +1,111 @@
+{% extends "page_template.html" %}
+{% block pagetitle %}Class Time{% endblock pagetitle %}
+{% block pagecontent %}
+
+<script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+
+<script>
+
+var timezoneOffset = {{ timezone_offset }};
+var timezoneOffsetClient = -1 * (new Date()).getTimezoneOffset();
+if (timezoneOffset != timezoneOffsetClient)
+{
+    window.location = "/classtime?coach={{ coach_email|escapejs }}&timezone_offset=" + timezoneOffsetClient;
+}
+else
+{
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'highchart',
+                defaultSeriesType: 'column',
+                marginRight: 130,
+                marginBottom: 100
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                column: {
+                },
+                series: {
+                    showInLegend: false,
+                    stacking: 'normal',
+                    point: {
+                        events: {
+                            click: function() {
+                            }
+                        }
+                    }
+            }
+            },
+            title: {
+                text: '{{ classtime.today_formatted|escapejs }}',
+                x: -20 //center
+            },
+            subtitle: {
+                text: "Time Spent on Exercises and Videos",
+                x: -20
+            },
+            xAxis: {
+                categories: [
+                {% for data in student_data %}
+                '{{ data|hash:"name"|escapejs }}<br/>(<em>{{ data|hash:"total_minutes"|escapejs }} min. total</em>)'{% if not forloop.last %},{% endif %}
+                {% endfor %}
+                ]
+            },
+            yAxis: {
+                title: {
+                    text: 'Time Spent (Minutes)'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                formatter: function() {
+                    return this.point.desc;
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'top',
+                x: -10,
+                y: 100,
+                borderWidth: 0
+            },
+            series: [
+                    {% for row in classtime.rows reversed %}
+                    { 
+                       data: [
+                        {% for chunk in row.chunks %}
+                        {
+                            x: {{ forloop.counter0 }}, 
+                            {% if chunk %}
+                                y: {{ chunk.minutes_spent }},
+                            {% else %}
+                                y: 0,
+                            {% endif %}
+                            desc: '{{ chunk.description|escapejs }}',
+                            {% if chunk %}
+                            color: {% if chunk.during_schoolday %}'lightBlue'{% else %}'darkBlue'{% endif %}
+                            {% endif %}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                        ]
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                    ]
+        });
+    });
+}
+</script>
+
+<div id="highchart">Loading...</div>
+
+{% endblock pagecontent %}
+

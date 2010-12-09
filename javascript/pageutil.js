@@ -132,7 +132,7 @@ function onYouTubePlayerStateChange(state) {
 
 var VideoStats = {
 
-    dPercentGranularity: 0.1,
+    dPercentGranularity: 0.05,
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
