@@ -3,11 +3,7 @@
 {% block pagecontent %}
 
 {% if not problems %}
-<p>{{student|escape}} hasn't done any problems for {{exercise_name|escape}}</p>
-{% else %}{% ifequal num_problems 1 %}
-<p>{{student|escape}} has done only one problem for {{exercise_name|escape}}</p>
-{% else %}{% ifequal num_problems 2 %}
-<p>{{student|escape}} has done only two problems for {{exercise_name|escape}}</p>
+<p>{{student|escape}} needs to do a few more problems in {{exercise_name|escape}} before we can start displaying this graph.</p>
 {% else %}
 <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
 
@@ -101,8 +97,6 @@ var chart;
 
 <div id="highchart_problems"></div>
 
-{% endifequal %}
-{% endifequal %}
 {% endif %}
 
 {% endblock pagecontent %}
