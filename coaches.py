@@ -567,18 +567,27 @@ class ViewClassTime(request_handler.RequestHandler):
                 dt = self.dt_to_ctz(datetime.datetime.now())
                 dt_ctz = datetime.datetime(dt.year, dt.month, dt.day)
 
-            classtime = self.get_class_time_activity(student_emails, dt_ctz)
-
+            classtime = None
             student_data = []
+
+            if self.request_int("timezone_offset", default=-1) != -1:
+                # If no timezone offset is specified, don't bother grabbing all the data
+                # because we'll be redirecting back to here w/ timezone information.
+                classtime = self.get_class_time_activity(student_emails, dt_ctz)
+
             for student_email in student_emails:
 
                 short_name = util.get_nickname_for(users.User(email=student_email))
                 if len(short_name) > 18:
                     short_name = short_name[0:18] + "..."
 
+                total_student_minutes = 0
+                if classtime is not None:
+                    total_student_minutes = classtime.get_student_total(student_email)
+
                 student_data.append({
                     "name": short_name,
-                    "total_minutes": "~%.0f" % classtime.get_student_total(student_email)
+                    "total_minutes": "~%.0f" % total_student_minutes
                     })
 
             template_values = {
