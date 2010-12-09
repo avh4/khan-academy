@@ -33,7 +33,7 @@
         </div>
         <h3>Class Reports</h3>
     </div>
-    <h4>Class Energy Points per Minute</h4>
+    <div id="report-page-title"><h4>Class Energy Points per Minute</h4></div>
 <script>
 
 var updateInterval = 5000;
@@ -103,12 +103,14 @@ var chart;
                         }
                     },
 					title: {
-                        text: "{{ coach_email|escapejs }} - Class Energy Points",
-						x: -20 //center
+                        text: '',
+						align: 'left',
+                        x: 60
 					},
 					subtitle: {
-						text: 'Energy Points Earned per Minute (Rolling Average)',
-						x: -20
+                        text: '',
+                        align: 'left',
+                        x: 60
 					},
 					xAxis: {
                         type: 'datetime',

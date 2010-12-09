@@ -225,7 +225,12 @@ var VideoStats = {
                 (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
         {
             // Either video was finished or another 10% has been watched
+            console.log("saving at percentage " + percent);
             this.save();
+        }
+        else
+        {
+            console.log("not saving at percentage " + percent);
         }
 
     },

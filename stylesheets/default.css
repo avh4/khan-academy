@@ -952,6 +952,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     color: #444;
     margin: 1em 0;
 }
+#report-page-title {
+    text-align: center;
+}
 
 #reports-nav {
     background-color: #ccc;
