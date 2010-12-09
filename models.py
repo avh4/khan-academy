@@ -154,7 +154,7 @@ class Exercise(db.Model):
         return name.replace('_', ' ').capitalize()
 
     def display_name(self):
-        return Exercise.to_display_name(name)
+        return Exercise.to_display_name(self.name)
 
     def required_streak(self):
         if self.summative:
