@@ -84,8 +84,12 @@ class UserExercise(db.Model):
     def struggling_threshold(self):
         return self.get_exercise().struggling_threshold()
 
+    @staticmethod
+    def is_struggling_with(user_exercise, exercise):
+        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak() and user_exercise.total_done > exercise.struggling_threshold() 
+
     def is_struggling(self):
-        return self.streak == 0 and self.longest_streak < self.required_streak() and self.total_done > self.struggling_threshold() 
+        return UserExercise.is_struggling_with(self, self.get_exercise())
     
     def get_review_interval(self):
         review_interval = datetime.timedelta(seconds=self.review_interval_secs)

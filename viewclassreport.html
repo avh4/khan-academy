@@ -40,32 +40,32 @@
     
     <table id="module-progress">
         <tr>
-            {% for exercise in exercises %}
+            {% for exercise_name in exercise_names %}
                 {% if forloop.first %}
                     <th id="students-header">Students</th>
                 {% endif %}
-                {% for student_email in exercise_data|hash:exercise %}
+                {% for student_email in exercise_data|hash:exercise_name %}
                     {% if forloop.first %}
-                        <th><div>{{ exercise_data|hash:exercise|hash:student_email|hash:"exercise_display"|escape }}</div></th>
+                        <th><div>{{ exercise_data|hash:exercise_name|hash:student_email|hash:"exercise_display"|escape }}</div></th>
                     {% endif %}
                 {% endfor %}
             {% endfor %}
         </tr>
         {% for student_email in students %}
             <tr>
-            {% for exercise in exercises %}            
+            {% for exercise_name in exercise_names %}            
                 {% if forloop.first %}
                     <td class="student-email">
                         <a style="color:#006699;" href="/progresschart?student_email={{ student_email|escape }};">
-                            <nobr>{{ exercise_data|hash:exercise|hash:student_email|hash:"short_name"|escape }}</nobr>
+                            <nobr>{{ exercise_data|hash:exercise_name|hash:student_email|hash:"short_name"|escape }}</nobr>
                         </a>
                     </td>
-                    <td class="student-module-status {{ exercise_data|hash:exercise|hash:student_email|hash:"color"|escapejs }}" onclick="location.href='{{ exercise_data|hash:exercise|hash:student_email|hash:"link"|escapejs }}'">
-                        <div class="exercise-info-hover" style="display: none;" onclick="location.href='{{ exercise_data|hash:exercise|hash:student_email|hash:"link"|escapejs }}'">{{ exercise_data|hash:exercise|hash:student_email|hash:"hover" }}</div>
+                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escapejs }}" onclick="location.href='{{ exercise_data|hash:exercise_name|hash:student_email|hash:"link"|escapejs }}'">
+                        <div class="exercise-info-hover" style="display: none;" onclick="location.href='{{ exercise_data|hash:exercise_name|hash:student_email|hash:"link"|escapejs }}'">{{ exercise_data|hash:exercise_name|hash:student_email|hash:"hover" }}</div>
                     </td>
                 {% else %}
-                    <td class="student-module-status {{ exercise_data|hash:exercise|hash:student_email|hash:"color"|escapejs }}" onclick="location.href='{{ exercise_data|hash:exercise|hash:student_email|hash:"link"|escapejs }}'">
-                        <div class="exercise-info-hover" style="display: none;" onclick="location.href='{{ exercise_data|hash:exercise|hash:student_email|hash:"link"|escapejs }}'">{{ exercise_data|hash:exercise|hash:student_email|hash:"hover" }}</div>
+                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escapejs }}" onclick="location.href='{{ exercise_data|hash:exercise_name|hash:student_email|hash:"link"|escapejs }}'">
+                        <div class="exercise-info-hover" style="display: none;" onclick="location.href='{{ exercise_data|hash:exercise_name|hash:student_email|hash:"link"|escapejs }}'">{{ exercise_data|hash:exercise_name|hash:student_email|hash:"hover" }}</div>
                     </td>
                 {% endif %}
     		{% endfor %}
