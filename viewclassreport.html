@@ -84,17 +84,25 @@ After they register your id, you'll be able to see their progress below, and via
     {% endfor %}
 </table>
 <script type="text/javascript">
+$(document).mousemove(function(e){window.mouseX = e.pageX; window.mouseY = e.pageY;});
 $("#module-progress td.student-module-status").hover( 
     function(e){
-        var infoHover = $(this).children(".exercise-info-hover");
-        if ( !infoHover.is(":empty") ) {
-            infoHover.css('left', e.pageX + 15);
-            infoHover.css('top', e.pageY);
-            infoHover.css('cursor', 'pointer');
-            infoHover.show();
-        }
+        var dtLastHover = window.dtLastHover = new Date();
+        var self = this;
+        setTimeout(function(){
+            if (dtLastHover != window.dtLastHover) return;
+        
+            var infoHover = $(self).children(".exercise-info-hover");
+            if ( !infoHover.is(":empty") ) {
+                infoHover.css('left', window.mouseX + 15);
+                infoHover.css('top', window.mouseY);
+                infoHover.css('cursor', 'pointer');
+                infoHover.show();
+            }
+        }, 100);
     },
     function(e){ 
+        window.dtLastHover = null;
         $(this).children(".exercise-info-hover").hide();
     }
 );
