@@ -149,8 +149,12 @@ class Exercise(db.Model):
     last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
     sanitizer_used = db.StringProperty()
 
+    @staticmethod
+    def to_display_name(name):
+        return name.replace('_', ' ').capitalize()
+
     def display_name(self):
-        return self.name.replace('_', ' ').capitalize()
+        return Exercise.to_display_name(name)
 
     def required_streak(self):
         if self.summative:

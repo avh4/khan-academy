@@ -288,7 +288,7 @@ class ViewProgressChart(request_handler.RequestHandler):
                 #logging.info(ue.exercise + ": " + str(ue.proficient_date))
                 #logging.info("delta: " + str(ue.proficient_date - user_data.joined))
                 proficient_date = ue.proficient_date.strftime('%m/%d/%Y')
-                data = ExerciseData(ue.exercise.replace('_', ' ').capitalize(), ue.exercise, days_until_proficient, proficient_date)
+                data = ExerciseData(Exercise.to_display_name(ue.exercise), ue.exercise, days_until_proficient, proficient_date)
                 user_exercises.append(data)
                 max_days = days_until_proficient
                 end_date = ue.proficient_date
@@ -424,8 +424,7 @@ class ClassTimeChunk:
         self.cached_activity_class = None
 
     def minutes_spent(self):
-        timespan = self.end - self.start
-        return float(timespan.seconds + (timespan.days * 24 * 3600)) / 60.0
+        return util.minutes_between(self.start, self.end)
 
     def activity_class(self):
 
@@ -497,19 +496,49 @@ class ClassTimeChunk:
         return None
 
     def description(self):
-        class_activity = self.activity_class()
+        dict_videos = {}
+        dict_exercises = {}
 
-        desc = "~%.0f minutes"
-        if class_activity == "exercise_video":
-            desc = "~%.0f min. of exercises and video"
-        elif class_activity == "exercise":
-            desc = "~%.0f min. of exercises"
-        elif class_activity == "video":
-            desc = "~%.0f min. of video"
+        for activity in self.activities:
 
-        desc = ("<b>%s</b> - <b>%s</b>" % (self.start.strftime("%I:%M%p"), self.end.strftime("%I:%M%p"))) + "<br/><br/>" + desc
+            dict_target = None
+            name_activity = None
 
-        return desc % self.minutes_spent()
+            if type(activity) == ProblemLog:
+                name_activity = activity.exercise
+                dict_target = dict_exercises
+            elif type(activity) == VideoLog:
+                name_activity = activity.video_title
+                dict_target = dict_videos
+
+            if dict_target is not None:
+
+                # For older data that doesn't have video titles recorded
+                if name_activity is None:
+                    name_activity = "Unknown"
+
+                if not dict_target.has_key(name_activity):
+                    dict_target[name_activity] = True
+
+        desc_videos = ""
+        for key in dict_videos:
+            if len(desc_videos) > 0:
+                desc_videos += "<br/>"
+            desc_videos += " - <em>%s</em>" % key
+        if len(desc_videos) > 0:
+            desc_videos = "<br/><b>Videos:</b><br/>" + desc_videos
+
+        desc_exercises = ""
+        for key in dict_exercises:
+            if len(desc_exercises) > 0:
+                desc_exercises += "<br/>"
+            desc_exercises += " - <em>%s</em>" % Exercise.to_display_name(key)
+        if len(desc_exercises) > 0:
+            desc_exercises = "<br/><b>Exercises:</b><br/>" + desc_exercises
+
+        desc = ("<b>%s</b> - <b>%s</b><br/>(<em>~%.0f min.</em>)" % (self.start.strftime("%I:%M%p"), self.end.strftime("%I:%M%p"), self.minutes_spent())) + "<br/>" + desc_videos + desc_exercises
+
+        return desc
 
 class ViewClassTime(request_handler.RequestHandler):
 
@@ -699,7 +728,7 @@ class ViewClassReport(request_handler.RequestHandler):
                         status = "Started"
                         color = "started"
 
-                    exercise_display = exercise.replace('_', ' ').capitalize()
+                    exercise_display = Exercise.to_display_name(exercise)
                     short_name = name
                     if len(short_name) > 18:
                         short_name = short_name[0:18] + "..."
@@ -860,7 +889,7 @@ class ViewCharts(request_handler.RequestHandler):
                 'App' : App,
                 'username': user.nickname(),
                 'logout_url': logout_url,
-                'exercise_name': exercise_name.replace('_', ' ').capitalize(),
+                'exercise_name': Exercise.to_display_name(exercise_name),
                 'exid': exercise_name,
                 'problems': problem_list,
                 'num_problems': num_problems,

@@ -76,3 +76,7 @@ def get_nickname_for(user):
 
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
+
+def minutes_between(dt1, dt2):
+    timespan = dt2 - dt1
+    return float(timespan.seconds + (timespan.days * 24 * 3600)) / 60.0
