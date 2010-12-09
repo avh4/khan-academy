@@ -1,4 +1,6 @@
 import os
+import logging
+import datetime
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -16,6 +18,15 @@ class RequestHandler(webapp.RequestHandler):
     def request_int(self, key, default = None):
         try:
             return int(self.request_string(key))
+        except ValueError:
+            if default is not None:
+                return default
+            else:
+                raise # No value available and no default supplied, raise error
+
+    def request_date(self, key, format_string, default = None):
+        try:
+            return datetime.datetime.strptime(self.request_string(key), format_string)
         except ValueError:
             if default is not None:
                 return default

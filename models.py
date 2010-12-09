@@ -493,15 +493,12 @@ class VideoLog(db.Model):
     seconds_watched = db.IntegerProperty(default = 0)
 
     @staticmethod
-    def get_for_user_and_day(user):
+    def get_for_user_and_day(user, dt):
         query = VideoLog.all()
         query.filter('user =', user)
 
-        today_date = datetime.date.today()
-        today = datetime.datetime(today_date.year, today_date.month, today_date.day)
-        tomorrow = today + datetime.timedelta(days = 1)
-        query.filter('time_watched <=', tomorrow)
-        query.filter('time_watched >=', today)
+        query.filter('time_watched <=', dt + datetime.timedelta(days = 1))
+        query.filter('time_watched >=', dt)
         query.order('time_watched')
 
         return query
@@ -523,15 +520,12 @@ class ProblemLog(db.Model):
     hint_used = db.BooleanProperty(default = False)
 
     @staticmethod
-    def get_for_user_and_day(user):
+    def get_for_user_and_day(user, dt):
         query = ProblemLog.all()
         query.filter('user =', user)
 
-        today_date = datetime.date.today()
-        today = datetime.datetime(today_date.year, today_date.month, today_date.day)
-        tomorrow = today + datetime.timedelta(days = 1)
-        query.filter('time_done <=', tomorrow)
-        query.filter('time_done >=', today)
+        query.filter('time_done <=', dt + datetime.timedelta(days = 1))
+        query.filter('time_done >=', dt)
         query.order('time_done')
 
         return query

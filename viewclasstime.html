@@ -4,108 +4,132 @@
 
 <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
 
-<script>
+{% if not student_data %}
+    You have no students!
+{% else %}
 
-var timezoneOffset = {{ timezone_offset }};
-var timezoneOffsetClient = -1 * (new Date()).getTimezoneOffset();
-if (timezoneOffset != timezoneOffsetClient)
-{
-    window.location = "/classtime?coach={{ coach_email|escapejs }}&timezone_offset=" + timezoneOffsetClient;
-}
-else
-{
-    var chart;
-    $(document).ready(function() {
-        chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'highchart',
-                defaultSeriesType: 'column',
-                marginRight: 130,
-                marginBottom: 100
-            },
-            credits: {
-                enabled: false
-            },
-            plotOptions: {
-                column: {
+    <script>
+
+    // We currently use javascript to grab the client's timezone and force the graph
+    // to display in the browser's specified client timezone.
+
+    var timezoneOffset = {{ timezone_offset }};
+    var timezoneOffsetClient = -1 * (new Date()).getTimezoneOffset();
+    var urlTarget = "/classtime?coach={{ coach_email|escapejs }}&timezone_offset=" + timezoneOffsetClient;
+
+    if (timezoneOffset != timezoneOffsetClient)
+    {
+        window.location = urlTarget;
+    }
+    else
+    {
+        $(function(){
+            $("#targetDatepicker").datepicker().change(function(){ window.location = urlTarget + "&dt=" + this.value; });
+            $("#titleDate").click(function(){$("#targetDatepicker").focus();});
+        });
+
+        var chart;
+        $(function() {
+            chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'highchart',
+                    defaultSeriesType: 'column',
+                    marginRight: 130,
+                    marginBottom: 100
                 },
-                series: {
-                    showInLegend: false,
-                    stacking: 'normal',
-                    point: {
-                        events: {
-                            click: function() {
+                credits: {
+                    enabled: false
+                },
+                plotOptions: {
+                    column: {
+                    },
+                    series: {
+                        showInLegend: false,
+                        stacking: 'normal',
+                        point: {
+                            events: {
+                                click: function() {
+                                }
                             }
                         }
-                    }
-            }
-            },
-            title: {
-                text: '{{ classtime.today_formatted|escapejs }}',
-                x: -20 //center
-            },
-            subtitle: {
-                text: "Time Spent on Exercises and Videos",
-                x: -20
-            },
-            xAxis: {
-                categories: [
-                {% for data in student_data %}
-                '{{ data|hash:"name"|escapejs }}<br/>(<em>{{ data|hash:"total_minutes"|escapejs }} min. total</em>)'{% if not forloop.last %},{% endif %}
-                {% endfor %}
-                ]
-            },
-            yAxis: {
-                title: {
-                    text: 'Time Spent (Minutes)'
-                },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                }]
-            },
-            tooltip: {
-                formatter: function() {
-                    return this.point.desc;
                 }
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'top',
-                x: -10,
-                y: 100,
-                borderWidth: 0
-            },
-            series: [
-                    {% for row in classtime.rows reversed %}
-                    { 
-                       data: [
-                        {% for chunk in row.chunks %}
-                        {
-                            x: {{ forloop.counter0 }}, 
-                            {% if chunk %}
-                                y: {{ chunk.minutes_spent }},
-                            {% else %}
-                                y: 0,
-                            {% endif %}
-                            desc: '{{ chunk.description|escapejs }}',
-                            {% if chunk %}
-                            color: {% if chunk.during_schoolday %}'lightBlue'{% else %}'darkBlue'{% endif %}
-                            {% endif %}
+                },
+                title: {
+                    text: '',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: "Classroom Activity on Exercises and Videos",
+                    x: -20
+                },
+                xAxis: {
+                    categories: [
+                    {% for data in student_data %}
+                    '{{ data|hash:"name"|escapejs }}<br/>(<em>{{ data|hash:"total_minutes"|escapejs }} min. total</em>)'{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                    ]
+                },
+                yAxis: {
+                    title: {
+                        text: 'Time Spent (Minutes)'
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                tooltip: {
+                    formatter: function() {
+                        return this.point.desc;
+                    }
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'top',
+                    x: -10,
+                    y: 100,
+                    borderWidth: 0
+                },
+                series: [
+                        {% for row in classtime.rows reversed %}
+                        { 
+                           data: [
+                            {% for chunk in row.chunks %}
+                            {
+                                x: {{ forloop.counter0 }}, 
+                                {% if chunk %}
+                                    y: {{ chunk.minutes_spent }},
+                                {% else %}
+                                    y: 0,
+                                {% endif %}
+                                desc: '{{ chunk.description|escapejs }}',
+                                {% if chunk %}
+                                color: {% if chunk.during_schoolday %}'lightBlue'{% else %}'darkBlue'{% endif %}
+                                {% endif %}
+                            }{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                            ]
                         }{% if not forloop.last %},{% endif %}
                         {% endfor %}
                         ]
-                    }{% if not forloop.last %},{% endif %}
-                    {% endfor %}
-                    ]
+            });
         });
-    });
-}
-</script>
+    }
+    </script>
 
-<div id="highchart">Loading...</div>
+    <div style="width:100%;padding-top:10px;">
+        <div style="text-align:center;">
+            <input style="font-size:30px;font-weight:bold;text-align:center;" type="text" id="targetDatepicker" value="{{ classtime.today_formatted|escape }}"/>
+        </div>
+        {% if not classtime.rows %}
+            <div style="padding:10px;text-align:center;font-weight:bold;">Classroom activity was pretty silent on this date...</div>
+        {% else %}
+            <div id="highchart" style="min-width:{{ width }}px;height:550px;">Loading...</div>
+        {% endif %}
+    </div>
+{% endif %}
 
 {% endblock pagecontent %}
 

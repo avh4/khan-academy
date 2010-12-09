@@ -368,7 +368,7 @@ class ClassTime:
         return 0
 
     def today_formatted(self):
-        return self.today.strftime("%d/%m/%Y")
+        return self.today.strftime("%m/%d/%Y")
 
     def drop_into_column(self, chunk, column):
 
@@ -414,7 +414,7 @@ class ClassTimeRow:
 class ClassTimeChunk:
 
     SCHOOLDAY_START_HOURS = 8 # 8am
-    SCHOOLDAY_END_HOURS = 16 # 3pm
+    SCHOOLDAY_END_HOURS = 15 # 3pm
 
     def __init__(self):
         self.student = None
@@ -513,11 +513,14 @@ class ClassTimeChunk:
 
 class ViewClassTime(request_handler.RequestHandler):
 
+    def __init__(self):
+        self.timezone_offset = None
+        self.timezone_adjustment = None
+
     def get(self):
         user = util.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)
-            timezone_offset = self.request_int("timezone_offset", default=0)
             user_coach = user
 
             if users.is_current_user_admin():
@@ -529,12 +532,23 @@ class ViewClassTime(request_handler.RequestHandler):
             coach_user_data = UserData.get_or_insert_for(user_coach)
             student_emails = coach_user_data.get_students()
 
-            classtime = self.get_class_time_activity(student_emails, timezone_offset)
+            dt_ctz = self.request_date("dt", "%m/%d/%Y", default=datetime.datetime.min)
+
+            if dt_ctz == datetime.datetime.min:
+                dt = self.dt_to_ctz(datetime.datetime.now())
+                dt_ctz = datetime.datetime(dt.year, dt.month, dt.day)
+
+            classtime = self.get_class_time_activity(student_emails, dt_ctz)
 
             student_data = []
             for student_email in student_emails:
+
+                short_name = util.get_nickname_for(users.User(email=student_email))
+                if len(short_name) > 18:
+                    short_name = short_name[0:18] + "..."
+
                 student_data.append({
-                    "name": util.get_nickname_for(users.User(email=student_email)),
+                    "name": short_name,
                     "total_minutes": "~%.0f" % classtime.get_student_total(student_email)
                     })
 
@@ -543,8 +557,9 @@ class ViewClassTime(request_handler.RequestHandler):
                 'username': user.nickname(),
                 'logout_url': logout_url,
                 'classtime': classtime,
-                'timezone_offset': timezone_offset,
+                'timezone_offset': self.timezone_offset,
                 'coach_email': user_coach.email(),
+                'width': (150 * len(student_data)) + 150,
                 'student_data': student_data,
                 }
             path = os.path.join(os.path.dirname(__file__), 'viewclasstime.html')
@@ -552,25 +567,33 @@ class ViewClassTime(request_handler.RequestHandler):
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
-    def get_class_time_activity(self, student_emails, timezone_offset):
+    def prepare_tz_adjustment(self):
+        if self.timezone_adjustment is None:
+            self.timezone_offset = self.request_int("timezone_offset", default=0)
+            self.timezone_adjustment = datetime.timedelta(minutes = self.timezone_offset)
+
+    def dt_to_utc(self, dt):
+        self.prepare_tz_adjustment()
+        return dt - self.timezone_adjustment
+
+    def dt_to_ctz(self, dt):
+        self.prepare_tz_adjustment()
+        return dt + self.timezone_adjustment
+
+    def get_class_time_activity(self, student_emails, dt_ctz):
 
         column = 0
 
-        timezone_adjustment = datetime.timedelta(minutes = timezone_offset)
-        def tz_adj(dt):
-            return dt + timezone_adjustment
-
         classtime = ClassTime()
 
-        today = tz_adj(datetime.datetime.now())
-        classtime.today = datetime.datetime(today.year, today.month, today.day)
+        classtime.today = dt_ctz
         tomorrow = classtime.today + datetime.timedelta(days = 1)
 
         for student_email in student_emails:
             student = users.User(email=student_email)
 
-            problem_logs = ProblemLog.get_for_user_and_day(student)
-            video_logs = VideoLog.get_for_user_and_day(student)
+            problem_logs = ProblemLog.get_for_user_and_day(student, self.dt_to_utc(dt_ctz))
+            video_logs = VideoLog.get_for_user_and_day(student, self.dt_to_utc(dt_ctz))
 
             problem_and_video_logs = []
 
@@ -586,7 +609,7 @@ class ViewClassTime(request_handler.RequestHandler):
 
             for activity in problem_and_video_logs:
 
-                if chunk_current is not None and tz_adj(activity.time_started()) > (chunk_current.end + chunk_delta):
+                if chunk_current is not None and self.dt_to_ctz(activity.time_started()) > (chunk_current.end + chunk_delta):
                     classtime.drop_into_column(chunk_current, column)
                     chunk_current.description()
                     chunk_current = None
@@ -594,11 +617,11 @@ class ViewClassTime(request_handler.RequestHandler):
                 if chunk_current is None:
                     chunk_current = ClassTimeChunk()
                     chunk_current.student = student
-                    chunk_current.start = max(tz_adj(activity.time_started()), classtime.today)
-                    chunk_current.end = min(tz_adj(activity.time_ended()), tomorrow)
+                    chunk_current.start = self.dt_to_ctz(activity.time_started())
+                    chunk_current.end = self.dt_to_ctz(activity.time_ended())
 
                 chunk_current.activities.append(activity)
-                chunk_current.end = min(tz_adj(activity.time_ended()), tomorrow)
+                chunk_current.end = min(self.dt_to_ctz(activity.time_ended()), tomorrow)
 
             if chunk_current is not None:
                 classtime.drop_into_column(chunk_current, column)
