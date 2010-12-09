@@ -38,11 +38,11 @@ class UserExercise(db.Model):
 
     user = db.UserProperty()
     exercise = db.StringProperty()
-    streak = db.IntegerProperty()
-    longest_streak = db.IntegerProperty()
+    streak = db.IntegerProperty(default = 0)
+    longest_streak = db.IntegerProperty(default = 0)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
-    total_done = db.IntegerProperty()
+    total_done = db.IntegerProperty(default = 0)
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * 3)) # Default 3 days until review
     proficient_date = db.DateTimeProperty()

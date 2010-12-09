@@ -15,6 +15,10 @@ def smart_truncate(content, length=100, suffix='...'):
 def greater_than(x, y):
     return x > y
 
+@register.filter
+def hash(h, key):
+    return h[key]
+
 def mod(content, i):
     return content % i
 

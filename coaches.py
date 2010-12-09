@@ -17,7 +17,7 @@ import util
 import request_handler
 
 from models import UserExercise, Exercise, UserData, ProblemLog, ExerciseGraph
-
+from django.template.defaultfilters import escape
 
 def meanstdv(x):
     n, mean, std = len(x), 0, 0
@@ -374,65 +374,79 @@ class ViewClassReport(request_handler.RequestHandler):
 
             coach_user_data = UserData.get_or_insert_for(user_coach)  
             students = coach_user_data.get_students()
-            exercises = self.get_class_exercises(students)
-            table_headers = []            
-            table_headers.append("Name")
-            working_total_row = []
-            help_total_row = []
-            proficient_total_row = []
-            for exercise in exercises:
-                table_headers.append(exercise.replace('_', ' ').capitalize()) 
-                working_total_row.append(0)
-                help_total_row.append(0)
-                proficient_total_row.append(0)                
-            table_data = []
+            class_exercises = self.get_class_exercises(students)
+
+            exercises_all = Exercise.get_all_use_cache()
+            exercises_found = []
+
+            for exercise in exercises_all:
+                for student_email in students:
+                    if class_exercises[student_email].has_key(exercise.name):
+                        exercises_found.append(exercise.name)
+                        break
+
+            exercise_data = {}
+
             for student_email in students:   
-                row = []
-                student = users.User(email=student_email)
-                student_data = UserData.get_or_insert_for(student)
+
+                student_data = class_exercises[student_email]["student_data"]
                 name = util.get_nickname_for(student_data.user)
                 if student_email != name:
                     name = name + " (%s)" % student_email
-                row.append(ReportCell(data='<a href="/progresschart?student_email=%s">%s</a>' % (student_email, name) ))
                 i = 0
-                for exercise in exercises:
-                    link = "/charts?student_email="+student_email+"&exercise_name="+exercise 
-                    if student_data.is_proficient_at(exercise):
-                        row.append(ReportCell(css_class="proficient", link=link))
-                        proficient_total_row[i] += 1
-                    elif student_data.is_suggested(exercise):
-                        if student_data.is_struggling_with(exercise):
-                            row.append(ReportCell(css_class="needs_help", link=link))
-                            help_total_row[i] += 1
-                        else:
-                            row.append(ReportCell(css_class="working", link=link))
-                            working_total_row[i] += 1
-                    else:
-                        row.append(ReportCell())
-                    i += 1
-                table_data.append(row) 
-            row = [ReportCell("Total students working (but not proficient):")]
-            for count in working_total_row:
-                row.append(ReportCell(data=count, css_class="number"))
-            table_data.append(row) 
 
-            row = [ReportCell("Total students needing help:")]
-            for count in help_total_row:
-                row.append(ReportCell(data=count, css_class="number"))
-            table_data.append(row) 
-            
-            row = [ReportCell("Total proficient students:")]
-            for count in proficient_total_row:
-                row.append(ReportCell(data=count, css_class="number"))
-            table_data.append(row)                       
-            
+                for exercise in exercises_found:
+
+                    user_exercise = UserExercise()
+                    if class_exercises[student_email].has_key(exercise):
+                        user_exercise = class_exercises[student_email][exercise]
+
+                    if not exercise_data.has_key(exercise):
+                        exercise_data[exercise] = {}
+
+                    link = "/charts?student_email="+student_email+"&exercise_name="+exercise
+
+                    status = ""
+                    hover = ""
+                    color = "transparent"
+
+                    if user_exercise.exercise is not None:
+                        if student_data.is_proficient_at(exercise):
+                            status = "Proficient"
+                            color = "proficient"
+                        elif user_exercise.is_struggling():
+                            status = "Struggling"
+                            color = "struggling"
+                        elif user_exercise.total_done > 0:
+                            status = "Started"
+                            color = "started"
+
+                    exercise_display = exercise.replace('_', ' ').capitalize()
+                    short_name = name
+                    if len(short_name) > 18:
+                        short_name = short_name[0:18] + "..."
+
+                    if len(status) > 0:
+                        hover = "<b>%s</b><br/><br/><b>%s</b><br/><em>Status: %s</em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (escape(name), exercise_display, status, user_exercise.streak, user_exercise.total_done)
+
+                    exercise_data[exercise][student_email] = {
+                            "name": name, 
+                            "short_name": short_name, 
+                            "exercise_display": exercise_display, 
+                            "link": link, 
+                            "hover": hover,
+                            "color": color
+                            }
+                    i += 1
+
             template_values = {
                 'App' : App,
                 'username': user.nickname(),
                 'logout_url': logout_url,
-                'table_headers': table_headers,
-                'table_data': table_data,
+                'exercises': exercises_found,
+                'exercise_data': exercise_data,
                 'coach_id': coach_user_data.user.email(),
+                'students': students,
                 }
             path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
             self.response.out.write(template.render(path, template_values))
@@ -440,21 +454,20 @@ class ViewClassReport(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
         
     def get_class_exercises(self, students):
-            exercise_dict = {}
-            for student_email in students:           
+            class_exercise_dict = {}
+            for student_email in students:
+
                 student = users.User(email=student_email)
-                student_data = UserData.get_or_insert_for(student)
+                student_data = UserData.get_for(student)
+
+                class_exercise_dict[student_email] = {"student_data": student_data}
+
                 user_exercises = UserExercise.get_for_user_use_cache(student)
                 for user_exercise in user_exercises:
-                    if user_exercise.exercise not in exercise_dict:
-                        exercise_dict[user_exercise.exercise] = 1
-            results = []
-            exercises = Exercise.get_all_use_cache()            
-            for exercise in exercises:
-                if exercise.name in exercise_dict:
-                    results.append(exercise.name)
-            return results            
+                    if user_exercise.exercise not in class_exercise_dict[student_email]:
+                        class_exercise_dict[student_email][user_exercise.exercise] = user_exercise
 
+            return class_exercise_dict
 
 class ViewCharts(request_handler.RequestHandler):
 

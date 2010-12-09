@@ -936,6 +936,76 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
 /* End of Individual Exercise Styles */
 
+/* Teacher Dashboard/Report Styles */
+
+#module-progress {
+    display: block;
+    margin: 0 50px 20px 0;
+}
+#module-progress th {
+    color: #555;
+    vertical-align: bottom;
+    font-size: 90%;
+    font-weight: bold;
+    background-color: #CCC;
+    border: 1px solid #bbb;
+    border-bottom: 1px solid #999;
+    padding: 5px;
+    text-shadow: 0 1px 0 #EEE;
+    
+    -webkit-border-top-left-radius: 3px;
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+#module-progress th div {
+    min-width: 100px;
+}
+#module-progress td.student-module-status {
+    border: 1px solid #eee;    
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+#module-progress td.proficient,
+#module-progress td.struggling,
+#module-progress td.started {
+    cursor: pointer;
+    background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .2)), to(rgba(255, 255, 255,.1)));
+}
+#module-progress td.proficient {
+    background-color: #80C65A;
+    border-color: #bbb #a1a1a1 #a1a1a1 #bbb;
+}
+#module-progress td.struggling {
+    background-color: red;
+    border-color: #bbb #a1a1a1 #a1a1a1 #bbb;
+}
+#module-progress td.started {
+    background-color: lightblue;
+    border-color: #ccc #aaa #aaa #ccc;
+}
+#module-progress .exercise-info-hover {
+    background: #fff;
+    border: 1px solid #bbb;
+    cursor: pointer;
+    position: absolute;
+    padding: 5px;
+    width: 150px;
+    z-index: 10;
+    
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    
+    -webkit-box-shadow: 1px 1px 3px #ccc;
+    -moz-box-shadow: 1px 1px 3px #ccc;
+    box-shadow: 1px 1px 3px #ccc;
+}
+/* End of teacher Dashboard Styles */
+
 #tabs-table, #tabs-table td.content {
     width: 100%;
 }
