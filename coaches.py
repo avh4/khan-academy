@@ -501,11 +501,11 @@ class ClassTimeChunk:
 
         desc = "~%.0f minutes"
         if class_activity == "exercise_video":
-            desc = "~%.0f minutes of exercises and video"
+            desc = "~%.0f min. of exercises and video"
         elif class_activity == "exercise":
-            desc = "~%.0f minutes of exercises"
+            desc = "~%.0f min. of exercises"
         elif class_activity == "video":
-            desc = "~%.0f minutes of video"
+            desc = "~%.0f min. of video"
 
         desc = ("<b>%s</b> - <b>%s</b>" % (self.start.strftime("%I:%M%p"), self.end.strftime("%I:%M%p"))) + "<br/><br/>" + desc
 
