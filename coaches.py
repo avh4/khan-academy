@@ -410,16 +410,15 @@ class ViewClassReport(request_handler.RequestHandler):
                     hover = ""
                     color = "transparent"
 
-                    if user_exercise.exercise is not None:
-                        if student_data.is_proficient_at(exercise):
-                            status = "Proficient"
-                            color = "proficient"
-                        elif user_exercise.is_struggling():
-                            status = "Struggling"
-                            color = "struggling"
-                        elif user_exercise.total_done > 0:
-                            status = "Started"
-                            color = "started"
+                    if student_data.is_proficient_at(exercise):
+                        status = "Proficient"
+                        color = "proficient"
+                    elif user_exercise.exercise is not None and user_exercise.is_struggling():
+                        status = "Struggling"
+                        color = "struggling"
+                    elif user_exercise.exercise is not None and user_exercise.total_done > 0:
+                        status = "Started"
+                        color = "started"
 
                     exercise_display = exercise.replace('_', ' ').capitalize()
                     short_name = name
