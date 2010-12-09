@@ -31,7 +31,16 @@
         </div>
         <h3>Class Reports</h3>
     </div>
-    <div id="report-page-title"><h4>Daily Activity Report</h4></div>
+    <div id="report-page-title">
+        <h4>Daily Activity Report</h4>
+        <br/>
+        <input type="text" id="targetDatepicker" value="{{ classtime.today_formatted|escape }}"/>
+        {% if not classtime.rows %}
+            <div class="report-note">
+                Classroom activity was pretty silent on this date...
+            </div>
+        {% endif %}
+    </div>
 <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
 {% if not student_data %}
     <p>To enable viewing this class report, each of your students should log in and click on the <a href="coaches">Add a Coach</a>
@@ -51,6 +60,7 @@
 
     if (timezoneOffset != timezoneOffsetClient)
     {
+        $(".report-note").text("Loading...");
         window.location = urlTarget;
     }
     else
@@ -155,13 +165,8 @@
     </script>
 
     <div style="width:100%;">
-        <div style="text-align:center;">
-            <input style="font-size:30px;font-weight:bold;text-align:center;" type="text" id="targetDatepicker" value="{{ classtime.today_formatted|escape }}"/>
-        </div>
-        {% if not classtime.rows %}
-            <div style="padding:10px;text-align:center;font-weight:bold;">Classroom activity was pretty silent on this date...</div>
-        {% else %}
-            <div id="highchart" style="min-width:{{ width }}px;min-height:450px;">Loading...</div>
+        {% if classtime.rows %}
+            <div id="highchart" style="min-width:{{ width }}px;min-height:450px;"></div>
         {% endif %}
     </div>
 {% endif %}
