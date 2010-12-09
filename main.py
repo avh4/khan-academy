@@ -614,6 +614,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                 video_log = VideoLog()
                 video_log.user = user
                 video_log.video = video
+                video_log.video_title = video.title
                 video_log.seconds_watched = seconds_watched
                 video_log.put()
 

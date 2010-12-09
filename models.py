@@ -489,6 +489,7 @@ class UserVideo(db.Model):
 class VideoLog(db.Model):
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
+    video_title = db.StringProperty()
     time_watched = db.DateTimeProperty(auto_now_add = True)
     seconds_watched = db.IntegerProperty(default = 0)
 
