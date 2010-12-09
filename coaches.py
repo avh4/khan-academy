@@ -219,7 +219,7 @@ class ViewSharedPoints(request_handler.RequestHandler):
         if user:
 
             logout_url = users.create_logout_url(self.request.uri)
-            user_coach = None
+            user_coach = user
 
             coach_email = self.request_string("coach")
             if len(coach_email) > 0:
@@ -241,7 +241,7 @@ class ViewSharedPoints(request_handler.RequestHandler):
                         'username': user.nickname(),
                         'logout_url': logout_url,  
                         'user_coach': user_coach,
-                        'coach_email': coach_email
+                        'coach_email': user_coach.email()
                         }
                 path = os.path.join(os.path.dirname(__file__), 'viewsharedpoints.html')
                 self.response.out.write(template.render(path, template_values))
