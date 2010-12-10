@@ -29,8 +29,15 @@ var chart;
                             lineWidth: 1
                         },
                         series: {
-                            showInLegend: false
-                    }
+                            showInLegend: false,
+                            point: {
+                                events: {
+                                    click: function() {
+                                        window.location = '/charts?student_email={{ student_email|escapejs }}&exercise_name=' + this.name;
+                                    }
+                                }
+                            }
+                        }
                     },
 					title: {
                         text: "{{ student|escapejs }}",
@@ -62,7 +69,7 @@ var chart;
 					},
 					tooltip: {
 						formatter: function() {
-				                return '<b>' + this.point.name + '</b><br/>' + this.point.dt;
+				                return '<b>' + this.point.display_name + '</b><br/>' + this.point.dt;
 						}
 					},
 					legend: {
@@ -75,7 +82,12 @@ var chart;
 					},
                     series: [{data:[
                             {% for user_exercise in user_exercises %}
-                            { dt: '{{ user_exercise.proficient_date|escapejs }}', name: '{{ user_exercise.name|escapejs }}', x: {{ user_exercise.days_until_proficient }}, y: {{forloop.counter}} }
+                            { 
+                                dt: '{{ user_exercise.proficient_date|escapejs }}', 
+                                name: '{{ user_exercise.name|escapejs }}', 
+                                display_name: '{{ user_exercise.display_name|escapejs }}', 
+                                x: {{ user_exercise.days_until_proficient }}, 
+                                y: {{forloop.counter}} }
                             {% if not forloop.last %},{% endif %}
                             {% endfor %}
                             ]}]

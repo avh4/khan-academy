@@ -257,6 +257,9 @@ class ViewProgressChart(request_handler.RequestHandler):
                 self.exid = exid
                 self.days_until_proficient = days_until_proficient
                 self.proficient_date = proficient_date
+
+            def display_name(self):
+                return Exercise.to_display_name(self.name)
                 
         user = util.get_current_user()
         student = user
@@ -288,7 +291,7 @@ class ViewProgressChart(request_handler.RequestHandler):
                 #logging.info(ue.exercise + ": " + str(ue.proficient_date))
                 #logging.info("delta: " + str(ue.proficient_date - user_data.joined))
                 proficient_date = ue.proficient_date.strftime('%m/%d/%Y')
-                data = ExerciseData(Exercise.to_display_name(ue.exercise), ue.exercise, days_until_proficient, proficient_date)
+                data = ExerciseData(ue.exercise, ue.exercise, days_until_proficient, proficient_date)
                 user_exercises.append(data)
                 max_days = days_until_proficient
                 end_date = ue.proficient_date
