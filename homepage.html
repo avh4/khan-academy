@@ -89,6 +89,15 @@
 <P>
 <table cellpadding=2 border=0>
 <tr><td>
+
+{% if DVD_list %}
+<ul class="menu" id="menu">
+    {% for playlist in DVD_list %}
+	    <li><a href="#{{playlist}}" class="menulink">{{playlist}}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+
 <div id="browse"><h2>Browse 1800+ videos by topic:</h2>
 <ul class="menu" id="menu">
 	<li><a href="#" class="menulink">Math</a>
@@ -180,6 +189,7 @@
 
 </ul>
 </div>
+{% endif %}
 </td></tr>
 </table>
 

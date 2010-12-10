@@ -13,10 +13,10 @@ import util
 import request_handler
 
 import coaches
-
-from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video
-        
+from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video, ExerciseVideo      
 from discussion import qa
+from topics_list import all_topics_list
+
 
 
 class Export(request_handler.RequestHandler):
@@ -209,7 +209,8 @@ class ImportUserData(request_handler.RequestHandler):
                 user_video = UserVideo()
                 user_video.user = student
                 user_video.video = self.get_video(uv["video"])
-                user_video.last_second_watched = uv["last_second_watched"]
+                if "last_second_watched" in uv:                  
+                    user_video.last_second_watched = uv["last_second_watched"]
                 user_video.seconds_watched = uv["seconds_watched"]
                 user_video.last_watched = self.datetime_from_str(uv["last_watched"])  
                 user_video.put()                                    
@@ -241,7 +242,7 @@ class Playlists(request_handler.RequestHandler):
 
     def get(self): 
         playlists = []   
-        for playlist_title in util.all_topics_list:            
+        for playlist_title in all_topics_list:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -253,8 +254,8 @@ class Playlists(request_handler.RequestHandler):
                             } 
             playlists.append(playlist_dict) 
         self.response.out.write(json.dumps(playlists, indent=4))        
-                        
-
+                             
+        
 class PlaylistVideos(request_handler.RequestHandler):
 
     def get(self): 
@@ -278,5 +279,28 @@ class PlaylistVideos(request_handler.RequestHandler):
                           'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title))
                          }                         
             videos.append(video_dict)                        
-        self.response.out.write(json.dumps(videos, indent=4))        
+        self.response.out.write(json.dumps(videos, indent=4))     
+        
+
+class VideosForExercise(request_handler.RequestHandler):
+
+   def get(self):
+       exid = self.request.get('exid')
+       exercise = Exercise.all().filter('name =', exid).get()
+
+       exercise_videos = []
+       for exercise_video in ExerciseVideo.all().filter('exercise =', exercise):
+            v = exercise_video.video
+            video_dict = {'youtube_id':  v.youtube_id,
+                          'youtube_url': v.url,
+                          'title': v.title, 
+                          'description': v.description,
+                          'keywords': v.keywords,                         
+                          'readable_id': v.readable_id,
+                          'ka_url': "http://www.khanacademy.org/video/%s" % (v.readable_id,)
+                         }         
+            exercise_videos.append(video_dict)
+
+       self.response.out.write(json.dumps(exercise_videos, indent=4))
+       
         

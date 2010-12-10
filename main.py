@@ -63,6 +63,8 @@ from discussion import qa
 from discussion import notification
 from discussion import render
 
+from topics_list import topics_list, all_topics_list, DVD_list
+
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -1402,7 +1404,7 @@ def library_content_html(force_refresh = False):
 
     for playlist in Playlist.all():
         dict_playlists[playlist.key()] = playlist
-        if playlist.title in util.topics_list:
+        if playlist.title in topics_list:
             dict_playlists_by_title[playlist.title] = playlist
 
     for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
@@ -1418,7 +1420,7 @@ def library_content_html(force_refresh = False):
         else:
             dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
 
-    for topic in util.topics_list:
+    for topic in topics_list:
 
         playlist = dict_playlists_by_title[topic]
         playlist_key = playlist.key()
@@ -1461,7 +1463,7 @@ class GenerateVideoMapping(request_handler.RequestHandler):
 
     def get(self): 
         video_mapping = {}
-        for playlist_title in util.all_topics_list:            
+        for playlist_title in all_topics_list:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -1483,7 +1485,7 @@ class YoutubeVideoList(request_handler.RequestHandler):
 
     def get(self):
         video_mapping = {}
-        for playlist_title in util.all_topics_list:            
+        for playlist_title in all_topics_list:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -1531,6 +1533,7 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'link3': link3,
                                                   'link4': link4,
                                                   'library_content': library_content,
+                                                  'DVD_list': DVD_list,
                                                   'logout_url': logout_url}, 
                                                   self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
