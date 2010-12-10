@@ -543,7 +543,7 @@ class ProblemLog(db.Model):
         # For reporting's sake, we cap the amount of time that you can be considered to be
         # working on a single problem at 60 minutes. If you've left your browser open
         # longer, you're probably not actively working on the problem.
-        return self.time_done - datetime.timedelta(seconds = min(3600, self.time_taken))
+        return self.time_done - datetime.timedelta(seconds = min(consts.MAX_WORKING_ON_PROBLEM_SECONDS, self.time_taken))
 
     def time_ended(self):
         return self.time_done

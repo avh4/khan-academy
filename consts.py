@@ -26,3 +26,6 @@ INCOMPLETE_EXERCISE_MULTIPLIER = 5
 
 # Base energy points awarded for watching an entire video
 VIDEO_POINTS_BASE = 750
+
+# Maximum time we're willing to report that a user worked on a single problem, in seconds
+MAX_WORKING_ON_PROBLEM_SECONDS = 3600
