@@ -28,4 +28,4 @@ INCOMPLETE_EXERCISE_MULTIPLIER = 5
 VIDEO_POINTS_BASE = 750
 
 # Maximum time we're willing to report that a user worked on a single problem, in seconds
-MAX_WORKING_ON_PROBLEM_SECONDS = 3600
+MAX_WORKING_ON_PROBLEM_SECONDS = 1200

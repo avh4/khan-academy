@@ -539,11 +539,14 @@ class ProblemLog(db.Model):
 
         return query
 
-    def time_started(self):
+    def time_taken_capped_for_reporting(self):
         # For reporting's sake, we cap the amount of time that you can be considered to be
         # working on a single problem at 60 minutes. If you've left your browser open
         # longer, you're probably not actively working on the problem.
-        return self.time_done - datetime.timedelta(seconds = min(consts.MAX_WORKING_ON_PROBLEM_SECONDS, self.time_taken))
+        return min(consts.MAX_WORKING_ON_PROBLEM_SECONDS, self.time_taken)
+
+    def time_started(self):
+        return self.time_done - datetime.timedelta(seconds = self.time_taken_capped_for_reporting())
 
     def time_ended(self):
         return self.time_done

@@ -855,7 +855,7 @@ class ViewCharts(request_handler.RequestHandler):
                     time_taken_list.append(problem.time_taken)
                     if problem.time_taken > max_time_taken:
                         max_time_taken = problem.time_taken
-                    problem_list.append(Problem(problem.time_taken, problem.time_taken, problem.correct))
+                    problem_list.append(Problem(problem.time_taken_capped_for_reporting(), problem.time_taken_capped_for_reporting(), problem.correct))
                     #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
                                         
                     if needs_proficient_date:
