@@ -61,6 +61,7 @@
     if (timezoneOffset != timezoneOffsetClient)
     {
         $(".report-note").text("Loading...");
+        $("#targetDatepicker").hide();
         window.location = urlTarget;
     }
     else
