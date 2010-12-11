@@ -3,67 +3,63 @@ import copy
 
 # Each DVD needs to stay under 4.4GB
 
-math_DVD_list = [ # 3.6GB
-    'Arithmetic',
-    'Pre-algebra',
-    'Algebra',
-    'Geometry',
-    'Trigonometry',
-    'Probability',
-    'Statistics',
-    'Precalculus'
-]
+DVDs_dict = {
+    'Math': [ # 3.6GB
+        'Arithmetic',
+        'Pre-algebra',
+        'Algebra',
+        'Geometry',
+        'Trigonometry',
+        'Probability',
+        'Statistics',
+        'Precalculus',
+    ],
+    'Advanced Math': [ # 4.0GB
+        'Calculus',
+        'Differential Equations',
+        'Linear Algebra',
+    ],        
+    'Math Worked Examples': [ # 4.2GB
+        'Developmental Math',
+        'MA Tests for Education Licensure (MTEL) -Pre-Alg',
+        'Algebra I Worked Examples',
+        'ck12.org Algebra 1 Examples',
+        'California Standards Test: Algebra I',
+        'California Standards Test: Algebra II',
+        'California Standards Test: Geometry',
+        'Singapore Math',
+    ],
+    'Chemistry': [ # 2.9GB
+        'Chemistry',
+        'Organic Chemistry',
+    ],
+    'Science': [ # 2.8GB
+        'Cosmology and Astronomy',
+        'Biology',
+        'Physics',
+    ],
+    'Finance': [ # 2.5GB
+        'Finance',
+        'Banking and Money',
+        'Valuation and Investing',
+        'Venture Capital and Capital Markets',
+        'Credit Crisis',
+        'Paulson Bailout',
+        'Geithner Plan',
+        'Current Economics',
+        'Currency',
+    ],
+    'Test Prep': [ # 2.0GB
+        'SAT Preparation',
+        'GMAT: Problem Solving',
+        'GMAT Data Sufficiency',
+        'CAHSEE Example Problems',
+    ],
+}
 
-advanced_math_DVD_list = [ # 4.0GB
-    'Calculus',
-    'Differential Equations',
-    'Linear Algebra'
-]        
-
-math_worked_examples_DVD_list = [ # 4.2GB
-    'Developmental Math',
-    'MA Tests for Education Licensure (MTEL) -Pre-Alg',
-    'Algebra I Worked Examples',
-    'ck12.org Algebra 1 Examples',
-    'California Standards Test: Algebra I',
-    'California Standards Test: Algebra II',
-    'California Standards Test: Geometry',
-    'Singapore Math'
-]
-
-chemistry_DVD_list = [ # 2.9GB
-    'Chemistry',
-    'Organic Chemistry',
-]
-
-science_DVD_list = [ # 2.8GB
-    'Cosmology and Astronomy',
-    'Biology',
-    'Physics'
-]
-
-finance_DVD_list = [ # 2.5GB
-    'Finance',
-    'Banking and Money',
-    'Valuation and Investing',
-    'Venture Capital and Capital Markets',
-    'Credit Crisis',
-    'Paulson Bailout',
-    'Geithner Plan',
-    'Current Economics',
-    'Currency'
-]
-
-test_prep_DVD_list = [ # 2.0GB
-    'SAT Preparation',
-    'GMAT: Problem Solving',
-    'GMAT Data Sufficiency',
-    'CAHSEE Example Problems'
-]
-
-# replace False with the DVD_list above that you want to burn
+# replace None with the DVD name above that you want to burn
 # this will restrict the homepage to only show the playlists from that list
-DVD_list = False # math_DVD_list
+DVD_list = DVDs_dict.get(None) #'Math'
 
 if DVD_list:
     topics_list = all_topics_list = DVD_list
