@@ -1,20 +1,112 @@
-{% extends "page_template.html" %}
-{% block pagescript %}
-<style type="text/css">
-#downloads p {
-    margin-top: 1.2em;
-    margin-bottom: 1.2em;
-}
-</style>
-{% endblock pagescript %}
+{% extends "about_template.html" %}
 {% block pagetitle %}Downloads{% endblock pagetitle %}
-{% block pagecontent %}
+{% block aboutcontent %}
+<ul>
+	<li><A href="#offline"><span>Offline Server</span></a></li>
+	<li><A href="#store"><span>DVD Store</span></a></li>
+	<li><A href="#other"><span>Other Sources</span></a></li>
+</ul>
 
-<article id="downloads">
-<p>Here are some options for downloading Khan Academy videos and exercises for use offline.</p>
+<div id="offline">
+<p>For an offline capable version of the site for Windows, visit the
+<a href="http://code.google.com/p/khanacademy/downloads/list">download page.</a>
+Unzip it and click on run.bat, which will start up the server and load the
+local version of the Khan Academy homepage in your browser. All the exercises
+should work at this point.</p>
+
+<p>Next go to the download_scripts directory and click on the playlist(s) you want to download
+(download_ALL.bat will get everything).  When you're done downloading, the videos in that playlist
+will work when you click on them in the browser.</p>
+
+<p>Once you've downloaded your playlists, feel free to <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/">
+distribute</a> them, as long as it's not done on a for-profit basis.  You could burn a DVD or USB stick and send it to
+someone without internet access, or order the equivalent from our <a href="#store">store</a>.
+</p>
+</div>
+
+<div id="store">
+<p>If someone you know has a computer running Windows and a DVD drive, but no internet access, they can still use
+the Khan Academy offline videos and exercises on DVD.  This is the same as you can download <a href="">here</a>
+but can be helpful if your internet connection is slow, you don't know how to burn a DVD, or you would just like
+someone to do the downloading/burning/mailing for you.</p>
+
+<p>To help us gauge interest in this, please send an email to
+<a href="mailto:khan-academy-comments@googlegroups.com">khan-academy-comments@googlegroups.com</a> telling us which
+DVD you would like to purchase.  The prices will probably be around $7 per DVD, or the 6 DVD set for $18. That
+should be around our breakeven point for burning and mailing them, but if it's off we'll adjust the price to
+make it that way.</p>
+
+Math DVD
+<ul>
+<li>Arithmetic</li>
+<li>Pre-algebra</li>
+<li>Algebra</li>
+<li>Geometry</li>
+<li>Trigonometry</li>
+<li>Probablility</li>
+<li>Statistics</li>
+<li>Pre-Calculus</li>
+</ul>
+
+Advanced Math DVD
+<ul>
+<li>Calculus</li>
+<li>Differential Equations</li>
+<li>Linear Algebra</li>
+</ul>
+
+Math Worked Examples DVD
+<ul>
+<li>Developmental Math</li>
+<li>MA Tests for Education Licensure (MTEL) -Pre-Alg</li>
+<li>Algebra I Worked Examples</li>
+<li>ck12.org Algebra 1 Examples</li>
+<li>California Standards Test: Algebra I</li>
+<li>California Standards Test: Algebra II</li>
+<li>California Standards Test: Geometry</li>
+<li>Singapore Math</li>
+</ul>
+
+Science DVD
+<ul>
+<li>Cosmology and Astronomy</li>
+<li>Biology</li>
+<li>Physics</li>
+</ul>
+
+Chemistry DVD
+<ul>
+<li>Chemistry</li>
+<li>Organic Chemistry</li>
+</ul>
+
+Finance DVD
+<ul>
+<li>Finance</li>
+<li>Banking and Money</li>
+<li>Valuation and Investing</li>
+<li>Venture Capital and Capital Markets</li>
+<li>Credit Crisis</li>
+<li>Paulson Bailout</li>
+<li>Geithner Plan</li>
+<li>Current Economics</li>
+<li>Currency</li>
+</ul>
+
+Test Prep DVD
+<ul>
+<li>SAT Preparation</li>
+<li>GMAT Data Sufficiency</li>
+<li>GMAT Problem Solving</li>
+<li>CAHSEE Example Problems</li>
+</ul>
+</div>
+
+
+<div id="other">
+<p>Here are some other sources for downloading Khan Academy videos.</p>
 <p><strong>Note: we have little or no experience with most of these,
 so they aren't officially supported.</strong></p>
-<p>Videos</p>
 <ul>
 <li><a href="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewiTunesUInstitution?id=391034778">
 Khan Academy</a> on iTunes U.</li>
@@ -34,40 +126,7 @@ Khan Academy: A Classroom In Your Pocket</a> by Irynsoft. An app for the ipod/ip
 on code.google.com.  Check here for updates.
 </li>
 </ul>
+</div>
 
-<p>Videos and Exercises</p>
-<ul>
-<li><a href="http://code.google.com/p/khanacademy/downloads/list">Offline videos and exercises</a> for windows.
-A packaged up development server.  Unzip it and click on run.bat, which will start up the server and load the
-local version of the Khan Academy homepage in your browser.
-
-Next go to the download_scripts directory, and click on the playlist that you want to download.
-Once the script is complete, the videos in that playlist will work when you click on them in the
-browser.
-</li>
-<li><a href="http://code.google.com/p/khanacademy/issues/detail?id=4">Offline use issue</a>
-on code.google.com.  Check here for updates.
-</li>
-</ul>
-
-<p>Store</p>
-<ul>
-<li>If someone you know has a computer and DVD drive, but no internet access, they can still use the Khan Academy
-<a href="/store">offline videos and exercises on DVD</a>.  This is the same as you can download above but can be helpful if your internet
-connection is slow, you don't know how to burn a DVD, or you would just like someone to do the downloading/burning/mailing
-for you.
-</li>
-</ul>
-
-<p>Here are a few spreadsheets that go with the videos.</p>
-<ul>
-<li><A HREF="/downloads/MortgageCalculator.xlsx">MortgageCalculator.xlsx</A></li>
-<li><A HREF="/downloads/NormalDistribution.xls">NormalDistribution.xls</A></li>
-<li><A HREF="/downloads/NormalIntro.xls">NormalIntro.xls</A></li>
-<li><A HREF="/downloads/buyrent.xls">buyrent.xls</A></li>
-<li><A HREF="/downloads/cupcakes.xls">cupcakes.xls</A></li>
-<li><A HREF="/downloads/cupcakes.xlsx">cupcakes.xlsx</A></li>
-</ul>
-</article>
-{% endblock pagecontent %}
+{% endblock aboutcontent %}
 
