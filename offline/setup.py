@@ -38,6 +38,7 @@ def download_appengine(appengine_zip):
         replace_in_file("google_appengine/google/appengine/tools/bulkloader.py", "self.num_threads = arg_dict['num_threads']", "self.num_threads = 5")             
             
 
+
 def get_khanacademy_code():
     revision = ""  
     os.chdir(code_dir)
@@ -63,10 +64,13 @@ def get_khanacademy_code():
         print "output:\n" + output
     os.chdir(code_dir + "/khanacademy-read-only")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
-    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")  
-    os.chdir(ka_dir)
-    replace_in_file("readme.txt", "{{version_number}}", revision)        
+    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")      
     return revision
+
+
+def insert_revision_in_readme(revision):    
+    os.chdir(ka_dir)
+    replace_in_file("readme.txt", "{{version_number}}", revision)    
     
     
 def copy_python25():
@@ -127,12 +131,6 @@ def copy_datastore():
             datastore_path = line.split()[-1][:-1]
             shutil.copy(datastore_path, "../")
             break
-
-
-def generate_library_content():
-    print "generating library content"
-    os.chdir(code_dir + "/khanacademy-read-only")
-    urlretrieve("http://localhost:8080/library_content", "library_content.html")
     
 
 def generate_video_mapping():
@@ -180,25 +178,30 @@ def zip_directory(revision):
                  except:
                      traceback.print_exc()
                      
-def revert_readme():
+def revert_readme(revision):
     os.chdir(ka_dir)    
     replace_in_file("readme.txt", revision, "{{version_number}}")        
-    
+   
 
-if __name__ == "__main__":  
+def setup():
     download_appengine("google_appengine_1.3.7.zip")
     revision = get_khanacademy_code()
+    insert_revision_in_readme(revision)
     copy_python25()
     download_7zip()
     download_highcharts()
     upload_sample_data()
     copy_datastore()
-    generate_library_content()
     generate_video_mapping()
     remove_bulkloader_logs()
     create_download_scripts()
     zip_directory(revision)
-    revert_readme()
+    revert_readme(revision)
     sys.exit()
     #TODO: upload it http://code.google.com/p/khanacademy/downloads/list ?                                     
+
                                        
+if __name__ == "__main__":  
+    setup()
+    
+    
