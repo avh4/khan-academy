@@ -3,34 +3,11 @@
 <style type="text/css">
 #page_sub_nav b { display: none; }
 </style>
-<script type="text/javascript">
-    $(function() {
-        $("#reports-jump-menu #page-changer #submit").hide();
-        $("#reports-jump-menu #page-changer select").val("classreport");
-        $("#reports-jump-menu #page-changer select").change( function() {
-            window.location = $("#reports-jump-menu #page-changer select option:selected").val() + "?coach={{coach_email|escapejs}}";
-        });
-    }
-    );
-</script>
 {% endblock pagescript %}
 {% block pagetitle %}Class Report{% endblock pagetitle %}
 {% block pagecontent %}
 <div id="report-page-content">
-    <div id="reports-nav">
-        <div id="reports-jump-menu">
-            <label>View Report:</label>
-            <form id="page-changer" action="" method="post">
-                <select class="report-select">
-                    <option value="classreport" selected="true">Student Progress Report</option>
-                    <option value="classtime">Daily Activity Report</option>
-                    <option value="sharedpoints">Class Energy Points per Minute</option>
-                </select>
-                <input type="submit" value="Go" id="submit" />
-            </form>
-        </div>
-        <h3>Class Reports</h3>
-    </div>
+    {% reports_navigation coach_email "classreport" %}
     <div id="report-page-title"><h4>Student Progress Report</h4></div>
     {% if students %}
     <p>

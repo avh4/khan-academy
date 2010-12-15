@@ -148,6 +148,11 @@ def streak_bar(user_exercise):
             "show_longest_streak_label": show_longest_streak_label
             }
 
+@register.inclusion_tag("reports_navigation.html")
+def reports_navigation(coach_email, current_report="classreport"):
+    return  {'coach_email': coach_email, 'current_report': current_report }
+    
+    
 register.tag(highlight)
 
 webapp.template.register_template_library('discussion.templatetags')
