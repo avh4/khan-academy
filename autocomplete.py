@@ -1,15 +1,16 @@
 from google.appengine.ext import db
-from google.appengine.api import memcache
 
 import app
 from app import App
 import request_handler
-from models import Video, Playlist
+import consts
+import layer_cache
+from models import Video, Playlist, VideoPlaylist
 
 from django.utils import simplejson
 import logging
 
-CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 # Expires after one day
+CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 3 # Expires after three days
 MAX_RESULTS_PER_TYPE = 10
 VIDEO_TITLE_MEMCACHE_KEY = "video_title_dicts"
 PLAYLIST_TITLE_MEMCACHE_KEY = "playlist_title_dicts"
@@ -38,29 +39,21 @@ class Autocomplete(request_handler.RequestHandler):
             video_results = filter(lambda video_dict: query in video_dict["title"].lower(), video_title_dicts())
             playlist_results = filter(lambda playlist_dict: query in playlist_dict["title"].lower(), playlist_title_dicts())
 
-            video_results = sorted(video_results, key=lambda dict: dict["title"].lower())[:MAX_RESULTS_PER_TYPE]
-            playlist_results = sorted(playlist_results, key=lambda dict: dict["title"].lower())[:MAX_RESULTS_PER_TYPE]
+            video_results = sorted(video_results, key=lambda dict: dict["title"].lower().index(query))[:MAX_RESULTS_PER_TYPE]
+            playlist_results = sorted(playlist_results, key=lambda dict: dict["title"].lower().index(query))[:MAX_RESULTS_PER_TYPE]
 
         json = simplejson.dumps({"query": query, "videos": video_results, "playlists": playlist_results}, ensure_ascii=False)
         self.response.out.write(json)
 
+@layer_cache.cache_with_key(VIDEO_TITLE_MEMCACHE_KEY, expiration=CACHE_EXPIRATION_SECONDS)
 def video_title_dicts():
-    # Use a key namespace for the current app version so any new deployments are guaranteed to get fresh data.
-    dicts = memcache.get(VIDEO_TITLE_MEMCACHE_KEY, namespace=App.version)
+    live_video_dict = {}
+    for video_playlist in VideoPlaylist.all().filter('live_association = ', True):
+        live_video_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)] = True
 
-    if dicts == None:
-        dicts = map(lambda video: {"title": video.title, "url": "/video/%s" % video.readable_id}, Video.all())
-        if not memcache.set(VIDEO_TITLE_MEMCACHE_KEY, dicts, time=CACHE_EXPIRATION_SECONDS, namespace=App.version):
-            logging.error("Memcache set failed for %s" % VIDEO_TITLE_MEMCACHE_KEY)
+    live_videos = filter(lambda video: video.key() in live_video_dict, Video.all())
+    return map(lambda video: {"title": video.title, "url": "/video/%s" % video.readable_id}, live_videos)
 
-    return dicts
-
+@layer_cache.cache_with_key(PLAYLIST_TITLE_MEMCACHE_KEY, expiration=CACHE_EXPIRATION_SECONDS)
 def playlist_title_dicts():
-    dicts = memcache.get(PLAYLIST_TITLE_MEMCACHE_KEY, namespace=App.version)
-
-    if dicts == None:
-        dicts = map(lambda playlist: {"title": playlist.title, "url": "/#%s" % playlist.title}, Playlist.all())
-        if not memcache.set(PLAYLIST_TITLE_MEMCACHE_KEY, dicts, time=CACHE_EXPIRATION_SECONDS, namespace=App.version):
-            logging.error("Memcache set failed for %s" % PLAYLIST_TITLE_MEMCACHE_KEY)
-
-    return dicts
+    return map(lambda playlist: {"title": playlist.title, "url": "/#%s" % playlist.title}, Playlist.all())
