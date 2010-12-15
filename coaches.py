@@ -735,6 +735,10 @@ class ViewClassReport(request_handler.RequestHandler):
                     if student_data.is_proficient_at(exercise_name):
                         status = "Proficient"
                         color = "proficient"
+
+                        if not student_data.is_explicitly_proficient_at(exercise_name):
+                            status = "Proficient (due to proficiency in a more advanced module)"
+
                     elif user_exercise.exercise is not None and UserExercise.is_struggling_with(user_exercise, exercise):
                         status = "Struggling"
                         color = "struggling"
@@ -748,7 +752,7 @@ class ViewClassReport(request_handler.RequestHandler):
                         short_name = short_name[0:18] + "..."
 
                     if len(status) > 0:
-                        hover = "<b>%s</b><br/><br/><b>%s</b><br/><em>Status: %s</em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (escape(name), exercise_display, status, user_exercise.streak, user_exercise.total_done)
+                        hover = "<b>%s</b><br/><br/><b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (escape(name), exercise_display, status, user_exercise.streak, user_exercise.total_done)
 
                     exercise_data[exercise_name][student_email] = {
                             "name": name, 

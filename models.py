@@ -90,7 +90,7 @@ class UserExercise(db.Model):
 
     def is_struggling(self):
         return UserExercise.is_struggling_with(self, self.get_exercise())
-    
+
     def get_review_interval(self):
         review_interval = datetime.timedelta(seconds=self.review_interval_secs)
         return review_interval
@@ -346,6 +346,9 @@ class UserData(db.Model):
     def is_proficient_at(self, exid):
         self.reassess_if_necessary()
         return (exid in self.all_proficient_exercises)
+
+    def is_explicitly_proficient_at(self, exid):
+        return (exid in self.proficient_exercises)
 
     def is_reviewing(self, exid, user_exercise, time):
 
