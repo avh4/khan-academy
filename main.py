@@ -55,7 +55,7 @@ import util
 import request_handler
 import points
 
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, VideoLog
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 
 from discussion import comments
 from discussion import qa
@@ -572,6 +572,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
             if video:
 
+                user_data = UserData.get_or_insert_for(user)
                 user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
 
                 video_points_previous = points.VideoPointCalculator(user_video)
@@ -587,6 +588,9 @@ class LogVideoProgress(request_handler.RequestHandler):
                 except ValueError:
                     pass # Ignore if we can't parse
 
+                # Cap seconds_watched at duration of video
+                seconds_watched = min(seconds_watched, video.duration)
+
                 last_second_watched = 0
                 try:
                     last_second_watched = int(float(self.request.get("last_second_watched")))
@@ -598,14 +602,23 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 if seconds_watched > 0:
                     user_video.seconds_watched += seconds_watched
+                    user_data.total_seconds_watched += seconds_watched
+
+                    # Update seconds_watched of all associated UserPlaylists
+                    query = VideoPlaylist.all()
+                    query.filter('video =', video)
+                    query.filter('live_association = ', True)
+                    for video_playlist in query:
+                        user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
+                        user_playlist.seconds_watched += seconds_watched
+                        user_playlist.last_watched = datetime.datetime.now()
+                        user_playlist.put()
 
                 user_video.duration = video.duration
                 user_video.put()
 
                 video_points_total = points.VideoPointCalculator(user_video)
                 video_points_received = video_points_total - video_points_previous
-
-                user_data = UserData.get_or_insert_for(user)
 
                 if video_points_received > 0:
                     user_data.add_points(video_points_received)

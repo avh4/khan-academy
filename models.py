@@ -254,6 +254,7 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     need_to_reassess = db.BooleanProperty()
     points = db.IntegerProperty()
+    total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
@@ -456,6 +457,32 @@ class Playlist(Searchable, db.Model):
     INDEX_ONLY = ['title', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
+
+class UserPlaylist(db.Model):
+    user = db.UserProperty()
+    playlist = db.ReferenceProperty(Playlist)
+    seconds_watched = db.IntegerProperty(default = 0)
+    last_watched = db.DateTimeProperty(auto_now_add = True)
+
+    @staticmethod
+    def get_key_name(playlist, user):
+        return "user_playlist:" + user.email() + ":" + playlist.youtube_id
+
+    @staticmethod
+    def get_for_playlist_and_user(playlist, user, insert_if_missing=False):
+
+        if not user:
+            return None
+
+        key = UserPlaylist.get_key_name(playlist, user)
+
+        if insert_if_missing:
+            return UserPlaylist.get_or_insert(
+                        key_name = key,
+                        user = user,
+                        playlist = playlist)
+        else:
+            return UserPlaylist.get_by_key_name(key)
 
 class UserVideo(db.Model):
 
