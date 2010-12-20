@@ -1,3 +1,6 @@
+html, body {
+    height: 100%;
+}
 html {
     overflow-y: scroll;
 }
@@ -8,6 +11,11 @@ body {
     font-size: 11px;
     margin: 0;
     color: #000;
+}
+
+#page-container {
+    position: relative;
+    min-height: 100%;
 }
 
 /* Links in the header and footer don't change color when visited. */
@@ -71,100 +79,327 @@ header, footer {
 }
 
 footer {
-    height: 25px;
+    height: 208px;
     clear: both;
+    background: url(/images/footer-bg.png) repeat-x 0 0;
+    min-width: 970px;
+    position: absolute;
+    bottom: 0;
+    right:0;
+    left: 0;
 }
+    footer.short {
+        height: auto;
+        color: #555;
+        background: #eee;
+        border-top: 1px solid #bbb;
+        z-index: 10;
+    }
+    footer #leaves {
+        background: url(/images/footer-leaves.png) no-repeat top center;
+        height: 188px;
+        padding: 10px 23px;
+        min-width: 970px;
+    }
+    footer.short #leaves {
+        height: auto;
+    }
+    footer ul.page_links {
+        float: left;
+        padding: 7px;
+        list-style: url(/images/list-item-green.png);
+        padding: 0 20px;
+        margin: 0;
+    }
+    footer ul.page_links li {
+        padding-right: 8px;
+        padding-bottom: 8px;
+    }
+    footer.short span.sep {
+        padding-right: 10px;
+    }
+    footer#footer #leaves a {
+        color: white;
+        text-decoration: none;
+    }
+        footer#footer.short #leaves a {
+            background: url(/images/list-item-green.png) no-repeat center left;
+            padding-left: 7px;
+            padding-right: 10px;
+            color: #555;
+        }
+    footer#footer #leaves a:hover {
+        color: black;
+    }
+    footer #copyright {
+        float: right;
+        padding-top: 2px;
+    }
+    footer#footer #leaves #copyright a {
+        background: transparent;
+        padding: 0;
+    }
+    footer #copyright img {
+        border: 0px;
+        position: relative;
+        top: -1px;
+    }
 
 #page_brand  {
     position: relative;
     float: left;
     white-space: nowrap;
+    width: 100%;
 }
 
-#page_visitors {
-    position: absolute;
-    left: 140px;
-    top: 40px;
-    font-size:14px;
-    display: none; /* hidden until AJAX call to chartbeat gets the number */
+#top-header {
+    height: 42px;
 }
 
-#page_num_visitors {
-    font-weight: bold;
+#top-header #logo {
+    height: 42px;
+    position: relative;
+    background: url(/images/logo-topper.png) no-repeat 0 0;
+    width: 317px;
+}
+    #top-header #logo #logo-highlight {
+        position: absolute;
+        background: url(/images/logo-highlight.png) no-repeat -110px 0px;
+        width: 592px;
+        height: 194px;
+    }
+    #top-header #logo #logo-image{
+        position: absolute;
+        left: 23px;
+        top: 15px;
+        z-index: 1;    
+    }
+
+#top-header #top-header-links #page_fb_like {
+    display: inline;   
 }
 
-#page_visitors {
-	color: #8ebe4f;
-	text-decoration: none;
+#top-header #stats {
+    position: relative;
+    z-index: 2;
+    color: #999;
 }
+    #top-header #stats #page_visitors {
+        position: absolute;
+        left: 84px;
+        top: 50px;
+        font-size:15px;
+        font-style: italic;
+        font-weight: normal;
+        font-family: Georgia;
+        display: none; /* hidden until AJAX call to chartbeat gets the number */
+        text-decoration: none;
+    }
 
-#page_fb_like {
-    display: block;
-    clear: both;
-    position: absolute;
-    left: 110px;
-    top: 60px;    
-}
-
-#page_top_nav {
+#user-info {
     margin-right: 0;
     position: relative;
-    min-width: 55ex;
+    top: -4px;
+}
+    #user-info ul {
+        display: block;
+        clear: right;
+        float: right;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    #user-info a.notification_link img {
+        position: relative;
+        top:-1px;
+    }
+
+#sitewide-navigation {
+    clear: both;
+    margin: 75px 0 0;
+    background: #eee;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
+    background: -webkit-gradient( linear, left top, left bottom, from(#f7f7f7), to(#ddd));
+    background: -moz-linear-gradient( top, #f7f7f7, #ddd );
+    height: 30px;
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #eee;
+}
+#sitewide-navigation nav {
+    padding-top: 2px;
+    padding-left: 15px;
+}
+#sitewide-navigation nav ul {
+    margin: 0;
+    padding: 0;
+}
+#sitewide-navigation nav > ul > li {
+    font-size: 15px;
+    color: #555;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .9);
+}
+#sitewide-navigation nav > ul > li:hover {
+    color: black;
+}
+#sitewide-navigation nav > ul > li ul {
+    font-size: 12px;
 }
 
-#page_auth {
-    float: right;
-    display: block;
+#top-header #top-header-links {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin-left: 317px;
+    min-width: 680px;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#79A90C', endColorstr='#64920C');
+    background: -webkit-gradient( linear, left top, left bottom, from(#79A90C), to(#64920C));
+    background: -moz-linear-gradient( top, #79A90C, #64920C );
+    border-bottom: 1px solid #567D0A;
+    height: 41px;
 }
 
-#page_status {
-    display: block;
-    clear: right;
+    #top-header #top-header-links span {
+        vertical-align: middle;
+    }
+    #top-header #top-header-links span img {
+        vertical-align: middle;
+    }
+    #top-header #top-header-links span.separator {
+        background: url(/images/header-separator.png) no-repeat center center;
+        padding: 0 5px;
+        line-height: 42px;
+        font-size: 40px;
+        
+        /* For IE */
+        position: relative\9;
+        top: 7px\9;
+        *top: 0;
+    }
+    #top-header #top-header-links .page_links a {
+        text-decoration: none;
+        color: #fff;
+    }
+    #top-header #top-header-links .page_links a:hover {
+        text-decoration: underline;
+    }
+    #top-header #top-header-links .page_links #social-links img {
+        position: relative;
+        top: -1px;
+    }
+    
+#top-header #top-header-links #page_auth.page_links {
     float: right;
+    display: block;
+    height: 100%;
+    position: relative;
+    z-index: 101;
 }
-#page_status #page_points {
-    float:right;
-    padding-top: 5px;
-    padding-right: 7px;
+    #top-header #top-header-links #page_auth.page_links #login-menu {
+        margin-top: 8px;
+    }
+    #top-header #top-header-links #page_auth .css-menu ul {
+        padding: 0;
+    }
+    #top-header #top-header-links #page_auth .css-menu > ul > li {
+        font-size: 12px;
+    }
+    #top-header #top-header-links #page_auth .css-menu.noscript > ul > li:hover
+    #top-header #top-header-links #page_auth .css-menu.noscript > ul > li > a:hover,
+    #top-header #top-header-links #page_auth .css-menu > ul > li.css-menu-js-hover {
+        background: #E1EDC5;
+    }
+    #top-header #top-header-links #page_auth .css-menu ul a {
+        color: #333;
+        font-weight: normal;
+        background: #E1EDC5;
+    }
+    #top-header #top-header-links #page_auth .css-menu ul a:hover {
+        background: #fff;
+        color: #e45c02;
+    }
+    #top-header #top-header-links #page_auth .css-menu > ul > li:after {
+        background-image: url(/images/pulldown-green.png);
+    }
+    #login-menu .fb_button, #login-menu .fb_button_rtl {
+        background-image: none;
+        background: transparent;
+        padding: 0;
+        display: block;
+    }
+    #login-menu .fb_button:hover, #login-menu .fb_button_rtl:hover {
+        background: #fff;
+    }
+    #login-menu .fb_button .fb_button_text, #login-menu .fb_button_rtl .fb_button_text {
+        background-image: none;
+        background: transparent;
+        color: #333;
+        border: none;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        font-weight: normal;
+        margin: 0;
+        padding: 0 1ex;
+        line-height: 3ex;
+    }
+    #login-menu .fb_button .fb_button_text:hover, #login-menu .fb_button_rtl .fb_button_text:hover {
+        color: #e45c02;
+    }
+
+#page_social_links {
+    white-space: nowrap; /* For IE7 */
 }
 
 #page_login_options * {
     vertical-align: middle;
 }
 
+#search-box {
+    position: relative;
+}
 #page_search {
     display: block;
     float: right;
     clear: right;
-    margin-top: 0.2em;
+    margin-top: 22px;
     padding-top: 0;
-    padding-right: 1em;
+    padding-right: 45px;
 }
+    #page_search #search-input {
+        background:url("/images/Search-icon.png") no-repeat scroll 5px 5px #FFFFFF;
+        border:1px solid #bbb;
+        font-size:15px;
+        padding: 0;
+        padding-left: 23px;
+        height: 27px;
+        width: 270px;
 
-#page_search input {
-    background:url("/images/Search-icon.png") no-repeat scroll 2px 1px #FFFFFF;
-    border:1px solid #DDDDDD;
-    font-size:12px;
-    padding:2px 2px 2px 18px;
-    width: 20em;
-}
+        /* For jquery-ui autocomplete */
+        z-index: 100;
+        position: relative;
+        
+        /* For IE */
+        height: 22px\9;
+        padding-top: 5px\9;
+    }
+    #page_search #search-submit {
+        background: url(/images/search-button-blue.png) no-repeat 0 0;
+        border: none;
+        padding: 0;
+        margin: 0;
+        width: 29px;
+        height: 29px;
+        position: absolute;
+        color: transparent;
+    }
+    #page_search input.placeholder {
+        color: #898989;
+    }
+    #page_search input.ui-autocomplete-loading {
+        background-image: url("/images/throbber.gif")
+    }
 
-#page_search input.placeholder {
-    color: #898989;
-}
-
-#page_search input.ui-autocomplete-loading {
-    background-image: url("/images/throbber.gif")
-}
-
-#page_social_links {
-    clear: right;
-    float: right;
-}
-
-#page_social_links {
-    white-space: nowrap; /* For IE7 */
-}
 
 nav {
     display: block;
@@ -180,10 +415,14 @@ nav {
 }
 
 #page_main_nav li#do-exercises:after {
-        content: "";
+        display: none;
     }
     #page_main_nav li#do-exercises a {
-        color: white;
+        color: #555;
+    }
+    #page_main_nav li#do-exercises:hover {
+        border-color: transparent;
+        background: transparent;
     }
     #page_main_nav li#do-exercises a:hover {
         color: black;
@@ -193,61 +432,28 @@ nav {
     float: right;
 }
 
-#page_sub_nav {
-    /*border-top: solid 1px #3366cc;*/
-    border-bottom:2px solid #80C65A;
+nav#page_sub_nav {
+    font-size: 14px;
+    padding: 10px 23px;
+    position: relative;
+    z-index: 3;
+    background: #eee;
+    color: #444;
+    border-bottom: 1px solid #ddd;
+    text-shadow: 0 1px 0 #fff;
+    width: auto;
 }
 
-footer {
-    border-top:2px solid #80C65A;
-}
-
-#page_sub_nav {
-    background-color: #e5ecf9;
-    text-indent: .2em;
-}
-
-header ul, footer ul {
+header ul {
     margin: 0;
     padding: .2em 1em .2em 1em;
 }
 
-nav ul.page_links li, header ul.page_links li, footer ul.page_links li {
+nav ul.page_links li, header ul.page_links li {
     display: inline;
     white-space: nowrap;
 }
 
-nav ul.page_links li:before, header ul.page_links li:before {
-    content: "|";
-}
-
-footer ul.page_links {
-    float: left;
-    padding: 7px;
-}
-
-footer ul.page_links li {
-    padding-right: 8px;
-}
-
-footer ul.page_links .link_separator{
-    border-left: 1px solid black;
-    padding-left: 10px;
-}
-
-footer div {
-    float: right;
-    padding: 7px;
-}
-
-footer div img {
-    border: 0px;
-}
-
-
-nav ul.page_links li:first-child:before, header ul.page_links li:first-child:before, footer ul.page_links li:first-child:before {
-    content: "";
-}
 
 article, section {
     display: block;
@@ -342,7 +548,13 @@ a:link.google-analytics-link-track
 /***************For All-videos page******************/
 
 /* General styles file */
+.text-inset {
+    text-shadow: 0 -1px 0 rgba(0,0,0, .4);
+}
 
+.text-inset:hover {
+    text-shadow: none;
+}
 
 /* Typography */
 
@@ -446,7 +658,6 @@ a:link.google-analytics-link-track
 			
 	#library #library-content {
 		background-color: #fff;
-		border: 1px solid #ccc;
 		border-top: 0;
 		padding: 10px;
 	}
@@ -459,7 +670,7 @@ a:link.google-analytics-link-track
 				color: #333;
 			}
 			#library #library-content #library-content-main h2.playlist-heading {
-				color: #666;
+				color: #444;
 				margin-bottom: 0;
 			}
 			#library #library-content #library-content-main p.playlist-desc {
@@ -481,11 +692,11 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-				background: url(/images/playnav.png) no-repeat 0 3px;
+				background: url(/images/list-item-black.png) no-repeat 0 3px;
 				padding: 0 2px 0 13px;
 			}
 			#library #library-content #library-content-main a.video-link:hover {
-				background-image: url(/images/play-dark.png);
+                color: black;
 			}
 
 
@@ -515,15 +726,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 /* Exercise Dashboard styles */
 
 #container {
-    width: 960px;
-    margin: 0 auto;
     overflow: hidden;
     position: relative; 
 }
     #container.dashboard {
         border-left: 1px solid #ccc;
         border-right: 1px solid #ccc;
-        width: 970px;
         
         -webkit-box-shadow: 0 1px 3px #ccc;
         -moz-box-shadow: 0 1px 3px #ccc;
@@ -536,7 +744,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         overflow: scroll;
         overflow-x: hidden;
         overflow-y: scroll;
-        padding: 10px 5px 0 5px;
+        padding: 0 5px;
         z-index: 1;
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
@@ -547,14 +755,15 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     
     #container #dashboard-header {
-        background: #D5DDF3;
-        border-width: 0 1px 1px 1px;
+        background: #DDD;
+        border-width: 0 0 1px 0;
         border-color: #ddd;
         border-style: solid;
         height: 27px;
         padding: 5px;
         position: relative;
         z-index: 0;
+        text-shadow: 0 1px 0 #f7f7f7;
     }
     #container #dashboard-header #collapse-drawer {
         position: absolute;
@@ -568,10 +777,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
 
     #container #dashboard-header #dashboard-title {
-        background: #E8ECF9;
+        background: #EEE;
         border-right: 1px solid #bbb;
-        color: #333;
-        font-size: 24px;
+        color: #444;
+        font-size: 18px;
         font-weight: bold;
         width: 339px;
         margin: -5px;
@@ -580,18 +789,19 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
-        z-index: 1;       
+        z-index: 1;
+        text-shadow: 0 1px 0 #fff;
     }
         #container #dashboard-header #dashboard-title #dashboard-icon {
             position: relative;
-            top: 2px;
+            top: 4px;
         }
         
     #container #dashboard-header #dashboard-nav {
         float: right;
         font-weight: bold;
         position: relative;
-        top: 4px;
+        top: 6px;
     }
     #container #dashboard-header #dashboard-nav span.selected a {
         border: none;
@@ -599,7 +809,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         cursor: default;
     }
     #container #dashboard-map {
-        width: 970px;
     }
 
     #container #dashboard-map #map-canvas {
@@ -617,7 +826,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     width: 320px;
     height: 80px;
     cursor: pointer;
-    border: 1px dotted #fff;
+    border: 1px dotted #bbb;
 }
     .exercise-badge:hover, .exercise-badge-hover {
         -webkit-box-shadow: 0 0 3px #666;
@@ -668,9 +877,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     
 #container h3 {
-    font-size: 16px;
+    display: block;
+    font-size: 14px;
     color: #333;
-    text-shadow: 1px 1px 1px #ccc;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #bbb;
 }
 /* End of Exercise Dashboard styles */
 
@@ -678,6 +889,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #container.single-exercise {
     overflow: visible;
+    min-width: 950px;
 }
 #container #dashboard-header.single-exercise {
     border: 1px solid #ccc;
@@ -687,20 +899,20 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background: background:#e5ecf9;
     border: 1px solid #ccc;
     border-top: none;
-    border-bottom: 1px solid #bbb;
+    border-right: none;
+    border-bottom: 1px solid #ccc;
+    border-left-style: dotted;
     cursor: auto;
     height: auto;
     margin: 0 0 0 70px;
-    width: 887px;
-    
-    -webkit-box-shadow: 0 1px 3px #ccc;
-    -moz-box-shadow: 0 1px 3px #ccc;
-    box-shadow: 0 1px 3px #ccc;
+    min-width: 887px;
+    width: auto;
+    padding-left: 5px;
 }
     .exercise-badge.single-exercise:hover {
-        -webkit-box-shadow: 0 1px 3px #ccc;
-        -moz-box-shadow: 0 1px 3px #ccc;
-        box-shadow: 0 1px 3px #ccc;
+        -webkit-box-shadow:none;
+        -moz-box-shadow: none;
+        box-shadow: none;
     }
 
 .exercise-badge.single-exercise .proficient-badge {
@@ -719,7 +931,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .exercise-badge.single-exercise .exercise-title {
     font-size:18px;
     top: 6px;
-    left: 70px;
+    left: 75px;
     width: 550px;
 }
 .exercise-badge.single-exercise .streak-bar {
@@ -730,7 +942,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 .exercise-badge.single-exercise .related-content {
     bottom: 7px;
-    left: 70px;
+    left: 75px;
     position: absolute;
     width: 535px;
 }
@@ -775,18 +987,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 #back-to-dashboard.single-exercise {
     background-color: #EEE;
-    border-bottom: 1px solid #bbb;
-    border-left: 1px solid #bbb;
+    border-bottom: 1px solid #ccc;
     color: #666;
     float: left;
     font-size: 11px;
     height: 68px;
     padding-left: 3px;
     width: 67px;
-    
-    -webkit-box-shadow: #CCC 0px 1px 3px;
-    -moz-box-shadow: #CCC 0px 1px 3px;
-    box-shadow: #CCC 0px 1px 3px;
 }
 #question_area {
     margin-bottom: 10px;
@@ -799,6 +1006,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     float: right;
     max-width: 300px;
     min-width: 240px;
+    margin-right: 10px;
 }
     #answer_area .info-box {
         background: #eee;
@@ -867,7 +1075,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         /* Energy points badge look. Should be used wherever we display energy points */
         #answer_area .info-box #related-video-list .video-energy-points,
         .video_extra_links .video-energy-points,
-        #page_status .energy-points-badge {
+        #user-info .energy-points-badge {
             background: #0080C9;
             border-right: 2px solid #00659E;
             border-top: 2px solid #2994D2;
@@ -879,6 +1087,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             text-shadow: 0px -1px 0px #666;
+        }
+        #user-info .energy-points-badge {
+            float: none;
+            font-size: 9px;
+            position: relative;
+            top: 1px;
         }
     #answer_area .info-box .info-box-sub-description {
         display: block;
@@ -957,17 +1171,17 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 #reports-nav {
-    background-color: #ccc;
-    border-bottom: 1px solid #aaa;
-    text-shadow: 0 1px 0 #eee;
-    margin: -5px;
-    padding: 5px;
+    font-size: 15px;
+    padding: 10px 23px;
 }
 
 #reports-nav #reports-jump-menu {
     color: #444;
     float:right;
     font-weight: bold;
+    font-size: 14px;
+    position: relative;
+    top: -1px;
 }
 #reports-nav #reports-jump-menu select {
     position: relative;
@@ -1083,6 +1297,14 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     text-decoration: underline;
 }
 /* End of teacher Dashboard Styles */
+
+/* One-Off Page Styles */
+
+#coaches, #students, #donate, #individual_report {
+    padding: 0 23px;
+}
+
+/* End One-off page styles */
 
 #tabs-table, #tabs-table td.content {
     width: 100%;

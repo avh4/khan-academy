@@ -349,7 +349,7 @@ table.feedback_list th {
     text-align: left;
 }
 
-img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: white; }
+img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: transparent; }
 .page_controls img.icon { vertical-align: middle; }
 .button img.icon { background: transparent; }
 #page_sub_nav img.icon { background: #E5ECF9; }

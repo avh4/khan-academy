@@ -368,7 +368,7 @@ var Drawer = {
     resize: function() {
         var jel = $("#dashboard-drawer, #dashboard-map");
         var yTop = jel.offset().top;
-        jel.height($(window).height() - yTop - $("#footer").height() - 20);
+        jel.height($(window).height() - yTop - $("#footer").height());
 
         if (window.KnowledgeMap && KnowledgeMap.map)
             google.maps.event.trigger(KnowledgeMap.map, 'resize');

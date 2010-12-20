@@ -4,8 +4,6 @@
     class="username_and_notification_shift"
     {% endif %}
 >
-    <b>{{username|escape}}</b>
-
     <a class="notification_link" href="/discussion/videofeedbacknotificationlist"
         {% if count %}
             title="{{ count }} new answers to your questions"
@@ -20,4 +18,5 @@
             <img src="/images/email-gray.png" class="icon" />
         {% endif %}
     </a>
+    <b>{{username|escape}}</b>
 </span>

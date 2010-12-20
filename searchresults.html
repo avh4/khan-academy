@@ -10,13 +10,11 @@
         background-color: #fcc;
     }
     .search_results {
-        margin-left: 4em;
-        margin-right: 4em;
+        margin: 0 23px;
     }
     .search_results form {
         display: block;
-        margin: 1em;
-        text-align: center;
+        margin: 1em 0;
     }
     .search_results form * {
         font-size: large;
@@ -44,6 +42,9 @@
     .search_results .highlight {
         font-weight: bold;
     }
+    #search-page-box {
+        width: 270px;
+    }
 </style>
 {% endblock pagescript %}
 {% block pagemessage %}
@@ -56,22 +57,9 @@
 {% block pagecontent %}
 <article class="search_results">
     <form action="/search">
-        <input type="text" name="page_search_query" value='{{page_search_query|escape}}'>
+        <input id="search-page-box" type="text" name="page_search_query" value='{{page_search_query|escape}}'>
         <button type="submit">Search</button>
     </form>
-
-    {% if playlists %}
-    <section class="playlists">
-        <h1>Playlists</h1>
-        <dl>
-        {% for playlist in playlists %}
-            {% if playlist.description %}
-            <dt><a href="/#{{playlist.title|urlencode}}">{% highlight searched_phrases playlist.title %}</a></dt><dd>{% highlight searched_phrases playlist.description %}</dd>
-            {% endif %}
-        {% endfor %}        
-        </dl>
-    </section>
-    {% endif %}
     {% if videos %}
     <section class="videos">
         <h1>Videos</h1>
@@ -86,6 +74,18 @@
             <p>Keywords: <span class="keywords">{% highlight searched_phrases video.keywords %}</span></p>
             {% endif %}
             </dd>
+        {% endfor %}        
+        </dl>
+    </section>
+    {% endif %}
+    {% if playlists %}
+    <section class="playlists">
+        <h1>Playlists</h1>
+        <dl>
+        {% for playlist in playlists %}
+            {% if playlist.description %}
+            <dt><a href="/#{{playlist.title|urlencode}}">{% highlight searched_phrases playlist.title %}</a></dt><dd>{% highlight searched_phrases playlist.description %}</dd>
+            {% endif %}
         {% endfor %}        
         </dl>
     </section>

@@ -2,14 +2,17 @@
 {% block pagescript %}
 <style>
 #page_sub_nav b { display: none; }
+#page_sub_nav { padding: 0; }
 </style>
 {% endblock pagescript %}
 {% block pagetitle %}Shared energy points{% endblock pagetitle %}
+{% block pagesubmenu %}
+    {% reports_navigation coach_email "sharedpoints" %}
+{% endblock pagesubmenu %}
 {% block pagecontent %}
 
 <script type="text/javascript" src="{% if not App.offline_mode %}http://statickhan.appspot.com{% endif %}/javascript/highcharts.js?{{App.version}}"></script>
 <div id="report-page-content">
-    {% reports_navigation coach_email "sharedpoints" %}
     <div id="report-page-title"><h4>Class Energy Points per Minute</h4></div>
 <script>
 

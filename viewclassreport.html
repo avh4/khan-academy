@@ -2,12 +2,16 @@
 {% block pagescript %}
 <style type="text/css">
 #page_sub_nav b { display: none; }
+#page_sub_nav { padding: 0; }
 </style>
 {% endblock pagescript %}
 {% block pagetitle %}Class Report{% endblock pagetitle %}
+{% block pagesubmenu %}
+    {% reports_navigation coach_email "classreport" %}
+{% endblock pagesubmenu %}
 {% block pagecontent %}
 <div id="report-page-content">
-    {% reports_navigation coach_email "classreport" %}
+    
     <div id="report-page-title"><h4>Student Progress Report</h4></div>
     {% if students %}
     <p>

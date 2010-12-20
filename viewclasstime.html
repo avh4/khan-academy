@@ -1,13 +1,16 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
-<style>
+<style type="text/css">
 #page_sub_nav b { display: none; }
+#page_sub_nav { padding: 0; }
 </style>
 {% endblock pagescript %}
 {% block pagetitle %}Class Time{% endblock pagetitle %}
+{% block pagesubmenu %}
+    {% reports_navigation coach_email "classtime" %}
+{% endblock pagesubmenu %}
 {% block pagecontent %}
 <div id="report-page-content">
-    {% reports_navigation coach_email "classtime" %}
     <div id="report-page-title">
         <h4>Daily Activity Report</h4>
         <br/>

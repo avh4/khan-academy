@@ -3,7 +3,7 @@
 {% block pagescript %}
 <style>
     /* Temporary styles to fit new exercises into old template, will be removed when new template is dropped in. */
-    #page_sub_nav b {display: none;}}
+    #page_sub_nav {display: none;}
 </style>
   <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
   <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
@@ -58,6 +58,7 @@ function submitForm(value)
 {% endblock pagescript %}
 
 {% block pagecontent %}
+<div id="page-container">
 <div id="container" class="single-exercise">
 <div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
 <div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
@@ -275,5 +276,10 @@ $(document).ready(function() {
 });
 //--></script>
 </div>
+</div>
 {% endblock pagecontent %}
+
+{% block pagefooter %}
+{% include "page_footer_short.html" %}
+{% endblock %}
 

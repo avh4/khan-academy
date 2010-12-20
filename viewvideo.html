@@ -7,6 +7,9 @@
     #video_dropdown {
         display: none;
         text-indent: 0;
+        padding-left: 5px;
+        position: relative;
+        top: 1px;
     }
     #video_dropdown .ui-button {
         display: block;
@@ -50,11 +53,21 @@
         margin-top: 2em;
         padding-bottom: .5ex;
     }
+    .prev_next_nav a {
+        text-decoration: none;
+    }
+    .prev_next_nav a:hover {
+        text-decoration: underline;
+    }
     #prev_video {
         display: block;
         float: left;
         margin-right: 1em;
         text-align: left;
+        background: url(/images/list-item-black-left.png) no-repeat 0 4px;
+        padding-top: 1px;
+        padding-left: 10px;
+        height: 20px;
     }
     #playlists {
         display: block;
@@ -65,6 +78,10 @@
         float: right;
         margin-left: 1em;
         text-align: right;
+        background: url(/images/list-item-black.png) no-repeat 100% 4px;
+        padding-top: 1px;
+        padding-right: 10px;
+        height: 20px;
     }
 
     #youtube_blocked {
@@ -76,6 +93,43 @@
         clear: both;
         padding-top: 1em;
     }
+    .video #description {
+        padding-top: 20px;
+    }
+        .video #description h3 {
+            display: block;
+            margin: 0;
+            font-size: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ccc;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .video #description h3 span.title {
+            color: #e45c02;
+        }
+        .video #description h3 span.long-description {
+            color: #555;
+            font-weight: normal;
+            position: relative;
+            top: -1px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    #page_sub_nav .breadcrumbs_nav {
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-left: -5px;
+        width: auto;
+    }
+    #page_sub_nav .breadcrumbs_nav a {
+        text-decoration: none;
+        padding: 0 5px;
+    }
+    #page_sub_nav .breadcrumbs_nav #video_menu {
+        text-transform: none;
+    }
 </style>
 <script>
 $(function(){
@@ -83,7 +137,7 @@ $(function(){
        $("#youtube_blocked").css("visibility", "visible").css("left", "0px").css("position", "relative");
        $("#idOVideo").hide();
        VideoStats.prepareAlternativePlayer(); // If YouTube is hidden, use the flv player for statistics
-    }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('body');
+    }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('#page-container');
     $('#video_selector').hide();
     $('#video_dropdown').css('display', 'inline-block');
     var menu = $('#video_dropdown ol').menu();
@@ -119,7 +173,7 @@ $(function(){
 </script>
 {% endblock pagescript %}
 {% block pagesubmenu %}
-<nav class="breadcrumbs_nav">
+<span class="breadcrumbs_nav">
         <a href="/">All videos</a> &#187;
         <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> &#187;
     <form id="video_selector">
@@ -140,14 +194,19 @@ $(function(){
             </ol>
         </div>
     </span>
-    {% if video.description %}
-        : {{video.description|escape}}
-    {% endif %}
-</nav>
+</span>
 {% endblock pagesubmenu %}
 {% block pagecontent %}
 <article class="video">
-    <div>
+    <div id="description">
+        <h3>
+            <span class="title">{{video.title|escape}}</span>
+        {% if video.description %}
+            <span class="long-description">: {{video.description|escape}}</span>
+        {% endif %}
+        </h3>
+    </div>
+    <div style="margin-top: -15px;">
         <nav class="prev_next_nav">
             {% if previous_video %}
             <label id="prev_video">
@@ -176,16 +235,12 @@ $(function(){
             | <a href="/exercises?exid={{exercise}}">Exercises</a>
             {% endif %}</span>
         </nobr></span>
-        {% if playlists %}
-        <label id="playlists">
-            <b>Related Playlists:</b>
-            {% for p in playlists %}
-            <a href="/?video={{video.readable_id|urlencode}}#{{p.title|urlencode}}">{{p.title|escape}}</a>
-            {% endfor %}
-        </label>
-        {% endif %}
+
         {% video_comments video playlist comments_page %}
         {% video_qa video playlist qa_page qa_expand_id %}
         </div>
     </article>
 {% endblock pagecontent %}
+{% block pagefooter %}
+{% include "page_footer_short.html" %}
+{% endblock %}

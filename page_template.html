@@ -58,7 +58,7 @@
 
             $(function(){
                 // Configure the search form
-                $('#page_search input').placeholder();
+                $('#page_search input[type=text]').placeholder();
                 initAutocomplete();
 
                 // Make the CSS-only menus click-activated
@@ -151,223 +151,237 @@
 
     </head>
     <body>
-    {% if App.facebook_app_id %}
-    {# Start Facebook connect stuff #}
-    <div id="fb-root"></div>
-    <script>
-      window.fbAsyncInit = function() {
-        FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
-                 xfbml: true});
-
-        {% if not username %}
-            FB.Event.subscribe('auth.login', function(response) {
-                window.location.reload();
-            });
-        {% endif %}
-
-        FB.getLoginStatus(function(response) {
-           if (response.session) {
-            $('#page_logout').click(function(e) {
-                FB.logout(function() { 
-                    window.location = $("#page_logout").attr("href"); 
+    <div id="page-container">
+        {% if App.facebook_app_id %}
+        {# Start Facebook connect stuff #}
+        <div id="fb-root"></div>
+        <script>
+          window.fbAsyncInit = function() {
+            FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
+                     xfbml: true});
+    
+            {% if not username %}
+                FB.Event.subscribe('auth.login', function(response) {
+                    window.location.reload();
                 });
-                e.preventDefault();
-                return false;
+            {% endif %}
+    
+            FB.getLoginStatus(function(response) {
+               if (response.session) {
+                $('#page_logout').click(function(e) {
+                    FB.logout(function() { 
+                        window.location = $("#page_logout").attr("href"); 
+                    });
+                    e.preventDefault();
+                    return false;
+                });
+               }
             });
-           }
-        });
-      };
-      (function() {
-        var e = document.createElement('script'); e.async = true;
-        e.src = document.location.protocol +
-          '//connect.facebook.net/en_US/all.js';
-        document.getElementById('fb-root').appendChild(e);
-      }());
-    </script>
-    {# End Facebook connect stuff #}
-    {% endif %}
-
-	{# Make script-requiring elements visible. #}
-	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
-
-        <header>
-            <div id="page_brand">
-                <a id="page_logo" href="/"><img src="/images/handtreehorizontal.png?{{App.version}}" alt="Khan Academy"></a>
-                    <span id="page_visitors">
-                        <span id="page_num_visitors">
-                            <!-- Content will get populated by javacript at end of page -->
-                        </span>&nbsp;lessons delivered
-                    </span>
-                <fb:like id="page_fb_like" href="http://www.khanacademy.org" show_faces="false" width="280" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
-            </div>
-            <ul class="page_links" id="page_auth">
-
-                {% if username %}
-                <li>
-                    {% username_and_notification username %}
-                </li>
-                <li>
-                    <a id="page_logout" href="{{logout_url}}">Logout</a>
-                </li>
-                {% else %}
-                <li id="page_login_options">
-                    <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id"><img style="border:outset 2px; padding: 1px;" src="/images/login-with-google-button.png" alt="Login with Google"></a>
-                    {% if App.facebook_app_secret %}
-                    <fb:login-button></fb:login-button>
-                    {% endif %}
-                    {% if App.accepts_openid %}
-                    [<a href="{{login_url}}">more login choices...</a>]
-                    {% endif %}
-                </li>
-                {% endif %}
-            </ul>
-                <nav class="css-menu noscript" id="page_main_nav">
-                    <ul>
-                        <li>
-                            Watch Videos
-                            <ul>
-                                <li>
-                                    <a href="/#browse">Browse by Topic</a>
-                                </li>
-                                <li>
-                                    <a href="/search">Search</a>
-                                </li>
-                                <li>
-                                    <a href="/downloads">Download</a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li id="do-exercises">
-                            <a href="/exercisedashboard">Do Exercises</a>
-                        </li>
-                        <li>
-                            Join Us
-                            <ul>
-                                <li>
-                                   <p>About Us</p>
-                                    <ul>
-                                        <li>
-                                            <a href="/about">Overview</a>
-                                        </li>
-                                        <li>
-                                            <a href="/about#faq">Frequently Asked Questions</a>
-                                        </li>
-                                        <li>
-                                            <a href="/getinvolved#credits">Credits</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <p>Coaching Tools</p>
-                                    <ul>
-                                        <li>
-                                            <a href="/students">Become a Coach</a>
-                                        </li>
-                                        <li>
-                                            <a href="/students">View Students</a>
-                                        </li>
-                                        <li>
-                                            <a href="/classreport">Class Report</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li>
-                                    <p>How to Help</p>
-                                    <ul>
-                                        <li>
-                                            <a href="/getinvolved#translation">Translate Videos</a>
-                                        </li>
-                                        <li>
-                                            <a href="http://sites.google.com/a/khanacademy.org/forge/for-developers/getting-started-with-the-code">Develop Software</a>
-                                        </li>
-                                        <li>
-                                            <a href="/reportissue?type=Defect&issue_labels={{issue_labels|urlencode}}">Report a Problem</a>
-                                        </li>
-                                        <li>
-                                            <a href="/donate">Donate</a>
-                                        </li>
-                                        <li>
-                                            <a href="/getinvolved">Help in Other Ways</a>
-                                        </li>
-                                        <li>
-                                            <a href="/about#contactus">Contact Us</a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+          };
+          (function() {
+            var e = document.createElement('script'); e.async = true;
+            e.src = document.location.protocol +
+              '//connect.facebook.net/en_US/all.js';
+            document.getElementById('fb-root').appendChild(e);
+          }());
+        </script>
+        {# End Facebook connect stuff #}
+        {% endif %}
+    
+    	{# Make script-requiring elements visible. #}
+    	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
+    
+            <header>
+                <div id="top-header">
+                    <div id="top-header-links">
+                        <span class="page_links" id="page_auth">
+                            {% if username %}
+                                <span id="user-info">
+                                    {% username_and_notification username %}
+                                {% if points %}
+                                    <span class="energy-points-badge">{{points}}</span>
+                                {% endif %}
+                                </span>
+                                <span class="separator">&nbsp;</span>
+                                <a id="page_logout" href="{{logout_url}}">Logout</a>
+                            {% else %}
+                            <nav class="css-menu noscript" id="login-menu">
+                                <ul class="ui-corner-top">
+                                    <li class="ui-corner-top">
+                                        Login
+                                        <ul class="ui-corner-tr ui-corner-bottom">
+                                            <li id="page_login_options">
+                                                <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id">Login with Google</a>
+                                            </li>
+                                            {% if App.facebook_app_secret %}
+                                            <li><fb:login-button>Login with Facebook</fb:login-button></li>
+                                            {% endif %}
+                                            {% if App.accepts_openid %}
+                                            <li>[<a href="{{login_url}}">more login choices...</a>]</li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+                            {% endif %}
+                            <span class="separator">&nbsp;</span>
+                            <a href="/donate" id="donate-link">Donate</a>
+                            <span class="separator">&nbsp;</span>
+                            <span id="social-links">
+                                <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy"><img src="/images/twitter.png" alt="Twitter" title="Twitter"></a>
+                                <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy"><img src="/images/facebook.png" alt="Facebook" title="Facebook"></a>
+                            </span>
+                            <span class="separator">&nbsp;</span>
+                            <span>
+                                <fb:like id="page_fb_like" href="http://www.khanacademy.org" layout="button_count" show_faces="false" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
+                            </span>
+                        </span>
+                    </div>
+                    <div id="logo">
+                        <div id="logo-highlight">
+                            <a id="logo-image" href="/"><img src="/images/logo-no-highlight.png?{{App.version}}" alt="Khan Academy"></a>
+                        </div>
+                    </div>
+                    <div id="stats">
+                        <span id="page_visitors">
+                                <span id="page_num_visitors">
+                                    <!-- Content will get populated by javacript at end of page -->
+                                </span>&nbsp;lessons delivered
+                        </span>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div id="search-box">
+                    <form id="page_search" action="/search">
+                        <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-left placeholder"><input type="submit" value=" " id="search-submit" />
+                    </form>
+                </div>
+                <div id="sitewide-navigation">
+                    <nav class="css-menu noscript" id="page_main_nav">
+                        <ul>
+                            <li class="ui-corner-top">
+                                Watch Videos
+                                <ul class="ui-corner-tr ui-corner-bottom">
+                                    <li>
+                                        <a href="/#browse">Browse by Topic</a>
+                                    </li>
+                                    <li>
+                                        <a href="/search">Search</a>
+                                    </li>
+                                    <li>
+                                        <a href="/downloads">Download</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li id="do-exercises" class="ui-corner-top">
+                                <a href="/exercisedashboard">Do Exercises</a>
+                            </li>
+                            <li class="ui-corner-top">
+                                Join Us
+                                <ul class="ui-corner-tr">
+                                    <li>
+                                       <p>About Us</p>
+                                        <ul>
+                                            <li>
+                                                <a href="/about">Overview</a>
+                                            </li>
+                                            <li>
+                                                <a href="/about#faq">Frequently Asked Questions</a>
+                                            </li>
+                                            <li>
+                                                <a href="/getinvolved#credits">Credits</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <p>Coaching Tools</p>
+                                        <ul>
+                                            <li>
+                                                <a href="/students">Become a Coach</a>
+                                            </li>
+                                            <li>
+                                                <a href="/students">View Students</a>
+                                            </li>
+                                            <li>
+                                                <a href="/classreport">Class Report</a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <p>How to Help</p>
+                                        <ul>
+                                            <li>
+                                                <a href="/getinvolved#translation">Translate Videos</a>
+                                            </li>
+                                            <li>
+                                                <a href="http://sites.google.com/a/khanacademy.org/forge/for-developers/getting-started-with-the-code">Develop Software</a>
+                                            </li>
+                                            <li>
+                                                <a href="/reportissue?type=Defect&issue_labels={{issue_labels|urlencode}}">Report a Problem</a>
+                                            </li>
+                                            <li>
+                                                <a href="/donate">Donate</a>
+                                            </li>
+                                            <li>
+                                                <a href="/getinvolved">Help in Other Ways</a>
+                                            </li>
+                                            <li>
+                                                <a href="/about#contactus">Contact Us</a>
+                                            </li>
+    
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                <nav id="page_sub_nav">
+                    {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
+                    {% endblock pagesubmenu %}
                 </nav>
-            <div id="page_top_nav">
-                <ul class="page_links" id="page_status">
-
-                    {% if points %}
-                    <li>
-                        <div class="energy-points-badge">{{points}}</div>
-                        <label id="page_points">Energy Points:</label>
-                    </li>
-                    {% endif %}
-                </ul>
-                <ul class="page_links" id="page_social_links">
-                    <li>
-                        <a href="/donate">Donate</a>
-                    </li>
-                    <li> Follow Us on
-                        <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Youtube-Subscribe-Header']);" href="http://www.youtube.com/khanacademy"><img src="/images/youtube-16.jpg" alt="YouTube" title="YouTube"></a>
-                        <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy"><img src="/images/facebook-16.jpg" alt="Facebook" title="Facebook"></a>
-                        <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy"><img src="/images/twitter-16.jpg" alt="Twitter" title="Twitter"></a>
-                    </li>
-                </ul>
-                <form id="page_search" action="/search">
-                    <input type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}'>
-                </form>
-            </div>
-            <nav id="page_sub_nav">
-                {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
-                {% endblock pagesubmenu %}
-
-            </nav>
-
-            {% block pagemessage %}
-
-            {% endblock pagemessage %}
-        </header>
-        {% block pagecontent %}
-        {% endblock pagecontent %}
-        {% include "page_footer.html" %}
-
-	<!-- For ChartBeat analytics START -->
-	<script type="text/javascript">
-	var _sf_async_config={uid:10894,domain:"khanacademy.org"};
-	(function(){
-	  function loadChartbeat() {
-	    window._sf_endpt=(new Date()).getTime();
-	    var e = document.createElement('script');
-	    e.setAttribute('language', 'javascript');
-	    e.setAttribute('type', 'text/javascript');
-	    e.setAttribute('src',
-	       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
-	       "static.chartbeat.com/js/chartbeat.js");
-	    document.body.appendChild(e);
-	  }
-	  var oldonload = window.onload;
-	  window.onload = (typeof window.onload != 'function') ?
-	     loadChartbeat : function() { oldonload(); loadChartbeat(); };
-	})();
-	</script>
-	<!-- For ChartBeat analytics END -->
-
-	<!-- ChartBeat API - get # of users online now BEGIN -->
-
-   <script type="text/javascript">
-
-            $('#page_num_visitors').append(totalViewsString);
-            $('#page_visitors').css('display', 'inline');
-	</script>
-
-	<!-- ChartBeat API - get # of users online now END -->
-
-
+                {% block pagemessage %}
+    
+                {% endblock pagemessage %}
+            </header>
+            {% block pagecontent %}
+            {% endblock pagecontent %}
+            <div style="padding: 10px;">&nbsp;</div>
+            {% block pagefooter %}
+            {% include "page_footer_short.html" %}
+            {% endblock %}
+    
+    	<!-- For ChartBeat analytics START -->
+    	<script type="text/javascript">
+    	var _sf_async_config={uid:10894,domain:"khanacademy.org"};
+    	(function(){
+    	  function loadChartbeat() {
+    	    window._sf_endpt=(new Date()).getTime();
+    	    var e = document.createElement('script');
+    	    e.setAttribute('language', 'javascript');
+    	    e.setAttribute('type', 'text/javascript');
+    	    e.setAttribute('src',
+    	       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
+    	       "static.chartbeat.com/js/chartbeat.js");
+    	    document.body.appendChild(e);
+    	  }
+    	  var oldonload = window.onload;
+    	  window.onload = (typeof window.onload != 'function') ?
+    	     loadChartbeat : function() { oldonload(); loadChartbeat(); };
+    	})();
+    	</script>
+    	<!-- For ChartBeat analytics END -->
+    
+    	<!-- ChartBeat API - get # of users online now BEGIN -->
+    
+       <script type="text/javascript">
+    
+                $('#page_num_visitors').append(totalViewsString);
+                $('#page_visitors').css('display', 'inline');
+    	</script>
+    
+    	<!-- ChartBeat API - get # of users online now END -->
+    
+    </div>
     </body>
 </html>
