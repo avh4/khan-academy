@@ -69,3 +69,4 @@ class AtlasBadge(ExerciseCompletionCountBadge):
         self.description = "Atlas"
         self.badge_category = BadgeCategory.DIAMOND
         self.points = 50000
+        self.is_teaser_if_unknown = True

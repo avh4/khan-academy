@@ -50,8 +50,11 @@ class Badge:
         # Keep .name constant even if description changes.
         # This way we only remove existing badges from people if the class name changes.
         self.name = self.__class__.__name__.lower()
-
         self.badge_context_type = BadgeContextType.NONE
+
+        # is_teaser_if_unknown replaces the badge's description with question marks
+        # on the "all badges" page if the badge hasn't been achieved yet
+        self.is_teaser_if_unknown = False
         
     @staticmethod
     def add_target_context_name(name, target_context_name):

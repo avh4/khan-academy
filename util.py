@@ -58,3 +58,14 @@ def seconds_to_time_string(seconds_init):
     else:
         return "%d second%s" % (seconds, pluralize(seconds))
 
+def thousands_separated_number(x):
+    # See http://stackoverflow.com/questions/1823058/how-to-print-number-with-commas-as-thousands-separators-in-python-2-x
+    if x < 0:
+        return '-' + intWithCommas(-x)
+    result = ''
+    while x >= 1000:
+        x, r = divmod(x, 1000)
+        result = ",%03d%s" % (r, result)
+    return "%d%s" % (x, result)
+
+

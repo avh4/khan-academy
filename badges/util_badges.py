@@ -16,6 +16,7 @@ import playlist_time_badges
 import power_time_badges
 import recovery_problem_badges
 import unfinished_streak_problem_badges
+import points_badges
 
 import layer_cache
 import request_handler
@@ -54,6 +55,9 @@ def all_badges():
         power_time_badges.PowerFiveMinutesBadge(),
         power_time_badges.PowerHourBadge(),
         power_time_badges.DoublePowerHourBadge(),
+
+        points_badges.MillionaireBadge(),
+        points_badges.TenMillionaireBadge(),
 
         exercise_completion_badges.ApprenticeArithmeticianBadge(),
         exercise_completion_badges.JourneymanArithmeticianBadge(),
