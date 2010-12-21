@@ -93,8 +93,7 @@ class ViewCoaches(request_handler.RequestHandler):
                 'coaches': user_data.coaches
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewcoaches.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewcoaches.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
             
@@ -174,8 +173,7 @@ class ViewIndividualReport(request_handler.RequestHandler):
                 'student_email': student_email,                  
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewindividualreport.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewindividualreport.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -243,8 +241,7 @@ class ViewSharedPoints(request_handler.RequestHandler):
                         'user_coach': user_coach,
                         'coach_email': user_coach.email(),
                         }
-                path = os.path.join(os.path.dirname(__file__), 'viewsharedpoints.html')
-                self.response.out.write(template.render(path, template_values))
+                self.render_template('viewsharedpoints.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))  
         
@@ -317,8 +314,7 @@ class ViewProgressChart(request_handler.RequestHandler):
                 #'stats': stats,
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewprogresschart.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewprogresschart.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))  
             
@@ -349,8 +345,7 @@ class ViewStudents(request_handler.RequestHandler):
                 'coach_email': user_data.user.email(),
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewstudents.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewstudents.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
         
@@ -603,8 +598,7 @@ class ViewClassTime(request_handler.RequestHandler):
                 'width': (80 * len(student_data)) + 150,
                 'student_data': student_data,
                 }
-            path = os.path.join(os.path.dirname(__file__), 'viewclasstime.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewclasstime.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -773,8 +767,7 @@ class ViewClassReport(request_handler.RequestHandler):
                 'coach_email': coach_user_data.user.email(),
                 'students': students,
                 }
-            path = os.path.join(os.path.dirname(__file__), 'viewclassreport.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewclassreport.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
         
@@ -917,8 +910,7 @@ class ViewCharts(request_handler.RequestHandler):
                 'seconds_ranges': seconds_ranges,
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewcharts.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewcharts.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
