@@ -88,6 +88,10 @@ handlers:
   script: main.py
   login: admin
 
+- url: /mapreduce(/.*)?
+  script: mapreduce/main.py
+  login: admin
+
 - url: .*
   script: main.py
   

@@ -1,0 +1,8 @@
+mapreduce:
+- name: UpdateUserBadges
+  mapper:
+    input_reader: mapreduce.input_readers.DatastoreInputReader
+    handler: badges.util_badges.update_for_mapper
+    params:
+      - name: entity_kind
+        default: models.UserData

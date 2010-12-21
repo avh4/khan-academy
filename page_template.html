@@ -198,8 +198,13 @@
                             {% if username %}
                                 <span id="user-info">
                                     {% username_and_notification username %}
+                                    {% if user_data %}
+                                        {% badge_counts user_data %}
+                                    {% else %}
+                                        {% badge_counts %}
+                                    {% endif %}
                                 {% if points %}
-                                    <span class="energy-points-badge">{{points}}</span>
+                                    <span title="{{points}} energy points" class="energy-points-badge">{{points}}</span>
                                 {% endif %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
@@ -350,6 +355,10 @@
             {% block pagefooter %}
             {% include "page_footer_short.html" %}
             {% endblock %}
+
+            {% if username %}
+                {% badge_notifications %}
+            {% endif %}
     
     	<!-- For ChartBeat analytics START -->
     	<script type="text/javascript">

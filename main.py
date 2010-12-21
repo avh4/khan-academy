@@ -62,6 +62,9 @@ from discussion import qa
 from discussion import notification
 from discussion import render
 
+from badges import util_badges
+from badges import last_action_cache
+
 from topics_list import topics_list, all_topics_list, DVD_list
 
         
@@ -297,6 +300,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'App' : App,
                 'arithmetic_template': 'arithmetic_template.html',
                 'username': user.nickname(),
+                'user_data': user_data,
                 'points': user_data.points,
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
@@ -597,6 +601,13 @@ class LogVideoProgress(request_handler.RequestHandler):
                 except ValueError:
                     pass # Ignore if we can't parse
 
+                video_log = VideoLog()
+                video_log.user = user
+                video_log.video = video
+                video_log.video_title = video.title
+                video_log.seconds_watched = seconds_watched
+                video_log.put()
+
                 if last_second_watched > user_video.last_second_watched:
                     user_video.last_second_watched = last_second_watched
 
@@ -608,11 +619,26 @@ class LogVideoProgress(request_handler.RequestHandler):
                     query = VideoPlaylist.all()
                     query.filter('video =', video)
                     query.filter('live_association = ', True)
+
+                    first_video_playlist = True
+                    action_cache = None
                     for video_playlist in query:
                         user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
                         user_playlist.seconds_watched += seconds_watched
                         user_playlist.last_watched = datetime.datetime.now()
                         user_playlist.put()
+
+                        if action_cache is None:
+                            action_cache=last_action_cache.LastActionCache.get_cache_and_push_video_log(user, video_log)
+
+                        util_badges.update_with_user_playlist(
+                                user, 
+                                user_data, 
+                                user_playlist,
+                                include_other_badges = first_video_playlist,
+                                action_cache = action_cache)
+
+                        first_video_playlist = False
 
                 user_video.duration = video.duration
                 user_video.put()
@@ -624,13 +650,6 @@ class LogVideoProgress(request_handler.RequestHandler):
                     user_data.add_points(video_points_received)
 
                 user_data.put()
-
-                video_log = VideoLog()
-                video_log.user = user
-                video_log.video = video
-                video_log.video_title = video.title
-                video_log.seconds_watched = seconds_watched
-                video_log.put()
 
                 points_total = user_data.points
 
@@ -880,6 +899,7 @@ class ViewAllExercises(request_handler.RequestHandler):
                 'suggested_exercises': suggested_exercises,
                 'points': user_data.points,
                 'username': user.nickname(),
+                'user_data': user_data,
                 'expanded_all_exercises': user_data.expanded_all_exercises,
                 'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
                 'logout_url': logout_url,
@@ -999,6 +1019,7 @@ class UpdateExercise(request_handler.RequestHandler):
             delete_covers = self.request.get('delete_covers')
             v_position = self.request.get('v_position')
             h_position = self.request.get('h_position')
+            seconds_per_fast_problem = self.request.get('seconds_per_fast_problem')
 
             add_video = self.request.get('add_video')
             delete_video = self.request.get('delete_video')
@@ -1021,6 +1042,8 @@ class UpdateExercise(request_handler.RequestHandler):
                 exercise.v_position = int(v_position)
             if h_position:
                 exercise.h_position = int(h_position)
+            if seconds_per_fast_problem:
+                exercise.seconds_per_fast_problem = float(seconds_per_fast_problem)
 
             if add_video:
                 query = ExerciseVideo.all()
@@ -1061,10 +1084,7 @@ class UpdateExercise(request_handler.RequestHandler):
 
             exercise.put()
 
-            if v_position or h_position:
-                self.redirect('/admin94040')
-            else:
-                self.redirect('/editexercise?name=' + exercise_name)
+            self.redirect('/editexercise?name=' + exercise_name)
 
 class GraphPage(request_handler.RequestHandler):
 
@@ -1115,7 +1135,10 @@ class RegisterAnswer(request_handler.RequestHandler):
             elapsed_time = int(float(time.time()) - start_time)
 
             userExercise = db.get(key)
+            exercise = userExercise.get_exercise()
+
             userExercise.last_done = datetime.datetime.now()
+            userExercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
             
             # If a non-admin tries to answer a problem out-of-order, just ignore it and
             # display the next problem.
@@ -1143,7 +1166,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             suggested = user_data.is_suggested(exid)
             proficient = user_data.is_proficient_at(exid)
                                 
-            user_data.add_points(points.ExercisePointCalculator(userExercise.get_exercise(), userExercise, suggested, proficient))
+            user_data.add_points(points.ExercisePointCalculator(exercise, userExercise, suggested, proficient))
             user_data.put()
 
             if userExercise.total_done:
@@ -1167,6 +1190,14 @@ class RegisterAnswer(request_handler.RequestHandler):
                 # Just in case RegisterCorrectness didn't get called.
                 userExercise.reset_streak()
             userExercise.put()
+
+            if util_badges.update_with_user_exercise(
+                    user, 
+                    user_data, 
+                    userExercise, 
+                    include_other_badges = True, 
+                    action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log)):
+                user_data.put()
 
             self.redirect('/exercises?exid=' + exid)
         else:
@@ -1513,6 +1544,7 @@ class ViewHomePage(request_handler.RequestHandler):
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
+                                                  'user_data': user_data,
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'video_id': movie_youtube_id,
                                                   'link1': link1,
@@ -1981,6 +2013,7 @@ def real_main():
         ('/admin/deletestalevideos', DeleteStaleVideos),
         ('/admin/fixplaylistref', FixPlaylistRef),
         ('/admin/deletestaleplaylists', DeleteStalePlaylists),
+        ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
 
         ('/coaches', coaches.ViewCoaches),
         ('/registercoach', coaches.RegisterCoach),  
@@ -2047,6 +2080,9 @@ def real_main():
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
         ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),
+
+        ('/badges/view', util_badges.ViewBadges),
+
         ], debug=True)
     run_wsgi_app(application)
 

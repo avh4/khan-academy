@@ -33,3 +33,14 @@ def create_login_url(dest_url):
 def minutes_between(dt1, dt2):
     timespan = dt2 - dt1
     return float(timespan.seconds + (timespan.days * 24 * 3600)) / 60.0
+
+def seconds_to_clock_format(seconds):
+    seconds_left = seconds
+
+    hours = seconds_left / 3600
+    seconds_left -= hours * 3600
+
+    minutes = seconds_left / 60
+    seconds_left -= minutes * 60
+
+    return "%d:%02d:%02d" % (hours, minutes, seconds_left)

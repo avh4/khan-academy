@@ -1,0 +1,11 @@
+{% if user_badges %}
+    <div style="display:none;" class="badge-award-container">
+    <h3>New badge{{ user_badges|length|pluralize }} <span style="font-weight:normal;">(<a href="#" onclick="Badges.hide();return false;">close</a>)</span></h3>
+    {% for user_badge in user_badges %}
+        {% if user_badge.badge %}
+            {% badge_block user_badge.badge %}
+        {% endif %}
+    {% endfor %}
+    </div>
+    <script>$(Badges.show);</script>
+{% endif %}

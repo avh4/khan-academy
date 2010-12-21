@@ -875,6 +875,87 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
          left: 85px;
          bottom: 3px;
     }
+
+.achievement-badge-counts {
+    text-decoration: none;
+}
+
+.achievement-badge-counts {
+    position: relative;
+    top: 1px;
+}
+
+.achievement-badge {
+    background: #eee;
+    margin-bottom: 15px;
+    margin-left: 15px;
+    position: relative;
+    width: 320px;
+    height: 90px;
+    border: 1px dotted #fff;
+    opacity: 0.75;
+    filter:alpha(opacity=75);
+}
+.achievement-badge-owned, .badge-award-container .achievement-badge {
+    -webkit-box-shadow: 0 0 10px #666;
+    -moz-box-shadow: 0 0 10px #666;
+    box-shadow: 0 0 10px #666;
+    border: 1px solid #aaa;
+    opacity: 1.0;
+    filter:alpha(opacity=100);
+}
+    .badge-award-container .achievement-badge {
+        cursor: pointer;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+    .achievement-badge .energy-points-badge {
+        background: url(/images/energy-points-badge.png) no-repeat;
+        width: 52px;
+        height: 37px;
+        text-align: center;
+        padding-top: 5px;
+        color: white;
+        font-weight: bold;
+        text-shadow: 0px -1px 0px #666;
+        position: absolute;
+        left: 267px;
+        top: 5px;
+    }
+    .achievement-badge .achievement-title {
+        font-weight: bold;
+        position: absolute;
+        left: 47px;
+        top: 8px;
+        font-size: larger;
+        width: 170px;
+    }
+    .achievement-badge .achievement-count {
+        font-size: 16px;
+        font-weight: bold;
+        position: absolute;
+        width: 40px;
+        text-align: center;
+    }
+    .achievement-badge .achievement-desc {
+        position: relative;
+        left: 47px;
+        width: 270px;
+        font-size: 12px;
+        margin-top: 4px;
+        font-style: italic;
+    }
+    .achievement-badge .achievement-desc-no-count {
+        left: 5px;
+        width: 310px;
+    }
+
+.achievement-badges-container {
+    padding: 0 10px;
+}
+    .achievement-badges-container .achievement-badge {
+        float: left;
+    }
     
 #container h3 {
     display: block;
@@ -1325,4 +1406,29 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     width: 800px;
     margin-left: auto;
     margin-right: auto;
+}
+
+.badge-award-container {
+    position: absolute;
+    top: 0px;
+    left: 50px;
+    z-index: 100;
+    background: white;
+    padding: 15px 15px 0 15px;
+    -webkit-box-shadow: 0 0 10px #666;
+    -moz-box-shadow: 0 0 10px #666;
+    box-shadow: 0 0 10px #666;
+    border: 1px solid #aaa;
+}
+
+.badge-award-notification {
+    border: 1px solid black;
+    background-color: silver;
+    padding: 6px;
+}
+
+.badge-award-notification .energy-points-badge {
+    position: relative;
+    top: -4px;
+    margin-left: 5px;
 }

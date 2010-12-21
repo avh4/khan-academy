@@ -131,4 +131,12 @@
     </form>
 </div>
 
+<div class="hdg"><h3>Badge Calculation Constants</h3></div>
+<div>
+    <form method="POST" action="/updateexercise">
+        <input type="hidden" name="name" value="{{main_exercise.name|escape}}"/>
+        seconds_per_fast_problem: <input type="text" name="seconds_per_fast_problem" value="{{main_exercise.seconds_per_fast_problem}}"/><br/>
+        <input type="submit" value="Update badge calculation constants"/>
+    </form>
+
 {% endblock pagecontent %}

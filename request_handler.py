@@ -64,6 +64,7 @@ class RequestHandler(webapp.RequestHandler):
             template_values['username'] = user.nickname()            
         user_data = UserData.get_for(user)
         if user_data is not None:
+            template_values['user_data'] = user_data
             template_values['points'] = user_data.points
         template_values['login_url'] = util.create_login_url(self.request.uri)
         template_values['logout_url'] = users.create_logout_url(self.request.uri)

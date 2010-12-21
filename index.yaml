@@ -114,6 +114,18 @@ indexes:
   - name: parent_subject
   - name: index
 
+- kind: UserBadge
+  properties:
+  - name: user
+  - name: badge_name
+  - name: date
+    direction: desc
+
+- kind: UserData
+  properties:
+  - name: __key__
+    direction: desc
+
 - kind: UserData
   properties:
   - name: user

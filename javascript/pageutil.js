@@ -374,3 +374,43 @@ var Drawer = {
             google.maps.event.trigger(KnowledgeMap.map, 'resize');
     }
 }
+
+var Badges = {
+
+    show: function() {
+        var jel = $(".badge-award-container");
+        $(".achievement-badge", jel).click(function(){
+            window.location = "/badges/view";
+            return false;
+        });
+        setTimeout(function(){
+            var jelTarget = $(".achievement-badge-counts");
+            jel.css("visibility", "hidden").css("display", "");
+            jel.css("left", jelTarget.offset().left + jelTarget.width() - jel.width()).css("top", -1 * jel.height());
+            var top = jelTarget.offset().top + jelTarget.height() + 5;
+            var topBounce = top + 10;
+            jel.css("display", "").css("visibility", "visible");
+            jel.animate({top: topBounce}, 500, function(){jel.animate({top: top}, 100);});
+        }, 100);
+    },
+
+    hide: function() {
+        var jel = $(".badge-award-container");
+        jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
+    },
+
+    showMoreContext: function(el) {
+        var jelLink = $(el).parents(".badge-context-hidden-link");
+        var jelBadge = jelLink.parents(".achievement-badge")
+        var jelContext = $(".badge-context-hidden", jelBadge);
+
+        if (jelLink.length && jelBadge.length && jelContext.length)
+        {
+            $(".ellipsis", jelLink).remove();
+            jelLink.html(jelLink.text());
+            jelContext.css("display", "");
+            jelBadge.css("min-height", jelBadge.css("height")).css("height", "auto");
+            jelBadge.nextAll(".achievement-badge").first().css("clear", "both");
+        }
+    }
+}

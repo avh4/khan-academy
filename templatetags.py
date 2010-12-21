@@ -156,4 +156,5 @@ def reports_navigation(coach_email, current_report="classreport"):
 register.tag(highlight)
 
 webapp.template.register_template_library('discussion.templatetags')
+webapp.template.register_template_library('badges.templatetags')
 

@@ -1,0 +1,36 @@
+{% extends "page_template.html" %}
+
+{% block pagetitle %}
+    Badges
+{% endblock pagetitle %}
+
+{% block pagecontent %}
+
+<div class="achievement-badges-container">
+{% if user_badges %}
+    <br/><h3>Your badges</h3><br/><br/>
+    <div class="clear">&nbsp;</div>
+    {% for user_badge in user_badges %}
+        {% if user_badge.badge %}
+            {% badge_block user_badge.badge user_badge %}
+        {% endif %}
+    {% endfor %}
+    <div class="clear">&nbsp;</div>
+{% endif %}
+
+<br/><h2>All badges</h2>
+{% for badge_collection in badge_collections %}
+    {% for badge in badge_collection %}
+        {% if forloop.first %}
+        <div class="clear">&nbsp;</div>
+        <br/><h3>{{ badge.type_label|escape }}</h3><br/><br/>
+        <div class="clear">&nbsp;</div>
+        {% endif %}
+        {% badge_block badge %}
+    {% endfor %}
+{% endfor %}
+    <div class="clear">&nbsp;</div>
+</div>
+
+{% endblock pagecontent %}
+
