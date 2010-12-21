@@ -61,26 +61,26 @@ class SoCloseBadge(UnfinishedStreakProblemBadge):
 
     def __init__(self):
         self.problems_required = 30
-        self.description = "You're So Close"
+        self.description = "Perseverance"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 0
+        self.points = 50
         UnfinishedStreakProblemBadge.__init__(self)
 
 class KeepFightingBadge(UnfinishedStreakProblemBadge):
 
     def __init__(self):
         self.problems_required = 40
-        self.description = "Keep Fighting"
+        self.description = "Steadfastness"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 0
+        self.points = 50
         UnfinishedStreakProblemBadge.__init__(self)
 
 class UndeterrableBadge(UnfinishedStreakProblemBadge):
 
     def __init__(self):
         self.problems_required = 50
-        self.description = "Undeterrable"
-        self.badge_category = BadgeCategory.GOLD
-        self.points = 0
+        self.description = "Tenacity"
+        self.badge_category = BadgeCategory.SILVER
+        self.points = 50
         UnfinishedStreakProblemBadge.__init__(self)
 

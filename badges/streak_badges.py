@@ -35,7 +35,7 @@ class AwesomeStreakBadge(StreakBadge):
     def __init__(self):
         self.streak_required = 30
         self.description = "Awesome Streak"
-        self.badge_category = BadgeCategory.SILVER
+        self.badge_category = BadgeCategory.BRONZE
         self.points = 0
         StreakBadge.__init__(self)
 
@@ -43,7 +43,7 @@ class RidiculousStreakBadge(StreakBadge):
     def __init__(self):
         self.streak_required = 50
         self.description = "Ridiculous Streak"
-        self.badge_category = BadgeCategory.GOLD
+        self.badge_category = BadgeCategory.SILVER
         self.points = 0
         StreakBadge.__init__(self)
 
@@ -51,6 +51,6 @@ class LudicrousStreakBadge(StreakBadge):
     def __init__(self):
         self.streak_required = 75
         self.description = "Ludicrous Streak"
-        self.badge_category = BadgeCategory.PLATINUM
+        self.badge_category = BadgeCategory.SILVER
         self.points = 0
         StreakBadge.__init__(self)
