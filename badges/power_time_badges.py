@@ -53,7 +53,7 @@ class PowerTimeBadge(Badge):
         return True
 
     def extended_description(self):
-        return "Correctly answer %s problems and watch %s of video in %s" % (self.problems_required, util.seconds_to_clock_format(self.video_seconds_required), self.s_time_limit_description)
+        return "Correctly answer %s problems and watch %s of video in %s" % (self.problems_required, util.seconds_to_time_string(self.video_seconds_required), self.s_time_limit_description)
 
 class PowerFiveMinutesBadge(PowerTimeBadge):
 

@@ -1,5 +1,6 @@
 import urllib
 from google.appengine.api import users
+from django.template.defaultfilters import pluralize
 
 import facebook_util
 
@@ -34,13 +35,26 @@ def minutes_between(dt1, dt2):
     timespan = dt2 - dt1
     return float(timespan.seconds + (timespan.days * 24 * 3600)) / 60.0
 
-def seconds_to_clock_format(seconds):
-    seconds_left = seconds
+def seconds_to_time_string(seconds_init):
 
-    hours = seconds_left / 3600
-    seconds_left -= hours * 3600
+    seconds = seconds_init
 
-    minutes = seconds_left / 60
-    seconds_left -= minutes * 60
+    hours = seconds / 3600
+    seconds -= hours * 3600
 
-    return "%d:%02d:%02d" % (hours, minutes, seconds_left)
+    minutes = seconds / 60
+    seconds -= minutes * 60
+
+    if hours and minutes and seconds:
+        return "%d hour%s, %d minute%s, and %d second%s" % (hours, pluralize(hours), minutes, pluralize(minutes), seconds, pluralize(seconds))
+    elif hours and minutes:
+        return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
+    elif hours:
+        return "%d hour%s" % (hours, pluralize(hours))
+    elif minutes and seconds:
+        return "%d minute%s and %d second%s" % (minutes, pluralize(minutes), seconds, pluralize(seconds))
+    elif minutes:
+        return "%d minute%s" % (minutes, pluralize(minutes))
+    else:
+        return "%d second%s" % (seconds, pluralize(seconds))
+

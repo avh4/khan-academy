@@ -15,7 +15,7 @@ class PlaylistTimeBadge(PlaylistBadge):
         return user_playlist.seconds_watched >= self.seconds_required
 
     def extended_description(self):
-        return "Watch %s of video in a single playlist" % util.seconds_to_clock_format(self.seconds_required)
+        return "Watch %s of video in a single playlist" % util.seconds_to_time_string(self.seconds_required)
 
 class NicePlaylistTimeBadge(PlaylistTimeBadge):
     def __init__(self):
