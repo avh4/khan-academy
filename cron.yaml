@@ -3,6 +3,9 @@ cron:
 #- description: badge update
 #  url: /admin/startnewbadgemapreduce
 #  schedule: every 12 hours
+#- description: exercise statistics update
+#  url: /admin/startnewexercisestatisticsmapreduce
+#  schedule: every saturday 12:00
 - description: 1 calculus
   url: /playlistsync?playlist_number=1
   schedule: every tuesday 12:00
