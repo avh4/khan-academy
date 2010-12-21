@@ -1412,7 +1412,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: absolute;
     top: 0px;
     left: 50px;
-    z-index: 100;
+    z-index: 101;
     background: white;
     padding: 15px 15px 0 15px;
     -webkit-box-shadow: 0 0 10px #666;

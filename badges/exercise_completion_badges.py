@@ -76,6 +76,30 @@ class MasterTrigonometricianBadge(ExerciseCompletionBadge):
         self.points = 750
         ExerciseCompletionBadge.__init__(self)
 
+class ApprenticePrealgebraistBadge(ExerciseCompletionBadge):
+    def __init__(self):
+        self.exercise_names_required = ['exponents_1', 'adding_and_subtracting_negative_numbers', 'adding_and_subtracting_fractions']
+        self.description = "Apprentice Pre-algebraist"
+        self.badge_category = BadgeCategory.BRONZE
+        self.points = 100
+        ExerciseCompletionBadge.__init__(self)
+
+class JourneymanPrealgebraistBadge(ExerciseCompletionBadge):
+    def __init__(self):
+        self.exercise_names_required = ['exponents_2', 'multiplying_and_dividing_negative_numbers', 'multiplying_fractions', 'dividing_fractions']
+        self.description = "Journeyman Pre-algebraist"
+        self.badge_category = BadgeCategory.BRONZE
+        self.points = 500
+        ExerciseCompletionBadge.__init__(self)
+
+class MasterPrealgebraistBadge(ExerciseCompletionBadge):
+    def __init__(self):
+        self.exercise_names_required = ['exponents_3', 'order_of_operations', 'ordering_numbers', 'scientific_notation', 'units', 'simplifying_radicals']
+        self.description = "Master Pre-algebraist"
+        self.badge_category = BadgeCategory.SILVER
+        self.points = 750
+        ExerciseCompletionBadge.__init__(self)
+
 class ApprenticeAlgebraistBadge(ExerciseCompletionBadge):
     def __init__(self):
         self.exercise_names_required = ['exponents_3', 'exponent_rules', 'logarithms_1', 'linear_equations_1', 'percentage_word_problems_1', 'functions_1']

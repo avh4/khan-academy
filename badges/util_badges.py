@@ -49,9 +49,15 @@ def all_badges():
         exercise_completion_badges.ApprenticeArithmeticianBadge(),
         exercise_completion_badges.JourneymanArithmeticianBadge(),
         exercise_completion_badges.MasterArithmeticianBadge(),
+
         exercise_completion_badges.ApprenticeTrigonometricianBadge(),
         exercise_completion_badges.JourneymanTrigonometricianBadge(),
         exercise_completion_badges.MasterTrigonometricianBadge(),
+
+        exercise_completion_badges.ApprenticePrealgebraistBadge(),
+        exercise_completion_badges.JourneymanPrealgebraistBadge(),
+        exercise_completion_badges.MasterPrealgebraistBadge(),
+
         exercise_completion_badges.ApprenticeAlgebraistBadge(),
         exercise_completion_badges.JourneymanAlgebraistBadge(),
         exercise_completion_badges.MasterAlgebraistBadge(),
