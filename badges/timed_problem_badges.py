@@ -10,18 +10,14 @@ class TimedProblemBadge(ExerciseBadge):
         user_exercise = kwargs.get("user_exercise", None)
         action_cache = kwargs.get("action_cache", None)
 
-        logging.critical("A")
-
         if user_exercise is None or action_cache is None:
             return False
-        logging.critical("B")
 
         c_logs = len(action_cache.problem_logs)
         if c_logs >= self.problems_required:
 
             time_taken = 0
             time_allotted = self.problems_required * user_exercise.seconds_per_fast_problem
-            logging.critical("C:" + str(time_allotted))
 
             for i in range(self.problems_required):
 
@@ -29,7 +25,6 @@ class TimedProblemBadge(ExerciseBadge):
                 time_taken += problem.time_taken
 
                 if time_taken > time_allotted or not problem.correct or problem.exercise != user_exercise.exercise:
-                    logging.critical("exiting for exercise: " + problem.exercise + ", taken: " + str(time_taken))
                     return False
 
             return time_taken <= time_allotted
