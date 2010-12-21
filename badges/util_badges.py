@@ -14,6 +14,7 @@ import exercise_completion_badges
 import exercise_completion_count_badges
 import playlist_time_badges
 import power_time_badges
+import recovery_problem_badges
 
 import layer_cache
 import request_handler
@@ -41,6 +42,9 @@ def all_badges():
         timed_problem_badges.AwesomeTimedProblemBadge(),
         timed_problem_badges.RidiculousTimedProblemBadge(),
         timed_problem_badges.LudicrousTimedProblemBadge(),
+
+        recovery_problem_badges.RecoveryBadge(),
+        recovery_problem_badges.ResurrectionBadge(),
 
         power_time_badges.PowerFiveMinutesBadge(),
         power_time_badges.PowerHourBadge(),
