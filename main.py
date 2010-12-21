@@ -54,6 +54,7 @@ import app
 import util
 import request_handler
 import points
+import exercise_statistics
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 
@@ -2014,6 +2015,7 @@ def real_main():
         ('/admin/fixplaylistref', FixPlaylistRef),
         ('/admin/deletestaleplaylists', DeleteStalePlaylists),
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
+        ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
 
         ('/coaches', coaches.ViewCoaches),
         ('/registercoach', coaches.RegisterCoach),  

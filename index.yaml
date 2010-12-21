@@ -88,6 +88,13 @@ indexes:
 
 - kind: ProblemLog
   properties:
+  - name: correct
+  - name: exercise
+  - name: time_done
+    direction: desc
+
+- kind: ProblemLog
+  properties:
   - name: exercise
   - name: user
   - name: time_done

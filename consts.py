@@ -29,3 +29,18 @@ VIDEO_POINTS_BASE = 750
 
 # Maximum time we're willing to report that a user worked on a single problem, in seconds
 MAX_WORKING_ON_PROBLEM_SECONDS = 1200
+
+# Required # of saved problems before we run statistics on a particular exercise
+REQUIRED_PROBLEMS_FOR_EXERCISE_STATISTICS = 50
+
+# Number of most recent problems we examine when calculating exercise statistics
+LATEST_PROBLEMS_FOR_EXERCISE_STATISTICS = 5000
+
+# Speediest exercise percentile to use when calculating "fast" problem times
+FASTEST_EXERCISE_PERCENTILE = 0.1
+
+# Minimum seconds we'd ever require for a "fast" problem
+MIN_SECONDS_PER_FAST_PROBLEM = 2.0
+
+# Maximum seconds we'd ever allow for a "fast" problem
+MAX_SECONDS_PER_FAST_PROBLEM = 30.0

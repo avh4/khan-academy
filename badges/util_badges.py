@@ -160,18 +160,21 @@ class StartNewBadgeMapReduce(request_handler.RequestHandler):
 
     def get(self):
 
-        # Start a new Mapper task for calling update_for_mapper
+        # Admin-only restriction is handled by /admin/* URL pattern
+        # so this can be called by a cron job.
+
+        # Start a new Mapper task for calling badge_update_map
         mapreduce_id = control.start_map(
                 name = "UpdateUserBadges",
-                handler_spec = "badges.util_badges.update_for_mapper",
+                handler_spec = "badges.util_badges.badge_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
                 reader_parameters = {"entity_kind": "models.UserData"})
 
         self.response.out.write("OK: " + str(mapreduce_id))
 
-# update_for_mapper is called by a background MapReduce task.
+# badge_update_map is called by a background MapReduce task.
 # Each call updates the badges for a single user.
-def update_for_mapper(user_data):
+def badge_update_map(user_data):
     user = user_data.user
 
     if user is None:
