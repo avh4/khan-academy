@@ -58,6 +58,7 @@ class PowerTimeBadge(Badge):
 class PowerFiveMinutesBadge(PowerTimeBadge):
 
     def __init__(self):
+        PowerTimeBadge.__init__(self)
         self.problems_required = 15
         self.video_seconds_required = 60
         self.seconds_allotted = 60 * 5
@@ -65,11 +66,11 @@ class PowerFiveMinutesBadge(PowerTimeBadge):
         self.description = "Inspired Five Minutes"
         self.badge_category = BadgeCategory.BRONZE
         self.points = 0
-        PowerTimeBadge.__init__(self)
 
 class PowerHourBadge(PowerTimeBadge):
 
     def __init__(self):
+        PowerTimeBadge.__init__(self)
         self.problems_required = 90
         self.video_seconds_required = 15 * 60
         self.seconds_allotted = 3600
@@ -77,11 +78,11 @@ class PowerHourBadge(PowerTimeBadge):
         self.description = "Power Hour"
         self.badge_category = BadgeCategory.SILVER
         self.points = 0
-        PowerTimeBadge.__init__(self)
 
 class DoublePowerHourBadge(PowerTimeBadge):
 
     def __init__(self):
+        PowerTimeBadge.__init__(self)
         self.problems_required = 90 * 2
         self.video_seconds_required = 30 * 60
         self.seconds_allotted = 3600 * 2
@@ -89,5 +90,4 @@ class DoublePowerHourBadge(PowerTimeBadge):
         self.description = "Double Power Hour"
         self.badge_category = BadgeCategory.GOLD
         self.points = 0
-        PowerTimeBadge.__init__(self)
 

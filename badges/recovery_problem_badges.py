@@ -48,21 +48,21 @@ class RecoveryProblemBadge(ExerciseBadge):
 class RecoveryBadge(RecoveryProblemBadge):
 
     def __init__(self):
+        RecoveryProblemBadge.__init__(self)
         self.problems_wrong = 5
         self.problems_wrong_out_of = 10
         self.description = "Persistence"
         self.s_problems_description = "a few problems"
         self.badge_category = BadgeCategory.BRONZE
         self.points = 50
-        RecoveryProblemBadge.__init__(self)
 
 class ResurrectionBadge(RecoveryProblemBadge):
 
     def __init__(self):
+        RecoveryProblemBadge.__init__(self)
         self.problems_wrong = 10
         self.problems_wrong_out_of = 20
         self.description = "Sticktoitiveness"
         self.s_problems_description = "many problems"
         self.badge_category = BadgeCategory.SILVER
         self.points = 50
-        RecoveryProblemBadge.__init__(self)
