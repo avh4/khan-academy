@@ -1,6 +1,6 @@
 {% if user_badges %}
     <div style="display:none;" class="badge-award-container">
-    <h3>New badge{{ user_badges|length|pluralize }} <span style="font-weight:normal;">(<a href="#" onclick="Badges.hide();return false;">close</a>)</span></h3>
+    <h3 class="ui-corner-top">New badge{{ user_badges|length|pluralize }} <span style="font-weight:normal; float: right;">(<a href="#" onclick="Badges.hide();return false;">close</a>)</span></h3>
     {% for user_badge in user_badges %}
         {% if user_badge.badge %}
             {% badge_block user_badge.badge %}

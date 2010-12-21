@@ -89,6 +89,7 @@
 .css-menu > ul > li > a:hover {
     color: black;
     cursor: pointer;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .8);
 }
 
 .css-menu.noscript > ul > li:hover,
@@ -100,6 +101,7 @@
     color: black;
     outline: none;
     border-color: #ddd;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .8);
 }
 
 .css-menu > ul > li > ul {
