@@ -46,7 +46,11 @@ class Badge:
         #   self.description,
         #   self.badge_category,
         #   self.points
-        self.name = self.description.replace(" ", "").lower()
+
+        # Keep .name constant even if description changes.
+        # This way we only remove existing badges from people if the class name changes.
+        self.name = self.__class__.__name__.lower()
+
         self.badge_context_type = BadgeContextType.NONE
         
     @staticmethod
