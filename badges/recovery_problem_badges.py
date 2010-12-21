@@ -53,7 +53,7 @@ class RecoveryBadge(RecoveryProblemBadge):
         self.description = "Recovery"
         self.s_problems_description = "a few problems"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 100
+        self.points = 0
         RecoveryProblemBadge.__init__(self)
 
 class ResurrectionBadge(RecoveryProblemBadge):
@@ -64,5 +64,5 @@ class ResurrectionBadge(RecoveryProblemBadge):
         self.description = "Resurrection"
         self.s_problems_description = "many problems"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 100
+        self.points = 0
         RecoveryProblemBadge.__init__(self)

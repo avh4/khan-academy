@@ -64,7 +64,7 @@ class PowerFiveMinutesBadge(PowerTimeBadge):
         self.s_time_limit_description = "five minutes"
         self.description = "Inspired Five Minutes"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 100
+        self.points = 0
         PowerTimeBadge.__init__(self)
 
 class PowerHourBadge(PowerTimeBadge):
@@ -76,7 +76,7 @@ class PowerHourBadge(PowerTimeBadge):
         self.s_time_limit_description = "one hour"
         self.description = "Power Hour"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 1000
+        self.points = 0
         PowerTimeBadge.__init__(self)
 
 class DoublePowerHourBadge(PowerTimeBadge):
@@ -88,6 +88,6 @@ class DoublePowerHourBadge(PowerTimeBadge):
         self.s_time_limit_description = "two hours"
         self.description = "Double Power Hour"
         self.badge_category = BadgeCategory.GOLD
-        self.points = 5000
+        self.points = 0
         PowerTimeBadge.__init__(self)
 

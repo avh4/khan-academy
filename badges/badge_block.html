@@ -1,6 +1,6 @@
 <div class="achievement-badge {% if user_badge or badge.is_owned %}achievement-badge-owned{% endif %}" title="{{ badge.type_label|escape }}: {{ badge.extended_description|escape }}">
     <img src="{{ badge.icon_src }}" width="40" height="40"/>
-    <div class="energy-points-badge">{{ badge.points }}</div>
+    {% if badge.points %}<div class="energy-points-badge">{{ badge.points }}</div>{% endif %}
     <div class="achievement-title">{{ badge.description|escape }}</div>
     {% if user_badge %}
         <div class="achievement-count">x{{ user_badge.count }}</div>

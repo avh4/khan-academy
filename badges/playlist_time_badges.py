@@ -22,7 +22,7 @@ class NicePlaylistTimeBadge(PlaylistTimeBadge):
         self.seconds_required = 60 * 15
         self.description = "Nice Listener"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 100
+        self.points = 0
         PlaylistTimeBadge.__init__(self)
 
 class GreatPlaylistTimeBadge(PlaylistTimeBadge):
@@ -30,7 +30,7 @@ class GreatPlaylistTimeBadge(PlaylistTimeBadge):
         self.seconds_required = 60 * 30
         self.description = "Great Listener"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 1000
+        self.points = 0
         PlaylistTimeBadge.__init__(self)
 
 class AwesomePlaylistTimeBadge(PlaylistTimeBadge):
@@ -38,7 +38,7 @@ class AwesomePlaylistTimeBadge(PlaylistTimeBadge):
         self.seconds_required = 60 * 60
         self.description = "Awesome Listener"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 4500
+        self.points = 0
         PlaylistTimeBadge.__init__(self)
 
 class RidiculousPlaylistTimeBadge(PlaylistTimeBadge):
@@ -46,7 +46,7 @@ class RidiculousPlaylistTimeBadge(PlaylistTimeBadge):
         self.seconds_required = 60 * 60 * 4
         self.description = "Ridiculous Listener"
         self.badge_category = BadgeCategory.GOLD
-        self.points = 10000
+        self.points = 0
         PlaylistTimeBadge.__init__(self)
 
 class LudicrousPlaylistTimeBadge(PlaylistTimeBadge):
@@ -54,5 +54,5 @@ class LudicrousPlaylistTimeBadge(PlaylistTimeBadge):
         self.seconds_required = 60 * 60 * 10
         self.description = "Ludicrous Listener"
         self.badge_category = BadgeCategory.PLATINUM
-        self.points = 25000
+        self.points = 0
         PlaylistTimeBadge.__init__(self)
