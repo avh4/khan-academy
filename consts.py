@@ -37,7 +37,7 @@ REQUIRED_PROBLEMS_FOR_EXERCISE_STATISTICS = 50
 LATEST_PROBLEMS_FOR_EXERCISE_STATISTICS = 10000
 
 # Speediest exercise percentile to use when calculating "fast" problem times
-FASTEST_EXERCISE_PERCENTILE = 0.1
+FASTEST_EXERCISE_PERCENTILE = 0.25
 
 # Minimum seconds we'd ever require for a "fast" problem
 MIN_SECONDS_PER_FAST_PROBLEM = 2.0
