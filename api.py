@@ -276,7 +276,8 @@ class PlaylistVideos(request_handler.RequestHandler):
                           'description': v.description,
                           'keywords': v.keywords,                         
                           'readable_id': v.readable_id,
-                          'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title))
+                          'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title)),
+                          'video_position': pv.video_position
                          }                         
             videos.append(video_dict)                        
         self.response.out.write(json.dumps(videos, indent=4))     

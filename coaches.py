@@ -669,13 +669,7 @@ class ViewClassTime(request_handler.RequestHandler):
         
 class ViewClassReport(request_handler.RequestHandler):
         
-    def get(self):
-        class ReportCell:
-            def __init__(self, data="", css_class="", link=""):
-                self.data = data
-                self.css_class = css_class
-                self.link = link
-            
+    def get(self):            
         user = util.get_current_user()
         if user:
             logout_url = users.create_logout_url(self.request.uri)   
