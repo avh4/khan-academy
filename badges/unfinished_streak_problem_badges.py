@@ -24,6 +24,10 @@ class UnfinishedStreakProblemBadge(ExerciseBadge):
 
         c_logs = len(action_cache.problem_logs)
 
+        # We need a history of at least 10 problem_logs in the action cache
+        if c_logs < 10:
+            return False
+
         # Make sure the last problem is from this exercise and that they got it wrong
         last_problem_log = action_cache.get_problem_log(c_logs - 1)
         if (last_problem_log.exercise != user_exercise.exercise or last_problem_log.correct):
