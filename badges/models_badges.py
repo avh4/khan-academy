@@ -19,7 +19,7 @@ class UserBadge(db.Model):
 
     @staticmethod
     def count_by_badge_name(name):
-        query = UserBadge.all()
+        query = UserBadge.all(keys_only=True)
         query.filter('badge_name = ', name)
-        return query.count()
+        return query.count(100000)
 
