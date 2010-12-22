@@ -53,17 +53,16 @@ class PowerTimeBadge(Badge):
         return True
 
     def extended_description(self):
-        return "Correctly answer %s problems and watch %s of video in %s" % (self.problems_required, util.seconds_to_time_string(self.video_seconds_required), self.s_time_limit_description)
+        return "Correctly answer %s problems and watch %s of video in %s" % (self.problems_required, util.seconds_to_time_string(self.video_seconds_required), util.seconds_to_time_string(self.seconds_allotted))
 
-class PowerFiveMinutesBadge(PowerTimeBadge):
+class PowerFifteenMinutesBadge(PowerTimeBadge):
 
     def __init__(self):
         PowerTimeBadge.__init__(self)
-        self.problems_required = 15
-        self.video_seconds_required = 60
-        self.seconds_allotted = 60 * 5
-        self.s_time_limit_description = "five minutes"
-        self.description = "Inspired Five Minutes"
+        self.problems_required = 10
+        self.video_seconds_required = 60 * 10
+        self.seconds_allotted = 60 * 15
+        self.description = "Inspired 15 Minutes"
         self.badge_category = BadgeCategory.BRONZE
         self.points = 0
 
@@ -74,7 +73,6 @@ class PowerHourBadge(PowerTimeBadge):
         self.problems_required = 90
         self.video_seconds_required = 15 * 60
         self.seconds_allotted = 3600
-        self.s_time_limit_description = "one hour"
         self.description = "Power Hour"
         self.badge_category = BadgeCategory.SILVER
         self.points = 0
@@ -86,7 +84,6 @@ class DoublePowerHourBadge(PowerTimeBadge):
         self.problems_required = 90 * 2
         self.video_seconds_required = 30 * 60
         self.seconds_allotted = 3600 * 2
-        self.s_time_limit_description = "two hours"
         self.description = "Double Power Hour"
         self.badge_category = BadgeCategory.GOLD
         self.points = 0

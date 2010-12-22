@@ -52,7 +52,7 @@ def all_badges():
         unfinished_streak_problem_badges.KeepFightingBadge(),
         unfinished_streak_problem_badges.UndeterrableBadge(),
 
-        power_time_badges.PowerFiveMinutesBadge(),
+        power_time_badges.PowerFifteenMinutesBadge(),
         power_time_badges.PowerHourBadge(),
         power_time_badges.DoublePowerHourBadge(),
 
