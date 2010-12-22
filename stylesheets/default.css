@@ -99,7 +99,6 @@ footer {
         background: url(/images/footer-leaves.png) no-repeat top center;
         height: 188px;
         padding: 10px 23px;
-        min-width: 970px;
     }
     footer.short #leaves {
         height: auto;
@@ -132,7 +131,9 @@ footer {
         color: black;
     }
     footer #copyright {
-        float: right;
+        position: absolute;
+        right: 23px;
+        top: 10px;
         padding-top: 2px;
     }
     footer#footer #leaves #copyright a {
@@ -175,9 +176,6 @@ footer {
         z-index: 1;    
     }
 
-#top-header #top-header-links #page_fb_like {
-    display: inline;   
-}
 
 #top-header #stats {
     position: relative;
@@ -264,6 +262,13 @@ footer {
     border-bottom: 1px solid #567D0A;
     height: 41px;
 }
+    #top-header #top-header-links #fb-like-badge {
+        display: inline-block;
+        width: 90px;
+    }
+    #top-header #top-header-links #page_fb_like {
+        display: inline;   
+    }
     #top-header #top-header-links span {
         vertical-align: middle;
     }
