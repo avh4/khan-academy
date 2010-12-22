@@ -57,6 +57,7 @@ class RequestHandler(webapp.RequestHandler):
 
     def render_template(self, template_name, template_values):
         template_values['App'] = App
+        template_values['None'] = None
         template_values['points'] = None
         template_values['username'] = ""
         user = util.get_current_user()

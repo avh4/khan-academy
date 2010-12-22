@@ -149,8 +149,9 @@ class ViewBadges(request_handler.RequestHandler):
         diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), key=lambda badge:badge.points)
 
         template_values = {
-                'user_badges': user_badges,
-                'badge_collections': [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges],
+                "user_badges": user_badges,
+                "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges],
+                "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False)
                 }
 
         self.render_template('viewbadges.html', template_values)

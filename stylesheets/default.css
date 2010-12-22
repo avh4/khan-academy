@@ -959,6 +959,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-size: larger;
         width: 170px;
     }
+    .achievement-badge .achievement-title .frequency {
+        font-size: 12px;
+        font-style: italic;
+    }
     .achievement-badge .achievement-count {
         font-size: 16px;
         font-weight: bold;

@@ -53,7 +53,7 @@
         <br/><h3>{{ badge.type_label|escape }}</h3><br/><br/>
         <div class="clear">&nbsp;</div>
         {% endif %}
-        {% badge_block badge %}
+        {% badge_block badge None show_badge_frequencies %}
     {% endfor %}
 {% endfor %}
     <div class="clear">&nbsp;</div>

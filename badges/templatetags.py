@@ -42,9 +42,13 @@ def badge_counts(user_data=None):
     }
 
 @register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
-def badge_block(badge, user_badge=None):
+def badge_block(badge, user_badge=None, show_frequency=False):
     extended_description = badge.extended_description()
     if badge.is_teaser_if_unknown and user_badge is None:
         extended_description = "???"
 
-    return {"badge": badge, "user_badge": user_badge, "extended_description": extended_description}
+    frequency = None
+    if show_frequency:
+        frequency = badge.frequency()
+
+    return {"badge": badge, "user_badge": user_badge, "extended_description": extended_description, "frequency": frequency}

@@ -150,6 +150,9 @@ class Badge:
 
         UserBadgeNotifier.push_for_user(user, user_badge)
 
+    def frequency(self):
+        return models_badges.UserBadge.count_by_badge_name(self.name)
+
 class UserBadgeNotifier:
 
     # Only show up to 2 badge notifications at a time, rest
