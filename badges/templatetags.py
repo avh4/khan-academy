@@ -14,6 +14,8 @@ def badge_notifications():
     for user_badge in user_badges:
         user_badge.badge = all_badges_dict.get(user_badge.badge_name)
 
+    user_badges = filter(lambda user_badge: user_badge.badge is not None, user_badges)
+
     if len(user_badges) > 1:
         user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserBadgeNotifier.NOTIFICATION_LIMIT]
 
