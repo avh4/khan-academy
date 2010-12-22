@@ -1470,3 +1470,15 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     top: -4px;
     margin-left: 5px;
 }
+
+.achievement-badges-explanation {
+    padding: 15px 30px;
+}
+    .achievement-badges-explanation table {
+        width: 100%;
+    }
+    .achievement-badges-explanation table td {
+        text-align: center;
+        vertical-align: top;
+        padding: 0 10px;
+    }
