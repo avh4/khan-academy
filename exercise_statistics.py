@@ -42,7 +42,7 @@ def statistics_update_map(exercise):
 
     for problem_log in problem_logs:
         # Ignore outliers
-        if problem_log.time_taken > 0 and problem_log.time_taken < consts.MAX_WORKING_ON_PROBLEM_SECONDS:
+        if problem_log.time_taken > 3.0 and problem_log.time_taken < consts.MAX_WORKING_ON_PROBLEM_SECONDS:
             list_time_taken.append(float(problem_log.time_taken))
 
     if len(list_time_taken) <= consts.REQUIRED_PROBLEMS_FOR_EXERCISE_STATISTICS:
