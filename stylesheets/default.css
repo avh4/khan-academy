@@ -258,6 +258,7 @@ footer {
     min-width: 680px;
     background: #79A90C url(/images/header-bg.png) repeat-x 0 0;
     height: 42px;
+    font-weight: bold;
 }
     #top-header #top-header-links #fb-like-badge {
         display: inline-block;
@@ -312,7 +313,6 @@ footer {
         padding: 0;
     }
     #top-header #top-header-links #page_auth .css-menu > ul > li {
-        font-weight: normal;
         font-size: 12px;
         text-shadow: 0 -1px 0 rgba(0,0,0, .5);
     }
