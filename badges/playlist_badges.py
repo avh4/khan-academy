@@ -13,12 +13,12 @@ class PlaylistBadge(Badge):
         if user_playlist is None:
             return False
 
-        return self.name_with_target_context(UserPlaylist.playlist.get_value_for_datastore(user_playlist)) in user_data.badges
+        return self.name_with_target_context(user_playlist.playlist.title) in user_data.badges
 
     def award_to(self, user, user_data, *args, **kwargs):
         user_playlist = kwargs.get("user_playlist", None)
         if user_playlist is None:
             return False
 
-        self.complete_award_to(user, user_data, user_playlist.playlist, UserPlaylist.playlist.get_value_for_datastore(user_playlist))
+        self.complete_award_to(user, user_data, user_playlist.playlist, user_playlist.playlist.title)
 
