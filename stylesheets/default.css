@@ -256,11 +256,8 @@ footer {
     right: 0;
     margin-left: 317px;
     min-width: 680px;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#79A90C', endColorstr='#64920C');
-    background: -webkit-gradient( linear, left top, left bottom, from(#79A90C), to(#64920C));
-    background: -moz-linear-gradient( top, #79A90C, #64920C );
-    border-bottom: 1px solid #567D0A;
-    height: 41px;
+    background: #79A90C url(/images/header-bg.png) repeat-x 0 0;
+    height: 42px;
 }
     #top-header #top-header-links #fb-like-badge {
         display: inline-block;
