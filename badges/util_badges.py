@@ -28,6 +28,13 @@ import logging
 @layer_cache.cache_with_key("all_badges", layer=layer_cache.SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
 def all_badges():
     return [
+        exercise_completion_count_badges.GettingStartedBadge(),
+        exercise_completion_count_badges.MakingProgressBadge(),
+        exercise_completion_count_badges.HardAtWorkBadge(),
+        exercise_completion_count_badges.WorkHorseBadge(),
+        exercise_completion_count_badges.MagellanBadge(),
+        exercise_completion_count_badges.AtlasBadge(),
+
         streak_badges.NiceStreakBadge(),
         streak_badges.GreatStreakBadge(),
         streak_badges.AwesomeStreakBadge(),
@@ -77,12 +84,6 @@ def all_badges():
         exercise_completion_badges.LevelThreeAlgebraistBadge(),
         exercise_completion_badges.LevelFourAlgebraistBadge(),
 
-        exercise_completion_count_badges.GettingStartedBadge(),
-        exercise_completion_count_badges.MakingProgressBadge(),
-        exercise_completion_count_badges.HardAtWorkBadge(),
-        exercise_completion_count_badges.WorkHorseBadge(),
-        exercise_completion_count_badges.MagellanBadge(),
-        exercise_completion_count_badges.AtlasBadge(),
     ]
 
 @layer_cache.cache_with_key("all_badges_dict", layer=layer_cache.SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)

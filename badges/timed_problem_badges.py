@@ -38,7 +38,7 @@ class NiceTimedProblemBadge(TimedProblemBadge):
 
     def __init__(self):
         TimedProblemBadge.__init__(self)
-        self.problems_required = 4
+        self.problems_required = 5
         self.description = "Picking Up Steam"
         self.badge_category = BadgeCategory.BRONZE
         self.points = 100
@@ -47,16 +47,16 @@ class GreatTimedProblemBadge(TimedProblemBadge):
 
     def __init__(self):
         TimedProblemBadge.__init__(self)
-        self.problems_required = 8
+        self.problems_required = 10
         self.description = "Going Transonic"
-        self.badge_category = BadgeCategory.BRONZE
+        self.badge_category = BadgeCategory.SILVER
         self.points = 500
 
 class AwesomeTimedProblemBadge(TimedProblemBadge):
 
     def __init__(self):
         TimedProblemBadge.__init__(self)
-        self.problems_required = 16
+        self.problems_required = 20
         self.description = "Going Supersonic"
         self.badge_category = BadgeCategory.SILVER
         self.points = 750
