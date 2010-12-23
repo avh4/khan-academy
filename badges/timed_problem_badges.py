@@ -76,5 +76,5 @@ class LudicrousTimedProblemBadge(TimedProblemBadge):
         TimedProblemBadge.__init__(self)
         self.problems_required = 75
         self.description = "299,792,458 Meters per Second"
-        self.badge_category = BadgeCategory.PLATINUM
+        self.badge_category = BadgeCategory.GOLD
         self.points = 5000
