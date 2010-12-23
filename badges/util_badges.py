@@ -142,11 +142,11 @@ class ViewBadges(request_handler.RequestHandler):
         user_badges = sorted(user_badges, reverse=True, key=lambda user_badge:user_badge.date)
         possible_badges = sorted(possible_badges, key=lambda badge:badge.badge_category)
 
-        bronze_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.BRONZE, possible_badges), key=lambda badge:badge.points)
-        silver_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.SILVER, possible_badges), key=lambda badge:badge.points)
-        gold_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.GOLD, possible_badges), key=lambda badge:badge.points)
-        platinum_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.PLATINUM, possible_badges), key=lambda badge:badge.points)
-        diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), key=lambda badge:badge.points)
+        bronze_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.BRONZE, possible_badges), reverse=True, key=lambda badge:badge.points)
+        silver_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.SILVER, possible_badges), reverse=True, key=lambda badge:badge.points)
+        gold_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.GOLD, possible_badges), reverse=True, key=lambda badge:badge.points)
+        platinum_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.PLATINUM, possible_badges), reverse=True, key=lambda badge:badge.points)
+        diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), reverse=True, key=lambda badge:badge.points)
 
         template_values = {
                 "user_badges": user_badges,
