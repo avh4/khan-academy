@@ -54,7 +54,7 @@ class RecoveryBadge(RecoveryProblemBadge):
         self.description = "Persistence"
         self.s_problems_description = "a few problems"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 50
+        self.points = 0
 
 class ResurrectionBadge(RecoveryProblemBadge):
 
@@ -65,4 +65,4 @@ class ResurrectionBadge(RecoveryProblemBadge):
         self.description = "Sticktoitiveness"
         self.s_problems_description = "many problems"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 50
+        self.points = 0

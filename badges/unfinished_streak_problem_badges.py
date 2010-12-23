@@ -68,7 +68,7 @@ class SoCloseBadge(UnfinishedStreakProblemBadge):
         self.problems_required = 30
         self.description = "Perseverance"
         self.badge_category = BadgeCategory.BRONZE
-        self.points = 50
+        self.points = 0
 
 class KeepFightingBadge(UnfinishedStreakProblemBadge):
 
@@ -77,7 +77,7 @@ class KeepFightingBadge(UnfinishedStreakProblemBadge):
         self.problems_required = 40
         self.description = "Steadfastness"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 50
+        self.points = 0
 
 class UndeterrableBadge(UnfinishedStreakProblemBadge):
 
@@ -86,5 +86,5 @@ class UndeterrableBadge(UnfinishedStreakProblemBadge):
         self.problems_required = 50
         self.description = "Tenacity"
         self.badge_category = BadgeCategory.SILVER
-        self.points = 50
+        self.points = 0
 
