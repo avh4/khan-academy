@@ -1,5 +1,6 @@
 from models import UserPlaylist
 from badges import Badge, BadgeContextType, BadgeCategory
+import logging
 
 # All badges that may be awarded once-per-Playlist inherit from PlaylistBadge
 class PlaylistBadge(Badge):
@@ -13,7 +14,7 @@ class PlaylistBadge(Badge):
         if user_playlist is None:
             return False
 
-        return self.name_with_target_context(user_playlist.playlist.title) in user_data.badges
+        return self.name_with_target_context(user_playlist.title) in user_data.badges
 
     def award_to(self, user, user_data, *args, **kwargs):
         user_playlist = kwargs.get("user_playlist", None)

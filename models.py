@@ -466,6 +466,7 @@ class UserPlaylist(db.Model):
     playlist = db.ReferenceProperty(Playlist)
     seconds_watched = db.IntegerProperty(default = 0)
     last_watched = db.DateTimeProperty(auto_now_add = True)
+    title = db.StringProperty()
 
     @staticmethod
     def get_for_user(user):

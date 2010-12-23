@@ -2,6 +2,7 @@ from google.appengine.api import memcache
 
 import util
 import models_badges
+import logging
 
 # Badges can either be Exercise badges (can earn one for every Exercise),
 # Playlist badges (one for every Playlist),
@@ -136,7 +137,6 @@ class Badge:
         user_badge = models_badges.UserBadge.get_by_key_name(key_name)
 
         if user_badge is None:
-
             user_data.add_points(self.points)
 
             user_badge = models_badges.UserBadge(

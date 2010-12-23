@@ -625,6 +625,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                     action_cache = None
                     for video_playlist in query:
                         user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
+                        user_playlist.title = video_playlist.playlist.title
                         user_playlist.seconds_watched += seconds_watched
                         user_playlist.last_watched = datetime.datetime.now()
                         user_playlist.put()
