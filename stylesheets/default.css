@@ -175,6 +175,10 @@ footer {
         top: 15px;
         z-index: 1;    
     }
+    #top-header #logo #logo-image img {
+        width: 309px;
+        height: 71px;
+    }
 
 
 #top-header #stats {
@@ -297,6 +301,8 @@ footer {
     #top-header #top-header-links .page_links #social-links img {
         position: relative;
         top: -1px;
+        height: 24px;
+        width: 24px;
     }
     
 #top-header #top-header-links #page_auth.page_links {
@@ -1488,3 +1494,59 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         vertical-align: top;
         padding: 0 10px;
     }
+
+/* Start knowledge map CSS */
+.hidden_knowledge_map {
+    display: none;
+}
+
+.nodeLabel {
+    color: white;
+    font-family: "Lucida Grande", "Arial", sans-serif;
+    font-size: 12px;
+    text-align: center;
+    width: 80px;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.creditLabel {
+    color: white;
+    font-size: 10px;
+    margin: 0 2px 2px 0;
+    white-space: nowrap;
+    opacity: 0.5;
+}
+
+/*
+These style customizations will be applied to nodes
+of particular types on the knowledge map.
+*/
+.nodeLabelProficient {
+}
+.nodeLabelReview {
+}
+.nodeLabelSuggested {
+}
+.nodeLabelZoom8 {
+    font-size: 9px;
+    width: 60px;
+}
+.nodeLabelZoom7 {
+    visibility: hidden;
+}
+.nodeLabelHighlight {
+    -webkit-box-shadow: 0 0 10px yellow;
+    -moz-box-shadow: 0 0 10px yellow;
+    box-shadow: 0 0 10px yellow;
+    border: 1px solid #aaa;
+    background-color: black;
+}
+.nodeLabelSummative {
+    visibility: visible;
+    font-size: 12px;
+    background-color: black;
+    z-index: 1000;
+    position: relative;
+}
+/* End Knowledge Map CSS */
