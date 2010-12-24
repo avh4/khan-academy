@@ -1161,9 +1161,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             problem_log.hint_used = hint_used
             problem_log.put()
 
-            query = UserData.all()
-            query.filter('user =', userExercise.user)
-            user_data = query.get()
+            user_data = UserData.get_for(userExercise.user)
             
             suggested = user_data.is_suggested(exid)
             proficient = user_data.is_proficient_at(exid)
@@ -1179,7 +1177,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 userExercise.streak = userExercise.streak + 1
                 if userExercise.streak > userExercise.longest_streak:
                     userExercise.longest_streak = userExercise.streak
-                if userExercise.streak == userExercise.get_exercise().required_streak():
+                if userExercise.streak >= exercise.required_streak() and not proficient:
                     userExercise.set_proficient(True)
                     userExercise.proficient_date = datetime.datetime.now()                    
             else:
@@ -1193,6 +1191,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 userExercise.reset_streak()
             userExercise.put()
 
+            # Reload user data before checking badges in case set_proficient updated the datastore behind the scenes
+            user_data = UserData.get_for(userExercise.user)
             if util_badges.update_with_user_exercise(
                     user, 
                     user_data, 
