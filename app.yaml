@@ -2,7 +2,7 @@ application: khanexercises
 version: 764
 runtime: python
 api_version: 1
-default_expiration: "14d"
+default_expiration: "31d"
 
 skip_files:
 - ^(.*/)?app\.yaml
