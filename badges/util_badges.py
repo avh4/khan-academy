@@ -18,6 +18,7 @@ import power_time_badges
 import recovery_problem_badges
 import unfinished_streak_problem_badges
 import points_badges
+import tenure_badges
 
 import layer_cache
 import request_handler
@@ -86,6 +87,10 @@ def all_badges():
         exercise_completion_badges.LevelTwoAlgebraistBadge(),
         exercise_completion_badges.LevelThreeAlgebraistBadge(),
         exercise_completion_badges.LevelFourAlgebraistBadge(),
+
+        tenure_badges.YearOneBadge(),
+        tenure_badges.YearTwoBadge(),
+        tenure_badges.YearThreeBadge(),
 
     ]
 

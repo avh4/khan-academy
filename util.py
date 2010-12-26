@@ -1,3 +1,4 @@
+import datetime
 import urllib
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
@@ -31,13 +32,25 @@ def get_nickname_for(user):
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
 
-def minutes_between(dt1, dt2):
+def seconds_since(dt):
+    return seconds_between(dt, datetime.datetime.now())
+
+def seconds_between(dt1, dt2):
     timespan = dt2 - dt1
-    return float(timespan.seconds + (timespan.days * 24 * 3600)) / 60.0
+    return float(timespan.seconds + (timespan.days * 24 * 3600))
+
+def minutes_between(dt1, dt2):
+    return seconds_between(dt1, dt2) / 60.0
 
 def seconds_to_time_string(seconds_init):
 
     seconds = seconds_init
+
+    years = seconds / (86400 * 365)
+    seconds -= years * (86400 * 365)
+
+    days = seconds / 86400
+    seconds -= days * 86400
 
     hours = seconds / 3600
     seconds -= hours * 3600
@@ -45,6 +58,16 @@ def seconds_to_time_string(seconds_init):
     minutes = seconds / 60
     seconds -= minutes * 60
 
+    if years and days and hours:
+        return "%d year%s, %d day%s, and %d hour%s" % (years, pluralize(years), days, pluralize(days), hours, pluralize(hours))
+    elif years and days:
+        return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
+    elif years:
+        return "%d year%s" % (years, pluralize(years))
+    elif days and hours:
+        return "%d day%s and %d hour%s" % (day, pluralize(day), hours, pluralize(hours))
+    elif days:
+        return "%d day%s" % (days, pluralize(days))
     if hours and minutes and seconds:
         return "%d hour%s, %d minute%s, and %d second%s" % (hours, pluralize(hours), minutes, pluralize(minutes), seconds, pluralize(seconds))
     elif hours and minutes:
