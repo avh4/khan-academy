@@ -35,6 +35,12 @@ def all_badges():
         exercise_completion_count_badges.MagellanBadge(),
         exercise_completion_count_badges.AtlasBadge(),
 
+        points_badges.TenThousandaireBadge(),
+        points_badges.HundredThousandaireBadge(),
+        points_badges.FiveHundredThousandaireBadge(),
+        points_badges.MillionaireBadge(),
+        points_badges.TenMillionaireBadge(),
+
         streak_badges.NiceStreakBadge(),
         streak_badges.GreatStreakBadge(),
         streak_badges.AwesomeStreakBadge(),
@@ -63,9 +69,6 @@ def all_badges():
         power_time_badges.PowerFifteenMinutesBadge(),
         power_time_badges.PowerHourBadge(),
         power_time_badges.DoublePowerHourBadge(),
-
-        points_badges.MillionaireBadge(),
-        points_badges.TenMillionaireBadge(),
 
         exercise_completion_badges.LevelOneArithmeticianBadge(),
         exercise_completion_badges.LevelTwoArithmeticianBadge(),
