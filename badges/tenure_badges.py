@@ -41,7 +41,7 @@ class YearOneBadge(TenureBadge):
     def __init__(self):
         TenureBadge.__init__(self)
         self.seconds_required = 60 * 60 * 24 * 365
-        self.description = "Yuri Gagarin" # First human in space
+        self.description = "Cypress"
         self.badge_category = BadgeCategory.BRONZE
         self.points = 0
 
@@ -49,7 +49,7 @@ class YearTwoBadge(TenureBadge):
     def __init__(self):
         TenureBadge.__init__(self)
         self.seconds_required = 60 * 60 * 24 * 365 * 2
-        self.description = "Valentina Tereshkova" # First woman in space
+        self.description = "Redwood"
         self.badge_category = BadgeCategory.SILVER
         self.points = 0
 
@@ -57,7 +57,7 @@ class YearThreeBadge(TenureBadge):
     def __init__(self):
         TenureBadge.__init__(self)
         self.seconds_required = 60 * 60 * 24 * 365 * 3
-        self.description = "John Glenn" # Oldest person to fly in space
+        self.description = "Sequoia"
         self.badge_category = BadgeCategory.GOLD
         self.points = 0
 
