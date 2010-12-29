@@ -161,6 +161,9 @@ def exercises_javascript():
 @register.inclusion_tag("maps_javascript.html")
 def maps_javascript():
     return {'App': App}
+@register.inclusion_tag("shared_css.html")
+def shared_css():
+    return {'App': App}
     
 register.tag(highlight)
 

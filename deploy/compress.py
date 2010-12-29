@@ -1,46 +1,46 @@
 import os
 import subprocess
 
-COMBINED_FILENAME = "combined.js"
-COMPRESSED_FILENAME = "compressed.js"
+COMBINED_FILENAME = "combined"
+COMPRESSED_FILENAME = "compressed"
 PACKAGE_SUFFIX = "-package"
 
-# Combine all .js files in all "-package" suffixed directories
-# into a single combined.js file for each package, then
-# minify into a single compressed.js file.
-def compress_all_js_packages(path):
+# Combine all .js\.css files in all "-package" suffixed directories
+# into a single combined.js\.css file for each package, then
+# minify into a single compressed.js\.css file.
+def compress_all_packages(path, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
 
     names = os.listdir(path)
     for name in names:
         if name.endswith(PACKAGE_SUFFIX):
-            compress_js(os.path.join(path, name))
+            compress_package(os.path.join(path, name), suffix)
 
-def compress_js(path):
+def compress_package(path, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
 
-    remove_working_files(path)
+    remove_working_files(path, suffix)
 
-    path_combined = combine_js(path)
-    path_compressed = minify_js(path, path_combined)
+    path_combined = combine_package(path, suffix)
+    path_compressed = minify_package(path, path_combined, suffix)
 
     if not os.path.exists(path_compressed):
         raise Exception("Did not successfully compress: %s" % path_compressed)
 
     return path_compressed
 
-# Remove previous combined.js and compress.js files
-def remove_working_files(path):
+# Remove previous combined.js\.css and compress.js\.css files
+def remove_working_files(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
-        if filename.endswith(COMBINED_FILENAME) or filename.endswith(COMPRESSED_FILENAME):
+        if filename.endswith(COMBINED_FILENAME + suffix) or filename.endswith(COMPRESSED_FILENAME + suffix):
             os.remove(os.path.join(path, filename))
 
 # Use YUICompressor to minify the combined file
-def minify_js(path, path_combined):
-    path_compressed = os.path.join(path, COMPRESSED_FILENAME)
+def minify_package(path, path_combined, suffix):
+    path_compressed = os.path.join(path, COMPRESSED_FILENAME + suffix)
 
     print "Compressing %s into %s" % (path_combined, path_compressed)
     print popen_results(["java", "-jar", "yuicompressor-2.4.2.jar", "--charset", "utf-8", path_combined, "-o", path_compressed])
@@ -50,16 +50,16 @@ def minify_js(path, path_combined):
 
     return path_compressed
 
-# Combine all files into a single combined.js
-def combine_js(path):
+# Combine all files into a single combined.js\.css
+def combine_package(path, suffix):
     static_filenames = []
     filenames = os.listdir(path)
     for filename in filenames:
-        if filename.endswith(".js"):
+        if filename.endswith(suffix):
             static_filenames.append(filename)
 
     static_filenames = sorted(static_filenames, key=javascript_sort_key)
-    path_combined = os.path.join(path, COMBINED_FILENAME)
+    path_combined = os.path.join(path, COMBINED_FILENAME + suffix)
 
     print "Building %s" % path_combined
 

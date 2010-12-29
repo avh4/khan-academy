@@ -30,8 +30,13 @@ def svn_up():
 
 def compress_js():
     print "Compressing javascript"
-    path_js = os.path.join(os.path.dirname(__file__), "..", "javascript")
-    compress.compress_all_js_packages(path_js)
+    path = os.path.join(os.path.dirname(__file__), "..", "javascript")
+    compress.compress_all_packages(path, ".js")
+
+def compress_css():
+    print "Compressing stylesheets"
+    path = os.path.join(os.path.dirname(__file__), "..", "stylesheets")
+    compress.compress_all_packages(path, ".css")
 
 def deploy(version):
     print "Deploying version " + str(version)
@@ -69,6 +74,7 @@ def main():
         version = options.version
 
     compress_js()
+    compress_css()
 
     if not options.dryrun:
         deploy(version)
