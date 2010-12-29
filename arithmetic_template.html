@@ -5,10 +5,7 @@
     /* Temporary styles to fit new exercises into old template, will be removed when new template is dropped in. */
     #page_sub_nav {display: none;}
 </style>
-  <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/seedrandom.js?{{App.version}}"></script>
+  {% exercises_javascript %}
   {% comment %}
      We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
@@ -30,9 +27,6 @@
 	}
       });
   </script>
-  <script type="text/javascript" src="/javascript/metautil.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/exerciseutil.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/graphutil.js?{{App.version}}"></script>
   <script type="text/javascript"><!--
 $(document).ready(function () {
 	KhanAcademy.onMathMLSupportReady(function() {

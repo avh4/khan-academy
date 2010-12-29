@@ -1,6 +1,5 @@
 <script src="http://maps.google.com/maps/api/js?sensor=false&amp;key=ABQIAAAAJ-mYWD3X4Pkikj6eWkh_phSd--NJdwyOK2gu8IMLZJjA2xrvxxRF_LQyLMsHujtn2ox9Nn7KMuJ-Yg" type="text/javascript"></script>
-<script src="/javascript/maps/markerwithlabel.js?{{App.version}}"></script>
-<script src="/javascript/maps/knowledgemap.js?{{App.version}}"></script>
+{% maps_javascript %}
 
 <script>
 $(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_coords.2 }});});

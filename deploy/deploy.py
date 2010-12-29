@@ -3,6 +3,8 @@ import subprocess
 import os
 import optparse
 
+import compress
+
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     return proc.communicate()[0]
@@ -26,6 +28,11 @@ def svn_up():
 
     return version
 
+def compress_js():
+    print "Compressing javascript"
+    path_js = os.path.join(os.path.dirname(__file__), "..", "javascript")
+    compress.compress_all_js_packages(path_js)
+
 def deploy(version):
     print "Deploying version " + str(version)
     os.system("appcfg.py -V " + str(version) + " update .")
@@ -42,6 +49,10 @@ def main():
         action="store", dest="version",
         help="Override the deployed version identifier", default="")
 
+    parser.add_option('-d', '--dryrun',
+        action="store_true", dest="dryrun",
+        help="Dry run without the final deploy-to-App-Engine step", default=False)
+
     options, args = parser.parse_args()
 
     if not options.force:
@@ -57,7 +68,10 @@ def main():
     if len(options.version) > 0:
         version = options.version
 
-    deploy(version)
+    compress_js()
+
+    if not options.dryrun:
+        deploy(version)
 
 if __name__ == "__main__":
     main()

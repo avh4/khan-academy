@@ -5,16 +5,9 @@
 <head>
     <title>Khan Academy Login</title>
         <link rel="stylesheet" type="text/css" media="screen" href="/javascript/jQueryOpenIdPlugin/openid.css?{{App.version}}" />
-        {# Support offline use with dev appserver #}
-        {% if App.is_dev_server %}
-        <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}">
-        </script>
-        {% else %}
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
-        </script>
-        {% endif %}
-        <script type="text/javascript" src="/javascript/jQueryOpenIdPlugin/jquery.openid.js?{{App.version}}">
-        </script>
+
+        {% shared_javascript %}
+        <script type="text/javascript" src="/javascript/jQueryOpenIdPlugin/jquery.openid.js?{{App.version}}"></script>
         <script type="text/javascript">
         $(function () {
            $("form.openid:eq(0)").openid(); 

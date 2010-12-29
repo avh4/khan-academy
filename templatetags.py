@@ -150,8 +150,17 @@ def streak_bar(user_exercise):
 
 @register.inclusion_tag("reports_navigation.html")
 def reports_navigation(coach_email, current_report="classreport"):
-    return  {'coach_email': coach_email, 'current_report': current_report }
+    return {'coach_email': coach_email, 'current_report': current_report }
     
+@register.inclusion_tag("shared_javascript.html")
+def shared_javascript():
+    return {'App': App}
+@register.inclusion_tag("exercises_javascript.html")
+def exercises_javascript():
+    return {'App': App}
+@register.inclusion_tag("maps_javascript.html")
+def maps_javascript():
+    return {'App': App}
     
 register.tag(highlight)
 

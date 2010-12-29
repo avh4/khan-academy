@@ -80,14 +80,20 @@ def combine_js(path):
 
     return path_combined
 
-# Make sure jQuery components are sent down at top of any file
+# Make sure jQuery or other necessary components are sent down at top of any file.
+# We shouldn't need to add to this list if we only run JS code using jQuery's $(fxn) 
+# standard for document.ready.
 def javascript_sort_key(filename):
     if filename == "jquery.js":
         return 0
-    elif filename.startswith("jquery."):
+    elif filename == "jquery-ui.js":
         return 1
-    else:
+    elif filename.startswith("jquery."):
         return 2
+    elif filename == "metautil.js":
+        return 3
+    else:
+        return 4
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)

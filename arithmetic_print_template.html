@@ -4,18 +4,9 @@
   <title>Khan Academy</title>
   
   <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
-    {# Support offline use with dev appserver #}
-    {% if App.is_dev_server %}
-    <script type="text/javascript" src="/javascript/jstree/_lib/jquery.js?{{App.version}}">
-    </script>
-    {% else %}
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js">
-    </script>
-    {% endif %}
-  <script type="text/javascript" src="/javascript/ASCIIMathML.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/ASCIIsvg.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/fontdetect.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/seedrandom.js?{{App.version}}"></script>
+  {% shared_javascript %}
+  {% exercises_javascript %}
+
   {% comment %}
      We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
@@ -37,9 +28,6 @@
 	}
       });
   </script>
-  <script type="text/javascript" src="/javascript/metautil.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/exerciseutil.js?{{App.version}}"></script>
-  <script type="text/javascript" src="/javascript/graphutil.js?{{App.version}}"></script>
   
 <script language=Javascript1.2><!--
 $(document).ready(function () {

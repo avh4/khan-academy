@@ -1,0 +1,7 @@
+{% if not App.is_dev_server %}
+    <script type="text/javascript" src="/javascript/maps-package/compressed.js?{{App.version}}"></script>
+{% else %}
+    <script src="/javascript/maps-package/markerwithlabel.js?{{App.version}}"></script>
+    <script src="/javascript/maps-package/knowledgemap.js?{{App.version}}"></script>
+{% endif %}
+
