@@ -41,9 +41,10 @@ def remove_working_files(path, suffix):
 # Use YUICompressor to minify the combined file
 def minify_package(path, path_combined, suffix):
     path_compressed = os.path.join(path, COMPRESSED_FILENAME + suffix)
+    path_compressor = os.path.join(os.path.dirname(__file__), "yuicompressor-2.4.2.jar")
 
     print "Compressing %s into %s" % (path_combined, path_compressed)
-    print popen_results(["java", "-jar", "yuicompressor-2.4.2.jar", "--charset", "utf-8", path_combined, "-o", path_compressed])
+    print popen_results(["java", "-jar", path_compressor, "--charset", "utf-8", path_combined, "-o", path_compressed])
     
     if not os.path.exists(path_compressed):
         raise Exception("Unable to YUICompress: %s" % path_combined)
