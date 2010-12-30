@@ -1479,6 +1479,22 @@ def library_content_html(bust_cache = False):
 
     return html
 
+class ShowUnusedPlaylists(request_handler.RequestHandler):
+
+    def get(self):
+
+        playlists = Playlist.all()
+        playlists_unused = []
+
+        for playlist in playlists:
+            if not playlist.title in all_topics_list:
+                playlists_unused.append(playlist)
+
+        self.response.out.write("Unused playlists:<br/><br/>")
+        for playlist_unused in playlists_unused:
+            self.response.out.write(" + " + playlist_unused.title + "<br/>")
+        self.response.out.write("</br>Done")
+
 class GenerateVideoMapping(request_handler.RequestHandler):
 
     def get(self): 
@@ -2007,6 +2023,7 @@ def real_main():
         ('/autocomplete', autocomplete.Autocomplete),
         ('/savemapcoords', knowledgemap.SaveMapCoords),
         ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
+        ('/showunusedplaylists', ShowUnusedPlaylists),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
@@ -2034,7 +2051,6 @@ def real_main():
         ('/api/importuserdata', api.ImportUserData),
         ('/api/playlists', api.Playlists),          
         ('/api/playlistvideos', api.PlaylistVideos), 
-
         
         ('/press/.*', ViewArticle),
         ('/login', Login),

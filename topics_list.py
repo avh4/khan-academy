@@ -28,6 +28,7 @@ DVDs_dict = {
         'California Standards Test: Algebra II',
         'California Standards Test: Geometry',
         'Singapore Math',
+#        'IIT JEE Questions', Not added for now due to size constraint, but belongs...
     ],
     'Chemistry': [ # 2.9GB
         'Chemistry',
@@ -101,6 +102,7 @@ else:
     topics_list.append('Paulson Bailout')
     topics_list.append('CAHSEE Example Problems')
     topics_list.append('Cosmology and Astronomy')
+    topics_list.append('IIT JEE Questions')
     topics_list.sort()
 
     all_topics_list = copy.copy(topics_list)
