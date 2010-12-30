@@ -111,7 +111,7 @@ function submitForm(value)
                 <span class="info-box-header">Problem #{{ problem_number }}</span>
                 <span class="info-box-subheader">You are viewing a problem in {{ exercise.display_name|escape }}.</span>
                 <span class="info-box-sub-description">To see the solution, 
-                    <input class="button orange" type="button" value="show the next hint." onclick="evaluate_hint(true);"/></span>
+                    <input class="button orange" type="button" value="show the next hint." onclick="evaluate_hint(true, true);"/></span>
                 <span class="info-box-sub-description">To work on problems like this, <a href="/exercises?exid={{ exid }}">start this exercise</a>.</span>
             {% endif %}
 
@@ -158,7 +158,7 @@ function submitForm(value)
 			{
 				if (elForm && elForm.hint) elForm.hint.value = "Next Hint";
 			}
-			function evaluate_hint(fSkipConfirmation)
+			function evaluate_hint(fSkipConfirmation, fSkipResetStreak)
 			{
 				confirmed = true;
 				confirmation_text = 'One-time warning: Using a hint will erase your streak.\nAre you sure you want to continue?'
@@ -175,6 +175,8 @@ function submitForm(value)
 				{
 					relabel_hint();
 					{% block hintfunction %}next_step(){% endblock hintfunction %};
+					if (!fSkipResetStreak)
+						reset_streak();
 				}
 
                 if (!fSkipConfirmation)

@@ -750,6 +750,21 @@ function free_answer_footer()
 	document.answerform.reset();
 }
 
+function reset_streak() {
+    if ($("#hint_used").val() != 1) {
+        fade_streaks();
+        $.ajax({
+                    type: "POST",
+                    url: "/resetstreak",
+                    data: {	key: $("#key").val() },
+                    data_type: 'json'
+               }); 
+    }
+    $("#hint_used").val("1");
+}
 
-
+function fade_streaks() {
+    $(".unit-rating li.current-rating").animate({opacity: 0.0}, "fast");
+    $(".unit-rating li.current-label").animate({opacity: 0.0}, "fast");
+}
 

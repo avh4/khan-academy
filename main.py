@@ -1223,12 +1223,15 @@ class RegisterCorrectness(request_handler.RequestHandler):
         if user:
             key = self.request.get('key')
             correct = int(self.request.get('correct'))
+            hint_used = self.request_bool('hint_used', default=False)
             userExercise = db.get(key)
             userExercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
                 if userExercise.streak == 0:
                     # 2+ in a row wrong -> not proficient
                     userExercise.set_proficient(False)
+                userExercise.reset_streak()
+            if hint_used:
                 userExercise.reset_streak()
             userExercise.put()
         else:
@@ -1237,6 +1240,22 @@ class RegisterCorrectness(request_handler.RequestHandler):
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+
+
+class ResetStreak(request_handler.RequestHandler):
+
+# This resets the user's streak through an AJAX post request when the user
+# clicks on the Hint button. 
+
+    def post(self):
+        user = util.get_current_user()
+        if user:
+            key = self.request.get('key')
+            userExercise = db.get(key)
+            userExercise.reset_streak()
+            userExercise.put()
+        else:
+            self.redirect(util.create_login_url(self.request.uri))
 
 
 class ViewUsers(request_handler.RequestHandler):
@@ -2008,6 +2027,7 @@ def real_main():
         ('/graphpage.html', GraphPage),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
+        ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
         ('/video', ViewVideo),
         ('/logvideoprogress', LogVideoProgress),
