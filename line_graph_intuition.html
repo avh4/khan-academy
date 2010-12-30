@@ -150,6 +150,11 @@ what the slope and y-intercept do to a line.<P>
 <iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="100%"></iframe>
 {% endblock maincell %}
 {% block answerform %}
+		<div style="text-align:right;">
+		<nobr><input type="button" class="button" value="-" onClick="slope(-1)"> Slope <input type="button" class="button" value="+" onClick="slope(+1)">&nbsp;&nbsp;&nbsp;&nbsp;
+		<input type="button" class="button" value="-" onClick="intercept(-1)"> Y-Intercept <input type="button" class="button" value="+" onClick="intercept(+1)"></nobr><br>
+		</div>
+
 		<table border=0>
 		<tr>
 		<td colspan="2">
@@ -168,10 +173,6 @@ what the slope and y-intercept do to a line.<P>
 		<input type="hidden" id="correct" name="correct" value="1">
 		<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 		<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-		<div style="text-align: left;">
-		<nobr><input type="button" class="button" value="-" onClick="slope(-1)">Slope<input type="button" class="button" value="+" onClick="slope(+1)">&nbsp;&nbsp;&nbsp;&nbsp;
-		<input type="button" class="button" value="-" onClick="intercept(-1)">Y-Intercept<input type="button" class="button" value="+" onClick="intercept(+1)"></nobr><br>
-		</div>
 		<div id="check-answer-results" style="display: none;">
 		  <img src="/images/blank.gif" name="feedback" id="feedback"><div id="nextbutton" style="position:relative;">
 		  <input type="button" class="button green" value="Correct! Next Question..." onClick="submitForm()"></div>
