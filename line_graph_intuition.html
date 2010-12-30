@@ -131,12 +131,16 @@ function graph_update() {
 
 function checkAnswer()
 {
-	
 	if (r2(curSlopeNum/curSlopeDen)==r2(correctSlope) && r2(curIntNum/curIntDen)==r2(correctIntercept))
-	{
+    {
+        handleCorrectness(true);
 		$("#check-answer-results").show();
 		document.images.feedback.src = correct.src;
 	}
+    else
+    {
+		$("#check-answer-results").hide();
+    }
 }
 
 
@@ -166,16 +170,16 @@ what the slope and y-intercept do to a line.<P>
 		</script></DIV></td>
 		</tr>
 		</table>
-		<input type="hidden" name="exid" value="{{exid}}">
-		<input type="hidden" name="streak" value="{{streak}}">
-		<input type="hidden" name="key" value="{{key}}">
-		<input type="hidden" name="start_time" value="{{start_time}}">
+		<input type="hidden" id="exid" name="exid" value="{{exid}}">
+		<input type="hidden" id="streak" name="streak" value="{{streak}}">
+		<input type="hidden" id="key" name="key" value="{{key}}">
+		<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
 		<input type="hidden" id="correct" name="correct" value="1">
 		<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
 		<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
 		<div id="check-answer-results" style="display: none;">
 		  <img src="/images/blank.gif" name="feedback" id="feedback"><div id="nextbutton" style="position:relative;">
-		  <input type="button" class="button green" value="Correct! Next Question..." onClick="submitForm()"></div>
+		  <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()"></div>
 		</div>
 
 
