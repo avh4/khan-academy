@@ -58,8 +58,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
                     "dict_answers": dict_answers
                   }
 
-        path = os.path.join(os.path.dirname(__file__), 'video_feedback_notification_list.html')
-        self.response.out.write(template.render(path, context))
+        self.render_template('discussion/video_feedback_notification_list.html', context)
 
 class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
 
