@@ -57,8 +57,7 @@ class VideoFeedbackList(request_handler.RequestHandler):
                     "dict_count_comments": dict_count_comments
                   }
 
-        path = os.path.join(os.path.dirname(__file__), 'video_feedback_list.html')
-        self.response.out.write(template.render(path, context))
+        self.render_template("video_feedback_list.html", context)
 
 class ModeratorList(request_handler.RequestHandler):
 
@@ -69,6 +68,7 @@ class ModeratorList(request_handler.RequestHandler):
             return
 
         mods = models.UserData.gql("WHERE moderator = :1", True)
+
         path = os.path.join(os.path.dirname(__file__), 'mod_list.html')
         self.response.out.write(template.render(path, {"mods" : mods}))
 
