@@ -1613,8 +1613,7 @@ class ViewAboutUs(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'aboutus.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('aboutus.html', template_values)
 
 class ViewGetInvolved(request_handler.RequestHandler):
     def get(self):
@@ -1628,8 +1627,7 @@ class ViewGetInvolved(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'getinvolved.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('getinvolved.html', template_values)
 
 class Donate(request_handler.RequestHandler):
 
@@ -1644,8 +1642,7 @@ class Donate(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'donate.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('donate.html', template_values)
 
 
 class ViewDownloads(request_handler.RequestHandler):
@@ -1661,8 +1658,7 @@ class ViewDownloads(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'downloads.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('downloads.html', template_values)
         
 
 class ViewStore(request_handler.RequestHandler):
@@ -1678,9 +1674,7 @@ class ViewStore(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'store.html')
-        self.response.out.write(template.render(path, template_values))
-        
+        self.render_template('store.html', template_values)
         
 class ViewHowToHelp(request_handler.RequestHandler):
 
