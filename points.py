@@ -32,7 +32,11 @@ def VideoPointCalculator(user_video):
         return 0
     
     seconds_credit = min(user_video.seconds_watched, user_video.duration)
+
     credit_multiplier = float(seconds_credit) / float(user_video.duration)
+    if credit_multiplier >= consts.REQUIRED_PERCENTAGE_FOR_FULL_VIDEO_POINTS:
+        credit_multiplier = 1.0
+
     points = consts.VIDEO_POINTS_BASE * credit_multiplier
 
     return int(math.ceil(points))
