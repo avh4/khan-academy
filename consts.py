@@ -44,3 +44,13 @@ MIN_SECONDS_PER_FAST_PROBLEM = 2.0
 
 # Maximum seconds we'd ever allow for a "fast" problem
 MAX_SECONDS_PER_FAST_PROBLEM = 60.0
+
+# Maximum number of days we're willing to postpone a review
+MAX_REVIEW_INTERVAL_DAYS = 45
+
+# Default number of days we're willing to postpone a review
+DEFAULT_REVIEW_INTERVAL_DAYS = 7
+
+# Minimum number of days we're willing to postpone a review
+MIN_REVIEW_INTERVAL_DAYS = 1
+

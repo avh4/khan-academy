@@ -44,7 +44,7 @@ class UserExercise(db.Model):
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
-    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * 3)) # Default 3 days until review
+    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
     proficient_date = db.DateTimeProperty()
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
     
@@ -94,19 +94,32 @@ class UserExercise(db.Model):
 
     def get_review_interval(self):
         review_interval = datetime.timedelta(seconds=self.review_interval_secs)
+
+        if review_interval.days < consts.MIN_REVIEW_INTERVAL_DAYS:
+            review_interval = datetime.timedelta(days=consts.MIN_REVIEW_INTERVAL_DAYS)
+        elif review_interval.days > consts.MAX_REVIEW_INTERVAL_DAYS:
+            review_interval = datetime.timedelta(days=consts.MAX_REVIEW_INTERVAL_DAYS)
+
         return review_interval
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
-        # if the user is not now and never has been proficient, don't schedule a review
+        # If the user is not now and never has been proficient, don't schedule a review
         if (self.streak + correct) < self.required_streak() and self.longest_streak < self.required_streak():
             return
+
+        # If the user is hitting a new streak either for the first time or after having lost
+        # proficiency, reset their review interval counter.
+        if (self.streak + correct) >= self.required_streak:
+            self.review_interval_secs = 60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS
+
         review_interval = self.get_review_interval()
+
         if correct and self.last_review != datetime.datetime.min:
             time_since_last_review = now - self.last_review
             if time_since_last_review >= review_interval:
                 review_interval = time_since_last_review * 2
         if not correct:
-            review_interval = review_interval // 3
+            review_interval = review_interval // 2
         if correct:
             self.last_review = now
         else:
