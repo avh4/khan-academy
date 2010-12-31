@@ -152,16 +152,16 @@ def streak_bar(user_exercise):
 def reports_navigation(coach_email, current_report="classreport"):
     return {'coach_email': coach_email, 'current_report': current_report }
     
-@register.inclusion_tag("shared_javascript.html")
+@register.inclusion_tag(("shared_javascript.html", "../shared_javascript.html"))
 def shared_javascript():
     return {'App': App}
-@register.inclusion_tag("exercises_javascript.html")
+@register.inclusion_tag(("exercises_javascript.html", "../exercises_javascript.html"))
 def exercises_javascript():
     return {'App': App}
-@register.inclusion_tag("maps_javascript.html")
+@register.inclusion_tag(("maps_javascript.html", "../maps_javascript.html"))
 def maps_javascript():
     return {'App': App}
-@register.inclusion_tag("shared_css.html")
+@register.inclusion_tag(("shared_css.html", "../shared_css.html"))
 def shared_css():
     return {'App': App}
     
