@@ -23,7 +23,7 @@
     });
 
     var hintsGiven = 0;
-    var leftMargin = 140;
+    var leftMargin = 200;
     var xCharSpacing = 15;
     var ySpacing = 60;
     var numLineY = 150;
@@ -93,8 +93,8 @@
         }
         else if (hintsGiven == 4)
         {
-            present.text([leftMargin,40], "Another way to think about it is", above);
-            present.text([leftMargin,20], "the non-negative version of " + num + " is " + Math.abs(num) + ".", above);
+            present.text([leftMargin,40], "Another way to think about it is the", above);
+            present.text([leftMargin,20], "non-negative version of " + num + " is " + Math.abs(num) + ".", above);
         }
         hintsGiven++;
         steps_given++;
