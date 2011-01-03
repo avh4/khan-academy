@@ -582,8 +582,6 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 video_points_previous = points.VideoPointCalculator(user_video)
 
-                user_video.last_watched = datetime.datetime.now()
-
                 seconds_watched = 0
                 try:
                     # Seconds watched is restricted by both the scrubber's position
@@ -601,6 +599,17 @@ class LogVideoProgress(request_handler.RequestHandler):
                     last_second_watched = int(float(self.request.get("last_second_watched")))
                 except ValueError:
                     pass # Ignore if we can't parse
+
+                action_cache=last_action_cache.LastActionCache.get_for_user(user)
+                last_video_log = action_cache.get_last_video_log()
+
+                # If the last video logged is not this video and the times being credited
+                # overlap, don't give points for this video. Can only get points for one video
+                # at a time.
+                if last_video_log and last_video_log.key_for_video() != video.key():
+                    dt_now = datetime.datetime.now()
+                    if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
+                        return
 
                 video_log = VideoLog()
                 video_log.user = user
@@ -622,7 +631,6 @@ class LogVideoProgress(request_handler.RequestHandler):
                     query.filter('live_association = ', True)
 
                     first_video_playlist = True
-                    action_cache = None
                     for video_playlist in query:
                         user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
                         user_playlist.title = video_playlist.playlist.title
@@ -630,8 +638,8 @@ class LogVideoProgress(request_handler.RequestHandler):
                         user_playlist.last_watched = datetime.datetime.now()
                         user_playlist.put()
 
-                        if action_cache is None:
-                            action_cache=last_action_cache.LastActionCache.get_cache_and_push_video_log(user, video_log)
+                        if first_video_playlist:
+                            action_cache.push_video_log(video_log)
 
                         util_badges.update_with_user_playlist(
                                 user, 
@@ -642,6 +650,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                         first_video_playlist = False
 
+                user_video.last_watched = datetime.datetime.now()
                 user_video.duration = video.duration
                 user_video.put()
 

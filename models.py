@@ -571,6 +571,9 @@ class VideoLog(db.Model):
     def time_ended(self):
         return self.time_watched
 
+    def key_for_video(self):
+        return VideoLog.video.get_value_for_datastore(self)
+
 class ProblemLog(db.Model):
 
     user = db.UserProperty()

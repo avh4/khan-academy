@@ -82,6 +82,12 @@ class LastActionCache:
             self.video_log_models[ix] = db.model_from_protobuf(entity_pb.EntityProto(self.video_logs[ix]))
         return self.video_log_models[ix]
 
+    def get_last_video_log(self):
+        c = len(self.video_logs)
+        if c <= 0:
+            return None
+        return self.get_video_log(c - 1)
+
     def store(self):
         # Wipe out deserialized models before serialization for speed
         self.problem_log_models = {}

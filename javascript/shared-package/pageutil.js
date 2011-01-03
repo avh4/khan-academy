@@ -141,7 +141,6 @@ var VideoStats = {
     cachedDuration: 0, // For use by alternative FLV player
     cachedCurrentTime: 0, // For use by alternative FLV player
     dtSinceSave: null,
-    fWindowHasFocus: false,
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
@@ -168,10 +167,6 @@ var VideoStats = {
         this.cachedDuration = 0;
         this.cachedCurrentTime = 0;
         this.dtSinceSave = new Date();
-
-        this.fWindowHasFocus = true;
-        $(window).focus(function(){ VideoStats.fWindowHasFocus = true; });
-        $(window).blur(function(){ VideoStats.fWindowHasFocus = false; });
 
         // Listen to state changes in player to detect final end of video
         this.listenToPlayerStateChange();
@@ -213,13 +208,6 @@ var VideoStats = {
     },
 
     saveIfChanged: function() {
-
-        if (!this.fWindowHasFocus)
-        {
-            // Only save current stats if the video viewing window has focus
-            return;
-        }
-
         var percent = this.getPercentWatched();
         if (percent > this.dPercentLastSaved && 
                 (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
