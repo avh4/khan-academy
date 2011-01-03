@@ -841,8 +841,8 @@ class ReportIssue(request_handler.RequestHandler):
             page = 'makecomment.html'
         elif issue_type == 'Question':
             page = 'askquestion.html'
-        path = os.path.join(os.path.dirname(__file__), page)
-        self.response.out.write(template.render(path, template_values))
+
+        self.render_template(page, template_values)
 
 class ProvideFeedback(request_handler.RequestHandler):
 
@@ -857,8 +857,8 @@ class ProvideFeedback(request_handler.RequestHandler):
             'username': user and user.nickname() or "",
             'logout_url': logout_url,
             }
-        path = os.path.join(os.path.dirname(__file__), "provide_feedback.html")
-        self.response.out.write(template.render(path, template_values))
+
+        self.render_template("provide_feedback.html", template_values)
 
 class ViewAllExercises(request_handler.RequestHandler):
 
@@ -984,8 +984,7 @@ class EditExercise(request_handler.RequestHandler):
                 'main_exercise': main_exercise,
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'editexercise.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template("editexercise.html", template_values)
 
 class UpdateExercise(request_handler.RequestHandler):
     
