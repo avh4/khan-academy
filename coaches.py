@@ -840,7 +840,7 @@ class ViewCharts(request_handler.RequestHandler):
             num_problems = problems.count()                           
             correct_in_a_row = 0
             proficient_date = None
-            if num_problems > 2:          
+            if num_problems > 0:
                 time_taken_list = []
                 for problem in problems:  
                     time_taken_list.append(problem.time_taken)

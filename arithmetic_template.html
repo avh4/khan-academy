@@ -37,7 +37,12 @@ $(document).ready(function () {
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
 KhanAcademy.problem_number = "{{problem_number}}";
-KhanAcademy.seedRandom(KhanAcademy.problem_number);
+KhanAcademy.problem_seed = KhanAcademy.problem_number;
+{% if exercise.summative %}
+    {# We use different seeds for summative exercises so they don't reuse content already seen in normal exercises. #}
+    KhanAcademy.problem_seed = KhanAcademy.problem_seed + "-summative";
+{% endif %}
+KhanAcademy.seedRandom(KhanAcademy.problem_seed);
 function submitForm(value)
 {
 	var form = document.forms['answerform'];
