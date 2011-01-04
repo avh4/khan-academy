@@ -1149,15 +1149,20 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             userExercise.last_done = datetime.datetime.now()
             userExercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
+
+            user_data = UserData.get_for(userExercise.user)
             
             # If a non-admin tries to answer a problem out-of-order, just ignore it and
             # display the next problem.
             if problem_number != userExercise.total_done+1 and not users.is_current_user_admin():
-                # Only admins can answer problems out of order. If someone is doing this, they may be running
+                # Only admins can answer problems out of order.
+
+                # If someone is doing this, they may be running
                 # a script of requests forgeries against us. Take away a single energy point.
                 # If they're not evil and/or running a script, it's only a single point.
                 user_data.add_points(-1)
                 user_data.put()
+
                 self.redirect('/exercises?exid=' + exid)
                 return
             
@@ -1172,9 +1177,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             problem_log.problem_number = problem_number
             problem_log.hint_used = hint_used
             problem_log.put()
-
-            user_data = UserData.get_for(userExercise.user)
-            
+ 
             suggested = user_data.is_suggested(exid)
             proficient = user_data.is_proficient_at(exid)
                                 
