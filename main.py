@@ -266,12 +266,26 @@ class ViewExercise(request_handler.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            exercise_non_summative = exercise.non_summative_exercise(user_data)
-            exercise_videos = exercise_non_summative.related_videos().fetch(10)
             userExercise = user_data.get_or_insert_exercise(exid)
 
             if not problem_number:
                 problem_number = userExercise.total_done+1
+
+            # When viewing a problem out-of-order, show read-only view
+            read_only = self.request_bool('read_only', default=False) or problem_number != (userExercise.total_done + 1)
+
+            exercise_non_summative = exercise.non_summative_exercise(problem_number)
+
+            # If read-only and an explicit exid is provided for non-summative content, use
+            # overriding exercise
+            if read_only:
+                exid_non_summative = self.request_string('exid_non_summative', default=None)
+                if exid_non_summative:
+                    query = Exercise.all()
+                    query.filter('name =', exid_non_summative)
+                    exercise_non_summative = query.get()
+                    
+            exercise_videos = exercise_non_summative.related_videos().fetch(10)
 
             proficient = exercise.proficient = user_data.is_proficient_at(exid)
             suggested = exercise.suggested = user_data.is_suggested(exid)
@@ -293,9 +307,6 @@ class ViewExercise(request_handler.RequestHandler):
             # We can't currently print summative exercises.
             if exercise.summative:
                 num_problems_to_print = 0
-
-            # When viewing a problem out-of-order, show read-only view
-            read_only = problem_number != (userExercise.total_done + 1)
 
             template_values = {
                 'App' : App,
@@ -328,7 +339,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
             template_file = exercise_non_summative.name + '.html'
-            if exercise.raw_html is not None:
+            if not exercise.summative and exercise.raw_html is not None:
                 exercise.ensure_sanitized()
                 template_file = 'caja_template.html'
 
@@ -1169,13 +1180,15 @@ class RegisterAnswer(request_handler.RequestHandler):
             problem_log = ProblemLog()
             problem_log.user = user
             problem_log.exercise = exid
-            problem_log.correct = False
-            if correct:
-                problem_log.correct = True
+            problem_log.correct = correct
             problem_log.time_done = datetime.datetime.now()
             problem_log.time_taken = elapsed_time
             problem_log.problem_number = problem_number
             problem_log.hint_used = hint_used
+
+            if exercise.summative:
+                problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
+
             problem_log.put()
  
             suggested = user_data.is_suggested(exid)

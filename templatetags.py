@@ -125,19 +125,20 @@ def streak_bar(user_exercise):
     show_streak_label = streak_width > width_required_for_label
     show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - streak_width) > width_required_for_label
 
-    extra_class = ""
-
     summative = False
     if hasattr(user_exercise, "summative"):
         summative = user_exercise.summative
     else:
         summative = user_exercise.get_exercise().summative
 
+    levels = []
     if summative:
-        extra_class = "streak-bar-challenge"
+        c_levels = user_exercise.required_streak() / consts.REQUIRED_STREAK
+        level_offset = streak_max_width / float(c_levels)
+        for ix in range(c_levels - 1):
+            levels.append(math.ceil((ix + 1) * level_offset) + 1)
 
     return {
-            "extra_class": extra_class,
             "streak": streak,
             "longest_streak": longest_streak,
             "streak_width": streak_width, 
@@ -145,7 +146,8 @@ def streak_bar(user_exercise):
             "streak_max_width": streak_max_width,
             "streak_icon_width": streak_icon_width,
             "show_streak_label": show_streak_label,
-            "show_longest_streak_label": show_longest_streak_label
+            "show_longest_streak_label": show_longest_streak_label,
+            "levels": levels
             }
 
 @register.inclusion_tag("reports_navigation.html")

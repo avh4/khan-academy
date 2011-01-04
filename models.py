@@ -170,14 +170,16 @@ class Exercise(db.Model):
 
     @staticmethod
     def to_display_name(name):
-        return name.replace('_', ' ').capitalize()
+        if name:
+            return name.replace('_', ' ').capitalize()
+        return ""
 
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
     def required_streak(self):
         if self.summative:
-            return consts.REQUIRED_STREAK * len(self.covers)
+            return consts.REQUIRED_STREAK * len(self.prerequisites)
         else:
             return consts.REQUIRED_STREAK
 
@@ -188,37 +190,29 @@ class Exercise(db.Model):
         if not self.summative:
             return []
         query = db.Query(Exercise)
-        query.filter("name IN ", self.covers)
+        query.filter("name IN ", self.prerequisites)
         return query
 
-    def summative_parents(self):
-        query = db.Query(Exercise)
-        query.filter("summative = ", True)
-        query.filter("covers = ", self.name)
-        return query
-
-    def non_summative_exercise(self, user_data):
+    def non_summative_exercise(self, problem_number):
         if not self.summative:
             return self
 
-        if len(self.covers) <= 0:
-            raise Exception("Summative exercise '%s' does not cover any other exercises" % self.name)
+        if len(self.prerequisites) <= 0:
+            raise Exception("Summative exercise '%s' does not include any other exercises" % self.name)
 
-        user_exercise = user_data.get_or_insert_exercise(self.name)
-
-        # For now we just cycle through all of the covered exercises in a summative exercise
-        index = user_exercise.total_done % len(self.covers)
-        exid = self.covers[index]
+        # For now we just cycle through all of the included exercises in a summative exercise
+        index = int(problem_number) % len(self.prerequisites)
+        exid = self.prerequisites[index]
 
         query = Exercise.all()
         query.filter('name =', exid)
         exercise = query.get()
 
         if not exercise:
-            raise Exception("Unable to find covered exercise")
+            raise Exception("Unable to find included exercise")
 
         if exercise.summative:
-            return exercise.non_summative_exercise(user_data)
+            return exercise.non_summative_exercise(problem_number)
         else:
             return exercise
 
@@ -584,6 +578,7 @@ class ProblemLog(db.Model):
     time_done = db.DateTimeProperty()
     time_taken = db.IntegerProperty()
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
+    exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
     hint_used = db.BooleanProperty(default = False)
 
     @staticmethod

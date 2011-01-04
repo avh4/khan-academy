@@ -14,15 +14,16 @@
 
   <P>
   <B>Prerequisites</B> are exercise modules that the user should become proficient in before starting on this exercise.
+    {% if main_exercise.summative %}
+        <br/>&nbsp;&nbsp;&nbsp;
+        <strong>NOTE: Summative exercises</strong> will generate problems from all prerequisite exercises.
+    {% endif %}
+
   <P>
   <b>Covers</B> are exercise modules whose concepts are a subset of the concepts practiced in this module. For example,
   "Adding and Subtracting Fractions" makes a student practice negative and positive numbers so "Adding and
   Subtracting Negative and Positive Numbers" would be "covered" by it.
   <P>
-
-    {% if main_exercise.summative %}
-        <strong>NOTE: Summative exercises</strong> will generate problems from all "covered" exercises.
-    {% endif %}
 
   <div class=hdg><h3>Prerequisite and Covered Modules</h3></div>
   <table border=0 cellspacing=0 cellpadding=3 width=100%>

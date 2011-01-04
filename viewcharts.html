@@ -9,6 +9,11 @@
 
 <script>
 var chart;
+
+function exercise_url(point) {
+    return "/exercises?exid={{ exid|escapejs }}&read_only=1&problem_number=" + point.x + (point.exercise_non_summative ? "&exid_non_summative=" + point.exercise_non_summative : ""); 
+}
+
 			$(document).ready(function() {
 				chart = new Highcharts.Chart({
 					chart: {
@@ -30,7 +35,7 @@ var chart;
                             point: {
                                 events: {
                                     click: function() {
-                                        window.location = '/exercises?exid={{ exid|escapejs }}&problem_number=' + this.x;
+                                        window.location = exercise_url(this);
                                     }
                                 }
                             }
@@ -67,10 +72,14 @@ var chart;
 					},
 					tooltip: {
 						formatter: function() {
-                            return '<b><a style="color:blue;" href="/exercises?exid={{ exid|escapejs }}&problem_number=' + this.point.x + '">Problem ' + this.point.x + '</a> - ' + (this.point.correct ? "Correct" : "Incorrect") +
-                                           '</b><br/>' +
-                                       'Seconds used: ' + this.point.time_taken + '<br/><br/>' +
-                                       '<em>Click the graph to view this problem</em>.';
+                            return '<b><a style="color:blue;" ' + 
+                                    'href="' + exercise_url(this.point) + '"' +
+                                    '>Problem ' + this.point.x + 
+                                    '</a> - ' + (this.point.correct ? "Correct" : "Incorrect") +
+                                    '</b><br/>' +
+                                    'Seconds used: ' + this.point.time_taken + '<br/>' +
+                                    (this.point.exercise_non_summative ? 'From exercise: ' + this.point.exercise_non_summative_display + '<br/>' : '') +
+                                    '<br/><em>Click the graph to view this problem</em>.';
 						}
 					},
 					legend: {
@@ -84,8 +93,12 @@ var chart;
                     series: [{data:[
                             {% for problem in problems %}
                             {
-                                correct: {{ problem.correct }},
+                                correct: {% if problem.correct %}true{% else %}false{% endif %},
                                 time_taken: {{ problem.time_taken }},
+                                {% if problem.exercise_non_summative %}
+                                    exercise_non_summative_display: '{{ problem.exercise_non_summative_display|escapejs }}',
+                                    exercise_non_summative: '{{ problem.exercise_non_summative|escapejs }}',
+                                {% endif %}
                                 name: '{{ user_exercise.name|escapejs }}',
                                 x: {{ forloop.counter }},
                                 y: {{ problem.time_taken }},

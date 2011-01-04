@@ -74,19 +74,23 @@ def all_badges():
         exercise_completion_badges.LevelOneArithmeticianBadge(),
         exercise_completion_badges.LevelTwoArithmeticianBadge(),
         exercise_completion_badges.LevelThreeArithmeticianBadge(),
+        exercise_completion_badges.TopLevelArithmeticianBadge(),
 
         exercise_completion_badges.LevelOneTrigonometricianBadge(),
         exercise_completion_badges.LevelTwoTrigonometricianBadge(),
         exercise_completion_badges.LevelThreeTrigonometricianBadge(),
+        exercise_completion_badges.TopLevelTrigonometricianBadge(),
 
         exercise_completion_badges.LevelOnePrealgebraistBadge(),
         exercise_completion_badges.LevelTwoPrealgebraistBadge(),
         exercise_completion_badges.LevelThreePrealgebraistBadge(),
+        exercise_completion_badges.TopLevelPrealgebraistBadge(),
 
         exercise_completion_badges.LevelOneAlgebraistBadge(),
         exercise_completion_badges.LevelTwoAlgebraistBadge(),
         exercise_completion_badges.LevelThreeAlgebraistBadge(),
         exercise_completion_badges.LevelFourAlgebraistBadge(),
+        exercise_completion_badges.TopLevelAlgebraistBadge(),
 
         tenure_badges.YearOneBadge(),
         tenure_badges.YearTwoBadge(),

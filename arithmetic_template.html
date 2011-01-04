@@ -64,7 +64,8 @@ function submitForm(value)
 		{% streak_bar user_exercise %}
 		<div class="related-content">
             {% if exercise.summative %}
-                Get 10 streaks to complete this challenge.
+                Get {{exercise.prerequisites|length}} streaks of 10 to complete this challenge. Once you complete a streak, it will not be reset.
+                This problem is from <a href="/exercises?exid={{exercise_non_summative.name|escape}}">{{exercise_non_summative.display_name|escape}}</a>.
             {% else %}
                 {% related_videos exercise_videos %}
             {% endif %}

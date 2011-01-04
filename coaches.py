@@ -797,13 +797,13 @@ class ViewCharts(request_handler.RequestHandler):
                 
     def get(self):
         class Problem:
-            def __init__(self, time_taken, moving_average, correct):
-                self.time_taken = time_taken
-                self.moving_average = moving_average
-                if correct:
-                    self.correct = 1
-                else:
-                    self.correct = 0
+            def __init__(self, problem_log):
+                self.time_taken = problem_log.time_taken_capped_for_reporting()
+                self.moving_average = problem_log.time_taken_capped_for_reporting()
+                self.correct = problem_log.correct
+                self.exercise_non_summative = problem_log.exercise_non_summative
+                self.exercise_non_summative_display = Exercise.to_display_name(problem_log.exercise_non_summative)
+
         user = util.get_current_user()
         student = user
         if user:
@@ -846,7 +846,7 @@ class ViewCharts(request_handler.RequestHandler):
                     time_taken_list.append(problem.time_taken)
                     if problem.time_taken > max_time_taken:
                         max_time_taken = problem.time_taken
-                    problem_list.append(Problem(problem.time_taken_capped_for_reporting(), problem.time_taken_capped_for_reporting(), problem.correct))
+                    problem_list.append(Problem(problem))
                     #logging.info(str(problem.time_taken) + " " + str(problem.correct))  
                                         
                     if needs_proficient_date:
