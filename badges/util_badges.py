@@ -161,10 +161,11 @@ class ViewBadges(request_handler.RequestHandler):
         gold_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.GOLD, possible_badges), key=lambda badge:badge.points or sys.maxint)
         platinum_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.PLATINUM, possible_badges), key=lambda badge:badge.points or sys.maxint)
         diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), key=lambda badge:badge.points or sys.maxint)
-
+        master_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.MASTER, possible_badges), key=lambda badge:badge.points or sys.maxint)
+        
         template_values = {
                 "user_badges": user_badges,
-                "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges],
+                "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges, master_badges],
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False)
                 }
 

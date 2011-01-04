@@ -67,7 +67,7 @@ class TopLevelArithmeticianBadge(ChallengeCompletionBadge):
         ExerciseCompletionBadge.__init__(self)
         self.exercise_names_required = ['arithmetic_challenge']
         self.description = "Master of Arithmetic"
-        self.badge_category = BadgeCategory.SILVER
+        self.badge_category = BadgeCategory.MASTER
         self.points = 2500
 
 class LevelOneTrigonometricianBadge(ExerciseCompletionBadge):
@@ -99,8 +99,11 @@ class TopLevelTrigonometricianBadge(ChallengeCompletionBadge):
         ExerciseCompletionBadge.__init__(self)
         self.exercise_names_required = ['trigonometry_challenge']
         self.description = "Master of Trigonometry"
-        self.badge_category = BadgeCategory.GOLD
+        self.badge_category = BadgeCategory.MASTER
         self.points = 2500
+        
+    def icon_src(self):
+        return "/images/badges/master-challenge.png"
 
 class LevelOnePrealgebraistBadge(ExerciseCompletionBadge):
     def __init__(self):
@@ -131,7 +134,7 @@ class TopLevelPrealgebraistBadge(ChallengeCompletionBadge):
         ExerciseCompletionBadge.__init__(self)
         self.exercise_names_required = ['pre-algebra_challenge']
         self.description = "Master of Pre-algebra"
-        self.badge_category = BadgeCategory.SILVER
+        self.badge_category = BadgeCategory.MASTER
         self.points = 2500
 
 class LevelOneAlgebraistBadge(ExerciseCompletionBadge):
@@ -171,5 +174,5 @@ class TopLevelAlgebraistBadge(ChallengeCompletionBadge):
         ExerciseCompletionBadge.__init__(self)
         self.exercise_names_required = ['algebra_challenge']
         self.description = "Master of Algebra"
-        self.badge_category = BadgeCategory.GOLD
+        self.badge_category = BadgeCategory.MASTER
         self.points = 2500

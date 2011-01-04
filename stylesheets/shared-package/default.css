@@ -990,11 +990,41 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         left: 5px;
         width: 310px;
     }
+    .achievement-badge #badge-icon {
+        width: 40px;
+        height: 40px;
+    }
 
 .achievement-badges-container .achievement-badge {
     float: left;
 }
-    
+
+.achievement-badge.category-5 {
+    width: 190px;
+    height: auto;
+    outline: 1px dashed #bbb;
+    outline-offset: -5px;
+    padding: 10px 10px 15px;
+    text-align: center;
+}
+    .achievement-badge.category-5 #badge-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+    }
+    .achievement-badge.category-5 .achievement-title {
+        position: static;
+        width: auto;
+    }
+    .achievement-badge.category-5 .energy-points-badge {
+        position: absolute;
+        left: 152px;
+        top: 7px;
+    }
+    .achievement-badge.category-5 .achievement-desc {
+        position: static;
+        width: auto;
+    }
 #container h3 {
     display: block;
     font-size: 14px;

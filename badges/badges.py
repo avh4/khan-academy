@@ -19,6 +19,7 @@ class BadgeCategory:
     GOLD = 2 # Earth, "Rare"
     PLATINUM = 3 # Sun, "Epic"
     DIAMOND = 4 # Black Hole, "Legendary"
+    MASTER = 5 # Summative/Academic Achievement
 
     @staticmethod
     def empty_count_dict():
@@ -28,6 +29,7 @@ class BadgeCategory:
         count_dict[BadgeCategory.GOLD] = 0
         count_dict[BadgeCategory.PLATINUM] = 0
         count_dict[BadgeCategory.DIAMOND] = 0
+        count_dict[BadgeCategory.MASTER] = 0
         return count_dict
 
 # Badge is the base class used by various badge subclasses (ExerciseBadge, PlaylistBadge, TimedProblemBadge, etc).
@@ -80,6 +82,8 @@ class Badge:
             return "/images/badges/sun-small.png"
         elif self.badge_category == BadgeCategory.DIAMOND:
             return "/images/badges/eclipse-small.png"
+        elif self.badge_category == BadgeCategory.MASTER:
+            return "/images/badges/master-challenge-blue.png"
         return "/images/badges/half-moon-small.png"
 
     def type_label(self):
@@ -93,6 +97,8 @@ class Badge:
             return "Sun (Epic)"
         elif self.badge_category == BadgeCategory.DIAMOND:
             return "Black Hole (Legendary)"
+        elif self.badge_category == BadgeCategory.MASTER:
+            return "Mission Patches (Challenge Completion)"
         return "Common"
 
     def name_with_target_context(self, target_context_name):
