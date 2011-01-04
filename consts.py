@@ -31,7 +31,7 @@ VIDEO_POINTS_BASE = 750
 REQUIRED_PERCENTAGE_FOR_FULL_VIDEO_POINTS = 0.9
 
 # Maximum time we're willing to report that a user worked on a single problem, in seconds
-MAX_WORKING_ON_PROBLEM_SECONDS = 1200
+MAX_WORKING_ON_PROBLEM_SECONDS = 600
 
 # Required # of saved problems before we run statistics on a particular exercise
 REQUIRED_PROBLEMS_FOR_EXERCISE_STATISTICS = 50
