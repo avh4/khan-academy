@@ -153,7 +153,7 @@ class ViewBadges(request_handler.RequestHandler):
         for badge in possible_badges:
             badge.is_owned = user_badges_dict.has_key(badge.name)
 
-        user_badges = sorted(filter(lambda user_badge: hasattr(user_badge, "badge"), user_badges), reverse=True, key=lambda user_badge:user_badge.date)
+        user_badges = sorted(filter(lambda user_badge: hasattr(user_badge, "badge") and user_badge.badge is not None, user_badges), reverse=True, key=lambda user_badge:user_badge.date)
         possible_badges = sorted(possible_badges, key=lambda badge:badge.badge_category)
 
         user_badges_normal = filter(lambda user_badge: user_badge.badge.badge_category != badges.BadgeCategory.MASTER, user_badges)
