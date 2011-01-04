@@ -101,9 +101,6 @@ class TopLevelTrigonometricianBadge(ChallengeCompletionBadge):
         self.description = "Master of Trigonometry"
         self.badge_category = BadgeCategory.MASTER
         self.points = 2500
-        
-    def icon_src(self):
-        return "/images/badges/master-challenge.png"
 
 class LevelOnePrealgebraistBadge(ExerciseCompletionBadge):
     def __init__(self):
