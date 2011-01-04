@@ -1000,11 +1000,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 .achievement-badge.category-5 {
-    width: 190px;
+    width: auto;
     height: auto;
-    outline: 1px dashed #bbb;
-    outline-offset: -5px;
-    padding: 10px 10px 15px;
     text-align: center;
 }
     .achievement-badge.category-5 #badge-icon {
@@ -1018,13 +1015,23 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     .achievement-badge.category-5 .energy-points-badge {
         position: absolute;
-        left: 152px;
+        left: 150px;
         top: 7px;
     }
     .achievement-badge.category-5 .achievement-desc {
         position: static;
         width: auto;
     }
+    .achievement-badge.category-5 #outline-box {
+        margin: 3px;
+        width: 190px;
+        padding: 7px 7px 12px;
+        outline: 1px dashed #bbb;
+        position: relative;
+    }
+.achievement-badge.category-5.achievement-badge-owned {
+    outline-offset: -13px;
+}
 #container h3 {
     display: block;
     font-size: 14px;

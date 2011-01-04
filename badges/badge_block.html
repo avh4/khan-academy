@@ -1,4 +1,5 @@
 <div class="achievement-badge category-{{badge.badge_category}} {% if user_badge or badge.is_owned %}achievement-badge-owned{% endif %}" title="{{ badge.type_label|escape }}: {{ extended_description|escape }}">
+    <div id="outline-box">
     <img src="{{ badge.icon_src }}" id="badge-icon"/>
     <div class="achievement-title">{{ badge.description|escape }}{% if frequency %} <span class="frequency">(x{{ frequency }})</span>{% endif %}</div>
     {% if user_badge and badge.badge_context_type %}
@@ -30,4 +31,5 @@
         {% endif %}
     </div>
     {% if badge.points %}<div class="energy-points-badge">{{ badge.points }}</div>{% endif %}
+    </div>
 </div>
