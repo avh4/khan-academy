@@ -41,6 +41,7 @@ def badge_counts(user_data=None):
             "gold": counts_dict[badges.BadgeCategory.GOLD],
             "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
             "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
+            "master": counts_dict[badges.BadgeCategory.MASTER],
     }
 
 @register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
