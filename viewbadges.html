@@ -38,10 +38,21 @@
 </div>
 
 <div class="achievement-badges-container">
-{% if user_badges %}
+{% if user_badges_normal %}
     <h3>Your badges</h3><br/><br/>
     <div class="clear">&nbsp;</div>
-    {% for user_badge in user_badges %}
+    {% for user_badge in user_badges_normal %}
+        {% if user_badge.badge %}
+            {% badge_block user_badge.badge user_badge %}
+        {% endif %}
+    {% endfor %}
+    <div class="clear">&nbsp;</div>
+{% endif %}
+
+{% if user_badges_master %}
+    <h3>Your mission patches</h3><br/><br/>
+    <div class="clear">&nbsp;</div>
+    {% for user_badge in user_badges_master %}
         {% if user_badge.badge %}
             {% badge_block user_badge.badge user_badge %}
         {% endif %}

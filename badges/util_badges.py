@@ -153,8 +153,11 @@ class ViewBadges(request_handler.RequestHandler):
         for badge in possible_badges:
             badge.is_owned = user_badges_dict.has_key(badge.name)
 
-        user_badges = sorted(user_badges, reverse=True, key=lambda user_badge:user_badge.date)
+        user_badges = sorted(filter(lambda user_badge: hasattr(user_badge, "badge"), user_badges), reverse=True, key=lambda user_badge:user_badge.date)
         possible_badges = sorted(possible_badges, key=lambda badge:badge.badge_category)
+
+        user_badges_normal = filter(lambda user_badge: user_badge.badge.badge_category != badges.BadgeCategory.MASTER, user_badges)
+        user_badges_master = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.MASTER, user_badges)
 
         bronze_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.BRONZE, possible_badges), key=lambda badge:badge.points or sys.maxint)
         silver_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.SILVER, possible_badges), key=lambda badge:badge.points or sys.maxint)
@@ -164,7 +167,8 @@ class ViewBadges(request_handler.RequestHandler):
         master_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.MASTER, possible_badges), key=lambda badge:badge.points or sys.maxint)
         
         template_values = {
-                "user_badges": user_badges,
+                "user_badges_normal": user_badges_normal,
+                "user_badges_master": user_badges_master,
                 "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges, master_badges],
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False)
                 }
