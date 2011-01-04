@@ -416,6 +416,8 @@ class UserData(db.Model):
         if self.points == None:
             self.points = 0
         self.points += points
+        if self.points < 0:
+            self.points = 0
     
 class Video(Searchable, db.Model):
 
