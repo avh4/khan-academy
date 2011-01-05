@@ -47,6 +47,7 @@ class UserExercise(db.Model):
     review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
     proficient_date = db.DateTimeProperty()
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
+    summative = db.BooleanProperty(default=False)
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
     @staticmethod

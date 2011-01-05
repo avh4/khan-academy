@@ -9,6 +9,10 @@ class StreakBadge(ExerciseBadge):
         if user_exercise is None:
             return False
 
+        # Don't give streak rewards for summative exercises currently
+        if user_exercise.summative:
+            return False
+
         return user_exercise.longest_streak >= self.streak_required
 
     def extended_description(self):

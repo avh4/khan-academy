@@ -1160,6 +1160,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             userExercise.last_done = datetime.datetime.now()
             userExercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
+            userExercise.summative = exercise.summative
 
             user_data = UserData.get_for(userExercise.user)
             
