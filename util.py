@@ -64,7 +64,7 @@ def seconds_to_time_string(seconds_init):
     elif years:
         return "%d year%s" % (years, pluralize(years))
     elif days and hours:
-        return "%d day%s and %d hour%s" % (day, pluralize(day), hours, pluralize(hours))
+        return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
         return "%d day%s" % (days, pluralize(days))
     elif hours:
