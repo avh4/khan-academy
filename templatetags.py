@@ -1,4 +1,5 @@
 import re
+import logging
 import cgi
 import math
 from google.appengine.ext import webapp
@@ -126,14 +127,8 @@ def streak_bar(user_exercise):
     show_streak_label = streak_width > width_required_for_label
     show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - streak_width) > width_required_for_label
 
-    summative = False
-    if hasattr(user_exercise, "summative"):
-        summative = user_exercise.summative
-    else:
-        summative = user_exercise.get_exercise().summative
-
     levels = []
-    if summative:
+    if user_exercise.summative:
         c_levels = user_exercise.required_streak() / consts.REQUIRED_STREAK
         level_offset = streak_max_width / float(c_levels)
         for ix in range(c_levels - 1):
