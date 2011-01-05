@@ -11,6 +11,7 @@ from app import App
 import app
 import util
 import request_handler
+import layer_cache
 
 import coaches
 from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video, ExerciseVideo      
@@ -238,49 +239,58 @@ class ViewImport(request_handler.RequestHandler):
         self.response.out.write(template.render(path, template_values)) 
         
         
-class Playlists(request_handler.RequestHandler):
-
-    def get(self): 
-        playlists = []   
-        for playlist_title in all_topics_list:            
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            playlist_dict = {'youtube_id':  playlist.youtube_id,
-                             'youtube_url': playlist.url,
-                             'title': playlist.title, 
-                             'description': playlist.description,
-                             'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist_title),)
-                            } 
-            playlists.append(playlist_dict) 
-        self.response.out.write(json.dumps(playlists, indent=4))        
-                             
         
-class PlaylistVideos(request_handler.RequestHandler):
-
-    def get(self): 
-        playlist_title = self.request.get('playlist')
+@layer_cache.cache_with_key("playlists")
+def get_playlists():
+    playlists = []   
+    for playlist_title in all_topics_list:            
         query = Playlist.all()
         query.filter('title =', playlist_title)
         playlist = query.get()
-        query = VideoPlaylist.all()
-        query.filter('playlist =', playlist)
-        query.filter('live_association = ', True)
-        query.order('video_position')
-        videos = []       
-        for pv in query.fetch(500):
-            v = pv.video
-            video_dict = {'youtube_id':  v.youtube_id,
-                          'youtube_url': v.url,
-                          'title': v.title, 
-                          'description': v.description,
-                          'keywords': v.keywords,                         
-                          'readable_id': v.readable_id,
-                          'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title)),
-                          'video_position': pv.video_position
-                         }                         
-            videos.append(video_dict)                        
-        self.response.out.write(json.dumps(videos, indent=4))     
+        playlist_dict = {'youtube_id':  playlist.youtube_id,
+                         'youtube_url': playlist.url,
+                         'title': playlist.title, 
+                         'description': playlist.description,
+                         'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist_title),)
+                        } 
+        playlists.append(playlist_dict) 
+    return json.dumps(playlists, indent=4)
+                
+class Playlists(request_handler.RequestHandler):
+    def get(self): 
+        self.response.out.write(get_playlists())        
+                             
+
+
+@layer_cache.cache_with_key_fxn(lambda playlist_title: "playlistvideos-" + playlist_title)
+def get_playlist_videos(playlist_title):
+    query = Playlist.all()
+    query.filter('title =', playlist_title)
+    playlist = query.get()
+    query = VideoPlaylist.all()
+    query.filter('playlist =', playlist)
+    query.filter('live_association = ', True)
+    query.order('video_position')
+    videos = []       
+    for pv in query.fetch(500):
+        v = pv.video
+        video_dict = {'youtube_id':  v.youtube_id,
+                      'youtube_url': v.url,
+                      'title': v.title, 
+                      'description': v.description,
+                      'keywords': v.keywords,                         
+                      'readable_id': v.readable_id,
+                      'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title)),
+                      'video_position': pv.video_position
+                     }                         
+        videos.append(video_dict)                        
+    return json.dumps(videos, indent=4)
+
+class PlaylistVideos(request_handler.RequestHandler):
+    def get(self): 
+        playlist_title = self.request.get('playlist')
+        self.response.out.write(get_playlist_videos(playlist_title))    
+ 
         
 
 class VideosForExercise(request_handler.RequestHandler):
