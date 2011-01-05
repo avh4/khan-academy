@@ -1,0 +1,192 @@
+{% extends arithmetic_template %}
+
+{% block maincode %}
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+var x = [];
+var y = [];
+
+// first point
+// (1-indexed because I thought I might be showing subscripts before)
+x[1] = getRandomIntRange(-9, 9);
+y[1] = getRandomIntRange(-9, 9);
+
+// second point
+x[2] = getRandomIntRange(-9, 9);
+y[2] = getRandomIntRange(-9, 9);
+
+// midpoint
+x[3] = (x[1] + x[2]) / 2;
+y[3] = (y[1] + y[2]) / 2;
+
+// correct answers (varies on problem type)
+var correctX;
+var correctY;
+
+// colors for each point type
+var color = {
+	1: 'purple',
+	2: 'blue',
+	3: 'green'
+}
+
+function namePoint(px, py)
+{
+	return '('+px+', '+py+')';
+}
+
+function getPoint(pt)
+{
+	return colorText(namePoint(x[pt], y[pt]), color[pt]);
+}
+
+function colorText(text, color)
+{
+	return '<span style="color:'+color+'">'+text+'</span>';
+}
+
+funcTypes = [];
+funcTypes[0] = function() {
+	// find the midpoint between two given points
+	setCorrectAnswer('`'+getPoint(3)+'`');
+
+	correctX = x[3];
+	correctY = y[3];
+	
+	write_text('What is the '+colorText('midpoint', color[3])+' between the points '+getPoint(1)+' and '+getPoint(2)+' ?');
+	
+	write_step('The '+colorText('x-coordinate of the midpoint', color[3])+' is the average of the x-coordinates '+colorText(x[1], color[1])+' and '+colorText(x[2], color[2])+'!');
+	write_step('<p>'+colorText('x',color[3])+' = (1/2)('+colorText(x[1], color[1])+' + '+colorText(x[2], color[2])+')</p>' +
+				'<p>'+colorText('x',color[3])+' = '+colorText(x[3],color[3])+'</p>');
+	
+	write_step('The '+colorText('y-coordinate of the midpoint', color[3])+' is the average of the y-coordinates '+colorText(y[1], color[1])+' and '+colorText(y[2], color[2])+'!');
+	write_step('<p>'+colorText('y',color[3])+' = (1/2)('+colorText(y[1], color[1])+' + '+colorText(y[2], color[2])+')</p>' +
+				'<p>'+colorText('y',color[3])+' = '+colorText(y[3],color[3])+'</p>');
+	
+	write_step('The midpoint is '+getPoint(3)+'.');
+	graph_update = function() {
+		graphInit();
+		graphPoint(1);
+		graphPoint(2);
+	}
+	
+	draw_next_step = function() {
+		if (steps_given==1) // average x
+		{
+			present.stroke = color[3];
+			present.line([x[3], -10], [x[3], 10]);
+		}
+		if (steps_given==3) // average y
+		{
+			present.line([-10, y[3]], [10, y[3]]);
+		}
+		if (steps_given==4) // midpoint
+		{
+			graphPoint(3);
+		}
+		give_next_step();
+	}
+}
+
+funcTypes[1] = function() {
+	// given one point and a midpoint, find the other point
+	var given = getRandomIntRange(1, 2);
+	var unknown = (given == 1 ? 2 : 1);
+	
+	setCorrectAnswer('`'+getPoint(unknown)+'`');
+	
+	correctX = x[unknown];
+	correctY = y[unknown];
+	
+	write_text('The point '+getPoint(3)+' is the midpoint of '+getPoint(given)+' and '+colorText('what point', color[unknown])+'?');
+	
+	write_step('The average of the '+colorText('x-coordinate', color[unknown])+' + '+colorText(x[given], color[given]) + 
+				' should be '+colorText(x[3], color[3])+'!');
+	write_step('<p>`(1/2)`('+colorText('x', color[unknown])+'` + `'+colorText(x[given], color[given])+') = '+colorText(x[3], color[3])+'</p>' +
+				'<p>Solving for x:</p>' +
+				'<p>'+colorText('x', color[unknown])+' + '+colorText(x[given], color[given])+' = '+2*x[3] +
+				'<p>'+colorText('x', color[unknown])+' = '+colorText(x[unknown], color[unknown]));
+	
+	write_step('The average of the '+colorText('y-coordinate', color[unknown])+' + '+colorText(y[given], color[given]) + 
+				' should be '+colorText(y[3], color[3])+'!');
+	write_step('<p>`(1/2)`('+colorText('y', color[unknown])+'` + `'+colorText(y[given], color[given])+') = '+colorText(y[3], color[3])+'</p>' +
+				'<p>Solving for y:</p>' +
+				'<p>'+colorText('y', color[unknown])+' + '+colorText(y[given], color[given])+' = '+2*y[3] +
+				'<p>'+colorText('y', color[unknown])+' = '+colorText(y[unknown], color[unknown]));
+	
+	write_step('The other point is '+getPoint(unknown)+'.');
+	
+	graph_update = function() {
+		graphInit();
+		graphPoint(3);
+		graphPoint(given);
+	}
+	
+	draw_next_step = function() {
+		if (steps_given==1) // otherpt x
+		{
+			present.stroke = color[unknown];
+			present.line([x[unknown], -10], [x[unknown], 10]);
+		}
+		if (steps_given==3) // otherpt y
+		{
+			present.line([-10, y[unknown]], [10, y[unknown]]);
+		}
+		if (steps_given==4)
+		{
+			graphPoint(unknown);
+		}
+		give_next_step();
+	}
+}
+
+randomMember(funcTypes)();
+
+function graphInit() {
+	initPlane();
+
+	present.fontsize = "15";
+	present.fontfamily = "sans-serif";
+	present.fontstyle = "bold";
+}
+
+function graphPoint(pt)
+{
+	present.ASdot([x[pt], y[pt]], 3, color[pt], color[pt]);
+	present.fontfill = color[pt];
+	present.text([x[pt], y[pt]], namePoint(x[pt], y[pt]), aboveright);
+}
+
+//-->
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="420" width="420"></iframe></td>
+{% endblock graphdisplay %}
+
+{% block answerarea %}
+<span class="info-box-header">Answer</span>
+(<input type="text" size=4 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"/>,
+<input type="text" size=4 id="answery"  autocomplete="off" name="answery" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"/>)</br>
+{% endblock answerarea %}
+
+{% block checkanswer %}
+// custom short-answer since there's no real need for multiple choice here
+highlight_answer();
+
+var ansX = parseFloatStrict(document.getElementById("answer").value);
+var ansY = parseFloatStrict(document.getElementById("answery").value);
+if (isNaN(ansX) || isNaN(ansY)) 
+{
+		window.alert("Your X or Y coordinate is not a number. Please try again.");
+		return;
+}
+var isCorrect = (ansX.toFixed(2) == correctX.toFixed(2)) && (ansY.toFixed(2) == correctY.toFixed(2));
+
+handleCorrectness(isCorrect);
+{% endblock checkanswer %}
+
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
