@@ -3,6 +3,7 @@ import cgi
 import math
 from google.appengine.ext import webapp
 from django import template
+
 from app import App
 import consts
 
@@ -166,7 +167,7 @@ def maps_javascript():
 @register.inclusion_tag(("shared_css.html", "../shared_css.html"))
 def shared_css():
     return {'App': App}
-    
+
 register.tag(highlight)
 
 webapp.template.register_template_library('discussion.templatetags')

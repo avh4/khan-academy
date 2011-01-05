@@ -7,7 +7,7 @@
     {% endif %}
     <div class="achievement-desc {% if not user_badge %}achievement-desc-no-count{% endif %}">
         {% if user_badge %}
-            Last achieved {{ user_badge.date|timesince_ago }}
+            Last achieved {{ user_badge.date|timesince_ago_short }}
             {% if user_badge.count|greater_than:1 %}
                 in 
                 {% for context_name in user_badge.list_context_names %}

@@ -1,6 +1,10 @@
-# import the webapp module
+import re
+
 from google.appengine.ext import webapp
 from django import template
+from django.template.defaultfilters import timesince
+
+import util
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -18,6 +22,23 @@ def greater_than(x, y):
 @register.filter
 def hash(h, key):
     return h[key]
+
+@register.filter
+def timesince_ago(content):
+    if not content:
+        return ""
+    return append_ago(timesince(content))
+
+@register.filter
+def timesince_ago_short(content):
+    if not content:
+        return ""
+    return append_ago(util.seconds_to_time_string(util.seconds_since(content)))
+
+def append_ago(s_time):
+    if not s_time:
+        return ""
+    return re.sub("^0 minutes ago", "just now", s_time + " ago")
 
 def mod(content, i):
     return content % i
