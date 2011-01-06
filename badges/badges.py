@@ -150,7 +150,8 @@ class Badge:
                     user = user,
                     badge_name = self.name,
                     target_context = target_context,
-                    target_context_name = target_context_name)
+                    target_context_name = target_context_name,
+                    points_earned = self.points)
 
             user_badge.put()
 

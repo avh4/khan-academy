@@ -8,6 +8,7 @@ class UserBadge(db.Model):
     badge_name = db.StringProperty()
     target_context = db.ReferenceProperty()
     target_context_name = db.StringProperty()
+    points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
     def get_for(user):

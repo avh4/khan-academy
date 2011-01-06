@@ -411,8 +411,6 @@ class UserData(db.Model):
         if self.points == None:
             self.points = 0
         self.points += points
-        if self.points < 0:
-            self.points = 0
     
 class Video(Searchable, db.Model):
 
@@ -550,6 +548,7 @@ class VideoLog(db.Model):
     video_title = db.StringProperty()
     time_watched = db.DateTimeProperty(auto_now_add = True)
     seconds_watched = db.IntegerProperty(default = 0)
+    points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
     def get_for_user_and_day(user, dt):
@@ -581,6 +580,7 @@ class ProblemLog(db.Model):
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
     hint_used = db.BooleanProperty(default = False)
+    points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
     def get_for_user_and_day(user, dt):

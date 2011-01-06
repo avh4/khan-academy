@@ -627,7 +627,6 @@ class LogVideoProgress(request_handler.RequestHandler):
                 video_log.video = video
                 video_log.video_title = video.title
                 video_log.seconds_watched = seconds_watched
-                video_log.put()
 
                 if last_second_watched > user_video.last_second_watched:
                     user_video.last_second_watched = last_second_watched
@@ -669,8 +668,10 @@ class LogVideoProgress(request_handler.RequestHandler):
                 video_points_received = video_points_total - video_points_previous
 
                 if video_points_received > 0:
+                    video_log.points_earned = video_points_received
                     user_data.add_points(video_points_received)
 
+                video_log.put()
                 user_data.put()
 
                 points_total = user_data.points
@@ -1147,6 +1148,9 @@ class RegisterAnswer(request_handler.RequestHandler):
         exid = self.request_string('exid')
         user = util.get_current_user()
         if user:
+
+            dt_done = datetime.datetime.now()
+
             key = self.request_string('key')
             correct = self.request_bool('correct')
             problem_number = self.request_int('problem_number')
@@ -1168,21 +1172,24 @@ class RegisterAnswer(request_handler.RequestHandler):
             # display the next problem.
             if problem_number != userExercise.total_done+1 and not users.is_current_user_admin():
                 # Only admins can answer problems out of order.
-
-                # If someone is doing this, they may be running
-                # a script of requests forgeries against us. Take away a single energy point.
-                # If they're not evil and/or running a script, it's only a single point.
-                user_data.add_points(-1)
-                user_data.put()
-
                 self.redirect('/exercises?exid=' + exid)
                 return
-            
+
+            suggested = user_data.is_suggested(exid)
+            proficient = user_data.is_proficient_at(exid)
+            points_possible = points.ExercisePointCalculator(exercise, userExercise, suggested, proficient)
+
             problem_log = ProblemLog()
+                                
+            if correct:
+                problem_log.points_earned = points_possible
+                user_data.add_points(points_possible)
+                user_data.put()
+            
             problem_log.user = user
             problem_log.exercise = exid
             problem_log.correct = correct
-            problem_log.time_done = datetime.datetime.now()
+            problem_log.time_done = dt_done
             problem_log.time_taken = elapsed_time
             problem_log.problem_number = problem_number
             problem_log.hint_used = hint_used
@@ -1192,13 +1199,6 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             problem_log.put()
  
-            suggested = user_data.is_suggested(exid)
-            proficient = user_data.is_proficient_at(exid)
-                                
-            if correct:
-                user_data.add_points(points.ExercisePointCalculator(exercise, userExercise, suggested, proficient))
-                user_data.put()
-
             if userExercise.total_done:
                 userExercise.total_done = userExercise.total_done + 1
             else:
