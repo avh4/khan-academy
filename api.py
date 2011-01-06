@@ -14,7 +14,7 @@ import request_handler
 import layer_cache
 
 import coaches
-from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video, ExerciseVideo      
+from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video, ExerciseVideo, Setting    
 from discussion import qa
 from topics_list import all_topics_list
 
@@ -238,9 +238,9 @@ class ViewImport(request_handler.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'import.html')
         self.response.out.write(template.render(path, template_values)) 
         
+
         
-        
-@layer_cache.cache_with_key("playlists")
+@layer_cache.cache_with_key("playlists_%s" % Setting.cached_library_content_date(), persist_across_app_versions = True)
 def get_playlists():
     playlists = []   
     for playlist_title in all_topics_list:            
@@ -262,7 +262,10 @@ class Playlists(request_handler.RequestHandler):
                              
 
 
-@layer_cache.cache_with_key_fxn(lambda playlist_title: "playlistvideos-" + playlist_title)
+@layer_cache.cache_with_key_fxn(
+    lambda playlist_title: "playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()), 
+    persist_across_app_versions = True
+    )
 def get_playlist_videos(playlist_title):
     query = Playlist.all()
     query.filter('title =', playlist_title)
