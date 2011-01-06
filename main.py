@@ -304,8 +304,10 @@ class ViewExercise(request_handler.RequestHandler):
             if proficient:
                 num_problems_to_print = exercise.required_streak()
 
-            # We can't currently print summative exercises.
             if exercise.summative:
+                # Make sure UserExercise has proper summative value even before it's been set.
+                userExercise.summative = True
+                # We can't currently print summative exercises.
                 num_problems_to_print = 0
 
             template_values = {
