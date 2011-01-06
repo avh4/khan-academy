@@ -1552,13 +1552,92 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 .nodeLabel {
+    text-align: center;
+    cursor: pointer;
+}
+
+.nodeLabel div {
     color: white;
     font-family: "Lucida Grande", "Arial", sans-serif;
     font-size: 12px;
-    text-align: center;
     width: 80px;
     border: 1px solid transparent;
-    cursor: pointer;
+}
+
+.nodeLabelHidden {
+    display: none;
+}
+.nodeLabelProficient div {
+}
+.nodeLabelReview div {
+}
+.nodeLabelSuggested div {
+}
+
+.nodeLabelZoom10 {
+    position: relative;
+    left: -40px;
+    top: -40px;
+}
+.nodeLabelZoom10 img {
+    width: 80px;
+    height: 80px;
+}
+
+.nodeLabelZoom9 {
+    position: relative;
+    left: -40px;
+    top: -20px;
+}
+.nodeLabelZoom9 img {
+    width: 40px;
+    height: 40px;
+    *margin-left: 20px;
+}
+
+.nodeLabelZoom8 {
+    position: relative;
+    left: -30px;
+    top: -13px;
+}
+.nodeLabelZoom8 div {
+    font-size: 9px;
+    width: 60px;
+}
+.nodeLabelZoom8 img {
+    width: 26px;
+    height: 26px;
+    *margin-left: 18px;
+}
+
+.nodeLabelZoom7 {
+    position: relative;
+    left: -41px;
+    top: -7px;
+    cursor: inherit;
+}
+.nodeLabelZoom7 div {
+    visibility: hidden;
+}
+.nodeLabelZoom7 img {
+    width: 10px;
+    height: 10px;
+    *margin-left: 35px;
+}
+
+.nodeLabelHighlight div {
+    -webkit-box-shadow: 0 0 10px yellow;
+    -moz-box-shadow: 0 0 10px yellow;
+    box-shadow: 0 0 10px yellow;
+    border: 1px solid #aaa;
+    background-color: black;
+}
+.nodeLabelSummative div {
+    visibility: visible;
+    font-size: 12px;
+    background-color: black;
+    z-index: 1000;
+    position: relative;
 }
 
 .creditLabel {
@@ -1567,37 +1646,5 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     margin: 0 2px 2px 0;
     white-space: nowrap;
     opacity: 0.5;
-}
-
-/*
-These style customizations will be applied to nodes
-of particular types on the knowledge map.
-*/
-.nodeLabelProficient {
-}
-.nodeLabelReview {
-}
-.nodeLabelSuggested {
-}
-.nodeLabelZoom8 {
-    font-size: 9px;
-    width: 60px;
-}
-.nodeLabelZoom7 {
-    visibility: hidden;
-}
-.nodeLabelHighlight {
-    -webkit-box-shadow: 0 0 10px yellow;
-    -moz-box-shadow: 0 0 10px yellow;
-    box-shadow: 0 0 10px yellow;
-    border: 1px solid #aaa;
-    background-color: black;
-}
-.nodeLabelSummative {
-    visibility: visible;
-    font-size: 12px;
-    background-color: black;
-    z-index: 1000;
-    position: relative;
 }
 /* End Knowledge Map CSS */

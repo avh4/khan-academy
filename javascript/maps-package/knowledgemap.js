@@ -1,9 +1,10 @@
-
 var KnowledgeMap = {
 
     map: null,
+    overlay: null,
     dictNodes: {},
     dictEdges: [],
+    markers: [],
     widthPoints: 200,
     heightPoints: 120,
     colors: {
@@ -33,7 +34,8 @@ var KnowledgeMap = {
     nodeSpacing: {lat: 0.392, lng: 0.35},
     latLngBounds: null,
     reZoom: /nodeLabelZoom(\d)+/g,
-    reHighlight: /nodeLabelHighlight/g,
+    reHidden: /nodeLabelHidden/g,
+    fFirstDraw: true,
     fCenterChanged: false,
     fZoomChanged: false,
     options: {
@@ -78,10 +80,11 @@ var KnowledgeMap = {
         }
 
         this.layoutGraph();
+        this.drawOverlay();
+
         this.latLngBounds = new google.maps.LatLngBounds(new google.maps.LatLng(this.latMin, this.lngMin), new google.maps.LatLng(this.latMax, this.lngMax)),
 
         google.maps.event.addListener(this.map, "center_changed", function(){KnowledgeMap.onCenterChange();});
-        google.maps.event.addListener(this.map, "zoom_changed", function(){KnowledgeMap.onZoomChange();});
         google.maps.event.addListener(this.map, "idle", function(){KnowledgeMap.onIdle();});
 
         this.giveNasaCredit();
@@ -138,6 +141,37 @@ var KnowledgeMap = {
                 this.drawEdge(this.dictNodes[key], rgTargets[ix], zoom);
             }
         }
+    },
+
+    drawOverlay: function() {
+
+        this.overlay = new com.redfin.FastMarkerOverlay(this.map, this.markers);
+        this.overlay.drawOriginal = this.overlay.draw;
+        this.overlay.draw = function() {
+            this.drawOriginal();
+
+            var jrgNodes = $(".nodeLabel");
+
+            if (!KnowledgeMap.fFirstDraw)
+            {
+                KnowledgeMap.onZoomChange(jrgNodes);
+            }
+
+            jrgNodes.each(function(){
+                KnowledgeMap.attachNodeEvents(this, KnowledgeMap.dictNodes[$(this).attr("data-id")]);
+            });
+
+            KnowledgeMap.fFirstDraw = false;
+        }
+    },
+
+    attachNodeEvents: function(el, node) {
+        $(el).click(
+                function(){KnowledgeMap.onNodeClick(node);}
+            ).hover(
+                function(){KnowledgeMap.onNodeMouseover(this, node);},
+                function(){KnowledgeMap.onNodeMouseout(this, node);}
+            );
     },
 
     addNode: function(node) {
@@ -226,30 +260,23 @@ var KnowledgeMap = {
 
         node.iconUrl = iconUrl;
 
-        var marker = new MarkerWithLabel({
-            position: node.latLng,
-            map: this.map,
-            icon: this.getMarkerIcon(node, zoom),
-            flat: true,
-            labelContent: node.name,
-            labelAnchor: this.getLabelAnchor(node, zoom),
-            labelClass: this.getLabelClass(labelClass, zoom),
-            visible: (!node.summative || zoom == this.options.minZoom),
-            zIndex: node.summative ? 2 : 1
-        });
+        var iconOptions = this.getIconOptions(node, zoom);
+        var marker = new com.redfin.FastMarker(
+                "marker-" + node.id, 
+                node.latLng, 
+                ["<div id='node-" + node.id + "' data-id='" + node.id + "' class='" + this.getLabelClass(labelClass, node, zoom) + "'><img src='" + iconOptions.url +"'/><div>" + node.name + "</div></div>"], 
+                "", 
+                node.summative ? 2 : 1,
+                0,0);
 
-        node.marker = marker;
-
-        google.maps.event.addListener(marker, "click", function(){KnowledgeMap.onNodeClick(node);});
-        google.maps.event.addListener(marker, "mouseover", function(){KnowledgeMap.onNodeMouseover(node);});
-        google.maps.event.addListener(marker, "mouseout", function(){KnowledgeMap.onNodeMouseout(node);});
+        this.markers[this.markers.length] = marker;
     },
 
     getMapForEdge: function(edge, zoom) {
         return ((zoom == this.options.minZoom) == edge.summative) ? this.map : null;
     },
 
-    getMarkerIcon: function(node, zoom) {
+    getIconOptions: function(node, zoom) {
 
         var iconUrl = node.iconUrl;
         var iconUrlCacheKey = iconUrl + "@" + zoom;
@@ -257,76 +284,62 @@ var KnowledgeMap = {
         if (!this.iconCache) this.iconCache = {};
         if (!this.iconCache[iconUrlCacheKey])
         {
-            var zoomBase = node.summative ? this.options.minZoom + 1 : this.options.maxZoom;
-            var size = (1 / (zoomBase - zoom + 1)) * 80;
             var url = iconUrl;
 
             if (!node.summative && zoom <= this.options.minZoom)
             {
-                size = 10;
                 url = iconUrl.replace(".png", "-star.png");
             }
 
-            this.iconCache[iconUrlCacheKey] = new google.maps.MarkerImage(url, 
-                    null, 
-                    null, 
-                    new google.maps.Point(size / 2, size / 2), 
-                    new google.maps.Size(size, size));
+            this.iconCache[iconUrlCacheKey] = {url: url};
         }
         return this.iconCache[iconUrlCacheKey];
     },
 
-    getLabelClass: function(classOrig, zoom, highlight) {
+    getLabelClass: function(classOrig, node, zoom) {
+
+        var visible = !node.summative || zoom == this.options.minZoom;
+        classOrig = classOrig.replace(this.reHidden, "") + (visible ? "" : " nodeLabelHidden");
+
+        if (node.summative && visible) zoom = this.options.maxZoom - 1;
 
         classOrig = classOrig.replace(this.reZoom, "") + (" nodeLabelZoom" + zoom);
-
-        if (highlight)
-            classOrig += " nodeLabelHighlight";
-        else
-            classOrig = classOrig.replace(this.reHighlight, "");
 
         return classOrig;
     },
 
-    getLabelAnchor: function(node, zoom) {
-        var key = zoom + (node.summative ? "-summative" : "");
-
-        if (!this.labelAnchorCache) this.labelAnchorCache = {};
-        if (!this.labelAnchorCache[key])
-        {
-            var zoomBase = node.summative ? this.options.minZoom + 1 : this.options.maxZoom;
-            var offset = -1 * (45 / (zoomBase - zoom + 1));
-            this.labelAnchorCache[key] = new google.maps.Point(zoom == 8 ? 30 : 40, offset);
-        }
-        return this.labelAnchorCache[key];
-    },
-
     highlightNode: function(node, highlight) {
-        var marker = node.marker;
-        marker.labelClass = this.getLabelClass(marker.labelClass, this.map.getZoom(), highlight);
-        marker.label.setStyles();
+        var jel = $("#node-" + node.id);
+        if (highlight)
+            jel.addClass("nodeLabelHighlight");
+        else
+            jel.removeClass("nodeLabelHighlight");
     },
 
     onNodeClick: function(node) {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
-        {
-            // Zoom on node
-            this.map.setCenter(node.latLng);
-            this.map.setZoom(this.map.getZoom() + 1);
-        }
-        else
-        {
-            // Go to exercise
-            window.location = node.url;
-        }
+            return;
+
+        // Go to exercise
+        window.location = node.url;
     },
 
-    onNodeMouseover: function(node) {
+    onNodeMouseover: function(el, node) {
+        if (el.nodeName.toLowerCase() != "div")
+            return;
+        if (!node.summative && this.map.getZoom() <= this.options.minZoom)
+            return;
+
         $(".exercise-badge[data-id=\"" + node.id + "\"]").addClass("exercise-badge-hover");
         this.highlightNode(node, true);
     },
 
-    onNodeMouseout: function(node) {
+    onNodeMouseout: function(el, node) {
+        if (el.nodeName.toLowerCase() != "div")
+            return;
+        if (!node.summative && this.map.getZoom() <= this.options.minZoom)
+            return;
+
         $(".exercise-badge[data-id=\"" + node.id + "\"]").removeClass("exercise-badge-hover");
         this.highlightNode(node, false);
     },
@@ -343,28 +356,23 @@ var KnowledgeMap = {
         if (node) KnowledgeMap.highlightNode(node, false);
     },
 
-    onZoomChange: function() {
+    onZoomChange: function(jrgNodes) {
+
+        var zoom = this.map.getZoom();
 
         if (zoom < this.options.minZoom) return;
         if (zoom > this.options.maxZoom) return;
 
         this.fZoomChanged = true;
 
-        var zoom = this.map.getZoom();
+        jrgNodes.each(function() {
+            var jel = $(this);
+            var node = KnowledgeMap.dictNodes[jel.attr("data-id")];
 
-        for (var key in this.dictNodes)
-        {
-            var node = this.dictNodes[key];
-            var marker = node.marker;
-
-            if (node.summative)
-                marker.setVisible(!node.summative || zoom == this.options.minZoom);
-
-            marker.setIcon(this.getMarkerIcon(node, zoom));
-            marker.labelAnchor = this.getLabelAnchor(node, zoom);
-            marker.labelClass = this.getLabelClass(marker.labelClass, zoom);
-            marker.label.setStyles();
-        }
+            var iconOptions = KnowledgeMap.getIconOptions(node, zoom);
+            $("img", jel).attr("src", iconOptions.url);
+            jel.attr("class", KnowledgeMap.getLabelClass(jel.attr("class"), node, zoom));
+        });
 
         for (var key in this.dictEdges)
         {
