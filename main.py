@@ -1588,7 +1588,7 @@ class ExerciseAndVideoEntityList(request_handler.RequestHandler):
         self.response.out.write("Exercises:\n")
 
         for exercise in Exercise.all():
-            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.name + "\n")
+            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name() + "\n")
 
         self.response.out.write("\n\nVideos:\n")
         for playlist_title in all_topics_list:
