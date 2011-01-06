@@ -1570,7 +1570,6 @@ class GenerateVideoMapping(request_handler.RequestHandler):
 class YoutubeVideoList(request_handler.RequestHandler):
 
     def get(self):
-        video_mapping = {}
         for playlist_title in all_topics_list:            
             query = Playlist.all()
             query.filter('title =', playlist_title)
@@ -1582,7 +1581,27 @@ class YoutubeVideoList(request_handler.RequestHandler):
             for pv in query.fetch(500):
                 v = pv.video
                 self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')       
-        
+
+class ExerciseAndVideoEntityList(request_handler.RequestHandler):
+
+    def get(self):
+        self.response.out.write("Exercises:\n")
+
+        for exercise in Exercise.all():
+            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.name + "\n")
+
+        self.response.out.write("\n\nVideos:\n")
+        for playlist_title in all_topics_list:
+            query = Playlist.all()
+            query.filter('title =', playlist_title)
+            playlist = query.get()
+            query = VideoPlaylist.all()
+            query.filter('playlist =', playlist)
+            query.filter('live_association = ', True)
+            query.order('video_position')
+            for pv in query.fetch(1000):
+                v = pv.video
+                self.response.out.write(str(v.key().id()) + "\t" + v.title + "\n")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -2034,7 +2053,8 @@ def real_main():
         ('/exercisedashboard', ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
         ('/video_mapping', GenerateVideoMapping),  
-        ('/youtube_list', YoutubeVideoList),                   
+        ('/youtube_list', YoutubeVideoList),
+        ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
         ('/syncvideodata', UpdateVideoData),
         ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
