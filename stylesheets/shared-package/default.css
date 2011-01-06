@@ -998,11 +998,18 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .achievement-badges-container .achievement-badge {
     float: left;
 }
+.achievement-badges-container h3 {
+    font-size: 15px;
+    color: #333;
+    display: block;
+}
 
 .achievement-badge.category-5 {
     width: auto;
     height: auto;
+    min-width: 190px;
     text-align: center;
+    background: none;
 }
     .achievement-badge.category-5 #badge-icon {
         width: 100px;
@@ -1015,23 +1022,30 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     .achievement-badge.category-5 .energy-points-badge {
         position: absolute;
-        left: 150px;
-        top: 7px;
+        left: auto;
+        top: 6px;
+        right: -10px;
     }
     .achievement-badge.category-5 .achievement-desc {
         position: static;
         width: auto;
     }
     .achievement-badge.category-5 #outline-box {
-        margin: 3px;
-        width: 190px;
-        padding: 7px 7px 12px;
-        outline: 1px dashed #bbb;
-        position: relative;
     }
 .achievement-badge.category-5.achievement-badge-owned {
-    outline-offset: -13px;
+    border: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
+    .achievement-badge.category-5.achievement-badge-owned .achievement-title,
+    .achievement-badge.category-5.achievement-badge-owned .achievement-desc {
+        text-shadow: 1px 1px 1px #ccc;
+    }
+    .achievement-badge.category-5.achievement-badge-owned .energy-points-badge {
+        display: none;
+    }
+
 #container h3 {
     display: block;
     font-size: 14px;
@@ -1529,7 +1543,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .achievement-badges-explanation table td {
         text-align: center;
         vertical-align: top;
-        padding: 0 10px;
+        padding: 5px 10px;
     }
 
 /* Start knowledge map CSS */
