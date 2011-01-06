@@ -98,7 +98,7 @@ class Badge:
         elif self.badge_category == BadgeCategory.DIAMOND:
             return "Black Hole (Legendary)"
         elif self.badge_category == BadgeCategory.MASTER:
-            return "Mission Patches (Challenge Completion)"
+            return "Challenge Patches (Challenge Completion)"
         return "Common"
 
     def name_with_target_context(self, target_context_name):
