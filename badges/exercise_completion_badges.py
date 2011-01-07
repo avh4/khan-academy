@@ -68,7 +68,7 @@ class TopLevelArithmeticianBadge(ChallengeCompletionBadge):
         self.exercise_names_required = ['arithmetic_challenge']
         self.description = "Master of Arithmetic"
         self.badge_category = BadgeCategory.MASTER
-        self.points = 2500
+        self.points = 10000
     
     def icon_src(self):
         return "/images/badges/Arithmetic.png"
@@ -103,7 +103,7 @@ class TopLevelTrigonometricianBadge(ChallengeCompletionBadge):
         self.exercise_names_required = ['trigonometry_challenge']
         self.description = "Master of Trigonometry"
         self.badge_category = BadgeCategory.MASTER
-        self.points = 2500
+        self.points = 10000
     
     def icon_src(self):
         return "/images/badges/Geometry-Trig.png"
@@ -138,7 +138,7 @@ class TopLevelPrealgebraistBadge(ChallengeCompletionBadge):
         self.exercise_names_required = ['pre-algebra_challenge']
         self.description = "Master of Pre-algebra"
         self.badge_category = BadgeCategory.MASTER
-        self.points = 2500
+        self.points = 10000
     
     def icon_src(self):
         return "/images/badges/Pre-Algebra.png"
@@ -181,7 +181,7 @@ class TopLevelAlgebraistBadge(ChallengeCompletionBadge):
         self.exercise_names_required = ['algebra_challenge']
         self.description = "Master of Algebra"
         self.badge_category = BadgeCategory.MASTER
-        self.points = 2500
+        self.points = 10000
     
     def icon_src(self):
         return "/images/badges/Algebra.png"
