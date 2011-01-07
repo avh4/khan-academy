@@ -1032,7 +1032,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     .achievement-badge.category-5 #outline-box {
     }
-.achievement-badge.category-5.achievement-badge-owned {
+    
+.badge-award-container .achievement-badge.category-5, .achievement-badge.category-5.achievement-badge-owned {
     border: none;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
@@ -1045,6 +1046,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .achievement-badge.category-5.achievement-badge-owned .energy-points-badge {
         display: none;
     }
+
+.badge-award-container .achievement-badge.category-5 {
+    min-width: 195px;
+}    
+.badge-award-container .achievement-badge.category-5 .energy-points-badge {
+    right: -5px;
+}
 
 #container h3 {
     display: block;
