@@ -162,7 +162,7 @@ class LevelTwoAlgebraistBadge(ExerciseCompletionBadge):
 class LevelThreeAlgebraistBadge(ExerciseCompletionBadge):
     def __init__(self):
         ExerciseCompletionBadge.__init__(self)
-        self.exercise_names_required = ['linear_equations_3', 'systems_of_equations', 'multiplying_expressions_1', 'even_and_odd_functions', 'inverses_of_functions', 'slope_of_a_line']
+        self.exercise_names_required = ['linear_equations_3', 'systems_of_equations', 'multiplying_expressions_1', 'even_and_odd_functions', 'inverses_of_functions', 'slope_of_a_line', 'midpoint_formula']
         self.description = "Artisan I Algebraist"
         self.badge_category = BadgeCategory.SILVER
         self.points = 750
