@@ -92,7 +92,7 @@ class LevelTwoTrigonometricianBadge(ExerciseCompletionBadge):
 class LevelThreeTrigonometricianBadge(ExerciseCompletionBadge):
     def __init__(self):
         ExerciseCompletionBadge.__init__(self)
-        self.exercise_names_required = ['trigonometry_2', 'graphs_of_sine_and_cosine', 'inverse_trig_identities', 'trig_identities_1']
+        self.exercise_names_required = ['trigonometry_2', 'graphs_of_sine_and_cosine', 'inverse_trig_functions', 'trig_identities_1']
         self.description = "Artisan Trigonometrician"
         self.badge_category = BadgeCategory.SILVER
         self.points = 750
