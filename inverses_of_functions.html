@@ -23,6 +23,26 @@ function format_variable_fraction(n, d, varIsN)
     	return fraction;
     }
 }
+function format_fraction(n, d)
+{
+	// Incompatibility: has parentheses in numerator
+	if (d == 0)
+		return "`undefined`";
+	if (n == 0)
+		return "0";
+	var sign = (n/d < 0) ? " - " : "";
+	n = Math.abs(n);
+	d = Math.abs(d);
+	var gcd = getGCD(n, d);
+	n = n/gcd;
+	d = d/gcd;
+	if (d > 1) {
+		fraction = sign + "(" + n + ")/"+d;
+		return fraction;
+	} else {
+		return sign + n;
+	}
+}
 function nicefy_signs(expr)
 {
     while (expr.indexOf("  ") != -1) {
@@ -32,12 +52,28 @@ function nicefy_signs(expr)
 	while (expr.indexOf("1x") != -1) {
 		expr = expr.replace("1x", "x");
 	}
-	while (expr.indexOf("+ -") != -1) {
-		expr = expr.replace("+ -", "-");
+	
+	while (expr.indexOf(" +") != -1) {
+		expr = expr.replace(" +", "+");
 	}
-	while (expr.indexOf("- -") != -1) {
-		expr = expr.replace("- -", "+")
+	while (expr.indexOf(" -") != -1) {
+		expr = expr.replace(" -", "-");
 	}
+	while (expr.indexOf("+ ") != -1) {
+		expr = expr.replace("+ ", "+");
+	}
+	while (expr.indexOf("- ") != -1) {
+		expr = expr.replace("- ", "-");
+	}
+	
+	while (expr.indexOf("+-") != -1) {
+		expr = expr.replace("+-", "-");
+	}
+	while (expr.indexOf("--") != -1) {
+		expr = expr.replace("--", "+");
+	}
+	
+	expr.replace()
 	return expr;
 }
 
@@ -164,7 +200,7 @@ funcGens[1] = function() {
     addWrongChoiceLine(format_variable_fraction("x", M) + " + " + B);
     addWrongChoiceLine(format_variable_fraction("x", M) + " - " + B);
                        
-    addWrongChoiceLine(format_variable_fraction("x", M) + " - " + format_fraction(M, B));
+    addWrongChoiceLine(format_variable_fraction("x", M) + " + " + format_fraction(M*-1, B));
     addWrongChoiceLine(format_variable_fraction("x", M) + " + " + invB);
     addWrongChoiceLine(format_variable_fraction("x", M*-1) + " - " + invB);
     addWrongChoiceLine(format_variable_fraction("x", M*-1) + " + " + invB);
