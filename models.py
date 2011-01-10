@@ -551,12 +551,12 @@ class VideoLog(db.Model):
     points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
-    def get_for_user_and_day(user, dt):
+    def get_for_user_between_dts(user, dt_a, dt_b):
         query = VideoLog.all()
         query.filter('user =', user)
 
-        query.filter('time_watched <=', dt + datetime.timedelta(days = 1))
-        query.filter('time_watched >=', dt)
+        query.filter('time_watched >=', dt_a)
+        query.filter('time_watched <=', dt_b)
         query.order('time_watched')
 
         return query
@@ -583,12 +583,12 @@ class ProblemLog(db.Model):
     points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
-    def get_for_user_and_day(user, dt):
+    def get_for_user_between_dts(user, dt_a, dt_b):
         query = ProblemLog.all()
         query.filter('user =', user)
 
-        query.filter('time_done <=', dt + datetime.timedelta(days = 1))
-        query.filter('time_done >=', dt)
+        query.filter('time_done >=', dt_a)
+        query.filter('time_done <=', dt_b)
         query.order('time_done')
 
         return query

@@ -1,0 +1,109 @@
+{% extends "page_template.html" %}
+
+{% block pagetitle %}
+    Profile
+{% endblock pagetitle %}
+
+{% block pagecontent %}
+<script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+
+<div class="user-profile">
+
+    <script>
+    {% if classtime_table.rows %}
+    var chart;
+    $(function() {
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'highchart',
+                defaultSeriesType: 'column',
+                marginRight: 130,
+                marginBottom: 100
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                column: {
+                },
+                series: {
+                    showInLegend: false,
+                    stacking: 'normal',
+                    point: {
+                        events: {
+                            click: function() {
+                            }
+                        }
+                    }
+            }
+            },
+            title: {
+                text: ''
+            },
+            xAxis: {
+                labels: {
+                    align: 'left',
+                    x: -5,
+                    y: 10,
+                    rotation: 45
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Time Spent (Minutes)'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                formatter: function() {
+                    return this.point.desc;
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'top',
+                x: -10,
+                y: 100,
+                borderWidth: 0
+            },
+            series: [
+                    {% for row in classtime_table.rows reversed %}
+                    { 
+                       data: [
+                        {% for chunk in row.chunks %}
+                        {
+                            x: {{ forloop.counter0 }}, 
+                            {% if chunk %}
+                                y: {{ chunk.minutes_spent }},
+                            {% else %}
+                                y: 0,
+                            {% endif %}
+                            desc: '{{ chunk.description|escapejs }}',
+                            {% if chunk %}
+                            color: 'lightBlue'
+                            {% endif %}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                        ]
+                    }{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                    ]
+        });
+    });
+    {% endif %}
+    </script>
+
+    <div style="width:100%;">
+        {% if classtime_table.rows %}
+            <div id="highchart" style="min-width:{{ width }}px;min-height:450px;"></div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock pagecontent %}
+
