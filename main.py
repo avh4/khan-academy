@@ -137,6 +137,7 @@ class UpdateVideoReadableNames(request_handler.RequestHandler):  #Makes sure eve
         for video in all_videos:
             potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
             potential_id = re.sub('-+$', '', potential_id)  # remove any trailing dashes (see issue 1140)
+            potential_id = re.sub('^-+', '', potential_id)  # remove any leading dashes (see issue 1526)                        
             if video.readable_id == potential_id: # id is unchanged
                 continue
             number_to_add = 0
