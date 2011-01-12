@@ -127,12 +127,11 @@ class UserExercise(db.Model):
             self.last_review = datetime.datetime.min
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
         
-    def set_proficient(self, proficient):
+    def set_proficient(self, proficient, user_data):
         if not proficient and self.longest_streak < self.required_streak():
             # Not proficient and never has been so nothing to do
             return
 
-        user_data = UserData.get_or_insert_for(self.user)
         if proficient:
             if self.exercise not in user_data.proficient_exercises:
                     user_data.proficient_exercises.append(self.exercise)

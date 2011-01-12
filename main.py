@@ -1212,7 +1212,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 if userExercise.streak > userExercise.longest_streak:
                     userExercise.longest_streak = userExercise.streak
                 if userExercise.streak >= exercise.required_streak() and not proficient:
-                    userExercise.set_proficient(True)
+                    userExercise.set_proficient(True, user_data)
                     userExercise.proficient_date = datetime.datetime.now()                    
             else:
                 # Can't do the following here because RegisterCorrectness() already
@@ -1225,8 +1225,6 @@ class RegisterAnswer(request_handler.RequestHandler):
                 userExercise.reset_streak()
             userExercise.put()
 
-            # Reload user data before checking badges in case set_proficient updated the datastore behind the scenes
-            user_data = UserData.get_for(userExercise.user)
             if util_badges.update_with_user_exercise(
                     user, 
                     user_data, 
@@ -1263,7 +1261,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
             if correct == 0:
                 if userExercise.streak == 0:
                     # 2+ in a row wrong -> not proficient
-                    userExercise.set_proficient(False)
+                    userExercise.set_proficient(False, UserData.get_or_insert_for(user))
                 userExercise.reset_streak()
             if hint_used:
                 userExercise.reset_streak()
