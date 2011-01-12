@@ -1187,7 +1187,6 @@ class RegisterAnswer(request_handler.RequestHandler):
             if correct:
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
-                user_data.put()
             
             problem_log.user = user
             problem_log.exercise = exid
@@ -1200,8 +1199,6 @@ class RegisterAnswer(request_handler.RequestHandler):
             if exercise.summative:
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
-            problem_log.put()
- 
             if userExercise.total_done:
                 userExercise.total_done = userExercise.total_done + 1
             else:
@@ -1223,15 +1220,15 @@ class RegisterAnswer(request_handler.RequestHandler):
                 
                 # Just in case RegisterCorrectness didn't get called.
                 userExercise.reset_streak()
-            userExercise.put()
 
-            if util_badges.update_with_user_exercise(
-                    user, 
-                    user_data, 
-                    userExercise, 
-                    include_other_badges = True, 
-                    action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log)):
-                user_data.put()
+            util_badges.update_with_user_exercise(
+                user, 
+                user_data, 
+                userExercise, 
+                include_other_badges = True, 
+                action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
+
+            db.put([user_data, problem_log, userExercise])
 
             self.redirect('/exercises?exid=' + exid)
         else:
