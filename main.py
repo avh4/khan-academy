@@ -1228,6 +1228,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
+            userExercise.clear_memcache()
             db.put([user_data, problem_log, userExercise])
 
             self.redirect('/exercises?exid=' + exid)

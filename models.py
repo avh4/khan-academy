@@ -50,9 +50,14 @@ class UserExercise(db.Model):
     summative = db.BooleanProperty(default=False)
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
+
+    @staticmethod
+    def get_key_for_user(user):
+        return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
+
     @staticmethod
     def get_for_user_use_cache(user):
-        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
+        user_exercises_key = UserExercise.get_key_for_user(user)
         user_exercises = memcache.get(user_exercises_key)
         if user_exercises is None:
             query = UserExercise.all()
@@ -60,10 +65,12 @@ class UserExercise(db.Model):
             user_exercises = query.fetch(1000)
             memcache.set(user_exercises_key, user_exercises)
         return user_exercises
+
+    def clear_memcache(self):
+        memcache.delete(UserExercise.get_key_for_user(self.user))
     
     def put(self):
-        user_exercises_key = UserExercise._USER_EXERCISE_KEY_FORMAT % self.user.email()
-        memcache.delete(user_exercises_key)
+        self.clear_memcache()
         db.Model.put(self)
 
     def get_exercise(self):
