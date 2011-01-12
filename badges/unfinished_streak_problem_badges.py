@@ -28,9 +28,9 @@ class UnfinishedStreakProblemBadge(ExerciseBadge):
         if c_logs < 10:
             return False
 
-        # Make sure the last problem is from this exercise and that they got it wrong
+        # Make sure the last problem is from this exercise and that they got it right
         last_problem_log = action_cache.get_problem_log(c_logs - 1)
-        if (last_problem_log.exercise != user_exercise.exercise or last_problem_log.correct):
+        if (last_problem_log.exercise != user_exercise.exercise or not last_problem_log.correct):
             return False
 
         c_correct = 0
