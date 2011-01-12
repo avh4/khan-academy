@@ -2,7 +2,6 @@ import logging
 import os
 import datetime
 import itertools
-import copy
 from collections import deque
 from pprint import pformat
 from math import sqrt, ceil

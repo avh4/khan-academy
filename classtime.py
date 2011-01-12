@@ -1,5 +1,6 @@
 import datetime
 import logging
+import copy
 
 from google.appengine.api import users
 
