@@ -1,0 +1,142 @@
+{% extends arithmetic_template %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+var term1 = 0;
+var term2 = 0;
+var term1color = getNextColor();
+var term2color = getNextColor();
+
+var hintsGiven = 0;
+var xSpacing =65;
+var ySpacing = 60;
+var xMax = 400;
+var xMin = 0;
+var yMax = 600;
+var yMin = 0;
+var leftMargin = 50;
+var standardSize = 75;
+var smallSize = 17;
+var numLineY = 450;
+var circleXPos = leftMargin/2;
+var circleYPos = numLineY;
+var circleCount = 1;
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var eFunction = function()
+{
+	term1 = getRandomIntRange(1, 10);
+	terms = [0, 1, 2, 3, 5, 10];
+	term2 = terms[getRandomInt(5)];
+	var temp = 0
+	if (Math.round(Math.random()) == 0) {
+		temp = term1
+		term1 = term2
+		term2 = temp
+	}
+}
+
+
+//This is the comparison function that makes sure that current random entries haven't been given recently
+var cFunction = function(history)
+{
+	return (history.indexOf(term1+'*'+term2)!=-1 || history.indexOf(term2+'*'+term1)!=-1);
+}
+
+//This function defines what an entry in the history should look like
+var tFunction = function()
+{
+	return (Math.min(term1,term2)+'*'+Math.max(term1,term2));
+}
+
+//This checks the history and regenerates random numbers if the current ones have already been used recently 
+checkHistory(cFunction, eFunction, tFunction, 20);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function graph_update()
+{
+	present.initPicture(xMin,xMax,yMin);
+	present.fontfill = nColor;
+	present.fontsize = standardSize;
+	present.fontweight = "normal";
+	
+	present.fontfamily = "Arial";
+	present.fontstyle = "normal";
+	present.text([leftMargin,500], term1, above, 'term1');
+	present.text([leftMargin+xSpacing,500], 'x', above);
+	present.text([leftMargin+2*xSpacing,500], term2, above, 'term2');
+	present.text([leftMargin+3*xSpacing+10,500], '=', above);
+	present.text([leftMargin+4*xSpacing,500], '?', above, 'prod');
+	setCorrectAnswer(term1*term2);
+}
+
+function drawCircles(num, color)
+{
+	present.strokewidth=3;
+	present.stroke=color;
+	present.fontfill=color;
+	var radius = 15;
+	for(var i=0; i<num; i++)
+	{
+		present.circle([circleXPos,circleYPos], radius);
+
+		present.fontsize = smallSize;
+		present.text([circleXPos, circleYPos-18], circleCount++, above);
+		present.fontsize = standardSize;
+
+		circleYPos-= (2*radius)+5;
+	}
+	circleXPos+= (2*radius)+5;
+	circleYPos = numLineY;
+}
+
+
+function next_step()
+{
+	if (hintsGiven==0 && correctAnswer!=0)
+	{
+		present.fontfill = term1color;
+		present.text([leftMargin,500], term1, above, 'term1');
+		drawCircles(term1, term1color);
+	}
+	if (hintsGiven==1 && correctAnswer!=0)
+	{
+		present.fontfill = term2color;
+		present.text([leftMargin+2*xSpacing,500], term2, above, 'term2');
+		for(var i=1; i<term2; i++)
+			drawCircles(term1, term2color);
+	}
+	if (hintsGiven==2 || correctAnswer==0)
+	{
+		present.fontfill = getNextColor();;
+		present.text([leftMargin+4*xSpacing+20,500], correctAnswer, above, 'prod');
+	}
+	
+	if(correctAnswer==0)
+	{
+		present.fontsize = smallSize;
+		present.text([(xMax+xMin)/2, numLineY], '0 times anything is 0', above);
+	}
+	
+	hintsGiven++;
+	steps_given++;
+	
+}
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=600" height="625" width="100%"></iframe>{% endblock maincell %}
+  
