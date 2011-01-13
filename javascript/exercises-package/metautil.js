@@ -390,7 +390,7 @@ KhanAcademy = {
 				MathPlayer = false
 			};
 			return (($.browser.mozilla && versionAtLeast("1.5")) ||
-                  		($.browser.msie && MathPlayer) ||
+                  		($.browser.msie && MathPlayer && $.browser.version != "9.0" && $.browser.version != "8.0") ||
                   		($.browser.opera && versionAtLeast("9.52")));
 				
 			function versionAtLeast(minVersion) {

@@ -1,6 +1,7 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}Exercise{% endblock pagetitle %}
 {% block pagescript %}
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
 <style>
     /* Temporary styles to fit new exercises into old template, will be removed when new template is dropped in. */
     #page_sub_nav {display: none;}
@@ -11,7 +12,7 @@
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
      we update MathJax.
   {% endcomment %}
-  <script type="text/javascript" src="/MathJax-svn382-2/MathJax.js">
+  <script type="text/javascript" src="/MathJax-git-2011-01-12/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",
