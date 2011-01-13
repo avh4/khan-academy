@@ -102,13 +102,14 @@
 
             _gaq.push('_trackEvent', 'Click', 'Donate-Recurring-Paypal');
 
-            $("#recurring-donations-submit").attr("disabled", true);
-            $(".throbber", this).show();
+            $('#recurring-donations-submit').attr('disabled', true);
+            $('.throbber', this).show();
 
             setTimeout(function() { // after 1 second, submit the form
                 form.submit();
             }, 1000);
         });
+        $('#recurring-donations-submit').removeAttr('disabled');
     </script>
 
     
