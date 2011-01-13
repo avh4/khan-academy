@@ -51,7 +51,7 @@
         
     <b>Or set up a recurring donation</b>
     <p>
-    <form action="https://www.paypal.com/cgi-bin/webscr" method="post">
+    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" id="recurring-donations">
     <input type="hidden" name="cmd" value="_xclick-subscriptions">
     <input type="hidden" name="business" value="JBBC7SGTYUGK2">
     <input type="hidden" name="lc" value="US">
@@ -89,9 +89,27 @@
 
      <tr><td>Donation amount ($USD)</td></tr><tr><td><input type="text" name="a3" value="25" maxlength="60"></td></tr>
      </table>
-     <input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+     <input id="recurring-donations-submit" type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+     <img src="/images/throbber.gif" class="throbber" style="display:none;" />
      <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
      </form>
+
+    <script>
+        // From http://stackoverflow.com/questions/4086587/track-event-in-google-analytics-upon-clicking-form-submit
+        $('#recurring-donations').submit(function(e) {
+            var form = this;
+            e.preventDefault(); // disable the default submit action
+
+            _gaq.push('_trackEvent', 'Click', 'Donate-Recurring-Paypal');
+
+            $("#recurring-donations-submit").attr("disabled", true);
+            $(".throbber", this).show();
+
+            setTimeout(function() { // after 1 second, submit the form
+                form.submit();
+            }, 1000);
+        });
+    </script>
 
     
     
