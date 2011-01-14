@@ -665,7 +665,6 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video.last_watched = datetime.datetime.now()
                 user_video.duration = video.duration
-                user_video.put()
 
                 video_points_total = points.VideoPointCalculator(user_video)
                 video_points_received = video_points_total - video_points_previous
@@ -674,8 +673,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                     video_log.points_earned = video_points_received
                     user_data.add_points(video_points_received)
 
-                video_log.put()
-                user_data.put()
+                db.put([user_video, video_log, user_data])
 
                 points_total = user_data.points
 
