@@ -1211,6 +1211,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 if userExercise.streak >= exercise.required_streak() and not proficient:
                     userExercise.set_proficient(True, user_data)
                     userExercise.proficient_date = datetime.datetime.now()                    
+                    user_data.reassess_if_necessary()
             else:
                 # Can't do the following here because RegisterCorrectness() already
                 # set streak = 0.
