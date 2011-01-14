@@ -1,0 +1,663 @@
+
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+
+// author: Joey Chang
+// equation types:
+//
+// equationType = 0:
+// Gx(yz) + Ay + Bz + C = Dy + Ez + F
+// The yz in parens just means a y, a z, or both may be included in that term.
+// All constants A - G are non-zero from -10 to 10. random values are picked so no terms cancel out.
+// Solve for x.
+//
+// equationType = 1:
+// Axy + Bxz + Cx + D = Ey + F
+// Axy + Bxz + Cx = Ey + (F-D) --> separate non-x terms
+// x*(Ay + Bz + C) = Ey + (F-D) --> factor out x
+// x = [Ey + (F-D)] / (Ay + Bz + C) --> divide to isolate x
+// Conditions: F != D
+//
+// equationType = 2:
+// (Ax + By) / C = (Dx + Ez) / F
+// F(Ax + By) = C(Dx + Ez) --> multiply out denominators
+// FAx + FBy = CDx + CEz  --> distributive prop
+// FAx - CDx = CEz - FBy --> collect x terms to one side
+// x(FA - CD) = CEz - FBy --> factoring
+// x = (CEz - FBy) / (FA - CD)  --> isolate x
+// Conditions: make sure FA - CD != 0
+
+
+
+
+var equationType = 0;
+display_per_step = 3; //the right and left panes of the hint table
+var theAnswer = '';
+
+var selColor = "#AE9CC9";
+var noSelColor = "#333333";
+
+
+// returns font size/color adjusted string
+// note difference from linear equations impl where the back quote is placed to surround it. not sure why this
+// helps keep mathml behaving
+// Ben: without the surrounding backquotes, the parsing of the html (is it into mathml?) gets messed up. I'm not
+//      certain why enclosing it makes it work. Notice the linear_equations_1 impl of this doesn't use the surrounding backquotes.
+//      I had guessed what backquotes do is surround regions for the mathml parser to ignore, but if that's the case, my change makes
+//      the entire string below *except* for the string param be ignored while the lin eq 1 impl does the opposite, making *only* the
+//      string portion be ignored by the mathml parser. I must be thinking of this wrong.
+function getEqExpString(string)
+{
+	var selFontString = '`<font color='+selColor+' size=4>';
+	return (selFontString+'`'+string+'`</font>`');
+}
+
+// creates hints for type 0
+function generateHintStepsForEquationType0(xTermCoefficient,leftYCoefficient,leftZCoefficient,leftConstant,rightYCoefficient,rightZCoefficient,rightConstant,xTermHasY,xTermHasZ)
+{
+	write_text("Solve for `x`:");
+        
+        // format x term by adding coefficient and the y and z var if it has it
+        xTerm = xTermCoefficient + 'x';
+        if (xTermHasY)
+        {
+            xTerm += 'y';
+        }
+        if (xTermHasZ)
+        {
+            xTerm += 'z';
+        }
+        
+        // display formula
+	table_step_header("",
+                          xTerm + formatCoefficient(leftYCoefficient) + 'y' + formatCoefficient(leftZCoefficient) + 'z' + formatConstant(leftConstant),
+                          formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+    
+        // suggest combining constant terms to the right
+	write_table_step('Combine the constants to the right side.',
+                          xTerm + formatCoefficient(leftYCoefficient) + 'y' + formatCoefficient(leftZCoefficient) + 'z' + getEqExpString(formatConstant(leftConstant)),
+                          formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + getEqExpString(formatConstant(rightConstant)));
+        rightConstant -= leftConstant;
+
+        // result of combining constant terms to the right
+	write_table_step('',
+                          xTerm + formatCoefficient(leftYCoefficient) + 'y' + formatCoefficient(leftZCoefficient) + 'z',
+                          formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + getEqExpString(formatConstant(rightConstant)));
+
+        // suggest combining z terms to the right
+	write_table_step('Combine the z terms to the right side.',
+                          xTerm + formatCoefficient(leftYCoefficient) + 'y' + getEqExpString(formatCoefficient(leftZCoefficient) + 'z'),
+                          formatFirstCoefficient(rightYCoefficient) + 'y' + getEqExpString(formatCoefficient(rightZCoefficient) + 'z') + formatConstant(rightConstant));
+        rightZCoefficient -= leftZCoefficient;
+
+        // result of combining z terms to the right
+	write_table_step('',
+                          xTerm + formatCoefficient(leftYCoefficient) + 'y',
+                          formatFirstCoefficient(rightYCoefficient) + 'y' + getEqExpString(formatCoefficient(rightZCoefficient) + 'z') + formatConstant(rightConstant));
+        
+        // suggest combining y terms to the right
+	write_table_step('Combine the y terms to the right side.',
+                          xTerm + getEqExpString(formatCoefficient(leftYCoefficient) + 'y'),
+                          getEqExpString(formatFirstCoefficient(rightYCoefficient) + 'y') + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+        rightYCoefficient -= leftYCoefficient;
+
+        // result of combining y terms to the right
+	write_table_step('',
+                          xTerm,
+                          getEqExpString(formatFirstCoefficient(rightYCoefficient) + 'y') + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+
+        var divisor = ''; // divisor for answer
+
+        if (xTermHasY && xTermHasZ)
+        {
+            write_table_step('Isolate the x.',
+                              getEqExpString(xTermCoefficient) + 'x' + getEqExpString('yz'),
+                              formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+            
+            divisor = xTermCoefficient+'yz';
+        }
+        else if (xTermHasY)
+        {
+            write_table_step('Isolate the x.',
+                              getEqExpString(xTermCoefficient) + 'x' + getEqExpString('y'),
+                              formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+            
+            divisor = xTermCoefficient+'y';
+        }
+        else if (xTermHasZ)
+        {
+            write_table_step('Isolate the x.',
+                              getEqExpString(xTermCoefficient) + 'x' + getEqExpString('z'),
+                              formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+            
+            divisor = xTermCoefficient+'z';
+        }
+        else
+        {
+            write_table_step('Isolate the x.',
+                              getEqExpString(xTermCoefficient) + 'x',
+                              formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant));
+            
+            divisor = xTermCoefficient;
+        }
+        
+        theAnswer = '(' + formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(rightConstant) + ')/('+divisor+')'; 
+
+        // show result
+        write_table_step('The result!',
+                          'x',
+                          theAnswer);
+
+	table_step_footer();
+        
+        // 1 in 5 times make the answer none of the above while changing the correct answer to a slight variation
+        // and then altering that variation, making sure not to accidentally alter it to the right answer
+        if (getRandomInt(4) == 0)
+        {
+            // form answers
+            setCorrectAnswer('`none of the answers shown`' );
+            
+            // set up coefficients for correct answer
+            var correctConstant = rightConstant;
+            var correctYCoefficient = rightYCoefficient;
+            var correctZCoefficient = rightZCoefficient;
+            var temp;
+            
+            // randomly change one of the terms (constants or y or z terms) so the answer is wrong
+            // and so variations on it are also wrong
+            var randomVal = getRandomInt(2);
+            if (randomVal == 0)
+            {
+                temp = correctConstant;
+                while(correctConstant == temp) correctConstant = get_random();
+            }
+            else if (randomVal == 1)
+            {
+                temp = correctYCoefficient;
+                while(correctYCoefficient == temp) correctYCoefficient = get_random();
+            }
+            else
+            {
+                temp = correctZCoefficient;
+                while(correctZCoefficient == temp) correctZCoefficient = get_random();
+            }
+            
+            // pick different yterm coeff
+            var wrongYTerm = rightYCoefficient;
+            while (wrongYTerm == rightYCoefficient || wrongYTerm == correctYCoefficient)
+            {
+                wrongYTerm = get_random();    
+            }
+    
+            // pick different yterm coeff
+            var wrongZTerm = rightZCoefficient;
+            while (wrongZTerm == rightZCoefficient || wrongZTerm == correctZCoefficient)
+            {
+                wrongZTerm = get_random();    
+            }
+    
+            // pick different yterm coeff
+            var wrongConstant = rightConstant;
+            while (wrongConstant == rightConstant || wrongConstant == correctConstant)
+            {
+                wrongConstant = get_random();    
+            }
+            addWrongChoice('(' + formatFirstCoefficient(wrongYTerm) + 'y' + formatCoefficient(wrongZTerm) + 'z' + formatConstant(correctConstant) + ')/('+divisor+')' );
+    
+            addWrongChoice('(' + formatFirstCoefficient(correctYCoefficient) + 'y' + formatCoefficient(wrongZTerm) + 'z' + formatConstant(wrongConstant) + ')/('+divisor+')' );
+    
+            addWrongChoice('(' + formatFirstCoefficient(wrongYTerm) + 'y' + formatCoefficient(correctZCoefficient) + 'z' + formatConstant(wrongConstant) + ')/('+divisor+')' );
+    
+            addWrongChoice('(' + formatFirstCoefficient(correctYCoefficient) + 'y' + formatCoefficient(correctZCoefficient) + 'z' + formatConstant(correctConstant) + ')/('+divisor+')' );
+        }
+        // the other cases we set the right answer then vary the terms in the numerator for each wrong answer
+        else
+        {
+            // form answers
+            setCorrectAnswer('x='+theAnswer);
+            
+            // pick different yterm coeff
+            var wrongYTerm = rightYCoefficient;
+            while (wrongYTerm == rightYCoefficient)
+            {
+                wrongYTerm = get_random();    
+            }
+    
+            // pick different yterm coeff
+            var wrongZTerm = rightZCoefficient;
+            while (wrongZTerm == rightZCoefficient)
+            {
+                wrongZTerm = get_random();    
+            }
+    
+            // pick different yterm coeff
+            var wrongConstant = rightConstant;
+            while (wrongConstant == rightConstant)
+            {
+                wrongConstant = get_random();    
+            }
+            addWrongChoice('(' + formatFirstCoefficient(wrongYTerm) + 'y' + formatCoefficient(wrongZTerm) + 'z' + formatConstant(rightConstant) + ')/('+divisor+')' );
+    
+            addWrongChoice('(' + formatFirstCoefficient(rightYCoefficient) + 'y' + formatCoefficient(wrongZTerm) + 'z' + formatConstant(wrongConstant) + ')/('+divisor+')' );
+    
+            addWrongChoice('(' + formatFirstCoefficient(wrongYTerm) + 'y' + formatCoefficient(rightZCoefficient) + 'z' + formatConstant(wrongConstant) + ')/('+divisor+')' );
+    
+            addWrongChoice('`none of the answers shown`' );
+        }
+}
+
+// creates hints for type 1
+function generateHintStepsForEquationType1(leftXYCoefficient,leftXZCoefficient,leftXCoefficient,leftConstant,rightYCoefficient,rightConstant)
+{
+	write_text("Solve for `x`:");
+        
+        // display formula
+	table_step_header("",
+                          formatFirstCoefficient(leftXYCoefficient) + 'xy' +
+                            formatCoefficient(leftXZCoefficient) + 'xz' +
+                            formatCoefficient(leftXCoefficient) + 'x' +
+                            formatConstant(leftConstant),
+                          formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant));
+
+        // suggest combining constant terms to the right
+	write_table_step('Combine the constants to the right side.',
+                         formatFirstCoefficient(leftXYCoefficient) + 'xy' +
+                            formatCoefficient(leftXZCoefficient) + 'xz' +
+                            formatCoefficient(leftXCoefficient) + 'x' +
+                            getEqExpString(formatConstant(leftConstant)),
+                         formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            getEqExpString(formatConstant(rightConstant)));
+        var wrongConstant = rightConstant + leftConstant;
+        rightConstant -= leftConstant;
+        
+        // result of combining constant terms to the right
+	write_table_step('',
+                         formatFirstCoefficient(leftXYCoefficient) + 'xy' +
+                            formatCoefficient(leftXZCoefficient) + 'xz' +
+                            formatCoefficient(leftXCoefficient) + 'x',
+                         formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            getEqExpString(formatConstant(rightConstant)));
+        
+        // note the x
+	write_table_step('Notice all the left terms have an x.',
+                         formatFirstCoefficient(leftXYCoefficient) + getEqExpString('x') + 'y' +
+                            formatCoefficient(leftXZCoefficient) + getEqExpString('x') + 'z' +
+                            formatCoefficient(leftXCoefficient) + getEqExpString('x'),
+                         formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant));
+
+        // suggest factoring the x
+	write_table_step('Factor out the x.',
+                         formatFirstCoefficient(leftXYCoefficient) + getEqExpString('x') + 'y' +
+                            formatCoefficient(leftXZCoefficient) + getEqExpString('x') + 'z' +
+                            formatCoefficient(leftXCoefficient) + getEqExpString('x'),
+                         formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant));
+
+        // factor the x
+	write_table_step('',
+                         'x * (' + formatFirstCoefficient(leftXYCoefficient) + 'y' +
+                            formatCoefficient(leftXZCoefficient) + 'z' +
+                            formatCoefficient(leftXCoefficient) + ')',
+                         formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant));
+
+        // isolate the x
+	write_table_step('Isolate the x.',
+                         'x *' + getEqExpString('(' + formatFirstCoefficient(leftXYCoefficient) + 'y' +
+                            formatCoefficient(leftXZCoefficient) + 'z' +
+                            formatCoefficient(leftXCoefficient) + ')'),
+                         formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant));
+
+        theAnswer = '(' + formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant) + ')/(' + formatFirstCoefficient(leftXYCoefficient) + 'y' +
+                            formatCoefficient(leftXZCoefficient) + 'z' +
+                            formatCoefficient(leftXCoefficient) + ')';
+
+        // show result of isolating the x
+	write_table_step('The result!',
+                         'x',
+                         theAnswer);
+
+	table_step_footer();
+
+
+        // form answers
+        setCorrectAnswer('x='+theAnswer);
+        
+        addWrongChoice('x='+'(' + formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(wrongConstant) + ')/(' + formatFirstCoefficient(leftXYCoefficient) + 'y' +
+                            formatCoefficient(leftXZCoefficient) + 'z' +
+                            formatCoefficient(leftXCoefficient) + ')');
+        addWrongChoice('x='+'(' + formatFirstCoefficient(leftXYCoefficient) + 'y' +
+                            formatCoefficient(leftXZCoefficient) + 'z' +
+                            formatCoefficient(leftXCoefficient) + ')/(' + formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(wrongConstant) + ')');
+        addWrongChoice('x='+'(' + formatFirstCoefficient(leftXYCoefficient) + 'y' +
+                            formatCoefficient(leftXZCoefficient) + 'z' +
+                            formatCoefficient(leftXCoefficient) + ')/(' + formatFirstCoefficient(rightYCoefficient) + 'y' +
+                            formatConstant(rightConstant) + ')');
+        addWrongChoice('x=' + formatFirstCoefficient(rightYCoefficient-leftXYCoefficient) + 'y' +
+                            formatCoefficient(-leftXZCoefficient) + 'z' +
+                            formatConstant(rightConstant));
+        
+}    
+
+// creates hints for type 2
+function generateHintStepsForEquationType2(leftXCoefficient,leftYCoefficient,leftDivisor,rightXCoefficient,rightZCoefficient,rightDivisor)
+{
+	write_text("Solve for `x`:");
+        
+        // display formula
+	table_step_header("",
+                          "(" + 
+                            formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y' + ')/' +
+                            leftDivisor,
+                          "(" + 
+                            formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z' + ')/' +
+                            rightDivisor);
+ 
+        // suggest multiplying out the left denominator
+	write_table_step('Multiply both sides by' + getEqExpString(formatFirstCoefficient(leftDivisor)) + '.',
+                         getEqExpString(leftDivisor) + '*(' + 
+                            formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y' + ')/' +
+                            leftDivisor,
+                         '(' + 
+                            formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z' + ')/' +
+                            rightDivisor + '*' + getEqExpString(leftDivisor)
+                            );
+
+        // result of multiplying out the left denominator
+	write_table_step('',
+                         formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y',
+                         leftDivisor + '*(' + 
+                            formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z' + ')/' +
+                            rightDivisor
+                            );
+
+        // suggest multiplying out the right denominator
+	write_table_step('Multiply both sides by' + getEqExpString(formatFirstCoefficient(rightDivisor)) + '.',
+                         getEqExpString(rightDivisor) + '*(' + 
+                            formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y)',
+                         leftDivisor + '*(' + 
+                            formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z' + ')/' +
+                            rightDivisor + '*' + getEqExpString(rightDivisor) 
+                            );
+
+        // result of multiplying out the right denominator
+	write_table_step('',
+                         rightDivisor + '*(' + 
+                            formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y)',
+                         leftDivisor + '*(' + 
+                            formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z)'
+                            );
+
+        // suggest distributing factors
+	write_table_step('Distribute the factors.',
+                         getEqExpString(rightDivisor) + '*(' + 
+                            formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y)',
+                         getEqExpString(leftDivisor) + '*(' + 
+                            formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z)'
+                            );
+        var wrongZCoefficient = rightZCoefficient * rightDivisor;
+        var wrongYCoefficient = -leftYCoefficient * leftDivisor; // negated because it moves over to right side
+        var wrongLeftXCoefficient2 = leftXCoefficient*leftDivisor - rightXCoefficient*rightDivisor;
+        leftXCoefficient *= rightDivisor;
+        leftYCoefficient *= rightDivisor;
+        rightXCoefficient *= leftDivisor;
+        rightZCoefficient *= leftDivisor;
+
+        // result of distributing factors
+	write_table_step('',
+                         formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y',
+                         formatFirstCoefficient(rightXCoefficient) + 'x' +
+                            formatCoefficient(rightZCoefficient) + 'z'
+                            );
+
+        // suggest collecting x terms
+	write_table_step('Combine x terms to the left.',
+                         getEqExpString(formatFirstCoefficient(leftXCoefficient) + 'x')  +
+                            formatCoefficient(leftYCoefficient) + 'y',
+                         getEqExpString(formatFirstCoefficient(rightXCoefficient) + 'x') +
+                            formatCoefficient(rightZCoefficient) + 'z'
+                            );
+        var wrongLeftXCoefficient = leftXCoefficient + rightXCoefficient;
+        leftXCoefficient -= rightXCoefficient;
+
+        // collect x terms
+	write_table_step('',
+                         formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            formatCoefficient(leftYCoefficient) + 'y',
+                         formatFirstCoefficient(rightZCoefficient) + 'z'
+                            );
+
+        // suggest moving y term to right
+	write_table_step('Move the y term to the right.',
+                         formatFirstCoefficient(leftXCoefficient) + 'x' +
+                            getEqExpString(formatCoefficient(leftYCoefficient) + 'y'),
+                         formatFirstCoefficient(rightZCoefficient) + 'z'
+                            );
+        var rightYCoefficient = -leftYCoefficient;
+
+        // move y term to right
+	write_table_step('',
+                         formatFirstCoefficient(leftXCoefficient) + 'x',
+                         formatFirstCoefficient(rightZCoefficient) + 'z' +
+                            formatCoefficient(rightYCoefficient) + 'y'
+                            );
+
+        // suggest dividing out x term coefficient
+	write_table_step('Divide out the x coefficient.',
+                         getEqExpString(formatFirstCoefficient(leftXCoefficient)) + 'x',
+                         formatFirstCoefficient(rightZCoefficient) + 'z' +
+                            formatCoefficient(rightYCoefficient) + 'y'
+                            );
+
+        theAnswer = '(' + formatFirstCoefficient(rightZCoefficient) + 'z' +
+                            formatCoefficient(rightYCoefficient) + 'y)/' + leftXCoefficient;
+
+        // divide out x term coefficient
+	write_table_step('The result!',
+                         'x',
+                         theAnswer);
+
+        // form answers
+        setCorrectAnswer('x='+theAnswer);
+        
+        addWrongChoice('x='+'(' + formatFirstCoefficient(rightZCoefficient) + 'z' +
+                            formatCoefficient(rightYCoefficient) + 'y)/' + wrongLeftXCoefficient);
+        addWrongChoice('x='+'(' + formatFirstCoefficient(wrongZCoefficient) + 'z' +
+                            formatCoefficient(wrongYCoefficient) + 'y)/' + leftXCoefficient);
+        addWrongChoice('x='+'(' + formatFirstCoefficient(wrongZCoefficient) + 'z' +
+                            formatCoefficient(wrongYCoefficient) + 'y)/' + wrongLeftXCoefficient);
+        addWrongChoice('x='+'(' + formatFirstCoefficient(rightZCoefficient) + 'z' +
+                            formatCoefficient(rightYCoefficient) + 'y)/' + wrongLeftXCoefficient2);
+        addWrongChoice('x='+'(' + formatFirstCoefficient(wrongZCoefficient) + 'z' +
+                            formatCoefficient(wrongYCoefficient) + 'y)/' + wrongLeftXCoefficient2);
+        addWrongChoice('x='+'(' + formatFirstCoefficient(wrongZCoefficient) + 'z' +
+                            formatCoefficient(wrongYCoefficient) + 'y)/' + wrongLeftXCoefficient2);
+
+
+
+
+
+	table_step_footer();
+}
+
+function get_equation_string_side(x, c, selX, selC) {
+	var equation_string = " ";
+	var first=0; //boolean to test if the first term on the side has been printed
+	var xColor = noSelColor;
+	var cColor = noSelColor;
+
+	if (selX)
+		xColor = selColor;
+	if (selC)
+		cColor = selColor;
+		
+	equation_string = '`<font color=\"'+xColor+'\">`';
+	for (var i=0; i<x.length; i++) {
+		if (x[i]!=0) {
+			
+			if (first==0) {
+				first=1;
+				equation_string+=format_first_coefficient(x[i])+'x';
+			}
+			else {
+				equation_string+=format_coefficient(x[i])+'x';
+			}
+		}
+		
+	}
+	equation_string += '`</font><font color=\"'+cColor+'\">`'
+	for (var i=0; i<c.length; i++) {
+		if (first==0) {
+			first=1;
+			equation_string+=c[i];
+		}
+		else {
+			equation_string+=format_constant(c[i]);
+		}
+	}
+	equation_string += '`</font>`';
+	return equation_string;
+}
+
+
+function rational_equation(top_x, bot_x, top_c, bot_c) //assumes the form (AX+B)/(CX+D)
+{
+	var equation_string = "(";
+	equation_string+=format_first_coefficient(top_x[0])+'x';
+	equation_string+=format_constant(top_c[0]);
+	equation_string+= ")/(";
+	equation_string+=format_first_coefficient(bot_x[0])+'x';
+	equation_string+=format_constant(bot_c[0]);
+	equation_string+=")"; 
+
+	return equation_string;
+}
+
+
+
+// tagging this generateequation block for now because the linear_equations modules used it, but really it probably doesn't need to be blocked (nothing will likely overload it)
+{% block generateequation %}
+
+//console.log('hello world');
+
+var NUM_EQUATION_TYPES = 3;
+equationType = getRandomInt(NUM_EQUATION_TYPES - 1)
+equationType = 2;
+if (equationType == 0)
+{
+    // first equation type of the form:
+    // Gx(yz) + Ay + Bz + C = Dy + Ez + F
+    // The yz in parens just means a y, a z, or both may be included in that term. All constants A - G are non-zero from -10 to 10.
+    // Solve for x.
+    
+    // first determine the coefficients and the presence of other unknowns with the x term
+    var leftYCoefficient = get_random();
+    var leftZCoefficient = get_random();
+    var leftConstant = get_random();
+    var rightYCoefficient = leftYCoefficient;
+    while (rightYCoefficient == leftYCoefficient) // make sure terms don't cancel out
+    {
+        rightYCoefficient = get_random();
+    }
+    var rightZCoefficient = leftZCoefficient;
+    while (rightZCoefficient == leftZCoefficient) // make sure terms don't cancel out
+    {
+        rightZCoefficient = get_random();
+    }    
+    var rightConstant = leftConstant;
+    while (rightConstant== leftConstant) // make sure terms don't cancel out
+    {
+        rightConstant = get_random();
+    }    
+    var xTermCoefficient = get_random();
+    
+    // whether there is a y, i.e. -5xy
+    var xTermHasY = false;
+    if (getRandomInt(1) == 0) xTermHasY = true;
+
+    // whether there is a z, i.e. -5xz
+    var xTermHasZ = false;
+    if (getRandomInt(1) == 0) xTermHasZ = true;
+}
+else if (equationType == 1)
+{
+    var leftXYCoefficient = get_random();
+    var leftXZCoefficient = get_random();
+    var leftXCoefficient = get_random();    
+    var leftConstant = get_random();
+    var rightYCoefficient = get_random();    
+    var rightConstant = leftConstant;
+    while (rightConstant == leftConstant)
+    {
+        rightConstant = get_random(); // don't let constants cancel out
+    }
+}
+else if (equationType == 2)
+{
+    var leftXCoefficient = get_random();
+    var leftYCoefficient = get_random();
+    var leftDivisor = get_random();    
+    var rightXCoefficient = get_random();
+    var rightZCoefficient = get_random();    
+    var rightDivisor = get_random();    
+    while (leftXCoefficient*rightDivisor == rightXCoefficient*leftDivisor)
+    {
+        rightDivisor = get_random(); // don't let solution's divisor = 0
+    }
+}
+
+{% endblock generateequation %}
+
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script language=Javascript1.2><!--
+//Write the question on the page
+
+// Ben: do I really need to put some code in a maincell block and some in a maincode block? I figured if not, then I might as well
+//      just put the call to generateHintSteps directly in the if-else above that brances on equationType (and not call it
+//      generateHintSteps of course but rather simply createProblem or something since it also creates the right/wrong answers)
+
+// generate hint steps
+if (equationType == 0)
+{
+    generateHintStepsForEquationType0(xTermCoefficient,leftYCoefficient,leftZCoefficient,leftConstant,rightYCoefficient,rightZCoefficient,rightConstant,xTermHasY,xTermHasZ);
+}
+else if (equationType == 1)
+{
+    generateHintStepsForEquationType1(leftXYCoefficient,leftXZCoefficient,leftXCoefficient,leftConstant,rightYCoefficient,rightConstant);
+}
+else if (equationType == 2)
+{
+    generateHintStepsForEquationType2(leftXCoefficient,leftYCoefficient,leftDivisor,rightXCoefficient,rightZCoefficient,rightDivisor);
+}
+
+
+//-->
+</script>
+
+{% endblock maincell %}
+
