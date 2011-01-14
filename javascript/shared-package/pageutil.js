@@ -223,14 +223,22 @@ var VideoStats = {
 
         this.fSaving = true;
         var percent = this.getPercentWatched();
+        var dtSinceSaveBeforeError = this.dtSinceSave;
 
-        $.post("/logvideoprogress", 
-                {
+        $.ajax({type: "POST",
+                url: "/logvideoprogress", 
+                data: {
                     video_key: $("#video_key").val(),
                     last_second_watched: this.getSecondsWatched(),
                     seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
                 },
-                function (data) { VideoStats.finishSave(data, percent); });
+                success: function (data) { VideoStats.finishSave(data, percent); },
+                error: function () {
+                    // Restore pre-error stats so user can still get full
+                    // credit for video even if GAE timed out on a request
+                    VideoStats.fSaving = false; VideoStats.dtSinceSave = dtSinceSaveBeforeError;
+                }
+        });
 
         this.dtSinceSave = new Date();
     },
