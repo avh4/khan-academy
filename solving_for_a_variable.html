@@ -47,10 +47,10 @@ var noSelColor = "#333333";
 //      I had guessed what backquotes do is surround regions for the mathml parser to ignore, but if that's the case, my change makes
 //      the entire string below *except* for the string param be ignored while the lin eq 1 impl does the opposite, making *only* the
 //      string portion be ignored by the mathml parser. I must be thinking of this wrong.
-function getEqExpString(string)
+function getEqExpString(str)
 {
 	var selFontString = '`<font color='+selColor+' size=4>';
-	return (selFontString+'`'+string+'`</font>`');
+	return (selFontString+'`'+str+'`</font>`');
 }
 
 // creates hints for type 0
@@ -363,7 +363,7 @@ function generateHintStepsForEquationType2(leftXCoefficient,leftYCoefficient,lef
                             rightDivisor);
  
         // suggest multiplying out the left denominator
-	write_table_step('Multiply both sides by' + getEqExpString(formatFirstCoefficient(leftDivisor)) + '.',
+	write_table_step('Multiply both sides by ' + getEqExpString(formatFirstCoefficient(leftDivisor)) + '.',
                          getEqExpString(leftDivisor) + '*(' + 
                             formatFirstCoefficient(leftXCoefficient) + 'x' +
                             formatCoefficient(leftYCoefficient) + 'y' + ')/' +
@@ -385,7 +385,7 @@ function generateHintStepsForEquationType2(leftXCoefficient,leftYCoefficient,lef
                             );
 
         // suggest multiplying out the right denominator
-	write_table_step('Multiply both sides by' + getEqExpString(formatFirstCoefficient(rightDivisor)) + '.',
+	write_table_step('Multiply both sides by ' + getEqExpString(formatFirstCoefficient(rightDivisor)) + '.',
                          getEqExpString(rightDivisor) + '*(' + 
                             formatFirstCoefficient(leftXCoefficient) + 'x' +
                             formatCoefficient(leftYCoefficient) + 'y)',
