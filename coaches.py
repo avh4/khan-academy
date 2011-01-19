@@ -440,6 +440,9 @@ class ViewClassReport(request_handler.RequestHandler):
             for student_email in students:   
 
                 student_data = class_exercises[student_email]["student_data"]
+                if not student_data:
+                    continue
+
                 name = util.get_nickname_for(student_data.user)
                 i = 0
 
