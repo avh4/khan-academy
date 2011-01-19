@@ -2,6 +2,8 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 // Dependent Probability
+// Author: Joey Chang
+// Date: 1/19/11
 //
 // Problem layout:
 // You have A coins in a bag. B of them are unfair in that they have a C% chance of coming up heads when flipped (the rest
@@ -12,28 +14,28 @@
 // C - % chance of unfair coins coming up heads
 // D - number of times chosen coin is flipped
 //
-//
 
 
 var ExerciseDependentProbability = {
 
-    COINS_MIN: 5,
-    COINS_MAX: 15,
-    UNFAIR_COINS_MIN: 2,
-    UNFAIR_COINS_MAX: 4,
-    PERCENT_UNFAIR_HEADS_MIN: 30,
-    PERCENT_UNFAIR_HEADS_MAX: 70,
-    PERCENT_UNFAIR_HEADS_INCR: 5,
-    COIN_FLIPS_MIN: 2,
-    COIN_FLIPS_MAX: 4,
-    COLOR_FAIR: "#33CC33",
-    COLOR_UNFAIR: "#CC3333",
+    // constant values
+    COINS_MIN: 5,			// random range for total coins in bag
+    COINS_MAX: 15,			// .
+    UNFAIR_COINS_MIN: 2,		// random range for unfair coins (NOTE: MAX must be <= COINS_MIN)
+    UNFAIR_COINS_MAX: 4,		// .
+    PERCENT_UNFAIR_HEADS_MIN: 30,	// random range for % chance heads shows on the unfair coin
+    PERCENT_UNFAIR_HEADS_MAX: 70,	// .
+    PERCENT_UNFAIR_HEADS_INCR: 5,	// increment of selected random value (i.e. 20, 25, 30, 35... are possible values for incr of 5)
+    COIN_FLIPS_MIN: 2,			// random range for number of coin flips
+    COIN_FLIPS_MAX: 4,			// .
+    COLOR_FAIR: "#33CC33",		// color used to tag fair-related terms in hints
+    COLOR_UNFAIR: "#CC3333",		// color used to tag unfair-related terms in hints
 
-    numCoins: 0,
-    numUnfairCoins: 0,
-    percentChanceUnfairHeads: 0,
-    numFlips: 0,
-    answer: 0,
+    numCoins: 0,			// randomly chosen number of coins in bag
+    numUnfairCoins: 0,			// randomly chosen number of unfair coins
+    percentChanceUnfairHeads: 0,	// randomly chosen % chance of flipping heads with unfair coin
+    numFlips: 0,			// randomly chosen number of flips
+    answer: 0,				// computed answer (saved for use in hint system)
     
     init: function() {
         this.numCoins = getRandomIntRange(this.COINS_MIN, this.COINS_MAX);
@@ -49,7 +51,7 @@ var ExerciseDependentProbability = {
 	var unfairCoinFractionString = this.numUnfairCoins + '/' + this.numCoins;
 	var fairCoinFractionString = (this.numCoins-this.numUnfairCoins) + '/' + this.numCoins;
 	var decimalChanceUnfairHeads = this.percentChanceUnfairHeads / 100;
-	var unfairHeadsDecimalFormula = '' + decimalChanceUnfairHeads;
+	var unfairHeadsDecimalFormula = decimalChanceUnfairHeads.toString();
 	for (var i = 0; i < this.numFlips - 1; i++)
 	{
 		unfairHeadsDecimalFormula += '*' + decimalChanceUnfairHeads;
@@ -60,7 +62,7 @@ var ExerciseDependentProbability = {
 		unfairHeadsPercentFormula += '*' + this.percentChanceUnfairHeads + '%';
 	}
 	var decimalChanceFairHeads = (100 - this.percentChanceUnfairHeads) / 100;
-	var fairHeadsDecimalFormula = '' + decimalChanceFairHeads;
+	var fairHeadsDecimalFormula = decimalChanceFairHeads.toString();
 	for (var i = 0; i < this.numFlips - 1; i++)
 	{
 		fairHeadsDecimalFormula += '*' + decimalChanceFairHeads;
@@ -71,29 +73,74 @@ var ExerciseDependentProbability = {
 		fairHeadsPercentFormula += '*' + this.percentChanceFairHeads + '%';
 	}
 	
+	// write question text
 	write_text('You have ' + this.numCoins + ' coins in a bag. ' + this.numUnfairCoins + ' of them are ' +
 		   'unfair in that they have a ' + this.percentChanceUnfairHeads + '% chance of coming up heads when ' +
 		   'flipped (the rest are fair coins). You randomly choose one coin from the bag and flip it ' +
 		   this.numFlips + ' times. What is the percent probability of getting ' + this.numFlips + ' heads?');
 	
+	// hint indicating different coin types
 	write_step('<br>You can only possibly pick a fair coin or pick an unfair coin. There is no other outcome.');
+
+	// hint questioning coin type selection chances
 	write_step('<br>What chance do you have of picking an unfair coin? How about a fair coin?');
-	write_step('<br>An unfair coin occurs ' + mathFormatWithColor(unfairCoinFractionString, this.COLOR_UNFAIR) + ' of the time.');
-	write_step('<br>A fair coin occurs the rest of the time, or ' + mathFormatWithColor(fairCoinFractionString, this.COLOR_FAIR) + ' of the time.');
-	write_step('<br>For that ' + mathFormatWithColor(unfairCoinFractionString, this.COLOR_UNFAIR) + ' of the time that you pick an unfair coin, what is the chance of flipping ' + mathFormatWithColor(this.numFlips, this.COLOR_UNFAIR) + ' heads using that unfair coin?');
-	write_step('<br>The chance is ' + mathFormatWithColor(unfairHeadsPercentFormula, this.COLOR_UNFAIR) + ', or ' + mathFormatWithColor(unfairHeadsDecimalFormula, this.COLOR_UNFAIR) + '.');
-	write_step('<br>Now, then, your chance of both picking the unfair coin and also flipping ' + mathFormatWithColor(this.numFlips, this.COLOR_UNFAIR) + ' heads--the chance that both these events occur--is what?');
-	write_step('<br>It is ' + mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR));
-	write_step('<br>Now, the other possibility, picking the fair coin and flipping ' + mathFormatWithColor(this.numFlips, this.COLOR_FAIR) + ' heads is what?');
-	write_step('<br>It is ' + mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR));
+
+	// hint showing chance of unfair coin picked
+	write_step('<br>An unfair coin occurs ' +
+		   mathFormatWithColor(unfairCoinFractionString, this.COLOR_UNFAIR) +
+		   ' of the time.');
+
+	// hint showing chance of fair coin picked
+	write_step('<br>A fair coin occurs the rest of the time, or ' +
+		   mathFormatWithColor(fairCoinFractionString, this.COLOR_FAIR) +
+		   ' of the time.');
+
+	// hint questioning head-flipping chances for unfair coin
+	write_step('<br>For that ' +
+		   mathFormatWithColor(unfairCoinFractionString, this.COLOR_UNFAIR) +
+		   ' of the time that you pick an unfair coin, what is the chance of flipping ' +
+		   mathFormatWithColor(this.numFlips, this.COLOR_UNFAIR) +
+		   ' heads using that unfair coin?');
+
+	// hint showing chance of flipping all heads for unfair coin
+	write_step('<br>The chance is ' +
+		   mathFormatWithColor(unfairHeadsPercentFormula, this.COLOR_UNFAIR) +
+		   ', or ' +
+		   mathFormatWithColor(unfairHeadsDecimalFormula, this.COLOR_UNFAIR) +
+		   '.');
+
+	// hint suggesting combining unfair coin selection with all-heads-flip event
+	write_step('<br>Now, then, your chance of both picking the unfair coin and also flipping ' +
+		   mathFormatWithColor(this.numFlips, this.COLOR_UNFAIR) +
+		   ' heads--the chance that both these events occur--is what?');
+
+	// hint revealing computed chance with unfair coin
+	write_step('<br>It is ' +
+		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR));
+
+	// hint questioning the fair coin computation	
+	write_step('<br>Now, the other possibility, picking the fair coin and flipping ' +
+		   mathFormatWithColor(this.numFlips, this.COLOR_FAIR) +
+		   ' heads is what?');
+
+	// hint showing the fair coin computation	
+	write_step('<br>It is ' +
+		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR));
+
+	// hint questioning how to combine previously computed events
 	write_step('<br>How do you combine these two mutually exclusive events to find the chance that either occurs?');
+
+	// hint revealing the answer
 	write_step('<br>Add them! So your answer is ' +
 		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR) +
-		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR) + ', or ' +
-		   this.answer + '%.');
+		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR) +
+		   ', or ' +
+		   this.answer +
+		   '%.');
 	
     },
 
+    // Computes correct answer and adds wrong choices within a reasonable max range given the selected random inputs
     computeAnswer: function() {
 	// the answer is chanceUnfairPicked * (unfairCoinHeads ^ flips) + chanceFairPicked * (.5 ^ flips)
 	var chanceUnfairPicked = this.numUnfairCoins / this.numCoins;
