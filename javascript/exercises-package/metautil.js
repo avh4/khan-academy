@@ -86,6 +86,13 @@ function setCorrectAnswer(a)
 	correct_answer = a;
 }
 
+function mathFormatWithColor(e,color)
+{
+	var formattedString = mathFormat(e);
+	var selFontString = '<font color='+color+' size=4>';
+	return (selFontString+formattedString+'</font>');
+	
+}
 
 function mathFormat(e)
 {

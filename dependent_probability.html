@@ -1,0 +1,133 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+// Dependent Probability
+//
+// Problem layout:
+// You have A coins in a bag. B of them are unfair in that they have a C% chance of coming up heads when flipped (the rest
+// are fair coins). You randomly choose one coin from the bag and flip it D times. What is the probability of getting D heads?
+//
+// A - coins in bag
+// B - unfair coins
+// C - % chance of unfair coins coming up heads
+// D - number of times chosen coin is flipped
+//
+//
+
+
+var ExerciseDependentProbability = {
+
+    COINS_MIN: 5,
+    COINS_MAX: 15,
+    UNFAIR_COINS_MIN: 2,
+    UNFAIR_COINS_MAX: 4,
+    PERCENT_UNFAIR_HEADS_MIN: 30,
+    PERCENT_UNFAIR_HEADS_MAX: 70,
+    PERCENT_UNFAIR_HEADS_INCR: 5,
+    COIN_FLIPS_MIN: 2,
+    COIN_FLIPS_MAX: 4,
+    COLOR_FAIR: "#33CC33",
+    COLOR_UNFAIR: "#CC3333",
+
+    numCoins: 0,
+    numUnfairCoins: 0,
+    percentChanceUnfairHeads: 0,
+    numFlips: 0,
+    answer: 0,
+    
+    init: function() {
+        this.numCoins = getRandomIntRange(this.COINS_MIN, this.COINS_MAX);
+	this.numUnfairCoins = getRandomIntRange(this.UNFAIR_COINS_MIN, this.UNFAIR_COINS_MAX);
+	var numIncr = (this.PERCENT_UNFAIR_HEADS_MAX - this.PERCENT_UNFAIR_HEADS_MIN) / this.PERCENT_UNFAIR_HEADS_INCR;
+	this.percentChanceUnfairHeads = this.PERCENT_UNFAIR_HEADS_MIN + getRandomInt(numIncr) * this.PERCENT_UNFAIR_HEADS_INCR;
+	this.numFlips = getRandomIntRange(this.COIN_FLIPS_MIN, this.COIN_FLIPS_MAX);
+
+	// compute answer
+	this.computeAnswer();
+
+	// create some convenience variables for forming the hint text
+	var unfairCoinFractionString = this.numUnfairCoins + '/' + this.numCoins;
+	var fairCoinFractionString = (this.numCoins-this.numUnfairCoins) + '/' + this.numCoins;
+	var decimalChanceUnfairHeads = this.percentChanceUnfairHeads / 100;
+	var unfairHeadsDecimalFormula = '' + decimalChanceUnfairHeads;
+	for (var i = 0; i < this.numFlips - 1; i++)
+	{
+		unfairHeadsDecimalFormula += '*' + decimalChanceUnfairHeads;
+	}
+	var unfairHeadsPercentFormula = this.percentChanceUnfairHeads + '%';
+	for (var i = 0; i < this.numFlips - 1; i++)
+	{
+		unfairHeadsPercentFormula += '*' + this.percentChanceUnfairHeads + '%';
+	}
+	var decimalChanceFairHeads = (100 - this.percentChanceUnfairHeads) / 100;
+	var fairHeadsDecimalFormula = '' + decimalChanceFairHeads;
+	for (var i = 0; i < this.numFlips - 1; i++)
+	{
+		fairHeadsDecimalFormula += '*' + decimalChanceFairHeads;
+	}
+	var fairHeadsPercentFormula = this.percentChanceFairHeads + '%';
+	for (var i = 0; i < this.numFlips - 1; i++)
+	{
+		fairHeadsPercentFormula += '*' + this.percentChanceFairHeads + '%';
+	}
+	
+	write_text('You have ' + this.numCoins + ' coins in a bag. ' + this.numUnfairCoins + ' of them are ' +
+		   'unfair in that they have a ' + this.percentChanceUnfairHeads + '% chance of coming up heads when ' +
+		   'flipped (the rest are fair coins). You randomly choose one coin from the bag and flip it ' +
+		   this.numFlips + ' times. What is the percent probability of getting ' + this.numFlips + ' heads?');
+	
+	write_step('<br>You can only possibly pick a fair coin or pick an unfair coin. There is no other outcome.');
+	write_step('<br>What chance do you have of picking an unfair coin? How about a fair coin?');
+	write_step('<br>An unfair coin occurs ' + mathFormatWithColor(unfairCoinFractionString, this.COLOR_UNFAIR) + ' of the time.');
+	write_step('<br>A fair coin occurs the rest of the time, or ' + mathFormatWithColor(fairCoinFractionString, this.COLOR_FAIR) + ' of the time.');
+	write_step('<br>For that ' + mathFormatWithColor(unfairCoinFractionString, this.COLOR_UNFAIR) + ' of the time that you pick an unfair coin, what is the chance of flipping ' + mathFormatWithColor(this.numFlips, this.COLOR_UNFAIR) + ' heads using that unfair coin?');
+	write_step('<br>The chance is ' + mathFormatWithColor(unfairHeadsPercentFormula, this.COLOR_UNFAIR) + ', or ' + mathFormatWithColor(unfairHeadsDecimalFormula, this.COLOR_UNFAIR) + '.');
+	write_step('<br>Now, then, your chance of both picking the unfair coin and also flipping ' + mathFormatWithColor(this.numFlips, this.COLOR_UNFAIR) + ' heads--the chance that both these events occur--is what?');
+	write_step('<br>It is ' + mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR));
+	write_step('<br>Now, the other possibility, picking the fair coin and flipping ' + mathFormatWithColor(this.numFlips, this.COLOR_FAIR) + ' heads is what?');
+	write_step('<br>It is ' + mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR));
+	write_step('<br>How do you combine these two mutually exclusive events to find the chance that either occurs?');
+	write_step('<br>Add them! So your answer is ' +
+		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR) +
+		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR) + ', or ' +
+		   this.answer + '%.');
+	
+    },
+
+    computeAnswer: function() {
+	// the answer is chanceUnfairPicked * (unfairCoinHeads ^ flips) + chanceFairPicked * (.5 ^ flips)
+	var chanceUnfairPicked = this.numUnfairCoins / this.numCoins;
+	var chanceFairPicked = 1 - chanceUnfairPicked;
+	
+	// answer in rounded xx.xx% form, i.e. 32.63
+	this.answer = Math.round(10000 * (chanceUnfairPicked * Math.pow((this.percentChanceUnfairHeads / 100), this.numFlips) +
+		chanceFairPicked * Math.pow(.5,this.numFlips))) / 100;
+
+	setCorrectAnswer(this.answer + '%');
+	
+	// cap the wrong answers at a maximum value
+	var maxAnswerSeed = Math.pow(Math.max(50,this.percentChanceUnfairHeads) / 100, this.numFlips) * 10000;
+	
+	addWrongChoice(getRandomInt(maxAnswerSeed) / 100 + '%');
+	addWrongChoice(getRandomInt(maxAnswerSeed) / 100 + '%');
+	addWrongChoice(getRandomInt(maxAnswerSeed) / 100 + '%');
+	addWrongChoice(getRandomInt(maxAnswerSeed) / 100 + '%');	
+    },
+
+}
+
+// initialize the exercise!
+ExerciseDependentProbability.init();
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincell %}
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe></td>
+{% endblock graphdisplay %}
+
+{% block maincellwidth %}70%{% endblock maincellwidth %}
