@@ -63,7 +63,7 @@ function randomAccelMotion()
 {
 	// generated numbers are going to be messy anyway, so might as well
 	// make them all messy
-	var accel = getRandomIntRange(-200, 200)/10;
+	var accel = nonZeroRandomInt(-200, 200)/10;
 	var v_init = getRandomIntRange(-400, 400)/10;
 	var time = getRandomIntRange(100, 200)/10;
 	var disp = v_init * time + (1/2) * accel * time * time;
