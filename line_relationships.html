@@ -1,0 +1,16 @@
+{% extends "multiple_choice_template.html" %}
+{% block maincode %}
+<style>
+  .line1 { color: blue }
+  .line2 { color: red }
+</style>
+<script src="/javascript/exercises/line_relationships.js?{{App.version}}"></script>
+<script>
+LineRelationshipsExercise.init();
+
+function graph_update() {
+initPlane();
+}
+</script>
+{% endblock maincode %}
+{% block hintfunction %}LineRelationshipsExercise.drawNextStep(){% endblock hintfunction %}
