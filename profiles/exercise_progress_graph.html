@@ -27,8 +27,8 @@ $("#module-progress .student-module-status").hover(
         
             var hoverData = $(self).children(".hover-data");
             var infoHover = $("#info-hover-container")
-            if (hoverData.html().trim()) {
-                infoHover.html(hoverData.html().trim());
+            if ($.trim(hoverData.html())) {
+                infoHover.html($.trim(hoverData.html()));
                 
                 var left = window.mouseX + 15;
 
