@@ -6,10 +6,11 @@
 
 <script>
     var chart;
+    var star = $.browser.msie ? "*" : "★";
     $(function() {
         chart = new Highcharts.Chart({
             chart: {
-                renderTo: 'highchart',
+                renderTo: 'highchart'
             },
             credits: {
                 enabled: false
@@ -23,7 +24,7 @@
                         connectorColor: 'black',
                         formatter: function() {
                             if (!this.point.name) return false;
-                            return "<b>" + this.point.name + (this.point.proficient ? "★" : "") + "</b>";
+                            return "<b>" + this.point.name + (this.point.proficient ? star : "") + "</b>";
                         }
                     }
                 }
@@ -134,10 +135,10 @@
                                 exid: '{{ dict_exercise_seconds|hash:key_exercise|hash:"exid"|escapejs }}',
                                 y: {{ dict_exercise_seconds|hash:key_exercise|hash:"percentage"|escapejs }},
                                 proficient: {% if dict_exercise_seconds|hash:key_exercise|hash:"proficient" %}true{% else %}false{% endif %},
-                                tooltip_title: '<b>{{ dict_exercise_seconds|hash:key_exercise|hash:"exercise_title"|escapejs }}</b> (exercise{% if dict_exercise_seconds|hash:key_exercise|hash:"proficient" %}, <b>★Proficient</b>{% endif %})',
+                                tooltip_title: '<b>{{ dict_exercise_seconds|hash:key_exercise|hash:"exercise_title"|escapejs }}</b> (exercise{% if dict_exercise_seconds|hash:key_exercise|hash:"proficient" %}, <b>' + star + 'Proficient</b>{% endif %})',
                                 time_spent: '{{ dict_exercise_seconds|hash:key_exercise|hash:"time_spent"|escapejs }}',
-                                tooltip_more: '{{ dict_exercise_seconds|hash:key_exercise|hash:"s_problems"|escapejs }}<br/>{{ dict_exercise_seconds|hash:key_exercise|hash:"s_correct_problems"|escapejs }}<br/>',
-                                }{% if not forloop.last %},{% endif %}
+                                tooltip_more: '{{ dict_exercise_seconds|hash:key_exercise|hash:"s_problems"|escapejs }}<br/>{{ dict_exercise_seconds|hash:key_exercise|hash:"s_correct_problems"|escapejs }}<br/>'
+                            }{% if not forloop.last %},{% endif %}
                         {% endfor %}
                     ]
                 }

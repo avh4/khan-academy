@@ -7,7 +7,9 @@ var Profile = {
 
     init: function() {
 
-        $.address.externalChange(function(){ Profile.historyChange(); });
+        if ($.address)
+            $.address.externalChange(function(){ Profile.historyChange(); });
+
         $(".graph-link").click(function(){Profile.loadGraphFromLink(this); return false;});
 
         $("#individual_report #achievements #achievement-list > ul li").click(function() {
@@ -138,7 +140,8 @@ var Profile = {
         if (!fNoHistoryEntry)
         {
             // Add history entry for browser
-            $.address.parameter("graph_url", href, false);
+            if ($.address)
+                $.address.parameter("graph_url", href, false);
         }
 
         this.showGraphThrobber(false);
@@ -147,7 +150,7 @@ var Profile = {
     },
 
     historyChange: function(e) {
-        var href = $.address.parameter("graph_url") || this.initialGraphUrl;
+        var href = ($.address ? $.address.parameter("graph_url") : "") || this.initialGraphUrl;
         if (href)
         {
             this.expandAccordionForHref(href);
