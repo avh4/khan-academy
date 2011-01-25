@@ -186,7 +186,7 @@
                                         {% badge_counts %}
                                     {% endif %}
                                 {% if points %}
-                                    <span title="{{points}} energy points" class="energy-points-badge">{{points}}</span>
+                                    <span title="{{points}} energy points" class="energy-points-badge" onclick="location.href='/profile'">{{points}}</span>
                                 {% endif %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
@@ -375,5 +375,7 @@
     	<!-- ChartBeat API - get # of users online now END -->
     
     </div>
+    {% block bottompagescript %}
+    {% endblock bottompagescript %}
     </body>
 </html>

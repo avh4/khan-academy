@@ -1,0 +1,26 @@
+<div id="recent-activity">
+    <h2>Recent Activity</h2>
+    {% if list_recent_activity %}
+    <div id="activity-list">
+        <ul>
+            {% for recent_activity in list_recent_activity %}
+
+                {% ifequal recent_activity.s_type "Badge" %}
+                    <li>{% profile_recent_activity_entry_badge student recent_activity %}</li>
+                {% endifequal %}
+
+                {% ifequal recent_activity.s_type "Exercise" %}
+                    <li>{% profile_recent_activity_entry_exercise student recent_activity %}</li>
+                {% endifequal %}
+
+                {% ifequal recent_activity.s_type "Video" %}
+                    <li>{% profile_recent_activity_entry_video student recent_activity %}</li>
+                {% endifequal %}
+
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+        <br/>Your recent <a href="/#browse">video</a>, <a href="/exercisedashboard">exercise</a>, and <a href="/badges/view">badge</a> activity will show up here.
+    {% endif %}
+</div>

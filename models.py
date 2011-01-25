@@ -22,17 +22,25 @@ class Setting(db.Model):
     value = db.StringProperty()
 
     @staticmethod
-    def cached_library_content_date(val = None):
+    def get_or_set_with_key(key, val = None):
         if val is None:
-            setting = Setting.get_by_key_name("cached_library_content_date")
+            setting = Setting.get_by_key_name(key)
             if setting is not None:
                 return setting.value
             return None
         else:
-            setting = Setting.get_or_insert("cached_library_content_date")
-            setting.value = val
+            setting = Setting.get_or_insert(key)
+            setting.value = str(val)
             setting.put()
             return setting.value
+
+    @staticmethod
+    def cached_library_content_date(val = None):
+        return Setting.get_or_set_with_key("cached_library_content_date", val)
+
+    @staticmethod
+    def count_videos(val = None):
+        return Setting.get_or_set_with_key("count_videos", val) or 0
 
 class UserExercise(db.Model):
 
@@ -154,6 +162,7 @@ class UserExercise(db.Model):
 class Exercise(db.Model):
 
     name = db.StringProperty()
+    short_display_name = db.StringProperty(default="")
     prerequisites = db.StringListProperty()
     covers = db.StringListProperty()
     v_position = db.IntegerProperty()
@@ -176,6 +185,12 @@ class Exercise(db.Model):
     sanitizer_used = db.StringProperty()
 
     @staticmethod
+    def get_by_name(name):
+        query = Exercise.all()
+        query.filter('name =', name)
+        return query.get()
+
+    @staticmethod
     def to_display_name(name):
         if name:
             return name.replace('_', ' ').capitalize()
@@ -183,6 +198,11 @@ class Exercise(db.Model):
 
     def display_name(self):
         return Exercise.to_display_name(self.name)
+
+    def short_name(self):
+        if self.short_display_name:
+            return self.short_display_name[:11]
+        return self.display_name()[:11]
 
     def required_streak(self):
         if self.summative:
@@ -241,7 +261,6 @@ class Exercise(db.Model):
         self.last_sanitized = datetime.datetime.now()
         self.sanitizer = Exercise._CURRENT_SANITIZER
         self.put()
-        
     
     _EXERCISES_KEY = "Exercise.all()"    
     @staticmethod
@@ -253,8 +272,18 @@ class Exercise(db.Model):
             memcache.set(Exercise._EXERCISES_KEY, exercises, namespace=App.version)
         return exercises
 
+    _EXERCISES_COUNT_KEY = "Exercise.count()"
+    @staticmethod
+    def get_count():
+        count = memcache.get(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
+        if count is None:
+            count = Exercise.all().count()
+            memcache.set(Exercise._EXERCISES_COUNT_KEY, count, namespace=App.version)
+        return count
+
     def put(self):
         memcache.delete(Exercise._EXERCISES_KEY, namespace=App.version)
+        memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
 
 
@@ -275,6 +304,7 @@ class UserData(db.Model):
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
+    videos_completed = db.IntegerProperty(default = -1)
     
     @staticmethod
     def get_for_current_user():
@@ -417,6 +447,12 @@ class UserData(db.Model):
         if self.points == None:
             self.points = 0
         self.points += points
+
+    def get_videos_completed(self):
+        if self.videos_completed < 0:
+            self.videos_completed = UserVideo.count_completed_for_user(self.user)
+            self.put()
+        return self.videos_completed
     
 class Video(Searchable, db.Model):
 
@@ -531,6 +567,13 @@ class UserVideo(db.Model):
         else:
             return UserVideo.get_by_key_name(key)
 
+    @staticmethod
+    def count_completed_for_user(user):
+        query = UserVideo.all()
+        query.filter("user = ", user)
+        query.filter("completed = ", True)
+        return query.count()
+
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
 
@@ -544,6 +587,7 @@ class UserVideo(db.Model):
 
     last_watched = db.DateTimeProperty(auto_now_add = True)
     duration = db.IntegerProperty(default = 0)
+    completed = db.BooleanProperty(default = False)
 
     def points(self):
         return points.VideoPointCalculator(self)
@@ -555,6 +599,7 @@ class VideoLog(db.Model):
     time_watched = db.DateTimeProperty(auto_now_add = True)
     seconds_watched = db.IntegerProperty(default = 0)
     points_earned = db.IntegerProperty(default = 0)
+    playlist_titles = db.StringListProperty()
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):
@@ -567,11 +612,25 @@ class VideoLog(db.Model):
 
         return query
 
+    @staticmethod
+    def get_for_user_and_video(user, video):
+        query = VideoLog.all()
+
+        query.filter('user =', user)
+        query.filter('video =', video)
+
+        query.order('time_watched')
+
+        return query
+
     def time_started(self):
         return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
 
     def time_ended(self):
         return self.time_watched
+
+    def minutes_spent(self):
+        return util.minutes_between(self.time_started(), self.time_ended())
 
     def key_for_video(self):
         return VideoLog.video.get_value_for_datastore(self)
@@ -587,6 +646,7 @@ class ProblemLog(db.Model):
     exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
+    earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):
@@ -610,6 +670,9 @@ class ProblemLog(db.Model):
 
     def time_ended(self):
         return self.time_done
+
+    def minutes_spent(self):
+        return util.minutes_between(self.time_started(), self.time_ended())
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and
@@ -688,6 +751,8 @@ class ExerciseVideo(db.Model):
     video = db.ReferenceProperty(Video)
     exercise = db.ReferenceProperty(Exercise)
 
+    def key_for_video(self):
+        return ExerciseVideo.video.get_value_for_datastore(self)
 
 # Matching between playlists and exercises
 

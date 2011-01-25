@@ -128,6 +128,11 @@ indexes:
   - name: date
     direction: desc
 
+- kind: UserBadge
+  properties:
+  - name: user
+  - name: date
+
 - kind: UserData
   properties:
   - name: __key__
@@ -151,6 +156,11 @@ indexes:
   - name: user
   - name: proficient_date
 
+- kind: UserVideo
+  properties:
+  - name: __key__
+    direction: desc
+
 - kind: Video
   properties:
   - name: __key__
@@ -159,6 +169,12 @@ indexes:
 - kind: VideoLog
   properties:
   - name: user
+  - name: time_watched
+
+- kind: VideoLog
+  properties:
+  - name: user
+  - name: video
   - name: time_watched
 
 - kind: VideoPlaylist

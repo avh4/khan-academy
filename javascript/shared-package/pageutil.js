@@ -411,6 +411,24 @@ var Badges = {
     }
 }
 
+var Timezone = {
+    tz_offset: null,
+
+    append_tz_offset_query_param: function(href) {
+        if (href.indexOf("?") > -1)
+            href += "&";
+        else
+            href += "?";
+        return href + "tz_offset=" + Timezone.get_tz_offset();
+    },
+
+    get_tz_offset: function() {
+        if (this.tz_offset == null)
+            this.tz_offset = -1 * (new Date()).getTimezoneOffset();
+        return this.tz_offset;
+    }
+}
+
 function fixFacebookLogin()
 {
     // Older versions of Firefox require an href attribute on the link inside

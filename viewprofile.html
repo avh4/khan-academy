@@ -1,109 +1,138 @@
 {% extends "page_template.html" %}
-
-{% block pagetitle %}
-    Profile
-{% endblock pagetitle %}
-
-{% block pagecontent %}
-<script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
-
-<div class="user-profile">
-
-    <script>
-    {% if classtime_table.rows %}
-    var chart;
-    $(function() {
-        chart = new Highcharts.Chart({
-            chart: {
-                renderTo: 'highchart',
-                defaultSeriesType: 'column',
-                marginRight: 130,
-                marginBottom: 100
-            },
-            credits: {
-                enabled: false
-            },
-            plotOptions: {
-                column: {
-                },
-                series: {
-                    showInLegend: false,
-                    stacking: 'normal',
-                    point: {
-                        events: {
-                            click: function() {
-                            }
-                        }
-                    }
-            }
-            },
-            title: {
-                text: ''
-            },
-            xAxis: {
-                labels: {
-                    align: 'left',
-                    x: -5,
-                    y: 10,
-                    rotation: 45
-                }
-            },
-            yAxis: {
-                title: {
-                    text: 'Time Spent (Minutes)'
-                },
-                plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                }]
-            },
-            tooltip: {
-                formatter: function() {
-                    return this.point.desc;
-                }
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'top',
-                x: -10,
-                y: 100,
-                borderWidth: 0
-            },
-            series: [
-                    {% for row in classtime_table.rows reversed %}
-                    { 
-                       data: [
-                        {% for chunk in row.chunks %}
-                        {
-                            x: {{ forloop.counter0 }}, 
-                            {% if chunk %}
-                                y: {{ chunk.minutes_spent }},
-                            {% else %}
-                                y: 0,
-                            {% endif %}
-                            desc: '{{ chunk.description|escapejs }}',
-                            {% if chunk %}
-                            color: 'lightBlue'
-                            {% endif %}
-                        }{% if not forloop.last %},{% endif %}
-                        {% endfor %}
-                        ]
-                    }{% if not forloop.last %},{% endif %}
-                    {% endfor %}
-                    ]
-        });
-    });
-    {% endif %}
-    </script>
-
-    <div style="width:100%;">
-        {% if classtime_table.rows %}
-            <div id="highchart" style="min-width:{{ width }}px;min-height:450px;"></div>
-        {% endif %}
+{% block pagesubmenu %}
+    <div id="profile-header">
+        <span id="high-level-stats">
+            <span id="videos-watched">
+                <span class="profile-header-icon"><img src="/images/video-camera-icon-shadow.png" /></span>
+                <span class="count">
+                    {{ count_videos_completed }} / {{ count_videos }}<br />
+                    <span class="label">Videos</span>
+                </span>
+            </span>
+            <span id="exercises-completed" >
+                <span class="profile-header-icon"><img src="/images/generic-exercise-icon-shadow.png" /></span>
+                <span class="count">
+                    {{ count_exercises_proficient }} / {{ count_exercises }}<br />
+                    <span class="label">Exercises</span>
+                </span>
+            </span>
+            <span id="energy-points">
+                <span title="{{points}} energy points" class="energy-points-badge">{{points}}</span><br />
+                <span class="label">Total Energy Points</span>
+            </span>                    
+            </span>
+        </span>
+        <span id="user-info">
+            <img src="/images/darth.png" />
+            <span id="name">{{student_nickname|escape}}</span>
+        </span>
     </div>
-</div>
+{% endblock pagesubmenu %}
+{% block pagecontent %}
+<article id="individual_report">
+    <div id="vital-statistics">
+        <div id="stats-nav">
+            <h2>Vital statistics</h2>
 
+            <ul id="nav-accordion">
+                <li>
+                    {% profile_graph_link student "Activity" "activity" selected_graph_type %}
+                    <p class="accordion-content">
+                        Shows how much much work you're doing each day.
+                        {% profile_graph_date_picker student "activity" %}
+                    </p>
+                </li>
+                <li>
+                    {% profile_graph_link student "Focus" "focus" selected_graph_type %}
+                    <p class="accordion-content">
+                        Shows how well you've focused on exercises and video playlists.
+                        {% profile_graph_date_picker student "focus" %}
+                    </p>
+                </li>
+                <li>
+                    {% profile_graph_link student "Exercise Progress" "exerciseprogress" selected_graph_type %}
+                    <p class="accordion-content">
+                        Shows you which exercises you've worked on and completed.
+                    </p>
+                </li>
+                <li>
+                    {% profile_graph_link student "Exercise Progress Over Time" "exercisesovertime" selected_graph_type %}
+                    <p class="accordion-content">Shows how many exercises you've completed over time. </p>
+                </li>
+            </ul>
+        </div>
+        <div id="stats-charts">
+            {% profile_graph_control student %}
+        </div>
+    </div>
+    <div id="achievements">
+        <h2><a name="achievements">Your Achievements</a></h2>
+        <div id="achievement-list">
+            <ul>
+                <li id="category-5" class="master {% if user_badges_master %}owned{% endif %}">
+                    <img src="/images/badges/master-challenge-blue.png" />
+                    <div class="label">Challenge Patches{% if user_badges_master %} x {{user_badges_master|length}}{% endif %}</div>
+                </li>
+                <li id="category-4" class="platinum {% if user_badges_diamond %}owned{% endif %}">
+                    <img src="/images/badges/eclipse-medium.png" />
+                    <div class="label">Black Hole Badges{% if user_badges_diamond %} x {{user_badges_diamond|length}}{% endif %}</div>
+                </li>
+                <li id="category-3" class="diamond {% if user_badges_platinum %}owned{% endif %}">
+                    <img src="/images/badges/sun-medium.png" />
+                    <div class="label">Sun Badges{% if user_badges_platinum %} x {{user_badges_platinum|length}}{% endif %}</div>
+                </li>
+                <li id="category-2" class="gold {% if user_badges_gold %}owned{% endif %}">
+                    <img src="/images/badges/earth-medium.png" />
+                    <div class="label">Earth Badges{% if user_badges_gold %} x {{user_badges_gold|length}}{% endif %}</div>
+                </li>
+                <li id="category-1" class="silver {% if user_badges_silver %}owned{% endif %}">
+                    <img src="/images/badges/moon-medium.png" />
+                    <div class="label">Moon Badges{% if user_badges_silver %} x {{user_badges_silver|length}}{% endif %}</div>
+                </li>
+                <li id="category-0" class="bronze {% if user_badges_bronze %}owned{% endif %}">
+                    <img src="/images/badges/meteorite-medium.png" />
+                    <div class="label">Meteorite Badges{% if user_badges_bronze %} x {{user_badges_bronze|length}}{% endif %}</div>
+                </li>
+            </ul>
+            <div class="clear"></div>
+            <div id="badge-container" class="inset-container" style="display: none;">
+            {% if badge_collections %}
+                {% for badge_collection in badge_collections %}
+                {% for badge in badge_collection %}
+                    {% if forloop.first %}
+                        <div id="category-{{badge.badge_category}}" style="display: none;">
+                        {% if user_badges|hash:badge.badge_category %}
+                        <div id="user-owned">
+                        <h2 style="display: block; margin-left: 10px;">Your Badges</h2>
+                            {% for user_badge in user_badges|hash:badge.badge_category %}
+                                {% badge_block user_badge.badge user_badge %}
+                            {% endfor %}
+                            <div class="clear"></div>
+                        </div>
+                        {% endif %}
+                        <div id="all-badges">
+                        <h2 style="display: block; margin-left: 10px;">All Badges</h2>
+                    {% endif %}
+                        {% badge_block badge None show_badge_frequencies%}
+                    {% if forloop.last %}
+                        </div>
+                        <div class="clear"></div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                {% endfor %}
+            {% endif %}
+            </div>
+        </div>
+    </div>
+    {% profile_recent_activity student %}
+</article>
+<div id="info-hover-container" style="display: none;"></div>
 {% endblock pagecontent %}
+
+{% block bottompagescript %}
+    <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+    {% profile_javascript %}
+    <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
+{% endblock bottompagescript %}
 

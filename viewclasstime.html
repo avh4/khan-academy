@@ -131,7 +131,7 @@
                                 {% endif %}
                                 desc: '{{ chunk.description|escapejs }}',
                                 {% if chunk %}
-                                color: {% if chunk.during_schoolday %}'lightBlue'{% else %}'darkBlue'{% endif %}
+                                color: {% if chunk.during_schoolday %}'#ADD8E6'{% else %}'#00008B'{% endif %}
                                 {% endif %}
                             }{% if not forloop.last %},{% endif %}
                             {% endfor %}

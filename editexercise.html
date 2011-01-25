@@ -122,6 +122,15 @@
 </table>
 {% endif %}
 
+<div class="hdg"><h3>Short Name</h3></div>
+<div>
+    <form method="POST" action="/updateexercise">
+        <input type="hidden" name="name" value="{{main_exercise.name|escape}}"/>
+        Short name (11 chars max): <input type="text" name="short_display_name" value="{{main_exercise.short_display_name|escape}}" maxlength="11"/><br/>
+        <input type="submit" value="Update short name"/>
+    </form>
+</div>
+
 <div class="hdg"><h3>Map Position</h3></div>
 <div>
     <form method="POST" action="/updateexercise">

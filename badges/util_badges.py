@@ -121,59 +121,83 @@ def get_badge_counts(user_data):
 
     return count_dict
 
+def get_user_badges(user = None):
+
+    if not user:
+        user = util.get_current_user()
+
+    user_badges = []
+    user_badges_dict = {}
+
+    if user:
+        user_badges = models_badges.UserBadge.get_for(user)
+        badges_dict = all_badges_dict()
+        user_badge_last = None
+        for user_badge in user_badges:
+            if user_badge_last and user_badge_last.badge_name == user_badge.badge_name:
+                user_badge_last.count += 1
+                if user_badge_last.count > 1:
+                    user_badge_last.list_context_names_hidden.append(user_badge.target_context_name)
+                else:
+                    user_badge_last.list_context_names.append(user_badge.target_context_name)
+            else:
+                user_badge.badge = badges_dict.get(user_badge.badge_name)
+                user_badge.count = 1
+                user_badge.list_context_names = [user_badge.target_context_name]
+                user_badge.list_context_names_hidden = []
+                user_badge_last = user_badge
+                user_badges_dict[user_badge.badge_name] = True
+
+    possible_badges = all_badges()
+    for badge in possible_badges:
+        badge.is_owned = user_badges_dict.has_key(badge.name)
+
+    user_badges = sorted(filter(lambda user_badge: hasattr(user_badge, "badge") and user_badge.badge is not None, user_badges), reverse=True, key=lambda user_badge:user_badge.date)
+    possible_badges = sorted(possible_badges, key=lambda badge:badge.badge_category)
+
+    user_badges_normal = filter(lambda user_badge: user_badge.badge.badge_category != badges.BadgeCategory.MASTER, user_badges)
+    user_badges_master = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.MASTER, user_badges)
+    user_badges_diamond = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.DIAMOND, user_badges)
+    user_badges_platinum = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.PLATINUM, user_badges)
+    user_badges_gold = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.GOLD, user_badges)
+    user_badges_silver = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.SILVER, user_badges)
+    user_badges_bronze = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.BRONZE, user_badges)    
+
+    bronze_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.BRONZE, possible_badges), key=lambda badge:badge.points or sys.maxint)
+    silver_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.SILVER, possible_badges), key=lambda badge:badge.points or sys.maxint)
+    gold_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.GOLD, possible_badges), key=lambda badge:badge.points or sys.maxint)
+    platinum_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.PLATINUM, possible_badges), key=lambda badge:badge.points or sys.maxint)
+    diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), key=lambda badge:badge.points or sys.maxint)
+    master_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.MASTER, possible_badges), key=lambda badge:badge.points or sys.maxint)
+    
+    
+    return { 'possible_badges': possible_badges, 
+             'user_badges': user_badges, 
+             'user_badges_normal': user_badges_normal, 
+             'user_badges_master': user_badges_master,
+             "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges, master_badges],
+             'bronze_badges': user_badges_bronze,
+             'silver_badges': user_badges_silver,
+             'gold_badges': user_badges_gold,
+             'platinum_badges': user_badges_platinum,
+             'diamond_badges': user_badges_diamond, }
+
 class ViewBadges(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
-
-        user_badges = []
-        user_badges_dict = {}
-
-        if user:
-            user_badges = models_badges.UserBadge.get_for(user)
-            badges_dict = all_badges_dict()
-            user_badge_last = None
-            for user_badge in user_badges:
-                if user_badge_last and user_badge_last.badge_name == user_badge.badge_name:
-                    user_badge_last.count += 1
-                    if user_badge_last.count > 1:
-                        user_badge_last.list_context_names_hidden.append(user_badge.target_context_name)
-                    else:
-                        user_badge_last.list_context_names.append(user_badge.target_context_name)
-                else:
-                    user_badge.badge = badges_dict.get(user_badge.badge_name)
-                    user_badge.count = 1
-                    user_badge.list_context_names = [user_badge.target_context_name]
-                    user_badge.list_context_names_hidden = []
-                    user_badge_last = user_badge
-                    user_badges_dict[user_badge.badge_name] = True
-
-        possible_badges = all_badges()
-        for badge in possible_badges:
-            badge.is_owned = user_badges_dict.has_key(badge.name)
-
-        user_badges = sorted(filter(lambda user_badge: hasattr(user_badge, "badge") and user_badge.badge is not None, user_badges), reverse=True, key=lambda user_badge:user_badge.date)
-        possible_badges = sorted(possible_badges, key=lambda badge:badge.badge_category)
-
-        user_badges_normal = filter(lambda user_badge: user_badge.badge.badge_category != badges.BadgeCategory.MASTER, user_badges)
-        user_badges_master = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.MASTER, user_badges)
-
-        bronze_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.BRONZE, possible_badges), key=lambda badge:badge.points or sys.maxint)
-        silver_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.SILVER, possible_badges), key=lambda badge:badge.points or sys.maxint)
-        gold_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.GOLD, possible_badges), key=lambda badge:badge.points or sys.maxint)
-        platinum_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.PLATINUM, possible_badges), key=lambda badge:badge.points or sys.maxint)
-        diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), key=lambda badge:badge.points or sys.maxint)
-        master_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.MASTER, possible_badges), key=lambda badge:badge.points or sys.maxint)
+        user_badges = get_user_badges()
         
         template_values = {
-                "user_badges_normal": user_badges_normal,
-                "user_badges_master": user_badges_master,
-                "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges, master_badges],
+                "user_badges_normal": user_badges['user_badges_normal'],
+                "user_badges_master": user_badges['user_badges_master'],
+                "badge_collections": user_badges['badge_collections'],
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False)
                 }
 
         self.render_template('viewbadges.html', template_values)
+    
+   
 
 # /admin/startnewbadgemapreduce is called periodically by a cron job
 class StartNewBadgeMapReduce(request_handler.RequestHandler):

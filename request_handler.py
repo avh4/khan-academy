@@ -48,6 +48,22 @@ class RequestHandler(webapp.RequestHandler):
         else:
             return self.request_int(key, 1 if default else 0) == 1
 
+    def is_ajax_request(self):
+        # jQuery sets X-Requested-With header for this detection.
+        if self.request.headers.has_key("x-requested-with"):
+            s_requested_with = self.request.headers["x-requested-with"]
+            if s_requested_with and s_requested_with.lower() == "xmlhttprequest":
+                return True
+        return self.request_bool("is_ajax_override", default=False)
+
+    def request_url_with_additional_query_params(self, params):
+        url = self.request.url
+        if url.find("?") > -1:
+            url += "&"
+        else:
+            url += "?"
+        return url + params
+
     def handle_exception(self, e, *args):
         if type(e) is CapabilityDisabledError:
             self.response.out.write("<p>The site is temporarily down for maintenance.  Please try again at the start of the next hour.  We apologize for the inconvenience.</p>")

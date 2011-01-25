@@ -43,7 +43,7 @@ def seconds_between(dt1, dt2):
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
 
-def seconds_to_time_string(seconds_init):
+def seconds_to_time_string(seconds_init, short_display = True):
 
     seconds = seconds_init
 
@@ -68,8 +68,13 @@ def seconds_to_time_string(seconds_init):
     elif days:
         return "%d day%s" % (days, pluralize(days))
     elif hours:
-        return "%d hour%s" % (hours, pluralize(hours))
+        if not short_display and minutes:
+            return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
+        else:
+            return "%d hour%s" % (hours, pluralize(hours))
     else:
+        if not short_display and seconds and not minutes:
+            return "%d second%s" % (seconds, pluralize(seconds))
         return "%d minute%s" % (minutes, pluralize(minutes))
 
 def thousands_separated_number(x):

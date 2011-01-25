@@ -1,4 +1,5 @@
 import re
+import datetime
 
 from google.appengine.ext import webapp
 from django import template
@@ -34,6 +35,10 @@ def timesince_ago_short(content):
     if not content:
         return ""
     return append_ago(util.seconds_to_time_string(util.seconds_since(content)))
+
+@register.filter
+def utc_to_ctz(content, tz_offset):
+    return content + datetime.timedelta(minutes=tz_offset)
 
 def append_ago(s_time):
     if not s_time:

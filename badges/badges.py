@@ -86,6 +86,20 @@ class Badge:
             return "/images/badges/master-challenge-blue.png"
         return "/images/badges/half-moon-small.png"
 
+    def chart_icon_src(self):
+        if self.badge_category == BadgeCategory.BRONZE:
+            return "/images/badges/meteorite-small-chart.png"
+        elif self.badge_category == BadgeCategory.SILVER:
+            return "/images/badges/moon-small-chart.png"
+        elif self.badge_category == BadgeCategory.GOLD:
+            return "/images/badges/earth-small-chart.png"
+        elif self.badge_category == BadgeCategory.PLATINUM:
+            return "/images/badges/sun-small-chart.png"
+        elif self.badge_category == BadgeCategory.DIAMOND:
+            return "/images/badges/eclipse-small-chart.png"
+        elif self.badge_category == BadgeCategory.MASTER:
+            return "/images/badges/master-challenge-blue-chart.png"
+
     def type_label(self):
         if self.badge_category == BadgeCategory.BRONZE:
             return "Meteorite (Common)"

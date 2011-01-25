@@ -1,0 +1,8 @@
+<li class="achievement">
+    <span class="activity-image"><img src="/images/generic-badge-icon-inset.png" /></span>
+    Earned <a href="#achievements" onclick="$('#achievement-list ul li#category-{{ recent_activity.badge.badge_category }}').click();" class="badge-link category-{{ recent_activity.badge.badge_category }}">{{ recent_activity.badge.description|escape }}</a>
+    {% if recent_activity.user_badge.target_context_name %}
+        for {{ recent_activity.user_badge.target_context_name|escape }}
+    {% endif %}
+    <span class="time">{{ recent_activity.timestamp|escape }}</span>
+</li>

@@ -19,6 +19,15 @@ class UserBadge(db.Model):
         return query.fetch(1000)
 
     @staticmethod
+    def get_for_user_between_dts(user, dt_a, dt_b):
+        query = UserBadge.all()
+        query.filter('user =', user)
+        query.filter('date >=', dt_a)
+        query.filter('date <=', dt_b)
+        query.order('date')
+        return query.fetch(1000)
+
+    @staticmethod
     def count_by_badge_name(name):
         query = UserBadge.all(keys_only=True)
         query.filter('badge_name = ', name)

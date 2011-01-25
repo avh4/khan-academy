@@ -55,16 +55,18 @@ import util
 import request_handler
 import points
 import exercise_statistics
+import backfill
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 
 from discussion import comments
 from discussion import qa
 from discussion import notification
-from discussion import render
 
 from badges import util_badges
 from badges import last_action_cache
+
+from profile import util_profile
 
 from topics_list import topics_list, all_topics_list, DVD_list
 
@@ -651,6 +653,8 @@ class LogVideoProgress(request_handler.RequestHandler):
                         user_playlist.last_watched = datetime.datetime.now()
                         user_playlist.put()
 
+                        video_log.playlist_titles.append(user_playlist.title)
+
                         if first_video_playlist:
                             action_cache.push_video_log(video_log)
 
@@ -668,6 +672,11 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 video_points_total = points.VideoPointCalculator(user_video)
                 video_points_received = video_points_total - video_points_previous
+
+                if not user_video.completed and video_points_total >= consts.VIDEO_POINTS_BASE:
+                    # Just finished this video for the first time
+                    user_video.completed = True
+                    user_data.videos_completed = -1
 
                 if video_points_received > 0:
                     video_log.points_earned = video_points_received
@@ -1043,6 +1052,7 @@ class UpdateExercise(request_handler.RequestHandler):
             v_position = self.request.get('v_position')
             h_position = self.request.get('h_position')
             seconds_per_fast_problem = self.request.get('seconds_per_fast_problem')
+            short_display_name = self.request.get('short_display_name')
 
             add_video = self.request.get('add_video')
             delete_video = self.request.get('delete_video')
@@ -1067,6 +1077,8 @@ class UpdateExercise(request_handler.RequestHandler):
                 exercise.h_position = int(h_position)
             if seconds_per_fast_problem:
                 exercise.seconds_per_fast_problem = float(seconds_per_fast_problem)
+            if short_display_name:
+                exercise.short_display_name = short_display_name
 
             if add_video:
                 query = ExerciseVideo.all()
@@ -1210,6 +1222,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                     userExercise.set_proficient(True, user_data)
                     userExercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
+                    problem_log.earned_proficiency = True
             else:
                 # Can't do the following here because RegisterCorrectness() already
                 # set streak = 0.
@@ -1474,6 +1487,7 @@ def library_content_html(bust_cache = False):
     all_playlists = []
 
     dict_videos = {}
+    dict_videos_counted = {}
     dict_playlists = {}
     dict_playlists_by_title = {}
     dict_video_playlists = {}
@@ -1498,6 +1512,11 @@ def library_content_html(bust_cache = False):
             dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
         else:
             dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
+
+        dict_videos_counted[video_key] = True
+
+    # Update count of all distinct videos associated w/ a live playlist
+    Setting.count_videos(len(dict_videos_counted.keys()))
 
     for topic in topics_list:
 
@@ -2097,6 +2116,7 @@ def real_main():
         ('/admin/deletestaleplaylists', DeleteStalePlaylists),
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
+        ('/admin/backfill', backfill.StartNewBackfillMapReduce),
 
         ('/coaches', coaches.ViewCoaches),
         ('/registercoach', coaches.RegisterCoach),  
@@ -2108,6 +2128,13 @@ def real_main():
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
+
+        ('/profile/graph/activity', util_profile.ActivityGraph),
+        ('/profile/graph/focus', util_profile.FocusGraph),
+        ('/profile/graph/exercisesovertime', util_profile.ExercisesOverTimeGraph),
+        ('/profile/graph/exerciseproblems', util_profile.ExerciseProblemsGraph),
+        ('/profile/graph/exerciseprogress', util_profile.ExerciseProgressGraph),
+        ('/profile', util_profile.ViewProfile),
 
         ('/api/export', api.Export),
         ('/api/import', api.ViewImport),

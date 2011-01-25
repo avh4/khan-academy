@@ -37,7 +37,7 @@
             {% for exercise_name in exercise_names %}            
                 {% if forloop.first %}
                     <td class="student-email">
-                        <a style="color:#006699;" href="/progresschart?student_email={{ student_email|escape }};">
+                        <a style="color:#006699;" href="/profile?selected_graph_type=exercisesovertime&student_email={{ student_email|escape }}">
                             <nobr>{{ exercise_data|hash:exercise_name|hash:student_email|hash:"short_name"|escape }}</nobr>
                         </a>
                     </td>

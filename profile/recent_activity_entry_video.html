@@ -1,0 +1,5 @@
+<li class="video">
+    <span class="activity-image"><img src="/images/video-camera-icon-inset.png" /></span>
+    Watched <span class="video-minutes">{{ recent_activity.time_watched|escape }}</span> of <a href="/video?v={{recent_activity.video_log.video.youtube_id}}">{{ recent_activity.video_log.video_title|escape }}</a>
+    <span class="time">{{ recent_activity.timestamp|escape }}</span>
+</li>

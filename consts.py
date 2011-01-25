@@ -57,3 +57,5 @@ DEFAULT_REVIEW_INTERVAL_DAYS = 7
 # Minimum number of days we're willing to postpone a review
 MIN_REVIEW_INTERVAL_DAYS = 1
 
+# Maximum range of days we'll show on a profile graph
+MAX_GRAPH_DAY_RANGE = 30
