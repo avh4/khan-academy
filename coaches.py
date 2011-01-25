@@ -21,7 +21,7 @@ from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, Exerc
 from badges import util_badges
 from django.template.defaultfilters import escape
 
-from profile.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
+from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
 
 def meanstdv(x):
     n, mean, std = len(x), 0, 0

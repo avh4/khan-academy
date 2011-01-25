@@ -5,7 +5,7 @@ import urllib
 from django.utils import simplejson
 from google.appengine.api import users
 
-from profile import templatetags
+from profiles import templatetags
 import request_handler
 import util
 import models

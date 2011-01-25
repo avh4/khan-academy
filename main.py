@@ -66,7 +66,7 @@ from discussion import notification
 from badges import util_badges
 from badges import last_action_cache
 
-from profile import util_profile
+from profiles import util_profile
 
 from topics_list import topics_list, all_topics_list, DVD_list
 

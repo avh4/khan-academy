@@ -170,5 +170,5 @@ register.tag(highlight)
 
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
-webapp.template.register_template_library('profile.templatetags')
+webapp.template.register_template_library('profiles.templatetags')
 
