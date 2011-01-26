@@ -3,7 +3,7 @@ import datetime
 import util
 import models
 import templatefilters
-from badges import util_badges, models_badges, last_action_cache
+from badges import util_badges, models_badges
 
 # Number of hours until activity is no longer considered "recent" for profiles
 HOURS_RECENT_ACTIVITY = 72
@@ -89,44 +89,32 @@ def recent_badge_activity(user, dt_start, dt_end):
 
     return list_badge_activity
 
-def recent_exercise_activity(action_cache, dt_start):
+def recent_exercise_activity(user, dt_start, dt_end):
 
     list_exercise_activity = []
+    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end)
 
-    c_logs = len(action_cache.problem_logs)
-    for i in range(c_logs):
-        problem_log = action_cache.get_problem_log(c_logs - i - 1)
-        if problem_log.time_done > dt_start:
-            list_exercise_activity.append(RecentExerciseActivity(problem_log))
-        else:
-            break
+    for problem_log in problem_logs:
+        list_exercise_activity.append(RecentExerciseActivity(problem_log))
 
-    list_exercise_activity.reverse()
     return list_exercise_activity
 
-def recent_video_activity(action_cache, dt_start):
+def recent_video_activity(user, dt_start, dt_end):
 
     list_video_activity = []
+    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end)
 
-    c_logs = len(action_cache.video_logs)
-    for i in range(c_logs):
-        video_log = action_cache.get_video_log(c_logs - i - 1)
-        if video_log.time_watched > dt_start:
-            list_video_activity.append(RecentVideoActivity(video_log))
-        else:
-            break
+    for video_log in video_logs:
+        list_video_activity.append(RecentVideoActivity(video_log))
 
-    list_video_activity.reverse()
     return list_video_activity
 
 def recent_activity_for(user, dt_start, dt_end):
 
-    action_cache = last_action_cache.LastActionCache.get_for_user(user)
-
     list_recent_activity_types = [
             recent_badge_activity(user, dt_start, dt_end), 
-            recent_exercise_activity(action_cache, dt_start), 
-            recent_video_activity(action_cache, dt_start),
+            recent_exercise_activity(user, dt_start, dt_end), 
+            recent_video_activity(user, dt_start, dt_end),
     ]
     list_recent_activity = [activity for sublist in list_recent_activity_types for activity in sublist]
 
