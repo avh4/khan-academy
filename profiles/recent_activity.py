@@ -92,7 +92,9 @@ def recent_badge_activity(user, dt_start, dt_end):
 def recent_exercise_activity(user, dt_start, dt_end):
 
     list_exercise_activity = []
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end)
+
+    # We fetch all of the results here to avoid making tons of RPC calls.
+    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end).fetch(500000)
 
     for problem_log in problem_logs:
         list_exercise_activity.append(RecentExerciseActivity(problem_log))
@@ -102,7 +104,9 @@ def recent_exercise_activity(user, dt_start, dt_end):
 def recent_video_activity(user, dt_start, dt_end):
 
     list_video_activity = []
-    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end)
+
+    # We fetch all of the results here to avoid making tons of RPC calls.
+    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end).fetch(500000)
 
     for video_log in video_logs:
         list_video_activity.append(RecentVideoActivity(video_log))

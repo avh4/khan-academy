@@ -11,7 +11,8 @@ def get_playlist_focus_data(user, dt_start_utc, dt_end_utc):
     total_seconds = 0
     dict_playlist_seconds = {}
 
-    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc)
+    # We fetch all of the results here to avoid making tons of RPC calls.
+    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(500000)
 
     for video_log in video_logs:
 
@@ -47,7 +48,8 @@ def get_exercise_focus_data(user, dt_start_utc, dt_end_utc):
     total_seconds = 0
     dict_exercise_seconds = {}
 
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc)
+    # We fetch all of the results here to avoid making tons of RPC calls.
+    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(500000)
 
     for problem_log in problem_logs:
 
