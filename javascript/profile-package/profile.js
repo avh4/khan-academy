@@ -118,12 +118,13 @@ var Profile = {
 
         this.styleSublinkFromHref(href);
         this.fLoadingGraph = true;
+        this.fLoadedGraph = true;
 
         $.ajax({type: "GET",
                 url: Timezone.append_tz_offset_query_param(href),
                 data: {},
                 success: function(data){ Profile.finishLoadGraph(data, href, fNoHistoryEntry); },
-                error: function() { Profile.fLoadingGraph = false;}
+                error: function() { Profile.finishLoadGraphError(); }
         });
         $("#graph-content").html("");
         this.showGraphThrobber(true);
@@ -132,10 +133,9 @@ var Profile = {
     finishLoadGraph: function(data, href, fNoHistoryEntry) {
 
         this.fLoadingGraph = false;
-        this.fLoadedGraph = true;
 
         try { eval("var dict_json = " + data); }
-        catch(e) { return; }
+        catch(e) { this.finishLoadGraphError(); return; }
 
         if (!fNoHistoryEntry)
         {
@@ -147,6 +147,12 @@ var Profile = {
         this.showGraphThrobber(false);
         this.styleSublinkFromHref(dict_json.url);
         $("#graph-content").html(dict_json.html);
+    },
+
+    finishLoadGraphError: function() {
+        this.fLoadingGraph = false;
+        this.showGraphThrobber(false);
+        $("#graph-content").html("<div class='graph-notification'>It's our fault. We ran into a problem loading this graph. Try again later, and if this continues to happen please <a href='/reportissue?type=Defect'>let us know</a>.</div>");
     },
 
     historyChange: function(e) {
