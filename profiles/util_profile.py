@@ -46,6 +46,7 @@ class ViewProfile(request_handler.RequestHandler):
                 'selected_graph_type': selected_graph_type,
                 'initial_graph_url': initial_graph_url,
                 'tz_offset': tz_offset,
+                'student_points': user_data_student.points,
                 'count_videos': models.Setting.count_videos(),
                 'count_videos_completed': user_data_student.get_videos_completed(),
                 'count_exercises': models.Exercise.get_count(),
