@@ -73,7 +73,9 @@ def add_bucket_html_summary(dict_bucket, key, limit):
 def get_exercise_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc)
+
+    # We fetch all of the results here to avoid making tons of RPC calls.
+    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(500000)
 
     for problem_log in problem_logs:
         key = get_bucket_value(problem_log.time_done, tz_offset, bucket_type)
@@ -100,7 +102,9 @@ def get_exercise_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_
 def get_playlist_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
-    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc)
+
+    # We fetch all of the results here to avoid making tons of RPC calls.
+    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(500000)
 
     for video_log in video_logs:
         key = get_bucket_value(video_log.time_watched, tz_offset, bucket_type)
