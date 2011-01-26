@@ -17,8 +17,11 @@
     top: 1px;
 }
 #page_sub_nav #profile-header #user-info #name {
-    padding-left: 5px;
     font-size: 20px;
+}
+#page_sub_nav #profile-header #user-info img {
+    width: 0px;
+    visibility: hidden;
 }    
 #page_sub_nav #profile-header #high-level-stats {
     float: right;
