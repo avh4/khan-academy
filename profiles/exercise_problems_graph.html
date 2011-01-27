@@ -71,6 +71,7 @@ function exercise_url(point) {
 						title: {
 							text: 'Time Used (seconds)'
 						},
+                        maxPadding: 0.15,
 						plotLines: [{
 							value: 0,
 							width: 1,
@@ -78,21 +79,32 @@ function exercise_url(point) {
 						}]
 					},
 					tooltip: {
-						formatter: function() {
-                            if (this.point.fVideo) {
-                                if (!this.point.desc) return false;
-                                return '<strong>Related Videos</strong> (' + this.point.time_watched + ')<br/><br/>' + this.point.desc;
+                        shared: true,
+                        crosshairs: true,
+                        formatter: function() {
+                            var s = "";
+
+                            for (var ix = 0; ix < this.points.length; ix++)
+                            {
+                                var point = this.points[ix].point;
+
+                                if (point.fVideo) {
+                                    if (point.desc)
+                                    s += '<br/><br><strong>' + point.time_watched + ' of related videos watched:</strong><br/>' + point.desc;
+                                }
+                                else if (point.fSummary) {
+                                    s += '<b>' + (point.hint_used ? 'Hint Used<br/><br/>' : '') + '<a style="color:blue;" ' + 
+                                            'href="' + exercise_url(point) + '"' +
+                                            '>Problem ' + point.x + 
+                                            '</a> - ' + (point.correct ? "Correct" : "Incorrect") +
+                                            '</b><br/>' +
+                                            'Seconds used: ' + point.time_taken + '<br/>' +
+                                            (point.exercise_non_summative ? 'From exercise: ' + point.exercise_non_summative_display_name + '<br/>' : '') +
+                                            '<br/><em>Click the graph to view this problem</em>.';
+                                }
                             }
-                            else {
-                                return '<b><a style="color:blue;" ' + 
-                                        'href="' + exercise_url(this.point) + '"' +
-                                        '>Problem ' + this.point.x + 
-                                        '</a> - ' + (this.point.correct ? "Correct" : "Incorrect") +
-                                        '</b><br/>' +
-                                        'Seconds used: ' + this.point.time_taken + '<br/>' +
-                                        (this.point.exercise_non_summative ? 'From exercise: ' + this.point.exercise_non_summative_display_name + '<br/>' : '') +
-                                        '<br/><em>Click the graph to view this problem</em>.';
-                            }
+
+                            return s;
 						}
 					},
                     legend: {
@@ -118,7 +130,9 @@ function exercise_url(point) {
                                 data:[
                                 {% for problem in problem_list %}
                                 {
+                                    fSummary: true,
                                     correct: {% if problem.correct %}true{% else %}false{% endif %},
+                                    hint_used: {% if problem.hint_used %}true{% else %}false{% endif %},
                                     time_taken: {{ problem.time_taken }},
                                     {% if problem.exercise_non_summative %}
                                         exercise_non_summative_display_name: '{{ problem.exercise_non_summative_display_name|escapejs }}',
@@ -154,7 +168,30 @@ function exercise_url(point) {
                                 {% if not forloop.last %},{% endif %}
                                 {% endfor %}
                                 ]
-                            }]
+                            },
+                            {
+                                type: 'scatter',
+                                showInLegend: false,
+                                data:[
+                                {% for problem in problem_list %}
+                                {
+                                    fHint: true,
+                                    x: {{ forloop.counter }} + {{ x_offset }},
+                                    {% if problem.hint_used %}
+                                        y: {{ problem.time_taken }},
+                                        desc: 'Hint used',
+                                        time_watched: '{{ problem.video_time|escapejs }}',
+                                        marker: { symbol: 'url(/images/hint-small-chart.png)'}
+                                    {% else %}
+                                        y: 0,
+                                        enabled: false
+                                    {% endif %}
+                                }
+                                {% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                                ]
+                            }
+                            ]
 				});
 			});
 </script>
