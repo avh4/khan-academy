@@ -5,6 +5,7 @@ import logging
 from django.template.defaultfilters import pluralize
 
 import models
+import activity_summary
 import util
 from badges import models_badges, util_badges
 
@@ -70,26 +71,26 @@ def add_bucket_html_summary(dict_bucket, key, limit):
                 c += 1
             dict_bucket[bucket]["html_summary"] = "<br/>".join(list_entries)
 
-def get_exercise_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
+def get_exercise_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
 
-    # We fetch all of the results here to avoid making tons of RPC calls.
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(500000)
+    for hourly_activity_log in hourly_activity_logs:
+        key = get_bucket_value(hourly_activity_log.date, tz_offset, bucket_type)
+        activity_summary = hourly_activity_log.activity_summary
 
-    for problem_log in problem_logs:
-        key = get_bucket_value(problem_log.time_done, tz_offset, bucket_type)
-
-        if not dict_bucket.has_key(key):
+        if not dict_bucket.has_key(key) or not activity_summary.has_exercise_activity():
             continue;
 
         if not dict_bucket[key]:
             dict_bucket[key] = {"minutes": 0, "seconds": 0, "points": 0, "exercise_names": {}}
 
-        dict_bucket[key]["minutes"] += problem_log.minutes_spent()
-        dict_bucket[key]["seconds"] += problem_log.time_taken_capped_for_reporting()
-        dict_bucket[key]["points"] += problem_log.points_earned
-        dict_bucket[key]["exercise_names"][models.Exercise.to_display_name(problem_log.exercise)] = True
+        for exercise_key in activity_summary.dict_exercises.keys():
+            activity_summary_exercise_item = activity_summary.dict_exercises[exercise_key]
+            dict_bucket[key]["minutes"] += (activity_summary_exercise_item.time_taken / 60.0)
+            dict_bucket[key]["seconds"] += activity_summary_exercise_item.time_taken
+            dict_bucket[key]["points"] += activity_summary_exercise_item.points_earned
+            dict_bucket[key]["exercise_names"][models.Exercise.to_display_name(activity_summary_exercise_item.exercise)] = True
 
     for bucket in bucket_list:
         if dict_bucket[bucket]:
@@ -99,26 +100,26 @@ def get_exercise_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_
 
     return dict_bucket
 
-def get_playlist_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
+def get_playlist_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
 
-    # We fetch all of the results here to avoid making tons of RPC calls.
-    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(500000)
+    for hourly_activity_log in hourly_activity_logs:
+        key = get_bucket_value(hourly_activity_log.date, tz_offset, bucket_type)
+        activity_summary = hourly_activity_log.activity_summary
 
-    for video_log in video_logs:
-        key = get_bucket_value(video_log.time_watched, tz_offset, bucket_type)
-
-        if not dict_bucket.has_key(key):
+        if not dict_bucket.has_key(key) or not activity_summary.has_video_activity():
             continue;
 
         if not dict_bucket[key]:
             dict_bucket[key] = {"minutes": 0, "seconds": 0, "points": 0, "video_titles": {}}
 
-        dict_bucket[key]["minutes"] += video_log.minutes_spent()
-        dict_bucket[key]["seconds"] += video_log.seconds_watched
-        dict_bucket[key]["points"] += video_log.points_earned
-        dict_bucket[key]["video_titles"][video_log.video_title] = True
+        for video_key in activity_summary.dict_videos.keys():
+            activity_summary_video_item = activity_summary.dict_videos[video_key]
+            dict_bucket[key]["minutes"] += (activity_summary_video_item.seconds_watched / 60.0)
+            dict_bucket[key]["seconds"] += activity_summary_video_item.seconds_watched
+            dict_bucket[key]["points"] += activity_summary_video_item.points_earned
+            dict_bucket[key]["video_titles"][activity_summary_video_item.video_title] = True
 
     for bucket in bucket_list:
         if dict_bucket[bucket]:
@@ -210,16 +211,22 @@ def map_scatter_y_values(dict_target, dict_exercise_buckets, dict_playlist_bucke
 def has_activity_type(dict_target, bucket, key_activity):
     return dict_target[bucket] and dict_target[bucket][key_activity]
 
-def activity_graph_context(user, dt_start_utc, dt_end_utc, tz_offset):
+def activity_graph_context(user_data_student, dt_start_utc, dt_end_utc, tz_offset):
 
-    if not user:
+    if not user_data_student:
         return {}
+
+    user = user_data_student.user
+
+    # Should never be more than (31*24)=744 activity logs per user
+    hourly_activity_logs = models.HourlyActivityLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(1000)
+    hourly_activity_logs = activity_summary.fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_data_student, dt_end_utc)
 
     bucket_type = get_bucket_type(dt_start_utc, dt_end_utc)
     bucket_list = get_bucket_list(dt_start_utc, dt_end_utc, tz_offset, bucket_type)
 
-    dict_playlist_buckets = get_playlist_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
-    dict_exercise_buckets = get_exercise_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
+    dict_playlist_buckets = get_playlist_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
+    dict_exercise_buckets = get_exercise_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
     dict_badge_buckets = get_badge_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
     dict_proficiency_buckets = get_proficiency_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
     dict_points_buckets = get_points_activity_data(bucket_list, dict_playlist_buckets, dict_exercise_buckets, dict_badge_buckets)

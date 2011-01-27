@@ -73,12 +73,13 @@ class ProfileGraph(request_handler.RequestHandler):
         user = util.get_current_user()
         if user:
             student = user
+            user_data_student = None
 
             student_email = self.request_string("student_email")
             if student_email and student_email != student.email():
                 student_override = users.User(email=student_email)
-                user_data = models.UserData.get_or_insert_for(student_override)
-                if (not users.is_current_user_admin()) and user.email() not in user_data.coaches and user.email().lower() not in user_data.coaches:
+                user_data_student = models.UserData.get_or_insert_for(student_override)
+                if (not users.is_current_user_admin()) and user.email() not in user_data_student.coaches and user.email().lower() not in user_data_student.coaches:
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     self.redirect("/profile")
                 else:
@@ -91,7 +92,10 @@ class ProfileGraph(request_handler.RequestHandler):
                         (self.GRAPH_TYPE, urllib.quote(student.email()), urllib.quote(urllib.quote(self.request.query_string))))
                 return
 
-            html_and_context = self.graph_html_and_context(student)
+            if not user_data_student:
+                user_data_student = models.UserData.get_or_insert_for(student)
+
+            html_and_context = self.graph_html_and_context(user_data_student)
 
             if html_and_context["context"].has_key("is_graph_empty") and html_and_context["context"]["is_graph_empty"]:
                 # This graph is empty of activity. If it's a date-restricted graph, see if bumping out the time restrictions can help.
@@ -182,25 +186,25 @@ class ProfileDateRangeGraph(ProfileGraph):
 
 class ActivityGraph(ProfileDateRangeGraph):
     GRAPH_TYPE = "activity"
-    def graph_html_and_context(self, student):
-        return templatetags.profile_activity_graph(student, self.get_start_date(), self.get_end_date(), self.tz_offset())
+    def graph_html_and_context(self, user_data_student):
+        return templatetags.profile_activity_graph(user_data_student, self.get_start_date(), self.get_end_date(), self.tz_offset())
 
 class FocusGraph(ProfileDateRangeGraph):
     GRAPH_TYPE = "focus"
-    def graph_html_and_context(self, student):
-        return templatetags.profile_focus_graph(student, self.get_start_date(), self.get_end_date())
+    def graph_html_and_context(self, user_data_student):
+        return templatetags.profile_focus_graph(user_data_student, self.get_start_date(), self.get_end_date())
 
 class ExercisesOverTimeGraph(ProfileGraph):
     GRAPH_TYPE = "exercisesovertime"
-    def graph_html_and_context(self, student):
-        return templatetags.profile_exercises_over_time_graph(student)
+    def graph_html_and_context(self, user_data_student):
+        return templatetags.profile_exercises_over_time_graph(user_data_student)
 
 class ExerciseProblemsGraph(ProfileGraph):
     GRAPH_TYPE = "exerciseproblems"
-    def graph_html_and_context(self, student):
-        return templatetags.profile_exercise_problems_graph(student, self.request_string("exercise_name"))
+    def graph_html_and_context(self, user_data_student):
+        return templatetags.profile_exercise_problems_graph(user_data_student, self.request_string("exercise_name"))
 
 class ExerciseProgressGraph(ProfileGraph):
     GRAPH_TYPE = "exerciseprogress"
-    def graph_html_and_context(self, student):
-        return templatetags.profile_exercise_progress_graph(student)
+    def graph_html_and_context(self, user_data_student):
+        return templatetags.profile_exercise_progress_graph(user_data_student)

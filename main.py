@@ -56,6 +56,7 @@ import request_handler
 import points
 import exercise_statistics
 import backfill
+import activity_summary
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 
@@ -670,6 +671,8 @@ class LogVideoProgress(request_handler.RequestHandler):
                 user_video.last_watched = datetime.datetime.now()
                 user_video.duration = video.duration
 
+                user_data.last_activity = user_video.last_watched
+
                 video_points_total = points.VideoPointCalculator(user_video)
                 video_points_received = video_points_total - video_points_previous
 
@@ -1180,6 +1183,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             userExercise.summative = exercise.summative
 
             user_data = UserData.get_for(userExercise.user)
+            user_data.last_activity = userExercise.last_done
             
             # If a non-admin tries to answer a problem out-of-order, just ignore it and
             # display the next problem.
@@ -2117,6 +2121,7 @@ def real_main():
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+        ('/admin/hourlyactivitylog', activity_summary.StartNewHourlyActivityLogMapReduce),
 
         ('/coaches', coaches.ViewCoaches),
         ('/registercoach', coaches.RegisterCoach),  

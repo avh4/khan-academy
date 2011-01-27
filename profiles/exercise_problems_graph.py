@@ -31,15 +31,17 @@ class VideoPoint:
         self.first_video_title = video_log.video_title
         self.dict_titles = {video_log.video_title: True}
 
-def exercise_problems_graph_context(user, exid):
-    if not user:
+def exercise_problems_graph_context(user_data_student, exid):
+
+    if not user_data_student:
         return {}
+
+    user = user_data_student.user
 
     if not exid:
         exid = "addition_1"
 
-    user_data = models.UserData.get_for(user)
-    user_exercise = user_data.get_or_insert_exercise(exid)
+    user_exercise = user_data_student.get_or_insert_exercise(exid)
     exercise = user_exercise.get_exercise()
 
     if not exercise:

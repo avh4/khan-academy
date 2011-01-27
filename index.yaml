@@ -76,6 +76,11 @@ indexes:
   - name: date
     direction: desc
 
+- kind: HourlyActivityLog
+  properties:
+  - name: user
+  - name: date
+
 - kind: Playlist
   properties:
   - name: __key__

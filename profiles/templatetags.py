@@ -17,20 +17,20 @@ def render_graph_html_and_context(filename, context):
     return {"html": render_block_to_string(path, 'graph', context), "context": context}
 
 @register.simple_tag
-def profile_activity_graph(user, dt_start, dt_end, tz_offset):
-    return render_graph_html_and_context("activity_graph.html", activity_graph.activity_graph_context(user, dt_start, dt_end, tz_offset))
+def profile_activity_graph(user_data_student, dt_start, dt_end, tz_offset):
+    return render_graph_html_and_context("activity_graph.html", activity_graph.activity_graph_context(user_data_student, dt_start, dt_end, tz_offset))
 @register.simple_tag
-def profile_focus_graph(user, dt_start, dt_end):
-    return render_graph_html_and_context("focus_graph.html", focus_graph.focus_graph_context(user, dt_start, dt_end))
+def profile_focus_graph(user_data_student, dt_start, dt_end):
+    return render_graph_html_and_context("focus_graph.html", focus_graph.focus_graph_context(user_data_student, dt_start, dt_end))
 @register.simple_tag
-def profile_exercises_over_time_graph(user):
-    return render_graph_html_and_context("exercises_over_time_graph.html", exercises_over_time_graph.exercises_over_time_graph_context(user))
+def profile_exercises_over_time_graph(user_data_student):
+    return render_graph_html_and_context("exercises_over_time_graph.html", exercises_over_time_graph.exercises_over_time_graph_context(user_data_student))
 @register.simple_tag
-def profile_exercise_problems_graph(user, exid):
-    return render_graph_html_and_context("exercise_problems_graph.html", exercise_problems_graph.exercise_problems_graph_context(user, exid))
+def profile_exercise_problems_graph(user_data_student, exid):
+    return render_graph_html_and_context("exercise_problems_graph.html", exercise_problems_graph.exercise_problems_graph_context(user_data_student, exid))
 @register.simple_tag
-def profile_exercise_progress_graph(user):
-    return render_graph_html_and_context("exercise_progress_graph.html", exercise_progress_graph.exercise_progress_graph_context(user))
+def profile_exercise_progress_graph(user_data_student):
+    return render_graph_html_and_context("exercise_progress_graph.html", exercise_progress_graph.exercise_progress_graph_context(user_data_student))
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
 def profile_graph_link(user, graph_name, graph_type, selected_graph_type):

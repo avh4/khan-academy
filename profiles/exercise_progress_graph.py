@@ -3,15 +3,17 @@ import logging
 
 from models import UserExercise, Exercise, UserData
 
-def exercise_progress_graph_context(user):
-    if not user:
+def exercise_progress_graph_context(user_data_student):
+
+    if not user_data_student:
         return {}
     
+    user = user_data_student.user
+
     exercise_data = {}
     
     exercises = Exercise.get_all_use_cache()
     user_exercises = UserExercise.get_for_user_use_cache(user)
-    student_data = UserData.get_or_insert_for(user)
 
     dict_user_exercises = {}
     for user_exercise in user_exercises:
@@ -32,11 +34,11 @@ def exercise_progress_graph_context(user):
             user_exercise = dict_user_exercises[exercise.name]
             exercise_name = user_exercise.exercise
 
-            if student_data.is_proficient_at(exercise_name):
+            if user_data_student.is_proficient_at(exercise_name):
                 status = "Proficient"
                 color = "proficient"
     
-                if not student_data.is_explicitly_proficient_at(exercise_name):
+                if not user_data_student.is_explicitly_proficient_at(exercise_name):
                     status = "Proficient (due to proficiency in a more advanced module)"
     
             elif user_exercise.exercise is not None and UserExercise.is_struggling_with(user_exercise, user_exercise.get_exercise()):

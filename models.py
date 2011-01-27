@@ -6,6 +6,7 @@ from google.appengine.api import users
 from google.appengine.api import memcache
 
 from google.appengine.ext import db
+import object_property
 import cajole
 import app
 import util
@@ -305,6 +306,8 @@ class UserData(db.Model):
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
+    last_hourly_summary = db.DateTimeProperty()
+    last_activity = db.DateTimeProperty()
     
     @staticmethod
     def get_for_current_user():
@@ -635,6 +638,34 @@ class VideoLog(db.Model):
     def key_for_video(self):
         return VideoLog.video.get_value_for_datastore(self)
 
+class HourlyActivityLog(db.Model):
+    user = db.UserProperty()
+    date = db.DateTimeProperty()
+    activity_summary = object_property.ObjectProperty()
+
+    @staticmethod
+    def get_key_name(user, date):
+        return "%s:%s" % (user.email(), date.strftime("%Y-%m-%d-%H"))
+
+    @staticmethod
+    def build(user, date, activity_summary):
+        log = HourlyActivityLog(key_name=HourlyActivityLog.get_key_name(user, date))
+        log.user = user
+        log.date = date
+        log.activity_summary = activity_summary
+        return log
+
+    @staticmethod
+    def get_for_user_between_dts(user, dt_a, dt_b):
+        query = HourlyActivityLog.all()
+        query.filter('user =', user)
+
+        query.filter('date >=', dt_a)
+        query.filter('date <', dt_b)
+        query.order('date')
+
+        return query
+
 class ProblemLog(db.Model):
 
     user = db.UserProperty()
@@ -654,7 +685,7 @@ class ProblemLog(db.Model):
         query.filter('user =', user)
 
         query.filter('time_done >=', dt_a)
-        query.filter('time_done <=', dt_b)
+        query.filter('time_done <', dt_b)
         query.order('time_done')
 
         return query
