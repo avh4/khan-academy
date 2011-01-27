@@ -23,14 +23,20 @@
 import logging
 import math
 import StringIO
+import time
 import zipfile
 
 from google.appengine.api import datastore
 from google.appengine.api import namespace_manager
-
+# TODO(user): Remove this hack once 1.4.0 is live in production.
+try:
+  from google.appengine.datastore import datastore_rpc
+except ImportError:
+  datastore_rpc = None
 from mapreduce.lib import blobstore
 from google.appengine.ext import db
 from mapreduce.lib import key_range
+from google.appengine.ext.db import metadata
 from mapreduce import util
 from mapreduce.model import JsonMixin
 
@@ -135,6 +141,9 @@ class DatastoreInputReader(InputReader):
   # Maximum number of shards we'll create.
   _MAX_SHARD_COUNT = 256
 
+  # __scatter__ oversampling factor
+  _OVERSAMPLING_FACTOR = 32
+
   # Mapreduce parameters.
   ENTITY_KIND_PARAM = "entity_kind"
   KEYS_ONLY_PARAM = "keys_only"
@@ -207,42 +216,57 @@ class DatastoreInputReader(InputReader):
 
     raw_entity_kind = util.get_short_name(entity_kind_name)
 
+    if shard_count == 1:
+      # With one shard we don't need to calculate any splitpoints at all.
+      return [key_range.KeyRange(namespace=namespace, _app=app)]
+
     # we use datastore.Query instead of ext.db.Query here, because we can't
     # erase ordering on db.Query once we set it.
     ds_query = datastore.Query(kind=raw_entity_kind,
                                namespace=namespace,
                                _app=app,
                                keys_only=True)
-    ds_query.Order("__key__")
-    first_entity_key_list = ds_query.Get(1)
-    if not first_entity_key_list:
-      logging.warning("Could not retrieve an entity of type %s." %
-                      raw_entity_kind)
-      return []
-    first_entity_key = first_entity_key_list[0]
-    ds_query.Order(("__key__", datastore.Query.DESCENDING))
-    try:
-      last_entity_key, = ds_query.Get(1)
-    except db.NeedIndexError, e:
-      # TODO(user): Show this error in the worker log, not the app logs.
-      logging.warning("Cannot create accurate approximation of keyspace, "
-                      "guessing instead. Please address this problem: %s", e)
-      # TODO(user): Use a key-end hint from the user input parameters
-      # in this case, in the event the user has a good way of figuring out
-      # the range of the keyspace.
-      last_entity_key = key_range.KeyRange.guess_end_key(raw_entity_kind,
-                                                         first_entity_key)
-    full_keyrange = key_range.KeyRange(
-        first_entity_key, last_entity_key, None, True, True,
-        namespace=namespace,
-        _app=app)
-    key_ranges = [full_keyrange]
-    number_of_half_splits = int(math.floor(math.log(shard_count, 2)))
-    for _ in range(0, number_of_half_splits):
-      new_ranges = []
-      for r in key_ranges:
-        new_ranges += r.split_range(1)
-      key_ranges = new_ranges
+    ds_query.Order("__scatter__")
+    random_keys = ds_query.Get(shard_count * cls._OVERSAMPLING_FACTOR)
+    if not random_keys:
+      # This might mean that there are no entities with scatter property
+      # or there are no entities at all.
+      return [key_range.KeyRange(namespace=namespace, _app=app)]
+    random_keys.sort()
+    # pick shard_count - 1 points to generate shard_count splits
+    split_points_count = shard_count - 1
+    if len(random_keys) > split_points_count:
+      # downsample
+      random_keys = [random_keys[len(random_keys)*i/split_points_count]
+                     for i in range(split_points_count)]
+
+    key_ranges = []
+
+    key_ranges.append(key_range.KeyRange(
+        key_start=None,
+        key_end=random_keys[0],
+        direction=key_range.KeyRange.ASC,
+        include_start=False,
+        include_end=False,
+        namespace=namespace))
+
+    for i in range(0, len(random_keys) - 1):
+      key_ranges.append(key_range.KeyRange(
+          key_start=random_keys[i],
+          key_end=random_keys[i+1],
+          direction=key_range.KeyRange.ASC,
+          include_start=True,
+          include_end=False,
+          namespace=namespace))
+
+    key_ranges.append(key_range.KeyRange(
+        key_start=random_keys[-1],
+        key_end=None,
+        direction=key_range.KeyRange.ASC,
+        include_start=True,
+        include_end=False,
+        namespace=namespace))
+
     return key_ranges
 
   @classmethod
@@ -346,8 +370,12 @@ class DatastoreInputReader(InputReader):
 
     Args:
       mapper_spec: MapperSpec with params containing 'entity_kind'.
-        May also have 'batch_size' in the params to specify the number
-        of entities to process in each batch.
+        May have 'namespaces' in the params as either a list of namespace
+        strings or a comma-seperated list of namespaces. If specified then the
+        input reader will only yield entities in the given namespaces. If
+        'namespaces' is not given then the current namespace will be used. May
+        also have 'batch_size' in the params to specify the number of entities
+        to process in each batch.
 
     Returns:
       A list of InputReader objects of length <= number_of_shards. These
@@ -586,6 +614,11 @@ class BlobstoreLineInputReader(InputReader):
       raise BadReaderParamsError("Too many 'blob_keys' for mapper input")
     if not blob_keys:
       raise BadReaderParamsError("No 'blob_keys' specified for mapper input")
+    for blob_key in blob_keys:
+      blob_info = blobstore.BlobInfo.get(blobstore.BlobKey(blob_key))
+      if not blob_info:
+        raise BadReaderParamsError("Could not find blobinfo for key %s" %
+                                   blob_key)
 
   @classmethod
   def split_input(cls, mapper_spec):
@@ -730,6 +763,12 @@ class BlobstoreZipInputReader(InputReader):
     params = mapper_spec.params
     if cls.BLOB_KEY_PARAM not in params:
       raise BadReaderParamsError("Must specify 'blob_key' for mapper input")
+    blob_key = params[cls.BLOB_KEY_PARAM]
+    blob_info = blobstore.BlobInfo.get(blobstore.BlobKey(blob_key))
+    if not blob_info:
+      raise BadReaderParamsError("Could not find blobinfo for key %s" %
+                                 blob_key)
+
 
   @classmethod
   def split_input(cls, mapper_spec, _reader=blobstore.BlobReader):
@@ -847,6 +886,11 @@ class BlobstoreZipLineInputReader(InputReader):
       raise BadReaderParamsError("Too many 'blob_keys' for mapper input")
     if not blob_keys:
       raise BadReaderParamsError("No 'blob_keys' specified for mapper input")
+    for blob_key in blob_keys:
+      blob_info = blobstore.BlobInfo.get(blobstore.BlobKey(blob_key))
+      if not blob_info:
+        raise BadReaderParamsError("Could not find blobinfo for key %s" %
+                                   blob_key)
 
   @classmethod
   def split_input(cls, mapper_spec, _reader=blobstore.BlobReader):
@@ -994,3 +1038,221 @@ class BlobstoreZipLineInputReader(InputReader):
         self._blob_key, self._start_file_index, self._end_file_index,
         self._next_offset())
 
+
+class ConsistentKeyReader(DatastoreKeyInputReader):
+  """A key reader which reads consistent data from datastore.
+
+  Datastore might have entities which were written, but not visible through
+  queries for some time. Typically these entities can be only read inside
+  transaction until they are 'applied'.
+
+  This reader reads all keys even if they are not visible. It might take
+  significant time to start yielding some data because it has to apply all
+  modifications created before its start.
+  """
+  START_TIME_US_PARAM = 'start_time_us'
+  UNAPPLIED_LOG_FILTER = '__unapplied_log_timestamp_us__ <'
+  DUMMY_KIND = 'DUMMY_KIND'
+  DUMMY_ID = 106275677020293L
+
+  def __init__(self,
+               entity_kind,
+               key_range_param,
+               batch_size=DatastoreKeyInputReader._BATCH_SIZE,
+               start_time_us=None):
+    """Constructor.
+
+    Args:
+      entity_kind: Kind of entity to read as string.
+      key_range_param: Key range to scan through as key_range.KeyRange.
+      batch_size: Size of single batch read (number of entities).
+      start_time_us: Start time of the reader (as given by time.time()
+        function). It will apply all unapplied jobs created before it was
+        started.
+    """
+    DatastoreInputReader.__init__(
+        self, entity_kind, key_range_param, batch_size)
+    self.start_time_us = start_time_us
+
+  def __iter__(self):
+    """Iterates over the keys in the given KeyRanges.
+
+    Yields:
+      A db.Key instance for each key in the given key range, starting with
+      keys for unapplied jobs.
+    """
+    while True:  # Iterates over each key range.
+      if self._current_key_range is None:
+        break
+
+      # TODO(user): Remove this hack once 1.4.0 is live in production.
+      if datastore_rpc:
+        self._apply_jobs()
+
+      while True:  # Iterates over each key in the current key range.
+        # Fetches the next batch of the result keys.
+        query = self._current_key_range.make_ascending_datastore_query(
+            kind=self._entity_kind, keys_only=True)
+        keys = query.Get(limit=self._batch_size)
+
+        # No results, this shard is complete.
+        if not keys:
+          self._advance_key_range()
+          break
+
+        # All good, now we can feed the mapper.
+        for key in keys:
+          self._current_key_range.advance(key)
+          yield key
+
+  def _apply_jobs(self):
+    """Apply all jobs in current key range."""
+    while True:
+      # Creates an unapplied query and fetches unapplied jobs in the result
+      # range.
+      unapplied_query = self._current_key_range.make_ascending_datastore_query(
+          kind=None, keys_only=True)
+      unapplied_query[
+          ConsistentKeyReader.UNAPPLIED_LOG_FILTER] = self.start_time_us
+      unapplied_jobs = unapplied_query.Get(limit=self._batch_size)
+
+      if not unapplied_jobs:
+        return
+
+      # There were some unapplied jobs. Roll them forward.
+      keys_to_apply = []
+      for key in unapplied_jobs:
+        # To apply the entity group we need to read something from it.
+        # We use dummy kind and id because we don't actually need any data.
+        path = key.to_path() + [ConsistentKeyReader.DUMMY_KIND,
+                                ConsistentKeyReader.DUMMY_ID]
+        keys_to_apply.append(
+            db.Key.from_path(_app=key.app(), namespace=key.namespace(), *path))
+      db.get(keys_to_apply, config=datastore_rpc.Configuration(
+          deadline=10,
+          read_policy=datastore_rpc.Configuration.APPLY_ALL_JOBS_CONSISTENCY))
+
+
+  @classmethod
+  def _split_input_from_namespace(cls,
+                                  app,
+                                  namespace,
+                                  entity_kind_name,
+                                  shard_count):
+    key_ranges = super(ConsistentKeyReader, cls)._split_input_from_namespace(
+        app, namespace, entity_kind_name, shard_count)
+
+    # The KeyRanges calculated by the base class may not include keys for
+    # entities that have unapplied jobs. So use an open key range for the first
+    # and last KeyRanges to ensure that they will be processed.
+    if key_ranges:
+      key_ranges[0].key_start = None
+      key_ranges[0].include_start = False
+      key_ranges[-1].key_end = None
+      key_ranges[-1].include_end = False
+    return key_ranges
+
+  @classmethod
+  def _split_input_from_params(cls, app, namespaces, entity_kind_name,
+                               params, shard_count):
+    readers = super(ConsistentKeyReader, cls)._split_input_from_params(app,
+                                                          namespaces,
+                                                          entity_kind_name,
+                                                          params,
+                                                          shard_count)
+
+    # We always produce at least one key range because:
+    # a) there might be unapplied entities
+    # b) it simplifies mapper code
+    if not readers:
+      key_ranges = [key_range.KeyRange(namespace=namespace, _app=app)
+                    for namespace in namespaces]
+      readers = [cls(entity_kind_name, key_ranges)]
+
+    return readers
+
+  @classmethod
+  def split_input(cls, mapper_spec):
+    """Splits input into key ranges."""
+    readers = super(ConsistentKeyReader, cls).split_input(mapper_spec)
+
+    start_time_us = mapper_spec.params.get(
+        cls.START_TIME_US_PARAM, long(time.time() * 1e6))
+    for reader in readers:
+      reader.start_time_us = start_time_us
+    return readers
+
+  def to_json(self):
+    """Serializes all the data in this reader into json form.
+
+    Returns:
+      all the data in json-compatible map.
+    """
+    json_dict = {self.KEY_RANGE_PARAM: [k.to_json() for k in self._key_ranges],
+                 self.ENTITY_KIND_PARAM: self._entity_kind,
+                 self.BATCH_SIZE_PARAM: self._batch_size,
+                 self.START_TIME_US_PARAM: self.start_time_us}
+    return json_dict
+
+  @classmethod
+  def from_json(cls, json):
+    """Create new ConsistentKeyReader from the json, encoded by to_json.
+
+    Args:
+      json: json map representation of ConsistentKeyReader.
+
+    Returns:
+      an instance of ConsistentKeyReader with all data deserialized from json.
+    """
+    query_range = cls(
+        json[cls.ENTITY_KIND_PARAM],
+        [key_range.KeyRange.from_json(k) for k in json[cls.KEY_RANGE_PARAM]],
+        json[cls.BATCH_SIZE_PARAM],
+        json[cls.START_TIME_US_PARAM])
+    return query_range
+
+
+# TODO(user): This reader always produces only one shard, because
+# namespace entities use the mix of ids/names, and KeyRange-based splitting
+# doesn't work satisfactory in this case.
+# It's possible to implement specific splitting functionality for the reader
+# instead of reusing generic one. Meanwhile 1 shard is enough for our
+# applications.
+class NamespaceInputReader(DatastoreKeyInputReader):
+  """An input reader to iterate over namespaces.
+
+  This reader yields namespace names as string.
+  It will always produce only one shard.
+  """
+
+  @classmethod
+  def validate(cls, mapper_spec):
+    """Validates mapper spec.
+
+    Args:
+      mapper_spec: The MapperSpec for this InputReader.
+
+    Raises:
+      BadReaderParamsError: required parameters are missing or invalid.
+    """
+    mapper_spec.params[cls.ENTITY_KIND_PARAM] = metadata.Namespace.kind()
+    mapper_spec.shard_count = 1
+    cls._common_validate(mapper_spec)
+
+  @classmethod
+  def split_input(cls, mapper_spec):
+    """Returns a list of input readers for the input spec.
+
+    Args:
+      mapper_spec: The MapperSpec for this InputReader.
+
+    Returns:
+      A list of InputReaders.
+    """
+    mapper_spec.params[cls.ENTITY_KIND_PARAM] = metadata.Namespace.kind()
+    mapper_spec.shard_count = 1
+    return super(DatastoreKeyInputReader, cls).split_input(mapper_spec)
+
+  def __iter__(self):
+    for key in DatastoreKeyInputReader.__iter__(self):
+      yield metadata.Namespace.key_to_namespace(key)
