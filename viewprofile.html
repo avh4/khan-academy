@@ -6,14 +6,14 @@
                 <span class="profile-header-icon"><img src="/images/video-camera-icon-shadow.png" /></span>
                 <span class="count">
                     {{ count_videos_completed }} / {{ count_videos }}<br />
-                    <span class="label">Videos</span>
+                    <span class="label">Videos Completed</span>
                 </span>
             </span>
             <span id="exercises-completed" >
                 <span class="profile-header-icon"><img src="/images/generic-exercise-icon-shadow.png" /></span>
                 <span class="count">
                     {{ count_exercises_proficient }} / {{ count_exercises }}<br />
-                    <span class="label">Exercises</span>
+                    <span class="label">Proficient Exercises</span>
                 </span>
             </span>
             <span id="energy-points">
@@ -53,6 +53,11 @@
                     {% profile_graph_link student "Exercise Progress" "exerciseprogress" selected_graph_type %}
                     <p class="accordion-content">
                         Shows you which exercises you've worked on and completed.
+                        <span class="graph-date-picker">
+                            <span class="progress-legend proficient">Proficient</span>
+                            <span class="progress-legend started">Started</span>
+                            <span class="progress-legend struggling">Struggling</span>
+                        </span>
                     </p>
                 </li>
                 <li>
@@ -103,7 +108,7 @@
                         <div id="category-{{badge.badge_category}}" style="display: none;">
                         {% if user_badges|hash:badge.badge_category %}
                         <div id="user-owned">
-                        <h2 style="display: block; margin-left: 10px;">Your Badges</h2>
+                        <h2 style="display: block; margin-left: 10px;">Badges you've earned</h2>
                             {% for user_badge in user_badges|hash:badge.badge_category %}
                                 {% badge_block user_badge.badge user_badge %}
                             {% endfor %}
@@ -111,7 +116,7 @@
                         </div>
                         {% endif %}
                         <div id="all-badges">
-                        <h2 style="display: block; margin-left: 10px;">All Badges</h2>
+                        <h2 style="display: block; margin-left: 10px;">Possible Badges</h2>
                     {% endif %}
                         {% badge_block badge None show_badge_frequencies%}
                     {% if forloop.last %}

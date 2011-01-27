@@ -90,17 +90,22 @@ function exercise_url(point) {
 
                                 if (point.fVideo) {
                                     if (point.desc)
-                                    s += '<br/><br><strong>' + point.time_watched + ' of related videos watched:</strong><br/>' + point.desc;
+                                    s += '<br><strong style="font-size: 13px; font-weight: bold;">Watched ' 
+                                    + point.time_watched + 
+                                    ' of related videos<br><b style="font-size: 13px; font-weight: bold;">before answering:</strong><br/>' + point.desc;
                                 }
                                 else if (point.fSummary) {
-                                    s += '<b>' + (point.hint_used ? 'Hint Used<br/><br/>' : '') + '<a style="color:blue;" ' + 
+                                    s += '<a style="font-size: 15px;" ' + 
                                             'href="' + exercise_url(point) + '"' +
                                             '>Problem ' + point.x + 
-                                            '</a> - ' + (point.correct ? "Correct" : "Incorrect") +
+                                            '</a><b style="font-size: 15px;"> - ' + (point.correct ? "Correct" : "Incorrect") +
+                                            (point.hint_used ? '<span style="color: red; font-style: italic; font-weight:bold">(Hint Used)' : '') +
                                             '</b><br/>' +
                                             'Seconds used: ' + point.time_taken + '<br/>' +
-                                            (point.exercise_non_summative ? 'From exercise: ' + point.exercise_non_summative_display_name + '<br/>' : '') +
-                                            '<br/><em>Click the graph to view this problem</em>.';
+                                            (point.exercise_non_summative ? 'From exercise: ' + point.exercise_non_summative_display_name + '<br/>' : '');
+                                }
+                                else if (ix = this.points.length -1) {
+                                    s += '<br><br/><em>Click the graph to view this problem</em>.';
                                 }
                             }
 
