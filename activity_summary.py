@@ -85,8 +85,6 @@ def fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_da
     dt_end = min(dt_end, datetime.datetime.now())
     dt_start = max(dt_end - datetime.timedelta(hours=3), user_data.last_hourly_summary)
 
-    logging.critical("dt_end: %s, dt_start: %s", dt_start, dt_end)
-
     # Chop off minutes and seconds
     dt_start = datetime.datetime(dt_start.year, dt_start.month, dt_start.day, dt_start.hour)
     dt_end = datetime.datetime(dt_end.year, dt_end.month, dt_end.day, dt_end.hour)
@@ -94,10 +92,8 @@ def fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_da
     dt = dt_start
 
     while dt <= dt_end:
-        logging.critical("building: %s", dt)
         summary = ActivitySummary.build(user_data.user, dt)
         if summary.has_activity():
-            logging.critical("activity!")
             log = models.HourlyActivityLog.build(user_data.user, dt, summary)
             hourly_activity_logs.append(log)
         dt += datetime.timedelta(hours=1)
