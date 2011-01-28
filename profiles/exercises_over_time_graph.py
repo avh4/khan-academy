@@ -11,12 +11,12 @@ class ExerciseData:
         def display_name(self):
             return models.Exercise.to_display_name(self.name)
 
-def exercises_over_time_graph_context(user):
+def exercises_over_time_graph_context(user_data):
 
-    if not user:
+    if not user_data:
         return {}
-       
-    user_data = models.UserData.get_or_insert_for(user)
+
+    user = user_data.user
     user_exercises = []
     end_date = None
 

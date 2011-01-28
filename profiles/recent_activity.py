@@ -6,9 +6,9 @@ import templatefilters
 from badges import util_badges, models_badges
 
 # Number of hours until activity is no longer considered "recent" for profiles
-HOURS_RECENT_ACTIVITY = 72
+HOURS_RECENT_ACTIVITY = 48
 # Number of most-recent items shown in recent activity
-MOST_RECENT_ITEMS = 12
+MOST_RECENT_ITEMS = 10
 
 class RecentActivity:
 
