@@ -3,6 +3,9 @@ cron:
 - description: badge update
   url: /admin/startnewbadgemapreduce
   schedule: every 24 hours
+- description: daily_activity_log
+  url: /admin/dailyactivitylog
+  schedule: every 24 hours
 - description: exercise statistics update
   url: /admin/startnewexercisestatisticsmapreduce
   schedule: every saturday 12:00
