@@ -38,7 +38,7 @@
                 <li>
                     {% profile_graph_link student "Activity" "activity" selected_graph_type %}
                     <p class="accordion-content">
-                        Shows how much much work you're doing each day.
+                        Shows how much work you're doing each day.
                         {% profile_graph_date_picker student "activity" %}
                     </p>
                 </li>
@@ -108,7 +108,7 @@
                         <div id="category-{{badge.badge_category}}" style="display: none;">
                         {% if user_badges|hash:badge.badge_category %}
                         <div id="user-owned">
-                        <h2 style="display: block; margin-left: 10px;">Badges you've earned</h2>
+                        <h2 style="display: block; margin-left: 10px;">Badges Earned</h2>
                             {% for user_badge in user_badges|hash:badge.badge_category %}
                                 {% badge_block user_badge.badge user_badge %}
                             {% endfor %}
