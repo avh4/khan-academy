@@ -42,14 +42,18 @@ class ActivitySummary:
         return self.has_video_activity() or self.has_exercise_activity()
 
     @staticmethod
-    def build(user, date):
+    def build(user, date, problem_logs, video_logs):
         summary = ActivitySummary()
         summary.user = user
         # Chop off minutes and seconds
         summary.date = datetime.datetime(date.year, date.month, date.day, date.hour)
 
-        problem_logs = models.ProblemLog.get_for_user_between_dts(user, summary.date, summary.date + datetime.timedelta(hours=1))
-        for problem_log in problem_logs:
+        date_next = date + datetime.timedelta(hours=1)
+        
+        problem_logs_filtered = filter(lambda problem_log: date <= problem_log.time_done < date_next, problem_logs)
+        video_logs_filtered = filter(lambda video_log: date <= video_log.time_watched < date_next, video_logs)
+
+        for problem_log in problem_logs_filtered:
             if not summary.dict_exercises.has_key(problem_log.exercise):
                 summary.dict_exercises[problem_log.exercise] = ActivitySummaryExerciseItem()
 
@@ -61,8 +65,7 @@ class ActivitySummary:
             if problem_log.correct:
                 summary_item.c_correct += 1
 
-        video_logs = models.VideoLog.get_for_user_between_dts(user, summary.date, summary.date + datetime.timedelta(hours=1))
-        for video_log in video_logs:
+        for video_log in video_logs_filtered:
             video_key = video_log.key_for_video()
             if not summary.dict_videos.has_key(video_key):
                 summary.dict_videos[video_key] = ActivitySummaryVideoItem()
@@ -83,7 +86,10 @@ def fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_da
     # We're willing to fill the last 3 hours with realtime data if summary logs haven't
     # been compiled for some reason.
     dt_end = min(dt_end, datetime.datetime.now())
-    dt_start = max(dt_end - datetime.timedelta(hours=3), user_data.last_hourly_summary)
+    dt_start = dt_end - datetime.timedelta(hours=3)
+
+    if user_data.last_hourly_summary:
+        dt_start = max(dt_end - datetime.timedelta(hours=3), user_data.last_hourly_summary)
 
     # Chop off minutes and seconds
     dt_start = datetime.datetime(dt_start.year, dt_start.month, dt_start.day, dt_start.hour)
@@ -91,8 +97,11 @@ def fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_da
 
     dt = dt_start
 
+    problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+    video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+
     while dt <= dt_end:
-        summary = ActivitySummary.build(user_data.user, dt)
+        summary = ActivitySummary.build(user_data.user, dt, problem_logs, video_logs)
         if summary.has_activity():
             log = models.HourlyActivityLog.build(user_data.user, dt, summary)
             hourly_activity_logs.append(log)
@@ -128,9 +137,11 @@ def hourly_activity_summary_map(user_data):
         dt = dt_start
         list_entities_to_put = []
 
-        while dt <= dt_end:
+        problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+        video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
 
-            summary = ActivitySummary.build(user_data.user, dt)
+        while dt <= dt_end:
+            summary = ActivitySummary.build(user_data.user, dt, problem_logs, video_logs)
             if summary.has_activity():
                 log = models.HourlyActivityLog.build(user_data.user, dt, summary)
                 list_entities_to_put.append(log)
@@ -153,7 +164,7 @@ class StartNewHourlyActivityLogMapReduce(request_handler.RequestHandler):
                 handler_spec = "activity_summary.hourly_activity_summary_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
                 reader_parameters = {"entity_kind": "models.UserData"},
-                shard_count = 12)
+                shard_count = 20)
         self.response.out.write("OK: " + str(mapreduce_id))
 
 
