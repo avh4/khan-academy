@@ -109,8 +109,8 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
     if user_data.last_daily_summary:
         dt_start = max(dt_end - datetime.timedelta(days=2), user_data.last_daily_summary)
 
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
-    video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+    problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
+    video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
 
     # Chop off hours, minutes, and seconds
     dt_start = datetime.datetime(dt_start.year, dt_start.month, dt_start.day)
@@ -155,8 +155,8 @@ def daily_activity_summary_map(user_data):
         dt = dt_start
         list_entities_to_put = []
 
-        problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
-        video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+        problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
+        video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
 
         while dt <= dt_end:
             summary = DailyActivitySummary.build(user_data.user, dt, problem_logs, video_logs)

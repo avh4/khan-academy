@@ -258,8 +258,7 @@ def activity_graph_context(user_data_student, dt_start_utc, dt_end_utc, tz_offse
     for bucket in bucket_list:
         if (has_activity_type(dict_playlist_buckets, bucket, "minutes") or
             has_activity_type(dict_exercise_buckets, bucket, "minutes") or
-            has_activity_type(dict_badge_buckets, bucket, "badge_category") or
-            has_activity_type(dict_points_buckets, bucket, "points")):
+            has_activity_type(dict_badge_buckets, bucket, "badge_category")):
                 has_activity = True
                 break
 
