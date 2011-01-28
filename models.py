@@ -306,7 +306,7 @@ class UserData(db.Model):
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
-    last_hourly_summary = db.DateTimeProperty()
+    last_daily_summary = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     
     @staticmethod
@@ -638,7 +638,7 @@ class VideoLog(db.Model):
     def key_for_video(self):
         return VideoLog.video.get_value_for_datastore(self)
 
-class HourlyActivityLog(db.Model):
+class DailyActivityLog(db.Model):
     user = db.UserProperty()
     date = db.DateTimeProperty()
     activity_summary = object_property.ObjectProperty()
@@ -649,7 +649,7 @@ class HourlyActivityLog(db.Model):
 
     @staticmethod
     def build(user, date, activity_summary):
-        log = HourlyActivityLog(key_name=HourlyActivityLog.get_key_name(user, date))
+        log = DailyActivityLog(key_name=DailyActivityLog.get_key_name(user, date))
         log.user = user
         log.date = date
         log.activity_summary = activity_summary
@@ -657,7 +657,7 @@ class HourlyActivityLog(db.Model):
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):
-        query = HourlyActivityLog.all()
+        query = DailyActivityLog.all()
         query.filter('user =', user)
 
         query.filter('date >=', dt_a)

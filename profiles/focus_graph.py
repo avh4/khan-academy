@@ -8,33 +8,41 @@ import models
 import util
 import activity_summary
 
-def get_playlist_focus_data(user, hourly_activity_logs, dt_start_utc, dt_end_utc):
+def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc):
     total_seconds = 0
     dict_playlist_seconds = {}
 
-    for hourly_activity_log in hourly_activity_logs:
+    for daily_activity_log in daily_activity_logs:
+        activity_summary = daily_activity_log.activity_summary
+        for hour in activity_summary.hourly_summaries:
 
-        activity_summary = hourly_activity_log.activity_summary
-        for video_key in activity_summary.dict_videos.keys():
-            activity_summary_video_item = activity_summary.dict_videos[video_key]
+            hourly_activity_summary = activity_summary.hourly_summaries[hour]
 
-            playlist_title = "Other"
-            if activity_summary_video_item.playlist_titles:
-                playlist_title = activity_summary_video_item.playlist_titles[0] # Only count against the first playlist for now
+            # We need to filter for dates outside of our range here because we expanded our DB query
+            # to make sure we got the entire client time zone date range
+            if hourly_activity_summary.date < dt_start_utc or hourly_activity_summary.date > dt_end_utc:
+                continue
 
-            key_playlist = playlist_title.lower()
-            if dict_playlist_seconds.has_key(key_playlist):
-                dict_playlist_seconds[key_playlist]["seconds"] += activity_summary_video_item.seconds_watched
-            else:
-                dict_playlist_seconds[key_playlist] = {"playlist_title": playlist_title, "seconds": activity_summary_video_item.seconds_watched, "videos": {}}
+            for video_key in hourly_activity_summary.dict_videos.keys():
+                hourly_activity_summary_video_item = hourly_activity_summary.dict_videos[video_key]
 
-            key_video = activity_summary_video_item.video_title.lower()
-            if dict_playlist_seconds[key_playlist]["videos"].has_key(key_video):
-                dict_playlist_seconds[key_playlist]["videos"][key_video]["seconds"] += activity_summary_video_item.seconds_watched
-            else:
-                dict_playlist_seconds[key_playlist]["videos"][key_video] = {"video_title": activity_summary_video_item.video_title, "seconds": activity_summary_video_item.seconds_watched}
+                playlist_title = "Other"
+                if hourly_activity_summary_video_item.playlist_titles:
+                    playlist_title = hourly_activity_summary_video_item.playlist_titles[0] # Only count against the first playlist for now
 
-            total_seconds += activity_summary_video_item.seconds_watched
+                key_playlist = playlist_title.lower()
+                if dict_playlist_seconds.has_key(key_playlist):
+                    dict_playlist_seconds[key_playlist]["seconds"] += hourly_activity_summary_video_item.seconds_watched
+                else:
+                    dict_playlist_seconds[key_playlist] = {"playlist_title": playlist_title, "seconds": hourly_activity_summary_video_item.seconds_watched, "videos": {}}
+
+                key_video = hourly_activity_summary_video_item.video_title.lower()
+                if dict_playlist_seconds[key_playlist]["videos"].has_key(key_video):
+                    dict_playlist_seconds[key_playlist]["videos"][key_video]["seconds"] += hourly_activity_summary_video_item.seconds_watched
+                else:
+                    dict_playlist_seconds[key_playlist]["videos"][key_video] = {"video_title": hourly_activity_summary_video_item.video_title, "seconds": hourly_activity_summary_video_item.seconds_watched}
+
+                total_seconds += hourly_activity_summary_video_item.seconds_watched
 
     for key_playlist in dict_playlist_seconds:
         dict_playlist_seconds[key_playlist]["percentage"] = int(float(dict_playlist_seconds[key_playlist]["seconds"]) / float(total_seconds) * 100.0)
@@ -45,29 +53,40 @@ def get_playlist_focus_data(user, hourly_activity_logs, dt_start_utc, dt_end_utc
 
     return (total_seconds, dict_playlist_seconds)
 
-def get_exercise_focus_data(user, user_data, hourly_activity_logs, dt_start_utc, dt_end_utc):
+def get_exercise_focus_data(user, user_data, daily_activity_logs, dt_start_utc, dt_end_utc):
 
     total_seconds = 0
     dict_exercise_seconds = {}
 
-    for hourly_activity_log in hourly_activity_logs:
+    for daily_activity_log in daily_activity_logs:
+        activity_summary = daily_activity_log.activity_summary
+        for hour in activity_summary.hourly_summaries:
 
-        activity_summary = hourly_activity_log.activity_summary
+            hourly_activity_summary = activity_summary.hourly_summaries[hour]
 
-        for exercise_key in activity_summary.dict_exercises.keys():
-            activity_summary_exercise_item = activity_summary.dict_exercises[exercise_key]
+            logging.critical("found hour: %d", hour)
 
-            exid = activity_summary_exercise_item.exercise
+            # We need to filter for dates outside of our range here because we expanded our DB query
+            # to make sure we got the entire client time zone date range
+            if hourly_activity_summary.date < dt_start_utc or hourly_activity_summary.date > dt_end_utc:
+                continue
 
-            key_exercise = exid.lower()
-            if not dict_exercise_seconds.has_key(key_exercise):
-                dict_exercise_seconds[key_exercise] = {"exercise_title": models.Exercise.to_display_name(exid), "exid": exid, "seconds": 0, "correct": 0, "problems": 0}
+            logging.critical("B found hour: %d", hour)
 
-            dict_exercise_seconds[key_exercise]["seconds"] += activity_summary_exercise_item.time_taken
-            dict_exercise_seconds[key_exercise]["problems"] += activity_summary_exercise_item.c_problems
-            dict_exercise_seconds[key_exercise]["correct"] += activity_summary_exercise_item.c_correct
+            for exercise_key in hourly_activity_summary.dict_exercises.keys():
+                hourly_activity_summary_exercise_item = hourly_activity_summary.dict_exercises[exercise_key]
 
-            total_seconds += activity_summary_exercise_item.time_taken
+                exid = hourly_activity_summary_exercise_item.exercise
+
+                key_exercise = exid.lower()
+                if not dict_exercise_seconds.has_key(key_exercise):
+                    dict_exercise_seconds[key_exercise] = {"exercise_title": models.Exercise.to_display_name(exid), "exid": exid, "seconds": 0, "correct": 0, "problems": 0}
+
+                dict_exercise_seconds[key_exercise]["seconds"] += hourly_activity_summary_exercise_item.time_taken
+                dict_exercise_seconds[key_exercise]["problems"] += hourly_activity_summary_exercise_item.c_problems
+                dict_exercise_seconds[key_exercise]["correct"] += hourly_activity_summary_exercise_item.c_correct
+
+                total_seconds += hourly_activity_summary_exercise_item.time_taken
 
     keys = dict_exercise_seconds.keys()
     for key_exercise in keys:
@@ -97,12 +116,15 @@ def focus_graph_context(user_data_student, dt_start_utc, dt_end_utc):
 
     user = user_data_student.user
 
-    # Should never be more than (31*24)=744 activity logs per user
-    hourly_activity_logs = models.HourlyActivityLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(1000)
-    hourly_activity_logs = activity_summary.fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_data_student, dt_end_utc)
+    # We have to expand by 1 day on each side to be sure we grab proper 'day' in client's time zone,
+    # then we filter for proper time zone daily boundaries
+    dt_start_utc_expanded = dt_start_utc - datetime.timedelta(days=1)
+    dt_end_utc_expanded = dt_end_utc + datetime.timedelta(days=1)
+    daily_activity_logs = models.DailyActivityLog.get_for_user_between_dts(user, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
+    daily_activity_logs = activity_summary.fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data_student, dt_end_utc_expanded)
 
-    playlist_focus_data = get_playlist_focus_data(user, hourly_activity_logs, dt_start_utc, dt_end_utc)
-    exercise_focus_data = get_exercise_focus_data(user, user_data_student, hourly_activity_logs, dt_start_utc, dt_end_utc)
+    playlist_focus_data = get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
+    exercise_focus_data = get_exercise_focus_data(user, user_data_student, daily_activity_logs, dt_start_utc, dt_end_utc)
 
     total_playlist_seconds = playlist_focus_data[0]
     dict_playlist_seconds = playlist_focus_data[1]

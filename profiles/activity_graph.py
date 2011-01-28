@@ -71,26 +71,35 @@ def add_bucket_html_summary(dict_bucket, key, limit):
                 c += 1
             dict_bucket[bucket]["html_summary"] = "<br/>".join(list_entries)
 
-def get_exercise_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
+def get_exercise_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
 
-    for hourly_activity_log in hourly_activity_logs:
-        key = get_bucket_value(hourly_activity_log.date, tz_offset, bucket_type)
-        activity_summary = hourly_activity_log.activity_summary
+    for daily_activity_log in daily_activity_logs:
+        activity_summary = daily_activity_log.activity_summary
+        for hour in activity_summary.hourly_summaries:
 
-        if not dict_bucket.has_key(key) or not activity_summary.has_exercise_activity():
-            continue;
+            hourly_activity_summary = activity_summary.hourly_summaries[hour]
 
-        if not dict_bucket[key]:
-            dict_bucket[key] = {"minutes": 0, "seconds": 0, "points": 0, "exercise_names": {}}
+            # We need to filter for dates outside of our range here because we expanded our DB query
+            # to make sure we got the entire client time zone date range
+            if hourly_activity_summary.date < dt_start_utc or hourly_activity_summary.date > dt_end_utc:
+                continue
 
-        for exercise_key in activity_summary.dict_exercises.keys():
-            activity_summary_exercise_item = activity_summary.dict_exercises[exercise_key]
-            dict_bucket[key]["minutes"] += (activity_summary_exercise_item.time_taken / 60.0)
-            dict_bucket[key]["seconds"] += activity_summary_exercise_item.time_taken
-            dict_bucket[key]["points"] += activity_summary_exercise_item.points_earned
-            dict_bucket[key]["exercise_names"][models.Exercise.to_display_name(activity_summary_exercise_item.exercise)] = True
+            key = get_bucket_value(hourly_activity_summary.date, tz_offset, bucket_type)
+
+            if not dict_bucket.has_key(key) or not hourly_activity_summary.has_exercise_activity():
+                continue;
+
+            if not dict_bucket[key]:
+                dict_bucket[key] = {"minutes": 0, "seconds": 0, "points": 0, "exercise_names": {}}
+
+            for exercise_key in hourly_activity_summary.dict_exercises.keys():
+                activity_summary_exercise_item = hourly_activity_summary.dict_exercises[exercise_key]
+                dict_bucket[key]["minutes"] += (activity_summary_exercise_item.time_taken / 60.0)
+                dict_bucket[key]["seconds"] += activity_summary_exercise_item.time_taken
+                dict_bucket[key]["points"] += activity_summary_exercise_item.points_earned
+                dict_bucket[key]["exercise_names"][models.Exercise.to_display_name(activity_summary_exercise_item.exercise)] = True
 
     for bucket in bucket_list:
         if dict_bucket[bucket]:
@@ -100,26 +109,34 @@ def get_exercise_activity_data(user, bucket_list, bucket_type, hourly_activity_l
 
     return dict_bucket
 
-def get_playlist_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
+def get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
 
-    for hourly_activity_log in hourly_activity_logs:
-        key = get_bucket_value(hourly_activity_log.date, tz_offset, bucket_type)
-        activity_summary = hourly_activity_log.activity_summary
+    for daily_activity_log in daily_activity_logs:
+        activity_summary = daily_activity_log.activity_summary
+        for hour in activity_summary.hourly_summaries:
 
-        if not dict_bucket.has_key(key) or not activity_summary.has_video_activity():
-            continue;
+            hourly_activity_summary = activity_summary.hourly_summaries[hour]
 
-        if not dict_bucket[key]:
-            dict_bucket[key] = {"minutes": 0, "seconds": 0, "points": 0, "video_titles": {}}
+            # We need to filter for dates outside of our range here because we expanded our DB query
+            # to make sure we got the entire client time zone date range
+            if hourly_activity_summary.date < dt_start_utc or hourly_activity_summary.date > dt_end_utc:
+                continue
 
-        for video_key in activity_summary.dict_videos.keys():
-            activity_summary_video_item = activity_summary.dict_videos[video_key]
-            dict_bucket[key]["minutes"] += (activity_summary_video_item.seconds_watched / 60.0)
-            dict_bucket[key]["seconds"] += activity_summary_video_item.seconds_watched
-            dict_bucket[key]["points"] += activity_summary_video_item.points_earned
-            dict_bucket[key]["video_titles"][activity_summary_video_item.video_title] = True
+            key = get_bucket_value(hourly_activity_summary.date, tz_offset, bucket_type)
+            if not dict_bucket.has_key(key) or not hourly_activity_summary.has_video_activity():
+                continue;
+
+            if not dict_bucket[key]:
+                dict_bucket[key] = {"minutes": 0, "seconds": 0, "points": 0, "video_titles": {}}
+
+            for video_key in hourly_activity_summary.dict_videos.keys():
+                activity_summary_video_item = hourly_activity_summary.dict_videos[video_key]
+                dict_bucket[key]["minutes"] += (activity_summary_video_item.seconds_watched / 60.0)
+                dict_bucket[key]["seconds"] += activity_summary_video_item.seconds_watched
+                dict_bucket[key]["points"] += activity_summary_video_item.points_earned
+                dict_bucket[key]["video_titles"][activity_summary_video_item.video_title] = True
 
     for bucket in bucket_list:
         if dict_bucket[bucket]:
@@ -218,15 +235,18 @@ def activity_graph_context(user_data_student, dt_start_utc, dt_end_utc, tz_offse
 
     user = user_data_student.user
 
-    # Should never be more than (31*24)=744 activity logs per user
-    hourly_activity_logs = models.HourlyActivityLog.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(1000)
-    hourly_activity_logs = activity_summary.fill_realtime_recent_hourly_activity_summaries(hourly_activity_logs, user_data_student, dt_end_utc)
+    # We have to expand by 1 day on each side to be sure we grab proper 'day' in client's time zone,
+    # then we filter for proper time zone daily boundaries
+    dt_start_utc_expanded = dt_start_utc - datetime.timedelta(days=1)
+    dt_end_utc_expanded = dt_end_utc + datetime.timedelta(days=1)
+    daily_activity_logs = models.DailyActivityLog.get_for_user_between_dts(user, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
+    daily_activity_logs = activity_summary.fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data_student, dt_end_utc_expanded)
 
     bucket_type = get_bucket_type(dt_start_utc, dt_end_utc)
     bucket_list = get_bucket_list(dt_start_utc, dt_end_utc, tz_offset, bucket_type)
 
-    dict_playlist_buckets = get_playlist_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
-    dict_exercise_buckets = get_exercise_activity_data(user, bucket_list, bucket_type, hourly_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
+    dict_playlist_buckets = get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
+    dict_exercise_buckets = get_exercise_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
     dict_badge_buckets = get_badge_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
     dict_proficiency_buckets = get_proficiency_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
     dict_points_buckets = get_points_activity_data(bucket_list, dict_playlist_buckets, dict_exercise_buckets, dict_badge_buckets)

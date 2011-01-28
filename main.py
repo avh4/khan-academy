@@ -2121,7 +2121,7 @@ def real_main():
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
-        ('/admin/hourlyactivitylog', activity_summary.StartNewHourlyActivityLogMapReduce),
+        ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
 
         ('/coaches', coaches.ViewCoaches),
         ('/registercoach', coaches.RegisterCoach),  
