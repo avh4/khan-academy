@@ -26,7 +26,7 @@ var KnowledgeMap = {
                     Suggested: "images/node-challenge-suggested.png"
                        }
     },
-    latLngHome: new google.maps.LatLng(-0.629254, 0.730775),
+    latLngHome: new google.maps.LatLng(-0.064844, 0.736268),
     latMin: 90,
     latMax: -90,
     lngMin: 180,
@@ -88,6 +88,10 @@ var KnowledgeMap = {
         google.maps.event.addListener(this.map, "idle", function(){KnowledgeMap.onIdle();});
 
         this.giveNasaCredit();
+    },
+
+    escapeSelector: function(s) {
+        return s.replace(/(:|\.)/g,'\\$1');
     },
 
     giveNasaCredit: function() {
@@ -309,7 +313,9 @@ var KnowledgeMap = {
     },
 
     highlightNode: function(node, highlight) {
-        var jel = $("#node-" + node.id);
+        var jel = $("#node-" + KnowledgeMap.escapeSelector(node.id));
+        console.log("#node-" + KnowledgeMap.escapeSelector(node.id));
+        console.log(jel);
         if (highlight)
             jel.addClass("nodeLabelHighlight");
         else
@@ -330,7 +336,7 @@ var KnowledgeMap = {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
-        $(".exercise-badge[data-id=\"" + node.id + "\"]").addClass("exercise-badge-hover");
+        $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").addClass("exercise-badge-hover");
         this.highlightNode(node, true);
     },
 
@@ -340,7 +346,7 @@ var KnowledgeMap = {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
-        $(".exercise-badge[data-id=\"" + node.id + "\"]").removeClass("exercise-badge-hover");
+        $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").removeClass("exercise-badge-hover");
         this.highlightNode(node, false);
     },
 
