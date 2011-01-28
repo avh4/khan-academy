@@ -164,7 +164,7 @@ class StartNewHourlyActivityLogMapReduce(request_handler.RequestHandler):
                 handler_spec = "activity_summary.hourly_activity_summary_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
                 reader_parameters = {"entity_kind": "models.UserData"},
-                shard_count = 20)
+                shard_count = 64)
         self.response.out.write("OK: " + str(mapreduce_id))
 
 
