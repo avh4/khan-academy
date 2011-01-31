@@ -18,8 +18,8 @@ class UnfinishedStreakProblemBadge(ExerciseBadge):
         if user_exercise.total_done < self.problems_required:
             return False
 
-        # Make sure they haven't yet reached explicit proficiency
-        if user_data.is_explicitly_proficient_at(user_exercise.exercise):
+        # Make sure they haven't yet reached proficiency
+        if user_data.is_proficient_at(user_exercise.exercise):
             return False
 
         c_logs = len(action_cache.problem_logs)
