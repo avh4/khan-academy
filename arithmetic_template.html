@@ -63,7 +63,7 @@ function submitForm(value)
 <div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
 <div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
 
-        {% exercise_icon exercise %}
+        {% exercise_icon exercise App %}
 
 		<div class="energy-points-badge">{{exercise_points}}</div>
 		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name|escape}}</A></div>
