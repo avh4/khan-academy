@@ -49,7 +49,7 @@
         {% if review_exercises %}
         {% for exercise in review_exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
-                {% exercise_icon exercise %}
+                {% exercise_icon exercise App %}
         		<div class="energy-points-badge">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
 
@@ -59,7 +59,7 @@
         {% endif %}
         {% for exercise in suggested_exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
-                {% exercise_icon exercise %}
+                {% exercise_icon exercise App %}
         		<div class="energy-points-badge">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
         		
@@ -71,7 +71,7 @@
             <h3>Recent Exercises</h3>
             {% for exercise in recent_exercises %}
                 <div class="exercise-badge" data-id="{{exercise.name}}">
-                    {% exercise_icon exercise %}
+                    {% exercise_icon exercise App %}
                     <div class="energy-points-badge">{{exercise.points}}</div>
                     <div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
 
@@ -86,7 +86,7 @@
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
         {% for exercise in exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
-                {% exercise_icon exercise %}
+                {% exercise_icon exercise App %}
         		<div class="energy-points-badge">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
                 {% streak_bar exercise %}

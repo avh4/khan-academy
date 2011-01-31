@@ -76,7 +76,7 @@ def related_videos(exercise_videos):
     return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE}
 
 @register.inclusion_tag("exercise_icon.html")
-def exercise_icon(exercise):
+def exercise_icon(exercise, App):
     s_prefix = "proficient-badge"
     if exercise.summative:
         s_prefix = "challenge"
@@ -91,7 +91,7 @@ def exercise_icon(exercise):
     else:
         src = "/images/%s-not-started.png" % s_prefix
 
-    return {"src": src}
+    return {"src": src, "version": App.version }
 
 @register.inclusion_tag("exercise_message.html")
 def exercise_message(exercise, coaches, endangered, reviewing, proficient, struggling):

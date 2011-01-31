@@ -15,15 +15,15 @@ var KnowledgeMap = {
     },
     icons: {
             Exercise: {
-                    Proficient: "/images/node-complete.png",
-                    Review: "/images/node-review.png",
-                    Suggested: "/images/node-suggested.png",
-                    Normal: "/images/node-not-started.png"
+                    Proficient: "/images/node-complete.png?" + KA_VERSION,
+                    Review: "/images/node-review.png?" + KA_VERSION,
+                    Suggested: "/images/node-suggested.png?" + KA_VERSION,
+                    Normal: "/images/node-not-started.png?" + KA_VERSION
                       },
             Summative: {
-                    Normal: "images/node-challenge-not-started.png",
-                    Proficient: "images/node-challenge-complete.png",
-                    Suggested: "images/node-challenge-suggested.png"
+                    Normal: "images/node-challenge-not-started.png?" + KA_VERSION,
+                    Proficient: "images/node-challenge-complete.png?" + KA_VERSION,
+                    Suggested: "images/node-challenge-suggested.png?" + KA_VERSION
                        }
     },
     latLngHome: new google.maps.LatLng(-0.064844, 0.736268),
