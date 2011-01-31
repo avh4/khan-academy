@@ -110,7 +110,7 @@
                                 y: {{ dict_playlist_seconds|hash:key_playlist|hash:"percentage"|escapejs }},
                                 tooltip_title: '<b>{{ dict_playlist_seconds|hash:key_playlist|hash:"playlist_title"|escapejs }}</b> (videos)',
                                 time_spent: '{{ dict_playlist_seconds|hash:key_playlist|hash:"time_spent"|escapejs }}',
-                                tooltip_more: '{% for key_video in dict_playlist_seconds|hash:key_playlist|hash:"videos" %}<em>{{ dict_playlist_seconds|hash:key_playlist|hash:"videos"|hash:key_video|hash:"video_title"|escapejs}}</em><br/> - {{ dict_playlist_seconds|hash:key_playlist|hash:"videos"|hash:key_video|hash:"time_spent"|escapejs}}{% if not forloop.last %}<br/>{% endif %}{% endfor %}'
+                                tooltip_more: '{{ dict_playlist_seconds|hash:key_playlist|hash:"tooltip_more"|escapejs }}'
                                 }{% if not forloop.last %},{% endif %}
                         {% endfor %}
                     ]

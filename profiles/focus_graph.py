@@ -48,8 +48,18 @@ def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
         dict_playlist_seconds[key_playlist]["percentage"] = int(float(dict_playlist_seconds[key_playlist]["seconds"]) / float(total_seconds) * 100.0)
         dict_playlist_seconds[key_playlist]["time_spent"] = util.seconds_to_time_string(dict_playlist_seconds[key_playlist]["seconds"], False)
 
+        tooltip_more = ""
+        c_videos_tooltip = 0
+        c_videos_tooltip_max = 8
         for key_video in dict_playlist_seconds[key_playlist]["videos"]:
-            dict_playlist_seconds[key_playlist]["videos"][key_video]["time_spent"] = util.seconds_to_time_string(dict_playlist_seconds[key_playlist]["videos"][key_video]["seconds"], False)
+            if c_videos_tooltip < c_videos_tooltip_max:
+                video_title = dict_playlist_seconds[key_playlist]["videos"][key_video]["video_title"]
+                time_spent = util.seconds_to_time_string(dict_playlist_seconds[key_playlist]["videos"][key_video]["seconds"], False)
+                tooltip_more += "<em>%s</em><br> - %s" % (video_title, time_spent) + "<br/>"
+            elif c_videos_tooltip == c_videos_tooltip_max:
+                tooltip_more += "<em>...and %d more</em>" % (len(dict_playlist_seconds[key_playlist]["videos"]) - c_videos_tooltip_max)
+            c_videos_tooltip += 1
+        dict_playlist_seconds[key_playlist]["tooltip_more"] = tooltip_more
 
     return (total_seconds, dict_playlist_seconds)
 
