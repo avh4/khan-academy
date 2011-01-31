@@ -1508,16 +1508,17 @@ def library_content_html(bust_cache = False):
         playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
         video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
 
-        video = dict_videos[video_key]
-        playlist = dict_playlists[playlist_key]
-        fast_video_playlist_dict = {"video":video, "playlist":playlist}
+        if dict_videos.has_key(video_key) and dict_playlists.has_key(playlist_key):
+            video = dict_videos[video_key]
+            playlist = dict_playlists[playlist_key]
+            fast_video_playlist_dict = {"video":video, "playlist":playlist}
 
-        if dict_video_playlists.has_key(playlist_key):
-            dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
-        else:
-            dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
+            if dict_video_playlists.has_key(playlist_key):
+                dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
+            else:
+                dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
 
-        dict_videos_counted[video_key] = True
+            dict_videos_counted[video_key] = True
 
     # Update count of all distinct videos associated w/ a live playlist
     Setting.count_videos(len(dict_videos_counted.keys()))
