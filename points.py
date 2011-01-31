@@ -9,21 +9,32 @@ def ExercisePointCalculator(exercise, user_exercise, suggested, proficient):
     degrade_threshold = required_streak + consts.DEGRADING_EXERCISES_AFTER_STREAK
 
     if user_exercise.longest_streak <= required_streak:
+        # Have never hit a streak, higher base than normal
         points = consts.INCOMPLETE_EXERCISE_POINTS_BASE
     elif user_exercise.longest_streak < degrade_threshold:
+        # Significantly past hitting a streak, start to degrade points
         points = degrade_threshold - user_exercise.longest_streak
 
     if (points < consts.EXERCISE_POINTS_BASE):
+        # Never award less than a few points
         points = consts.EXERCISE_POINTS_BASE
     
     if exercise.summative:
+        # Slightly higher rewards for summative exercises
         points = points * consts.SUMMATIVE_EXERCISE_MULTIPLIER
 
     if suggested:
+        # Higher awards for suggested
         points = points * consts.SUGGESTED_EXERCISE_MULTIPLIER
 
     if not proficient:
+        # Higher awards for not being currently proficient
         points = points * consts.INCOMPLETE_EXERCISE_MULTIPLIER
+
+    if not exercise.summative and user_exercise.total_done >= consts.LIMIT_EXERCISES_NON_SUMMATIVE:
+        # Non-summative exercises can be gamed by getting 9 correct, then 1 wrong. Put an upper limit
+        # on the number of problems that continue to award useful points for non-summative.
+        points = consts.EXERCISE_POINTS_BASE
 
     return int(math.ceil(points))
 

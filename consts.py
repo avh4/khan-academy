@@ -9,6 +9,10 @@ CHALLENGE_STREAK_BARRIER = 10
 # before energy points bottom out for the exercise
 DEGRADING_EXERCISES_AFTER_STREAK = 15
 
+# Number of problems after which a non-summative exercise no longer rewards substantive points
+# (all problems capped at EXERCISE_POINTS_BASE to avoid 9-correct, 1-wrong streak loophole abuse)
+LIMIT_EXERCISES_NON_SUMMATIVE = 150
+
 # Minimum number of energy points available for a correct problem
 EXERCISE_POINTS_BASE = 5
 
