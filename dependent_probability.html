@@ -61,7 +61,7 @@ var ExerciseDependentProbability = {
 	{
 		unfairHeadsPercentFormula += '*' + this.percentChanceUnfairHeads + '%';
 	}
-	var decimalChanceFairHeads = (100 - this.percentChanceUnfairHeads) / 100;
+	var decimalChanceFairHeads = 0.5;
 	var fairHeadsDecimalFormula = decimalChanceFairHeads.toString();
 	for (var i = 0; i < this.numFlips - 1; i++)
 	{
@@ -116,8 +116,8 @@ var ExerciseDependentProbability = {
 
 	// hint revealing computed chance with unfair coin
 	write_step('<br>It is ' +
-		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR));
-
+		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula, this.COLOR_UNFAIR));
+		   
 	// hint questioning the fair coin computation	
 	write_step('<br>Now, the other possibility, picking the fair coin and flipping ' +
 		   mathFormatWithColor(this.numFlips, this.COLOR_FAIR) +
@@ -125,19 +125,19 @@ var ExerciseDependentProbability = {
 
 	// hint showing the fair coin computation	
 	write_step('<br>It is ' +
-		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR));
+		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula, this.COLOR_FAIR));
 
 	// hint questioning how to combine previously computed events
 	write_step('<br>How do you combine these two mutually exclusive events to find the chance that either occurs?');
 
 	// hint revealing the answer
 	write_step('<br>Add them! So your answer is ' +
-		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula + '.', this.COLOR_UNFAIR) +
-		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula + '.', this.COLOR_FAIR) +
+		   mathFormatWithColor(unfairCoinFractionString + '*' + unfairHeadsDecimalFormula, this.COLOR_UNFAIR) +
+		   ' + ' +
+		   mathFormatWithColor(fairCoinFractionString + '*' + fairHeadsDecimalFormula, this.COLOR_FAIR) +
 		   ', or ' +
 		   this.answer +
 		   '%.');
-	
     },
 
     // Computes correct answer and adds wrong choices within a reasonable max range given the selected random inputs
