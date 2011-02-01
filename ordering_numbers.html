@@ -77,7 +77,7 @@ for(var i=0; i<5; i++)
 		quantDisplays.push((Math.round(numerator/denominator*1000)/10)+'%');
 	else if (formatType==FRACTION)
 	{
-		if (decValue<1 || getRandomIntRange(1,2)==1)
+		if (decValue<1 || getRandomIntRange(1,2)==1 || numerator % denominator == 0)
 		{
 			quantDisplays.push(format_fraction(numerator,denominator));
 		}
