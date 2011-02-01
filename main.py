@@ -2010,9 +2010,7 @@ class ViewArticle(request_handler.RequestHandler):
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
 
-        path = os.path.join(os.path.dirname(__file__), 'article.html')
-        
-        self.response.out.write(template.render(path, template_values))
+        self.render_template("article.html", template_values)
             
 class Login(request_handler.RequestHandler):
 
