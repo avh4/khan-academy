@@ -74,14 +74,10 @@ def get_exercise_focus_data(user, user_data, daily_activity_logs, dt_start_utc, 
 
             hourly_activity_summary = activity_summary.hourly_summaries[hour]
 
-            logging.critical("found hour: %d", hour)
-
             # We need to filter for dates outside of our range here because we expanded our DB query
             # to make sure we got the entire client time zone date range
             if hourly_activity_summary.date < dt_start_utc or hourly_activity_summary.date > dt_end_utc:
                 continue
-
-            logging.critical("B found hour: %d", hour)
 
             for exercise_key in hourly_activity_summary.dict_exercises.keys():
                 hourly_activity_summary_exercise_item = hourly_activity_summary.dict_exercises[exercise_key]
