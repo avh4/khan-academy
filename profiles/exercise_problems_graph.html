@@ -101,8 +101,9 @@ function exercise_url(point) {
                                             '</a><b style="font-size: 15px;"> - ' + (point.correct ? "Correct" : "Incorrect") +
                                             (point.hint_used ? '<span style="color: red; font-style: italic; font-weight:bold">(Hint Used)' : '') +
                                             '</b><br/>' +
-                                            'Seconds used: ' + point.time_taken + '<br/>' +
-                                            (point.exercise_non_summative ? 'From exercise: ' + point.exercise_non_summative_display_name + '<br/>' : '');
+                                            point.time_used + ' used<br/><br/>' +
+                                            point.timesince +
+                                            (point.exercise_non_summative ? '<br/><br/>From exercise: ' + point.exercise_non_summative_display_name : '');
                                 }
                                 else if (ix = this.points.length -1) {
                                     s += '<br><br/><em>Click the graph to view this problem</em>.';
@@ -138,7 +139,8 @@ function exercise_url(point) {
                                     fSummary: true,
                                     correct: {% if problem.correct %}true{% else %}false{% endif %},
                                     hint_used: {% if problem.hint_used %}true{% else %}false{% endif %},
-                                    time_taken: {{ problem.time_taken }},
+                                    time_used: '{{ problem.exercise_time|escapejs }}',
+                                    timesince: '{{ problem.time_done|timesince_ago }}',
                                     {% if problem.exercise_non_summative %}
                                         exercise_non_summative_display_name: '{{ problem.exercise_non_summative_display_name|escapejs }}',
                                         exercise_non_summative: '{{ problem.exercise_non_summative|escapejs }}',

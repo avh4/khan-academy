@@ -5,6 +5,7 @@ import logging
 class ProblemPoint:
     def __init__(self, problem_log):
         self.time_taken = problem_log.time_taken_capped_for_reporting()
+        self.time_done = problem_log.time_done
         self.correct = problem_log.correct
         self.hint_used = problem_log.hint_used
         self.exercise_non_summative = problem_log.exercise_non_summative
@@ -17,6 +18,9 @@ class ProblemPoint:
             return ""
         else:
             return "<br/>".join(self.video_point.dict_titles.keys())
+
+    def exercise_time(self):
+        return util.seconds_to_time_string(self.time_taken, False)
 
     def video_time(self):
         if not self.video_point:
