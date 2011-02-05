@@ -23,11 +23,13 @@ var chart;
                             lineWidth: 1
                         },
                         series: {
+                            lineWidth: 1,
                             events: {
                                 legendItemClick: function() { return false; }
                             }, 
                             marker: {
-                                radius: 6
+                                symbol: 'circle',
+                                radius: 4
                             },
                             point: {
                                 events: {
@@ -59,6 +61,7 @@ var chart;
 						}]
 					},
 					yAxis: {
+                        min: 1,
 						title: {
 							text: 'Modules Completed'
 						},
