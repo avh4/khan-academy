@@ -59,20 +59,31 @@ var Profile = {
             var series = chart.series[ix];
             var fSelected = (series == seriesHighlight);
 
-            if (fSelected) {
-                series.graph.attr('opacity', 1.0);
-                series.graph.attr('stroke', '#006699');
-            }
-            else {
-                series.graph.attr('opacity', 0.3);
-                series.graph.attr('stroke', '#CCCCCC');
-            }
+            if (series.fSelectedLast == null || series.fSelectedLast != fSelected)
+            {
+                if (fSelected) {
+                    series.graph.attr('opacity', 1.0);
+                    series.graph.attr('stroke', '#006699');
+                    if (!series.options.zIndexOrig)
+                        series.options.zIndexOrig = series.options.zIndex
+                    series.options.zIndex = 1000;
+                    series.shadow = true;
+                }
+                else {
+                    series.graph.attr('opacity', 0.3);
+                    series.graph.attr('stroke', '#CCCCCC');
+                    if (series.options.zIndexOrig)
+                        series.options.zIndex = series.options.zIndexOrig;
+                    series.shadow = false;
+                }
 
-            for (var ixData = 0; ixData < series.data.length; ixData++) {
-                series.data[ixData].options.marker = {enabled: fSelected};
-            }
+                for (var ixData = 0; ixData < series.data.length; ixData++) {
+                    series.data[ixData].options.marker = {enabled: fSelected};
+                }
 
-            series.isDirty = true;
+                series.isDirty = true;
+                series.fSelectedLast = fSelected;
+            }
         }
 
         chart.redraw();

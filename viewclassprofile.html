@@ -25,7 +25,7 @@
             <ul>
                 {% for dict_student in dict_students %}
                 <li>
-                <a href="javascript: void 0;" class="highlight-student-series" data-email="{{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
+                <a href="#" class="highlight-student-series" data-email="{{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
                 </li>
                 {% endfor %}
             </ul>
