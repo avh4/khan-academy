@@ -31,8 +31,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-<!--    <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>-->
-    <script type="text/javascript" src="/javascript/highcharts.js?{{App.version}}"></script>
+    <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
     {% profile_javascript %}
     <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
 {% endblock bottompagescript %}
