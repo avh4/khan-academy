@@ -116,9 +116,9 @@
                     series: [
                             {% for key in dict_student_exercises %}
                             {
+                                animation: false,
                                 name: '{{ key|escapejs }}',
                                 email: '{{ dict_student_exercises|hash:key|hash:"email"|escapejs }}',
-                                zIndex: 1,
                                 data:[
                                 {% for exercise_data in dict_student_exercises|hash:key|hash:"exercises" %}
                                 { 

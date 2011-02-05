@@ -62,18 +62,15 @@ var Profile = {
             if (series.fSelectedLast == null || series.fSelectedLast != fSelected)
             {
                 if (fSelected) {
-                    series.graph.attr('opacity', 1.0);
+                    series.graph.attr('opacity', 0.99);
                     series.graph.attr('stroke', '#006699');
-                    if (!series.options.zIndexOrig)
-                        series.options.zIndexOrig = series.options.zIndex
-                    series.options.zIndex = 1000;
+                    series.options.lineWidth = 2;
                     series.shadow = true;
                 }
                 else {
                     series.graph.attr('opacity', 0.3);
                     series.graph.attr('stroke', '#CCCCCC');
-                    if (series.options.zIndexOrig)
-                        series.options.zIndex = series.options.zIndexOrig;
+                    series.options.lineWidth = 1;
                     series.shadow = false;
                 }
 
@@ -85,6 +82,10 @@ var Profile = {
                 series.fSelectedLast = fSelected;
             }
         }
+
+        var options = seriesHighlight.options;
+        seriesHighlight.remove(false);
+        chart.addSeries(options, false, false);
 
         chart.redraw();
     },
