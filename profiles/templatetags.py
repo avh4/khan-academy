@@ -5,17 +5,19 @@ from google.appengine.ext import webapp
 
 from render import render_block_to_string
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
+from profiles import class_exercises_over_time_graph
 
 register = webapp.template.create_template_register()
 
 @register.inclusion_tag(("../profiles/graph_control.html", "profiles/graph_control.html"))
-def profile_graph_control(student):
-    return { "student": student }
+def profile_graph_control():
+    return {}
 
 def render_graph_html_and_context(filename, context):
     path = os.path.join(os.path.dirname(__file__), filename)
     return {"html": render_block_to_string(path, 'graph', context), "context": context}
 
+# Profile Graph Types
 @register.simple_tag
 def profile_activity_graph(user_data_student, dt_start, dt_end, tz_offset):
     return render_graph_html_and_context("activity_graph.html", activity_graph.activity_graph_context(user_data_student, dt_start, dt_end, tz_offset))
@@ -31,6 +33,13 @@ def profile_exercise_problems_graph(user_data_student, exid):
 @register.simple_tag
 def profile_exercise_progress_graph(user_data_student):
     return render_graph_html_and_context("exercise_progress_graph.html", exercise_progress_graph.exercise_progress_graph_context(user_data_student))
+# End profile graph types
+
+# Class profile graph types
+@register.simple_tag
+def class_profile_exercises_over_time_graph(user_data_coach):
+    return render_graph_html_and_context("class_exercises_over_time_graph.html", class_exercises_over_time_graph.class_exercises_over_time_graph_context(user_data_coach))
+# End class profile graph types
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
 def profile_graph_link(user, graph_name, graph_type, selected_graph_type):

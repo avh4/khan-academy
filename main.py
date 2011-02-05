@@ -2140,6 +2140,9 @@ def real_main():
         ('/profile/graph/exerciseprogress', util_profile.ExerciseProgressGraph),
         ('/profile', util_profile.ViewProfile),
 
+        ('/profile/graph/classexercisesovertime', util_profile.ClassExercisesOverTimeGraph),
+        ('/class_profile', util_profile.ViewClassProfile),
+
         ('/api/export', api.Export),
         ('/api/import', api.ViewImport),
         ('/api/importuserdata', api.ImportUserData),

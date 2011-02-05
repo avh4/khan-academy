@@ -41,6 +41,7 @@
                         cursor: 'pointer',
                     {% endif %}
                     events: {
+                        legendItemClick: function() { return false; },
                         click: function(e) {
                         {% if enable_drill_down %}
                             if (e && e.point) drillIntoBucket(e.point.x);

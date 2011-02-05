@@ -1,75 +1,63 @@
-{% extends "page_template.html" %}
-{% block pagesubmenu %}
-    <div id="profile-header">
-        <span id="high-level-stats">
-            <span id="videos-watched">
-                <span class="profile-header-icon"><img src="/images/video-camera-icon-shadow.png" /></span>
-                <span class="count">
-                    {{ count_videos_completed }} / {{ count_videos }}<br />
-                    <span class="label">Videos Completed</span>
-                </span>
-            </span>
-            <span id="exercises-completed" >
-                <span class="profile-header-icon"><img src="/images/generic-exercise-icon-shadow.png" /></span>
-                <span class="count">
-                    {{ count_exercises_proficient }} / {{ count_exercises }}<br />
-                    <span class="label">Proficient Exercises</span>
-                </span>
-            </span>
-            <span id="energy-points">
-                <span title="{{student_points}} energy points" class="energy-points-badge">{{student_points}}</span><br />
-                <span class="label">Total Energy Points</span>
-            </span>                    
-            </span>
-        </span>
-        <span id="user-info">
-            <img src="/images/darth.png" />
-            <span id="name">{{student_nickname|escape}}</span>
-        </span>
-    </div>
-{% endblock pagesubmenu %}
-{% block pagecontent %}
-<article id="individual_report">
-    <div id="vital-statistics">
-        <div id="stats-nav">
-            <h2>Vital Statistics</h2>
+{% extends "profile_template.html" %}
 
-            <ul id="nav-accordion">
-                <li>
-                    {% profile_graph_link student "Activity" "activity" selected_graph_type %}
-                    <p class="accordion-content">
-                        Shows how much work you're doing each day.
-                        {% profile_graph_date_picker student "activity" %}
-                    </p>
-                </li>
-                <li>
-                    {% profile_graph_link student "Focus" "focus" selected_graph_type %}
-                    <p class="accordion-content">
-                        Shows how well you've focused on exercises and video playlists.
-                        {% profile_graph_date_picker student "focus" %}
-                    </p>
-                </li>
-                <li>
-                    {% profile_graph_link student "Exercise Progress" "exerciseprogress" selected_graph_type %}
-                    <p class="accordion-content">
-                        Shows you which exercises you've worked on and completed.
-                        <span class="graph-date-picker">
-                            <span class="progress-legend proficient">Proficient</span>
-                            <span class="progress-legend started">Started</span>
-                            <span class="progress-legend struggling">Struggling</span>
-                        </span>
-                    </p>
-                </li>
-                <li>
-                    {% profile_graph_link student "Exercise Progress Over Time" "exercisesovertime" selected_graph_type %}
-                    <p class="accordion-content">Shows how many exercises you've completed over time. </p>
-                </li>
-            </ul>
-        </div>
-        <div id="stats-charts">
-            {% profile_graph_control student %}
-        </div>
-    </div>
+{% block profile_name %}{{ student_nickname|escape }}{% endblock profile_name %}
+
+{% block high_level_stats %}
+    <span id="videos-watched">
+        <span class="profile-header-icon"><img src="/images/video-camera-icon-shadow.png" /></span>
+        <span class="count">
+            {{ count_videos_completed }} / {{ count_videos }}<br />
+            <span class="label">Videos Completed</span>
+        </span>
+    </span>
+    <span id="exercises-completed" >
+        <span class="profile-header-icon"><img src="/images/generic-exercise-icon-shadow.png" /></span>
+        <span class="count">
+            {{ count_exercises_proficient }} / {{ count_exercises }}<br />
+            <span class="label">Proficient Exercises</span>
+        </span>
+    </span>
+    <span id="energy-points">
+        <span title="{{student_points}} energy points" class="energy-points-badge">{{student_points}}</span><br />
+        <span class="label">Total Energy Points</span>
+    </span>                    
+{% endblock high_level_stats %}
+
+{% block graph_accordion %}
+    <ul id="nav-accordion">
+        <li>
+            {% profile_graph_link student "Activity" "activity" selected_graph_type %}
+            <p class="accordion-content">
+                Shows how much work you're doing each day.
+                {% profile_graph_date_picker student "activity" %}
+            </p>
+        </li>
+        <li>
+            {% profile_graph_link student "Focus" "focus" selected_graph_type %}
+            <p class="accordion-content">
+                Shows how well you've focused on exercises and video playlists.
+                {% profile_graph_date_picker student "focus" %}
+            </p>
+        </li>
+        <li>
+            {% profile_graph_link student "Exercise Progress" "exerciseprogress" selected_graph_type %}
+            <p class="accordion-content">
+                Shows you which exercises you've worked on and completed.
+                <span class="graph-date-picker">
+                    <span class="progress-legend proficient">Proficient</span>
+                    <span class="progress-legend started">Started</span>
+                    <span class="progress-legend struggling">Struggling</span>
+                </span>
+            </p>
+        </li>
+        <li>
+            {% profile_graph_link student "Exercise Progress Over Time" "exercisesovertime" selected_graph_type %}
+            <p class="accordion-content">Shows how many exercises you've completed over time. </p>
+        </li>
+    </ul>
+{% endblock graph_accordion %}
+
+{% block profile_extended_sections %}
     <div id="achievements">
         <h2><a name="achievements">Your Achievements</a></h2>
         <div id="achievement-list">
@@ -131,13 +119,5 @@
         </div>
     </div>
     {% profile_recent_activity student %}
-</article>
-<div id="info-hover-container" style="display: none;"></div>
-{% endblock pagecontent %}
-
-{% block bottompagescript %}
-    <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
-    {% profile_javascript %}
-    <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
-{% endblock bottompagescript %}
+{% endblock profile_extended_sections %}
 

@@ -1,0 +1,39 @@
+{% extends "page_template.html" %}
+
+{% block pagesubmenu %}
+    <div id="profile-header">
+        <span id="high-level-stats">
+            {% block high_level_stats %}{% endblock high_level_stats %}
+        </span>
+        <span id="user-info">
+            <img src="/images/darth.png" />
+            <span id="name">{% block profile_name %}{% endblock profile_name %}</span>
+        </span>
+    </div>
+{% endblock pagesubmenu %}
+
+{% block pagecontent %}
+    <article id="individual_report">
+        <div id="vital-statistics">
+            <div id="stats-nav">
+                <h2>Vital Statistics</h2>
+                {% block graph_accordion %}{% endblock graph_accordion %}
+            </div>
+            <div id="stats-charts">
+                {% profile_graph_control %}
+            </div>
+        </div>
+
+        {% block profile_extended_sections %}{% endblock profile_extended_sections %}
+    </article>
+
+    <div id="info-hover-container" style="display: none;"></div>
+{% endblock pagecontent %}
+
+{% block bottompagescript %}
+<!--    <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>-->
+    <script type="text/javascript" src="/javascript/highcharts.js?{{App.version}}"></script>
+    {% profile_javascript %}
+    <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
+{% endblock bottompagescript %}
+

@@ -1,0 +1,42 @@
+{% extends "profile_template.html" %}
+
+{% block profile_name %}{{ coach_nickname|escape }}'s class{% endblock profile_name %}
+
+{% block high_level_stats %}
+    <span id="students-coached">
+        <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
+        <span class="count">
+            {{ count_students }}<br />
+            <span class="label">Students</span>
+        </span>
+    </span>
+    <span id="energy-points">
+        <span title="{{class_points}} energy points" class="energy-points-badge">{{class_points}}</span><br />
+        <span class="label">Class Energy Points</span>
+    </span>                    
+{% endblock high_level_stats %}
+
+{% block graph_accordion %}
+    <ul id="nav-accordion">
+        <li>
+            {% profile_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
+            <p class="accordion-content">Shows how many exercises your students have completed over time.</p>
+        </li>
+    </ul>
+{% endblock graph_accordion %}
+
+{% block profile_extended_sections %}
+    <div id="students-list">
+        <h2>Your Students</h2>
+        <div id="student-list">
+            <ul>
+                {% for dict_student in dict_students %}
+                <li>
+                    <a href="/profile?student_email={{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endblock profile_extended_sections %}
+

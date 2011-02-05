@@ -1,0 +1,119 @@
+{% block graph %}
+
+{% if not dict_student_exercises %}
+    <div class="graph-notification">Your students don't have any proficient exercises...yet. Point them to <a href="/exercisedashboard">the exercise dashboard</a>.</div>
+{% endif %}
+
+<script>
+
+var chart;
+			$(document).ready(function() {
+				chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'highchart',
+						defaultSeriesType: 'scatter'
+					},
+                    credits: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        scatter: {
+                            cursor: 'pointer',
+                            dashStyle: 'Solid',
+                            lineWidth: 1
+                        },
+                        series: {
+                            events: {
+                                legendItemClick: function() { return false; }
+                            }, 
+                            marker: {
+                                radius: 6
+                            },
+                            point: {
+                                events: {
+                                    click: function() {
+                                        Profile.collapseAccordion();
+                                        Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name=' + this.name);
+                                    }
+                                }
+                            }
+                        }
+                    },
+					title: {
+                        text: "",
+						x: -20 //center
+					},
+					subtitle: {
+						text: 'Exercise Progress Over Time',
+						x: -20
+					},
+					xAxis: {
+						title: {
+							text: 'Days working on the site'
+						},
+                        min: 0,
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					yAxis: {
+						title: {
+							text: 'Modules Completed'
+						},
+						plotLines: [{
+							value: 0,
+							width: 1,
+							color: '#808080'
+						}]
+					},
+					tooltip: {
+						formatter: function() {
+                            return '<b>' + this.point.nickname + '</b><br/><br/><b>' + this.point.display_name + '</b><br/>' + this.point.dt;
+						}
+					},
+                    legend: {
+                        enabled: false,
+                        layout: 'horizontal',
+                        align: 'left',
+                        verticalAlign: 'bottom',
+                        floating: true,
+                        backgroundColor: 'white',
+                        shadow: true,
+                        x: 60,
+                        y: 18,
+                        itemHoverStyle: {
+                            cursor: 'default',
+                            color: '#3E576F'
+                        }
+                    },
+                    series: [
+                            {% for key in dict_student_exercises %}
+                            {
+                                name: '{{ key|escapejs }}',
+                                data:[
+                                {% for exercise_data in dict_student_exercises|hash:key %}
+                                { 
+                                    dt: '{{ exercise_data.proficient_date|escapejs }}', 
+                                    name: '{{ exercise_data.name|escapejs }}', 
+                                    display_name: '{{ exercise_data.display_name|escapejs }}', 
+                                    nickname: '{{ exercise_data.nickname|escapejs }}',
+                                    x: {{ exercise_data.days_until_proficient }}, 
+                                    y: {{ forloop.counter }}
+                                }{% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            ]}{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        ]
+				});
+			});
+
+</script>
+
+<div id="highchart-container" class="{% if not dict_student_exercises %}empty-chart{% endif %}">
+    <div id="highchart"></div>
+</div>
+
+{% endblock graph %}
+

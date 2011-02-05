@@ -35,7 +35,9 @@
         display: inline-block;
     }
 #profile-header #high-level-stats #videos-watched,
-#profile-header #high-level-stats #exercises-completed {
+#profile-header #high-level-stats #exercises-completed,
+#profile-header #high-level-stats #students-coached
+{
     margin-right: 10px;
 }
     #profile-header #high-level-stats span > span.count {
