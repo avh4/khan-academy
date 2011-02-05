@@ -20,7 +20,17 @@
     <ul id="nav-accordion">
         <li>
             {% profile_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
-            <p class="accordion-content">Shows how many exercises your students have completed over time.</p>
+            <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
+            
+            <ul>
+                {% for dict_student in dict_students %}
+                <li>
+                <a href="javascript: void 0;" class="highlight-student-series" data-email="{{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+
+            </div>
         </li>
     </ul>
 {% endblock graph_accordion %}

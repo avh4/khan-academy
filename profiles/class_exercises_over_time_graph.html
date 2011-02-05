@@ -6,8 +6,30 @@
 
 <script>
 
-var chart;
+    var chart;
+
+    function getSeriesByEmail(chart, sEmail) {
+        if (!chart) return null;
+
+        for (var ix = 0; ix < chart.series.length; ix++) {
+            if (chart.series[ix].options.email == sEmail) return chart.series[ix];
+        }
+
+        return null;
+    }
+
 			$(document).ready(function() {
+
+                if (!window.fBoundHighlightStudentLinks) {
+                    $("a.highlight-student-series").click(function() {
+                        $("a.highlight-student-series").removeClass("selected");
+                        Profile.highlightSeries(chart, getSeriesByEmail(chart, $(this).attr("data-email")));
+                        $(this).addClass("selected");
+                        return false;
+                    });
+                    window.fBoundHighlightStudentLinks = true;
+                }
+
 				chart = new Highcharts.Chart({
 					chart: {
 						renderTo: 'highchart',
@@ -95,8 +117,9 @@ var chart;
                             {% for key in dict_student_exercises %}
                             {
                                 name: '{{ key|escapejs }}',
+                                email: '{{ dict_student_exercises|hash:key|hash:"email"|escapejs }}',
                                 data:[
-                                {% for exercise_data in dict_student_exercises|hash:key %}
+                                {% for exercise_data in dict_student_exercises|hash:key|hash:"exercises" %}
                                 { 
                                     dt: '{{ exercise_data.proficient_date|escapejs }}', 
                                     name: '{{ exercise_data.name|escapejs }}', 

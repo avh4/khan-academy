@@ -28,7 +28,7 @@ def class_exercises_over_time_graph_context(user_data):
     for student_email in student_emails:
         student = users.User(student_email)
         student_nickname = util.get_nickname_for(student)
-        dict_student_exercises[student_nickname] = []
+        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": student.email(), "exercises": [] }
 
         query = models.UserExercise.all()
         query.filter('user =', student)
@@ -39,7 +39,7 @@ def class_exercises_over_time_graph_context(user_data):
             days_until_proficient = (user_exercise.proficient_date - user_data.joined).days
             proficient_date = user_exercise.proficient_date.strftime('%m/%d/%Y')
             data = ExerciseData(student_nickname, user_exercise.exercise, user_exercise.exercise, days_until_proficient, proficient_date)
-            dict_student_exercises[student_nickname].append(data)
+            dict_student_exercises[student_nickname]["exercises"].append(data)
             end_date = user_exercise.proficient_date
 
     return { 'dict_student_exercises': dict_student_exercises }

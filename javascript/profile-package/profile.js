@@ -50,6 +50,34 @@ var Profile = {
         }, 1000);
     },
 
+    highlightSeries: function(chart, seriesHighlight) {
+
+        if (!chart || !seriesHighlight) return;
+
+        for (var ix = 0; ix < chart.series.length; ix++)
+        {
+            var series = chart.series[ix];
+            var fSelected = (series == seriesHighlight);
+
+            if (fSelected) {
+                series.graph.attr('opacity', 1.0);
+                series.graph.attr('stroke', '#006699');
+            }
+            else {
+                series.graph.attr('opacity', 0.3);
+                series.graph.attr('stroke', '#CCCCCC');
+            }
+
+            for (var ixData = 0; ixData < series.data.length; ixData++) {
+                series.data[ixData].options.marker = {enabled: fSelected};
+            }
+
+            series.isDirty = true;
+        }
+
+        chart.redraw();
+    },
+
     collapseAccordion: function() {
         // Turn on collapsing, collapse everything, and turn off collapsing
         $("#stats-nav #nav-accordion").accordion(
