@@ -62,18 +62,21 @@ var Profile = {
             if (series.fSelectedLast == null || series.fSelectedLast != fSelected)
             {
                 if (fSelected) {
-                    series.options.lineWidth = 2.5;
+                    series.options.lineWidth = 4.5;
                     series.options.shadow = true;
                 }
                 else {
-                    series.graph.attr('opacity', 0.18);
+                    series.graph.attr('opacity', 0.1);
                     series.graph.attr('stroke', '#CCCCCC');
                     series.options.lineWidth = 1;
                     series.options.shadow = false;
                 }
 
                 for (var ixData = 0; ixData < series.data.length; ixData++) {
-                    series.data[ixData].options.marker = {enabled: fSelected};
+                    series.data[ixData].options.marker = {
+                        enabled: fSelected, 
+                        radius: fSelected ? 6 : 4
+                    };
                 }
 
                 series.isDirty = true;
@@ -82,7 +85,7 @@ var Profile = {
         }
 
         var options = seriesHighlight.options;
-        options.color = '#006699';
+        options.color = '#0080C9';
         seriesHighlight.remove(false);
         chart.addSeries(options, false, false);
 
