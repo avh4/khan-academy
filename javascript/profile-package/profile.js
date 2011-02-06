@@ -62,11 +62,11 @@ var Profile = {
             if (series.fSelectedLast == null || series.fSelectedLast != fSelected)
             {
                 if (fSelected) {
-                    series.options.lineWidth = 2;
+                    series.options.lineWidth = 2.5;
                     series.options.shadow = true;
                 }
                 else {
-                    series.graph.attr('opacity', 0.3);
+                    series.graph.attr('opacity', 0.18);
                     series.graph.attr('stroke', '#CCCCCC');
                     series.options.lineWidth = 1;
                     series.options.shadow = false;
