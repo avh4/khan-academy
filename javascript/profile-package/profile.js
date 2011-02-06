@@ -57,6 +57,8 @@ var Profile = {
         for (var ix = 0; ix < chart.series.length; ix++) {
             var series = chart.series[ix];
 
+            this.muteSeriesStyles(series);
+
             for (var ixData = 0; ixData < series.data.length; ixData++) {
                 var pointOptions = series.data[ixData].options;
                 if (!pointOptions.marker) pointOptions.marker = {};
@@ -68,6 +70,13 @@ var Profile = {
         }
 
         chart.redraw();
+    },
+
+    muteSeriesStyles: function(series) {
+        series.graph.attr('opacity', 0.1);
+        series.graph.attr('stroke', '#CCCCCC');
+        series.options.lineWidth = 1;
+        series.options.shadow = false;
     },
 
     highlightSeries: function(chart, seriesHighlight) {
@@ -86,10 +95,7 @@ var Profile = {
                     series.options.shadow = true;
                 }
                 else {
-                    series.graph.attr('opacity', 0.1);
-                    series.graph.attr('stroke', '#CCCCCC');
-                    series.options.lineWidth = 1;
-                    series.options.shadow = false;
+                    this.muteSeriesStyles(series);
                 }
 
                 for (var ixData = 0; ixData < series.data.length; ixData++) {
