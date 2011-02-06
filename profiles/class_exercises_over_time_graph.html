@@ -28,6 +28,10 @@
                         return false;
                     });
                     window.fBoundHighlightStudentLinks = true;
+
+                    $("a.graph-link-header").click(function() {
+                        $("a.highlight-student-series").removeClass("selected");
+                    });
                 }
 
 				chart = new Highcharts.Chart({
@@ -68,12 +72,12 @@
 						x: -20 //center
 					},
 					subtitle: {
-						text: 'Exercise Progress Over Time',
+                        text: '',
 						x: -20
 					},
 					xAxis: {
 						title: {
-							text: 'Days working on the site'
+                            text: ''
 						},
                         min: 0,
 						plotLines: [{

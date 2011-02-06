@@ -115,8 +115,11 @@
     #individual_report #vital-statistics #stats-nav ul#nav-accordion {
         padding: 10px 0 0 3px;
     }
-    #individual_report #vital-statistics #stats-nav ul#nav-accordion p.accordion-content {
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content {
         min-width: 250px;
+    }
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content .instructions {
+        font-size: 10px;
     }
     #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul {
         padding-left: 15px;
@@ -159,7 +162,8 @@
             text-decoration: none;
             color: #DD6900;
         }
-    #individual_report #vital-statistics #stats-nav ul > li > p {
+    #individual_report #vital-statistics #stats-nav ul > li > p,
+    #individual_report #vital-statistics #stats-nav ul > li > div {
         color: #333;
         border: 1px solid #ccc;
         border-top: none;
