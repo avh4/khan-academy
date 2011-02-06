@@ -129,7 +129,8 @@
     #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul li {
         margin-bottom: 0;
     }
-    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul li a {
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul li a,
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content a.highlight-section {
         font-size: 10px;
         color: #006699;
         display: inline;
@@ -137,7 +138,8 @@
         text-decoration: underline;
         border: 0;
     }
-    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul li a.selected {
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul li a.selected,
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content a.selected {
         color: #DD6900;
         text-decoration: none;
     }

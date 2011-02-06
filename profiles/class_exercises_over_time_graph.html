@@ -14,14 +14,12 @@
             if (window.fBoundClassExerciseProgressChart) return;
 
             $("a.show-students-highlight").click(function() {
-                $("#students-highlight").slideDown();
-                $("#exercises-highlight").slideUp();
+                ClassExerciseProgressChart.showStudents();
                 return false;
             });
 
             $("a.show-exercises-highlight").click(function() {
-                $("#exercises-highlight").slideDown();
-                $("#students-highlight").slideUp();
+                ClassExerciseProgressChart.showExercises();
                 return false;
             });
 
@@ -37,10 +35,29 @@
 
             $("a.graph-link-header").click(function() {
                 ClassExerciseProgressChart.deselectSublinks();
-                $("#students-highlight, #exercises-highlight").slideUp();
+                ClassExerciseProgressChart.showNone();
             });
 
             window.fBoundClassExerciseProgressChart = true;
+        },
+
+        showStudents: function() {
+            $(".highlight-section").removeClass("selected");
+            $(".show-students-highlight").addClass("selected");
+            $("#students-highlight").slideDown();
+            $("#exercises-highlight").slideUp();
+        },
+
+        showExercises: function() {
+            $(".highlight-section").removeClass("selected");
+            $(".show-exercises-highlight").addClass("selected");
+            $("#exercises-highlight").slideDown();
+            $("#students-highlight").slideUp();
+        },
+
+        showNone: function() {
+            $(".highlight-section").removeClass("selected");
+            $("#exercises-highlight, #students-highlight").slideUp();
         },
 
         deselectSublinks: function() {
