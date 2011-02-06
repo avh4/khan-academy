@@ -62,7 +62,7 @@ var Profile = {
             if (series.fSelectedLast == null || series.fSelectedLast != fSelected)
             {
                 if (fSelected) {
-                    series.options.lineWidth = 4.5;
+                    series.options.lineWidth = 3.5;
                     series.options.shadow = true;
                 }
                 else {
@@ -75,7 +75,7 @@ var Profile = {
                 for (var ixData = 0; ixData < series.data.length; ixData++) {
                     series.data[ixData].options.marker = {
                         enabled: fSelected, 
-                        radius: fSelected ? 6 : 4
+                        radius: fSelected ? 5 : 4
                     };
                 }
 
