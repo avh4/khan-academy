@@ -21,7 +21,7 @@
         <li>
             {% profile_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
-                <span class="instructions">Click to highlight an individual student.</span><br />
+                <span class="instructions">Click to highlight an individual student:</span><br />
             <ul>
                 {% for dict_student in dict_students %}
                 <li>
@@ -37,7 +37,7 @@
 
 {% block profile_extended_sections %}
     <div id="students-list">
-        <h2>Your Students</h2>
+        <h2>Student Profiles</h2>
         <div id="student-list">
             <ul>
                 {% for dict_student in dict_students %}

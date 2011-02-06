@@ -111,6 +111,7 @@
     #individual_report #vital-statistics #stats-nav {
         width: 280px;
         float: left;
+        margin-bottom: 10px;
     }
     #individual_report #vital-statistics #stats-nav ul#nav-accordion {
         padding: 10px 0 0 3px;
