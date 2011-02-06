@@ -63,7 +63,6 @@ var Profile = {
             {
                 if (fSelected) {
                     series.options.lineWidth = 2;
-                    series.options.marker.enabled = true;
                     series.options.shadow = true;
                 }
                 else {
