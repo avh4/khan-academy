@@ -46,6 +46,11 @@ def profile_graph_link(user, graph_name, graph_type, selected_graph_type):
     selected = (graph_type == selected_graph_type)
     return { "user": user, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
 
+@register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
+def profile_class_graph_link(coach, graph_name, graph_type, selected_graph_type):
+    selected = (graph_type == selected_graph_type)
+    return { "user": None, "coach": coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
+
 @register.inclusion_tag(("../profiles/graph_date_picker.html", "profiles/graph_date_picker.html"))
 def profile_graph_date_picker(user, graph_type):
     return { "user": user, "graph_type": graph_type }
