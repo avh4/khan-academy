@@ -73,10 +73,19 @@ var Profile = {
     },
 
     muteSeriesStyles: function(series) {
+        if (series.options.fMuted) return;
+
         series.graph.attr('opacity', 0.1);
         series.graph.attr('stroke', '#CCCCCC');
         series.options.lineWidth = 1;
         series.options.shadow = false;
+        series.options.fMuted = true;
+    },
+
+    accentuateSeriesStyles: function(series) {
+        series.options.lineWidth = 3.5;
+        series.options.shadow = true;
+        series.options.fMuted = false;
     },
 
     highlightSeries: function(chart, seriesHighlight) {
@@ -90,13 +99,10 @@ var Profile = {
 
             if (series.fSelectedLast == null || series.fSelectedLast != fSelected)
             {
-                if (fSelected) {
-                    series.options.lineWidth = 3.5;
-                    series.options.shadow = true;
-                }
-                else {
+                if (fSelected)
+                    this.accentuateSeriesStyles(series);
+                else
                     this.muteSeriesStyles(series);
-                }
 
                 for (var ixData = 0; ixData < series.data.length; ixData++) {
                     series.data[ixData].options.marker = {

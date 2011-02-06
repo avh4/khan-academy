@@ -122,6 +122,18 @@
     #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content .instructions {
         font-size: 10px;
     }
+    #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content .vertical-choice-container {
+        max-height: 300px;
+        margin-top: 5px;
+        padding: 2px 5px 5px 5px;
+        overflow: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        border: 1px solid #CCCCCC;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+    }
     #individual_report #vital-statistics #stats-nav ul#nav-accordion .accordion-content ul {
         padding-left: 15px;
         list-style: disc outside none;
