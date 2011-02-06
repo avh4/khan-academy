@@ -21,14 +21,27 @@
         <li>
             {% profile_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
-                <span class="instructions">Click to highlight an individual student:</span><br />
-            <ul>
-                {% for dict_student in dict_students %}
-                <li>
-                <a href="#" class="highlight-student-series" data-email="{{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
-                </li>
-                {% endfor %}
-            </ul>
+                <span class="instructions">Highlight a <a href="#" class="show-students-highlight">specific student</a> or a <a href="#" class="show-exercises-highlight">specific exercise</a>.</span><br />
+
+                <div id="students-highlight" style="display:none;">
+                    <ul>
+                        {% for dict_student in dict_students %}
+                        <li>
+                        <a href="#" class="highlight-student-series" data-email="{{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div id="exercises-highlight" style="display:none;">
+                    <ul>
+                        {% for exercise in exercises %}
+                        <li>
+                        <a href="#" class="highlight-exercise-points" data-exercise="{{ exercise.name|escape }}">{{ exercise.display_name|escape }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
             </div>
         </li>

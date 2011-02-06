@@ -47,6 +47,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'class_points': class_points,
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
+                    'exercises': models.Exercise.get_all_use_cache(),
                     }
             self.render_template('viewclassprofile.html', template_values)
         else:

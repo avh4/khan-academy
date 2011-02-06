@@ -8,31 +8,74 @@
 
     var chart;
 
-    function getSeriesByEmail(chart, sEmail) {
-        if (!chart) return null;
+    var ClassExerciseProgressChart = {
 
-        for (var ix = 0; ix < chart.series.length; ix++) {
-            if (chart.series[ix].options.email == sEmail) return chart.series[ix];
+        init: function() {
+            if (window.fBoundClassExerciseProgressChart) return;
+
+            $("a.show-students-highlight").click(function() {
+                $("#students-highlight").slideDown();
+                $("#exercises-highlight").slideUp();
+                return false;
+            });
+
+            $("a.show-exercises-highlight").click(function() {
+                $("#exercises-highlight").slideDown();
+                $("#students-highlight").slideUp();
+                return false;
+            });
+
+            $("a.highlight-student-series").click(function() {
+                ClassExerciseProgressChart.highlightStudentSeries(this);
+                return false;
+            });
+
+            $("a.highlight-exercise-points").click(function() {
+                ClassExerciseProgressChart.highlightExercisePoints(this);
+                return false;
+            });
+
+            $("a.graph-link-header").click(function() {
+                ClassExerciseProgressChart.deselectSublinks();
+                $("#students-highlight, #exercises-highlight").slideUp();
+            });
+
+            window.fBoundClassExerciseProgressChart = true;
+        },
+
+        deselectSublinks: function() {
+            $("a.highlight-student-series, a.highlight-exercise-points").removeClass("selected");
+        },
+
+        highlightStudentSeries: function(el) {
+            var jel = $(el);
+            this.deselectSublinks();
+            Profile.highlightSeries(chart, ClassExerciseProgressChart.getSeriesByEmail(chart, jel.attr("data-email")));
+            jel.addClass("selected");
+        },
+
+        highlightExercisePoints: function(el) {
+            var jel = $(el);
+            this.deselectSublinks();
+            var sExerciseName = jel.attr("data-exercise");
+            Profile.highlightPoints(chart, function(point){ return point.name == sExerciseName; });
+            jel.addClass("selected");
+        },
+
+        getSeriesByEmail: function (chart, sEmail) {
+            if (!chart) return null;
+
+            for (var ix = 0; ix < chart.series.length; ix++) {
+                if (chart.series[ix].options.email == sEmail) return chart.series[ix];
+            }
+
+            return null;
         }
-
-        return null;
     }
 
 			$(document).ready(function() {
 
-                if (!window.fBoundHighlightStudentLinks) {
-                    $("a.highlight-student-series").click(function() {
-                        $("a.highlight-student-series").removeClass("selected");
-                        Profile.highlightSeries(chart, getSeriesByEmail(chart, $(this).attr("data-email")));
-                        $(this).addClass("selected");
-                        return false;
-                    });
-                    window.fBoundHighlightStudentLinks = true;
-
-                    $("a.graph-link-header").click(function() {
-                        $("a.highlight-student-series").removeClass("selected");
-                    });
-                }
+                ClassExerciseProgressChart.init();
 
 				chart = new Highcharts.Chart({
 					chart: {

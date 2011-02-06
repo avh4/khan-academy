@@ -50,6 +50,26 @@ var Profile = {
         }, 1000);
     },
 
+    highlightPoints: function(chart, fxnHighlight) {
+
+        if (!chart) return;
+
+        for (var ix = 0; ix < chart.series.length; ix++) {
+            var series = chart.series[ix];
+
+            for (var ixData = 0; ixData < series.data.length; ixData++) {
+                var pointOptions = series.data[ixData].options;
+                if (!pointOptions.marker) pointOptions.marker = {};
+                pointOptions.marker.enabled = fxnHighlight(pointOptions);
+                if (pointOptions.marker.enabled) pointOptions.marker.radius = 6;
+            }
+
+            series.isDirty = true;
+        }
+
+        chart.redraw();
+    },
+
     highlightSeries: function(chart, seriesHighlight) {
 
         if (!chart || !seriesHighlight) return;

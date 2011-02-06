@@ -24,6 +24,7 @@ def class_exercises_over_time_graph_context(user_data):
 
     student_emails = user_data.get_students()
     dict_student_exercises = {}
+    dict_exercises = {}
 
     for student_email in student_emails:
         student = users.User(student_email)
