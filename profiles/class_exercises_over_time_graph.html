@@ -121,7 +121,7 @@
                                 events: {
                                     click: function() {
                                         Profile.collapseAccordion();
-                                        Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name=' + this.name);
+                                        Profile.loadGraph('/profile/graph/exerciseproblems?student_email=' + this.series.options.email + '&exercise_name=' + this.name);
                                     }
                                 }
                             }
