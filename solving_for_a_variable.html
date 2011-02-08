@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // author: Joey Chang
 ////////////////////////////////////////////////////////////////////////////////
-// Modfied by: Joshua Olson 1/28/2010
+// Modfied by: Joshua Olson 1/28/2011
 // Changes: Refactored code to reduce duplicated statments in excercise type 0
 //          ensured that all answers are in reduced form, except type 1 since it 
 //          exceedingly rare that we will be able to factor out a term and have a gcd
@@ -13,6 +13,10 @@
 //          Changed all " to ' unless explicitly mentioned
 //          Variables should be random consecutive letters i.e. a,b,c or p,q,r or x,y,z
 //
+// Modified by: Joshua Olson 2/6/2011
+// Fixed o+ showing up as a ASCIIMathML symbol of ⊕ by removing o as a possible variable
+// Fixed variables showing up as undefined by making the first variable a max of index[22]
+// Fixed type 2 equations not showing all answers
 ////////////////////////////////////////////////////////////////////////////////
 // Do to in order to meet exercise spec:
 //  Maybe a couple more variations too (some simpler problems)
@@ -45,11 +49,11 @@
 
 
 display_per_step = 3; //the right and left panes of the hint table
-var letters = 'abcdefghijklmnopqrstuvwxyz';
-var letter = getRandomInt(24);
+var letters = 'abcdefghijklmnpqrstuvwxyz'; //Don't let a variable be 'o' due to ASCIIMathML issues
+var letter = getRandomInt(22); 
 var xVar = letters[letter];  //Use these variables to generalize our function variables
 var yVar = letters[letter + 1];
-var zVar = letters[letter + 2]
+var zVar = letters[letter + 2];
 
 var selColor = '#AE9CC9';
 var noSelColor = '#333333';
@@ -219,7 +223,7 @@ function generateHintStepsForEquationType0(xTermCoefficient,leftYCoefficient,lef
     addWrongChoice(xVar + '=' +'(' + formatFirstCoefficient(correctYCoefficient3) + yVar + formatCoefficient(correctZCoefficient3) + zVar + formatConstant(wrongConstant3) + ')/(' + divisor3 + additionalVars + ')' );
     
     //Reduce the fractions in the answers so we have answers everyone can come up with  
-    gcd = getGCD(getGCD(Math.abs(divisor), Math.abs(wrongYTerm)), getGCD(Math.abs(wrongZTerm), Math.abs(wrongConstant)));
+    gcd = getGCD(getGCD(Math.abs(divisor), Math.abs(wrongYTerm)), getGCD(Math.abs(wrongZTerm), Math.abs(correctConstant)));
     //divisor should always be positive at this point
     var divisor4 = divisor / gcd;
     var wrongYTerm4 = wrongYTerm / gcd;
@@ -410,27 +414,26 @@ function generateHintStepsForEquationType2(leftXCoefficient,leftYCoefficient,lef
     // form answers
     setCorrectAnswer(xVar + '=' + theAnswer);
     
-    var wrongZCoefficient = 0;
-    var wrongYCoefficient = 0;
-    var wrongXCoefficient = 0;
+    var wrongZ = 0;
+    var wrongY = 0;
+    var wrongX = 0;
         
-    gcd = getGCD(getGCD(Math.abs(rightZCoefficient),Math.abs(rightYCoefficient)),Math.abs(wrongLeftXCoefficient));
+    gcd = getGCD(getGCD(Math.abs(rightZCoefficient),Math.abs(rightYCoefficient)),Math.abs(leftXCoefficient));
     //The bottom coefficient must be positive to be in reduced terms then divide out by the GCD
     if(leftXCoefficient < 0)
     {
-        wrongZCoefficient = -rightZCoefficient / gcd;
-        wrongYCoefficient = -rightYCoefficient / gcd;
-        wrongXCoefficient = -leftXCoefficient / gcd;
+        wrongZ = -rightZCoefficient / gcd;
+        wrongY = -rightYCoefficient / gcd;
+        wrongX = -leftXCoefficient / gcd;
     }
     else
     {
-        wrongZCoefficient = rightZCoefficient / gcd;
-        wrongYCoefficient = rightYCoefficient / gcd;
-        wrongXCoefficient = leftXCoefficient / gcd;
+        wrongZ = rightZCoefficient / gcd;
+        wrongY = rightYCoefficient / gcd;
+        wrongX = leftXCoefficient / gcd;
     }
         
-    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZCoefficient) + zVar +
-                        formatCoefficient(wrongYCoefficient) + yVar + ')/' + wrongXCoefficient);
+    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZ) + zVar + formatCoefficient(wrongY) + yVar + ')/' + wrongX);
                         
     gcd = getGCD(getGCD(Math.abs(wrongZCoefficient),Math.abs(wrongYCoefficient)),Math.abs(leftXCoefficient));
     //The bottom coefficient must be positive to be in reduced terms then divide out by the GCD
@@ -447,80 +450,75 @@ function generateHintStepsForEquationType2(leftXCoefficient,leftYCoefficient,lef
         wrongXCoefficient = leftXCoefficient / gcd;
     }
     
-    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZCoefficient) + zVar +
-                        formatCoefficient(wrongYCoefficient) + yVar + ')/' + wrongXCoefficient);
+    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZ) + zVar + formatCoefficient(wrongY) + yVar + ')/' + wrongX);
                         
     gcd = getGCD(getGCD(Math.abs(wrongZCoefficient),Math.abs(wrongYCoefficient)),Math.abs(wrongLeftXCoefficient));
     //The bottom coefficient must be positive to be in reduced terms then divide out by the GCD
-    if(leftXCoefficient < 0)
+    if(wrongLeftXCoefficient < 0)
     {
-        wrongZCoefficient = -wrongZCoefficient / gcd;
-        wrongYCoefficient = -wrongYCoefficient / gcd;
-        wrongXCoefficient = -wrongLeftXCoefficient / gcd;
+        wrongZ = -wrongZCoefficient / gcd;
+        wrongY = -wrongYCoefficient / gcd;
+        wrongX = -wrongLeftXCoefficient / gcd;
     }
     else
     {
-        wrongZCoefficient = wrongZCoefficient / gcd;
-        wrongYCoefficient = wrongYCoefficient / gcd;
-        wrongXCoefficient = wrongLeftXCoefficient / gcd;
+        wrongZ = wrongZCoefficient / gcd;
+        wrongY = wrongYCoefficient / gcd;
+        wrongX = wrongLeftXCoefficient / gcd;
     }
      
-    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZCoefficient) + zVar +
-                        formatCoefficient(wrongYCoefficient) + yVar + ')/' + wrongXCoefficient);
+    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZ) + zVar + formatCoefficient(wrongY) + yVar + ')/' + wrongX);
     
     gcd = getGCD(getGCD(Math.abs(rightZCoefficient),Math.abs(rightYCoefficient)),Math.abs(wrongLeftXCoefficient2));
     //The bottom coefficient must be positive to be in reduced terms then divide out by the GCD
-    if(leftXCoefficient < 0)
+    if(wrongLeftXCoefficient2 < 0)
     {
-        wrongZCoefficient = -rightZCoefficient / gcd;
-        wrongYCoefficient = -rightYCoefficient / gcd;
-        wrongXCoefficient = -wrongLeftXCoefficient2 / gcd;
+        wrongZ = -rightZCoefficient / gcd;
+        wrongY = -rightYCoefficient / gcd;
+        wrongX = -wrongLeftXCoefficient2 / gcd;
     }
     else
     {
-        wrongZCoefficient = rightZCoefficient / gcd;
-        wrongYCoefficient = rightYCoefficient / gcd;
-        wrongXCoefficient = wrongLeftXCoefficient2 / gcd;
+        wrongZ = rightZCoefficient / gcd;
+        wrongY = rightYCoefficient / gcd;
+        wrongX = wrongLeftXCoefficient2 / gcd;
     }
 
-    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZCoefficient) + zVar +
-                        formatCoefficient(wrongYCoefficient) + yVar + ')/' + wrongXCoefficient);
+    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZ) + zVar + formatCoefficient(wrongY) + yVar + ')/' + wrongX);
                         
     gcd = getGCD(getGCD(Math.abs(wrongZCoefficient),Math.abs(wrongYCoefficient)),Math.abs(wrongLeftXCoefficient2));                        
     //The bottom coefficient must be positive to be in reduced terms then divide out by the GCD
-    if(leftXCoefficient < 0)
+    if(wrongLeftXCoefficient2 < 0)
     {
-        wrongZCoefficient = -wrongZCoefficient / gcd;
-        wrongYCoefficient = -wrongYCoefficient / gcd;
-        wrongXCoefficient = -wrongLeftXCoefficient2 / gcd;
+        wrongZ = -wrongZCoefficient / gcd;
+        wrongY = -wrongYCoefficient / gcd;
+        wrongX = -wrongLeftXCoefficient2 / gcd;
     }
     else
     {
-        wrongZCoefficient = wrongZCoefficient / gcd;
-        wrongYCoefficient = wrongYCoefficient / gcd;
-        wrongXCoefficient = wrongLeftXCoefficient2 / gcd;
+        wrongZ = wrongZCoefficient / gcd;
+        wrongY = wrongYCoefficient / gcd;
+        wrongX = wrongLeftXCoefficient2 / gcd;
     }
 
-    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZCoefficient) + zVar +
-                        formatCoefficient(wrongYCoefficient) + yVar + ')/' + wrongXCoefficient);
+    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZ) + zVar + formatCoefficient(wrongY) + yVar + ')/' + wrongX);
                         
     gcd = getGCD(getGCD(Math.abs(wrongZCoefficient),Math.abs(rightYCoefficient)),Math.abs(wrongLeftXCoefficient2));                        
     //The bottom coefficient must be positive to be in reduced terms then divide out by the GCD
-    if(leftXCoefficient < 0)
+    if(wrongLeftXCoefficient2 < 0)
     {
-        wrongZCoefficient = -wrongZCoefficient / gcd;
-        wrongYCoefficient = -rightYCoefficient / gcd;
-        wrongXCoefficient = -wrongLeftXCoefficient2 / gcd;
+        wrongZ = -wrongZCoefficient / gcd;
+        wrongY = -rightYCoefficient / gcd;
+        wrongX = -wrongLeftXCoefficient2 / gcd;
     }
     else
     {
-        wrongZCoefficient = wrongZCoefficient / gcd;
-        wrongYCoefficient = rightYCoefficient / gcd;
-        wrongXCoefficient = wrongLeftXCoefficient2 / gcd;
+        wrongZ = wrongZCoefficient / gcd;
+        wrongY = rightYCoefficient / gcd;
+        wrongX = wrongLeftXCoefficient2 / gcd;
     }
 
-    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZCoefficient) + zVar +
-                        formatCoefficient(wrongYCoefficient) + yVar + ')/' + wrongXCoefficient);
+    addWrongChoice(xVar + '=' + '(' + formatFirstCoefficient(wrongZ) + zVar + formatCoefficient(wrongY) + yVar + ')/' + wrongX);
 }
 
 function get_equation_string_side(x, c, selX, selC) {
