@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd /home/ec2-user
+
 # Remove old bulkloader log files
 rm bulkloader-*
 
