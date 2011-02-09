@@ -314,8 +314,6 @@ var KnowledgeMap = {
 
     highlightNode: function(node, highlight) {
         var jel = $("#node-" + KnowledgeMap.escapeSelector(node.id));
-        console.log("#node-" + KnowledgeMap.escapeSelector(node.id));
-        console.log(jel);
         if (highlight)
             jel.addClass("nodeLabelHighlight");
         else
