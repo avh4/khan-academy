@@ -71,7 +71,6 @@ KhanAcademy.seedRandom(KhanAcademy.problem_number);
 		{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
 	</div>
 	<div id='answer_area' style="display: inline-block; padding: 1em;">
-		{% block answergraphdisplay %} {% endblock answergraphdisplay %}
 		<form id="answerform" action="/registeranswer" method="post">
 			{% block answerform %}
 			{% comment %}
