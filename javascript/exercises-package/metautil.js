@@ -227,6 +227,7 @@ function handleCorrectness(isCorrect)
 		
 		tries++;
 		$("#check-answer-results").show();
+		$("#check-answer-results #nextbutton").hide();
 		document.images.feedback.src= incorrect.src;
 	}
 }
