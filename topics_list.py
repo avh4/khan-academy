@@ -69,6 +69,7 @@ else:
     topics_list.append('Arithmetic')
     topics_list.append('Chemistry')
     topics_list.append('Developmental Math')
+    topics_list.append('Developmental Math 2')
     topics_list.append('Pre-algebra')
     topics_list.append('MA Tests for Education Licensure (MTEL) -Pre-Alg')
     topics_list.append('Geometry')
