@@ -22,16 +22,10 @@ class ClassTimeAnalyzer:
     def dt_to_ctz(self, dt):
         return dt + self.timezone_adjustment
 
-    def get_classtime_table(self, student_emails, dt_start_ctz = datetime.datetime.min, dt_end_ctz = datetime.datetime.min):
+    def get_classtime_table(self, student_emails, dt_start_utc):
 
-        # If no start date is provided, assume today in client's time zone
-        if dt_start_ctz == datetime.datetime.min:
-            dt = self.dt_to_ctz(datetime.datetime.now())
-            dt_start_ctz = datetime.datetime(dt.year, dt.month, dt.day)
-
-        # If no end date is provided, assume tomorrow in client's time zone
-        if dt_end_ctz == datetime.datetime.min:
-            dt_end_ctz = dt_start_ctz + datetime.timedelta(days = 1)
+        dt_start_ctz = self.dt_to_ctz(dt_start_utc)
+        dt_end_ctz = dt_start_ctz + datetime.timedelta(days = 1)
 
         column = 0
 

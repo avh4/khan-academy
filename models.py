@@ -390,9 +390,9 @@ class UserData(db.Model):
     
     def reassess_if_necessary(self, user=None):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
-            return
+            return False
         ex_graph = ExerciseGraph(self, user)
-        self.reassess_from_graph(ex_graph)
+        return self.reassess_from_graph(ex_graph)
         
     def is_proficient_at(self, exid, user=None):
         self.reassess_if_necessary(user)

@@ -72,8 +72,12 @@ def knowledgemap_embed(exercises, map_coords):
     return {"App": App, "exercises": exercises, "map_coords": map_coords}
 
 @register.inclusion_tag("related_videos.html")
-def related_videos(exercise_videos):
-    return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE}
+def related_videos_with_points(exercise_videos):
+    return related_videos(exercise_videos, True)
+
+@register.inclusion_tag("related_videos.html")
+def related_videos(exercise_videos, show_points=False):
+    return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE, "show_points": show_points}
 
 @register.inclusion_tag("exercise_icon.html")
 def exercise_icon(exercise, App):

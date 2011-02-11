@@ -2,6 +2,8 @@
 
 {% block profile_name %}{{ coach_nickname|escape }}'s class{% endblock profile_name %}
 
+{% block statistics_title %}Class Statistics{% endblock statistics_title %}
+
 {% block high_level_stats %}
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
@@ -13,11 +15,30 @@
     <span id="energy-points">
         <span title="{{class_points}} energy points" class="energy-points-badge">{{class_points}}</span><br />
         <span class="label">Class Energy Points</span>
-    </span>                    
+    </span>
 {% endblock high_level_stats %}
 
 {% block graph_accordion %}
     <ul id="nav-accordion">
+        <li>
+            {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type %}
+            <p class="accordion-content">
+                Shows you which exercises your class has worked on and completed.
+                <span class="graph-options">
+                    <span class="progress-legend proficient">Proficient</span>
+                    <span class="progress-legend started">Started</span>
+                    <span class="progress-legend struggling">Struggling</span>
+                </span>
+            </p>
+        </li>
+        <li>
+            {% profile_class_graph_link coach "Daily Activity Report" "classtime" selected_graph_type %}
+            <p class="accordion-content">
+                Shows your total class activity on a specific date.
+                {% profile_graph_calendar_picker coach "classtime" %}
+                <span class="instructions">Light blue activity shows normal school hours, and dark blue is outside normal hours.</span>
+            </p>
+        </li>
         <li>
             {% profile_class_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
@@ -44,6 +65,12 @@
                 </div>
 
             </div>
+        </li>
+        <li>
+            {% profile_class_graph_link coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type %}
+            <p class="accordion-content">
+                Shows your total class energy points per minute as a continuously updating rolling average.
+            </p>
         </li>
     </ul>
 {% endblock graph_accordion %}

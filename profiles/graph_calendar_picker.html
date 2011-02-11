@@ -1,0 +1,5 @@
+<input type="text" id="targetDatepicker" value="Today"/>
+<script>
+    $("#targetDatepicker").datepicker().change(function(){Profile.loadGraph("/profile/graph/{{ graph_type|escape }}?coach_email={{ user.email|escape }}&dt=" + this.value);});
+</script>
+

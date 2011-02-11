@@ -16,7 +16,7 @@
     <article id="individual_report">
         <div id="vital-statistics">
             <div id="stats-nav">
-                <h2>Vital Statistics</h2>
+                <h2>{% block statistics_title %}Vital Statistics{% endblock statistics_title %}</h2>
                 {% block graph_accordion %}{% endblock graph_accordion %}
             </div>
             <div id="stats-charts">
@@ -31,7 +31,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    <script type="text/javascript" src="http://statickhan.appspot.com/javascript/highcharts.js?{{App.version}}"></script>
+    <script type="text/javascript" src="{% if not App.offline_mode %}http://statickhan.appspot.com{% endif %}/javascript/highcharts.js?{{App.version}}"></script>
     {% profile_javascript %}
     <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
 {% endblock bottompagescript %}

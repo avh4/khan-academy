@@ -111,6 +111,7 @@ class ProfileGraph(request_handler.RequestHandler):
 
     def get(self):
         html = ""
+        json_update = ""
 
         target_and_user_data = self.get_profile_target_and_user_data()
         user_target = target_and_user_data[0]
@@ -121,17 +122,23 @@ class ProfileGraph(request_handler.RequestHandler):
             if self.redirect_if_not_ajax(user_target):
                 return
 
-            html_and_context = self.graph_html_and_context(user_data_target)
+            if self.request_bool("update", default=False):
+                json_update = self.json_update(user_data_target)
+            else:
+                html_and_context = self.graph_html_and_context(user_data_target)
 
-            if html_and_context["context"].has_key("is_graph_empty") and html_and_context["context"]["is_graph_empty"]:
-                # This graph is empty of activity. If it's a date-restricted graph, see if bumping out the time restrictions can help.
-                if self.redirect_for_more_data():
-                    return
+                if html_and_context["context"].has_key("is_graph_empty") and html_and_context["context"]["is_graph_empty"]:
+                    # This graph is empty of activity. If it's a date-restricted graph, see if bumping out the time restrictions can help.
+                    if self.redirect_for_more_data():
+                        return
 
-            html = html_and_context["html"]
+                html = html_and_context["html"]
 
-        json = simplejson.dumps({"html": html, "url": self.request.url}, ensure_ascii=False)
-        self.response.out.write(json)
+        if len(json_update) > 0:
+            self.response.out.write(json_update)
+        else:
+            json = simplejson.dumps({"html": html, "url": self.request.url}, ensure_ascii=False)
+            self.response.out.write(json)
 
     def get_profile_target_and_user_data(self):
         student = None
@@ -168,6 +175,9 @@ class ProfileGraph(request_handler.RequestHandler):
     def redirect_for_more_data(self):
         return False
 
+    def json_update(self, user_data):
+        return ""
+
 class ClassProfileGraph(ProfileGraph):
 
     def get_profile_target_and_user_data(self):
@@ -190,12 +200,12 @@ class ClassProfileGraph(ProfileGraph):
     def redirect_if_not_ajax(self, coach):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
-            self.redirect("/profile?selected_graph_type=%s&coach_email=%s&graph_query_params=%s" % 
+            self.redirect("/class_profile?selected_graph_type=%s&coach_email=%s&graph_query_params=%s" % 
                     (self.GRAPH_TYPE, urllib.quote(coach.email()), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
 
-class ProfileDateRangeGraph(ProfileGraph):
+class ProfileDateToolsGraph(ProfileGraph):
 
     DATE_FORMAT = "%Y-%m-%d"
 
@@ -209,7 +219,7 @@ class ProfileDateRangeGraph(ProfileGraph):
 
     def request_date_ctz(self, key):
         # Always work w/ client timezone dates on the client and UTC dates on the server
-        dt = self.request_date(key, ProfileDateRangeGraph.DATE_FORMAT, default=datetime.datetime.min)
+        dt = self.request_date(key, self.DATE_FORMAT, default=datetime.datetime.min)
         if dt == datetime.datetime.min:
             s_dt = self.request_string(key, default="")
             if s_dt == "today":
@@ -231,6 +241,21 @@ class ProfileDateRangeGraph(ProfileGraph):
     def utc_to_ctz(self, dt_utc):
         return dt_utc + datetime.timedelta(minutes=self.tz_offset())
 
+class ClassProfileDateGraph(ClassProfileGraph, ProfileDateToolsGraph):
+
+    DATE_FORMAT = "%m/%d/%Y"
+
+    def get_date(self):
+        dt_ctz = self.request_date_ctz("dt")
+
+        if dt_ctz == datetime.datetime.min:
+            # If no date, assume looking at today
+            dt_ctz = self.utc_to_ctz(datetime.datetime.now())
+
+        return self.ctz_to_utc(self.inclusive_start_date(dt_ctz))
+
+class ProfileDateRangeGraph(ProfileDateToolsGraph):
+
     def get_start_date(self):
         dt_ctz = self.request_date_ctz("dt_start")
 
@@ -238,7 +263,7 @@ class ProfileDateRangeGraph(ProfileGraph):
             # If no start date, assume looking at last 7 days
             dt_ctz = self.utc_to_ctz(datetime.datetime.now() - datetime.timedelta(days=6))
 
-        return self.ctz_to_utc(ProfileDateRangeGraph.inclusive_start_date(dt_ctz))
+        return self.ctz_to_utc(self.inclusive_start_date(dt_ctz))
 
     def get_end_date(self):
         dt_ctz = self.request_date_ctz("dt_end")
@@ -256,7 +281,7 @@ class ProfileDateRangeGraph(ProfileGraph):
             # Maximum range of 30 days for now
             dt_ctz = dt_start_ctz + datetime.timedelta(days=consts.MAX_GRAPH_DAY_RANGE)
 
-        return self.ctz_to_utc(ProfileDateRangeGraph.inclusive_end_date(dt_ctz))
+        return self.ctz_to_utc(self.inclusive_end_date(dt_ctz))
 
     def redirect_for_more_data(self):
         dt_start_ctz_test = self.request_date_ctz("dt_start")
@@ -298,4 +323,22 @@ class ClassExercisesOverTimeGraph(ClassProfileGraph):
     GRAPH_TYPE = "classexercisesovertime"
     def graph_html_and_context(self, user_data_coach):
         return templatetags.class_profile_exercises_over_time_graph(user_data_coach)
+
+class ClassProgressReportGraph(ClassProfileGraph):
+    GRAPH_TYPE = "classprogressreport"
+    def graph_html_and_context(self, user_data_coach):
+        return templatetags.class_profile_progress_report_graph(user_data_coach)
+
+class ClassTimeGraph(ClassProfileDateGraph):
+    GRAPH_TYPE = "classtime"
+    def graph_html_and_context(self, user_data_coach):
+        return templatetags.class_profile_time_graph(user_data_coach, self.get_date(), self.tz_offset())
+
+class ClassEnergyPointsPerMinuteGraph(ClassProfileGraph):
+    GRAPH_TYPE = "classenergypointsperminute"
+    def graph_html_and_context(self, user_data_coach):
+        return templatetags.class_profile_energy_points_per_minute_graph(user_data_coach)
+
+    def json_update(self, user_data_coach):
+        return templatetags.class_profile_energy_points_per_minute_update(user_data_coach)
 

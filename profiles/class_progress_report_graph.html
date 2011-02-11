@@ -1,0 +1,223 @@
+{% block graph %}
+
+{% if not student_emails %}
+    <div class="graph-notification">You don't have any students yet.</div>
+{% endif %}
+
+<script type="text/javascript">
+
+    var ProgressReport = {
+
+        init: function() {
+
+            if ($.browser.msie && parseInt($.browser.version) < 8)
+            {
+                this.showBrowserRequirements();
+                return;
+            }
+
+            this.adjustTable();
+            this.onResize();
+            $("#module-progress td.student-module-status").hover(this.onHover, this.onUnhover);
+
+            if (window.fBoundProgressReport) return;
+
+            $(window).resize(ProgressReport.onResize);
+            $(document).mousemove(function(e){window.mouseX = e.pageX; window.mouseY = e.pageY;});
+
+            window.fBoundProgressReport = true;
+        },
+
+        showBrowserRequirements: function() { 
+            $("#module-progress").replaceWith("<div class='graph-notification'>This chart requires a newer browser such as Google Chrome, Safari, Firefox, or Internet Explorer 8+.</div>");
+        },
+
+        hoverDiv: function() {
+            if (!window.elProgressReportHoverDiv)
+            {
+                window.elProgressReportHoverDiv = $("<div class='exercise-info-hover' style='position:absolute;display:none;'></div>");
+                $(document.body).append(window.elProgressReportHoverDiv);
+            }
+            return window.elProgressReportHoverDiv;
+        },
+
+        onHover: function() {
+            var dtLastHover = window.dtLastHover = new Date();
+            var self = this;
+            setTimeout(function(){
+                if (dtLastHover != window.dtLastHover) return;
+            
+                var sHover = $(self).attr("data-hover");
+                if (sHover)
+                {
+                    var jelHover = $(ProgressReport.hoverDiv());
+                    jelHover.html(sHover);
+
+                    var left = window.mouseX + 15;
+                    if (left + 150 > $(window).scrollLeft() + $(window).width()) left -= 150;
+
+                    var top = window.mouseY + 5;
+                    if (top + 115 > $(window).scrollTop() + $(window).height()) top -= 115;
+
+                    jelHover.css('left', left).css('top', top);
+                    jelHover.css('cursor', 'pointer');
+                    jelHover.show();
+                }
+            }, 100);
+        },
+
+        onUnhover: function() {
+            window.dtLastHover = null;
+            $(ProgressReport.hoverDiv()).hide();
+        },
+
+        onScroll: function() {
+
+            var jelTable = $("#table_div");
+            var jelHeader = $("#divHeader");
+            var jelColumn = $("#firstcol");
+
+            var leftTable = jelTable.scrollLeft();
+            var topTable = jelTable.scrollTop();
+
+            var leftHeader = jelHeader.scrollLeft(leftTable).scrollLeft();
+            var topColumn = jelColumn.scrollTop(topTable).scrollTop();
+
+            if (leftHeader < leftTable)
+            {
+                jelHeader.children().first().css("padding-right", 20);
+                jelHeader.scrollLeft(leftTable);
+            }
+
+            if (topColumn < topTable)
+            {
+                jelColumn.children().first().css("padding-bottom", 20);
+                jelColumn.scrollTop(topTable);
+            }
+        },
+
+        onResize: function() {
+
+            var width = $("#graph-content").width() - $("#firstTd").width() - 12;
+            $(".sizeOnResize").width(width);
+
+        },
+
+        adjustTable: function() {
+
+            // From http://fixed-header-using-jquery.blogspot.com/2009/05/scrollable-table-with-fixed-header-and.html
+            //
+            var colCount = $('#firstTr>td').length; //get total number of column
+         
+            var m = 0;
+            var n = 0;
+            var brow = 'mozilla';
+         
+            jQuery.each(jQuery.browser, function(i, val) {
+                if(val == true){
+                    brow = i.toString();
+                }
+            });
+         
+            $('.tableHeader').each(function(i){
+                if (m < colCount){
+         
+                    if (brow == 'mozilla'){
+                        $('#firstTd').css("width",$('.tableFirstCol').width());//for adjusting first td
+                        $(this).css('width',$('#table_div td:eq('+m+')').width());//for assigning width to table Header div
+                    }
+                    else if (brow == 'msie'){
+                        $('#firstTd').css("width",$('.tableFirstCol').width());
+                        $(this).css('width',$('#table_div td:eq('+m+')').width()-2);//In IE there is difference of 2 px
+                    }
+                    else if (brow == 'safari'){
+                        $('#firstTd').css("width",$('.tableFirstCol').width());
+                        $(this).css('width',$('#table_div td:eq('+m+')').width());
+                    }
+                    else {
+                        $('#firstTd').css("width",$('.tableFirstCol').width());
+                        $(this).css('width',$('#table_div td:eq('+m+')').innerWidth());
+                    }
+                }
+                m++;
+            });
+         
+            $('.tableFirstCol').each(function(i){
+                if(brow == 'mozilla'){
+                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').outerHeight());//for providing height using scrollable table column height
+                }
+                else if(brow == 'msie'){
+                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').innerHeight());
+                }
+                else {
+                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').height());
+                }
+                n++;
+            });
+        }
+    };
+
+    $(document).ready(function(){ProgressReport.init();});
+
+</script>
+
+<table id="module-progress" cellspacing="0" cellpadding="0" border="0">
+    <tr>
+        <th id="firstTd" class="tableHeader">Student Progress</th>
+        <td>
+            <div id="divHeader" class="sizeOnResize" style="overflow:hidden;width:450px;">
+                <table cellspacing="0" cellpadding="0" border="1" >
+                  <tr>
+                    {% for exercise_name in exercise_names %}
+                        {% for student_email in exercise_data|hash:exercise_name %}
+                            {% if forloop.first %}
+                                <th><div class="tableHeader">{{ exercise_data|hash:exercise_name|hash:student_email|hash:"exercise_display"|escape }}</div></th>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                  </tr>
+                </table>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td valign="top">
+          <div id="firstcol" style="overflow:hidden;height:325px;">
+            <table cellspacing="0" cellpadding="0" border="0" >
+                {% for student_email in student_emails %}
+                    {% for exercise_name in exercise_names %}            
+                        {% if forloop.first %}
+                        <tr>
+                            <td class="tableFirstCol student-email">
+                                <a style="color:#006699;" href="/profile?selected_graph_type=exerciseprogress&student_email={{ student_email|escape }}">
+                                    <nobr>{{ exercise_data|hash:exercise_name|hash:student_email|hash:"short_name"|escape }}</nobr>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </table>
+          </div>
+        </td>
+
+        <td valign="top">
+            <div id="table_div" class="sizeOnResize" style="overflow:scroll;height:325px;width:450px;position:relative" onscroll="ProgressReport.onScroll();" >
+                <table style="width:100%" cellspacing="0" cellpadding="0" border="0" >
+                    {% for student_email in student_emails %}
+                    <tr {% if forloop.first %}id="firstTr"{% endif %}>
+                    {% for exercise_name in exercise_names %}            
+                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escapejs }}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name={{ exercise_name|escapejs }}');" data-hover="{{exercise_data|hash:exercise_name|hash:student_email|hash:"hover"|escape}}"></td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+        </td>
+
+    </tr>
+</table>
+ 
+{% endblock graph %}
+
+
