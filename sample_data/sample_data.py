@@ -76,6 +76,8 @@ def main():
         if options.python is not None:
             call_args.insert(0, options.python)
 
+        call_args.append('--num_threads=1')
+
         if args[0] == 'upload':
             call_args.append('upload_data')
         elif args[0] == 'download':
