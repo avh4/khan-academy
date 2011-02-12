@@ -268,7 +268,7 @@ class ProfileDateRangeGraph(ProfileDateToolsGraph):
     def get_end_date(self):
         dt_ctz = self.request_date_ctz("dt_end")
         dt_start_ctz_test = self.request_date_ctz("dt_start")
-        dt_start_ctz = self.get_start_date()
+        dt_start_ctz = self.utc_to_ctz(self.get_start_date())
 
         if (dt_ctz == datetime.datetime.min and dt_start_ctz_test == datetime.datetime.min):
             # If no end date or start date specified, assume looking at 7 days after start date
