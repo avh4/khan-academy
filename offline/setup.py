@@ -64,7 +64,7 @@ def get_khanacademy_code():
         print "output:\n" + output
     os.chdir(code_dir + "/khanacademy-read-only")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
-    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")      
+    replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")             
     return revision
 
 
@@ -109,7 +109,15 @@ def download_highcharts():
         zf.close()
         os.remove("Highcharts-2.1.1.zip") 
              
-    
+             
+def download_vlc():
+    os.chdir(ka_dir)
+    if not os.path.exists("vlc-1.1.5-win32.exe"):
+        print "downloading vlc"   
+        urlretrieve("http://downloads.sourceforge.net/project/vlc/1.1.5/win32/vlc-1.1.5-win32.exe?r=&ts=1292520846&use_mirror=ignum2", 
+            "vlc-1.1.5-win32.exe")
+        
+        
 def upload_sample_data(): 
     # --use_sqlite giving intermittent errors
     command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
@@ -184,12 +192,13 @@ def revert_readme(revision):
    
 
 def setup():
-    download_appengine("google_appengine_1.3.7.zip")
+    download_appengine("google_appengine_1.4.2.zip")
     revision = get_khanacademy_code()
     insert_revision_in_readme(revision)
     copy_python25()
     download_7zip()
     download_highcharts()
+    download_vlc()
     upload_sample_data()
     copy_datastore()
     generate_video_mapping()
