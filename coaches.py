@@ -149,41 +149,14 @@ class ViewProgressChart(request_handler.RequestHandler):
         self.redirect("/profile?selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
             
 class ViewStudents(request_handler.RequestHandler):
-
     def get(self):
-        user = util.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)
-            logout_url = users.create_logout_url(self.request.uri)
-            
-            student_emails = user_data.get_students()
-            students = []
-            for student_email in student_emails:   
-                student = users.User(email=student_email)
-                student_data = UserData.get_or_insert_for(student)
-                student_data.user.name = util.get_nickname_for(student_data.user) 
-                if student_email != student_data.user.name:
-                   student_data.user.name += " (%s)" % student_email                                       
-                students.append(student_data.user)
-
-            template_values = {
-                'App' : App,
-                'username': user.nickname(),
-                'logout_url': logout_url,
-                'students': students,
-                'coach_email': user_data.user.email(),
-                }
-
-            self.render_template('viewstudents.html', template_values)
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
-        
+        self.redirect("/class_profile")
+       
 class ViewClassTime(request_handler.RequestHandler):
     def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassTimeGraph.GRAPH_TYPE)
 
 class ViewClassReport(request_handler.RequestHandler):
-        
     def get(self):            
         self.redirect("/class_profile?selected_graph_type=%s" % ClassProgressReportGraph.GRAPH_TYPE)
 
