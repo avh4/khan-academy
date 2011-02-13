@@ -41,6 +41,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             template_values = {
                     'coach': coach,
+                    'coach_email': coach.email(),
                     'coach_nickname': util.get_nickname_for(coach),
                     'dict_students': dict_students,
                     'count_students': len(dict_students),
@@ -48,6 +49,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),
+                    'is_profile_empty': len(dict_students) <= 0,
                     }
             self.render_template('viewclassprofile.html', template_values)
         else:

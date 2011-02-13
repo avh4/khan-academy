@@ -90,3 +90,16 @@
     </div>
 {% endblock profile_extended_sections %}
 
+{% block profile_is_empty %}
+
+    <div>
+        You don't have any students yet. Once students make you their coach, you'll have access to all types of interesting data about their progress and achievements.<br/><br/>
+        <strong>Each of your students should:</strong><br/>
+        <ol>
+            <li>Log in and click on the <a href="/coaches">Add a Coach</a> link at the bottom of the page.</li>
+            <li>They'll need your coach email address (<em>{{ coach_email|escape }}</em>).</li>
+            <li>Once they click the <em>Register Coach</em> button, you'll be able to follow their progress any time by visiting this <a href="/class_profile">Class Report</a>.</li>
+    </div>
+
+{% endblock profile_is_empty %}
+
