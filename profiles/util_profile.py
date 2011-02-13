@@ -36,7 +36,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                 "nickname": util.get_nickname_for(student_data.user),
             }, students_data)
 
-            selected_graph_type = self.request_string("selected_graph_type") or ClassExercisesOverTimeGraph.GRAPH_TYPE
+            selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
 
             template_values = {
