@@ -80,7 +80,7 @@ def seconds_to_time_string(seconds_init, short_display = True):
 def thousands_separated_number(x):
     # See http://stackoverflow.com/questions/1823058/how-to-print-number-with-commas-as-thousands-separators-in-python-2-x
     if x < 0:
-        return '-' + intWithCommas(-x)
+        return '-' + thousands_separated_number(-x)
     result = ''
     while x >= 1000:
         x, r = divmod(x, 1000)

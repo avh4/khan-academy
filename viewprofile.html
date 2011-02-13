@@ -18,7 +18,7 @@
         </span>
     </span>
     <span id="energy-points">
-        <span title="{{student_points}} energy points" class="energy-points-badge">{{student_points}}</span><br />
+        <span title="{{student_points}} energy points" class="energy-points-badge">{{ student_points|thousands_separated }}</span><br />
         <span class="label">Total Energy Points</span>
     </span>                    
 {% endblock high_level_stats %}

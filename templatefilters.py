@@ -40,6 +40,10 @@ def timesince_ago_short(content):
 def utc_to_ctz(content, tz_offset):
     return content + datetime.timedelta(minutes=tz_offset)
 
+@register.filter
+def thousands_separated(content):
+    return util.thousands_separated_number(content)
+
 def append_ago(s_time):
     if not s_time:
         return ""
