@@ -39,11 +39,28 @@ class ViewClassProfile(request_handler.RequestHandler):
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
 
+            # Sort students alphabetically and sort into 4 chunked up columns for easy table html
+            dict_students_sorted = sorted(dict_students, key=lambda dict_student:dict_student["nickname"])
+            students_per_row = 4
+            students_per_col = max(1, len(dict_students_sorted) / students_per_row)
+            list_cols = [[], [], [], []]
+            list_students_columnized = []
+
+            for ix in range(0, len(dict_students_sorted)):
+                dict_student = dict_students_sorted[ix]
+                list_cols[(ix / students_per_col) % students_per_row].append(dict_student)
+
+            for ix in range(0, len(dict_students_sorted)):
+                dict_student = list_cols[ix % students_per_row][(ix / students_per_row) % students_per_col]
+                list_students_columnized.append(dict_student)
+
             template_values = {
                     'coach': coach,
                     'coach_email': coach.email(),
                     'coach_nickname': util.get_nickname_for(coach),
                     'dict_students': dict_students,
+                    'students_per_row': students_per_row,
+                    'list_students_columnized': list_students_columnized,
                     'count_students': len(dict_students),
                     'class_points': class_points,
                     'selected_graph_type': selected_graph_type,

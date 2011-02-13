@@ -408,3 +408,12 @@ div.graph-notification {
 #graph-progress-bar .ui-progressbar-value {
     background-image: url('/images/progress-animated.gif');
 }
+
+#student-list {
+    margin-top: 10px;
+}
+
+#student-list table td {
+    padding: 5px;
+    margin: 0;
+}

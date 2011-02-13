@@ -79,13 +79,22 @@
     <div id="students-list">
         <h2>Student Profiles</h2>
         <div id="student-list">
-            <ul>
-                {% for dict_student in dict_students %}
-                <li>
-                    <a href="/profile?student_email={{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
-                </li>
+            <table>
+                {% for dict_student in list_students_columnized %}
+                    {% if not forloop.counter0|mod:students_per_row %}
+                        {% if not forloop.first %}
+                            </tr>
+                        {% endif %}
+                    <tr>
+                    {% endif %}
+                        <td>
+                            <a href="/profile?student_email={{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
+                        </td>
+                    {% if forloop.last %}
+                    </tr>
+                    {% endif %}
                 {% endfor %}
-            </ul>
+            </table>
         </div>
     </div>
 {% endblock profile_extended_sections %}
