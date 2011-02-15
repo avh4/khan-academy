@@ -572,6 +572,40 @@ function graphRectangle(topLeft, topRight, bottomRight, bottomLeft)
 	
 }
 
+function graphPolygon(vertices){
+    this.color = getNextColor();
+    this.vertices = vertices;
+    this.sides = [];
+    //this.angles = [];
+    for(var i = 0; i < vertices.length; i++){
+        this.sides.push(new noLabelLine(this.vertices[i], this.vertices[(i + 1)%vertices.length]));
+        //this.angles.push(new graphAngle(this.vertices[(i-1)%vertices.length], this.vertices[i], this.vertices[(i+1)%vertices.length]));
+    }
+
+    //this.regStr = ("<b>Polygon</b>"); //TODO - this isn't right, but appending 12 point names doesn't make much sense either
+    //this.colorStr = (this.regStr, this.color);
+
+    this.drawInColor = function()
+    {
+        this.drawInOtherColor(this.color);
+    }
+
+    this.drawInOtherColor = function(color)
+    {
+        for(var i = 0; i < this.sides.length; i++){
+            this.sides[i].drawInOtherColor(color);
+        }
+    }
+
+    this.draw = function()
+    {
+        for(var i = 0; i < this.sides.length; i++){
+            this.sides[i].draw();
+        }
+    }
+}
+
+
 function graphTriangle(left, top, right)
 {
 	this.left = left;
@@ -798,6 +832,15 @@ function getOverlayedSimilarTriangles()
 }
 
 
+function getRegularPolygon(n){
+    var vertices = [];
+    var offset = (Math.PI / 2) + getRandomIntRange(0, 1) * Math.PI / n;
+    for(var i = 0; i < n; i++){
+        var theta = offset + i * Math.PI * 2 / n;
+        vertices.push(new graphPoint(Math.cos(theta), Math.sin(theta), belowleft)); //TODO - Label positions need to be set better if they're going to be used
+    }
+    return new graphPolygon(vertices);
+}
 
 function overline(x)
 {
