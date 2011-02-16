@@ -219,11 +219,6 @@ class UpdateVideoData(request_handler.RequestHandler):
                     video_data.title = video.media.title.text.decode('windows-1252')
                     video_data.url = video.media.player.url.decode('windows-1252')
                     video_data.duration = int(video.media.duration.seconds)
-
-                    # Strip off microsecond data
-                    updated = video.updated.text.decode('windows-1252')
-                    updated = updated[:updated.rfind(".")]
-                    video_data.date_updated = datetime.datetime.strptime(updated, "%Y-%m-%dT%H:%M:%S")
                     video_data.views = int(video.statistics.view_count)
 
                     if video.media.description.text is not None:
