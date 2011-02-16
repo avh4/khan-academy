@@ -42,6 +42,9 @@ var ExerciseDependentProbability = {
 	this.numUnfairCoins = getRandomIntRange(this.UNFAIR_COINS_MIN, this.UNFAIR_COINS_MAX);
 	var numIncr = (this.PERCENT_UNFAIR_HEADS_MAX - this.PERCENT_UNFAIR_HEADS_MIN) / this.PERCENT_UNFAIR_HEADS_INCR;
 	this.percentChanceUnfairHeads = this.PERCENT_UNFAIR_HEADS_MIN + getRandomInt(numIncr) * this.PERCENT_UNFAIR_HEADS_INCR;
+    if(this.percentChanceUnfairHeads == 50){
+        this.percentChanceUnfairHeads = 50 + this.PERCENT_UNFAIR_HEADS_INCR;  //Prevent the unfair coin from being fair
+    }
 	this.numFlips = getRandomIntRange(this.COIN_FLIPS_MIN, this.COIN_FLIPS_MAX);
 
 	// compute answer
