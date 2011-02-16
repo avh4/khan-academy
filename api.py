@@ -18,8 +18,6 @@ from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Play
 from discussion import qa
 from topics_list import all_topics_list
 
-
-
 class Export(request_handler.RequestHandler):
 
     def datetime_to_str(self, datetime):
@@ -240,7 +238,7 @@ class ViewImport(request_handler.RequestHandler):
         
 
         
-@layer_cache.cache_with_key("playlists_%s" % Setting.cached_library_content_date(), persist_across_app_versions = True)
+@layer_cache.cache_with_key("playlists_%s" % Setting.cached_library_content_date())
 def get_playlists():
     playlists = []   
     for playlist_title in all_topics_list:            
@@ -251,7 +249,7 @@ def get_playlists():
                          'youtube_url': playlist.url,
                          'title': playlist.title, 
                          'description': playlist.description,
-                         'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist_title),)
+                         'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist_title)),
                         } 
         playlists.append(playlist_dict) 
     return json.dumps(playlists, indent=4)
@@ -259,13 +257,8 @@ def get_playlists():
 class Playlists(request_handler.RequestHandler):
     def get(self): 
         self.response.out.write(get_playlists())        
-                             
 
-
-@layer_cache.cache_with_key_fxn(
-    lambda playlist_title: "playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()), 
-    persist_across_app_versions = True
-    )
+@layer_cache.cache_with_key_fxn(lambda playlist_title: "playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()))
 def get_playlist_videos(playlist_title):
     query = Playlist.all()
     query.filter('title =', playlist_title)
@@ -274,7 +267,7 @@ def get_playlist_videos(playlist_title):
     query.filter('playlist =', playlist)
     query.filter('live_association = ', True)
     query.order('video_position')
-    videos = []       
+    videos = []
     for pv in query.fetch(500):
         v = pv.video
         video_dict = {'youtube_id':  v.youtube_id,
@@ -284,7 +277,8 @@ def get_playlist_videos(playlist_title):
                       'keywords': v.keywords,                         
                       'readable_id': v.readable_id,
                       'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title)),
-                      'video_position': pv.video_position
+                      'video_position': pv.video_position,
+                      'views': v.views,
                      }                         
         videos.append(video_dict)                        
     return json.dumps(videos, indent=4)
@@ -294,8 +288,6 @@ class PlaylistVideos(request_handler.RequestHandler):
         playlist_title = self.request.get('playlist')
         self.response.out.write(get_playlist_videos(playlist_title))    
  
-        
-
 class VideosForExercise(request_handler.RequestHandler):
 
    def get(self):
