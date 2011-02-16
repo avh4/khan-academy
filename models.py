@@ -467,7 +467,6 @@ class Video(Searchable, db.Model):
     keywords = db.StringProperty()
     duration = db.IntegerProperty(default = 0)
     readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
-    date_updated = db.DateTimeProperty()
     views = db.IntegerProperty(default = 0) # YouTube view count
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
