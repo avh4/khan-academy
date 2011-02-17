@@ -8,12 +8,10 @@ import models
 import consts
 import points
 
-def user_video_update_map(user_video):
-    video_points_total = points.VideoPointCalculator(user_video)
-    if not user_video.completed and video_points_total >= consts.VIDEO_POINTS_BASE:
-        # Just finished this video for the first time
-        user_video.completed = True
-        yield op.db.Put(user_video)
+def user_exercise_update_map(user_exercise):
+    if not models.UserExercise.exercise_model.get_value_for_datastore(user_exercise):
+        user_exercise.exercise_model = models.Exercise.get_by_name(user_exercise.exercise)
+        yield op.db.Put(user_exercise)
 
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
@@ -21,10 +19,10 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
         # so this can be called by a cron job.
         # Start a new Mapper task for calling statistics_update_map
         mapreduce_id = control.start_map(
-                name = "BackfillUserVideo",
-                handler_spec = "backfill.user_video_update_map",
+                name = "BackfillUserExercise",
+                handler_spec = "backfill.user_exercise_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-                reader_parameters = {"entity_kind": "models.UserVideo"})
+                reader_parameters = {"entity_kind": "models.UserExercise"})
         self.response.out.write("OK: " + str(mapreduce_id))
 
 

@@ -272,7 +272,7 @@ class ViewExercise(request_handler.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            userExercise = user_data.get_or_insert_exercise(exid)
+            userExercise = user_data.get_or_insert_exercise(exercise)
 
             if not problem_number:
                 problem_number = userExercise.total_done+1
@@ -787,7 +787,7 @@ class PrintExercise(request_handler.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            userExercise = user_data.get_or_insert_exercise(exid)
+            userExercise = user_data.get_or_insert_exercise(exercise)
             
             if not problem_number:
                 problem_number = userExercise.total_done+1

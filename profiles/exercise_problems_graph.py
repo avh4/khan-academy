@@ -45,11 +45,12 @@ def exercise_problems_graph_context(user_data_student, exid):
     if not exid:
         exid = "addition_1"
 
-    user_exercise = user_data_student.get_or_insert_exercise(exid)
-    exercise = user_exercise.get_exercise()
+    exercise = models.Exercise.get_by_name(exid)
 
     if not exercise:
         return {}
+
+    user_exercise = user_data_student.get_or_insert_exercise(exercise)
 
     related_videos = exercise.related_videos()
     video_list = []

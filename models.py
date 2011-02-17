@@ -43,123 +43,6 @@ class Setting(db.Model):
     def count_videos(val = None):
         return Setting.get_or_set_with_key("count_videos", val) or 0
 
-class UserExercise(db.Model):
-
-    user = db.UserProperty()
-    exercise = db.StringProperty()
-    streak = db.IntegerProperty(default = 0)
-    longest_streak = db.IntegerProperty(default = 0)
-    first_done = db.DateTimeProperty(auto_now_add=True)
-    last_done = db.DateTimeProperty()
-    total_done = db.IntegerProperty(default = 0)
-    last_review = db.DateTimeProperty(default=datetime.datetime.min)
-    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
-    proficient_date = db.DateTimeProperty()
-    seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
-    summative = db.BooleanProperty(default=False)
-    
-    _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
-
-    @staticmethod
-    def get_key_for_user(user):
-        return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
-
-    @staticmethod
-    def get_for_user_use_cache(user):
-        user_exercises_key = UserExercise.get_key_for_user(user)
-        user_exercises = memcache.get(user_exercises_key)
-        if user_exercises is None:
-            query = UserExercise.all()
-            query.filter('user =', user)
-            user_exercises = query.fetch(1000)
-            memcache.set(user_exercises_key, user_exercises)
-        return user_exercises
-
-    def clear_memcache(self):
-        memcache.delete(UserExercise.get_key_for_user(self.user))
-    
-    def put(self):
-        self.clear_memcache()
-        db.Model.put(self)
-
-    def get_exercise(self):
-        if not hasattr(self, "cached_exercise"):
-            query = Exercise.all()
-            query.filter('name =', self.exercise)
-            self.cached_exercise = query.get()
-        return self.cached_exercise
-
-    def required_streak(self):
-        return self.get_exercise().required_streak()
-
-    def reset_streak(self):
-        if self.get_exercise().summative:
-            # Reset streak to latest 10 milestone
-            self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-        else:
-            self.streak = 0
-
-    def struggling_threshold(self):
-        return self.get_exercise().struggling_threshold()
-
-    @staticmethod
-    def is_struggling_with(user_exercise, exercise):
-        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak() and user_exercise.total_done > exercise.struggling_threshold() 
-
-    def is_struggling(self):
-        return UserExercise.is_struggling_with(self, self.get_exercise())
-
-    def get_review_interval(self):
-        review_interval = datetime.timedelta(seconds=self.review_interval_secs)
-
-        if review_interval.days < consts.MIN_REVIEW_INTERVAL_DAYS:
-            review_interval = datetime.timedelta(days=consts.MIN_REVIEW_INTERVAL_DAYS)
-        elif review_interval.days > consts.MAX_REVIEW_INTERVAL_DAYS:
-            review_interval = datetime.timedelta(days=consts.MAX_REVIEW_INTERVAL_DAYS)
-
-        return review_interval
-
-    def schedule_review(self, correct, now=datetime.datetime.now()):
-        # If the user is not now and never has been proficient, don't schedule a review
-        if (self.streak + correct) < self.required_streak() and self.longest_streak < self.required_streak():
-            return
-
-        # If the user is hitting a new streak either for the first time or after having lost
-        # proficiency, reset their review interval counter.
-        if (self.streak + correct) >= self.required_streak:
-            self.review_interval_secs = 60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS
-
-        review_interval = self.get_review_interval()
-
-        if correct and self.last_review != datetime.datetime.min:
-            time_since_last_review = now - self.last_review
-            if time_since_last_review >= review_interval:
-                review_interval = time_since_last_review * 2
-        if not correct:
-            review_interval = review_interval // 2
-        if correct:
-            self.last_review = now
-        else:
-            self.last_review = datetime.datetime.min
-        self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
-        
-    def set_proficient(self, proficient, user_data):
-        if not proficient and self.longest_streak < self.required_streak():
-            # Not proficient and never has been so nothing to do
-            return
-
-        if proficient:
-            if self.exercise not in user_data.proficient_exercises:
-                    user_data.proficient_exercises.append(self.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
-        else:
-            if self.exercise in user_data.proficient_exercises:
-                    user_data.proficient_exercises.remove(self.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
-        
-
 class Exercise(db.Model):
 
     name = db.StringProperty()
@@ -287,6 +170,127 @@ class Exercise(db.Model):
         memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
 
+class UserExercise(db.Model):
+
+    user = db.UserProperty()
+    exercise = db.StringProperty()
+    exercise_model = db.ReferenceProperty(Exercise)
+    streak = db.IntegerProperty(default = 0)
+    longest_streak = db.IntegerProperty(default = 0)
+    first_done = db.DateTimeProperty(auto_now_add=True)
+    last_done = db.DateTimeProperty()
+    total_done = db.IntegerProperty(default = 0)
+    last_review = db.DateTimeProperty(default=datetime.datetime.min)
+    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
+    proficient_date = db.DateTimeProperty()
+    seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
+    summative = db.BooleanProperty(default=False)
+    
+    _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
+
+    @staticmethod
+    def get_key_for_user(user):
+        return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
+
+    @staticmethod
+    def get_for_user_use_cache(user):
+        user_exercises_key = UserExercise.get_key_for_user(user)
+        user_exercises = memcache.get(user_exercises_key)
+        if user_exercises is None:
+            query = UserExercise.all()
+            query.filter('user =', user)
+            user_exercises = query.fetch(1000)
+            memcache.set(user_exercises_key, user_exercises)
+        return user_exercises
+
+    def clear_memcache(self):
+        memcache.delete(UserExercise.get_key_for_user(self.user))
+    
+    def put(self):
+        self.clear_memcache()
+        db.Model.put(self)
+
+    def get_exercise(self):
+        if not hasattr(self, "cached_exercise"):
+            if UserExercise.exercise_model.get_value_for_datastore(self):
+                self.cached_exercise = self.exercise_model
+            else:
+                # Not all user_exercises have exercise_model populated
+                query = Exercise.all()
+                query.filter('name =', self.exercise)
+                self.cached_exercise = query.get()
+
+        return self.cached_exercise
+
+    def required_streak(self):
+        return self.get_exercise().required_streak()
+
+    def reset_streak(self):
+        if self.get_exercise().summative:
+            # Reset streak to latest 10 milestone
+            self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+        else:
+            self.streak = 0
+
+    def struggling_threshold(self):
+        return self.get_exercise().struggling_threshold()
+
+    @staticmethod
+    def is_struggling_with(user_exercise, exercise):
+        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak() and user_exercise.total_done > exercise.struggling_threshold() 
+
+    def is_struggling(self):
+        return UserExercise.is_struggling_with(self, self.get_exercise())
+
+    def get_review_interval(self):
+        review_interval = datetime.timedelta(seconds=self.review_interval_secs)
+
+        if review_interval.days < consts.MIN_REVIEW_INTERVAL_DAYS:
+            review_interval = datetime.timedelta(days=consts.MIN_REVIEW_INTERVAL_DAYS)
+        elif review_interval.days > consts.MAX_REVIEW_INTERVAL_DAYS:
+            review_interval = datetime.timedelta(days=consts.MAX_REVIEW_INTERVAL_DAYS)
+
+        return review_interval
+
+    def schedule_review(self, correct, now=datetime.datetime.now()):
+        # If the user is not now and never has been proficient, don't schedule a review
+        if (self.streak + correct) < self.required_streak() and self.longest_streak < self.required_streak():
+            return
+
+        # If the user is hitting a new streak either for the first time or after having lost
+        # proficiency, reset their review interval counter.
+        if (self.streak + correct) >= self.required_streak:
+            self.review_interval_secs = 60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS
+
+        review_interval = self.get_review_interval()
+
+        if correct and self.last_review != datetime.datetime.min:
+            time_since_last_review = now - self.last_review
+            if time_since_last_review >= review_interval:
+                review_interval = time_since_last_review * 2
+        if not correct:
+            review_interval = review_interval // 2
+        if correct:
+            self.last_review = now
+        else:
+            self.last_review = datetime.datetime.min
+        self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
+        
+    def set_proficient(self, proficient, user_data):
+        if not proficient and self.longest_streak < self.required_streak():
+            # Not proficient and never has been so nothing to do
+            return
+
+        if proficient:
+            if self.exercise not in user_data.proficient_exercises:
+                    user_data.proficient_exercises.append(self.exercise)
+                    user_data.need_to_reassess = True
+                    user_data.put()
+        else:
+            if self.exercise in user_data.proficient_exercises:
+                    user_data.proficient_exercises.remove(self.exercise)
+                    user_data.need_to_reassess = True
+                    user_data.put()
 
 class UserData(db.Model):
 
@@ -345,8 +349,9 @@ class UserData(db.Model):
                 )
         return user_data
 
-    def get_or_insert_exercise(self, exid):
+    def get_or_insert_exercise(self, exercise):
 
+        exid = exercise.name
         userExercise = UserExercise.get_by_key_name(exid, parent=self)
 
         if not userExercise:
@@ -365,6 +370,7 @@ class UserData(db.Model):
                 parent=self,
                 user=self.user,
                 exercise=exid,
+                exercise_model=exercise,
                 streak=0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),
