@@ -26,6 +26,11 @@ handlers:
 - url: /stylesheets
   static_dir: stylesheets
   
+- url: /favicon.ico
+  static_files: images/favicon.ico
+  mime_type: image/x-icon
+  upload: images/favicon.ico
+
 - url: /images/favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
