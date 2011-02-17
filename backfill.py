@@ -22,7 +22,8 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
                 name = "BackfillUserExercise",
                 handler_spec = "backfill.user_exercise_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-                reader_parameters = {"entity_kind": "models.UserExercise"})
+                reader_parameters = {"entity_kind": "models.UserExercise"},
+                shard_count = 64)
         self.response.out.write("OK: " + str(mapreduce_id))
 
 
