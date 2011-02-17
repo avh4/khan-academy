@@ -20,5 +20,5 @@ class ExerciseBadge(Badge):
         if user_exercise is None:
             return False
 
-        self.complete_award_to(user, user_data, user_exercise.get_exercise(), models.Exercise.to_display_name(user_exercise.exercise))
+        self.complete_award_to(user, user_data, user_exercise.exercise_model, models.Exercise.to_display_name(user_exercise.exercise))
 

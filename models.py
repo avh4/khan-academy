@@ -210,37 +210,25 @@ class UserExercise(db.Model):
         self.clear_memcache()
         db.Model.put(self)
 
-    def get_exercise(self):
-        if not hasattr(self, "cached_exercise"):
-            if UserExercise.exercise_model.get_value_for_datastore(self):
-                self.cached_exercise = self.exercise_model
-            else:
-                # Not all user_exercises have exercise_model populated
-                query = Exercise.all()
-                query.filter('name =', self.exercise)
-                self.cached_exercise = query.get()
-
-        return self.cached_exercise
-
     def required_streak(self):
-        return self.get_exercise().required_streak()
+        return self.exercise_model.required_streak()
 
     def reset_streak(self):
-        if self.get_exercise().summative:
+        if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
             self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
         else:
             self.streak = 0
 
     def struggling_threshold(self):
-        return self.get_exercise().struggling_threshold()
+        return self.exercise_model.struggling_threshold()
 
     @staticmethod
     def is_struggling_with(user_exercise, exercise):
         return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak() and user_exercise.total_done > exercise.struggling_threshold() 
 
     def is_struggling(self):
-        return UserExercise.is_struggling_with(self, self.get_exercise())
+        return UserExercise.is_struggling_with(self, self.exercise_model)
 
     def get_review_interval(self):
         review_interval = datetime.timedelta(seconds=self.review_interval_secs)

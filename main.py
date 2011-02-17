@@ -1178,7 +1178,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             elapsed_time = int(float(time.time()) - start_time)
 
             userExercise = db.get(key)
-            exercise = userExercise.get_exercise()
+            exercise = userExercise.exercise_model
 
             userExercise.last_done = datetime.datetime.now()
             userExercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
