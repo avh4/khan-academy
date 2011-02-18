@@ -2,9 +2,18 @@
 <head>
     {% exercises_javascript %}
 </head>
-<body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4" onload="translate(); drawPictures()">
+<body spacing="0" bgcolor=white text="#000000" link="#006699" vlink="#5493B4">
 
-<embed width="{{width}}" height="{{height}}" src="/helperpages/d.svg" script='parent.graph_update()' wmode="transparent">
+<div id="dpaper"></div>
+
+<script type="text/javascript">
+window.onload = function() {
+    var paper = Raphael("dpaper", {{width}}, {{height}});
+    initPaper(paper, {{width}}, {{height}});
+    parent.graph_update();
+};
+
+</script>
 
 </body>
 </html>
