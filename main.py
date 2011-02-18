@@ -10,6 +10,8 @@ import logging
 import re
 from urlparse import urlparse
 from pprint import pformat
+from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
+from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
 import django.conf
 
@@ -1626,10 +1628,19 @@ class ExerciseAndVideoEntityList(request_handler.RequestHandler):
             for pv in query.fetch(1000):
                 v = pv.video
                 self.response.out.write(str(v.key().id()) + "\t" + v.title + "\n")
+
+class Crash(request_handler.RequestHandler):
+    def get(self):
+        if self.request_bool("capability_disabled", default=False):
+            raise CapabilityDisabledError("Simulate scheduled GAE downtime")
+        else:
+            # Even Watson isn't perfect
+            raise Exception("What is Toronto?")
             
 class ViewHomePage(request_handler.RequestHandler):
 
     def get(self):
+
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
@@ -2111,6 +2122,7 @@ def real_main():
         ('/savemapcoords', knowledgemap.SaveMapCoords),
         ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
         ('/showunusedplaylists', ShowUnusedPlaylists),
+        ('/crash', Crash),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),

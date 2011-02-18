@@ -65,11 +65,18 @@ class RequestHandler(webapp.RequestHandler):
         return url + params
 
     def handle_exception(self, e, *args):
-        if type(e) is CapabilityDisabledError:
-            self.response.out.write("<p>The site is temporarily down for maintenance.  Please try again at the start of the next hour.  We apologize for the inconvenience.</p>")
-            return
-        else:
+
+        if App.is_dev_server:
             return webapp.RequestHandler.handle_exception(self, e, args)
+        else:
+            logging.exception(e)
+
+            message = "We ran into a problem, it's our fault, and we're working on it."
+            if type(e) is CapabilityDisabledError:
+                message = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
+
+            self.error(500)
+            self.render_template('viewerror.html', {"message": message})
 
     def render_template(self, template_name, template_values):
         template_values['App'] = App
