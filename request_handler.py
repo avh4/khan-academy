@@ -71,7 +71,7 @@ class RequestHandler(webapp.RequestHandler):
         else:
             logging.exception(e)
 
-            message = "We ran into a problem, it's our fault, and we're working on it."
+            message = "We ran into a problem. It's our fault, and we're working on it."
             if type(e) is CapabilityDisabledError:
                 message = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
 
