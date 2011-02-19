@@ -380,6 +380,10 @@ class PlaylistVideos(request_handler.RequestHandler):
 class VideoLibrary(request_handler.RequestHandler):
     def get(self):
         self.response.out.write(zlib.decompress(get_video_library_json_compressed()))
+
+class VideoLibraryLastUpdated(request_handler.RequestHandler):
+    def get(self):
+        self.response.out.write(Setting.cached_library_content_date())
  
 class VideosForExercise(request_handler.RequestHandler):
 

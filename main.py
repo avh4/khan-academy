@@ -2166,6 +2166,7 @@ def real_main():
         ('/api/playlists', api.Playlists),          
         ('/api/playlistvideos', api.PlaylistVideos), 
         ('/api/videolibrary', api.VideoLibrary), 
+        ('/api/videolibrarylastupdated', api.VideoLibraryLastUpdated), 
         
         ('/press/.*', ViewArticle),
         ('/login', Login),
