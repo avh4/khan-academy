@@ -2165,6 +2165,7 @@ def real_main():
         ('/api/importuserdata', api.ImportUserData),
         ('/api/playlists', api.Playlists),          
         ('/api/playlistvideos', api.PlaylistVideos), 
+        ('/api/videolibrary', api.VideoLibrary), 
         
         ('/press/.*', ViewArticle),
         ('/login', Login),

@@ -460,8 +460,18 @@ class Video(Searchable, db.Model):
     playlists = db.StringListProperty()
     keywords = db.StringProperty()
     duration = db.IntegerProperty(default = 0)
-    readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
-    views = db.IntegerProperty(default = 0) # YouTube view count
+
+    # Human readable, unique id that can be used in URLS.
+    readable_id = db.StringProperty()
+
+    # YouTube view count from last sync.
+    views = db.IntegerProperty(default = 0)
+
+    # Date first added via KA library sync with YouTube.
+    # This property hasn't always existsed, so for many old videos 
+    # this date may be much later than the actual YouTube upload date.
+    date_added = db.DateTimeProperty(auto_now_add=True)
+
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False

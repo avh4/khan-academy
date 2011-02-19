@@ -1,4 +1,5 @@
 import logging
+import zlib
 import os
 import datetime
 import urllib
@@ -236,57 +237,149 @@ class ViewImport(request_handler.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'import.html')
         self.response.out.write(template.render(path, template_values)) 
         
+class JsonApiDict():
+    @staticmethod
+    def video(video, video_position, playlist_title, video_prev, video_next):
 
-        
-@layer_cache.cache_with_key("playlists_%s" % Setting.cached_library_content_date())
-def get_playlists():
-    playlists = []   
-    for playlist_title in all_topics_list:            
-        query = Playlist.all()
-        query.filter('title =', playlist_title)
-        playlist = query.get()
-        playlist_dict = {'youtube_id':  playlist.youtube_id,
-                         'youtube_url': playlist.url,
-                         'title': playlist.title, 
-                         'description': playlist.description,
-                         'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist_title)),
-                        } 
-        playlists.append(playlist_dict) 
-    return json.dumps(playlists, indent=4)
-                
-class Playlists(request_handler.RequestHandler):
-    def get(self): 
-        self.response.out.write(get_playlists())        
+        prev_video_youtube_id = ""
+        next_video_youtube_id = ""
+        related_video_youtube_ids = []
 
-@layer_cache.cache_with_key_fxn(lambda playlist_title: "playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()))
-def get_playlist_videos(playlist_title):
+        if video_prev:
+            prev_video_youtube_id = video_prev.youtube_id
+            related_video_youtube_ids.append(prev_video_youtube_id)
+
+        if video_next:
+            next_video_youtube_id = video_next.youtube_id
+            related_video_youtube_ids.append(next_video_youtube_id)
+
+        return {
+            'youtube_id':  video.youtube_id,
+            'youtube_url': video.url,
+            'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (video.readable_id, urllib.quote_plus(playlist_title)),
+            'title': video.title, 
+            'description': video.description,
+            'keywords': video.keywords,                         
+            'readable_id': video.readable_id,
+            'video_position': video_position,
+            'views': video.views,
+            'duration': video.duration,
+            'date_added': video.date_added.strftime('%Y-%m-%d %H:%M:%S'),
+            'playlist_titles': video.playlists,
+            'prev_video': prev_video_youtube_id,
+            'next_video': next_video_youtube_id,
+            'related_videos': related_video_youtube_ids,
+        }
+
+    @staticmethod
+    def playlist(playlist):
+        return {
+            'youtube_id':  playlist.youtube_id,
+            'youtube_url': playlist.url,
+            'title': playlist.title, 
+            'description': playlist.description,
+            'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist.title)),
+        }
+
+@layer_cache.cache_with_key("json_playlists_%s" % Setting.cached_library_content_date())
+def get_playlists_json():
+    return json.dumps(get_playlist_api_dicts(), indent=4)
+
+@layer_cache.cache_with_key_fxn(lambda playlist_title: "json_playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()))
+def get_playlist_videos_json(playlist_title):
     query = Playlist.all()
     query.filter('title =', playlist_title)
     playlist = query.get()
-    query = VideoPlaylist.all()
-    query.filter('playlist =', playlist)
-    query.filter('live_association = ', True)
-    query.order('video_position')
-    videos = []
-    for pv in query.fetch(500):
-        v = pv.video
-        video_dict = {'youtube_id':  v.youtube_id,
-                      'youtube_url': v.url,
-                      'title': v.title, 
-                      'description': v.description,
-                      'keywords': v.keywords,                         
-                      'readable_id': v.readable_id,
-                      'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (v.readable_id, urllib.quote_plus(playlist_title)),
-                      'video_position': pv.video_position,
-                      'views': v.views,
-                     }                         
-        videos.append(video_dict)                        
-    return json.dumps(videos, indent=4)
+
+    video_query = Video.all()
+    video_query.filter('playlists = ', playlist_title)
+    video_key_dict = get_video_key_dict(video_query)
+
+    video_playlist_query = VideoPlaylist.all()
+    video_playlist_query.filter('playlist =', playlist)
+    video_playlist_query.filter('live_association =', True)
+    video_playlist_key_dict = get_video_playlist_key_dict(video_playlist_query)
+
+    return json.dumps(get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict), indent=4)
+
+@layer_cache.cache_with_key("json_video_library_%s" % Setting.cached_library_content_date())
+def get_video_library_json_compressed():
+    playlist_api_dicts = []
+    playlists = get_all_topic_playlists()
+    video_key_dict = get_video_key_dict(Video.all())
+
+    video_playlist_query = VideoPlaylist.all()
+    video_playlist_query.filter('live_association =', True)
+    video_playlist_key_dict = get_video_playlist_key_dict(video_playlist_query)
+
+    for playlist in playlists:
+        playlist_api_dict = JsonApiDict.playlist(playlist)
+        playlist_api_dict["videos"] = get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict)
+        playlist_api_dicts.append(playlist_api_dict)
+
+    # We compress this huge json payload so it'll fit in memcache
+    return zlib.compress(json.dumps(playlist_api_dicts, indent=4))
+
+def get_all_topic_playlists():
+    playlists = []
+    for playlist in Playlist.all().fetch(1000):
+        if playlist.title in all_topics_list:
+            playlists.append(playlist)
+    return playlists
+
+def get_playlist_api_dicts():
+    playlist_api_dicts = []
+    for playlist in get_all_topic_playlists():
+        playlist_api_dicts.append(JsonApiDict.playlist(playlist))
+    return playlist_api_dicts
+
+def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict):
+
+    video_api_dicts = []
+    video_playlists = video_playlist_key_dict[playlist.key()]
+    c_videos = len(video_playlists)
+
+    for ix in range(0, c_videos):
+        video_playlist = video_playlists[ix]
+
+        video = video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)]
+        video_prev = None if ix <= 0 else video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlists[ix - 1])]# video_playlists[ix - 1].video
+        video_next = None if ix + 1 >= (c_videos) else video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlists[ix + 1])]# video_playlists[ix + 1].video
+
+        video_api_dicts.append(JsonApiDict.video(video, video_playlist.video_position, playlist.title, video_prev, video_next))
+
+    return video_api_dicts
+
+def get_video_key_dict(query):
+    video_key_dict = {}
+    for video in query.fetch(10000):
+        video_key_dict[video.key()] = video
+    return video_key_dict
+
+def get_video_playlist_key_dict(query):
+    video_playlist_key_dict = {}
+    for video_playlist in query.fetch(10000):
+        playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
+
+        if not video_playlist_key_dict.has_key(playlist_key):
+            video_playlist_key_dict[playlist_key] = []
+
+        video_playlist_key_dict[playlist_key].append(video_playlist)
+
+    return video_playlist_key_dict
+
+class Playlists(request_handler.RequestHandler):
+    def get(self): 
+        self.response.out.write(get_playlists_json())        
 
 class PlaylistVideos(request_handler.RequestHandler):
     def get(self): 
-        playlist_title = self.request.get('playlist')
-        self.response.out.write(get_playlist_videos(playlist_title))    
+        playlist_title = self.request_string('playlist')
+        self.response.out.write(get_playlist_videos_json(playlist_title))
+
+class VideoLibrary(request_handler.RequestHandler):
+    def get(self):
+        self.response.out.write(zlib.decompress(get_video_library_json_compressed()))
  
 class VideosForExercise(request_handler.RequestHandler):
 
