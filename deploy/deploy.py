@@ -55,7 +55,7 @@ def main():
         help="Override the deployed version identifier", default="")
 
     parser.add_option('-x', '--no-up',
-        action="store", dest="noup",
+        action="store_true", dest="noup",
         help="Don't svn up before deploy", default="")
 
     parser.add_option('-d', '--dryrun',
