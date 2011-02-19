@@ -54,6 +54,10 @@ def main():
         action="store", dest="version",
         help="Override the deployed version identifier", default="")
 
+    parser.add_option('-x', '--no-up',
+        action="store", dest="noup",
+        help="Don't svn up before deploy", default="")
+
     parser.add_option('-d', '--dryrun',
         action="store_true", dest="dryrun",
         help="Dry run without the final deploy-to-App-Engine step", default=False)
@@ -65,10 +69,11 @@ def main():
             print "Local changes found in this directory, canceling deploy."
             return
 
-    version = svn_up()
-    if version <= 0:
-        print "Could not find version in 'svn up' output."
-        return
+    if not options.noup or len(options.version) == 0:
+        version = svn_up()
+        if version <= 0:
+            print "Could not find version in 'svn up' output."
+            return
 
     if len(options.version) > 0:
         version = options.version
