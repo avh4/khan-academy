@@ -278,6 +278,7 @@ class JsonApiDict():
             'youtube_url': playlist.url,
             'title': playlist.title, 
             'description': playlist.description,
+            'videos': [],
             'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist.title)),
         }
 
@@ -383,7 +384,7 @@ class VideoLibrary(request_handler.RequestHandler):
 
 class VideoLibraryLastUpdated(request_handler.RequestHandler):
     def get(self):
-        self.response.out.write(Setting.cached_library_content_date())
+        self.response.out.write(json.dumps(Setting.cached_library_content_date(), indent=4))
  
 class VideosForExercise(request_handler.RequestHandler):
 
