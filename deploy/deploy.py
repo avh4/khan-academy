@@ -69,6 +69,8 @@ def main():
             print "Local changes found in this directory, canceling deploy."
             return
 
+    version = -1
+
     if not options.noup or len(options.version) == 0:
         version = svn_up()
         if version <= 0:
