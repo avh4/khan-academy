@@ -66,17 +66,12 @@ class RequestHandler(webapp.RequestHandler):
 
     def handle_exception(self, e, *args):
 
-        if App.is_dev_server:
-            return webapp.RequestHandler.handle_exception(self, e, args)
-        else:
-            logging.exception(e)
+        message = "We ran into a problem. It's our fault, and we're working on it."
+        if type(e) is CapabilityDisabledError:
+            message = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
 
-            message = "We ran into a problem. It's our fault, and we're working on it."
-            if type(e) is CapabilityDisabledError:
-                message = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
-
-            self.error(500)
-            self.render_template('viewerror.html', {"message": message})
+        webapp.RequestHandler.handle_exception(self, e, args)
+        self.render_template('viewerror.html', {"message": message})
 
     def render_template(self, template_name, template_values):
         template_values['App'] = App
