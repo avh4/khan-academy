@@ -21,7 +21,7 @@ gzip -f *.log
 for f in *.gz
 do
   echo "Moving $f to s3 bucket"
-  s3cmd-1.0.0/s3cmd put $f s3://KA-datastore/$f
+  s3cmd-1.0.0/s3cmd put $f s3://KA-full-backups/$f
 done
 
 # Delete files older than 2 weeks
