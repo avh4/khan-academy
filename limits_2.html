@@ -225,3 +225,11 @@ if (getRandomIntRange(0, 1)) { // 50% chance we graph
 	document.getElementById('present').style.display = 'none';
 }
 {% endblock graphlimit %}
+
+{% block hintfunction %}
+if (funcType != 4) { // if we have a hint that needs a graph, then graph
+        draw_next_step();
+} else {
+        give_next_step();
+}
+{% endblock hintfunction %}

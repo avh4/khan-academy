@@ -202,7 +202,8 @@ function line(p,q,id) { // segment connecting points p,q (coordinates in units)
 	       "fill": (fill != "none" ? fill : null)
 	      });
     if (strokedasharray != null) {
-	node.attr("stroke-dasharray", strokedasharray);
+	// FIXME ignoring the specified strokedasharray for now
+	node.attr("stroke-dasharray", ".");
     }
     if (marker=="dot" || marker=="arrowdot") {
 	ASdot(p,markersize,markerstroke,markerfill);
@@ -336,7 +337,9 @@ function rect(p,q,id,rx,ry) { // opposite corners in units, rounded by radii
 
 function text(p,st,pos,id,fontsty) {
     st = st + ''; // make sure st is a string, IE handles st=0 strangely
-
+    if (st == '') {
+	st = ' '; // Raphael doesn't like empty text
+    }
     var textanchor = "middle";
     var dx = 0;
     var dy = fontsize/3;
