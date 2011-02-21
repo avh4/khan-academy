@@ -409,16 +409,6 @@ class UserData(db.Model):
         review_exercise_names = map(lambda exercise: exercise.name, ex_graph.get_review_exercises(time))
         return (exid in review_exercise_names)
 
-    def is_struggling_with(self, exid):
-        if self.is_proficient_at(exid):
-            return False
-        else:
-            userExercise = UserExercise.all().filter('user =', self.user).filter('exercise =', exid).get()              
-            if userExercise and userExercise.is_struggling():
-                return True
-            else:
-                return False
-            
     def is_suggested(self, exid):
         self.reassess_if_necessary()
         return (exid in self.suggested_exercises)
