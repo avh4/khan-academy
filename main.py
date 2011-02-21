@@ -1206,7 +1206,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
 
             problem_log = ProblemLog()
-                                
+
             if correct:
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
@@ -1237,12 +1237,6 @@ class RegisterAnswer(request_handler.RequestHandler):
                     user_data.reassess_if_necessary()
                     problem_log.earned_proficiency = True
             else:
-                # Can't do the following here because RegisterCorrectness() already
-                # set streak = 0.
-                # if user_exercise.streak == 0:
-                    # 2+ in a row wrong -> not proficient
-                    # user_exercise.set_proficient(False)
-                
                 # Just in case RegisterCorrectness didn't get called.
                 user_exercise.reset_streak()
 
