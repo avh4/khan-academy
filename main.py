@@ -1179,26 +1179,26 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             elapsed_time = int(float(time.time()) - start_time)
 
-            userExercise = db.get(key)
-            exercise = userExercise.exercise_model
+            user_exercise = db.get(key)
+            user_data = UserData.get_for(user_exercise.user)
+            exercise = user_exercise.exercise_model
 
-            userExercise.last_done = datetime.datetime.now()
-            userExercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
-            userExercise.summative = exercise.summative
+            user_exercise.last_done = datetime.datetime.now()
+            user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
+            user_exercise.summative = exercise.summative
 
-            user_data = UserData.get_for(userExercise.user)
-            user_data.last_activity = userExercise.last_done
+            user_data.last_activity = user_exercise.last_done
             
             # If a non-admin tries to answer a problem out-of-order, just ignore it and
             # display the next problem.
-            if problem_number != userExercise.total_done+1 and not users.is_current_user_admin():
+            if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
                 # Only admins can answer problems out of order.
                 self.redirect('/exercises?exid=' + exid)
                 return
 
             suggested = user_data.is_suggested(exid)
             proficient = user_data.is_proficient_at(exid)
-            points_possible = points.ExercisePointCalculator(exercise, userExercise, suggested, proficient)
+            points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
 
             problem_log = ProblemLog()
                                 
@@ -1217,39 +1217,39 @@ class RegisterAnswer(request_handler.RequestHandler):
             if exercise.summative:
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
-            if userExercise.total_done:
-                userExercise.total_done = userExercise.total_done + 1
+            if user_exercise.total_done:
+                user_exercise.total_done = user_exercise.total_done + 1
             else:
-                userExercise.total_done = 1
+                user_exercise.total_done = 1
 
             if correct:
-                userExercise.streak = userExercise.streak + 1
-                if userExercise.streak > userExercise.longest_streak:
-                    userExercise.longest_streak = userExercise.streak
-                if userExercise.streak >= exercise.required_streak() and not proficient:
-                    userExercise.set_proficient(True, user_data)
-                    userExercise.proficient_date = datetime.datetime.now()                    
+                user_exercise.streak = user_exercise.streak + 1
+                if user_exercise.streak > user_exercise.longest_streak:
+                    user_exercise.longest_streak = user_exercise.streak
+                if user_exercise.streak >= exercise.required_streak() and not proficient:
+                    user_exercise.set_proficient(True, user_data)
+                    user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
                     problem_log.earned_proficiency = True
             else:
                 # Can't do the following here because RegisterCorrectness() already
                 # set streak = 0.
-                # if userExercise.streak == 0:
+                # if user_exercise.streak == 0:
                     # 2+ in a row wrong -> not proficient
-                    # userExercise.set_proficient(False)
+                    # user_exercise.set_proficient(False)
                 
                 # Just in case RegisterCorrectness didn't get called.
-                userExercise.reset_streak()
+                user_exercise.reset_streak()
 
             util_badges.update_with_user_exercise(
                 user, 
                 user_data, 
-                userExercise, 
+                user_exercise, 
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-            userExercise.clear_memcache()
-            db.put([user_data, problem_log, userExercise])
+            user_exercise.clear_memcache()
+            db.put([user_data, problem_log, user_exercise])
 
             self.redirect('/exercises?exid=' + exid)
         else:
