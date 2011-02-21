@@ -271,13 +271,13 @@ class ViewExercise(request_handler.RequestHandler):
                 exid = 'addition_1'
 
             exercise = Exercise.get_by_name(exid)
-            userExercise = user_data.get_or_insert_exercise(exercise)
+            user_exercise = user_data.get_or_insert_exercise(exercise)
 
             if not problem_number:
-                problem_number = userExercise.total_done+1
+                problem_number = user_exercise.total_done+1
 
             # When viewing a problem out-of-order, show read-only view
-            read_only = self.request_bool('read_only', default=False) or problem_number != (userExercise.total_done + 1)
+            read_only = self.request_bool('read_only', default=False) or problem_number != (user_exercise.total_done + 1)
 
             exercise_non_summative = exercise.non_summative_exercise(problem_number)
 
@@ -292,16 +292,16 @@ class ViewExercise(request_handler.RequestHandler):
 
             proficient = exercise.proficient = user_data.is_proficient_at(exid)
             suggested = exercise.suggested = user_data.is_suggested(exid)
-            reviewing = exercise.review = user_data.is_reviewing(exid, userExercise, self.get_time())
-            struggling = UserExercise.is_struggling_with(userExercise, exercise)
-            endangered = proficient and userExercise.streak == 0 and userExercise.longest_streak >= exercise.required_streak()
+            reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
+            struggling = UserExercise.is_struggling_with(user_exercise, exercise)
+            endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
 
-            exercise_points = points.ExercisePointCalculator(exercise, userExercise, suggested, proficient)
+            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
                    
             logout_url = users.create_logout_url(self.request.uri)
             
             # Note: if they just need a single problem for review they can just print this page.
-            num_problems_to_print = max(2, exercise.required_streak() - userExercise.streak)
+            num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
             
             # If the user is proficient, assume they want to print a bunch of practice problems.
             if proficient:
@@ -309,7 +309,7 @@ class ViewExercise(request_handler.RequestHandler):
 
             if exercise.summative:
                 # Make sure UserExercise has proper summative value even before it's been set.
-                userExercise.summative = True
+                user_exercise.summative = True
                 # We can't currently print summative exercises.
                 num_problems_to_print = 0
 
@@ -327,16 +327,16 @@ class ViewExercise(request_handler.RequestHandler):
                 'struggling': struggling,
                 'suggested': suggested,
                 'cookiename': user.nickname().replace('@', 'at'),
-                'key': userExercise.key(),
+                'key': user_exercise.key(),
                 'exercise': exercise,
                 'exid': exid,
                 'start_time': time.time(),
                 'exercise_videos': exercise_videos,
                 'exercise_non_summative': exercise_non_summative,
                 'extitle': exid.replace('_', ' ').capitalize(),
-                'user_exercise': userExercise,
+                'user_exercise': user_exercise,
                 'logout_url': logout_url,
-                'streak': userExercise.streak,
+                'streak': user_exercise.streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
                 'read_only': read_only,
