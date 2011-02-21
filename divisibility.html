@@ -1,4 +1,4 @@
-{% extends "adding_and_subtracting_fractions.html" %}
+{% extends "multiple_choice_template.html" %}
 {% block maincode %}
 <script language=Javascript1.2><!--
 var allprimes = new Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
@@ -248,7 +248,7 @@ function draw_next_step()
 
 {% block maincell %}
 <script language=Javascript1.2><!--
-write_text('All Numbers divisible by both `' + num1 + '` and `' + num2 + '` are also divisible by which of the following?');
+write_text('All numbers divisible by both `' + num1 + '` and `' + num2 + '` are also divisible by which of the following?');
 /******** debug/testing outputs
 write_text('Number 1 factors: ' + num1Factors);
 write_text('Number 2 factors: ' + num2Factors);

@@ -113,7 +113,7 @@ function graphAngle(p1,vertex, p2) //p1 should be counter clockwise from p2 and 
 	this.p1 = p1;
 	this.p2 = p2;
 	this.vertex = vertex;
-	this.regStr = '<B>&ang;'+p1.regStr+vertex.regStr+p2.regStr+'</B>';
+	this.regStr = '<B>`&#8736;`'+p1.regStr+vertex.regStr+p2.regStr+'</B>';
 	this.colorStr = colorString(this.regStr, this.color);
 	this.handle = 'a_'+p1.regStr+vertex.regStr+p2.regStr;
 	
@@ -214,7 +214,7 @@ function graphRightAngle(p1,vertex, p2) //p1 should be counter clockwise from p2
 	
 	
 	this.handle = 'a_'+p1.regStr+vertex.regStr+p2.regStr;
-	this.regStr = '<B>&ang;'+p1.regStr+vertex.regStr+p2.regStr+'</b>';
+	this.regStr = '<B>`&#8736;`'+p1.regStr+vertex.regStr+p2.regStr+'</b>';
 	this.colorStr = colorString(this.regStr, this.color);
 	
 	this.drawInOtherColor = function(color)

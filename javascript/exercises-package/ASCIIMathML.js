@@ -26,7 +26,7 @@ for more details.
 var checkForMathML = true; // check if browser can display MathML
 var notifyIfNoMathML = true; // put note at top of page if no MathML capability
 var mathcolor = "";   // change it to "" (to inherit) or any other color
-var mathfontfamily = "serif"; // change to "" (to inherit) or another family
+var mathfontfamily = ""; // change to "" (to inherit) or another family
 var displaystyle = true;   // puts limits above and below large operators
 var separatetokens = false;// if true, nonletters must separate letter tokens
 

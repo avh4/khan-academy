@@ -335,6 +335,8 @@ function rect(p,q,id,rx,ry) { // opposite corners in units, rounded by radii
 }
 
 function text(p,st,pos,id,fontsty) {
+    st = st + ''; // make sure st is a string, IE handles st=0 strangely
+
     var textanchor = "middle";
     var dx = 0;
     var dy = fontsize/3;
@@ -351,10 +353,6 @@ function text(p,st,pos,id,fontsty) {
 	    dx = -fontsize/2;
 	}
     }
-    // magic number:
-    // strange y discrepancy between Raphael and SVG that we need to
-    // account for
-    dy -= 10;
 
     var node;
     if (id!=null) node = svgNodes[id];

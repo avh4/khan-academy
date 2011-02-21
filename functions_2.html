@@ -71,7 +71,7 @@ function draw_next_step() {
 		present.marker="dot";
 		present.markerfill="orange";
 		present.line([0, correctY], functionPath[correctX+11]);
-		present.text([-11, 10], 'f('+correctX+')='+correctY, right);
+		present.text([-10, 9], 'f('+correctX+')='+correctY, right);
 	}
 	if (steps_given==1)
 	{
@@ -82,12 +82,12 @@ function draw_next_step() {
 		present.marker="dot";
 		present.markerfill="#28AE7B";
 		present.line([0, correctGY], gPath[correctGX+11]);
-		present.text([-11, 8.7], 'g('+correctGX+')='+correctGY, right);
+		present.text([-10, 7.7], 'g('+correctGX+')='+correctGY, right);
 	}
 	if (steps_given==2)
 	{
 		present.fontfill="black";
-		present.text([-11, 7.4], fCoef+'('+correctY+')'+format_coefficient(gCoef)+'('+correctGY+')='+correct_answer, right);
+		present.text([-10, 6.4], fCoef+'('+correctY+')'+format_coefficient(gCoef)+'('+correctGY+')='+correct_answer, right);
 	
 	}
 	steps_given++;
@@ -97,29 +97,14 @@ function draw_next_step() {
 function graph_update() {
 
 
-	present.initPicture(-11,11, -11, 11);
-	present.fontstyle = "normal";
-	present.fontsize = "10";
-	present.stroke = "#DDDDDD";
-	present.strokewidth = "2";
-	for(var i=-10; i<11; i++)
-	{
-		if (i!=0)
-		{
-			present.line([i,-11], [i,11]);
-			present.line([-11,i], [11,i]);
-			present.text([i, .1], i, below);
-			present.text([0, i], i, right);
-		}
-	}
-	present.axes();
+	initPlane();
 	
 	present.stroke="orange";
 	present.fontstyle="italic";
 	present.fontfill="orange";
 	present.fontstroke="none";
 	present.fontsize="20"
-	present.text(functionPath[functionPath.length-1], 'f(x)', above);
+	present.text(functionPath[functionPath.length-2], 'f(x)', above);
 	present.path(functionPath);
 	
 	present.stroke="#28AE7B";
@@ -127,7 +112,7 @@ function graph_update() {
 	present.fontfill="#28AE7B";
 	present.fontstroke="none";
 	present.fontsize="20"
-	present.text(gPath[gPath.length-1], 'g(x)', above);
+	present.text(gPath[gPath.length-2], 'g(x)', above);
 	present.path(gPath);
 }
 
