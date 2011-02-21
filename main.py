@@ -1273,16 +1273,22 @@ class RegisterCorrectness(request_handler.RequestHandler):
             key = self.request.get('key')
             correct = int(self.request.get('correct'))
             hint_used = self.request_bool('hint_used', default=False)
-            userExercise = db.get(key)
-            userExercise.schedule_review(correct == 1, self.get_time())
+            user_exercise = db.get(key)
+
+            if user_exercise.user != user:
+                # Don't let anybody answer anybody else's questions.
+                self.redirect('/exercises?exid=' + exid)
+                return
+
+            user_exercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
-                if userExercise.streak == 0:
+                if user_exercise.streak == 0:
                     # 2+ in a row wrong -> not proficient
-                    userExercise.set_proficient(False, UserData.get_or_insert_for(user))
-                userExercise.reset_streak()
+                    user_exercise.set_proficient(False, UserData.get_or_insert_for(user))
+                user_exercise.reset_streak()
             if hint_used:
-                userExercise.reset_streak()
-            userExercise.put()
+                user_exercise.reset_streak()
+            user_exercise.put()
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
