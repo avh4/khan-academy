@@ -270,10 +270,7 @@ class ViewExercise(request_handler.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            query = Exercise.all()
-            query.filter('name =', exid)
-            exercise = query.get()
-
+            exercise = Exercise.get_by_name(exid)
             userExercise = user_data.get_or_insert_exercise(exercise)
 
             if not problem_number:
@@ -289,9 +286,7 @@ class ViewExercise(request_handler.RequestHandler):
             if read_only:
                 exid_non_summative = self.request_string('exid_non_summative', default=None)
                 if exid_non_summative:
-                    query = Exercise.all()
-                    query.filter('name =', exid_non_summative)
-                    exercise_non_summative = query.get()
+                    exercise_non_summative = Exercise.get_by_name(exid_non_summative)
                     
             exercise_videos = exercise_non_summative.related_videos().fetch(10)
 
