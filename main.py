@@ -1201,13 +1201,12 @@ class RegisterAnswer(request_handler.RequestHandler):
                 self.redirect('/exercises?exid=' + exid)
                 return
 
-            suggested = user_data.is_suggested(exid)
-            proficient = user_data.is_proficient_at(exid)
-            points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
-
             problem_log = ProblemLog()
+            proficient = user_data.is_proficient_at(exid)
 
             if correct:
+                suggested = user_data.is_suggested(exid)
+                points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
             
