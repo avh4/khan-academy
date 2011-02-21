@@ -1183,6 +1183,11 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_data = UserData.get_for(user_exercise.user)
             exercise = user_exercise.exercise_model
 
+            if user_exercise.user != user:
+                # Don't let anybody answer anybody else's questions.
+                self.redirect('/exercises?exid=' + exid)
+                return
+
             user_exercise.last_done = datetime.datetime.now()
             user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
             user_exercise.summative = exercise.summative
