@@ -14,6 +14,7 @@ import consts
 import points
 from search import Searchable
 from app import App
+import layer_cache
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -38,6 +39,10 @@ class Setting(db.Model):
     @staticmethod
     def cached_library_content_date(val = None):
         return Setting.get_or_set_with_key("cached_library_content_date", val)
+
+    @staticmethod
+    def cached_exercises_date(val = None):
+        return Setting.get_or_set_with_key("cached_exercises_date", val)
 
     @staticmethod
     def count_videos(val = None):
@@ -146,15 +151,11 @@ class Exercise(db.Model):
         self.sanitizer = Exercise._CURRENT_SANITIZER
         self.put()
     
-    _EXERCISES_KEY = "Exercise.all()"    
     @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_%s" % Setting.cached_exercises_date())
     def get_all_use_cache():
-        exercises = memcache.get(Exercise._EXERCISES_KEY, namespace=App.version)
-        if exercises is None:
-            query = Exercise.all().order('h_position')
-            exercises = query.fetch(200)
-            memcache.set(Exercise._EXERCISES_KEY, exercises, namespace=App.version)
-        return exercises
+        query = Exercise.all().order('h_position')
+        return query.fetch(200)
 
     _EXERCISES_COUNT_KEY = "Exercise.count()"
     @staticmethod
@@ -166,7 +167,7 @@ class Exercise(db.Model):
         return count
 
     def put(self):
-        memcache.delete(Exercise._EXERCISES_KEY, namespace=App.version)
+        Setting.cached_exercises_date(str(datetime.datetime.now()))
         memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
 
