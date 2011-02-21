@@ -267,12 +267,12 @@ class ViewExercise(request_handler.RequestHandler):
 
             user_data = UserData.get_or_insert_for(user)
 
+            if not exid:
+                exid = 'addition_1'
+
             query = Exercise.all()
             query.filter('name =', exid)
             exercise = query.get()
-
-            if not exid:
-                exid = 'addition_1'
 
             userExercise = user_data.get_or_insert_exercise(exercise)
 
