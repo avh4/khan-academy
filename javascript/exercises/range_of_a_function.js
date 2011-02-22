@@ -41,8 +41,10 @@ var ExerciseRangeOfAFunction = {
             //Plot each interval between holes
 
             var epsilon = 0.00001;
-            present.plot(this.equation.f, -5, this.equation.holes[0][0] - epsilon);  //Plot to the first hole.  TODO - assumes grid starts at X = -5
-            present.plot(this.equation.f, this.equation.holes[this.equation.holes.length - 1][0]+ epsilon, 5);                        //Plot from the last hole.  TODO - assumes grid ends at X = 5
+            var minx = -10;  //TODO - assumes grid ends ranges X = -10 to 10
+            var maxx = 10;
+            present.plot(this.equation.f, minx, this.equation.holes[0][0] - epsilon);  //Plot to the first hole.
+            present.plot(this.equation.f, this.equation.holes[this.equation.holes.length - 1][0]+ epsilon, maxx);                        //Plot from the last hole.  
             if(this.equation.holes.length > 1){
                 for(var i=0; i < this.equation.holes.length - 1; i++){
                     present.plot(this.equation.f, this.holes[i][0] + epsilon, this.holes[i+1] - epsilon)
@@ -177,6 +179,5 @@ var ExerciseRangeOfAFunction = {
 }
 
 function graph_update(){
-    present.setBorder(0);
-    present.axes();
+    initPlane();
 }
