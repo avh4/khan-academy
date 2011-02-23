@@ -2236,6 +2236,7 @@ def real_main():
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
+        ('/index\.html', PermanentRedirectToHome),
 
         ], debug=True)
     run_wsgi_app(application)
