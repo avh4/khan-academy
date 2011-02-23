@@ -178,7 +178,7 @@ function initPicture(x_min,x_max,y_min,y_max) {
 	    var node = paper.rect(0, 0, width, height);
 	    
 	    node.attr({
-		"stroke-width": 1,
+		"stroke-width": 0,
 		"fill": "white"
 	    });
 
