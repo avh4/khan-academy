@@ -2070,7 +2070,24 @@ class Search(request_handler.RequestHandler):
                            'searched_phrases': searched_phrases
                            })
         self.render_template("searchresults.html", template_values)
-                    
+
+class PermanentRedirectToHome(request_handler.RequestHandler):
+    def get(self):
+
+        redirect_target = "/"
+        relative_path = self.request.path.rpartition('/')[2].lower()
+
+        # Permanently redirect old JSP version of the site to home
+        # or, in the case of some special targets, to their appropriate new URL
+        dict_redirects = {
+            "sat.jsp": "/sat",
+            "gmat.jsp": "/gmat",
+        }
+
+        if dict_redirects.has_key(relative_path):
+            redirect_target = dict_redirects[relative_path]
+
+        self.redirect(redirect_target, True)
                         
 def real_main():    
     webapp.template.register_template_library('templatefilters')
@@ -2216,6 +2233,9 @@ def real_main():
         ('/discussion/moderatorlist', qa.ModeratorList),
 
         ('/badges/view', util_badges.ViewBadges),
+
+        # Redirect any links to old JSP version
+        ('/.*\.jsp', PermanentRedirectToHome),
 
         ], debug=True)
     run_wsgi_app(application)
