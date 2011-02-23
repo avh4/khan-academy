@@ -1,3 +1,14 @@
+// Functions 3
+// Author: Omar Rizwan
+// Date: 2011-02-23
+//
+// Problem spec: None
+//
+// Problem layout:
+// You get 2-3 function definitions
+// [i.e. f(x) = x^2, g(x) = x + f(x)]
+// then have to solve for an expression using the functions
+// [i.e. f(g(x))]
 
 var ka = (ka === undefined ? {} : ka);
 
