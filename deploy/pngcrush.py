@@ -23,10 +23,10 @@ def pngcrush_images():
     print "pngcrushing images"
     path = os.path.join(os.path.dirname(__file__), "..", "images")
 
-    names = os.listdir(path)
-    for name in names:
-        if name.lower().endswith(".png"):
-            pngcrush_image(path, name)
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            if name.lower().endswith(".png"):
+                pngcrush_image(root, name)
 
 def main():
     pngcrush_images()
