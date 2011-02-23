@@ -71,6 +71,11 @@ class RequestHandler(webapp.RequestHandler):
             message = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
 
         webapp.RequestHandler.handle_exception(self, e, args)
+
+        # Never show stack traces on production machines
+        if not App.is_dev_server:
+            self.response.clear()
+
         self.render_template('viewerror.html', {"message": message})
 
     def render_template(self, template_name, template_values):
