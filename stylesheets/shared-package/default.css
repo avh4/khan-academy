@@ -1771,7 +1771,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background: transparent;
     position: relative;
 }
-
+#about-us {
+    *position: static;
+}
 /* Two column structure for content pages */
 .col1, .col2 {
     min-width: 48%;
@@ -1903,7 +1905,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         }
 /* end of team styles */
 /* Blog styles */
-
+#about-blog {
+    position: relative;
+}
 #about-blog #blog-content {
     width: 75%;
     margin-right: 25%;
