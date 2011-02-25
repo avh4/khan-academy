@@ -2332,6 +2332,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 .nodeLabel {
     text-align: center;
     cursor: pointer;
+    line-height: normal;
 }
 
 .nodeLabel div {
