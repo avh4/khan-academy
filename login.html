@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!-- Based on jQuery OpenID Plugin 1.1 Copyright 2009 Jarrett Vance http://jvance.com/pages/jQueryOpenIdPlugin.xhtml.  
-     Licensed under CC-by 3.0. -->
-<html xmlns="http://www.w3.org/1999/xhtml" >
-<head>
-    <title>Khan Academy Login</title>
+{% extends "page_template.html" %}
+
+{% block pagetitle %}{% endblock pagetitle %}
+
+{% block pagescript %}
         <link rel="stylesheet" type="text/css" media="screen" href="/javascript/jQueryOpenIdPlugin/openid.css?{{App.version}}" />
 
         {% shared_javascript %}
@@ -13,8 +12,12 @@
            $("form.openid:eq(0)").openid(); 
         });            
         </script>
-</head>
-<body>
+        <style>
+            #page_sub_nav { display: none; }
+        </style>
+{% endblock pagescript %}
+
+{% block pagecontent %}
     {% if App.facebook_app_id %}
     {# Start Facebook connect stuff #}
     <div id="fb-root"></div>
@@ -35,60 +38,78 @@
     </script>
     {# End Facebook connect stuff #}
     {% endif %}
-	<h1>Login to the Khan Academy</h1>
-    <p>If you have an account with one of the following services, just click on its logo to login to the Khan Academy:</p>
-<form class="openid" method="post" action="/login?continue={{continue|urlencode}}"> 
-  <div><ul class="providers"> 
-  <li class="direct" title="Google"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/googleW.png" alt="icon" /><span>https://www.google.com/accounts/o8/id</span></li>
-  {% if App.facebook_app_secret %}
-  <li title="Facebook"> 
-        <fb:login-button></fb:login-button>
-  {% endif %}
-  {% if App.accepts_openid %} 
-  <li class="domainname" title="Google Apps domain name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 
-  <li class="direct" title="Yahoo"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/yahooW.png" alt="icon" /><span>http://yahoo.com/</span></li> 
-  <li class="username" title="AOL screen name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/aolW.png" alt="icon" /><span>http://openid.aol.com/<strong>username</strong></span></li> 
-  <li class="username" title="MyOpenID user name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/myopenid.png" alt="icon" /><span>http://<strong>username</strong>.myopenid.com/</span></li> 
-  <li class="username" title="Flickr user name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/flickr.png" alt="icon" /><span>http://flickr.com/<strong>username</strong>/</span></li> 
-  <li class="username" title="Technorati user name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/technorati.png" alt="icon" /><span>http://technorati.com/people/technorati/<strong>username</strong>/</span></li> 
-  <li class="username" title="Wordpress blog name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/wordpress.png" alt="icon" /><span>http://<strong>username</strong>.wordpress.com</span></li> 
-  <li class="username" title="Blogger blog name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/blogger.png" alt="icon" /><span>http://<strong>username</strong>.blogspot.com/</span></li> 
-  <li class="username" title="LiveJournal blog name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/livejournal.png" alt="icon" /><span>http://<strong>username</strong>.livejournal.com</span></li> 
-  <li class="username" title="ClaimID user name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/claimid.png" alt="icon" /><span>http://claimid.com/<strong>username</strong></span></li> 
-  <li class="username" title="Vidoop user name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/vidoop.png" alt="icon" /><span>http://<strong>username</strong>.myvidoop.com/</span></li> 
-  <li class="username" title="Verisign user name"> 
-        <img src="/javascript/jQueryOpenIdPlugin/images/verisign.png" alt="icon" /><span>http://<strong>username</strong>.pip.verisignlabs.com/</span></li> 
-  <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" />
-  {% endif %} 
-  <span><strong>http://{your-openid-url}</strong></span></li> 
-  </ul></div> 
-  <fieldset id="username_fields"> 
-  <label for="openid_username">Enter your <span>Provider user name</span></label> 
-  <div><span></span><input type="text" name="openid_username" /><span></span> 
-  <input type="submit" value="Login" /></div> 
-  </fieldset> 
-  <fieldset id="domainname_fields"> 
-  <label for="openid_domainname">Enter your <span>Provider domain name</span></label> 
-  <div><span></span><input type="text" name="openid_domainname" /><span></span> 
-  <input type="submit" value="Login" /></div> 
-  </fieldset> 
-  <fieldset  id="identifier_fields"> 
-  <label for="openid_identifier">Enter your <a class="openid_logo" href="http://openid.net">OpenID</a></label> 
-  <div><input type="text" name="openid_identifier" /> 
-  <input type="submit" value="Login" /></div> 
-  </fieldset> 
-</form>
-</body>
-</html>
+<div id="login-page">
+	<h2 class="pulls">You need to login to access this part of the site.</h2>
+    <h3>Already have an account with one of these sites? Click the logo to use your account to login here:</h3>
+    <form class="openid" method="post" action="/login?continue={{continue|urlencode}}"> 
+      <div><ul class="providers"> 
+      <li class="direct" title="Google">
+            <div class="sign-in-text">Login with:</div>
+            <img src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span></li>
+      {% if App.facebook_app_secret %}
+      <div id="real_fb_button" style="display: none;"><fb:login-button></fb:login-button></div>
+      <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();">
+            <div class="sign-in-text">Login with:</div>
+            <img src="/images/facebook-logo-large.png" />
+      {% endif %}
+      {% if App.accepts_openid %} 
+      <li class="domainname" title="Google Apps domain name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 
+      <li class="direct" title="Yahoo"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/yahooW.png" alt="icon" /><span>http://yahoo.com/</span></li> 
+      <li class="username" title="AOL screen name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/aolW.png" alt="icon" /><span>http://openid.aol.com/<strong>username</strong></span></li> 
+      <li class="username" title="MyOpenID user name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/myopenid.png" alt="icon" /><span>http://<strong>username</strong>.myopenid.com/</span></li> 
+      <li class="username" title="Flickr user name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/flickr.png" alt="icon" /><span>http://flickr.com/<strong>username</strong>/</span></li> 
+      <li class="username" title="Technorati user name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/technorati.png" alt="icon" /><span>http://technorati.com/people/technorati/<strong>username</strong>/</span></li> 
+      <li class="username" title="Wordpress blog name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/wordpress.png" alt="icon" /><span>http://<strong>username</strong>.wordpress.com</span></li> 
+      <li class="username" title="Blogger blog name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/blogger.png" alt="icon" /><span>http://<strong>username</strong>.blogspot.com/</span></li> 
+      <li class="username" title="LiveJournal blog name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/livejournal.png" alt="icon" /><span>http://<strong>username</strong>.livejournal.com</span></li> 
+      <li class="username" title="ClaimID user name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/claimid.png" alt="icon" /><span>http://claimid.com/<strong>username</strong></span></li> 
+      <li class="username" title="Vidoop user name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/vidoop.png" alt="icon" /><span>http://<strong>username</strong>.myvidoop.com/</span></li> 
+      <li class="username" title="Verisign user name"> 
+            <img src="/javascript/jQueryOpenIdPlugin/images/verisign.png" alt="icon" /><span>http://<strong>username</strong>.pip.verisignlabs.com/</span></li> 
+      <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" />
+      {% endif %} 
+      <span><strong>http://{your-openid-url}</strong></span></li> 
+      </ul></div> 
+      <fieldset id="username_fields"> 
+      <label for="openid_username">Enter your <span>Provider user name</span></label> 
+      <div><span></span><input type="text" name="openid_username" /><span></span> 
+      <input type="submit" value="Login" /></div> 
+      </fieldset> 
+      <fieldset id="domainname_fields"> 
+      <label for="openid_domainname">Enter your <span>Provider domain name</span></label> 
+      <div><span></span><input type="text" name="openid_domainname" /><span></span> 
+      <input type="submit" value="Login" /></div> 
+      </fieldset> 
+      <fieldset  id="identifier_fields"> 
+      <label for="openid_identifier">Enter your <a class="openid_logo" href="http://openid.net">OpenID</a></label> 
+      <div><input type="text" name="openid_identifier" /> 
+      <input type="submit" value="Login" /></div> 
+      </fieldset> 
+    </form>
+    <div class="clear"></div>
+    <h5 style="margin-top: 18px;">Don't have an account yet?</h5>
+    <p style="margin-bottom: 45px;">
+        <a href="https://www.google.com/accounts/NewAccount">Sign up for a Google account</a>&nbsp;&nbsp;
+        <a href="http://www.facebook.com/r.php">Sign up for a Facebook account</a>
+    </p>
+    <h2 class="pulls">Why should you sign up?</h2>
+    <h3>When you login, we save all of your progress. Also, students and coaches get access to some cool tools:</h3>
+    <div id="feature-list">
+        <div class="feature"><img src="/images/exercise-dashboard-medium.png" height="250" width="320" /><br />Students: <strong>navigate your knowledge map</strong> as you work through exercises.</strong></div>
+    <div class="feature"><img src="/images/student-profile-medium.png" height="250" width="320" /><br />Students: <strong>track your video and exercise progress</strong> in your profile.</div>
+    <div class="feature"><img src="/images/class-report-medium.png" height="250" width="320" /><br />Coaches: <strong>Track all of your students</strong> with the class report.</div>
+        <div class="clear">&nbsp;</div>
+    </div>
+</div>
+{% endblock pagecontent %}

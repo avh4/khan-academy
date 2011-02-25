@@ -8,6 +8,9 @@ except:
         facebook_app_id = None
         facebook_app_secret = None
         remote_api_secret = None
+        constant_contact_api_key = None
+        constant_contact_username = None
+        constant_contact_password = None
 
 # A singleton shared across requests
 class App(object):
@@ -21,6 +24,10 @@ class App(object):
     facebook_app_id = secrets.facebook_app_id
     facebook_app_secret = secrets.facebook_app_secret
     remote_api_secret = secrets.remote_api_secret
+
+    constant_contact_api_key = secrets.constant_contact_api_key
+    constant_contact_username = secrets.constant_contact_username
+    constant_contact_password = secrets.constant_contact_password
     
     is_dev_server = False
     if os.environ["SERVER_SOFTWARE"].startswith('Development'):

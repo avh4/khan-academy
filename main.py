@@ -66,9 +66,13 @@ from discussion import comments
 from discussion import qa
 from discussion import notification
 
+from about import util_about
+from about import blog
+
 from badges import util_badges
 from badges import last_action_cache
 
+from mailing_lists import util_mailing_lists
 from profiles import util_profile
 
 from topics_list import topics_list, all_topics_list, DVD_list
@@ -340,6 +344,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'time_warp': time_warp,
                 'problem_number': problem_number,
                 'read_only': read_only,
+                'selected_nav_link': 'practice',
                 'num_problems_to_print': num_problems_to_print,
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
@@ -574,6 +579,7 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'exercise_videos': exercise_videos,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
+                                                  'selected_nav_link': 'watch',
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
         self.render_template('viewvideo.html', template_values)
@@ -937,6 +943,7 @@ class ViewAllExercises(request_handler.RequestHandler):
                 'user_data': user_data,
                 'expanded_all_exercises': user_data.expanded_all_exercises,
                 'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
+                'selected_nav_link': 'practice',
                 'logout_url': logout_url,
                 }
 
@@ -1536,10 +1543,17 @@ def library_content_html(bust_cache = False):
                  'title': topic,
                  'topic': topic,
                  'playlist': playlist,
-                 'videos': playlist_videos
+                 'videos': playlist_videos,
+                 'next': None
                  }
 
         all_playlists.append(playlist_data)
+
+    playlist_data_prev = None
+    for playlist_data in all_playlists:
+        if playlist_data_prev:
+            playlist_data_prev['next'] = playlist_data
+        playlist_data_prev = playlist_data
 
     # Separating out the columns because the formatting is a little different on each column
     template_values = {
@@ -1644,21 +1658,76 @@ class ViewHomePage(request_handler.RequestHandler):
         user_data = UserData.get_for_current_user()
         logout_url = users.create_logout_url(self.request.uri)
         
-        movie_youtube_id =   random.choice(['p6l8-1kHUsA', 'UuMTSU9DcqQ'])
-        
-        image_and_link_list = ['<A href="/press/fortune"><img src="/images/splashthumbnails/fortune_thumbnail.png" align=right></a>',
-        		      	'<A href="/about#GEL"><img src="/images/splashthumbnails/gel_thumbnail.png" align=right></a>',
-        		      	'<A href="/getinvolved#translation"><img src="/images/splashthumbnails/translation_thumbnail.png" align=right></a>',
-        		       '<A href="/about#NEWSHOUR"><img src="/images/splashthumbnails/pbs_thumbnail.png" align=right></a>',
-        		       '<A href="/about#OVERVIEW"><img src="/images/splashthumbnails/overview_thumbnail.png" align=right></a>']
-        		       
-        random.shuffle(image_and_link_list)
-        		       
-        link1 = image_and_link_list[0]
-        link2 = image_and_link_list[1]
-        link3 = image_and_link_list[2]
-        link4 = image_and_link_list[3]
-        
+        thumbnail_link_sets = [
+            [
+                { 
+                    "href": "/video/khan-academy-on-the-gates-notes", 
+                    "src": "/images/splashthumbnails/gates_thumbnail.png", 
+                    "desc": "Bill Gates' favorite teacher",
+                    "youtube_id": "UuMTSU9DcqQ",
+                    "selected": False,
+                },
+                { 
+                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs", 
+                    "src": "/images/splashthumbnails/overview_thumbnail.png", 
+                    "desc": "Overview of our video library",
+                    "youtube_id": "dsFQ9kM1qDs",
+                    "selected": False,
+                },
+                { 
+                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference", 
+                    "src": "/images/splashthumbnails/gel_thumbnail.png", 
+                    "desc": "Sal Khan talk at GEL 2010",
+                    "youtube_id": "yTXKCzrFh3c",
+                    "selected": False,
+                },
+                { 
+                    "href": "/video/khan-academy-on-pbs-newshour--edited", 
+                    "src": "/images/splashthumbnails/pbs_thumbnail.png", 
+                    "desc": "Khan Academy on PBS Newshour",
+                    "youtube_id": "4jXv03sktik",
+                    "selected": False,
+                },
+            ],
+            [
+                { 
+                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
+                    "src": "/images/splashthumbnails/tech_award_thumbnail.png", 
+                    "desc": "What is the Khan Academy?",
+                    "youtube_id": "p6l8-1kHUsA",
+                    "selected": False,
+                },
+                { 
+                    "href": "/video/khan-academy-exercise-software", 
+                    "src": "/images/splashthumbnails/exercises_thumbnail.png", 
+                    "desc": "Overview of our exercise software",
+                    "youtube_id": "hw5k98GV7po",
+                    "selected": False,
+                },
+                { 
+                    "href": "/video/cnn---google-award-to-khan-academy", 
+                    "src": "/images/splashthumbnails/cnn_thumbnail.png", 
+                    "desc": "CNN: Google award to Khan Academy",
+                    "youtube_id": "QGxgAHer3Ow",
+                    "selected": False,
+                },
+                { 
+                    "href": "/video/forbes--names-you-need-to-know---khan-academy", 
+                    "src": "/images/splashthumbnails/forbes_thumbnail.png", 
+                    "desc": "Forbes names you need to know",
+                    "youtube_id": "UkfppuS0Plg",
+                    "selected": False,
+                },
+            ]
+        ]
+
+        random.shuffle(thumbnail_link_sets)
+
+        # Highlight video #1 from the first set of off-screen thumbnails
+        selected_thumbnail = thumbnail_link_sets[1][0]
+        selected_thumbnail["selected"] = True
+        movie_youtube_id = selected_thumbnail["youtube_id"]
+
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library_content_html()
         
@@ -1668,82 +1737,31 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'user_data': user_data,
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'video_id': movie_youtube_id,
-                                                  'link1': link1,
-                                                  'link2': link2,
-                                                  'link3': link3,
-                                                  'link4': link4,
+                                                  'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
-                                                  'logout_url': logout_url}, 
+                                                  'logout_url': logout_url,
+                                                  'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
         path = os.path.join(os.path.dirname(__file__), 'homepage.html')
         self.response.out.write(template.render(path, template_values))
         
 class ViewFAQ(request_handler.RequestHandler):
-
     def get(self):
-        self.redirect("/about#faq", True)
+        self.redirect("/about/faq", True)
         return
-
-class ViewAboutUs(request_handler.RequestHandler):
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
-                                                  self.request)
-                                                  
-        self.render_template('aboutus.html', template_values)
 
 class ViewGetInvolved(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
-                                                  self.request)
-                                                  
-        self.render_template('getinvolved.html', template_values)
+        self.redirect("/contribute", True)
+
+class ViewContribute(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class Donate(request_handler.RequestHandler):
-
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
-                                                  self.request)
-                                                  
-        self.render_template('donate.html', template_values)
-
-
-class ViewDownloads(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
-                                                  self.request)
-                                                  
-        self.render_template('downloads.html', template_values)
-        
+        self.redirect("/contribute", True)
 
 class ViewStore(request_handler.RequestHandler):
 
@@ -1763,7 +1781,7 @@ class ViewStore(request_handler.RequestHandler):
 class ViewHowToHelp(request_handler.RequestHandler):
 
     def get(self):
-        self.redirect("/getinvolved", True)
+        self.redirect("/contribute", True)
         return
 
 
@@ -2095,8 +2113,15 @@ def real_main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
-        ('/frequently-asked-questions', ViewFAQ),
-        ('/about', ViewAboutUs),
+        ('/about', util_about.ViewAbout),
+        ('/about/blog', blog.ViewBlog),
+        ('/about/blog/.*', blog.ViewBlogPost),
+        ('/about/the-team', util_about.ViewAboutTheTeam),
+        ('/contribute', ViewContribute ),
+        ('/frequently-asked-questions', util_about.ViewFAQ),
+        ('/about/faq', util_about.ViewFAQ),
+        ('/downloads', util_about.ViewDownloads),
+        ('/about/downloads', util_about.ViewDownloads),
         ('/getinvolved', ViewGetInvolved),
         ('/donate', Donate),
         ('/exercisedashboard', ViewAllExercises),
@@ -2127,7 +2152,6 @@ def real_main():
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
-        ('/downloads', ViewDownloads),
         ('/store', ViewStore),        
         ('/info/how-to-help', ViewHowToHelp),
         ('/info/.*', ViewInfoPage),
@@ -2162,6 +2186,8 @@ def real_main():
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
+
+        ('/mailing-lists/subscribe', util_mailing_lists.Subscribe),
 
         ('/profile/graph/activity', util_profile.ActivityGraph),
         ('/profile/graph/focus', util_profile.FocusGraph),

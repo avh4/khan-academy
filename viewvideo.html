@@ -8,8 +8,6 @@
         display: none;
         text-indent: 0;
         padding-left: 5px;
-        position: relative;
-        top: 1px;
     }
     #video_dropdown .ui-button {
         display: block;
@@ -94,14 +92,11 @@
         padding-top: 1em;
     }
     .video #description {
-        padding-top: 20px;
+        padding-top: 18px;
     }
         .video #description h3 {
             display: block;
-            margin: 0;
             font-size: 15px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #ccc;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -174,7 +169,7 @@ $(function(){
 {% endblock pagescript %}
 {% block pagesubmenu %}
 <span class="breadcrumbs_nav">
-        <a href="/">All videos</a> &#187;
+        <a href="/#browse">All videos</a> &#187;
         <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> &#187;
     <form id="video_selector">
         <select name="v">
@@ -197,6 +192,7 @@ $(function(){
 </span>
 {% endblock pagesubmenu %}
 {% block pagecontent %}
+<div id="video-page">
 <article class="video">
     <div id="description">
         <h3>
@@ -206,7 +202,7 @@ $(function(){
         {% endif %}
         </h3>
     </div>
-    <div style="margin-top: -15px;">
+    <div style="margin-top: -5px;">
         <nav class="prev_next_nav">
             {% if previous_video %}
             <label id="prev_video">
@@ -240,6 +236,7 @@ $(function(){
         {% video_qa video playlist qa_page qa_expand_id %}
         </div>
     </article>
+</div>
 {% endblock pagecontent %}
 {% block pagefooter %}
 {% include "page_footer_short.html" %}

@@ -44,6 +44,28 @@ def utc_to_ctz(content, tz_offset):
 def thousands_separated(content):
     return util.thousands_separated_number(content)
 
+@register.filter
+def youtube_timestamp_links(content):
+    dict_replaced = {}
+    html_template = "<span class='youTube' seconds='%s'>%s</span>"
+
+    for match in re.finditer("(\d+:\d{2})", content):
+        time = match.group(0)
+
+        if not dict_replaced.has_key(time):
+            rg_time = time.split(":")
+            minutes = int(rg_time[0])
+            seconds = int(rg_time[1])
+            html_link = youtube_jump_link(time, (minutes * 60) + seconds)
+            content = content.replace(time, html_link)
+            dict_replaced[time] = True
+
+    return content
+
+@register.simple_tag
+def youtube_jump_link(content, seconds):
+    return "<span class='youTube' seconds='%s'>%s</span>" % (seconds, content)
+
 def append_ago(s_time):
     if not s_time:
         return ""

@@ -2,12 +2,17 @@
         <div id="library-content" >
             <div id="library-content-main">
             {% for playlist_data in all_playlists %}
-                <A NAME="{{playlist_data.title}}"></A>
-                <h2 class='playlist-heading'>{{playlist_data.title|escape}}</h2>
+            {% if forloop.first %}
+                <div class="clear"><a name="{{ playlist_data.title|escape }}">&nbsp;</a></div>
+            {% endif %}
+            <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
                 <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
                 {% column_major_sorted_videos playlist_data.videos %}
-                <div class="clear"></div>
-                <P></P>
+                <div class="clear">
+                {% if playlist_data.next %}
+                    <a name="{{ playlist_data.next.title|escape }}">&nbsp;</a>
+                {% endif %}
+                </div>
             {% endfor %}
             </div>
         </div>

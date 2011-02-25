@@ -165,7 +165,7 @@
     <tr>
         <th id="firstTd" class="tableHeader">Student Progress</th>
         <td>
-            <div id="divHeader" class="sizeOnResize" style="overflow:hidden;width:450px;">
+            <div id="divHeader" class="sizeOnResize" style="overflow:hidden;width:450px; line-height: 15px;">
                 <table cellspacing="0" cellpadding="0" border="1" >
                   <tr>
                     {% for exercise_name in exercise_names %}
@@ -181,14 +181,14 @@
         </td>
     </tr>
     <tr>
-        <td valign="top">
+        <td style="vertical-align: top;">
           <div id="firstcol" style="overflow:hidden;height:325px;">
             <table cellspacing="0" cellpadding="0" border="0" >
                 {% for student_email in student_emails %}
                     {% for exercise_name in exercise_names %}            
                         {% if forloop.first %}
                         <tr>
-                            <td class="tableFirstCol student-email">
+                            <td class="tableFirstCol student-email" style="vertical-align: none;">
                                 <a style="color:#006699;" href="/profile?selected_graph_type=exerciseprogress&student_email={{ student_email|escape }}">
                                     <nobr>{{ exercise_data|hash:exercise_name|hash:student_email|hash:"short_name"|escape }}</nobr>
                                 </a>

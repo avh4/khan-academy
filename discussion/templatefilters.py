@@ -7,24 +7,6 @@ from django.template.defaultfilters import linebreaksbr
 register = webapp.template.create_template_register()
 
 @register.filter
-def youtube_timestamp_links(content):
-    dict_replaced = {}
-    html_template = "<span class='youTube' seconds='%s'>%s</span>"
-
-    for match in re.finditer("(\d+:\d{2})", content):
-        time = match.group(0)
-
-        if not dict_replaced.has_key(time):
-            rg_time = time.split(":")
-            minutes = int(rg_time[0])
-            seconds = int(rg_time[1])
-            html_link = html_template % ((minutes * 60) + seconds, time)
-            content = content.replace(time, html_link)
-            dict_replaced[time] = True
-
-    return content
-
-@register.filter
 def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
 
     # After a specified number of linebreaks, apply span with a CSS class

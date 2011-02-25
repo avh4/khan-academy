@@ -71,8 +71,12 @@
     z-index: 1;
     cursor: pointer;
     
-    -webkit-border-top-left-radius: 3px;
-    -webkit-border-top-right-radius: 3px;
+    -webkit-border-top-left-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 .css-menu > ul > li:after {
@@ -83,6 +87,9 @@
     display: inline-block;
     position: relative;
     top: 1px;
+}
+.css-menu > ul > li.solo:after {
+    background: none;
 }
 
 .css-menu > ul > li:hover,
@@ -97,12 +104,25 @@
 .css-menu > ul > li.css-menu-js-hover
  {
     z-index: 5;
-    background-color: #EEE;
+    background-color: #f7f7f7;
     color: black;
     outline: none;
     border-color: #ddd;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .8);
 }
+
+.css-menu.noscript > ul > li.solo:hover,
+.css-menu.noscript > ul > li.solo > a:hover,
+.css-menu > ul > li.solo.css-menu-js-hover
+ {
+    z-index: 5;
+    background-color: transparent;
+    color: black;
+    outline: none;
+    border-color: transparent;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .8);
+}
+
 
 .css-menu > ul > li > ul {
     clear:left;
@@ -110,7 +130,7 @@
     left: -999em;                  /* initially hide the entire list hierarchy */
     padding:0;                               /* this is our box border width */
     z-index: 3;
-    background-color: #EEE;
+    background-color: #f7f7f7;
     color: black;
 }
 
@@ -144,6 +164,16 @@
     border: solid 1px #ddd;
     -webkit-box-shadow: 1px 1px 2px rgba(0,0,0, .5);
     -moz-box-shadow: 1px 1px 2px rgba(0,0,0, .5);
+    
+    -webkit-border-bottom-left-radius: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-bottomleft: 5px;
+    -moz-border-radius-bottomright: 5px;
+    -moz-border-radius-topright: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 .css-menu > ul > li > ul li,
@@ -157,7 +187,7 @@
     padding-left: 1ex;    
     padding-right: 1ex;
     font-weight: normal;
-    background-color: #EEE; /* IE7 needs this to workaround http://haslayout.net/css/Hover-White-Background-Ignore-Bug */
+    background-color: #f7f7f7; /* IE7 needs this to workaround http://haslayout.net/css/Hover-White-Background-Ignore-Bug */
     margin: 0;    
     height:auto;
     color: black;               /* this sets the unselected drop-down text color */
@@ -168,7 +198,7 @@
 }
 
 .css-menu > ul > li > ul > li > ul {
-    border-bottom: solid 1px #ccc;
+    border-bottom: none;
 }
 
 .css-menu > ul > li > ul > li:last-child > ul {

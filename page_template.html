@@ -22,7 +22,7 @@
         <meta property="fb:admins" content="100000121497109,718859633"/> {# That's Sal and Dean #}
         <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
         <meta property="og:description"
-              content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 1600+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
+              content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 2100+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
         <script>var KA_VERSION = '{{ App.version }}';</script>
@@ -42,53 +42,7 @@
                 // Configure the search form
                 $('#page_search input[type=text]').placeholder();
                 initAutocomplete();
-
-                // Make the CSS-only menus click-activated
-                var active_menu = undefined;
-                $('.noscript').removeClass('noscript');
-                $('.css-menu > ul > li').click(function() {
-                    if (active_menu) {
-                        active_menu.removeClass('css-menu-js-hover');
-                    }
-                    if ($(this) == active_menu) {
-                        active_menu = undefined
-                    }
-                    else {
-                        active_menu = $(this);
-                        $(this).addClass('css-menu-js-hover');
-                    }
-                });
-                $(document).bind("click focusin", function(e){
-                    if ($(e.target).closest(".css-menu").length == 0 && active_menu) {
-                        active_menu.removeClass('css-menu-js-hover');
-                        active_menu = undefined;
-                    }
-                });
-                // Make the CSS-only menus keyboard-accessible
-                $('.css-menu a').focus(function(e){
-                    $(e.target).addClass('css-menu-js-hover').closest(".css-menu > ul > li").addClass('css-menu-js-hover');
-                }).blur(function(e){
-                    $(e.target).removeClass('css-menu-js-hover').closest(".css-menu > ul > li").removeClass('css-menu-js-hover');
-                });
             });
-
-
-
-            //Javascript for estimating the cumulative video views in real-time
-            function addCommas(nStr)
-	    {
-	        nStr += '';
-		x = nStr.split('.');
-		x1 = x[0];
-		x2 = x.length > 1 ? '.' + x[1] : '';
-		var rgx = /(\d+)(\d{3})/;
-		while (rgx.test(x1)) {
-		    x1 = x1.replace(rgx, '$1' + ',' + '$2');
-		}
-		return x1 + x2;
-	    }
-
-
 
 	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
 	    var seedTotalViews = 28402468
@@ -100,9 +54,6 @@
 	    var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
 
 	    var totalViewsString = addCommas(""+estimatedTotalViews);
-        
-
-
 
         </script>
         {% block pagescript %}
@@ -121,19 +72,13 @@
 	  _gaq.push(['ht._setDomainName', '.khanacademy.org']);
 	  _gaq.push(['ht._trackPageview']);
 
-
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
-
 	</script>
 	<!-- New, faster Google Analytics async tag END -->
 
     </head>
     <body>
     <div id="page-container">
+    <div id="page-container-inner">
         {% if App.facebook_app_id %}
         {# Start Facebook connect stuff #}
         <div id="fb-root"></div>
@@ -212,7 +157,7 @@
                             </nav>
                             {% endif %}
                             <span class="separator">&nbsp;</span>
-                            <a href="/donate" id="donate-link">Donate</a>
+                            <a href="/contribute" id="donate-link">Donate</a>
                             <span class="separator">&nbsp;</span>
                             <span id="social-links">
                                 <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Youtube-Subscribe-Header']);" href="http://www.youtube.com/khanacademy"><img src="/images/youtube.png" alt="YouTube" title="YouTube"></a>
@@ -226,9 +171,8 @@
                         </span>
                     </div>
                     <div id="logo">
-                        <div id="logo-highlight">
-                            <a id="logo-image" href="/"><img src="/images/logo-no-highlight.png?{{App.version}}" alt="Khan Academy"></a>
-                        </div>
+                        <div id="logo-highlight"></div>
+                        <a id="logo-image" href="/"><img src="/images/logo-no-highlight.png?{{App.version}}" alt="Khan Academy"></a>
                     </div>
                     <div id="stats">
                         <span id="page_visitors">
@@ -241,87 +185,18 @@
                 </div>
                 <div id="search-box">
                     <form id="page_search" action="/search">
-                        <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-left placeholder"><input type="submit" value=" " id="search-submit" />
+                        <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-left placeholder" /><input type="submit" value=" " id="search-submit" />
                     </form>
                 </div>
                 <div id="sitewide-navigation">
-                    <nav class="css-menu noscript" id="page_main_nav">
-                        <ul>
-                            <li class="ui-corner-top">
-                                Watch Videos
-                                <ul class="ui-corner-tr ui-corner-bottom">
-                                    <li>
-                                        <a href="/#browse">Browse by Topic</a>
-                                    </li>
-                                    <li>
-                                        <a href="/search">Search</a>
-                                    </li>
-                                    <li>
-                                        <a href="/downloads">Download</a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li id="do-exercises" class="ui-corner-top">
-                                <div id="do-exercise-inner"><a href="/exercisedashboard">Do Exercises</a></div>
-                            </li>
-                            <li class="ui-corner-top">
-                                Join Us
-                                <ul class="ui-corner-tr">
-                                    <li>
-                                       <p>About Us</p>
-                                        <ul>
-                                            <li>
-                                                <a href="/about">Overview</a>
-                                            </li>
-                                            <li>
-                                                <a href="/about#faq">Frequently Asked Questions</a>
-                                            </li>
-                                            <li>
-                                                <a href="/getinvolved#credits">Credits</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <p>Coaching Tools</p>
-                                        <ul>
-                                            <li>
-                                                <a href="/students">Become a Coach</a>
-                                            </li>
-                                            <li>
-                                                <a href="/students">View Students</a>
-                                            </li>
-                                            <li>
-                                                <a href="/class_profile">Class Report</a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <p>How to Help</p>
-                                        <ul>
-                                            <li>
-                                                <a href="/getinvolved#translation">Translate Videos</a>
-                                            </li>
-                                            <li>
-                                                <a href="http://sites.google.com/a/khanacademy.org/forge/for-developers/getting-started-with-the-code">Develop Software</a>
-                                            </li>
-                                            <li>
-                                                <a href="/reportissue?type=Defect&issue_labels={{issue_labels|urlencode}}">Report a Problem</a>
-                                            </li>
-                                            <li>
-                                                <a href="/donate">Donate</a>
-                                            </li>
-                                            <li>
-                                                <a href="/getinvolved">Help in Other Ways</a>
-                                            </li>
-                                            <li>
-                                                <a href="/about#contactus">Contact Us</a>
-                                            </li>
-    
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
+                    <nav>
+                      <span class="links">
+                          <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected"{% endifequal %}>Watch</a>
+                        <a href="/exercisedashboard" {% ifequal selected_nav_link "practice" %}class="selected"{% endifequal %}>Practice</a>
+                        <a href="/class_profile" {% ifequal selected_nav_link "coach" %}class="selected"{% endifequal %}>Coach</a>
+                        <a href="/contribute" {% ifequal selected_nav_link "contribute" %}class="selected"{% endifequal %}>Contribute</a>
+                        <a href="/about" {% ifequal selected_nav_link "about" %}class="selected"{% endifequal %}>About</a>
+                        </span>
                     </nav>
                 </div>
                 <nav id="page_sub_nav">
@@ -335,9 +210,6 @@
             {% block pagecontent %}
             {% endblock pagecontent %}
             <div style="padding: 10px;">&nbsp;</div>
-            {% block pagefooter %}
-            {% include "page_footer_short.html" %}
-            {% endblock %}
 
             {% if username %}
                 {% badge_notifications %}
@@ -375,7 +247,22 @@
     	<!-- ChartBeat API - get # of users online now END -->
     
     </div>
+    </div>
+    <div class="push"></div>
+    {% block pagefooter %}
+    {% include "page_footer_short.html" %}
+    {% endblock %}
+
     {% block bottompagescript %}
     {% endblock bottompagescript %}
+
+	<script type="text/javascript">
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
+
     </body>
 </html>

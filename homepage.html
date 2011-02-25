@@ -1,94 +1,71 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 <style>
-    .highlighted {
-        font-weight: bold !important;
-    }
-    ul.menu {list-style:none; margin:0; padding:0}
-	ul.menu * {margin:0; padding:0}
-	ul.menu a {display:block; color:#000; text-decoration:none}
-	ul.menu li {position:relative; float:left; margin-right:2px}
-	ul.menu ul {position:absolute; top:26px; left:0; background:#d1d1d1; display:none; opacity:0; list-style:none}
-	ul.menu ul li {position:relative; border:1px solid #aaa; border-top:none; width:148px; margin:0}
-	ul.menu ul li a {display:block; padding:3px 7px 5px; background-color:#d1d1d1}
-	ul.menu ul li a:hover {background-color:#c5c5c5}
-	ul.menu ul ul {left:148px; top:-1px}
-	ul.menu .menulink {border:1px solid #aaa; padding:5px 7px 7px; font-weight:bold; background:url(/images/header.gif); width:134px}
-	ul.menu .menulink:hover, ul.menu .menuhover {background:url(/images/header_over.gif)}
-	ul.menu .sub {background:#d1d1d1 url(/images/arrow.gif) 136px 8px no-repeat}
-	ul.menu .topline {border-top:1px solid #aaa}
 	#page_sub_nav { display: none; }
+	td { vertical-align: top; }
 </style>
-<script>
-    $(function () {
-        function getUrlVars(){
-            var vars = [], hash;
-            var url = window.location.href;
-            var hashes = url.slice(url.indexOf('?') + 1, url.indexOf('#')).split('&');
-            for(var i = 0; i < hashes.length; i++)
-            {
-                hash = hashes[i].split('=');
-                vars.push(hash[0]);
-                vars[hash[0]] = hash[1];
-            }
-            return vars;
-        }
-
-        var urlVars = getUrlVars();
-        var video_id = urlVars['video'];
-        $(".highlighted").removeClass("highlighted");
-        if (video_id) {
-            $("#library a[href=/video/" + video_id + "], #library a[href*=/video/" + video_id + "?]").addClass("highlighted");
-        }
-    });
-
-
-
-</script>
-<script type="text/javascript" src="/javascript/dropdownscript.js"></script>
 
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
-<img src="/images/blank.gif" height=15 width=100%><P>
-<table border=0 cellpadding=2>
-<tr><td valign=top><div id="homepage-text">
-<h3>The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.</h3>
-<P>
-            	    	     We are complementing Salman's ever-growing library with user-paced exercises--developed as an <A href="http://code.google.com/p/khanacademy/">open source project</A>--allowing the Khan Academy to become the free classroom for the World.
+<div id="homepage" style="position: relative;">
+    <div id="main-video">
+        {% youtube_player_embed video_id 480 380 %}
+    </div>
+    <div id="homepage-text">
+        <h1 class="main-headline"><a href="/#browse">Watch.</a> <a href="/exercisedashboard">Practice.</a> Learn almost anything&mdash;for free.</h1>
+        <p>
+            What started out as Sal making a few algebra videos for his cousins has grown 
+            to over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> and <a href="/exercisedashboard">100 self-paced exercises</a> and assessments covering 
+            everything from arithmetic to physics, finance, and history.
+        </p>
+        <p class="call-to-action-buttons"><a href="/#browse" class="call-to-action simple-button">Browse the library</a><span style="padding: 5px 10px;">&mdash; <em>or</em> &mdash;</span><a href="/exercisedashboard" class="call-to-action simple-button">Try an exercise</a></p>
+        <h2>Help us change education</h2>
+        <p>
+            <a href="/about/the-team">Our small team</a> is on a mission to deliver a world-class education to anyone anywhere, and you can help.
+            Take a second to <a href="/contribute">get the word out</a>, or read about how <a href="/contribute">teachers</a>, <a href="/contribute">donors</a>, and <a href="/contribute">everyone else</a> can contribute.
+        </p>
+        <h2 class="featured-videos">Watch a video about the Khan Academy</h2>
+    </div>
 
-        <P>
-<h3><A href="/exercisedashboard"><B>Log in to the Khan Academy web application for user-paced practice and instruction</B></A></h3>
-</div></td>
-<td valign=top>
-<table border=0 cellpadding=2 cellspacing=0 align=right bgcolor="black" >
-<tr>
-<td rowspan=2 width=200 height=200>
-    <object id="idOVideo" name="idOVideo" width="249" height="200">
-        <param name="movie" value="http://www.youtube.com/v/{{video_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
-        <param name="allowFullScreen" value="true">
-        <param name="allowScriptAccess" value="always">
-        <param name="wmode" value="transparent">
-        <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{video_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="249" height="200">
-    </object>
-</td>
-<td width=200>
-	{{link1}}</td>
-<td width=200>
-	{{link2}}</td>
-</tr>
-<tr>
-<td>
-	{{link3}}</td>
-<td>
-	{{link4}}</td>
-</tr>
-</table>
+    <div id="thumbnails_container">
+        <table width="100%">
+            <tr>
+                <td width="3%">
+                    <div class="thumbnails_arrow" id="arrow-left">
+                        <div class="arrow-left-shadow"></div>
+                        <div class="arrow-left"></div>
+                    </div>
+                </td>
+                <td width="94%">
+                    <div id="thumbnails">
+                        {% for thumbnail_link_set in thumbnail_link_sets %}
+                            <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
+                            {% for thumbnail_link in thumbnail_link_set %}
+                                <td style="width:25%" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}" {% if thumbnail_link|hash:"selected" %}class="selected"{% endif %}>
+                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><img src="{{ thumbnail_link|hash:"src"|escape }}" /></a>
+                                    <div class="thumbnail_label">
+                                        <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link">{{ thumbnail_link|hash:"desc"|escape }}</a>
+                                    </div>
+                                </td>
+                            {% endfor %}
+                            </tr></table></div>
+                        {% endfor %}
+                    </div>
+                </td>
+                <td width="3%">
+                    <div class="thumbnails_arrow" id="arrow-right">
+                        <div class="arrow-right-shadow"></div>
+                        <div class="arrow-right"></div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
 
-</td></tr></table>
-<P>
-<table cellpadding=2 border=0>
-<tr><td>
+    <div class="clear"></div>
+<hr>
+<h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
 
 {% if DVD_list %}
 <ul class="menu" id="menu">
@@ -97,108 +74,21 @@
     {% endfor %}
 </ul>
 {% else %}
-
-<div id="browse"><h2>Browse 2000+ videos by topic:</h2>
-<ul class="menu" id="menu">
-	<li><a href="#" class="menulink">Math</a>
-		<ul>
-
-			<li><a href="#Arithmetic">Arithmetic</a></li>
-            <li><a href="#Developmental Math">Developmental Math</a></li>
-			<li>
-				<a href="#" class="sub">Pre-Algebra</a>
-				<ul>
-					<li class="topline"><a href="#Pre-algebra">Core Pre-Algebra</a></li>
-					<li><a href="#MA Tests for Education Licensure (MTEL) -Pre-Alg">Worked Examples 1</a></li>
-
-				</ul>
-			</li>
-			<li><a href="#Brain Teasers">Brain Teasers</a></li>
-			<li>
-				<a href="#" class="sub">Algebra</a>
-				<ul>
-					<li class="topline"><a href="#Algebra">Core Algebra</a></li>
-					<li><a href="#California Standards Test: Algebra I">Worked Examples 1</a></li>
-					<li><a href="#ck12.org Algebra 1 Examples">Worked Examples 2</a></li>
-					<li><a href="#California Standards Test: Algebra II">Worked Examples 3</a></li>
-
-				</ul>
-			</li>
-			<li>
-				<a href="#" class="sub">Geometry</a>
-				<ul>
-
-					<li class="topline"><a href="#Geometry">Core Geometry</a></li>
-					<li><a href="#California Standards Test: Geometry">Worked Examples 1</a></li>
-				</ul>
-			</li>
-			<li><a href="#Trigonometry">Trigonometry</a></li>
-			<li><a href="#Probability">Probability</a></li>
-			<li><a href="#Statistics">Statistics</a></li>
-			<li><a href="#Precalculus">Pre-Calculus</a></li>
-			<li><a href="#Calculus">Calculus</a></li>
-			<li><a href="#Differential Equations">Differential Equations</a></li>
-			<li><a href="#Linear Algebra">Linear Algebra (Advanced)</a></li>
-
-		</ul>
-	</li>
-
-	<li>
-		<a href="#" class="menulink">Science</a>
-		<ul>
-			<li><a href="#Biology">Biology</a></li>
-			<li><a href="#Chemistry">Chemistry</a></li>
-			<li><a href="#Physics">Physics</a></li>
-			<li><a href="#Organic Chemistry">Organic Chemistry</a></li>
-			<li><a href="#Cosmology and Astronomy">Cosmology and Astronomy</a></li>
-		</ul>
-	</li>
-
-	<li>
-		<a href="#" class="menulink">Humanities & Other</a>
-		<ul>
-			<li><a href="#History">History</a></li>
-			<li>
-				<a href="#" class="sub">Finance</a>
-				<ul>
-					<li class="topline"><a href="#Finance">Core Finance</a></li>
-					<li><a href="#Banking and Money">Banking and Money</a></li>
-					<li><a href="#Valuation and Investing">Valuation and Investing</a></li>
-					<li><a href="#Venture Capital and Capital Markets">Venture Capital and Capital Markets</a></li>
-					<li><a href="#Credit Crisis">Credit Crisis</a></li>
-					<li><a href="#Paulson Bailout">Paulson Bailout</a></li>
-					<li><a href="#Geithner Plan">Geithner Plan</a></li>
-					<li><a href="#Current Economics">Current Economics</a></li>
-					<li><a href="#Currency">Currency</a></li>
-				</ul>
-
-			</li>
-
-		</ul>
-	</li>
-	<li>
-		<a href="#" class="menulink">Test Prep</a>
-		<ul>
-			<li><a href="/sat">SAT Math</a></li>
-			<li><a href="/gmat">GMAT</a></li>
-            <li><a href="#CAHSEE Example Problems">CAHSEE</a></li>
-            <li><a href="#IIT JEE Questions">IIT JEE</a></li>
-		</ul>
-	</li>
-	<li><a href="#Khan Academy-Related Talks and Interviews" class="menulink">Talks and Interviews</a></li>
-
-</ul>
-</div>
+<div id="browse-control-anchor"></div>
+{% playlist_browser "browse" %}
+{% playlist_browser "browse-fixed" %}
 {% endif %}
-</td></tr>
-</table>
-
-<P>
-<script type="text/javascript">
-	var menu=new menu.dd("menu");
-	menu.init("menu","menuhover");
-</script>
 
 {{ library_content }}
 
+</div>
+
+<div id="back-to-top">
+    <a class="arrow" href="#">▲</a>
+    <a class="text" href="#">Back to Top</a>
+</div>
 {% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {% homepage_javascript %}
+{% endblock bottompagescript %}

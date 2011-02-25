@@ -21,7 +21,7 @@ def video_comments(video, playlist, page=0):
 def video_qa(video, playlist, page=0, qa_expand_id=None):
     return video_qa_context(video, playlist, page, qa_expand_id)
 
-@register.inclusion_tag(("discussion/signature.html", "signature.html"))
+@register.inclusion_tag(("../discussion/signature.html", "discussion/signature.html"))
 def signature(target=None, verb=None):
     return {
                 "target": target, 
@@ -30,7 +30,7 @@ def signature(target=None, verb=None):
                 "is_author": target and target.author == util.get_current_user()
             }
 
-@register.inclusion_tag(("discussion/mod_tools.html", "mod_tools.html"))
+@register.inclusion_tag(("../discussion/mod_tools.html", "discussion/mod_tools.html"))
 def mod_tools(target):
     return {
                 "target": target,
@@ -40,22 +40,22 @@ def mod_tools(target):
                 "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
             }
 
-@register.inclusion_tag(("discussion/author_tools.html", "author_tools.html"))
+@register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
 def author_tools(target):
     return {
                 "target": target,
                 "editable": not target.is_type(models_discussion.FeedbackType.Comment)
             }
 
-@register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))
+@register.inclusion_tag(("../discussion/question_answers.html", "discussion/question_answers.html"))
 def question_answers(answers):
     return { "answers": answers }
 
-@register.inclusion_tag(("discussion/question_answers.html", "question_answers.html"))
+@register.inclusion_tag(("../discussion/question_answers.html", "discussion/question_answers.html"))
 def standalone_answers(video, playlist, dict_answers):
     return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
 
-@register.inclusion_tag(("discussion/username_and_notification.html", "username_and_notification.html"))
+@register.inclusion_tag(("../discussion/username_and_notification.html", "discussion/username_and_notification.html"))
 def username_and_notification(username):
     count = models_discussion.FeedbackNotification.gql("WHERE user = :1", util.get_current_user()).count()
     return { "username": username, "count": count }

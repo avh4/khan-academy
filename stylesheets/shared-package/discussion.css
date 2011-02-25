@@ -362,7 +362,12 @@ form { display: inline; }
 a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
 a.control:hover { color: #DD6900; }
 
-span.username_and_notification_shift { position:relative; left: 12px; }
+#top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
+#top-header #top-header-links span.username_and_notification { vertical-align:baseline; position:relative; top:2px; }
+#top-header #top-header-links span.username_and_notification span.user-name { vertical-align:baseline; }
+#top-header #top-header-links span.username_and_notification span.user-notification { vertical-align:baseline; }
+#top-header #top-header-links span.username_and_notification_shift { left: 12px; }
+#top-header #user-info img { position:relative; top:-1px; }
 
 div.clearFloat { overflow:hidden; height:1px; clear:both; }
 

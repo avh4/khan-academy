@@ -1,3 +1,7 @@
+#page_sub_nav #profile-header {
+    margin: -6px 0 -10px;
+}
+
 #page_sub_nav #profile-header #user-info,
 #page_sub_nav #profile-header #high-level-stats {
     display: inline-block;
@@ -10,6 +14,8 @@
         width: 50px;
         height: 50px;
         vertical-align: middle;
+        position: relative;
+        top: -4px;
     }
 
 #page_sub_nav #profile-header #user-info {
@@ -76,15 +82,13 @@
 }
 #individual_report h2 {
     color: #444;
-    display: block;
-    font-size: 200%;
     font-style: italic;
     font-weight: normal;
     margin: 0;
-    padding: 5px 5px 2px;
+    padding: 5px 5px 7px 1px;
     width: 280px;
     
-    background: transparent url(/images/profile-header-bg.png) no-repeat 3px 100%;
+    background: transparent url(/images/profile-header-bg.png) no-repeat 0px 100%;
     
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -107,6 +111,8 @@
     min-width: 970px;
     min-height: 325px;
     position: relative;
+    margin-top: 0;
+    padding-top: 18px;
 }
     #individual_report #vital-statistics #stats-nav {
         width: 280px;
@@ -160,7 +166,8 @@
     }
     #individual_report #vital-statistics #stats-nav ul > li > a {
         display: block;
-        padding: .5em .5em .5em 2em;
+        padding: 7px 5px 5px 25px;
+        font-size: 14px;
     }
         #individual_report #vital-statistics #stats-nav ul > li > a.ui-state-default {
             background: transparent;
@@ -198,7 +205,7 @@
     }
     #individual_report #vital-statistics #stats-nav ul > li > p .graph-options .progress-legend {
         display: inline-block;
-        padding: 3px;
+        padding: 3px 3px 2px;
         color: #333;
         text-shadow: 0 1px 0 rgba(255,255,255, .4);
         cursor: default;
@@ -309,15 +316,16 @@
         #individual_report #achievements #achievement-list > ul li:hover div.label,
         #individual_report #achievements #achievement-list > ul li.selected div.label {
             border: 1px solid #bbb;
+            border-bottom: 1px solid #999;
             cursor: pointer;
             background: #ddd;
             background-image: -webkit-gradient(linear, left top, left bottom,  from(#eee), to(#ccc));
             background-image: -moz-linear-gradient( top, #eee, #ccc );
             filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#cccccc');
             
-            -moz-box-shadow: 0 1px 1px #bbb;
-            -webkit-box-shadow: 0 1px 1px #bbb;
-            box-shadow: 0 1px 1px #bbb;
+            -moz-box-shadow: 0 1px 1px #ccc;
+            -webkit-box-shadow: 0 1px 1px #ccc;
+            box-shadow: 0 1px 1px #ccc;
         }
         #individual_report #achievements #achievement-list > ul li.selected {
             opacity: 1;
@@ -416,4 +424,46 @@ div.graph-notification {
 #student-list table td {
     padding: 5px;
     margin: 0;
+}
+
+/* No students page styles */
+
+#empty-class {
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    border-bottom: 1px solid #aaa;
+    margin: 18px auto !important;
+    padding: 18px;
+    width: 600px;
+    
+    -webkit-box-shadow: 0px 1px 3px #ccc;
+    -moz-box-shadow: 0px 1px 3px #ccc;
+    box-shadow: 0px 1px 3px #ccc;
+}
+#empty-class > p {
+    font-size: 15px;
+}
+#empty-class ol {
+    margin-bottom: 18px;
+    font-size: 80px;
+}
+#empty-class ol li {
+    padding: 9px;
+    background: #fff;
+    border: 1px solid #ccc;
+    margin-bottom: 18px;
+    font-size: 16px;
+    text-align: center;
+    
+    -webkit-box-shadow: inset 0 0 3px #ddd;
+    -moz-box-shadow: inset 0 0 3px #ddd;
+    box-shadow: inset 0 0 3px #ddd;
+    
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+#empty-class ol li img {
+    display: block;
+    margin: 0 auto 9px
 }

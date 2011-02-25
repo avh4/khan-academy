@@ -1,0 +1,8 @@
+<div class="mailing_list_container" id="mailing_list_container_{{ list_id|escape }}">
+    <form name="mailing_list_form">
+        <input type="text" name="email" class="placeholder email" placeholder="Enter your email address" value="" /><br/>
+        <input type="submit" value="Sign me up" class="simple-button" />
+    </form>
+    <span style="display:none;" class="error">Invalid email address.</span>
+</div>
+<script>MailingList.init("{{ list_id|escapejs }}");</script>

@@ -1,28 +1,8 @@
 
 var Discussion = {
-    player: null,
 
     init: function() {
-        Discussion.prepareYouTubeLinks();
-    },
-
-    prepareYouTubeLinks: function() {
-        if ($.browser.msie) return;
-
-        $("span.youTube").addClass("playYouTube").removeClass("youTube").click(Discussion.playYouTube);
-    },
-
-    playYouTube: function() {
-        var seconds = $(this).attr("seconds");
-        if (Discussion.player && seconds)
-        {
-            Discussion.player.seekTo(Math.max(0, seconds - 2), true);
-
-            // If user has scrolled below the youtube video, scroll to top of video
-            // when a play link is clicked.
-            var yTop = $(Discussion.player).offset().top - 2;
-            if ($(window).scrollTop() > yTop) $(window).scrollTop(yTop);
-        }
+        VideoControls.initJumpLinks();
     },
 
     showThrobberOnRight: function(jTarget) {
@@ -225,7 +205,7 @@ var QA = {
 
         setTimeout(function(){QA.cancel.apply(el)}, 1);
         $(".answers_container", parent).html(dict_json.html);
-        Discussion.prepareYouTubeLinks();
+        VideoControls.initJumpLinks();
         Discussion.hideThrobber();
         QA.enable();
     },
@@ -256,7 +236,7 @@ var QA = {
         QA.page = dict_json.page;
         QA.initPagesAndQuestions();
         Discussion.hideThrobber();
-        Discussion.prepareYouTubeLinks();
+        VideoControls.initJumpLinks();
     },
 
     getQAParent: function(el) {
@@ -299,10 +279,11 @@ var QA = {
 
             var jTarget = $(el);
             var offset = jTarget.offset();
+            var offsetContainer = $("#video-page").offset();
 
             jNote.css("visibility", "hidden").css("display", "");
-            var top = offset.top + (jTarget.height() / 2) - (jNote.height() / 2);
-            var left = offset.left + (jTarget.width() / 2) - (jNote.width() / 2);
+            var top = offset.top - offsetContainer.top + (jTarget.height() / 2) - (jNote.height() / 2);
+            var left = offset.left - offsetContainer.left + (jTarget.width() / 2) - (jNote.width() / 2);
             jNote.css("top", top).css("left", left).css("visibility", "visible").css("display", "");
 
             setTimeout(function(){$(".login_link").focus();}, 50);
@@ -505,7 +486,7 @@ var Comments = {
         Comments.page = dict_json.page;
         Comments.initPages();
         Discussion.hideThrobber();
-        Discussion.prepareYouTubeLinks();
+        VideoControls.initJumpLinks();
     },
 
     add: function() {
@@ -552,10 +533,12 @@ var Comments = {
 
     disable: function() {
         $(".comment_text, .comment_submit").attr("disabled", "disabled");
+        $(".comment_submit").addClass("buttonDisabled");
     },
 
     enable: function() {
         $(".comment_text, .comment_submit").removeAttr("disabled");
+        $(".comment_submit").removeClass("buttonDisabled");
     },
 
     updateRemaining: function() {

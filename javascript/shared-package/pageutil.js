@@ -11,6 +11,12 @@ function addCommas(nStr) // to show clean number format for "people learning rig
 	return x1 + x2;
 }
 
+function validateEmail(sEmail)
+{ 
+     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ 
+     return sEmail.match(re) 
+}
+
 function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
     var o = {
                 "label": match.title,
@@ -122,12 +128,77 @@ function onYouTubePlayerReady(playerID) {
     var player = document.getElementById("idPlayer");
     if (!player) player = document.getElementById("idOVideo");
 
-    Discussion.player = player;
+    VideoControls.player = player;
     VideoStats.player = player;
 }
 
 function onYouTubePlayerStateChange(state) {
     VideoStats.playerStateChange(state);
+}
+
+var VideoControls = {
+
+    player: null,
+
+    initJumpLinks: function() {
+        $("span.youTube").addClass("playYouTube").removeClass("youTube").click(VideoControls.clickYouTubeJump);
+    },
+
+    clickYouTubeJump: function() {
+        var seconds = $(this).attr("seconds");
+        if (VideoControls.player && seconds)
+        {
+            VideoControls.player.seekTo(Math.max(0, seconds - 2), true);
+            VideoControls.scrollToPlayer();
+        }
+    },
+
+    scrollToPlayer: function() {
+        // If user has scrolled below the youtube video, scroll to top of video
+        // when a play link is clicked.
+        var yTop = $(VideoControls.player).offset().top - 2;
+        if ($(window).scrollTop() > yTop) $(window).scrollTop(yTop);
+    },
+
+    initThumbnails: function() {
+
+        var jelThumbnails = $("#thumbnails");
+        
+        this.thumbnailResize(jelThumbnails);
+        $(window).resize(function(){ VideoControls.thumbnailResize(jelThumbnails); });
+
+        jelThumbnails.cycle({ 
+            fx:     'scrollHorz', 
+            timeout: 0,
+            speed: 800,
+            slideResize: 0,
+            easing: 'backinout',
+            startingSlide: 0,
+            prev: '#arrow-left',
+            next: '#arrow-right'
+        });
+
+        $(".thumbnail_link", jelThumbnails).click(VideoControls.thumbnailClick);
+    },
+
+    thumbnailResize: function(jelThumbnails) {
+        var width = jelThumbnails.parent().width();
+        jelThumbnails.width(width);
+        $("table", jelThumbnails).width(width);
+    },
+    
+    thumbnailClick: function() {
+        var jelParent = $(this).parents("td").first();
+        var youtubeId = jelParent.attr("data-youtube-id");
+        if (VideoControls.player && youtubeId)
+        {
+            VideoControls.player.loadVideoById(youtubeId, 0, "default");
+            VideoControls.scrollToPlayer();
+            $("#thumbnails td.selected").removeClass("selected");
+            jelParent.addClass("selected");
+            return false;
+        }
+    }
 }
 
 var VideoStats = {
@@ -426,6 +497,31 @@ var Timezone = {
         if (this.tz_offset == null)
             this.tz_offset = -1 * (new Date()).getTimezoneOffset();
         return this.tz_offset;
+    }
+}
+
+var MailingList = {
+    init: function(sIdList) {
+        var jelMailingListContainer = $("#mailing_list_container_" + sIdList);
+        var jelMailingList = $("form", jelMailingListContainer);
+        var jelEmail = $(".email", jelMailingList);
+
+        jelEmail.placeholder().change(function(){
+            $(".error", jelMailingListContainer).css("display", (!$(this).val() || validateEmail($(this).val())) ? "none" : "");
+        }).keypress(function(){
+            if ($(".error", jelMailingListContainer).is(":visible") && validateEmail($(this).val()))
+                $(".error", jelMailingListContainer).css("display", "none");
+        });
+
+        jelMailingList.submit(function(e){
+            if (validateEmail(jelEmail.val()))
+            {
+                $.post("/mailing-lists/subscribe", {list_id: sIdList, email: jelEmail.val()});
+                jelMailingListContainer.html("Done!");
+            }
+            e.preventDefault();
+            return false;
+        });
     }
 }
 

@@ -67,6 +67,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),
                     'is_profile_empty': len(dict_students) <= 0,
+                    'selected_nav_link': 'coach',
                     }
             self.render_template('viewclassprofile.html', template_values)
         else:

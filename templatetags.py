@@ -57,7 +57,7 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
                "list_height": column_indices[0] * link_height,
           }
 
-@register.inclusion_tag("youtube_player_embed.html")
+@register.inclusion_tag(("../youtube_player_embed.html", "youtube_player_embed.html"))
 def youtube_player_embed(youtube_id, width=800, height=480):
     return {"youtube_id": youtube_id, "width": width, "height": height}
 
@@ -172,13 +172,21 @@ def maps_javascript():
 @register.inclusion_tag(("profile_javascript.html", "../profile_javascript.html"))
 def profile_javascript():
     return {'App': App}
+@register.inclusion_tag(("homepage_javascript.html", "../homepage_javascript.html"))
+def homepage_javascript():
+    return {'App': App}
 @register.inclusion_tag(("shared_css.html", "../shared_css.html"))
 def shared_css():
     return {'App': App}
+
+@register.inclusion_tag("playlist_browser.html")
+def playlist_browser(browser_id):
+    return {'browser_id': browser_id}
 
 register.tag(highlight)
 
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
 webapp.template.register_template_library('profiles.templatetags')
+webapp.template.register_template_library('mailing_lists.templatetags')
 
