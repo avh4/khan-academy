@@ -170,7 +170,7 @@ var VideoControls = {
         jelThumbnails.cycle({ 
             fx:     'scrollHorz', 
             timeout: 0,
-            speed: 800,
+            speed: 550,
             slideResize: 0,
             easing: 'backinout',
             startingSlide: 0,
