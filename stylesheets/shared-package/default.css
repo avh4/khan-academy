@@ -2434,7 +2434,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 /* End Knowledge Map CSS */
 
 /* Use media queries to handle wide browsers */
-@media all and (min-width: 1200px) {
+@media all and /*!YUI-Compressor */ (min-width: 1200px) {
     #page-container {
         margin-left: auto;
         margin-right: auto;
