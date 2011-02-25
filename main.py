@@ -1759,6 +1759,10 @@ class ViewContribute(request_handler.RequestHandler):
     def get(self):
         self.render_template('contribute.html', {"selected_nav_link": "contribute"})
 
+class ViewCredits(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('viewcredits.html', {"selected_nav_link": "contribute"})
+
 class Donate(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
@@ -2118,6 +2122,7 @@ def real_main():
         ('/about/blog/.*', blog.ViewBlogPost),
         ('/about/the-team', util_about.ViewAboutTheTeam),
         ('/contribute', ViewContribute ),
+        ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),
         ('/about/faq', util_about.ViewFAQ),
         ('/downloads', util_about.ViewDownloads),
