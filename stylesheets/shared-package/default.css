@@ -1767,7 +1767,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #coaches, #students, #donate, #individual_report, 
 .achievement-badges-container, #login-page, 
-#about-us, #homepage, #video-page, #contribute {
+#about-us, #homepage, #video-page, #contribute,
+#credits {
     padding: 0 23px;
     background: transparent;
     position: relative;
@@ -1817,16 +1818,16 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: relative;
     top: -2px;
 }
-#contribute #credits dl {
+#credits dl {
     margin-left: 23px;
     font-size: 14px;
 }
-#contribute #credits dt {
+#credits dt {
     font-weight: bold;
     float: left;
     margin-right: 1ex;
 }
-#contribute #credits dd:before {
+#credits dd:before {
     content: "- ";
 }
 /* End of contribute styles */
@@ -1840,6 +1841,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #the-team .col1 p {
     font-size: 15px;
     line-height: 22px;
+}
+#the-team .general-contact ul {
+    margin-bottom: 18px;
+}
+#the-team .general-contact ul li {
+    margin-bottom: 10px;
 }
 #the-team .team-photo {
     width: 95%; 
@@ -1887,15 +1894,14 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         #the-team .team-card .card-info p {
             font-size: 13px;
         }
-        #the-team .team-card .card-info .contact-links a {
+        #the-team .team-card .card-info .contact-links a, .general-contact a {
             padding: 10px 10px 10px 28px;
             text-decoration: none;
         }
-        #the-team .team-card .card-info .contact-links a:hover {
+        #the-team .team-card .card-info .contact-links a:hover, .general-contact a:hover {
             text-decoration: underline;
         }
-        #the-team .team-card .card-info .contact-email {
-            
+        #the-team .team-card .card-info .contact-email, .general-contact .contact-email {
             background: url(/images/contact-email.png) no-repeat left center;
         }
         #the-team .team-card .card-info .contact-twitter {
