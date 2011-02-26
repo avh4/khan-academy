@@ -1663,7 +1663,7 @@ class ViewHomePage(request_handler.RequestHandler):
                 { 
                     "href": "/video/khan-academy-on-the-gates-notes", 
                     "src": "/images/splashthumbnails/gates_thumbnail.png", 
-                    "desc": "Bill Gates' favorite teacher",
+                    "desc": "Khan Academy on the Gates Notes",
                     "youtube_id": "UuMTSU9DcqQ",
                     "selected": False,
                 },
