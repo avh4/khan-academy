@@ -138,6 +138,13 @@ class Exercise(db.Model):
         query.filter('exercise =', self.key())
         return query
 
+    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
+    def related_videos_fetch(self):
+        exercise_videos = self.related_videos().fetch(10)
+        for exercise_video in exercise_videos:
+            exercise_video.video # Pre-cache video entity
+        return exercise_videos
+
     _CURRENT_SANITIZER = "http://caja.appspot.com/"
     def ensure_sanitized(self):
         if self.last_sanitized >= self.last_modified and self.sanitizer_used == Exercise._CURRENT_SANITIZER:

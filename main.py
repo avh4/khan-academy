@@ -292,7 +292,7 @@ class ViewExercise(request_handler.RequestHandler):
                 if exid_non_summative:
                     exercise_non_summative = Exercise.get_by_name(exid_non_summative)
                     
-            exercise_videos = exercise_non_summative.related_videos().fetch(10)
+            exercise_videos = exercise_non_summative.related_videos_fetch()
 
             proficient = exercise.proficient = user_data.is_proficient_at(exid)
             suggested = exercise.suggested = user_data.is_suggested(exid)
