@@ -309,7 +309,7 @@ footer {
 #top-header #logo {
     height: 42px;
     position: relative;
-    background: url(/images/logo-topper.png) no-repeat 0 0;
+    background: url(/images/logo-topper.png?1) no-repeat 0 0;
     width: 317px;
 }
     #top-header #logo #logo-highlight {
