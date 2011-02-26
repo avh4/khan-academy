@@ -118,7 +118,10 @@ def new_answer_for_video_question(video, question, answer):
     notification.user = question.author
     notification.feedback = answer
 
-    db.put(notification)
+    user_data = models.UserData.get_for(notification.user)
+    user_data.count_feedback_notification = -1
+
+    db.put([notification, user_data])
 
 def clear_question_answers_for_current_user(s_question_id):
 
@@ -139,9 +142,15 @@ def clear_question_answers_for_current_user(s_question_id):
     if not question:
         return;
 
+    user_data = models.UserData.get_for(user)
+
     feedback_keys = question.children_keys()
     for key in feedback_keys:
         notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1 AND feedback = :2", user, key)
         if notifications.count():
             db.delete(notifications)
+
+    user_data.count_feedback_notification = -1
+    user_data.put()
+
 

@@ -124,7 +124,7 @@
                         <span class="page_links" id="page_auth">
                             {% if username %}
                                 <span id="user-info">
-                                    {% username_and_notification username %}
+                                    {% username_and_notification username user_data %}
                                     {% if user_data %}
                                         {% badge_counts user_data %}
                                     {% else %}

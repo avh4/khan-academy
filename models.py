@@ -15,6 +15,7 @@ import points
 from search import Searchable
 from app import App
 import layer_cache
+from discussion import models_discussion
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -308,6 +309,7 @@ class UserData(db.Model):
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
+    count_feedback_notification = db.IntegerProperty(default = -1)
     
     @staticmethod
     def get_for_current_user():
@@ -448,6 +450,12 @@ class UserData(db.Model):
             self.videos_completed = UserVideo.count_completed_for_user(self.user)
             self.put()
         return self.videos_completed
+
+    def feedback_notification_count(self):
+        if self.count_feedback_notification == -1:
+            self.count_feedback_notification = models_discussion.FeedbackNotification.gql("WHERE user = :1", self.user).count()
+            self.put()
+        return self.count_feedback_notification
     
 class Video(Searchable, db.Model):
 

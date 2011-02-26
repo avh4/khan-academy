@@ -56,8 +56,8 @@ def standalone_answers(video, playlist, dict_answers):
     return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
 
 @register.inclusion_tag(("../discussion/username_and_notification.html", "discussion/username_and_notification.html"))
-def username_and_notification(username):
-    count = models_discussion.FeedbackNotification.gql("WHERE user = :1", util.get_current_user()).count()
+def username_and_notification(username, user_data):
+    count = user_data.feedback_notification_count() if user_data else 0
     return { "username": username, "count": count }
 
 @register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
