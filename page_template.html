@@ -9,7 +9,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
-        {% else %}<title>Khan Academy</title>
+        {% else %}{% if exercise %}<title>{{exercise.display_name}} | Khan Academy</title>
+	{% else %}<title>Khan Academy</title>
+	{% endif %}
         {% endif %}
         <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -->
         <meta property="fb:page_id" content="159403248441" />
