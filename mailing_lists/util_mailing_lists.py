@@ -9,7 +9,7 @@ from django.utils import simplejson
 from app import App
 import request_handler
 
-CONSTANT_CONTACT_USERNAME = "kamens"
+CONSTANT_CONTACT_USERNAME = "shantanu@khanacademy.org"
 
 def constant_contact_request(url, xml_payload = None, put_request = False):
     password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
