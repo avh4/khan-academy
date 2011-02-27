@@ -12,6 +12,9 @@ from about import util_about
 TUMBLR_URL = "http://khanacademy.tumblr.com"
 POSTS_PER_PAGE = 5
 
+class TumblrException(Exception):
+    pass
+
 class BlogPost:
     def __init__(self, json):
         self.post_id = json["id"]
@@ -22,7 +25,18 @@ class BlogPost:
         self.slug = json["slug"]
 
     def local_url(self):
+        if not self.post_id:
+            return "/about/blog"
         return "/about/blog/post/%s/%s" % (self.post_id, self.slug)
+
+class TumblrDownBlogPost(BlogPost):
+    def __init__(self):
+        self.post_id = ""
+        self.title = "Temporarily unavailable"
+        self.body = "Our blog is temporarily unavailable but will be back soon."
+        self.dt = ""
+        self.url = "/about/blog"
+        self.slug = ""
 
 def strip_json(json):
 
@@ -54,15 +68,15 @@ def get_posts(offset = 0, post_id = None, force_refresh = False):
             request = urllib2.urlopen("%s/api/read/json" % TUMBLR_URL, params_encoded)
             json = request.read()
         except:
-            raise Exception("Error while grabbing blog posts from Tumblr.")
+            raise TumblrException("Error while grabbing blog posts from Tumblr.")
 
-        json = strip_json(json)
         posts = []
 
         try:
+            json = strip_json(json)
             posts = parse_json_posts(json)
         except:
-            raise Exception("Error while parsing blog posts from Tumblr")
+            raise TumblrException("Error while parsing blog posts from Tumblr")
 
         if posts:
             # Cache for an hour
@@ -98,7 +112,11 @@ class ViewBlog(util_about.AboutRequestHandler):
         offset = self.request_int("offset", default=0)
         force_refresh = self.request_bool("force_refresh", default=False)
 
-        posts = get_posts(offset, None, force_refresh)
+        posts = []
+        try:
+            posts = get_posts(offset, None, force_refresh)
+        except TumblrException:
+            posts = [TumblrDownBlogPost()]
 
         has_prev = offset > 0
         has_next = len(posts) > POSTS_PER_PAGE
@@ -144,6 +162,9 @@ class ViewBlogPost(util_about.AboutRequestHandler):
 
         force_refresh = self.request_bool("force_refresh", default=False)
 
-        post = get_single_post(post_id, force_refresh)
+        try:
+            post = get_single_post(post_id, force_refresh)
+        except TumblrException:
+            post = TumblrDownBlogPost()
 
         self.render_template('about/viewblogpost.html', {"post": post, "selected_id": "blog"})
