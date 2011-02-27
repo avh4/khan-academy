@@ -118,7 +118,7 @@ def new_answer_for_video_question(video, question, answer):
     notification.user = question.author
     notification.feedback = answer
 
-    user_data = models.UserData.get_for(notification.user)
+    user_data = models.UserData.get_or_insert_for(notification.user)
     user_data.count_feedback_notification = -1
 
     db.put([notification, user_data])

@@ -819,6 +819,7 @@ class PrintExercise(request_handler.RequestHandler):
                 'user_exercise': userExercise,
                 'logout_url': logout_url,
                 'time_warp': time_warp,
+                'user_data': user_data,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
             
