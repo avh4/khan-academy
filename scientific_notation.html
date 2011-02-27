@@ -109,6 +109,7 @@ switch(problemType)
         write_text("Error in problem type selection, a value outside the appropiate range was returned by the ranom integer generator.  Error in primary switch.");
     break;
 }
+
 /********************** End of main code     *******************************/
 
 /********************** Start of supporting code     *******************************/
@@ -133,7 +134,7 @@ function convertToScientificLTO()
         tempScientificString += problemNumScientific[i];
     }
     scientificString = tempScientificString;
-    scientificString += " &times; 10<sup>" + scientificNumExponent + "</sup>";
+    scientificString += " &times; 10^" + scientificNumExponent;
 }
 
 function convertToScientificGTO()
@@ -156,7 +157,7 @@ function convertToScientificGTO()
         tempScientificString += problemNumScientific[i];
     }
     scientificString = tempScientificString;
-    scientificString += " &times; 10<sup>" + scientificNumExponent + "</sup>";
+    scientificString += " &times; 10^" + scientificNumExponent;
 }
 
 function generateWrongAnswer(answerBase, power)
@@ -177,14 +178,14 @@ function generateWrongAnswer(answerBase, power)
         {
             //add wrong answer that is the negative exponent of the right answer
             localPower = 0-power;
-            wrongAnswerString = answerBase + " &times; 10<sup>" + localPower + "</sup>";
+            wrongAnswerString = answerBase + " &times; 10^" + localPower;
             addWrongChoice(wrongAnswerString);
         }
         else if(2 == problemType)
         {
             //add wrong answer that is the positive of the right answer
             localPower = Math.abs(power);
-            wrongAnswerString = answerBase + " &times; 10<sup>" + localPower + "</sup>";
+            wrongAnswerString = answerBase + " &times; 10^" + localPower;
             addWrongChoice(wrongAnswerString);
         }
 
@@ -194,24 +195,24 @@ function generateWrongAnswer(answerBase, power)
         {
             localPower = getRandomIntRange(-10,10);
         }
-        wrongAnswerString = answerBase + " &times; 10<sup>" + localPower + "</sup>";
+        wrongAnswerString = answerBase + " &times; 10^" + localPower;
         addWrongChoice(wrongAnswerString);
 
         //add wrong answer that is a power more than the right answer
         localPower = power + 1;
-        wrongAnswerString = answerBase + " &times; 10<sup>" + localPower + "</sup>";
+        wrongAnswerString = answerBase + " &times; 10^" + localPower;
         addWrongChoice(wrongAnswerString);
 
         //add wrong answer that is a power less than the right answer
         localPower = power - 1;
-        wrongAnswerString = answerBase + " &times; 10<sup>" + localPower + "</sup>";
+        wrongAnswerString = answerBase + " &times; 10^" + localPower;
         addWrongChoice(wrongAnswerString);
 
         //add a wrong answer that is a correct value, but is shifted a decimal to right
         answerBaseNum = Number(answerBase);
         answerBaseNum *= 10;
         answerBaseNum = Round(answerBaseNum, answerBase.length - 2);
-        wrongAnswerString = answerBaseNum.toString() + " &times; 10<sup>" + Number(power - 1) + "</sup>";
+        wrongAnswerString = answerBaseNum.toString() + " &times; 10^" + Number(power - 1);
         addWrongChoice(wrongAnswerString);
 
     
@@ -219,7 +220,7 @@ function generateWrongAnswer(answerBase, power)
         answerBaseNum = Number(answerBase);
         answerBaseNum /= 10;
         answerBaseNum = Round(answerBaseNum, answerBase.length - 1);
-        wrongAnswerString = answerBaseNum.toString() + " &times; 10<sup>" + Number(power + 1) + "</sup>";
+        wrongAnswerString = answerBaseNum.toString() + " &times; 10^" + Number(power + 1);
         addWrongChoice(wrongAnswerString);
     }
     else if(3 == problemType)
@@ -345,70 +346,40 @@ function Round(Number, DecimalPlaces)
    return Math.round(parseFloat(Number) * Math.pow(10, DecimalPlaces)) / Math.pow(10, DecimalPlaces);
 }
 
-function draw_next_step()
+function generateHints()
 {
     var tempRound = 0;
     switch(problemType)
     {
         case 1:
-            if (steps_given>=0)
-            {
-                document.getElementById('hint1').style.display = 'block';
-                document.getElementById('hint1').innerHTML = "<li>There are " + scientificNumExponent + " digits to the right of the leading " + problemNum[0] + " (and to the left of the decimal).</li>";
-            }
-            if (steps_given>=1)
-            {
-                document.getElementById('hint2').style.display = 'block';
-                document.getElementById('hint2').innerHTML = "<li>So: " + cleanedProblemNum + " = " + scientificString + "</li>";
-            }
+	writeStep("There are " + scientificNumExponent + " digits to the right of the leading " + problemNum[0] + " (and to the left of the decimal).");
+	writeStep("So: `" + cleanedProblemNum + " = " + scientificString + "`");
         break;
         
         case 2:
-            if (steps_given>=0)
-            {
-                document.getElementById('hint1').style.display = 'block';
-                document.getElementById('hint1').innerHTML = "<li>Count the zeros to the right of the decimal before the leading " + problemNumScientific[0] + ".</li>";
-            }
-            if (steps_given>=1)
-            {
-                document.getElementById('hint2').style.display = 'block';
-                document.getElementById('hint2').innerHTML = "<li>We have " + Number(Math.abs(scientificNumExponent) - 1) + " zeros.</li>";
-            }
-            if (steps_given>=2)
-            {
-                document.getElementById('hint3').style.display = 'block';
-                document.getElementById('hint3').innerHTML = "<li>Including the leading " + problemNumScientific[0] + " (and the zeros), we have " + Math.abs(scientificNumExponent) + " digits to the right of the decimal.</li>";
-            }
-            if (steps_given>=3)
-            {
-                document.getElementById('hint4').style.display = 'block';
-                document.getElementById('hint4').innerHTML = "<li>So: " + cleanedProblemNum + " = " + scientificString + "</li>";
-            }
+	writeStep("Count the zeroes to the right of the decimal before the leading " + problemNumScientific[0] + ".");
+	writeStep("We have " + Number(Math.abs(scientificNumExponent) - 1) + " zeroes.");
+        writeStep("Including the leading " + problemNumScientific[0] + " (and the zeros), we have " + Math.abs(scientificNumExponent) + " digits to the right of the decimal.");
+	writeStep("So: `" + cleanedProblemNum + " = " + scientificString + "`");
         break;
         
         case 3:
-            if (steps_given>=0)
-            {
-                document.getElementById('hint1').style.display = 'block';
-                document.getElementById('hint1').innerHTML = "<li>" + scientificString + " = " + tempScientificString + " &times; " + cleanNumberString(Number(Math.pow(10,scientificNumExponent)).toString()) + "</li>";
-            }
-            if (steps_given>=1)
-            {
-                tempRound = (Number(tempScientificString) * Math.pow(10,scientificNumExponent));
-                if(1 > tempRound)
-                {
-                    tempRound = Round(tempRound, tempScientificString.length + Math.abs(scientificNumExponent));
-                }
-                else
-                {
-                    tempRound = Round(tempRound, 0);
-                }
-                document.getElementById('hint2').style.display = 'block';
-                document.getElementById('hint2').innerHTML = "<li>" + tempScientificString + " &times; " + cleanNumberString(Number(Math.pow(10,scientificNumExponent)).toString()) + " = " + cleanNumberString(tempRound.toString()) + "</li>";
-            }
+	writeStep("`" + scientificString + " = " + tempScientificString + " &times; " + cleanNumberString(Number(Math.pow(10,scientificNumExponent)).toString()) + "`");
+
+	tempRound = (Number(tempScientificString) * Math.pow(10,scientificNumExponent));
+	if(1 > tempRound)
+	{
+	tempRound = Round(tempRound, tempScientificString.length + Math.abs(scientificNumExponent));
+	}
+	else
+	{
+	tempRound = Round(tempRound, 0);
+	}
+	writeStep("`" + tempScientificString + " &times; " + cleanNumberString(Number(Math.pow(10,scientificNumExponent)).toString()) + " = " + cleanNumberString(tempRound.toString()) + "`");
         break;
+
         default:
-            write_text("Error in problem type selection, a value outside the appropiate range was returned by the ranom integer generator.  Error in hint giver switch.");
+	writeStep("Error in problem type selection, a value outside the appropiate range was returned by the ranom integer generator.  Error in hint giver switch.");
         break;
     }
     steps_given++;
@@ -432,20 +403,13 @@ switch(problemType)
     break;
     
     case 3:
-        write_text(scientificString + '  = ');
+        write_text('`' + scientificString + '  = `');
     break;
 }
 
+generateHints();
 
 //-->
 </script>
-<br />
-<ul>
-<div id="hint1" style="display:none;font-family:sans-serif;font-size:12pt"></div>
-<div id="hint2" style="display:none;font-family:sans-serif;font-size:12pt"></div>
-<div id="hint3" style="display:none;font-family:sans-serif;font-size:12pt"></div>
-<div id="hint4" style="display:none;font-family:sans-serif;font-size:12pt"></div>
-</ul>
 
 {% endblock maincell %}
-{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
