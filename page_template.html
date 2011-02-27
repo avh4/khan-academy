@@ -9,7 +9,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
-        {% else %}{% if exercise %}<title>{{exercise.display_name}} | Khan Academy</title>
+        {% else %}{% if exercise %}<title>{{exercise.display_name|escape}} | Khan Academy</title>
 	{% else %}<title>Khan Academy</title>
 	{% endif %}
         {% endif %}
