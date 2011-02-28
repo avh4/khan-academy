@@ -142,7 +142,7 @@ def clear_question_answers_for_current_user(s_question_id):
     if not question:
         return;
 
-    user_data = models.UserData.get_for(user)
+    user_data = models.UserData.get_or_insert_for(user)
 
     feedback_keys = question.children_keys()
     for key in feedback_keys:
