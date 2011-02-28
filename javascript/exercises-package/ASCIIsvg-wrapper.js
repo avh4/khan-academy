@@ -191,26 +191,27 @@ function initPicture(x_min,x_max,y_min,y_max) {
 function line(p,q,id) { // segment connecting points p,q (coordinates in units)
     var node;
     if (id!=null) node = svgNodes[id];
-    if (node==null) {
+    if (typeof node == "undefined" || node==null) {
 	node = paper.path();
 	svgNodes[id] = node;
     }
-    node.attr({path: "M"+(p[0]*xunitlength+origin[0])+","+
+    node.attr("path","M"+(p[0]*xunitlength+origin[0])+","+
 		      (height-p[1]*yunitlength-origin[1])+" "+
-	       (q[0]*xunitlength+origin[0])+","+(height-q[1]*yunitlength-origin[1]),
-	       "stroke-width": strokewidth,
-	       "stroke": stroke,
-	       "fill": (fill != "none" ? fill : null)
-	      });
-    if (strokedasharray != null) {
-	// FIXME ignoring the specified strokedasharray for now
-	node.attr("stroke-dasharray", ".");
+		      (q[0]*xunitlength+origin[0])+","+(height-q[1]*yunitlength-origin[1]));
+    node.attr("stroke-width", strokewidth);
+    if (strokedasharray!=null) {
+	node.attr("stroke-dasharray", '.');
+    }
+    node.attr("stroke", stroke);
+    if (fill != "none") {
+	node.attr("fill", fill);
     }
     if (marker=="dot" || marker=="arrowdot") {
 	ASdot(p,markersize,markerstroke,markerfill);
 	if (marker=="arrowdot") arrowhead(p,q);
 	ASdot(q,markersize,markerstroke,markerfill);
     } else if (marker=="arrow") arrowhead(p,q);
+
     return node;
 }
 
@@ -381,13 +382,16 @@ function text(p,st,pos,id,fontsty) {
     var dy = fontsize/3;
 
     if (pos!=null) {
-	if (pos.slice(0,5)=="above") dy = -fontsize/2;
-	if (pos.slice(0,5)=="below") dy = fontsize-0;
+	if (pos.slice(0,5)=="above") {
+	    dy = -fontsize/1.2;
+	} else if (pos.slice(0,5)=="below") {
+	    dy = fontsize-0;
+	}
+
 	if (pos.slice(0,5)=="right" || pos.slice(5,10)=="right") {
 	    textanchor = "start";
 	    dx = fontsize/2;
-	}
-	if (pos.slice(0,4)=="left" || pos.slice(5,9)=="left") {
+	} else if (pos.slice(0,4)=="left" || pos.slice(5,9)=="left") {
 	    textanchor = "end";
 	    dx = -fontsize/2;
 	}
