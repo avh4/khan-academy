@@ -78,6 +78,24 @@ class RequestHandler(webapp.RequestHandler):
 
         self.render_template('viewerror.html', {"message": message})
 
+    def user_agent(self):
+        return str(self.request.headers['User-Agent'])
+
+    def redirect_via_refresh_if_webkit(self, location):
+        if self.user_agent().lower().find("webkit") > -1:
+            # When WebKit issues a 302 redirect after a POST request,
+            # all previously cached static content (images, scripts, the whole kit'n'kaboodle)
+            # is cleared from cache and re-retrieved. Until it's fixed, we'll avoid this WebKit-only 
+            # bug by using a Refresh header.
+            #
+            # https://bugs.webkit.org/show_bug.cgi?id=38690
+            # http://stackoverflow.com/questions/4301405/webkit-image-reload-on-post-redirect-get
+            # http://www.google.com/support/forum/p/Chrome/thread?tid=72bf3773f7e66d68&hl=en
+            #
+            self.response.headers.add_header("Refresh", "0; URL=%s" % location)
+        else:
+            self.redirect(location)
+
     def render_template(self, template_name, template_values):
         template_values['App'] = App
         template_values['None'] = None
