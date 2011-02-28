@@ -20,7 +20,7 @@ from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, Exerc
 from badges import util_badges
 
 from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
-from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPerMinuteGraph
+from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPerMinuteGraph, ClassTimeGraph
 
 def meanstdv(x):
     n, mean, std = len(x), 0, 0
