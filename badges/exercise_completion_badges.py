@@ -23,9 +23,15 @@ class ExerciseCompletionBadge(Badge):
     def extended_description(self):
         s_exercises = ""
         for exercise_name in self.exercise_names_required:
-            if len(s_exercises) > 0:
-                s_exercises += ", "
-            s_exercises += models.Exercise.to_display_name(exercise_name)
+            badge_name = models.Exercise.to_display_name(exercise_name)
+            if len(s_exercises) > 80:
+                badge_name = models.Exercise.to_short_name(exercise_name)
+
+            if len(badge_name) > 0:
+                if len(s_exercises) > 0:
+                    s_exercises += ", "
+                s_exercises += badge_name
+
         return "Achieve proficiency in %s" % s_exercises
 
 class ChallengeCompletionBadge(ExerciseCompletionBadge):

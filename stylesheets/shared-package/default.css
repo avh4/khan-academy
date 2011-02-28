@@ -1255,6 +1255,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-size: 11px;
         margin-top: 4px;
         font-style: italic;
+        line-height: normal;
     }
     .achievement-badge .achievement-desc-no-count {
         left: 5px;

@@ -76,9 +76,10 @@ class Exercise(db.Model):
 
     @staticmethod
     def get_by_name(name):
-        query = Exercise.all()
-        query.filter('name =', name)
-        return query.get()
+        dict_exercises = Exercise.get_dict_use_cache()
+        if dict_exercises.has_key(name):
+            return dict_exercises[name]
+        return None
 
     @staticmethod
     def to_display_name(name):
@@ -88,6 +89,13 @@ class Exercise(db.Model):
 
     def display_name(self):
         return Exercise.to_display_name(self.name)
+
+    @staticmethod
+    def to_short_name(name):
+        exercise = Exercise.get_by_name(name)
+        if exercise:
+            return exercise.short_name()
+        return ""
 
     def short_name(self):
         if self.short_display_name:
@@ -164,6 +172,15 @@ class Exercise(db.Model):
     def get_all_use_cache():
         query = Exercise.all().order('h_position')
         return query.fetch(200)
+
+    @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_dict_%s" % Setting.cached_exercises_date())
+    def get_dict_use_cache():
+        exercises = Exercise.get_all_use_cache()
+        dict_exercises = {}
+        for exercise in exercises:
+            dict_exercises[exercise.name] = exercise
+        return dict_exercises
 
     _EXERCISES_COUNT_KEY = "Exercise.count()"
     @staticmethod
