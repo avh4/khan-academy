@@ -1186,11 +1186,6 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_data = UserData.get_for(user_exercise.user)
             exercise = user_exercise.exercise_model
 
-            if user_exercise.user.email() != user.email():
-                # Don't let anybody answer anybody else's questions.
-                self.redirect('/exercises?exid=' + exid)
-                return
-
             user_exercise.last_done = datetime.datetime.now()
             user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
             user_exercise.summative = exercise.summative
@@ -1276,11 +1271,6 @@ class RegisterCorrectness(request_handler.RequestHandler):
             correct = int(self.request.get('correct'))
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
-
-            if user_exercise.user.email() != user.email():
-                # Don't let anybody answer anybody else's questions.
-                self.redirect('/exercisedashboard')
-                return
 
             user_exercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
