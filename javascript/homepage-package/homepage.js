@@ -44,8 +44,7 @@ var Homepage = {
             var jelFixed = $("#browse-fixed")
             var jelTop = $("#back-to-top");
 
-            if (!Homepage.fTopBound)
-                jelTop.click(function(){Homepage.waypointTop(jel, jelFixed, jelTop);});
+            jelTop.click(function(){Homepage.waypointTop(jel, jelFixed, jelTop);});
 
             if (direction == "down")
                 Homepage.waypointVideos(jel, jelFixed, jelTop);
