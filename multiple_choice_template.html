@@ -40,7 +40,7 @@
 
 	for (i=0; i<answerChoices.length; i++)
     {
-		document.write('<p style="white-space:nowrap;margin-top:10px;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">&nbsp;'+answerChoices[i]+'</input></p>');
+		document.write('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input type=\"radio\" id="answerChoice'+i+'" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">&nbsp;'+answerChoices[i]+'</input></p></label>');
     }
 
 //-->
