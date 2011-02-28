@@ -183,6 +183,7 @@ function initPicture(x_min,x_max,y_min,y_max) {
 	    });
 
 	    border = defaultborder;
+	    return node;
 	}
     }
 }
@@ -210,6 +211,7 @@ function line(p,q,id) { // segment connecting points p,q (coordinates in units)
 	if (marker=="arrowdot") arrowhead(p,q);
 	ASdot(q,markersize,markerstroke,markerfill);
     } else if (marker=="arrow") arrowhead(p,q);
+    return node;
 }
 
 function path(plist,id,c) {
@@ -315,6 +317,40 @@ function ellipse(center,rx,ry,id) { // coordinates in units
     node.attr("stroke-width", strokewidth);
     node.attr("stroke", stroke);
     node.attr("fill", fill);
+    return node;
+}
+
+function arc_elliptical(start,end,rx,ry,id) { // coordinates in units
+    var node, v;
+    //alert([fill, stroke, origin, xunitlength, yunitlength, height])
+    if (id!=null) node = svgNodes[id];
+    if (rx==null) {
+        v=[end[0]-start[0],end[1]-start[1]];
+        rx = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
+    }
+    if (typeof node == "undefined" || node==null) {
+        node = paper.path();
+        svgNodes[id] = node;
+    }
+    var path = "M"+(start[0]*xunitlength+origin[0])+","+
+            (height-start[1]*yunitlength-origin[1])+" A"+rx*xunitlength+","+
+            ry*yunitlength+" 0 0,0 "+(end[0]*xunitlength+origin[0])+","+
+            (height-end[1]*yunitlength-origin[1]);
+    node.attr("path", path);
+    node.attr("stroke-width", strokewidth);
+    node.attr("stroke", stroke);
+    node.attr("fill", fill);
+    if (marker=="arrow" || marker=="arrowdot") {
+        u = [(end[1]-start[1])/4,(start[0]-end[0])/4];
+        v = [(end[0]-start[0])/2,(end[1]-start[1])/2];
+        v = [start[0]+v[0]+u[0],start[1]+v[1]+u[1]];
+    } else v=[start[0],start[1]];
+    if (marker=="dot" || marker=="arrowdot") {
+        ASdot(start,markersize,markerstroke,markerfill);
+        if (marker=="arrowdot") arrowhead(v,end);
+        ASdot(end,markersize,markerstroke,markerfill);
+    } else if (marker=="arrow") arrowhead(v,end);
+    return node;
 }
 
 function rect(p,q,id,rx,ry) { // opposite corners in units, rounded by radii

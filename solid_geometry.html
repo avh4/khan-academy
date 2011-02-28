@@ -1,0 +1,17 @@
+{% extends "multiple_choice_template.html" %}
+{% block maincode %}
+<style>
+  .line1 { color: blue }
+  .line2 { color: red }
+</style>
+<script src="/javascript/exercises/solid_geometry.js?{{App.version}}"></script>
+<script>
+SolidGeometryExercise.init();
+
+function graph_update() {
+    SolidGeometryExercise.graphUpdate();
+}
+</script>
+{% endblock maincode %}
+{% block hintfunction %}SolidGeometryExercise.getHint();{% endblock hintfunction %}
+{% block maincell %}<iframe id="canvas" name="present" frameborder=0 src="/graphpage.html?w=400&h=350" height="350" width="400" scrolling="no"></iframe>{% endblock maincell %}
