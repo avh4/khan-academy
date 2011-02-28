@@ -857,31 +857,6 @@ function writeGraphicalHint(hint, stuffToDraw)
 	writeStep(hint);
 }
 
-
-KhanAcademy_hint_by_id = {};
-
-// Store away the innerHTML of the hints so that users don't accidentally see it if they copy/paste
-// the page to a text editor as described in issue 57.
-function hide_hints() {
-	var step = 1;
-	while(true) {
-		var part = 1;
-		while (true) {
-			var id = "step" + step + "_" + part;
-			var elem = document.getElementById(id);
-			if (!elem) 
-				break;
-			KhanAcademy_hint_by_id[id] = elem.innerHTML;
-			elem.innerHTML = '';
-			part++;
-		}
-		if (part == 1) 
-			// Nothing for this step so we must be done
-			break;
-		step++;
-	}	
-}
-
 function give_next_step() {
 	
 	var justDrawn = graphicalHints[steps_given];
@@ -901,22 +876,14 @@ function give_next_step() {
 	
 	
 	//graph_update();
-	for(var i=1; i<=display_per_step; i++)
-	{
-		show_step(i);
-	}
+	
+	show_step();
 	translate(); // Process any ASCII Math -> MathML
 }
 
-function show_step(i)
+function show_step() 
 {
-	var id = "step"+steps_given+"_"+i;
-	var elem = document.getElementById(id);
-	if (elem) 
-	{
-		elem.innerHTML = KhanAcademy_hint_by_id[id];
-		elem.style.visibility = 'visible';				
-	}
+    $(".step" + steps_given).css("visibility", "visible");
 }
 
 function randomRotation()

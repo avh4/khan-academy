@@ -18,11 +18,11 @@ var starttimestring = date_to_string(starttime);
 var time;
 var displaygraph = false;
 var alreadyRedirect = 0;
-var display_per_step = 1;  //This is how many DIV panes get displayed every time a new hint is given
 var timesWrong = 0; //This is used only by words.jsp and new_question()
 var recordedProblem = 0;
 var recordedCorrect = 0;
-
+var selColor = "#AE9CC9";
+var noSelColor = "#333333";
 
 var correct = new Image();
 correct.src = "/images/face-smiley.gif";
@@ -174,7 +174,9 @@ function addWrongChoice(choice)
 			possibleAnswers.push(choice);
 }
 
-
+function getNumPossibleAnswers() {
+    return possibleAnswers.length;
+}
 
 function arrayEqual(a,b) //return true if the elements in the array are equal
 {
@@ -283,6 +285,34 @@ function format_constant(number)
 	else {
 		return ""; 
 	}
+}
+
+function format_string_with_color(str, color)
+{
+    return '<font color=' + color + ' size=4>' + '`' + str + '`</font>';
+}
+
+function format_expression(coeff, str, color, is_leading) {
+    var expression = '';
+	for (var i = 0; i < coeff.length; i++) {
+        if (i == 0)
+            expression += '<font color=\"'+ color +'\">`';
+        if (i == 0 && is_leading) {
+            if (str == '')
+                expression += coeff[i]
+            else
+                expression += format_first_coefficient(coeff[i]) + str;
+        } else {
+            if (!str)
+                expression += format_constant(coeff[i])
+            else
+		        expression += format_coefficient(coeff[i]) + str;
+    	}
+    }
+   if (expression)
+        expression += '`</font>';
+        
+    return expression;
 }
 
 function date_to_string(d)
@@ -539,42 +569,48 @@ function start_random_problem()
 
 function write_step(text, step) //Deprecated
 {
-	document.write('<P><div id=\"step'+step+'_'+display_per_step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+	document.write('<P><div class=\"step'+step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
 }
 
 function write_step(text)
 {
-	document.write('<P><div id=\"step'+next_step_to_write+'_'+display_per_step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+    document.write('<P><div class=\"step'+next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+	next_step_to_write++;
+}
+
+function write_table_step_generic(explanation, left, center, right)
+{
+	document.write(	'<tr class="step'+ next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
+        	+ '<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '<FONT class=\"explanation\" class=\"nobr\">' + explanation + '</font>' +'</font></div>'
+			+'</td><td align=right class=\"nobr\"><nobr>'
+			+'<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '`' + left + '`' + '</font></div>'
+			+'</nobr></td><td align=left class=\"nobr\"><nobr>'
+			+ '<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '`'+ center + right + '`' + '</font></div>'
+			+'</nobr></td></tr>');
+			
 	next_step_to_write++;
 }
 
 function write_table_step(explanation, left, right)
 {
-	document.write(	'<tr><td align=left class=\"nobr\">'
-			+get_step_part_string('<FONT class=\"explanation\"  class=\"nobr\">'+explanation+'</font>', next_step_to_write, 3)
-			+'</td><td align=right class=\"nobr\"><nobr>'
-			+get_step_part_string('`'+left+'`', next_step_to_write, 1)
-			+'</nobr></td><td align=left class=\"nobr\"><nobr>'
-			+get_step_part_string('`='+right+'`', next_step_to_write, 2)
-			+'</nobr></td></tr>');
-	next_step_to_write++;
+    write_table_step_generic(explanation, left, '=', right);
 }
 
 function table_step_header(explanation, left, right)
 {
-	document.write('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
+    table_step_header_generic(explanation, left, '=', right);
+}
+
+function table_step_header_generic(explanation, left, center, right) 
+{
+    document.write('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
 			left+
-			'</font></td><td align=left class=\"nobr\"><nobr><font face=\"arial\" size=4  class=\"nobr\">`='+right+'`</font></nobr></td></tr>');	
+			'</font></td><td align=left class=\"nobr\"><nobr><font face=\"arial\" size=4  class=\"nobr\">`' + center  +right+'`</font></nobr></td></tr>');
 }
 
 function table_step_footer()
 {
 	document.write('</table></center>');
-}
-
-function get_step_part_string(text, present_step, part)
-{
-	return ('<div id=\"step'+present_step+'_'+part+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=4>'+text+'</font></div>');
 }
 
 function write_equation(equation)
@@ -656,7 +692,7 @@ function problem_footer()
 			}
 			else
 			{
-				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
+				answerChoices[i]= '`' + possibleAnswers[possibleWrongIndices.pop()] + '`';
 			}
 			/****
 			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
@@ -664,9 +700,8 @@ function problem_footer()
 			answerChoices[i]='`'+new_wrong_choice+'`';
 			*****/
 		}
-
+		
 		document.write('<br><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></br>');
-
 	}
 
 	document.write('<br><input type=\"button\" value=\"Hint\" onClick=\"give_next_step()\"><input type=\"button\" value=\"Check Answer\" onClick=\"check_answer()\"></br>');

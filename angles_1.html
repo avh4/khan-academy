@@ -805,8 +805,7 @@ function overline(x)
 function draw_next_step() {
 	drawVariable(explanationStack[steps_given][0]);
 	steps_given++;
-	for(var i=1; i<=display_per_step; i++)
-		show_step(i);
+    show_step();
 }
 
 

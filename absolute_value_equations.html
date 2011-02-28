@@ -1,0 +1,12 @@
+{% extends "multiple_choice_template.html" %}
+
+{% block maincode %}
+<script src="/javascript/exercises/absolute_value_equations.js?{{App.version}}"></script>
+<script>
+    var exercise = new AbsoluteValueEquationsExercise();
+    exercise.init();
+</script>
+
+{% endblock maincode %}
+
+

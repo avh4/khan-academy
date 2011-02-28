@@ -48,15 +48,11 @@
 // Conditions: make sure FA - CD != 0
 
 
-display_per_step = 3; //the right and left panes of the hint table
 var letters = 'abcdefghijklmnpqrstuvwxyz'; //Don't let a variable be 'o' due to ASCIIMathML issues
 var letter = getRandomInt(22); 
 var xVar = letters[letter];  //Use these variables to generalize our function variables
 var yVar = letters[letter + 1];
 var zVar = letters[letter + 2];
-
-var selColor = '#AE9CC9';
-var noSelColor = '#333333';
 
 // returns font size/color adjusted string
 // note difference from linear equations impl where the back quote is placed to surround it. not sure why this

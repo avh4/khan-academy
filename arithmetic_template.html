@@ -39,7 +39,7 @@ var currentexercise = "{{exid}}";
 KhanAcademy.problem_number = "{{problem_number}}";
 KhanAcademy.problem_seed = KhanAcademy.problem_number;
 {% if exercise.summative %}
-    {# We use different seeds for summative exercises so they don't reuse content already seen in normal exercises. #}
+    {# We use different seeds for summative exercises so they do not reuse content already seen in normal exercises. #}
     KhanAcademy.problem_seed = KhanAcademy.problem_seed + "-summative";
 {% endif %}
 KhanAcademy.seedRandom(KhanAcademy.problem_seed);
@@ -220,7 +220,6 @@ function submitForm(value)
 </div>
 <div style="clear: both;"></div>
 <script type="text/javascript"><!--
-hide_hints();
 $(document).ready(function() {
     var scratchpad_cookie_name = "show_scratchpad";
 

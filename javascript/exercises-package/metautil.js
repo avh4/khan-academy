@@ -127,23 +127,6 @@ function randomMember(arr)
 	return arr[getRandomInt(arr.length-1)];
 }
 
-function problemFooter()
-{
-	while (possibleAnswers.length<6)
-	{
-		addWrongChoice(getRandomIntRange(-10,10));
-	}
-	correct_answer = mathFormat(correct_answer);
-	
-	
-	problem_footer();
-}
-
-function freeAnswerFooter()
-{
-	free_answer_footer();
-}
-
 function formatCoefficient(c)
 {
 	return format_coefficient(c);
@@ -270,61 +253,6 @@ function parseFloatStrict(val)
 function isNumericStrict(val)
 {
     return !isNaN(parseFloat(val)) && isFinite(val);
-}
-
-function graphFooter()
-{
-	correct_answer = mathFormat(correct_answer);
-}
-
-
-function graphicalFooter()
-{
-
-	correct_answer = mathFormat(correct_answer);
-	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
-
-	//Fill in the choices
-	//need to fix it so that the other choices can never be the same as the correct choice
-	
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
-	for (var i=0; i<5; i++)
-	{
-		if (i==correctchoice) 
-		{
-			answerChoices[i]=correct_answer;
-		}
-		else
-		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]='`'+definiteWrongAnswers[definiteWrongIndices.pop()]+'`';
-			}
-			else
-			{
-				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
-			}
-		}
-
-		document.write('<br><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></br>');
-
-	}
-
-	document.write('<br><input type=\"button\" value=\"Hint\" onClick=\"give_next_step()\"><input type=\"button\" value=\"Check Answer\" onClick=\"check_answer()\"></br>');
-	document.write('<br><img src=\"/images/blank.gif\" name=\"feedback\"><div id=\"nextbutton\" style=\"position:relative; visibility:hidden;\"><input type=\"button\" value=\"Correct! Next Question...\" onClick=\"new_question()\"></div></br>');
-	document.write('</form></td></tr></table>');	
-	document.answerform.reset();
-}
-
-function getResponseProps(response, header){
-	try {
-		var s = response.getResponseHeader(header || 'X-Ajax-Props');
-		if (s==null || s=="")
-			return new Object()
-		else
-			return eval("o="+s)
-	} catch (e) { return new Object() }
 }
 
 KhanAcademy = {
