@@ -1,32 +1,69 @@
 {% extends "about_template.html" %}
+{% block pagescript %}
+<style>
+    #faq {
+        padding-top: 18px;
+    }
+    #faq-nav {
+        background: #eee;
+        padding: 9px;
+        max-width: 31%;
+        min-width: 31%;
+        margin-right: 3%;
+        margin-bottom: 90px;
+    }
+    #faq-nav ul {
+        list-style: outside decimal;
+        margin-left: 18px;
+    }
+    #faq-nav li {
+        margin-bottom: 5px;
+    }
+    #faq-nav li a {
+        text-decoration: none;
+        text-shadow: 0 1px 0 #fff;
+    }
+    #faq-nav li a:hover {
+        text-decoration: underline;
+    }
+</style>
+<script type="text/javascript" src="/javascript/homepage-package/waypoints.min.js?{{App.version}}"></script>
+{% endblock %}
 {% block aboutcontent %}
 
 <div id="faq">
-    <h1 class="main-headline">Frequently Asked Questions</h1>
-
-    <p style="font-style:italic;">
-        Sal answers a few commonly asked questions about the Khan Academy...
-    </p>
-
-    <ul>
-        <li><a href="#why">Why are you doing this project?</a></li>
-        <li><a href="#what">What do you think makes the Khan Academy different than all of the other educational resources out there?</a></li>
-        <li><a href="#curricula">What curricula are you following?</a></li>
-        <li><a href="#effective">How do you know that the Khan Academy is effective?</a></li>
-        <li><a href="#started">How did you get started?</a></li>
-        <li><a href="#full-time">How did you have the time to do this while working full-time?</a></li>
-        <li><a href="#access-content">Is there any way to access the content besides YouTube?</a></li>
-        <li><a href="#funding">How are you funding/making money off of this?</a></li>
-        <li><a href="#business">Are you interested in turning this into a business? Maybe with some VC funding?</a></li>
-        <li><a href="#videos">Did you do all of the videos?</a></li>
-        <li><a href="#dub">Can I dub your videos in another language?</a></li>
-        <li><a href="#topics">What topics do you plan to cover?</a></li>
-        <li><a href="#long-term">What is the long-term goal for the Khan Academy?</a></li>
-        <li><a href="#equipment">What equipment do you use to make your videos?</a></li>
-        <li><a href="#where-from">Where are you from? What ethnicity/religion are you?</a></li>
-        <li><a href="#help">How can I/you help?</a></li>
-    </ul><br/>
-
+    
+    <div id="faq-nav-wrapper">
+        <div id="faq-nav" class="col1 forty-sixty vertical-shadow">
+            <h2 class="pulls">Frequently Asked Questions</h2>
+            <p style="margin-top: 9px;">
+                <em>Sal answers a few commonly asked questions about the Khan Academy...</em>
+            </p>
+            <ul>
+                <li><a href="#why">Why are you doing this project?</a></li>
+                <li><a href="#what">What do you think makes the Khan Academy different than all of the other educational resources out there?</a></li>
+                <li><a href="#curricula">What curricula are you following?</a></li>
+                <li><a href="#effective">How do you know that the Khan Academy is effective?</a></li>
+                <li><a href="#started">How did you get started?</a></li>
+                <li><a href="#full-time">How did you have the time to do this while working full-time?</a></li>
+                <li><a href="#access-content">Is there any way to access the content besides YouTube?</a></li>
+                <li><a href="#funding">How are you funding/making money off of this?</a></li>
+                <li><a href="#business">Are you interested in turning this into a business? Maybe with some VC funding?</a></li>
+                <li><a href="#videos">Did you do all of the videos?</a></li>
+                <li><a href="#dub">Can I dub your videos in another language?</a></li>
+                <li><a href="#topics">What topics do you plan to cover?</a></li>
+                <li><a href="#long-term">What is the long-term goal for the Khan Academy?</a></li>
+                <li><a href="#equipment">What equipment do you use to make your videos?</a></li>
+                <li><a href="#where-from">Where are you from? What ethnicity/religion are you?</a></li>
+                <li><a href="#help">How can I/you help?</a></li>
+            </ul>
+        </div>
+        <div id="nav-placeholder" class="col1 forty-sixty" style="height: 1px; padding: 0 9px; max-width: 31%; min-width: 31%; margin-right: 3%;">
+            &nbsp;
+        </div>
+    </div>
+    <div class="col2 forty-sixty" style="text-align: justify; padding-top: 9px;">
+    
     <a name="why"><h2>Why are you doing this project?</h2></a>
     <p>
         I (Sal) can't imagine a better use of my (or anyone's) time.
@@ -243,7 +280,6 @@
         not be for at least another 50 or 60 years).  Should give me time to make several tens of thousands of videos in pretty
         much every subject.
     </p>
-
     <a name="long-term"><h2>What is the long-term goal for the Khan Academy?</h2></a>
     <p>
     I see Khan Academy becoming the world's first free, world-class virtual school where anyone can learn anything--for free.
@@ -274,7 +310,30 @@
     <p>
     See the <a href="/getinvolved">How to help</a> page.
     </p>
+    </div>
+    <div class="clear"></div>
+    <p>&nbsp;</p>
 </div>
+<script type="text/javascript">
+    $(document).ready(function() {	
+        // Waypoint behavior not supported in IE7-
+        if ($.browser.msie && parseInt($.browser.version) < 8) return;
 
+        $.waypoints.settings.scrollThrottle = 50;
+
+        $("#faq-nav").waypoint(function(event, direction) {
+
+            var jel = $(this);
+            var jelPlaceholder = $("#nav-placeholder");
+            
+            if (direction == "down") {
+                jel.css('position', 'fixed').css('top', '-80px').css('max-width', jelPlaceholder.width()).css('min-width', jelPlaceholder.width());
+            }
+            else {
+                jel.css('position', 'static').css('max-width', '31%').css('min-width', '31%');
+            }
+        });
+    });
+</script>
 {% endblock aboutcontent %}
 
