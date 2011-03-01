@@ -30,7 +30,6 @@ correct.src = "/images/face-smiley.gif";
 var incorrect = new Image();
 incorrect.src = "/images/face-sad.gif";
 
-
 // Deprecated: Use generateRandomProblem (below) instead.
 // Note: compareFunction is now ignored.  entryFunction must return the same
 // id for all problems that should be considered equivalent.
@@ -312,12 +311,12 @@ function format_expression(coeff, str, color, is_leading) {
             if (str == '')
                 expression += coeff[i]
             else
-                expression += format_first_coefficient(coeff[i]) + str;
+                expression += format_first_coefficient(coeff[i]) + " " + str + " " ;
         } else {
             if (!str)
                 expression += format_constant(coeff[i])
             else
-		        expression += format_coefficient(coeff[i]) + str;
+		        expression += format_coefficient(coeff[i]) + " " + str + " ";
     	}
     }
    if (expression)
@@ -604,6 +603,15 @@ function array_sum(a) {
 function start_random_problem()
 {
 	window.location = randomProblem();
+}
+
+function open_left_padding(pixels) {
+    document.write("<div style=\'padding-left: " + pixels + "px\'")
+    
+}
+
+function close_left_padding() {
+    document.write("</div>");
 }
 
 function write_step(text, step) //Deprecated

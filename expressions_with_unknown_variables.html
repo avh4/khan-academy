@@ -1,0 +1,16 @@
+{% extends "arithmetic_template.html" %}
+
+{% block maincode %}
+<script src="/javascript/exercises/expressions_with_unknown_variables.js?{{App.version}}"></script>
+<script>
+    var exercise = new ExpressionsWithUnknownVariablesExercise();
+    exercise.init();
+</script>
+
+{% endblock maincode %}
+
+{% block hintfunction %}
+give_next_step()
+{% endblock hintfunction%}
+
+
