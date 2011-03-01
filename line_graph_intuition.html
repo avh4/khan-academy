@@ -27,11 +27,11 @@ var curIntDen = 1;
 
 function eqString()
 {
-	var expString = "<font size=15>`y=";
-	expString+=formatFraction(curSlopeNum, curSlopeDen, false);
-	expString+="x";
-	expString+=formatFraction(curIntNum, curIntDen, true);
-	expString+="`</font>";
+	var expString = "<div style='font-size: 20px; padding-top: 20px;'>`y=";
+	expString += format_fraction(curSlopeNum, curSlopeDen);
+	expString += "x";
+	expString += format_fraction_with_sign(curIntNum, curIntDen);
+	expString += "`</div>";
 	return expString;
 }
 
@@ -39,10 +39,9 @@ function slope(num)
 {
 	var oldDen = curSlopeDen;
 	curSlopeDen = getLCM(curSlopeDen, slopeIncr);
-	curSlopeNum = curSlopeDen/oldDen*curSlopeNum +num*curSlopeDen/slopeIncr;
+	curSlopeNum = (curSlopeDen / oldDen * curSlopeNum) + (num * curSlopeDen / slopeIncr);
 	document.getElementById("equation").innerHTML = eqString();
 	translate();
-	//text([-11, 9], eqString(), right, 'eqstring');
 	present.plot(f, 'graph');
 	checkAnswer();
 }
@@ -51,47 +50,16 @@ function intercept(num)
 {
 	var oldDen = curIntDen;
 	curIntDen = getLCM(curIntDen, slopeIncr);
-	curIntNum = curIntDen/oldDen*curIntNum +num*curIntDen/slopeIncr;
+	curIntNum = (curIntDen / oldDen * curIntNum) + (num * curIntDen / slopeIncr);
 	document.getElementById("equation").innerHTML = eqString();
 	translate();
-	//text([-11, 9], eqString(), right, 'eqstring');
 	present.plot(f, 'graph');
 	checkAnswer();
-}
-function formatFraction(n, d, sign)
-{
-	var gcd = getGCD(n, d);
-	var new_numerator = n/gcd;
-	var new_denominator = d/gcd;
-	
-	var expressionString = "";
-	if(sign || (n/d <0))
-	{
-		if(n/d >= 0)
-			expressionString +="+ ";
-		else
-			expressionString +="- ";
-	}
-	
-	if (new_numerator== 0) {
-		expressionString +="0";
-	}
-	else if (new_denominator== 1) {
-		expressionString +=Math.abs(new_numerator);
-	}
-	else if (new_denominator== 0) {
-		expressionString += "undefined";
-	}
-	else {
-		expressionString += Math.abs(new_numerator)+"/"+
-					Math.abs(new_denominator);
-	}
-	return expressionString;
 }
 
 var f = function f(x)
 {
-	return (curSlopeNum/curSlopeDen*x+curIntNum/curIntDen);
+	return ((curSlopeNum / curSlopeDen * x) + (curIntNum / curIntDen));
 }
 
 
@@ -101,15 +69,15 @@ function r2(x)
 }
 
 function graph_update() {
-	present.initPicture(-10,10, -10, 10);
+	present.initPicture(-10, 10, -10, 10);
 	present.fontfamily = "arial";
-	present.fontstyle="normal";
+	present.fontstyle ="normal";
 	present.fontsize = "10";
 	present.stroke = "#EEEEEE";
 	present.strokewidth = "2";
-	for(var i=-10; i<11; i++)
+	for(var i = -10; i < 11; i++)
 	{
-		if (i!=0)
+		if (i)
 		{
 			present.line([i,-11], [i,11]);
 			present.line([-11,i], [11,i]);
@@ -120,12 +88,9 @@ function graph_update() {
 	present.axes();
 	present.ASdot([x1,y1], 2, "#528B8B", "#528B8B");
 	present.ASdot([x2,y2], 2, "#528B8B", "#528B8B");
-	present.fontsize="25";
+	present.fontsize = "25";
 	present.strokewidth = "1";
-	//fontfill="black";
-	//stroke = "black";
-	//text([-11, 9], eqString(), right, 'eqstring');
-	present.stroke="orange";
+	present.stroke = "orange";
 	present.plot(f, 'graph');
 }
 
