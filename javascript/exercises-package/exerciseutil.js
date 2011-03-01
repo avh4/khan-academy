@@ -7,6 +7,7 @@ var answerChoices2 = new Array(5);
 var possibleAnswers = new Array(); //These are the possible answers
 var possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
 var definiteWrongAnswers = new Array();
+var checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
 var steps_given=0;
 var next_step_to_write =1;
 var correctchoice;
@@ -173,6 +174,16 @@ function addWrongChoice(choice)
 		if(!equivInArray(choice, possibleAnswers) && !equivInArray(choice, definiteWrongAnswers))
 			possibleAnswers.push(choice);
 }
+
+//To add choices in checkbox-based problems
+function addCorrectCheckboxChoice(choice){
+    checkboxChoices.push([choice, true]);
+}
+
+function addIncorrectCheckboxChoice(choice){
+    checkboxChoices.push([choice, false]);
+}
+
 
 function getNumPossibleAnswers() {
     return possibleAnswers.length;
@@ -552,6 +563,34 @@ function check_both_answers()
 	handleCorrectness(isCorrect);
 }
 
+function randomizeCheckboxChoices(){
+    var randomizedCheckboxChoices = [];
+    while(checkboxChoices.length > 0){
+        randomizedCheckboxChoices.push(checkboxChoices.splice(getRandomIntRange(0, checkboxChoices.length - 1), 1)[0]);
+    }
+    checkboxChoices = randomizedCheckboxChoices;
+}
+
+function generateCheckboxAnswerArea(){
+    randomizeCheckboxChoices();
+    for(var i=0; i < checkboxChoices.length; i++){
+        var checkbox_name = 'selectAnswerCheckbox_'+i; //Has to match the value used in checkCheckboxChoices
+        document.write('<span style="white-space:nowrap;"><input type=\"checkbox\" class="select-choice" name=\"'+checkbox_name+'\" id=\"'+checkbox_name+'"><label for='+checkbox_name+'>'+checkboxChoices[i][0]+'</label></input></span><br/>');
+    }
+}
+
+function checkCheckboxChoices()
+{
+    var isCorrect;
+    isCorrect = true;
+    for(var i=0; i<checkboxChoices.length; i++){
+        checkboxName = "selectAnswerCheckbox_"+i //Name of checkbox in DOM
+        if(checkboxChoices[i][1] != answerform[checkboxName].checked){
+            isCorrect = false;
+        }
+    }
+    handleCorrectness(isCorrect);
+}
 
 function array_sum(a) {
 
