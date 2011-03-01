@@ -36,7 +36,7 @@
     <div id="faq-nav-wrapper">
         <div id="faq-nav" class="col1 forty-sixty vertical-shadow">
             <h2 class="pulls">Frequently Asked Questions</h2>
-            <p style="margin-top: 9px;">
+            <p id="wp1" style="margin-top: 9px;">
                 <em>Sal answers a few commonly asked questions about the Khan Academy...</em>
             </p>
             <ul>
@@ -321,9 +321,9 @@
 
         $.waypoints.settings.scrollThrottle = 50;
 
-        $("#faq-nav").waypoint(function(event, direction) {
+        $("#wp1").waypoint(function(event, direction) {
 
-            var jel = $(this);
+            var jel = $("#faq-nav");
             var jelPlaceholder = $("#nav-placeholder");
             
             if (direction == "down") {
