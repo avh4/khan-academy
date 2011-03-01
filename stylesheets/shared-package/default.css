@@ -2033,9 +2033,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border: 1px solid #ccc;
     border-bottom: 1px solid #aaa;
 
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
 }
 
 #back-to-top:hover {
