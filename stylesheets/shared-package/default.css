@@ -1892,7 +1892,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             font-size: 13px;
         }
         #the-team .team-card .card-info .contact-links a, .general-contact a {
-            padding: 10px 10px 10px 28px;
+            padding: 10px 9px 10px 28px;
             text-decoration: none;
         }
         #the-team .team-card .card-info .contact-links a:hover, .general-contact a:hover {
