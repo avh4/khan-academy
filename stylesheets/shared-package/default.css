@@ -198,19 +198,15 @@ a[href="#"], .requires_script {
 /*
  * Give script-using links a dotted underline when they are visible.
  */
- 
-a[onclick]:link, 
+  
 a[href="#"]:link, 
 a.uses_script:link, 
-a[onclick]:visited, 
 a[href="#"]:visited, 
 a.uses_script:visited {
     text-decoration: none;
     border-bottom: dotted 1px #069;
 }
 
-a[onclick]:link:hover, a[onclick]:link:focus,
-a[onclick]:visited:hover, a[onclick]:visited:focus,
 a[href="#"]:link:hover, a[href="#"]:link:focus,
 a[href="#"]:visited:hover, a[href="#"]:visited:focus,
 a.uses_script:link:hover, a.uses_script:link:focus,
