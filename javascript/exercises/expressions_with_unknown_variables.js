@@ -9,8 +9,7 @@
         If a + b = 5, what is 2a + 2b?
         If a + b = 5 and c - d = 9, what is 4a + 3c - 3d + 4b?
     
-    The coefficients are always set to 1 in this exercise.
-    If desired, this exercise may be extended to have random coefficients.
+    The coefficients may either be all 1 or all random.
     
     The question has either one or two expressions.
     Each expression either has two or three terms.
@@ -22,8 +21,11 @@
 function ExpressionsWithUnknownVariablesExercise() {
     var premises = [];
     var variables = ["abc", "xyz"]
+    var use_random_coeff = false;
     
-    this.init = function() {
+    this.init = function(use_random_coefficients) {
+        use_random_coeff = use_random_coefficients;
+        
         generateProblem();
         showProblem();
         generateHints();
@@ -65,19 +67,26 @@ function ExpressionsWithUnknownVariablesExercise() {
         var v = variables.pop();
         var s = "";
         
-        t[0] = {coefficient: 1, variable: v[0]}
+        t[0] = {coefficient: getCoefficient(), variable: v[0]};
         s += format_expression([t[0].coefficient], t[0].variable, noSelColor, true);
         
-        t[1] = {coefficient: 1, variable: v[1]}
+        t[1] = {coefficient: getCoefficient(), variable: v[1]};
         s += format_expression([t[1].coefficient], t[1].variable, noSelColor, false);
         
         if (get_random() > 0) {
-            t[2] = {coefficient: 1, variable: v[2]}
+            t[2] = {coefficient: getCoefficient(), variable: v[2]};
             s += format_expression([t[2].coefficient], t[2].variable, noSelColor, false);
         }
         
         t.to_s = s;
         return t;
+    }
+    
+    function getCoefficient() {
+        if (use_random_coeff) 
+            return get_random();
+
+        return 1;
     }
     
     function showProblem() {
