@@ -1,0 +1,27 @@
+{% extends "arithmetic_template.html" %}
+
+{% block maincode %}
+<script src="/javascript/exercises/rate_problems_1.js?{{App.version}}"></script>
+<style type="text/css">
+.hint_orange {
+    color: orange;
+}
+
+.hint_blue {
+    color: blue;
+}
+</style>
+{% endblock maincode %}
+
+{% block maincell %}
+<script>
+    var exercise = new RateProblemsExercise();
+    exercise.init();
+</script>
+{% endblock maincell %}
+
+{% block hintfunction %}
+give_next_step()
+{% endblock hintfunction%}
+
+
