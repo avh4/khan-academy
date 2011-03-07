@@ -318,6 +318,10 @@ function next_step()
 			curDividend = dividendDigits[dividendDigits.length-curDigit];
 			while (divisor>curDividend)
 			{
+				if (curDigit>(maxDividendDec-dividendDec+divisorDec)) {
+	                createEntry(quotientRow, dividendDigits.length-curDigit+1, 0);
+	                curQuotientID = drawDigit(quotientRow, dividendDigits.length-curDigit+1);
+				}
 				//alert([divisor,curDividend]);
 				curDigit++;
 				curDividend = curDividend*10+dividendDigits[dividendDigits.length-curDigit];
