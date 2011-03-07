@@ -173,7 +173,7 @@ var ExerciseNewDefinitions = {
                 var first_hint_term = "";
                 if(operands_reduced){
                     writeStep("So " + this.print(true, false) + " is equivalent to " + this.print(true, true));
-                    first_hint_term = this.print(true, false) + "`=" + this.print(true, true) + "`<br>";
+                    first_hint_term = this.print(true, false) + "=" + this.print(true, true) + "<br>";
                 }
                 else{
                     first_hint_term = "";
