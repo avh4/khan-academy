@@ -173,16 +173,16 @@ var ExerciseNewDefinitions = {
                 var first_hint_term = "";
                 if(operands_reduced){
                     writeStep("So " + this.print(true, false) + " is equivalent to " + this.print(true, true));
-                    first_hint_term = this.print(true, false) + "=" + this.print(true, true) + "<br>";
+                    first_hint_term = this.print(true, false) + "`=" + this.print(true, true) + "`<br>";
                 }
                 else{
                     first_hint_term = "";
                 }
                 writeStep("Substitute " + this.print(true, true) + " into the definition of `"+ this.symbol + "` with `x = "+this.op1.evaluate()+"` and `y="+this.op2.evaluate()+"`");
                 //writeStep("<center>"+first_hint_term+"=`" + this.definition + "`<br>" + first_hint_term+"=`"+ this.getEvalString() + " = " + this.evaluate() + "`</center>");
-                writeStep("<center>" + first_hint_term + this.print(true, false) + "=" + this.definition + "</center>")
-                writeStep("<center>" + this.print(true, false) + "=" + this.getEvalString() + "</center>")
-                writeStep("<center>" + this.print(true, false) + "=" + this.evaluate() + "</center>")
+                writeStep("<center>" + first_hint_term + this.print(true, false) + "`=" + this.definition + "`</center>")
+                writeStep("<center>" + this.print(true, false) + "`=" + this.getEvalString() + "`</center>")
+                writeStep("<center>" + this.print(true, false) + "`=" + this.evaluate() + "`</center>")
 
 
                 return true
