@@ -1767,7 +1767,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #coaches, #students, #donate, #individual_report, 
 .achievement-badges-container, #login-page, 
 #about-us, #homepage, #video-page, #contribute,
-#credits {
+#credits, #report-problem {
     padding: 0 23px;
     background: transparent;
     position: relative;
@@ -2189,6 +2189,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 }
 /* End homepage styles */
 
+/* About the site styles */
 #screenshot-tour img.rounded-background {
     background: white;
 }
@@ -2197,6 +2198,8 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     height: 170px;
     width: 125px;
 }
+/* End about the site */
+
 /* Login Page Styles */
 
 #login-page {
@@ -2259,6 +2262,14 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     box-shadow: 1px 2px 2px #CCC;
 }
 /* End login page style */
+
+/* Report a problem styles */
+#report-problem ol {
+    list-style: decimal outside;
+    margin: 18px 27px;
+    font-size: 15px;
+}
+/* End Report a problem styles */
 
 .mailing_list_container .error {
     color: red;
