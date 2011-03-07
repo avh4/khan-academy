@@ -6,7 +6,7 @@
 
 var ExercisePolygons = {
     shapeNames: ["circle", "INVALID", "INVALID", "triangle", "square", "pentagon", "hexagon", "heptagon", "octagon", "enneagon", "decagon", "hendecagon", "dodecagon"],
-    shapesToUse: [3, 4, 5, 6, 8, 10, 12],
+    shapesToUse: [3, 4, 5, 6, 7, 8, 10, 12],
 
     init: function(){
         writeText("What kind of polygon is shown below?");
