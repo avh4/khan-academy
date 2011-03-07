@@ -112,19 +112,17 @@
             white-space: nowrap;
             text-overflow: ellipsis;
         }
-    #page_sub_nav .breadcrumbs_nav {
-        font-size: 12px;
-        text-transform: uppercase;
-        margin-left: -5px;
-        width: auto;
-    }
     #page_sub_nav .breadcrumbs_nav a {
         text-decoration: none;
-        padding: 0 5px;
     }
     #page_sub_nav .breadcrumbs_nav #video_menu {
         text-transform: none;
     }
+    #page_sub_nav .breadcrumbs_nav #video_dropdown {
+        position: relative;
+        top: -1px;    
+    }
+    
 </style>
 <script>
 $(function(){
@@ -168,9 +166,11 @@ $(function(){
 </script>
 {% endblock pagescript %}
 {% block pagesubmenu %}
-<span class="breadcrumbs_nav">
-        <a href="/#browse">All videos</a> &#187;
-        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> &#187;
+<span class="breadcrumbs_nav video-nav">
+        <a href="/#browse">All videos</a>
+        <span class="breadcrumb-separator">&#187;</span>
+        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> 
+        <span class="breadcrumb-separator">&#187;</span>
     <form id="video_selector">
         <select name="v">
             {% for v in videos %}
@@ -179,7 +179,7 @@ $(function(){
         </select>
         <button type="submit">Go</button>
     </form>
-    <span id="video_dropdown">
+    <span id="video_dropdown" class="selected">
         <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}">{{video.title|escape}}</a>
         <div id="video_menu">
             <ol>
