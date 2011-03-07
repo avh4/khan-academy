@@ -133,7 +133,10 @@ def daily_activity_summary_map(user_data):
     dt_start = user_data.last_daily_summary or datetime.datetime.min
 
     # Stop summarizing at the last sign of activity
-    dt_end = user_data.last_activity or datetime.datetime.now()
+    dt_end = datetime.datetime.now()
+    if user_data.last_activity:
+        # Make sure we always include the full day that contained the user's last activity
+        dt_end = user_data.last_activity + datetime.timedelta(days=1)
 
     # Never summarize the most recent day
     # (it'll be summarized later, and we'll use the more detailed logs for this data)
@@ -182,6 +185,7 @@ class StartNewDailyActivityLogMapReduce(request_handler.RequestHandler):
                 handler_spec = "activity_summary.daily_activity_summary_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
                 reader_parameters = {"entity_kind": "models.UserData"},
+                mapreduce_parameters = {"processing_rate": 250},
                 shard_count = 64)
         self.response.out.write("OK: " + str(mapreduce_id))
 
