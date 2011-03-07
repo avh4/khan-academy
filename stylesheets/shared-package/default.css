@@ -1353,7 +1353,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border-bottom: 1px solid #ccc;
     border-left-style: dotted;
     cursor: auto;
-    height: auto;
+    height: 70px;
     margin: 0 0 0 70px;
     min-width: 887px;
     width: auto;
@@ -1370,9 +1370,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
 
 .exercise-badge.single-exercise .proficient-badge {
-    padding: 3px 3px 0 3px;
+    padding: 0 3px;
 }
     .exercise-badge.single-exercise .proficient-badge img {
+        position: relative;
+        top: 3px;
         width: 60px;
         height: 62px;
     }
