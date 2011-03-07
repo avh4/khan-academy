@@ -80,7 +80,8 @@ body {
 
 h1, h2, h3, h4, h5 { color: #111; font-weight: normal; }
 h1 {font-size:25px; margin-bottom: 18px;}
-    h1.main-headline {font-size: 32px; position: relative; line-height: 37px; z-index: 10; padding-top: 18px;}
+    .main-headline, .section-headline { padding-top: 18px; }
+    h1.main-headline {font-size: 32px; position: relative; line-height: 37px; z-index: 10;}
     h1.main-headline a { text-decoration: none; }
     h1.main-headline a:visited {color: #069;}
     h1.main-headline a:hover {text-decoration: underline;}
