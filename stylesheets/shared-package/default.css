@@ -2373,6 +2373,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 #empty-class ol li {
     padding: 9px;
     background: #fff;
+    position: relative;
     border: 1px solid #ccc;
     margin-bottom: 18px;
     font-size: 16px;
@@ -2389,6 +2390,23 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 #empty-class ol li img {
     display: block;
     margin: 0 auto 9px
+}
+
+#empty-class ol li div.coach-email {
+    position: absolute;
+    font-weight: bold;
+    font-size: 18px;
+    width: 195px;
+    overflow: hidden;
+    text-align: left;
+}
+#empty-class ol li.enter-email div.coach-email {
+    top: 86px;
+    left: 115px;
+}
+#empty-class ol li.click-register div.coach-email {
+    top: 87px;
+    left: 110px;
 }
 /* End No students page styles */
 

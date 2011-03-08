@@ -6,12 +6,14 @@
             <p>Log in and click on the <a href="/coaches">Add a Coach</a> link at the bottom of the page.</p>
             <img src="/images/add-a-coach.png" style="border: 1px solid #ddd;" />
         </li>
-        <li>
-            <p>Enter your Coach ID, which is: <strong>{{ coach_email|escape }}</strong>.</p>
+        <li class="enter-email">
+            <p>Enter your Coach ID. Your Coach ID is <strong>{{ coach_email|escape }}</strong>.</p>
+            <div class="coach-email">{{ coach_email|escape }}</div>
             <img src="/images/enter-coach-email.png" />
         </li>
-        <li>
+        <li class="click-register">
             <p>Click the <em>Register Coach</em> button.</p>
+            <div class="coach-email">{{ coach_email|escape }}</div>
             <img src="/images/click-register.png" />
         </li>
     </ol>
