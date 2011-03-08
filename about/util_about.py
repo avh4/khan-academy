@@ -1,6 +1,7 @@
 import request_handler
 import consts
 import util
+from app import App
 
 class AboutRequestHandler(request_handler.RequestHandler):
     def render_template(self, template_name, template_values):
@@ -22,7 +23,7 @@ class ViewGettingStarted(AboutRequestHandler):
         if user:
             coach_email = user.email()
             
-        self.render_template('about/getting-started.html', {"selected_id": "getting-started", "approx_vid_count": consts.APPROX_VID_COUNT, "coach_email": coach_email})
+        self.render_template('about/getting-started.html', {"selected_id": "getting-started", "approx_vid_count": consts.APPROX_VID_COUNT, "coach_email": coach_email, "App": App })
 
 class ViewFAQ(AboutRequestHandler):
     def get(self):

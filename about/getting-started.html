@@ -52,7 +52,7 @@
     <div class="col2 forty-sixty" style="text-align: justify; padding-top: 9px;">
     
     <a name="students"><h2>How do I start using the site?</h2></a>
-    <a href="/about" style="float: right; margin: 0 0 20px 20px;">
+    <a href="/about" style="float: right; margin: 0 0 20px 20px; min-width: 320px;">
         <img src="/images/exercise-dashboard-medium.png" height="250" width="320" class="rounded-background">
     </a>
     <p>
@@ -86,7 +86,7 @@
     </p>
     <p style="margin-left:23px;">
         If you already have Google Apps for Education accounts, but aren't able to use them to sign in on the Khan Academy, 
-        <a href="#teachers" onclick="$('#google-upgrade').slideDown('fast');">you might need to upgrade your account</a>.
+        <a href="" onclick="$('#google-upgrade').slideDown('fast');return false;">you might need to upgrade your account</a>.
     </p>
     <div id="google-upgrade" class="vertical-shadow rounded-background" style="display: none; margin-left:23px; padding: 0 18px; background: #eee; text-shadow: 0 1px 0 #fff;">
         <p>
@@ -117,7 +117,7 @@
     </div>
     <p>
         Once this is done, each student will need to identify you as their coach. There are detailed instructions and screenshots on the 
-        <a href="/class_profile">Coach page</a> or <a href="#teachers" onclick="$('#empty-class-container').slideDown('fast');">you can find them here</a>.
+        <a href="/class_profile">Coach page</a> or <a href="" onclick="$('#empty-class-container').slideDown('fast');return false;">you can find them here</a>.
     </p>
     <div id="empty-class-container" style="display: none;">
         {% include "../empty_class_instructions.html" %}
