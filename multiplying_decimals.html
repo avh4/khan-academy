@@ -172,17 +172,16 @@ function drawExplanation(mArray, carry, ones, tens, operator)
 	present.fontsize="50";
 	present.marker = "none";
 
-	for(var i=0; i<bottomNumberDigits; i++)
+	for(var i = 0; i < bottomNumberDigits; i++)
 	{
-		if (i<mArray.length)
+		if (i < mArray.length)
 		{
 			var x = digits[mArray[i]];
-			if (x!=null)
+			if (x)
 			{
 				present.fontfill = x.color;
 				
 				present.text([textX, textY], x.val+'', above, 'm'+i);
-				//drawLineBox([textX, textY], x.row, x.col, fontfill, true, true, 'm'+i);
 				textX+=xSpacing;
 				if(i<mArray.length-1 && digits[mArray[i+1]]!=null)
 				{
@@ -199,17 +198,15 @@ function drawExplanation(mArray, carry, ones, tens, operator)
 			{
 				present.text([textX, textY], '', above, 'm'+i);
 				present.text([textX, textY], '', above, 'operator'+i);
-				//drawLineBox([-100, -100], -10, -10, "white", true, true, 'm'+i);
 			}
 		}
 		else
 		{
 			present.text([textX, textY], '', above, 'm'+i);
 			present.text([textX, textY], '', above, 'operator'+i);
-			//drawLineBox([-100, -100], -10, -10, "white", true, true, 'm'+i);
 		}
 	}
-	if(carry!=null )
+	if(carry)
 	{
 		
 		present.fontfill = nColor;
@@ -217,7 +214,6 @@ function drawExplanation(mArray, carry, ones, tens, operator)
 		textX+=xSpacing;
 		present.fontfill = digits[carry].color;
 		present.text([textX, textY], digits[carry].val+'', above, 'carry2');
-		//drawLineBox([textX, textY], digits[carry].row, digits[carry].col, fontfill, true, true, 'oldcarry');
 		textX+=xSpacing;
 		
 	}
@@ -225,7 +221,6 @@ function drawExplanation(mArray, carry, ones, tens, operator)
 	{
 		present.text([textX, textY], '', above, '+2');
 		present.text([textX, textY], '', above, 'carry2');
-		//drawLineBox([textX, textY], 0, 0, "white", true, true, 'oldcarry');
 	}
 
 	present.fontfill = nColor;
@@ -235,24 +230,14 @@ function drawExplanation(mArray, carry, ones, tens, operator)
 		textX+=xSpacing;
 		present.fontfill = digits[tens].color;
 		present.text([textX, textY], digits[tens].val+'', above, 'tens');
-		
-		/*
-		if (digits[tens].row<botNumRow)
-			//drawLineBox([textX, textY], digits[tens].row,  digits[tens].col, fontfill, true, true, 'newcarry');
-		else
-			//drawLineBox([textX, textY], digits[tens].row,  digits[tens].col, fontfill, false, true, 'newcarry');
-			*/
 	}
 	else
 	{
 		present.text([textX, textY], '', above, 'tens');
-		//drawLineBox([textX, textY], 0,  0, "white", false, true, 'newcarry');
 	}
 	textX+=xSpacing;
 	present.fontfill = digits[ones].color;
 	present.text([textX, textY], digits[ones].val+'', above, 'ones');
-	//drawLineBox([textX, textY], digits[ones].row,  digits[ones].col, fontfill, true, false, 'onesline');
-	
 }
 
 
@@ -293,13 +278,9 @@ function graph_update()
 	setCorrectAnswer(answer);
 }
 
-
-
-
-
 function getValue(row, col)
 {
-	if (digits[row+'_'+col]!=null)
+	if (digits[row+'_'+col])
 		return digits[row+'_'+col].val;
 	else
 		return 0;
@@ -464,11 +445,6 @@ function get_random(max)
 {
 	var epsilon = .9;
 	return Math.round(KhanAcademy.random()*(max+epsilon) - epsilon/2);
-}
-function increment_counter()
-{
-	counter++;
-	document.getElementById("testing").innerHTML = get_random(4);
 }
 
 function getFontString(text, font)
