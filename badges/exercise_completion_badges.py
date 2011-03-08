@@ -176,8 +176,16 @@ class LevelThreeAlgebraistBadge(ExerciseCompletionBadge):
 class LevelFourAlgebraistBadge(ExerciseCompletionBadge):
     def __init__(self):
         ExerciseCompletionBadge.__init__(self)
-        self.exercise_names_required = ['linear_equations_4', 'linear_inequalities', 'average_word_problems', 'equation_of_a_line', 'solving_quadratics_by_factoring', 'quadratic_equation', 'solving_for_a_variable', 'absolute_value_equations']
+        self.exercise_names_required = ['linear_equations_4', 'linear_inequalities', 'average_word_problems', 'equation_of_a_line', 'solving_quadratics_by_factoring', 'quadratic_equation', 'solving_for_a_variable', 'expressions_with_unknown_variables']
         self.description = "Artisan II Algebraist"
+        self.badge_category = BadgeCategory.SILVER
+        self.points = 1000
+        
+class LevelFiveAlgebraistBadge(ExerciseCompletionBadge):
+    def __init__(self):
+        ExerciseCompletionBadge.__init__(self)
+        self.exercise_names_required = ['new_definitions_1', 'new_definitions_2', 'expressions_with_unknown_variables_2', 'absolute_value_equations', 'radical_equations', 'rate_problems_1']
+        self.description = "Artisan III Algebraist"
         self.badge_category = BadgeCategory.SILVER
         self.points = 1000
 
