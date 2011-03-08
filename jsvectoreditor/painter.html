@@ -1,0 +1,144 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Painter</title>
+	
+	<meta name = "viewport" content = "width = device-width">
+	
+	<!--Stylesheet(s) for our app-->
+	<style type="text/css" media="screen">@import "painter/painter.css";</style>
+	
+	<!--Libraries-->
+	<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+	<script type="text/javascript"> google.load("jquery", "1.3.2"); </script>
+	
+	<!--Script(s) for our app-->
+	<script type="text/javascript" src="painter/tinyjson.js" ></script>
+	<script type="text/javascript" src="painter/raphael.js"></script>
+	<script type="text/javascript" src="painter/editor.js"></script>
+	<script type="text/javascript" src="painter/shape.js"></script>
+	<script type="text/javascript" src="painter/tracker.js"></script>
+</head>
+<body>
+	<div id="canvas"></div>
+	<div id="dialog">
+		<textarea id="data"></textarea>
+		<br /><br />
+		<span class="dialogButtons">
+			<input id="importShapesButton" type="button" value="Import Shapes" />
+			<input id="closeDialogButton" type="button" value="Close" />
+		</span>
+	</div>
+		
+	<div id="toolbar">
+		<!-- TODO: load the images locally so they can be swapped out more easily -->
+		<button id="select"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/select.gif" title="Select"></button>
+		<button id="selectp"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/selectadd.gif" title="Select Add"></button>
+		<!-- <button id="rect"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/rectangle.gif" title="Rectangle"></button> -->
+		<!-- <button id="line"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/line.gif" title="Line"></button> -->
+		<!-- <button id="ellipse"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/circle.gif" title="Ellipse"></button> -->
+		<button id="path"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/path.gif" title="Path/Freeform"></button>
+		<!-- <button id="polygon"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/polygon.gif" title="Polygon"></button> -->
+		<!-- <button id="image"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/image.gif" title="Image"></button> -->
+		<button id="text"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/text.gif" title="Text"></button>
+		<button id="delete"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/icon/delete.gif" title="Delete"></button>
+		<!-- <button id="getMarkup"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/silk/script_code.png" title="Markup"></button> -->
+		<button id="clearCanvas"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/silk/arrow_rotate_clockwise.png" title="Reset"></button>
+		
+		<!-- <button id="save"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/silk/disk.png" title="Delete"></button> -->
+		<!-- <button id="open"><img src="http://ajaxanimator.googlecode.com/svn/trunk/ajaxanimator/img/silk/folder_go.png" title="Open"></button> -->
+
+		<br>
+		
+		<span>Fill:</span>
+		 
+		<select id="fillcolor"> 
+			<!-- 
+				JockM: put the color names in for the colorblind, and for 
+				sad majority of browsers that can't style option tags
+			-->
+			<option value="red" class="redThing">Red</option> 
+			<option value="black" class="blackThing">Black</option> 
+			<option value="navy" class="navyThing">Navy</option> 
+			<option value="fuchsia" class="fuchiaThing">Fuchsia</option> 
+			<option value="lime" class="limeThing">Lime</option> 
+			<option value="purple" class="purpleThing">Purple</option> 
+			<option value="gray" class="grayThing">Gray</option> 
+			<option value="maroon" class="maroonThing">Maroon</option> 
+			<option value="wheat" class="wheatThing">Wheat</option> 
+			<option value="blue" class="blueThing">Blue</option> 
+			<option value="green" class="greenThing">Green</option> 
+			<option value="yellow" class="yellowThing">Yellow</option> 
+			<option value="aqua" class="aquaThing">Aqua</option> 
+			<option value="white" class="whiteThing">White</option>
+			<option value="none" selected>None</option> 
+		</select>
+		 
+		<select id="fillopacity"> 
+			<option value="1">100%</option> 
+			<option value=".90">90%</option> 
+			<option value=".80">80%</option> 
+			<option value=".70">70%</option> 
+			<option value=".60">60%</option> 
+			<option value=".50">50%</option> 
+			<option value=".40">40%</option> 
+			<option value=".30">30%</option> 
+			<option value=".20">20%</option>
+			<option value=".10">10%</option>  
+		</select>
+		 
+		<span>Stroke:</span>
+		 
+		<select id="strokecolor" class="blackThing"> 
+			<!-- 
+				JockM: put the color names in for the colorblind, and for 
+				sad majority of browsers that can't style option tags
+			-->
+			<option value="red" class="redThing">Red</option> 
+			<option value="black" class="blackThing" selected>Black</option> 
+			<option value="navy" class="navyThing">Navy</option> 
+			<option value="fuchsia" class="fuchiaThing">Fuchsia</option> 
+			<option value="lime" class="limeThing">Lime</option> 
+			<option value="purple" class="purpleThing">Purple</option> 
+			<option value="gray" class="grayThing">Gray</option> 
+			<option value="maroon" class="maroonThing">Maroon</option> 
+			<option value="wheat" class="wheatThing">Wheat</option> 
+			<option value="blue" class="blueThing">Blue</option> 
+			<option value="green" class="greenThing">Green</option> 
+			<option value="yellow" class="yellowThing">Yellow</option> 
+			<option value="aqua" class="aquaThing">Aqua</option> 
+			<option value="white" class="whiteThing">White</option>
+			<option value="none">None</option> 
+		</select>
+		 
+		<select id="strokewidth"> 
+			<option value="1px">1px</option> 
+			<option value="2px" selected>2px</option> 
+			<option value="3px">3px</option> 
+			<option value="4px">4px</option> 
+			<option value="5px">5px</option> 
+			<option value="6px">6px</option>
+			<option value="7px">7px</option> 
+			<option value="8px">8px</option> 
+			<option value="9px">9px</option> 
+			<option value="10px">10px</option>
+		</select> 
+		  
+		<select id="strokeopacity"> 
+			<option value="1">100%</option> 
+			<option value=".90">90%</option> 
+			<option value=".80">80%</option> 
+			<option value=".70">70%</option> 
+			<option value=".60">60%</option> 
+			<option value=".50">50%</option> 
+			<option value=".40">40%</option> 
+			<option value=".30">30%</option> 
+			<option value=".20">20%</option>
+			<option value=".10">10%</option>  
+		</select> 
+	</div>
+
+	<!-- View Script for our app -->
+	<script type="text/javascript" src="painter/painter.js"></script>
+</body>
+</html>

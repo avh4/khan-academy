@@ -60,24 +60,11 @@ handlers:
 - url: /MathJax-git-2011-01-14
   static_dir: MathJax
 
-  # The url below needs to be updated whenever we change/upgrade svg-edit.
-  # We use our own version of the svg-editor.html file
-- url: /svg-edit-[^/]*/svg-editor\.html
-  static_files: helperpages/svg-editor.html
-  upload: helperpages/svg-editor.html
-  
-  # Make sure we serve the svg files with the correct mime-type.
-- url: /svg-edit-[^/]*/(.*)\.svg
-  static_files: svg-edit/\1.svg
-  upload: svg-edit/(.*)\.svg
-  mime_type: image/svg+xml
-
-  # All the other svg-editor bits are stock.
-  # The url below needs to be updated whenever we change/upgrade svg-edit.
+  # The url below needs to be updated whenever we change/upgrade jsvectoreditor.
   # Unfortunately, we can't use a regex due to a GAE bug:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /svg-edit-2.5-khan-120310-3
-  static_dir: svg-edit
+- url: /jsvectoreditor-r203-khan-2011-03-07
+  static_dir: jsvectoreditor
 
   # The url below needs to be updated whenever we change/upgrade Jit.
   # Unfortunately, we can't use a regex due to a GAE bug:
