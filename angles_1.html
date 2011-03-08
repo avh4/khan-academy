@@ -26,9 +26,9 @@ var yMax = 0;
 function initConditions(x, depth)
 {
 	searchStack.push([x, depth, definedVariables.slice(), usedVariables.slice()]);
-	//alert('initConditions('+x+', '+depth+')');
+
 	usedVariables.push(x);
-	//solveDependencies(usedVariables);
+
 	if (depth==0)
 	{
 		definedVariables.push(x);
@@ -351,9 +351,6 @@ function drawVariable(a)
 			present.text([textX, textY], variables[a].mapping+'='+initHash[a].value, textPos);
 		
 		
-		
-		//present.marker='dot';
-		//present.line([textX, textY],[textX, textY]); 
 	} else if (variables[a].type=='line' && (a!=goal || goalDrawn==false))
 	{
 		present.stroke = variables[a].color;
@@ -803,6 +800,7 @@ function overline(x)
 
 
 function draw_next_step() {
+    if (explanationStack.length <= steps_given) return;
 	drawVariable(explanationStack[steps_given][0]);
 	steps_given++;
     show_step();
@@ -878,20 +876,13 @@ function updateType2()
 			present.line(p1,p2);
 		}
 	}
-/***
-	present.line(points.A.coor, points.C.coor);
-	present.line(points.A.coor, points.D.coor);
-	present.line(points.B.coor, points.E.coor);
-	present.line(points.B.coor, points.D.coor);
-	present.line(points.C.coor, points.E.coor);
-***/	
 }
 
 
 function getReasonString(reason)
 {
 	var reasonString = reason[0]+':<UL>';
-	for(var i=1; i<reason.length; i++)
+	for(var i = 1; i < reason.length; i++)
 		reasonString+='<li>'+reason[i]+'</li>';
 	reasonString+='</ul>';
 	
@@ -913,7 +904,7 @@ function type1()
 	variables['IBD'] = {type: 'angle', points:['I','B','D'], seed:150, color: '#777777'};
 	variables['ABI'] = {type: 'angle', points:['A','B','I'], seed:120, color: '#AA5303'};
 	variables['BIF'] = {type: 'angle', points:['B','I','F'], seed:120, color: '#CDBA96'};
-	variables['CBE'] = {type: 'angle', points:['C','B','E'], seed:120, color: '#FFCC11'};
+	variables['CBE'] = {type: 'angle', points:['C','B','E'], seed:120, color: '#D9A326'};
 	variables['HIF'] = {type: 'angle', points:['H','I','F'], seed:60, color: '#6B8E23'};
 	variables['GIH'] = {type: 'angle', points:['G','I','H'], seed:120, color: '#668B8B'};
 	variables['GIC'] = {type: 'angle', points:['G','I','C'], seed:60, color: '#00CED1'};
@@ -1310,10 +1301,7 @@ for(key in initHash)
 
 findPathsToGoal([], initVars);
 getExplanation();
-/**
-if (usedInitCond.length==0)
-	alert(initCond+' , '+goal);*/
-//alert(usedInitCond);
+
 correct_answer=initHash[goal].value;
 correctAnswer = correct_answer;
 
