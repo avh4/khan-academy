@@ -104,7 +104,7 @@ function submitForm(value)
 		{% block graphdisplay %}  {% endblock graphdisplay %}
 		</tr></table>
 		{% block maincell %}{% endblock maincell %}
-		<iframe id="svgedit" name="svgedit" width="100%" height="100%" allowtransparency="true" scrolling="no" frameBorder="0" style="background-color: transparent; position: absolute; top: -26px; left: 0; width: 100%; height: 100%; overflow: hidden; border:none;"></iframe>
+		<iframe id="svgedit" name="svgedit" width="100%" height="100%" allowtransparency="true" style="background-color: transparent; position: absolute; top: -26px; left: 0; width: 100%; height: 100%; overflow: hidden; border:none;"></iframe>
 	</div>
 	<div id="answer_area">
 	   <form id="answerform" action="/registeranswer" method="post">
@@ -227,14 +227,14 @@ $(document).ready(function() {
 		$('#scratch_pad_hide').css('display', 'none');
 		$('#scratch_pad_show').css('display', 'inline');
 		$('#svgedit').css('display', 'none');
-		$('#question_area').css('min-height', 'auto').css('padding-left', '0');
+		$('#question_area').css('min-height', 'auto').css('padding-top', '0');
         createCookie(scratchpad_cookie_name,"false",365);
         return false;
 	}
 	function showScratchPad() {
 		$('#scratch_pad_show').css('display', 'none');
 		$('#scratch_pad_hide').css('display', 'inline');
-		$('#question_area').css('min-height', '400px').css('padding-left', '80px');
+		$('#question_area').css('min-height', '400px').css('padding-top', '54px');
 		var svgedit = $('#svgedit');
 		svgedit.css('display', 'block');
 		if (!svgedit.attr('src')) {
@@ -243,7 +243,7 @@ $(document).ready(function() {
 			NOTE 2: To avoid caching issues, the svg-edit version number below needs to be updated here and
 			in app.yaml whenever we update svg-edit.
 			*/
-			svgedit.attr('src', '/jsvectoreditor-r203-khan-2011-03-07/painter.html');
+			svgedit.attr('src', '/svg-edit-2.5-khan-120310-3/svg-editor.html');
 		}
         createCookie(scratchpad_cookie_name,"true",365);
         return false;
@@ -260,9 +260,12 @@ $(document).ready(function() {
 		return vars;
 	}
 
-	$('#scratch_pad_show').click(showScratchPad);
-	$('#scratch_pad_hide').click(hideScratchPad);
-	$('#scratch_pad_toggle').css('display', 'inline');
+	if (!$.browser.msie)
+	{
+		$('#scratch_pad_show').click(showScratchPad);
+		$('#scratch_pad_hide').click(hideScratchPad);
+		$('#scratch_pad_toggle').css('display', 'inline');
+	}
 
     if(readCookie(scratchpad_cookie_name) == "true")
         showScratchPad();
