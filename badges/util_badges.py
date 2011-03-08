@@ -90,6 +90,7 @@ def all_badges():
         exercise_completion_badges.LevelTwoAlgebraistBadge(),
         exercise_completion_badges.LevelThreeAlgebraistBadge(),
         exercise_completion_badges.LevelFourAlgebraistBadge(),
+        exercise_completion_badges.LevelFiveAlgebraistBadge(),
         exercise_completion_badges.TopLevelAlgebraistBadge(),
 
         tenure_badges.YearOneBadge(),
