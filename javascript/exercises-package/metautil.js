@@ -237,7 +237,7 @@ function parseFloatStrict(val)
         // with periods.
         // See http://stackoverflow.com/questions/2085275/what-is-the-decimal-separator-symbol-in-javascript
         var reComma = /,/g;
-        val = val.replace(reComma, "");
+        val = val.replace(reComma, ".");
         val = $.trim(val);
 
         if (!isNumericStrict(val)) return NaN;
