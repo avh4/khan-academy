@@ -2112,6 +2112,7 @@ def real_main():
         ('/about/blog', blog.ViewBlog),
         ('/about/blog/.*', blog.ViewBlogPost),
         ('/about/the-team', util_about.ViewAboutTheTeam),
+        ('/about/getting-started', util_about.ViewGettingStarted),
         ('/contribute', ViewContribute ),
         ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),

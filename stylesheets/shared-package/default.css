@@ -85,16 +85,6 @@ h1 {font-size:25px; margin-bottom: 18px;}
     h1.main-headline a { text-decoration: none; }
     h1.main-headline a:visited {color: #069;}
     h1.main-headline a:hover {text-decoration: underline;}
-    /* h1.main-headline:after { 
-        display: block;
-        content: "";
-        width: 120px;
-        height: 70px;
-        background: transparent url(/images/single-leaf.png) no-repeat center center;
-        position: absolute;
-        right: 0;
-        top: -16px;
-    } */
 h2 {font-size:20px; margin-bottom: 18px;}
 h3 {font-size:18px; margin-bottom: 18px;}
 h4 {font-size:15px; margin-bottom: 18px; font-weight: bold;}
@@ -457,6 +447,7 @@ footer {
         #sitewide-navigation a.contribute-link.selected:before {left: 40px;}
         #sitewide-navigation a.about-link.selected:before {left: 23px;}
         #page_sub_nav .breadcrumbs_nav a#faq.selected:before {left: 6px;}
+        #page_sub_nav .breadcrumbs_nav a#getting-started.selected:before {left: 50px;}
         #page_sub_nav .breadcrumbs_nav a#blog.selected:before {left: 11px;}
         #page_sub_nav .breadcrumbs_nav a#the-team.selected:before {left: 25px;}
         #page_sub_nav .breadcrumbs_nav.video-nav span.selected:before { 
@@ -491,6 +482,7 @@ footer {
     #sitewide-navigation a.contribute-link.selected:after {left: 41px; border-bottom-color: #fff;}
     #sitewide-navigation a.about-link.selected:after {left: 24px;}
     #page_sub_nav .breadcrumbs_nav a#faq.selected:after {left: 7px;}
+    #page_sub_nav .breadcrumbs_nav a#getting-started.selected:after {left: 51px;}
     #page_sub_nav .breadcrumbs_nav a#blog.selected:after {left: 12px;}
     #page_sub_nav .breadcrumbs_nav a#the-team.selected:after {left: 26px;}
     #page_sub_nav .breadcrumbs_nav.video-nav span.selected:after { 
@@ -2356,6 +2348,49 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     font-size: 15px;
 }
 /* End Report a problem styles */
+
+/* No students page styles */
+
+#empty-class {
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+    border-bottom: 1px solid #aaa;
+    margin: 18px auto !important;
+    padding: 18px;
+    width: 600px;
+    
+    -webkit-box-shadow: 0px 1px 3px #ccc;
+    -moz-box-shadow: 0px 1px 3px #ccc;
+    box-shadow: 0px 1px 3px #ccc;
+}
+#empty-class > p {
+    font-size: 15px;
+}
+#empty-class ol {
+    margin-bottom: 18px;
+    font-size: 80px;
+}
+#empty-class ol li {
+    padding: 9px;
+    background: #fff;
+    border: 1px solid #ccc;
+    margin-bottom: 18px;
+    font-size: 16px;
+    text-align: center;
+    
+    -webkit-box-shadow: inset 0 0 3px #ddd;
+    -moz-box-shadow: inset 0 0 3px #ddd;
+    box-shadow: inset 0 0 3px #ddd;
+    
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+}
+#empty-class ol li img {
+    display: block;
+    margin: 0 auto 9px
+}
+/* End No students page styles */
 
 .mailing_list_container .error {
     color: red;
