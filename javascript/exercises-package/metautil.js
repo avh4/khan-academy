@@ -217,33 +217,46 @@ function handleCorrectness(isCorrect)
 
 function checkFreeAnswer()
 {
-	var usersAnswer = parseFloatStrict(document.getElementById("answer").value);
-	if (isNaN(usersAnswer)) 
+    var val = document.getElementById("answer").value;
+	var usersAnswer = parseFloatStrict(val);
+	var usersAnswerLocale = parseFloatLocale(val);
+	if (isNaN(usersAnswer) && isNaN(usersAnswerLocale)) 
 	{
 			window.alert("Your answer is not a number.  Please try again.");
 			return;
 	}
-	var isCorrect = (usersAnswer==parseFloat(correctAnswer));
+	var isCorrect = ((usersAnswer==parseFloat(correctAnswer)) || (usersAnswerLocale==parseFloat(correctAnswer)));
 
 	handleCorrectness(isCorrect);
 }
 
-function parseFloatStrict(val)
+// Replace all commas with str
+function parseFloatGeneric(val, str)
 {
     if (val)
     {
-        // parseFloat never uses comma as decimal separator.
-        // If we want to allow commas for other locales, we can detect and replace
-        // with periods.
-        // See http://stackoverflow.com/questions/2085275/what-is-the-decimal-separator-symbol-in-javascript
         var reComma = /,/g;
-        val = val.replace(reComma, ".");
+        val = val.replace(reComma, str);
         val = $.trim(val);
 
         if (!isNumericStrict(val)) return NaN;
     }
 
-    return parseFloat(val);
+    return parseFloat(val);    
+}
+
+// Replace comma(s?) with . (for locale support)
+function parseFloatLocale(val)
+{
+    return parseFloatGeneric(val, ".")
+}
+
+// Remove all commas, for answers such as 50,000,000
+// parseFloat never uses comma as decimal separator.
+// See http://stackoverflow.com/questions/2085275/what-is-the-decimal-separator-symbol-in-javascript
+function parseFloatStrict(val)
+{
+    return parseFloatGeneric(val, "");
 }
 
 // See http://stackoverflow.com/questions/18082/validate-numbers-in-javascript-isnumeric
