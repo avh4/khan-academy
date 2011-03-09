@@ -5,6 +5,14 @@ dTrigFuncdx = {
 	"tan": "sec^2"
 	};
 
+function generateFunction(x)
+{
+    // Generate a differentiable expression object
+    // {fofx, dfofx, wrongs}
+    // x being the name of the variable we differentiate with respect to
+    return funcGens[getRandomInt(funcGens.length-1)](x);
+}
+
 function polyCoefs(low_deg, high_deg)
 {
 	var coefs = [];
@@ -246,16 +254,16 @@ funcGens[1] = function(x) {
 	var idx = getRandomInt(2); // 0 - 2 in trig funcs
 	var wrongs = [];
 	
-	wrongs[0] = 'sin ' + x;
-    wrongs[1] = 'csc ' + x;
-    wrongs[2] = 'sec ' + x;
-    wrongs[3] = 'tan ' + x;
-    wrongs[4] = '-sec ' + x;
-    wrongs[5] = '-cos ' + x;
+    wrongs[0] = 'sin(' + x + ')';
+    wrongs[1] = 'csc(' + x + ')';
+    wrongs[2] = 'sec(' + x + ')';
+    wrongs[3] = 'tan(' + x + ')';
+    wrongs[4] = '-sec(' + x + ')';
+    wrongs[5] = '-cos(' + x + ')';
 	
-	return { fofx: trigFuncs[idx] + ' ' + x,
-			dfofx: dTrigFuncdx[trigFuncs[idx]] + ' ' + x,
-			wrongs: wrongs };
+    return { fofx: trigFuncs[idx] + '(' + x + ')',
+	     dfofx: dTrigFuncdx[trigFuncs[idx]] + '(' + x + ')',
+	     wrongs: wrongs };
 }
 
 funcGens[2] = function(x) {
@@ -283,16 +291,16 @@ funcGens[3] = function(x) {
 	var wrongs = [];
 	
 	if (getRandomInt(1)) {
-		wrongs[0] = '1/(ln '+x+')';
+		wrongs[0] = '1/(ln('+x+'))';
 	    wrongs[1] = 'e^' + x;
 	    wrongs[2] = '1/(e^'+ x + ')';
-	    wrongs[3] = 'ln '+x;
+	    wrongs[3] = 'ln('+x+')';
 	    wrongs[4] = '1/('+x+'^2)';
 	    wrongs[5] = x;
 		
-		return { fofx: "ln " + x,
-				dfofx: "1/" + x,
-				wrongs: wrongs };
+	    return { fofx: "ln(" + x + ")",
+		     dfofx: "1/" + x,
+		     wrongs: wrongs };
 	} else {
 		wrongs[0] = x + '*e^('+x+'-1)';
 	    wrongs[1] = '1/'+ x;

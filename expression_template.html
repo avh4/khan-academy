@@ -1,0 +1,19 @@
+{% extends arithmetic_template %}
+{# This template is for exercises with math-expression answers (ex. x^2+3) #}
+{% block answerarea %}
+<script src="/javascript/expressions.js?{{App.version}}"></script>
+{% if not read_only %}
+<span class="info-box-header">Answer</span>
+<input style="min-width: 50px;" id="answer" name="answer" onkeyup="updatePreview();" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"></input>
+<div id="outputNode"></div>
+{% endif %}
+{% endblock answerarea %}
+
+{% block checkanswer %}
+highlight_answer();
+checkExpressionAnswer();
+{% endblock checkanswer %}
+
+{% block hintfunction %}
+give_next_step();
+{% endblock hintfunction %}

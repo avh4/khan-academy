@@ -1,7 +1,6 @@
 {% extends "page_template.html" %}
 {% block pagetitle %}Exercise{% endblock pagetitle %}
 {% block pagescript %}
-<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
 <style>
     /* Temporary styles to fit new exercises into old template, will be removed when new template is dropped in. */
     #page_sub_nav {display: none;}
@@ -143,7 +142,7 @@ function submitForm(value)
             </div>
             {% endif %}
 			{% endblock answerform %}
-		<script language=Javascript1.2><!--
+		<script type="text/javascript"><!--
 			// some modules already have a check_answer...
 			function check_answer_block() {
 				{% block checkanswer %}
@@ -188,8 +187,10 @@ function submitForm(value)
 			}
 			function highlight_answer()
 			{
+			    if (elForm.answer) {
 				elForm.answer.focus();
 				elForm.answer.select();
+			    }
 			}
 		//--></script>
         </div>

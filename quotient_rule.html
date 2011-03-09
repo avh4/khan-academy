@@ -1,0 +1,13 @@
+{% extends "expression_template.html" %}
+
+{% block maincode %}
+<script src="/javascript/calculus.js?{{App.version}}"></script>
+<script src="/javascript/exercises/quotient_rule.js?{{App.version}}"></script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script>
+    var exercise = new QuotientRuleExercise();
+    exercise.init();
+</script>
+{% endblock maincell %}

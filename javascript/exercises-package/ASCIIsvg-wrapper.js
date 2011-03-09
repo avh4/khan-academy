@@ -8,8 +8,6 @@
 // Wrapping Raphael instead of ASCIIsvg gives us immediate support for
 // browsers without SVG (that means IE without the Adobe SVGviewer).
 //
-// *This library is deprecated.*
-// Do not use ASCIIsvg API calls for new exercises.
 
 /* ASCIIsvg.js
    ==============
