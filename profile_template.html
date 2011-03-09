@@ -42,7 +42,6 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    <script type="text/javascript" src="{% if not App.offline_mode %}http://statickhan.appspot.com{% endif %}/javascript/highcharts.js?{{App.version}}"></script>
     {% profile_javascript %}
     <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
 {% endblock bottompagescript %}
