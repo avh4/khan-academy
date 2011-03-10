@@ -1,4 +1,8 @@
 syntax: glob
 
 *.pyc
+*combined.js
+*compressed.js
+*combined.css
+*compressed.css
 secrets.py
