@@ -9,22 +9,33 @@ def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     return proc.communicate()[0]
 
-def svn_st():
+def hg_st():
 
-    output = popen_results(['svn', 'st', '-q', '--ignore-externals'])
+    output = popen_results(['hg', 'st', '-mard'])
     return len(output) > 0
 
-def svn_up():
+def hg_pull_up():
 
     version = -1
-    pattern = re.compile("^(At|Updated to) revision (\\d+)\.$")
+    pattern = re.compile("^changeset:\\s+\\d+:(.+)$")
 
-    output = popen_results(['svn', 'up'])
+    # Pull latest
+    popen_results(['hg', 'pull'])
+
+    # Hg up and make sure we didn't hit a merge
+    output = popen_results(['hg', 'up'])
+    lines = output.split("\n")
+    if len(lines) != 2 or lines[0].find("files updated") < 0:
+        # Ran into merge or other problem
+        return version
+
+    # Grab the tip changeset hash
+    output = popen_results(['hg', 'tip'])
     lines = output.split("\n")
     for line in lines:
         match = pattern.match(line)
         if match:
-            version = int(match.groups()[1])
+            version = match.groups()[0]
 
     return version
 
@@ -56,7 +67,7 @@ def main():
 
     parser.add_option('-x', '--no-up',
         action="store_true", dest="noup",
-        help="Don't svn up before deploy", default="")
+        help="Don't hg pull/up before deploy", default="")
 
     parser.add_option('-d', '--dryrun',
         action="store_true", dest="dryrun",
@@ -65,21 +76,22 @@ def main():
     options, args = parser.parse_args()
 
     if not options.force:
-        if svn_st():
+        if hg_st():
             print "Local changes found in this directory, canceling deploy."
             return
 
     version = -1
 
     if not options.noup or len(options.version) == 0:
-        version = svn_up()
+        version = hg_pull_up()
         if version <= 0:
-            print "Could not find version in 'svn up' output."
+            print "Could not find version after 'hg pull', 'hg up', 'hg tip'."
             return
 
     if len(options.version) > 0:
         version = options.version
 
+    print "Deploying version " + str(version)
     compress_js()
     compress_css()
 
