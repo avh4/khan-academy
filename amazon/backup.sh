@@ -2,23 +2,14 @@
 
 cd /home/ec2-user
 
-# Remove old bulkloader log files
-rm bulkloader-*
-
-# Gzip results
-gzip -f *.dat
-gzip -f *.log
-
 # Backup entire datastore
-google_appengine/appcfg.py download_data --application=khanexercises --url=http://khanexercises.appspot.com/remote_api --filename=`date +%F.dat` --email=kamens@gmail.com --passin < private_pw > `date +%F.log`
-
-rm bulkloader-*
+google_appengine/appcfg.py download_data --application=khanexercises --url=http://khanexercises.appspot.com/remote_api --filename=`date +%F.full.dat` --email=kamens@gmail.com --passin < private_pw > `date +%F.full.log`
 
 # Gzip results
-gzip -f *.dat
-gzip -f *.log
+gzip -f *.full.dat
+gzip -f *.full.log
 
-for f in *.gz
+for f in *.full.*.gz
 do
   echo "Moving $f to s3 bucket"
   s3cmd-1.0.0/s3cmd put $f s3://KA-full-backups/$f
