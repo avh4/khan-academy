@@ -167,8 +167,8 @@ function submitForm(value)
             {% endblock answerarea %}
             {% if not read_only %}
 			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
-			<div id="check-answer-results" style="display: none;">
-                <img src="/images/blank.gif" name="feedback" id="feedback">
+			<div id="check-answer-results">
+                <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
                 <div id="nextbutton" class="button" style="position:relative; display: none;">
                     <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()">
                 </div>

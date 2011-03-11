@@ -15,8 +15,6 @@ function renderChoices() {
 	var availAnswers = 1 + possibleAnswers.length + definiteWrongAnswers.length; // only so many answers available
 	answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
 	correctchoice = Math.round(KhanAcademy.random()*(answerChoices.length-0.02)-.49);
-	//Fill in the choices
-	//need to fix it so that the other choices can never be the same as the correct choice
 
 	var possibleWrongIndices=randomIndices(possibleAnswers.length);
 	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);

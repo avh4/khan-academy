@@ -197,22 +197,30 @@ function handleCorrectness(isCorrect)
 		}
 
         $("#hint_used").val(steps_given == 0 ? "0" : "1");
-
-		$("#check-answer-results").show();
-		$("#check-answer-results #nextbutton").show();
-		$("#check-answer-button").hide();
-		document.images.feedback.src = correct.src;
 		eraseCookie(notDoneCookie);
-		document.forms['answerform'].correctnextbutton.focus()
 	}
 	else
 	{
-		
 		tries++;
-		$("#check-answer-results").show();
-		$("#check-answer-results #nextbutton").hide();
-		document.images.feedback.src= incorrect.src;
 	}
+	showFeedback(isCorrect);
+}
+
+function resetFeedback() {
+    $("#check-answer-button").show();
+    $("#nextbutton").hide();
+    $("feedback").hide();
+}
+
+function showFeedback(isCorrect) {
+    if (isCorrect) {
+		$("#check-answer-button").hide();
+    	$("#nextbutton").show();
+		$("#feedback").attr("src", correct.src);
+        $("#nextbutton input").focus();
+    } else {
+		$("#feedback").attr("src", incorrect.src);
+    }
 }
 
 function checkFreeAnswer()

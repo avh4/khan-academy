@@ -12,8 +12,11 @@
     function showNextProblem() {
         exercise = new AbsoluteValueEquationsExercise();
         exercise.init();
+        
+        // should prob not be called here
         renderChoices();
-        translate();    
+        resetFeedback();
+        translate();
     }
 </script>
 {% endblock maincell %}
