@@ -1247,7 +1247,11 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
 
-            self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
+            if not self.is_ajax_request():
+                self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
+            else:
+                json = simplejson.dumps({"number": user_exercise.total_done + 1}, ensure_ascii=False)
+                self.response.out.write(json)
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)

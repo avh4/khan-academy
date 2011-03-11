@@ -464,26 +464,6 @@ function record_problem() //presents the 'next question' button
 	effort = Math.max(effort, 1);
 }
 
-function processReq() {
-	recordedProblem=1;
-    if (xmlhttp.readyState == 4) {
-        if (xmlhttp.status == 200) {
-	 
-	  //alert( "everything worked");
-	  
-	  
-	  
-	  
-        } 
-	else {
-          //alert( "Not able to log problem" );
-	  
-	  
-	}
-    }
-}
-
-
 function check_free_answer()
 {
 	// alert(correctAnswer);
@@ -600,34 +580,29 @@ function array_sum(a) {
 	return sum;
 }
 
-function start_random_problem()
-{
-	window.location = randomProblem();
-}
-
 function open_left_padding(pixels) {
-    document.write("<div style=\'padding-left: " + pixels + "px\'")
+    $("#question_content").append("<div style=\'padding-left: " + pixels + "px\'")
     
 }
 
 function close_left_padding() {
-    document.write("</div>");
+    $("#question_content").append("</div>");
 }
 
 function write_step(text, step) //Deprecated
 {
-	document.write('<P><div class=\"step'+step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+	$("#question_content").append('<P><div class=\"step'+step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
 }
 
 function write_step(text)
 {
-    document.write('<P><div class=\"step'+next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+    $("#question_content").append('<P><div class=\"step'+next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
 	next_step_to_write++;
 }
 
 function write_table_step_generic(explanation, left, center, right)
 {
-	document.write(	'<tr class="step'+ next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
+	$("#question_content").append(	'<tr class="step'+ next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
         	+ '<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '<FONT class=\"explanation\" class=\"nobr\">' + explanation + '</font>' +'</font></div>'
 			+'</td><td align=right class=\"nobr\"><nobr>'
 			+'<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '`' + left + '`' + '</font></div>'
@@ -650,24 +625,24 @@ function table_step_header(explanation, left, right)
 
 function table_step_header_generic(explanation, left, center, right) 
 {
-    document.write('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
+    $("#question_content").append('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
 			left+
 			'</font></td><td align=left class=\"nobr\"><nobr><font face=\"arial\" size=4  class=\"nobr\">`' + center  +right+'`</font></nobr></td></tr>');
 }
 
 function table_step_footer()
 {
-	document.write('</table></center>');
+	$("#question_content").append('</table></center>');
 }
 
 function write_equation(equation)
 {
-	document.write('<p><font face=\"arial\" size=4><center>`'+equation+'`</center></font></p>');
+	$("#question_content").append('<p><font face=\"arial\" size=4><center>`'+equation+'`</center></font></p>');
 }
 
 function write_text(text)
 {
-	document.write('<p><font face=\"arial\" size=3>'+text+'</font></p>');
+	$("#question_content").append('<p><font face=\"arial\" size=3>'+text+'</font></p>');
 }
 
 function equation_string(equation)
@@ -688,14 +663,9 @@ function perfect_square_factor(n)  //only factors numbers up to 625
 
 	for (var i=1; (i<25 && i<Math.abs(n)); i++)
 	{
-		//document.write('<p>'+n+" "+i+" "+(Math.abs(n)%(i*i))+'</p>');
 		if ((Math.abs(n)%(i*i))==0)
-		{
 			square_factor=i*i;
-		}
 	}
-	//alert("N:"+n+",Factor:"+square_factor);
-
 
 	if (Math.abs(square_factor)==1) //the number is not factorable has the product of a perfect square and another number
 	{
@@ -741,11 +711,6 @@ function problem_footer()
 			{
 				answerChoices[i]= '`' + possibleAnswers[possibleWrongIndices.pop()] + '`';
 			}
-			/****
-			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
-			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0];
-			answerChoices[i]='`'+new_wrong_choice+'`';
-			*****/
 		}
 		
 		document.write('<br><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></br>');

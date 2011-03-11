@@ -3,11 +3,18 @@
 {% block maincode %}
 <script src="/javascript/exercises/linear_equations.js?{{App.version}}"></script>
 <script src="/javascript/exercises/absolute_value_equations.js?{{App.version}}"></script>
+{% endblock maincode %}
+{% block maincell %}
 <script>
     var exercise = new AbsoluteValueEquationsExercise();
     exercise.init();
+        
+    function showNextProblem() {
+        exercise = new AbsoluteValueEquationsExercise();
+        exercise.init();
+        renderChoices();
+        translate();    
+    }
 </script>
-
-{% endblock maincode %}
-
+{% endblock maincell %}
 

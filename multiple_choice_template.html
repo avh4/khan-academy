@@ -2,7 +2,16 @@
 {% block answerarea %}
 
 <span class="info-box-header">Answer</span>
+<div id="answer_content">
+</div>
+
 <script language=Javascript1.2><!--
+
+renderChoices();
+
+function renderChoices() {
+    $("#answer_content").html("");
+    
 	var availAnswers = 1 + possibleAnswers.length + definiteWrongAnswers.length; // only so many answers available
 	answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
 	correctchoice = Math.round(KhanAcademy.random()*(answerChoices.length-0.02)-.49);
@@ -40,8 +49,10 @@
 
 	for (i=0; i<answerChoices.length; i++)
     {
-		document.write('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input type=\"radio\" id="answerChoice'+i+'" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">&nbsp;'+answerChoices[i]+'</input></p></label>');
+		$("#answer_content").append('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input type=\"radio\" id="answerChoice'+i+'" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">&nbsp;'+answerChoices[i]+'</input></p></label>');
     }
+    
+}
 
 //-->
 </script>
