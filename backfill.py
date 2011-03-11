@@ -9,9 +9,7 @@ import consts
 import points
 
 def user_exercise_update_map(user_exercise):
-    if not models.UserExercise.exercise_model.get_value_for_datastore(user_exercise):
-        user_exercise.exercise_model = models.Exercise.get_by_name(user_exercise.exercise)
-        yield op.db.Put(user_exercise)
+    return
 
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
@@ -23,7 +21,9 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
                 handler_spec = "backfill.user_exercise_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
                 reader_parameters = {"entity_kind": "models.UserExercise"},
-                shard_count = 64)
+                shard_count = 64,
+                queue_name = "backfill-mapreduce-queue",
+                )
         self.response.out.write("OK: " + str(mapreduce_id))
 
 
