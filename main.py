@@ -697,55 +697,6 @@ class LogVideoProgress(request_handler.RequestHandler):
         json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
-class ViewExerciseVideos(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)
-            exkey = self.request.get('exkey')
-            if exkey:
-                exercise = Exercise.get(db.Key(exkey))
-                query = ExerciseVideo.all()
-                query.filter('exercise =', exercise.key())
-
-                exercise_videos = query.fetch(50)
-
-                logout_url = users.create_logout_url(self.request.uri)
-                first_video = None
-                issue_labels = None
-                if len(exercise_videos) > 0:
-                    first_video = exercise_videos[0].video
-                    issue_labels = 'Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id
-                for exercise_video in exercise_videos:
-                    video = exercise_video.video
-                    video.video_folder = get_mangled_playlist_name(video.playlists[0])  
-
-                if App.offline_mode:
-                    video_path = "/videos/" 
-                else:
-                    video_path = "http://www.archive.org/download/KhanAcademy_"
-            
-                template_values = {
-                    'App' : App,
-                    'points': user_data.points,
-                    'user': user,
-                    'username': user.nickname(),
-                    'logout_url': logout_url,
-                    'exercise': exercise,
-                    'video_path': video_path,                    
-                    'first_video': first_video,
-                    'extitle': exercise.name.replace('_', ' ').capitalize(),
-                    'exercise_videos': exercise_videos,
-                    'issue_labels': issue_labels, 
-                    }   
-
-                path = os.path.join(os.path.dirname(__file__), 'exercisevideos.html')
-                self.response.out.write(template.render(path, template_values))
-        else:
-
-            self.redirect(util.create_login_url(self.request.uri))
-
 class PrintProblem(request_handler.RequestHandler):
     
     def get(self):
@@ -820,6 +771,7 @@ class PrintExercise(request_handler.RequestHandler):
                 'logout_url': logout_url,
                 'time_warp': time_warp,
                 'user_data': user_data,
+                'num_problems': num_problems,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
             
@@ -2132,7 +2084,6 @@ def real_main():
         ('/editexercise', EditExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisevideos', ViewExerciseVideos),
         ('/viewexercisesonmap', KnowledgeMap),
         ('/testdatastore', DataStoreTest),
         ('/admin94040', ExerciseAdminPage),
