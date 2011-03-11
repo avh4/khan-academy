@@ -362,97 +362,11 @@ class ViewExercise(request_handler.RequestHandler):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
-
-class OldViewVideo(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        video = None
-        video_id = self.request.get('v')
-        path = self.request.path
-        readable_id  = urllib.unquote(path.rpartition('/')[2])
-        if video_id: # Support for old links
-            query = Video.all()
-            query.filter('youtube_id =', video_id)
-            video = query.get()
-            readable_id = video.readable_id
-            self.redirect("/video/"+urllib.quote(readable_id), True)
-            return
-        
-        if readable_id:
-            readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
-            query = Video.all()
-            query.filter('readable_id =', readable_id)
-            # The following should just be:
-            # video = query.get()
-            # but the database currently contains multiple Video objects for a particular
-            # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
-            # changed and our code was producing youtube_ids that ended with '_player'.
-            # This hack gets the most recent valid Video object.
-            key_id = 0
-            for v in query:
-                if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
-                    video = v
-                    key_id = v.key().id()
-            # End of hack
-            
-        if video is None:
-            error_message = "No video found for ID '%s'" % readable_id
-            logging.error(error_message)
-            report_issue_handler = ReportIssue()
-            report_issue_handler.initialize(self.request, self.response)
-            report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
-                                                           'message': 'Error: %s' % error_message})
-            return
-
-            
-        query = db.GqlQuery("SELECT * FROM VideoPlaylist WHERE video = :1 AND live_association = TRUE", video)
-        video_playlists = query.fetch(5)
-
-        for video_playlist in video_playlists:
-            query = VideoPlaylist.all()
-            query.filter('playlist =', video_playlist.playlist)
-            query.filter('live_association = ', True) 
-            query.order('video_position')
-            video_playlist.videos = query.fetch(500)
-
-            for videos_in_playlist in video_playlist.videos:
-                if videos_in_playlist.video_position == video_playlist.video_position:
-                    videos_in_playlist.current_video = True
-                else:
-                    videos_in_playlist.current_video = False
-                if videos_in_playlist.video_position == video_playlist.video_position - 1:
-                    video_playlist.previous_video = videos_in_playlist.video
-                if videos_in_playlist.video_position == video_playlist.video_position + 1:
-                    video_playlist.next_video = videos_in_playlist.video
-
-        # If a QA question is being expanded, we want to clear notifications for its
-        # answers before we render page_template so the notification icon shows
-        # its updated count. 
-        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
-                
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url,
-                                                  'video': video,
-                                                  'video_playlists': video_playlists, 
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
-        path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
-        self.response.out.write(template.render(path, template_values))
-
-
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
     
- 
-
 class ViewVideo(request_handler.RequestHandler):
 
     def get(self):
