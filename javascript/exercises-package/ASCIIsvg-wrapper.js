@@ -516,7 +516,7 @@ function axes(dx,dy,labels,gdx,gdy) {
     if (ytick!=null) {dy = ytick}
     //alert(null)
     dx = (dx==null?xunitlength:dx*xunitlength);
-    dy = (dy==null?dx:dy*yunitlength);
+    dy = (dy==null?yunitlength:dy*yunitlength);
     fontsize = Math.min(dx/2,dy/2,16);//alert(fontsize)
     ticklength = fontsize/4;
     if (xgrid!=null) gdx = xgrid;
