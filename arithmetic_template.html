@@ -49,6 +49,7 @@ function updateRandomSeed(number) {
     KhanAcademy.problem_seed = KhanAcademy.problem_seed + "-summative";
 {% endif %}
 KhanAcademy.seedRandom(KhanAcademy.problem_seed);
+
 function submitForm(value)
 {
     // if challenge, submit normally:
@@ -66,21 +67,26 @@ function submitForm(value)
             data += "&";
         data += value + "=" + $("#" + value).val();
     });
+
     $.ajax({
         type: "POST",
         url: "/registeranswer",
         data: data,
         success: function(response) {
-            // response should have more properties.
+            // marcia: response should have more properties.
             // need to update points, badges etc
-            updateRandomSeed(response.number);
+            updateRandomSeed(response.problem_number);
             try {
                 $("#question_content").html("");
-                showNextProblem();                
-            } catch (err) {
-                alert("do normal page re-load")
-            }
+                clearAnswerChoices();
+                showNextProblem();
 
+                resetFeedback();
+                updateUserData(response);
+            } catch (err) {
+                alert("error: do normal page re-load")
+                window.location.reload();
+            }
         }
     });
 }

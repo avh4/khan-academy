@@ -166,6 +166,10 @@ function equivInArray(target, arr) {
 	return false;
 }
 
+function clearAnswerChoices() {
+    possibleAnswers = [];
+}
+
 //To add a choice; assumes correct_answer is already defined
 function addWrongChoice(choice)
 {
@@ -796,6 +800,25 @@ function free_answer_footer()
 	document.write('</form></td></tr></table>');
 	document.answerform.reset();
 }
+
+function updateUserData(data) {
+    $("#user-info .energy-points-badge").html(data.points);
+    $("#start_time").val(data.start_time);
+    $("#problem_number").val(data.problem_number);
+    
+    // question for ben: do the following values change between problems?
+    $("#key").val(data.key);
+    $("#time_warp").val(data.time_warp);
+    
+    // 'proficient': proficient,
+    // 'endangered': endangered,
+    // 'reviewing': reviewing,
+    // 'exercise': exercise,
+    // 'user_exercise': userExercise,
+    // 
+    // 'user_data': user_data,
+}
+
 
 function reset_streak() {
     if ($("#hint_used").val() != 1) {

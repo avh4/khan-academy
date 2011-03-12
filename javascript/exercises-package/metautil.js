@@ -209,18 +209,20 @@ function handleCorrectness(isCorrect)
 function resetFeedback() {
     $("#check-answer-button").show();
     $("#nextbutton").hide();
-    $("feedback").hide();
+    $("#feedback").hide();
+    correctnessRegistered = false;
 }
 
 function showFeedback(isCorrect) {
     if (isCorrect) {
 		$("#check-answer-button").hide();
     	$("#nextbutton").show();
-		$("#feedback").attr("src", correct.src);
+    	$("#feedback").attr("src", correct.src);
         $("#nextbutton input").focus();
     } else {
 		$("#feedback").attr("src", incorrect.src);
     }
+    $("#feedback").show();
 }
 
 function checkFreeAnswer()

@@ -1169,6 +1169,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
     def post(self):
         exid = self.request_string('exid')
+        time_warp = self.request_string('time_warp')
         user = util.get_current_user()
         if user:
 
@@ -1250,7 +1251,16 @@ class RegisterAnswer(request_handler.RequestHandler):
             if not self.is_ajax_request():
                 self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
             else:
-                json = simplejson.dumps({"number": user_exercise.total_done + 1}, ensure_ascii=False)
+                updated_values = {"problem_number": user_exercise.total_done + 1,
+                    'points': user_data.points,
+                    'proficient': user_data.is_proficient_at(exid),
+                    'endangered': proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak(),
+                    'reviewing': user_data.is_reviewing(exid, user_exercise, self.get_time()),
+                    'key': key,
+                    'start_time': time.time(),
+                    'time_warp': time_warp,
+                    }
+                json = simplejson.dumps(updated_values)
                 self.response.out.write(json)
         else:
             # Redirect to display the problem again which requires authentication
