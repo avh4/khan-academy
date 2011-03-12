@@ -71,33 +71,31 @@ function graph_update() {
 	
 	if (steps_given==0)
 	{
-		
-		initPicture(x_min,x_max, y_min, y_max);
-		axes();
-		fontsize=16;
-		stroke="red";
-		plot("draw_line(x)");
-		stroke="none";
-		marker="dot";
-		line([x1,y1], [x2,y2]);
+		present.initPicture(x_min,x_max, y_min, y_max);
+		present.axes();
+		present.fontsize=16;
+		present.stroke="red";
+		present.plot("parent.draw_line(x)");
+		present.stroke="none";
+		present.marker="dot";
+		present.line([x1,y1], [x2,y2]);
 
-
-		text([x1,y1], "("+x1+","+y1+")", p1_position);
-		text([x2,y2], "("+x2+","+y2+")", p2_position);
+		present.text([x1,y1], "("+x1+","+y1+")", p1_position);
+		present.text([x2,y2], "("+x2+","+y2+")", p2_position);
 	}
 	if (steps_given==1)
 	{
-		stroke="green";
-		marker="arrow";
-		line([x2, y2],[x2, y1]);
-		stroke="blue";
-		line([x2, y1],[x1, y1]);
+		present.stroke="green";
+		present.marker="arrow";
+		present.line([x2, y2],[x2, y1]);
+		present.stroke="blue";
+		present.line([x2, y1],[x1, y1]);
 
 	}
 	if (steps_given==2)
 	{
-		text([x2, y2+(y1-y2)/2], ""+(y1-y2), right);
-		text([x2+(x1-x2)/2, y1], ""+(x1-x2), below);
+		present.text([x2, y2+(y1-y2)/2], ""+(y1-y2), right);
+		present.text([x2+(x1-x2)/2, y1], ""+(x1-x2), below);
 		
 	}
 	
