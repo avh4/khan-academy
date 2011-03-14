@@ -531,6 +531,13 @@ class Video(Searchable, db.Model):
         else:
             return 0
 
+    @staticmethod
+    def get_dict(query, fxn_key):
+        video_dict = {}
+        for video in query.fetch(10000):
+            video_dict[fxn_key(video)] = video
+        return video_dict
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
@@ -802,8 +809,18 @@ class VideoPlaylist(db.Model):
         query.order('video_position')
         return query
 
-# Matching between videos and exercises
+    @staticmethod
+    def get_key_dict(query):
+        video_playlist_key_dict = {}
+        for video_playlist in query.fetch(10000):
+            playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
 
+            if not video_playlist_key_dict.has_key(playlist_key):
+                video_playlist_key_dict[playlist_key] = {}
+
+            video_playlist_key_dict[playlist_key][VideoPlaylist.video.get_value_for_datastore(video_playlist)] = video_playlist
+
+        return video_playlist_key_dict
 
 class ExerciseVideo(db.Model):
 
