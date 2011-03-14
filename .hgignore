@@ -6,3 +6,5 @@ syntax: glob
 *combined.css
 *compressed.css
 secrets.py
+datastore/*
+sample_data/bulkloader-*
