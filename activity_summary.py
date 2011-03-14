@@ -152,8 +152,8 @@ def daily_activity_summary_map(user_data):
     # If at least one day has passed b/w last summary and latest activity
     if (dt_end - dt_start) >= datetime.timedelta(days=1):
 
-        # Only iterate over 3 days per mapreduce
-        dt_end = min(dt_end, dt_start + datetime.timedelta(days=3))
+        # Only iterate over 10 days per mapreduce
+        dt_end = min(dt_end, dt_start + datetime.timedelta(days=10))
 
         dt = dt_start
         list_entities_to_put = []
