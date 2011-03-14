@@ -186,6 +186,31 @@ function initPicture(x_min,x_max,y_min,y_max) {
     }
 }
 
+// scale and coord functions for directly manipulating the Raphael paper
+function xscale(x) {
+    return x*xunitlength;
+}
+
+function yscale(y) {
+    return y*yunitlength;
+}
+
+function xcoord(x) {
+    return xscale(x)+origin[0];
+}
+
+function ycoord(y) {
+    return height-yscale(y)-origin[1];
+}
+
+function coord(x, y) {
+    if(x.length) {
+        y = x[1];
+        x = x[0];
+    }
+    return xcoord(x) + ',' + ycoord(y);
+}
+
 function line(p,q,id) { // segment connecting points p,q (coordinates in units)
     var node;
     if (id!=null) node = svgNodes[id];
@@ -271,35 +296,7 @@ function loop(p,d,id) {
 }
 
 function arc(start,end,radius,id) { // coordinates in units
-    var node, v;
-    //alert([fill, stroke, origin, xunitlength, yunitlength, height])
-    if (id!=null) node = svgNodes[id];
-    if (radius==null) {
-	v=[end[0]-start[0],end[1]-start[1]];
-	radius = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
-    }
-    if (typeof node == "undefined" || node==null) {
-	node = paper.path();
-	svgNodes[id] = node;
-    }
-    node.attr("path","M"+(start[0]*xunitlength+origin[0])+","+
-		      (height-start[1]*yunitlength-origin[1])+" A"+radius*xunitlength+","+
-		      radius*yunitlength+" 0 0,0 "+(end[0]*xunitlength+origin[0])+","+
-		      (height-end[1]*yunitlength-origin[1]));
-    node.attr("stroke-width", strokewidth);
-    node.attr("stroke", stroke);
-    node.attr("fill", fill);
-    if (marker=="arrow" || marker=="arrowdot") {
-	u = [(end[1]-start[1])/4,(start[0]-end[0])/4];
-	v = [(end[0]-start[0])/2,(end[1]-start[1])/2];
-	//alert([u,v])
-	v = [start[0]+v[0]+u[0],start[1]+v[1]+u[1]];
-    } else v=[start[0],start[1]];
-    if (marker=="dot" || marker=="arrowdot") {
-	ASdot(start,markersize,markerstroke,markerfill);
-	if (marker=="arrowdot") arrowhead(v,end);
-	ASdot(end,markersize,markerstroke,markerfill);
-    } else if (marker=="arrow") arrowhead(v,end);
+    return arc_elliptical(start, end, radius, radius, id);
 }
 
 function ellipse(center,rx,ry,id) { // coordinates in units
@@ -325,7 +322,7 @@ function arc_elliptical(start,end,rx,ry,id) { // coordinates in units
     if (id!=null) node = svgNodes[id];
     if (rx==null) {
         v=[end[0]-start[0],end[1]-start[1]];
-        rx = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
+        rx = ry = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
     }
     if (typeof node == "undefined" || node==null) {
         node = paper.path();
@@ -368,6 +365,7 @@ function rect(p,q,id,rx,ry) { // opposite corners in units, rounded by radii
     node.attr("stroke-width", strokewidth);
     node.attr("stroke", stroke);
     node.attr("fill", fill);
+    return node;
 }
 
 function text(p,st,pos,id,fontsty) {
@@ -516,7 +514,7 @@ function axes(dx,dy,labels,gdx,gdy) {
     if (ytick!=null) {dy = ytick}
     //alert(null)
     dx = (dx==null?xunitlength:dx*xunitlength);
-    dy = (dy==null?dx:dy*yunitlength);
+    dy = (dy==null?yunitlength:dy*yunitlength);
     fontsize = Math.min(dx/2,dy/2,16);//alert(fontsize)
     ticklength = fontsize/4;
     if (xgrid!=null) gdx = xgrid;

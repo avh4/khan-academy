@@ -1,0 +1,12 @@
+queue:
+- name: activity-log-mapreduce-queue
+  rate: 5/s
+
+- name: badge-mapreduce-queue
+  rate: 5/s
+
+- name: exercise-statistics-mapreduce-queue
+  rate: 5/s
+
+- name: backfill-mapreduce-queue
+  rate: 5/s

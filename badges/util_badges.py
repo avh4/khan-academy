@@ -213,7 +213,9 @@ class StartNewBadgeMapReduce(request_handler.RequestHandler):
                 name = "UpdateUserBadges",
                 handler_spec = "badges.util_badges.badge_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-                reader_parameters = {"entity_kind": "models.UserData"})
+                reader_parameters = {"entity_kind": "models.UserData"},
+                queue_name = "badge-mapreduce-queue",
+                )
 
         self.response.out.write("OK: " + str(mapreduce_id))
 

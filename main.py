@@ -175,16 +175,6 @@ class UpdateVideoData(request_handler.RequestHandler):
         yt_service = gdata.youtube.service.YouTubeService()
         playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
 
-        # deletes the specified entities, 10 at a time, to avoid:
-        # http://code.google.com/p/googleappengine/issues/detail?id=3397
-        # when using dev_appserver.py --use_sqlite
-        def delete_entities(ents):
-            start = 0
-            while start < len(ents):
-                end = min(start+10, len(ents))
-                db.delete(ents[start:end])
-                start = end
-                
         # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
         query = VideoPlaylist.all()
         all_video_playlists = []
@@ -364,97 +354,11 @@ class ViewExercise(request_handler.RequestHandler):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
-
-class OldViewVideo(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        video = None
-        video_id = self.request.get('v')
-        path = self.request.path
-        readable_id  = urllib.unquote(path.rpartition('/')[2])
-        if video_id: # Support for old links
-            query = Video.all()
-            query.filter('youtube_id =', video_id)
-            video = query.get()
-            readable_id = video.readable_id
-            self.redirect("/video/"+urllib.quote(readable_id), True)
-            return
-        
-        if readable_id:
-            readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
-            query = Video.all()
-            query.filter('readable_id =', readable_id)
-            # The following should just be:
-            # video = query.get()
-            # but the database currently contains multiple Video objects for a particular
-            # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
-            # changed and our code was producing youtube_ids that ended with '_player'.
-            # This hack gets the most recent valid Video object.
-            key_id = 0
-            for v in query:
-                if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
-                    video = v
-                    key_id = v.key().id()
-            # End of hack
-            
-        if video is None:
-            error_message = "No video found for ID '%s'" % readable_id
-            logging.error(error_message)
-            report_issue_handler = ReportIssue()
-            report_issue_handler.initialize(self.request, self.response)
-            report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
-                                                           'message': 'Error: %s' % error_message})
-            return
-
-            
-        query = db.GqlQuery("SELECT * FROM VideoPlaylist WHERE video = :1 AND live_association = TRUE", video)
-        video_playlists = query.fetch(5)
-
-        for video_playlist in video_playlists:
-            query = VideoPlaylist.all()
-            query.filter('playlist =', video_playlist.playlist)
-            query.filter('live_association = ', True) 
-            query.order('video_position')
-            video_playlist.videos = query.fetch(500)
-
-            for videos_in_playlist in video_playlist.videos:
-                if videos_in_playlist.video_position == video_playlist.video_position:
-                    videos_in_playlist.current_video = True
-                else:
-                    videos_in_playlist.current_video = False
-                if videos_in_playlist.video_position == video_playlist.video_position - 1:
-                    video_playlist.previous_video = videos_in_playlist.video
-                if videos_in_playlist.video_position == video_playlist.video_position + 1:
-                    video_playlist.next_video = videos_in_playlist.video
-
-        # If a QA question is being expanded, we want to clear notifications for its
-        # answers before we render page_template so the notification icon shows
-        # its updated count. 
-        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
-                
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url,
-                                                  'video': video,
-                                                  'video_playlists': video_playlists, 
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
-        path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
-        self.response.out.write(template.render(path, template_values))
-
-
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
     
- 
-
 class ViewVideo(request_handler.RequestHandler):
 
     def get(self):
@@ -519,7 +423,7 @@ class ViewVideo(request_handler.RequestHandler):
         # the playlist and the video in it that has the readable_id.  Note that we don't 
         # query the Video entities for one with the requested readable_id because in some
         # cases there are multiple Video objects in the datastore with the same readable_id
-        # (e.g. there are 2 "Order of Operations" videos).           
+        # (e.g. there are 2 "Order of Operations" videos).          
             
         videos = VideoPlaylist.get_cached_videos_for_playlist(playlist)
         previous_video = None
@@ -699,55 +603,6 @@ class LogVideoProgress(request_handler.RequestHandler):
         json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
-class ViewExerciseVideos(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)
-            exkey = self.request.get('exkey')
-            if exkey:
-                exercise = Exercise.get(db.Key(exkey))
-                query = ExerciseVideo.all()
-                query.filter('exercise =', exercise.key())
-
-                exercise_videos = query.fetch(50)
-
-                logout_url = users.create_logout_url(self.request.uri)
-                first_video = None
-                issue_labels = None
-                if len(exercise_videos) > 0:
-                    first_video = exercise_videos[0].video
-                    issue_labels = 'Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id
-                for exercise_video in exercise_videos:
-                    video = exercise_video.video
-                    video.video_folder = get_mangled_playlist_name(video.playlists[0])  
-
-                if App.offline_mode:
-                    video_path = "/videos/" 
-                else:
-                    video_path = "http://www.archive.org/download/KhanAcademy_"
-            
-                template_values = {
-                    'App' : App,
-                    'points': user_data.points,
-                    'user': user,
-                    'username': user.nickname(),
-                    'logout_url': logout_url,
-                    'exercise': exercise,
-                    'video_path': video_path,                    
-                    'first_video': first_video,
-                    'extitle': exercise.name.replace('_', ' ').capitalize(),
-                    'exercise_videos': exercise_videos,
-                    'issue_labels': issue_labels, 
-                    }   
-
-                path = os.path.join(os.path.dirname(__file__), 'exercisevideos.html')
-                self.response.out.write(template.render(path, template_values))
-        else:
-
-            self.redirect(util.create_login_url(self.request.uri))
-
 class PrintProblem(request_handler.RequestHandler):
     
     def get(self):
@@ -822,6 +677,7 @@ class PrintExercise(request_handler.RequestHandler):
                 'logout_url': logout_url,
                 'time_warp': time_warp,
                 'user_data': user_data,
+                'num_problems': num_problems,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
             
@@ -2181,7 +2037,6 @@ def real_main():
         ('/editexercise', EditExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisevideos', ViewExerciseVideos),
         ('/viewexercisesonmap', KnowledgeMap),
         ('/testdatastore', DataStoreTest),
         ('/admin94040', ExerciseAdminPage),
@@ -2329,7 +2184,7 @@ def profile_main():
     print "</pre>"
     
 main = real_main
-# Uncomment the following line to enable profiling
+# Uncomment the following line to enable profiling 
 # main = profile_main
 
 if __name__ == '__main__':

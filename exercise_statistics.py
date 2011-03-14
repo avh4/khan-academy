@@ -22,7 +22,9 @@ class StartNewExerciseStatisticsMapReduce(request_handler.RequestHandler):
                 name = "UpdateExerciseStatistics",
                 handler_spec = "exercise_statistics.statistics_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-                reader_parameters = {"entity_kind": "models.Exercise"})
+                reader_parameters = {"entity_kind": "models.Exercise"},
+                queue_name = "exercise-statistics-mapreduce-queue",
+                )
 
         self.response.out.write("OK: " + str(mapreduce_id))
 
