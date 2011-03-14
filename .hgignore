@@ -7,3 +7,5 @@ syntax: glob
 *compressed.css
 *.pem
 secrets.py
+datastore/*
+sample_data/bulkloader-*
