@@ -22,13 +22,44 @@ var alreadyRedirect = 0;
 var timesWrong = 0; //This is used only by words.jsp and new_question()
 var recordedProblem = 0;
 var recordedCorrect = 0;
-var selColor = "#AE9CC9";
-var noSelColor = "#333333";
 
 var correct = new Image();
 correct.src = "/images/face-smiley.gif";
 var incorrect = new Image();
 incorrect.src = "/images/face-sad.gif";
+var selColor = "#AE9CC9";
+var noSelColor = "#333333";
+
+// TODO: refactor these variables.
+function reInitializeVariables() {
+    currentexercise ="";
+    tries=0;
+    correct_at_first_try=false;
+    perfectlycorrect = 0; //switched to 1 if the student gets the answer right without hints
+    answerChoices = new Array(5);
+    answerChoices2 = new Array(5);
+    possibleAnswers = new Array(); //These are the possible answers
+    possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
+    definiteWrongAnswers = new Array();
+    checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
+    steps_given=0;
+    next_step_to_write =1;
+    correctchoice;
+    correctchoice2; //used when there are 2 answer choices
+    selectedchoice;
+    selectedchoice2; 
+    starttime = new Date();
+    starttimestring = date_to_string(starttime);
+    time;
+    displaygraph = false;
+    alreadyRedirect = 0;
+    timesWrong = 0; //This is used only by words.jsp and new_question()
+    recordedProblem = 0;
+    recordedCorrect = 0;
+}
+
+
+
 
 // Deprecated: Use generateRandomProblem (below) instead.
 // Note: compareFunction is now ignored.  entryFunction must return the same
@@ -806,17 +837,24 @@ function updateUserData(data) {
     $("#start_time").val(data.start_time);
     $("#problem_number").val(data.problem_number);
     
+    var link = $("#report-problem").attr("href");
+    link = link.substr(0, link.indexOf("Problem-")) + "Problem-" + data.problem_number
+    $("#report-problem").attr("href", link);
+    
     // question for ben: do the following values change between problems?
     $("#key").val(data.key);
     $("#time_warp").val(data.time_warp);
     
-    // 'proficient': proficient,
-    // 'endangered': endangered,
-    // 'reviewing': reviewing,
-    // 'exercise': exercise,
-    // 'user_exercise': userExercise,
-    // 
-    // 'user_data': user_data,
+    $("#streak").val(data.streak);
+    $("#exercise-points").html(data.exercise_points);    
+    
+    $("#streak-bar-container").html(data.streak_bar_html);
+    $("#exercise-message-container").html(data.exercise_message_html);
+    $(".exercise_message").slideDown();
+    $("#correct").val(0);
+    $("#hint_used").val(0);
+
+    reInitializeVariables();
 }
 
 

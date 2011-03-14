@@ -1,3 +1,5 @@
+<div id="exercise-message-container">
+{% block exercise_message_block %}
 <div class="exercise_message" style="display:none;">
 {% if endangered %}
 	Uh oh.&nbsp;  You missed a problem in an exercise that you'd previously mastered.&nbsp;
@@ -30,5 +32,7 @@
 		{% endif %}
 	{% endif %}
 {% endif %}
+</div>
+{% endblock %}
 </div>
 <script>$(window).load(function(){$(".exercise_message").slideDown();});</script>
