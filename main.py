@@ -2145,7 +2145,7 @@ def profile_main():
     print "</pre>"
     
 main = real_main
-# Uncomment the following line to enable profiling
+# Uncomment the following line to enable profiling 
 # main = profile_main
 
 if __name__ == '__main__':
