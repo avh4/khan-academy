@@ -30,8 +30,7 @@ incorrect.src = "/images/face-sad.gif";
 var selColor = "#AE9CC9";
 var noSelColor = "#333333";
 
-// TODO: refactor these variables.
-function reInitializeVariables() {
+function initializeVariables() {
     currentexercise ="";
     tries=0;
     correct_at_first_try=false;
@@ -56,6 +55,8 @@ function reInitializeVariables() {
     timesWrong = 0; //This is used only by words.jsp and new_question()
     recordedProblem = 0;
     recordedCorrect = 0;
+    $("#correct").val(0);
+    $("#hint_used").val(0);
 }
 
 
@@ -850,11 +851,10 @@ function updateUserData(data) {
     
     $("#streak-bar-container").html(data.streak_bar_html);
     $("#exercise-message-container").html(data.exercise_message_html);
+    $("#exercise-icon-container").html(data.exercise_icon_html);
     $(".exercise_message").slideDown();
-    $("#correct").val(0);
-    $("#hint_used").val(0);
 
-    reInitializeVariables();
+    initializeVariables();
 }
 
 

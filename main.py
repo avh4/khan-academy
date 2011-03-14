@@ -78,7 +78,7 @@ from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
 
 from render import render_block_to_string
-from templatetags import streak_bar, exercise_message
+from templatetags import streak_bar, exercise_message, exercise_icon
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -1253,19 +1253,25 @@ class RegisterAnswer(request_handler.RequestHandler):
             if not self.is_ajax_request():
                 self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
             else:
-                proficient = user_data.is_proficient_at(exid)
-                endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
-                suggested = user_data.is_suggested(exid)
-                reviewing = user_data.is_reviewing(exid, user_exercise, self.get_time())
+                proficient = exercise.proficient = user_data.is_proficient_at(exid)
+                suggested = exercise.suggested = user_data.is_suggested(exid)
+                reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
                 struggling = UserExercise.is_struggling_with(user_exercise, exercise)
+                endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+                
                 exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
                 
                 streak_bar_path = os.path.join(os.path.dirname(__file__), 'streak_bar.html')
-                streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar(user_exercise))
+                streak_bar_context = streak_bar(user_exercise)
+                streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context)
                 
                 exercise_message_path = os.path.join(os.path.dirname(__file__), 'exercise_message.html')
                 exercise_message_context = exercise_message(exercise, user_data.coaches, endangered, reviewing, proficient, struggling)
                 exercise_message_html = render_block_to_string(exercise_message_path, 'exercise_message_block', exercise_message_context)
+                
+                exercise_icon_path = os.path.join(os.path.dirname(__file__), 'exercise_icon.html')
+                exercise_icon_context = exercise_icon(exercise, App)
+                exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context)
                 
                 updated_values = {
                     'proficient': proficient,
@@ -1280,7 +1286,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                     'time_warp': time_warp,
                     'problem_number': user_exercise.total_done + 1,
                     'streak_bar_html': streak_bar_html,
-                    'exercise_message_html': exercise_message_html
+                    'exercise_message_html': exercise_message_html,
+                    'exercise_icon_html': exercise_icon_html
                     }
                     
                     #

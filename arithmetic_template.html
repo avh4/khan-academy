@@ -29,6 +29,7 @@
   </script>
   <script type="text/javascript"><!--
 $(document).ready(function () {
+    initializeVariables();
 	KhanAcademy.onMathMLSupportReady(function() {
 		translate();
 	});
@@ -81,6 +82,7 @@ function submitForm(value)
                 showNextProblem();
                 resetFeedback();
                 updateUserData(data);
+                translate();
             } catch (err) {
                 // do normal page reload on error
                 window.location.reload();
@@ -113,9 +115,7 @@ function submitForm(value)
     </div>
 
     {% if not read_only %}
-        {% if endangered or reviewing or proficient or struggling %}
-            {% exercise_message exercise coaches endangered reviewing proficient struggling %}
-        {% endif %}
+        {% exercise_message exercise coaches endangered reviewing proficient struggling %}
     {% endif %}
     
 <div id="extras" class="single-exercise">
