@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import cgi
 import os
 import datetime
 import time
@@ -8,7 +7,6 @@ import random
 import urllib
 import logging
 import re
-from urlparse import urlparse
 from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
@@ -35,9 +33,6 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-import gdata.youtube
-import gdata.youtube.service
-import gdata.alt.appengine
 import qbrary
 import bulk_update.handler
 import facebook
@@ -47,6 +42,7 @@ import coaches
 import api
 import knowledgemap
 import consts
+import youtube_sync
 
 from search import Searchable
 import search
@@ -133,121 +129,6 @@ class KillLiveAssociations(request_handler.RequestHandler):
         for video_playlist in all_video_playlists:
             video_playlist.live_association = False
         db.put(all_video_playlists)
-
-
-class UpdateVideoReadableNames(request_handler.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        query = Video.all()
-        all_videos = query.fetch(100000)
-        for video in all_videos:
-            potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
-            potential_id = re.sub('-+$', '', potential_id)  # remove any trailing dashes (see issue 1140)
-            potential_id = re.sub('^-+', '', potential_id)  # remove any leading dashes (see issue 1526)                        
-            if video.readable_id == potential_id: # id is unchanged
-                continue
-            number_to_add = 0
-            current_id = potential_id
-            while True:
-                query = Video.all()
-                query.filter('readable_id=', current_id)
-                if (query.get() is None): #id is unique so use it and break out
-                    video.readable_id = current_id
-                    video.put()
-                    break
-                else: # id is not unique so will have to go through loop again
-                    number_to_add+=1
-                    current_id = potential_id+'-'+number_to_add                       
-        
-class UpdateVideoData(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
-        self.response.out.write('<html>')
-        yt_service = gdata.youtube.service.YouTubeService()
-        playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
-
-        # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
-        query = VideoPlaylist.all()
-        all_video_playlists = []
-        for video_playlist in query:
-            video_playlist.live_association = False
-            all_video_playlists.append(video_playlist)
-        db.put(all_video_playlists)
-
-        for playlist in playlist_feed.entry:
-            self.response.out.write('<p>Playlist  ' + playlist.id.text)
-            playlist_id = playlist.id.text.replace('http://gdata.youtube.com/feeds/api/users/khanacademy/playlists/', '')
-            playlist_uri = playlist.id.text.replace('users/khanacademy/', '')
-            query = Playlist.all()
-            query.filter('youtube_id =', playlist_id)
-            playlist_data = query.get()
-            if not playlist_data:
-                playlist_data = Playlist(youtube_id=playlist_id)
-                self.response.out.write('<p><strong>Creating Playlist: ' + playlist.title.text + '</strong>')
-            playlist_data.url = playlist_uri
-            playlist_data.title = playlist.title.text
-            playlist_data.description = playlist.description.text
-            playlist_data.put()
-            playlist_data.index()
-            playlist_data.indexed_title_changed()
-            
-            for i in range(0, 4):
-                start_index = i * 50 + 1
-                video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri + '?start-index=' + str(start_index) + '&max-results=50')
-                video_data_list = []
-                for video in video_feed.entry:
-
-                    video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0]
-                    query = Video.all()
-                    query.filter('youtube_id =', video_id.decode('windows-1252'))
-                    video_data = query.get()
-                    if not video_data:
-                        video_data = Video(youtube_id=video_id.decode('windows-1252'))
-                        self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('windows-1252') + '</strong>')
-                        video_data.playlists = []
-                    video_data.title = video.media.title.text.decode('windows-1252')
-                    video_data.url = video.media.player.url.decode('windows-1252')
-                    video_data.duration = int(video.media.duration.seconds)
-                    video_data.views = int(video.statistics.view_count)
-
-                    if video.media.description.text is not None:
-                        video_data.description = video.media.description.text.decode('windows-1252')
-                    else:
-                        video_data.decription = ' '
-
-                    if playlist.title.text not in video_data.playlists:
-                        video_data.playlists.append(playlist.title.text.decode('windows-1252'))
-                    video_data.keywords = video.media.keywords.text.decode('windows-1252')
-                    video_data.position = video.position
-                    video_data_list.append(video_data)
-                db.put(video_data_list)
-                for video_data in video_data_list:
-                    video_data.index()
-                    video_data.indexed_title_changed()
-
-                playlist_videos = []
-                for video_data in video_data_list:                
-                    query = VideoPlaylist.all()
-                    query.filter('playlist =', playlist_data.key())
-                    query.filter('video =', video_data.key())
-                    playlist_video = query.get()
-                    if not playlist_video:
-                        playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
-                        self.response.out.write('<p><strong>Creating VideoPlaylist(' + playlist_data.title + ',' + video_data.title + ')</strong>')
-                    else:
-                        self.response.out.write('<p>Updating VideoPlaylist(' + playlist_video.playlist.title + ',' + playlist_video.video.title + ')')
-                    playlist_video.live_association = True
-                    playlist_video.video_position = int(video_data.position.text)
-                    playlist_videos.append(playlist_video)
-                db.put(playlist_videos)
-
 
 class ViewExercise(request_handler.RequestHandler):
 
@@ -1982,8 +1863,10 @@ def real_main():
         ('/video_mapping', GenerateVideoMapping),  
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/syncvideodata', UpdateVideoData),
-        ('/readablevideonames', UpdateVideoReadableNames),
+
+        ('/syncvideodata', youtube_sync.UpdateVideoData),
+        ('/readablevideonames', youtube_sync.UpdateVideoReadableNames),
+
         ('/exercises', ViewExercise),
         ('/editexercise', EditExercise),
         ('/printexercise', PrintExercise),
@@ -2134,9 +2017,9 @@ def profile_main():
     stats.print_callers()
     print "</pre>"
     
-main = real_main
+# main = real_main
 # Uncomment the following line to enable profiling 
-# main = profile_main
+main = profile_main
 
 if __name__ == '__main__':
     main()
