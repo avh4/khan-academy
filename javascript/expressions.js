@@ -3,9 +3,7 @@ function updatePreview()
     var str = '`'+$("#answer").val()+'`';
 
     var outnode = $("#outputNode").get(0);
-    var n = outnode.childNodes.length;
-    for (var i=0; i<n; i++)
-	outnode.removeChild(outnode.firstChild);
+    $("#outputNode").html("");
     outnode.appendChild(document.createTextNode(str));
     
     AMprocessNode(outnode);
@@ -28,7 +26,7 @@ function checkExpressionAnswer()
     try {
 	eval("g = function(x){ with(Math) return "+mathjs(usersAnswer)+" }");
     } catch (ex) {
-	alert("Your expression isn't valid!");
+	alert("Your answer doesn't make sense as a math expression.");
 	return;
     }
     var isCorrect = true;
