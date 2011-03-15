@@ -269,9 +269,27 @@ writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span sty
 			}
 		}
 
-		document.write('<span style="white-space:nowrap;"><input type=\"radio\" name=\"selectAnswer\" class="select-choice" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></span><br/>');
-
+		document.write('<p style="white-space:nowrap;margin:5px 0"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
 	}
+
+    var $choices = $('.select-choice');
+    $choices.click(function(e) {
+        select_choice(this.getAttribute('data-choice'));
+        if (this != document.activeElement)
+            $(this).focus();
+    });
+
+    $choices.focus(function(e) {
+        $(this).click();
+    });
+
+    $choices.keypress(function(e) {
+        if (e.which == '13') {
+            check_answer_block();
+            return false;
+        }
+    });
+
 //-->
 </script>
 {% endblock answerarea %}
