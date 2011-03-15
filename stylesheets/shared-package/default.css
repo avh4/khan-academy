@@ -1884,6 +1884,15 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 /* End One-off page styles */
+/* Download page styles */
+#downloads {
+    padding-bottom: 36px;
+}
+.dvd-list {
+    float: left;
+    margin-right: 18px;
+    min-height: 180px;
+}
 /* Contribute styles */
 #contribute {
     text-align: justify;
