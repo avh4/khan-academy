@@ -40,8 +40,25 @@
 
 	for (i=0; i<answerChoices.length; i++)
     {
-		document.write('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input type=\"radio\" id="answerChoice'+i+'" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">&nbsp;'+answerChoices[i]+'</input></p></label>');
+		document.write('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input tabindex="' + (i+1) + '" type=\"radio\" id="answerChoice'+i+'" class="select-choice" name="selectAnswer" data-choice="' + i + '">&nbsp;'+answerChoices[i]+'</input></p></label>');
     }
+
+    var $choices = $('.select-choice');
+    $choices.click(function(e) {
+        select_choice(this.getAttribute('data-choice'));
+        this.focus();
+    });
+
+    $choices.focus(function(e) {
+        this.checked = true;
+    });
+
+    $choices.keypress(function(e) {
+        if (e.keyCode === 13) {
+            check_answer_block();
+            return false;
+        }
+    });
 
 //-->
 </script>
