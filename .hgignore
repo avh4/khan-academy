@@ -5,4 +5,7 @@ syntax: glob
 *compressed.js
 *combined.css
 *compressed.css
+*.pem
 secrets.py
+datastore/*
+sample_data/bulkloader-*

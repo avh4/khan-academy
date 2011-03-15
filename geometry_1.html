@@ -75,20 +75,20 @@ var triangleFunction = function drawTriangle()
 function type1()
 {
 	var r = getRandomIntRange(2,9);
-	var C = format_first_coefficient(2*r)+'&pi;';
+	var C = format_first_coefficient(2*r)+'pi';
 	toDraw['C']= true;
 	toDraw['r']= true;
 	displaygraph=true;
 	
-	write_text('The circumference of the circle is '+C+'.');
+	write_text('The circumference of the circle is `'+C+'`.');
 	write_text('What is the radius of the circle?');
-	write_step('The equation for the circumference of a circle is:'+equation_string('C=2 &pi; r'));
+	write_step('The equation for the circumference of a circle is:'+equation_string('C=2pir'));
 	write_step('We know that `C='+C+'` , so:');
-	write_step(equation_string(C+'=2 &pi; r'));
+	write_step(equation_string(C+'=2pir'));
 	write_step('Solving for r gives:'+equation_string('r='+r));
 	correct_answer = r+'';
 	addWrongChoice('sqrt('+C+')');
-	addWrongChoice((2*r*r)+'&pi;');
+	addWrongChoice((2*r*r)+'pi');
 	addWrongChoice(2*r);
 	addWrongChoice(4*r);
 	addWrongChoice('sqrt('+r+')');
@@ -99,20 +99,20 @@ function type1()
 function type2()  
 {
 	var r = getRandomIntRange(2,9);
-	var C = format_first_coefficient(2*r)+'&pi;';
+	var C = format_first_coefficient(2*r)+'pi';
 	toDraw['C']= true;
 	toDraw['r']= true;
 	displaygraph=true;
 	
 	write_text('The radius of the circle is '+r+'.');
 	write_text('What is the circumference of the circle?');
-	write_step('The equation for the circumference of a circle is:'+equation_string('C=2 &pi; r'));
+	write_step('The equation for the circumference of a circle is:'+equation_string('C=2 pi r'));
 	write_step('We know that `r='+r+'` , so:');
-	write_step(equation_string('C=2 &pi; *'+r));
+	write_step(equation_string('C=2 pi *'+r));
 	write_step('Solving for C gives:'+equation_string('C='+C));
 	correct_answer = C+'';
 	addWrongChoice('sqrt('+C+')');
-	addWrongChoice((r*r)+'&pi;');
+	addWrongChoice((r*r)+'pi');
 	addWrongChoice(2*r);
 	addWrongChoice(4*r);
 	addWrongChoice('sqrt('+r+')');
@@ -124,20 +124,20 @@ function type2()
 function type3()  
 {
 	var r = getRandomIntRange(2,9);
-	var A = format_first_coefficient(r*r)+'&pi;';
+	var A = format_first_coefficient(r*r)+'pi';
 	toDraw['A']= true;
 	toDraw['r']= true;
 	displaygraph=true;
 	
-	write_text('The area of the circle is '+A+'.');
+	write_text('The area of the circle is `'+A+'`.');
 	write_text('What is the radius of the circle?');
-	write_step('The equation for the area of a circle is:'+equation_string('A=&pi; r^2'));
+	write_step('The equation for the area of a circle is:'+equation_string('A=pi r^2'));
 	write_step('We know that `A='+A+'` , so:');
-	write_step(equation_string(A+'=&pi; * r^2'));
+	write_step(equation_string(A+'=pi * r^2'));
 	write_step('Solving for r gives:'+equation_string('r='+r));
 	correct_answer =  r+'';
 	addWrongChoice('sqrt('+A+')');
-	addWrongChoice((r*r)+'&pi;');
+	addWrongChoice((r*r)+'pi');
 	addWrongChoice(2*r);
 	addWrongChoice(4*r);
 	addWrongChoice('sqrt('+r+')');
@@ -148,21 +148,21 @@ function type3()
 function type4()  
 {
 	var r = getRandomIntRange(2,9);
-	var A = format_first_coefficient(r*r)+'&pi;';
+	var A = format_first_coefficient(r*r)+'pi';
 	toDraw['A']= true;
 	toDraw['r']= true;
 	displaygraph=true;
 	
 	write_text('The radius of the circle is '+r+'.');
 	write_text('What is the area of the circle?');
-	write_step('The equation for the area of a circle is:'+equation_string('A=&pi; r^2'));
+	write_step('The equation for the area of a circle is:'+equation_string('A=pi r^2'));
 	write_step('We know that `r='+r+'` , so:');
-	write_step(equation_string('A=&pi; *'+r+'^2'));
+	write_step(equation_string('A=pi *'+r+'^2'));
 	write_step('Solving for A gives:'+equation_string('A='+A));
 	correct_answer = A+'';
 	addWrongChoice('sqrt('+A+')');
-	addWrongChoice((2*r*r)+'&pi;');
-	addWrongChoice(2*r+'&pi;');
+	addWrongChoice((2*r*r)+'pi');
+	addWrongChoice(2*r+'pi');
 	addWrongChoice(4*r);
 	addWrongChoice('sqrt('+r+')');
 	addWrongChoice(''+getRandomIntRange(1,20));
