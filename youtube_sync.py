@@ -1,4 +1,6 @@
 import cgi
+import datetime
+import logging
 import re
 from urlparse import urlparse
 
@@ -6,11 +8,72 @@ import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
 
+from google.appengine.api import taskqueue
 from google.appengine.api import users
 from google.appengine.ext import db
 
-from models import Video, Playlist, VideoPlaylist
+from models import Setting, Video, Playlist, VideoPlaylist
 import request_handler
+
+class YouTubeSyncStep:
+    START = 0
+    UPDATE_VIDEO_AND_PLAYLIST_DATA = 1 # Sets all VideoPlaylist.dt_last_live_association = Setting.dtLastYouTubeSyncStart
+    UPDATE_VIDEO_AND_PLAYLIST_READABLE_NAMES = 2
+    COMMIT_LIVE_ASSOCIATIONS = 3 # Put entire set of video_playlists in bulk according to dt_last_live_association
+    INDEX_VIDEO_AND_PLAYLIST_DATA = 4
+    REGENERATE_LIBRARY_CONTENT = 5
+    FINISH = 6
+
+class YouTubeSync(request_handler.RequestHandler):
+
+    def get(self):
+        self.task_step(0)
+
+    def post(self):
+        # Protected for admins only by app.yaml so taskqueue can hit this URL
+        step = self.request_int("step", default = 0)
+
+        if step == YouTubeSyncStep.START:
+            self.startYouTubeSync()
+        elif step == YouTubeSyncStep.UPDATE_VIDEO_AND_PLAYLIST_DATA:
+            self.updateVideoAndPlaylistData()
+        elif step == YouTubeSyncStep.UPDATE_VIDEO_AND_PLAYLIST_READABLE_NAMES:
+            self.updateVideoAndPlaylistReadableNames()
+        elif step == YouTubeSyncStep.COMMIT_LIVE_ASSOCIATIONS:
+            self.commitLiveAssociations()
+        elif step == YouTubeSyncStep.INDEX_VIDEO_AND_PLAYLIST_DATA:
+            self.indexVideoAndPlaylistData()
+        elif step == YouTubeSyncStep.REGENERATE_LIBRARY_CONTENT:
+            self.regenerateLibraryContent()
+        elif step == YouTubeSyncStep.FINISH:
+            self.finishYouTubeSync()
+
+        if step < YouTubeSyncStep.FINISH:
+            self.task_step(step + 1)
+
+    def task_step(self, step):
+        taskqueue.add(url='/admin/youtubesync', queue_name='youtube-sync-queue', params={'step': step})
+
+    def startYouTubeSync(self):
+        Setting.dt_last_youtube_sync_start(str(datetime.datetime.now()))
+
+    def updateVideoAndPlaylistData(self):
+        pass
+
+    def updateVideoAndPlaylistReadableNames(self):
+        pass
+
+    def commitLiveAssociations(self):
+        pass
+
+    def indexVideoAndPlaylistData(self):
+        pass
+
+    def regenerateLibraryContent(self):
+        pass
+
+    def finishYouTubeSync(self):
+        Setting.dt_last_youtube_sync_finish(str(datetime.datetime.now()))
 
 class UpdateVideoReadableNames(request_handler.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
 

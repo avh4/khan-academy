@@ -1863,10 +1863,6 @@ def real_main():
         ('/video_mapping', GenerateVideoMapping),  
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-
-        ('/syncvideodata', youtube_sync.UpdateVideoData),
-        ('/readablevideonames', youtube_sync.UpdateVideoReadableNames),
-
         ('/exercises', ViewExercise),
         ('/editexercise', EditExercise),
         ('/printexercise', PrintExercise),
@@ -1910,6 +1906,7 @@ def real_main():
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
+        ('/admin/youtubesync', youtube_sync.YouTubeSync),
 
         ('/coaches', coaches.ViewCoaches),
         ('/registercoach', coaches.RegisterCoach),  
@@ -2017,9 +2014,9 @@ def profile_main():
     stats.print_callers()
     print "</pre>"
     
-# main = real_main
+main = real_main
 # Uncomment the following line to enable profiling 
-main = profile_main
+# main = profile_main
 
 if __name__ == '__main__':
     main()
