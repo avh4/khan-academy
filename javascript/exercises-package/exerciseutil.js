@@ -218,6 +218,11 @@ function inArray(item, a)
 	return false;
 }
 
+//
+function get_randomInRange(pRangeMin,pRangeMax,pFloatVal){
+    var randVal = pRangeMin + (Math.random() * (pRangeMax - pRangeMin));
+    return typeof floatVal=='undefined'?Math.round(randVal):randVal.toFixed(pFloatVal);
+}
 //get_random() returns a non-zero random number between -10 and 10
 function get_random()
 {

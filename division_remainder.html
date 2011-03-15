@@ -1,0 +1,12 @@
+{% extends arithmetic_template %}
+{% block maincode %}
+<script type="text/javascript" src="/javascript/division_remainder.js"></script>
+{% endblock maincode %}
+
+{% block answerarea %}
+<span class="info-box-header">Answer</span>
+<div id="dvAnswers" style="text-align: left;"></div>
+{% endblock answerarea %}
+{% block checkanswer %}check_answer(){% endblock checkanswer %}
+{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=555" height="600" width="100%"></iframe>{% endblock maincell %}
+  
