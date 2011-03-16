@@ -38,7 +38,7 @@ class YouTubeSync(request_handler.RequestHandler):
             self.response.out.write("Sync started")
         else:
             latest_logs_query = YouTubeSyncStepLog.all()
-            latest_logs_query.order("dt")
+            latest_logs_query.order("-dt")
             latest_logs = latest_logs_query.fetch(10)
 
             self.response.out.write("Latest sync logs:<br/><br/>")
