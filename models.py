@@ -49,6 +49,10 @@ class Setting(db.Model):
     def count_videos(val = None):
         return Setting.get_or_set_with_key("count_videos", val) or 0
 
+    @staticmethod
+    def last_youtube_sync_generation_start(val = None):
+        return Setting.get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
+
 class Exercise(db.Model):
 
     name = db.StringProperty()
@@ -531,6 +535,13 @@ class Video(Searchable, db.Model):
         else:
             return 0
 
+    @staticmethod
+    def get_dict(query, fxn_key):
+        video_dict = {}
+        for video in query.fetch(10000):
+            video_dict[fxn_key(video)] = video
+        return video_dict
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
@@ -743,7 +754,10 @@ class VideoPlaylist(db.Model):
     playlist = db.ReferenceProperty(Playlist)
     video = db.ReferenceProperty(Video)
     video_position = db.IntegerProperty()
-    live_association = db.BooleanProperty(default = False)  #So we can remove associations without deleting the entry.  We need this so that bulkuploading of VideoPlaylist info has the proper effect.
+
+    # Lets us enable/disable video playlist relationships in bulk without removing the entry
+    live_association = db.BooleanProperty(default = False)
+    last_live_association_generation = db.IntegerProperty(default = 0)
 
     _VIDEO_PLAYLIST_KEY_FORMAT = "VideoPlaylist_Videos_for_Playlist_%s"
     _PLAYLIST_VIDEO_KEY_FORMAT = "VideoPlaylist_Playlists_for_Video_%s"
@@ -802,8 +816,18 @@ class VideoPlaylist(db.Model):
         query.order('video_position')
         return query
 
-# Matching between videos and exercises
+    @staticmethod
+    def get_key_dict(query):
+        video_playlist_key_dict = {}
+        for video_playlist in query.fetch(10000):
+            playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
 
+            if not video_playlist_key_dict.has_key(playlist_key):
+                video_playlist_key_dict[playlist_key] = {}
+
+            video_playlist_key_dict[playlist_key][VideoPlaylist.video.get_value_for_datastore(video_playlist)] = video_playlist
+
+        return video_playlist_key_dict
 
 class ExerciseVideo(db.Model):
 

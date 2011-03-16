@@ -47,25 +47,23 @@ function renderChoices() {
 
 	for (i=0; i<answerChoices.length; i++)
     {
-        $("#answer_content").append('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input tabindex="' + (i+1) + '" type=\"radio\" id="answerChoice'+i+'" class="select-choice" name="selectAnswer" data-choice="' + i + '">&nbsp;'+answerChoices[i]+'</input></p></label>');
-   }
-
-
-    
+        $("#answer_content").append('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
+    }
 }
 
     var $choices = $('.select-choice');
     $choices.click(function(e) {
         select_choice(this.getAttribute('data-choice'));
-        this.focus();
+        if (this != document.activeElement)
+            $(this).focus();
     });
 
     $choices.focus(function(e) {
-        this.checked = true;
+        $(this).click();
     });
 
     $choices.keypress(function(e) {
-        if (e.keyCode === 13) {
+        if (e.which == '13') {
             check_answer_block();
             return false;
         }

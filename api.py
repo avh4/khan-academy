@@ -294,12 +294,12 @@ def get_playlist_videos_json(playlist_title):
 
     video_query = Video.all()
     video_query.filter('playlists = ', playlist_title)
-    video_key_dict = get_video_key_dict(video_query)
+    video_key_dict = Video.get_dict(video_query, lambda video: video.key())
 
     video_playlist_query = VideoPlaylist.all()
     video_playlist_query.filter('playlist =', playlist)
     video_playlist_query.filter('live_association =', True)
-    video_playlist_key_dict = get_video_playlist_key_dict(video_playlist_query)
+    video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
 
     return json.dumps(get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict), indent=4)
 
@@ -307,11 +307,11 @@ def get_playlist_videos_json(playlist_title):
 def get_video_library_json_compressed():
     playlist_api_dicts = []
     playlists = get_all_topic_playlists()
-    video_key_dict = get_video_key_dict(Video.all())
+    video_key_dict = Video.get_dict(Video.all(), lambda video: video.key())
 
     video_playlist_query = VideoPlaylist.all()
     video_playlist_query.filter('live_association =', True)
-    video_playlist_key_dict = get_video_playlist_key_dict(video_playlist_query)
+    video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
 
     for playlist in playlists:
         playlist_api_dict = JsonApiDict.playlist(playlist)
@@ -337,7 +337,7 @@ def get_playlist_api_dicts():
 def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict):
 
     video_api_dicts = []
-    video_playlists = video_playlist_key_dict[playlist.key()]
+    video_playlists = sorted(video_playlist_key_dict[playlist.key()].values(), key=lambda video_playlist: video_playlist.video_position)
     c_videos = len(video_playlists)
 
     for ix in range(0, c_videos):
@@ -350,24 +350,6 @@ def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_di
         video_api_dicts.append(JsonApiDict.video(video, video_playlist.video_position, playlist.title, video_prev, video_next))
 
     return video_api_dicts
-
-def get_video_key_dict(query):
-    video_key_dict = {}
-    for video in query.fetch(10000):
-        video_key_dict[video.key()] = video
-    return video_key_dict
-
-def get_video_playlist_key_dict(query):
-    video_playlist_key_dict = {}
-    for video_playlist in query.fetch(10000):
-        playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
-
-        if not video_playlist_key_dict.has_key(playlist_key):
-            video_playlist_key_dict[playlist_key] = []
-
-        video_playlist_key_dict[playlist_key].append(video_playlist)
-
-    return video_playlist_key_dict
 
 class Playlists(request_handler.RequestHandler):
     def get(self): 
