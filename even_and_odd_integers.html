@@ -157,8 +157,8 @@ for (var i=0; i<expression_stack.length; i++) {
 }
 
 last_expression = expression_stack[expression_stack.length-1];
-setCorrectAnswer(last_expression.parity);
-addWrongChoice(get_opposite_parity(last_expression.parity));
+setCorrectAnswer('`'+last_expression.parity+'`');
+addWrongChoice('`'+get_opposite_parity(last_expression.parity)+'`');
 
 
 
@@ -190,63 +190,9 @@ write_step("An even times anything is even");
 // when you press hint, highlight expression and give hint
 // hint again, highlist more and give hint
 
-setCorrectAnswer("Even");
-addWrongChoice("Odd");
+setCorrectAnswer("`Even`");
+addWrongChoice("`Odd`");
 */
 
 </script>
 {% endblock maincode %}
-{% block answerarea %}
-
-<span class="info-box-header">Answer</span>
-<script>
-    // modifed from even_and_odd_functions
-
-    // slightly modified multiple-choice code
-    // - only 2 choices
-    // - doesn't mathize the choice text
-	correctchoice = getRandomIntRange(0,1);
-
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
-	for (var i=0; i<2; i++)
-	{
-		if (i==correctchoice)
-		{
-			answerChoices[i]=correct_answer;
-		}
-		else
-		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]=definiteWrongAnswers[definiteWrongIndices.pop()];
-			}
-			else
-			{
-				answerChoices[i]=possibleAnswers[possibleWrongIndices.pop()];
-			}
-		}
-
-		document.write('<p style="white-space:nowrap;margin:5px 0"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
-	}
-
-    var $choices = $('.select-choice');
-    $choices.click(function(e) {
-        select_choice(this.getAttribute('data-choice'));
-        if (this != document.activeElement)
-            $(this).focus();
-    });
-
-    $choices.focus(function(e) {
-        $(this).click();
-    });
-
-    $choices.keypress(function(e) {
-        if (e.which == '13') {
-            check_answer_block();
-            return false;
-        }
-    });
-
-</script>
-{% endblock answerarea %}
