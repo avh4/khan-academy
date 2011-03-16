@@ -1,0 +1,19 @@
+{% extends "multiple_choice_template.html" %}
+
+{% block maincode %}
+<link rel="stylesheet" type="text/css" href="/stylesheets/chemistry-package/periodictable.css?{{App.version}}" />
+<script src="/javascript/chemistry-package/periodictable.js?{{App.version}}"></script>
+<script src="/javascript/exercises/chemistry_intro.js?{{App.version}}"></script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script>
+    exercise = new IntroToChemistry();
+    exercise.init();
+</script>
+{% endblock maincell %}
+
+{% block hintfunction %}
+exercise.give_next_hint();
+give_next_step()
+{% endblock hintfunction%}
