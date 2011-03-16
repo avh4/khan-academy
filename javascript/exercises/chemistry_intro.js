@@ -36,10 +36,11 @@ function IntroToChemistry() {
         }
         exercise.init();
         document.write(periodic_table.toHTML());
-        periodic_table.highlightElement(exercise.correctElement.symbol);
     }
 
-    this.give_next_hint = function() { }
+    this.give_next_hint = function() { 
+        periodic_table.highlightElement(exercise.correctElement.symbol);
+    }
 }
 
 function SymbolExercise() {
