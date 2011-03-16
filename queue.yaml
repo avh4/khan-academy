@@ -10,3 +10,6 @@ queue:
 
 - name: backfill-mapreduce-queue
   rate: 5/s
+
+- name: youtube-sync-queue
+  rate: 5/s
