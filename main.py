@@ -38,7 +38,6 @@ from google.appengine.ext import db
 import gdata.youtube
 import gdata.youtube.service
 import gdata.alt.appengine
-import qbrary
 import bulk_update.handler
 import facebook
 import layer_cache
@@ -2118,29 +2117,6 @@ def real_main():
 
         ('/deletevideoplaylists', DeleteVideoPlaylists), 
         ('/killliveassociations', KillLiveAssociations),
-
-        # Below are all qbrary related pages
-        ('/qbrary', qbrary.IntroPage),
-        ('/worldhistory', qbrary.IntroPage),
-        ('/managequestions', qbrary.ManageQuestions),
-        ('/subjectmanager', qbrary.SubjectManager),
-        ('/editsubject', qbrary.CreateEditSubject),
-        ('/viewsubject', qbrary.ViewSubject),
-        ('/deletequestion', qbrary.DeleteQuestion),
-        ('/deletesubject', qbrary.DeleteSubject),
-        ('/changepublished', qbrary.ChangePublished),
-        ('/pickquestiontopic', qbrary.PickQuestionTopic),
-        ('/pickquiztopic', qbrary.PickQuizTopic),
-        ('/answerquestion', qbrary.AnswerQuestion),
-        ('/previewquestion', qbrary.PreviewQuestion),
-        ('/rating', qbrary.Rating),
-        ('/viewquestion', qbrary.ViewQuestion),
-        ('/editquestion', qbrary.CreateEditQuestion),
-        ('/addquestion', qbrary.CreateEditQuestion),
-        ('/checkanswer', qbrary.CheckAnswer),
-        ('/sessionaction', qbrary.SessionAction),
-        ('/flagquestion', qbrary.FlagQuestion),
-        ('/viewauthors', qbrary.ViewAuthors),
 
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),
