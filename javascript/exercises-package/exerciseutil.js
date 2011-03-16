@@ -1,7 +1,37 @@
-var currentexercise ="";
-var tries=0;
-var correct_at_first_try=false;
-var perfectlycorrect = 0; //switched to 1 if the student gets the answer right without hints
+var Exercise = {
+    fSupportsAjax: false,
+    init: function() {
+        this.tries=0;
+        // this.answerChoices = new Array(5);
+        // this.possibleAnswers = new Array(); //These are the possible answers
+        // this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
+        // this.definiteWrongAnswers = new Array();
+        // this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
+        // this.steps_given=0;
+        // this.next_step_to_write =1;
+        // this.correctchoice;
+        // this.correctchoice2; //used when there are 2 answer choices
+        // this.selectedchoice;
+        // this.selectedchoice2; 
+        // this.starttime = new Date();
+        // this.starttimestring = date_to_string(starttime);
+        // this.time;
+        // this.displaygraph = false;
+        // this.alreadyRedirect = 0;
+        // this.timesWrong = 0; //This is used only by words.jsp and new_question()
+        this.correct = new Image();
+        this.correct.src = "/images/face-smiley.gif";
+        this.incorrect = new Image();
+        this.incorrect.src = "/images/face-sad.gif";
+        $("#correct").val(0);
+        $("#hint_used").val(0);
+        
+    }
+};
+
+
+
+
 var answerChoices = new Array(5);
 var answerChoices2 = new Array(5);
 var possibleAnswers = new Array(); //These are the possible answers
@@ -23,44 +53,8 @@ var timesWrong = 0; //This is used only by words.jsp and new_question()
 var recordedProblem = 0;
 var recordedCorrect = 0;
 
-var correct = new Image();
-correct.src = "/images/face-smiley.gif";
-var incorrect = new Image();
-incorrect.src = "/images/face-sad.gif";
 var selColor = "#AE9CC9";
 var noSelColor = "#333333";
-
-function initializeVariables() {
-    currentexercise ="";
-    tries=0;
-    correct_at_first_try=false;
-    perfectlycorrect = 0; //switched to 1 if the student gets the answer right without hints
-    answerChoices = new Array(5);
-    answerChoices2 = new Array(5);
-    possibleAnswers = new Array(); //These are the possible answers
-    possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-    definiteWrongAnswers = new Array();
-    checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
-    steps_given=0;
-    next_step_to_write =1;
-    correctchoice;
-    correctchoice2; //used when there are 2 answer choices
-    selectedchoice;
-    selectedchoice2; 
-    starttime = new Date();
-    starttimestring = date_to_string(starttime);
-    time;
-    displaygraph = false;
-    alreadyRedirect = 0;
-    timesWrong = 0; //This is used only by words.jsp and new_question()
-    recordedProblem = 0;
-    recordedCorrect = 0;
-    $("#correct").val(0);
-    $("#hint_used").val(0);
-}
-
-
-
 
 // Deprecated: Use generateRandomProblem (below) instead.
 // Note: compareFunction is now ignored.  entryFunction must return the same
@@ -196,10 +190,6 @@ function equivInArray(target, arr) {
 			return true;
 	}
 	return false;
-}
-
-function clearAnswerChoices() {
-    possibleAnswers = [];
 }
 
 //To add a choice; assumes correct_answer is already defined
@@ -462,65 +452,6 @@ var notDoneType = ''; //This is used by pickType in metautil.js to prevent stude
 var notDoneCookie = '';
 
 
-function record_problem() //presents the 'next question' button
-{
-	eraseCookie(notDoneCookie);
-	
-	var endtime = new Date();
-	time = endtime.getSeconds()-starttime.getSeconds() +
-			60* (endtime.getMinutes() - starttime.getMinutes()) +
-			3600* (endtime.getHours() - starttime.getHours());
-	
-	
-	if (tries==0 && steps_given==0)
-	{
-		correct_at_first_try=true;
-		perfectlycorrect=1;
-		if (recordedCorrect==0)
-		{
-			streak++;
-			recordedCorrect=1;
-		}
-		
-		//effort=2*effort; //Get double the points for not using hints and getting it right on the first try
-		
-	}
-	else
-	{
-		perfectlycorrect=0;
-		streak = 0;	
-		effort = 1;
-	}
-	
-	if (randomMode==1) //You should get more points for problems that are given randomly
-	{
-		effort =2*effort;
-	}
-	
-	effort = Math.max(effort, 1);
-}
-
-function check_free_answer()
-{
-	// alert(correctAnswer);
-	if (document.answerform.answer.value==correctAnswer)
-	{
-		document.images.feedback.src = correct.src;
-		if (tries==0 && steps_given==0)
-		{
-			document.getElementById("correct").value="1"
-		}
-		//new_question();
-		$("#check-answer-results").show();
-	}
-	else
-	{
-		tries++;
-		document.images.feedback.src= incorrect.src;
-		record_problem();	
-	}
-}
-
 //For modules that need new colors;
 var hColors = ['#D9A326', '#E8887D', '#9CC9B7', '#AE9CC9', '#EAADEA', '#CD8C95', '#EE8262', '#FBA16C', '#DEB887','#CFD784'];
 var nColor = "#777777"; //Stands for "normal" color
@@ -713,126 +644,6 @@ function perfect_square_factor(n)  //only factors numbers up to 625
 	}
 }
 
-function problem_footer()
-{
-	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
-	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
-	if (displaygraph)
-	{
-		document.write('</td><td valign=\"top\"><embed align=\"left\" width=260 height=260 src=\"/d.svg\" script=\'graph_update()\'><form name=\"answerform\">');
-	}
-	else
-	{
-		document.write('</td><td valign=\"top\"><form name=\"answerform\">');
-	}
-	
-	//Fill in the choices
-	//need to fix it so that the other choices can never be the same as the correct choice
-	
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
-	for (var i=0; i<5; i++)
-	{
-		if (i==correctchoice) 
-		{
-			answerChoices[i]=correct_answer;
-		}
-		else
-		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]='`'+definiteWrongAnswers[definiteWrongIndices.pop()]+'`';
-			}
-			else
-			{
-				answerChoices[i]= '`' + possibleAnswers[possibleWrongIndices.pop()] + '`';
-			}
-		}
-		
-		document.write('<br><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]+'</input></br>');
-	}
-
-	document.write('<br><input type=\"button\" value=\"Hint\" onClick=\"give_next_step()\"><input type=\"button\" value=\"Check Answer\" onClick=\"check_answer()\"></br>');
-	document.write('<br><img src=\"/images/blank.gif\" name=\"feedback\"><div id=\"nextbutton\" style=\"position:relative; visibility:hidden;\"><input type=\"button\" value=\"Correct! Next Question...\" onClick=\"new_question()\"></div></br>');
-	document.write('</form></td></tr></table>');	
-	document.answerform.reset();
-}
-
-//for problems where the user has to select 2 answers
-function double_answer_footer()
-{
-	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
-	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
-	correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
-	if (displaygraph)
-	{
-		document.write('</td><td valign=\"top\"><embed align\"right\" width=200 height=200 src=\"d.svg\" script=\'graph_update()\'><form name=\"answerform\">');
-	}
-	else
-	{
-		document.write('</td><td valign=\"top\"><form name=\"answerform\">');
-	}
-	
-	//Fill in the choices
-	//need to fix it so that the other choices can never be the same as the correct choice
-	document.write('<table border=0>');
-	for (var i=0; i<5; i++)
-	{
-		if (i==correctchoice) 
-		{
-			answerChoices[i]=correct_answer;
-		}
-		else
-		{
-			
-			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
-			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0]
-			answerChoices[i]='`'+new_wrong_choice+'`';
-		}
-		if (i==correctchoice2) 
-		{
-			answerChoices2[i]=correct_answer2;
-		}
-		else
-		{
-			
-			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
-			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
-			answerChoices2[i]='`'+new_wrong_choice+'`';
-		}
-		document.write('<tr><td><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]
-			+'</input></td><td><input type=\"radio\" name=\"selectAnswer2\" onClick=\"select_choice2('+i+')\">'+answerChoices2[i]+'</input></td></tr>');
-
-	}
-
-	document.write('</table>')
-	
-	document.write('<br><input type=\"button\" value=\"Hint\" onClick=\"give_next_step()\"><input type=\"button\" value=\"Check Answer\" onClick=\"check_both_answers()\"></br>');
-	document.write('<br><img src=\"/images/blank.gif\" name=\"feedback\"><div id=\"nextbutton\" style=\"position:relative; visibility:hidden;\"><input type=\"button\" value=\"Correct! Next Question...\" onClick=\"new_question()\"></div></P>');
-	document.write('</form></td></tr></table>');	
-	document.answerform.reset();
-}
-
-function checkAnswerWithReturn(event)
-{
-	if (event &&event.which==13)
-		check_free_answer();
-	else
-		return true;
-}
-
-
-function free_answer_footer()
-{
-	document.write('</td><td valign=\"top\"><form name=\"answerform\">');
-	document.write('<br>Answer:<input type=\"text\" size=10 id=\"answer\" name=\"answer\"></br>');
-	document.write('<br><input type=\"button\" value=\"Hint\"  onClick=\"give_next_step()\">');
-	document.write('<input type=\"button\" value=\"Check Answer\" onClick=\"check_free_answer()\"></br>');
-	document.write('<br><img src=\"/images/blank.gif\" name=\"feedback\"><div id=\"nextbutton\" style=\"position:relative; visibility:hidden;\"><input type=\"button\" value=\"Correct! Next Question...\" onClick=\"new_question()\"></div></br>');
-	document.write('</form></td></tr></table>');
-	document.answerform.reset();
-}
-
 function updateUserData(data) {
     $("#user-info .energy-points-badge").html(data.points);
     $("#start_time").val(data.start_time);
@@ -841,11 +652,7 @@ function updateUserData(data) {
     var link = $("#report-problem").attr("href");
     link = link.substr(0, link.indexOf("Problem-")) + "Problem-" + data.problem_number
     $("#report-problem").attr("href", link);
-    
-    // question for ben: do the following values change between problems?
-    $("#key").val(data.key);
     $("#time_warp").val(data.time_warp);
-    
     $("#streak").val(data.streak);
     $("#exercise-points").html(data.exercise_points);    
     
@@ -854,9 +661,8 @@ function updateUserData(data) {
     $("#exercise-icon-container").html(data.exercise_icon_html);
     $(".exercise_message").slideDown();
 
-    initializeVariables();
+    Exercise.init();
 }
-
 
 function reset_streak() {
     if ($("#hint_used").val() != 1) {

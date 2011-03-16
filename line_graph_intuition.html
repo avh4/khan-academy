@@ -97,15 +97,7 @@ function graph_update() {
 function checkAnswer()
 {
 	if (r2(curSlopeNum/curSlopeDen)==r2(correctSlope) && r2(curIntNum/curIntDen)==r2(correctIntercept))
-    {
         handleCorrectness(true);
-		$("#check-answer-results").show();
-		document.images.feedback.src = correct.src;
-	}
-    else
-    {
-		$("#check-answer-results").hide();
-    }
 }
 
 

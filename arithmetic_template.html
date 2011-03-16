@@ -29,7 +29,7 @@
   </script>
   <script type="text/javascript"><!--
 $(document).ready(function () {
-    initializeVariables();
+    Exercise.init();
 	KhanAcademy.onMathMLSupportReady(function() {
 		translate();
 	});
@@ -78,7 +78,6 @@ function submitForm(value)
                 eval("var data=" + response);
                 updateRandomSeed(data.problem_number);
                 $("#question_content").html("");
-                clearAnswerChoices();
                 showNextProblem();
                 resetFeedback();
                 updateUserData(data);

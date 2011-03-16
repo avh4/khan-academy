@@ -183,7 +183,7 @@ function handleCorrectness(isCorrect)
 			{
 				key: $("#key").val(),
 				time_warp: $("#time_warp").val(),
-				correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
+				correct: ((isCorrect && Exercise.tries==0 && steps_given==0) ? 1 : 0),
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
 			}); // Fire and forget, no callback.
 		correctnessRegistered = true;		
@@ -191,7 +191,7 @@ function handleCorrectness(isCorrect)
 	if (isCorrect)
 	{
 		
-		if (tries==0 && steps_given==0)
+		if (Exercise.tries==0 && steps_given==0)
 		{
 			document.getElementById("correct").value="1"
 		}
@@ -201,7 +201,7 @@ function handleCorrectness(isCorrect)
 	}
 	else
 	{
-		tries++;
+		Exercise.tries++;
 	}
 	showFeedback(isCorrect);
 }
@@ -217,10 +217,10 @@ function showFeedback(isCorrect) {
     if (isCorrect) {
 		$("#check-answer-button").hide();
     	$("#nextbutton").show();
-    	$("#feedback").attr("src", correct.src);
+    	$("#feedback").attr("src", Exercise.correct.src);
         $("#nextbutton input").focus();
     } else {
-		$("#feedback").attr("src", incorrect.src);
+		$("#feedback").attr("src", Exercise.incorrect.src);
     }
     $("#feedback").show();
 }
