@@ -80,7 +80,15 @@ class YouTubeSync(request_handler.RequestHandler):
 
     def updateVideoAndPlaylistData(self):
         self.response.out.write('<html>')
+
         yt_service = gdata.youtube.service.YouTubeService()
+
+        # Now that we run these queries from the App Engine servers, we need to 
+        # explicitly specify our developer_key to avoid being lumped together w/ rest of GAE and
+        # throttled by YouTube's "Too many request" quota
+        yt_service.developer_key = "AI39si6ctKTnSR_Vx7o7GpkpeSZAKa6xjbZz6WySzTvKVYRDAO7NHBVwofphk82oP-OSUwIZd0pOJyNuWK8bbOlqzJc9OFozrQ"
+        yt_service.client_id = "n/a"
+
         playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
 
         video_youtube_id_dict = Video.get_dict(Video.all(), lambda video: video.youtube_id)
@@ -129,7 +137,9 @@ class YouTubeSync(request_handler.RequestHandler):
                     video_data.title = video.media.title.text.decode('windows-1252')
                     video_data.url = video.media.player.url.decode('windows-1252')
                     video_data.duration = int(video.media.duration.seconds)
-                    video_data.views = int(video.statistics.view_count)
+
+                    if video.statistics:
+                        video_data.views = int(video.statistics.view_count)
 
                     if video.media.description.text is not None:
                         video_data.description = video.media.description.text.decode('windows-1252')
