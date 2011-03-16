@@ -1452,7 +1452,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
     .exercise-badge.single-exercise .proficient-badge img {
         position: relative;
-        top: 3px;
+        top: 4px;
         width: 60px;
         height: 62px;
     }
@@ -1534,12 +1534,14 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: relative;
     padding: 0;
     float: left;
-    width: 655px;
+    width: 65%;
+    margin-left: 1%;
+    margin-right: 1%;
 }
 #answer_area {
     float: right;
-    max-width: 300px;
-    min-width: 240px;
+    max-width: 27%;
+    min-width: 24%;
     margin-right: 10px;
 }
     #answer_area .info-box {
@@ -1882,6 +1884,15 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 /* End One-off page styles */
+/* Download page styles */
+#downloads {
+    padding-bottom: 36px;
+}
+.dvd-list {
+    float: left;
+    margin-right: 18px;
+    min-height: 180px;
+}
 /* Contribute styles */
 #contribute {
     text-align: justify;
@@ -2614,7 +2625,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
         border-left: 1px solid #ddd;
     }
     #question_area {
-        margin-left: 1px;
+        margin-left: 1%;
     }
 }
 

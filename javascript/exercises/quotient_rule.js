@@ -35,7 +35,7 @@ function QuotientRuleExercise() {
     }
 
     function generateHints() {
-	write_step('`'+notation.dfofx+' = ((text{bottom})(d/dx text{top}) - (text{top})(d/dx text{bottom}))/(text{bottom}^2)`');
+	write_step('<p>We remember from the quotient rule that</p><p>`'+notation.dfofx+' = ((text{bottom})(d/dx text{top}) - (text{top})(d/dx text{bottom}))/(text{bottom}^2)`</p>');
 
 	write_step('`text{bottom} = '+bottom.fofx+'`');
 	write_step('`d/dx text{top} = '+top.dfofx+'`');

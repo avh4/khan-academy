@@ -1423,6 +1423,13 @@ class ViewHomePage(request_handler.RequestHandler):
             ],
             [
                 { 
+                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html", 
+                    "src": "/images/splashthumbnails/ted_thumbnail.jpg", 
+                    "desc": "Sal on the Khan Academy @ TED",
+                    "youtube_id": "gM95HHI4gLk",
+                    "selected": False,
+                },
+                { 
                     "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
                     "src": "/images/splashthumbnails/tech_award_thumbnail.png", 
                     "desc": "What is the Khan Academy?",
@@ -1434,13 +1441,6 @@ class ViewHomePage(request_handler.RequestHandler):
                     "src": "/images/splashthumbnails/exercises_thumbnail.png", 
                     "desc": "Overview of our exercise software",
                     "youtube_id": "hw5k98GV7po",
-                    "selected": False,
-                },
-                { 
-                    "href": "/video/cnn---google-award-to-khan-academy", 
-                    "src": "/images/splashthumbnails/cnn_thumbnail.png", 
-                    "desc": "CNN: Google award to Khan Academy",
-                    "youtube_id": "QGxgAHer3Ow",
                     "selected": False,
                 },
                 { 

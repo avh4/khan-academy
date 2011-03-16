@@ -15,6 +15,9 @@ do
   s3cmd-1.0.0/s3cmd put $f s3://KA-full-backups/$f
 done
 
-# Delete files older than 2 weeks
-find *.gz -mtime +14 -exec rm {} \;
+# Delete files older than 1 week
+find *.gz -mtime +7 -exec rm {} \;
+find *.log -mtime +7 -exec rm {} \;
+find *.dat -mtime +7 -exec rm {} \;
+find *.sql3 -mtime +7 -exec rm {} \;
 
