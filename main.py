@@ -1215,6 +1215,10 @@ class GenerateHomepageContent(request_handler.RequestHandler):
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
+    def post(self):
+        # We support posts so we can fire task queues at this handler
+        self.get()
+
     def get(self):
         library_content_html(bust_cache=True)
         self.response.out.write("Library content regenerated")  

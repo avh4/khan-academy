@@ -50,12 +50,12 @@ class Setting(db.Model):
         return Setting.get_or_set_with_key("count_videos", val) or 0
 
     @staticmethod
-    def dt_last_youtube_sync_start(val = None):
-        return Setting.get_or_set_with_key("dt_last_youtube_sync_start", val)
+    def last_youtube_sync_generation_start(val = None):
+        return Setting.get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
 
     @staticmethod
-    def dt_last_youtube_sync_finish(val = None):
-        return Setting.get_or_set_with_key("dt_last_youtube_sync_finish", val)
+    def last_youtube_sync_generation_finish(val = None):
+        return Setting.get_or_set_with_key("last_youtube_sync_generation_finish", val) or 0
 
 class Exercise(db.Model):
 
@@ -761,7 +761,7 @@ class VideoPlaylist(db.Model):
 
     # Lets us enable/disable video playlist relationships in bulk without removing the entry
     live_association = db.BooleanProperty(default = False)
-    dt_last_live_association = db.DateTimeProperty(default = datetime.datetime.max)
+    last_live_association_generation = db.IntegerProperty(default = 0)
 
     _VIDEO_PLAYLIST_KEY_FORMAT = "VideoPlaylist_Videos_for_Playlist_%s"
     _PLAYLIST_VIDEO_KEY_FORMAT = "VideoPlaylist_Playlists_for_Video_%s"

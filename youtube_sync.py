@@ -17,12 +17,16 @@ import request_handler
 
 class YouTubeSyncStep:
     START = 0
-    UPDATE_VIDEO_AND_PLAYLIST_DATA = 1 # Sets all VideoPlaylist.dt_last_live_association = Setting.dtLastYouTubeSyncStart
+    UPDATE_VIDEO_AND_PLAYLIST_DATA = 1 # Sets all VideoPlaylist.last_live_association_generation = Setting.last_youtube_sync_generation_start
     UPDATE_VIDEO_AND_PLAYLIST_READABLE_NAMES = 2
-    COMMIT_LIVE_ASSOCIATIONS = 3 # Put entire set of video_playlists in bulk according to dt_last_live_association
+    COMMIT_LIVE_ASSOCIATIONS = 3 # Put entire set of video_playlists in bulk according to last_live_association_generation
     INDEX_VIDEO_AND_PLAYLIST_DATA = 4
     REGENERATE_LIBRARY_CONTENT = 5
-    FINISH = 6
+
+class YouTubeSyncStepLog(db.Model):
+    step = db.IntegerProperty()
+    generation = db.IntegerProperty()
+    dt = db.DateTimeProperty(auto_now_add = True)
 
 class YouTubeSync(request_handler.RequestHandler):
 
@@ -45,85 +49,30 @@ class YouTubeSync(request_handler.RequestHandler):
             self.indexVideoAndPlaylistData()
         elif step == YouTubeSyncStep.REGENERATE_LIBRARY_CONTENT:
             self.regenerateLibraryContent()
-        elif step == YouTubeSyncStep.FINISH:
-            self.finishYouTubeSync()
 
-        if step < YouTubeSyncStep.FINISH:
+        log = YouTubeSyncStepLog()
+        log.step = step
+        log.generation = int(Setting.last_youtube_sync_generation_start())
+        log.put()
+
+        if step < YouTubeSyncStep.REGENERATE_LIBRARY_CONTENT:
             self.task_step(step + 1)
 
     def task_step(self, step):
         taskqueue.add(url='/admin/youtubesync', queue_name='youtube-sync-queue', params={'step': step})
 
     def startYouTubeSync(self):
-        Setting.dt_last_youtube_sync_start(str(datetime.datetime.now()))
+        Setting.last_youtube_sync_generation_start(int(Setting.last_youtube_sync_generation_start()) + 1)
 
     def updateVideoAndPlaylistData(self):
-        pass
-
-    def updateVideoAndPlaylistReadableNames(self):
-        pass
-
-    def commitLiveAssociations(self):
-        pass
-
-    def indexVideoAndPlaylistData(self):
-        pass
-
-    def regenerateLibraryContent(self):
-        pass
-
-    def finishYouTubeSync(self):
-        Setting.dt_last_youtube_sync_finish(str(datetime.datetime.now()))
-
-class UpdateVideoReadableNames(request_handler.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        query = Video.all()
-        all_videos = query.fetch(100000)
-        for video in all_videos:
-            potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
-            potential_id = re.sub('-+$', '', potential_id)  # remove any trailing dashes (see issue 1140)
-            potential_id = re.sub('^-+', '', potential_id)  # remove any leading dashes (see issue 1526)                        
-            if video.readable_id == potential_id: # id is unchanged
-                continue
-            number_to_add = 0
-            current_id = potential_id
-            while True:
-                query = Video.all()
-                query.filter('readable_id=', current_id)
-                if (query.get() is None): #id is unique so use it and break out
-                    video.readable_id = current_id
-                    video.put()
-                    break
-                else: # id is not unique so will have to go through loop again
-                    number_to_add+=1
-                    current_id = potential_id+'-'+number_to_add                       
-        
-class UpdateVideoData(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         self.response.out.write('<html>')
         yt_service = gdata.youtube.service.YouTubeService()
         playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
 
-        # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
-        query = VideoPlaylist.all()
-        all_video_playlists = []
-
-        for video_playlist in query:
-            video_playlist.live_association = False
-            all_video_playlists.append(video_playlist)
-        db.put(all_video_playlists)
-
         video_youtube_id_dict = Video.get_dict(Video.all(), lambda video: video.youtube_id)
         video_playlist_key_dict = VideoPlaylist.get_key_dict(VideoPlaylist.all())
+
+        association_generation = int(Setting.last_youtube_sync_generation_start())
 
         for playlist in playlist_feed.entry:
 
@@ -140,8 +89,6 @@ class UpdateVideoData(request_handler.RequestHandler):
             playlist_data.title = playlist.title.text
             playlist_data.description = playlist.description.text
             playlist_data.put()
-            playlist_data.index()
-            playlist_data.indexed_title_changed()
             
             for i in range(0, 10):
                 start_index = i * 50 + 1
@@ -181,9 +128,6 @@ class UpdateVideoData(request_handler.RequestHandler):
                     video_data.position = video.position
                     video_data_list.append(video_data)
                 db.put(video_data_list)
-                for video_data in video_data_list:
-                    video_data.index()
-                    video_data.indexed_title_changed()
 
                 playlist_videos = []
                 for video_data in video_data_list:                
@@ -197,9 +141,53 @@ class UpdateVideoData(request_handler.RequestHandler):
                         self.response.out.write('<p><strong>Creating VideoPlaylist(' + playlist_data.title + ',' + video_data.title + ')</strong>')
                     else:
                         self.response.out.write('<p>Updating VideoPlaylist(' + playlist_video.playlist.title + ',' + playlist_video.video.title + ')')
-                    playlist_video.live_association = True
+                    playlist_video.last_live_association_generation = association_generation
                     playlist_video.video_position = int(video_data.position.text)
                     playlist_videos.append(playlist_video)
                 db.put(playlist_videos)
 
+    def updateVideoAndPlaylistReadableNames(self):
+        # Makes sure every video and playlist has a unique "name" that can be used in URLs
+        query = Video.all()
+        all_videos = query.fetch(100000)
+        for video in all_videos:
+            potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
+            potential_id = re.sub('-+$', '', potential_id)  # remove any trailing dashes (see issue 1140)
+            potential_id = re.sub('^-+', '', potential_id)  # remove any leading dashes (see issue 1526)                        
+            if video.readable_id == potential_id: # id is unchanged
+                continue
+            number_to_add = 0
+            current_id = potential_id
+            while True:
+                query = Video.all()
+                query.filter('readable_id=', current_id)
+                if (query.get() is None): #id is unique so use it and break out
+                    video.readable_id = current_id
+                    video.put()
+                    break
+                else: # id is not unique so will have to go through loop again
+                    number_to_add+=1
+                    current_id = potential_id+'-'+number_to_add                       
+
+    def commitLiveAssociations(self):
+        association_generation = int(Setting.last_youtube_sync_generation_start())
+
+        video_playlists = []
+        for video_playlist in VideoPlaylist.all():
+            video_playlist.live_association = (video_playlist.last_live_association_generation >= association_generation)
+            video_playlists.append(video_playlist)
+
+        db.put(video_playlists)
+
+    def indexVideoAndPlaylistData(self):
+        for video in Video.all():
+            video.index()
+            video.indexed_title_changed()
+
+        for playlist in Playlist.all():
+            playlist.index()
+            playlist.indexed_title_changed()
+
+    def regenerateLibraryContent(self):
+        taskqueue.add(url='/library_content', queue_name='youtube-sync-queue')
 
