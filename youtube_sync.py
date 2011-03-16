@@ -204,12 +204,14 @@ class YouTubeSync(request_handler.RequestHandler):
         db.put(video_playlists)
 
     def indexVideoData(self):
-        for video in Video.all():
+        videos = Video.all().fetch(10000)
+        for video in videos:
             video.index()
             video.indexed_title_changed()
 
     def indexPlaylistData(self):
-        for playlist in Playlist.all():
+        playlists = Playlist.all().fetch(10000)
+        for playlist in playlists:
             playlist.index()
             playlist.indexed_title_changed()
 
