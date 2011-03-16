@@ -399,13 +399,21 @@ function text(p,st,pos,id,fontsty) {
 	node = paper.text();
 	svgNodes[id] = node;
     }
-    node.attr("x",p[0]*xunitlength+origin[0]+dx);
-    // Magic number: 
-    node.attr("y",height-p[1]*yunitlength-origin[1]+dy);
-    if (paper.type == "SVG") {
+    var textx = p[0]*xunitlength+origin[0]+dx;
+    var texty = height-p[1]*yunitlength-origin[1]+dy;
+
+    if (paper.raphael.vml) {
+	// VML text adjustment from
+	// https://groups.google.com/group/raphaeljs/browse_thread/thread/daf44c4c1557b898
+	textx -= 2; // be careful, use 'minus equal' assignment here
+	texty += 2.2 + fontsize/10;
+    } else {
 	// font-style doesn't work in VML on IE
 	node.attr("font-style",(fontsty!=null?fontsty:fontstyle));
     }
+    node.attr("x", textx);
+    node.attr("y", texty);
+
     node.attr("text",st);
     node.attr("font-family",fontfamily);
     node.attr("font-size",fontsize);
@@ -697,6 +705,12 @@ function mathjs(st) {
 	st = st.slice(0,j+1)+"factorial("+st.slice(j+1,i)+")"+st.slice(i+1);
     }
     return st;
+}
+
+function functionFrom(exp) {
+    // warning: don't let stuff which is not from user input or the exercise in here
+    eval("var fn = function(x){ with(Math) return "+mathjs(exp)+" }");
+    return fn;
 }
 
 function plot(fun,x_min,x_max,points,id) {

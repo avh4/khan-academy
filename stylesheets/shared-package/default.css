@@ -1530,6 +1530,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     width: 67px;
 }
 #question_area {
+    margin-left: 10px;
     margin-bottom: 10px;
     position: relative;
     padding: 0;

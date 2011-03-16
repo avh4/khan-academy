@@ -173,7 +173,11 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 {% block answerarea %}
 
 <span class="info-box-header">Answer</span>
+<table border="0" width="200">
 <script language=Javascript1.2><!--
+	// highly modified multiple-choice code
+	// - 2 sets of choices (x and y each have 5)
+
 	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
 	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
 	correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
@@ -181,8 +185,8 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 	
 	//Fill in the choices
 	//need to fix it so that the other choices can never be the same as the correct choice
-	document.write('<table border=0 width=200>');
-	for (var i=0; i<5; i++)
+    var numChoices=5;
+	for (var i=0; i<numChoices; i++)
 	{
 		if (i==correctchoice) 
 		{
@@ -205,10 +209,33 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
 			answerChoices2[i]='`'+new_wrong_choice+'`';
 		}
-		document.write('<tr><td><input type=\"radio\" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">'+answerChoices[i]
-			+'</input></td><td><input type=\"radio\" name=\"selectAnswer2\" onClick=\"select_choice2('+i+')\">'+answerChoices2[i]+'</input></td></tr>');
 
+		document.write('<tr><td><p style="white-space:nowrap;margin:5px 0"><label for="answerChoiceA'+i+'"><input type="radio" id="answerChoiceA'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p></td>'
+		              +'<td><p style="white-space:nowrap;margin:5px 0"><label for="answerChoiceB'+i+'"><input type="radio" id="answerChoiceB'+i+'" name="selectAnswer2" class="select-choice2" tabindex="'+(i+1+numChoices)+'" data-choice="'+i+'">&nbsp;'+answerChoices2[i]+'</input></label></p></td></tr>');
 	}
+
+    var $choices = $('.select-choice,.select-choice2');
+    $choices.click(function(e) {
+        if ($(this).hasClass('select-choice'))
+            select_choice(this.getAttribute('data-choice'));
+        else
+            select_choice2(this.getAttribute('data-choice'));
+        
+        if (this != document.activeElement)
+            $(this).focus();
+    });
+
+    $choices.focus(function(e) {
+        $(this).click();
+    });
+
+    $choices.keypress(function(e) {
+        if (e.which == '13') {
+            check_answer_block();
+            return false;
+        }
+    });
+
 //-->
 </script>
 </table>

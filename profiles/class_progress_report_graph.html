@@ -119,25 +119,15 @@
                 }
             });
          
-            $('.tableHeader').each(function(i){
+            $('#firstTd').css("width",$('.tableFirstCol').width());//for adjusting first td
+            $('div.tableHeader').each(function(i){
                 if (m < colCount){
          
-                    if (brow == 'mozilla'){
-                        $('#firstTd').css("width",$('.tableFirstCol').width());//for adjusting first td
-                        $(this).css('width',$('#table_div td:eq('+m+')').width());//for assigning width to table Header div
+                    var cellWidth = $('#table_div td:eq('+m+')').width();
+                    if (brow == 'msie'){
+                        cellWidth -= 2; //In IE there is difference of 2 px
                     }
-                    else if (brow == 'msie'){
-                        $('#firstTd').css("width",$('.tableFirstCol').width());
-                        $(this).css('width',$('#table_div td:eq('+m+')').width()-2);//In IE there is difference of 2 px
-                    }
-                    else if (brow == 'safari'){
-                        $('#firstTd').css("width",$('.tableFirstCol').width());
-                        $(this).css('width',$('#table_div td:eq('+m+')').width());
-                    }
-                    else {
-                        $('#firstTd').css("width",$('.tableFirstCol').width());
-                        $(this).css('width',$('#table_div td:eq('+m+')').innerWidth());
-                    }
+                    $(this).width(cellWidth);
                 }
                 m++;
             });
@@ -166,7 +156,7 @@
         <th id="firstTd" class="tableHeader">Student Progress</th>
         <td>
             <div id="divHeader" class="sizeOnResize" style="overflow:hidden;width:450px; line-height: 15px;">
-                <table cellspacing="0" cellpadding="0" border="1" >
+                <table cellspacing="0" cellpadding="0" border="1" style="width: 100%">
                   <tr>
                     {% for exercise_name in exercise_names %}
                         {% for student_email in exercise_data|hash:exercise_name %}
@@ -175,6 +165,7 @@
                             {% endif %}
                         {% endfor %}
                     {% endfor %}
+                    <th style="max-width:5px; min-width: 5px; width: 5px">&nbsp;</th>
                   </tr>
                 </table>
             </div>
