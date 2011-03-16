@@ -20,8 +20,9 @@ class YouTubeSyncStep:
     UPDATE_VIDEO_AND_PLAYLIST_DATA = 1 # Sets all VideoPlaylist.last_live_association_generation = Setting.last_youtube_sync_generation_start
     UPDATE_VIDEO_AND_PLAYLIST_READABLE_NAMES = 2
     COMMIT_LIVE_ASSOCIATIONS = 3 # Put entire set of video_playlists in bulk according to last_live_association_generation
-    INDEX_VIDEO_AND_PLAYLIST_DATA = 4
-    REGENERATE_LIBRARY_CONTENT = 5
+    INDEX_VIDEO_DATA = 4
+    INDEX_PLAYLIST_DATA = 5
+    REGENERATE_LIBRARY_CONTENT = 6
 
 class YouTubeSyncStepLog(db.Model):
     step = db.IntegerProperty()
@@ -31,7 +32,18 @@ class YouTubeSyncStepLog(db.Model):
 class YouTubeSync(request_handler.RequestHandler):
 
     def get(self):
-        self.task_step(0)
+
+        if self.request_bool("start", default = False):
+            self.task_step(0)
+            self.response.out.write("Sync started")
+        else:
+            latest_logs_query = YouTubeSyncStepLog.all()
+            latest_logs_query.order("dt")
+            latest_logs = latest_logs_query.fetch(10)
+
+            self.response.out.write("Latest sync logs:<br/><br/>")
+            for sync_log in latest_logs:
+                self.response.out.write("Step: %s, Generation: %s, Date: %s<br/>" % (sync_log.step, sync_log.generation, sync_log.dt))
 
     def post(self):
         # Protected for admins only by app.yaml so taskqueue can hit this URL
@@ -45,8 +57,10 @@ class YouTubeSync(request_handler.RequestHandler):
             self.updateVideoAndPlaylistReadableNames()
         elif step == YouTubeSyncStep.COMMIT_LIVE_ASSOCIATIONS:
             self.commitLiveAssociations()
-        elif step == YouTubeSyncStep.INDEX_VIDEO_AND_PLAYLIST_DATA:
-            self.indexVideoAndPlaylistData()
+        elif step == YouTubeSyncStep.INDEX_VIDEO_DATA:
+            self.indexVideoData()
+        elif step == YouTubeSyncStep.INDEX_PLAYLIST_DATA:
+            self.indexPlaylistData()
         elif step == YouTubeSyncStep.REGENERATE_LIBRARY_CONTENT:
             self.regenerateLibraryContent()
 
@@ -179,11 +193,12 @@ class YouTubeSync(request_handler.RequestHandler):
 
         db.put(video_playlists)
 
-    def indexVideoAndPlaylistData(self):
+    def indexVideoData(self):
         for video in Video.all():
             video.index()
             video.indexed_title_changed()
 
+    def indexPlaylistData(self):
         for playlist in Playlist.all():
             playlist.index()
             playlist.indexed_title_changed()
