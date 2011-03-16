@@ -1890,7 +1890,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 .dvd-list {
     float: left;
-    margin-right: 18px;
+    margin-right: 2%;
+    width: 23%;
     min-height: 180px;
 }
 /* Contribute styles */
