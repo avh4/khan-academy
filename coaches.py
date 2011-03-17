@@ -13,6 +13,7 @@ from django.utils import simplejson
 
 from app import App
 import app
+import facebook_util
 import util
 import request_handler
 
@@ -86,19 +87,11 @@ class ViewCoaches(request_handler.RequestHandler):
         user = util.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
-            logout_url = users.create_logout_url(self.request.uri)
+            invalid_coach = self.request_bool("invalid_coach", default = False)
 
-            template_values = {
-                'App' : App,
-                'username': user.nickname(),
-                'logout_url': logout_url,
-                'coaches': user_data.coaches
-                }
-
-            self.render_template('viewcoaches.html', template_values)
+            self.render_template('viewcoaches.html', { 'coaches': user_data.coaches, 'invalid_coach': invalid_coach })
         else:
             self.redirect(util.create_login_url(self.request.uri))
-            
             
 class RegisterCoach(request_handler.RequestHandler):
     
@@ -109,11 +102,17 @@ class RegisterCoach(request_handler.RequestHandler):
             return
 
         user_data = UserData.get_or_insert_for(user)
-        coach_email = self.request.get('coach').lower()            
-        user_data.coaches.append(coach_email)
-        user_data.put()
-        self.redirect("/coaches")
-            
+
+        coach_email = self.request.get('coach').lower()
+        if coach_email.lower().startswith(facebook_util.FACEBOOK_ID_EMAIL_PREFIX) or coach_email.find("@") > 0:
+            # We can't currently explicitly verify coach existence b/c they might not have UserData, 
+            # so we at least check email format.
+            user_data.coaches.append(coach_email)
+            user_data.put()
+
+            self.redirect("/coaches")
+        else:
+            self.redirect("/coaches?invalid_coach=1")
 
 class UnregisterCoach(request_handler.RequestHandler):
 

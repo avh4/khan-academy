@@ -13,13 +13,13 @@
         }
     </style>
 
-    <h2>Oops. We broke our streak.</h2><br/>
+    <h2>{{ title|escape }}</h2><br/>
     <div id="tree-container">
         <img src="/images/missing-leaf.png"/><br/>
         <img id="leaf" src="/images/leaf.png" />
     </div>
-    <h2>{{ message|escape }}</h2>
-    <p>This has been reported to us, and we'll be looking for a fix. If the problem continues, feel free to <a href="/reportissue?type=Defect">send us a report directly</a>.</p>
+    <h2>{{ message_html }}</h2>
+    <p>{{ sub_message_html }}</p>
 
     <script>
         var shake = 4;

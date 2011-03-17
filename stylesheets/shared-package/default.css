@@ -573,9 +573,6 @@ footer {
         *top: 0;
     }
     #sitewide-navigation span.separator {
-        background-image: url(/images/header-separator-grayscale.png);
-    }
-    #sitewide-navigation span.separator {
         line-height: 0
     }
     #top-header #top-header-links .page_links a {
