@@ -6,14 +6,12 @@ from django.utils import simplejson
 from google.appengine.api import memcache
 
 import request_handler
+from custom_exceptions import TumblrException
 from app import App
 from about import util_about
 
 TUMBLR_URL = "http://khanacademy.tumblr.com"
 POSTS_PER_PAGE = 5
-
-class TumblrException(Exception):
-    pass
 
 class BlogPost:
     def __init__(self, json):

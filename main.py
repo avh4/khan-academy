@@ -73,6 +73,7 @@ from profiles import util_profile
 
 from topics_list import topics_list, all_topics_list, DVD_list
 
+from custom_exceptions import MissingVideoException
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -242,15 +243,6 @@ class ViewVideo(request_handler.RequestHandler):
 
     def get(self):
 
-        def report_missing_video(readable_id):
-            error_message = "No video found for ID '%s'" % readable_id
-            logging.error(error_message)
-            report_issue_handler = ReportIssue()
-            report_issue_handler.initialize(self.request, self.response)
-            report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
-                                                           'message': 'Error: %s' % error_message})
-            return
-
         # This method displays a video in the context of a particular playlist.
         # To do that we first need to find the appropriate playlist.  If we aren't 
         # given the playlist title in a query param, we need to find a playlist that
@@ -271,6 +263,10 @@ class ViewVideo(request_handler.RequestHandler):
             query = Video.all()
             query.filter('youtube_id =', video_id)
             video = query.get()
+
+            if not video:
+                raise MissingVideoException("Missing video w/ youtube id '%s'" % video_id)
+
             readable_id = video.readable_id
             playlist = video.first_playlist()
             redirect_to_canonical_url = True
@@ -289,8 +285,8 @@ class ViewVideo(request_handler.RequestHandler):
             # Get video by readable_id just to get the first playlist for the video
             video = Video.get_for_readable_id(readable_id)
             if video is None:
-                report_missing_video(readable_id)
-                return
+                raise MissingVideoException("Missing video '%s'" % readable_id)
+
             playlist = video.first_playlist()
             redirect_to_canonical_url = True
  
@@ -317,8 +313,7 @@ class ViewVideo(request_handler.RequestHandler):
                 next_video = v
 
         if video is None:
-            report_missing_video(readable_id)
-            return
+            raise MissingVideoException("Missing video '%s'" % readable_id)
 
         playlists = VideoPlaylist.get_cached_playlists_for_video(video)
         for p in playlists:

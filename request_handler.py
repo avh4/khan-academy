@@ -6,6 +6,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
+from custom_exceptions import MissingVideoException
 import util
 from app import App
 from models import UserData
@@ -66,17 +67,35 @@ class RequestHandler(webapp.RequestHandler):
 
     def handle_exception(self, e, *args):
 
-        message = "We ran into a problem. It's our fault, and we're working on it."
-        if type(e) is CapabilityDisabledError:
-            message = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
+        silence_report = False
 
-        webapp.RequestHandler.handle_exception(self, e, args)
+        title = "Oops. We broke our streak."
+        message_html = "We ran into a problem. It's our fault, and we're working on it."
+        sub_message_html = "This has been reported to us, and we'll be looking for a fix. If the problem continues, feel free to <a href='/reportissue?type=Defect'>send us a report directly</a>."
+
+        if type(e) is CapabilityDisabledError:
+
+            # App Engine maintenance period
+            message_html = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
+
+        elif type(e) is MissingVideoException:
+
+            # We don't log missing videos as errors because they're so common due to malformed URLs or renamed videos.
+            # Ask users to report any significant problems, and log as info in case we need to research.
+            silence_report = True
+            logging.info(e)
+            title = "This video is no longer around."
+            message_html = "You're looking for a video that either never existed or wandered away. <a href='/'>Head to our video library</a> to find it."
+            sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
+
+        if not silence_report:
+            webapp.RequestHandler.handle_exception(self, e, args)
 
         # Never show stack traces on production machines
         if not App.is_dev_server:
             self.response.clear()
 
-        self.render_template('viewerror.html', {"message": message})
+        self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
 
     def user_agent(self):
         return str(self.request.headers['User-Agent'])
