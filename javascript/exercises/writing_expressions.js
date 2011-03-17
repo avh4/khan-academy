@@ -10,8 +10,8 @@
 // 
 // 
 
-
-function SimpleExpression() {
+// Expression of the form ax + b
+function Expression() {
     var coeff = get_random();
     var variable = "x";
     var constant = get_random();
@@ -122,7 +122,7 @@ function WritingExpressionsExercise() {
     generateWrongAnswers();
     
     function showProblem() {
-        expression = new SimpleExpression();
+        expression = new Expression();
         write_text("Select the expression that represents the following phrase: ");
         open_left_padding(30);
         write_text(expression.toEnglish());
@@ -143,7 +143,7 @@ function WritingExpressionsExercise() {
         // If None of the above is the correct answer, then the following has no effect.
         addWrongChoice("`None of these`");
         
-        var wrong = new SimpleExpression();
+        var wrong = new Expression();
         wrong.setCoefficient(expression.getCoefficient() * -1);
         wrong.setConstant(expression.getConstant());
         addWrongChoice(wrong.toString());
@@ -162,9 +162,8 @@ function WritingExpressionsExercise() {
             addWrongChoice(wrong.toString());
 
         while (getNumPossibleAnswers() < 4) {
-            wrong = new SimpleExpression();
+            wrong = new Expression();
             addWrongChoice(wrong.toString());
         }
     }
 }
-
