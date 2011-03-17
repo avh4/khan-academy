@@ -3,14 +3,11 @@
 // Date: 2011-03-16
 //
 // Problem layout:
-// (multiple choice, and none of the above?)
-// -- the sum of
-// -- the difference
-// -- a is 5 more than b
-// -- a is 5 more than the product of 3 and b
-// -- a is 
-// -- quotient / dividend / divisor
-// -- add meaning, like age, dollars, speed.
+// Select the expression that represents the following phrase:
+//  b more/less than the product of a and x
+//  answer == ax + b or none of the above
+// Constraints: a and b are ints in (-10, 10) except 0
+// 
 // 
 
 
@@ -42,7 +39,6 @@ function SimpleExpression() {
         if (coeff < 0)
             clause += " negative ";
         clause += numbers[Math.abs(coeff)] + " and ";
-            
         clause += " " + variable;
         
         clauses.push(clause);
@@ -51,8 +47,24 @@ function SimpleExpression() {
         return result;
     }
     
-    this.toColorCoded = function() {
-        return "<span style='color: blue'>" + clauses[0]+ "</span>" + "<span style='color: orange'>" + clauses[1] + "</span>";
+    this.showHints = function() {
+        write_step("Let's break this phrase into smaller parts.");
+        
+        open_left_padding(30);
+        var blue_clause = format_string_with_color(clauses[0], "blue");
+        var orange_clause = format_string_with_color(clauses[1], "orange");
+        write_step(blue_clause + orange_clause);
+
+        write_step("What is " + orange_clause + "?");
+        var orange_math = format_math_with_color(format_first_coefficient(coeff) + variable, "orange");
+        write_step("`" + coeff + " * " + variable + " = ` "+ orange_math);
+        
+        write_step("What is " + blue_clause + " " + orange_math + "?");
+        var blue_math = format_math_with_color(format_constant(constant), "blue");
+        write_step(orange_math + blue_math);
+        close_left_padding();
+        
+        write_step("So, " + this.toEnglish() + " can be written as "  + "`" + this.toString() + "`");
     }
     
     this.getCoefficient = function() {
@@ -95,23 +107,23 @@ function WritingExpressionsExercise() {
         close_left_padding();
         
         var answer = expression.toString();
-        setCorrectAnswer(expression.toString());
+        if (get_random() > -5) 
+            setCorrectAnswer(expression.toString());
+        else
+            setCorrectAnswer("`None of the above`");
     }
     
     function showHints() {
-        write_text("Let's break this phrase into smaller parts.");
-        open_left_padding(30);
-        write_text(expression.toColorCoded());
-        write_text("This translates to: `" + expression.getConstant() + "` and `" +  expression.getCoefficient() + expression.getVariable()) + "`";
-        write_text("Or: `" + expression.getConstant() + " + " + expression.getCoefficient() + expression.getVariable() + "`");
-        write_text("Reordering the terms gives: `" + expression.toString()) + "`";
-        close_left_padding();
+        expression.showHints();
     }
     
-    
     function generateWrongAnswers() {
+        // If None of the above is the correct answer, then the following has no effect.
+        addWrongChoice("`None of the above`");
+        
         var wrong = new SimpleExpression();
         wrong.setCoefficient(expression.getCoefficient() * -1);
+        wrong.setConstant(expression.getConstant());
         addWrongChoice(wrong.toString());
         
         wrong.setConstant(expression.getConstant() * -1);
@@ -121,16 +133,16 @@ function WritingExpressionsExercise() {
         wrong.setConstant(expression.getCoefficient());
         if (!expression.equals(wrong)) 
             addWrongChoice(wrong.toString());
+        
+        wrong.setCoefficient(expression.getConstant() * -1);
+        wrong.setConstant(expression.getCoefficient() * -1);
+        if (!expression.equals(wrong))
+            addWrongChoice(wrong.toString());
 
         while (getNumPossibleAnswers() < 4) {
             wrong = new SimpleExpression();
             addWrongChoice(wrong.toString());
         }
     }
-    
-
-    
-        
-
 }
 
