@@ -31,6 +31,10 @@ handlers:
   mime_type: image/x-icon
   upload: images/favicon.ico
 
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
+
 - url: /images/favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
@@ -63,7 +67,7 @@ handlers:
   # The url below needs to be updated whenever we change/upgrade scratchpad.
   # Unfortunately, we can't use a regex due to a GAE bug:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /scratchpad-2011-03-12
+- url: /scratchpad-2011-03-17
   static_dir: scratchpad
 
   # The url below needs to be updated whenever we change/upgrade Jit.

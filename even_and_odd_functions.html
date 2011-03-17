@@ -129,26 +129,26 @@ var funcCategory = getRandomIntRange(0, 2);
 switch(funcCategory) {
     case 0:
         curExp = oddMakers[getRandomIntRange(0, oddMakers.length - 1)]();
-        setCorrectAnswer('Odd');
+        setCorrectAnswer('`Odd`');
         fofna = -1 * fofa;
         
-        addWrongChoice('Neither');
-        addWrongChoice('Even');
+        addWrongChoice('`Neither`');
+        addWrongChoice('`Even`');
         break;
     case 1:
         curExp = evenMakers[getRandomIntRange(0, evenMakers.length - 1)]();
-        setCorrectAnswer('Even');
+        setCorrectAnswer('`Even`');
         fofna = fofa;
         
-        addWrongChoice('Neither');
-        addWrongChoice('Odd');
+        addWrongChoice('`Neither`');
+        addWrongChoice('`Odd`');
         break;
     case 2:
         curExp = neitherMakers[getRandomIntRange(0, neitherMakers.length - 1)]();
-        setCorrectAnswer('Neither');
+        setCorrectAnswer('`Neither`');
         
-        addWrongChoice('Even');
-        addWrongChoice('Odd');
+        addWrongChoice('`Even`');
+        addWrongChoice('`Odd`');
 }
 
 function graph_update() {
@@ -240,57 +240,5 @@ writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span sty
     </td>
 </tr></table>
 {% endblock maincell %}
-{% block answerarea %}
 
-<span class="info-box-header">Answer</span>
-<script language=Javascript1.2><!--
-    // slightly modified multiple-choice code
-    // - only 3 choices
-    // - doesn't mathize the choice text
-	correctchoice = getRandomIntRange(0,2);
-	
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
-	for (var i=0; i<3; i++)
-	{
-		if (i==correctchoice) 
-		{
-			answerChoices[i]=correct_answer;
-		}
-		else
-		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]=definiteWrongAnswers[definiteWrongIndices.pop()];
-			}
-			else
-			{
-				answerChoices[i]=possibleAnswers[possibleWrongIndices.pop()];
-			}
-		}
-
-		document.write('<p style="white-space:nowrap;margin:5px 0"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
-	}
-
-    var $choices = $('.select-choice');
-    $choices.click(function(e) {
-        select_choice(this.getAttribute('data-choice'));
-        if (this != document.activeElement)
-            $(this).focus();
-    });
-
-    $choices.focus(function(e) {
-        $(this).click();
-    });
-
-    $choices.keypress(function(e) {
-        if (e.which == '13') {
-            check_answer_block();
-            return false;
-        }
-    });
-
-//-->
-</script>
-{% endblock answerarea %}
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

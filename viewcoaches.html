@@ -43,6 +43,11 @@
 <p>
 Enter the coach id your coach gives you to allow them to view all of your performance data on the Khan Academy.
 </p>
+
+{% if invalid_coach %}
+<p><span style="color:red;font-weight:bold;">You must enter a full, valid coach id.</span><br/>A full coach id will either be a complete email address, like <strong>teacher@gmail.com</strong>, or a Facebook id, like <strong>http://facebookid.khanacademy.org/1067499349</strong>.</p>
+{% endif %}
+
 <p>
 <form action="/registercoach" method="post">
 <input type="text" name="coach">

@@ -7,6 +7,7 @@ from django import template
 
 from app import App
 import consts
+import util
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -182,6 +183,15 @@ def shared_css():
 @register.inclusion_tag("playlist_browser.html")
 def playlist_browser(browser_id):
     return {'browser_id': browser_id}
+
+@register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
+def empty_class_instructions(class_is_empty=True):
+    user = util.get_current_user()
+    coach_email = "Not signed in. Please sign in to see your Coach ID."
+    if user:
+        coach_email = user.email()
+            
+    return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
 register.tag(highlight)
 

@@ -211,6 +211,10 @@ img {
     /* Fix IE image scaling so that it isn't crappy */
 }
 
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
 header, footer {
     display: block;
     width: 100%;
@@ -571,9 +575,6 @@ footer {
         position: relative\9;
         top: 7px\9;
         *top: 0;
-    }
-    #sitewide-navigation span.separator {
-        background-image: url(/images/header-separator-grayscale.png);
     }
     #sitewide-navigation span.separator {
         line-height: 0
