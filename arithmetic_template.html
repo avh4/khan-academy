@@ -128,7 +128,7 @@ function submitForm(value)
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
             {% block answerarea %}
                 {% if not read_only %}
-                <span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+                <span class="info-box-header">Answer</span><input type="number" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
                 {% endif %}
             {% endblock answerarea %}
 
