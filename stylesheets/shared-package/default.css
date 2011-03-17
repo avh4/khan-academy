@@ -211,6 +211,10 @@ img {
     /* Fix IE image scaling so that it isn't crappy */
 }
 
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
 header, footer {
     display: block;
     width: 100%;
