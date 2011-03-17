@@ -18,21 +18,11 @@ class ViewAboutTheTeam(AboutRequestHandler):
         
 class ViewGettingStarted(AboutRequestHandler):
     def get(self):
-        user = util.get_current_user()
-        coach_email = "Not signed in. Please sign in to see your Coach ID."
-        if user:
-            coach_email = user.email()
-            
-        self.render_template('about/getting-started.html', {"selected_id": "getting-started", "approx_vid_count": consts.APPROX_VID_COUNT, "coach_email": coach_email, "App": App })
+        self.render_template('about/getting-started.html', {"selected_id": "getting-started", "approx_vid_count": consts.APPROX_VID_COUNT, "App": App })
 
 class ViewFAQ(AboutRequestHandler):
     def get(self):
-        user = util.get_current_user()
-        coach_email = "Not signed in. Please sign in to see your Coach ID."
-        if user:
-            coach_email = user.email()
-            
-        self.render_template('about/faq.html', {"selected_id": "faq", "approx_vid_count": consts.APPROX_VID_COUNT, "coach_email": coach_email})
+        self.render_template('about/faq.html', {"selected_id": "faq", "approx_vid_count": consts.APPROX_VID_COUNT })
 
 class ViewDownloads(AboutRequestHandler):
     def get(self):
