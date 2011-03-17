@@ -31,6 +31,10 @@ handlers:
   mime_type: image/x-icon
   upload: images/favicon.ico
 
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
+
 - url: /images/favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
