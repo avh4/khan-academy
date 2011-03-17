@@ -269,6 +269,10 @@ class ViewVideo(request_handler.RequestHandler):
 
             readable_id = video.readable_id
             playlist = video.first_playlist()
+
+            if not playlist:
+                raise MissingVideoException("Missing video w/ youtube id '%s'" % video_id)
+
             redirect_to_canonical_url = True
 
         if playlist_title is not None and len(playlist_title) > 0:
