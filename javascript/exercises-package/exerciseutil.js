@@ -368,6 +368,19 @@ function getLCM(x,y)
 	return (x *y/getGCD(x,y));
 }
 
+function format_fraction_first_coefficient(n, d)
+{
+	var ffc = format_fraction(n, d);
+
+	if (ffc == '1') {
+	   	return '';
+	} else if (ffc == '-1') {
+	       	return '-';
+	} else {
+	        return ffc;
+	}
+}
+
 function format_fraction(n, d)
 {
 	if (d == 0)
