@@ -114,10 +114,10 @@ function ArithmeticWordProblemsExercise() {
     };
 
     this.type2 = function() {
-        var store = stores[getRandomIntRange(0, stores.length - 1)];
+        var store = randomMember(stores);
         this.store = store.name;
-        this.item1 = store.items[getRandomIntRange(0, store.items.length - 1)];
-        do { this.item2 = store.items[getRandomIntRange(0, store.items.length - 1)]; } while (this.item2 == this.item1);
+        this.item1 = randomMember(store.items);
+        do { this.item2 = randomMember(store.items); } while (this.item2 == this.item1);
 
         do {
             this.total = nonZeroRandomInt(10, 99);
@@ -158,8 +158,8 @@ function ArithmeticWordProblemsExercise() {
         this.total = 0;
         this.fps = new Array();
 
-        this.person = people[getRandomIntRange(0, people.length - 1)];
-        var col = collections[getRandomIntRange(0, collections.length - 1)];
+        this.person = randomMember(people);
+        var col = randomMember(collections);
         this.item1 = col.object;
         this.item2 = col.collection;
 
