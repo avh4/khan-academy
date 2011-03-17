@@ -1989,7 +1989,6 @@ def real_main():
         ('/discussion/pagequestions', qa.PageQuestions),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
-        ('/discussion/videofeedbacklist', qa.VideoFeedbackList),
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
         ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),

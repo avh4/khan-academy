@@ -16,49 +16,6 @@ import app
 import util
 import request_handler
 
-# Temporary /discussion/videofeedbacklist URL to list counts of undeleted feedback for each video
-# along with links that change visited/unvisited style whenever new feedback is added.
-#
-# This is not meant to be a permanent piece of UI for the discussion interface, it is a tool
-# for those who want to keep track of feedback while the larger "view all/unanswered/etc questions" interface
-# is built.
-class VideoFeedbackList(request_handler.RequestHandler):
-
-    def get(self):
-
-        feedbacks = models_discussion.Feedback.gql("WHERE deleted = :1", False)
-
-        dict_videos = {}
-        dict_count_questions = defaultdict(int)
-        dict_count_answers = defaultdict(int)
-        dict_count_comments = defaultdict(int)
-
-        for feedback in feedbacks:
-            video = feedback.first_target()
-
-            if video == None or type(video).__name__ != "Video":
-                continue
-
-            video_key = video.key()
-            dict_videos[video_key] = video
-
-            if feedback.is_type(models_discussion.FeedbackType.Question):
-                dict_count_questions[video_key] += 1
-            elif feedback.is_type(models_discussion.FeedbackType.Answer):
-                dict_count_answers[video_key] += 1
-            elif feedback.is_type(models_discussion.FeedbackType.Comment):
-                dict_count_comments[video_key] += 1
-
-        videos = sorted(dict_videos.values(), key=lambda video: video.playlists[0] + video.title)
-        context = {
-                    "videos": videos,
-                    "dict_count_questions": dict_count_questions,
-                    "dict_count_answers": dict_count_answers,
-                    "dict_count_comments": dict_count_comments
-                  }
-
-        self.render_template("video_feedback_list.html", context)
-
 class ModeratorList(request_handler.RequestHandler):
 
     def get(self):
