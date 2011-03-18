@@ -1359,6 +1359,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     min-width: 190px;
     text-align: center;
     background: none;
+    border: none;
     opacity: .5;
     filter: alpha(opacity=50);
 }
