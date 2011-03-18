@@ -18,26 +18,6 @@
 {% endblock pagescript %}
 
 {% block pagecontent %}
-    {% if App.facebook_app_id %}
-    {# Start Facebook connect stuff #}
-    <div id="fb-root"></div>
-    <script>
-      window.fbAsyncInit = function() {
-        FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
-                 xfbml: true});
-        FB.Event.subscribe('auth.login', function(response) {
-            window.location.href = '{{continue|escape}}';
-        });
-      };
-      (function() {
-        var e = document.createElement('script'); e.async = true;
-        e.src = document.location.protocol +
-          '//connect.facebook.net/en_US/all.js';
-        document.getElementById('fb-root').appendChild(e);
-      }());
-    </script>
-    {# End Facebook connect stuff #}
-    {% endif %}
 <div id="login-page">
 	<h2 class="pulls">You need to login to access this part of the site.</h2>
     <h3>Already have an account with one of these sites? Click the logo to use your account to login here:</h3>
