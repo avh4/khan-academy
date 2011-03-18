@@ -524,3 +524,36 @@ var MailingList = {
         });
     }
 }
+
+var CSSMenus = {
+
+    active_menu: null,
+
+    init: function() {
+        // Make the CSS-only menus click-activated
+        $('.noscript').removeClass('noscript');
+        $('.css-menu > ul > li').click(function() {
+            if (CSSMenus.active_menu) CSSMenus.active_menu.removeClass('css-menu-js-hover');
+
+            if (CSSMenus.active_menu && this == CSSMenus.active_menu[0])
+                CSSMenus.active_menu = null;
+            else
+                CSSMenus.active_menu = $(this).addClass('css-menu-js-hover');
+        });
+
+        $(document).bind("click focusin", function(e){
+            if (CSSMenus.active_menu && $(e.target).closest(".css-menu").length == 0) {
+                CSSMenus.active_menu.removeClass('css-menu-js-hover');
+                CSSMenus.active_menu = null;
+            }
+        });
+
+        // Make the CSS-only menus keyboard-accessible
+        $('.css-menu a').focus(function(e){
+            $(e.target).addClass('css-menu-js-hover').closest(".css-menu > ul > li").addClass('css-menu-js-hover');
+        }).blur(function(e){
+            $(e.target).removeClass('css-menu-js-hover').closest(".css-menu > ul > li").removeClass('css-menu-js-hover');
+        });
+    }
+}
+$(CSSMenus.init);
