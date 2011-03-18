@@ -524,20 +524,3 @@ var MailingList = {
         });
     }
 }
-
-function fixFacebookLogin()
-{
-    // Older versions of Firefox require an href attribute on the link inside
-    // of our css-menus to stop a .mousedown from closing the menu before .click
-    // can fire.
-    var jel = $("#login-menu a.fb_button");
-
-    if (!jel.length)
-    {
-        setTimeout(fixFacebookLogin, 250);
-        return;
-    }
-
-    jel.attr("href", "javascript: void 0;");
-}
-$(fixFacebookLogin);

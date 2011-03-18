@@ -47,10 +47,10 @@
             <div class="sign-in-text">Login with:</div>
             <img src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span></li>
       {% if App.facebook_app_secret %}
-      <div id="real_fb_button" style="display: none;"><fb:login-button></fb:login-button></div>
       <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();">
             <div class="sign-in-text">Login with:</div>
             <img src="/images/facebook-logo-large.png" />
+      </li>
       {% endif %}
       {% if App.accepts_openid %} 
       <li class="domainname" title="Google Apps domain name"> 
@@ -77,9 +77,8 @@
             <img src="/javascript/jQueryOpenIdPlugin/images/vidoop.png" alt="icon" /><span>http://<strong>username</strong>.myvidoop.com/</span></li> 
       <li class="username" title="Verisign user name"> 
             <img src="/javascript/jQueryOpenIdPlugin/images/verisign.png" alt="icon" /><span>http://<strong>username</strong>.pip.verisignlabs.com/</span></li> 
-      <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" />
+      <li class="openid" title="OpenID"><img src="/javascript/jQueryOpenIdPlugin/images/openidW.png" alt="icon" /><span><strong>http://{your-openid-url}</strong></span></li> 
       {% endif %} 
-      <span><strong>http://{your-openid-url}</strong></span></li> 
       </ul></div> 
       <fieldset id="username_fields"> 
       <label for="openid_username">Enter your <span>Provider user name</span></label> 
