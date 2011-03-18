@@ -51,7 +51,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                 list_cols[(ix / students_per_col) % students_per_row].append(dict_student)
 
             for ix in range(0, len(dict_students_sorted)):
-                dict_student = list_cols[ix % students_per_row][(ix / students_per_row) % students_per_col]
+                dict_student = list_cols[ix % students_per_row][(ix / students_per_row) % (students_per_col + 1)]
                 list_students_columnized.append(dict_student)
 
             template_values = {

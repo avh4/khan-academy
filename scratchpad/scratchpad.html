@@ -185,7 +185,7 @@
               text = document.createElement("div");
               text.className = "wysiwyg";
               text.innerHTML = "|";
-              text.style.top = e.clientY + 'px';
+              text.style.top = (e.clientY - 30) + 'px';
               text.style.left = e.clientX + 'px';
               text.style.color = stroke;
               $(text).keydown(function(e){

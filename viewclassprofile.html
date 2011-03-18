@@ -99,13 +99,13 @@
         <div id="add_students_instructions" style="margin-top: 18px;">
             Need to add more students? <a href="" onclick="$('.add_students_instructions').slideDown('fast'); return false;">Click here for instructions</a>.
             <div style="display:none;" class="add_students_instructions">
-                {% include "empty_class_instructions.html" %}
+                {% empty_class_instructions 0 %}
             </div>
         </div>
     </div>
 {% endblock profile_extended_sections %}
 
 {% block profile_is_empty %}
-{% include "empty_class_instructions.html" %}
+{% empty_class_instructions True %}
 {% endblock profile_is_empty %}
 
