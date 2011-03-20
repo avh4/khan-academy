@@ -148,23 +148,23 @@ periodic_table = (function() {
     var buildBottomTable = function() {
         var tableHTML = '';
         tableHTML += '<table class="periodictable">';
-        tableHTML += '<tr>';
-        tableHTML += '<td class="empty"></td>';
-        tableHTML += '<td class="empty"></td>';
+        tableHTML += '<tr class="period period_6">';
+        tableHTML += '<td class="empty">&nbsp;</td>';
+        tableHTML += '<td class="empty">&nbsp;</td>';
         for (var i = 57; i <= 71; i++) {
             var element = atomicNumbers[i];
             tableHTML += elementToHTML(element);
         }  
-        tableHTML += '<td class="empty"></td>';
+        tableHTML += '<td class="empty">&nbsp;</td>';
         tableHTML += '</tr>';
-        tableHTML += '<tr>';
-        tableHTML += '<td class="empty"></td>';
-        tableHTML += '<td class="empty"></td>';
+        tableHTML += '<tr class="period period_7">';
+        tableHTML += '<td class="empty">&nbsp;</td>';
+        tableHTML += '<td class="empty">&nbsp;</td>';
         for (var i = 89; i <= 103; i++) {
             var element = atomicNumbers[i];
             tableHTML += elementToHTML(element);
         }  
-        tableHTML += '<td class="empty"></td>';
+        tableHTML += '<td class="empty">&nbsp;</td>';
         tableHTML += '</tr>';
         tableHTML += '</table>';
         return tableHTML;
@@ -182,7 +182,7 @@ periodic_table = (function() {
                     extraClass = 'actinides';
                 }      
             } 
-            cells += '<td class="empty ' + extraClass + '"></td>';
+            cells += '<td class="empty ' + extraClass + '">&nbsp;</td>';
 
             lastGroup++;
         }
@@ -214,6 +214,7 @@ periodic_table = (function() {
                 tableHTML += elementToHTML(element);
                 lastGroup = group;
             }
+            tableHTML += buildEmptyCells(lastGroup, group, period);
         }
 
         tableHTML += '</tr>';
@@ -225,8 +226,27 @@ periodic_table = (function() {
     }
 
     var highlightElement = function(symbol) {
-        jQuery('.periodictable .element.highlighted').removeClass('highlighted');
         jQuery('.periodictable .element.symbol_' + symbol).addClass('highlighted');
+    }
+
+    var highlightPeriod = function(period) {
+        jQuery('.periodictable .period_' + period).addClass('highlighted');
+    }
+
+    var highlightGroup = function(group) {
+        jQuery('.periodictable .group_' + group).addClass('group_highlighted');
+    }
+
+    var highlightElementSymbol = function(symbol) {
+        jQuery('.periodictable .element.symbol_' + symbol + ' .symbol').addClass('highlighted');
+    }
+
+    var highlightElementWeight = function(symbol) {
+        jQuery('.periodictable .element.symbol_' + symbol + ' .atomic_weight').addClass('highlighted');
+    }
+
+    var highlightElementNumber = function(symbol) {
+        jQuery('.periodictable .element.symbol_' + symbol + ' .atomic_number').addClass('highlighted');
     }
 
     return {
@@ -237,6 +257,11 @@ periodic_table = (function() {
         symbols: symbols,
         atomicWeights: atomicWeights,
         highlightElement: highlightElement,
+        highlightPeriod: highlightPeriod,
+        highlightGroup: highlightGroup,
+        highlightElementSymbol: highlightElementSymbol,
+        highlightElementWeight: highlightElementWeight,
+        highlightElementNumber: highlightElementNumber,
         toHTML: toHTML 
     }
 })();

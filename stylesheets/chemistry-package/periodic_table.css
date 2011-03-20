@@ -1,15 +1,13 @@
 .periodictable {
     table-layout: fixed;
     text-align: center;
-}
-
-.periodictable .period {
+    width: 100%;
 }
 
 .periodictable .empty,
 .periodictable .element {
     height: 40px;
-    width: 40px;
+    width: 5.55%;
 }
 
 .periodictable .element {
@@ -32,8 +30,19 @@
 .periodictable .other_metals { background-color: #CC66CC; }
 .periodictable .semi_metals { background-color: #FF926D; }
 
+.periodictable .period.highlighted .element {
+    background-color: black;
+}
+
+.periodictable .element.group_highlighted {
+    background-color: black;
+}
+
 .periodictable .element.highlighted { 
-    border: 1px solid white;
     background-color: black !important;
     color: white !important;
+}
+
+.periodictable .element .highlighted { 
+    color: yellow;
 }
