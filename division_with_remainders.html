@@ -1,0 +1,12 @@
+{% extends arithmetic_template %}
+{% block maincode %}
+<script type="text/javascript" src="/javascript/division_with_remainders.js"></script>
+<div id="question" style="padding-left:25px;font-size:20px;color:#000">Enter your answer as '8r1' for '8 with a remainder of 1'</div>
+<div id="dvAnswer" style="display:none;padding-top:15px;padding-left:25px;font-size:16px;color:#777"></div>
+
+{% endblock maincode %}
+
+
+{% block checkanswer %}checkDivisionRemainderAnswer(){% endblock checkanswer %}
+{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=555" height="600" width="100%"></iframe>{% endblock maincell %}
+  

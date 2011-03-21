@@ -138,6 +138,9 @@ Matrix.Subtraction = new function(){
                 }
             }
         }
+
+        setCorrectAnswer(_resultentMatrix);
+
         leftMatrixEquation = leftMatrixEquation + "\\end{bmatrix}";
         rightMatrixEquation = rightMatrixEquation + "\\end{bmatrix}";
         _resultMatrixEquation = _resultMatrixEquation + "\\end{bmatrix}";
@@ -151,9 +154,9 @@ Matrix.Subtraction = new function(){
         _wrongMatrixEquation3 = _wrongMatrixEquation3 + "\\end{bmatrix}";
         _wrongChoices.push(_wrongMatrixEquation3);
         
-        _equation = "<div style='float:left; font-size:250%'>\\["  + leftMatrixEquation + "-" + rightMatrixEquation + "  =   ?\\]</div>";
+        _equation = "<div style='float:left; font-size:150%'>\\["  + leftMatrixEquation + "-" + rightMatrixEquation + "  =   ?\\]</div>";
         $("#dvQuestion").append(_equation);
-        $("#dvHint").append("<div style='float:left; font-size:250%'>\\["  + leftMatrixEquation + "-" + rightMatrixEquation + "  = " + _resultMatrixEquation + "\\]</div>");
+        $("#dvHint").append("<div style='float:left; font-size:150%'>\\["  + leftMatrixEquation + "-" + rightMatrixEquation + "  = " + _resultMatrixEquation + "\\]</div>");
     }
 
 
@@ -165,18 +168,50 @@ Matrix.Subtraction = new function(){
      * Detail: Display answer options on screen
      */
     var _createAnswers = function(){
-        correctchoice = Math.round(KhanAcademy.random()*(4-0.02)-.49);
-        var wringChoiceCount = 0;
-        for (var i=0; i<4; i++)
-        {
-            if (i==correctchoice)
-            {
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + _resultMatrixEquation  + '</input></span><br/>');
-            } else {
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + _wrongChoices[wringChoiceCount]  + '</input></span><br/>');
-                wringChoiceCount +=1;
+        var tmpTable="";
+        var tmpTableRow="";
+        tmpTable ="<table cellspacing='0' cellpadding='2'>";
+        for (var i=0; i<_row; i++){
+            tmpTableRow +='<tr>';
+            for (var j=0; j<_column; j++){
+                if(i==0){
+                    if(j==0){
+                        tmpTableRow += '<td style="border-left:solid 1px black; border-top:solid 1px black;">&nbsp;</td>';
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+
+                    } else if(j==_column-1){
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                        tmpTableRow += '<td style="border-right:solid 1px black; border-top:solid 1px black;">&nbsp;</td>';
+
+                    } else{
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    }
+                } else if(i==_row-1){
+                    if(j==0){
+                        tmpTableRow += '<td style="border-left:solid 1px black; border-bottom:solid 1px black;">&nbsp;</td>';
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    } else if(j==_column-1){
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                        tmpTableRow += '<td style="border-right:solid 1px black; border-bottom:solid 1px black;">&nbsp;</td>';
+                    } else{
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    }
+                } else {
+                    if(j==0){
+                        tmpTableRow += '<td style="border-left:solid 1px black;">&nbsp;</td>';
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    } else if(j==_column-1){
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                        tmpTableRow += '<td style="border-right:solid 1px black;">&nbsp;</td>';
+                    } else{
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    }
+                }
             }
+            tmpTableRow += '</tr>';
         }
+        tmpTable += tmpTableRow  + "</table>";
+        $("#dvAnswers").append(tmpTable);
     }
     return {
         /*Public Methods*/
@@ -216,24 +251,24 @@ Matrix.Subtraction = new function(){
                 
                 var digitPosition;
                 if(_hintsGiven == 0){
-                    digitPosition = "first digit of";
+                    digitPosition = "1<sup>st</sup> digit of";
                 } else if(_hintsGiven == 1){
-                    digitPosition = "second digit of";
+                    digitPosition = "2<sup>nd</sup> digit of";
                 } else if(_hintsGiven == 2){
-                    digitPosition = "third digit of";
+                    digitPosition = "3<sup>rd</sup> digit of";
                 } else if(_hintsGiven == 3){
-                    digitPosition = "fourth digit of";
+                    digitPosition = "4<sup>th</sup> digit of";
                 }
                 if(_hintRow == 0){
-                    digitPosition = digitPosition + " first row";
+                    digitPosition = digitPosition + " 1<sup>st</sup> row";
                 } else if (_hintRow== 1){
-                    digitPosition = digitPosition + " second row";
+                    digitPosition = digitPosition + " 2<sup>nd</sup> row";
                 } else if (_hintRow== 2){
-                    digitPosition = digitPosition + " third row";
+                    digitPosition = digitPosition + " 3<sup>rd</sup> row";
                 } else if (_hintRow== 3){
-                    digitPosition = digitPosition + " fourth row";
+                    digitPosition = digitPosition + " 4<sup>th</sup> row";
                 }
-                digitPosition = "<br />Hint:<br /><br />Subtract <span style='color:Red;'>" + digitPosition + " of Right Matrix</span> FROM <span style='color:Blue;'>" + digitPosition + " of Left Matrix</span>"
+                digitPosition = "<br />Subtract <span style='color:Red;'>" + digitPosition + " of right matrix</span> from <span style='color:Blue;'>" + digitPosition + " of left matrix</span>"
 
                 $("#dvHintText").html(digitPosition)
                 _hintsGiven++;
@@ -243,6 +278,24 @@ Matrix.Subtraction = new function(){
                 }
                 steps_given++;
             }
+        },
+
+        check_answer: function(){
+            var isCorrect=true;
+            for (var i=0; i<_row; i++){
+                for (var j=0; j<_column; j++){
+                    if(((correct_answer[i][j]).toString() != document.getElementById('txt' + i + '' + j).value) ){
+                        if(isNaN(document.getElementById('txt' + i + '' + j).value)==true){
+                            window.alert("Your answer is not a number.  Please try again.");
+                        }
+                        isCorrect=false;
+                        break;
+                    }
+                }
+                if(isCorrect==false)
+                    break;
+            }
+            handleCorrectness(isCorrect);
         }
     };
 };

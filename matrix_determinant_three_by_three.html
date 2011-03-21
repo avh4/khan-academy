@@ -1,7 +1,9 @@
 {% extends arithmetic_template %}
 {% block maincode %}
-<script type="text/javascript" src="/javascript/matrix_determinent_three_by_three.js"></script>
+<script type="text/javascript" src="/javascript/matrix_determinant_three_by_three.js"></script>
 <div id="dvQuestion"></div>
+<div style="clear:left"></div>
+<div id="dvSample3x3" style="display:none; float:left; font-size:150%"></div>
 <div style="clear:left"></div>
 <div id="dvHint" style="display:none; padding-left:4px;"></div>
 <div style="clear:left"></div>
@@ -12,11 +14,9 @@
 <div id="dvHint_simplified3" style="display:none; padding-left:4px;"></div>
 <div style="clear:left"></div>
 <div id="dvHintText" style="font-size: 18px; font-weight: bold; float:left; padding-left: 5px;"></div>
-
 {% endblock maincode %}
 
-{% block maincell %}
-{% endblock maincell %}
+{%block maincell%}
+{%endblock maincell%}
 
-
-{% block hintfunction %}Matrix.Determinent.next_step(){% endblock hintfunction %}
+{% block hintfunction %}Matrix.Determinant.next_step(){% endblock hintfunction %}

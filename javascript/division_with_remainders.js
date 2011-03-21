@@ -97,7 +97,7 @@ function createEntry(row, col, value)
             col: col,
             val: value,
             color: getNextColor()
-            };
+        };
 }
 
 function getNextColor()
@@ -225,31 +225,14 @@ function graph_update()
 
 
 function setAnswerChoices(){
+    setCorrectAnswer(quotient + "r" + (dividend%divisor));
+}
+function checkDivisionRemainderAnswer(){
+    highlight_answer();
+    var usersAnswer = document.getElementById("answer").value;
+    var isCorrect = (usersAnswer == correctAnswer);
+    handleCorrectness(isCorrect);
 
-    var wrongChoiceCount =0;
-
-    correctchoice = Math.round(KhanAcademy.random()*(4-0.02)-.49);
-    
-    for (var i=0; i<4; i++)
-    {
-        if (i==correctchoice)
-        {
-            $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + quotient + "r" + (dividend%divisor)  + '</input></span><br/>');
-        //$("#dvAnswers").append('<div ><div style="float:left;"><span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\"></input></span></div><div style="float:left;">' + _resultMatrixEquation  + '</div><br/>');
-        } else {
-            if(wrongChoiceCount==0){
-
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + (quotient+1) + "r" + (dividend%divisor)  + '</input></span><br/>');
-            } else if(wrongChoiceCount==1){
-
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + quotient + "r" + ((dividend%divisor)-1)  + '</input></span><br/>');
-            } else if(wrongChoiceCount==2){
-
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + (quotient-1) + "r" + ((dividend%divisor)+1)  + '</input></span><br/>');
-            }
-            wrongChoiceCount +=1;
-        }
-    }
 }
 
 
@@ -308,171 +291,180 @@ var justStarting = false;
 function next_step()
 {
     //uncolorNumbers();
-    explanationTerms = [];
-    steps_given++;
-    if(divided==false)
-    {
-
-        if(curDividend==null)  //We're just getting started
+    if(curDigit<=dividendDigits.length){
+        explanationTerms = [];
+        steps_given++;
+        if(divided==false)
         {
-            justStarting = true;
-            curDividend = dividendDigits[dividendDigits.length-curDigit];
-            while (divisor>curDividend)
+
+            if(curDividend==null)  //We're just getting started
             {
-                //alert([divisor,curDividend]);
-                curDigit++;
-                curDividend = curDividend*10+dividendDigits[dividendDigits.length-curDigit];
+                justStarting = true;
+                curDividend = dividendDigits[dividendDigits.length-curDigit];
+                while (divisor>curDividend)
+                {
+                    //alert([divisor,curDividend]);
+                    curDigit++;
+                    curDividend = curDividend*10+dividendDigits[dividendDigits.length-curDigit];
+                }
+            //alert([divisor,curDividend]);
             }
-        //alert([divisor,curDividend]);
+            else
+            {
+                justStarting = false;
+                changeColor(dividendIDs[dividendIDs.length-curDigit],nColor);
+            }
+
+            curQuotient = Math.floor(curDividend/divisor);
+
+            //Draw out the quotient
+            createEntry(quotientRow, dividendDigits.length-curDigit+1, curQuotient);
+            curQuotientID = drawDigit(quotientRow, dividendDigits.length-curDigit+1,true);
+            curQuotientColor = digits[curQuotientID].color;
+
+            //Write out that 'Divisor goes into dividend quotient times
+            //alert(digits[divisorIDs[0]].color);
+            divisorColor = digits[divisorIDs[0]].color;
+
+
+            changeDivisorColor(divisorColor);
+            clearExp();
+            writeExp(divisor+'',divisorColor);
+            writeExp(' goes into', nColor);
+
+
+            if (justStarting)
+            {
+                curDividendColor = getNextColor();
+                for(var i=0; i<curDigit; i++)
+                    changeColor(dividendIDs[dividendIDs.length-1-i], curDividendColor);
+                writeExp(curDividend+' ',curDividendColor);
+            }
+            else
+            {
+                writeExp(difference,differenceColor);
+                writeExp(curDropDown,curDropDownColor);
+            }
+
+
+            writeExp(' ', nColor);
+            writeExp(curQuotient+'', curQuotientColor);
+            writeExp(' times', nColor);
+
+            divided=true;
         }
-        else
+        else if (multiplied==false)
         {
-            justStarting = false;
-            changeColor(dividendIDs[dividendIDs.length-curDigit],nColor);
+            clearExp();
+            product = divisor*curQuotient;
+            createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, product);
+            curProductID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
+            curProductColor = digits[curProductID].color;
+            writeExp(curQuotient, curQuotientColor);
+            writeExp(' x ', nColor);
+            writeExp(divisor, divisorColor);
+            writeExp(' = ', nColor);
+            writeExp(product, curProductColor);
+            if (justStarting)
+            {
+                for(var i=0; i<curDigit; i++)
+                    changeColor(dividendIDs[dividendIDs.length-1-i], nColor);
+            }
+            else
+            {
+                changeColor(curDifferenceID, nColor);
+                changeColor(curDropDownID, nColor);
+            }
+            multiplied=true;
+            curProductRow++;
         }
-
-        curQuotient = Math.floor(curDividend/divisor);
-
-        //Draw out the quotient
-        createEntry(quotientRow, dividendDigits.length-curDigit+1, curQuotient);
-        curQuotientID = drawDigit(quotientRow, dividendDigits.length-curDigit+1,true);
-        curQuotientColor = digits[curQuotientID].color;
-
-        //Write out that 'Divisor goes into dividend quotient times
-        //alert(digits[divisorIDs[0]].color);
-        divisorColor = digits[divisorIDs[0]].color;
-
-
-        changeDivisorColor(divisorColor);
-        clearExp();
-        writeExp(divisor+'',divisorColor);
-        writeExp(' goes into', nColor);
-
-
-        if (justStarting)
+        else if (subtraction==false)
         {
-            curDividendColor = getNextColor();
-            for(var i=0; i<curDigit; i++)
-                changeColor(dividendIDs[dividendIDs.length-1-i], curDividendColor);
-            writeExp(curDividend+' ',curDividendColor);
+            clearExp();
+            if (justStarting)
+            {
+                for(var i=0; i<curDigit; i++)
+                    changeColor(dividendIDs[dividendIDs.length-1-i], curDividendColor);
+            }
+            else
+            {
+                changeColor(curDifferenceID,curDropDownColor);
+                changeColor(curDropDownID, curDropDownColor);
+                curDividendColor = curDropDownColor;
+                oldDifferenceID = curDifferenceID;
+
+            }
+            difference = curDividend - product;
+            createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, difference);
+            curDifferenceID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
+            differenceColor = digits[curDifferenceID].color;
+            var p1 = getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit);
+            var p2 = getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1+divisorDigits.length);
+            p1[1] = p1[1]+12;
+            p2[1] = p2[1]+12;
+
+            p1[0] = p1[0]-xSpacing/2;
+            p2[0] = p2[0]-xSpacing/2;
+            present.marker = "none";
+            present.stroke = nColor;
+            present.fontfill = nColor;
+            present.line(p1,p2);
+            p2[0] = p2[0]-xSpacing/2;
+            present.text(p2,'-', above);
+            writeExp(curDividend,curDividendColor);
+            writeExp(' - ', nColor);
+            writeExp(product, curProductColor);
+            writeExp(' = ', nColor);
+            writeExp(difference, differenceColor);
+
+            changeColor(curQuotientID, nColor);
+            changeDivisorColor(nColor);
+
+            subtraction=true;
         }
-        else
+        else //if (dropDown==false)
         {
-            writeExp(difference,differenceColor);
-            writeExp(curDropDown,curDropDownColor);
+            clearExp();
+            if (justStarting)
+            {
+            //for(var i=0; i<curDigit; i++)
+            //  changeColor(dividendIDs[dividendIDs.length-1-i], nColor);
+            }
+            else
+            {
+                changeColor(oldDifferenceID, nColor);
+                changeColor(curDropDownID, nColor);
+            }
+            curDigit++;
+            if(curDigit<=dividendDigits.length)
+            {
+                curDividend = difference*10+dividendDigits[dividendDigits.length-curDigit];
+                createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, dividendDigits[dividendDigits.length-curDigit]);
+                curDropDownID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
+                curDropDown = digits[curDropDownID].val;
+                curDropDownColor = digits[curDropDownID].color;
+                changeColor(dividendIDs[dividendIDs.length-curDigit], curDropDownColor);
+                writeExp('Bring down the ', nColor);
+                writeExp(curDropDown, curDropDownColor);
+                present.marker="arrow";
+                present.stroke = nColor;
+                present.line(getCoor(mainRow,dividendDigits.length-curDigit+1),getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1));
+                changeColor(curProductID, nColor);
+
+                curProductRow++;
+                divided=false;
+                multiplied=false;
+                subtraction=false;
+            }// avoid errors of over flow
+            else
+            {
+                var remainder=dividend%divisor;
+                $('#dvAnswer').html('The answer is '+quotient + " with a remainder of " + remainder +" which should be entered as '"+quotient+'r'+remainder+"'");
+                $('#dvAnswer').css('display','block');
+            }
         }
-
-
-        writeExp(' ', nColor);
-        writeExp(curQuotient+'', curQuotientColor);
-        writeExp(' times', nColor);
-
-        divided=true;
-    }
-    else if (multiplied==false)
-    {
-        clearExp();
-        product = divisor*curQuotient;
-        createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, product);
-        curProductID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
-        curProductColor = digits[curProductID].color;
-        writeExp(curQuotient, curQuotientColor);
-        writeExp(' x ', nColor);
-        writeExp(divisor, divisorColor);
-        writeExp(' = ', nColor);
-        writeExp(product, curProductColor);
-        if (justStarting)
-        {
-            for(var i=0; i<curDigit; i++)
-                changeColor(dividendIDs[dividendIDs.length-1-i], nColor);
-        }
-        else
-        {
-            changeColor(curDifferenceID, nColor);
-            changeColor(curDropDownID, nColor);
-        }
-        multiplied=true;
-        curProductRow++;
-    }
-    else if (subtraction==false)
-    {
-        clearExp();
-        if (justStarting)
-        {
-            for(var i=0; i<curDigit; i++)
-                changeColor(dividendIDs[dividendIDs.length-1-i], curDividendColor);
-        }
-        else
-        {
-            changeColor(curDifferenceID,curDropDownColor);
-            changeColor(curDropDownID, curDropDownColor);
-            curDividendColor = curDropDownColor;
-            oldDifferenceID = curDifferenceID;
-
-        }
-        difference = curDividend - product;
-        createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, difference);
-        curDifferenceID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
-        differenceColor = digits[curDifferenceID].color;
-        var p1 = getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit);
-        var p2 = getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1+divisorDigits.length);
-        p1[1] = p1[1]+12;
-        p2[1] = p2[1]+12;
-
-        p1[0] = p1[0]-xSpacing/2;
-        p2[0] = p2[0]-xSpacing/2;
-        present.marker = "none";
-        present.stroke = nColor;
-        present.fontfill = nColor;
-        present.line(p1,p2);
-        p2[0] = p2[0]-xSpacing/2;
-        present.text(p2,'-', above);
-        writeExp(curDividend,curDividendColor);
-        writeExp(' - ', nColor);
-        writeExp(product, curProductColor);
-        writeExp(' = ', nColor);
-        writeExp(difference, differenceColor);
-
-        changeColor(curQuotientID, nColor);
-        changeDivisorColor(nColor);
-
-        subtraction=true;
-    }
-    else //if (dropDown==false)
-    {
-        clearExp();
-        if (justStarting)
-        {
-            for(var i=0; i<curDigit; i++)
-                changeColor(dividendIDs[dividendIDs.length-1-i], nColor);
-        }
-        else
-        {
-            changeColor(oldDifferenceID, nColor);
-            changeColor(curDropDownID, nColor);
-        }
-        curDigit++;
-        curDividend = difference*10+dividendDigits[dividendDigits.length-curDigit];
-        createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, dividendDigits[dividendDigits.length-curDigit]);
-        curDropDownID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
-        curDropDown = digits[curDropDownID].val;
-        curDropDownColor = digits[curDropDownID].color;
-        changeColor(dividendIDs[dividendIDs.length-curDigit], curDropDownColor);
-        writeExp('Bring down the ', nColor);
-        writeExp(curDropDown, curDropDownColor);
-        present.marker="arrow";
-        present.stroke = nColor;
-        present.line(getCoor(mainRow,dividendDigits.length-curDigit+1),getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1));
-        changeColor(curProductID, nColor);
-
-        curProductRow++;
-        divided=false;
-        multiplied=false;
-        subtraction=false;
-
-    }
-    drawExplanation();
-
+        drawExplanation();
+    }//end of cur digit length check
 }
 
 

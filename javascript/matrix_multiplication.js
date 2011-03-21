@@ -45,6 +45,7 @@ Matrix = function(){}
 Matrix.Multiplication = new function(){
     /*Private Members*/
     var _hintsGiven = 0;
+    var _TotalHintsGiven = 0;
     var _hintLeftMatrixRow = 0;
     var _hintRightMatrixColumn = 0;
     var _hintResultentMatrixColumn = 0;
@@ -155,6 +156,8 @@ Matrix.Multiplication = new function(){
             }
         }
 
+        setCorrectAnswer(_resultentMatrix);
+        
         for(loopI=0; loopI < _LeftMatrixRow; loopI++)
         {
             _resultMatrixEquation = _resultMatrixEquation + "\\\\";
@@ -191,9 +194,9 @@ Matrix.Multiplication = new function(){
         rightMatrixEquation = rightMatrixEquation + "\\end{bmatrix}";
         _resultMatrixEquation = _resultMatrixEquation + "\\end{bmatrix}";
                 
-        _equation = "<div style='float:left; font-size:250%'>\\["  + leftMatrixEquation + "*" + rightMatrixEquation + "  = ?\\]</div>";
+        _equation = "<div style='float:left; font-size:150%'>\\["  + leftMatrixEquation + "*" + rightMatrixEquation + "  = ?\\]</div>";
         $("#dvQuestion").append(_equation);
-        $("#dvHint").append("<div style='float:left; font-size:250%'>\\["  + leftMatrixEquation + "*" + rightMatrixEquation + "  = " + _resultMatrixEquation + "\\]</div>");
+        $("#dvHint").append("<div style='float:left; font-size:150%'>\\["  + leftMatrixEquation + "*" + rightMatrixEquation + "  = " + _resultMatrixEquation + "\\]</div>");
     }
 
 
@@ -205,18 +208,51 @@ Matrix.Multiplication = new function(){
      * Detail: Display answer options on screen
      */
     var _createAnswers = function(){
-        correctchoice = Math.round(KhanAcademy.random()*(4-0.02)-.49);
-        var wringChoiceCount = 0;
-        for (var i=0; i<4; i++)
-        {
-            if (i==correctchoice)
-            {
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + _resultMatrixEquation  + '</input></span><br/>');
-            } else {
-                $("#dvAnswers").append('<span style="white-space:nowrap;"><input type=\"radio\" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">' + _wrongChoices[wringChoiceCount]  + '</input></span><br/>');
-                wringChoiceCount +=1;
+        var tmpTable="";
+        var tmpTableRow="";
+        tmpTable ="<table cellspacing='0' cellpadding='2'>";
+        for (var i=0; i<_LeftMatrixRow; i++){
+            tmpTableRow +='<tr>';
+            for (var j=0; j<_RightMatrixColumn; j++){
+                if(i==0){
+                    if(j==0){
+                        tmpTableRow += '<td style="border-left:solid 1px black; border-top:solid 1px black;">&nbsp;</td>';
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+
+                    } else if(j==_RightMatrixColumn-1){
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                        tmpTableRow += '<td style="border-right:solid 1px black; border-top:solid 1px black;">&nbsp;</td>';
+
+                    } else{
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    }
+                } else if(i==_LeftMatrixRow-1){
+                    if(j==0){
+                        tmpTableRow += '<td style="border-left:solid 1px black; border-bottom:solid 1px black;">&nbsp;</td>';
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    } else if(j==_RightMatrixColumn-1){
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                        tmpTableRow += '<td style="border-right:solid 1px black; border-bottom:solid 1px black;">&nbsp;</td>';
+                    } else{
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    }
+                } else {
+                    if(j==0){
+                        tmpTableRow += '<td style="border-left:solid 1px black;">&nbsp;</td>';
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    } else if(j==_RightMatrixColumn-1){
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                        tmpTableRow += '<td style="border-right:solid 1px black;">&nbsp;</td>';
+                    } else{
+                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
+                    }
+                }
             }
+            tmpTableRow += '</tr>';
         }
+        tmpTable += tmpTableRow  + "</table>";
+        $("#dvAnswers").append(tmpTable);
+
     }
     return {
         /*Public Methods*/
@@ -240,64 +276,125 @@ Matrix.Multiplication = new function(){
         * Detail: Create next hint step for user.
         */
         next_step: function(){
-            if(_hintsGiven ==0){
-                $("#dvHint .mfenced:eq(2) .mn").css("display","none");
-                $("#dvHint").css("display","");
-            }
-            var loopI=0;
-            if(_hintsGiven < _LeftMatrixRow*_RightMatrixColumn){
-                if(_hintRightMatrixColumn == 0){
-                    $("#dvHint .mfenced:eq(0) .mn").css("color","Black");
-                    for(loopI=0; loopI<_LeftMatrixColumn; loopI++){
-                        if(loopI==0){
-                            $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].style.color = "Red";
-                            _hintMultiplicationArray[loopI] = "<span style='color:red'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
-                        } else if(loopI==1){
-                            $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].style.color = "Green";
-                            _hintMultiplicationArray[loopI] = "<span style='color:Green'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
-                        } else if(loopI==2){
-                            $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI)  + _hintLeftMatrixRow].style.color = "Blue";
-                            _hintMultiplicationArray[loopI] = "<span style='color:Blue'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
-                        } else if(loopI==3){
-                            $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI)  + _hintLeftMatrixRow].style.color = "Pink";
-                            _hintMultiplicationArray[loopI] = "<span style='color:Pink'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
+            _TotalHintsGiven++;
+            if(_TotalHintsGiven == 1){
+                $("#dvHintText").html("Resultant Matrix of product of 2 matrices will have rows equal to the rows if Left Matrix and Columns equal to the column of right matrix");
+            } else if(_TotalHintsGiven == 2){
+                $("#dvHintText").html("The resultant matrix will have 2 Rows & 3 Columns.");
+            } else{
+                //if(_hintsGiven%_LeftMatrixRow == 0){
+                //}
+               
+                if(_hintsGiven == 0){
+                    $("#dvHint .mfenced:eq(2) .mn").css("display","none");
+                    $("#dvHint").css("display","");
+                }
+                var loopI=0;
+                if(_hintsGiven < _LeftMatrixRow*_RightMatrixColumn){
+                    if(_hintRightMatrixColumn == 0){
+                        $("#dvHint .mfenced:eq(0) .mn").css("color","Black");
+                        for(loopI=0; loopI<_LeftMatrixColumn; loopI++){
+                            if(loopI==0){
+                                $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].style.color = "Red";
+                                _hintMultiplicationArray[loopI] = "<span style='color:red'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
+                            } else if(loopI==1){
+                                $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].style.color = "Green";
+                                _hintMultiplicationArray[loopI] = "<span style='color:Green'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
+                            } else if(loopI==2){
+                                $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI)  + _hintLeftMatrixRow].style.color = "Blue";
+                                _hintMultiplicationArray[loopI] = "<span style='color:Blue'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
+                            } else if(loopI==3){
+                                $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI)  + _hintLeftMatrixRow].style.color = "Pink";
+                                _hintMultiplicationArray[loopI] = "<span style='color:Pink'>" + $("#dvHint .mfenced:eq(0) .mn")[(_LeftMatrixRow * loopI) + _hintLeftMatrixRow].innerText;
+                            }
                         }
                     }
+
+                    $("#dvHint .mfenced:eq(1) .mn").css("color","Black");
+                    var currentRow="";
+                    var currentColumn="";
+                    switch (Math.floor(_hintsGiven/_RightMatrixColumn) + 1) {
+                        case 1:
+                            currentRow = '1<sup>st</sup>';
+                            break;
+                        case 2:
+                            currentRow = '2<sup>nd</sup>';
+                            break;
+                        case 3:
+                            currentRow = '3<sup>rd</sup>';
+                            break;
+                        case 4:
+                            currentRow = '4<sup>th</sup>';
+                            break;
+                    }
+                    switch (Math.floor(_hintsGiven%_RightMatrixColumn) + 1) {
+                        case 1:
+                            currentColumn = '1<sup>st</sup>';
+                            break;
+                        case 2:
+                            currentColumn = '2<sup>nd</sup>';
+                            break;
+                        case 3:
+                            currentColumn = '3<sup>rd</sup>';
+                            break;
+                        case 4:
+                            currentColumn = '4<sup>th</sup>';
+                            break;
+                    }
+                    for(loopI=0; loopI<_RightMatrixRow; loopI++){
+                        if(loopI==0){
+
+                            $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Red";
+                            $("#dvHintText").html("Multiply the " + currentRow + " row of left matrix with the " + currentColumn + " column of right matrix digit by digit and sum the resultant product. <br /><br />");
+                            $("#dvHintText").append(_hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
+                        } else if(loopI==1){
+                            $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Green";
+                            $("#dvHintText").append(" + " + _hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
+                        } else if(loopI==2){
+                            $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Blue";
+                            $("#dvHintText").append(" + " + _hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
+                        } else if(loopI==3){
+                            $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Pink";
+                            $("#dvHintText").append(" + " + _hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
+                        }
+                    }
+                
+                    $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].style.display = "";
+                    $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].style.color = "Lime"
+                    $("#dvHintText").append(" = <span style='color:Lime'>" + $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].innerText  + "</span>");
+                    $("#dvHintText").append("<br /><br /> <span style='color:Lime'>" + $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].innerText  + "</span> will be placed as " + currentColumn + " element of " + currentRow + " row of resultant matrix. ");
+
+                    _hintResultentMatrixColumn += _LeftMatrixRow;
+                    _hintRightMatrixColumn += _LeftMatrixColumn;
+                    if(_hintRightMatrixColumn >= (_RightMatrixColumn*_RightMatrixRow)){
+                        _hintResultentMatrixColumn = 0;
+                        _hintRightMatrixColumn=0;
+                        _hintLeftMatrixRow += 1;
+                    }
+                
+                    _hintsGiven += 1;
                 }
-
-                $("#dvHint .mfenced:eq(1) .mn").css("color","Black");
-
-                for(loopI=0; loopI<_RightMatrixRow; loopI++){
-                    if(loopI==0){
-                        $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Red";
-                        $("#dvHintText").html(_hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
-                    } else if(loopI==1){
-                        $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Green";
-                        $("#dvHintText").append(" + " + _hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
-                    } else if(loopI==2){
-                        $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Blue";
-                        $("#dvHintText").append(" + " + _hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
-                    } else if(loopI==3){
-                        $("#dvHint .mfenced:eq(1) .mn")[_hintRightMatrixColumn + loopI].style.color = "Pink";
-                        $("#dvHintText").append(" + " + _hintMultiplicationArray[loopI] + "x" + $("#dvHint .mfenced:eq(1) .mn")[(_hintRightMatrixColumn + loopI)].innerText);
+                steps_given++;
+                _TotalHintsGiven++;
+            } 
+        },
+        
+        check_answer: function(){
+            var isCorrect=true;
+            for (var i=0; i<_LeftMatrixRow; i++){
+                for (var j=0; j<_RightMatrixColumn; j++){
+                    if(((correct_answer[i][j]).toString() != document.getElementById('txt' + i + '' + j).value) ){
+                        if(isNaN(document.getElementById('txt' + i + '' + j).value)==true){
+                            window.alert("Your answer is not a number.  Please try again.");
+                        }
+                        isCorrect=false;
+                        break;
                     }
                 }
-                
-                $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].style.display = "";
-                $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].style.color = "Lime"
-                $("#dvHintText").append(" = <span style='color:Lime'>" + $("#dvHint .mfenced:eq(2) .mn")[_hintResultentMatrixColumn + _hintLeftMatrixRow].innerText  + "</span>");
-
-                _hintResultentMatrixColumn += _LeftMatrixRow;
-                _hintRightMatrixColumn += _LeftMatrixColumn;
-                if(_hintRightMatrixColumn >= (_RightMatrixColumn*_RightMatrixRow)){
-                    _hintResultentMatrixColumn = 0;
-                    _hintRightMatrixColumn=0;
-                    _hintLeftMatrixRow += 1;
-                }
-                
-                _hintsGiven += 1;
-                steps_given++;
-            } 
+                if(isCorrect==false)
+                    break;
+            }
+            handleCorrectness(isCorrect);
         }
     };
 };

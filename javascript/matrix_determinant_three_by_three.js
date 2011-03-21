@@ -21,11 +21,11 @@ MathJax.Hub.Config({
         Augment: {
             Font: {
                 loadError: function (font) {
-                    MathJax.Message.Set("Can't load web font TeX/"+font.directory,null,2000);
+                    MathJax.Message.Set("Can't load web font TeX/"+font.directory,null,500);
                     document.getElementById("noWebFont").style.display = "";
                 },
                 firefoxFontError: function (font) {
-                    MathJax.Message.Set("Firefox can't load web fonts from a remote host",null,2000);
+                    MathJax.Message.Set("Firefox can't load web fonts from a remote host",null,500);
                     document.getElementById("ffWebFont").style.display = "";
                 }
             }
@@ -42,7 +42,7 @@ Matrix = function(){}
 /*
  * Class Name: Determinent
  */
-Matrix.Determinent = new function(){
+Matrix.Determinant = new function(){
 
     /*Private Members*/
     var _hintsGiven = 0;
@@ -90,7 +90,7 @@ Matrix.Determinent = new function(){
         }
         _matrixEquation = _matrixEquation + "\\end{vmatrix}";
 
-        _equation = "<div style='font-size:250%'>\\["  + _matrixEquation  + "  =   ?\\]</div>";
+        _equation = "<div style='font-size:150%'>\\["  + _matrixEquation  + "  =   ?\\]</div>";
         $("#dvQuestion").append(_equation);
         var correctAnswer = (_matrix[0][0] * ((_matrix[1][1] * _matrix[2][2])-(_matrix[1][2] * _matrix[2][1]))) - (_matrix[0][1] * ((_matrix[1][0] * _matrix[2][2])-(_matrix[1][2] * _matrix[2][0]))) + (_matrix[0][2] * ((_matrix[1][0] * _matrix[2][1])-(_matrix[1][1] * _matrix[2][0])))
         setCorrectAnswer(correctAnswer);
@@ -101,7 +101,11 @@ Matrix.Determinent = new function(){
         $("#dvHint").append("<div><div style='float:left; font-size:150%; color:Red;'>\\[" + _matrix[0][0] + "*" + subMatrix1 + "\\]</div> <div id='dvHint2' style='float:left; font-size:150%; padding-left:8px; color:Blue; display:none;'>\\[ - " + _matrix[0][1] + "*" + subMatrix2 +  "\\]</div> <div id='dvHint3' style='float:left; font-size:150%; padding-left:8px; color:Green; display:none;' >\\[ + " + _matrix[0][2] + "*" + subMatrix3 + "\\]</div> </div>");
         $("#dvHint_simplified1").append("<div><div style='float:left; font-size:150%; color:Red;'>\\[" + _matrix[0][0] + "*(" + _matrix[1][1] + "*" + _matrix[2][2] + " - " + _matrix[1][2] + "*" + _matrix[2][1] + ")\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Blue;'>\\[ - " + _matrix[0][1] + "*(" + _matrix[1][0] + "*" + _matrix[2][2] + " - " + _matrix[1][2] + "*" + _matrix[2][0] + ")\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Green;'>\\[ + " + _matrix[0][2] + "*(" + _matrix[1][0] + "*" + _matrix[2][1] + " - " + _matrix[1][1] + "*" + _matrix[2][0] + ")\\]</div> </div>");
         $("#dvHint_simplified2").append("<div><div style='float:left; font-size:150%; color:Red;'>\\[" + _matrix[0][0] + "*(" +(( _matrix[1][1] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][1])) + ")\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Blue;'>\\[ - " + _matrix[0][1] + "*(" + ((_matrix[1][0] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][0])) + ")\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Green;'>\\[ + " + _matrix[0][2] + "*(" + ((_matrix[1][0] * _matrix[2][1]) - (_matrix[1][1] * _matrix[2][0])) + ")\\]</div> </div>");
-        $("#dvHint_simplified3").append("<div><div style='float:left; font-size:150%; color:Red;'>\\[" + (_matrix[0][0] *(( _matrix[1][1] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][1]))) + "\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Blue;'>\\[ "+ ((((_matrix[1][0] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][0]))<0)? " + ": "-") + ((-1)*(_matrix[0][1] * ((_matrix[1][0] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][0])))) + "\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Green;'>\\[ " + (((_matrix[1][0] * _matrix[2][1]) - (_matrix[1][1] * _matrix[2][0]))<0?"":"+") + (_matrix[0][2] * ((_matrix[1][0] * _matrix[2][1]) - (_matrix[1][1] * _matrix[2][0]))) + " = " + correctAnswer + "\\]</div> </div>");
+        $("#dvHint_simplified3").append("<div><div style='float:left; font-size:150%; color:Red;'>\\[" + (_matrix[0][0] *(( _matrix[1][1] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][1]))) + "\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Blue;'>\\[ "+ ((((_matrix[1][0] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][0]))<0)? (" + " + ((-1)*(_matrix[0][1] * ((_matrix[1][0] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][0]))))): ("-" + ((_matrix[0][1] * ((_matrix[1][0] * _matrix[2][2]) - (_matrix[1][2] * _matrix[2][0]))))))  + "\\]</div> <div style='float:left; font-size:150%; padding-left:8px; color:Green;'>\\[ " + (((_matrix[1][0] * _matrix[2][1]) - (_matrix[1][1] * _matrix[2][0]))<0?"":"+") + (_matrix[0][2] * ((_matrix[1][0] * _matrix[2][1]) - (_matrix[1][1] * _matrix[2][0]))) + " = " + correctAnswer + "\\]</div> </div>");
+        $("#dvSample3x3").append("\\[det(A) = \\begin{vmatrix}\\mathbf{a}&\\mathbf{b}&\\mathbf{c}\\\\\\mathbf{d}&\\mathbf{e}&\\mathbf{f}\\\\\\mathbf{g}&\\mathbf{h}&\\mathbf{i}\\end{vmatrix} = ?\\]");
+        $("#dvSample3x3").append("\\[det(A) = a\\begin{vmatrix}\\mathbf{e}&\\mathbf{f}\\\\\\mathbf{h}&\\mathbf{i}\\end{vmatrix} - b\\begin{vmatrix}\\mathbf{d}&\\mathbf{f}\\\\\\mathbf{g}&\\mathbf{i}\\end{vmatrix} + c\\begin{vmatrix}\\mathbf{d}&\\mathbf{e}\\\\\\mathbf{g}&\\mathbf{h}\\end{vmatrix}\\]")
+        $("#dvSample3x3").append("\\[det(A) = a(e*i - f*h) - b(d*i - f*g) + c(d*h - e*g)\\]")
+
     }
     return {
         /*Public Methods*/
@@ -127,126 +131,38 @@ Matrix.Determinent = new function(){
             _hintsGiven++;
             steps_given++;
             if(_hintsGiven == 1){
-                $("#dvHint").css("display","");
-
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(0)").animate( {
-                    color: "Red"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(1)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(2)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(3)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(6)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(4)").animate( {
-                    color: "Red"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(5)").animate( {
-                    color: "Red"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(7)").animate( {
-                    color: "Red"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(8)").animate( {
-                    color: "Red"
-                }, 2000);
-
-             
+                $("#dvSample3x3").css("display","");
             } else if(_hintsGiven == 2){
-                $("#dvHint2").css("display","");
-
-                $("#dvHintText").css("color","Red");
-
-                $("#dvQuestion .mfenced:eq(0) span .mn").animate( {
-                    color: "Black"
-                }, 100);
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(0)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(1)").animate( {
-                    color: "Blue"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(2)").animate( {
-                    color: "Blue"
-                }, 2000);
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(3)").animate( {
-                    color: "Blue"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(4)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(5)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(6)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(7)").animate( {
-                    color: "Blue"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(8)").animate( {
-                    color: "Blue"
-                }, 2000);
-
-             
-                
-
+                $("#dvHint").css("display","");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(0)").css("color","Red");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(4)").css("color","Red");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(5)").css("color","Red");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(7)").css("color","Red");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(8)").css("color","Red");
             } else if(_hintsGiven == 3){
-                $("#dvHint3").css("display","");
-
+                $("#dvHint2").css("display","");
                 $("#dvHintText").css("color","Red");
-                $("#dvQuestion .mfenced:eq(0) span .mn").animate( {
-                    color: "Black"
-                }, 100);
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(0)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(1)").animate( {
-                    color: "Green"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(2)").animate( {
-                    color: "Green"
-                }, 2000);
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(3)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(4)").animate( {
-                    color: "Green"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(5)").animate( {
-                    color: "Green"
-                }, 2000);
-
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(6)").animate( {
-                    color: "Green"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(7)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-                $("#dvQuestion .mfenced:eq(0) span .mn:eq(8)").animate( {
-                    color: "#DFDFDF"
-                }, 2000);
-
+                $("#dvQuestion .mfenced:eq(0) span .mn").css("color","Black");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(1)").css("color","Blue");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(2)").css("color","Blue");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(3)").css("color","Blue");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(7)").css("color","Blue");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(8)").css("color","Blue");
             } else if(_hintsGiven == 4){
-                $("#dvQuestion .mfenced:eq(0) span .mn").animate( {
-                    color: "Black"
-                }, 100);
-                $("#dvHint_simplified1").css("display","");
+                $("#dvHint3").css("display","");
+                $("#dvHintText").css("color","Red");
+                $("#dvQuestion .mfenced:eq(0) span .mn").css("color","Black");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(1)").css("color","Green");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(2)").css("color","Green");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(4)").css("color","Green");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(5)").css("color","Green");
+                $("#dvQuestion .mfenced:eq(0) span .mn:eq(6)").css("color","Green");
             } else if(_hintsGiven == 5){
-                $("#dvHint_simplified2").css("display","");
+                $("#dvQuestion .mfenced:eq(0) span .mn").css("color","Black");
+                $("#dvHint_simplified1").css("display","");
             } else if(_hintsGiven == 6){
+                $("#dvHint_simplified2").css("display","");
+            } else if(_hintsGiven == 7){
                 $("#dvHint_simplified3").css("display","");
             }
         }
@@ -255,5 +171,5 @@ Matrix.Determinent = new function(){
 
 
 $(document).ready(function(){
-    Matrix.Determinent.init();
+    Matrix.Determinant.init();
 })
