@@ -31,6 +31,9 @@
         <script>var KA_VERSION = '{{ App.version }}';</script>
         {% shared_css %}
         {% shared_javascript %}
+        {% if is_mobile %}
+            {% mobile_javascript %}
+        {% endif %}
 
         <script type="text/javascript">
             // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.

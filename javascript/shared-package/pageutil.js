@@ -369,12 +369,22 @@ var Drawer = {
         $(window).resize(function(){Drawer.resize();});
         this.resize();
 
-        if (window.KnowledgeMap)
+        if (window.TouchScroll)
         {
-            $(".exercise-badge").hover(
-                    function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
-                    function(){KnowledgeMap.onBadgeMouseout.apply(this);}
-            );
+            // Mobile device, support single-finger touch scrolling
+            var jelDrawer = $("#dashboard-drawer");
+            jelDrawer.removeClass("drawer-hoverable");
+            var scroller = new TouchScroll(jelDrawer[0], {});
+        }
+        else
+        {
+            if (window.KnowledgeMap)
+            {
+                $(".exercise-badge").hover(
+                        function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
+                        function(){KnowledgeMap.onBadgeMouseout.apply(this);}
+                );
+            }
         }
     },
 

@@ -27,7 +27,7 @@ class ModeratorList(request_handler.RequestHandler):
         mods = models.UserData.gql("WHERE moderator = :1", True)
 
         path = os.path.join(os.path.dirname(__file__), 'mod_list.html')
-        self.response.out.write(template.render(path, {"mods" : mods}))
+        self.render_template('discussion/mod_list.html', {"mods" : mods})
 
     def post(self):
 

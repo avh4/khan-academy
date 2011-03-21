@@ -44,7 +44,7 @@
         <div id="dashboard-title"><img src="/images/dashboard-icon-active.png" id="dashboard-icon" width=22 height=22 /> Exercises <a href="#" id="collapse-drawer" class="toggle-drawer"><img src="/images/expand-left.png" width="25" height="25"/></a></div>
             <a href="#" id="expand-drawer" class="toggle-drawer"><img src="/images/expand-right.png" width="25" height="25" /></a>
         </div>
-    <div id="dashboard-drawer">
+    <div id="dashboard-drawer" class="drawer-hoverable"><div>
        <h3>Suggested Exercises</h3>
         {% if review_exercises %}
         {% for exercise in review_exercises %}
@@ -93,7 +93,7 @@
             </div>
         {% endfor %}
         </div>
-    </div>
+    </div></div>
 
     <div id="dashboard-map">
         {% knowledgemap_embed exercises map_coords %}
