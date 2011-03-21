@@ -71,13 +71,12 @@ function Expression() {
 }
 
 function EvaluatingExpressionsExercise() {
-    var expression;
+    var expression = new Expression();
     showProblem();
     showHints();
-    setCorrectAnswer(10);
+    setCorrectAnswer(expression.getValue());
     
     function showProblem() {
-        expression = new Expression();
         write_text("Evaluate the following expression when `x = " + expression.getInputValue() + "`.");
         
         open_left_padding(30);
