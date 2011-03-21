@@ -369,12 +369,11 @@ var Drawer = {
         $(window).resize(function(){Drawer.resize();});
         this.resize();
 
-        if (window.TouchScroll)
+        if (window.iScroll)
         {
             // Mobile device, support single-finger touch scrolling
-            var jelDrawer = $("#dashboard-drawer");
-            jelDrawer.removeClass("drawer-hoverable");
-            var scroller = new TouchScroll(jelDrawer[0], {});
+            $("#dashboard-drawer").removeClass("drawer-hoverable");
+            var scroller = new iScroll('dashboard-drawer', { hScroll: false, hScrollbar: false, vScrollbar: false });
         }
         else
         {
