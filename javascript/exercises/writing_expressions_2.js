@@ -48,26 +48,26 @@ function Expression() {
     }
     
     this.showHints = function() {
-        write_text("Let's break this phrase into smaller parts.");
+        write_step("Let's break this phrase into smaller parts.");
         
         open_left_padding(30);
         var outer_clause = format_string_with_color(clauses.outer, "blue");
         var inner_clause = format_string_with_color(clauses.inner, "orange");
-        write_text(outer_clause + inner_clause);
+        write_step(outer_clause + inner_clause);
 
-        write_text("What is " + inner_clause + "?");
+        write_step("What is " + inner_clause + "?");
         var inner_expression = format_math_with_color(variable + format_constant(constant), "orange");
-        write_text(inner_expression);
+        write_step(inner_expression);
 
         inner_expression = format_math_with_color("(" + variable + format_constant(constant) + ")", "orange");
-        write_text("What is " + outer_clause + " " + inner_expression + "?");
+        write_step("What is " + outer_clause + " " + inner_expression + "?");
         
         var outer_expression = format_math_with_color(factor + " * ", "blue");
-        write_text(outer_expression + inner_expression);
+        write_step(outer_expression + inner_expression);
 
         close_left_padding();
         
-        write_text("So, " + this.toEnglish() + " can be written as "  + "`" + this.toString() + "`");
+        write_step("So, " + this.toEnglish() + " can be written as "  + "`" + this.toString() + "`");
     }
     
     this.getFactor = function() {
