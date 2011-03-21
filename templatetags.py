@@ -176,6 +176,9 @@ def profile_javascript():
 @register.inclusion_tag(("homepage_javascript.html", "../homepage_javascript.html"))
 def homepage_javascript():
     return {'App': App}
+@register.inclusion_tag(("mobile_javascript.html", "../mobile_javascript.html"))
+def mobile_javascript():
+    return {'App': App}
 @register.inclusion_tag(("shared_css.html", "../shared_css.html"))
 def shared_css():
     return {'App': App}

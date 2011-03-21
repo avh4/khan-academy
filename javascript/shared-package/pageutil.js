@@ -369,12 +369,21 @@ var Drawer = {
         $(window).resize(function(){Drawer.resize();});
         this.resize();
 
-        if (window.KnowledgeMap)
+        if (window.iScroll)
         {
-            $(".exercise-badge").hover(
-                    function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
-                    function(){KnowledgeMap.onBadgeMouseout.apply(this);}
-            );
+            // Mobile device, support single-finger touch scrolling
+            $("#dashboard-drawer").removeClass("drawer-hoverable");
+            var scroller = new iScroll('dashboard-drawer', { hScroll: false, hScrollbar: false, vScrollbar: false });
+        }
+        else
+        {
+            if (window.KnowledgeMap)
+            {
+                $(".exercise-badge").hover(
+                        function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
+                        function(){KnowledgeMap.onBadgeMouseout.apply(this);}
+                );
+            }
         }
     },
 
@@ -525,19 +534,35 @@ var MailingList = {
     }
 }
 
-function fixFacebookLogin()
-{
-    // Older versions of Firefox require an href attribute on the link inside
-    // of our css-menus to stop a .mousedown from closing the menu before .click
-    // can fire.
-    var jel = $("#login-menu a.fb_button");
+var CSSMenus = {
 
-    if (!jel.length)
-    {
-        setTimeout(fixFacebookLogin, 250);
-        return;
+    active_menu: null,
+
+    init: function() {
+        // Make the CSS-only menus click-activated
+        $('.noscript').removeClass('noscript');
+        $('.css-menu > ul > li').click(function() {
+            if (CSSMenus.active_menu) CSSMenus.active_menu.removeClass('css-menu-js-hover');
+
+            if (CSSMenus.active_menu && this == CSSMenus.active_menu[0])
+                CSSMenus.active_menu = null;
+            else
+                CSSMenus.active_menu = $(this).addClass('css-menu-js-hover');
+        });
+
+        $(document).bind("click focusin", function(e){
+            if (CSSMenus.active_menu && $(e.target).closest(".css-menu").length == 0) {
+                CSSMenus.active_menu.removeClass('css-menu-js-hover');
+                CSSMenus.active_menu = null;
+            }
+        });
+
+        // Make the CSS-only menus keyboard-accessible
+        $('.css-menu a').focus(function(e){
+            $(e.target).addClass('css-menu-js-hover').closest(".css-menu > ul > li").addClass('css-menu-js-hover');
+        }).blur(function(e){
+            $(e.target).removeClass('css-menu-js-hover').closest(".css-menu > ul > li").removeClass('css-menu-js-hover');
+        });
     }
-
-    jel.attr("href", "javascript: void 0;");
 }
-$(fixFacebookLogin);
+$(CSSMenus.init);

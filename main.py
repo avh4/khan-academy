@@ -225,8 +225,7 @@ class ViewExercise(request_handler.RequestHandler):
                 exercise.ensure_sanitized()
                 template_file = 'caja_template.html'
 
-            path = os.path.join(os.path.dirname(__file__), template_file)
-            self.response.out.write(template.render(path, template_values))
+            self.render_template(template_file, template_values)
         else:
 
             self.redirect(util.create_login_url(self.request.uri))
@@ -496,8 +495,7 @@ class PrintProblem(request_handler.RequestHandler):
                 'problem_number': self.request.get('problem_number')
                 }
         
-        path = os.path.join(os.path.dirname(__file__), exid + '.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template(exid + '.html', template_values)
         
 class PrintExercise(request_handler.RequestHandler):
 
@@ -559,8 +557,7 @@ class PrintExercise(request_handler.RequestHandler):
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
             
-            path = os.path.join(os.path.dirname(__file__), 'print_template.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('print_template.html', template_values)
                 
         else:
 
@@ -578,8 +575,7 @@ class ExerciseAdminPage(request_handler.RequestHandler):
 
         template_values = {'App' : App, 'exercises': exercises}
 
-        path = os.path.join(os.path.dirname(__file__), 'exerciseadmin.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('exerciseadmin.html', template_values)
 
 
 class ReportIssue(request_handler.RequestHandler):
@@ -667,25 +663,18 @@ class ViewAllExercises(request_handler.RequestHandler):
                     exercise.review = True
                     exercise.status = "Review"
 
-            logout_url = users.create_logout_url(self.request.uri)
-
             template_values = {
-                'App' : App,
                 'exercises': ex_graph.exercises,
                 'recent_exercises': recent_exercises,
                 'review_exercises': review_exercises,
                 'suggested_exercises': suggested_exercises,
-                'points': user_data.points,
-                'username': user.nickname(),
                 'user_data': user_data,
                 'expanded_all_exercises': user_data.expanded_all_exercises,
                 'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
                 'selected_nav_link': 'practice',
-                'logout_url': logout_url,
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewexercises.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewexercises.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -874,8 +863,7 @@ class GraphPage(request_handler.RequestHandler):
         height = self.request.get('h')
         template_values = {'App' : App, 'width': width, 'height': height}
 
-        path = os.path.join(os.path.dirname(__file__), 'graphpage.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('graphpage.html', template_values)
 
 class AdminViewUser(request_handler.RequestHandler):
 
@@ -898,8 +886,7 @@ class AdminViewUser(request_handler.RequestHandler):
                     break
 
             template_values = {'App' : App, 'exercise_data': exercisedata, 'user_data': userdata}
-            path = os.path.join(os.path.dirname(__file__), 'adminviewuser.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('adminviewuser.html', template_values)
 
 class RegisterAnswer(request_handler.RequestHandler):
 
@@ -1209,8 +1196,7 @@ class GenerateHomepageContent(request_handler.RequestHandler):
                              os.path.join(os.path.dirname(__file__), 'videolibrary_topic.html'), 
                              os.path.join(os.path.dirname(__file__), 'videolibrary_playlist.html')),
             }
-        path = os.path.join(os.path.dirname(__file__), 'homepage_content_template.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('homepage_content_template.html', template_values)
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
@@ -1474,8 +1460,7 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'logout_url': logout_url,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
-        path = os.path.join(os.path.dirname(__file__), 'homepage.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('homepage.html', template_values)
         
 class ViewFAQ(request_handler.RequestHandler):
     def get(self):
@@ -1543,8 +1528,7 @@ class ViewSAT(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'sat.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
 
@@ -1563,8 +1547,7 @@ class ViewGMAT(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'gmat.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('gmat.html', template_values)
                        
 
 class RetargetFeedback(bulk_update.handler.UpdateKind):
@@ -1795,12 +1778,10 @@ class Login(request_handler.RequestHandler):
         if App.facebook_app_secret is None:
             self.redirect(users.create_login_url(cont))
             return
-        path = os.path.join(os.path.dirname(__file__), 'login.html')
         template_values = {
-                           'App': App,
                            'continue': cont                              
                            }
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('login.html', template_values)
 
 class Search(request_handler.RequestHandler):
 

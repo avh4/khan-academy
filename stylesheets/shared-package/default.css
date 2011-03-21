@@ -1187,7 +1187,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -moz-border-radius: 10px;
     border-radius: 10px;
 }
-    .exercise-badge:hover, .exercise-badge-hover {
+    .drawer-hoverable .exercise-badge:hover, .drawer-hoverable .exercise-badge-hover {
         -webkit-box-shadow: 0 0 3px #666;
         -moz-box-shadow: 0 0 3px #666;
         box-shadow: 0 0 3px #666;
@@ -1359,6 +1359,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     min-width: 190px;
     text-align: center;
     background: none;
+    border: none;
     opacity: .5;
     filter: alpha(opacity=50);
 }

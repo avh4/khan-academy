@@ -61,7 +61,7 @@ handlers:
   # The url below needs to be updated whenever we change/upgrade MathJax.
   # Unfortunately, we can't use a regex due to a GAE bug:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /MathJax-git-2011-01-14
+- url: /MathJax-1.1
   static_dir: MathJax
 
   # The url below needs to be updated whenever we change/upgrade scratchpad.

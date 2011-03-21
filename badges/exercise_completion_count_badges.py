@@ -65,7 +65,7 @@ class MagellanBadge(ExerciseCompletionCountBadge):
 class AtlasBadge(ExerciseCompletionCountBadge):
     def __init__(self):
         ExerciseCompletionCountBadge.__init__(self)
-        self.required_exercises = 150
+        self.required_exercises = 250
         self.description = "Atlas"
         self.badge_category = BadgeCategory.DIAMOND
         self.points = 50000

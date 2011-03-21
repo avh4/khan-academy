@@ -71,6 +71,21 @@ class Badge:
         else:
             return name_with_context
 
+    def category_description(self):
+        if self.badge_category == BadgeCategory.BRONZE:
+            return "Meteorite badges are common and easy to earn when just getting started."
+        elif self.badge_category == BadgeCategory.SILVER:
+            return "Moon badges are uncommon and represent an investment in learning."
+        elif self.badge_category == BadgeCategory.GOLD:
+            return "Earth badges are rare. They require a significant amount of learning."
+        elif self.badge_category == BadgeCategory.PLATINUM:
+            return "Sun badges are epic. Earning them is a true challenge, and they require impressive dedication."
+        elif self.badge_category == BadgeCategory.DIAMOND:
+            return "Black Hole badges are legendary and unknown. They are the most unique Khan Academy awards."
+        elif self.badge_category == BadgeCategory.MASTER:
+            return "Challenge Patches are special awards for completing challenge exercises."
+        return ""
+
     def icon_src(self):
         if self.badge_category == BadgeCategory.BRONZE:
             return "/images/badges/meteorite-small.png"

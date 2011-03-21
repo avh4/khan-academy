@@ -94,6 +94,11 @@
                 {% for badge in badge_collection %}
                     {% if forloop.first %}
                         <div id="category-{{badge.badge_category}}" style="display: none;">
+                            <div class="badge-description-container">
+                                <div class="badge-description-content">
+                                    {{ badge.category_description }}
+                                </div>
+                            </div>
                         {% if user_badges|hash:badge.badge_category %}
                         <div id="user-owned">
                         <h2 style="display: block; margin-left: 10px;">Badges Earned</h2>

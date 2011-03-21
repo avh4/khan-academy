@@ -617,7 +617,7 @@ class UserVideo(db.Model):
         query = UserVideo.all()
         query.filter("user = ", user)
         query.filter("completed = ", True)
-        return query.count()
+        return query.count(limit=10000)
 
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)

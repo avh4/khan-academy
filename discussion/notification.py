@@ -80,8 +80,7 @@ class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
                   }
 
         self.response.headers['Content-Type'] = 'text/xml'
-        path = os.path.join(os.path.dirname(__file__), 'video_feedback_notification_feed.xml')
-        self.response.out.write(template.render(path, context))
+        self.render_template('discussion/video_feedback_notification_feed.xml', context)
 
 def feedback_answers_for_user(user):
     notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1", user)
