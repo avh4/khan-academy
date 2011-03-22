@@ -44,8 +44,8 @@ var KnowledgeMap = {
                     // http://gmaps-samples-v3.googlecode.com/svn/trunk/planetary-maptypes/planetary-maptypes.html
                     return KnowledgeMap.getHorizontallyRepeatingTileUrl(coord, zoom, 
                             function(coord, zoom) {
-                              return "http://mw1.google.com/mw-planetary/sky/skytiles_v1/" +
-                                 coord.x + "_" + coord.y + '_' + zoom + '.jpg';
+                              return "/images/map-tiles/field_" +
+                                 Math.floor(Math.random()*4+1) + '.jpg';
                             }
                 )},
                 tileSize: new google.maps.Size(256, 256),
