@@ -21,7 +21,13 @@ com.redfin.FastMarkerOverlay.prototype = new google.maps.OverlayView();
 com.redfin.FastMarkerOverlay.prototype.onAdd = function() {
   this._div = document.createElement("div");
   var panes = this.getPanes();
-  panes.overlayLayer.appendChild(this._div);
+
+  // Ben Kamens: this needs to be overlayMouseTarget, not overlayLayer, for iOS
+  // to work in Google Maps API 3+.
+  //
+  // See http://code.google.com/p/gmaps-api-issues/issues/detail?id=3078
+  //
+  panes.overlayMouseTarget.appendChild(this._div);
 }
 
 /* Copy our data to a new FastMarkerOverlay

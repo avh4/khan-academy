@@ -9,7 +9,7 @@
 {% endblock pagescript %}
 
 {% block pagecontent %}
-  <div class=hdg><h3><A href="/admin94040">Edit Exercise</A>: {{main_exercise.display_name}}</h3></div>
+  <div class=hdg><h3><A href="/admin94040">Edit Exercise</A>: <A href="/exercises?exid={{main_exercise.name}}">{{main_exercise.display_name}}</A></h3></div>
   Use this page to modify exercise dependencies and associations.
 
   <P>

@@ -100,6 +100,14 @@ class RequestHandler(webapp.RequestHandler):
     def user_agent(self):
         return str(self.request.headers['User-Agent'])
 
+    def is_mobile(self):
+        user_agent_lower = self.user_agent().lower()
+        return user_agent_lower.find("ipod") > -1 or \
+                user_agent_lower.find("ipad") > -1 or \
+                user_agent_lower.find("iphone") > -1 or \
+                user_agent_lower.find("webos") > -1 or \
+                user_agent_lower.find("android") > -1
+
     def redirect_via_refresh_if_webkit(self, location):
         if self.user_agent().lower().find("webkit") > -1:
             # When WebKit issues a 302 redirect after a POST request,
@@ -130,6 +138,9 @@ class RequestHandler(webapp.RequestHandler):
 
         template_values['login_url'] = util.create_login_url(self.request.uri)
         template_values['logout_url'] = users.create_logout_url(self.request.uri)
+
+        template_values['is_mobile'] = self.is_mobile()
+
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
  

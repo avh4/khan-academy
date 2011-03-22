@@ -11,7 +11,7 @@
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
      we update MathJax.
   {% endcomment %}
-  <script type="text/javascript" src="/MathJax-git-2011-01-14/MathJax.js">
+  <script type="text/javascript" src="/MathJax-1.1/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",
@@ -128,7 +128,7 @@ function submitForm(value)
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
             {% block answerarea %}
                 {% if not read_only %}
-                <span class="info-box-header">Answer</span><input type="number" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+                <span class="info-box-header">Answer</span><input {% if is_mobile %} type="number" {% else %} type="text" {% endif %}  id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
                 {% endif %}
             {% endblock answerarea %}
 

@@ -234,8 +234,7 @@ class ViewImport(request_handler.RequestHandler):
                                                   'logout_url': logout_url}, 
                                                   self.request)
 
-        path = os.path.join(os.path.dirname(__file__), 'import.html')
-        self.response.out.write(template.render(path, template_values)) 
+        self.render_template('import.html', template_values)
         
 class JsonApiDict():
     @staticmethod

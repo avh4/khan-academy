@@ -1,0 +1,5 @@
+{% if not App.is_dev_server %}
+    <script type="text/javascript" src="/javascript/mobile-package/compressed.js?{{App.version}}"></script>
+{% else %}
+    <script src="/javascript/mobile-package/iscroll-lite.min.js?{{App.version}}"></script>
+{% endif %}
