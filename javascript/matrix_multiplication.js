@@ -72,7 +72,7 @@ Matrix.Multiplication = new function(){
      * Parameters: none
      * Description:Creates a Matrix Multiplication equation with common dinominators
      */
-    var _createMatrixEqation = function(){
+    var _createMatrixEquation = function(){
         var _wrongMatrixEquation1 = null;
         var _wrongMatrixEquation2 = null;
         var _wrongMatrixEquation3 = null;
@@ -264,7 +264,7 @@ Matrix.Multiplication = new function(){
         * Detail: Initialize Matrix Multiplication Exercise
         */
         init: function(){
-            _createMatrixEqation();
+            _createMatrixEquation();
             _createAnswers();
         },
 

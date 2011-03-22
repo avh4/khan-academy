@@ -3,7 +3,7 @@
 * Date: 20 Feb 2011
 * Description: Fraction addition exercise with common dinominators.
 */
-MathJax.HTML.Cookie.Set("menu",{});
+
 
 /*
  * Confiure LaTeX
@@ -59,7 +59,7 @@ Matrix.Determinant = new function(){
      * Parameters: none
      * Description:Creates a Matrix determinent equation
      */
-    var _createMatrixEqation = function(){
+    var _createMatrixEquation = function(){
 
         var loopI =0;
         var loopJ =0;
@@ -105,7 +105,7 @@ Matrix.Determinant = new function(){
         * Detail: Initialize Matrix determinent Exercise
         */
         init: function(){
-            _createMatrixEqation();
+           _createMatrixEquation();
         },
 
 

@@ -3,7 +3,6 @@
 * Date: 20 Feb 2011
 * Description: Fraction determinent exercise.
 */
-MathJax.HTML.Cookie.Set("menu",{});
 
 /*
  * Confiure LaTeX
@@ -59,7 +58,7 @@ Matrix.Determinant = new function(){
      * Parameters: none
      * Description:Creates a Matrix Determinent equation.
      */
-    var _createMatrixEqation = function(){
+    var _createMatrixEquation = function(){
 
         var loopI =0;
         var loopJ =0;
@@ -117,7 +116,7 @@ Matrix.Determinant = new function(){
         * Detail: Initialize Matrix Determinent Exercise
         */
         init: function(){
-            _createMatrixEqation();
+            _createMatrixEquation();
         },
 
 

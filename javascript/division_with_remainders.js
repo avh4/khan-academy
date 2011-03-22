@@ -1,12 +1,12 @@
 var counter = 0;
-var selectedArray = new Array();
+var selectedArray = [];
 var answer = 0;
-var dividend = get_randomInRange(15,99,0);//(divisor* quotient) + get_randomInRange(1,divisor - 1,0);
-var divisor = get_randomInRange(2,9,0);//Math.round(KhanAcademy.random()*90)+9;
+var dividend = get_randomInRange(15,99,0);
+var divisor = get_randomInRange(2,9,0);
 if(dividend%divisor == 0){
     dividend =dividend + get_randomInRange(1,divisor - 1,0);
 }
-var quotient = parseInt(dividend/divisor);//get_randomInRange(2,99,0);//Math.round(KhanAcademy.random()*990)+9;
+var quotient = parseInt(dividend/divisor);
 
 var temp_divisor = divisor;
 var temp_quotient = quotient;
@@ -281,7 +281,6 @@ function writeExp(expression , color)
     present.fontsize = smallFontSize;
     present.fontfill = color;
     curX += expression.length/2*smallXspacing;
-    //alert(curX);
     curTerm++;
     present.text([curX,curY], expression+'', above, 'term'+curTerm);
     curX += expression.length/2*smallXspacing;
@@ -303,11 +302,9 @@ function next_step()
                 curDividend = dividendDigits[dividendDigits.length-curDigit];
                 while (divisor>curDividend)
                 {
-                    //alert([divisor,curDividend]);
                     curDigit++;
                     curDividend = curDividend*10+dividendDigits[dividendDigits.length-curDigit];
                 }
-            //alert([divisor,curDividend]);
             }
             else
             {
@@ -323,7 +320,6 @@ function next_step()
             curQuotientColor = digits[curQuotientID].color;
 
             //Write out that 'Divisor goes into dividend quotient times
-            //alert(digits[divisorIDs[0]].color);
             divisorColor = digits[divisorIDs[0]].color;
 
 

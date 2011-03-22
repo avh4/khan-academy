@@ -64,7 +64,7 @@ Matrix.Subtraction = new function(){
      * Parameters: none
      * Description:Creates a Matrix subtraction equation.
      */
-    var _createMatrixEqation = function(){
+    var _createMatrixEquation = function(){
         var _wrongMatrixEquation1 = null;
         var _wrongMatrixEquation2 = null;
         var _wrongMatrixEquation3 = null;
@@ -223,7 +223,7 @@ Matrix.Subtraction = new function(){
         * Detail: Initialize Matrix Subtraction Exercise
         */
         init: function(){
-            _createMatrixEqation();
+            _createMatrixEquation();
             _createAnswers();
         },
 

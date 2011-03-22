@@ -3,7 +3,6 @@
 * Date: 20 Feb 2011
 * Description: Matrix addition exercise.
 */
-MathJax.HTML.Cookie.Set("menu",{});
 
 /*
  * Confiure LaTeX
@@ -64,7 +63,7 @@ Matrix.Addition = new function(){
      * Parameters: none
      * Description:Creates a Matrix addition equation.
      */
-    var _createMatrixEqation = function(){
+    var _createMatrixEquation = function(){
         var _wrongMatrixEquation1 = null;
         var _wrongMatrixEquation2 = null;
         var _wrongMatrixEquation3 = null;
@@ -218,7 +217,7 @@ Matrix.Addition = new function(){
         * Detail: Initialize Matrix Addition Exercise
         */
         init: function(){
-            _createMatrixEqation();
+            _createMatrixEquation();
             _createAnswers();
         },
 

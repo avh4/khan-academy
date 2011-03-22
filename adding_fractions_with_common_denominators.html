@@ -1,0 +1,25 @@
+{% extends arithmetic_template %}
+{% block maincode %}
+<div id="dvQuestion"></div>
+{% endblock maincode %}
+
+{% block maincell %}
+<div id="holder" style="padding-left:120px;"></div> 
+<div id="dvHintText1" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:blue;"></div>
+<div id="dvHintText2" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:red;"></div>
+<div id="dvHintText3" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:green;"></div>
+<div id="dvHintText4" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:orange;"></div>
+{% endblock maincell %}
+
+{% block answerarea %}
+<span class="info-box-header">Answer</span>
+<div id="dvAnswers" style="text-align: left;"></div>
+<script src="/javascript/exercises-package/raphael-min.js" type="text/javascript" charset="utf-8"></script> 
+<script src="/javascript/exercises-package/g.raphael-min.js" type="text/javascript" charset="utf-8"></script> 
+<script src="/javascript/exercises-package/g.pie-min.js" type="text/javascript" charset="utf-8"></script> 
+<script type="text/javascript" src="/javascript/adding_fractions_with_common_denominators.js"></script>
+{% endblock answerarea %}
+
+{% block checkanswer %} FractionAddition.AdditionWithCommonDenominator.check_answer(){% endblock checkanswer%}
+
+{% block hintfunction %}FractionAddition.AdditionWithCommonDenominator.next_step(){% endblock hintfunction %}
