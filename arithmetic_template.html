@@ -30,27 +30,16 @@
   <script type="text/javascript"><!--
 $(document).ready(function () {
     Exercise.init();
+    {% if exercise.summative %}
+    KhanAcademy.is_summative = true;
+    {% endif %}
+    KhanAcademy.updateSeed({{problem_number}});
 	KhanAcademy.onMathMLSupportReady(function() {
 		translate();
 	});
 });
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
-KhanAcademy.problem_number = "{{problem_number}}";
-KhanAcademy.problem_seed = KhanAcademy.problem_number;
-
-function updateRandomSeed(number) {
-    KhanAcademy.problem_number = number;
-    KhanAcademy.problem_seed = KhanAcademy.problem_number;   
-    KhanAcademy.seedRandom(KhanAcademy.problem_seed);
-}
-
-{% if exercise.summative %}
-    {# We use different seeds for summative exercises so they do not reuse content already seen in normal exercises. #}
-    KhanAcademy.problem_seed = KhanAcademy.problem_seed + "-summative";
-{% endif %}
-KhanAcademy.seedRandom(KhanAcademy.problem_seed);
-
 
 function submitForm(value)
 {
@@ -68,7 +57,7 @@ function submitForm(value)
         success: function(response) {
             try {
                 eval("var data=" + response);
-                updateRandomSeed(data.problem_number);
+                KhanAcademy.updateSeed(data.problem_number);
                 $("#question_content").html("");
                 showNextProblem();
                 resetFeedback();

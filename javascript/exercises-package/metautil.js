@@ -280,6 +280,7 @@ function isNumericStrict(val)
 
 KhanAcademy = {
     random: Math.random, // Initialized so that it can work before seedRandom is called.
+    is_summative: false,
     
     seedRandom: function(seed) {
         var mathRandom = Math.random;
@@ -288,6 +289,14 @@ KhanAcademy = {
         Math.random = mathRandom;
     },
     
+    updateSeed: function(number) {
+        KhanAcademy.problem_number = number;
+        KhanAcademy.problem_seed = KhanAcademy.problem_number;
+        if (KhanAcademy.is_summative)
+            KhanAcademy.problem_seed += "-summative";
+        KhanAcademy.seedRandom(KhanAcademy.problem_seed);
+    },   
+     
 	onMathMLSupportReady: function(callbackWhenReady) {
 		ASCIIMathMLTranslate = translate;
 		translate = function(callback) {
