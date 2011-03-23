@@ -111,7 +111,6 @@ def logout(handler):
 
 class StartYahooLogin(request_handler.RequestHandler):
     def get(self):
-        # REDIRECT TARGETS SHOULD INCLUDE CURRENT LOC
         if get_current_yahoo_user():
             self.redirect("/")
             return
@@ -120,8 +119,9 @@ class StartYahooLogin(request_handler.RequestHandler):
         client = oauth.Client(consumer)
 
         host = '/'.join(self.request.url.split('/')[:3])
+        callback_url = "%s/finishyahoologin?continue=%s" % (host, self.request_string("continue", default="/"))
 
-        resp, content = client.request(REQUEST_TOKEN_URL, "POST", body="oauth_callback=%s/finishyahoologin" % host)
+        resp, content = client.request(REQUEST_TOKEN_URL, "POST", body="oauth_callback=%s" % callback_url)
         if resp["status"] != "200":
             logging.warning("Yahoo OAuth request for request token failed")
             self.redirect("/")
@@ -182,4 +182,4 @@ class FinishYahooLogin(request_handler.RequestHandler):
         cred.guid = access_token['xoauth_yahoo_guid']
         cred.put()
 
-        self.redirect("/")
+        self.redirect(self.request_string("continue", default="/"))

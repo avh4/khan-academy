@@ -149,12 +149,17 @@
                                         Login
                                         <ul class="ui-corner-tr ui-corner-bottom">
                                             <li id="page_login_options">
-                                                <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id">Login with Google</a>
+                                                <a href="/login?continue={{login_continue_quoted}}&openid_identifier=https://www.google.com/accounts/o8/id">Login with Google</a>
                                             </li>
                                             {% if App.facebook_app_secret %}
                                             <li>
                                                 <a href="javascript: void 0;" onclick="$('#real_fb_button a').click();">Login with Facebook</a>
                                                 <div id="real_fb_button" style="display: none;"><fb:login-button></fb:login-button></div>
+                                            </li>
+                                            {% endif %}
+                                            {% if App.yahoo_consumer_secret %}
+                                            <li>
+                                                <a href="/startyahoologin?continue={{login_continue_quoted}}">Login with Yahoo</a>
                                             </li>
                                             {% endif %}
                                             {% if App.accepts_openid %}

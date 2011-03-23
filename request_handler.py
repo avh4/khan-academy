@@ -2,6 +2,8 @@ import os
 import logging
 import datetime
 import Cookie
+import urllib
+
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -154,9 +156,14 @@ class RequestHandler(webapp.RequestHandler):
         template_values['None'] = None
         template_values['points'] = None
         template_values['username'] = ""
+        template_values['login_continue_quoted'] = ""
+
         user = util.get_current_user()
-        if user is not None:
-            template_values['username'] = user.nickname()            
+        if user is None:
+            template_values['login_continue_quoted'] = urllib.quote(self.request.uri)
+        else:
+            template_values['username'] = user.nickname()
+
         user_data = UserData.get_for(user)
 
         template_values['user_data'] = user_data
