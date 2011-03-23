@@ -78,16 +78,19 @@ def get_yahoo_profile_from_oauth_hash(oauth_hash):
     if not profile:
         cred = models.OAuthCred.get_by_key_name(oauth_hash)
 
+        # We cheat and just always immediately refresh the token
+        # before even attempting to avoid the error checking
+        # for expired 1-hour tokens.
+        cred = exchange_oauth_cred(cred, refresh=True)
+
         if not cred or not cred.access_key or not cred.guid:
             return None
 
-        # TOKEN REFRESH
-        url = PROFILE_URL % cred.guid
         token = oauth.Token(key=cred.access_key, secret=cred.secret)
-
         consumer = oauth.Consumer(App.yahoo_consumer_key, App.yahoo_consumer_secret)
         client = oauth.Client(consumer, token)
-        resp, content = client.request(url)
+
+        resp, content = client.request(PROFILE_URL % cred.guid)
 
         if resp["status"] != "200":
             logging.warning("Yahoo OAuth request for tinyusercard failed for guid %s" % cred.guid)
@@ -149,37 +152,48 @@ class FinishYahooLogin(request_handler.RequestHandler):
         oauth_hash = get_oauth_hash_from_cookie()
         cred = models.OAuthCred.get_by_key_name(oauth_hash)
 
-        if not cred:
+        if exchange_oauth_cred(cred, verifier=self.request_string("oauth_verifier")):
+            self.redirect(self.request_string("continue", default="/"))
+        else:
             self.redirect("/")
-            return
 
-        consumer = oauth.Consumer(App.yahoo_consumer_key, App.yahoo_consumer_secret)
+def exchange_oauth_cred(cred, refresh=False, verifier=""):
 
+    if not cred:
+        return None
+
+    token = None
+    body = ""
+
+    if refresh:
+        token = oauth.Token(cred.access_key, cred.secret)
+        body = "oauth_session_handle=%s" % cred.session_handle
+    else:
         token = oauth.Token(cred.request_token, cred.secret)
-        token.set_verifier(self.request_string("oauth_verifier"))
-        client = oauth.Client(consumer, token)
+        token.set_verifier(verifier)
 
-        resp, content = client.request(ACCESS_TOKEN_URL, "POST")
-        if resp["status"] != "200":
-            logging.warning("Yahoo OAuth request for exchanging request token for access token failed")
-            self.redirect("/")
-            return
+    consumer = oauth.Consumer(App.yahoo_consumer_key, App.yahoo_consumer_secret)
+    client = oauth.Client(consumer, token)
 
-        access_token = dict(cgi.parse_qsl(content))
+    resp, content = client.request(ACCESS_TOKEN_URL, "POST", body=body)
+    if resp["status"] != "200":
+        logging.warning("Yahoo OAuth request for exchanging request token for access token failed")
+        return None
 
-        if not access_token or \
-                not access_token.has_key("xoauth_yahoo_guid") or \
-                not access_token.has_key("oauth_session_handle") or \
-                not access_token.has_key("oauth_token") or \
-                not access_token.has_key("oauth_token_secret"):
-            logging.warning("Yahoo OAuth access token, guid, session_handle, or secret missing")
-            self.redirect("/")
-            return
+    access_token = dict(cgi.parse_qsl(content))
 
-        cred.access_key = access_token['oauth_token']
-        cred.secret = access_token['oauth_token_secret']
-        cred.session_handle = access_token['oauth_session_handle']
-        cred.guid = access_token['xoauth_yahoo_guid']
-        cred.put()
+    if not access_token or \
+            not access_token.has_key("xoauth_yahoo_guid") or \
+            not access_token.has_key("oauth_session_handle") or \
+            not access_token.has_key("oauth_token") or \
+            not access_token.has_key("oauth_token_secret"):
+        logging.warning("Yahoo OAuth access token, guid, session_handle, or secret missing")
+        return None
 
-        self.redirect(self.request_string("continue", default="/"))
+    cred.access_key = access_token['oauth_token']
+    cred.secret = access_token['oauth_token_secret']
+    cred.session_handle = access_token['oauth_session_handle']
+    cred.guid = access_token['xoauth_yahoo_guid']
+    cred.put()
+
+    return cred
