@@ -25,13 +25,23 @@
       <div><ul class="providers"> 
       <li class="direct" title="Google">
             <div class="sign-in-text">Login with:</div>
-            <img src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span></li>
+            <img src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span>
+      </li>
+            
       {% if App.facebook_app_secret %}
       <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();">
             <div class="sign-in-text">Login with:</div>
             <img src="/images/facebook-logo-large.png" />
       </li>
       {% endif %}
+
+      {% if App.yahoo_consumer_secret %}
+      <li title="Yahoo" onclick="window.location='/startyahoologin';">
+            <div class="sign-in-text">Login with:</div>
+            YahooooOOOoo!
+      </li>
+      {% endif %}
+
       {% if App.accepts_openid %} 
       <li class="domainname" title="Google Apps domain name"> 
             <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 

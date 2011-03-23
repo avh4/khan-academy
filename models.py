@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import datetime, logging
 import math
+import uuid
+import base64
 from google.appengine.api import users
 from google.appengine.api import memcache
 
@@ -1017,3 +1019,20 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
+
+class OAuthCred(db.Model):
+    request_token = db.TextProperty()
+    access_key = db.TextProperty()
+    secret = db.TextProperty()
+    session_handle = db.TextProperty()
+    guid = db.StringProperty()
+
+    @staticmethod
+    def generate_with_random_hash():
+        cred = OAuthCred.get_or_insert(key_name = base64.b64encode(str(uuid.uuid4())))
+        cred.request_token = None
+        cred.access_key = None
+        cred.secret = None
+        cred.session_handle = None
+        cred.guid = None
+        return cred

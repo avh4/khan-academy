@@ -7,6 +7,8 @@ except:
     class secrets(object):
         facebook_app_id = None
         facebook_app_secret = None
+        yahoo_consumer_key = None
+        yahoo_consumer_secret = None
         remote_api_secret = None
         constant_contact_api_key = None
         constant_contact_username = None
@@ -20,9 +22,14 @@ class App(object):
     # during the deployment process.  Minor is always 1 on a dev
     # server.
     version = os.environ['CURRENT_VERSION_ID']
+
     # khanacademy.org
     facebook_app_id = secrets.facebook_app_id
     facebook_app_secret = secrets.facebook_app_secret
+
+    yahoo_consumer_key = secrets.yahoo_consumer_key
+    yahoo_consumer_secret = secrets.yahoo_consumer_secret
+
     remote_api_secret = secrets.remote_api_secret
 
     constant_contact_api_key = secrets.constant_contact_api_key

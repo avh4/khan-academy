@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import db
 
-from util import get_nickname_for
+from nicknames import get_nickname_for
 
 class FeedbackType:
     Question="question"

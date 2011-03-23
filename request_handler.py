@@ -1,6 +1,7 @@
 import os
 import logging
 import datetime
+import Cookie
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -122,6 +123,31 @@ class RequestHandler(webapp.RequestHandler):
             self.response.headers.add_header("Refresh", "0; URL=%s" % location)
         else:
             self.redirect(location)
+
+    # Cookie handling from http://appengine-cookbook.appspot.com/recipe/a-simple-cookie-class/
+    def set_cookie(self, key, value='', max_age=None,
+                   path='/', domain=None, secure=None, httponly=False,
+                   version=None, comment=None):
+        cookies = Cookie.BaseCookie()
+        cookies[key] = value
+        for var_name, var_value in [
+            ('max-age', max_age),
+            ('path', path),
+            ('domain', domain),
+            ('secure', secure),
+            ('HttpOnly', httponly),
+            ('version', version),
+            ('comment', comment),
+            ]:
+            if var_value is not None and var_value is not False:
+                cookies[key][var_name] = str(var_value)
+            if max_age is not None:
+                cookies[key]['expires'] = max_age
+        header_value = cookies[key].output(header='').lstrip()
+        self.response.headers._headers.append(('Set-Cookie', header_value))
+
+    def delete_cookie(self, key, path='/', domain=None):
+        self.set_cookie(key, '', path=path, domain=domain, max_age=0)
 
     def render_template(self, template_name, template_values):
         template_values['App'] = App

@@ -36,6 +36,7 @@ from google.appengine.ext import db
 import qbrary
 import bulk_update.handler
 import facebook
+import yahoo_util
 import layer_cache
 import autocomplete
 import coaches
@@ -1928,6 +1929,8 @@ def real_main():
         
         ('/press/.*', ViewArticle),
         ('/login', Login),
+        ('/startyahoologin', yahoo_util.StartYahooLogin),
+        ('/finishyahoologin', yahoo_util.FinishYahooLogin),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 
