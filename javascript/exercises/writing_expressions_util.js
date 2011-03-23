@@ -30,18 +30,6 @@ function Expression() {
         constant = new_constant;
     }
     
-    this.equals = function (other_expression) {
-        var inner_is_equal = false;
-        if (inner.equals instanceof Function && other_expression.getInner().equals instanceof Function)
-            inner_is_equal = inner.equals(other_expression.getInner());
-        else if (inner.equals instanceof Function || other_expression.getInner().equals instanceof Function)
-            return false;
-        else
-            inner_is_equal = inner == other_expression.getInner();
-            
-        return coeff == other_expression.getCoefficient() && constant == other_expression.getConstant();
-    }
-    
     this.toString = function() {
         var inner_str = inner.toString();
         if (inner_str.length != 1)
@@ -53,7 +41,7 @@ function Expression() {
         if (inner.toEnglish instanceof Function)
             product_clause.init(coeff, "that expression");
         else
-            product_clause.init(coeff.toString(), inner.toString());
+            product_clause.init(coeff, inner.toString());
         sum_clause.init(constant, product_clause.toEnglish());
         return sum_clause.toEnglish();
     }
@@ -135,9 +123,8 @@ function SumClause() {
                  break;
              default:
                 first_phrase = t2;
-                second_phrase = " then add " + t1;
-                english = " Take " + first_phrase + ", and " + second_phrase + ".";
                 second_phrase = " does adding " + t1 + " do";
+                english = " Take " + first_phrase + ", and then add " + t1 + ".";
          }
      }
      

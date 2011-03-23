@@ -63,13 +63,11 @@ function WritingExpressionsExercise() {
         
         wrong.setCoefficient(expression.getConstant());
         wrong.setConstant(expression.getCoefficient());
-        if (!expression.equals(wrong)) 
-            addWrongChoice(wrong.toString());
+        addWrongChoice(wrong.toString());
         
         wrong.setCoefficient(expression.getConstant() * -1);
         wrong.setConstant(expression.getCoefficient() * -1);
-        if (!expression.equals(wrong))
-            addWrongChoice(wrong.toString());
+        addWrongChoice(wrong.toString());
 
         while (getNumPossibleAnswers() < 4) {
             wrong = new Expression();
