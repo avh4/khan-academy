@@ -1769,7 +1769,7 @@ class Login(request_handler.RequestHandler):
 class Logout(request_handler.RequestHandler):
     def get(self):
         # Logout of both Yahoo and Google. Facebook is handled by JS.
-        self.delete_cookie(yahoo_util.YAHOO_COOKIE_NAME)
+        yahoo_util.logout(self)
         self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):

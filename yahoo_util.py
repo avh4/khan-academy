@@ -105,6 +105,10 @@ def get_yahoo_profile_from_oauth_hash(oauth_hash):
 
     return profile
 
+def logout(handler):
+    if get_oauth_hash_from_cookie():
+        handler.delete_cookie(YAHOO_COOKIE_NAME)
+
 class StartYahooLogin(request_handler.RequestHandler):
     def get(self):
         # REDIRECT TARGETS SHOULD INCLUDE CURRENT LOC
