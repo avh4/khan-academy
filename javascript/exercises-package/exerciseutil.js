@@ -5,7 +5,6 @@ var Exercise = {
         // this.answerChoices = new Array(5);
         // this.possibleAnswers = new Array(); //These are the possible answers
         // this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-        // this.definiteWrongAnswers = new Array();
         // this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
         // this.steps_given=0;
         // this.next_step_to_write =1;
@@ -29,14 +28,10 @@ var Exercise = {
     }
 };
 
-
-
-
 var answerChoices = new Array(5);
 var answerChoices2 = new Array(5);
 var possibleAnswers = new Array(); //These are the possible answers
 var possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-var definiteWrongAnswers = new Array();
 var checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
 var steps_given=0;
 var next_step_to_write =1;
@@ -196,7 +191,7 @@ function equivInArray(target, arr) {
 function addWrongChoice(choice)
 {
 	if(mathFormat(choice) != mathFormat(correct_answer))
-		if(!equivInArray(choice, possibleAnswers) && !equivInArray(choice, definiteWrongAnswers))
+		if(!equivInArray(choice, possibleAnswers))
 			possibleAnswers.push(choice);
 }
 

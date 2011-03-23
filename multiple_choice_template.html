@@ -12,12 +12,11 @@ renderChoices();
 function renderChoices() {
     $("#answer_content").html("");
     
-	var availAnswers = 1 + possibleAnswers.length + definiteWrongAnswers.length; // only so many answers available
+	var availAnswers = 1 + possibleAnswers.length; // only so many answers available
 	answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
 	correctchoice = Math.round(KhanAcademy.random()*(answerChoices.length-0.02)-.49);
 
 	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
 	for (var i=0; i<answerChoices.length; i++)
 	{
 		if (i==correctchoice)
@@ -26,14 +25,8 @@ function renderChoices() {
 		}
 		else
 		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]='`'+definiteWrongAnswers[definiteWrongIndices.pop()]+'`';
-			}
-			else if (possibleWrongIndices.length>0)
-			{
+			if (possibleWrongIndices.length>0)
 				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
-			}
 			else
 				continue;
 		}

@@ -51,17 +51,9 @@ function updateRandomSeed(number) {
 {% endif %}
 KhanAcademy.seedRandom(KhanAcademy.problem_seed);
 
+
 function submitForm(value)
 {
-    // if challenge, submit normally:
-    /*
-	var form = document.forms['answerform'];
-	if (form.beenSubmitted)
-		return false;
-	else
-		form.beenSubmitted = true;
-	form.submit();
-	*/
     var data = "";
     $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used"], function(index, value) {
         if (index)

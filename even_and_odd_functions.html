@@ -250,24 +250,12 @@ writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span sty
 	correctchoice = getRandomIntRange(0,2);
 	
 	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
-	for (var i=0; i<3; i++)
+	for (var i = 0; i < 3; i++)
 	{
-		if (i==correctchoice) 
-		{
-			answerChoices[i]=correct_answer;
-		}
+		if (i == correctchoice) 
+			answerChoices[i] = correct_answer;
 		else
-		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]=definiteWrongAnswers[definiteWrongIndices.pop()];
-			}
-			else
-			{
-				answerChoices[i]=possibleAnswers[possibleWrongIndices.pop()];
-			}
-		}
+			answerChoices[i]=possibleAnswers[possibleWrongIndices.pop()];
 
 		document.write('<p style="white-space:nowrap;margin:5px 0"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
 	}

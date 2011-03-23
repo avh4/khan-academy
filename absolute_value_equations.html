@@ -6,14 +6,12 @@
 {% endblock maincode %}
 {% block maincell %}
 <script>
-    var exercise = new AbsoluteValueEquationsExercise();
-    exercise.init();
-        
     function showNextProblem() {
         exercise = new AbsoluteValueEquationsExercise();
-        exercise.init();
         renderChoices();
     }
+
+    showNextProblem();
 </script>
 {% endblock maincell %}
 
