@@ -1,6 +1,5 @@
 
 import facebook_util
-import yahoo_util
 
 def get_nickname_for(user):
     if facebook_util.is_facebook_email(user.email()):

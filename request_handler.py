@@ -163,7 +163,7 @@ class RequestHandler(webapp.RequestHandler):
         template_values['points'] = user_data.points if user_data else 0
 
         template_values['login_url'] = util.create_login_url(self.request.uri)
-        template_values['logout_url'] = users.create_logout_url(self.request.uri)
+        template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
         template_values['is_mobile'] = self.is_mobile()
 

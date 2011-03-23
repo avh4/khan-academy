@@ -4,6 +4,7 @@ import urllib
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
 
+import nicknames
 import facebook_util
 import yahoo_util
 
@@ -28,6 +29,9 @@ def get_nickname_for(user):
 
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
+
+def create_logout_url(dest_url):
+    return "/logout?continue=%s" % urllib.quote(dest_url)
 
 def seconds_since(dt):
     return seconds_between(dt, datetime.datetime.now())

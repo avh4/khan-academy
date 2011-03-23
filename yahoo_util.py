@@ -30,7 +30,7 @@ import request_handler
 REQUEST_TOKEN_URL = "https://api.login.yahoo.com/oauth/v2/get_request_token"
 ACCESS_TOKEN_URL = "https://api.login.yahoo.com/oauth/v2/get_token"
 AUTHORIZATION_URL = "https://api.login.yahoo.com/oauth/v2/request_auth"
-CALLBACK_URL = "http://localhost:8084/oauth/request_token_ready"
+PROFILE_URL = "http://social.yahooapis.com/v1/user/%s/profile/tinyusercard?format=JSON"
 
 YAHOO_ID_EMAIL_PREFIX = "http://yahooid.khanacademy.org/"
 YAHOO_COOKIE_NAME = "yoa_khanacademy"
@@ -72,7 +72,6 @@ def get_oauth_hash_from_cookie():
     return morsel.value 
 
 def get_yahoo_profile_from_oauth_hash(oauth_hash):
-
     memcache_key = "yahoo_profile_%s" % oauth_hash
     profile = memcache.get(memcache_key)
 
@@ -83,7 +82,7 @@ def get_yahoo_profile_from_oauth_hash(oauth_hash):
             return None
 
         # TOKEN REFRESH
-        url = "http://social.yahooapis.com/v1/user/%s/profile/tinyusercard?format=JSON" % cred.guid
+        url = PROFILE_URL % cred.guid
         token = oauth.Token(key=cred.access_key, secret=cred.secret)
 
         consumer = oauth.Consumer(App.yahoo_consumer_key, App.yahoo_consumer_secret)
