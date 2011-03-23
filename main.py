@@ -1750,6 +1750,8 @@ class Login(request_handler.RequestHandler):
 
     def post(self):
         cont = self.request.get('continue')
+        direct = self.request_bool('direct', default = False)
+
         openid_identifier = self.request.get('openid_identifier')
         if openid_identifier is not None and len(openid_identifier) > 0:
             if App.accepts_openid:
@@ -1762,7 +1764,8 @@ class Login(request_handler.RequestHandler):
             self.redirect(users.create_login_url(cont))
             return
         template_values = {
-                           'continue': cont                              
+                           'continue': cont,
+                           'direct': direct
                            }
         self.render_template('login.html', template_values)
 

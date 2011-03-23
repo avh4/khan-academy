@@ -127,6 +127,7 @@ class StartYahooLogin(request_handler.RequestHandler):
         resp, content = client.request(REQUEST_TOKEN_URL, "POST", body="oauth_callback=%s" % callback_url)
         if resp["status"] != "200":
             logging.warning("Yahoo OAuth request for request token failed")
+            logging.warning(content)
             self.redirect("/")
             return
 

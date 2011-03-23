@@ -2304,6 +2304,11 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 #login-page a:visited {
     color: #069;
 }
+#login-page .providers-sign-up li {
+    float: left;
+    padding-right: 20px;
+    font-size: 15px;
+}
 #login-page .providers li {
     border: 2px solid #ccc;
     border-bottom-color: #bbb;

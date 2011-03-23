@@ -18,7 +18,7 @@
 
 {% block pagecontent %}
 <div id="login-page">
-	<h2 class="pulls">You need to login to access this part of the site.</h2>
+    <h2 class="pulls">{% if direct %}Login{% else %}You need to login to access this part of the site.{% endif %}</h2>
     <h3>Already have an account with one of these sites? Click the logo to use your account to login here:</h3>
     <form class="openid" method="post" action="/login?continue={{continue|urlencode}}"> 
       <div><ul class="providers"> 
@@ -86,11 +86,18 @@
       </fieldset> 
     </form>
     <div class="clear"></div>
-    <h5 style="margin-top: 18px;">Don't have an account yet?</h5>
-    <p style="margin-bottom: 45px;">
-        <a href="https://www.google.com/accounts/NewAccount">Sign up for a Google account</a>&nbsp;&nbsp;
-        <a href="http://www.facebook.com/r.php">Sign up for a Facebook account</a>
-    </p>
+
+    <div id="real_fb_button" style="display: none;"><fb:login-button></fb:login-button></div>
+
+    <h5 style="margin:18px 0 9px 0;">Don't have an account yet?</h5>
+    <div>
+        <ul class="providers-sign-up">
+            <li><a href="https://www.google.com/accounts/NewAccount">Sign up for a Google account</a></li>
+            <li><a href="http://www.facebook.com/r.php">Sign up for a Facebook account</a></li>
+            <li><a href="https://edit.yahoo.com/registration">Sign up for a Yahoo account</a><br/>(Yahoo Family Accounts support <a href="/about/getting-started#under-13">children under the age of 13</a>.)</li>
+        </ul>
+    </div>
+    <div class="clear">&nbsp;</div><br/><br/>
     <h2 class="pulls">Why should you sign up?</h2>
     <h3>When you login, we save all of your progress. Also, <a href="/about">students and coaches get access to some cool tools</a>:</h3>
     <div id="feature-list">
