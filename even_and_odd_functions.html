@@ -12,11 +12,13 @@ var a;
 var fofa;
 var fofna;
 
-function get_coefficient() {
-    var lcoef = KhanAcademy.random();
+function get_coefficient(offset) {
+    var lcoef = KhanAcademy.random() * 3.5;
+    if (offset)
+        lcoef += Math.abs(offset);
     if (getRandomIntRange(0,1) == 0)
         lcoef *= -1;
-    return lcoef*3.5;
+    return lcoef;
 }
 
 oddMakers[0] = function() {
@@ -50,8 +52,8 @@ oddMakers[2] = function() {
 
 evenMakers[0] = function() {
     // horizontal line
-    var cons = getRandomIntRange(-3,3);
-    
+    var cons = get_coefficient(0.5);
+
     a = getRandomIntRange(1, 5);
     fofa = cons;
     return 'y=' + cons;
@@ -59,7 +61,7 @@ evenMakers[0] = function() {
 
 evenMakers[1] = function() {
     // acos x
-    var lcoef = get_coefficient();
+    var lcoef = get_coefficient(0.25);
     
     a = getRandomIntRange(1, 4);
     fofa = lcoef * Math.cos(a);
@@ -68,7 +70,7 @@ evenMakers[1] = function() {
 
 evenMakers[2] = function() {
     // abs(x)
-    var lcoef = get_coefficient() / 2;
+    var lcoef = get_coefficient(0.25) / 2;
     var cons = get_coefficient();
     
     a = getRandomIntRange(1, 3);
@@ -78,7 +80,7 @@ evenMakers[2] = function() {
 
 evenMakers[3] = function() {
     // even-order polynomial
-    var lcoef = get_coefficient();
+    var lcoef = get_coefficient(0.01);
     var cons = getRandomIntRange(-5,5);
     
     a = getRandomIntRange(1,3);
@@ -88,8 +90,8 @@ evenMakers[3] = function() {
 
 neitherMakers[0] = function() {
     // shifted parabola
-    var lcoef = get_coefficient();
-    var xcoef = get_coefficient();
+    var lcoef = get_coefficient(0.5);
+    var xcoef = get_coefficient(1);
     
     a = 1;
     fofa = lcoef * Math.pow(a, 2) + xcoef * a;
@@ -100,9 +102,9 @@ neitherMakers[0] = function() {
 
 neitherMakers[1] = function() {
     // shifted odd-order polynomial
-    var ocoef = get_coefficient();
-    var icons = get_coefficient();
-    var xcoef = getRandomIntRange(-3,3);
+    var ocoef = get_coefficient(0.01);
+    var icons = get_coefficient(1);
+    var xcoef = getRandomIntRange(-1,1);
     var ocons = getRandomIntRange(-3,3)
     
     a = getRandomIntRange(1,3);
@@ -114,8 +116,9 @@ neitherMakers[1] = function() {
 
 neitherMakers[2] = function() {
     // shifted even-order polynomial
-    var ocoef = get_coefficient();
-    var icons = get_coefficient();
+
+    var ocoef = get_coefficient(0.1);
+    var icons = get_coefficient(0.75);
     var ocons = getRandomIntRange(-3,3);
     
     a = 1;
