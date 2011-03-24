@@ -126,11 +126,6 @@ hr {
     -webkit-border-radius: 5px;
     
     text-shadow: 0 1px 0 #fff;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 .simple-button:hover {
     border-color: #aaa;
@@ -163,6 +158,12 @@ hr {
     box-shadow: 0 1px 3px #ccc;
 }
 
+.action-gradient {
+    background: #eee;
+    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
+    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
+}
 /* End of basic typography */
 
 /* Links in the header and footer don't change color when visited. */
@@ -365,10 +366,6 @@ footer {
     margin: 75px 0 0;
     padding: 9px 0 9px 23px;
     height: 19px;
-    background: #eee;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
-    background: -webkit-gradient( linear, left top, left bottom, from(#f7f7f7), to(#ddd));
-    background: -moz-linear-gradient( top, #f7f7f7, #ddd );
     border-bottom: 1px solid #ccc;
     border-top: 1px solid #ddd;
 }
@@ -2196,11 +2193,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -webkit-border-radius: 5px;
     
     text-shadow: 0 1px 0 #fff;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 
 .thumbnails_arrow:hover {
@@ -2324,11 +2316,6 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     -moz-box-shadow: 2px 2px 5px #ccc;
     -webkit-box-shadow: 2px 2px 5px #ccc;
     box-shadow: 2px 2px 5px #ccc;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 #login-page .providers li:hover,
 #login-page .providers li:active {
