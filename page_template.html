@@ -95,7 +95,10 @@
     
             {% if not username %}
                 FB.Event.subscribe('auth.login', function(response) {
-                    window.location.reload();
+                    if ('{{ continue|escape }}')
+                        window.location = '{{ continue|escape }}';
+                    else
+                        window.location.reload();
                 });
             {% endif %}
     
