@@ -22,13 +22,13 @@
     <h3>Already have an account with one of these sites? Click the logo to use your account to login here:</h3>
     <form class="openid" method="post" action="/login?continue={{continue|urlencode}}"> 
       <div><ul class="providers"> 
-      <li class="direct" title="Google">
+      <li class="direct action-gradient" title="Google">
             <div class="sign-in-text">Login with:</div>
             <img width="205" height="70" src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span>
       </li>
             
       {% if App.facebook_app_secret %}
-      <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();">
+      <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();" class="action-gradient">
             <div class="sign-in-text">Login with:</div>
             <img width="205" height="70" src="/images/facebook-logo-large.png" />
       </li>
