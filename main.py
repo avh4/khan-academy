@@ -36,7 +36,6 @@ from google.appengine.ext import db
 import qbrary
 import bulk_update.handler
 import facebook
-import yahoo_util
 import layer_cache
 import autocomplete
 import coaches
@@ -1771,8 +1770,6 @@ class Login(request_handler.RequestHandler):
 
 class Logout(request_handler.RequestHandler):
     def get(self):
-        # Logout of both Yahoo and Google. Facebook is handled by JS.
-        yahoo_util.logout(self)
         self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):
@@ -1921,8 +1918,6 @@ def real_main():
         ('/press/.*', ViewArticle),
         ('/login', Login),
         ('/logout', Logout),
-        ('/startyahoologin', yahoo_util.StartYahooLogin),
-        ('/finishyahoologin', yahoo_util.FinishYahooLogin),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 

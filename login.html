@@ -34,13 +34,6 @@
       </li>
       {% endif %}
 
-      {% if App.yahoo_consumer_secret %}
-      <li title="Yahoo" onclick="window.location='/startyahoologin';">
-            <div class="sign-in-text">Login with:</div>
-            <img width="205" height="70" src="/images/yahoo-logo-large.png" />
-      </li>
-      {% endif %}
-
       {% if App.accepts_openid %} 
       <li class="domainname" title="Google Apps domain name"> 
             <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 
@@ -94,7 +87,6 @@
         <ul class="providers-sign-up">
             <li><a href="https://www.google.com/accounts/NewAccount">Sign up for a Google account</a></li>
             <li><a href="http://www.facebook.com/r.php">Sign up for a Facebook account</a></li>
-            <li><a href="https://edit.yahoo.com/registration">Sign up for a Yahoo account</a><br/>(Yahoo Family Accounts support <a href="/about/getting-started#under-13">children under the age of 13</a>.)</li>
         </ul>
     </div>
     <div class="clear">&nbsp;</div><br/><br/>

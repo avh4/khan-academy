@@ -6,7 +6,6 @@ from django.template.defaultfilters import pluralize
 
 import nicknames
 import facebook_util
-import yahoo_util
 
 def get_current_user():
 
@@ -17,10 +16,6 @@ def get_current_user():
     facebook_user = facebook_util.get_current_facebook_user()
     if facebook_user is not None:
         return facebook_user
-
-    yahoo_user = yahoo_util.get_current_yahoo_user()
-    if yahoo_user is not None:
-        return yahoo_user
 
     return None
 
