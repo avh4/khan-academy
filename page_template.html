@@ -144,9 +144,9 @@
                                 {% endif %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
-                                <a id="page_logout" href="{{logout_url}}">Logout</a>
+                                <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                            <a href="/login?direct=1">Login</a>
+                                <a href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator">&nbsp;</span>
                             <a href="/contribute" id="donate-link">Donate</a>
