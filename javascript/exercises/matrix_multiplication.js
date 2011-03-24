@@ -5,39 +5,13 @@
 */
 
 
-/*
- * Confiure LaTeX
- */
-MathJax.HTML.Cookie.Set("menu",{});
-MathJax.Hub.Config({
-    extensions: ["tex2jax.js"],
-    jax: ["input/TeX","output/HTML-CSS"],
-    "HTML-CSS": {
-        availableFonts:[],
-        styles: {
-            ".MathJax_Preview": {
-                visibility: "hidden"
-            }
-        },
-        Augment: {
-            Font: {
-                loadError: function (font) {
-                    MathJax.Message.Set("Can't load web font TeX/"+font.directory,null,2000);
-                    document.getElementById("noWebFont").style.display = "";
-                },
-                firefoxFontError: function (font) {
-                    MathJax.Message.Set("Firefox can't load web fonts from a remote host",null,3000);
-                    document.getElementById("ffWebFont").style.display = "";
-                }
-            }
-        }
-    }
-});
 
 /*
  * Matrix Namespace
  */
-Matrix = function(){}
+if (typeof Matrix == "undefined") {
+    Matrix = function(){}
+}
 
 /*
  * Class Name: Multiplication
@@ -62,7 +36,7 @@ Matrix.Multiplication = new function(){
     var _hintMultiplicationArray;
     var _resultMatrixEquation = null;
 
-    var _wrongChoices = new Array();
+
 
     /*Private Methods*/
 
@@ -73,126 +47,27 @@ Matrix.Multiplication = new function(){
      * Description:Creates a Matrix Multiplication equation with common dinominators
      */
     var _createMatrixEquation = function(){
-        var _wrongMatrixEquation1 = null;
-        var _wrongMatrixEquation2 = null;
-        var _wrongMatrixEquation3 = null;
         var leftMatrixEquation = null;
         var rightMatrixEquation = null;
-        var loopI = 0;
-        var loopJ = 0;
-        var loopK = 0;
         
-        _LeftMatrixRow =  Math.abs(get_randomInRange(2,4,0));
-        _LeftMatrixColumn =  Math.abs(get_randomInRange(2,4,0));
+        _LeftMatrixRow =  Math.abs(getRandomIntRange(2,4));
+        _LeftMatrixColumn =  Math.abs(getRandomIntRange(2,4));
         _RightMatrixRow = _LeftMatrixColumn;
-        _RightMatrixColumn = Math.abs(get_randomInRange(2,4,0));
-
-        _leftMatrix = new Array(_LeftMatrixRow);
-        _rightMatrix = new Array(_RightMatrixRow);
-        _resultentMatrix = new Array(_LeftMatrixRow);
+        _RightMatrixColumn = Math.abs(getRandomIntRange(2,4));
+       
         _hintMultiplicationArray = new Array(_LeftMatrixColumn);
-        for(loopI=0; loopI < _LeftMatrixRow; loopI++)
-        {
-            _leftMatrix[loopI] = new Array(_LeftMatrixColumn);
-            _resultentMatrix[loopI] = new Array(_RightMatrixColumn);
-        }
-        for(loopI=0; loopI < _RightMatrixRow; loopI++)
-        {
-            _rightMatrix[loopI] = new Array(_RightMatrixColumn);
-        }
+        _leftMatrix = KA.Matrix.createMatrix(_LeftMatrixRow, _LeftMatrixColumn);
+        _rightMatrix = KA.Matrix.createMatrix(_RightMatrixRow, _RightMatrixColumn);
+        _resultentMatrix = KA.Matrix.createMatrix(_LeftMatrixRow, _RightMatrixColumn);
 
-        leftMatrixEquation = "\\begin{bmatrix}";
-        rightMatrixEquation = "\\begin{bmatrix}";
-        _resultMatrixEquation = "\\begin{bmatrix}";
-
-        _wrongMatrixEquation1 = "\\begin{bmatrix}";
-        _wrongMatrixEquation2 = "\\begin{bmatrix}";
-        _wrongMatrixEquation3 = "\\begin{bmatrix}";
-
-        for(loopI=0; loopI < _LeftMatrixRow; loopI++){
-            leftMatrixEquation = leftMatrixEquation +  "\\\\";
-            for(loopJ=0; loopJ < _LeftMatrixColumn; loopJ++){
-                _leftMatrix[loopI][loopJ] = Math.abs(get_random());
-                if(loopJ == 0){
-                    leftMatrixEquation = leftMatrixEquation + "\\mathbf{" + _leftMatrix[loopI][loopJ]  + "}";
-                } else {
-                    leftMatrixEquation = leftMatrixEquation + " & \\mathbf{" + _leftMatrix[loopI][loopJ]  + "}";
-                }
-            }
-        }
-
-        for(loopI=0; loopI < _RightMatrixRow; loopI++){
-            rightMatrixEquation = rightMatrixEquation + "\\\\";
-            for(loopJ=0; loopJ < _RightMatrixColumn; loopJ++){
-                _rightMatrix[loopI][loopJ] = Math.abs(get_random());
-                if(loopJ == 0){
-                    rightMatrixEquation = rightMatrixEquation + "\\mathbf{" + _rightMatrix[loopI][loopJ]  + "}";
-                }else {
-
-                    rightMatrixEquation = rightMatrixEquation + " & \\mathbf{" + _rightMatrix[loopI][loopJ]  + "}";
-                }
-            }
-        }
-
-        for(loopI=0; loopI < _LeftMatrixRow; loopI++){
-            for(loopJ=0; loopJ < _LeftMatrixColumn; loopJ++){
-
-                for(loopK=0; loopK < _RightMatrixColumn; loopK++){
-                    if(_resultentMatrix[loopI][loopK] != null){
-                        _resultentMatrix[loopI][loopK] +=  _leftMatrix[loopI][loopJ] * _rightMatrix[loopJ][loopK];
-                    } else {
-                        _resultentMatrix[loopI][loopK] = _leftMatrix[loopI][loopJ] * _rightMatrix[loopJ][loopK];
-                    }
-                }
-            }
-        }
-
-        for(loopI=0; loopI < _LeftMatrixRow; loopI++)
-        {          
-            for(loopJ=0; loopJ < _RightMatrixColumn; loopJ++){
-                _wrongMatrixEquation1[loopI][loopJ] = Math.abs(get_randomInRange(30,180,0));
-                _wrongMatrixEquation2[loopI][loopJ] = Math.abs(get_randomInRange(30,180,0));
-                _wrongMatrixEquation3[loopI][loopJ] = Math.abs(get_randomInRange(30,180,0));
-            }
-        }
-
+        KA.Matrix.populate(_leftMatrix, _LeftMatrixRow, _LeftMatrixColumn);
+        KA.Matrix.populate(_rightMatrix, _RightMatrixRow, _RightMatrixColumn);
+        KA.Matrix.multiply(_leftMatrix, _LeftMatrixRow, _LeftMatrixColumn, _rightMatrix, _RightMatrixColumn, _resultentMatrix);
         setCorrectAnswer(_resultentMatrix);
-        
-        for(loopI=0; loopI < _LeftMatrixRow; loopI++)
-        {
-            _resultMatrixEquation = _resultMatrixEquation + "\\\\";
-            _wrongMatrixEquation1 = _wrongMatrixEquation1 + "\\\\";
-            _wrongMatrixEquation2 = _wrongMatrixEquation2 + "\\\\";
-            _wrongMatrixEquation3 = _wrongMatrixEquation3 + "\\\\";
 
-            for(loopJ=0; loopJ < _RightMatrixColumn; loopJ++){
-                if(loopJ == 0){
-
-                    _resultMatrixEquation = _resultMatrixEquation + "\\mathbf{" + _resultentMatrix[loopI][loopJ]  + "}";
-                    _wrongMatrixEquation1 = _wrongMatrixEquation1 + "\\mathbf{" +  Math.abs(get_randomInRange(20,180,0))  + "}";
-                    _wrongMatrixEquation2 = _wrongMatrixEquation2 + "\\mathbf{" +  Math.abs(get_randomInRange(20,180,0))  + "}";
-                    _wrongMatrixEquation3 = _wrongMatrixEquation3 + "\\mathbf{" +  Math.abs(get_randomInRange(20,180,0))  + "}";
-                } else {
-                    _resultMatrixEquation = _resultMatrixEquation + " & \\mathbf{" + _resultentMatrix[loopI][loopJ]  + "}";
-                    _wrongMatrixEquation1 = _wrongMatrixEquation1 + " & \\mathbf{" +  Math.abs(get_randomInRange(20,180,0))  + "}";
-                    _wrongMatrixEquation2 = _wrongMatrixEquation2 + " & \\mathbf{" +  Math.abs(get_randomInRange(20,180,0))  + "}";
-                    _wrongMatrixEquation3 = _wrongMatrixEquation3 + " & \\mathbf{" +  Math.abs(get_randomInRange(20,180,0))  + "}";
-                }
-            }
-        }
-
-        _wrongMatrixEquation1 = _wrongMatrixEquation1 + "\\end{bmatrix}";
-        _wrongChoices.push(_wrongMatrixEquation1);
-
-        _wrongMatrixEquation2 = _wrongMatrixEquation2 + "\\end{bmatrix}";
-        _wrongChoices.push(_wrongMatrixEquation2);
-
-        _wrongMatrixEquation3 = _wrongMatrixEquation3 + "\\end{bmatrix}";
-        _wrongChoices.push(_wrongMatrixEquation3);
-
-        leftMatrixEquation = leftMatrixEquation + "\\end{bmatrix}";
-        rightMatrixEquation = rightMatrixEquation + "\\end{bmatrix}";
-        _resultMatrixEquation = _resultMatrixEquation + "\\end{bmatrix}";
+        leftMatrixEquation = KA.Matrix.createEquation(_leftMatrix, _LeftMatrixRow, _LeftMatrixColumn);
+        rightMatrixEquation = KA.Matrix.createEquation(_rightMatrix, _RightMatrixRow, _RightMatrixColumn);
+        _resultMatrixEquation = KA.Matrix.createEquation(_resultentMatrix, _LeftMatrixRow, _RightMatrixColumn);
                 
         _equation = "<div style='float:left; font-size:150%'>\\["  + leftMatrixEquation + "*" + rightMatrixEquation + "  = ?\\]</div>";
         $("#dvQuestion").append(_equation);
@@ -208,51 +83,7 @@ Matrix.Multiplication = new function(){
      * Detail: Display answer options on screen
      */
     var _createAnswers = function(){
-        var tmpTable="";
-        var tmpTableRow="";
-        tmpTable ="<table cellspacing='0' cellpadding='2'>";
-        for (var i=0; i<_LeftMatrixRow; i++){
-            tmpTableRow +='<tr>';
-            for (var j=0; j<_RightMatrixColumn; j++){
-                if(i==0){
-                    if(j==0){
-                        tmpTableRow += '<td style="border-left:solid 1px black; border-top:solid 1px black;">&nbsp;</td>';
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-
-                    } else if(j==_RightMatrixColumn-1){
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                        tmpTableRow += '<td style="border-right:solid 1px black; border-top:solid 1px black;">&nbsp;</td>';
-
-                    } else{
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                    }
-                } else if(i==_LeftMatrixRow-1){
-                    if(j==0){
-                        tmpTableRow += '<td style="border-left:solid 1px black; border-bottom:solid 1px black;">&nbsp;</td>';
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                    } else if(j==_RightMatrixColumn-1){
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                        tmpTableRow += '<td style="border-right:solid 1px black; border-bottom:solid 1px black;">&nbsp;</td>';
-                    } else{
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                    }
-                } else {
-                    if(j==0){
-                        tmpTableRow += '<td style="border-left:solid 1px black;">&nbsp;</td>';
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                    } else if(j==_RightMatrixColumn-1){
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                        tmpTableRow += '<td style="border-right:solid 1px black;">&nbsp;</td>';
-                    } else{
-                        tmpTableRow += '<td><input id="txt' + i + '' + j + '" type="text" style="width:25px;" /></td>';
-                    }
-                }
-            }
-            tmpTableRow += '</tr>';
-        }
-        tmpTable += tmpTableRow  + "</table>";
-        $("#dvAnswers").append(tmpTable);
-
+        $("#dvAnswers").append(KA.Matrix.answerHtml(_LeftMatrixRow, _RightMatrixColumn));
     }
     return {
         /*Public Methods*/
@@ -370,8 +201,7 @@ Matrix.Multiplication = new function(){
                         _hintResultentMatrixColumn = 0;
                         _hintRightMatrixColumn=0;
                         _hintLeftMatrixRow += 1;
-                    }
-                
+                    }                
                     _hintsGiven += 1;
                 }
                 steps_given++;

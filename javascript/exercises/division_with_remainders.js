@@ -1,10 +1,10 @@
 var counter = 0;
 var selectedArray = [];
 var answer = 0;
-var dividend = get_randomInRange(15,99,0);
-var divisor = get_randomInRange(2,9,0);
+var dividend = getRandomIntRange(15,99);
+var divisor = getRandomIntRange(2,9);
 if(dividend%divisor == 0){
-    dividend =dividend + get_randomInRange(1,divisor - 1,0);
+    dividend =dividend + getRandomIntRange(1,divisor - 1);
 }
 var quotient = parseInt(dividend/divisor);
 

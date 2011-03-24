@@ -30,15 +30,14 @@ FractionSubtraction.SubtractionWordProblem = new function(){
     'I had [fraction1] gallons of paint and used [fraction2] gallons to paint my bedroom. How much paint do I have left?',
     "My glass had [fraction1] of a cup of apple juice left in it. I drank [fraction2] of it, how much is left?",
     "Bruce studies for [fraction1] hours daily. He devotes [fraction2] hours of his time for Science and Mathematics. How much time does he devote for other subjects?",
-    "Jack and Jill picked up [fraction1] cherries. If Jack picked up [fraction2] cherries how many did Jill pick up? ",
-    "Bob has [fraction1] baseball cards and John has [fraction2]. How many more cards does Bob has?",
+    "Jack and Jill picked up [fraction1] cherries. If Jack picked up [fraction2] cherries how many did Jill pick up? ",    
     "Customer's goods total to an amount of [fraction1] dollars and customer gives cashier an amount of [fraction2] dollars. How much money customer still owe the cashier?",
     "Anthony and Emily were in a spelling bee. Anthony spelled [fraction1] words correctly. Emily spelled [fraction2] words correctly. How many more words did Emily spell correctly?",
     "Chris had [fraction1] cupcakes. Danial ate [fraction2] of them. how many cupcakes Chris have left?",
     "A bowl has [fraction1] M&Ms in it. Rachael ate [fraction2] of them. How many are left in the bowl?",
     "Sam brought [fraction1] pizzas. Dean ate [fraction2] of them. How much of the pizza is left?",
     "Adam bought [fraction1] doughnuts and ate [fraction2] of them. How many are still left?",
-    "Arecipe needs [fraction1] teaspoon black pepper and [fraction2] red pepper. How much more black pepper does the recipe need?",
+    "A recipe needs [fraction1] teaspoon black pepper and [fraction2] red pepper. How much more black pepper does the recipe need?",
     "A football player advances [fraction2] of a yard. A second player in the same team advances [fraction1] of a yard. How much more yard did the second player advance?",
     "John lives [fraction1] mile from the Museum of Science. Sylvia leaves [fraction2] mile from the Museum of Science. How much closer is Sylvia from the museum?"
     ];
@@ -57,22 +56,22 @@ FractionSubtraction.SubtractionWordProblem = new function(){
     }
     
     /*
-     * Function:_createEqationWithCommonDenominator
+     * Function:_createEquationWithCommonDenominator
      * Access Level: Private
      * Parameters: none
      * Description:Creates a fraction subtraction word problem.
      */
-    var _createEqationWithCommonDenominator = function(){
+    var _createEquationWithCommonDenominator = function(){
         _wordProblem.sort( _randOrder );
         _num1 = Math.abs(get_random());
         _num2 = Math.abs(get_random());
         if(_num1 < _num2){
-            _den1 = get_randomInRange(_num2,_num2 + 10,0);
+            _den1 = getRandomIntRange(_num2,_num2 + 10);
         } else {
-            _den1 = get_randomInRange(_num1,_num1 + 10,0);
+            _den1 = getRandomIntRange(_num1,_num1 + 10);
         }
         _den2 = _den1;
-        _commonDenominator = getLCM(_den1, _den2);//Get LCM Of Denominators
+        _commonDenominator = _den2;
         if(_num1 < _num2){
             var _tmpNum = _num2;
             _num2 = _num1;
@@ -80,7 +79,7 @@ FractionSubtraction.SubtractionWordProblem = new function(){
         }
         var fractionEquation1= "`"+ _num1 + "/" + _den1 + "`";
         var fractionEquation2= "`" + _num2 + "/" + _den2 + "`";
-        var wordproblem = _wordProblem[get_randomInRange(0,_wordProblem.length-1,0)];
+        var wordproblem = _wordProblem[getRandomIntRange(0,_wordProblem.length-1)];
         wordproblem = wordproblem.replace("[fraction1]",fractionEquation1);
         wordproblem = wordproblem.replace("[fraction2]",fractionEquation2);
         _equation = wordproblem;
@@ -99,25 +98,25 @@ FractionSubtraction.SubtractionWordProblem = new function(){
      * Function:_writeEquation
      * Access Level: Private
      *
-     * Parameters1 Name: pSelector
+     * Parameters1 Name: Selector
      * Parameters1 Type: String
      * Parameters1 Detail: String Contain The Jquery Selector Of Div where expression need to be displayed.
      *
-     * Parameters2 Name: pEquation
+     * Parameters2 Name: Equation
      * Parameters2 Type: String
      * Parameters2 Detail: Expression that need to be displayed.
      *
-     * Parameters3 Name: pEquation
+     * Parameters3 Name: Equation
      * Parameters3 Type: String
      * Parameters3 Detail: To check if expression should be centered aligned.
      *
      * Description:Creates a fraction subtraction equation.
      */
-    var _writeEquation = function(pSelector,pEquation, pIsCentered){
-        if(pIsCentered){
-            $(pSelector).append('<p><font face=\"arial\" size=4><center>'+pEquation+'</center></font></p>');
+    var _writeEquation = function(Selector,Equation, IsCentered){
+        if(IsCentered){
+            $(Selector).append('<p><font face=\"arial\" size=4><center>'+Equation+'</center></font></p>');
         } else {
-            $(pSelector).append('<p><font face=\"arial\" size=4>'+pEquation+'</font></p>');
+            $(Selector).append('<p><font face=\"arial\" size=4>'+Equation+'</font></p>');
         }
     }
 
@@ -135,15 +134,34 @@ FractionSubtraction.SubtractionWordProblem = new function(){
     /*
      * Access Level: Private
      * Function: _createHint
-     * Parameters: none
-     * Detail: Create hints for user
+     * Parameter1 Name: MyShare
+     * Parameters1 Type: integer
+     * Parameters1 Detail: This is the value of the neumirator
+     *
+     * Parameter2 Name: MyTotal
+     * Parameters2 Type: integer
+     * Parameters2 Detail: This is the value of denominator
+     *
+     * Parameter3 name: X
+     * Parameters3 Type: integer
+     * Parameters3 Detail: X-co-ordinate for the center of Pie Chart
+     *
+     * Parameter4 name: Y
+     * Parameters4 Type: integer
+     * Parameters4 Detail: Y-co-ordinate for the center of Pie Chart
+     *
+     * Parameter4 name: Radius
+     * Parameters4 Type: integer
+     * Parameters4 Detail: Radius for the pie chart
+     *
+     * Description: Draws the pie charts with raphael.
      */
-    var _createHint =function(myShare, myTotal, x,lastend, radius) {
+    var _createHint =function(MyShare, MyTotal, X, Y, Radius) {
         
         var pieData=new Array();
         var colors=new Array();
-        for ( var i = 0; i < myTotal; i++) {
-            if (i < myShare) {
+        for ( var i = 0; i < MyTotal; i++) {
+            if (i < MyShare) {
                 if (i % 2){
                     colors[i] = "#C8F526";
                     pieData[i]=1;
@@ -165,7 +183,7 @@ FractionSubtraction.SubtractionWordProblem = new function(){
         opts.stroke="#ffffff";
         opts.strokewidth=1;
         opts.colors=colors;
-        _raphaelHandle.g.piechart(x, lastend, radius, pieData,opts);
+        _raphaelHandle.g.piechart(X, Y, Radius, pieData,opts);
         
     }
     return {
@@ -178,7 +196,7 @@ FractionSubtraction.SubtractionWordProblem = new function(){
          * Detail: Initialize Fraction subtraction Exercise
          */
         init: function(){
-            _createEqationWithCommonDenominator();
+            _createEquationWithCommonDenominator();
             _createAnswers();
         },
 

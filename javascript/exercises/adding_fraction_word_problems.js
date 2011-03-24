@@ -13,7 +13,7 @@ FractionAddition= function(){}
 /*
  * Class Name: AdditiionWordProblem
  */
-FractionAddition.AdditiionWordProblem = new function(){
+FractionAddition.AdditionWordProblem = new function(){
     /*Private Members*/
     
     var _hintsGiven = 0;
@@ -43,7 +43,7 @@ FractionAddition.AdditiionWordProblem = new function(){
     'Justin painted [fraction_1] of the fence on Tuesday and [fraction_2] of fence Wednesday. How much fence did he paint in all?',
     'Mike has [fraction_1] of a cake and David has [fraction_2]. How much cake do they have altogether?',
     'Heather goes to the grocery store and spends [fraction_1] dollars for pizza dough, [fraction_2] for mozzarella cheese and a can of pizza sauce. How much did she spend in all?',
-    'Eugene has [fraction_1] dollars and Erwin has [fraction_2] dollars. How much money do they have??'
+    'Eugene has [fraction_1] dollars and Erwin has [fraction_2] dollars. How much money do they have?'
     ];
     var _raphaelHandle = Raphael('holder',500,200);
 
@@ -60,23 +60,23 @@ FractionAddition.AdditiionWordProblem = new function(){
      * Parameters: none
      * Description:Creates a fraction Addition word problem.
      */
-    var _createEqationWithCommonDenominator = function(){
+    var _createEquationWithCommonDenominator = function(){
         _wordProblem.sort( _randOrder );
 
         _num1 = Math.abs(get_random());
         _num2 = Math.abs(get_random());
         
         if(_num1 < _num2){
-            _den1 = get_randomInRange(_num2,_num2 + 10,0);
+            _den1 = getRandomIntRange(_num2,_num2 + 10);
         } else {
-            _den1 = get_randomInRange(_num1,_num1 + 10,0);
+            _den1 = getRandomIntRange(_num1,_num1 + 10);
         }
         _den2 = _den1;
         _commonDenominator = getLCM(_den1, _den2);//Get LCM Of Denominators
 
         var fractionEquation1= "`"+ _num1 + "/" + _den1 + "`";
         var fractionEquation2= "`" + _num2 + "/" + _den2 + "`";
-        var wordproblem = _wordProblem[get_randomInRange(0,_wordProblem.length,0)];
+        var wordproblem = _wordProblem[getRandomIntRange(0,_wordProblem.length)];
 
         wordproblem = wordproblem.replace("[fraction_1]", fractionEquation1);
         wordproblem = wordproblem.replace("[fraction_2]", fractionEquation2);
@@ -95,25 +95,25 @@ FractionAddition.AdditiionWordProblem = new function(){
      * Function:_writeEquation
      * Access Level: Private
      *
-     * Parameters1 Name: pSelector
+     * Parameters1 Name: Selector
      * Parameters1 Type: String
      * Parameters1 Detail: String Contain The Jquery Selector Of Div where expression need to be displayed.
      *
-     * Parameters2 Name: pEquation
+     * Parameters2 Name: Equation
      * Parameters2 Type: String
      * Parameters2 Detail: Expression that need to be displayed.
      *
-     * Parameters3 Name: pEquation
+     * Parameters3 Name: Equation
      * Parameters3 Type: String
      * Parameters3 Detail: To check if expression should be centered aligned.
      *
      * Description:write a fraction addition wordproblem.
      */
-    var _writeEquation = function(pSelector,pEquation, pIsCentered){
-        if(pIsCentered){
-            $(pSelector).append('<p><font face=\"arial\" size=4><center>'+pEquation+'</center></font></p>');
+    var _writeEquation = function(Selector,Equation, IsCentered){
+        if(IsCentered){
+            $(Selector).append('<p><font face=\"arial\" size=4><center>'+Equation+'</center></font></p>');
         } else {
-            $(pSelector).append('<p><font face=\"arial\" size=4>'+pEquation+'</font></p>');
+            $(Selector).append('<p><font face=\"arial\" size=4>'+Equation+'</font></p>');
         }
     }
 
@@ -132,34 +132,34 @@ FractionAddition.AdditiionWordProblem = new function(){
     /*
      * Access Level: Private
      * Function: _createHint
-     * Parameter1 Name: pMyShare
+     * Parameter1 Name: MyShare
      * Parameters1 Type: integer
      * Parameters1 Detail: This is the value of the neumirator
      *
-     * Parameter2 Name: pMyTotal
+     * Parameter2 Name: MyTotal
      * Parameters2 Type: integer
      * Parameters2 Detail: This is the value of denominator
      *
-     * Parameter3 name: pX
+     * Parameter3 name: X
      * Parameters3 Type: integer
      * Parameters3 Detail: X-co-ordinate for the center of Pie Chart
      *
-     * Parameter4 name: pY
+     * Parameter4 name: Y
      * Parameters4 Type: integer
      * Parameters4 Detail: Y-co-ordinate for the center of Pie Chart
      *
-     * Parameter4 name: pRadius
+     * Parameter4 name: Radius
      * Parameters4 Type: integer
      * Parameters4 Detail: Radius for the pie chart
      *
      * Description: Draws the pie charts with raphael.
      */
-    var _createHint =function(pMyShare, pMyTotal, pX,pY, pRadius) {
+    var _createHint =function(MyShare, MyTotal, X, Y, Radius) {
         
         var pieData=new Array();
         var colors=new Array();
-        for ( var i = 0; i < pMyTotal; i++){
-            if (i < pMyShare){
+        for ( var i = 0; i < MyTotal; i++){
+            if (i < MyShare){
                 if (i % 2){
                     colors[i] = "#C8F526";
                     pieData[i]=1;
@@ -181,7 +181,7 @@ FractionAddition.AdditiionWordProblem = new function(){
         opts.stroke="#ffffff";
         opts.strokewidth=1;
         opts.colors=colors;
-        _raphaelHandle.g.piechart(pX, pY, pRadius, pieData,opts);
+        _raphaelHandle.g.piechart(X, Y, Radius, pieData,opts);
     }
     return {
         /*Public Methods*/
@@ -193,7 +193,7 @@ FractionAddition.AdditiionWordProblem = new function(){
         * Detail: Initialize Fraction Addition Exercise
         */
         init: function(){
-            _createEqationWithCommonDenominator();
+            _createEquationWithCommonDenominator();
             _createAnswers();
         },
 
@@ -242,5 +242,5 @@ FractionAddition.AdditiionWordProblem = new function(){
 };
 
 $(document).ready(function(){
-    FractionAddition.AdditiionWordProblem.init();
+    FractionAddition.AdditionWordProblem.init();
 })
