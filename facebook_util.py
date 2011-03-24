@@ -74,7 +74,7 @@ def get_facebook_profile():
             profile = graph.get_object("me")
             memcache.set(memcache_key, profile, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
         except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
-            logging.debug("Ignoring %s.  Assuming access_token is no longer valid." % error)
+            logging.debug("Ignoring %s.  Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
 
         return profile
 
