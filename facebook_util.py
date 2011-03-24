@@ -11,11 +11,6 @@ import facebook
 
 FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
 
-# Force cached facebook info expiration at least once every 20 days,
-# even though memcache will probably have cleared before then due to external
-# memory pressure.
-FACEBOOK_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 20
-
 def is_facebook_email(email):
     return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
 
@@ -35,7 +30,7 @@ def get_facebook_nickname(user):
         profile = graph.get_object(id)
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
-        memcache.set(memcache_key, name, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
+        memcache.set(memcache_key, name)
     except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError):
         name = email
 
@@ -64,6 +59,10 @@ def get_facebook_profile():
         if expires == 0 and time.time() > expires:
             return None
 
+        if not fb_user["access_token"]:
+            logging.debug("Empty access token for fb_user")
+            return None
+
         memcache_key = "facebook_profile_for_%s" % fb_user["access_token"]        
         profile = memcache.get(memcache_key)
         if profile is not None:
@@ -72,9 +71,14 @@ def get_facebook_profile():
         try:
             graph = facebook.GraphAPI(fb_user["access_token"])
             profile = graph.get_object("me")
-            memcache.set(memcache_key, profile, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
         except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
             logging.debug("Ignoring %s.  Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
+
+        if profile:
+            try:
+                memcache.set(memcache_key, profile)
+            except Exception, error:
+                logging.warning("Facebook profile memcache set failed: %s", error)
 
         return profile
 
