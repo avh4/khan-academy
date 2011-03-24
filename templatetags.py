@@ -138,12 +138,12 @@ def streak_bar(user_exercise):
         level_offset = streak_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
+    else:
+        if streak > consts.MAX_STREAK_SHOWN:
+            streak = "Max"
 
-    if streak > consts.MAX_STREAK_SHOWN:
-        streak = "Max"
-
-    if longest_streak > consts.MAX_STREAK_SHOWN:
-        longest_streak = "Max"
+        if longest_streak > consts.MAX_STREAK_SHOWN:
+            longest_streak = "Max"
 
     return {
             "streak": streak,
