@@ -55,6 +55,7 @@ import points
 import exercise_statistics
 import backfill
 import activity_summary
+import exercises
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 
@@ -556,21 +557,6 @@ class PrintExercise(request_handler.RequestHandler):
         else:
 
             self.redirect(util.create_login_url(self.request.uri))
-
-class ExerciseAdminPage(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        user = util.get_current_user()
-        query = Exercise.all().order('h_position')
-        exercises = query.fetch(200)
-
-        template_values = {'App' : App, 'exercises': exercises}
-
-        self.render_template('exerciseadmin.html', template_values)
-
 
 class ReportIssue(request_handler.RequestHandler):
 
@@ -1842,7 +1828,7 @@ def real_main():
         ('/printproblem', PrintProblem),
         ('/viewexercisesonmap', KnowledgeMap),
         ('/testdatastore', DataStoreTest),
-        ('/admin94040', ExerciseAdminPage),
+        ('/admin94040', exercises.ExerciseAdmin),
         ('/adminusers', ViewUsers),
         ('/videoless', VideolessExercises),
         ('/adminuserdata', AdminViewUser),

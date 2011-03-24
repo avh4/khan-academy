@@ -1,52 +1,29 @@
 {% extends "page_template.html" %}
-{% block pagescript %}
-<script type="text/javascript" src="/javascript/ckeditor/ckeditor.js">
-</script>
-<script type="text/javascript">
-    function submitForm(value){
-        document.forms['addexercise'].submit();
-    }
-    
-    $(function(){
-        // Swap in CKEditors
-        $("textarea").each(function(){
-            CKEDITOR.replace(this.id, {
-                toolbar: 'Full',
-                skin: 'kama',
-                resize_minWidth: 300,
-                width: "80%",
-                height: 400,
-                scayt_autoStartup: false,
-                disableNativeSpellChecker: false
-            });
-        });        
-    });
-</script>
-<style>
-    li {
-        display: inline;
-    }
-    
-    label {
-        display: block;
-    }
-</style>
-{% endblock pagescript %}
 {% block pagecontent %}
-<article>
-    <section>
-        <h1>Select an existing exercise to edit</h1>
+<style>#page_sub_nav{ display:none; }</style>
+<div style="padding:9px 23px;">
+    <div>
+        <h1 class="pulls">Select an existing exercise to edit</h1>
         <p>
-            <ul>
+            <table width="100%">
                 {% for exercise in exercises %}
-                <li>
-                    <a href="/editexercise?name={{exercise.name}}">{{exercise.display_name}}</a>
-                </li>
+                    {% if not forloop.counter0|mod:5 %}
+                        {% if not forloop.first %}
+                            </tr>
+                        {% endif %}
+                        <tr>
+                    {% endif %}
+                    <td>
+                        <a href="/editexercise?name={{ exercise.name|escape }}" title="{{ exercise.display_name|escape }}"><nobr>{{ exercise.display_name|truncatewords:4|escape }}</nobr></a>
+                    </td>
+                    {% if forloop.last %}
+                        </tr>
+                    {% endif %}
                 {% endfor %} 
-            </ul>
+            </table>
         </p>
-    </section>
-    <section>
+    </div>
+    <div>
         <h1>Add a new exercise</h1>
         <form id="addexercise" action="/updateexercise" method="post">
             <input type="hidden" name="v_position" value="0" /><input type="hidden" name="h_position" value="0" />
@@ -61,15 +38,8 @@
                 </span>
             </p>
             <p>
-                <label for="raw_html">
-                    Exercise content (leave blank for legacy exercises)
-                </label>
-                <textarea id="raw_html" name="raw_html">
-                </textarea>
-            </p>
-            <p>
-                <input type="button" value="Add Exercise" onClick="submitForm()"/>
+                <input type="submit" value="Add Exercise" />
             </p>
         </form>
-    </section>
-</article>{% endblock pagecontent %}
+    </div>
+</div>{% endblock pagecontent %}
