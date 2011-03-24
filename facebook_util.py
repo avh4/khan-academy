@@ -57,32 +57,42 @@ def get_current_facebook_user():
     return None
 
 def get_facebook_profile():
-    def get_profile_from_cookie(cookie):
-        expires = int(cookie["expires"])
+
+    def get_profile_from_fb_user(fb_user):
+
+        expires = int(fb_user["expires"])
         if expires == 0 and time.time() > expires:
             return None
-        memcache_key = "facebook_profile_for_%s" % cookie["access_token"]        
+
+        memcache_key = "facebook_profile_for_%s" % fb_user["access_token"]        
         profile = memcache.get(memcache_key)
         if profile is not None:
             return profile
+
         try:
-            graph = facebook.GraphAPI(cookie["access_token"])
+            graph = facebook.GraphAPI(fb_user["access_token"])
             profile = graph.get_object("me")
             memcache.set(memcache_key, profile, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
         except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
             logging.debug("Ignoring %s.  Assuming access_token is no longer valid." % error)
+
         return profile
 
     if App.facebook_app_secret is None:
         return None
+
     cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+
     morsel_key = "fbs_" + App.facebook_app_id
     morsel = cookies.get(morsel_key)
     if morsel is None:
         return None
+
     morsel_value = morsel.value
-    cookie = facebook.get_user_from_cookie(
+    fb_user = facebook.get_user_from_cookie(
         {morsel_key: morsel_value}, App.facebook_app_id, App.facebook_app_secret)
-    if cookie:
-        return get_profile_from_cookie(cookie)
+
+    if fb_user:
+        return get_profile_from_fb_user(fb_user)
+
     return None
