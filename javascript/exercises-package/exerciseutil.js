@@ -1,23 +1,21 @@
 var Exercise = {
     fSupportsAjax: false,
+    fExtendsMultipleChoice: false,
+    
+    showNextProblem: function() {},
+    
     init: function() {
         this.tries=0;
-        // this.answerChoices = new Array(5);
-        // this.possibleAnswers = new Array(); //These are the possible answers
-        // this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-        // this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
-        // this.steps_given=0;
-        // this.next_step_to_write =1;
-        // this.correctchoice;
-        // this.correctchoice2; //used when there are 2 answer choices
-        // this.selectedchoice;
-        // this.selectedchoice2; 
-        // this.starttime = new Date();
-        // this.starttimestring = date_to_string(starttime);
-        // this.time;
-        // this.displaygraph = false;
-        // this.alreadyRedirect = 0;
-        // this.timesWrong = 0; //This is used only by words.jsp and new_question()
+        this.answerChoices = new Array(5);
+        this.possibleAnswers = new Array(); //These are the possible answers
+        this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
+        this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
+        this.steps_given=0;
+        this.next_step_to_write =1;
+        this.correctchoice;
+        this.correctchoice2; //used when there are 2 answer choices
+        this.selectedchoice;
+        this.selectedchoice2; 
         this.correct = new Image();
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
@@ -25,28 +23,18 @@ var Exercise = {
         $("#correct").val(0);
         $("#hint_used").val(0);
         
+        if (this.fSupportsAjax)
+            this.showNextProblem();
+            
+        if (this.fExtendsMultipleChoice)
+            renderChoices();
+    },
+    
+    getNumPossibleAnswers: function() {
+        return this.possibleAnswers.length;
     }
+    
 };
-
-var answerChoices = new Array(5);
-var answerChoices2 = new Array(5);
-var possibleAnswers = new Array(); //These are the possible answers
-var possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-var checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
-var steps_given=0;
-var next_step_to_write =1;
-var correctchoice;
-var correctchoice2; //used when there are 2 answer choices
-var selectedchoice;
-var selectedchoice2; 
-var starttime = new Date();
-var starttimestring = date_to_string(starttime);
-var time;
-var displaygraph = false;
-var alreadyRedirect = 0;
-var timesWrong = 0; //This is used only by words.jsp and new_question()
-var recordedProblem = 0;
-var recordedCorrect = 0;
 
 var selColor = "#AE9CC9";
 var noSelColor = "#333333";
@@ -191,28 +179,28 @@ function equivInArray(target, arr) {
 function addWrongChoice(choice)
 {
 	if(mathFormat(choice) != mathFormat(correct_answer))
-		if(!equivInArray(choice, possibleAnswers))
-			possibleAnswers.push(choice);
+		if(!equivInArray(choice, Exercise.possibleAnswers))
+			Exercise.possibleAnswers.push(choice);
 }
 
 function renderChoices() {
     $("#answer_content").html("");
     
-	var availAnswers = 1 + possibleAnswers.length; // only so many answers available
-	answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
-	correctchoice = Math.round(KhanAcademy.random()*(answerChoices.length-0.02)-.49);
+	var availAnswers = 1 + Exercise.possibleAnswers.length; // only so many answers available
+	Exercise.answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
+	Exercise.correctchoice = Math.round(KhanAcademy.random()*(Exercise.answerChoices.length-0.02)-.49);
 
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	for (var i=0; i<answerChoices.length; i++)
+	var possibleWrongIndices=randomIndices(Exercise.getNumPossibleAnswers());
+	for (var i = 0; i < Exercise.answerChoices.length; i++)
 	{
-		if (i==correctchoice)
+		if (i==Exercise.correctchoice)
 		{
-			answerChoices[i]='`'+correct_answer+'`';
+			Exercise.answerChoices[i] = '`' + correct_answer + '`';
 		}
 		else
 		{
 			if (possibleWrongIndices.length>0)
-				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
+				Exercise.answerChoices[i]='`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';
 			else
 				continue;
 		}
@@ -221,28 +209,43 @@ function renderChoices() {
     // if you need to rearrange order or answers implement preDisplay function in derived html
     if (window.preDisplay)
     {
-        preDisplay(answerChoices, correctchoice);
+        preDisplay(Exercise.answerChoices, Exercise.correctchoice);
     }
 
-	for (i=0; i<answerChoices.length; i++)
+	for (i = 0; i < Exercise.answerChoices.length; i++)
     {
-        $("#answer_content").append('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
+        $("#answer_content").append('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
     }
+    
+    var $choices = $('.select-choice');
+    $choices.click(function(e) {
+        select_choice(this.getAttribute('data-choice'));
+        if (this != document.activeElement)
+            $(this).focus();
+    });
+
+    $choices.focus(function(e) {
+        $(this).click();
+    });
+
+    $choices.keypress(function(e) {
+        if (e.which == '13') {
+            check_answer_block();
+            return false;
+        }
+    });
 }
 
 //To add choices in checkbox-based problems
 function addCorrectCheckboxChoice(choice){
-    checkboxChoices.push([choice, true]);
+    Exercise.checkboxChoices.push([choice, true]);
 }
 
 function addIncorrectCheckboxChoice(choice){
-    checkboxChoices.push([choice, false]);
+    Exercise.checkboxChoices.push([choice, false]);
 }
 
 
-function getNumPossibleAnswers() {
-    return possibleAnswers.length;
-}
 
 function arrayEqual(a,b) //return true if the elements in the array are equal
 {
@@ -399,12 +402,12 @@ function date_as_string()
 
 function select_choice(choice)
 {
-	selectedchoice = choice;
+	Exercise.selectedchoice = choice;
 }
 
 function select_choice2(choice)
 {
-	selectedchoice2 = choice;
+	Exercise.selectedchoice2 = choice;
 }
 
 function getGCD(x,y) 
@@ -516,42 +519,42 @@ function randomFromArray(a)
 
 function check_answer()
 {
-	if (selectedchoice === undefined) 
+	if (Exercise.selectedchoice === undefined) 
 	{
 			window.alert("Please choose your answer.");
 			return;
 	}
 
-	var isCorrect = (selectedchoice==correctchoice)
+	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice)
 	handleCorrectness(isCorrect);
 }
 
 //for problems where the user can give 2 answers
 function check_both_answers()
 {
-	if (selectedchoice === undefined || selectedchoice2 === undefined) 
+	if (Exercise.selectedchoice === undefined || Exercise.selectedchoice2 === undefined) 
 	{
 			window.alert("Please choose both answers.");
 			return;
 	}
 
-	var isCorrect = (selectedchoice==correctchoice  && selectedchoice2==correctchoice2);
+	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice  && Exercise.selectedchoice2==Exercise.correctchoice2);
 	handleCorrectness(isCorrect);
 }
 
 function randomizeCheckboxChoices(){
     var randomizedCheckboxChoices = [];
-    while(checkboxChoices.length > 0){
-        randomizedCheckboxChoices.push(checkboxChoices.splice(getRandomIntRange(0, checkboxChoices.length - 1), 1)[0]);
+    while(Exercise.checkboxChoices.length > 0){
+        randomizedCheckboxChoices.push(Exercise.checkboxChoices.splice(getRandomIntRange(0, Exercise.checkboxChoices.length - 1), 1)[0]);
     }
-    checkboxChoices = randomizedCheckboxChoices;
+    Exercise.checkboxChoices = randomizedCheckboxChoices;
 }
 
 function generateCheckboxAnswerArea(){
     randomizeCheckboxChoices();
-    for(var i=0; i < checkboxChoices.length; i++){
+    for(var i=0; i < Exercise.checkboxChoices.length; i++){
         var checkbox_name = 'selectAnswerCheckbox_'+i; //Has to match the value used in checkCheckboxChoices
-        document.write('<span style="white-space:nowrap;"><input type=\"checkbox\" class="select-choice" name=\"'+checkbox_name+'\" id=\"'+checkbox_name+'"><label for='+checkbox_name+'>'+checkboxChoices[i][0]+'</label></input></span><br/>');
+        document.write('<span style="white-space:nowrap;"><input type=\"checkbox\" class="select-choice" name=\"'+checkbox_name+'\" id=\"'+checkbox_name+'"><label for='+checkbox_name+'>'+Exercise.checkboxChoices[i][0]+'</label></input></span><br/>');
     }
 }
 
@@ -559,9 +562,9 @@ function checkCheckboxChoices()
 {
     var isCorrect;
     isCorrect = true;
-    for(var i=0; i<checkboxChoices.length; i++){
+    for(var i = 0; i < Exercise.checkboxChoices.length; i++){
         checkboxName = "selectAnswerCheckbox_"+i //Name of checkbox in DOM
-        if(checkboxChoices[i][1] != answerform[checkboxName].checked){
+        if(Exercise.checkboxChoices[i][1] != answerform[checkboxName].checked){
             isCorrect = false;
         }
     }
@@ -593,13 +596,13 @@ function write_step(text, step) //Deprecated
 
 function write_step(text)
 {
-    $("#question_content").append('<P><div class=\"step'+next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
-	next_step_to_write++;
+    $("#question_content").append('<P><div class=\"step'+ Exercise.next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+	Exercise.next_step_to_write++;
 }
 
 function write_table_step_generic(explanation, left, center, right)
 {
-	$("#question_content").append(	'<tr class="step'+ next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
+	$("#question_content").append(	'<tr class="step'+ Exercise.next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
         	+ '<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '<FONT class=\"explanation\" class=\"nobr\">' + explanation + '</font>' +'</font></div>'
 			+'</td><td align=right class=\"nobr\"><nobr>'
 			+'<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '`' + left + '`' + '</font></div>'
@@ -607,7 +610,7 @@ function write_table_step_generic(explanation, left, center, right)
 			+ '<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '`'+ center + right + '`' + '</font></div>'
 			+'</nobr></td></tr>');
 			
-	next_step_to_write++;
+	Exercise.next_step_to_write++;
 }
 
 function write_table_step(explanation, left, right)
@@ -690,8 +693,6 @@ function updateUserData(data) {
     $("#exercise-message-container").html(data.exercise_message_html);
     $("#exercise-icon-container").html(data.exercise_icon_html);
     $(".exercise_message").slideDown();
-
-    Exercise.init();
 }
 
 function reset_streak() {

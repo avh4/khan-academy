@@ -6,12 +6,11 @@
 {% endblock maincode %}
 {% block maincell %}
 <script>
-    function showNextProblem() {
+    Exercise.fSupportsAjax = true;
+    Exercise.showNextProblem = function() {
         exercise = new AbsoluteValueEquationsExercise();
-        renderChoices();
     }
 
-    showNextProblem();
 </script>
 {% endblock maincell %}
 

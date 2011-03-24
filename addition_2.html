@@ -61,7 +61,7 @@ setCorrectAnswer(answer);
 function next_step()
 {
 	
-	if (steps_given<topNumberDigits)
+	if (Exercise.steps_given<topNumberDigits)
 	{
 		var hintString = getFontString('Hint: ', 'noSel');
 		
@@ -72,43 +72,43 @@ function next_step()
 			document.getElementById(item[0]).innerHTML = getFontString(item[1], 'noSel');
 		}
 		
-		var sum = carryArray[steps_given]+topNumber[steps_given]+bottomNumber[steps_given];
+		var sum = carryArray[Exercise.steps_given]+topNumber[Exercise.steps_given]+bottomNumber[Exercise.steps_given];
 		var ones = sum%10;
 		var carry = (sum-ones)/10;
 		
-		if (carryArray[steps_given]!=0)
+		if (carryArray[Exercise.steps_given]!=0)
 		{
-			document.getElementById("0_"+steps_given).innerHTML = getFontString(carryArray[steps_given], 'sel5');
-			selectedArray.push(["0_"+steps_given, carryArray[steps_given]]);
-			hintString += getFontString(carryArray[steps_given], 'sel5')+getFontString('+','noSel');
+			document.getElementById("0_"+Exercise.steps_given).innerHTML = getFontString(carryArray[Exercise.steps_given], 'sel5');
+			selectedArray.push(["0_"+Exercise.steps_given, carryArray[Exercise.steps_given]]);
+			hintString += getFontString(carryArray[Exercise.steps_given], 'sel5')+getFontString('+','noSel');
 		}
 		
-		document.getElementById("1_"+steps_given).innerHTML = getFontString(topNumber[steps_given], 'sel1');
-		selectedArray.push(["1_"+steps_given, topNumber[steps_given]]);
-		hintString += getFontString(topNumber[steps_given], 'sel1');
+		document.getElementById("1_"+Exercise.steps_given).innerHTML = getFontString(topNumber[Exercise.steps_given], 'sel1');
+		selectedArray.push(["1_"+Exercise.steps_given, topNumber[Exercise.steps_given]]);
+		hintString += getFontString(topNumber[Exercise.steps_given], 'sel1');
 		
 		
 		
-		if (steps_given<bottomNumberDigits)
+		if (Exercise.steps_given<bottomNumberDigits)
 		{
-			document.getElementById("2_"+steps_given).innerHTML = getFontString(bottomNumber[steps_given], 'sel2');
-			selectedArray.push(["2_"+steps_given, bottomNumber[steps_given]]);
-			hintString += getFontString('+','noSel')+getFontString(bottomNumber[steps_given], 'sel2');
+			document.getElementById("2_"+Exercise.steps_given).innerHTML = getFontString(bottomNumber[Exercise.steps_given], 'sel2');
+			selectedArray.push(["2_"+Exercise.steps_given, bottomNumber[Exercise.steps_given]]);
+			hintString += getFontString('+','noSel')+getFontString(bottomNumber[Exercise.steps_given], 'sel2');
 		}
 		
 		hintString+=getFontString('=', 'noSel');
 		
-		document.getElementById("3_"+steps_given).innerHTML = getFontString(ones, 'sel3');
-		selectedArray.push(["3_"+steps_given, ones]);
+		document.getElementById("3_"+Exercise.steps_given).innerHTML = getFontString(ones, 'sel3');
+		selectedArray.push(["3_"+Exercise.steps_given, ones]);
 		
 		if (carry!=0)
 		{
 			hintString+=getFontString(carry, 'sel4');
-			if (steps_given<topNumberDigits-1)
+			if (Exercise.steps_given<topNumberDigits-1)
 			{
-				carryArray[steps_given+1] = carry;
-				document.getElementById("0_"+(steps_given+1)).innerHTML = getFontString(carry, 'sel4');
-				selectedArray.push(["0_"+(steps_given+1), carry]);
+				carryArray[Exercise.steps_given+1] = carry;
+				document.getElementById("0_"+(Exercise.steps_given+1)).innerHTML = getFontString(carry, 'sel4');
+				selectedArray.push(["0_"+(Exercise.steps_given+1), carry]);
 			}
 			else
 			{
@@ -119,7 +119,7 @@ function next_step()
 		}
 		hintString+=getFontString(ones, 'sel3');
 		document.getElementById("hintbox").innerHTML = hintString;
-		steps_given++;
+		Exercise.steps_given++;
 	}
 
 }

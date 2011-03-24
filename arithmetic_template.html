@@ -28,46 +28,55 @@
       });
   </script>
   <script type="text/javascript"><!--
+
+  {% if exercise.summative %}
+      KhanAcademy.is_summative = true;
+  {% endif %}
+  KhanAcademy.updateSeed({{problem_number}});
+  
+    
 $(document).ready(function () {
-    Exercise.init();
-    {% if exercise.summative %}
-    KhanAcademy.is_summative = true;
-    {% endif %}
-    KhanAcademy.updateSeed({{problem_number}});
 	KhanAcademy.onMathMLSupportReady(function() {
 		translate();
 	});
+	
+	if (Exercise.fSupportsAjax)
+	    Exercise.init();
 });
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
 
+function finishRegisterAnswer(response) {
+    if (!Exercise.fSupportsAjax) 
+        window.location.reload();
+        
+    try {
+        eval("var data=" + response);
+        KhanAcademy.updateSeed(data.problem_number);
+        $("#question_content").html("");
+        Exercise.init();
+        resetFeedback();
+        updateUserData(data);
+        translate();
+    } catch (err) {
+        // do normal page reload on error
+        // window.location.reload();
+    }
+}
+
 function submitForm(value)
 {
-    var data = "";
-    $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used"], function(index, value) {
-        if (index)
-            data += "&";
-        data += value + "=" + $("#" + value).val();
+    
+    var data = {};
+    $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used"], function() {
+      data[this] = $("#" + this).val();
     });
 
     $.ajax({
         type: "POST",
         url: "/registeranswer",
         data: data,
-        success: function(response) {
-            try {
-                eval("var data=" + response);
-                KhanAcademy.updateSeed(data.problem_number);
-                $("#question_content").html("");
-                showNextProblem();
-                resetFeedback();
-                updateUserData(data);
-                translate();
-            } catch (err) {
-                // do normal page reload on error
-                window.location.reload();
-            }
-        }
+        success: finishRegisterAnswer
     });
 }
 // -->

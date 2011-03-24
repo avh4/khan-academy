@@ -221,13 +221,13 @@ function graph_update() {
 
 function draw_next_step()
 {
-    document.getElementById('hint'+steps_given).style.display = 'block';
+    document.getElementById('hint'+Exercise.steps_given).style.display = 'block';
     
 	present.fontstyle = "normal";
 	present.fontfamily = "sans-serif";
 	present.fontsize = "16";
 
-    if (steps_given==1)
+    if (Exercise.steps_given==1)
 	{
 	    present.stroke = "purple";
 		present.plot(curInvExp);
@@ -236,7 +236,7 @@ function draw_next_step()
     	present.stroke = "green";
     	present.plot("y=x");
 	}
-	steps_given++;
+	Exercise.steps_given++;
 }
 
 

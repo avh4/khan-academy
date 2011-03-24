@@ -51,7 +51,7 @@ function AbsoluteValueEquationsExercise() {
         var numerator = exc.getRightConstant();
         var denominator = exc.getLeftCoeff();
 
-		while (getNumPossibleAnswers() < 4)
+		while (Exercise.getNumPossibleAnswers() < 4)
 		{
     			var n_shift = get_random();
     			var d_shift = get_random();

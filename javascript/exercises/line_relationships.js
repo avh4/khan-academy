@@ -206,10 +206,10 @@ var LineRelationshipsExercise = {
     },
 
     drawNextStep: function() {
-	if (steps_given == 0) { // plot the first line
+	if (Exercise.steps_given == 0) { // plot the first line
 	    present.stroke = 'blue';
 	    present.plot(this.line1.slopeInt);
-	} else if (steps_given == 1) { // plot the second line
+	} else if (Exercise.steps_given == 1) { // plot the second line
 	    present.stroke = 'red';
 	    present.plot(this.line2.slopeInt);
 	}

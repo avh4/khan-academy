@@ -176,7 +176,7 @@ function draw_next_step()
 	present.fontsize = "16";
 
 
-	if (steps_given==0)
+	if (Exercise.steps_given==0)
 	{
 	    //alert('fofa = ' + fofa + ', a = ' + a);
 	    //alert(curExp);
@@ -191,7 +191,7 @@ function draw_next_step()
 		present.line([0, fofa], [a, fofa]);
 		present.text([0, fofa], "f(a)", left);	
 	}
-	else if (steps_given==1)
+	else if (Exercise.steps_given==1)
 	{
 		present.stroke= "green";
 	    present.line([-1 * a, 0], [-1 * a, fofna]);
@@ -200,11 +200,11 @@ function draw_next_step()
 		present.line([0, fofna], [-1 * a, fofna]);
 		present.text([0, fofna], "f(-a)", right);
 	}
-	else if (steps_given==2)
+	else if (Exercise.steps_given==2)
 	{
         document.getElementById('hint'+funcCategory).style.display = 'block';
 	}
-	steps_given++;
+	Exercise.steps_given++;
 }
 
 
@@ -247,17 +247,17 @@ writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span sty
     // slightly modified multiple-choice code
     // - only 3 choices
     // - doesn't mathize the choice text
-	correctchoice = getRandomIntRange(0,2);
+	Exercise.correctchoice = getRandomIntRange(0,2);
 	
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
+	var possibleWrongIndices=randomIndices(Exercise.getNumPossibleAnswers());
 	for (var i = 0; i < 3; i++)
 	{
-		if (i == correctchoice) 
-			answerChoices[i] = correct_answer;
+		if (i == Exercise.correctchoice) 
+			Exercise.answerChoices[i] = correct_answer;
 		else
-			answerChoices[i]=possibleAnswers[possibleWrongIndices.pop()];
+			Exercise.answerChoices[i] = Exercise.possibleAnswers[possibleWrongIndices.pop()];
 
-		document.write('<p style="white-space:nowrap;margin:5px 0"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
+		document.write('<p style="white-space:nowrap;margin:5px 0"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
 	}
 
     var $choices = $('.select-choice');

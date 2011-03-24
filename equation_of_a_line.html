@@ -68,7 +68,7 @@ function graph_update() {
 	}
 
 	
-	if (steps_given==0)
+	if (Exercise.steps_given==0)
 	{
 		
 		present.initPicture(x_min,x_max, y_min, y_max);
@@ -83,7 +83,7 @@ function graph_update() {
 		present.text([x1,y1], "("+x1+","+y1+")", p1_position);
 		present.text([x2,y2], "("+x2+","+y2+")", p2_position);
 	}
-	if (steps_given==1)
+	if (Exercise.steps_given==1)
 	{
 		present.stroke="green";
 		present.marker="arrow";
@@ -92,12 +92,12 @@ function graph_update() {
 		present.line([x2, y1],[x1, y1]);
 
 	}
-	if (steps_given==2)
+	if (Exercise.steps_given==2)
 	{
 		present.text([x2, y2+(y1-y2)/2], ""+(y1-y2), present.right);
 		present.text([x2+(x1-x2)/2, y1], ""+(x1-x2), present.below);
 	}
-	if (steps_given==4)
+	if (Exercise.steps_given==4)
 	{
 		present.stroke="red";
 		present.plot(m+"*x+"+b);
@@ -150,8 +150,8 @@ for (var i=0; i<5; i++)
 	{
 		bad_b_den = get_random();
 	}
-	possibleAnswers.push('m='+format_fraction(bad_m_num, bad_m_den));
-	possibleAnswers2.push('b='+format_fraction(bad_b_num, bad_b_den));
+	Exercise.possibleAnswers.push('m='+format_fraction(bad_m_num, bad_m_den));
+	Exercise.possibleAnswers2.push('b='+format_fraction(bad_b_num, bad_b_den));
 }
 //-->
 </script>

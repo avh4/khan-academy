@@ -183,7 +183,7 @@ function handleCorrectness(isCorrect)
 			{
 				key: $("#key").val(),
 				time_warp: $("#time_warp").val(),
-				correct: ((isCorrect && Exercise.tries==0 && steps_given==0) ? 1 : 0),
+				correct: ((isCorrect && Exercise.tries==0 && Exercise.steps_given==0) ? 1 : 0),
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
 			}); // Fire and forget, no callback.
 		correctnessRegistered = true;		
@@ -191,12 +191,12 @@ function handleCorrectness(isCorrect)
 	if (isCorrect)
 	{
 		
-		if (Exercise.tries==0 && steps_given==0)
+		if (Exercise.tries==0 && Exercise.steps_given==0)
 		{
 			document.getElementById("correct").value="1"
 		}
 
-        $("#hint_used").val(steps_given == 0 ? "0" : "1");
+        $("#hint_used").val(Exercise.steps_given == 0 ? "0" : "1");
 		eraseCookie(notDoneCookie);
 	}
 	else

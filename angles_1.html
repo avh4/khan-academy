@@ -800,9 +800,9 @@ function overline(x)
 
 
 function draw_next_step() {
-    if (explanationStack.length <= steps_given) return;
-	drawVariable(explanationStack[steps_given][0]);
-	steps_given++;
+    if (explanationStack.length <= Exercise.steps_given) return;
+	drawVariable(explanationStack[Exercise.steps_given][0]);
+	Exercise.steps_given++;
     show_step();
 }
 
