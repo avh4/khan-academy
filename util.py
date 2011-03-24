@@ -1,23 +1,42 @@
 import datetime
 import math
 import urllib
+import logging
+
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
 
 import nicknames
 import facebook_util
 
+_loaded_current_user = False
+_cached_current_user = None
+
+class CurrentUserMiddleware(object):
+    def __init__(self, app):
+        self.app = app    
+
+    def __call__(self, environ, start_response):
+        global _loaded_current_user, _cached_current_user
+
+        _loaded_current_user = False
+        _cached_current_user = None
+
+        return self.app(environ, start_response)
+
 def get_current_user():
+    global _loaded_current_user, _cached_current_user
 
-    appengine_user = users.get_current_user()
-    if appengine_user is not None:
-        return appengine_user
+    if not _loaded_current_user:
+        user = users.get_current_user()
 
-    facebook_user = facebook_util.get_current_facebook_user()
-    if facebook_user is not None:
-        return facebook_user
+        if not user:
+            user = facebook_util.get_current_facebook_user()
 
-    return None
+        _loaded_current_user = True
+        _cached_current_user = user
+
+    return _cached_current_user
 
 def get_nickname_for(user):
     return nicknames.get_nickname_for(user)

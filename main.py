@@ -1970,6 +1970,9 @@ def real_main():
         ('/index\.html', PermanentRedirectToHome),
 
         ], debug=True)
+
+    application = util.CurrentUserMiddleware(application)
+
     run_wsgi_app(application)
 
 def profile_main():
