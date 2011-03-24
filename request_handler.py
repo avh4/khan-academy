@@ -1,6 +1,9 @@
 import os
 import logging
 import datetime
+import Cookie
+import urllib
+
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -123,21 +126,51 @@ class RequestHandler(webapp.RequestHandler):
         else:
             self.redirect(location)
 
+    # Cookie handling from http://appengine-cookbook.appspot.com/recipe/a-simple-cookie-class/
+    def set_cookie(self, key, value='', max_age=None,
+                   path='/', domain=None, secure=None, httponly=False,
+                   version=None, comment=None):
+        cookies = Cookie.BaseCookie()
+        cookies[key] = value
+        for var_name, var_value in [
+            ('max-age', max_age),
+            ('path', path),
+            ('domain', domain),
+            ('secure', secure),
+            ('HttpOnly', httponly),
+            ('version', version),
+            ('comment', comment),
+            ]:
+            if var_value is not None and var_value is not False:
+                cookies[key][var_name] = str(var_value)
+            if max_age is not None:
+                cookies[key]['expires'] = max_age
+        header_value = cookies[key].output(header='').lstrip()
+        self.response.headers._headers.append(('Set-Cookie', header_value))
+
+    def delete_cookie(self, key, path='/', domain=None):
+        self.set_cookie(key, '', path=path, domain=domain, max_age=0)
+
     def render_template(self, template_name, template_values):
         template_values['App'] = App
         template_values['None'] = None
         template_values['points'] = None
         template_values['username'] = ""
+        template_values['login_continue_quoted'] = ""
+
         user = util.get_current_user()
-        if user is not None:
-            template_values['username'] = user.nickname()            
+        if user is None:
+            template_values['login_continue_quoted'] = urllib.quote(self.request.uri)
+        else:
+            template_values['username'] = user.nickname()
+
         user_data = UserData.get_for(user)
 
         template_values['user_data'] = user_data
         template_values['points'] = user_data.points if user_data else 0
 
         template_values['login_url'] = util.create_login_url(self.request.uri)
-        template_values['logout_url'] = users.create_logout_url(self.request.uri)
+        template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
         template_values['is_mobile'] = self.is_mobile()
 

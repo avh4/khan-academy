@@ -36,6 +36,7 @@ from google.appengine.ext import db
 import qbrary
 import bulk_update.handler
 import facebook
+import yahoo_util
 import layer_cache
 import autocomplete
 import coaches
@@ -174,8 +175,6 @@ class ViewExercise(request_handler.RequestHandler):
 
             exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
                    
-            logout_url = users.create_logout_url(self.request.uri)
-            
             # Note: if they just need a single problem for review they can just print this page.
             num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
             
@@ -211,7 +210,6 @@ class ViewExercise(request_handler.RequestHandler):
                 'exercise_non_summative': exercise_non_summative,
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'user_exercise': user_exercise,
-                'logout_url': logout_url,
                 'streak': user_exercise.streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
@@ -531,8 +529,6 @@ class PrintExercise(request_handler.RequestHandler):
             endangered = False
             reviewing = False
 
-            logout_url = users.create_logout_url(self.request.uri)
-
             template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
@@ -550,7 +546,6 @@ class PrintExercise(request_handler.RequestHandler):
                 'exercise_videos': exercise_videos,
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'user_exercise': userExercise,
-                'logout_url': logout_url,
                 'time_warp': time_warp,
                 'user_data': user_data,
                 'num_problems': num_problems,
@@ -587,7 +582,6 @@ class ReportIssue(request_handler.RequestHandler):
     def write_response(self, issue_type, extra_template_values):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
 
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
@@ -599,7 +593,6 @@ class ReportIssue(request_handler.RequestHandler):
             'username': user and user.nickname() or "",
             'referer': self.request.headers.get('Referer'),
             'user_agent': user_agent,
-            'logout_url': logout_url,
             }
         template_values.update(extra_template_values)
         page = 'reportissue_template.html'
@@ -621,13 +614,11 @@ class ProvideFeedback(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
 
         template_values = {
             'App' : App,
             'points': user_data.points,
             'username': user and user.nickname() or "",
-            'logout_url': logout_url,
             }
 
         self.render_template("provide_feedback.html", template_values)
@@ -1373,7 +1364,6 @@ class ViewHomePage(request_handler.RequestHandler):
 
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         
         thumbnail_link_sets = [
             [
@@ -1457,7 +1447,6 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
-                                                  'logout_url': logout_url,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
         self.render_template('homepage.html', template_values)
@@ -1488,12 +1477,11 @@ class ViewStore(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
                                                   
         self.render_template('store.html', template_values)
@@ -1510,7 +1498,6 @@ class ViewSAT(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         playlist_title = "SAT Preparation"
         query = Playlist.all()
         query.filter('title =', playlist_title)
@@ -1525,7 +1512,7 @@ class ViewSAT(request_handler.RequestHandler):
                                                   'username': user and user.nickname() or "",
                                                   'videos': playlist_videos,
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
                                                   
         self.render_template('sat.html', template_values)
@@ -1535,7 +1522,6 @@ class ViewGMAT(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         problem_solving = VideoPlaylist.get_query_for_playlist_title("GMAT: Problem Solving")
         data_sufficiency = VideoPlaylist.get_query_for_playlist_title("GMAT Data Sufficiency")
         template_values = qa.add_template_values({'App': App,
@@ -1544,7 +1530,7 @@ class ViewGMAT(request_handler.RequestHandler):
                                                   'data_sufficiency': data_sufficiency,
                                                   'problem_solving': problem_solving,
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
                                                   
         self.render_template('gmat.html', template_values)
@@ -1713,12 +1699,11 @@ class ViewInfoPage(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
         # Get the corresponding page from the info site
         path = urllib.unquote(self.request.path.rpartition('/')[2])
@@ -1738,7 +1723,6 @@ class ViewArticle(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         video = None
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
@@ -1754,7 +1738,6 @@ class ViewArticle(request_handler.RequestHandler):
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'article_url': article_url,
-                                                  'logout_url': logout_url,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
 
@@ -1767,6 +1750,8 @@ class Login(request_handler.RequestHandler):
 
     def post(self):
         cont = self.request.get('continue')
+        direct = self.request_bool('direct', default = False)
+
         openid_identifier = self.request.get('openid_identifier')
         if openid_identifier is not None and len(openid_identifier) > 0:
             if App.accepts_openid:
@@ -1779,9 +1764,16 @@ class Login(request_handler.RequestHandler):
             self.redirect(users.create_login_url(cont))
             return
         template_values = {
-                           'continue': cont                              
+                           'continue': cont,
+                           'direct': direct
                            }
         self.render_template('login.html', template_values)
+
+class Logout(request_handler.RequestHandler):
+    def get(self):
+        # Logout of both Yahoo and Google. Facebook is handled by JS.
+        yahoo_util.logout(self)
+        self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):
 
@@ -1928,6 +1920,9 @@ def real_main():
         
         ('/press/.*', ViewArticle),
         ('/login', Login),
+        ('/logout', Logout),
+        ('/startyahoologin', yahoo_util.StartYahooLogin),
+        ('/finishyahoologin', yahoo_util.FinishYahooLogin),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 

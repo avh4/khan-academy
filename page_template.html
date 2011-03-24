@@ -143,27 +143,7 @@
                                 <span class="separator">&nbsp;</span>
                                 <a id="page_logout" href="{{logout_url}}">Logout</a>
                             {% else %}
-                            <nav class="css-menu noscript" id="login-menu">
-                                <ul class="ui-corner-top">
-                                    <li class="ui-corner-top">
-                                        Login
-                                        <ul class="ui-corner-tr ui-corner-bottom">
-                                            <li id="page_login_options">
-                                                <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id">Login with Google</a>
-                                            </li>
-                                            {% if App.facebook_app_secret %}
-                                            <li>
-                                                <a href="javascript: void 0;" onclick="$('#real_fb_button a').click();">Login with Facebook</a>
-                                                <div id="real_fb_button" style="display: none;"><fb:login-button></fb:login-button></div>
-                                            </li>
-                                            {% endif %}
-                                            {% if App.accepts_openid %}
-                                            <li>[<a href="{{login_url}}">more login choices...</a>]</li>
-                                            {% endif %}
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </nav>
+                            <a href="/login?direct=1">Login</a>
                             {% endif %}
                             <span class="separator">&nbsp;</span>
                             <a href="/contribute" id="donate-link">Donate</a>

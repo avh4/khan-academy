@@ -4,34 +4,34 @@ import urllib
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
 
+import nicknames
 import facebook_util
+import yahoo_util
 
-
-"""Returns users.get_current_user() if not None, or a faked User based on the
-user's Facebook account if the user has one, or None.
-"""
 def get_current_user():
 
     appengine_user = users.get_current_user()
-
     if appengine_user is not None:
         return appengine_user
 
     facebook_user = facebook_util.get_current_facebook_user()
-
     if facebook_user is not None:
-        return facebook_user   
+        return facebook_user
+
+    yahoo_user = yahoo_util.get_current_yahoo_user()
+    if yahoo_user is not None:
+        return yahoo_user
 
     return None
 
 def get_nickname_for(user):
-    if facebook_util.is_facebook_email(user.email()):
-        return facebook_util.get_facebook_nickname(user)
-    else:
-        return user.nickname()
+    return nicknames.get_nickname_for(user)
 
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
+
+def create_logout_url(dest_url):
+    return "/logout?continue=%s" % urllib.quote(dest_url)
 
 def seconds_since(dt):
     return seconds_between(dt, datetime.datetime.now())

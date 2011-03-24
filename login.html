@@ -5,7 +5,6 @@
 {% block pagescript %}
         <link rel="stylesheet" type="text/css" media="screen" href="/javascript/jQueryOpenIdPlugin/openid.css?{{App.version}}" />
 
-        {% shared_javascript %}
         <script type="text/javascript" src="/javascript/jQueryOpenIdPlugin/jquery.openid.js?{{App.version}}"></script>
         <script type="text/javascript">
         $(function () {
@@ -19,19 +18,29 @@
 
 {% block pagecontent %}
 <div id="login-page">
-	<h2 class="pulls">You need to login to access this part of the site.</h2>
+    <h2 class="pulls">{% if direct %}Login{% else %}You need to login to access this part of the site.{% endif %}</h2>
     <h3>Already have an account with one of these sites? Click the logo to use your account to login here:</h3>
     <form class="openid" method="post" action="/login?continue={{continue|urlencode}}"> 
       <div><ul class="providers"> 
       <li class="direct" title="Google">
             <div class="sign-in-text">Login with:</div>
-            <img src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span></li>
+            <img width="205" height="70" src="/images/google-logo-large.png" /><span>https://www.google.com/accounts/o8/id</span>
+      </li>
+            
       {% if App.facebook_app_secret %}
       <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();">
             <div class="sign-in-text">Login with:</div>
-            <img src="/images/facebook-logo-large.png" />
+            <img width="205" height="70" src="/images/facebook-logo-large.png" />
       </li>
       {% endif %}
+
+      {% if App.yahoo_consumer_secret %}
+      <li title="Yahoo" onclick="window.location='/startyahoologin';">
+            <div class="sign-in-text">Login with:</div>
+            <img width="205" height="70" src="/images/yahoo-logo-large.png" />
+      </li>
+      {% endif %}
+
       {% if App.accepts_openid %} 
       <li class="domainname" title="Google Apps domain name"> 
             <img src="/javascript/jQueryOpenIdPlugin/images/googleappsW.png" alt="icon" /><span>https://www.google.com/accounts/o8/site-xrds?hd=<strong>domainname</strong></span></li> 
@@ -77,11 +86,18 @@
       </fieldset> 
     </form>
     <div class="clear"></div>
-    <h5 style="margin-top: 18px;">Don't have an account yet?</h5>
-    <p style="margin-bottom: 45px;">
-        <a href="https://www.google.com/accounts/NewAccount">Sign up for a Google account</a>&nbsp;&nbsp;
-        <a href="http://www.facebook.com/r.php">Sign up for a Facebook account</a>
-    </p>
+
+    <div id="real_fb_button" style="display: none;"><fb:login-button></fb:login-button></div>
+
+    <h5 style="margin:18px 0 9px 0;">Don't have an account yet?</h5>
+    <div>
+        <ul class="providers-sign-up">
+            <li><a href="https://www.google.com/accounts/NewAccount">Sign up for a Google account</a></li>
+            <li><a href="http://www.facebook.com/r.php">Sign up for a Facebook account</a></li>
+            <li><a href="https://edit.yahoo.com/registration">Sign up for a Yahoo account</a><br/>(Yahoo Family Accounts support <a href="/about/getting-started#under-13">children under the age of 13</a>.)</li>
+        </ul>
+    </div>
+    <div class="clear">&nbsp;</div><br/><br/>
     <h2 class="pulls">Why should you sign up?</h2>
     <h3>When you login, we save all of your progress. Also, <a href="/about">students and coaches get access to some cool tools</a>:</h3>
     <div id="feature-list">
