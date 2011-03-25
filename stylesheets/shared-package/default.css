@@ -952,7 +952,7 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-		background: url(Search-icon.png) no-repeat 2px 1px #fff;
+		background: url("/images/Search-icon.png") no-repeat 2px 1px #fff;
 		border: 1px solid #ddd;
 	}
 	#library #library-nav {
@@ -997,7 +997,6 @@ a:link.google-analytics-link-track
 				left:10px; /* value = (:before left) + (:before border-left) - (:after border-left) */
 				width:20px;
 				height:11px;
-				background: url(library-nav-nipple.png);
 				z-index: 10;				
 			}
 			#library #library-nav-links .video-count, #library #library-content #library-sub-nav #list-of-lists .video-count {
