@@ -127,6 +127,13 @@
                 <table class="exercise-properties">
 
                     <tr>
+                        <td style="font-weight:bold;">View</td>
+                        <td style="padding-bottom:9px;">
+                            <a href="/exercises?exid={{ main_exercise.name|escape }}" target="_blank">Open {{ main_exercise.display_name|escape }} in new tab</a>
+                        </td>
+                    </tr>
+
+                    <tr>
                         <td style="font-weight:bold;">Deployed</td>
                         <td style="padding-bottom:9px;">
                             <label for="live_yes">Live&nbsp;</label><input type="radio" id="live_yes" name="live" value="1" {% if main_exercise.live %}checked="checked"{% endif %}/>

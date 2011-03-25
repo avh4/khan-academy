@@ -63,7 +63,12 @@ function submitForm(value)
         {% exercise_icon exercise App %}
 
 		<div class="energy-points-badge">{{exercise_points}}</div>
-		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name|escape}}</A></div>
+        <div class="exercise-title">
+            <a href="/exercises?exid={{ exercise.name }}">{{ exercise.display_name|escape }}</a>
+            {% if not exercise.live %}
+            <span style="color:red;">(admins only, <a href="/editexercise?name={{ exercise.name|escape }}">deploy</a>)</span>
+            {% endif %}
+        </div>
 		{% streak_bar user_exercise %}
 		<div class="related-content">
             {% if exercise.summative %}

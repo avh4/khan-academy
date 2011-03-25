@@ -74,7 +74,7 @@ from profiles import util_profile
 
 from topics_list import topics_list, all_topics_list, DVD_list
 
-from custom_exceptions import MissingVideoException
+from custom_exceptions import MissingVideoException, MissingExerciseException
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -148,6 +148,10 @@ class ViewExercise(request_handler.RequestHandler):
                 exid = 'addition_1'
 
             exercise = Exercise.get_by_name(exid)
+
+            if not exercise: 
+                raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
+
             user_exercise = user_data.get_or_insert_exercise(exercise)
 
             if not problem_number:

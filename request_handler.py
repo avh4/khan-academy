@@ -9,7 +9,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
-from custom_exceptions import MissingVideoException
+from custom_exceptions import MissingVideoException, MissingExerciseException
 import util
 from app import App
 from models import UserData
@@ -80,6 +80,12 @@ class RequestHandler(webapp.RequestHandler):
 
             # App Engine maintenance period
             message_html = "We're temporarily down for maintenance. Try again in about an hour. We're sorry for the inconvenience."
+
+        elif type(e) is MissingExerciseException:
+
+            title = "This exercise isn't here right now."
+            message_html = "Either this exercise doesn't exist or it's temporarily hiding. You should <a href='/exercisedashboard'>head back to our other exercises</a>."
+            sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
 
         elif type(e) is MissingVideoException:
 

@@ -86,7 +86,7 @@ class Exercise(db.Model):
     def get_by_name(name):
         dict_exercises = Exercise.__get_dict_use_cache_unsafe__()
         if dict_exercises.has_key(name):
-            if dict_exercises[name].live or users.is_current_user_admin():
+            if dict_exercises[name].is_visible_to_current_user():
                 return dict_exercises[name]
         return None
 
@@ -110,6 +110,9 @@ class Exercise(db.Model):
         if self.short_display_name:
             return self.short_display_name[:11]
         return self.display_name()[:11]
+
+    def is_visible_to_current_user(self):
+        return self.live or users.is_current_user_admin()
 
     def required_streak(self):
         if self.summative:
