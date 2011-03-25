@@ -42,7 +42,6 @@ class EditExercise(request_handler.RequestHandler):
             query.filter('exercise =', main_exercise.key())
             exercise_videos = query.fetch(50)
 
-
             template_values = {
                 'exercises': exercises,
                 'exercise_videos': exercise_videos,
@@ -134,6 +133,8 @@ class UpdateExercise(request_handler.RequestHandler):
                     exercise_video.exercise = exercise
                     exercise_video.video = db.Key(video_key)
                     exercise_video.put()
+
+            exercise.live = self.request_bool("live", default=False)
 
             exercise.put()
 

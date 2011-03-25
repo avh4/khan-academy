@@ -19,7 +19,13 @@
                         <tr>
                     {% endif %}
                     <td>
-                        <a href="/editexercise?name={{ exercise.name|escape }}" title="{{ exercise.display_name|escape }}"><nobr>{{ exercise.display_name|truncatewords:4|escape }}</nobr></a>
+                        <a href="/editexercise?name={{ exercise.name|escape }}" 
+                            {% if exercise.live %}
+                            style="color:#069;"
+                            {% else %}
+                            style="color:red;text-decoration:line-through;"
+                            {% endif %}
+                            title="{{ exercise.display_name|escape }}"><nobr>{{ exercise.display_name|truncatewords:4|escape }}</nobr></a>
                     </td>
                     {% if forloop.last %}
                         </tr>

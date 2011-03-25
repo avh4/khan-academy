@@ -50,6 +50,11 @@ indexes:
   - name: __key__
     direction: desc
 
+- kind: Exercise
+  properties:
+  - name: live
+  - name: h_position
+
 - kind: ExerciseVideo
   properties:
   - name: __key__
