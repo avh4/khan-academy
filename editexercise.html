@@ -4,6 +4,10 @@
 
     <script>
 
+    function showLiveInstructions() {
+        $('#live-instructions').slideDown('fast', function(){$('#submit-live-button').focus();});
+    }
+
     function submitLive() {
         $("#form-exercise").attr("target", "_blank").attr("action", "http://www.khanacademy.org/updateexercise");
         $("#form-exercise").submit();
@@ -225,11 +229,11 @@
                 <input class="button" type="submit" value="Update {{ main_exercise.display_name|escape }}"/>
 
                 {% if App.is_dev_server %}
-                    ...or <a href="#" onclick="$('#live-instructions').slideDown('fast');return false;">deploy these updates to the live production datastore.</a>
+                ...or <a href="#" onclick="showLiveInstructions();return false;">deploy these updates to the live production datastore.</a>
 
                     <div id="live-instructions" style="display:none;padding:18px;margin:18px;background:#CCC;">
                         <strong style="color:red;">Warning</strong>: submitting will send these updates to the live www.khanacademy.org datastore, and this exercise will immediately become available according to its above status.<br/>
-                        <input class="button" onclick="submitLive();return false;" type="button" value="Send {{ main_exercise.display_name|escape }} updates to live www.khanacademy.org datastore"/><br/>
+                        <input id="submit-live-button" class="button" onclick="submitLive();return false;" type="button" value="Send {{ main_exercise.display_name|escape }} updates to live www.khanacademy.org datastore"/><br/>
                         <em>Submits in new window. If you are not logged in as an admin to www.khanacademy.org, you'll need to login and click this button again.</em>
                     </div>
                 {% endif %}
