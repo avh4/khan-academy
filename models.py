@@ -840,14 +840,6 @@ class ExerciseVideo(db.Model):
     def key_for_video(self):
         return ExerciseVideo.video.get_value_for_datastore(self)
 
-# Matching between playlists and exercises
-
-
-class ExercisePlaylist(db.Model):
-
-    exercise = db.ReferenceProperty(Exercise)
-    playlist = db.ReferenceProperty(Playlist)
-
 class ExerciseGraph(object):
 
     def __init__(self, user_data, user=None):

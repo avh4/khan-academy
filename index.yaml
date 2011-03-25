@@ -50,11 +50,6 @@ indexes:
   - name: __key__
     direction: desc
 
-- kind: ExercisePlaylist
-  properties:
-  - name: __key__
-    direction: desc
-
 - kind: ExerciseVideo
   properties:
   - name: __key__

@@ -20,7 +20,9 @@ function validateEmail(sEmail)
 function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
     var o = {
                 "label": match.title,
+                "title": match.title,
                 "value": match.url,
+                "key": match.key,
                 "fPlaylist": fPlaylist
             }
 
@@ -30,9 +32,9 @@ function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
     list[list.length] = o;
 }
 
-function initAutocomplete()
+function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
 {
-    var autocompleteWidget = $("#page_search input").autocomplete({
+    var autocompleteWidget = $(selector).autocomplete({
         delay: 150,
         source: function(req, fxnCallback) {
 
@@ -55,9 +57,13 @@ function initAutocomplete()
                     }
 
                     // Add playlist and video matches to list of autocomplete suggestions
-                    for (var ix = 0; ix < data.playlists.length; ix++)
+                    
+                    if (fPlaylists)
                     {
-                        addAutocompleteMatchToList(matches, data.playlists[ix], true, reMatch);
+                        for (var ix = 0; ix < data.playlists.length; ix++)
+                        {
+                            addAutocompleteMatchToList(matches, data.playlists[ix], true, reMatch);
+                        }
                     }
                     for (var ix = 0; ix < data.videos.length; ix++)
                     {
@@ -73,7 +79,10 @@ function initAutocomplete()
             return false;
         },
         select: function(e, ui) {
-            window.location = ui.item.value;
+            if (fxnSelect)
+                fxnSelect(ui.item);
+            else
+                window.location = ui.item.value;
             return false;
         },
         open: function(e, ui) {
@@ -93,7 +102,7 @@ function initAutocomplete()
             }
         }
     }).bind("keydown.autocomplete", function(e) {
-        if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.NUMPAD_ENTER)
+        if (!fIgnoreSubmitOnEnter && e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.NUMPAD_ENTER)
         {
             if (!autocompleteWidget.data("autocomplete").selectedItem)
             {

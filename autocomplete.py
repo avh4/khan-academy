@@ -52,7 +52,7 @@ def video_title_dicts():
         live_video_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)] = True
 
     live_videos = filter(lambda video: video.key() in live_video_dict, Video.all())
-    return map(lambda video: {"title": video.title, "url": "/video/%s" % video.readable_id}, live_videos)
+    return map(lambda video: {"title": video.title, "key": str(video.key()), "url": "/video/%s" % video.readable_id}, live_videos)
 
 @layer_cache.cache_with_key(PLAYLIST_TITLE_MEMCACHE_KEY, expiration=CACHE_EXPIRATION_SECONDS)
 def playlist_title_dicts():
