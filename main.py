@@ -285,13 +285,9 @@ class ViewExercise(request_handler.RequestHandler):
                     
             exercise_videos = exercise_non_summative.related_videos_fetch()
 
-            proficient = exercise.proficient = user_data.is_proficient_at(exid)
-            suggested = exercise.suggested = user_data.is_suggested(exid)
-            reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
-            struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-            endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+            exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                    
             logout_url = users.create_logout_url(self.request.uri)
             
@@ -299,7 +295,7 @@ class ViewExercise(request_handler.RequestHandler):
             num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
             
             # If the user is proficient, assume they want to print a bunch of practice problems.
-            if proficient:
+            if exercise_states['proficient']:
                 num_problems_to_print = exercise.required_streak()
 
             if exercise.summative:
@@ -316,11 +312,12 @@ class ViewExercise(request_handler.RequestHandler):
                 'points': user_data.points,
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
-                'proficient': proficient,
-                'endangered': endangered,
-                'reviewing': reviewing,
-                'struggling': struggling,
-                'suggested': suggested,
+                'exercise_states': exercise_states,
+                # 'proficient': proficient,
+                # 'endangered': endangered,
+                # 'reviewing': reviewing,
+                # 'struggling': struggling,
+                # 'suggested': suggested,
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': user_exercise.key(),
                 'exercise': exercise,
@@ -1108,31 +1105,23 @@ class RegisterAnswer(request_handler.RequestHandler):
             if not self.is_ajax_request():
                 self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
             else:
-                proficient = exercise.proficient = user_data.is_proficient_at(exid)
-                suggested = exercise.suggested = user_data.is_suggested(exid)
-                reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
-                struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-                endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
-                
-                exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+                exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+                exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                 
                 streak_bar_path = os.path.join(os.path.dirname(__file__), 'streak_bar.html')
                 streak_bar_context = streak_bar(user_exercise)
                 streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context)
                 
                 exercise_message_path = os.path.join(os.path.dirname(__file__), 'exercise_message.html')
-                exercise_message_context = exercise_message(exercise, user_data.coaches, endangered, reviewing, proficient, struggling)
-                exercise_message_html = render_block_to_string(exercise_message_path, 'exercise_message_block', exercise_message_context)
+                exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
+                exercise_message_html = render_block_to_string(exercise_message_path, 'exercise_message_block', exercise_message_context).strip()
                 
                 exercise_icon_path = os.path.join(os.path.dirname(__file__), 'exercise_icon.html')
                 exercise_icon_context = exercise_icon(exercise, App)
                 exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context)
                 
                 updated_values = {
-                    'proficient': proficient,
-                    'endangered': endangered,
-                    'reviewing': reviewing,
-                    'struggling': struggling,
+                    'exercise_states': exercise_states,
                     'exercise_points':  exercise_points,
                     'points': user_data.points,
                     'key': key,

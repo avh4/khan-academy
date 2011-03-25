@@ -60,7 +60,7 @@ function finishRegisterAnswer(response) {
         translate();
     } catch (err) {
         // do normal page reload on error
-        // window.location.reload();
+        window.location.reload();
     }
 }
 
@@ -104,7 +104,7 @@ function submitForm(value)
     </div>
 
     {% if not read_only %}
-        {% exercise_message exercise coaches endangered reviewing proficient struggling %}
+        {% exercise_message exercise coaches exercise_states %}
     {% endif %}
     
 <div id="extras" class="single-exercise">

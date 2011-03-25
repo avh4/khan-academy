@@ -98,15 +98,8 @@ def exercise_icon(exercise, App):
     return {"src": src, "version": App.version }
 
 @register.inclusion_tag("exercise_message.html")
-def exercise_message(exercise, coaches, endangered, reviewing, proficient, struggling):
-    return {
-            "exercise": exercise,
-            "coaches": coaches,
-            "endangered": endangered,
-            "reviewing": reviewing,
-            "proficient": proficient,
-            "struggling": struggling
-            }
+def exercise_message(exercise, coaches, exercise_states):
+    return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
 
 @register.inclusion_tag("possible_points_badge.html")
 def possible_points_badge(points, possible_points):

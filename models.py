@@ -399,6 +399,21 @@ class UserData(db.Model):
 
         return userExercise
         
+    def get_exercise_states(self, exercise, user_exercise, current_time):
+        proficient = exercise.proficient = self.is_proficient_at(exercise.name)
+        suggested = exercise.suggested = self.is_suggested(exercise.name)
+        reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
+        struggling = UserExercise.is_struggling_with(user_exercise, exercise)
+        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+        
+        return {
+            'proficient': proficient,
+            'suggested': suggested,
+            'reviewing': reviewing,
+            'struggling': struggling,
+            'endangered': endangered
+        }
+        
     def reassess_from_graph(self, ex_graph):
         all_proficient_exercises = []
         for ex in ex_graph.get_proficient_exercises():
