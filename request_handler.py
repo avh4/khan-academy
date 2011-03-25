@@ -167,15 +167,15 @@ class RequestHandler(webapp.RequestHandler):
         if user is not None:
             template_values['username'] = user.nickname()
 
-        if not template_values.has_key('continue'):
-            template_values['continue'] = ""
-
         user_data = UserData.get_for(user)
 
         template_values['user_data'] = user_data
         template_values['points'] = user_data.points if user_data else 0
 
-        template_values['login_url'] = ("%s&direct=1" % util.create_login_url(self.request.uri))
+        if not template_values.has_key('continue'):
+            template_values['continue'] = self.request.uri
+
+        template_values['login_url'] = ('%s&direct=1' % util.create_login_url(template_values['continue']))
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
         template_values['is_mobile'] = self.is_mobile()

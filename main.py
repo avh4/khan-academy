@@ -1577,7 +1577,7 @@ class Login(request_handler.RequestHandler):
         return self.post()
 
     def post(self):
-        cont = self.request.get('continue')
+        cont = self.request_string('continue', default = "/")
         direct = self.request_bool('direct', default = False)
 
         openid_identifier = self.request.get('openid_identifier')
