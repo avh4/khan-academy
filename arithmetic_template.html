@@ -46,9 +46,11 @@ var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";
 
 function finishRegisterAnswer(response) {
-    if (!Exercise.fSupportsAjax) 
+    if (!Exercise.fSupportsAjax) {
         window.location.reload();
-        
+        return;
+    }
+
     try {
         eval("var data=" + response);
         KhanAcademy.updateSeed(data.problem_number);

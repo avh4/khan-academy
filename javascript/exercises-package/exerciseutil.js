@@ -36,7 +36,6 @@ var Exercise = {
     getNumPossibleAnswers: function() {
         return this.possibleAnswers.length;
     }
-    
 };
 
 var selColor = "#AE9CC9";
