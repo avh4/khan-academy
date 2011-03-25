@@ -214,7 +214,7 @@ function renderChoices() {
 
 	for (i = 0; i < Exercise.answerChoices.length; i++)
     {
-        $("#answer_content").append('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
+       appendAnswerHtml('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
     }
     
     var $choices = $('.select-choice');
@@ -580,29 +580,42 @@ function array_sum(a) {
 	return sum;
 }
 
+function appendQuestionHtml(html) {
+    if (Exercise.fSupportsAjax)
+        $("#question_content").append(html);
+    else
+        document.write(html);
+}
+
+function appendAnswerHtml(html) {
+    if (Exercise.fSupportsAjax)
+         $("#answer_content").append(html)
+    else
+        document.write(html)
+}
+
 function open_left_padding(pixels) {
-    $("#question_content").append("<div style=\'padding-left: " + pixels + "px\'")
-    
+    appendQuestionHtml("<div style=\'padding-left: " + pixels + "px\'");
 }
 
 function close_left_padding() {
-    $("#question_content").append("</div>");
+    appendQuestionHtml("</div>");
 }
 
 function write_step(text, step) //Deprecated
 {
-	$("#question_content").append('<P><div class=\"step'+step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+	appendQuestionHtml('<P><div class=\"step'+step+'\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
 }
 
 function write_step(text)
 {
-    $("#question_content").append('<P><div class=\"step'+ Exercise.next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
+    appendQuestionHtml('<P><div class=\"step'+ Exercise.next_step_to_write + '\" style=\"position:relative; visibility:hidden;\"><font face=\"arial\" size=3>'+text+'</font></div></P>');
 	Exercise.next_step_to_write++;
 }
 
 function write_table_step_generic(explanation, left, center, right)
 {
-	$("#question_content").append(	'<tr class="step'+ Exercise.next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
+	appendQuestionHtml(	'<tr class="step'+ Exercise.next_step_to_write + '" style="visibility:hidden;"><td align=left class=\"nobr\">'
         	+ '<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '<FONT class=\"explanation\" class=\"nobr\">' + explanation + '</font>' +'</font></div>'
 			+'</td><td align=right class=\"nobr\"><nobr>'
 			+'<div style=\"position:relative;\"><font face=\"arial\" size=4>' + '`' + left + '`' + '</font></div>'
@@ -625,24 +638,24 @@ function table_step_header(explanation, left, right)
 
 function table_step_header_generic(explanation, left, center, right) 
 {
-    $("#question_content").append('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
+    appendQuestionHtml('<center><table border=0><tr><td></td><td></td><td></td></tr><tr><td align=left class=\"nobr\"><font face=\"arial\" size=4>'+explanation+'</font></td><td align=right class=\"nobr\"><font face=\"arial\" size=4>`'+
 			left+
 			'</font></td><td align=left class=\"nobr\"><nobr><font face=\"arial\" size=4  class=\"nobr\">`' + center  +right+'`</font></nobr></td></tr>');
 }
 
 function table_step_footer()
 {
-	$("#question_content").append('</table></center>');
+	appendQuestionHtml('</table></center>');
 }
 
 function write_equation(equation)
 {
-	$("#question_content").append('<p><font face=\"arial\" size=4><center>`'+equation+'`</center></font></p>');
+	appendQuestionHtml('<p><font face=\"arial\" size=4><center>`'+equation+'`</center></font></p>');
 }
 
 function write_text(text)
 {
-	$("#question_content").append('<p><font face=\"arial\" size=3>'+text+'</font></p>');
+	appendQuestionHtml('<p><font face=\"arial\" size=3>'+text+'</font></p>');
 }
 
 function equation_string(equation)
