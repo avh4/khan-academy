@@ -34,14 +34,13 @@
   {% endif %}
   KhanAcademy.updateSeed({{problem_number}});
   
-    
+Exercise.init();  
+
 $(document).ready(function () {
 	KhanAcademy.onMathMLSupportReady(function() {
 		translate();
 	});
-	
-	if (Exercise.fSupportsAjax)
-	    Exercise.init();
+    Exercise.display();
 });
 var username = "{{cookiename}}";
 var currentexercise = "{{exid}}";

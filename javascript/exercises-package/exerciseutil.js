@@ -20,12 +20,15 @@ var Exercise = {
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
         this.incorrect.src = "/images/face-sad.gif";
+    },
+    
+    display: function() {
         $("#correct").val(0);
         $("#hint_used").val(0);
         
         if (this.fSupportsAjax)
             this.showNextProblem();
-            
+
         if (this.fExtendsMultipleChoice)
             renderChoices();
     },
@@ -588,10 +591,7 @@ function appendQuestionHtml(html) {
 }
 
 function appendAnswerHtml(html) {
-    if (Exercise.fSupportsAjax)
-         $("#answer_content").append(html)
-    else
-        document.write(html)
+    $("#answer_content").append(html)
 }
 
 function open_left_padding(pixels) {
