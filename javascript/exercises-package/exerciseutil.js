@@ -703,20 +703,21 @@ function updateUserData(data) {
     $("#exercise-points").html(data.exercise_points);    
     
     $("#streak-bar-container").html(data.streak_bar_html);
-    $("#exercise-message-container").html(data.exercise_message_html);
     $("#exercise-icon-container").html(data.exercise_icon_html);
-    $(".exercise_message").slideDown();
+    $("#exercise-message-container").html(data.exercise_message_html);
+    if (data.exercise_message_html)
+        $(".exercise_message").slideDown();
 }
 
 function reset_streak() {
     if ($("#hint_used").val() != 1) {
         fade_streaks();
         $.ajax({
-                    type: "POST",
-                    url: "/resetstreak",
-                    data: {	key: $("#key").val() },
-                    data_type: 'json'
-               }); 
+            type: "POST",
+            url: "/resetstreak",
+            data: {	key: $("#key").val() },
+            data_type: 'json'
+        }); 
     }
     $("#hint_used").val("1");
 }
