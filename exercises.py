@@ -64,79 +64,82 @@ class UpdateExercise(request_handler.RequestHandler):
         user = util.get_current_user()
 
         exercise_name = self.request.get('name')
-        if exercise_name:
-            query = models.Exercise.all()
-            query.filter('name =', exercise_name)
-            exercise = query.get()
-            if not exercise:
-                exercise = models.Exercise(name=exercise_name)
-                exercise.prerequisites = []
-                exercise.covers = []
-                exercise.author = user
-                exercise.summative = self.request_bool("summative", default=False)
-                path = os.path.join(os.path.dirname(__file__), exercise_name + '.html')
-                raw_html = self.request.get('raw_html')
-                if not os.path.exists(path) and not exercise.summative and raw_html:
-                    exercise.raw_html = db.Text(raw_html)
-                    exercise.last_modified = datetime.datetime.now()
-                    exercise.ensure_sanitized()
+        if not exercise_name:
+            self.response.out.write("No exercise submitted, please resubmit if you just logged in.")
+            return
 
-            v_position = self.request.get('v_position')
-            h_position = self.request.get('h_position')
-            short_display_name = self.request.get('short_display_name')
-
-            add_video = self.request.get('add_video')
-            delete_video = self.request.get('delete_video')
-            add_playlist = self.request.get('add_playlist')
-            delete_playlist = self.request.get('delete_playlist')
-
+        query = models.Exercise.all()
+        query.filter('name =', exercise_name)
+        exercise = query.get()
+        if not exercise:
+            exercise = models.Exercise(name=exercise_name)
             exercise.prerequisites = []
-            for c_check_prereq in range(0, 1000):
-                prereq_append = self.request_string("prereq-%s" % c_check_prereq, default="")
-                if prereq_append and not prereq_append in exercise.prerequisites:
-                    exercise.prerequisites.append(prereq_append)
-
             exercise.covers = []
-            for c_check_cover in range(0, 1000):
-                cover_append = self.request_string("cover-%s" % c_check_cover, default="")
-                if cover_append and not cover_append in exercise.covers:
-                    exercise.covers.append(cover_append)
+            exercise.author = user
+            exercise.summative = self.request_bool("summative", default=False)
+            path = os.path.join(os.path.dirname(__file__), exercise_name + '.html')
+            raw_html = self.request.get('raw_html')
+            if not os.path.exists(path) and not exercise.summative and raw_html:
+                exercise.raw_html = db.Text(raw_html)
+                exercise.last_modified = datetime.datetime.now()
+                exercise.ensure_sanitized()
 
-            if v_position:
-                exercise.v_position = int(v_position)
+        v_position = self.request.get('v_position')
+        h_position = self.request.get('h_position')
+        short_display_name = self.request.get('short_display_name')
 
-            if h_position:
-                exercise.h_position = int(h_position)
+        add_video = self.request.get('add_video')
+        delete_video = self.request.get('delete_video')
+        add_playlist = self.request.get('add_playlist')
+        delete_playlist = self.request.get('delete_playlist')
 
-            if short_display_name:
-                exercise.short_display_name = short_display_name
+        exercise.prerequisites = []
+        for c_check_prereq in range(0, 1000):
+            prereq_append = self.request_string("prereq-%s" % c_check_prereq, default="")
+            if prereq_append and not prereq_append in exercise.prerequisites:
+                exercise.prerequisites.append(prereq_append)
 
-            video_keys = []
-            for c_check_video in range(0, 1000):
-                video_append = self.request_string("video-%s" % c_check_video, default="")
-                if video_append and not video_append in video_keys:
-                    video_keys.append(video_append)
+        exercise.covers = []
+        for c_check_cover in range(0, 1000):
+            cover_append = self.request_string("cover-%s" % c_check_cover, default="")
+            if cover_append and not cover_append in exercise.covers:
+                exercise.covers.append(cover_append)
 
-            query = models.ExerciseVideo.all()
-            query.filter('exercise =', exercise)
-            existing_exercise_videos = query.fetch(1000)
+        if v_position:
+            exercise.v_position = int(v_position)
 
-            existing_video_keys = []
-            for exercise_video in existing_exercise_videos:
-                existing_video_keys.append(exercise_video.video.key())
-                if not exercise_video.video.key() in video_keys:
-                    exercise_video.delete()
+        if h_position:
+            exercise.h_position = int(h_position)
 
-            for video_key in video_keys:
-                if not video_key in existing_video_keys:
-                    exercise_video = models.ExerciseVideo()
-                    exercise_video.exercise = exercise
-                    exercise_video.video = db.Key(video_key)
-                    exercise_video.put()
+        if short_display_name:
+            exercise.short_display_name = short_display_name
 
-            exercise.live = self.request_bool("live", default=False)
+        video_keys = []
+        for c_check_video in range(0, 1000):
+            video_append = self.request_string("video-%s" % c_check_video, default="")
+            if video_append and not video_append in video_keys:
+                video_keys.append(video_append)
 
-            exercise.put()
+        query = models.ExerciseVideo.all()
+        query.filter('exercise =', exercise)
+        existing_exercise_videos = query.fetch(1000)
 
-            self.redirect('/editexercise?saved=1&name=' + exercise_name)
+        existing_video_keys = []
+        for exercise_video in existing_exercise_videos:
+            existing_video_keys.append(exercise_video.video.key())
+            if not exercise_video.video.key() in video_keys:
+                exercise_video.delete()
+
+        for video_key in video_keys:
+            if not video_key in existing_video_keys:
+                exercise_video = models.ExerciseVideo()
+                exercise_video.exercise = exercise
+                exercise_video.video = db.Key(video_key)
+                exercise_video.put()
+
+        exercise.live = self.request_bool("live", default=False)
+
+        exercise.put()
+
+        self.redirect('/editexercise?saved=1&name=' + exercise_name)
 

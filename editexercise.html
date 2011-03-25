@@ -4,6 +4,11 @@
 
     <script>
 
+    function submitLive() {
+        $("#form-exercise").attr("target", "_blank").attr("action", "http://www.khanacademy.org/updateexercise");
+        $("#form-exercise").submit();
+    }
+
     function insertVideo(key, title) {
         if (!insertVideo.c) insertVideo.c = 0;
 
@@ -121,7 +126,7 @@
 
     <div style="padding: 9px 23px;">
         <div>
-            <form method="POST" action="/updateexercise">
+            <form id="form-exercise" method="POST" action="/updateexercise">
                 <input type="hidden" name="name" value="{{main_exercise.name|escape}}"/>
 
                 <table class="exercise-properties">
@@ -134,7 +139,7 @@
                     </tr>
 
                     <tr>
-                        <td style="font-weight:bold;">Deployed</td>
+                        <td style="font-weight:bold;">Status</td>
                         <td style="padding-bottom:9px;">
                             <label for="live_yes">Live&nbsp;</label><input type="radio" id="live_yes" name="live" value="1" {% if main_exercise.live %}checked="checked"{% endif %}/>
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -218,6 +223,16 @@
 
                 <br/>
                 <input class="button" type="submit" value="Update {{ main_exercise.display_name|escape }}"/>
+
+                {% if App.is_dev_server %}
+                    ...or <a href="#" onclick="$('#live-instructions').slideDown('fast');return false;">deploy these updates to the live production datastore.</a>
+
+                    <div id="live-instructions" style="display:none;padding:18px;margin:18px;background:#CCC;">
+                        <strong style="color:red;">Warning</strong>: submitting will send these updates to the live www.khanacademy.org datastore, and this exercise will immediately become available according to its above status.<br/>
+                        <input class="button" onclick="submitLive();return false;" type="button" value="Send {{ main_exercise.display_name|escape }} updates to live www.khanacademy.org datastore"/><br/>
+                        <em>Submits in new window. If you are not logged in as an admin to www.khanacademy.org, you'll need to login and click this button again.</em>
+                    </div>
+                {% endif %}
 
             </form>
         </div>
