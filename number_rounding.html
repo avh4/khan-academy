@@ -1,0 +1,20 @@
+{% extends arithmetic_template %}
+
+{% block maincode %}
+<div id="dvQuestion" style="font-size: 250%; padding-left: 15px;"></div>
+<div id="dvHint" style="font-size: 125%; padding-left: 15px;padding-top:20px;display:none;"></div>
+<div id="holder" style="padding-left:0px;"></div>
+<div id="dvAnswer" style="font-size: 125%; padding-left: 15px;padding-top:20px;display:none;"></div>
+{% endblock maincode %}
+
+{% block maincell %}
+<script src="/javascript/exercises-package/raphael-min.js" type="text/javascript" charset="utf-8"></script> 
+<script src="/javascript/exercises-package/g.raphael-min.js" type="text/javascript" charset="utf-8"></script> 
+<script src="/javascript/exercises-package/g.line-min.js" type="text/javascript" charset="utf-8"></script> 
+<script type="text/javascript" src="/javascript/exercises/number_rounding.js"></script>
+{% endblock maincell %}
+
+
+
+
+{% block hintfunction %}Rounding.next_step(){% endblock hintfunction %}
