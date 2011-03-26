@@ -15,21 +15,17 @@
 // 
 
 function RadicalEquationsExercise() {
-    var exc;
-    var x;
-    
-    this.init = function() {
-        exc = new LinearEquations();
-        exc.init("sqrt(x)");
-        calculateCorrectAnswer();
-        generateWrongAnswers();
-    }
+    var answer;
+    var exc = new LinearEquations();
+    exc.init("sqrt(x)");
+    calculateCorrectAnswer();
+    generateWrongAnswers();
     
     function calculateCorrectAnswer() {
         var right_c = exc.getRightConstant();
         var left_x = exc.getLeftCoeff();
 
-	    x = format_fraction(right_c * right_c, left_x * left_x);        
+	    answer = format_fraction(right_c * right_c, left_x * left_x);        
         var correct_answer = '';
         if (right_c / left_x < 0) {
             correct_answer = '`No solution`'
@@ -38,7 +34,7 @@ function RadicalEquationsExercise() {
             var root = format_fraction(right_c, left_x);
             write_step('Squaring both sides, `sqrt(x) * sqrt(x) = (' + root + ') * (' + root + ')`'); 
             
-            var correct_answer_backticked = '`x = ' + x + '`';
+            var correct_answer_backticked = '`x = ' + answer + '`';
             write_step('So, '+ correct_answer_backticked);
             
             // setCorrectAnswer wraps the answer in backticks, so let's remove them.
@@ -50,7 +46,7 @@ function RadicalEquationsExercise() {
     
     function generateWrongAnswers() {
         addWrongChoice('`No solution`');
-        addWrongChoice('x = ' + x);
+        addWrongChoice('x = ' + answer);
 
         var numerator = exc.getRightConstant();
         var denominator = exc.getLeftCoeff();

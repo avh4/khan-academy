@@ -4,12 +4,10 @@
 <script src="/javascript/exercises/linear_equations.js?{{App.version}}"></script>
 <script src="/javascript/exercises/radical_equations.js?{{App.version}}"></script>
 <script>
-    $(document).ready(function() {
+    Exercise.fSupportsAjax = true;
+    Exercise.showNextProblem = function() {
         var exercise = new RadicalEquationsExercise();
-        exercise.init();
-        renderChoices();     
-    })
-
+    }
 </script>
 
 {% endblock maincode %}

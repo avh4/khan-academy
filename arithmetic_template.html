@@ -29,10 +29,11 @@
   </script>
   <script type="text/javascript"><!--
 
-  {% if exercise.summative %}
-      KhanAcademy.is_summative = true;
-  {% endif %}
-  KhanAcademy.updateSeed({{problem_number}});
+{% if exercise.summative %}
+    KhanAcademy.is_summative = true;
+{% endif %}
+
+KhanAcademy.updateSeed({{problem_number}});
   
 Exercise.init();  
 
