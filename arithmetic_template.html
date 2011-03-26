@@ -67,18 +67,20 @@ function finishRegisterAnswer(response) {
 
 function submitForm(value)
 {
-    
-    var data = {};
-    $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used"], function() {
-      data[this] = $("#" + this).val();
-    });
+    if (Exercise.fSupportsAjax) {
+        var data = {};
+        $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used", "time_warp"], function() {
+          data[this] = $("#" + this).val();
+        });
 
-    $.ajax({
-        type: "POST",
-        url: "/registeranswer",
-        data: data,
-        success: finishRegisterAnswer
-    });
+        $.ajax({
+            type: "POST",
+            url: "/registeranswer",
+            data: data,
+            success: finishRegisterAnswer
+        });
+    } else
+        $("#answerform").submit();
 }
 // -->
 </script>

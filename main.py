@@ -1105,42 +1105,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             if not self.is_ajax_request():
                 self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
             else:
-                exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-                exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-                
-                streak_bar_path = os.path.join(os.path.dirname(__file__), 'streak_bar.html')
-                streak_bar_context = streak_bar(user_exercise)
-                streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context)
-                
-                exercise_message_path = os.path.join(os.path.dirname(__file__), 'exercise_message.html')
-                exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-                exercise_message_html = render_block_to_string(exercise_message_path, 'exercise_message_block', exercise_message_context).strip()
-                
-                exercise_icon_path = os.path.join(os.path.dirname(__file__), 'exercise_icon.html')
-                exercise_icon_context = exercise_icon(exercise, App)
-                exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context)
-                
-                updated_values = {
-                    'exercise_states': exercise_states,
-                    'exercise_points':  exercise_points,
-                    'points': user_data.points,
-                    'key': key,
-                    'start_time': time.time(),
-                    'streak': user_exercise.streak,
-                    'time_warp': time_warp,
-                    'problem_number': user_exercise.total_done + 1,
-                    'streak_bar_html': streak_bar_html,
-                    'exercise_message_html': exercise_message_html,
-                    'exercise_icon_html': exercise_icon_html
-                    }
-                    
-                    #
-                    #    'exercise_non_summative': exercise_non_summative,
-                    #    'read_only': read_only,
-                    #    'num_problems_to_print': num_problems_to_print,
-                    #
-                json = simplejson.dumps(updated_values)
-                self.response.out.write(json)
+                self.send_json(user_data, user_exercise, exercise, key, time_warp)
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)
@@ -1148,6 +1113,44 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+        
+    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        
+        streak_bar_path = os.path.join(os.path.dirname(__file__), 'streak_bar.html')
+        streak_bar_context = streak_bar(user_exercise)
+        streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context)
+        
+        exercise_message_path = os.path.join(os.path.dirname(__file__), 'exercise_message.html')
+        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
+        exercise_message_html = render_block_to_string(exercise_message_path, 'exercise_message_block', exercise_message_context).strip()
+        
+        exercise_icon_path = os.path.join(os.path.dirname(__file__), 'exercise_icon.html')
+        exercise_icon_context = exercise_icon(exercise, App)
+        exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context)
+        
+        updated_values = {
+            'exercise_states': exercise_states,
+            'exercise_points':  exercise_points,
+            'points': user_data.points,
+            'key': key,
+            'start_time': time.time(),
+            'streak': user_exercise.streak,
+            'time_warp': time_warp,
+            'problem_number': user_exercise.total_done + 1,
+            'streak_bar_html': streak_bar_html,
+            'exercise_message_html': exercise_message_html,
+            'exercise_icon_html': exercise_icon_html
+            }
+            
+            #
+            #    'exercise_non_summative': exercise_non_summative,
+            #    'read_only': read_only,
+            #    'num_problems_to_print': num_problems_to_print,
+            #
+        json = simplejson.dumps(updated_values)
+        self.response.out.write(json)
 
 
 class RegisterCorrectness(request_handler.RequestHandler):
