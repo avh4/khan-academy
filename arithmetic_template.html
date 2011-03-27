@@ -34,9 +34,10 @@
 {% endif %}
 
 KhanAcademy.updateSeed({{problem_number}});
-  
-Exercise.init();  
 
+// Because of legacy code's document.write usage,
+// Exercise.init and display must be called this way
+Exercise.init();  
 $(document).ready(function () {
 	KhanAcademy.onMathMLSupportReady(function() {
 		translate();
@@ -59,7 +60,7 @@ function finishRegisterAnswer(response) {
         Exercise.init();
         Exercise.display();
         resetFeedback();
-        updateUserData(data);
+        Exercise.updateUserData(data);
         translate();
     } catch (err) {
         // do normal page reload on error

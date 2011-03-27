@@ -39,6 +39,25 @@ var Exercise = {
     getNumPossibleAnswers: function() {
         return this.possibleAnswers.length;
     }
+    
+    updateUserData: function(data) {
+        $("#user-info .energy-points-badge").html(data.points);
+        $("#start_time").val(data.start_time);
+        $("#problem_number").val(data.problem_number);
+
+        var link = $("#report-problem").attr("href");
+        link = link.substr(0, link.indexOf("Problem-")) + "Problem-" + data.problem_number
+        $("#report-problem").attr("href", link);
+        $("#time_warp").val(data.time_warp);
+        $("#streak").val(data.streak);
+        $("#exercise-points").html(data.exercise_points);    
+
+        $("#streak-bar-container").html(data.streak_bar_html);
+        $("#exercise-icon-container").html(data.exercise_icon_html);
+        $("#exercise-message-container").html(data.exercise_message_html);
+        if (data.exercise_message_html)
+            $(".exercise_message").slideDown();        
+    }
 };
 
 var selColor = "#AE9CC9";
@@ -247,8 +266,6 @@ function addCorrectCheckboxChoice(choice){
 function addIncorrectCheckboxChoice(choice){
     Exercise.checkboxChoices.push([choice, false]);
 }
-
-
 
 function arrayEqual(a,b) //return true if the elements in the array are equal
 {
@@ -688,25 +705,6 @@ function perfect_square_factor(n)  //only factors numbers up to 625
 	{
 		return [n/square_factor, square_factor];
 	}
-}
-
-function updateUserData(data) {
-    $("#user-info .energy-points-badge").html(data.points);
-    $("#start_time").val(data.start_time);
-    $("#problem_number").val(data.problem_number);
-    
-    var link = $("#report-problem").attr("href");
-    link = link.substr(0, link.indexOf("Problem-")) + "Problem-" + data.problem_number
-    $("#report-problem").attr("href", link);
-    $("#time_warp").val(data.time_warp);
-    $("#streak").val(data.streak);
-    $("#exercise-points").html(data.exercise_points);    
-    
-    $("#streak-bar-container").html(data.streak_bar_html);
-    $("#exercise-icon-container").html(data.exercise_icon_html);
-    $("#exercise-message-container").html(data.exercise_message_html);
-    if (data.exercise_message_html)
-        $(".exercise_message").slideDown();
 }
 
 function reset_streak() {
