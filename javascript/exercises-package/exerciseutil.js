@@ -38,7 +38,7 @@ var Exercise = {
     
     getNumPossibleAnswers: function() {
         return this.possibleAnswers.length;
-    }
+    },
     
     updateUserData: function(data) {
         $("#user-info .energy-points-badge").html(data.points);
