@@ -8,8 +8,9 @@ import models
 import consts
 import points
 
-def user_exercise_update_map(user_exercise):
-    return
+def exercise_update_map(exercise):
+    exercise.live = True
+    yield op.db.Put(exercise)
 
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
@@ -18,9 +19,9 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
         # Start a new Mapper task for calling statistics_update_map
         mapreduce_id = control.start_map(
                 name = "BackfillUserExercise",
-                handler_spec = "backfill.user_exercise_update_map",
+                handler_spec = "backfill.exercise_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-                reader_parameters = {"entity_kind": "models.UserExercise"},
+                reader_parameters = {"entity_kind": "models.Exercise"},
                 shard_count = 64,
                 queue_name = "backfill-mapreduce-queue",
                 )

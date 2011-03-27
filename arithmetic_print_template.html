@@ -3,7 +3,6 @@
 <head>
   <title>Khan Academy</title>
   
-  <link rel="stylesheet" type="text/css" href="/stylesheets/stylesheet.css?{{App.version}}">
   {% shared_javascript %}
   {% exercises_javascript %}
 
@@ -12,7 +11,7 @@
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
      we update MathJax.
   {% endcomment %}
-  <script type="text/javascript" src="/MathJax-git-2011-01-14/MathJax.js">
+  <script type="text/javascript" src="/MathJax-1.1/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",

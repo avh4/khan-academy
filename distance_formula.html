@@ -16,8 +16,8 @@ writeText('Find the distance between the points <span style="color:green">(' + x
 correctAnswer = simplifiedRoot(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 setCorrectAnswer(correctAnswer);
 
-addWrongChoice(Math.abs(x1 - x2));
-addWrongChoice(Math.abs(y1 - y2));
+addWrongChoice(simplifiedRoot(Math.pow(x2 - x1, 2) * 3));
+addWrongChoice(simplifiedRoot(Math.pow(y2 - y1, 2) * 3));
 
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) + Math.abs(y1 - y2)));
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
@@ -25,8 +25,6 @@ addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2)));
 addWrongChoice(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2));
 
-addWrongChoice(Math.abs(x1 - x2) + Math.abs(y1 - y2));
-addWrongChoice(Math.abs(x1 - x2) * Math.abs(y1 - y2));
 addWrongChoice(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 // all distances should be positive
 // we're not testing integer subtraction here

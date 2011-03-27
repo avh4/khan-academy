@@ -11,11 +11,6 @@ import facebook
 
 FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
 
-# Force cached facebook info expiration at least once every 20 days,
-# even though memcache will probably have cleared before then due to external
-# memory pressure.
-FACEBOOK_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 20
-
 def is_facebook_email(email):
     return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
 
@@ -35,7 +30,7 @@ def get_facebook_nickname(user):
         profile = graph.get_object(id)
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
-        memcache.set(memcache_key, name, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
+        memcache.set(memcache_key, name)
     except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError):
         name = email
 
@@ -57,32 +52,51 @@ def get_current_facebook_user():
     return None
 
 def get_facebook_profile():
-    def get_profile_from_cookie(cookie):
-        expires = int(cookie["expires"])
+
+    def get_profile_from_fb_user(fb_user):
+
+        expires = int(fb_user["expires"])
         if expires == 0 and time.time() > expires:
             return None
-        memcache_key = "facebook_profile_for_%s" % cookie["access_token"]        
+
+        if not fb_user["access_token"]:
+            logging.debug("Empty access token for fb_user")
+            return None
+
+        memcache_key = "facebook_profile_for_%s" % fb_user["access_token"]        
         profile = memcache.get(memcache_key)
         if profile is not None:
             return profile
+
         try:
-            graph = facebook.GraphAPI(cookie["access_token"])
+            graph = facebook.GraphAPI(fb_user["access_token"])
             profile = graph.get_object("me")
-            memcache.set(memcache_key, profile, time=FACEBOOK_CACHE_EXPIRATION_SECONDS)
         except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
-            logging.debug("Ignoring %s.  Assuming access_token is no longer valid." % error)
+            logging.debug("Ignoring %s.  Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
+
+        if profile:
+            try:
+                memcache.set(memcache_key, profile)
+            except Exception, error:
+                logging.warning("Facebook profile memcache set failed: %s", error)
+
         return profile
 
     if App.facebook_app_secret is None:
         return None
+
     cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+
     morsel_key = "fbs_" + App.facebook_app_id
     morsel = cookies.get(morsel_key)
     if morsel is None:
         return None
+
     morsel_value = morsel.value
-    cookie = facebook.get_user_from_cookie(
+    fb_user = facebook.get_user_from_cookie(
         {morsel_key: morsel_value}, App.facebook_app_id, App.facebook_app_secret)
-    if cookie:
-        return get_profile_from_cookie(cookie)
+
+    if fb_user:
+        return get_profile_from_fb_user(fb_user)
+
     return None

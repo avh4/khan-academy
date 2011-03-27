@@ -7,6 +7,7 @@ from django import template
 
 from app import App
 import consts
+import util
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -130,12 +131,12 @@ def streak_bar(user_exercise):
         level_offset = streak_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
+    else:
+        if streak > consts.MAX_STREAK_SHOWN:
+            streak = "Max"
 
-    if streak > consts.MAX_STREAK_SHOWN:
-        streak = "Max"
-
-    if longest_streak > consts.MAX_STREAK_SHOWN:
-        longest_streak = "Max"
+        if longest_streak > consts.MAX_STREAK_SHOWN:
+            longest_streak = "Max"
 
     return {
             "streak": streak,
@@ -168,6 +169,9 @@ def profile_javascript():
 @register.inclusion_tag(("homepage_javascript.html", "../homepage_javascript.html"))
 def homepage_javascript():
     return {'App': App}
+@register.inclusion_tag(("mobile_javascript.html", "../mobile_javascript.html"))
+def mobile_javascript():
+    return {'App': App}
 @register.inclusion_tag(("shared_css.html", "../shared_css.html"))
 def shared_css():
     return {'App': App}
@@ -175,6 +179,15 @@ def shared_css():
 @register.inclusion_tag("playlist_browser.html")
 def playlist_browser(browser_id):
     return {'browser_id': browser_id}
+
+@register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
+def empty_class_instructions(class_is_empty=True):
+    user = util.get_current_user()
+    coach_email = "Not signed in. Please sign in to see your Coach ID."
+    if user:
+        coach_email = user.email()
+            
+    return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
 register.tag(highlight)
 

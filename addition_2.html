@@ -5,7 +5,15 @@
 {% endblock maincode %}
 
 
-{% block maincell %}<script language=Javascript1.2><!--
+{% block maincell %}
+<style>
+.maincell {
+line-height: normal;
+}
+</style>
+
+<div class="maincell">
+<script language=Javascript1.2><!--
 
 var counter = 0;
 var topNumber = new Array();
@@ -177,6 +185,6 @@ document.write('</tr></table></center></td></tr></table>');
 
 //-->
 </script>
-
+</div>
 
 {% endblock maincell %}

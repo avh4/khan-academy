@@ -126,11 +126,6 @@ hr {
     -webkit-border-radius: 5px;
     
     text-shadow: 0 1px 0 #fff;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 .simple-button:hover {
     border-color: #aaa;
@@ -163,6 +158,12 @@ hr {
     box-shadow: 0 1px 3px #ccc;
 }
 
+.action-gradient {
+    background: #eee;
+    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
+    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
+}
 /* End of basic typography */
 
 /* Links in the header and footer don't change color when visited. */
@@ -209,6 +210,10 @@ a.uses_script:visited:hover, a.uses_script:visited:focus
 img {
     -ms-interpolation-mode: bicubic;
     /* Fix IE image scaling so that it isn't crappy */
+}
+
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
 }
 
 header, footer {
@@ -361,10 +366,6 @@ footer {
     margin: 75px 0 0;
     padding: 9px 0 9px 23px;
     height: 19px;
-    background: #eee;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
-    background: -webkit-gradient( linear, left top, left bottom, from(#f7f7f7), to(#ddd));
-    background: -moz-linear-gradient( top, #f7f7f7, #ddd );
     border-bottom: 1px solid #ccc;
     border-top: 1px solid #ddd;
 }
@@ -571,9 +572,6 @@ footer {
         position: relative\9;
         top: 7px\9;
         *top: 0;
-    }
-    #sitewide-navigation span.separator {
-        background-image: url(/images/header-separator-grayscale.png);
     }
     #sitewide-navigation span.separator {
         line-height: 0
@@ -954,7 +952,7 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-		background: url(Search-icon.png) no-repeat 2px 1px #fff;
+		background: url("/images/Search-icon.png") no-repeat 2px 1px #fff;
 		border: 1px solid #ddd;
 	}
 	#library #library-nav {
@@ -999,7 +997,6 @@ a:link.google-analytics-link-track
 				left:10px; /* value = (:before left) + (:before border-left) - (:after border-left) */
 				width:20px;
 				height:11px;
-				background: url(library-nav-nipple.png);
 				z-index: 10;				
 			}
 			#library #library-nav-links .video-count, #library #library-content #library-sub-nav #list-of-lists .video-count {
@@ -1186,7 +1183,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -moz-border-radius: 10px;
     border-radius: 10px;
 }
-    .exercise-badge:hover, .exercise-badge-hover {
+    .drawer-hoverable .exercise-badge:hover, .drawer-hoverable .exercise-badge-hover {
         -webkit-box-shadow: 0 0 3px #666;
         -moz-box-shadow: 0 0 3px #666;
         box-shadow: 0 0 3px #666;
@@ -1358,6 +1355,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     min-width: 190px;
     text-align: center;
     background: none;
+    border: none;
     opacity: .5;
     filter: alpha(opacity=50);
 }
@@ -1753,6 +1751,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background-color: #F7F7F7;
     border-color: #CCCCCC;
 }
+#module-progress #firstcol td {
+    line-height: 1;
+    height: 20px;
+}
 #module-progress th {
     color: #555;
     vertical-align: bottom;
@@ -1824,7 +1826,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 #module-progress td.student-email {
     color: #555;
-    vertical-align: top;
+    vertical-align: middle;
     font-size: 11px;
     font-weight: bold;
     background-color: #CCC;
@@ -2190,11 +2192,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -webkit-border-radius: 5px;
     
     text-shadow: 0 1px 0 #fff;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 
 .thumbnails_arrow:hover {
@@ -2302,6 +2299,11 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 #login-page a:visited {
     color: #069;
 }
+#login-page .providers-sign-up li {
+    float: left;
+    padding-right: 20px;
+    font-size: 15px;
+}
 #login-page .providers li {
     border: 2px solid #ccc;
     border-bottom-color: #bbb;
@@ -2318,11 +2320,6 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     -moz-box-shadow: 2px 2px 5px #ccc;
     -webkit-box-shadow: 2px 2px 5px #ccc;
     box-shadow: 2px 2px 5px #ccc;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 #login-page .providers li:hover,
 #login-page .providers li:active {

@@ -225,17 +225,15 @@ class ViewImport(request_handler.RequestHandler):
     def get(self):  
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'student_email' : self.request.get('student_email'),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
 
-        path = os.path.join(os.path.dirname(__file__), 'import.html')
-        self.response.out.write(template.render(path, template_values)) 
+        self.render_template('import.html', template_values)
         
 class JsonApiDict():
     @staticmethod

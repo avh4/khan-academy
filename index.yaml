@@ -50,10 +50,10 @@ indexes:
   - name: __key__
     direction: desc
 
-- kind: ExercisePlaylist
+- kind: Exercise
   properties:
-  - name: __key__
-    direction: desc
+  - name: live
+  - name: h_position
 
 - kind: ExerciseVideo
   properties:

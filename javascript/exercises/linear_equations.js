@@ -47,7 +47,7 @@ function LinearEquations() {
 
      function addXTerm() {
         var term = format_first_coefficient(Math.abs(right_x[0])) + var_str;
-        var term_html = format_string_with_color(term, selColor);
+        var term_html = format_math_with_color(term, selColor);
 
         var step = generateHint(right_x[0], term_html);
         var lhs = step.lhs_term + format_expression(left_x, var_str, noSelColor, false) + format_expression(left_c, '', noSelColor, false);
@@ -55,10 +55,10 @@ function LinearEquations() {
         write_table_step(step.explanation, lhs, rhs);
 
         var explanation = format_expression([-1 * right_x[0], left_x[0]], var_str, selColor, true)
-        explanation += format_string_with_color('=', selColor) + format_expression([left_x[0]-right_x[0]], var_str, selColor, true)
+        explanation += format_math_with_color('=', selColor) + format_expression([left_x[0]-right_x[0]], var_str, selColor, true)
 
         explanation += '; ';
-        explanation += format_expression([right_x[0],-1*right_x[0]], var_str, selColor, true) + format_string_with_color('=0', selColor);
+        explanation += format_expression([right_x[0],-1*right_x[0]], var_str, selColor, true) + format_math_with_color('=0', selColor);
 
         left_x = [left_x[0]-right_x[0]];
         right_x = [];
@@ -71,7 +71,7 @@ function LinearEquations() {
 
      function addConstant() {
         var term = Math.abs(left_c[0]);
-        var term_html = format_string_with_color(term, selColor);
+        var term_html = format_math_with_color(term, selColor);
 
         var step = generateHint(left_c[0], term_html);
 
@@ -82,10 +82,10 @@ function LinearEquations() {
         write_table_step(step.explanation, lhs, rhs);
 
         var explanation = format_expression([-1*left_c[0],left_c[0]], '', selColor, true);
-        explanation += format_string_with_color('=0', selColor);
+        explanation += format_math_with_color('=0', selColor);
         explanation += '; ';
         explanation += format_expression([right_c[0],-1*left_c[0]], '', selColor, true)
-        explanation += format_string_with_color('=', selColor)
+        explanation += format_math_with_color('=', selColor)
         explanation += format_expression([right_c[0]-left_c[0]], '', selColor, true)
 
         right_c = [right_c[0]-left_c[0]];
@@ -100,19 +100,19 @@ function LinearEquations() {
          var hint = {};
          if (value > 0) {
              hint.explanation = 'Subtract ' + term_html + ' from both sides';
- 		    hint.lhs_term =format_string_with_color('-', selColor) + term_html;
- 		    hint.rhs_term = format_string_with_color('-', selColor) + term_html;
+ 		    hint.lhs_term =format_math_with_color('-', selColor) + term_html;
+ 		    hint.rhs_term = format_math_with_color('-', selColor) + term_html;
  		} else {
  		    hint.explanation = 'Add ' + term_html + ' to both sides';
  		    hint.lhs_term = term_html;
- 		    hint.rhs_term = format_string_with_color('+', selColor) + term_html;
+ 		    hint.rhs_term = format_math_with_color('+', selColor) + term_html;
  		}
          return hint;
      }
 
      function multiplyCoefficient() {
          var term = format_fraction(1, left_x[0]);
- 		var term_html = format_string_with_color('(' + term + ')', selColor);
+ 		var term_html = format_math_with_color('(' + term + ')', selColor);
  		var explanation = 'Multiply both sides by '+ term_html + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
 
  		var lhs = term_html + '`*`'+format_expression(left_x, var_str, noSelColor, true);

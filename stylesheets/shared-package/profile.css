@@ -260,6 +260,17 @@
         #individual_report #achievements #badge-container > div {
             padding-top: 20px;
         }
+        #individual_report #achievements #badge-container .badge-description-container {
+            text-align: center;
+            margin: 10px 0;
+            padding: 5px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+            #individual_report #achievements #badge-container .badge-description-container .badge-description-content {
+                text-align: center;
+                font-size: 16px;
+            }
         
     #individual_report #achievements #achievement-list {
         margin: 10px 0 30px;

@@ -64,9 +64,11 @@
         <a href="https://www.google.com/accounts/NewAccount">Google</a> or <a href="http://www.facebook.com/r.php">Facebook</a> account to get started.
     </p>
     <p>
-    If you are under the age of 13:
+    <a name="under-13">If you are under the age of 13:</a>
     </p>
-    <p style="margin-left:23px;">You are going to need to ask your parents to create an account for you first, sorry!</p>
+    <p style="margin-left:23px;">
+        You are going to need to ask your parents to create an account for you first, sorry!
+    </p>
     <div class="clear"></div>
     <a name="teachers"><h2>I'm a teacher, coach, or parent, how do I start using the site with my student(s)?</h2></a>
     <p>
@@ -79,14 +81,12 @@
     </p>
     <p>If your students are under 13:</p>
     
-    <p style="margin-left:23px;">You currently have two options:
-        you can sign your school up for <a href="http://www.google.com/a/help/intl/en/edu/">Google Apps for Education</a>, which will help you provide each student with a Google account that can be used with Khan Academy, or you can have your students' parents individually create accounts for each student on either 
-        <a href="https://www.google.com/accounts/NewAccount">Google</a> or <a href="http://www.facebook.com/r.php">Facebook</a>. We are constantly
-        working to improve this situation, but that's the best we've got at the moment (sorry!).
+    <p style="margin-left:23px;">You currently have two options: 
+    you can sign your school up for <a href="http://www.google.com/a/help/intl/en/edu/">Google Apps for Education</a>, which will help you provide each student with a Google account that can be used with Khan Academy, or you can have your students' parents individually create accounts for each student on either <a href="https://www.google.com/accounts/NewAccount">Google</a> or <a href="http://www.facebook.com/r.php">Facebook</a>. We are constantly working to improve this situation, but that's the best we've got at the moment (sorry!).
     </p>
     <p style="margin-left:23px;">
-        If you already have Google Apps for Education accounts, but aren't able to use them to sign in on the Khan Academy, 
-        <a href="" onclick="$('#google-upgrade').slideDown('fast');return false;">you might need to upgrade your account</a>.
+        If you already have Google Apps for Education accounts but aren't able to use them to sign in on the Khan Academy, 
+        <a href="#" onclick="$('#google-upgrade').slideDown('fast');return false;">you might need to upgrade your account</a>.
     </p>
     <div id="google-upgrade" class="vertical-shadow rounded-background" style="display: none; margin-left:23px; padding: 0 18px; background: #eee; text-shadow: 0 1px 0 #fff;">
         <p>
@@ -120,7 +120,7 @@
         <a href="/class_profile">Coach page</a> or <a href="" onclick="$('#empty-class-container').slideDown('fast');return false;">you can find them here</a>.
     </p>
     <div id="empty-class-container" style="display: none;">
-        {% include "../empty_class_instructions.html" %}
+        {% empty_class_instructions 0 %}
     </div>
     <a name="schools"><h2>I'm an administrator considering a pilot in my school, where do I begin?</h2></a>
     <p>

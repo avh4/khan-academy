@@ -132,18 +132,9 @@
                 m++;
             });
          
-            $('.tableFirstCol').each(function(i){
-                if(brow == 'mozilla'){
-                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').outerHeight());//for providing height using scrollable table column height
-                }
-                else if(brow == 'msie'){
-                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').innerHeight());
-                }
-                else {
-                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').height());
-                }
-                n++;
-            });
+            if (brow == 'chrome' || brow == 'safari') {
+                $("#module-progress #table_div").css('top', '1px');
+            }
         }
     };
 
@@ -193,7 +184,7 @@
         </td>
 
         <td valign="top">
-            <div id="table_div" class="sizeOnResize" style="overflow:scroll;height:325px;width:450px;position:relative" onscroll="ProgressReport.onScroll();" >
+            <div id="table_div" class="sizeOnResize" style="overflow:scroll;height:325px;width:450px;position:relative;" onscroll="ProgressReport.onScroll();" >
                 <table style="width:100%" cellspacing="0" cellpadding="0" border="0" >
                     {% for student_email in student_emails %}
                     <tr {% if forloop.first %}id="firstTr"{% endif %}>

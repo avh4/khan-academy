@@ -31,6 +31,9 @@
         <script>var KA_VERSION = '{{ App.version }}';</script>
         {% shared_css %}
         {% shared_javascript %}
+        {% if is_mobile %}
+            {% mobile_javascript %}
+        {% endif %}
 
         <script type="text/javascript">
             // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
@@ -44,7 +47,7 @@
             $(function(){
                 // Configure the search form
                 $('#page_search input[type=text]').placeholder();
-                initAutocomplete();
+                initAutocomplete("#page_search input", true);
             });
 
 	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
@@ -92,7 +95,10 @@
     
             {% if not username %}
                 FB.Event.subscribe('auth.login', function(response) {
-                    window.location.reload();
+                    if ('{{ continue|escapejs }}')
+                        window.location = '{{ continue|escapejs }}';
+                    else
+                        window.location.reload();
                 });
             {% endif %}
     
@@ -138,26 +144,9 @@
                                 {% endif %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
-                                <a id="page_logout" href="{{logout_url}}">Logout</a>
+                                <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                            <nav class="css-menu noscript" id="login-menu">
-                                <ul class="ui-corner-top">
-                                    <li class="ui-corner-top">
-                                        Login
-                                        <ul class="ui-corner-tr ui-corner-bottom">
-                                            <li id="page_login_options">
-                                                <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id">Login with Google</a>
-                                            </li>
-                                            {% if App.facebook_app_secret %}
-                                            <li><fb:login-button>Login with Facebook</fb:login-button></li>
-                                            {% endif %}
-                                            {% if App.accepts_openid %}
-                                            <li>[<a href="{{login_url}}">more login choices...</a>]</li>
-                                            {% endif %}
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </nav>
+                                <a href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator">&nbsp;</span>
                             <a href="/contribute" id="donate-link">Donate</a>
@@ -191,7 +180,7 @@
                         <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-left placeholder" /><input type="submit" value=" " id="search-submit" />
                     </form>
                 </div>
-                <div id="sitewide-navigation">
+                <div id="sitewide-navigation" class="action-gradient">
                     <nav>
                       <span class="links">
                           <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected watch-link"{% endifequal %}>Watch</a>

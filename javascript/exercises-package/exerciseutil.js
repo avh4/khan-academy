@@ -376,9 +376,12 @@ function format_constant(number)
 	}
 }
 
-function format_string_with_color(str, color)
-{
-    return '<font color=' + color + ' size=4>' + '`' + str + '`</font>';
+function format_string_with_color(str, color) {
+    return "<span style='color: " + color + "'>" + str + "</span>"
+}
+
+function format_math_with_color(str, color) {
+    return format_string_with_color("`" + str + "`", color);
 }
 
 function format_expression(coeff, str, color, is_leading) {

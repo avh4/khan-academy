@@ -1,75 +1,58 @@
 {% extends "page_template.html" %}
-{% block pagescript %}
-<script type="text/javascript" src="/javascript/ckeditor/ckeditor.js">
-</script>
-<script type="text/javascript">
-    function submitForm(value){
-        document.forms['addexercise'].submit();
-    }
-    
-    $(function(){
-        // Swap in CKEditors
-        $("textarea").each(function(){
-            CKEDITOR.replace(this.id, {
-                toolbar: 'Full',
-                skin: 'kama',
-                resize_minWidth: 300,
-                width: "80%",
-                height: 400,
-                scayt_autoStartup: false,
-                disableNativeSpellChecker: false
-            });
-        });        
-    });
-</script>
-<style>
-    li {
-        display: inline;
-    }
-    
-    label {
-        display: block;
-    }
-</style>
-{% endblock pagescript %}
+
+{% block pagesubmenu %}
+    <span class="breadcrumbs_nav">
+        Exercises
+    </span>
+{% endblock pagesubmenu %}
+
 {% block pagecontent %}
-<article>
-    <section>
-        <h1>Select an existing exercise to edit</h1>
+<div style="padding:0 23px;">
+    <div>
         <p>
-            <ul>
+            <table width="100%">
                 {% for exercise in exercises %}
-                <li>
-                    <a href="/editexercise?name={{exercise.name}}">{{exercise.display_name}}</a>
-                </li>
+                    {% if not forloop.counter0|mod:5 %}
+                        {% if not forloop.first %}
+                            </tr>
+                        {% endif %}
+                        <tr>
+                    {% endif %}
+                    <td>
+                        <a href="/editexercise?name={{ exercise.name|escape }}" 
+                            {% if exercise.live %}
+                            style="color:#069;"
+                            {% else %}
+                            style="color:red;text-decoration:line-through;"
+                            {% endif %}
+                            title="{{ exercise.display_name|escape }}"><nobr>{{ exercise.display_name|truncatewords:4|escape }}</nobr></a>
+                    </td>
+                    {% if forloop.last %}
+                        </tr>
+                    {% endif %}
                 {% endfor %} 
-            </ul>
+            </table>
         </p>
-    </section>
-    <section>
-        <h1>Add a new exercise</h1>
+    </div>
+    <div>
+        <h3>Add a new exercise</h3>
         <form id="addexercise" action="/updateexercise" method="post">
             <input type="hidden" name="v_position" value="0" /><input type="hidden" name="h_position" value="0" />
             <p>
-                <label for="name">
-                    Name (file name without .html for legacy exercises)
-                </label>
-                <input id="name" type="text" name="name" size="40" />
-                <span style="padding-left: 20px;">
-                    <input id="summative" name="summative" type="checkbox" value="1" />
-                    <label style="display:inline;" for="summative">Summative</label>
-                </span>
-            </p>
-            <p>
-                <label for="raw_html">
-                    Exercise content (leave blank for legacy exercises)
-                </label>
-                <textarea id="raw_html" name="raw_html">
-                </textarea>
-            </p>
-            <p>
-                <input type="button" value="Add Exercise" onClick="submitForm()"/>
+                <nobr>
+                    <label for="name">
+                        Name (file name without .html)
+                    </label>
+                    <input id="name" type="text" name="name" size="40" />
+                    <span style="padding-left: 20px;">
+                        <input id="summative" name="summative" type="checkbox" value="1" />
+                        <label style="display:inline;" for="summative">Summative</label>
+                    </span>
+                    <span style="padding-left: 20px;">
+                        <input type="submit" value="Add Exercise" />
+                    </span>
+                </nobr>
             </p>
         </form>
-    </section>
-</article>{% endblock pagecontent %}
+    </div>
+</div>{% endblock pagecontent %}

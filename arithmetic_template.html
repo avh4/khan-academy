@@ -11,7 +11,7 @@
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
      we update MathJax.
   {% endcomment %}
-  <script type="text/javascript" src="/MathJax-git-2011-01-14/MathJax.js">
+  <script type="text/javascript" src="/MathJax-1.1/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",
@@ -98,6 +98,13 @@ function submitForm(value)
 
 		<div id="exercise-points" class="energy-points-badge">{{exercise_points}}</div>
 		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name|escape}}</A></div>
+		<div class="energy-points-badge">{{exercise_points}}</div>
+        <div class="exercise-title">
+            <a href="/exercises?exid={{ exercise.name }}">{{ exercise.display_name|escape }}</a>
+            {% if not exercise.live %}
+            <span style="color:red;">(admins only, <a href="/editexercise?name={{ exercise.name|escape }}">deploy</a>)</span>
+            {% endif %}
+        </div>
 		{% streak_bar user_exercise %}
 		<div class="related-content">
             {% if exercise.summative %}
@@ -165,7 +172,7 @@ function submitForm(value)
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
             {% block answerarea %}
                 {% if not read_only %}
-                <span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+                <span class="info-box-header">Answer</span><input {% if is_mobile %} type="number" {% else %} type="text" {% endif %}  id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
                 {% endif %}
             {% endblock answerarea %}
             {% if not read_only %}
@@ -260,6 +267,8 @@ function submitForm(value)
 $(document).ready(function() {
     var scratchpad_cookie_name = "show_scratchpad";
 
+    $('#svgedit').css('border', '2px solid #ccc');
+
 	function hideScratchPad() {
 		$('#scratch_pad_hide').css('display', 'none');
 		$('#scratch_pad_show').css('display', 'inline');
@@ -271,7 +280,7 @@ $(document).ready(function() {
 	function showScratchPad() {
 		$('#scratch_pad_show').css('display', 'none');
 		$('#scratch_pad_hide').css('display', 'inline');
-		$('#question_area').css('min-height', '400px').css('padding-left', '54px');
+		$('#question_area').css('min-height', '460px').css('padding-left', '54px');
 		var svgedit = $('#svgedit');
 		svgedit.css('display', 'block');
 		if (!svgedit.attr('src')) {
@@ -279,7 +288,7 @@ $(document).ready(function() {
 			NOTE: To avoid caching issues, the scratchpad version number below needs to be updated here and
 			in app.yaml whenever we update scratchpad.
 			*/
-			svgedit.attr('src', '/scratchpad-2011-03-12/scratchpad.html');
+			svgedit.attr('src', '/scratchpad-2011-03-17/scratchpad.html');
 		}
         createCookie(scratchpad_cookie_name,"true",365);
         return false;
