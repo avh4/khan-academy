@@ -29,8 +29,11 @@ var Exercise = {
         if (this.fSupportsAjax)
             this.showNextProblem();
 
-        if (this.fExtendsMultipleChoice)
+        if (this.fExtendsMultipleChoice) {
+            $("#answer_content").html("");
             renderChoices();
+        } else
+            $("#answer").val("")
     },
     
     getNumPossibleAnswers: function() {
@@ -186,8 +189,6 @@ function addWrongChoice(choice)
 }
 
 function renderChoices() {
-    $("#answer_content").html("");
-    
 	var availAnswers = 1 + Exercise.possibleAnswers.length; // only so many answers available
 	Exercise.answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
 	Exercise.correctchoice = Math.round(KhanAcademy.random()*(Exercise.answerChoices.length-0.02)-.49);
