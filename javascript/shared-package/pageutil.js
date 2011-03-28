@@ -382,7 +382,7 @@ var Drawer = {
         {
             // Mobile device, support single-finger touch scrolling
             $("#dashboard-drawer").removeClass("drawer-hoverable");
-            var scroller = new iScroll('dashboard-drawer', { hScroll: false, hScrollbar: false, vScrollbar: false });
+            var scroller = new iScroll('dashboard-drawer-inner', { hScroll: false, hScrollbar: false, vScrollbar: false });
         }
         else
         {
