@@ -75,3 +75,14 @@ function fraction(n,d)
 	return expressionString;
 }
 
+function mathFraction(n,d)
+{
+	var expressionString = "("+n+")/("+d+")";
+	return expressionString;
+}
+
+function unitFraction(n,d)
+{
+	var expressionString = "text{"+n+"}/text{"+d+"}";
+	return expressionString;
+}
