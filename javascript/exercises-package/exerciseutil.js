@@ -46,7 +46,7 @@ var Exercise = {
         $("#problem_number").val(data.problem_number);
 
         var link = $("#report-problem").attr("href");
-        link = link.substr(0, link.indexOf("Problem-")) + "Problem-" + data.problem_number
+        link = link.substr(0, link.indexOf("Problem-")) + "Problem-" + data.problem_number;
         $("#report-problem").attr("href", link);
         $("#time_warp").val(data.time_warp);
         $("#streak").val(data.streak);
