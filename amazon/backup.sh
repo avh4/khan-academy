@@ -21,3 +21,4 @@ find *.log -mtime +7 -exec rm {} \;
 find *.dat -mtime +7 -exec rm {} \;
 find *.sql3 -mtime +7 -exec rm {} \;
 
+rm bulkloader-*
