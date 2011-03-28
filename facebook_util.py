@@ -68,11 +68,18 @@ def get_facebook_profile():
         if profile is not None:
             return profile
 
-        try:
-            graph = facebook.GraphAPI(fb_user["access_token"])
-            profile = graph.get_object("me")
-        except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
-            logging.debug("Ignoring %s.  Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
+        c_facebook_tries_left = 3
+        while not profile and c_facebook_tries_left > 0:
+            try:
+                graph = facebook.GraphAPI(fb_user["access_token"])
+                profile = graph.get_object("me")
+            except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
+                if str(error).find("Error validating access token") >= 0:
+                    c_facebook_tries_left = 0
+                    logging.debug("Ignoring '%s'. Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
+                else:
+                    c_facebook_tries_left -= 1
+                    logging.debug("Ignoring Facebook graph error '%s'. Tries left: %s" % (error, c_facebook_tries_left))
 
         if profile:
             try:
