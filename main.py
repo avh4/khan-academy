@@ -1200,6 +1200,12 @@ class Crash(request_handler.RequestHandler):
         else:
             # Even Watson isn't perfect
             raise Exception("What is Toronto?")
+
+class SendToLog(request_handler.RequestHandler):
+    def post(self):
+        message = self.request_string("message", default="")
+        if message:
+            logging.critical("Manually sent to log: %s" % message)
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1802,6 +1808,8 @@ def real_main():
         ('/discussion/moderatorlist', qa.ModeratorList),
 
         ('/badges/view', util_badges.ViewBadges),
+
+        ('/sendtolog', SendToLog),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
