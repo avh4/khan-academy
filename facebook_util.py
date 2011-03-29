@@ -76,7 +76,7 @@ def get_facebook_profile():
                 graph = facebook.GraphAPI(fb_user["access_token"])
                 profile = graph.get_object("me")
             except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError), error:
-                if str(error).find("Error validating access token") >= 0:
+                if type(error) == urllib2.HTTPError and error.code == 400:
                     c_facebook_tries_left = 0
                     logging.debug("Ignoring '%s'. Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
                 else:
