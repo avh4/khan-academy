@@ -39,6 +39,7 @@ usage of this module might look like this:
 import cgi
 import hashlib
 import time
+import logging
 import urllib
 import urllib2
 
@@ -172,8 +173,17 @@ class GraphAPI(object):
             else:
                 args["access_token"] = self.access_token
         post_data = None if post_args is None else urllib.urlencode(post_args)
-        file = urllib2.urlopen("https://graph.facebook.com/" + path + "?" +
-                              urllib.urlencode(args), post_data)
+
+        file = None
+        try:
+            file = urllib2.urlopen("https://graph.facebook.com/" + path + "?" +
+                                  urllib.urlencode(args), post_data)
+        except urllib2.HTTPError:
+            logging.debug("http error for url: %s", file.geturl())
+            if file:
+                file.close()
+            raise
+
         try:
             response = _parse_json(file.read())
         finally:
