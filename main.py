@@ -286,6 +286,9 @@ class ViewVideo(request_handler.RequestHandler):
                 raise MissingVideoException("Missing video '%s'" % readable_id)
 
             playlist = video.first_playlist()
+            if not playlist:
+                raise MissingVideoException("Missing video '%s'" % readable_id)
+
             redirect_to_canonical_url = True
  
         if redirect_to_canonical_url:
