@@ -718,6 +718,9 @@ class AdminViewUser(request_handler.RequestHandler):
 
 class RegisterAnswer(request_handler.RequestHandler):
 
+    def get(self):
+        self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
+
     def post(self):
         exid = self.request_string('exid')
         user = util.get_current_user()
@@ -809,6 +812,9 @@ class RegisterAnswer(request_handler.RequestHandler):
 
 
 class RegisterCorrectness(request_handler.RequestHandler):
+
+    def get(self):
+        self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
 
 # A POST request is made via AJAX when the user clicks "Check Answer".
 # This allows us to reset the user's streak if the answer was wrong.  If we wait
