@@ -914,7 +914,7 @@ function type1()
 	variables['BD'] = {type: 'line', points:['B','D'], value:pythSide[1], color: '#9370DB'};
 	variables['AD'] = {type: 'line', points:['A','D'], value:pythSide[2], color: '#DB70DB'};
 	variables['ABD=90'] = {type: 'variableboolean', dependent:'ABD', value:90};
-	variables['line GF is parrallel to line AE'] = {type: 'boolean', relation: ' is parallel to ', var1: 'GF', var2: 'AE'};
+	variables['line GF is parallel to line AE'] = {type: 'boolean', relation: ' is parallel to ', var1: 'GF', var2: 'AE'};
 	
 	points.A = {coor: [-5,0], label: left};
 	points.B = {coor: [-2,6], label: above};
@@ -944,10 +944,10 @@ function type1()
 			['GIH', 'GIC', supAngles],
 			['HIF', 'BIF', supAngles],
 			['BIF', 'GIC', supAngles],
-			['IBE','HIF', 'line GF is parrallel to line AE', corAngles],
-			['BIF','CBE', 'line GF is parrallel to line AE', corAngles],
-			['ABI','GIH', 'line GF is parrallel to line AE', corAngles],
-			['ABC','GIC', 'line GF is parrallel to line AE', corAngles],
+			['IBE','HIF', 'line GF is parallel to line AE', corAngles],
+			['BIF','CBE', 'line GF is parallel to line AE', corAngles],
+			['ABI','GIH', 'line GF is parallel to line AE', corAngles],
+			['ABC','GIC', 'line GF is parallel to line AE', corAngles],
 			['CBD','IBD', supAngles],
 			['AB', 'BD', 'AD', 'ABD=90', pyth],
 			['BDC','BCD','CBD', triAngSum]];
