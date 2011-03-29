@@ -179,7 +179,9 @@ class GraphAPI(object):
             file = urllib2.urlopen("https://graph.facebook.com/" + path + "?" +
                                   urllib.urlencode(args), post_data)
         except urllib2.HTTPError:
-            logging.debug("http error for url: %s", file.geturl())
+            logging.critical("http error for url: %s", "https://graph.facebook.com/" + path + "?" +
+                                  urllib.urlencode(args))
+            logging.critical("post data: %s", post_data)
             if file:
                 file.close()
             raise
