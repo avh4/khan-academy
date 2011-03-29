@@ -425,6 +425,14 @@ function format_not_reduced_with_sign(n, d)
 	return fraction;
 }
 
+function convertDegreeToRadian(degree) {
+    return degree * Math.PI / 180;
+}
+
+function convertRadianToDegree(radian) {
+    return radian * 180 / Math.PI;
+}
+
 var notDoneType = ''; //This is used by pickType in metautil.js to prevent students from refreshing away a type of problem
 var notDoneCookie = '';
 
