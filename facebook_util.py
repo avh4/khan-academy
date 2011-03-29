@@ -33,7 +33,7 @@ def get_facebook_nickname(user):
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
         memcache.set(memcache_key, name)
-    except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError):
+    except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError):
         name = email
 
     return name
