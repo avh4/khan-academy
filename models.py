@@ -166,19 +166,6 @@ class Exercise(db.Model):
             exercise_video.video # Pre-cache video entity
         return exercise_videos
 
-    _CURRENT_SANITIZER = "http://caja.appspot.com/"
-    def ensure_sanitized(self):
-        if self.last_sanitized >= self.last_modified and self.sanitizer_used == Exercise._CURRENT_SANITIZER:
-            return
-        cajoled = cajole.cajole(self.raw_html)
-        if 'error' in cajoled:
-            raise Exception(cajoled['html'])
-        self.safe_html = db.Text(cajoled['html'])
-        self.safe_js = db.Text(cajoled['js'])
-        self.last_sanitized = datetime.datetime.now()
-        self.sanitizer = Exercise._CURRENT_SANITIZER
-        self.put()
-
     @classmethod
     def all(cls, live_only = False):
         query = super(Exercise, cls).all()

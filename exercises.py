@@ -80,11 +80,6 @@ class UpdateExercise(request_handler.RequestHandler):
             exercise.author = user
             exercise.summative = self.request_bool("summative", default=False)
             path = os.path.join(os.path.dirname(__file__), exercise_name + '.html')
-            raw_html = self.request.get('raw_html')
-            if not os.path.exists(path) and not exercise.summative and raw_html:
-                exercise.raw_html = db.Text(raw_html)
-                exercise.last_modified = datetime.datetime.now()
-                exercise.ensure_sanitized()
 
         v_position = self.request.get('v_position')
         h_position = self.request.get('h_position')

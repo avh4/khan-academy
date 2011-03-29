@@ -216,14 +216,10 @@ class ViewExercise(request_handler.RequestHandler):
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
             template_file = exercise_non_summative.name + '.html'
-            if not exercise.summative and exercise.raw_html is not None:
-                exercise.ensure_sanitized()
-                template_file = 'caja_template.html'
-
             self.render_template(template_file, template_values)
         else:
-
             self.redirect(util.create_login_url(self.request.uri))
+            
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
