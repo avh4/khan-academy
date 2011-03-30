@@ -187,6 +187,10 @@ function handleCorrectness(isCorrect)
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
 		};
 
+        if (!data || !data.key) {
+            $.post("/sendtolog", {message: "registercorrectness isn't going to send the key!"});
+        }
+
 		$.ajax({
             type: "POST",
             url: "/registercorrectness", 

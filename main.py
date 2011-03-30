@@ -831,7 +831,12 @@ class RegisterCorrectness(request_handler.RequestHandler):
         user = util.get_current_user()
         if user:
             key = self.request.get('key')
-            correct = int(self.request.get('correct'))
+
+            try:
+                correct = int(self.request.get('correct'))
+            except:
+                raise Exception("Missing registercorrectness params. Key: '%s'" % key)
+
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
 
