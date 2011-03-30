@@ -179,13 +179,16 @@ function handleCorrectness(isCorrect)
 		// we don't worry about it because they might just be having connectivity problems or need to log in again.
 		// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
 		// but it takes longer and is more noticeable.
-		$.post("/registercorrectness", 
-			{
+        
+        var data = {
 				key: $("#key").val(),
 				time_warp: $("#time_warp").val(),
 				correct: ((isCorrect && Exercise.tries==0 && Exercise.steps_given==0) ? 1 : 0),
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
-			}); // Fire and forget, no callback.
+		};
+
+		$.get("/registercorrectness", data);
+
 		correctnessRegistered = true;		
 	}	
 	if (isCorrect)

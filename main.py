@@ -707,16 +707,28 @@ class AdminViewUser(request_handler.RequestHandler):
 
 class RegisterAnswer(request_handler.RequestHandler):
 
+    # RegisterAnswer uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    def get(self):
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
         user = util.get_current_user()
         if user:
+            key = self.request_string('key')
+
+            if not exid or not key:
+                logging.warning("Missing exid or key data in RegisterAnswer")
+                self.redirect('/exercises?exid=' + exid)
+                return
 
             dt_done = datetime.datetime.now()
-
-            key = self.request_string('key')
             correct = self.request_bool('correct')
+
             problem_number = self.request_int('problem_number')
             start_time = self.request_float('start_time')
             hint_used = self.request_bool('hint_used', default=False)
@@ -789,9 +801,10 @@ class RegisterAnswer(request_handler.RequestHandler):
             db.put([user_data, problem_log, user_exercise])
 
             if not self.is_ajax_request():
-                self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
+                self.redirect("/exercises?exid=%s" % exid)
             else:
                 self.send_json(user_data, user_exercise, exercise, key, time_warp)
+            
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)
@@ -838,19 +851,31 @@ class RegisterAnswer(request_handler.RequestHandler):
         json = simplejson.dumps(updated_values)
         self.response.out.write(json)
 
-
 class RegisterCorrectness(request_handler.RequestHandler):
 
-# A POST request is made via AJAX when the user clicks "Check Answer".
-# This allows us to reset the user's streak if the answer was wrong.  If we wait
-# until he clicks the "Next Problem" button, he can avoid resetting his streak
-# by just reloading the page.
-
+    # RegisterCorrectness uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    # A GET request is made via AJAX when the user clicks "Check Answer".
+    # This allows us to reset the user's streak if the answer was wrong.  If we wait
+    # until he clicks the "Next Problem" button, he can avoid resetting his streak
+    # by just reloading the page.
+    def get(self):
         user = util.get_current_user()
         if user:
             key = self.request.get('key')
+
+            if not key:
+                logging.warning("Missing key data in RegisterCorrectness")
+                self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
+                return
+
             correct = int(self.request.get('correct'))
+
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
 
@@ -1059,6 +1084,10 @@ class GenerateHomepageContent(request_handler.RequestHandler):
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
+    def post(self):
+        # We support posts so we can fire task queues at this handler
+        self.get()
+
     def get(self):
         library_content_html(bust_cache=True)
         self.response.out.write("Library content regenerated")  
@@ -1221,6 +1250,12 @@ class Crash(request_handler.RequestHandler):
         else:
             # Even Watson isn't perfect
             raise Exception("What is Toronto?")
+
+class SendToLog(request_handler.RequestHandler):
+    def post(self):
+        message = self.request_string("message", default="")
+        if message:
+            logging.critical("Manually sent to log: %s" % message)
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1800,6 +1835,8 @@ def real_main():
         ('/discussion/moderatorlist', qa.ModeratorList),
 
         ('/badges/view', util_badges.ViewBadges),
+
+        ('/sendtolog', SendToLog),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
