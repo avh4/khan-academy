@@ -718,23 +718,26 @@ class AdminViewUser(request_handler.RequestHandler):
 
 class RegisterAnswer(request_handler.RequestHandler):
 
-    def get(self):
-        self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
-
+    # RegisterAnswer uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    def get(self):
         exid = self.request_string('exid')
         user = util.get_current_user()
         if user:
-
-            dt_done = datetime.datetime.now()
-
             key = self.request_string('key')
 
-            try:
-                correct = self.request_bool('correct')
-            except:
-                answer_test = self.request_string("answer", default="")
-                raise Exception("Missing registeranswer params. Answer: '%s', Key: '%s', exid: '%s'" % (answer_test, key, exid))
+            if not exid or not key:
+                logging.warning("Missing exid or key data in RegisterAnswer")
+                self.redirect('/exercises?exid=' + exid)
+                return
+
+            dt_done = datetime.datetime.now()
+            correct = self.request_bool('correct')
 
             problem_number = self.request_int('problem_number')
             start_time = self.request_float('start_time')
@@ -816,26 +819,30 @@ class RegisterAnswer(request_handler.RequestHandler):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
-
 class RegisterCorrectness(request_handler.RequestHandler):
 
-    def get(self):
-        self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
-
-# A POST request is made via AJAX when the user clicks "Check Answer".
-# This allows us to reset the user's streak if the answer was wrong.  If we wait
-# until he clicks the "Next Problem" button, he can avoid resetting his streak
-# by just reloading the page.
-
+    # RegisterCorrectness uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    # A GET request is made via AJAX when the user clicks "Check Answer".
+    # This allows us to reset the user's streak if the answer was wrong.  If we wait
+    # until he clicks the "Next Problem" button, he can avoid resetting his streak
+    # by just reloading the page.
+    def get(self):
         user = util.get_current_user()
         if user:
             key = self.request.get('key')
 
-            try:
-                correct = int(self.request.get('correct'))
-            except:
-                raise Exception("Missing registercorrectness params. Key: '%s'" % key)
+            if not key:
+                logging.warning("Missing key data in RegisterCorrectness")
+                self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
+                return
+
+            correct = int(self.request.get('correct'))
 
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
