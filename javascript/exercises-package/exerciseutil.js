@@ -433,6 +433,10 @@ function convertRadianToDegree(radian) {
     return radian * 180 / Math.PI;
 }
 
+function roundToHundredth(num) {
+    return Math.round(num * 100) / 100;
+}
+
 var notDoneType = ''; //This is used by pickType in metautil.js to prevent students from refreshing away a type of problem
 var notDoneCookie = '';
 
