@@ -835,7 +835,6 @@ class RegisterCorrectness(request_handler.RequestHandler):
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
 
-            logging.critical("scheduling review!")
             user_exercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
                 if user_exercise.streak == 0:
