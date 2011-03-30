@@ -729,7 +729,13 @@ class RegisterAnswer(request_handler.RequestHandler):
             dt_done = datetime.datetime.now()
 
             key = self.request_string('key')
-            correct = self.request_bool('correct')
+
+            try:
+                correct = self.request_bool('correct')
+            except:
+                answer_test = self.request_string("answer", default="")
+                raise Exception("Missing registeranswer params. Answer: '%s', Key: '%s', exid: '%s'" % (answer_test, key, exid))
+
             problem_number = self.request_int('problem_number')
             start_time = self.request_float('start_time')
             hint_used = self.request_bool('hint_used', default=False)
@@ -829,6 +835,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
 
+            logging.critical("scheduling review!")
             user_exercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
                 if user_exercise.streak == 0:
