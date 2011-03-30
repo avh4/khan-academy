@@ -20,24 +20,19 @@ var common_angles = [{deg: 30, rad: "pi/6"},
                     {deg: 360, rad: "2pi"}]
 
 function RadiansAndDegreesExercise(type) {
-    var exercise;
-    
     if (type != RADIANS_TO_DEGREES && type != DEGREES_TO_RADIANS) {
         if (getRandomIntRange(0, 1))
-            exercise = new RadiansToDegreesExercise();
+            var exercise = new RadiansToDegreesExercise();
         else
-            exercise = new DegreesToRadiansExercise();
+            var exercise = new DegreesToRadiansExercise();
     }
-    
-    exercise.generateProblem();
-    exercise.generateHints();
 }
 
 function RadiansToDegreesExercise() {
     var radian;
     var answer;
-    
-    this.generateProblem = function() {
+
+    function generateProblem() {
         if (getRandomIntRange(0, 1)) {
             var index = getRandomIntRange(0, common_angles.length - 1);
             var angle = common_angles[index];
@@ -68,19 +63,22 @@ function RadiansToDegreesExercise() {
         setCorrectAnswer(answer + "&#176;");
     }
     
-    this.generateHints = function() {
+    function generateHints() {
         open_left_padding(30);
         write_step("To convert from radians to degrees, you multiply by `180&#176;` and then divide by `pi`.");
         write_step("`" + radian + " * (180&#176;) / pi = " + answer + "&#176;`");
         close_left_padding();
     }
+    
+    generateProblem();
+    generateHints();
 }
 
 function DegreesToRadiansExercise() {
     var degree;
     var answer;
     
-    this.generateProblem = function() {
+    function generateProblem() {
         if (getRandomIntRange(0, 1)) {
             var index = getRandomIntRange(0, common_angles.length - 1);
             var angle = common_angles[index];
@@ -111,10 +109,13 @@ function DegreesToRadiansExercise() {
         setCorrectAnswer(answer);
     }
     
-    this.generateHints = function() {
+    function generateHints() {
         open_left_padding(30);
         write_step("To convert from degrees to radians, you multiply by `pi` and then divide by `180&#176;`.");
         write_step("`" + degree + "&#176; * pi / (180&#176;) = " + answer + "`")
         close_left_padding();
     }
+    
+    generateProblem();
+    generateHints();
 }
