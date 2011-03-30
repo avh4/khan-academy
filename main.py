@@ -810,7 +810,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
 
-            self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
+            self.redirect("/exercises?exid=%s" % exid)
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)
