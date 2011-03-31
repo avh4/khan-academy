@@ -425,6 +425,29 @@ function format_not_reduced_with_sign(n, d)
 	return fraction;
 }
 
+function convertDegreeToRadian(degree) {
+    return degree * Math.PI / 180;
+}
+
+function convertRadianToDegree(radian) {
+    return radian * 180 / Math.PI;
+}
+
+// sample usage: rotateVector([1, 0], 90) ==> [0, 1]
+function rotateVector(vector, degree) {
+    var cos = Math.cos(convertDegreeToRadian(degree));
+    var sin = Math.sin(convertDegreeToRadian(degree));
+    
+    var new_x = (vector[0] * cos) - (vector[1] * sin);
+    var new_y = (vector[0] * sin) + (vector[1] * cos);
+    
+    return [roundToHundredth(new_x), roundToHundredth(new_y)];
+}
+
+function roundToHundredth(num) {
+    return Math.round(num * 100) / 100;
+}
+
 var notDoneType = ''; //This is used by pickType in metautil.js to prevent students from refreshing away a type of problem
 var notDoneCookie = '';
 
