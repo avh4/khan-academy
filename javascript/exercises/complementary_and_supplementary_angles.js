@@ -1,9 +1,9 @@
-var IS_COMP = 0;
-var IS_SUPP = 1;
+var IS_SUPP = 0;
+var IS_COMP = 1;
 
 function ComplementarySupplementaryAnglesExercise(t) {
     if (t == undefined)
-        t = getRandomIntRange(IS_COMP, IS_SUPP);
+        t = getRandomIntRange(IS_SUPP, IS_COMP);
 
     var exercise_type = t;
     var term;
@@ -19,7 +19,7 @@ function ComplementarySupplementaryAnglesExercise(t) {
     var answer_label;
     
     function generateProblem() {
-        if (exercise_type) {
+        if (exercise_type == IS_COMP) {
             total = 90;
             term = "complementary";
         } else {
