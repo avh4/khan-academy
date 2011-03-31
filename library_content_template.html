@@ -7,7 +7,7 @@
             {% endif %}
             <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
                 <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
-                {% column_major_sorted_videos playlist_data.videos %}
+                {% column_major_sorted_videos playlist_data.videos exercise_videos %}
                 <div class="clear">
                 {% if playlist_data.next %}
                     <a name="{{ playlist_data.next.title|escape }}">&nbsp;</a>

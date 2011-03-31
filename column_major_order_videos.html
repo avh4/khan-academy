@@ -1,5 +1,5 @@
 <ol style="height: {{list_height}}px; padding:0;">				
 	{% for playlist_video in videos %}<li style="width: {{column_width}}px; height: {{link_height}}px; margin-left: {{forloop.counter0|find_column_index:column_indices|multiply:column_width_plus_gutter}}px;{% if forloop.counter0|in_list:column_indices %} margin-top: -{{forloop.counter0|column_height:column_indices|multiply:link_height}}px;{%endif%}">
-    <A href="/video/{{playlist_video.video.readable_id}}?playlist={{playlist_video.playlist.title|urlencode}}" title="{{playlist_video.video.title|escape}}" class='video-link' style="font-size: {{font_size}}px;">{{playlist_video.video.title|escape}}</A>
+    <A href="/video/{{playlist_video.video.readable_id}}?playlist={{playlist_video.playlist.title|urlencode}}" title="{{playlist_video.video.title|escape}}" class='video-link{% if exercise_videos|hash:playlist_video.video.readable_id %} has-exercise{% endif %}' style="font-size: {{font_size}}px;">{{playlist_video.video.title|escape}}</A>
     </li>{% endfor %}
 </ol>

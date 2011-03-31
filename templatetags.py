@@ -39,7 +39,7 @@ class HighlightNode(template.Node):
         return text
 
 @register.inclusion_tag("column_major_order_videos.html")
-def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
+def column_major_sorted_videos(videos, exercise_videos, num_cols=3, column_width=300, gutter=20, font_size=12):
 
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
@@ -50,6 +50,7 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
         
     return {
                "videos": videos,
+               'exercise_videos': exercise_videos,
                "column_width": column_width,
                "column_width_plus_gutter": column_width + gutter,
                "font_size": font_size,
