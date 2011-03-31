@@ -22,7 +22,7 @@ def greater_than(x, y):
 
 @register.filter
 def hash(h, key):
-    return h[key]
+    return h.get(key, None)
 
 @register.filter
 def timesince_ago(content):
