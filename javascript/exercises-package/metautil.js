@@ -233,6 +233,13 @@ function checkFreeAnswer()
 	handleCorrectness(isCorrect);
 }
 
+function checkFreeAnswerString()
+{
+    var val = document.getElementById("answer").value;
+	var isCorrect = val===correctAnswer;
+	handleCorrectness(isCorrect);
+}
+
 // Replace all commas with str
 function parseFloatGeneric(val, str)
 {

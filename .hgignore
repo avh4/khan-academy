@@ -9,3 +9,4 @@ syntax: glob
 secrets.py
 datastore/*
 sample_data/bulkloader-*
+*.DS_Store
