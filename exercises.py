@@ -1,3 +1,5 @@
+import os
+
 from google.appengine.ext import db
 from google.appengine.api import users
 
@@ -114,6 +116,12 @@ class UpdateExercise(request_handler.RequestHandler):
         if short_display_name:
             exercise.short_display_name = short_display_name
 
+        exercise.live = self.request_bool("live", default=False)
+
+        if not exercise.is_saved():
+            # Exercise needs to be saved before checking related videos.
+            exercise.put()
+
         video_keys = []
         for c_check_video in range(0, 1000):
             video_append = self.request_string("video-%s" % c_check_video, default="")
@@ -121,7 +129,7 @@ class UpdateExercise(request_handler.RequestHandler):
                 video_keys.append(video_append)
 
         query = models.ExerciseVideo.all()
-        query.filter('exercise =', exercise)
+        query.filter('exercise =', exercise.key())
         existing_exercise_videos = query.fetch(1000)
 
         existing_video_keys = []
@@ -136,8 +144,6 @@ class UpdateExercise(request_handler.RequestHandler):
                 exercise_video.exercise = exercise
                 exercise_video.video = db.Key(video_key)
                 exercise_video.put()
-
-        exercise.live = self.request_bool("live", default=False)
 
         exercise.put()
 

@@ -18,7 +18,7 @@
         <div class="question_form">
             <form class="question" name="questions">
                 {% honeypots %}
-                <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                <input type="hidden" id="video_key" class="video_key_primary" name="video_key" value="{{ video.key }}" />
                 <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
                 <div class="question_placeholder requires_script">
                     <textarea name="question_text" class="question_text" rows="3" cols="40" 

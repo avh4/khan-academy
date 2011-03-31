@@ -2,6 +2,8 @@ import os
 import Cookie
 import logging
 import unicodedata
+import urllib2
+
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
@@ -31,7 +33,7 @@ def get_facebook_nickname(user):
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
         memcache.set(memcache_key, name)
-    except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError):
+    except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError):
         name = email
 
     return name
@@ -68,11 +70,18 @@ def get_facebook_profile():
         if profile is not None:
             return profile
 
-        try:
-            graph = facebook.GraphAPI(fb_user["access_token"])
-            profile = graph.get_object("me")
-        except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError), error:
-            logging.debug("Ignoring %s.  Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
+        c_facebook_tries_left = 3
+        while not profile and c_facebook_tries_left > 0:
+            try:
+                graph = facebook.GraphAPI(fb_user["access_token"])
+                profile = graph.get_object("me")
+            except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError), error:
+                if type(error) == urllib2.HTTPError and error.code == 400:
+                    c_facebook_tries_left = 0
+                    logging.debug("Ignoring '%s'. Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
+                else:
+                    c_facebook_tries_left -= 1
+                    logging.debug("Ignoring Facebook graph error '%s'. Tries left: %s" % (error, c_facebook_tries_left))
 
         if profile:
             try:

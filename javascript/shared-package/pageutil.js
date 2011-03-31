@@ -308,7 +308,7 @@ var VideoStats = {
         $.ajax({type: "POST",
                 url: "/logvideoprogress", 
                 data: {
-                    video_key: $("#video_key").val(),
+                    video_key: $(".video_key_primary").val(),
                     last_second_watched: this.getSecondsWatched(),
                     seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
                 },

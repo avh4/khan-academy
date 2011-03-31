@@ -4,7 +4,7 @@
 {% endblock maincode %}
 
 {% block maincell %}
-<script language=Javascript1.2><!--
+<script type="text/javascript"><!--
 
 /***
 Unit word problems
@@ -94,7 +94,7 @@ function type2() {
 	var i =m1;
 	var numString = ""+commaFormat(speed);
 	var denString = "";
-	var distanceString="<table border=0><tr><td>"+commaFormat(speed)+"</td><td>"+fraction(psMeasure[m1],tMeasure[t1])+"</td>";
+	var distanceString="`"+commaFormat(speed)+" "+unitFraction(psMeasure[m1],tMeasure[t1]);
 	var increment = (m2-m1)/Math.abs(m2-m1);
 	var curScale=Math.round(dMultiplier[m1]/dMultiplier[m1+increment]*1000)/1000;
 	var nextUnit=psMeasure[m1+increment];
@@ -103,11 +103,11 @@ function type2() {
 	
 	while(i!=m2)	
 	{
-		distanceString+="<td> x </td><td>"+fraction(commaFormat(Math.max(1,dMultiplier[i]/dMultiplier[i+increment])), commaFormat(Math.max(Math.round(dMultiplier[i+increment]/dMultiplier[i]),1)))
-			+"</td><td>"+fraction(nextUnit, curUnit)+"</td>";
-		numString+=" x "+commaFormat(Math.max(1,dMultiplier[i]/dMultiplier[i+increment]));
+		distanceString+=" xx "+mathFraction(commaFormat(Math.max(1,dMultiplier[i]/dMultiplier[i+increment])), commaFormat(Math.max(Math.round(dMultiplier[i+increment]/dMultiplier[i]),1)))
+			+unitFraction(nextUnit, curUnit);
+		numString+=" xx "+commaFormat(Math.max(1,dMultiplier[i]/dMultiplier[i+increment]));
 		if (denString.length>0)
-			denString+=" x ";
+			denString+=" xx ";
 		denString+=commaFormat(Math.max(Math.round(dMultiplier[i+increment]/dMultiplier[i]),1));
 		i+=increment;
 		nextUnit=psMeasure[i+increment];
@@ -120,12 +120,11 @@ function type2() {
 	nextUnit = tMeasure[t1+increment]+"s";
 	while(i!=t2)
 	{
-		distanceString+="<td> x </td><td>"+fraction(Math.max(Math.round(tMultiplier[i+increment]/tMultiplier[i]),1),Math.max(1,tMultiplier[i]/tMultiplier[i+increment]))+
-			"</td><td>"+
-			fraction(curUnit, nextUnit)+"</td>";
-		numString+=" x "+commaFormat(Math.max(Math.round(tMultiplier[i+increment]/tMultiplier[i]),1));
+		distanceString+=" xx "+mathFraction(Math.max(Math.round(tMultiplier[i+increment]/tMultiplier[i]),1),Math.max(1,tMultiplier[i]/tMultiplier[i+increment]))+
+			unitFraction(curUnit, nextUnit);
+		numString+=" xx "+commaFormat(Math.max(Math.round(tMultiplier[i+increment]/tMultiplier[i]),1));
 		if (denString.length>0)
-			denString+=" x ";
+			denString+=" xx ";
 		denString+=commaFormat(Math.max(1,tMultiplier[i]/tMultiplier[i+increment]));
 		i+=increment;
 		nextUnit=tMeasure[i+increment]+"s";
@@ -133,7 +132,7 @@ function type2() {
 	}
 
 
-	distanceString +="</tr></table>";
+	distanceString +="`";
 
 	correctAnswer = Math.round(speed*scale*1000)/1000;
 	correct_answer= "`" + commaFormat(correctAnswer) + "`";
@@ -165,10 +164,9 @@ function type2() {
 	
 	}
 	write_step(distanceString);
-	numString = "<span style='white-space: nowrap;'>" + numString + "</span>";
-	denString = "<span style='white-space: nowrap;'>" + denString + "</span>";
-	write_step("<table border=0><tr><td>= </td><td>"+fraction(numString, denString)+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
-	write_step("<table border=0><tr><td>= </td><td>"+correct_answer+"</td><td>"+fraction(psMeasure[m2],tMeasure[t2])+"</td></tr></table>");
+
+	write_step("`= "+mathFraction(numString, denString)+" "+unitFraction(psMeasure[m2],tMeasure[t2])+"`");
+	write_step("`= "+correct_answer+" "+unitFraction(psMeasure[m2],tMeasure[t2])+"`");
 }
 
 eval("type"+getRandomIntRange(1,2)+"()");  //Randomly choose a problem type

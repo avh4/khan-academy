@@ -33,9 +33,9 @@ $(document).ready(function () {
 		translate();
 	});
 });
-var username = "{{cookiename}}";
-var currentexercise = "{{exid}}";
-KhanAcademy.problem_number = "{{problem_number}}";
+var username = "{{cookiename|escapejs}}";
+var currentexercise = "{{exid|escapejs}}";
+KhanAcademy.problem_number = "{{problem_number|escapejs}}";
 KhanAcademy.problem_seed = KhanAcademy.problem_number;
 {% if exercise.summative %}
     {# We use different seeds for summative exercises so they do not reuse content already seen in normal exercises. #}
@@ -58,13 +58,13 @@ function submitForm(value)
 {% block pagecontent %}
 <div id="container" class="single-exercise">
 <div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
-<div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
+<div class="exercise-badge single-exercise" data-id="{{exercise.name|escape}}">
 
         {% exercise_icon exercise App %}
 
-		<div class="energy-points-badge">{{exercise_points}}</div>
+		<div class="energy-points-badge">{{exercise_points|escape}}</div>
         <div class="exercise-title">
-            <a href="/exercises?exid={{ exercise.name }}">{{ exercise.display_name|escape }}</a>
+            <a href="/exercises?exid={{exercise.name|escape}}">{{ exercise.display_name|escape }}</a>
             {% if not exercise.live %}
             <span style="color:red;">(admins only, <a href="/editexercise?name={{ exercise.name|escape }}">deploy</a>)</span>
             {% endif %}
@@ -111,26 +111,26 @@ function submitForm(value)
 		<iframe id="svgedit" name="svgedit" width="100%" height="100%" allowtransparency="true" frameBorder="0" scrolling="no" style="background-color: transparent; position: absolute; top: -26px; left: 0; width: 100%; height: 100%; overflow: visible; border:none;"></iframe>
 	</div>
 	<div id="answer_area">
-	   <form id="answerform" action="/registeranswer" method="post">
+	   <form id="answerform" action="/registeranswer" method="GET">
 	   <div class="info-box">
 			{% block answerform %}
 
             {% if read_only %}
-                <span class="info-box-header">Problem #{{ problem_number }}</span>
+                <span class="info-box-header">Problem #{{ problem_number|escape }}</span>
                 <span class="info-box-subheader">You are viewing a problem in {{ exercise.display_name|escape }}.</span>
                 <span class="info-box-sub-description">To see the solution, 
                     <input class="button orange" type="button" value="show the next hint." onclick="evaluate_hint(true, true);"/></span>
                 <span class="info-box-sub-description">To work on problems like this, <a href="/exercises?exid={{ exid }}">start this exercise</a>.</span>
             {% endif %}
 
-			<input type="hidden" id="exid" name="exid" value="{{exid}}">
-			<input type="hidden" id="streak" name="streak" value="{{streak}}">
-			<input type="hidden" id="key" name="key" value="{{key}}">
-			<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
+			<input type="hidden" id="exid" name="exid" value="{{exid|escape}}">
+			<input type="hidden" id="streak" name="streak" value="{{streak|escape}}">
+			<input type="hidden" id="key" name="key" value="{{key|escape}}">
+			<input type="hidden" id="start_time" name="start_time" value="{{start_time|escape}}">
 			<input type="hidden" id="correct" name="correct" value="0" />
 			<input type="hidden" id="hint_used" name="hint_used" value="0" />
-			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
-			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
+			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp|escape}}">
+			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number|escape}}">
             {% block answerarea %}
                 {% if not read_only %}
                 <span class="info-box-header">Answer</span><input {% if is_mobile %} type="number" {% else %} type="text" {% endif %}  id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
@@ -250,7 +250,7 @@ $(document).ready(function() {
 			NOTE: To avoid caching issues, the scratchpad version number below needs to be updated here and
 			in app.yaml whenever we update scratchpad.
 			*/
-			svgedit.attr('src', '/scratchpad-2011-03-17/scratchpad.html');
+			svgedit.attr('src', '/scratchpad-2011-03-28/scratchpad.html');
 		}
         createCookie(scratchpad_cookie_name,"true",365);
         return false;

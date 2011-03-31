@@ -212,7 +212,7 @@ class Exercise(db.Model):
     @staticmethod
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_dict_unsafe_%s" % Setting.cached_exercises_date())
     def __get_dict_use_cache_unsafe__():
-        exercises = Exercise.get_all_use_cache()
+        exercises = Exercise.__get_all_use_cache_unsafe__()
         dict_exercises = {}
         for exercise in exercises:
             dict_exercises[exercise.name] = exercise

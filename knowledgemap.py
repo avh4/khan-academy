@@ -16,6 +16,10 @@ class SaveExpandedAllExercises(request_handler.RequestHandler):
             user_data.put() 
 
 class SaveMapCoords(request_handler.RequestHandler):
+
+    def get(self):
+        return
+
     def post(self):
         user = util.get_current_user()
         if user:
