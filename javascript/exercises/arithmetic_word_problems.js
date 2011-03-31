@@ -131,7 +131,7 @@ function ArithmeticWordProblemsExercise() {
 
         writeText(this.replace("@n bought @0 @o1s from the @s store. @P also bought a @o2 for @e dollars. @P spent a total of @t dollars. How much did each @o1 cost?"));
         writeStep(this.replace("<li>Of the @t dollars, @p spent @e dollars on a @o2 so @p must have spent `@t - @e = @x` dollars on @o1s.</li>"));
-        writeStep(this.replace("<li>@P spent @x dollars on @0 @o1s, so @p must have spent `@x \\divide @0 = @1` dollars on each @o1s.</li>"));
+        writeStep(this.replace("<li>@P spent @x dollars on @0 @o1s, so @p must have spent `@x \\divide @0 = @1` dollars on each @o1.</li>"));
     };
 
     this.type3 = function() {
