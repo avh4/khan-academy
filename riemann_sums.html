@@ -1,0 +1,21 @@
+{% extends arithmetic_template %}
+
+{% block maincell %}
+<script src="/javascript/exercises/riemann_sums.js?{{App.version}}"></script>
+
+<script type="text/javascript">
+    var exercise = new RiemannSumsExercise();
+    exercise.init();
+
+    function graph_update(paper) {
+	exercise.graphUpdate(paper);
+    }
+
+    function next_step() { exercise.nextStep(); }
+    
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=450&h=450" height="490" width="490"></iframe></td>
+{% endblock graphdisplay %}

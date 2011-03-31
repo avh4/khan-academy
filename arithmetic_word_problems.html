@@ -1,0 +1,9 @@
+{% extends "arithmetic_template.html" %}
+{% block maincode %}
+<script src="/javascript/exercises/arithmetic_word_problems.js?{{App.version}}"></script>
+<script>
+var exercise = new ArithmeticWordProblemsExercise();
+exercise.init();
+</script>
+{% endblock maincode %}
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}
