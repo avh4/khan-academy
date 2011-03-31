@@ -187,26 +187,8 @@ function handleCorrectness(isCorrect)
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
 		};
 
-		$.ajax({
-            type: "POST",
-            url: "/registercorrectness", 
-			data: data,
-            success: function() { /* Fire and forget, no callback. */ },
-            error: function(xhr) {
-                if (xhr && xhr.status == 500) {
-                    $.post("/sendtolog", {
-                        message: "registercorrectness failure: " + 
-                        "key: (" + data.key + ")     " + 
-                        "key queried again: (" + $("#key").val() + ")     " + 
-                        "key len: (" + $("#key").length + ")     " + 
-                        "correct: (" + data.correct + ")     " + 
-                        "time_warp: (" + data.time_warp + ")     " + 
-                        "hint_used: (" + data.hint_used + ")     " + 
-                        "form html: (" + $("#answerform").html() + ")     "
-                    });
-                }
-            }
-        });
+		$.get("/registercorrectness", data);
+
 		correctnessRegistered = true;		
 	}	
 	if (isCorrect)
