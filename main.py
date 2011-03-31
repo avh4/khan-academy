@@ -132,70 +132,6 @@ class KillLiveAssociations(request_handler.RequestHandler):
             video_playlist.live_association = False
         db.put(all_video_playlists)
 
-class TestUserData(request_handler.RequestHandler):
-    def get(self):
-        if not users.is_current_user_admin():
-            return
-
-        user_1 = users.User('http://facebookid.khanacademy.org/525876620', federated_identity="Logan Williams")
-        user_2 = users.User('http://facebookid.khanacademy.org/100001639389777', federated_identity="Logan Williams")
-
-        self.response.out.write("user_1: %s<br/>" % user_1)
-        self.response.out.write("user_2: %s<br/>" % user_2)
-        self.response.out.write("user_1 == user_2: %s<br/>" % (user_1 == user_2))
-
-        user_data_1 = UserData.get_for(user_1)
-        user_data_2 = UserData.get_for(user_2)
-
-        self.response.out.write("<br/><br/><br/>")
-
-        if user_data_1:
-            self.response.out.write("user_data_1: %s<br/>" % user_data_1.key())
-            self.response.out.write("user_data_1.user: %s<br/>" % user_data_1.user)
-        if user_data_2:
-            self.response.out.write("user_data_2: %s<br/>" % user_data_2.key())
-            self.response.out.write("user_data_2.user: %s<br/>" % user_data_2.user)
-
-        self.response.out.write("<br/><br/><br/>")
-
-        exercise = Exercise.get_by_name('order_of_operations')
-        user_exercise_1 = None
-        user_exercise_2 = None
-
-        if user_data_1:
-            user_exercise_1 = user_data_1.get_or_insert_exercise(exercise, allow_insert=False)
-            if user_exercise_1:
-                self.response.out.write("user_exercise_1: %s<br/>" % user_exercise_1.key())
-
-        if user_data_2:
-            user_exercise_2 = user_data_2.get_or_insert_exercise(exercise, allow_insert=False)
-            if user_exercise_2:
-                self.response.out.write("user_exercise_2: %s<br/>" % user_exercise_2.key())
-
-
-        if user_exercise_1:
-            self.response.out.write("user_exercise_1.user: %s<br/>" % user_exercise_1.user)
-        if user_exercise_2:
-            self.response.out.write("user_exercise_2.user: %s<br/>" % user_exercise_2.user)
-
-        self.response.out.write("<br/><br/><br/>")
-
-        if user_exercise_1:
-            user_data_from_exercise_1 = UserData.get_for(user_exercise_1.user)
-            self.response.out.write("user_data_from_exercise_1: %s<br/>" % user_data_from_exercise_1.key())
-            if user_data_from_exercise_1:
-                self.response.out.write("user_data_from_exercise_1.user: %s<br/>" % user_data_from_exercise_1.user)
-                self.response.out.write("user_data_from_exercise_1.user == user_data_1.user: %s<br/>" % (user_data_from_exercise_1.user == user_data_1.user))
-
-        self.response.out.write("<br/><br/><br/>")
-
-        if user_exercise_2:
-            user_data_from_exercise_2 = UserData.get_for(user_exercise_2.user)
-            self.response.out.write("user_data_from_exercise_2: %s<br/>" % user_data_from_exercise_2.key())
-            if user_data_from_exercise_2:
-                self.response.out.write("user_data_from_exercise_2.user: %s<br/>" % user_data_from_exercise_2.user)
-                self.response.out.write("user_data_from_exercise_2.user == user_data_2.user: %s<br/>" % (user_data_from_exercise_2.user == user_data_2.user))
-
 class ViewExercise(request_handler.RequestHandler):
 
     def get(self):
@@ -1892,7 +1828,6 @@ def real_main():
         ('/badges/view', util_badges.ViewBadges),
 
         ('/sendtolog', SendToLog),
-        ('/testuserdata', TestUserData),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),

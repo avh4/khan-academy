@@ -400,7 +400,7 @@ class UserData(db.Model):
                 )
         return user_data
 
-    def get_or_insert_exercise(self, exercise, allow_insert = True):
+    def get_or_insert_exercise(self, exercise):
 
         exid = exercise.name
         userExercise = UserExercise.get_by_key_name(exid, parent=self)
@@ -415,7 +415,7 @@ class UserData(db.Model):
             query.order('-total_done') # Temporary workaround for issue 289
             userExercise = query.get()
 
-        if allow_insert and not userExercise:
+        if not userExercise:
             userExercise = UserExercise.get_or_insert(
                 key_name=exid,
                 parent=self,
