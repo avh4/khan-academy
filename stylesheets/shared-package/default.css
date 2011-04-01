@@ -164,6 +164,44 @@ hr {
     background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
+
+/* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
+.fancy-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.fancy-scrollbar::-webkit-scrollbar-button:start:decrement,
+.fancy-scrollbar::-webkit-scrollbar-button:end:increment {
+  background: transparent;
+  display: none;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:vertical:start {
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:vertical:end {
+  -webkit-border-bottom-left-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:horizontal:start {
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:horizontal:end {
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-thumb:vertical,
+.fancy-scrollbar::-webkit-scrollbar-thumb:horizontal {
+  background: #ccc;
+  border: 1px solid #aaa;
+  -webkit-border-radius: 4px;
+  display: block;
+  height: 50px;
+}
 /* End of basic typography */
 
 /* Links in the header and footer don't change color when visited. */
@@ -1085,16 +1123,18 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     #container #dashboard-drawer {
         position: absolute;
-        width: 340px;
+        background: #fff;
+        width: 350px;
         height: 800px;
-        overflow: scroll;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        padding: 10px 5px;
         z-index: 1;
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
+    }
+    #container #dashboard-drawer-inner {
+        margin-right: 2px;
+        overflow: auto;
+        padding: 10px 3px 10px 5px;
     }
     #container #dashboard-drawer h3 .subheader {
         font-weight: normal;
@@ -1164,9 +1204,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
     #container #dashboard-map #map-canvas {
         height: 100%;
-        left: 340px;
+        left: 350px;
         margin-left: 0;
-        margin-right: 340px;
+        margin-right: 350px;
     }
 
 .exercise-badge {
@@ -1175,9 +1215,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     margin-left: 1px;
     position: relative;
     width: 320px;
-    height: 78px;
+    height: 79px;
     cursor: pointer;
-    border: 1px dotted #bbb;
+    border: 1px solid #ccc;
     
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -1790,21 +1830,19 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     cursor: pointer;
     background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .25)), to(rgba(255, 255, 255,.1)));
     background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .4), rgba(255, 255, 255,.1));
+    border-color: #fff;
 }
 .progress-legend.proficient,
 #module-progress .proficient {
     background-color: #80C65A;
-    border-color: #bbb #a1a1a1 #a1a1a1 #bbb;
 }
 .progress-legend.struggling,
 #module-progress .struggling {
     background-color: red;
-    border-color: #bbb #a1a1a1 #a1a1a1 #bbb;
 }
 .progress-legend.started,
 #module-progress .started {
     background-color: lightblue;
-    border-color: #ccc #aaa #aaa #ccc;
 }
 .exercise-info-hover, #info-hover-container {
     background: #fff;
