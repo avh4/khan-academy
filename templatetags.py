@@ -38,12 +38,24 @@ class HighlightNode(template.Node):
         text = re.sub(regex, r'<span class="highlight">\1</span>', text)
         return text
 
+@register.inclusion_tag("column_major_order_styles.html")
+def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
+    col_list = range(0, num_cols)
+    link_height = font_size * 1.5
+    
+    return {
+        "columns": col_list,
+        "font_size": font_size,
+        "link_height": link_height,
+        "column_width": column_width,
+        "column_width_plus_gutter": column_width + gutter,
+    }
 @register.inclusion_tag("column_major_order_videos.html")
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
-
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
-    link_height = font_size * 1.5 
+    link_height = font_size * 1.5
+    current_playlist = videos[0]["playlist"].title.replace(' ', '-')
     # Calculate the column indexes (tops of columns). Since video lists won't divide evenly, distribute
     # the remainder to the left-most columns first, and correctly increment the indices for remaining columns
     column_indices = [(items_in_column * multiplier + (multiplier if multiplier <= remainder else remainder)) for multiplier in range(1, num_cols + 1)]
@@ -51,10 +63,9 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
     return {
                "videos": videos,
                "column_width": column_width,
-               "column_width_plus_gutter": column_width + gutter,
-               "font_size": font_size,
-               "link_height": link_height,
+               "current_playlist": current_playlist,
                "column_indices": column_indices,
+               "link_height": link_height,
                "list_height": column_indices[0] * link_height,
           }
 
