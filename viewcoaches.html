@@ -1,32 +1,15 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 <style>
+#coaches {
+    padding: 18px 23px;
+}
 #coaches p {
     margin-top: 1.2em;
     margin-bottom: 1.2em;
 }
-#coaches table {
-    border-top: 2px solid #80C65A;
-    border-spacing: 0;
-    border-collapse: collapse;
-}
-#coaches td, #coaches th {
-    padding: 3px;
-}
-#coaches th {
-    BORDER-RIGHT: #fff 1px solid;
-    PADDING-RIGHT: 5px;
-    BORDER-TOP: #fff 1px solid;
-    PADDING-LEFT: 5px;
-    FONT-SIZE: 11px;
-    PADDING-BOTTOM: 4px;
-    VERTICAL-ALIGN: bottom;
-    COLOR: #333;
-    LINE-HEIGHT: 13px;
-    PADDING-TOP: 4px;
-    BORDER-BOTTOM: #ccc 1px solid;
-    FONT-FAMILY: arial,helvetica,sans-serif;
-    BACKGROUND-COLOR: #d2dded
+#coaches td {
+    padding: 9px;
 }
 #coaches tr.even_row td {
     background-color:#FFFFFF;
@@ -40,6 +23,7 @@
 {% block pagecontent %}
 
 <article id="coaches">
+<h2>Add a coach</h2>
 <p>
     Your coach will give you their coach id. Enter it here to give them access to your Khan Academy data.
 </p>
@@ -61,23 +45,22 @@
 {% endif %}
 
 {% if coaches %}
-<form action="/unregistercoach" method="post">
-<table>
-<tr><th>Coach</th><th>Remove</th></tr>
-{% for coach in coaches %}
-		{% if forloop.counter|divisibleby:2 %}
-		<tr class="even_row" >
-		{% else %}
-		<tr class="odd_row">
-		{% endif %}
 
-		<td>{{coach}}</td>
-		<td><input type="checkbox" name="coach" value="{{coach}}"></td>
-		</tr>
-{% endfor %}
-</table>
-<p><input type="submit" value="Remove Coach" class="simple-button action-gradient"></p>
-</form>
+    <h2>Your coaches</h2>
+
+    <table>
+    {% for coach in coaches %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach|escape }}</td>
+                <td><a href="/unregistercoach?coach={{ coach|urlencode|escape }}" class="simple-button action-gradient">Remove</a></td>
+            </tr>
+    {% endfor %}
+    </table>
 {% endif %}
+
 </article>
 {% endblock pagecontent %}

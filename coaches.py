@@ -63,8 +63,7 @@ class RegisterCoach(request_handler.RequestHandler):
         self.redirect("/coaches?invalid_coach=1")
 
 class UnregisterCoach(request_handler.RequestHandler):
-
-    def post(self):
+    def get(self):
         user = util.get_current_user()
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
