@@ -41,24 +41,29 @@
 
 <article id="coaches">
 <p>
-Enter the coach id your coach gives you to allow them to view all of your performance data on the Khan Academy.
+    Your coach will give you their coach id. Enter it here to give them access to your Khan Academy data.
 </p>
-
-{% if invalid_coach %}
-<p><span style="color:red;font-weight:bold;">You must enter a full, valid coach id.</span><br/>A full coach id will either be a complete email address, like <strong>teacher@gmail.com</strong>, or a Facebook id, like <strong>http://facebookid.khanacademy.org/1067499349</strong>.</p>
-{% endif %}
 
 <p>
 <form action="/registercoach" method="post">
 <input type="text" name="coach">
-<input type="submit" value="Register Coach" class="simple-button action-gradient">
+<input type="submit" value="Add Coach" class="simple-button action-gradient">
 </form>
 </p>
+
+{% if invalid_coach %}
+<p><span style="color:red;font-weight:bold;">We can't find this coach.</span></p>
+
+<p style="padding-left:18px;">
+        Make sure you're entering your full coach's full id, which looks like <strong>teacher@gmail.com</strong> or <strong>http://facebookid.khanacademy.org/1067499349</strong>.<br/>
+        If you're entering your coach id correctly and still having trouble, make sure your coach has logged in to the Khan Academy at least once.
+</p>
+{% endif %}
 
 {% if coaches %}
 <form action="/unregistercoach" method="post">
 <table>
-<tr><th>Coach</th><th>Unregister</th></tr>
+<tr><th>Coach</th><th>Remove</th></tr>
 {% for coach in coaches %}
 		{% if forloop.counter|divisibleby:2 %}
 		<tr class="even_row" >
@@ -71,7 +76,7 @@ Enter the coach id your coach gives you to allow them to view all of your perfor
 		</tr>
 {% endfor %}
 </table>
-<p><input type="submit" value="Unregister Coach" class="simple-button action-gradient"></p>
+<p><input type="submit" value="Remove Coach" class="simple-button action-gradient"></p>
 </form>
 {% endif %}
 </article>

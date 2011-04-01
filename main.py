@@ -1669,7 +1669,6 @@ class ViewArticle(request_handler.RequestHandler):
         self.render_template("article.html", template_values)
             
 class Login(request_handler.RequestHandler):
-
     def get(self):
         return self.post()
 
@@ -1693,6 +1692,17 @@ class Login(request_handler.RequestHandler):
                            'direct': direct
                            }
         self.render_template('login.html', template_values)
+
+class PostLogin(request_handler.RequestHandler):
+    def get(self):
+        cont = self.request_string('continue', default = "/")
+
+        # Immediately after login we make sure this user has a UserData entry
+        user = util.get_current_user()
+        if user:
+            UserData.get_or_insert_for(user)
+
+        self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
     def get(self):
@@ -1843,6 +1853,7 @@ def real_main():
         
         ('/press/.*', ViewArticle),
         ('/login', Login),
+        ('/postlogin', PostLogin),
         ('/logout', Logout),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
