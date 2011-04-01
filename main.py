@@ -140,12 +140,18 @@ class TestUserData(request_handler.RequestHandler):
         user_1 = users.User('http://facebookid.khanacademy.org/525876620', federated_identity="Logan Williams")
         user_2 = users.User('http://facebookid.khanacademy.org/100001639389777', federated_identity="Logan Williams")
 
+        user_1b = users.User('http://facebookid.khanacademy.org/525876620')
+        user_2b = users.User('http://facebookid.khanacademy.org/100001639389777')
+
         self.response.out.write("user_1: %s<br/>" % user_1)
         self.response.out.write("user_2: %s<br/>" % user_2)
         self.response.out.write("user_1 == user_2: %s<br/>" % (user_1 == user_2))
 
         user_data_1 = UserData.get_for(user_1)
         user_data_2 = UserData.get_for(user_2)
+
+        user_data_1b = UserData.get_for(user_1b)
+        user_data_2b = UserData.get_for(user_2b)
 
         self.response.out.write("<br/><br/><br/>")
 
@@ -155,6 +161,16 @@ class TestUserData(request_handler.RequestHandler):
         if user_data_2:
             self.response.out.write("user_data_2: %s<br/>" % user_data_2.key())
             self.response.out.write("user_data_2.user: %s<br/>" % user_data_2.user)
+        if user_data_1b:
+            self.response.out.write("user_data_1b: %s<br/>" % user_data_1b.key())
+            self.response.out.write("user_data_1b.user: %s<br/>" % user_data_1b.user)
+        else:
+            self.response.out.write("user_data_1b: None<br/>")
+        if user_data_2b:
+            self.response.out.write("user_data_2b: %s<br/>" % user_data_2b.key())
+            self.response.out.write("user_data_2b.user: %s<br/>" % user_data_2b.user)
+        else:
+            self.response.out.write("user_data_2b: None<br/>")
 
         self.response.out.write("<br/><br/><br/>")
 
