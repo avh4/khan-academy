@@ -151,7 +151,7 @@ function ArithmeticWordProblemsExercise() {
         writeText(this.replace("@n is putting @o1s into @o2s. If @p puts @2 @o1s in each @o2 @p will make @3 @o2s and have @e @o1s left over. If @p instead puts @0 @o1s in each @o2, how many @o2s of @o1s can @p make?"));
         writeStep(this.replace("<li>@3 @o2s of @2 @o1s each results in `@3 \\times @2 = @x` @o1s</li>"));
         writeStep(this.replace("<li>@x @o1s plus @e left over equals @t total @o1s.</li>"));
-        writeStep(this.replace("<li>@t @o1s divided into groups of @0 is `@t \\divide @0 = @1` @o1s</li>"));
+        writeStep(this.replace("<li>@t @o1s divided into groups of @0 is `@t \\divide @0 = @1` @o2s</li>"));
     };
 
     this.init = function() {
