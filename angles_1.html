@@ -806,7 +806,9 @@ function draw_next_step() {
     show_step();
 }
 
-
+/**
+ * Iframe calls this function to render the graph.
+ */
 function graph_update() {
 	
 	
@@ -954,6 +956,14 @@ function type1()
 }
 
 
+/**
+ * Returns the coordinates of a point of intersection made between the two defined lines
+ * @p1 staring point of the first line.
+ * @p2 end point of the first line.
+ * @p3 staring point of the second line.
+ * @p4 end point of the second line.
+ * @return {string} Some return value.
+ */
 function intersection(p1,p2,p3,p4)
 {
 	var m1 = (points[p1].coor[1]-points[p2].coor[1])/(points[p1].coor[0]-points[p2].coor[0]);
@@ -962,9 +972,17 @@ function intersection(p1,p2,p3,p4)
 	var b2 = points[p3].coor[1] - m2*points[p3].coor[0];
 	var x = (b2-b1)/(m1-m2);
 	var y = m1*x+b1;
-	return [Math.round(x*100)/100,Math.round(y*100)/100];
+	return [toHundredths(x), toHundredths(y)];
 }
 
+/**
+ * Round a fraction to the nearest hundredths
+ * @f float to round.
+ */
+function toHundredths(f)
+{
+    return (Math.round(f*100)/100);
+}
 
 function getLine(p1, p2)
 {
@@ -978,6 +996,9 @@ function equalLines(line1, line2)
 	return (line1[0]==line2[0] && line1[1]==line2[1]);
 }
 
+/**
+ * TODO: find out if this is necessary. Can we just use toHundredths?
+ */
 function round2Dig(x)
 {
 
@@ -986,8 +1007,6 @@ function round2Dig(x)
 	return (Math.round(x*s)/s);
 
 }
-
-
 
 var colors = ['#D9A326', '#E8887D', '#9CC9B7', '#AE9CC9', '#CC6699', '#FF9999', '#CD9B9B', '#E47833', '#777777', '#CDBA96','#FFCC11','#6B8E23','#668B8B'];
 var curColor = 0;
@@ -998,6 +1017,19 @@ function getColor()
 	return colors[curColor];
 }
 
+/**
+ * Given the two end points of a line segment, with a common vertex, calculate
+ * the angle. 
+ *                * end1 ('A')
+ *               /
+ *              /
+ *             /
+ *  ('E') vert *---------* end2 ('C')
+ *
+ * @end1 The POINT of the endpoint of one line segment.
+ * @vert The common vertex
+ * @end2 The coordinate of the endpoint of the other line segment.
+ */
 function createAngle(end1, vert, end2)
 {
 
@@ -1053,9 +1085,6 @@ function sameDirection(p1, p2, q1, q2)
 {
 	return ((Math.round(p1)>=Math.round(p2) && Math.round(q1)>=Math.round(q2)) || (Math.round(p1)<Math.round(p2) && Math.round(q1)<Math.round(q2)));
 }
-
-
-
 
 function sameDirectionEdges(v1, e1, v2, e2)  //we assume that the edges will intersect so that we know that v1 and v2 are part of the same triangle,
 {
@@ -1175,41 +1204,42 @@ function findTriangle(angle)
 	//alert(angle);
 }
 
-
+/**
+ * Initialize the pentagon version of the problem. Create the line segments and
+ * identify the angles involved. 
+ */
 function type2()
 {
-	
+	// These are the line segments in our pentagon
 	variables['AC']={type: 'line', points:['A', 'C'], goal:false, color: getColor()};
 	variables['CE']={type: 'line', points:['C', 'E'], goal:false, color: getColor()};
 	variables['EB']={type: 'line', points:['E', 'B'], goal:false, color: getColor()};
 	variables['BD']={type: 'line', points:['B', 'D'], goal:false, color: getColor()};
 	variables['DA']={type: 'line', points:['D', 'A'], goal:false, color: getColor()};
 	
-	/**
-	variables['AB']={type: 'line', points:['A', 'B'], goal:false, color: getColor()};
-	variables['BC']={type: 'line', points:['B', 'C'], goal:false, color: getColor()};
-	variables['CD']={type: 'line', points:['C', 'D'], goal:false, color: getColor()};
-	variables['DE']={type: 'line', points:['D', 'E'], goal:false, color: getColor()};
-	variables['EA']={type: 'line', points:['E', 'A'], goal:false, color: getColor()};
-	****/
-	
 	rules = new Array();
 	
-	points.A = {coor: [-100*Math.cos(18*Math.PI/180), 100*Math.sin(18*Math.PI/180)], label: left};
-	points.B = {coor: [0,100], label: above};
-	points.C = {coor: [100*Math.cos(18*Math.PI/180), 100*Math.sin(18*Math.PI/180)], label: right};
-	points.D = {coor: [100*Math.cos(-54*Math.PI/180),100*Math.sin(-54*Math.PI/180)], label: right};
-	points.E = {coor: [-100*Math.cos(-54*Math.PI/180),100*Math.sin(-54*Math.PI/180)], label: right};
+    // calculate the position of the points in the pentagon.
+    // JB: round to the hundredths because some javascript libraries have issues
+    // with float comparisons. 
+    points.A = {coor: [toHundredths(-100*Math.cos(18*Math.PI/180)), toHundredths(100*Math.sin(18*Math.PI/180))], label: left};
+    points.B = {coor: [0,100], label: above};
+    points.C = {coor: [toHundredths(100*Math.cos(18*Math.PI/180)), toHundredths(100*Math.sin(18*Math.PI/180))], label: right};
+    points.D = {coor: [toHundredths(100*Math.cos(-54*Math.PI/180)), toHundredths(100*Math.sin(-54*Math.PI/180))], label: right};
+    points.E = {coor: [toHundredths(-100*Math.cos(-54*Math.PI/180)), toHundredths(100*Math.sin(-54*Math.PI/180))], label: right};
 	points.F = {coor: intersection('A','D','E','B'), label: left};
 	points.G = {coor: intersection('E','B','A','C'), label: aboveleft};
 	points.H = {coor: intersection('A','C','B','D'), label: aboveright};
 	points.I = {coor: intersection('B','D','C','E'), label: right};
 	points.J = {coor: intersection('A','D','C','E'), label: below};
 	
+    // go through each line segment. 
 	for (k in variables)
 	{
+        // comparing to the other line segments. 
 		for (j in variables)
 		{
+            // so long as it's not the same line!
 			if (variables[k].type=='line' && variables[j].type=='line' && k!=j)
 			{
 				
@@ -1224,15 +1254,18 @@ function type2()
 				else if (b==d) createAngle(a,b,d);
 				else
 				{
-				
+				    // in this case the segments don't share a vertex. 
 					var endpoints = [variables[k].points[0],variables[k].points[1],variables[j].points[0],variables[j].points[1]];
 					
+                    // find the point of intersection between the two line segments.
 					var p = intersection(endpoints[0], endpoints[1], endpoints[2], endpoints[3]); 
 					
 					var vert;
 					for (m in points)
 					{
-						if (points[m].coor[0]==p[0] && points[m].coor[1]==p[1])
+                        // opera js fix: we don't need to be any more precise than an int.
+						if (Math.round(points[m].coor[0]) == Math.round(p[0]) &&
+                            Math.round(points[m].coor[1]) == Math.round(p[1]))
 						{
 							vert = m+'';
 							break;
@@ -1250,7 +1283,6 @@ function type2()
 					rules.push([a+vert+c, b+vert+d, oppAngles]);
 					rules.push([a+vert+d, b+vert+c, oppAngles]);
 				}
-				
 			}
 		}
 	}
@@ -1277,7 +1309,7 @@ var points = {};
 var rules;
 var variables = {};
 
-if (KhanAcademy.random()>KhanAcademy.random())
+//if (KhanAcademy.random()>KhanAcademy.random())
 	type=2;
 
 
