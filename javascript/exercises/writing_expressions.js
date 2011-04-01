@@ -21,6 +21,7 @@
 
 function WritingExpressionsExercise() {
     var expression = new Expression();
+    var orig_answer;
     
     showProblem();
     showHints();
@@ -32,9 +33,9 @@ function WritingExpressionsExercise() {
         write_text(expression.toEnglish());
         close_left_padding();
         
-        var answer = expression.toString();
+        orig_answer = expression.toString();
         if (get_random() > -5) 
-            setCorrectAnswer(expression.toString());
+            setCorrectAnswer(orig_answer);
         else
             setCorrectAnswer("`None of these`");
     }
@@ -50,28 +51,36 @@ function WritingExpressionsExercise() {
     }
     
     function generateWrongAnswers() {
-        // If None of the above is the correct answer, then the following has no effect.
-        addWrongChoice("`None of these`");
+        addWrongChoiceIfNotOrig("`None of these`");
         
         var wrong = new Expression();
         wrong.setCoefficient(expression.getCoefficient() * -1);
         wrong.setConstant(expression.getConstant());
-        addWrongChoice(wrong.toString());
+        addWrongChoiceIfNotOrig(wrong.toString());
         
         wrong.setConstant(expression.getConstant() * -1);
-        addWrongChoice(wrong.toString());
+        addWrongChoiceIfNotOrig(wrong.toString());
         
         wrong.setCoefficient(expression.getConstant());
         wrong.setConstant(expression.getCoefficient());
-        addWrongChoice(wrong.toString());
+        addWrongChoiceIfNotOrig(wrong.toString());
         
         wrong.setCoefficient(expression.getConstant() * -1);
         wrong.setConstant(expression.getCoefficient() * -1);
-        addWrongChoice(wrong.toString());
+        addWrongChoiceIfNotOrig(wrong.toString());
 
         while (getNumPossibleAnswers() < 4) {
             wrong = new Expression();
-            addWrongChoice(wrong.toString());
+            addWrongChoiceIfNotOrig(wrong.toString());
         }
+    }
+    
+    // When the correct answer is rigged to "None of the these", 
+    // we don't want a wrong answer to be correct.
+    // Eventually, refactor this into exerciseutil 
+    // so that all exercises with a "None of these" option will benefit.
+    function addWrongChoiceIfNotOrig(wrong_str) {
+        if (wrong_str != orig_answer)
+            addWrongChoice(wrong_str)
     }
 }
