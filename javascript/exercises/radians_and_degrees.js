@@ -42,7 +42,7 @@ function RadiansToDegreesExercise() {
             
             for (var i = 1; i <= 3; i++) {
                 var wrong_index = (index + (4 * i)) % common_angles.length;
-                addWrongChoice(common_angles[wrong_index].deg);
+                addWrongChoice(common_angles[wrong_index].deg + "&#176;");
             }
         } else {
             var random_degree = getRandomIntRange(0, 360);
