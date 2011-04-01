@@ -31,7 +31,7 @@
 <p>
 <form action="/registercoach" method="post">
 <input type="text" name="coach">
-<input type="submit" value="Add Coach" class="simple-button action-gradient">
+<input type="submit" value="Add coach" class="simple-button action-gradient">
 </form>
 </p>
 
@@ -56,7 +56,7 @@
             <tr class="odd_row">
             {% endif %}
                 <td>{{ coach|escape }}</td>
-                <td><a href="/unregistercoach?coach={{ coach|urlencode|escape }}" class="simple-button action-gradient">Remove</a></td>
+                <td><a href="/unregistercoach?coach={{ coach|urlencode|escape }}" class="simple-button action-gradient">Remove coach</a></td>
             </tr>
     {% endfor %}
     </table>
