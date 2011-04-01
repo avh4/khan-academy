@@ -1074,13 +1074,9 @@ def library_content_html(bust_cache = False):
     dict_playlists = {}
     dict_playlists_by_title = {}
     dict_video_playlists = {}
-    dict_exercise_videos = {}
 
     for video in Video.all():
         dict_videos[video.key()] = video
-
-    for exercise_video in ExerciseVideo.all().fetch(2000):
-        dict_exercise_videos[exercise_video.video.readable_id] = exercise_video.exercise.name 
 
     for playlist in Playlist.all():
         dict_playlists[playlist.key()] = playlist
@@ -1132,7 +1128,6 @@ def library_content_html(bust_cache = False):
     template_values = {
         'App' : App,
         'all_playlists': all_playlists,
-        'exercise_videos': dict_exercise_videos,
         }
     path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
     html = template.render(path, template_values)

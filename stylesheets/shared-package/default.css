@@ -1079,12 +1079,9 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-				background: url(/images/video-progress/video-only-none.png) no-repeat 0px 0px;
-				padding: 0 2px 0 18px;
+				background: url(/images/list-item-black.png) no-repeat 0 3px;
+				padding: 0 2px 0 13px;
 			}
-			 #library #library-content #library-content-main a.video-link.has-exercise {
-			     background-image: url(/images/video-progress/has-both-none.png);
-			 }
 			#library #library-content #library-content-main a.video-link:hover {
                 color: black;
 			}
