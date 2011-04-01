@@ -160,6 +160,9 @@ class RequestHandler(webapp.RequestHandler):
         if not template_values.has_key('continue'):
             template_values['continue'] = self.request.uri
 
+        # Always insert a post-login request before our continue url
+        template_values['continue'] = util.create_post_login_url(template_values['continue'])
+
         template_values['login_url'] = ('%s&direct=1' % util.create_login_url(template_values['continue']))
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 

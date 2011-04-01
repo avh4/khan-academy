@@ -45,7 +45,10 @@ def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
                 total_seconds += hourly_activity_summary_video_item.seconds_watched
 
     for key_playlist in dict_playlist_seconds:
-        dict_playlist_seconds[key_playlist]["percentage"] = int(float(dict_playlist_seconds[key_playlist]["seconds"]) / float(total_seconds) * 100.0)
+        dict_playlist_seconds[key_playlist]["percentage"] = 0
+        if total_seconds > 0:
+            dict_playlist_seconds[key_playlist]["percentage"] = int(float(dict_playlist_seconds[key_playlist]["seconds"]) / float(total_seconds) * 100.0)
+
         dict_playlist_seconds[key_playlist]["time_spent"] = util.seconds_to_time_string(dict_playlist_seconds[key_playlist]["seconds"], False)
 
         tooltip_more = ""
@@ -96,7 +99,9 @@ def get_exercise_focus_data(user, user_data, daily_activity_logs, dt_start_utc, 
 
     keys = dict_exercise_seconds.keys()
     for key_exercise in keys:
-        percentage = int(float(dict_exercise_seconds[key_exercise]["seconds"]) / float(total_seconds) * 100.0)
+        percentage = 0
+        if total_seconds > 0:
+            percentage = int(float(dict_exercise_seconds[key_exercise]["seconds"]) / float(total_seconds) * 100.0)
         if percentage:
             dict_exercise_seconds[key_exercise]["percentage"] = percentage
             dict_exercise_seconds[key_exercise]["time_spent"] = util.seconds_to_time_string(dict_exercise_seconds[key_exercise]["seconds"], False)
