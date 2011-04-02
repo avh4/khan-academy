@@ -1,5 +1,5 @@
 <ol style="height: {{list_height}}px;">				
-	{% for playlist_video in videos %}<li class="m{{forloop.counter0|find_column_index:column_indices}}" style="{% if forloop.counter0|in_list:column_indices %} margin-top: -{{forloop.counter0|column_height:column_indices|multiply:link_height}}px;{%endif%}">
+	{% for playlist_video in videos %}<li class="m{{forloop.counter0|find_column_index:column_indices}}" {% if forloop.counter0|in_list:column_indices %}style="margin-top: -{{forloop.counter0|column_height:column_indices|multiply:link_height}}px;"{%endif%}>
     <A href="/video/{{playlist_video.video.readable_id}}?playlist={{playlist_video.playlist.title|urlencode}}" title="{{playlist_video.video.title|escape}}" class='video-link'>{{playlist_video.video.title|escape}}</A>
     </li>{% endfor %}
 </ol>
