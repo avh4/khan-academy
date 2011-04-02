@@ -972,16 +972,7 @@ function intersection(p1,p2,p3,p4)
 	var b2 = points[p3].coor[1] - m2*points[p3].coor[0];
 	var x = (b2-b1)/(m1-m2);
 	var y = m1*x+b1;
-	return [toHundredths(x), toHundredths(y)];
-}
-
-/**
- * Round a fraction to the nearest hundredths
- * @f float to round.
- */
-function toHundredths(f)
-{
-    return (Math.round(f*100)/100);
+	return [roundNumber(x, 2), roundNumber(y, 2)];
 }
 
 function getLine(p1, p2)
@@ -997,7 +988,7 @@ function equalLines(line1, line2)
 }
 
 /**
- * TODO: find out if this is necessary. Can we just use toHundredths?
+ * TODO: find out if this is necessary. Can we use existing rounding?
  */
 function round2Dig(x)
 {
@@ -1222,11 +1213,11 @@ function type2()
     // calculate the position of the points in the pentagon.
     // JB: round to the hundredths because some javascript libraries have issues
     // with float comparisons. 
-    points.A = {coor: [toHundredths(-100*Math.cos(18*Math.PI/180)), toHundredths(100*Math.sin(18*Math.PI/180))], label: left};
+    points.A = {coor: [roundNumber(-100*Math.cos(18*Math.PI/180), 2), roundNumber(100*Math.sin(18*Math.PI/180), 2)], label: left};
     points.B = {coor: [0,100], label: above};
-    points.C = {coor: [toHundredths(100*Math.cos(18*Math.PI/180)), toHundredths(100*Math.sin(18*Math.PI/180))], label: right};
-    points.D = {coor: [toHundredths(100*Math.cos(-54*Math.PI/180)), toHundredths(100*Math.sin(-54*Math.PI/180))], label: right};
-    points.E = {coor: [toHundredths(-100*Math.cos(-54*Math.PI/180)), toHundredths(100*Math.sin(-54*Math.PI/180))], label: right};
+    points.C = {coor: [roundNumber(100*Math.cos(18*Math.PI/180), 2), roundNumber(100*Math.sin(18*Math.PI/180), 2)], label: right};
+    points.D = {coor: [roundNumber(100*Math.cos(-54*Math.PI/180), 2), roundNumber(100*Math.sin(-54*Math.PI/180), 2)], label: right};
+    points.E = {coor: [roundNumber(-100*Math.cos(-54*Math.PI/180), 2), roundNumber(100*Math.sin(-54*Math.PI/180), 2)], label: right};
 	points.F = {coor: intersection('A','D','E','B'), label: left};
 	points.G = {coor: intersection('E','B','A','C'), label: aboveleft};
 	points.H = {coor: intersection('A','C','B','D'), label: aboveright};
