@@ -342,6 +342,34 @@ class UserExercise(db.Model):
                     user_data.need_to_reassess = True
                     user_data.put()
 
+class CoachRequest(db.Model):
+    coach_requesting = db.UserProperty()
+    student_requested = db.UserProperty()
+
+    @staticmethod
+    def key_for(coach, student):
+        return "%s_request_for_%s" % (coach.email(), student.email())
+
+    @staticmethod
+    def get_for(coach, student):
+        return CoachRequest.get_by_key_name(CoachRequest.key_for(coach, student))
+
+    @staticmethod
+    def get_or_insert_for(coach, student):
+        return CoachRequest.get_or_insert(
+                key_name = CoachRequest.key_for(coach, student),
+                coach_requesting = coach,
+                student_requested = student,
+                )
+
+    @staticmethod
+    def get_for_student(student):
+        return CoachRequest.all().filter("student_requested = ", student)
+
+    @staticmethod
+    def get_for_coach(coach):
+        return CoachRequest.all().filter("coach_requesting = ", coach)
+
 class UserData(db.Model):
 
     user = db.UserProperty()       
@@ -492,6 +520,9 @@ class UserData(db.Model):
    
     def get_students(self):
         return map(lambda student_data: student_data.user.email(), self.get_students_data())
+
+    def is_coached_by(self, coach):
+        return coach.email() in self.coaches or coach.email().lower() in self.coaches
 
     def add_points(self, points):
         if self.points == None:
