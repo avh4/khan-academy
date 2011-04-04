@@ -38,10 +38,10 @@ SignificantFigures.CountSignificantFigures = new function(){
     "----.----"];
     var _lHints = [
     'Digits from 1-9 are always significant.',
-    'Zeros between two other significant digits are always significant',
-    'Zeros to the right of the decimal place and another significant digit are significant',
-    'Zeros used solely for spacing the decimal point are not significant',
-    'The significant numbers are: ',
+    'Zeros between two other significant digits are always significant.',
+    'Zeros to the right of the decimal place and another significant digit are significant.',
+    'Zeros used solely for spacing the decimal point are not significant.',
+    'Significant digit(s) : ',
     '....So there are' 
     ];
 
@@ -71,15 +71,15 @@ SignificantFigures.CountSignificantFigures = new function(){
         if(lStringNumber.match(/^[0-9]+\.[0-9]+$/)) {
             lStringNumber = ltrim(lStringNumber, '0.');
             _stringNumberForHint = lStringNumber;
-            lStringNumber = lStringNumber.replace('.', '')
+            lStringNumber = lStringNumber.replace('.', '');
         } else {
             lStringNumber = rtrim(lStringNumber, '0');
             lStringNumber = ltrim(lStringNumber, '0');
             _stringNumberForHint = lStringNumber;
         }
-
         return lStringNumber.length;
     }
+
 
     /*
      * Access Level: Private
@@ -108,15 +108,28 @@ SignificantFigures.CountSignificantFigures = new function(){
 
 
     /*
+     * Function:_writeEquation
      * Access Level: Private
-     * Function: _createNumber
-     * Parameter: none
+     *
+     * Parameters1 Name: Selector
+     * Parameters1 Type: String
+     * Parameters1 Detail: String Contain The Jquery Selector Of Div where expression need to be displayed.
+     *
+     * Parameters2 Name: Equation
+     * Parameters2 Type: String
+     * Parameters2 Detail: Expression that need to be displayed.
+     *
+     * Parameters3 Name: Equation
+     * Parameters3 Type: String
+     * Parameters3 Detail: To check if expression should be centered aligned.
+     *
+     * Description:Formats and generates the question to be asked.
      */
-    var _writeEquation = function(pSelector,pEquation, pIsCentered){
-        if(pIsCentered){
-            $(pSelector).append('<center><span style="font-family: arial; font-size: 200%; font-weight: bold;">'+pEquation+'</span></center>');
+    var _writeEquation = function(Selector,Equation, IsCentered){
+        if(IsCentered){
+            $(Selector).append('<center><span style="font-family: arial; font-size: 200%; font-weight: bold;">' + Equation + '</span></center>');
         } else {
-            $(pSelector).append('<span style="font-family: arial; font-size: 200%; font-weight: bold;">'+pEquation+'</span>');
+            $(Selector).append('<span style="font-family: arial; font-size: 200%; font-weight: bold;">' + Equation + '</span>');
         }
     }
 
@@ -128,18 +141,29 @@ SignificantFigures.CountSignificantFigures = new function(){
      * Parameter2 Name: StringifiedNumber
      */
     var _createHints = function(SignificantNumbers, StringifiedNumber) {
-        var lHint = 'Significant Numbers are: ';
+        var lHint = 'Significant digit(s) : ';
         var str='';
-        lHint += StringifiedNumber.replace(SignificantNumbers, '<span style="color: red;" >' + SignificantNumbers + '</span>');
+        lHint += StringifiedNumber.replace(SignificantNumbers, '<span style="color: ' + getNextColor() + '; " >' + SignificantNumbers + '</span>.');
         _lHints[_lHints.length-2] = lHint;
-        _lHints[_lHints.length-1] =  (SignificantNumbers.indexOf('.')!=-1)?'....So there are '+ (SignificantNumbers.length-1) +' significant figures':'....So there are '+ (SignificantNumbers.length) +' significant figures';
-        
-        str+="<div id='hint0' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999; ' ><br/>"+ _lHints[0]+"</div>";
-        str+="<div id='hint1' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>"+ _lHints[1]+"</div>";
-        str+="<div id='hint2' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>"+ _lHints[2]+"</div>";
-        str+="<div id='hint3' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>"+ _lHints[3]+"</div>";
-        str+="<div id='hint4' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>"+ _lHints[4]+"</div>";
-        str+="<div id='hint5' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>"+ _lHints[5]+"</div>";        
+        if((SignificantNumbers.indexOf('.')!=-1)){
+            if(SignificantNumbers.length-1==1){
+                _lHints[_lHints.length-1] = 'There is <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length-1) + '</span> significant figure.';
+            } else {
+                _lHints[_lHints.length-1] = 'There are <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length-1) + '</span> significant figures.';
+            }
+        } else {
+            if(SignificantNumbers.length==1){
+                _lHints[_lHints.length-1] = 'There is <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length) + '</span> significant figure.';
+            } else {
+                _lHints[_lHints.length-1] = 'There are <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length) + '</span> significant figures.';
+            }
+        }
+        str+="<div id='hint0' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[0] + "</div>";
+        str+="<div id='hint1' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[1] + "</div>";
+        str+="<div id='hint2' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[2] + "</div>";
+        str+="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[3] + "</div>";
+        str+="<div id='hint4' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[4] + "</div>";
+        str+="<div id='hint5' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[5] + "</div>";
         $('#dvHint').html(str);        
     }   
     return {
@@ -155,7 +179,7 @@ SignificantFigures.CountSignificantFigures = new function(){
          * Access Level: Public
          * Function: init
          */
-        next_step: function (){
+        next_step: function(){
             if(_hintStep<=5){ 
                 $('#hint'+_hintStep).css('display','block');
                 _hintStep++;

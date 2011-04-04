@@ -22,6 +22,11 @@ FractionAddition.AdditionWordProblem = new function(){
     var _den1 = null;
     var _den2 = null;
     var _commonDenominator;
+    var _reducedNominator;
+    var _reducedDenominator;
+    var _unreducedNominator;
+    var _myColor=getNextColor() ;
+    var _totalColor=getNextColor() ;
     var _equation = null;
     var _wordProblem = [
     'At my birthday party, the girls ate [fraction_1] pizzas and the boys ate [fraction_2] pizzas. How many pizzas were eaten at my party?',
@@ -37,10 +42,10 @@ FractionAddition.AdditionWordProblem = new function(){
     'Drew purchased [fraction_1] kg apples and [fraction_2] kg oranges. What is the total weight of fruits purchased by her?',
     'John walked [fraction_1] of a mile yesterday and [fraction_2] of a mile today. How many miles has John walked?',
     'Mary is preparing a final exam. She studies [fraction_1] hours on Friday and [fraction_2] hours on Saturday. How many hours she studied over the weekend?',
-    'A recipe requires [fraction_1] teaspoon cayenne pepper, 3/4 teaspoon black pepper, and [fraction_2] teaspoon red pepper. How much pepper does this recipe need?',
+    'A recipe requires [fraction_1] teaspoon cayenne pepper and [fraction_2] teaspoon red pepper. How much pepper does this recipe need?',
     'Justin read [fraction_1] pages of his book on Monday. On Tuesday, he read [fraction_2] more pages. How many pages did he read on both days combined?',
     'Martin spent [fraction_1] on a book and [fraction_2] on a candy bar. How much did Martin spend in all?',
-    'Justin painted [fraction_1] of the fence on Tuesday and [fraction_2] of fence Wednesday. How much fence did he paint in all?',
+    'Justin painted [fraction_1] of the fence on Tuesday and [fraction_2] of fence Wednesday. How much of the fence did he paint in all?',
     'Mike has [fraction_1] of a cake and David has [fraction_2]. How much cake do they have altogether?',
     'Heather goes to the grocery store and spends [fraction_1] dollars for pizza dough, [fraction_2] for mozzarella cheese and a can of pizza sauce. How much did she spend in all?',
     'Eugene has [fraction_1] dollars and Erwin has [fraction_2] dollars. How much money do they have?'
@@ -76,19 +81,22 @@ FractionAddition.AdditionWordProblem = new function(){
 
         var fractionEquation1= "`"+ _num1 + "/" + _den1 + "`";
         var fractionEquation2= "`" + _num2 + "/" + _den2 + "`";
-        var wordproblem = _wordProblem[getRandomIntRange(0,_wordProblem.length)];
+        var questionIndex=getRandomIntRange(0,_wordProblem.length-1);
+        var wordproblem = _wordProblem[questionIndex];
 
         wordproblem = wordproblem.replace("[fraction_1]", fractionEquation1);
         wordproblem = wordproblem.replace("[fraction_2]", fractionEquation2);
         _equation = wordproblem;
         $("#dvHintText2").append('`?/' + _den1 + '`')
         if(_num1>_num2){
-        $("#dvHintText4").append("`"+ _num1 + "/" + _den1 + "` `+` `" + _num2 + "/" + _den2 + "`" + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
+            $("#dvHintText4").append("`"+ _num1 + "/" + _den1 + "` `+` `" + _num2 + "/" + _den2 + "`" + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
         } else {
-        $("#dvHintText4").append("`"+ _num2 + "/" + _den1 + "` `+` `" + _num1 + "/" + _den2 + "`" + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
+            $("#dvHintText4").append("`"+ _num2 + "/" + _den1 + "` `+` `" + _num1 + "/" + _den2 + "`" + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
         }
         _writeEquation("#dvQuestion", _equation, false);
         setCorrectAnswer((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2) + "/" + _commonDenominator);
+        _unreducedNominator=(_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2);
+        _reduce();
     }
 
     /*
@@ -125,9 +133,33 @@ FractionAddition.AdditionWordProblem = new function(){
      * Detail: Display answer options on screen
      */
     var _createAnswers = function(){
-        $("#dvAnswers").append("<div><div style='padding-left: 7px;'><input id='txtNominator' type='text' style='width:25px;'/></div><div style='width: 43px; border-top: solid 3px black;'></div><div style='padding-left: 7px;'><input id='txtDenominator' type='text' style='width:25px;' /></div></div>");
+        $("#dvAnswers").append("<div><div style='padding-left: 7px;'><input autocomplete='off' id='txtNominator' type='text' style='width:25px;'/></div><div style='width: 43px; border-top: solid 3px black;'></div><div style='padding-left: 7px;'><input autocomplete='off' id='txtDenominator' type='text' style='width:25px;' /></div></div>");
     }
+    
+    /*
+     * Access Level: Private
+     * Function: _reduce
+     * Parameters: none
+     * Detail: Reduce the fraction
+     */
+    var _reduce = function(){
+        var factorX = 1;
 
+        //Find common factors of Numerator and Denominator
+        for ( var x = 2; x <= Math.min( _unreducedNominator, _commonDenominator ); x ++ ) {
+            var check1 = _unreducedNominator / x;
+            if ( check1 == Math.round( check1 ) ) {
+                var check2 = _commonDenominator / x;
+                if ( check2 == Math.round( check2 ) ) {
+                    factorX = x;
+                }
+            }
+        }
+
+        _reducedNominator=(_unreducedNominator/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
+        _reducedDenominator=_commonDenominator/factorX;  //divide by highest common factor to reduce fraction
+
+    }
 
     /*
      * Access Level: Private
@@ -158,24 +190,24 @@ FractionAddition.AdditionWordProblem = new function(){
         
         var pieData=new Array();
         var colors=new Array();
-        for ( var i = 0; i < MyTotal; i++){
-            if (i < MyShare){
-                if (i % 2){
-                    colors[i] = "#C8F526";
+        for (var i = 0; i < MyTotal; i++){
+            if (i < MyShare) {
+                if (i % 2) {
+                    colors[i] = _myColor;
                     pieData[i]=1;
                 } else {
-                    colors[i] = "#BCE937";
+                    colors[i] = _myColor;
                     pieData[i]=1;
                 }
             } else {
                 if (i % 2){
-                    colors[i] = "#FFE303";
+                    colors[i] = _totalColor
                     pieData[i]=1;
                 } else {
                     pieData[i]=1;
-                    colors[i] = "#FBEC5D";
+                    colors[i] = _totalColor;
                 }
-            }                      
+            }
         }                     
         var opts={};
         opts.stroke="#ffffff";
@@ -213,11 +245,13 @@ FractionAddition.AdditionWordProblem = new function(){
                 $("#dvHintText1").css("display","")
                 $("#dvHintText1").append("Since these fractions both have the same denominator, the sum is going to have the same denominator.");
             } else if (_hintsGiven==3) {
+                $("#dvHintText2").css('color',getNextColor());
                 $("#dvHintText2").css("display","");
             } else if (_hintsGiven==4) {
                 $("#dvHintText3").css("display","");
                 $("#dvHintText3").append("The numerator is simply going to be the sum of the numerators.");
             } else if (_hintsGiven==5) {
+                $("#dvHintText4").css('color',getNextColor());
                 $("#dvHintText4").css("display","");
             }
             _hintsGiven++;
@@ -228,14 +262,26 @@ FractionAddition.AdditionWordProblem = new function(){
             var Nominator = document.getElementById("txtNominator").value
             var Denominator = document.getElementById("txtDenominator").value
             if(isNaN(Nominator) || $.trim(Nominator) ==''){
-                alert("Enter valid nominator.");
+                alert("Enter a valid numerator.");
                 return;
+            } else if(_reducedDenominator==1 && $.trim(Denominator) ==''){
+
             } else if(isNaN(Denominator) || $.trim(Denominator) ==''){
-                alert("Enter valid dinominator.");
+                alert("Enter a valid denominator.");
                 return;
             }
             var isCorrect = false;
-            isCorrect = (correct_answer == (Nominator  + "/" + Denominator));
+            if(_reducedDenominator==1){
+                if($.trim(Denominator) =='')
+                {
+                    isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator== Nominator) ;
+                }else{
+                    isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator+"/"+_reducedDenominator== (Nominator  + "/" + Denominator)) ;
+                }
+
+            }else {
+                isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator+"/"+_reducedDenominator== (Nominator  + "/" + Denominator)) ;
+            }
             handleCorrectness(isCorrect);
         }
     };
@@ -243,4 +289,15 @@ FractionAddition.AdditionWordProblem = new function(){
 
 $(document).ready(function(){
     FractionAddition.AdditionWordProblem.init();
+    $('#txtNominator').focus();
+    $('#txtNominator').keyup(function(e) {        
+        if(e.keyCode == 13) {
+            FractionAddition.AdditionWordProblem.check_answer();
+        }
+    });
+    $('#txtDenominator').keyup(function(e) {        
+        if(e.keyCode == 13) {
+            FractionAddition.AdditionWordProblem.check_answer();
+        }
+    });
 })

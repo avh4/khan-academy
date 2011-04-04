@@ -97,7 +97,7 @@ NewSignificantFigures.DivideSignificantFigures = new function(){
         }
 		
         _answer.rounded=simplifiedAnswer;
-        _equation = 'When considering significant figures, ' + lStringifiedNumber+' / '+lStringifiedNumber2+' = ?';
+        _equation = '<p style="font-size:85%;">When considering significant figures, <font face="arial" size=5>`' + lStringifiedNumber + '` `\\divide` `' + lStringifiedNumber2 + '` `=` `?`</font></p>';
         _writeEquation("#dvQuestion", _equation, false); //Write New Equation       
         setCorrectAnswer(simplifiedAnswer);
         _makeHints(significantCount1, significantCount2,_answer);
@@ -151,12 +151,20 @@ NewSignificantFigures.DivideSignificantFigures = new function(){
      */
     var _makeHints = function(Number1,Number2,Answer) {
         var str="";
-       var answerSigCount= (Number1.sigCount<=Number2.sigCount)?Number1:Number2;
-        str+="<div id='hint0' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>When quantities are multiplied or divided, the number of significant figures in the answer is equal to the number of significant figures in the quantity with the smallest number of significant figures.</div>";
-        str+="<div id='hint1' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;' ><br/>Determine which number has smaller significant count between <span style='color:red'>"+Number1.basic+"</span> and <span style='color:red'>"+Number2.basic+"</span></div>";
-        str+="<div id='hint2' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;'><br/>"+Number1.basic+" / "+Number2.basic+" = "+(Number1.basic/Number2.basic)+"</div>";
-        str+="<div id='hint3' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;'><br/>Now round the division result to "+answerSigCount.sigCount+" significant digit(s) as "+answerSigCount.basic+" has a minimum number of significant digit(s) that is "+answerSigCount.sigCount+"</div>";
-        str+="<div id='hint4' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#f00'><br/>The Answer is "+Answer.rounded+" </div>";
+        var answerSigCount= (Number1.sigCount<=Number2.sigCount)?Number1:Number2;
+
+        str +="<div id='hint0' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>When dividing with significant figures, the answer can't have more significant digits than either of the terms (dividend or quotient).</div>";
+        str +="<div id='hint1' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>First, figure out which term has the fewest significant figures.</div>";
+        str +="<div id='hint2' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>In this case, " + Number1.basic + " has " + Number1.sigCount + " significant figure(s), and " + Number2.basic + " has " + Number2.sigCount + " significant figure(s).</div>";
+        if(Number1.sigCount == Number2.sigCount){
+            str +="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>Since both the terms " +Number1.basic + " and " + Number2.basic + " have the same number of (" + Number2.sigCount + ") significant digit(s), we will round our answer to " + Number2.sigCount + " significant digit(s).</div>";
+        } else {
+            str +="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>Since " + answerSigCount.basic + " has only " + answerSigCount.sigCount + " significant digit(s), we will round our answer to " + answerSigCount.sigCount + " significant digit.</div>";
+        }
+        str +=  '<div id="hint4" style="display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;"><br/><p style="font-size:85%;"><font face="arial" size=5>`' + Number1.basic +'` `\\divide` `' + Number2.basic + '` `=` `' + (Number1.basic/Number2.basic) + '`</font></p></div>';
+       
+        str += "<div id='hint5' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + (Number1.basic/Number2.basic) + " rounded to " + answerSigCount.sigCount + " significant digit is <span style='color:" + getNextColor() + "'>" + Answer.rounded + "</span>.</div>";
+
         $('#dvHint').html(str);
     }    
     return {
@@ -177,7 +185,7 @@ NewSignificantFigures.DivideSignificantFigures = new function(){
          * Description: Function used to generate next step of Hint.
          */
         next_step: function (){
-            if(_hintStep <= 4){
+            if(_hintStep <= 5){
                 $('#hint'+_hintStep).css('display','block');
                 _hintStep++;
             }

@@ -8,25 +8,44 @@
  * Class Name: Rounding
  */
 Rounding = new function(){
-    
+
     /*Private Members*/
     var _number=0;
     var _correctAnswer=0;
     var _roundingType = [
-    "Tenth",
-    "Hundredth",
-    "Thousandth",
+    "ten",
+    "hundred",
+    "thousand"   
+    ];
+
+    var _roundingTypeDecimal=[
+    'tenth',
+    'hundredth',
+    'thousandth'
+    ]
+    var _combinations=[    
+    "----",
+    "---",
+    "--",
+    "-.--",
+    "-.---",
+    "-.----"    
     ];
     var _hints = new Array();
     var _divider;
     var _cutOff; //1= unit rounding ,2= tens rounding , 3= thousands rounding
     var _hintStep = 0;
-    var _roudingTypeToUse = "";    
+    var _roudingTypeToUse = "";
     var _onScale=false;
+    var _hasDecimal=false;
     var _numberValid=false;
     var _raphaelHolder = Raphael("holder",850,150);
     var _lines=null;
     var _isCentered=false;
+    var _fractionPart=null;
+    var _intPart=null;
+    var _highlightIndex=null;
+
 
     /*
      * Function:_randOrder
@@ -37,7 +56,55 @@ Rounding = new function(){
     var _randOrder = function (){
         return (Math.round(Math.random())-0.5);
     }
-    
+
+    var _createNumber = function(){
+        var lStringifiedNumber = '';
+        _combinations.sort( _randOrder );        
+        var combination = _combinations[getRandomIntRange(0,5)];
+        var combinationLength=combination.length;
+        var decimalIndex;
+        var roudingTypeMaxRange=0;
+
+        for(var i=0; i<combinationLength; i++){
+            if(combination.substring(i,i+1)=="-"){
+                lStringifiedNumber += (getRandomIntRange(1,8)).toString();
+            } else {
+                lStringifiedNumber += combination.substring(i,i+1);
+            }
+        }       
+        _number=parseFloat(lStringifiedNumber);
+        decimalIndex=lStringifiedNumber.indexOf('.', 0);
+
+        if(decimalIndex==-1){
+            if(_number < 100){
+                roudingTypeMaxRange=0;
+            } else if(_number < 1000){
+                roudingTypeMaxRange=1;
+            } else if(_number < 10000){
+                roudingTypeMaxRange=2;
+            }
+            // _roundingType.sort( _randOrder );
+            _roudingTypeToUse = _roundingType[getRandomIntRange(0,roudingTypeMaxRange)];
+        }//if not decimal
+        else{
+            _hasDecimal=true;
+            if(combinationLength==4)
+            {
+                _roudingTypeToUse='tenth';
+            } else if(combinationLength==5){
+                roudingTypeMaxRange=1;
+            //      _roudingTypeToUse='hundredth';
+            } else if(combinationLength>5){
+                roudingTypeMaxRange=2;
+            //    _roudingTypeToUse='thousandth';
+            }
+            // _roundingTypeDecimal.sort( _randOrder );
+            _roudingTypeToUse = _roundingTypeDecimal[getRandomIntRange(0,roudingTypeMaxRange)];
+
+        }//if decimal is included
+        
+    }
+
     /*
      * Access Level: Private
      * Function: _createChoice
@@ -47,44 +114,70 @@ Rounding = new function(){
      */
     var _createProblem = function(){
         do{
-            _number = getRandomIntRange(11,30000);
-            var roudingTypeMaxRange=0;
-
-            if(_number < 100){
-                roudingTypeMaxRange=0;
-            } else if(_number < 1000){
-                roudingTypeMaxRange=1;
-            } else if(_number < 10000){
-                roudingTypeMaxRange=2;
-            }
-
-            _roundingType.sort( _randOrder );
-            _roudingTypeToUse = _roundingType[getRandomIntRange(0,roudingTypeMaxRange)];
-            
+            _createNumber();
+            var strNumber=_number.toString();
+            var roundPortion;
             switch (_roudingTypeToUse){
-                case 'Tenth':
+                case 'ten':
+                
                     _cutOff=1;
-                    _hints[0]='The two closest tens to ' + _number + ' are';
+                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
                     _divider=0;
                     break;
 
-                case 'Hundredth':
+                case 'hundred':
+                
                     _cutOff=2;
-                    _hints[0]='The two closest hundreds to ' + _number + ' are';
+                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
                     _divider=10;
                     break;
-                    
-                case 'Thousandth':
+
+                case 'thousand':
+                
                     _cutOff=3;
-                    _hints[0]='The two closest thousands to ' + _number + ' are';
+                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
                     _divider=100;
                     break;
+
+                case 'tenth':
+                    _cutOff=1;
+                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
+                    _divider=0.1;
+                    _fractionPart=strNumber.substring(2,3);
+                    _highlightIndex=strNumber.substring(3,4);
+                    break;
+
+
+                case 'hundredth':
+                    _cutOff=1;
+                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
+                    _divider=0.01;
+                    _fractionPart=strNumber.substring(2,4);
+                    _highlightIndex=strNumber.substring(4,5);
+                    break;
+
+
+                case 'thousandth':
+                    _cutOff=1;
+                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
+                    _divider=0.001;
+                    _fractionPart=strNumber.substring(2,5);
+                    _highlightIndex=strNumber.substring(5,6);
+                    break;
             }
+
+           
             // below code checks if the number is not already or is to small to be displayed on the scale for hints
-            var strNumber=_number.toString();
-            var roundPortion=strNumber.substring(strNumber.length-_cutOff,strNumber.length);
+            
+            if(_hasDecimal){
+                roundPortion=strNumber.substring(3,3+_cutOff);
+                _intPart=strNumber.substring(0,1);
+                
+            } else{
+                roundPortion=strNumber.substring(strNumber.length-_cutOff,strNumber.length);
+            }
             if(roundPortion=='0' || roundPortion=='00' || roundPortion=='000' ){
-                _numberValid=false;                
+                _numberValid=false;
             } else if(_cutOff==3 && roundPortion[0]=='0' && parseInt(ltrim(roundPortion.substring(1,2),'0'))<30 ){
                 _numberValid=false;
             } else if(_cutOff==2 && roundPortion[0]=='0' && parseInt(ltrim(roundPortion.substring(1,1),'0'))<3 ){
@@ -95,7 +188,7 @@ Rounding = new function(){
         }while(!_numberValid)
 
         $("#dvQuestion").append('Round '  + _number + ' to the nearest ' + _roudingTypeToUse + '.');
-        
+
     }
 
     /*
@@ -112,7 +205,8 @@ Rounding = new function(){
         var subtractToRoundDown = 0;
         var doRoundUp = false;
         var doRoundDown = false;
-        if(_roudingTypeToUse=="Tenth"){
+   
+        if(_roudingTypeToUse=="ten"){
             numberToRound = parseInt(ltrim(numberInStr.substr(numberInStr.length - 2),'0'));
 
             addToRoundUp = 10 - (numberToRound%10);
@@ -123,7 +217,7 @@ Rounding = new function(){
             } else{
                 doRoundDown=true;
             }
-        } else if(_roudingTypeToUse == "Hundredth"){
+        } else if(_roudingTypeToUse == "hundred"){
             numberToRound = parseInt(ltrim(numberInStr.substr(numberInStr.length - 3),'0'));
 
             addToRoundUp = 100 - (numberToRound%100);
@@ -134,7 +228,7 @@ Rounding = new function(){
             } else{
                 doRoundDown=true;
             }
-        } else if(_roudingTypeToUse == "Thousandth"){
+        } else if(_roudingTypeToUse == "thousand"){
             numberToRound = parseInt(ltrim(numberInStr.substr(numberInStr.length - 4),'0'));
 
 
@@ -146,17 +240,24 @@ Rounding = new function(){
             } else{
                 doRoundDown=true;
             }
+        } else{
+            _correctAnswer=parseFloat(_intPart+'.'+_fractionPart);
+            if(_highlightIndex>4){
+                _correctAnswer=parseFloat(_intPart+'.'+(parseInt(_fractionPart)+1));
+            }
+            setCorrectAnswer(_correctAnswer);
+            return;
         }
-        
+
         if(doRoundUp){
             _correctAnswer = _number + addToRoundUp;
         } else if(doRoundDown){
             _correctAnswer = _number - subtractToRoundDown;
         }
-        
+
         setCorrectAnswer(_correctAnswer);
     }
-    
+
 
     /*
      * Access Level: Private
@@ -176,53 +277,75 @@ Rounding = new function(){
      * Parameter4 name: HintNumber
      * Parameters4 Type: integer
      * Parameters4 Detail: This number tells which step we are doing of the hint at the moment
-     *     
+     *
      * Description: Draws the Hints
      */
     var _createHint = function(Number,CutOff,Raphael,HintNumber){
+
         
         var strNumber=Number.toString();
         var arrNumber= new Array();
         var i=0,start,incStep,startIndex,x1,x2;
-        var numLength=strNumber.length;
-        
-        for(i=0; i<numLength; i++){
-            arrNumber[i]=parseInt(strNumber[i]);                
+       
+
+        if(_hasDecimal){            
+            strNumber=strNumber.substr(2, CutOff+1);
+            Number=parseInt(strNumber);
         }
-        
+
+        var numLength=strNumber.length;
+        for(i=0;i<numLength; i++){
+            arrNumber[i]=parseInt(strNumber[i]);
+        }
+
         //the starting number from where x-axis should begin
-        start=Number-parseInt(ltrim(strNumber.substring(numLength-CutOff,numLength),'0'));
         
+        if(_hasDecimal){
+            start=0;
+        } else{
+            start=Number-parseInt(ltrim(strNumber.substring(numLength-CutOff,numLength),'0'));
+        }
         var xArray = [];
         var yArray = [];
-        
+
         switch(CutOff){
             case 1:
                 incStep=1;
                 break;
-        
+
             case 2:
                 incStep=10;
                 break;
-        
+
             case 3:
                 incStep=100;
-                break;        
+                break;
         }
-       
+
         for(i=0;i<=10;i++){
             xArray[i]=start;
             yArray[i]=0;
-            start+=incStep;       
+            start+=incStep;
         }
 
+        
+
         if(CutOff==1){// in case of tens rounding we dont need startIndex and the remianing mathematics is fixed
-            startIndex=0;            
-            x1=arrNumber[numLength-CutOff]*78+15;
-            x2=arrNumber[numLength-CutOff]*78+25;
-            if(arrNumber[numLength-CutOff]==5){
-                _isCentered=true;
+            startIndex=0;
+            if(_hasDecimal){
+                x1=_highlightIndex*78+15;
+                x2=_highlightIndex*78+25;
+                if(_highlightIndex==5){
+                    _isCentered=true;
+                }
+            }else{
+                x1=arrNumber[numLength-CutOff]*78+15;
+                x2=arrNumber[numLength-CutOff]*78+25;
+                if(arrNumber[numLength-CutOff]==5){
+                    _isCentered=true;
+                }
             }
+            
         } else {
             for(i=0;i<=10;i++){
                 if(Number<=xArray[i]){
@@ -253,6 +376,23 @@ Rounding = new function(){
             });
             _lines.axis[0].text.items[0].attr('fill','#F00');
             _lines.axis[0].text.items[10].attr('fill','#F00');
+
+
+
+            if(_hasDecimal)
+            {
+                var temp;
+                for(i=1;i<=9;i++){
+                    temp=_intPart+'.'+_fractionPart+i;
+                    _lines.axis[0].text.items[i].attr('text',temp);
+
+                }
+                
+                _lines.axis[0].text.items[0].attr('text',_intPart+'.'+_fractionPart);                
+                _lines.axis[0].text.items[10].attr('text',_intPart+'.'+(parseInt(_fractionPart)+1));
+
+
+            }
         }
 
         //begin hint 2 at this point we highlight the number in question
@@ -278,18 +418,22 @@ Rounding = new function(){
             }
 
             if(CutOff==1){
-                _lines.axis[0].text.items[arrNumber[numLength-CutOff]].attr('fill','#0F0');
+                if(_hasDecimal){
+                    _lines.axis[0].text.items[_highlightIndex].attr('fill','#0F0');
+                }else {
+                    _lines.axis[0].text.items[arrNumber[numLength-CutOff]].attr('fill','#0F0');
+                }
             }
         }//end of step 2
 
         //begin step3 at this point we draw the arrow heads above
         if(HintNumber>1){
-            
+
             var firstPathCoOrdinates="M 25 90 H " + x1 + "  m 0 -5 v 10 l 10 -5";
             var firstPath=Raphael.path(firstPathCoOrdinates);
             var firstPathReverse=Raphael.path(firstPathCoOrdinates);
             firstPathReverse.rotate(180);
-      
+
             firstPath.attr({
                 fill: '#000',
                 stroke: '#000',
@@ -301,13 +445,13 @@ Rounding = new function(){
                 stroke: '#000',
                 'stroke-width': 1
             });
-      
+
             var secondPathCoOrdinates="M " + x2 + " 90 H 795  m 0 -5 v 10 l 10 -5";
             var secondPath=Raphael.path(secondPathCoOrdinates);
             var secondPathReverse=Raphael.path(secondPathCoOrdinates);
 
             secondPathReverse.rotate(180);
-      
+
             secondPath.attr({
                 fill: '#000',
                 stroke: '#000',
@@ -323,12 +467,12 @@ Rounding = new function(){
             _hints[2]="Whats nearest to <strong>" + Number + "</strong> ? " + xArray[0] + " or "+xArray[10];
 
         }//hint for step 2 closed draws the arrow heads in this case
-        
+
         if(_isCentered && HintNumber==1){
             $('#dvAnswer').html("Since the value to be rounded lies exactly between " + xArray[0] + " and " + xArray[10] + " , therefore we round to the higher boundary");
             $('#dvAnswer').css('display','block');
         }
-    
+
     }//end of _createhint
 
 
@@ -339,7 +483,7 @@ Rounding = new function(){
         },
         next_step: function (){
             $('#dvHint').css('display','block');
-                        
+
             if(_hintStep<3){
                 $('#dvHint').html(_hints[_hintStep]);
                 _createHint(_number,_cutOff,_raphaelHolder,_hintStep);
@@ -348,9 +492,9 @@ Rounding = new function(){
                     var answerHtml=$('#dvAnswer').html();
                     $('#dvAnswer').html(answerHtml+="<br/><br/><strong>Answer " + _correctAnswer + "</strong>");
                 } else {
-                    $('#dvAnswer').html("<strong>Answer "+_correctAnswer+"</strong> is nearest so we round <strong>"+_number+"</strong> to <span style='text-decoration:underline'><strong>"+_correctAnswer+"</strong></span>");
+                    $('#dvAnswer').html("<strong>Answer "+_correctAnswer+"</strong> is the nearest "+_roudingTypeToUse +", so we round <strong>"+_number+"</strong> to <span style='text-decoration:underline'><strong>"+_correctAnswer+"</strong></span>");
                 }
-                $('#dvAnswer').css('display','block');                
+                $('#dvAnswer').css('display','block');
             }
             _hintStep++;
             steps_given++;

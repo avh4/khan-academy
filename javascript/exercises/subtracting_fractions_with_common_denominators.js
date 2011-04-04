@@ -21,7 +21,12 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
     var _den1 = null;
     var _den2 = null;
     var _commonDenominator;
+    var _reducedNominator;
+    var _reducedDenominator;
+    var _unreducedNominator;
     var _equation = null;
+    var _myColor=getNextColor() ;
+    var _totalColor=getNextColor() ;
     var _raphaelHandle = Raphael('holder',500,200);
     
     /*Private Methods*/
@@ -56,6 +61,8 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
         $("#dvHintText4").append(_equation + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)-(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`")
         _writeEquation("#dvQuestion", _equation + " `=` ?", true);//Write New Equation
         setCorrectAnswer((_num1*_commonDenominator/_den1)-(_num2*_commonDenominator/_den2) + "/" + _commonDenominator);
+        _unreducedNominator=(_num1*_commonDenominator/_den1)-(_num2*_commonDenominator/_den2);
+        _reduce();
     }
 
     /*
@@ -92,8 +99,34 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
      * Detail: Display answer options on screen
      */
     var _createAnswers = function(){
-        $("#dvAnswers").append("<div><div style='padding-left: 7px;'><input id='txtNominator' type='text' style='width:25px;'/></div><div style='width: 43px; border-top: solid 3px black;'></div><div style='padding-left: 7px;'><input id='txtDenominator' type='text' style='width:25px;' /></div></div>");
+        $("#dvAnswers").append("<div><div style='padding-left: 7px;'><input autocomplete='off' id='txtNominator' type='text' style='width:25px;'/></div><div style='width: 43px; border-top: solid 3px black;'></div><div style='padding-left: 7px;'><input autocomplete='off' id='txtDenominator' type='text' style='width:25px;' /></div></div>");
     }
+
+    /*
+     * Access Level: Private
+     * Function: _reduce
+     * Parameters: none
+     * Detail: Reduce the fraction
+     */
+    var _reduce = function(){
+        var factorX = 1;
+
+        //Find common factors of Numerator and Denominator
+        for ( var x = 2; x <= Math.min( _unreducedNominator, _commonDenominator ); x ++ ) {
+            var check1 = _unreducedNominator / x;
+            if ( check1 == Math.round( check1 ) ) {
+                var check2 = _commonDenominator / x;
+                if ( check2 == Math.round( check2 ) ) {
+                    factorX = x;
+                }
+            }
+        }
+
+        _reducedNominator=(_unreducedNominator/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
+        _reducedDenominator=_commonDenominator/factorX;  //divide by highest common factor to reduce fraction
+
+    }
+
 
     /*
      * Access Level: Private
@@ -120,36 +153,33 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
      *
      * Description: Draws the pie charts with raphael.
      */
-    var _createHint =function(MyShare, MyTotal, X, Y, Radius) {
-        
+    var _createHint =function(MyShare, MyTotal, X,Y, Radius) {
         var pieData=new Array();
         var colors=new Array();
-        for ( var i = 0; i < MyTotal; i++) {
+        for (var i = 0; i < MyTotal; i++){
             if (i < MyShare) {
-                if (i % 2){
-                    colors[i] = "#C8F526";
+                if (i % 2) {
+                    colors[i] = _myColor;
                     pieData[i]=1;
                 } else {
-                    colors[i] = "#BCE937";
+                    colors[i] = _myColor;
                     pieData[i]=1;
                 }
             } else {
                 if (i % 2){
-                    colors[i] = "#FFE303";
+                    colors[i] = _totalColor
                     pieData[i]=1;
                 } else {
                     pieData[i]=1;
-                    colors[i] = "#FBEC5D";
+                    colors[i] = _totalColor;
                 }
-            }                                       
+            }
         }
-                      
         var opts={};
         opts.stroke="#ffffff";
         opts.strokewidth=1;
         opts.colors=colors;
         _raphaelHandle.g.piechart(X, Y, Radius, pieData,opts);
-        
     }
     return {
         /*Public Methods*/
@@ -181,10 +211,12 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
                 $("#dvHintText1").append("Since these fractions both have the same denominator, the difference is going to have the same denominator.");
             } else if (_hintsGiven==3) {
                 $("#dvHintText2").css("display","");
+                $("#dvHintText2").css('color',getNextColor());
             } else if (_hintsGiven==4) {
                 $("#dvHintText3").css("display","");
-                $("#dvHintText3").append("The numerator is simply going to be the difference of the numerators");
+                $("#dvHintText3").append("The numerator is simply going to be the difference of the numerators.");
             } else if (_hintsGiven==5) {
+                $("#dvHintText4").css('color',getNextColor());
                 $("#dvHintText4").css("display","");
             }
             _hintsGiven++;
@@ -195,18 +227,42 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
             var Nominator = document.getElementById("txtNominator").value
             var Denominator = document.getElementById("txtDenominator").value
             if(isNaN(Nominator) || $.trim(Nominator) ==''){
-                alert("Enter valid nominator.");
+                alert("Enter a valid numerator.");
                 return;
+            } else if(_unreducedNominator==0 && $.trim(Denominator) ==''){
+
             } else if(isNaN(Denominator) || $.trim(Denominator) ==''){
-                alert("Enter valid dinominator.");
+                alert("Enter a valid denominator.");
                 return;
             }
             var isCorrect = false;
-            isCorrect = (correct_answer == (Nominator  + "/" + Denominator));
+            if(_unreducedNominator==0){
+                if($.trim(Denominator) =='')
+                {
+                    isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_unreducedNominator== Nominator) ;
+                }else{
+                    isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator+"/"+_reducedDenominator== (Nominator  + "/" + Denominator)) ;
+                }
+
+            }else {
+                isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator+"/"+_reducedDenominator== (Nominator  + "/" + Denominator)) ;
+            }
             handleCorrectness(isCorrect);
         }
     };
 };
 $(document).ready(function(){
     FractionSubtraction.SubtractionWithCommonDenominator.init();
+    $('#txtNominator').focus();
+    $('#txtNominator').keyup(function(e) {    
+        if(e.keyCode == 13) {
+            FractionSubtraction.SubtractionWithCommonDenominator.check_answer();
+        }
+    });
+    $('#txtDenominator').keyup(function(e) {    
+        if(e.keyCode == 13) {
+            FractionSubtraction.SubtractionWithCommonDenominator.check_answer();
+        }
+    });
+
 })

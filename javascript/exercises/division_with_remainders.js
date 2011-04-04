@@ -230,11 +230,15 @@ function setAnswerChoices(){
 function checkDivisionRemainderAnswer(){
     highlight_answer();
     var usersAnswer = document.getElementById("answer").value;
-    var isCorrect = (usersAnswer == correctAnswer);
-    handleCorrectness(isCorrect);
+    var RegExp=/^\d+r\d+$/;
+    if(usersAnswer.search(RegExp)==-1){
+        alert('Your answer is not in proper format. Please try again');
 
+    }else {
+        var isCorrect = (usersAnswer == correctAnswer);
+        handleCorrectness(isCorrect);
+    }
 }
-
 
 function getValue(row, col)
 {
@@ -346,6 +350,7 @@ function next_step()
             writeExp(' ', nColor);
             writeExp(curQuotient+'', curQuotientColor);
             writeExp(' times', nColor);
+            writeExp('.', '#777777');
 
             divided=true;
         }
@@ -361,6 +366,8 @@ function next_step()
             writeExp(divisor, divisorColor);
             writeExp(' = ', nColor);
             writeExp(product, curProductColor);
+            writeExp('.', '#777777');
+
             if (justStarting)
             {
                 for(var i=0; i<curDigit; i++)
@@ -412,6 +419,7 @@ function next_step()
             writeExp(product, curProductColor);
             writeExp(' = ', nColor);
             writeExp(difference, differenceColor);
+            writeExp('.', '#777777');
 
             changeColor(curQuotientID, nColor);
             changeDivisorColor(nColor);
@@ -442,6 +450,8 @@ function next_step()
                 changeColor(dividendIDs[dividendIDs.length-curDigit], curDropDownColor);
                 writeExp('Bring down the ', nColor);
                 writeExp(curDropDown, curDropDownColor);
+                writeExp('.', '#777777');
+
                 present.marker="arrow";
                 present.stroke = nColor;
                 present.line(getCoor(mainRow,dividendDigits.length-curDigit+1),getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1));
@@ -455,7 +465,7 @@ function next_step()
             else
             {
                 var remainder=dividend%divisor;
-                $('#dvAnswer').html('The answer is '+quotient + " with a remainder of " + remainder +" which should be entered as '"+quotient+'r'+remainder+"'");
+                $('#dvAnswer').html('The answer is '+quotient + " with a remainder of " + remainder +" which should be entered as '"+quotient+'r'+remainder+"'.");
                 $('#dvAnswer').css('display','block');
             }
         }
