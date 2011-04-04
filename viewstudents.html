@@ -23,9 +23,17 @@
 {% block pagecontent %}
 
 <article id="students">
-<h2>Request a student</h2>
+<h2>Adding a student</h2>
+
+<h3>Option 1: Students can add you as their coach</h3>
+<p><a href="" onclick="$('.add_students_instructions').slideDown('fast'); return false;">Click here for instructions</a>.</p>
+<div style="display:none;" class="add_students_instructions">
+    {% empty_class_instructions 0 %}
+</div>
+
+<h3>Option 2: Request a student</h3>
 <p>
-    Enter your student's coach id. This will send them a coaching request, and if they approve you will have access to their Khan Academy data.
+    Enter your student's coach id. This will send them a coaching request which, once approved, you give you access to their Khan Academy data.
 </p>
 
 <form action="/requeststudent" method="post">

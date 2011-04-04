@@ -77,7 +77,7 @@
 
 {% block profile_extended_sections %}
     <div id="students-list">
-        <h2 class="student-profiles">Students</h2>
+        <h2 class="student-profiles">Students <span style="font-size:12px;font-style:normal;">(<a href="/students">Add or remove</a>)</span></h2>
         <div id="student-list">
             <table>
                 {% for dict_student in list_students_columnized %}
@@ -95,12 +95,6 @@
                     {% endif %}
                 {% endfor %}
             </table>
-        </div>
-        <div id="add_students_instructions" style="margin-top: 18px;">
-            Need to add more students? <a href="" onclick="$('.add_students_instructions').slideDown('fast'); return false;">Click here for instructions</a>.
-            <div style="display:none;" class="add_students_instructions">
-                {% empty_class_instructions 0 %}
-            </div>
         </div>
     </div>
 {% endblock profile_extended_sections %}
