@@ -454,7 +454,14 @@ class ViewVideo(request_handler.RequestHandler):
 
 class LogVideoProgress(request_handler.RequestHandler):
     
+    # LogVideoProgress uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    def get(self):
 
         user = util.get_current_user()
         video_points_total = 0
