@@ -386,18 +386,20 @@ class UserData(db.Model):
         # the next block can just be a call to .get_or_insert()
         user_data = UserData.get_for(user)
         if user_data is None:
-            user_data = UserData.get_or_insert(
-                key_name=user.nickname(),
-                user=user,
-                moderator=False,
-                last_login=datetime.datetime.now(),
-                proficient_exercises=[],
-                suggested_exercises=[],
-                assigned_exercises=[],
-                need_to_reassess=True,
-                points=0,
-                coaches=[]
-                )
+            if user.email():
+                key = "user_email_key_%s" % user.email()
+                user_data = UserData.get_or_insert(
+                    key_name=key,
+                    user=user,
+                    moderator=False,
+                    last_login=datetime.datetime.now(),
+                    proficient_exercises=[],
+                    suggested_exercises=[],
+                    assigned_exercises=[],
+                    need_to_reassess=True,
+                    points=0,
+                    coaches=[]
+                    )
         return user_data
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
