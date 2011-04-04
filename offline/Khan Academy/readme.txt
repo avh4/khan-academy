@@ -1,6 +1,6 @@
 This is version {{version_number}} of the Khan Academy website for offline use.
 The changes since the last version can be seen here:
-http://code.google.com/p/khanacademy/source/list
+https://khanacademy.kilnhg.com/Repo/Website/Group/stable
 
 Once you've unzipped it click on run.bat, which will start up the server and load the local version of the 
 Khan Academy homepage in your browser.  

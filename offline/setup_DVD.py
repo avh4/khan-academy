@@ -2,7 +2,7 @@ import sys, os, traceback, shutil
 from os.path import join
 
 from setup import offline_dir, ka_dir, replace_in_file, get_khanacademy_code
-sys.path.append("Khan Academy/code/khanacademy-read-only")
+sys.path.append("Khan Academy/code/khanacademy-stable")
 from topics_list import DVDs_dict
 
 
@@ -52,12 +52,12 @@ def copy_to_staging(DVD_name, staging_drive):
     os.chdir(staging_dir)  
     replace_in_file("run.bat", "rem --use_sqlite giving intermittent errors", '"%~dp0/code/Python25/python.exe" "%~dp0/code/copy_datastore.py"')
     replace_in_file("run.bat",
-        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" --datastore_path="%~dp0/code/dev_appserver.datastore" "%~dp0/code/khanacademy-read-only"',
-        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" "%~dp0/code/khanacademy-read-only"')        
+        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" --datastore_path="%~dp0/code/dev_appserver.datastore" "%~dp0/code/khanacademy-stable"',
+        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" "%~dp0/code/khanacademy-stable"')        
     file = open("readme.txt", "w")
     file.write(readme_text % (revision, DVD_name))
     file.close()
-    os.chdir(staging_dir + "/code/khanacademy-read-only")
+    os.chdir(staging_dir + "/code/khanacademy-stable")
     replace_in_file("topics_list.py", "DVDs_dict.get(None)", "DVDs_dict.get('" + DVD_name + "')")    
         
     os.chdir(staging_dir + "/code")
