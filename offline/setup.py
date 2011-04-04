@@ -183,8 +183,8 @@ def create_download_scripts():
     playlists = video_mapping.keys()
     playlists.sort()
 
-    if not os.path.exists("download_scripts"):
-    	os.mkdir("download_scripts")
+    if not os.path.exists(ka_dir + "/download_scripts"):
+    	os.mkdir(ka_dir + "/download_scripts")
 
     for playlist in playlists:
         file = open(ka_dir + "/download_scripts/download_" + playlist + ".bat", "w")
