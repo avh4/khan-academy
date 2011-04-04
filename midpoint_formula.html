@@ -177,16 +177,10 @@ function graphPoint(pt)
 // custom short-answer since there's no real need for multiple choice here
 highlight_answer();
 
-var ansX = parseFloatStrict(document.getElementById("answer").value);
-var ansY = parseFloatStrict(document.getElementById("answery").value);
-if (isNaN(ansX) || isNaN(ansY)) 
-{
-		window.alert("Your X or Y coordinate is not a number. Please try again.");
-		return;
-}
-var isCorrect = (ansX.toFixed(2) == correctX.toFixed(2)) && (ansY.toFixed(2) == correctY.toFixed(2));
+var isXCorrect = isInputCorrect($("#answer").val(), correctX, 0);
+var isYCorrect = isInputCorrect($("#answery").val(), correctY, 0);
 
-handleCorrectness(isCorrect);
+handleCorrectness(isXCorrect && isYCorrect);
 {% endblock checkanswer %}
 
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

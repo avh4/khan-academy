@@ -220,17 +220,21 @@ function handleCorrectness(isCorrect)
 
 function checkFreeAnswer()
 {
-    var val = document.getElementById("answer").value;
-	var usersAnswer = parseFloatStrict(val);
-	var usersAnswerLocale = parseFloatLocale(val);
-	if (isNaN(usersAnswer) && isNaN(usersAnswerLocale)) 
-	{
+    var isCorrect = isInputCorrect($("#answer").val(), correctAnswer, 0);
+	handleCorrectness(isCorrect);
+}
+
+function isInputCorrect(input_str, answer, epsilon) {
+    var usersAnswer = parseFloatStrict(input_str);
+	var usersAnswerLocale = parseFloatLocale(input_str);
+	if (isNaN(usersAnswer) && isNaN(usersAnswerLocale)) {
 			window.alert("Your answer is not a number.  Please try again.");
 			return;
 	}
-	var isCorrect = ((usersAnswer==parseFloat(correctAnswer)) || (usersAnswerLocale==parseFloat(correctAnswer)));
-
-	handleCorrectness(isCorrect);
+	
+	var within = Math.abs(usersAnswer - parseFloat(answer)) <= epsilon;
+	var withinLocale = Math.abs(usersAnswerLocale - parseFloat(answer)) <= epsilon;
+	return (within || withinLocale);
 }
 
 function checkFreeAnswerString()
@@ -254,6 +258,7 @@ function parseFloatGeneric(val, str)
 
     return parseFloat(val);    
 }
+
 
 // Replace comma(s?) with . (for locale support)
 function parseFloatLocale(val)
