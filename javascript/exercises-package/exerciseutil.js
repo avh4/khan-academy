@@ -30,7 +30,9 @@ var Exercise = {
         Exercise.enable();
         
         if (this.fSupportsAjax) {
-            $("#question_content").css("left", 300);
+            $("#question_content").attr("id", "old_question_content");
+            $("#question_content_container").append("<div id=\"question_content\" style=\"position:relative; float: left\"></div>");
+            $("#question_content").css("left", 1000);
             this.showNextProblem();
         }
         
@@ -43,8 +45,12 @@ var Exercise = {
         // call translate after math is on page
         translate();
         
-        if (this.fSupportsAjax)
-            $("#question_content").animate({"left": 0}, "slow");
+        if (this.fSupportsAjax) {
+            $("#old_question_content").animate({"left": -500}, 1000, function() {
+                $("#old_question_content").remove();
+                $("#question_content").animate({"left": 0}, 1000);    
+            });
+        }
     },
     
     enable: function() {
@@ -83,7 +89,6 @@ var Exercise = {
         try {
             eval("var data=" + response);
             KhanAcademy.updateSeed(data.problem_number);
-            $("#question_content").html("");
             Exercise.init();
             Exercise.display();
             Exercise.resetFeedback();
