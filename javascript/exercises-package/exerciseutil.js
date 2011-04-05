@@ -23,21 +23,75 @@ var Exercise = {
     },
     
     display: function() {
+        // set vals to 0 after document is ready
         $("#correct").val(0);
         $("#hint_used").val(0);
+        this.showThrobber(false);
         
-        if (this.fSupportsAjax)
+        if (this.fSupportsAjax) {
+            $("#question_content").css("left", 300);
             this.showNextProblem();
-
+        }
+        
         if (this.fExtendsMultipleChoice) {
             $("#answer_content").html("");
             renderChoices();
         } else
             $("#answer").val("")
+            
+        // call translate after math is on page
+        translate();
+        
+        if (this.fSupportsAjax)
+            $("#question_content").animate({"left": 0}, "slow");
     },
     
-    getNumPossibleAnswers: function() {
-        return this.possibleAnswers.length;
+    submitForm: function() {
+        if (this.fSupportsAjax) {
+            var data = {};
+            $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used", "time_warp"], function() {
+              data[this] = $("#" + this).val();
+            });
+            
+            this.showThrobber(true);
+
+            $.ajax({
+                type: "GET",
+                url: "/registeranswer",
+                data: data,
+                success: this.finishRegisterAnswer,
+                error: this.error
+            });
+        } else
+            $("#answerform").submit();
+    },
+    
+    finishRegisterAnswer: function(response) {
+        try {
+            eval("var data=" + response);
+            KhanAcademy.updateSeed(data.problem_number);
+            $("#question_content").html("");
+            // For Ben/Jason: because of jquery + scoping, 
+            // what's the more correct way of calling below 2 lines?
+            Exercise.init();
+            Exercise.display();
+            Exercise.resetFeedback();
+            Exercise.updateUserData(data);
+        } catch (err) {
+            Exercise.error();
+        }
+    },
+    
+    error: function() {
+        // try page-reload on ajax error
+        window.location.reload();
+    },
+    
+    resetFeedback: function() {
+        $("#check-answer-button").show();
+        $("#nextbutton").hide();
+        $("#feedback").hide();
+        correctnessRegistered = false;
     },
     
     updateUserData: function(data) {
@@ -57,6 +111,17 @@ var Exercise = {
         $("#exercise-message-container").html(data.exercise_message_html);
         if (data.exercise_message_html)
             $(".exercise_message").slideDown();        
+    },
+    
+    getNumPossibleAnswers: function() {
+        return this.possibleAnswers.length;
+    },
+    
+    showThrobber: function (fVisible) {
+        if (fVisible)
+            $("#throbber").show();
+        else
+            $("#throbber").hide();
     }
 };
 

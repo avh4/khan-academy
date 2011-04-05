@@ -209,13 +209,6 @@ function handleCorrectness(isCorrect)
 	showFeedback(isCorrect);
 }
 
-function resetFeedback() {
-    $("#check-answer-button").show();
-    $("#nextbutton").hide();
-    $("#feedback").hide();
-    correctnessRegistered = false;
-}
-
 function showFeedback(isCorrect) {
     if (isCorrect) {
 		$("#check-answer-button").hide();
