@@ -21,14 +21,13 @@ var Exercise = {
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
         this.incorrect.src = "/images/face-sad.gif";
-        this.fRegisteringAnswer = false;
     },
     
     display: function() {
         // set vals to 0 after document is ready
         $("#correct").val(0);
         $("#hint_used").val(0);
-        this.showThrobber(false);
+        Exercise.enable();
         
         if (this.fSupportsAjax) {
             $("#question_content").css("left", 300);
@@ -48,17 +47,26 @@ var Exercise = {
             $("#question_content").animate({"left": 0}, "slow");
     },
     
+    enable: function() {
+        Exercise.fRegisteringAnswer = false;
+        $("#next-question-button").removeClass("buttonDisabled").removeAttr("disabled");
+        Exercise.showThrobber(false);
+    },
+    
+    disable: function() {
+        Exercise.fRegisteringAnswer = true;
+        $("#next-question-button").addClass("buttonDisabled").attr("disabled", "disabled");
+        setTimeout(function() { Exercise.showThrobber(true); }, 10);
+    },
+    
     submitForm: function() {
         if (this.fSupportsAjax) {
             var data = {};
             $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used", "time_warp"], function() {
               data[this] = $("#" + this).val();
             });
-
-            this.fRegisteringAnswer = true;
-            setTimeout(function() {
-                Exercise.showThrobber(true);
-            }, 10);
+            
+            Exercise.disable();
 
             $.ajax({
                 type: "GET",
@@ -92,7 +100,7 @@ var Exercise = {
     
     resetFeedback: function() {
         $("#check-answer-button").show();
-        $("#nextbutton").hide();
+        $("#next-container").hide();
         $("#feedback").hide();
         correctnessRegistered = false;
     },

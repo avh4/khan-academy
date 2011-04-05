@@ -212,9 +212,9 @@ function handleCorrectness(isCorrect)
 function showFeedback(isCorrect) {
     if (isCorrect) {
 		$("#check-answer-button").hide();
-    	$("#nextbutton").show();
+    	$("#next-container").show();
+        $("#next-question-button").focus();
     	$("#feedback").attr("src", Exercise.correct.src);
-        $("#nextbutton input").focus();
     } else {
 		$("#feedback").attr("src", Exercise.incorrect.src);
     }

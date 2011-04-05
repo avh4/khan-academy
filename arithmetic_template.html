@@ -143,8 +143,8 @@ var currentexercise = "{{exid|escapejs}}";
 			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
 			<div id="check-answer-results">
                 <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
-                <div id="nextbutton" class="button" style="position:relative; display: none;">
-                    <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="Exercise.submitForm()">
+                <div id="next-container" class="button" style="position:relative; display: none;">
+                    <input id="next-question-button" type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="Exercise.submitForm()">
                     <img src="/images/throbber.gif" id="throbber" style="display:none;" />
                 </div>
                 
