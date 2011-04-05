@@ -355,9 +355,10 @@ footer {
         top: 15px;
         z-index: 1;    
     }
-    #top-header #logo #logo-image img {
+    #top-header #logo #logo-image {
         width: 309px;
         height: 71px;
+        background: url(/images/logo-no-highlight.png?10) no-repeat 0 0;
     }
 
 
@@ -626,12 +627,21 @@ footer {
     }
     #social-links a {
         margin-right: 0;
-    }
-    #social-links img {
-        position: relative;
-        top: -1px;
+        display: inline-block;
         height: 24px;
         width: 24px;
+        position: relative;
+        *position: static;
+        top: 7px;
+    }
+    #social-links .youtube {
+        background: url(/images/youtube.png) no-repeat 0 0;
+    }
+    #social-links .twitter {
+        background: url(/images/twitter.png) no-repeat 0 0;
+    }
+    #social-links .facebook {
+        background: url(/images/facebook.png) no-repeat 0 0;
     }
     
 #top-header #top-header-links #page_auth.page_links {
