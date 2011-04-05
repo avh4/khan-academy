@@ -1,7 +1,7 @@
 /*
  * Author: Ali Muzaffar Khan
  * Date: 22 March 2011
- * Description: Fraction Subtraction exercise with common dinominators.
+ * Description: Number Rounding Exercise
  */
 
 /*
@@ -12,10 +12,16 @@ Rounding = new function(){
     /*Private Members*/
     var _number=0;
     var _correctAnswer=0;
+    var _stringNumber='';
+    var _numberLength='';
+    var _numberArray=[];
+    var _xAxis=[];
+    var _yAxis=[];
+    var _x1,_x2;
     var _roundingType = [
     "ten",
     "hundred",
-    "thousand"   
+    "thousand"
     ];
 
     var _roundingTypeDecimal=[
@@ -29,7 +35,7 @@ Rounding = new function(){
     "--",
     "-.--",
     "-.---",
-    "-.----"    
+    "-.----"
     ];
     var _hints = new Array();
     var _divider;
@@ -45,8 +51,7 @@ Rounding = new function(){
     var _fractionPart=null;
     var _intPart=null;
     var _highlightIndex=null;
-
-
+   
     /*
      * Function:_randOrder
      * Access Level: Private
@@ -56,6 +61,13 @@ Rounding = new function(){
     var _randOrder = function (){
         return (Math.round(Math.random())-0.5);
     }
+
+    /*
+     * Function:_createNumber
+     * Access Level: Private
+     * Parameters: none
+     * Description: This function generates the number for the problem
+     */
 
     var _createNumber = function(){
         var lStringifiedNumber = '';
@@ -68,11 +80,17 @@ Rounding = new function(){
         for(var i=0; i<combinationLength; i++){
             if(combination.substring(i,i+1)=="-"){
                 lStringifiedNumber += (getRandomIntRange(1,8)).toString();
+                _numberArray[i]=parseInt(lStringifiedNumber[i]);
             } else {
                 lStringifiedNumber += combination.substring(i,i+1);
+                _numberArray='.';
             }
         }       
+
         _number=parseFloat(lStringifiedNumber);
+        _stringNumber=lStringifiedNumber;
+        _numberLength=lStringifiedNumber.length;
+
         decimalIndex=lStringifiedNumber.indexOf('.', 0);
 
         if(decimalIndex==-1){
@@ -83,22 +101,21 @@ Rounding = new function(){
             } else if(_number < 10000){
                 roudingTypeMaxRange=2;
             }
-            // _roundingType.sort( _randOrder );
+
             _roudingTypeToUse = _roundingType[getRandomIntRange(0,roudingTypeMaxRange)];
         }//if not decimal
         else{
             _hasDecimal=true;
             if(combinationLength==4)
             {
-                _roudingTypeToUse='tenth';
+                roudingTypeMaxRange=0;
             } else if(combinationLength==5){
                 roudingTypeMaxRange=1;
-            //      _roudingTypeToUse='hundredth';
+
             } else if(combinationLength>5){
                 roudingTypeMaxRange=2;
-            //    _roudingTypeToUse='thousandth';
+
             }
-            // _roundingTypeDecimal.sort( _randOrder );
             _roudingTypeToUse = _roundingTypeDecimal[getRandomIntRange(0,roudingTypeMaxRange)];
 
         }//if decimal is included
@@ -107,74 +124,64 @@ Rounding = new function(){
 
     /*
      * Access Level: Private
-     * Function: _createChoice
+     * Function: _createProblem
      * Parameters Name: none
      *
-     * Description: Generates the number for rounding
+     * Description: This function determines the type of rounding
      */
     var _createProblem = function(){
         do{
-            _createNumber();
-            var strNumber=_number.toString();
+            _createNumber();            
             var roundPortion;
             switch (_roudingTypeToUse){
                 case 'ten':
-                
                     _cutOff=1;
-                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
                     _divider=0;
+                    _highlightIndex=_numberArray[_numberLength-_cutOff];
+
                     break;
 
                 case 'hundred':
-                
                     _cutOff=2;
-                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
                     _divider=10;
                     break;
 
                 case 'thousand':
-                
                     _cutOff=3;
-                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
                     _divider=100;
                     break;
 
                 case 'tenth':
                     _cutOff=1;
-                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
-                    _divider=0.1;
-                    _fractionPart=strNumber.substring(2,3);
-                    _highlightIndex=strNumber.substring(3,4);
+                    _fractionPart=_stringNumber.substring(2,3);
+                    _highlightIndex=_stringNumber.substring(3,4);
                     break;
 
 
                 case 'hundredth':
                     _cutOff=1;
-                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
-                    _divider=0.01;
-                    _fractionPart=strNumber.substring(2,4);
-                    _highlightIndex=strNumber.substring(4,5);
+                    _fractionPart=_stringNumber.substring(2,4);
+                    _highlightIndex=_stringNumber.substring(4,5);
                     break;
 
 
                 case 'thousandth':
                     _cutOff=1;
-                    _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
-                    _divider=0.001;
-                    _fractionPart=strNumber.substring(2,5);
-                    _highlightIndex=strNumber.substring(5,6);
+                    _fractionPart=_stringNumber.substring(2,5);
+                    _highlightIndex=_stringNumber.substring(5,6);
                     break;
             }
 
-           
+            _hints[0]='The two closest '+_roudingTypeToUse+'s to ' + _number + ' are';
+
             // below code checks if the number is not already or is to small to be displayed on the scale for hints
             
             if(_hasDecimal){
-                roundPortion=strNumber.substring(3,3+_cutOff);
-                _intPart=strNumber.substring(0,1);
+                roundPortion=_stringNumber.substring(3,3+_cutOff);
+                _intPart=_stringNumber.substring(0,1);
                 
             } else{
-                roundPortion=strNumber.substring(strNumber.length-_cutOff,strNumber.length);
+                roundPortion=_stringNumber.substring(_stringNumber.length-_cutOff,_stringNumber.length);
             }
             if(roundPortion=='0' || roundPortion=='00' || roundPortion=='000' ){
                 _numberValid=false;
@@ -192,13 +199,13 @@ Rounding = new function(){
     }
 
     /*
-     * Access Level: Private
-     * Function: _createChoice
-     * Parameter Name: none
-     *
-     * Description: sets the correct answer
-     */
-    var _creteAnswer = function() {
+ * Access Level: Private
+ * Function: _createAnswer
+ * Parameter Name: none
+ *
+ * Description: sets the correct answer
+ */
+    var _createAnswer = function() {
         var numberInStr = _number.toString();
         var numberToRound = 0;
         var addToRoundUp = 0;
@@ -260,59 +267,19 @@ Rounding = new function(){
 
 
     /*
+     * Function:_generateAxis
      * Access Level: Private
-     * Function: _createHint
-     * Parameter1 Name: Number
-     * Parameters1 Type: integer
-     * Parameters1 Detail: This is the number we are trying to round
-     *
-     * Parameter2 Name: CutOff
-     * Parameters2 Type: integer
-     * Parameters2 Detail: This value is equal to the private Variable _cutOff used to determine kind of rounding and in string manipulation
-     *
-     * Parameter3 name: Rapahel
-     * Parameters3 Type: object
-     * Parameters3 Detail: This is handle of Raphael
-     *
-     * Parameter4 name: HintNumber
-     * Parameters4 Type: integer
-     * Parameters4 Detail: This number tells which step we are doing of the hint at the moment
-     *
-     * Description: Draws the Hints
+     * Parameters: none
+     * Description: This function generates the the co-ordinates of the axis for drawing the scale
      */
-    var _createHint = function(Number,CutOff,Raphael,HintNumber){
 
-        
-        var strNumber=Number.toString();
-        var arrNumber= new Array();
-        var i=0,start,incStep,startIndex,x1,x2;
-       
-
-        if(_hasDecimal){            
-            strNumber=strNumber.substr(2, CutOff+1);
-            Number=parseInt(strNumber);
+    var _generateAxis = function() {
+            
+        var i=0,start=0,incStep=1;
+        if(!_hasDecimal) {
+            start=_number-parseInt(ltrim(_stringNumber.substring(_numberLength-_cutOff,_numberLength),'0'));
         }
-
-        var numLength=strNumber.length;
-        for(i=0;i<numLength; i++){
-            arrNumber[i]=parseInt(strNumber[i]);
-        }
-
-        //the starting number from where x-axis should begin
-        
-        if(_hasDecimal){
-            start=0;
-        } else{
-            start=Number-parseInt(ltrim(strNumber.substring(numLength-CutOff,numLength),'0'));
-        }
-        var xArray = [];
-        var yArray = [];
-
-        switch(CutOff){
-            case 1:
-                incStep=1;
-                break;
-
+        switch(_cutOff){
             case 2:
                 incStep=10;
                 break;
@@ -323,34 +290,69 @@ Rounding = new function(){
         }
 
         for(i=0;i<=10;i++){
-            xArray[i]=start;
-            yArray[i]=0;
+            _xAxis[i]=start;
+            _yAxis[i]=0;
             start+=incStep;
         }
-
         
+    }// end of axis generator
 
-        if(CutOff==1){// in case of tens rounding we dont need startIndex and the remianing mathematics is fixed
-            startIndex=0;
-            if(_hasDecimal){
-                x1=_highlightIndex*78+15;
-                x2=_highlightIndex*78+25;
-                if(_highlightIndex==5){
-                    _isCentered=true;
-                }
-            }else{
-                x1=arrNumber[numLength-CutOff]*78+15;
-                x2=arrNumber[numLength-CutOff]*78+25;
-                if(arrNumber[numLength-CutOff]==5){
-                    _isCentered=true;
-                }
+    /*
+     * Function:_generateAxis
+     * Access Level: Private
+     * Parameters: none
+     * Description: This function draws the scale
+     */
+    
+    var _drawScale = function (){
+        _generateAxis();
+        _lines = _raphaelHolder.g.linechart(15, 100, 800, 25, _xAxis, _yAxis, {
+            nostroke: false,
+            axis: "0 0 1 0",
+            axisxstep:10,
+            smooth: true
+        });
+        _lines.axis[0].text.items[0].attr('fill','#EE8262');
+        _lines.axis[0].text.items[10].attr('fill','#EE8262');
+
+        if(_hasDecimal)
+        {
+            var temp;
+            for(i=1;i<=9;i++){
+                temp=_intPart+'.'+_fractionPart+i;
+                _lines.axis[0].text.items[i].attr('text',temp);
+
             }
-            
+
+            _lines.axis[0].text.items[0].attr('text',_intPart+'.'+_fractionPart);
+            _lines.axis[0].text.items[10].attr('text',_intPart+'.'+(parseInt(_fractionPart)+1));
+
+
+        }
+    }
+
+    /*
+     * Function:_setCoordinates
+     * Access Level: Private
+     * Parameters: none
+     * Description: This function sets the co-ordinates for the hint lines that are to be drawn
+     */
+    
+    var _setCoordinates= function(){
+        var startIndex;
+        if(_cutOff==1){// in case of tens rounding we dont need startIndex and the remianing mathematics is fixed
+            startIndex=0;            
+            _x1=_highlightIndex*78+15;
+            _x2=_highlightIndex*78+25;
+            if(_highlightIndex==5){
+                _isCentered=true;
+            }          
+
         } else {
             for(i=0;i<=10;i++){
-                if(Number<=xArray[i]){
+                if(_number<=_xAxis[i]){
                     startIndex=i-1;
-                    if(Number==xArray[i]){
+                    if(_number==_xAxis[i]){
                         _onScale=true;
                     }
                     break;
@@ -358,118 +360,113 @@ Rounding = new function(){
             }
 
             if(_onScale){
-                x1=arrNumber[numLength-CutOff]*78+15;
-                x2=arrNumber[numLength-CutOff]*78+25;
+                _x1=_numberArray[_numberLength-_cutOff]*78+15;
+                _x2=_numberArray[_numberLength-_cutOff]*78+25;
             } else {
-                x1=(startIndex*78+15)+(78*(parseInt(ltrim(strNumber.substring(numLength-CutOff+1,numLength),'0')))/_divider);
-                x2=(startIndex*78+25)+(78*(parseInt(ltrim(strNumber.substring(numLength-CutOff+1,numLength),'0')))/_divider) ;
+                _x1=(startIndex*78+15)+(78*(parseInt(ltrim(_stringNumber.substring(_numberLength-_cutOff+1,_numberLength),'0')))/_divider);
+                _x2=(startIndex*78+25)+(78*(parseInt(ltrim(_stringNumber.substring(_numberLength-_cutOff+1,_numberLength),'0')))/_divider) ;
             }
         }
-        start=xArray[0];
+        return startIndex;
+    }
 
-        if(_lines==null){
-            _lines = Raphael.g.linechart(15, 100, 800, 25, xArray, yArray, {
-                nostroke: false,
-                axis: "0 0 1 0",
-                axisxstep:10,
-                smooth: true
-            });
-            _lines.axis[0].text.items[0].attr('fill','#F00');
-            _lines.axis[0].text.items[10].attr('fill','#F00');
+    /*
+     * Function:_drawLines
+     * Access Level: Private
+     * Parameters: none
+     * Description: This function draws the lines
+     */
+    
+    var _drawLines= function (){
+        var firstPathCoOrdinates="M 25 90 H " + _x1 + "  m 0 -5 v 10 l 10 -5";
+        var firstPath=_raphaelHolder.path(firstPathCoOrdinates);
+        var firstPathReverse=_raphaelHolder.path(firstPathCoOrdinates);
+        firstPathReverse.rotate(180);
 
+        firstPath.attr({
+            fill: '#000',
+            stroke: '#000',
+            'stroke-width': 1
+        });
 
+        firstPathReverse.attr({
+            fill: '#000',
+            stroke: '#000',
+            'stroke-width': 1
+        });
 
-            if(_hasDecimal)
-            {
-                var temp;
-                for(i=1;i<=9;i++){
-                    temp=_intPart+'.'+_fractionPart+i;
-                    _lines.axis[0].text.items[i].attr('text',temp);
+        var secondPathCoOrdinates="M " + _x2 + " 90 H 795  m 0 -5 v 10 l 10 -5";
+        var secondPath=_raphaelHolder.path(secondPathCoOrdinates);
+        var secondPathReverse=_raphaelHolder.path(secondPathCoOrdinates);
 
-                }
-                
-                _lines.axis[0].text.items[0].attr('text',_intPart+'.'+_fractionPart);                
-                _lines.axis[0].text.items[10].attr('text',_intPart+'.'+(parseInt(_fractionPart)+1));
+        secondPathReverse.rotate(180);
 
+        secondPath.attr({
+            fill: '#000',
+            stroke: '#000',
+            'stroke-width': 1
+        });
+        secondPathReverse.attr({
+            fill: '#000',
+            stroke: '#000',
+            'stroke-width': 1
+        });        
+    }
 
-            }
-        }
+    /*
+     * Function:_createHints
+     * Access Level: Private
+     * Parameters: none
+     * Description: This function handles the flow of hints 
+     */
+    
 
-        //begin hint 2 at this point we highlight the number in question
-        if(HintNumber==1){
-            if(CutOff>1 && !_onScale){
+    var _createHint = function(){
+        var startIndex;
+        if(_hintStep==0)
+        {
+            _drawScale();
 
-                var numCoOrdinates="M " + x2 + " 110 v 5";
-                var numPath=Raphael.path(numCoOrdinates);
+        }else if(_hintStep==1){
+            startIndex=_setCoordinates();
+            if(_cutOff>1 && !_onScale){
+
+                var numCoOrdinates="M " + _x2 + " 110 v 5";
+                var numPath=_raphaelHolder.path(numCoOrdinates);
                 numPath.attr({
-                    fill: '#0F0',
-                    stroke: '#0F0',
+                    fill: '#6D953C',
+                    stroke: '#6D953C',
                     'stroke-width': 1
                 });
 
-                var text = Raphael.text(x2, 105, Number);
-                text.attr('fill','#0F0');
-            } else if(CutOff>1 && _onScale) {
-                _lines.axis[0].text.items[startIndex+1].attr('fill','#0F0');
+                var text = _raphaelHolder.text(_x2, 105, _number);
+                text.attr('fill','#6D953C');
+            } else if(_cutOff>1 && _onScale) {
+                _lines.axis[0].text.items[startIndex+1].attr('fill','#6D953C');
 
                 if(startIndex+1==5){
                     _isCentered=true;
                 }
             }
 
-            if(CutOff==1){
-                if(_hasDecimal){
-                    _lines.axis[0].text.items[_highlightIndex].attr('fill','#0F0');
-                }else {
-                    _lines.axis[0].text.items[arrNumber[numLength-CutOff]].attr('fill','#0F0');
-                }
+            if(_cutOff==1){              
+                _lines.axis[0].text.items[_highlightIndex].attr('fill','#6D953C');
+               
             }
         }//end of step 2
 
         //begin step3 at this point we draw the arrow heads above
-        if(HintNumber>1){
+        if(_hintStep>1){
 
-            var firstPathCoOrdinates="M 25 90 H " + x1 + "  m 0 -5 v 10 l 10 -5";
-            var firstPath=Raphael.path(firstPathCoOrdinates);
-            var firstPathReverse=Raphael.path(firstPathCoOrdinates);
-            firstPathReverse.rotate(180);
+            _drawLines();
 
-            firstPath.attr({
-                fill: '#000',
-                stroke: '#000',
-                'stroke-width': 1
-            });
-
-            firstPathReverse.attr({
-                fill: '#000',
-                stroke: '#000',
-                'stroke-width': 1
-            });
-
-            var secondPathCoOrdinates="M " + x2 + " 90 H 795  m 0 -5 v 10 l 10 -5";
-            var secondPath=Raphael.path(secondPathCoOrdinates);
-            var secondPathReverse=Raphael.path(secondPathCoOrdinates);
-
-            secondPathReverse.rotate(180);
-
-            secondPath.attr({
-                fill: '#000',
-                stroke: '#000',
-                'stroke-width': 1
-            });
-            secondPathReverse.attr({
-                fill: '#000',
-                stroke: '#000',
-                'stroke-width': 1
-            });
-
-            _hints[1]="Whats nearest to <strong>" + Number + "</strong> ? " + xArray[0] + " or "+xArray[10];
-            _hints[2]="Whats nearest to <strong>" + Number + "</strong> ? " + xArray[0] + " or "+xArray[10];
+            _hints[1]="Whats nearest to <strong>" + Number + "</strong> ? " + _xAxis[0] + " or "+_xAxis[10];
+            _hints[2]="Whats nearest to <strong>" + Number + "</strong> ? " + _xAxis[0] + " or "+_xAxis[10];
 
         }//hint for step 2 closed draws the arrow heads in this case
 
-        if(_isCentered && HintNumber==1){
-            $('#dvAnswer').html("Since the value to be rounded lies exactly between " + xArray[0] + " and " + xArray[10] + " , therefore we round to the higher boundary");
+        if(_isCentered && _hintStep==1){
+            $('#dvAnswer').html("Since the value to be rounded lies exactly between " + _xAxis[0] + " and " + _xAxis[10] + " , therefore we round to the higher boundary");
             $('#dvAnswer').css('display','block');
         }
 
@@ -478,15 +475,15 @@ Rounding = new function(){
 
     return{
         init: function(){
-            _createProblem();
-            _creteAnswer();
+            _createProblem();            
+            _createAnswer();
         },
         next_step: function (){
             $('#dvHint').css('display','block');
 
             if(_hintStep<3){
                 $('#dvHint').html(_hints[_hintStep]);
-                _createHint(_number,_cutOff,_raphaelHolder,_hintStep);
+                _createHint();                
             } else if(_hintStep==3) {
                 if(_isCentered){
                     var answerHtml=$('#dvAnswer').html();
