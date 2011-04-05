@@ -66,6 +66,8 @@ from discussion import notification
 from about import util_about
 from about import blog
 
+from jobs import jobs
+
 from badges import util_badges
 from badges import last_action_cache
 
@@ -1924,6 +1926,8 @@ def real_main():
         ('/discussion/moderatorlist', qa.ModeratorList),
 
         ('/badges/view', util_badges.ViewBadges),
+
+        ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/sendtolog', SendToLog),
         ('/testuserdata', TestUserData),
