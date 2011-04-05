@@ -11,6 +11,7 @@
 function WritingNestedExpressionsExercise() {
     var inner_expression = new Expression();
     var expression = new Expression();
+    var orig_answer;
         
     expression.setInner(inner_expression);
     
@@ -29,9 +30,9 @@ function WritingNestedExpressionsExercise() {
         write_text(expression.toEnglish());
         close_left_padding();
         
-        var answer = expression.toString();
+        orig_answer = expression.toString();
         if (get_random() > -5) 
-            setCorrectAnswer(expression.toString());
+            setCorrectAnswer(orig_answer);
         else
             setCorrectAnswer("`None of these`");
     }
@@ -47,8 +48,7 @@ function WritingNestedExpressionsExercise() {
     }
     
     function generateWrongAnswers() {
-        // If None of the these is the correct answer, then the following has no effect.
-        addWrongChoice("`None of these`");
+        addWrongChoiceIfNotOrig("`None of these`");
         
         var coeff = expression.getCoefficient();
         var constant = expression.getConstant();
@@ -57,24 +57,33 @@ function WritingNestedExpressionsExercise() {
         var inner_constant = inner_expression.getConstant();
         
         expression.setCoefficient(coeff * -1);
-        addWrongChoice(expression.toString());
+        addWrongChoiceIfNotOrig(expression.toString());
         
         expression.setConstant(constant * -1);
         inner_expression.setCoefficient(inner_constant);
         inner_expression.setConstant(inner_coeff);
-        addWrongChoice(expression.toString());
+        addWrongChoiceIfNotOrig(expression.toString());
         
         expression.setCoefficient(constant);
         expression.setConstant(coeff);
-        addWrongChoice(expression.toString());
+        addWrongChoiceIfNotOrig(expression.toString());
         
         inner_expression.setCoefficient(inner_coeff);
         inner_expression.setConstant(inner_constant * -1);
-        addWrongChoice(expression.toString())
+        addWrongChoiceIfNotOrig(expression.toString())
 
         while (getNumPossibleAnswers() < 4) {
             expression.setConstant(get_random());
-            addWrongChoice(expression.toString());
+            addWrongChoiceIfNotOrig(expression.toString());
         }
+    }
+    
+    // When the correct answer is rigged to "None of the these", 
+    // we don't want a wrong answer to be correct.
+    // Eventually, refactor this into exerciseutil 
+    // so that all exercises with a "None of these" option will benefit.
+    function addWrongChoiceIfNotOrig(wrong_str) {
+        if (wrong_str != orig_answer)
+            addWrongChoice(wrong_str)
     }
 }

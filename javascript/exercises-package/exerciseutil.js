@@ -450,6 +450,19 @@ function getLCM(x,y)
 	return (x *y/getGCD(x,y));
 }
 
+function format_fraction_first_coefficient(n, d)
+{
+	var ffc = format_fraction(n, d);
+
+	if (ffc == '1') {
+	   	return '';
+	} else if (ffc == '-1') {
+	       	return '-';
+	} else {
+	        return ffc;
+	}
+}
+
 function format_fraction(n, d)
 {
 	if (d == 0)
@@ -502,6 +515,29 @@ function format_not_reduced_with_sign(n, d)
 		fraction = '+'+fraction;
 	}
 	return fraction;
+}
+
+function convertDegreeToRadian(degree) {
+    return degree * Math.PI / 180;
+}
+
+function convertRadianToDegree(radian) {
+    return radian * 180 / Math.PI;
+}
+
+// sample usage: rotateVector([1, 0], 90) ==> [0, 1]
+function rotateVector(vector, degree) {
+    var cos = Math.cos(convertDegreeToRadian(degree));
+    var sin = Math.sin(convertDegreeToRadian(degree));
+    
+    var new_x = (vector[0] * cos) - (vector[1] * sin);
+    var new_y = (vector[0] * sin) + (vector[1] * cos);
+    
+    return [roundToHundredth(new_x), roundToHundredth(new_y)];
+}
+
+function roundToHundredth(num) {
+    return Math.round(num * 100) / 100;
 }
 
 var notDoneType = ''; //This is used by pickType in metautil.js to prevent students from refreshing away a type of problem

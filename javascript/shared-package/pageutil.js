@@ -305,7 +305,7 @@ var VideoStats = {
         var percent = this.getPercentWatched();
         var dtSinceSaveBeforeError = this.dtSinceSave;
 
-        $.ajax({type: "POST",
+        $.ajax({type: "GET",
                 url: "/logvideoprogress", 
                 data: {
                     video_key: $(".video_key_primary").val(),
@@ -335,7 +335,7 @@ var VideoStats = {
             var jelPoints = $(".video-energy-points");
             jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
-            $("#page_top_nav .energy-points-badge").text(dict_json.points);
+            $("#top-header .energy-points-badge").text(dict_json.points);
         }
     },
 
@@ -382,7 +382,7 @@ var Drawer = {
         {
             // Mobile device, support single-finger touch scrolling
             $("#dashboard-drawer").removeClass("drawer-hoverable");
-            var scroller = new iScroll('dashboard-drawer', { hScroll: false, hScrollbar: false, vScrollbar: false });
+            var scroller = new iScroll('dashboard-drawer-inner', { hScroll: false, hScrollbar: false, vScrollbar: false });
         }
         else
         {
@@ -451,9 +451,12 @@ var Drawer = {
     },
 
     resize: function() {
-        var jel = $("#dashboard-drawer, #dashboard-map");
+        var jel = $("#dashboard-drawer, #dashboard-drawer-inner, #dashboard-map");
+        var jelDrawerInner = $("#dashboard-drawer-inner");
         var yTop = jel.offset().top;
         jel.height($(window).height() - yTop - $("#footer").height());
+        // Account for padding in the dashboard drawer
+        jelDrawerInner.height(jelDrawerInner.height() - 20);
 
         if (window.KnowledgeMap && KnowledgeMap.map)
             google.maps.event.trigger(KnowledgeMap.map, 'resize');

@@ -133,6 +133,86 @@ class KillLiveAssociations(request_handler.RequestHandler):
             video_playlist.live_association = False
         db.put(all_video_playlists)
 
+class TestUserData(request_handler.RequestHandler):
+    def get(self):
+        if not users.is_current_user_admin():
+            return
+
+        user_1 = users.User('http://facebookid.khanacademy.org/525876620', federated_identity="Logan Williams")
+        user_2 = users.User('http://facebookid.khanacademy.org/100001639389777', federated_identity="Logan Williams")
+
+        user_1b = users.User('http://facebookid.khanacademy.org/525876620')
+        user_2b = users.User('http://facebookid.khanacademy.org/100001639389777')
+
+        self.response.out.write("user_1: %s<br/>" % user_1)
+        self.response.out.write("user_2: %s<br/>" % user_2)
+        self.response.out.write("user_1 == user_2: %s<br/>" % (user_1 == user_2))
+
+        user_data_1 = UserData.get_for(user_1)
+        user_data_2 = UserData.get_for(user_2)
+
+        user_data_1b = UserData.get_for(user_1b)
+        user_data_2b = UserData.get_for(user_2b)
+
+        self.response.out.write("<br/><br/><br/>")
+
+        if user_data_1:
+            self.response.out.write("user_data_1: %s<br/>" % user_data_1.key())
+            self.response.out.write("user_data_1.user: %s<br/>" % user_data_1.user)
+        if user_data_2:
+            self.response.out.write("user_data_2: %s<br/>" % user_data_2.key())
+            self.response.out.write("user_data_2.user: %s<br/>" % user_data_2.user)
+        if user_data_1b:
+            self.response.out.write("user_data_1b: %s<br/>" % user_data_1b.key())
+            self.response.out.write("user_data_1b.user: %s<br/>" % user_data_1b.user)
+        else:
+            self.response.out.write("user_data_1b: None<br/>")
+        if user_data_2b:
+            self.response.out.write("user_data_2b: %s<br/>" % user_data_2b.key())
+            self.response.out.write("user_data_2b.user: %s<br/>" % user_data_2b.user)
+        else:
+            self.response.out.write("user_data_2b: None<br/>")
+
+        self.response.out.write("<br/><br/><br/>")
+
+        exercise = Exercise.get_by_name('order_of_operations')
+        user_exercise_1 = None
+        user_exercise_2 = None
+
+        if user_data_1:
+            user_exercise_1 = user_data_1.get_or_insert_exercise(exercise, allow_insert=False)
+            if user_exercise_1:
+                self.response.out.write("user_exercise_1: %s<br/>" % user_exercise_1.key())
+
+        if user_data_2:
+            user_exercise_2 = user_data_2.get_or_insert_exercise(exercise, allow_insert=False)
+            if user_exercise_2:
+                self.response.out.write("user_exercise_2: %s<br/>" % user_exercise_2.key())
+
+
+        if user_exercise_1:
+            self.response.out.write("user_exercise_1.user: %s<br/>" % user_exercise_1.user)
+        if user_exercise_2:
+            self.response.out.write("user_exercise_2.user: %s<br/>" % user_exercise_2.user)
+
+        self.response.out.write("<br/><br/><br/>")
+
+        if user_exercise_1:
+            user_data_from_exercise_1 = UserData.get_for(user_exercise_1.user)
+            self.response.out.write("user_data_from_exercise_1: %s<br/>" % user_data_from_exercise_1.key())
+            if user_data_from_exercise_1:
+                self.response.out.write("user_data_from_exercise_1.user: %s<br/>" % user_data_from_exercise_1.user)
+                self.response.out.write("user_data_from_exercise_1.user == user_data_1.user: %s<br/>" % (user_data_from_exercise_1.user == user_data_1.user))
+
+        self.response.out.write("<br/><br/><br/>")
+
+        if user_exercise_2:
+            user_data_from_exercise_2 = UserData.get_for(user_exercise_2.user)
+            self.response.out.write("user_data_from_exercise_2: %s<br/>" % user_data_from_exercise_2.key())
+            if user_data_from_exercise_2:
+                self.response.out.write("user_data_from_exercise_2.user: %s<br/>" % user_data_from_exercise_2.user)
+                self.response.out.write("user_data_from_exercise_2.user == user_data_2.user: %s<br/>" % (user_data_from_exercise_2.user == user_data_2.user))
+
 class ViewExercise(request_handler.RequestHandler):
 
     def get(self):
@@ -363,7 +443,14 @@ class ViewVideo(request_handler.RequestHandler):
 
 class LogVideoProgress(request_handler.RequestHandler):
     
+    # LogVideoProgress uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    def get(self):
 
         user = util.get_current_user()
         video_points_total = 0
@@ -1637,7 +1724,6 @@ class ViewArticle(request_handler.RequestHandler):
         self.render_template("article.html", template_values)
             
 class Login(request_handler.RequestHandler):
-
     def get(self):
         return self.post()
 
@@ -1661,6 +1747,17 @@ class Login(request_handler.RequestHandler):
                            'direct': direct
                            }
         self.render_template('login.html', template_values)
+
+class PostLogin(request_handler.RequestHandler):
+    def get(self):
+        cont = self.request_string('continue', default = "/")
+
+        # Immediately after login we make sure this user has a UserData entry
+        user = util.get_current_user()
+        if user:
+            UserData.get_or_insert_for(user)
+
+        self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
     def get(self):
@@ -1811,6 +1908,7 @@ def real_main():
         
         ('/press/.*', ViewArticle),
         ('/login', Login),
+        ('/postlogin', PostLogin),
         ('/logout', Logout),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
@@ -1837,6 +1935,7 @@ def real_main():
         ('/badges/view', util_badges.ViewBadges),
 
         ('/sendtolog', SendToLog),
+        ('/testuserdata', TestUserData),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),

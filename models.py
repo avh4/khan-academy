@@ -199,7 +199,7 @@ class Exercise(db.Model):
     @staticmethod
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_dict_unsafe_%s" % Setting.cached_exercises_date())
     def __get_dict_use_cache_unsafe__():
-        exercises = Exercise.get_all_use_cache()
+        exercises = Exercise.__get_all_use_cache_unsafe__()
         dict_exercises = {}
         for exercise in exercises:
             dict_exercises[exercise.name] = exercise
@@ -373,21 +373,23 @@ class UserData(db.Model):
         # the next block can just be a call to .get_or_insert()
         user_data = UserData.get_for(user)
         if user_data is None:
-            user_data = UserData.get_or_insert(
-                key_name=user.nickname(),
-                user=user,
-                moderator=False,
-                last_login=datetime.datetime.now(),
-                proficient_exercises=[],
-                suggested_exercises=[],
-                assigned_exercises=[],
-                need_to_reassess=True,
-                points=0,
-                coaches=[]
-                )
+            if user.email():
+                key = "user_email_key_%s" % user.email()
+                user_data = UserData.get_or_insert(
+                    key_name=key,
+                    user=user,
+                    moderator=False,
+                    last_login=datetime.datetime.now(),
+                    proficient_exercises=[],
+                    suggested_exercises=[],
+                    assigned_exercises=[],
+                    need_to_reassess=True,
+                    points=0,
+                    coaches=[]
+                    )
         return user_data
 
-    def get_or_insert_exercise(self, exercise):
+    def get_or_insert_exercise(self, exercise, allow_insert = True):
 
         exid = exercise.name
         userExercise = UserExercise.get_by_key_name(exid, parent=self)
@@ -402,7 +404,7 @@ class UserData(db.Model):
             query.order('-total_done') # Temporary workaround for issue 289
             userExercise = query.get()
 
-        if not userExercise:
+        if allow_insert and not userExercise:
             userExercise = UserExercise.get_or_insert(
                 key_name=exid,
                 parent=self,

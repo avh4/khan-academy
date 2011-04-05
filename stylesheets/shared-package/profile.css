@@ -428,11 +428,14 @@ div.graph-notification {
     background-image: url('/images/progress-animated.gif');
 }
 
-#student-list {
-    margin-top: 20px;
+#individual_report #students-list {
+    margin-top: 44px;
+}
+#individual_report #students-list > h2 {
+    margin-bottom: 18px;
 }
 
 #student-list table td {
-    padding: 5px;
+    padding-right: 10px;
     margin: 0;
 }

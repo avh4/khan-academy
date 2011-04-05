@@ -60,14 +60,9 @@ hintWithNo[unknown](motion, solving);
 // We allow +-1.0 error...
 highlight_answer();
 
-var usersAnswer = parseFloatStrict(document.getElementById("answer").value);
 var usersAnswerUnit = document.getElementById("answerunit").value;
-if (isNaN(usersAnswer)) 
-{
-		window.alert("Your answer is not a number.  Please try again.");
-		return;
-}
-var isCorrect = (  (Math.abs(usersAnswer - motion[solving]) < 1.0)
+
+var isCorrect = (isInputCorrect($("#answer").val(), motion[solving], 1.0)
 				&& (usersAnswerUnit == kunits[solving]) );
 
 handleCorrectness(isCorrect);

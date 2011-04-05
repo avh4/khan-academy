@@ -1,0 +1,177 @@
+{% extends "adding_and_subtracting_fractions.html" %}
+{% block maincode %}
+{% endblock maincode %}
+{% block maincell %}
+<script language=Javascript1.2><!--
+/**
+@Author: Aakash Prasad (aakash.prasad91@gmail.com)
+Module: Word Problems involving Fractions
+Description: Word problems involving
+Multiplying fractions with integers
+Adding and subtracting fractions  
+Multiplying fractions with other fractions
+**/
+var gender = Math.floor(Math.random()*2);
+var boyNames= ['David', 'Omer', 'Arman', 'Alex', 'Jason', 'Clay', 'Daniel', 'Sal', 'Shan', 'Alan', 'Joey', 'Ben', 'Raj'];
+var girlNames = ['Cindy', 'Claire', 'Sophia', 'Sabina', 'Angela', 'Maya', 'Jennifer', 'Samantha', 'Lily', 'Sarah', 'Neha', 'Lizzy', 'Priya'];
+if (gender == 0) {
+	var name = boyNames[Math.floor(Math.random() * boyNames.length)];
+	var pronoun = "he";
+	var possessive_pronoun = "his";
+} else {
+	var name = girlNames[Math.floor(Math.random() * girlNames.length)];
+	var pronoun = "she";
+	var possessive_pronoun = "her";	
+}
+//Type of problem
+var numProblems = 16;
+var type = getRandomIntRange(0,numProblems - 1);
+if (type == 0) {
+	var numerator = 1;
+	var denominator = getRandomIntRange(2,8);
+	var fraction = numerator / denominator;
+	var numguests = getRandomIntRange(10, 100); 
+	write_text(name + " is ordering pizza for a birthday party. If each of " + possessive_pronoun + " guests eats " + numerator + "/" + denominator + " of a pizza, and " + name + " is ordering pizza for " + numguests + " guests, how many pizzas should " + pronoun + " order?");
+	var correctans = fraction * numguests;
+} else if (type == 1) {
+	var numerator = getRandomIntRange(1,10);
+	var denominator = getRandomIntRange(2,10);
+	var fraction = numerator / denominator;
+	var numvideos = 1600;
+	write_text("If " + name + " has watched " + numerator + "/" + denominator + " of the " + numvideos + " Khan Academy videos, how many videos has " + pronoun + " watched?");
+	var correctans = fraction * numvideos;
+} else if (type == 2) {
+	var nummarbles = getRandomIntRange(10, 100);
+	var numerator = getRandomIntRange(1,10);
+	var denominator = getRandomIntRange(2,10);
+	var fraction = numerator / denominator;
+	write_text("A bag contains " + nummarbles + " marbles, each of which is red, blue, or green. If " + numerator + "/" + denominator + " of the marbles are red, how many marbles are red?");	
+} else if (type == 3) {
+	var numcoins = getRandomIntRange(10, 100);
+	var numerator = getRandomIntRange(1,10);
+	var denominator = getRandomIntRange(2,10);
+	var fraction = numerator / denominator;
+	write_text("If " + name + " has " + numcoins + " coins in " + possessive_pronoun + " piggy bank, and " + numerator + "/" + denominator + " of the coins are nickels, how many nickels are in the piggy bank?");
+} else if (type == 4) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var numerator2 = getRandomIntRange(1,2);
+	var denominator2 = getRandomIntRange(4,10);
+	var fraction2 = numerator2 / denominator2;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	write_text("If " + name + " ate " + numerator + "/" + denominator + " of a pizza, and " + name2 + " ate " + numerator2 + "/" + denominator2 + " of the same pizza, what fraction of the pizza did they eat together?");
+} else if (type == 5) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + name + " watched " + numerator + "/" + denominator + " of the Khan Academy videos, and " + name2 + " watched " + numerator2 + "/" + denominator2 + " of the videos, what fraction of the videos did " + name2 + " watch that " + name + " did not?");
+} else if (type == 6) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text(name + " did " + numerator + "/" + denominator + " of " + possessive_pronoun + " homework on Monday and " + numerator2 + "/" + denominator2 + " on Tuesday. How much of the homework does " + pronoun + " still have to do?");
+} else if (type == 6) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + name + "'s cake recipe uses " + numerator + "/" + denominator + " cups of sugar, and " + name2 + "'s recipe uses " + numerator2 + "/" + denominator2 + " cups of sugar, how many more cups of sugar does " + name2 + "'s recipe use than " + name + "'s recipe?");	
+} else if (type == 7) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("A bag contains red, blue, and green colored marbles. If " + numerator + "/" + denominator + " of the marbles are red, and " + numerator2 + "/" + denominator2 + " are green, what fraction of the marbles are blue?");	
+} else if (type == 8) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var colors = ['red', 'blue', 'green', 'black', 'white', 'yellow', 'silver'];
+	var color = colors[getRandomIntRange(0, colors.length - 1)];
+	write_text(numerator + '/' + denominator + " of the cars in a parking lot are " + color + ". What fraction of the cars are not " + color + "?");
+} else if (type == 9) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	write_text("If " + numerator + "/" + denominator + " of a country's electorate voted, what fraction did not vote?");
+} else if (type == 10) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + numerator + "/" + denominator + " of students in a class voted for their favorite ice cream flavor, and " + numerator2 + "/" + denominator2 + " of those students who voted picked vanilla, what fraction of all the students in the class voted for vanilla?");
+} else if (type == 11) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + numerator + "/" + denominator + " of the students in a school are in the school band, and " + numerator2 + "/" + denominator2 + " of the band members play the saxophone, what fraction of all the students in the school play the saxophone in the school band?");
+} else if (type == 12) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + numerator + "/" + denominator + " of the students in a school are on the track team, and " + numerator2 + "/" + denominator2 + " of the students on the track team can run a mile under 6 minutes, what fraction of all the students in the school are on the track team and can run a mile under 6 minutes?");
+} else if (type == 13) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + numerator + "/" + denominator + " of students on Khan Academy have moon badges, and " + numerator2 + "/" + denominator2 + " of those students with moon badges have the perseverance badge, what fraction of the students on Khan Academy have the perseverance badge?");	
+} else if (type == 14) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + numerator + "/" + denominator + " of the students in a school are boys, and " + numerator2 + "/" + denominator2 + " of the boys are on the boys tennis team, what fraction of all the students in the school are on the boys tennis team?");	
+} else if (type == 15) {
+	var numerator = getRandomIntRange(1,2);
+	var denominator = getRandomIntRange(4,10);
+	var fraction = numerator / denominator;
+	var name2 = girlNames[getRandomIntRange(0, girlNames.length -1)];
+	var numerator2 = numerator;
+	var denominator2 = getRandomIntRange(denominator,12);
+	var fraction2 = numerator2 / denominator2;
+	write_text("If " + numerator + "/" + denominator + " of the students in a school speak a second language, and if " + numerator2 + "/" + denominator2 + " of the students who speak a second language speak Spanish as their second language, what fraction of all the the students in the school speak Spanish as a second language?");
+}
+
+function draw_next_step() {
+	give_next_step();
+}
+//-->
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="420" width="420"></iframe></td>
+{% endblock graphdisplay %}
+
+{% block hintfunction %}draw_next_step(){% endblock hintfunction %}

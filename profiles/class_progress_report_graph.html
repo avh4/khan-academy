@@ -156,7 +156,7 @@
                             {% endif %}
                         {% endfor %}
                     {% endfor %}
-                    <th style="max-width:5px; min-width: 5px; width: 5px">&nbsp;</th>
+                    <th style="background: transparent; border-color: transparent; max-width:5px; min-width: 5px; width: 5px">&nbsp;</th>
                   </tr>
                 </table>
             </div>
@@ -179,13 +179,14 @@
                         {% endif %}
                     {% endfor %}
                 {% endfor %}
+                <td class="tableFirstCol student-email" style="background: transparent; border-color: transparent; max-width:5px; min-width: 5px; width: 5px">&nbsp;</td>
             </table>
           </div>
         </td>
 
         <td valign="top">
-            <div id="table_div" class="sizeOnResize" style="overflow:scroll;height:325px;width:450px;position:relative;" onscroll="ProgressReport.onScroll();" >
-                <table style="width:100%" cellspacing="0" cellpadding="0" border="0" >
+            <div id="table_div" class="sizeOnResize fancy-scrollbar" style="overflow:scroll;height:325px;width:450px;position:relative;" onscroll="ProgressReport.onScroll();" >
+                <table style="width:100%;" cellspacing="0" cellpadding="0" border="0">
                     {% for student_email in student_emails %}
                     <tr {% if forloop.first %}id="firstTr"{% endif %}>
                     {% for exercise_name in exercise_names %}            

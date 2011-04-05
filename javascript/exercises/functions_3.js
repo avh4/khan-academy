@@ -84,8 +84,8 @@ ka.Functions3Exercise = {
 
 	    if (c.consCoef != 0) {
 		text += (text.length > 0 ?
-			 formatCoefficient(c.consCoef) :
-			 formatFirstCoefficient(c.consCoef)
+			 formatConstant(c.consCoef) :
+			 c.consCoef
 			);
 	    }
 	    return text;

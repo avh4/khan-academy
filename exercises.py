@@ -111,31 +111,34 @@ class UpdateExercise(request_handler.RequestHandler):
         if short_display_name:
             exercise.short_display_name = short_display_name
 
-        if exercise.is_saved():
-            video_keys = []
-            for c_check_video in range(0, 1000):
-                video_append = self.request_string("video-%s" % c_check_video, default="")
-                if video_append and not video_append in video_keys:
-                    video_keys.append(video_append)
-
-            query = models.ExerciseVideo.all()
-            query.filter('exercise =', exercise.key())
-            existing_exercise_videos = query.fetch(1000)
-
-            existing_video_keys = []
-            for exercise_video in existing_exercise_videos:
-                existing_video_keys.append(exercise_video.video.key())
-                if not exercise_video.video.key() in video_keys:
-                    exercise_video.delete()
-
-            for video_key in video_keys:
-                if not video_key in existing_video_keys:
-                    exercise_video = models.ExerciseVideo()
-                    exercise_video.exercise = exercise
-                    exercise_video.video = db.Key(video_key)
-                    exercise_video.put()
-
         exercise.live = self.request_bool("live", default=False)
+
+        if not exercise.is_saved():
+            # Exercise needs to be saved before checking related videos.
+            exercise.put()
+
+        video_keys = []
+        for c_check_video in range(0, 1000):
+            video_append = self.request_string("video-%s" % c_check_video, default="")
+            if video_append and not video_append in video_keys:
+                video_keys.append(video_append)
+
+        query = models.ExerciseVideo.all()
+        query.filter('exercise =', exercise.key())
+        existing_exercise_videos = query.fetch(1000)
+
+        existing_video_keys = []
+        for exercise_video in existing_exercise_videos:
+            existing_video_keys.append(exercise_video.video.key())
+            if not exercise_video.video.key() in video_keys:
+                exercise_video.delete()
+
+        for video_key in video_keys:
+            if not video_key in existing_video_keys:
+                exercise_video = models.ExerciseVideo()
+                exercise_video.exercise = exercise
+                exercise_video.video = db.Key(video_key)
+                exercise_video.put()
 
         exercise.put()
 
