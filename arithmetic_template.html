@@ -48,11 +48,6 @@ var username = "{{cookiename|escapejs}}";
 var currentexercise = "{{exid|escapejs}}";
 
 function finishRegisterAnswer(response) {
-    if (!Exercise.fSupportsAjax) {
-        window.location.reload();
-        return;
-    }
-
     try {
         eval("var data=" + response);
         KhanAcademy.updateSeed(data.problem_number);
