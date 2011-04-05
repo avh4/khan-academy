@@ -12,10 +12,13 @@ from topics_list import DVDs_dict
 readme_text = """
 This is version %s of the Khan Academy %s DVD.
 The changes since the last version can be seen here:
-http://code.google.com/p/khanacademy/source/list
+https://khanacademy.kilnhg.com/Repo/Website/Group/stable
 
 Click on run.bat to start up the server and load the local version of the 
-Khan Academy homepage in your browser.   
+Khan Academy homepage in your browser.  The first time you run it, it will
+install to your hard drive the code, but not the videos.  If you have trouble
+viewing the videos through the browser, you can always install the video
+player VLC (vlc-1.1.5-win32.exe) to see them directly in the videos folder.
 
 Let us know how this worked for you at the following address:
 khan-academy-comments@googlegroups.com
