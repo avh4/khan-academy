@@ -124,9 +124,14 @@ var Exercise = {
 
         $("#streak-bar-container").html(data.streak_bar_html);
         $("#exercise-icon-container").html(data.exercise_icon_html);
-        $("#exercise-message-container").html(data.exercise_message_html);
-        if (data.exercise_message_html && !$("#exercise-message-container").is(":visible"))
-            $(".exercise_message").slideDown();        
+
+        var curr_message = $("#exercise-message-container").html();
+        if (data.exercise_message_html && curr_message != data.exercise_message_html) {
+            $("#exercise-message-container").html(data.exercise_message_html);
+            $(".exercise_message").hide();
+            $(".exercise_message").slideDown();    
+        }
+    
     },
     
     getNumPossibleAnswers: function() {
