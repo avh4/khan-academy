@@ -1,5 +1,6 @@
 var Exercise = {
     fSupportsAjax: false,
+    fRegisteringAnswer: false,
     fExtendsMultipleChoice: false,
     
     showNextProblem: function() {},
@@ -20,6 +21,7 @@ var Exercise = {
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
         this.incorrect.src = "/images/face-sad.gif";
+        this.fRegisteringAnswer = false;
     },
     
     display: function() {
@@ -52,8 +54,11 @@ var Exercise = {
             $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used", "time_warp"], function() {
               data[this] = $("#" + this).val();
             });
-            
-            this.showThrobber(true);
+
+            this.fRegisteringAnswer = true;
+            setTimeout(function() {
+                Exercise.showThrobber(true);
+            }, 10);
 
             $.ajax({
                 type: "GET",
@@ -71,8 +76,6 @@ var Exercise = {
             eval("var data=" + response);
             KhanAcademy.updateSeed(data.problem_number);
             $("#question_content").html("");
-            // For Ben/Jason: because of jquery + scoping, 
-            // what's the more correct way of calling below 2 lines?
             Exercise.init();
             Exercise.display();
             Exercise.resetFeedback();
@@ -118,7 +121,7 @@ var Exercise = {
     },
     
     showThrobber: function (fVisible) {
-        if (fVisible)
+        if (Exercise.fRegisteringAnswer && fVisible)
             $("#throbber").show();
         else
             $("#throbber").hide();
