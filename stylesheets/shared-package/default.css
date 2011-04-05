@@ -276,7 +276,8 @@ footer {
         z-index: 10;
     }
     footer #leaves {
-        background: url(/images/footer-leaves.png) no-repeat top center;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: 319px -908px;
         height: 188px;
         padding: 10px 23px;
     }
@@ -302,7 +303,8 @@ footer {
         text-decoration: none;
     }
         footer#footer.short #leaves a {
-            background: url(/images/list-item-green.png) no-repeat center left;
+            background-image: url(/images/non-repeating-sprites.png);
+            background-position: -10px -1142px;
             padding-left: 7px;
             padding-right: 10px;
             color: #555;
@@ -339,12 +341,14 @@ footer {
 #top-header #logo {
     height: 42px;
     position: relative;
-    background: url(/images/logo-topper.png?1) no-repeat 0 0;
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -10px -199px;
     width: 317px;
 }
     #top-header #logo #logo-highlight {
         position: absolute;
-        background: url(/images/logo-highlight.png) no-repeat 0px 0px;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -261px;
         width: 592px;
         height: 194px;
         left: -115px;
@@ -358,7 +362,8 @@ footer {
     #top-header #logo #logo-image {
         width: 309px;
         height: 71px;
-        background: url(/images/logo-no-highlight.png?10) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -465px;
     }
 
 
@@ -584,7 +589,8 @@ footer {
     right: 0;
     margin-left: 317px;
     min-width: 680px;
-    background: #79A90C url(/images/header-bg.png) repeat-x 0 0;
+    background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -10px;
     height: 42px;
     font-weight: bold;
 }
@@ -602,7 +608,8 @@ footer {
         vertical-align: middle;
     }
     #top-header #top-header-links span.separator, #sitewide-navigation span.separator {
-        background: url(/images/header-separator.png) no-repeat center center;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: 0px -5px;
         padding: 0 5px;
         line-height: 42px;
         font-size: 40px;
@@ -635,13 +642,16 @@ footer {
         top: 7px;
     }
     #social-links .youtube {
-        background: url(/images/youtube.png) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -67px;
     }
     #social-links .twitter {
-        background: url(/images/twitter.png) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -111px;
     }
     #social-links .facebook {
-        background: url(/images/facebook.png) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -155px;
     }
     
 #top-header #top-header-links #page_auth.page_links {
@@ -727,7 +737,8 @@ footer {
     padding-right: 50px;
 }
     #page_search #search-input {
-        background:url("/images/Search-icon.png") no-repeat scroll 5px 5px #FFFFFF;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -5px -867px;
         border:1px solid #bbb;
         font-size:15px;
         padding: 0;
@@ -744,7 +755,8 @@ footer {
         padding-top: 5px\9;
     }
     #page_search #search-submit {
-        background: url(/images/search-button-blue.png) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -556px;
         border: none;
         padding: 0;
         margin: 0;
@@ -1000,7 +1012,8 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-		background: url("/images/Search-icon.png") no-repeat 2px 1px #fff;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -5px -867px;
 		border: 1px solid #ddd;
 	}
 	#library #library-nav {
@@ -1240,7 +1253,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border: 1px solid #aaa;
     }
     .exercise-badge .energy-points-badge {
-        background: url(/images/energy-points-badge.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -680px;
         width: 52px;
         height: 37px;
         text-align: center;
@@ -1268,7 +1282,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: #006699;
         }
     .streak-bar {
-        background: url(/images/streak-meter-empty.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -730px;
         width: 228px;
         height: 30px;
     }
@@ -1338,7 +1353,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin: 10px 0;
     }
     .achievement-badge .energy-points-badge {
-        background: url(/images/energy-points-badge.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -680px;
         width: 52px;
         height: 37px;
         text-align: center;
@@ -1556,7 +1572,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-right: 10px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
-    background: transparent url(/images/dashboard-icon-inactive.png) no-repeat 9px 7px;
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -1px -598px;
     color: #333;
     display: block;
     font-size: 10px;
@@ -1564,7 +1581,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     text-decoration: none;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
-    background-image: url(/images/dashboard-icon-active.png);
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -82px -598px;
     color: #E35D04;
 }
 #back-to-dashboard.single-exercise {

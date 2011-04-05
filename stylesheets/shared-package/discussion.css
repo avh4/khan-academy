@@ -275,7 +275,8 @@ span.mod_tools_hidden {
 
 input.button, a.button {
     display: inline-block;
-	background: url(/images/btn-bg.png) repeat-x 0px 0px;
+	background-image: url(http://www.jaredhirsch.com/coolrunnings/public_images/ac3ba991ae/spriteme2.png);
+    background-position: 0px -72px;
 	padding:5px 10px 6px 10px;
 	font-weight:bold;
 	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
@@ -308,7 +309,8 @@ a.button {
 
 a.page, span.page_current {
     display: inline-block;
-	background: url(/images/btn-bg.png) repeat-x 0px 0px;
+    background-image: url(http://www.jaredhirsch.com/coolrunnings/public_images/ac3ba991ae/spriteme2.png);
+    background-position: 0px -72px;
 	padding:3px 5px 2px 5px;
 	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
 	border:1px solid rgba(0,0,0,0.4);
