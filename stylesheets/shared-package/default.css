@@ -314,11 +314,16 @@ footer {
     }
     footer #copyright {
         float: right;
-        padding-top: 2px;
+        text-align: right;
     }
-    footer#footer #leaves #copyright a {
-        background: transparent;
-        padding: 0;
+    footer#footer #leaves #copyright #creative-commons-link {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -143px -67px;
+        display: inline-block;
+        height: 15px;
+        position: relative;
+        top: 2px;
+        width: 80px;
     }
     footer #copyright img {
         border: 0px;
@@ -1102,7 +1107,8 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-				background: url(/images/list-item-black.png) no-repeat 0 3px;
+				background-image: url(/images/non-repeating-sprites.png);
+                background-position: -56px -36px;
 				padding: 0 2px 0 13px;
 			}
 			#library #library-content #library-content-main a.video-link:hover {
