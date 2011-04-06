@@ -46,9 +46,9 @@ var Exercise = {
         translate();
         
         if (this.fSupportsAjax) {
-            $("#old_question_content").animate({"left": -500}, 1000, function() {
+            $("#old_question_content").animate({"left": -500}, 250, function() {
                 $("#old_question_content").remove();
-                $("#question_content").animate({"left": 0}, 1000);    
+                $("#question_content").animate({"left": 0}, 250);    
             });
         }
     },
