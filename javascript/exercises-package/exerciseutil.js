@@ -127,9 +127,9 @@ var Exercise = {
 
         var curr_message = $("#exercise-message-container").html();
         if (data.exercise_message_html && curr_message != data.exercise_message_html) {
+            $("#exercise-message-container").hide();
             $("#exercise-message-container").html(data.exercise_message_html);
-            $(".exercise_message").hide();
-            $(".exercise_message").slideDown();    
+            $("#exercise-message-container").slideDown();    
         }
     
     },
