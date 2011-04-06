@@ -74,6 +74,11 @@ body {
     margin: 0 auto -77px;
     min-width: 1000px;
     max-width: 1200px;
+    position: relative;
+    background: transparent url(/images/content-border.png) no-repeat 0 153px;
+}
+#page-container-inner {
+    background: transparent url(/images/content-border.png) no-repeat right 153px;
 }
 
 /* Basic typography for the entire site */
@@ -413,10 +418,10 @@ footer {
 #sitewide-navigation {
     clear: both;
     margin: 75px 0 0;
-    padding: 9px 0 9px 23px;
+    padding: 9px 0 9px 22px;
     height: 19px;
+    border: 1px solid #ddd;
     border-bottom: 1px solid #ccc;
-    border-top: 1px solid #ddd;
 }
 #sitewide-navigation nav {
     font-size: 18px;
@@ -848,13 +853,14 @@ nav {
 }
 
 nav#page_sub_nav {
-    padding: 9px 23px;
+    padding: 9px 22px;
     min-height: 16px;
     position: relative;
     z-index: 3;
     background: #eee;
     color: #444;
-    border-bottom: 1px solid #ddd;
+    border: 1px solid #ddd;
+    border-top: none;
     text-shadow: 0 1px 0 #fff;
     width: auto;
 }
@@ -1497,7 +1503,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background: background:#e5ecf9;
     border: 1px solid #ccc;
     border-top: none;
-    border-right: none;
+    border-right: 1px solid #ddd;
     border-bottom: 1px solid #ccc;
     border-left-style: dotted;
     cursor: auto;
@@ -1594,11 +1600,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #back-to-dashboard.single-exercise {
     background-color: #EEE;
     border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ddd;
     color: #666;
     float: left;
     font-size: 11px;
     height: 70px;
-    padding-left: 3px;
+    padding-left: 2px;
     width: 67px;
 }
 #question_area {
@@ -2668,35 +2675,3 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     opacity: 0.5;
 }
 /* End Knowledge Map CSS */
-
-/* Use media queries to handle wide browsers */
-@media all and /*!YUI-Compressor */ (min-width: 1200px) {
-    #page-container {
-        margin-left: auto;
-        margin-right: auto;
-        position: relative;
-        background: transparent url(/images/content-border.png) no-repeat 0 153px;
-    }
-    #page-container-inner {
-        background: transparent url(/images/content-border.png) no-repeat right 153px;
-    }
-    #sitewide-navigation {
-        border: 1px solid #ddd;
-        border-bottom: 1px solid #ccc;
-    }
-    nav#page_sub_nav {
-        border-left: 1px solid #ddd;
-        border-right: 1px solid #ddd;
-    }
-    .exercise-badge.single-exercise {
-        border-right: 1px solid #ddd;
-    }
-    #back-to-dashboard.single-exercise {
-        border-left: 1px solid #ddd;
-    }
-    #question_area {
-        margin-left: 1%;
-    }
-}
-
-/* end media queries */
