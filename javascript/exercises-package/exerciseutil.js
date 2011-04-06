@@ -131,6 +131,13 @@ var Exercise = {
             $("#exercise-message-container").html(data.exercise_message_html);
             $("#exercise-message-container").slideDown();    
         }
+        
+        $("#badge-notification-container").html("");
+        $("#badge-notification-container").hide();
+        if (data.badge_notification_html) {
+            $("#badge-notification-container").html(data.badge_notification_html)
+            Badges.show()
+        }
     
     },
     

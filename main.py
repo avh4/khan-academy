@@ -76,6 +76,7 @@ from topics_list import topics_list, all_topics_list, DVD_list
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon
+from badges.templatetags import badge_notifications
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -916,6 +917,10 @@ class RegisterAnswer(request_handler.RequestHandler):
         exercise_icon_context = exercise_icon(exercise, App)
         exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context)
         
+        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
+        badge_notification_context = badge_notifications()
+        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
+        
         updated_values = {
             'exercise_states': exercise_states,
             'exercise_points':  exercise_points,
@@ -927,7 +932,8 @@ class RegisterAnswer(request_handler.RequestHandler):
             'problem_number': user_exercise.total_done + 1,
             'streak_bar_html': streak_bar_html,
             'exercise_message_html': exercise_message_html,
-            'exercise_icon_html': exercise_icon_html
+            'exercise_icon_html': exercise_icon_html,
+            'badge_notification_html': badge_notification_html
             }
             
             #
