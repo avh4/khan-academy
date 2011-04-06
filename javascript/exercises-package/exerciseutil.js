@@ -30,6 +30,7 @@ var Exercise = {
         Exercise.enable();
         
         if (this.fSupportsAjax) {
+            svgedit.clearScratchpad();
             $("#question_content").attr("id", "old_question_content");
             $("#question_content_container").append("<div id=\"question_content\" style=\"position:relative; float: left\"></div>");
             $("#question_content").css("left", 1000);

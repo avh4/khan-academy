@@ -344,11 +344,20 @@
           e.preventDefault();
         });
         
-        return pad;
+        this.clearShapes = function() {
+            shapes.remove();
+         }
+      }
+      
+      var sp;
+      
+      function clearScratchpad() {
+          if (sp)
+              sp.clearShapes();
       }
       
       $(document).ready(function() {
-	      var sp = Scratchpad();
+	      sp = new Scratchpad();
       });
     </script>
   </body>
