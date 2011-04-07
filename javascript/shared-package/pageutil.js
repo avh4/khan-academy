@@ -305,7 +305,7 @@ var VideoStats = {
         var percent = this.getPercentWatched();
         var dtSinceSaveBeforeError = this.dtSinceSave;
 
-        $.ajax({type: "POST",
+        $.ajax({type: "GET",
                 url: "/logvideoprogress", 
                 data: {
                     video_key: $(".video_key_primary").val(),
@@ -335,7 +335,7 @@ var VideoStats = {
             var jelPoints = $(".video-energy-points");
             jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
-            $("#page_top_nav .energy-points-badge").text(dict_json.points);
+            $("#top-header .energy-points-badge").text(dict_json.points);
         }
     },
 
