@@ -899,6 +899,18 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
 
+            problem_log.time_taken += 1
+            db.put([user_data, problem_log, user_exercise])
+
+            problem_log.time_taken += 1
+            db.put([user_data, problem_log, user_exercise])
+
+            problem_log.time_taken += 1
+            db.put([user_data, problem_log, user_exercise])
+
+            problem_log.time_taken += 1
+            db.put([user_data, problem_log, user_exercise])
+
             self.redirect("/exercises?exid=%s" % exid)
         else:
             # Redirect to display the problem again which requires authentication
