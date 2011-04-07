@@ -30,7 +30,7 @@ var Exercise = {
         Exercise.enable();
         
         if (this.fSupportsAjax) {
-    		if ($("#svgedit").attr('src'))
+            if (window.svgedit && svgedit.clearScratchpad) 
                 svgedit.clearScratchpad();
 
             $("#question_content").attr("id", "old_question_content");
