@@ -434,15 +434,15 @@ Rounding = new function(){
                 var numCoOrdinates="M " + _x2 + " 110 v 5";
                 var numPath=_raphaelHolder.path(numCoOrdinates);
                 numPath.attr({
-                    fill: '#6D953C',
-                    stroke: '#6D953C',
+                    fill: '#CFD784',
+                    stroke: '#CFD784',
                     'stroke-width': 1
                 });
 
                 var text = _raphaelHolder.text(_x2, 105, _number);
-                text.attr('fill','#6D953C');
+                text.attr('fill','#CFD784');
             } else if(_cutOff>1 && _onScale) {
-                _lines.axis[0].text.items[startIndex+1].attr('fill','#6D953C');
+                _lines.axis[0].text.items[startIndex+1].attr('fill','#CFD784');
 
                 if(startIndex+1==5){
                     _isCentered=true;
@@ -450,7 +450,7 @@ Rounding = new function(){
             }
 
             if(_cutOff==1){              
-                _lines.axis[0].text.items[_highlightIndex].attr('fill','#6D953C');
+                _lines.axis[0].text.items[_highlightIndex].attr('fill','#CFD784');
                
             }
         }//end of step 2
@@ -487,9 +487,9 @@ Rounding = new function(){
             } else if(_hintStep==3) {
                 if(_isCentered){
                     var answerHtml=$('#dvAnswer').html();
-                    $('#dvAnswer').html(answerHtml+="<br/><br/><strong>Answer " + _correctAnswer + "</strong>");
+                    $('#dvAnswer').html(answerHtml+="<br/><br/><strong>So the answer is  " + _correctAnswer + "</strong>");
                 } else {
-                    $('#dvAnswer').html("<strong>Answer "+_correctAnswer+"</strong> is the nearest "+_roudingTypeToUse +", so we round <strong>"+_number+"</strong> to <span style='text-decoration:underline'><strong>"+_correctAnswer+"</strong></span>");
+                    $('#dvAnswer').html("<strong>"+_correctAnswer+"</strong> is the nearest " +_roudingTypeToUse + ", so we round <strong>" + _number + "</strong> to <span style='text-decoration:underline'><strong>" +_correctAnswer + "</strong></span>");
                 }
                 $('#dvAnswer').css('display','block');
             }

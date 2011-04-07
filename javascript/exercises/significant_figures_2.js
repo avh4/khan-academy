@@ -148,12 +148,12 @@ NewSignificantFigures.MultiplySignificantFigures = new function(){
         if(Number1.sigCount == Number2.sigCount){
             str +="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>Since both the terms " + Number1.basic + " and " + Number2.basic + " have the same number of (" + Number2.sigCount + ") significant digit(s), we will round our answer to " + Number2.sigCount + " significant digit(s).</div>";
         } else {
-            str +="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>Since " + answerSigCount.basic + " has only " + answerSigCount.sigCount + " significant digit(s), we will round our answer to " + answerSigCount.sigCount + " significant digit.</div>";
+            str +="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>Since " + answerSigCount.basic + " has only " + answerSigCount.sigCount + " significant digit(s), we will round our answer to " + answerSigCount.sigCount + " significant digit(s).</div>";
         }
         str +=  '<div id="hint4" style="display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;"><br/><p style="font-size:85%;"><font face="arial" size=5>`' + Number1.basic +'` `\\times` `' + Number2.basic + '` `=` `' + (Number1.basic*Number2.basic) + '`</font></p></div>';
 
         //str += "<div id='hint4' style='display:none;font-family: arial; font-size: 150%; font-weight: bold;color:#999;'><br/>" + Number1.basic + " * " + Number2.basic + " = " + (Number1.basic*Number2.basic) + ".</div>";
-        str += "<div id='hint5' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + (Number1.basic*Number2.basic) + " rounded to " + answerSigCount.sigCount + " significant digit is <span style='color:" + getNextColor() + ";'>" + Answer.rounded + "</span>.</div>";
+        str += "<div id='hint5' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + (Number1.basic*Number2.basic) + " rounded to " + answerSigCount.sigCount + " significant digit(s) is <span style='color:" + getNextColor() + ";'>" + Answer.rounded + "</span>.</div>";
         $('#dvHint').html(str);
     }    
     return {        

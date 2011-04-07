@@ -66,6 +66,7 @@ FractionAddition.AdditionWordProblem = new function(){
      * Description:Creates a fraction Addition word problem.
      */
     var _createEquationWithCommonDenominator = function(){
+        var temp;
         _wordProblem.sort( _randOrder );
 
         _num1 = Math.abs(get_random());
@@ -94,9 +95,12 @@ FractionAddition.AdditionWordProblem = new function(){
             $("#dvHintText4").append("`"+ _num2 + "/" + _den1 + "` `+` `" + _num1 + "/" + _den2 + "`" + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
         }
         _writeEquation("#dvQuestion", _equation, false);
-        setCorrectAnswer((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2) + "/" + _commonDenominator);
         _unreducedNominator=(_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2);
-        _reduce();
+        temp=_reduce(_unreducedNominator,_commonDenominator);
+        _reducedNominator=temp.nominator;
+        _reducedDenominator=temp.denominator;
+        setCorrectAnswer(temp.nominator + "/" + temp.denominator);
+
     }
 
     /*
@@ -142,25 +146,25 @@ FractionAddition.AdditionWordProblem = new function(){
      * Parameters: none
      * Detail: Reduce the fraction
      */
-    var _reduce = function(){
+    var _reduce = function(num,den){
         var factorX = 1;
-
+        var result={};
         //Find common factors of Numerator and Denominator
-        for ( var x = 2; x <= Math.min( _unreducedNominator, _commonDenominator ); x ++ ) {
-            var check1 = _unreducedNominator / x;
+        for ( var x = 2; x <= Math.min( num, den ); x ++ ) {
+            var check1 = num / x;
             if ( check1 == Math.round( check1 ) ) {
-                var check2 = _commonDenominator / x;
+                var check2 = den / x;
                 if ( check2 == Math.round( check2 ) ) {
                     factorX = x;
                 }
             }
         }
 
-        _reducedNominator=(_unreducedNominator/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
-        _reducedDenominator=_commonDenominator/factorX;  //divide by highest common factor to reduce fraction
+        result.nominator=(num/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
+        result.denominator=den/factorX;  //divide by highest common factor to reduce fraction
 
+        return result;
     }
-
     /*
      * Access Level: Private
      * Function: _createHint
@@ -263,26 +267,25 @@ FractionAddition.AdditionWordProblem = new function(){
             var Denominator = document.getElementById("txtDenominator").value
             if(isNaN(Nominator) || $.trim(Nominator) ==''){
                 alert("Enter a valid numerator.");
-                return;
+                $('#txtNominator').focus();
+                return ;
             } else if(_reducedDenominator==1 && $.trim(Denominator) ==''){
 
             } else if(isNaN(Denominator) || $.trim(Denominator) ==''){
                 alert("Enter a valid denominator.");
-                return;
+                return ;
             }
-            var isCorrect = false;
-            if(_reducedDenominator==1){
-                if($.trim(Denominator) =='')
-                {
-                    isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator== Nominator) ;
-                }else{
-                    isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator+"/"+_reducedDenominator== (Nominator  + "/" + Denominator)) ;
-                }
-
+            var isCorrect = false,temp;           
+            if(_reducedDenominator==1 && $.trim(Denominator) ==''){
+                isCorrect = (_reducedNominator== Nominator) ;
             }else {
-                isCorrect = (correct_answer == (Nominator  + "/" + Denominator))||(_reducedNominator+"/"+_reducedDenominator== (Nominator  + "/" + Denominator)) ;
+                temp=_reduce(Nominator,Denominator);
+                isCorrect = (correct_answer == (temp.nominator  + "/" + temp.denominator));
             }
             handleCorrectness(isCorrect);
+            if(!isCorrect){
+                $('#txtNominator').focus();
+            }
         }
     };
 };
@@ -293,8 +296,24 @@ $(document).ready(function(){
     $('#txtNominator').keyup(function(e) {        
         if(e.keyCode == 13) {
             FractionAddition.AdditionWordProblem.check_answer();
-        }
+        } 
     });
+
+    $('#txtNominator').keypress(function(e) {
+        var Nominator = document.getElementById("txtNominator").value;
+        if(e.keyCode==191 || e.keyCode==47){
+            e.preventDefault();
+            if(isNaN(Nominator) || $.trim(Nominator) ==''){
+                document.getElementById("txtNominator").value='';
+                alert("Enter a valid numerator.");                
+            } else{
+                $('#txtDenominator').focus();                
+            }
+            
+        }
+        
+    });
+    
     $('#txtDenominator').keyup(function(e) {        
         if(e.keyCode == 13) {
             FractionAddition.AdditionWordProblem.check_answer();
