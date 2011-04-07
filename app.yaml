@@ -93,4 +93,5 @@ handlers:
   
 builtins:
 - appstats: on
+- datastore_admin: on
 
