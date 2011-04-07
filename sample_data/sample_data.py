@@ -54,7 +54,7 @@ def main():
 
     parser.add_option("-p", "--python", default=(sys.executable if platform.system() == "Windows" else None), help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
-    parser.add_option("-A", "--application", default='khanexercises', help="GAE application name")
+    parser.add_option("-A", "--application", default='khan-academy', help="GAE application name")
     
     (options, args) = parser.parse_args()
     if len(args) < 1:
