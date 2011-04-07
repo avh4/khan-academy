@@ -47,11 +47,11 @@ def main():
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
     parser.add_option("-A", "--application", default='khanexercises', help="GAE application name")
     # Performance options
-    parser.add_option("-n", "--num_threads", default='1', help="num_threads, passed to bulkloader")
-    parser.add_option("-s", "--batch_size", default='10', help="batch_size, passed to bulkloader")
-    parser.add_option("-b", "--bandwidth_limit", default='250000', help="bandwidth_limit, passed to bulkloader")
-    parser.add_option("-r", "--rps_limit", default='20', help="rps_limit of threads, passed to bulkloader")
-    parser.add_option("-c", "--http_limit", default='7', help="http_limit, passed to bulkloader")
+    parser.add_option("-n", "--num_threads", default='55', help="num_threads, passed to bulkloader")
+    parser.add_option("-s", "--batch_size", default='500', help="batch_size, passed to bulkloader")
+    parser.add_option("-b", "--bandwidth_limit", default='10000000', help="bandwidth_limit, passed to bulkloader")
+    parser.add_option("-r", "--rps_limit", default='15000', help="rps_limit of threads, passed to bulkloader")
+    parser.add_option("-c", "--http_limit", default='40', help="http_limit, passed to bulkloader")
     parser.add_option("-x", "--passin", default='', help="Path to file containing Google App Engine password")
  
     (options, args) = parser.parse_args()
