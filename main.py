@@ -907,7 +907,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         
         streak_bar_path = os.path.join(os.path.dirname(__file__), 'streak_bar.html')
         streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context)
+        streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context).strip()
         
         exercise_message_path = os.path.join(os.path.dirname(__file__), 'exercise_message.html')
         exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
@@ -915,7 +915,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         
         exercise_icon_path = os.path.join(os.path.dirname(__file__), 'exercise_icon.html')
         exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context)
+        exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context).strip()
         
         badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
         badge_notification_context = badge_notifications()
