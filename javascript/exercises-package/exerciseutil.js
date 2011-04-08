@@ -183,7 +183,6 @@ function addIncorrectCheckboxChoice(choice){
     checkboxChoices.push([choice, false]);
 }
 
-
 function getNumPossibleAnswers() {
     return possibleAnswers.length;
 }
@@ -465,85 +464,6 @@ var notDoneType = ''; //This is used by pickType in metautil.js to prevent stude
 var notDoneCookie = '';
 
 
-function record_problem() //presents the 'next question' button
-{
-	eraseCookie(notDoneCookie);
-	
-	var endtime = new Date();
-	time = endtime.getSeconds()-starttime.getSeconds() +
-			60* (endtime.getMinutes() - starttime.getMinutes()) +
-			3600* (endtime.getHours() - starttime.getHours());
-	
-	
-	if (tries==0 && steps_given==0)
-	{
-		correct_at_first_try=true;
-		perfectlycorrect=1;
-		if (recordedCorrect==0)
-		{
-			streak++;
-			recordedCorrect=1;
-		}
-		
-		//effort=2*effort; //Get double the points for not using hints and getting it right on the first try
-		
-	}
-	else
-	{
-		perfectlycorrect=0;
-		streak = 0;	
-		effort = 1;
-	}
-	
-	if (randomMode==1) //You should get more points for problems that are given randomly
-	{
-		effort =2*effort;
-	}
-	
-	effort = Math.max(effort, 1);
-}
-
-function processReq() {
-	recordedProblem=1;
-    if (xmlhttp.readyState == 4) {
-        if (xmlhttp.status == 200) {
-	 
-	  //alert( "everything worked");
-	  
-	  
-	  
-	  
-        } 
-	else {
-          //alert( "Not able to log problem" );
-	  
-	  
-	}
-    }
-}
-
-
-function check_free_answer()
-{
-	// alert(correctAnswer);
-	if (document.answerform.answer.value==correctAnswer)
-	{
-		document.images.feedback.src = correct.src;
-		if (tries==0 && steps_given==0)
-		{
-			document.getElementById("correct").value="1"
-		}
-		//new_question();
-		$("#check-answer-results").show();
-	}
-	else
-	{
-		tries++;
-		document.images.feedback.src= incorrect.src;
-		record_problem();	
-	}
-}
-
 //For modules that need new colors;
 var hColors = ['#D9A326', '#E8887D', '#9CC9B7', '#AE9CC9', '#EAADEA', '#CD8C95', '#EE8262', '#FBA16C', '#DEB887','#CFD784'];
 var nColor = "#777777"; //Stands for "normal" color
@@ -637,11 +557,6 @@ function array_sum(a) {
 		sum+=a[i];
 	}
 	return sum;
-}
-
-function start_random_problem()
-{
-	window.location = randomProblem();
 }
 
 function open_left_padding(pixels) {
@@ -848,26 +763,6 @@ function double_answer_footer()
 	document.write('<br><input type=\"button\" value=\"Hint\" onClick=\"give_next_step()\"><input type=\"button\" value=\"Check Answer\" onClick=\"check_both_answers()\"></br>');
 	document.write('<br><img src=\"/images/blank.gif\" name=\"feedback\"><div id=\"nextbutton\" style=\"position:relative; visibility:hidden;\"><input type=\"button\" value=\"Correct! Next Question...\" onClick=\"new_question()\"></div></P>');
 	document.write('</form></td></tr></table>');	
-	document.answerform.reset();
-}
-
-function checkAnswerWithReturn(event)
-{
-	if (event &&event.which==13)
-		check_free_answer();
-	else
-		return true;
-}
-
-
-function free_answer_footer()
-{
-	document.write('</td><td valign=\"top\"><form name=\"answerform\">');
-	document.write('<br>Answer:<input type=\"text\" size=10 id=\"answer\" name=\"answer\"></br>');
-	document.write('<br><input type=\"button\" value=\"Hint\"  onClick=\"give_next_step()\">');
-	document.write('<input type=\"button\" value=\"Check Answer\" onClick=\"check_free_answer()\"></br>');
-	document.write('<br><img src=\"/images/blank.gif\" name=\"feedback\"><div id=\"nextbutton\" style=\"position:relative; visibility:hidden;\"><input type=\"button\" value=\"Correct! Next Question...\" onClick=\"new_question()\"></div></br>');
-	document.write('</form></td></tr></table>');
 	document.answerform.reset();
 }
 
