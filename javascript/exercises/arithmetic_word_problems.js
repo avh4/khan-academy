@@ -39,7 +39,7 @@ function ArithmeticWordProblemsExercise() {
     stores = [
         { name: 'office supply', items: [ {i:'pen', is:'pens'}, {i:'pencil', is:'pencils'}, {i:'notebook', is:'notebooks'}] },
         { name: 'hardware', items: [ {i:'hammer', is:'hammers'}, {i:'nail', is:'nails'}, {i:'saw', is:'saws'}] },
-        { name: 'grocery', items: [ {i:'banana', is:'bananas'}, {i:'loaf of bread', is:'loaves of bread'}, {i:'gallon of milk', is:'gallons of milk'}, {i:'potato', is:'potatos'}] },
+        { name: 'grocery', items: [ {i:'banana', is:'bananas'}, {i:'loaf of bread', is:'loaves of bread'}, {i:'gallon of milk', is:'gallons of milk'}, {i:'potato', is:'potatoes'}] },
         { name: 'gift', items: [ {i:'toy', is:'toys'}, {i:'game', is:'games'}, {i:'souvenirs', is:'souvenirs'}] },
         { name: 'toy', items: [ {i:'stuffed animal', is:'stuffed animals'}, {i:'video game', is:'video games'}, {i:'race car', is:'race cars'}, {i: 'doll', is:'dolls'}] }
     ];
