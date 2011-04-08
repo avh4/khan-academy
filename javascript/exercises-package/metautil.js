@@ -220,21 +220,33 @@ function handleCorrectness(isCorrect)
 
 function checkFreeAnswer()
 {
-    var isCorrect = isInputCorrect($("#answer").val(), correctAnswer, 0);
-	handleCorrectness(isCorrect);
+    
+    var result = isInputCorrect($("#answer").val(), correctAnswer, 0);
+    if (result != Answer.INVALID)
+    	handleCorrectness(result == Answer.CORRECT);
+}
+
+Answer = {
+    INVALID: 0,
+    CORRECT: 1,
+    INCORRECT: 2
 }
 
 function isInputCorrect(input_str, answer, epsilon) {
     var usersAnswer = parseFloatStrict(input_str);
 	var usersAnswerLocale = parseFloatLocale(input_str);
 	if (isNaN(usersAnswer) && isNaN(usersAnswerLocale)) {
-			window.alert("Your answer is not a number.  Please try again.");
-			return;
+		window.alert("Your answer is not a number.  Please try again.");
+		return Answer.INVALID;
 	}
 	
 	var within = Math.abs(usersAnswer - parseFloat(answer)) <= epsilon;
 	var withinLocale = Math.abs(usersAnswerLocale - parseFloat(answer)) <= epsilon;
-	return (within || withinLocale);
+	
+	if (within || withinLocale)
+	    return Answer.CORRECT;
+    else
+        return Answer.INCORRECT;
 }
 
 function checkFreeAnswerString()
