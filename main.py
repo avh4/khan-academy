@@ -1837,6 +1837,7 @@ def real_main():
         ('/admin/fixplaylistref', FixPlaylistRef),
         ('/admin/deletestaleplaylists', DeleteStalePlaylists),
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
+        ('/admin/badgestatistics', util_badges.BadgeStatistics),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),

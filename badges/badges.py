@@ -187,7 +187,7 @@ class Badge:
         UserBadgeNotifier.push_for_user(user, user_badge)
 
     def frequency(self):
-        return models_badges.UserBadge.count_by_badge_name(self.name)
+        return models_badges.BadgeStat.count_by_badge_name(self.name)
 
 class UserBadgeNotifier:
 
