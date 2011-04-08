@@ -180,7 +180,10 @@ highlight_answer();
 var isXCorrect = isInputCorrect($("#answer").val(), correctX, 0);
 var isYCorrect = isInputCorrect($("#answery").val(), correctY, 0);
 
-handleCorrectness(isXCorrect && isYCorrect);
+if (isXCorrect != Answer.INVALID && isYCorrect != Answer.INVALID) {
+    handleCorrectness((isXCorrect == Answer.CORRECT) && (isYCorrect == Answer.CORRECT));
+}
+
 {% endblock checkanswer %}
 
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}
