@@ -32,21 +32,20 @@ var Exercise = {
         if (this.fSupportsAjax) {
             if (window.svgedit && svgedit.clearScratchpad) 
                 svgedit.clearScratchpad();
-
+        
             $("#question_content").attr("id", "old_question_content");
             $("#question_content_container").append("<div id=\"question_content\" style=\"position:relative; float: left\"></div>");
             $("#question_content").css("left", 1000);
             this.showNextProblem();
+            translate();
         }
         
         if (this.fExtendsMultipleChoice) {
             $("#answer_content").html("");
             renderChoices();
+            translate();
         } else
             $("#answer").val("")
-            
-        // call translate after math is on page
-        translate();
         
         if (this.fSupportsAjax) {
             $("#old_question_content").animate({"left": -500}, 250, function() {
@@ -133,6 +132,8 @@ var Exercise = {
             $("#exercise-message-container").hide();
             $("#exercise-message-container").html(data.exercise_message_html);
             $("#exercise-message-container").slideDown();    
+        } else if (!data.exercise_message_html) {
+            $("#exercise-message-container").html("")
         }
         
         $("#badge-notification-container").html("");
