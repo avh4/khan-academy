@@ -94,7 +94,14 @@ def get_facebook_profile():
     if App.facebook_app_secret is None:
         return None
 
-    cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+    cookies = None
+    try:
+        cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+    except Cookie.CookieError, error:
+        logging.critical("Ignoring Cookie Error, skipping Facebook login: '%s'" % error)
+
+    if cookies is None:
+        return None
 
     morsel_key = "fbs_" + App.facebook_app_id
     morsel = cookies.get(morsel_key)
