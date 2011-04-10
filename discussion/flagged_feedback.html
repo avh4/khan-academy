@@ -51,12 +51,14 @@
             <td>{% for flag in feedback.flags %}{{ flag|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
             <td>{% for email in feedback.flagged_by %}{{ email|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
             <td style="text-align:right;">
+                <nobr>
                 <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}">
                     <input type="submit" class="simple-button action-gradient" value="Clear flags"/>
                 </form>
                 <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}">
                     <input type="submit" class="simple-button action-gradient" value="Delete post"/>
                 </form>
+                </nobr>
             </td>
         </tr>
     {% endfor %}
