@@ -1,0 +1,68 @@
+{% extends "../page_template.html" %}
+
+{% block pagescript %}
+<style>
+#feedback {
+    padding: 0px 23px;
+}
+#feedback th {
+    text-align: left;
+    font-weight: bold;
+}
+#feedback td, #feedback th {
+    padding: 9px;
+}
+#feedback tr.even_row td {
+    background-color:#FFFFFF;
+}
+
+#feedback tr.odd_row td {
+    background-color:#EFEFEF;
+}
+</style>
+{% endblock pagescript %}
+
+{% block pagetitle %}Flagged Feedback{% endblock pagetitle %}
+
+{% block pagecontent %}
+
+<article id="feedback">
+<p>
+    Posts in need of moderator attention: {{ feedback_count|escape }}
+</p>
+
+{% if feedbacks %}
+    <table style="width:100%;">
+        <tr>
+            <th>Video</th>
+            <th>Content</th>
+            <th>Flags</th>
+            <th>Flagged By</th>
+            <th>&nbsp;</th>
+        </tr>
+    {% for feedback in feedbacks %}
+        {% if forloop.counter|divisibleby:2 %}
+        <tr class="even_row">
+        {% else %}
+        <tr class="odd_row">
+        {% endif %}
+            <td class="center"><a href="/video/{{feedback.first_target.readable_id|escape}}">{{ feedback.first_target.title|escape }}</a></td>
+            <td>{{ feedback.content|escape|linebreaksbr }}</td>
+            <td>{% for flag in feedback.flags %}{{ flag|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td>{% for email in feedback.flagged_by %}{{ email|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td style="text-align:right;">
+                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}">
+                    <input type="submit" class="simple-button action-gradient" value="Clear flags"/>
+                </form>
+                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}">
+                    <input type="submit" class="simple-button action-gradient" value="Delete post"/>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+</article>
+{% endblock pagecontent %}
+

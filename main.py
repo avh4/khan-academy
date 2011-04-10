@@ -1840,6 +1840,7 @@ def real_main():
         ('/admin/badgestatistics', util_badges.BadgeStatistics),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+        ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
 
@@ -1920,11 +1921,14 @@ def real_main():
         ('/discussion/editentity', qa.EditEntity),
         ('/discussion/answers', qa.Answers),
         ('/discussion/pagequestions', qa.PageQuestions),
+        ('/discussion/clearflags', qa.ClearFlags),
+        ('/discussion/flagentity', qa.FlagEntity),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
         ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),
+        ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
 
         ('/badges/view', util_badges.ViewBadges),
 

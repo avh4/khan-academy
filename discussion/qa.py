@@ -4,6 +4,8 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from mapreduce import control
+from mapreduce import operation as op
 
 from django.utils import simplejson
 from collections import defaultdict
@@ -25,8 +27,6 @@ class ModeratorList(request_handler.RequestHandler):
             return
 
         mods = models.UserData.gql("WHERE moderator = :1", True)
-
-        path = os.path.join(os.path.dirname(__file__), 'mod_list.html')
         self.render_template('discussion/mod_list.html', {"mods" : mods})
 
     def post(self):
@@ -43,6 +43,37 @@ class ModeratorList(request_handler.RequestHandler):
             db.put(user_data)
 
         self.redirect("/discussion/moderatorlist")
+
+class FlaggedFeedback(request_handler.RequestHandler):
+
+    def get(self):
+
+        if not is_current_user_moderator():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+
+        # Show all non-deleted feedback flagged for moderator attention
+        feedback_query = models_discussion.Feedback.all().filter("is_flagged = ", True).filter("deleted = ", False)
+
+        feedback_count = feedback_query.count()
+        feedbacks = feedback_query.fetch(25)
+        self.render_template("discussion/flagged_feedback.html", {"feedbacks": feedbacks, "feedback_count": feedback_count})
+
+def feedback_flag_update_map(feedback):
+    feedback.recalculate_flagged()
+    yield op.db.Put(feedback)
+
+class StartNewFlagUpdateMapReduce(request_handler.RequestHandler):
+    def get(self):
+        mapreduce_id = control.start_map(
+                name = "FeedbackFlagUpdate",
+                handler_spec = "discussion.qa.feedback_flag_update_map",
+                reader_spec = "mapreduce.input_readers.DatastoreInputReader",
+                reader_parameters = {"entity_kind": "discussion.models_discussion.Feedback"},
+                shard_count = 64,
+                queue_name = "backfill-mapreduce-queue",
+                )
+        self.response.out.write("OK: " + str(mapreduce_id))
 
 class ExpandQuestion(request_handler.RequestHandler):
 
@@ -122,7 +153,7 @@ class Answers(request_handler.RequestHandler):
         question = db.get(question_key)
 
         if question:
-            answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False)
+            answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False, False)
             template_values = {
                 "answers": answer_query,
                 "is_mod": is_current_user_moderator()
@@ -182,7 +213,7 @@ class EditEntity(request_handler.RequestHandler):
         if key and text:
             feedback = db.get(key)
             if feedback:
-                if is_current_user_moderator() or feedback.author == user:
+                if feedback.author == user or is_current_user_moderator():
 
                     feedback.content = text
                     db.put(feedback)
@@ -200,6 +231,34 @@ class EditEntity(request_handler.RequestHandler):
 
                         question = feedback.parent()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
+
+class FlagEntity(request_handler.RequestHandler):
+    def post(self):
+        # You have to at least be logged in to flag
+        user = util.get_current_user()
+        if not user:
+            return
+
+        key = self.request_string("entity_key", default="")
+        flag = self.request_string("flag", default="")
+        if key and models_discussion.FeedbackFlag.is_valid(flag):
+            entity = db.get(key)
+            if entity and entity.add_flag_by(flag, user):
+                entity.put()
+
+class ClearFlags(request_handler.RequestHandler):
+    def post(self):
+        if not is_current_user_moderator():
+            return
+
+        key = self.request.get("entity_key")
+        if key:
+            entity = db.get(key)
+            if entity:
+                entity.clear_flags()
+                entity.put()
+
+        self.redirect("/discussion/flaggedfeedback")
 
 class ChangeEntityType(request_handler.RequestHandler):
 
@@ -230,9 +289,11 @@ class DeleteEntity(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 # Must be a moderator or author of entity to delete
-                if is_current_user_moderator() or entity.author == user:
+                if entity.author == user or is_current_user_moderator():
                     entity.deleted = True
                     db.put(entity)
+
+        self.redirect("/discussion/flaggedfeedback")
 
 def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
 
@@ -243,15 +304,15 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         # make sure we're on the correct page
         question = models_discussion.Feedback.get_by_id(qa_expand_id)
         if question:
-            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND date > :4 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, question.date)
+            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 AND date > :5 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, False, question.date)
             count_preceding = question_preceding_query.count()
             page = 1 + (count_preceding / limit_per_page)
 
     if page <= 0:
         page = 1
 
-    question_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False)
-    answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, video.key(), False)
+    question_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, False)
+    answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, video.key(), False, False)
 
     count_total = question_query.count()
     questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)

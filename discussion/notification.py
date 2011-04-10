@@ -91,7 +91,7 @@ def feedback_answers_for_user(user):
 
         feedback = notification.feedback
 
-        if feedback == None or feedback.deleted or not feedback.is_type(models_discussion.FeedbackType.Answer):
+        if feedback == None or feedback.deleted or feedback.is_hidden_by_flags or not feedback.is_type(models_discussion.FeedbackType.Answer):
             # If we ever run into notification for a deleted or non-FeedbackType.Answer piece of feedback,
             # go ahead and clear the notification so we keep the DB clean.
             if feedback:
