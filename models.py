@@ -414,7 +414,6 @@ class UserData(db.Model):
             query = UserExercise.all()
             query.filter('user =', self.user)
             query.filter('exercise =', exid)
-            query.ancestor(self)
             query.order('-total_done') # Temporary workaround for issue 289
             userExercise = query.get()
 
