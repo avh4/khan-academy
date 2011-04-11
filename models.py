@@ -417,10 +417,10 @@ class UserData(db.Model):
             query.order('-total_done') # Temporary workaround for issue 289
 
             # In order to guarantee consistency in the HR datastore, we need to query
-            # via get_by_key_name for these old, parent-less entities.
+            # via db.get for these old, parent-less entities.
             key_user_exercise = query.get()
             if key_user_exercise:
-                userExercise = UserExercise.get_by_key_name(str(key_user_exercise))
+                userExercise = UserExercise.get(str(key_user_exercise))
 
         if allow_insert and not userExercise:
             userExercise = UserExercise.get_or_insert(
