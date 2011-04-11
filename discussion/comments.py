@@ -82,7 +82,7 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
     limit_per_page = 10
     limit_initially_visible = 3 if comments_hidden else limit_per_page
 
-    comments_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models_discussion.FeedbackType.Comment, video.key(), False)
+    comments_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date DESC", models_discussion.FeedbackType.Comment, video.key(), False, False)
     count_total = comments_query.count()
     comments = comments_query.fetch(limit_per_page, (page - 1) * limit_per_page)
 

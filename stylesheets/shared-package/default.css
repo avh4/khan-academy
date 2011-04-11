@@ -74,6 +74,11 @@ body {
     margin: 0 auto -77px;
     min-width: 1000px;
     max-width: 1200px;
+    position: relative;
+    background: transparent url(/images/content-border.png) no-repeat 0 153px;
+}
+#page-container-inner {
+    background: transparent url(/images/content-border.png) no-repeat right 153px;
 }
 
 /* Basic typography for the entire site */
@@ -276,7 +281,8 @@ footer {
         z-index: 10;
     }
     footer #leaves {
-        background: url(/images/footer-leaves.png) no-repeat top center;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: 319px -908px;
         height: 188px;
         padding: 10px 23px;
     }
@@ -302,7 +308,8 @@ footer {
         text-decoration: none;
     }
         footer#footer.short #leaves a {
-            background: url(/images/list-item-green.png) no-repeat center left;
+            background-image: url(/images/non-repeating-sprites.png);
+            background-position: -10px -1142px;
             padding-left: 7px;
             padding-right: 10px;
             color: #555;
@@ -312,11 +319,16 @@ footer {
     }
     footer #copyright {
         float: right;
-        padding-top: 2px;
+        text-align: right;
     }
-    footer#footer #leaves #copyright a {
-        background: transparent;
-        padding: 0;
+    footer#footer #leaves #copyright #creative-commons-link {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -143px -67px;
+        display: inline-block;
+        height: 15px;
+        position: relative;
+        top: 2px;
+        width: 80px;
     }
     footer #copyright img {
         border: 0px;
@@ -339,12 +351,14 @@ footer {
 #top-header #logo {
     height: 42px;
     position: relative;
-    background: url(/images/logo-topper.png?1) no-repeat 0 0;
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -10px -199px;
     width: 317px;
 }
     #top-header #logo #logo-highlight {
         position: absolute;
-        background: url(/images/logo-highlight.png) no-repeat 0px 0px;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -261px;
         width: 592px;
         height: 194px;
         left: -115px;
@@ -355,9 +369,11 @@ footer {
         top: 15px;
         z-index: 1;    
     }
-    #top-header #logo #logo-image img {
+    #top-header #logo #logo-image {
         width: 309px;
         height: 71px;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -465px;
     }
 
 
@@ -402,10 +418,10 @@ footer {
 #sitewide-navigation {
     clear: both;
     margin: 75px 0 0;
-    padding: 9px 0 9px 23px;
+    padding: 9px 0 9px 22px;
     height: 19px;
+    border: 1px solid #ddd;
     border-bottom: 1px solid #ccc;
-    border-top: 1px solid #ddd;
 }
 #sitewide-navigation nav {
     font-size: 18px;
@@ -583,7 +599,8 @@ footer {
     right: 0;
     margin-left: 317px;
     min-width: 680px;
-    background: #79A90C url(/images/header-bg.png) repeat-x 0 0;
+    background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -10px;
     height: 42px;
     font-weight: bold;
 }
@@ -601,7 +618,8 @@ footer {
         vertical-align: middle;
     }
     #top-header #top-header-links span.separator, #sitewide-navigation span.separator {
-        background: url(/images/header-separator.png) no-repeat center center;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: 0px -5px;
         padding: 0 5px;
         line-height: 42px;
         font-size: 40px;
@@ -624,14 +642,26 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    #social-links a {
+    #top-header #social-links a {
         margin-right: 0;
-    }
-    #social-links img {
-        position: relative;
-        top: -1px;
+        display: inline-block;
         height: 24px;
         width: 24px;
+        position: relative;
+        *position: static;
+        top: 7px;
+    }
+    #top-header #social-links .youtube {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -67px;
+    }
+    #top-header #social-links .twitter {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -111px;
+    }
+    #top-header #social-links .facebook {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -155px;
     }
     
 #top-header #top-header-links #page_auth.page_links {
@@ -717,7 +747,8 @@ footer {
     padding-right: 50px;
 }
     #page_search #search-input {
-        background:url("/images/Search-icon.png") no-repeat scroll 5px 5px #FFFFFF;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -5px -867px;
         border:1px solid #bbb;
         font-size:15px;
         padding: 0;
@@ -734,7 +765,8 @@ footer {
         padding-top: 5px\9;
     }
     #page_search #search-submit {
-        background: url(/images/search-button-blue.png) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -556px;
         border: none;
         padding: 0;
         margin: 0;
@@ -821,13 +853,14 @@ nav {
 }
 
 nav#page_sub_nav {
-    padding: 9px 23px;
+    padding: 9px 22px;
     min-height: 16px;
     position: relative;
     z-index: 3;
     background: #eee;
     color: #444;
-    border-bottom: 1px solid #ddd;
+    border: 1px solid #ddd;
+    border-top: none;
     text-shadow: 0 1px 0 #fff;
     width: auto;
 }
@@ -990,7 +1023,8 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-		background: url("/images/Search-icon.png") no-repeat 2px 1px #fff;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -5px -867px;
 		border: 1px solid #ddd;
 	}
 	#library #library-nav {
@@ -1079,7 +1113,8 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-				background: url(/images/list-item-black.png) no-repeat 0 3px;
+				background-image: url(/images/non-repeating-sprites.png);
+                background-position: -56px -36px;
 				padding: 0 2px 0 13px;
 			}
 			#library #library-content #library-content-main a.video-link:hover {
@@ -1230,7 +1265,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border: 1px solid #aaa;
     }
     .exercise-badge .energy-points-badge {
-        background: url(/images/energy-points-badge.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -680px;
         width: 52px;
         height: 37px;
         text-align: center;
@@ -1258,7 +1294,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: #006699;
         }
     .streak-bar {
-        background: url(/images/streak-meter-empty.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -730px;
         width: 228px;
         height: 30px;
     }
@@ -1328,7 +1365,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin: 10px 0;
     }
     .achievement-badge .energy-points-badge {
-        background: url(/images/energy-points-badge.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -680px;
         width: 52px;
         height: 37px;
         text-align: center;
@@ -1465,7 +1503,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background: background:#e5ecf9;
     border: 1px solid #ccc;
     border-top: none;
-    border-right: none;
+    border-right: 1px solid #ddd;
     border-bottom: 1px solid #ccc;
     border-left-style: dotted;
     cursor: auto;
@@ -1546,7 +1584,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-right: 10px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
-    background: transparent url(/images/dashboard-icon-inactive.png) no-repeat 9px 7px;
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -1px -598px;
     color: #333;
     display: block;
     font-size: 10px;
@@ -1554,17 +1593,19 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     text-decoration: none;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
-    background-image: url(/images/dashboard-icon-active.png);
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -81px -598px;
     color: #E35D04;
 }
 #back-to-dashboard.single-exercise {
     background-color: #EEE;
     border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ddd;
     color: #666;
     float: left;
     font-size: 11px;
     height: 70px;
-    padding-left: 3px;
+    padding-left: 2px;
     width: 67px;
 }
 #question_area {
@@ -2634,35 +2675,3 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     opacity: 0.5;
 }
 /* End Knowledge Map CSS */
-
-/* Use media queries to handle wide browsers */
-@media all and /*!YUI-Compressor */ (min-width: 1200px) {
-    #page-container {
-        margin-left: auto;
-        margin-right: auto;
-        position: relative;
-        background: transparent url(/images/content-border.png) no-repeat 0 153px;
-    }
-    #page-container-inner {
-        background: transparent url(/images/content-border.png) no-repeat right 153px;
-    }
-    #sitewide-navigation {
-        border: 1px solid #ddd;
-        border-bottom: 1px solid #ccc;
-    }
-    nav#page_sub_nav {
-        border-left: 1px solid #ddd;
-        border-right: 1px solid #ddd;
-    }
-    .exercise-badge.single-exercise {
-        border-right: 1px solid #ddd;
-    }
-    #back-to-dashboard.single-exercise {
-        border-left: 1px solid #ddd;
-    }
-    #question_area {
-        margin-left: 1%;
-    }
-}
-
-/* end media queries */

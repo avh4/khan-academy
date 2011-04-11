@@ -143,8 +143,8 @@
     display: inline;
 }
 
-span.mod_tools { font-size: 75%; }
-span.mod_tools_hidden {
+span.mod_tools, span.flag_tools { font-size: 75%; }
+span.mod_tools_hidden, span.flag_tools_hidden {
     background-color: #D2DDED;
     padding: 2px 10px;
     -moz-border-radius: 10px;
@@ -275,7 +275,8 @@ span.mod_tools_hidden {
 
 input.button, a.button {
     display: inline-block;
-	background: url(/images/btn-bg.png) repeat-x 0px 0px;
+	background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -72px;
 	padding:5px 10px 6px 10px;
 	font-weight:bold;
 	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
@@ -308,7 +309,8 @@ a.button {
 
 a.page, span.page_current {
     display: inline-block;
-	background: url(/images/btn-bg.png) repeat-x 0px 0px;
+    background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -72px;
 	padding:3px 5px 2px 5px;
 	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
 	border:1px solid rgba(0,0,0,0.4);
@@ -369,6 +371,22 @@ a.control:hover { color: #DD6900; }
 #top-header #user-info img { position:relative; top:-1px; }
 
 div.clearFloat { overflow:hidden; height:1px; clear:both; }
+
+span.flag_tools_show img {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    border: 0;
+}
+
+.flag_tools span.flag_tools_show a.flag_show { border: none; outline: none; }
+span.flag_tools_show img.feedback_flag { display:none; }
+span.flag_tools_show:hover img.feedback_flag { display:inline; }
+span.flag_tools_show:hover img.feedback_flag_gray { display:none; }
+
+div.feedback_flag:hover {
+    background: #fff url(/images/flag.png) no-repeat 0 0;
+}
 
 a.notification_link {
     text-decoration: none;

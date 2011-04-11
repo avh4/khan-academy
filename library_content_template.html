@@ -11,7 +11,7 @@
                 {% column_major_sorted_videos playlist_data.videos %}
                 <div class="clear">
                 {% if playlist_data.next %}
-                    <a name="{{ playlist_data.next.title|escape }}">&nbsp;</a>
+                    <a name="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
                 {% endif %}
                 </div>
             {% endfor %}

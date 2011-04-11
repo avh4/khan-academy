@@ -62,10 +62,12 @@ highlight_answer();
 
 var usersAnswerUnit = document.getElementById("answerunit").value;
 
-var isCorrect = (isInputCorrect($("#answer").val(), motion[solving], 1.0)
-				&& (usersAnswerUnit == kunits[solving]) );
+var result = isInputCorrect($("#answer").val(), motion[solving], 1.0)
 
-handleCorrectness(isCorrect);
+if (result != Answer.INVALID) {
+  handleCorrectness(result == Answer.CORRECT && usersAnswerUnit == kunits[solving]);  
+}
+
 {% endblock checkanswer %}
 
 {% block hintfunction %}give_next_step(){% endblock hintfunction %}
