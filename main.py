@@ -75,8 +75,8 @@ from topics_list import topics_list, all_topics_list, DVD_list
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
-from templatetags import streak_bar, exercise_message, exercise_icon
-from badges.templatetags import badge_notifications
+from templatetags import streak_bar, exercise_message, exercise_icon, user_points
+from badges.templatetags import badge_notifications, badge_counts
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -917,14 +917,21 @@ class RegisterAnswer(request_handler.RequestHandler):
         exercise_icon_context = exercise_icon(exercise, App)
         exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context).strip()
         
+        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
+        badge_count_context = badge_counts(user_data)
+        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
+        
         badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
         badge_notification_context = badge_notifications()
         badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
         
+        user_points_path = os.path.join(os.path.dirname(__file__), 'user_points.html')
+        user_points_context = user_points(user_data)
+        user_points_html = render_block_to_string(user_points_path, 'user_points_block', user_points_context).strip()
+        
         updated_values = {
             'exercise_states': exercise_states,
             'exercise_points':  exercise_points,
-            'points': user_data.points,
             'key': key,
             'start_time': time.time(),
             'streak': user_exercise.streak,
@@ -933,7 +940,9 @@ class RegisterAnswer(request_handler.RequestHandler):
             'streak_bar_html': streak_bar_html,
             'exercise_message_html': exercise_message_html,
             'exercise_icon_html': exercise_icon_html,
-            'badge_notification_html': badge_notification_html
+            'badge_count_html': badge_count_html,
+            'badge_notification_html': badge_notification_html,
+            'user_points_html': user_points_html
             }
             
             #

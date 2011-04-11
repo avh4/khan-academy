@@ -113,7 +113,7 @@ var Exercise = {
     },
     
     updateUserData: function(data) {
-        $("#user-info .energy-points-badge").html(data.points);
+        $("#user-points-container").html(data.user_points_html)
         $("#start_time").val(data.start_time);
         $("#problem_number").val(data.problem_number);
 
@@ -135,6 +135,8 @@ var Exercise = {
         } else if (!data.exercise_message_html) {
             $("#exercise-message-container").html("")
         }
+        
+        $("#badge-count-container").html(data.badge_count_html);
         
         $("#badge-notification-container").html("");
         $("#badge-notification-container").hide();

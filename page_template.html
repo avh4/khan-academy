@@ -134,14 +134,10 @@
                             {% if username %}
                                 <span id="user-info">
                                     {% username_and_notification username user_data %}
-                                    {% if user_data %}
-                                        {% badge_counts user_data %}
-                                    {% else %}
-                                        {% badge_counts %}
-                                    {% endif %}
-                                {% if points %}
-                                    <span title="{{ points|thousands_separated }} energy points" class="energy-points-badge" onclick="location.href='/profile'">{{ points|thousands_separated }}</span>
-                                {% endif %}
+
+                                    {% badge_counts user_data %}
+                                    
+                                    {% user_points user_data %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
