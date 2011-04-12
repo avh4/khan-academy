@@ -113,7 +113,7 @@ def exercise_icon(exercise, App):
 def exercise_message(exercise, coaches, exercise_states):
     return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
 
-@register.inclusion_tag("user_points.html")
+@register.inclusion_tag(("user_points.html", "../user_points.html"))
 def user_points(user_data):
     if user_data:
         points = user_data.points
