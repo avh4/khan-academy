@@ -33,7 +33,7 @@
 
 <h3>Option 2: Request a student</h3>
 <p>
-    Enter your student's student id. This will send them a coaching request which, once approved, you give you access to their Khan Academy data.
+    Enter your student's student id. This will send them a coaching request which, once approved, will give you access to their Khan Academy data.
 </p>
 
 <form action="/requeststudent" method="post">
@@ -46,33 +46,14 @@
     <p><span style="color:red;font-weight:bold;">We can't find this student.</span></p>
 
     <p style="padding-left:18px;">
-        Make sure you're entering the student's full coach id, which looks like <strong>student@gmail.com</strong> or <strong>http://facebookid.khanacademy.org/1067499349</strong>. A student can find look up their student id, by signing in and going to <a href="/coaches">http://www.khanacademy.org/coaches/</a><br/>
+        Make sure you're entering the student's full coach id, which looks like <strong>student@gmail.com</strong> or <strong>http://facebookid.khanacademy.org/1067499349</strong>. A student can find their student id by signing in and going to <a href="/coaches">http://www.khanacademy.org/coaches/</a><br/>
     </p>
 
 {% endif %}
 
-{% if student_emails %}
-
-    <br/><br/>
-    <h2>Your students</h2>
-
-    <table>
-    {% for student_email in student_emails %}
-            {% if forloop.counter|divisibleby:2 %}
-            <tr class="even_row">
-            {% else %}
-            <tr class="odd_row">
-            {% endif %}
-                <td>{{ student_email|escape }}</td>
-                <td><a href="/unregisterstudent?student_email={{ student_email|urlencode|escape }}" class="simple-button action-gradient">Remove student</a></td>
-            </tr>
-    {% endfor %}
-    </table>
-{% endif %}
-
 {% if coach_requests %}
 
-    <br/>
+    <br/><br/>
     <h2>Pending coach requests</h2>
 
     <p>These students need to accept you as their coach from the "Add a coach" screen.</p>
@@ -86,6 +67,25 @@
             {% endif %}
                 <td>{{ coach_request.student_requested.email|escape }}</td>
                 <td><em>Request pending</em></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+{% if student_emails %}
+
+    <br/>
+    <h2>Your students</h2>
+
+    <table>
+    {% for student_email in student_emails %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ student_email|escape }}</td>
+                <td><a href="/unregisterstudent?student_email={{ student_email|urlencode|escape }}" class="simple-button action-gradient">Remove student</a></td>
             </tr>
     {% endfor %}
     </table>
