@@ -341,7 +341,6 @@ function renderChoices() {
     
     var $choices = $('.select-choice');
     $choices.click(function(e) {
-        select_choice(this.getAttribute('data-choice'));
         if (this != document.activeElement)
             $(this).focus();
     });
@@ -682,13 +681,14 @@ function randomFromArray(a)
 
 function check_answer()
 {
-	if (Exercise.selectedchoice === undefined) 
-	{
-			window.alert("Please choose your answer.");
-			return;
-	}
-
-	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice)
+    var checkedIndex = $(":radio[name='selectAnswer']").index($(":radio[name='selectAnswer']:checked")); 
+    
+    if (checkedIndex == -1) {
+        window.alert("Please choose your answer.");
+        return;
+    }
+    
+	var isCorrect = (checkedIndex == Exercise.correctchoice)
 	handleCorrectness(isCorrect);
 }
 
