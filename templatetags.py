@@ -38,7 +38,7 @@ class HighlightNode(template.Node):
         text = re.sub(regex, r'<span class="highlight">\1</span>', text)
         return text
 
-@register.inclusion_tag("column_major_order_styles.html")
+@register.inclusion_tag(("column_major_order_styles.html", "../column_major_order_styles.html"))
 def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
     col_list = range(0, num_cols)
     link_height = font_size * 1.5
@@ -50,7 +50,7 @@ def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size
         "column_width": column_width,
         "column_width_plus_gutter": column_width + gutter,
     }
-@register.inclusion_tag("column_major_order_videos.html")
+@register.inclusion_tag(("column_major_order_videos.html", "../column_major_order_videos.html"))
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
@@ -69,29 +69,29 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
                "list_height": column_indices[0] * link_height,
           }
 
-@register.inclusion_tag(("../youtube_player_embed.html", "youtube_player_embed.html"))
+@register.inclusion_tag(("youtube_player_embed.html", "../youtube_player_embed.html"))
 def youtube_player_embed(youtube_id, width=800, height=480):
     return {"youtube_id": youtube_id, "width": width, "height": height}
 
-@register.inclusion_tag("flv_player_embed.html")
+@register.inclusion_tag(("flv_player_embed.html", "../flv_player_embed.html"))
 def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     if exercise_video:
         video_path = video_path + exercise_video.video_folder + "/" + exercise_video.readable_id + ".flv"
     return {"video_path": video_path, "width": width, "height": height}
 
-@register.inclusion_tag("knowledgemap_embed.html")
+@register.inclusion_tag(("knowledgemap_embed.html", "../knowledgemap_embed.html"))
 def knowledgemap_embed(exercises, map_coords):
     return {"App": App, "exercises": exercises, "map_coords": map_coords}
 
-@register.inclusion_tag("related_videos.html")
+@register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos_with_points(exercise_videos):
     return related_videos(exercise_videos, True)
 
-@register.inclusion_tag("related_videos.html")
+@register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos(exercise_videos, show_points=False):
     return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE, "show_points": show_points}
 
-@register.inclusion_tag("exercise_icon.html")
+@register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
 def exercise_icon(exercise, App):
     s_prefix = "proficient-badge"
     if exercise.summative:
@@ -121,11 +121,11 @@ def user_points(user_data):
         points = 0
     return {"points": points}
 
-@register.inclusion_tag("possible_points_badge.html")
+@register.inclusion_tag(("possible_points_badge.html", "../possible_points_badge.html"))
 def possible_points_badge(points, possible_points):
     return {"points": points, "possible_points": possible_points}
 
-@register.inclusion_tag("streak_bar.html")
+@register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))
 def streak_bar(user_exercise):
 
     streak = user_exercise.streak
@@ -169,7 +169,7 @@ def streak_bar(user_exercise):
             "levels": levels
             }
 
-@register.inclusion_tag("reports_navigation.html")
+@register.inclusion_tag(("reports_navigation.html", "../reports_navigation.html"))
 def reports_navigation(coach_email, current_report="classreport"):
     return {'coach_email': coach_email, 'current_report': current_report }
     
@@ -195,7 +195,7 @@ def mobile_javascript():
 def shared_css():
     return {'App': App}
 
-@register.inclusion_tag("playlist_browser.html")
+@register.inclusion_tag(("playlist_browser.html", "../playlist_browser.html"))
 def playlist_browser(browser_id):
     return {'browser_id': browser_id}
 
