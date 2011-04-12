@@ -113,6 +113,16 @@ def exercise_message(exercise, coaches, endangered, reviewing, proficient, strug
 def possible_points_badge(points, possible_points):
     return {"points": points, "possible_points": possible_points}
 
+@register.inclusion_tag("simple_student_info.html")
+def simple_student_info(user_data):
+    coach_count = len(user_data.coaches)
+
+    return { 
+            "first_coach": user_data.coaches[0] if coach_count >= 1 else None,
+            "additional_coaches": coach_count - 1 if coach_count > 1 else None,
+            "member_for": util.seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
+           }
+    
 @register.inclusion_tag("streak_bar.html")
 def streak_bar(user_exercise):
 

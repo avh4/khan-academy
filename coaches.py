@@ -30,12 +30,13 @@ class ViewCoaches(request_handler.RequestHandler):
             invalid_coach = self.request_bool("invalid_coach", default = False)
 
             user_data = UserData.get_or_insert_for(user)
-            coach_requests = CoachRequest.get_for_student(user)
+            coach_requests = CoachRequest.get_for_student(user).fetch(1000)
 
             template_values = {
                         "coaches": user_data.coaches,
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
+                        "student_id": user.email(),
                     }
 
             self.render_template('viewcoaches.html', template_values)
