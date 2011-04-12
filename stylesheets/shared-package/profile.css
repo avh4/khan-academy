@@ -20,7 +20,7 @@
 
 #page_sub_nav #profile-header #user-info {
     position: relative;
-    top: 1px;
+    top: -3px;
 }
 #page_sub_nav #profile-header #user-info #name {
     font-size: 20px;
@@ -28,7 +28,17 @@
 #page_sub_nav #profile-header #user-info img {
     width: 0px;
     visibility: hidden;
-}    
+}
+#page_sub_nav #profile-header #user-info #simple-student-info {
+    color: #666;
+    font-size: 11px; 
+    width: 480px;
+    
+    position: absolute; 
+    top: 30px; 
+    left: 4px; 
+}
+
 #page_sub_nav #profile-header #high-level-stats {
     float: right;
     position: relative;

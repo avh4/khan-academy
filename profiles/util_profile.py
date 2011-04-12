@@ -127,6 +127,7 @@ class ViewProfile(request_handler.RequestHandler):
                 'user_badges_diamond': user_badges['diamond_badges'],
                 'user_badges_master': user_badges['user_badges_master'],
                 'user_badges': [user_badges['bronze_badges'], user_badges['silver_badges'], user_badges['gold_badges'], user_badges['platinum_badges'], user_badges['diamond_badges'],user_badges['user_badges_master']],
+                'student_user_data': user_data_student,
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False),
             }
 

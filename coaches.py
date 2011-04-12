@@ -36,6 +36,7 @@ class ViewCoaches(request_handler.RequestHandler):
                         "coaches": user_data.coaches,
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
+                        "student_id": user.email(),
                     }
 
             self.render_template('viewcoaches.html', template_values)
