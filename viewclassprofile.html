@@ -1,6 +1,11 @@
 {% extends "profile_template.html" %}
 
-{% block profile_name %}{{ coach_nickname|escape }}'s class{% endblock profile_name %}
+{% block profile_name %}
+<span id="user-info">
+    <img src="/images/darth.png" />
+    <span id="name">{{ coach_nickname|escape }}'s class</span>
+</span>
+{% endblock profile_name %}
 
 {% block statistics_title %}Class Statistics{% endblock statistics_title %}
 

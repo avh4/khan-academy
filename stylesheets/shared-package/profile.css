@@ -20,6 +20,9 @@
 
 #page_sub_nav #profile-header #user-info {
     position: relative;
+    top: 1px;
+}
+#page_sub_nav #profile-header #user-info.has-details {
     top: -3px;
 }
 #page_sub_nav #profile-header #user-info #name {
