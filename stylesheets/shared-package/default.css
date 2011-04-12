@@ -642,7 +642,7 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    #social-links a {
+    #top-header #social-links a {
         margin-right: 0;
         display: inline-block;
         height: 24px;
@@ -651,15 +651,15 @@ footer {
         *position: static;
         top: 7px;
     }
-    #social-links .youtube {
+    #top-header #social-links .youtube {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -67px;
     }
-    #social-links .twitter {
+    #top-header #social-links .twitter {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -111px;
     }
-    #social-links .facebook {
+    #top-header #social-links .facebook {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -155px;
     }
