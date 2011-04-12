@@ -43,9 +43,10 @@ var Exercise = {
         if (this.fExtendsMultipleChoice) {
             $("#answer_content").html("");
             renderChoices();
-            translate();
         } else
             $("#answer").val("")
+            
+        translate();
         
         if (this.fSupportsAjax) {
             $("#old_question_content").animate({"left": -500}, 250, function() {
