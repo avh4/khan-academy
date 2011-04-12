@@ -368,7 +368,7 @@ function addIncorrectCheckboxChoice(choice){
 }
 
 function getNumPossibleAnswers() {
-    return possibleAnswers.length;
+    return Exercise.possibleAnswers.length;
 }
 
 function arrayEqual(a,b) //return true if the elements in the array are equal
