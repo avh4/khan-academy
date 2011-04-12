@@ -96,16 +96,12 @@ function graph_update() {
 
 function checkAnswer()
 {
-	if (r2(curSlopeNum/curSlopeDen)==r2(correctSlope) && r2(curIntNum/curIntDen)==r2(correctIntercept))
-    {
-        handleCorrectness(true);
-		$("#check-answer-results").show();
-		document.images.feedback.src = correct.src;
-	}
-    else
-    {
-		$("#check-answer-results").hide();
+	if (r2(curSlopeNum/curSlopeDen)==r2(correctSlope) && r2(curIntNum/curIntDen)==r2(correctIntercept)) {
+	    handleCorrectness(true);
+        $("#check-answer-results").show();
     }
+    else
+        $("#check-answer-results").hide();
 }
 
 
@@ -118,7 +114,7 @@ module is special in that you really can't get the question wrong--you just need
 what the slope and y-intercept do to a line.<P>
 <iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="100%"></iframe>
 {% endblock maincell %}
-{% block answerform %}
+{% block answerarea %}
 		<div style="text-align:right;">
 		<nobr><input type="button" class="button" value="-" onClick="slope(-1)"> Slope <input type="button" class="button" value="+" onClick="slope(+1)">&nbsp;&nbsp;&nbsp;&nbsp;
 		<input type="button" class="button" value="-" onClick="intercept(-1)"> Y-Intercept <input type="button" class="button" value="+" onClick="intercept(+1)"></nobr><br>
@@ -135,18 +131,12 @@ what the slope and y-intercept do to a line.<P>
 		</script></DIV></td>
 		</tr>
 		</table>
-		<input type="hidden" id="exid" name="exid" value="{{exid}}">
-		<input type="hidden" id="streak" name="streak" value="{{streak}}">
-		<input type="hidden" id="key" name="key" value="{{key}}">
-		<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
-		<input type="hidden" id="correct" name="correct" value="1">
-		<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
-		<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
-		<div id="check-answer-results" style="display: none;">
-		  <img src="/images/blank.gif" name="feedback" id="feedback"><div id="nextbutton" style="position:relative;">
-		  <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()"></div>
-		</div>
-
-
-{% endblock answerform %}
-
+{% endblock answerarea %}
+{% block feedbackarea %}
+<div id="check-answer-results">
+    <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
+    <div id="next-container" class="button" style="position:relative; display: none;">
+        <input id="next-question-button" type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="Exercise.submitForm()">
+    </div>
+</div>
+{% endblock feedbackarea %}

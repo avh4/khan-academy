@@ -35,12 +35,12 @@ for(var i=0; i<6; i++)
 	{
 		y = Math.round(KhanAcademy.random()*18)-9;
 	}
-	possibleAnswers.push(y);
+	Exercise.possibleAnswers.push(y);
 }
 
 function draw_next_step() {
 
-	if (steps_given==0)
+	if (Exercise.steps_given==0)
 	{
 		present.stroke="#9999FF";
 		present.strokedasharray="5,5";
@@ -50,14 +50,14 @@ function draw_next_step() {
 		present.text([correctX, correctY/2], 'x='+correctX, right);
 		
 	}
-	if (steps_given==1)
+	if (Exercise.steps_given==1)
 	{
 		present.stroke="#9999FF";
 		present.strokedasharray="5,5";
 		present.line([0, correctY], functionPath[correctX+11]);
 		present.text([correctX/2, correctY], 'f('+correctX+')='+correctY, above);
 	}
-	steps_given++;
+	Exercise.steps_given++;
 }
 
 

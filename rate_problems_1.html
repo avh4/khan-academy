@@ -15,8 +15,10 @@
 
 {% block maincell %}
 <script>
-    var exercise = new RateProblemsExercise();
-    exercise.init();
+    Exercise.fSupportsAjax = true;
+    Exercise.showNextProblem = function() {
+        var exercise = new RateProblemsExercise();
+    }
 </script>
 {% endblock maincell %}
 

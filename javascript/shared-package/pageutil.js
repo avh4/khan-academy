@@ -484,7 +484,7 @@ var Badges = {
 
     hide: function() {
         var jel = $(".badge-award-container");
-        jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
+        jel.animate({top: -1 * jel.height()}, 500, function(){jel.hide();});
     },
 
     showMoreContext: function(el) {

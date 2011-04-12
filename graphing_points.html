@@ -20,7 +20,7 @@ for(var i=0; i<6; i++)
 	}
 		
 	wrongAnswers.push([x,y]);
-	possibleAnswers.push('('+x+','+y+')');
+	Exercise.possibleAnswers.push('('+x+','+y+')');
 }
 
 function draw_next_step() {
@@ -28,21 +28,21 @@ function draw_next_step() {
 	present.fontsize = "14";
 	present.fontfill = "red";
 
-	if (steps_given<wrongAnswers.length)
+	if (Exercise.steps_given<wrongAnswers.length)
 	{
-		var x = wrongAnswers[steps_given][0];
-		var y = wrongAnswers[steps_given][1];
+		var x = wrongAnswers[Exercise.steps_given][0];
+		var y = wrongAnswers[Exercise.steps_given][1];
 		present.text([x,y], '('+x+','+y+')', aboveright); 
 	}
 	else
 	{
-		if (steps_given==wrongAnswers.length)
+		if (Exercise.steps_given==wrongAnswers.length)
 		{
 			present.text([correctX,correctY], '('+correctX+','+correctY+')', aboveright); 
 			present.ASdot([correctX,correctY], 4, "orange", "orange");
 		}
 	}
-	steps_given++;
+	Exercise.steps_given++;
 }
 
 
