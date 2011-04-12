@@ -60,7 +60,7 @@ def seconds_between(dt1, dt2):
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
 
-def seconds_to_time_string(seconds_init, short_display = True):
+def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
 
     seconds = seconds_init
 
@@ -80,7 +80,7 @@ def seconds_to_time_string(seconds_init, short_display = True):
         return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
     elif years:
         return "%d year%s" % (years, pluralize(years))
-    elif days and hours:
+    elif days and hours and show_hours:
         return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
         return "%d day%s" % (days, pluralize(days))
