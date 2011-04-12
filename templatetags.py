@@ -50,7 +50,7 @@ def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size
         "column_width": column_width,
         "column_width_plus_gutter": column_width + gutter,
     }
-@register.inclusion_tag("column_major_order_videos.html")
+@register.inclusion_tag(("column_major_order_videos.html", "../column_major_order_videos.html"))
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
@@ -69,29 +69,29 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
                "list_height": column_indices[0] * link_height,
           }
 
-@register.inclusion_tag(("../youtube_player_embed.html", "youtube_player_embed.html"))
+@register.inclusion_tag(("youtube_player_embed.html", "../youtube_player_embed.html"))
 def youtube_player_embed(youtube_id, width=800, height=480):
     return {"youtube_id": youtube_id, "width": width, "height": height}
 
-@register.inclusion_tag("flv_player_embed.html")
+@register.inclusion_tag(("flv_player_embed.html", "../flv_player_embed.html"))
 def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     if exercise_video:
         video_path = video_path + exercise_video.video_folder + "/" + exercise_video.readable_id + ".flv"
     return {"video_path": video_path, "width": width, "height": height}
 
-@register.inclusion_tag("knowledgemap_embed.html")
+@register.inclusion_tag(("knowledgemap_embed.html", "../knowledgemap_embed.html"))
 def knowledgemap_embed(exercises, map_coords):
     return {"App": App, "exercises": exercises, "map_coords": map_coords}
 
-@register.inclusion_tag("related_videos.html")
+@register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos_with_points(exercise_videos):
     return related_videos(exercise_videos, True)
 
-@register.inclusion_tag("related_videos.html")
+@register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos(exercise_videos, show_points=False):
     return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE, "show_points": show_points}
 
-@register.inclusion_tag("exercise_icon.html")
+@register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
 def exercise_icon(exercise, App):
     s_prefix = "proficient-badge"
     if exercise.summative:
@@ -113,7 +113,7 @@ def exercise_icon(exercise, App):
 def exercise_message(exercise, coaches, exercise_states):
     return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
 
-@register.inclusion_tag("user_points.html")
+@register.inclusion_tag(("user_points.html", "../user_points.html"))
 def user_points(user_data):
     if user_data:
         points = user_data.points
@@ -121,11 +121,11 @@ def user_points(user_data):
         points = 0
     return {"points": points}
 
-@register.inclusion_tag("possible_points_badge.html")
+@register.inclusion_tag(("possible_points_badge.html", "../possible_points_badge.html"))
 def possible_points_badge(points, possible_points):
     return {"points": points, "possible_points": possible_points}
 
-@register.inclusion_tag("simple_student_info.html")
+@register.inclusion_tag(("simple_student_info.html", "../simple_student_info.html"))
 def simple_student_info(user_data):
     coach_count = len(user_data.coaches)
 
@@ -134,8 +134,8 @@ def simple_student_info(user_data):
             "additional_coaches": coach_count - 1 if coach_count > 1 else None,
             "member_for": util.seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
            }
-    
-@register.inclusion_tag("streak_bar.html")
+
+@register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))
 def streak_bar(user_exercise):
 
     streak = user_exercise.streak
@@ -179,7 +179,7 @@ def streak_bar(user_exercise):
             "levels": levels
             }
 
-@register.inclusion_tag("reports_navigation.html")
+@register.inclusion_tag(("reports_navigation.html", "../reports_navigation.html"))
 def reports_navigation(coach_email, current_report="classreport"):
     return {'coach_email': coach_email, 'current_report': current_report }
     
@@ -205,7 +205,7 @@ def mobile_javascript():
 def shared_css():
     return {'App': App}
 
-@register.inclusion_tag("playlist_browser.html")
+@register.inclusion_tag(("playlist_browser.html", "../playlist_browser.html"))
 def playlist_browser(browser_id):
     return {'browser_id': browser_id}
 
