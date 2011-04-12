@@ -183,7 +183,7 @@ function handleCorrectness(isCorrect)
         var data = {
 				key: $("#key").val(),
 				time_warp: $("#time_warp").val(),
-				correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
+				correct: ((isCorrect && Exercise.tries==0 && Exercise.steps_given==0) ? 1 : 0),
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
 		};
 
@@ -194,28 +194,31 @@ function handleCorrectness(isCorrect)
 	if (isCorrect)
 	{
 		
-		if (tries==0 && steps_given==0)
+		if (Exercise.tries==0 && Exercise.steps_given==0)
 		{
 			document.getElementById("correct").value="1"
 		}
 
-        $("#hint_used").val(steps_given == 0 ? "0" : "1");
-
-		$("#check-answer-results").show();
-		$("#check-answer-results #nextbutton").show();
-		$("#check-answer-button").hide();
-		document.images.feedback.src = correct.src;
+        $("#hint_used").val(Exercise.steps_given == 0 ? "0" : "1");
 		eraseCookie(notDoneCookie);
-		document.forms['answerform'].correctnextbutton.focus()
 	}
 	else
 	{
-		
-		tries++;
-		$("#check-answer-results").show();
-		$("#check-answer-results #nextbutton").hide();
-		document.images.feedback.src= incorrect.src;
+		Exercise.tries++;
 	}
+	showFeedback(isCorrect);
+}
+
+function showFeedback(isCorrect) {
+    if (isCorrect) {
+		$("#check-answer-button").hide();
+    	$("#next-container").show();
+        $("#next-question-button").focus();
+    	$("#feedback").attr("src", Exercise.correct.src);
+    } else {
+		$("#feedback").attr("src", Exercise.incorrect.src);
+    }
+    $("#feedback").show();
 }
 
 function checkFreeAnswer()
@@ -297,6 +300,7 @@ function isNumericStrict(val)
 
 KhanAcademy = {
     random: Math.random, // Initialized so that it can work before seedRandom is called.
+    is_summative: false,
     
     seedRandom: function(seed) {
         var mathRandom = Math.random;
@@ -305,6 +309,14 @@ KhanAcademy = {
         Math.random = mathRandom;
     },
     
+    updateSeed: function(number) {
+        KhanAcademy.problem_number = number;
+        KhanAcademy.problem_seed = KhanAcademy.problem_number;
+        if (KhanAcademy.is_summative)
+            KhanAcademy.problem_seed += "-summative";
+        KhanAcademy.seedRandom(KhanAcademy.problem_seed);
+    },   
+     
 	onMathMLSupportReady: function(callbackWhenReady) {
 		ASCIIMathMLTranslate = translate;
 		translate = function(callback) {

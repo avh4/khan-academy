@@ -91,16 +91,16 @@ addWrongChoice(nicefy_signs("f(x + " + xShift + ") - " + yShift));
 addWrongChoice(nicefy_signs("f(x - " + xShift + ") - " + yShift));
 
 function draw_next_step() {
-	if (steps_given==0)
+	if (Exercise.steps_given==0)
 	{
 		if (flip) {
 			present.stroke = "purple";
 			present.plot(flipFunc);
 		} else {
-			steps_given = 1;
+			Exercise.steps_given = 1;
 		}
 	}
-	if (steps_given==1)
+	if (Exercise.steps_given==1)
 	{
 		present.stroke = "green";
 		present.plot(yShiftFunc);
@@ -108,14 +108,14 @@ function draw_next_step() {
 		present.marker = "arrow";
 		present.line([xOrig, (flip?-yOrig:yOrig)], [xOrig, (flip?-yOrig:yOrig) + yShift]);	
 	}
-	if (steps_given==2)
+	if (Exercise.steps_given==2)
 	{
 		present.stroke = "blue";
 		present.marker = "arrow";
 		present.line([xOrig, (flip?-yOrig:yOrig) + yShift], [xOrig + xShift, (flip?-yOrig:yOrig) + yShift]);
 	}
-	document.getElementById('hint'+steps_given).style.display = 'block';
-	steps_given++;
+	document.getElementById('hint'+Exercise.steps_given).style.display = 'block';
+	Exercise.steps_given++;
 }
 
 

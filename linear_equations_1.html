@@ -276,7 +276,7 @@ generate_steps(left_x_coefficients, left_constants, right_x_coefficients, right_
 //setCorrectAnswer('x=' + format_fraction(numerator,denominator));;
 
 //Wrong Answers
-while (possibleAnswers.length<6)
+while (Exercise.getNumPossibleAnswers() < 6)
 {
 	var n_shift = get_random();
 	var d_shift = get_random();

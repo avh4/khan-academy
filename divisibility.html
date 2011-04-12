@@ -2,7 +2,6 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 var allprimes = new Array(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97);
-var steps_given = 0;                                                //variable to keep track of the number of hints given
                                 
 var num1 = 0;                                                      //variable that holds the first number of the problem
 var num2 = 0;                                                      //variable that holds the second number of the problem
@@ -118,7 +117,7 @@ primefzn = null;                                              //destroy referenc
 answerPoolBool = new Array(answerPool.length);                //initialize the array to act as a bool field in a 2d array
 multiCount=Math.floor(answerPool.length/2);                   //will use half of the available pool in generating answers
 multiCount--;                                                 //increase or decrease multicount to make larger and smaller wrong answers respectively
-while(possibleAnswers.length<=5)                              //number of wrong answers generated
+while(Exercise.getNumPossibleAnswers() <= 5)                              //number of wrong answers generated
 {
     k++;
     i=0;                                                      //sets i to zero for each loop
@@ -218,27 +217,27 @@ function find_factors(x)
 }
 function draw_next_step()
 {
-	if (steps_given>=0)
+	if (Exercise.steps_given>=0)
 	{
 	    document.getElementById('hint1').style.display = 'block';
 	    document.getElementById('hint1').innerHTML = "<li>The prime factorization of " + num1 + " is: " + num1Factors + "</li>";
 	}
-	if (steps_given>=1)
+	if (Exercise.steps_given>=1)
 	{
 		  document.getElementById('hint2').style.display = 'block';
 		  document.getElementById('hint2').innerHTML = "<li>The prime factorization of " + num2 + " is: " + num2Factors + "</li>";
 	}
-	if (steps_given>=2)
+	if (Exercise.steps_given>=2)
 	{
 		  document.getElementById('hint3').style.display = 'block';
 		  document.getElementById('hint3').innerHTML = "<li>So, any number divisible by both must have " + combinedFactors + " as part of its own prime factorization.</li>";
 	}
-	if (steps_given>=3)
+	if (Exercise.steps_given>=3)
 	{
 		  document.getElementById('hint4').style.display = 'block';
 		  document.getElementById('hint4').innerHTML = "<li>The prime factorization of " + answer + " is " + answerFactors + " so it is divisible into any number that has " + combinedFactors + " as part of its factorization.</li>";
 	}
-	steps_given++;
+	Exercise.steps_given++;
 }
 /***************************** End of supporting functions *********************************/
 

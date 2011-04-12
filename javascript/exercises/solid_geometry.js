@@ -49,9 +49,9 @@ var SolidGeometryExercise = {
     },
     
     getHint: function() {
-        if(steps_given < problem.hints.length) {
+        if(Exercise.steps_given < problem.hints.length) {
             give_next_step();
-            var fn = problem.hints[steps_given-1].fn;
+            var fn = problem.hints[Exercise.steps_given-1].fn;
             if(fn) fn(problem);
         }
     }
