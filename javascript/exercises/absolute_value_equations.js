@@ -15,14 +15,10 @@
 // 
 
 function AbsoluteValueEquationsExercise() {
-    var exc;
-    
-    this.init = function() {
-        exc = new LinearEquations();
-        exc.init("|x|");
-        calculateCorrectAnswer();
-        generateWrongAnswers();
-    }
+    var exc = new LinearEquations();
+    exc.init("|x|");
+    calculateCorrectAnswer();
+    generateWrongAnswers();
     
     function calculateCorrectAnswer() {
         var right_c = exc.getRightConstant();
@@ -55,7 +51,7 @@ function AbsoluteValueEquationsExercise() {
         var numerator = exc.getRightConstant();
         var denominator = exc.getLeftCoeff();
 
-		while (getNumPossibleAnswers() < 4)
+		while (Exercise.getNumPossibleAnswers() < 4)
 		{
     			var n_shift = get_random();
     			var d_shift = get_random();

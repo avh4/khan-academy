@@ -2,7 +2,7 @@ import os, zipfile, sys, traceback, shutil, subprocess, time
 from os.path import join
 from urllib import urlretrieve
 from unzip import unzip
-    
+import re    
 
 offline_dir = os.getcwd()
 ka_dir = offline_dir + "/Khan Academy"
@@ -38,31 +38,53 @@ def download_appengine(appengine_zip):
         replace_in_file("google_appengine/google/appengine/tools/bulkloader.py", "self.num_threads = arg_dict['num_threads']", "self.num_threads = 5")             
             
 
+def popen_results(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    return proc.communicate()[0]
+    
+    
+def hg_pull_up():
+    version = -1
+    pattern = re.compile("^changeset:\\s+(.+):")
 
+    # Pull latest
+    popen_results(['hg', 'pull'])
+
+    # Hg up and make sure we didn't hit a merge
+    output = popen_results(['hg', 'up'])
+    lines = output.split("\n")
+    if len(lines) != 2 or lines[0].find("files updated") < 0:
+        # Ran into merge or other problem
+        print output
+        return version
+
+    # Grab the tip changeset hash
+    output = popen_results(['hg', 'tip'])
+    lines = output.split("\n")
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            version = match.groups()[0]         
+    return version
+    
+    
 def get_khanacademy_code():
     revision = ""  
     os.chdir(code_dir)
     output = ""
-    if os.path.exists("khanacademy-read-only"): 
+    if os.path.exists("khanacademy-stable"): 
         print "updating code"
-        os.chdir(code_dir + "/khanacademy-read-only")
-        output = subprocess.Popen(['svn', 'update'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
-        revision = ""    
-        for line in output.split("\n"):
-            if "At revision" in line or "Updated to revision" in line:
-                revision = "r" + line.split()[-1][:-1]
+        os.chdir(code_dir + "/khanacademy-stable")
+        revision = hg_pull_up()             
     else:
-        print "checking out khanacademy-read-only"
-        output = subprocess.Popen(['svn', 'checkout', 'http://khanacademy.googlecode.com/svn/trunk/', 'khanacademy-read-only'], 
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]  
-        for line in output.split("\n"):
-            if "Checked out revision" in line:
-                revision = "r" + line.split()[-1][:-1]
+        print "cloning khanacademy-stable"
+        popen_results(['hg', 'clone', 'https://khanacademy.kilnhg.com/Repo/Website/Group/stable', 'khanacademy-stable'])
+        os.chdir(code_dir + "/khanacademy-stable")        
+        revision = hg_pull_up()        
     if revision:
         print "At revision", revision
-    else:
-        print "output:\n" + output
-    os.chdir(code_dir + "/khanacademy-read-only")
+
+    os.chdir(code_dir + "/khanacademy-stable")
     replace_in_file("app.py", "offline_mode = False", "offline_mode = True")
     replace_in_file("app.yaml", "static_dir: offline/Khan Academy/videos", "static_dir: ../../videos")             
     return revision
@@ -99,11 +121,11 @@ def download_7zip():
 
 def download_highcharts():
     os.chdir(code_dir)
-    if not os.path.exists("khanacademy-read-only/javascript/highcharts.js"):
+    if not os.path.exists("khanacademy-stable/javascript/highcharts.js"):
         print "downloading highcharts"   
         urlretrieve("http://highcharts.com/downloads/zips/Highcharts-2.1.1.zip", "Highcharts-2.1.1.zip")
         zf = zipfile.ZipFile("Highcharts-2.1.1.zip")
-        file = open(code_dir+"/khanacademy-read-only/javascript/highcharts.js", 'wb')
+        file = open(code_dir+"/khanacademy-stable/javascript/highcharts.js", 'wb')
         file.write(zf.read("js/highcharts.js"))
         file.close()   
         zf.close()
@@ -120,12 +142,12 @@ def download_vlc():
         
 def upload_sample_data(): 
     # --use_sqlite giving intermittent errors
-    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-read-only"' % (code_dir, code_dir, code_dir)
+    command = '"%s/Python25/python.exe" "%s/google_appengine/dev_appserver.py" --clear_datastore "%s/khanacademy-stable"' % (code_dir, code_dir, code_dir)
     subprocess.Popen(command)
     print "giving time for server to start" 
     time.sleep(20)
     print "uploading sample data" 
-    os.chdir(code_dir + "/khanacademy-read-only/sample_data/")
+    os.chdir(code_dir + "/khanacademy-stable/sample_data/")
     os.system("sample_data.py upload --appcfg=../../google_appengine/appcfg.py")
 
 
@@ -148,7 +170,7 @@ def generate_video_mapping():
     
 
 def remove_bulkloader_logs():
-    sd_dir = code_dir + "/khanacademy-read-only/sample_data"
+    sd_dir = code_dir + "/khanacademy-stable/sample_data"
     for filename in os.listdir(sd_dir):
         if filename.startswith("bulkloader"):
             os.remove(sd_dir + "/" + filename)
@@ -160,6 +182,9 @@ def create_download_scripts():
 
     playlists = video_mapping.keys()
     playlists.sort()
+
+    if not os.path.exists(ka_dir + "/download_scripts"):
+    	os.mkdir(ka_dir + "/download_scripts")
 
     for playlist in playlists:
         file = open(ka_dir + "/download_scripts/download_" + playlist + ".bat", "w")
@@ -178,7 +203,7 @@ def zip_directory(revision):
     zip = zipfile.ZipFile("KhanAcademy-" + revision + ".zip", "w")
     for root, dirs, files in os.walk(ka_dir):
          for fileName in files:
-             if not ".svn" in join(root,fileName):
+             if not ".hg" in join(root,fileName):
                  #print join(root,fileName)
                  zipDir = root[len(offline_dir)+1:]
                  try:
@@ -197,7 +222,7 @@ def setup():
     insert_revision_in_readme(revision)
     copy_python25()
     download_7zip()
-    download_highcharts()
+    download_highcharts()    
     download_vlc()
     upload_sample_data()
     copy_datastore()
@@ -207,7 +232,7 @@ def setup():
     zip_directory(revision)
     revert_readme(revision)
     sys.exit()
-    #TODO: upload it http://code.google.com/p/khanacademy/downloads/list ?                                     
+    #TODO: upload it http://code.google.com/p/khanacademy/downloads/list ?    
 
                                        
 if __name__ == "__main__":  

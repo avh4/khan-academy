@@ -38,12 +38,24 @@ class HighlightNode(template.Node):
         text = re.sub(regex, r'<span class="highlight">\1</span>', text)
         return text
 
+@register.inclusion_tag("column_major_order_styles.html")
+def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
+    col_list = range(0, num_cols)
+    link_height = font_size * 1.5
+    
+    return {
+        "columns": col_list,
+        "font_size": font_size,
+        "link_height": link_height,
+        "column_width": column_width,
+        "column_width_plus_gutter": column_width + gutter,
+    }
 @register.inclusion_tag("column_major_order_videos.html")
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
-
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
-    link_height = font_size * 1.5 
+    link_height = font_size * 1.5
+    current_playlist = videos[0]["playlist"].title.replace(' ', '-')
     # Calculate the column indexes (tops of columns). Since video lists won't divide evenly, distribute
     # the remainder to the left-most columns first, and correctly increment the indices for remaining columns
     column_indices = [(items_in_column * multiplier + (multiplier if multiplier <= remainder else remainder)) for multiplier in range(1, num_cols + 1)]
@@ -51,10 +63,9 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
     return {
                "videos": videos,
                "column_width": column_width,
-               "column_width_plus_gutter": column_width + gutter,
-               "font_size": font_size,
-               "link_height": link_height,
+               "current_playlist": current_playlist,
                "column_indices": column_indices,
+               "link_height": link_height,
                "list_height": column_indices[0] * link_height,
           }
 
@@ -99,15 +110,16 @@ def exercise_icon(exercise, App):
     return {"src": src, "version": App.version }
 
 @register.inclusion_tag("exercise_message.html")
-def exercise_message(exercise, coaches, endangered, reviewing, proficient, struggling):
-    return {
-            "exercise": exercise,
-            "coaches": coaches,
-            "endangered": endangered,
-            "reviewing": reviewing,
-            "proficient": proficient,
-            "struggling": struggling
-            }
+def exercise_message(exercise, coaches, exercise_states):
+    return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
+
+@register.inclusion_tag("user_points.html")
+def user_points(user_data):
+    if user_data:
+        points = user_data.points
+    else:
+        points = 0
+    return {"points": points}
 
 @register.inclusion_tag("possible_points_badge.html")
 def possible_points_badge(points, possible_points):

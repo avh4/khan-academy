@@ -1,8 +1,0 @@
-{% extends "qbrary_page_template.html" %}
-{% block pagetitle %}<B>Quiz Question</B>{% endblock pagetitle %}
-    
-{% block pagecontent %}
-	<h3>Sorry, there are currently no questions in {{subject.name}}.
-	<P>
-	Perhaps you would like to <A href="/addquestion?subject_key={{subject.key}}">add one</A>?</h3>	
-{% endblock pagecontent %}

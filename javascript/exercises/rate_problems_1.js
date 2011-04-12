@@ -26,13 +26,10 @@
 
 function RateProblemsExercise() {
     var trips = [];
+    generateProblem();
+    showProblem();
+    generateHints();
 
-    this.init = function() {
-        generateProblem();
-        showProblem();
-        generateHints();
-    }
-    
     function generateProblem() {
         // See constraints in comments above
         trips.time = 11 - Math.abs(get_random());

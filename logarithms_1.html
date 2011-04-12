@@ -50,11 +50,17 @@ writeStep('<b>`'+base+'^'+exp+'='+num+'`</b> so <B>`log_{'+base+'}'+num+'='+exp+
 
 
 setCorrectAnswer(exp);
-addWrongChoice(num/base);
-addWrongChoice(exp+base);
-addWrongChoice(exp*base);
-addWrongChoice(exp-1);
 
+for (var i = 1; i < 6; i++) {
+    addWrongChoice(i);
+}
+
+while (getNumPossibleAnswers() < 5) {
+    var e_shift = get_random();
+    if ((exp + e_shift) > 0) {
+        addWrongChoice(exp + e_shift);
+    }
+}
 
 //-->
 </script>

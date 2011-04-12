@@ -9,11 +9,28 @@ class FeedbackType:
     Answer="answer"
     Comment="comment"
 
-    @staticmethod    
+    @staticmethod
     def is_valid(type):
         return (type == FeedbackType.Question or 
                 type == FeedbackType.Answer or 
                 type == FeedbackType.Comment)
+
+class FeedbackFlag:
+
+    # 2 or more flags immediately hides feedback
+    HIDE_LIMIT = 2
+
+    Inappropriate="inappropriate"
+    LowQuality="lowquality"
+    DoesNotBelong="doesnotbelong"
+    Spam="spam"
+
+    @staticmethod
+    def is_valid(flag):
+        return (flag == FeedbackFlag.Inappropriate or 
+                flag == FeedbackFlag.LowQuality or 
+                flag == FeedbackFlag.DoesNotBelong or 
+                flag == FeedbackFlag.Spam)
 
 class Feedback(db.Model):
     author = db.UserProperty()
@@ -22,6 +39,10 @@ class Feedback(db.Model):
     deleted = db.BooleanProperty(default=False)
     targets = db.ListProperty(db.Key)
     types = db.StringListProperty()
+    is_flagged = db.BooleanProperty(default=False)
+    is_hidden_by_flags = db.BooleanProperty(default=False)
+    flags = db.StringListProperty(default=None)
+    flagged_by = db.StringListProperty(default=None)
 
     def __init__(self, *args, **kwargs):
         db.Model.__init__(self, *args, **kwargs)
@@ -50,6 +71,24 @@ class Feedback(db.Model):
 
     def author_nickname(self):
         return get_nickname_for(self.author)
+
+    def add_flag_by(self, flag_type, user):
+        if user.email() in self.flagged_by:
+            return False
+
+        self.flags.append(flag_type)
+        self.flagged_by.append(user.email())
+        self.recalculate_flagged()
+        return True
+
+    def clear_flags(self):
+        self.flags = []
+        self.flagged_by = []
+        self.recalculate_flagged()
+
+    def recalculate_flagged(self):
+        self.is_flagged = len(self.flags or []) > 0
+        self.is_hidden_by_flags = len(self.flags or []) >= FeedbackFlag.HIDE_LIMIT
 
 class FeedbackNotification(db.Model):
     feedback = db.ReferenceProperty(Feedback)

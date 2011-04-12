@@ -1,5 +1,6 @@
 <div id="library">
         <div id="library-content" >
+            {% column_major_order_styles %}
             <div id="library-content-main">
             {% for playlist_data in all_playlists %}
             {% if forloop.first %}
@@ -10,7 +11,7 @@
                 {% column_major_sorted_videos playlist_data.videos %}
                 <div class="clear">
                 {% if playlist_data.next %}
-                    <a name="{{ playlist_data.next.title|escape }}">&nbsp;</a>
+                    <a name="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
                 {% endif %}
                 </div>
             {% endfor %}

@@ -6,8 +6,11 @@
 
 {% block maincell %}
 <script>
-    var exercise = new ExpressionsWithUnknownVariablesExercise();
-    exercise.init(true);
+    Exercise.fSupportsAjax = true;
+    Exercise.showNextProblem = function() {
+        var exercise = new ExpressionsWithUnknownVariablesExercise();
+        exercise.init(true);
+    }
 </script>
 {% endblock maincell %}
 

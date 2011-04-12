@@ -4,7 +4,7 @@ import copy
 # Each DVD needs to stay under 4.4GB
 
 DVDs_dict = {
-    'Math': [ # 3.6GB
+    'Math': [ # 3.85GB
         'Arithmetic',
         'Pre-algebra',
         'Algebra',
@@ -14,32 +14,28 @@ DVDs_dict = {
         'Statistics',
         'Precalculus',
     ],
-    'Advanced Math': [ # 4.0GB
+    'Advanced Math': [ # 4.11GB
         'Calculus',
         'Differential Equations',
         'Linear Algebra',
     ],        
-    'Math Worked Examples': [ # 4.2GB
+    'Math Worked Examples': [ # 3.92GB
         'Developmental Math',
-        'MA Tests for Education Licensure (MTEL) -Pre-Alg',
+        'Developmental Math 2',
         'Algebra I Worked Examples',
         'ck12.org Algebra 1 Examples',
-        'California Standards Test: Algebra I',
-        'California Standards Test: Algebra II',
-        'California Standards Test: Geometry',
         'Singapore Math',
-#        'IIT JEE Questions', Not added for now due to size constraint, but belongs...
     ],
-    'Chemistry': [ # 2.9GB
+    'Chemistry': [ # 2.92GB
         'Chemistry',
         'Organic Chemistry',
     ],
-    'Science': [ # 2.8GB
+    'Science': [ # 3.24GB
         'Cosmology and Astronomy',
         'Biology',
         'Physics',
     ],
-    'Finance': [ # 2.5GB
+    'Finance': [ # 2.84GB
         'Finance',
         'Banking and Money',
         'Valuation and Investing',
@@ -50,14 +46,25 @@ DVDs_dict = {
         'Current Economics',
         'Currency',
     ],
-    'Test Prep': [ # 2.0GB
-        'SAT Preparation',
-        'GMAT: Problem Solving',
-        'GMAT Data Sufficiency',
+    'Test Prep': [ # 3.37GB
+        'MA Tests for Education Licensure (MTEL) -Pre-Alg',
+        'California Standards Test: Algebra I',
+        'California Standards Test: Algebra II',
+        'California Standards Test: Geometry',        
         'CAHSEE Example Problems',
+        'SAT Preparation',
+        'IIT JEE Questions',
+        'GMAT: Problem Solving',
+        'GMAT Data Sufficiency',        
     ],
+    'Misc': [ # 1.93GB
+        'Talks and Interviews',
+        'History',   
+        'Brain Teasers',
+    ],    
 }
 
+        
 # replace None with the DVD name above that you want to burn
 # this will restrict the homepage to only show the playlists from that list
 DVD_list = DVDs_dict.get(None) #'Math'

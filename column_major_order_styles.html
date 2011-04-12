@@ -1,0 +1,14 @@
+<style>
+    #library #library-content ol li {
+        width: {{column_width}}px;
+        height: {{link_height}}px;   
+    }
+    #library #library-content ol li a {
+        font-size: {{font_size}}px;
+    }
+    {% for multiplier in columns %}
+    .m{{multiplier}} {
+        margin-left: {{column_width_plus_gutter|multiply:multiplier}}px;
+    }
+    {% endfor %}
+</style>
