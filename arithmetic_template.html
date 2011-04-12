@@ -142,7 +142,7 @@ var currentexercise = "{{exid|escapejs}}";
             {% endblock answerarea %}
             {% if not read_only %}
             {% block feedbackarea %}
-			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
+			<input type="button" class="button green" id="check-answer-button" tabindex="10" value="Check Answer" onClick="check_answer_block()">
 			<div id="check-answer-results">
                 <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
                 <div id="next-container" class="button" style="position:relative; display: none;">
