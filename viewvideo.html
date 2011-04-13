@@ -167,7 +167,7 @@ $(function(){
 <span class="breadcrumbs_nav video-nav">
         <a href="/#browse">All videos</a>
         <span class="breadcrumb-separator">&#187;</span>
-        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> 
+        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|slugify|urlencode}}">{{playlist.title|escape}}</a> 
         <span class="breadcrumb-separator">&#187;</span>
     <span id="video_dropdown" style="display:none;" class="selected">
         <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}">{{video.title|escape}}</a>

@@ -330,12 +330,12 @@ var VideoStats = {
         try { eval("var dict_json = " + data); }
         catch(e) { return; }
 
-        if (dict_json.video_points && dict_json.points)
+        if (dict_json.video_points && dict_json.user_points_html)
         {
             var jelPoints = $(".video-energy-points");
             jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
-            $("#top-header .energy-points-badge").text(dict_json.points);
+            $("#user-points-container").html(dict_json.user_points_html);
         }
     },
 

@@ -13,6 +13,7 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 import util
 from app import App
 from models import UserData
+from render import render_block_to_string
 
 class RequestHandler(webapp.RequestHandler):
 
@@ -171,3 +172,6 @@ class RequestHandler(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
  
+    def render_template_to_string(self, name, context):
+        path = os.path.join(os.path.dirname(__file__), name + ".html")
+        return render_block_to_string(path, name + "_block", context).strip()

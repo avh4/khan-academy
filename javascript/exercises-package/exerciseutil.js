@@ -1,4 +1,5 @@
 var Exercise = {
+    fWriteToDoc: true,
     fSupportsAjax: false,
     fRegisteringAnswer: false,
     fExtendsMultipleChoice: false,
@@ -36,9 +37,10 @@ var Exercise = {
             $("#question_content").attr("id", "old_question_content");
             $("#question_content_container").append("<div id=\"question_content\" style=\"position:relative; float: left\"></div>");
             $("#question_content").css("left", 1000);
-            this.showNextProblem();
-            translate();
         }
+        
+        this.showNextProblem();
+        translate();
         
         if (this.fExtendsMultipleChoice) {
             $("#answer_content").html("");
@@ -114,7 +116,7 @@ var Exercise = {
     },
     
     updateUserData: function(data) {
-        $("#user-points-container").html(data.user_points_html)
+        $("#user-points-container").html(data.user_points_html);
         $("#start_time").val(data.start_time);
         $("#problem_number").val(data.problem_number);
 
@@ -744,10 +746,10 @@ function array_sum(a) {
 }
 
 function appendQuestionHtml(html) {
-    if (Exercise.fSupportsAjax)
-        $("#question_content").append(html);
+    if (Exercise.fWriteToDoc)
+        document.write(html);     
     else
-        document.write(html);
+        $("#question_content").append(html);
 }
 
 function appendAnswerHtml(html) {

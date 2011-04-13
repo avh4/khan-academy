@@ -95,3 +95,11 @@ builtins:
 - appstats: on
 - datastore_admin: on
 
+admin_console:
+  pages:
+    - name: AppStats
+      url: /_ah/stats
+    - name: Mapreduce
+      url: /mapreduce
+    - name: YouTube Sync
+      url: /admin/youtubesync
