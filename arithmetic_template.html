@@ -40,6 +40,9 @@ KhanAcademy.updateSeed({{problem_number|escapejs}});
 Exercise.init();  
 $(document).ready(function () {
 	KhanAcademy.onMathMLSupportReady(function() {
+	    {% if exercise.summative %}
+	    Exercise.fSupportsAjax = false;
+	    {% endif %}
         Exercise.display();
 	});
 
