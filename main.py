@@ -36,6 +36,7 @@ from google.appengine.ext import db
 import bulk_update.handler
 import facebook
 import layer_cache
+import request_cache
 import autocomplete
 import coaches
 import api
@@ -1971,7 +1972,7 @@ def real_main():
 
         ], debug=True)
 
-    application = util.CurrentUserMiddleware(application)
+    application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
 
