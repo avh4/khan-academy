@@ -116,7 +116,7 @@ var Exercise = {
     },
     
     updateUserData: function(data) {
-        $("#user-points-container").html(data.user_points_html)
+        $("#user-points-container").html(data.user_points_html);
         $("#start_time").val(data.start_time);
         $("#problem_number").val(data.problem_number);
 

@@ -559,9 +559,10 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 db.put([user_video, video_log, user_data])
 
-                points_total = user_data.points
-
-        json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
 class PrintProblem(request_handler.RequestHandler):
@@ -907,17 +908,14 @@ class RegisterAnswer(request_handler.RequestHandler):
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
         exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
         
-        streak_bar_path = os.path.join(os.path.dirname(__file__), 'streak_bar.html')
         streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = render_block_to_string(streak_bar_path, 'streak_bar_block', streak_bar_context).strip()
+        streak_bar_html = self.render_template_to_string("streak_bar", streak_bar_context)
         
-        exercise_message_path = os.path.join(os.path.dirname(__file__), 'exercise_message.html')
         exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-        exercise_message_html = render_block_to_string(exercise_message_path, 'exercise_message_block', exercise_message_context).strip()
+        exercise_message_html = self.render_template_to_string("exercise_message", exercise_message_context)
         
-        exercise_icon_path = os.path.join(os.path.dirname(__file__), 'exercise_icon.html')
         exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = render_block_to_string(exercise_icon_path, 'exercise_icon_block', exercise_icon_context).strip()
+        exercise_icon_html = self.render_template_to_string("exercise_icon", exercise_icon_context)
         
         badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
         badge_count_context = badge_counts(user_data)
@@ -927,9 +925,8 @@ class RegisterAnswer(request_handler.RequestHandler):
         badge_notification_context = badge_notifications()
         badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
         
-        user_points_path = os.path.join(os.path.dirname(__file__), 'user_points.html')
         user_points_context = user_points(user_data)
-        user_points_html = render_block_to_string(user_points_path, 'user_points_block', user_points_context).strip()
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
         
         updated_values = {
             'exercise_states': exercise_states,
