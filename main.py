@@ -456,6 +456,7 @@ class LogVideoProgress(request_handler.RequestHandler):
     def get(self):
 
         user = util.get_current_user()
+        user_data = None
         video_points_total = 0
         points_total = 0
 
