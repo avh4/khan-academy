@@ -382,6 +382,27 @@ function format_not_reduced_with_sign(n, d)
     return fraction;
 }
 
+function get_reduced_fraction(numerator,denominator){
+    var factorX = 1;
+    var result={};
+    //Find common factors of Numerator and Denominator
+    for ( var x = 2; x <= Math.min( numerator, denominator ); x ++ ) {
+        var check1 = numerator / x;
+        if ( check1 == Math.round( check1 ) ) {
+            var check2 = denominator / x;
+            if ( check2 == Math.round( check2 ) ) {
+                factorX = x;
+            }
+        }
+    }
+
+    result.numerator=(numerator/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
+    result.denominator=denominator/factorX;  //divide by highest common factor to reduce fraction
+
+    return result;
+}
+
+
 var notDoneType = ''; //This is used by pickType in metautil.js to prevent students from refreshing away a type of problem
 var notDoneCookie = '';
 

@@ -487,9 +487,9 @@ Rounding = new function(){
             } else if(_hintStep==3) {
                 if(_isCentered){
                     var answerHtml=$('#dvAnswer').html();
-                    $('#dvAnswer').html(answerHtml+="<br/><br/><strong>So the answer is  " + _correctAnswer + "</strong>");
+                    $('#dvAnswer').html(answerHtml+="<br/><br/><strong>Answer " + _correctAnswer + "</strong>");
                 } else {
-                    $('#dvAnswer').html("<strong>"+_correctAnswer+"</strong> is the nearest " +_roudingTypeToUse + ", so we round <strong>" + _number + "</strong> to <span style='text-decoration:underline'><strong>" +_correctAnswer + "</strong></span>");
+                    $('#dvAnswer').html("<strong>Answer "+_correctAnswer+"</strong> is the nearest "+_roudingTypeToUse +", so we round <strong>"+_number+"</strong> to <span style='text-decoration:underline'><strong>"+_correctAnswer+"</strong></span>");
                 }
                 $('#dvAnswer').css('display','block');
             }

@@ -99,8 +99,8 @@ FractionSubtraction.SubtractionWordProblem = new function(){
         }
         _writeEquation("#dvQuestion", _equation, false);
         _unreducedNominator=(_num1*_commonDenominator/_den1)-(_num2*_commonDenominator/_den2);
-        temp=_reduce(_unreducedNominator,_commonDenominator);
-        _reducedNominator=temp.nominator;
+        temp=get_reduced_fraction(_unreducedNominator,_commonDenominator);
+        _reducedNominator=temp.numerator;
         _reducedDenominator=temp.denominator;
         setCorrectAnswer(_reducedNominator + "/" + _reducedDenominator);
     }
@@ -130,45 +130,7 @@ FractionSubtraction.SubtractionWordProblem = new function(){
             $(Selector).append('<p><font face=\"arial\" size=4>'+Equation+'</font></p>');
         }
     }
-
-
-    /*
-     * Access Level: Private
-     * Function: _createAnswers
-     * Parameters: none
-     * Detail: Display answer options on screen
-     */
-    var _createAnswers = function(){
-        $("#dvAnswers").append("<div><div style='padding-left: 7px;'><input autocomplete='off' id='txtNominator' type='text' style='width:25px;'/></div><div style='width: 43px; border-top: solid 3px black;'></div><div style='padding-left: 7px;'><input autocomplete='off' id='txtDenominator' type='text' style='width:25px;' /></div></div>");
-    }
-
-    /*
-     * Access Level: Private
-     * Function: _reduce
-     * Parameters: none
-     * Detail: Reduce the fraction
-     */
-    var _reduce = function(num,den){
-        var factorX = 1;
-        var result={};
-        //Find common factors of Numerator and Denominator
-        for ( var x = 2; x <= Math.min( num, den ); x ++ ) {
-            var check1 = num / x;
-            if ( check1 == Math.round( check1 ) ) {
-                var check2 = den / x;
-                if ( check2 == Math.round( check2 ) ) {
-                    factorX = x;
-                }
-            }
-        }
-
-        result.nominator=(num/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
-        result.denominator=den/factorX;  //divide by highest common factor to reduce fraction
-
-        return result;
-    }
-
-
+   
 
     /*
      * Access Level: Private
@@ -235,8 +197,7 @@ FractionSubtraction.SubtractionWordProblem = new function(){
          * Detail: Initialize Fraction subtraction Exercise
          */
         init: function(){
-            _createEquationWithCommonDenominator();
-            _createAnswers();
+            _createEquationWithCommonDenominator();         
         },
 
         /*
@@ -285,8 +246,8 @@ FractionSubtraction.SubtractionWordProblem = new function(){
             if(_reducedNominator==0 && $.trim(Denominator) ==''){
                 isCorrect = (Nominator==0) ;
             }else {
-                temp=_reduce(Nominator,Denominator);
-                isCorrect = (correct_answer == (temp.nominator  + "/" + temp.denominator));
+                temp=get_reduced_fraction(Nominator,Denominator);
+                isCorrect = (correct_answer == (temp.numerator  + "/" + temp.denominator));
             }
 
             handleCorrectness(isCorrect);
@@ -298,32 +259,5 @@ FractionSubtraction.SubtractionWordProblem = new function(){
 };
 
 $(document).ready(function(){
-    FractionSubtraction.SubtractionWordProblem.init();
-    $('#txtNominator').focus();
-    $('#txtNominator').keyup(function(e) {
-        if(e.keyCode == 13) {
-            FractionSubtraction.SubtractionWordProblem.check_answer();
-        }
-    });
-
-    $('#txtNominator').keypress(function(e) {
-        var Nominator = document.getElementById("txtNominator").value;
-        if(e.keyCode==191 || e.keyCode==47){
-            e.preventDefault();
-            if(isNaN(Nominator) || $.trim(Nominator) ==''){
-                document.getElementById("txtNominator").value='';
-                alert("Enter a valid numerator.");
-            } else{
-                $('#txtDenominator').focus();
-            }
-
-        }
-
-    });
-
-    $('#txtDenominator').keyup(function(e) {
-        if(e.keyCode == 13) {
-            FractionSubtraction.SubtractionWordProblem.check_answer();
-        }
-    });
+    FractionSubtraction.SubtractionWordProblem.init();   
 })
