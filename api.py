@@ -280,11 +280,13 @@ class JsonApiDict():
             'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist.title)),
         }
 
-@layer_cache.cache_with_key("json_playlists_%s" % Setting.cached_library_content_date())
+@layer_cache.cache_with_key("json_playlists_%s" % Setting.cached_library_content_date(), layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
 def get_playlists_json():
     return json.dumps(get_playlist_api_dicts(), indent=4)
 
-@layer_cache.cache_with_key_fxn(lambda playlist_title: "json_playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()))
+@layer_cache.cache_with_key_fxn(
+        lambda playlist_title: "json_playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()), 
+        layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
 def get_playlist_videos_json(playlist_title):
     query = Playlist.all()
     query.filter('title =', playlist_title)
@@ -301,7 +303,7 @@ def get_playlist_videos_json(playlist_title):
 
     return json.dumps(get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict), indent=4)
 
-@layer_cache.cache_with_key("json_video_library_%s" % Setting.cached_library_content_date())
+@layer_cache.cache_with_key("json_video_library_%s" % Setting.cached_library_content_date(), layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
 def get_video_library_json_compressed():
     playlist_api_dicts = []
     playlists = get_all_topic_playlists()
