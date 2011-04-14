@@ -1633,6 +1633,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border-bottom: 1px solid #aaa;
         color: #333;
         margin-bottom: 10px;
+        overflow-x: auto;
         padding: 10px;
         position: relative;
         z-index: 10;
