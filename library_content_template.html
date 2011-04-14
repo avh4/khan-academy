@@ -4,7 +4,7 @@
             <div id="library-content-main">
             {% for playlist_data in all_playlists %}
             {% if forloop.first %}
-                <div class="clear"><a name="{{ playlist_data.title|escape }}">&nbsp;</a></div>
+                <div class="clear"><a name="{{ playlist_data.title|slugify|escape }}">&nbsp;</a></div>
             {% endif %}
             <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
                 <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>

@@ -1,4 +1,5 @@
 import os
+import logging
 
 from google.appengine.api import users
 from google.appengine.ext import db
@@ -13,7 +14,7 @@ import models
 import models_discussion
 import notification
 from render import render_block_to_string
-from util_discussion import is_honeypot_empty, is_current_user_moderator
+import util_discussion
 import app
 import util
 import request_handler
@@ -48,7 +49,7 @@ class FlaggedFeedback(request_handler.RequestHandler):
 
     def get(self):
 
-        if not is_current_user_moderator():
+        if not util_discussion.is_current_user_moderator():
             self.redirect(users.create_login_url(self.request.uri))
             return
 
@@ -115,7 +116,7 @@ class AddAnswer(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        if not is_honeypot_empty(self.request):
+        if not util_discussion.is_honeypot_empty(self.request):
             # Honeypot caught a spammer (in case this is ever public or spammers
             # have google accounts)!
             return
@@ -140,7 +141,7 @@ class AddAnswer(request_handler.RequestHandler):
             # limit of 1MB per entity.  This is *highly* unlikely for a legitimate piece of feedback,
             # and we're choosing to crash in this case until someone legitimately runs into this.
             # See Issue 841.
-            db.put(answer)
+            answer.put()
             notification.new_answer_for_video_question(video, question, answer)
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)
@@ -156,7 +157,7 @@ class Answers(request_handler.RequestHandler):
             answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False, False)
             template_values = {
                 "answers": answer_query,
-                "is_mod": is_current_user_moderator()
+                "is_mod": util_discussion.is_current_user_moderator()
             }
             path = os.path.join(os.path.dirname(__file__), 'question_answers.html')
             html = render_block_to_string(path, 'answers', template_values)
@@ -175,7 +176,7 @@ class AddQuestion(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        if not is_honeypot_empty(self.request):
+        if not util_discussion.is_honeypot_empty(self.request):
             # Honeypot caught a spammer (in case this is ever public or spammers
             # have google accounts)!
             return
@@ -194,7 +195,7 @@ class AddQuestion(request_handler.RequestHandler):
             question.content = question_text
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
-            db.put(question)
+            question.put()
 
         self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=0" % (video_key, playlist_key))
 
@@ -213,10 +214,10 @@ class EditEntity(request_handler.RequestHandler):
         if key and text:
             feedback = db.get(key)
             if feedback:
-                if feedback.author == user or is_current_user_moderator():
+                if feedback.author == user or util_discussion.is_current_user_moderator():
 
                     feedback.content = text
-                    db.put(feedback)
+                    feedback.put()
 
                     # Redirect to appropriate list of entities depending on type of 
                     # feedback entity being edited.
@@ -248,7 +249,7 @@ class FlagEntity(request_handler.RequestHandler):
 
 class ClearFlags(request_handler.RequestHandler):
     def post(self):
-        if not is_current_user_moderator():
+        if not util_discussion.is_current_user_moderator():
             return
 
         key = self.request.get("entity_key")
@@ -265,7 +266,7 @@ class ChangeEntityType(request_handler.RequestHandler):
     def post(self):
 
         # Must be a moderator to change types of anything
-        if not is_current_user_moderator():
+        if not util_discussion.is_current_user_moderator():
             return
 
         key = self.request.get("entity_key")
@@ -274,7 +275,7 @@ class ChangeEntityType(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 entity.types = [target_type]
-                db.put(entity)
+                entity.put()
 
 class DeleteEntity(request_handler.RequestHandler):
 
@@ -289,9 +290,9 @@ class DeleteEntity(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 # Must be a moderator or author of entity to delete
-                if entity.author == user or is_current_user_moderator():
+                if entity.author == user or util_discussion.is_current_user_moderator():
                     entity.deleted = True
-                    db.put(entity)
+                    entity.put()
 
         self.redirect("/discussion/flaggedfeedback")
 
@@ -311,11 +312,13 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
     if page <= 0:
         page = 1
 
-    question_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, False)
-    answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, video.key(), False, False)
+    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
+    answers = sorted(
+            util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer), 
+            key=lambda feedback: feedback.date)
 
-    count_total = question_query.count()
-    questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)
+    count_total = len(questions)
+    questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]
 
     dict_questions = {}
     # Store each question in this page in a dict for answer population
@@ -323,7 +326,7 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         dict_questions[question.key()] = question
 
     # Just grab all answers for this video and cache in page's questions
-    for answer in answer_query:
+    for answer in answers:
         # Grab the key only for each answer, don't run a full gql query on the ReferenceProperty
         question_key = answer.parent_key()
         if (dict_questions.has_key(question_key)):
@@ -334,7 +337,7 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
             "user": util.get_current_user(),
-            "is_mod": is_current_user_moderator(),
+            "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,
             "questions": questions,

@@ -5,7 +5,6 @@
         font-weight: bold;
     }
     #video_dropdown {
-        display: none;
         text-indent: 0;
         padding-left: 5px;
     }
@@ -131,7 +130,6 @@ $(function(){
        $("#idOVideo").hide();
        VideoStats.prepareAlternativePlayer(); // If YouTube is hidden, use the flv player for statistics
     }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('#page-container');
-    $('#video_selector').hide();
     $('#video_dropdown').css('display', 'inline-block');
     var menu = $('#video_dropdown ol').menu();
 
@@ -169,17 +167,9 @@ $(function(){
 <span class="breadcrumbs_nav video-nav">
         <a href="/#browse">All videos</a>
         <span class="breadcrumb-separator">&#187;</span>
-        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|urlencode}}">{{playlist.title|escape}}</a> 
+        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|slugify|urlencode}}">{{playlist.title|escape}}</a> 
         <span class="breadcrumb-separator">&#187;</span>
-    <form id="video_selector">
-        <select name="v">
-            {% for v in videos %}
-            <option {{v.selected|default:""}} value="{{v.youtube_id}}">{{v.title|escape}}</option>
-            {% endfor %}
-        </select>
-        <button type="submit">Go</button>
-    </form>
-    <span id="video_dropdown" class="selected">
+    <span id="video_dropdown" style="display:none;" class="selected">
         <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}">{{video.title|escape}}</a>
         <div id="video_menu">
             <ol>
