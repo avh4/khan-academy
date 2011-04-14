@@ -58,7 +58,15 @@ class FlaggedFeedback(request_handler.RequestHandler):
 
         feedback_count = feedback_query.count()
         feedbacks = feedback_query.fetch(25)
-        self.render_template("discussion/flagged_feedback.html", {"feedbacks": feedbacks, "feedback_count": feedback_count})
+
+        template_content = {
+                "feedbacks": feedbacks, 
+                "feedback_count": feedback_count,
+                "feedback_type_question": models_discussion.FeedbackType.Question,
+                "feedback_type_comment": models_discussion.FeedbackType.Comment,
+                }
+
+        self.render_template("discussion/flagged_feedback.html", template_content)
 
 def feedback_flag_update_map(feedback):
     feedback.recalculate_flagged()
@@ -275,7 +283,13 @@ class ChangeEntityType(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 entity.types = [target_type]
+
+                if self.request_bool("clear_flags", default=False):
+                    entity.clear_flags()
+
                 entity.put()
+
+        self.redirect("/discussion/flaggedfeedback")
 
 class DeleteEntity(request_handler.RequestHandler):
 
@@ -313,7 +327,9 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         page = 1
 
     questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
-    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers = sorted(
+            util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer), 
+            key=lambda feedback: feedback.date)
 
     count_total = len(questions)
     questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]

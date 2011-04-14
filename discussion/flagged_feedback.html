@@ -19,7 +19,23 @@
 #feedback tr.odd_row td {
     background-color:#EFEFEF;
 }
+
 </style>
+
+<script>
+    $(function() {
+        $(".mod_action_col form").submit(function() {
+            var jel = $(this);
+
+            $.post(jel.attr("action"));
+
+            var jCols = $(".mod_action_col", jel.parents("tr").first());
+            jCols.html("<em><nobr>" + jel.attr("data-desc") +"</nobr></em>");
+
+            return false;
+        });
+    });
+</script>
 {% endblock pagescript %}
 
 {% block pagetitle %}Flagged Feedback{% endblock pagetitle %}
@@ -32,13 +48,14 @@
 </p>
 
 {% if feedbacks %}
-    <table style="width:100%;">
+    <table style="width:100%">
         <tr>
+            <th>&nbsp;</th>
+            <th>Type</th>
             <th>Video</th>
             <th>Content</th>
             <th>Flags</th>
             <th>Flagged By</th>
-            <th>&nbsp;</th>
         </tr>
     {% for feedback in feedbacks %}
         {% if forloop.counter|divisibleby:2 %}
@@ -46,20 +63,34 @@
         {% else %}
         <tr class="odd_row">
         {% endif %}
-            <td class="center"><a href="/video/{{feedback.first_target.readable_id|escape}}">{{ feedback.first_target.title|escape }}</a></td>
-            <td>{{ feedback.content|escape|linebreaksbr }}</td>
-            <td>{% for flag in feedback.flags %}{{ flag|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-            <td>{% for email in feedback.flagged_by %}{{ email|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-            <td style="text-align:right;">
+            <td style="text-align:left;width:1%;" class="mod_action_col">
                 <nobr>
-                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}">
+                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}" data-desc="Cleared flags">
                     <input type="submit" class="simple-button action-gradient" value="Clear flags"/>
                 </form>
-                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}">
+                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}" data-desc="Deleted">
                     <input type="submit" class="simple-button action-gradient" value="Delete post"/>
                 </form>
                 </nobr>
             </td>
+            <td style="text-align:left;width:1%;" class="mod_action_col">
+                <nobr>
+                {{feedback.types.0|capfirst|escape}}
+                {% ifequal feedback.types.0 feedback_type_comment %}
+                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_question}}" data-desc="Changed to question">
+                        <input type="submit" class="simple-button action-gradient" value="Change to Question"/>
+                    </form>
+                {% else %}
+                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_comment}}" data-desc="Changed to comment">
+                        <input type="submit" class="simple-button action-gradient" value="Change to Comment"/>
+                    </form>
+                {% endifequal %}
+                </nobr>
+            </td>
+            <td class="center"><a href="/video/{{feedback.first_target.readable_id|escape}}">{{ feedback.first_target.title|escape }}</a></td>
+            <td>{{ feedback.content|escape|linebreaksbr }}</td>
+            <td>{% for flag in feedback.flags %}{{ flag|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td>{% for email in feedback.flagged_by %}{{ email|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
         </tr>
     {% endfor %}
     </table>

@@ -463,8 +463,11 @@ class LogVideoProgress(request_handler.RequestHandler):
 
         if user:
 
-            video_key = self.request.get("video_key")
-            video = db.get(video_key)
+            video = None
+            video_key = self.request_string("video_key", default = "")
+
+            if video_key:
+                video = db.get(video_key)
 
             if video:
 
