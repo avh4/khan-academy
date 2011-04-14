@@ -313,7 +313,9 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         page = 1
 
     questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
-    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers = sorted(
+            util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer), 
+            key=lambda feedback: feedback.date)
 
     count_total = len(questions)
     questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]
