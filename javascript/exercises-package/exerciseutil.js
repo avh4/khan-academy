@@ -321,8 +321,8 @@ function renderChoices() {
 	}
 	
 	if(Exercise.fAddNoneOfThese) {
-        // With probability 1/5, the correct answer is "None of these"
-    	if (!getRandomIntRange(0, 4)) {
+        // With probability 1/4, the correct answer is "None of these"
+    	if (!getRandomIntRange(0, 3)) {
             answerChoices[Exercise.correctchoice] = answerChoices[num_choices - 1]	   
             Exercise.correctchoice = num_choices - 1; 
     	}
