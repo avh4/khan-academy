@@ -27,10 +27,10 @@
         $(".mod_action_col form").submit(function() {
             var jel = $(this);
 
-            $.post(jel.attr("action"), function() {
-                var jCols = $(".mod_action_col", jel.parents("tr").first());
-                jCols.html("<em><nobr>" + jel.attr("data-desc") +"</nobr></em>");
-            });
+            $.post(jel.attr("action"));
+
+            var jCols = $(".mod_action_col", jel.parents("tr").first());
+            jCols.html("<em><nobr>" + jel.attr("data-desc") +"</nobr></em>");
 
             return false;
         });
