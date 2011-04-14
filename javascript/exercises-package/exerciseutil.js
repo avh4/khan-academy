@@ -310,48 +310,28 @@ function addWrongChoice(choice)
 }
 
 function renderChoices() {
-	var availAnswers = 1 + Exercise.possibleAnswers.length; // only so many answers available
-	Exercise.answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
+	var availAnswers = Math.min(1 + Exercise.possibleAnswers.length, 5); // only so many answers available
+	Exercise.answerChoices = new Array(availAnswers); // at most 5 answers displayed, resize to fit
 	Exercise.correctchoice = Math.round(KhanAcademy.random()*(Exercise.answerChoices.length-0.02)-.49);
 
-	var possibleWrongIndices=randomIndices(Exercise.getNumPossibleAnswers());
-	for (var i = 0; i < Exercise.answerChoices.length; i++)
+	var possibleWrongIndices=randomIndices(availAnswers - 1);
+	for (var i = 0; i < availAnswers; i++)
 	{
-		if (i==Exercise.correctchoice)
-		{
+		if (i == Exercise.correctchoice)
 			Exercise.answerChoices[i] = '`' + correct_answer + '`';
-		}
 		else
-		{
-			if (possibleWrongIndices.length>0)
-				Exercise.answerChoices[i]='`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';
-			else
-				continue;
-		}
+			Exercise.answerChoices[i] = '`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';			    
 	}
 
     // if you need to rearrange order or answers implement preDisplay function in derived html
     if (window.preDisplay)
-    {
         preDisplay(Exercise.answerChoices, Exercise.correctchoice);
-    }
 
-	for (i = 0; i < Exercise.answerChoices.length; i++)
-    {
+	for (i = 0; i < Exercise.answerChoices.length; i++) {
        appendAnswerHtml('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
     }
     
-    var $choices = $('.select-choice');
-    $choices.click(function(e) {
-        if (this != document.activeElement)
-            $(this).focus();
-    });
-
-    $choices.focus(function(e) {
-        $(this).click();
-    });
-
-    $choices.keypress(function(e) {
+    $('.select-choice').keypress(function(e) {
         if (e.which == '13') {
             check_answer_block();
             return false;
