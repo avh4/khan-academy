@@ -179,6 +179,29 @@ push_fractions_other_than(intersection[2], intersection[3], "y", Exercise.possib
 	// - 2 sets of choices (x and y each have 5)
 
 	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
+	
+    function check_both_answers()
+    {
+    	if (Exercise.selectedchoice === undefined || Exercise.selectedchoice2 === undefined) 
+    	{
+    			window.alert("Please choose both answers.");
+    			return;
+    	}
+
+    	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice  && Exercise.selectedchoice2==Exercise.correctchoice2);
+    	handleCorrectness(isCorrect);
+    }
+    
+    function select_choice(choice)
+    {
+    	Exercise.selectedchoice = choice;
+    }
+
+    function select_choice2(choice)
+    {
+    	Exercise.selectedchoice2 = choice;
+    }
+        
 	Exercise.correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
 	Exercise.correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
 

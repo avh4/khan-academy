@@ -15,9 +15,6 @@ var Exercise = {
         this.steps_given=0;
         this.next_step_to_write =1;
         this.correctchoice;
-        this.correctchoice2; //used when there are 2 answer choices
-        this.selectedchoice;
-        this.selectedchoice2; 
         this.correct = new Image();
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
@@ -317,10 +314,14 @@ function renderChoices() {
 	var possibleWrongIndices=randomIndices(availAnswers - 1);
 	for (var i = 0; i < availAnswers; i++)
 	{
-		if (i == Exercise.correctchoice)
-			Exercise.answerChoices[i] = '`' + correct_answer + '`';
-		else
+		if (i == Exercise.correctchoice) {
+		    if (!getRandomIntRange(0, 5))
+		        Exercise.answerChoices[i] = "None of these";
+		    else
+			    Exercise.answerChoices[i] = '`' + correct_answer + '`';		    
+		} else {
 			Exercise.answerChoices[i] = '`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';			    
+		}
 	}
 
     // if you need to rearrange order or answers implement preDisplay function in derived html
@@ -508,16 +509,6 @@ function date_as_string()
 	return date_to_string(d);
 }
 
-function select_choice(choice)
-{
-	Exercise.selectedchoice = choice;
-}
-
-function select_choice2(choice)
-{
-	Exercise.selectedchoice2 = choice;
-}
-
 function getGCD(x,y) 
 {
 	var z;
@@ -671,19 +662,6 @@ function check_answer()
     }
     
 	var isCorrect = (checkedIndex == Exercise.correctchoice)
-	handleCorrectness(isCorrect);
-}
-
-//for problems where the user can give 2 answers
-function check_both_answers()
-{
-	if (Exercise.selectedchoice === undefined || Exercise.selectedchoice2 === undefined) 
-	{
-			window.alert("Please choose both answers.");
-			return;
-	}
-
-	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice  && Exercise.selectedchoice2==Exercise.correctchoice2);
 	handleCorrectness(isCorrect);
 }
 
