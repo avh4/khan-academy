@@ -29,7 +29,7 @@
 
             $.post(jel.attr("action"), function() {
                 var jCols = $(".mod_action_col", jel.parents("tr").first());
-                jCols.html("<em>Done</em>");
+                jCols.html("<em><nobr>" + jel.attr("data-desc") +"</nobr></em>");
             });
 
             return false;
@@ -65,10 +65,10 @@
         {% endif %}
             <td style="text-align:left;width:1%;" class="mod_action_col">
                 <nobr>
-                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}">
+                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}" data-desc="Cleared flags">
                     <input type="submit" class="simple-button action-gradient" value="Clear flags"/>
                 </form>
-                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}">
+                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}" data-desc="Deleted">
                     <input type="submit" class="simple-button action-gradient" value="Delete post"/>
                 </form>
                 </nobr>
@@ -77,11 +77,11 @@
                 <nobr>
                 {{feedback.types.0|capfirst|escape}}
                 {% ifequal feedback.types.0 feedback_type_comment %}
-                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_question}}">
+                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_question}}" data-desc="Changed to question">
                         <input type="submit" class="simple-button action-gradient" value="Change to Question"/>
                     </form>
                 {% else %}
-                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_comment}}">
+                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_comment}}" data-desc="Changed to comment">
                         <input type="submit" class="simple-button action-gradient" value="Change to Comment"/>
                     </form>
                 {% endifequal %}
