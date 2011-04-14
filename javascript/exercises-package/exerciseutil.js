@@ -2,13 +2,13 @@ var Exercise = {
     fWriteToDoc: true,
     fSupportsAjax: false,
     fRegisteringAnswer: false,
+    fAddNoneOfThese: true,
     fExtendsMultipleChoice: false,
     
     showNextProblem: function() {},
     
     init: function() {
         this.tries=0;
-        this.answerChoices = new Array(5);
         this.possibleAnswers = new Array(); //These are the possible answers
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
         this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
@@ -307,29 +307,34 @@ function addWrongChoice(choice)
 }
 
 function renderChoices() {
-	var availAnswers = Math.min(1 + Exercise.possibleAnswers.length, 5); // only so many answers available
-	Exercise.answerChoices = new Array(availAnswers); // at most 5 answers displayed, resize to fit
-	Exercise.correctchoice = Math.round(KhanAcademy.random()*(Exercise.answerChoices.length-0.02)-.49);
+	var num_choices = Math.min(1 + Exercise.possibleAnswers.length, 5);
+	var answerChoices = new Array(num_choices);
+	Exercise.correctchoice = Math.round(KhanAcademy.random()*(num_choices - 0.02)-.49);
 
-	var possibleWrongIndices=randomIndices(availAnswers - 1);
-	for (var i = 0; i < availAnswers; i++)
-	{
-		if (i == Exercise.correctchoice) {
-		    if (!getRandomIntRange(0, 5))
-		        Exercise.answerChoices[i] = "None of these";
-		    else
-			    Exercise.answerChoices[i] = '`' + correct_answer + '`';		    
-		} else {
-			Exercise.answerChoices[i] = '`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';			    
-		}
+	var possibleWrongIndices = randomIndices(num_choices - 1);
+
+	for (var i = 0; i < num_choices; i++) {
+    	if (i == Exercise.correctchoice)
+		    answerChoices[i] = '`' + correct_answer + '`';		    
+		else
+			answerChoices[i] = '`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';			    
+	}
+	
+	if(Exercise.fAddNoneOfThese) {
+        // With probability 1/5, the correct answer is "None of these"
+    	if (!getRandomIntRange(0, 4)) {
+            answerChoices[Exercise.correctchoice] = answerChoices[num_choices - 1]	   
+            Exercise.correctchoice = num_choices - 1; 
+    	}
+    	answerChoices[num_choices - 1] = "None of these";	    
 	}
 
     // if you need to rearrange order or answers implement preDisplay function in derived html
     if (window.preDisplay)
-        preDisplay(Exercise.answerChoices, Exercise.correctchoice);
+        preDisplay(answerChoices, Exercise.correctchoice);
 
-	for (i = 0; i < Exercise.answerChoices.length; i++) {
-       appendAnswerHtml('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
+	for (i = 0; i < num_choices; i++) {
+       appendAnswerHtml('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
     }
     
     $('.select-choice').keypress(function(e) {
