@@ -122,7 +122,7 @@ class FeedbackVote(db.Model):
     UP = 1
     DOWN = 2
 
-    feedback = db.ReferenceProperty(Feedback)
+    # Feedback reference stored in parent property
     video = db.ReferenceProperty()
     user = db.UserProperty()
     vote_type = db.IntegerProperty(default=0)
@@ -133,8 +133,8 @@ class FeedbackVote(db.Model):
             return
 
         vote = FeedbackVote.get_or_insert(
-                key_name = "by_%s_for_%s" % (user.email(), feedback.key()),
-                feedback = feedback,
+                key_name = "vote_by_%s" % user.email(),
+                parent = feedback,
                 video = feedback.first_target_key(),
                 user = user,
                 vote_type = vote_type)
@@ -154,7 +154,7 @@ class FeedbackVote(db.Model):
 
         dict = {}
         for vote in votes:
-            dict[vote.key_for_feedback()] = vote
+            dict[vote.parent_key()] = vote
 
         return dict
 
@@ -164,7 +164,7 @@ class FeedbackVote(db.Model):
             return 0
 
         query = FeedbackVote.all()
-        query.filter("feedback =", feedback)
+        query.ancestor(feedback)
         votes = query.fetch(100000)
 
         count_up = len(filter(lambda vote: vote.is_up(), votes))
@@ -177,6 +177,3 @@ class FeedbackVote(db.Model):
 
     def is_down(self):
         return self.vote_type == FeedbackVote.DOWN
-
-    def key_for_feedback(self):
-        return FeedbackVote.feedback.get_value_for_datastore(self)

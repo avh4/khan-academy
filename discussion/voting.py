@@ -1,4 +1,6 @@
+from google.appengine.api import users
 from google.appengine.ext import db
+from google.appengine.api import taskqueue
 
 from privileges import Privileges
 from models import UserData
@@ -13,6 +15,26 @@ class VoteEntity(request_handler.RequestHandler):
         if not user:
             return
 
+        # We kick off a taskqueue item to perform the actual vote insertion
+        # so we don't have to worry about fast writes to the entity group 
+        # causing contention problems for the HR datastore, because
+        # the taskqueue will just retry w/ exponential backoff.
+        taskqueue.add(url='/admin/discussion/finishvoteentity', queue_name='voting-queue', 
+                params={
+                    "email": user.email(),
+                    "vote_type": self.request_int("vote_type", default=FeedbackVote.ABSTAIN),
+                    "entity_key": self.request_string("entity_key", default="")
+                }
+        )
+
+class FinishVoteEntity(request_handler.RequestHandler):
+    def post(self):
+
+        email = self.request_string("email", default="")
+        if not email:
+            return
+
+        user = users.User(email)
         user_data = UserData.get_for(user)
 
         if not user_data:
