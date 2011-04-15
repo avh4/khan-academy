@@ -1,12 +1,12 @@
 <div id="{{ browser_id|escape }}" class="playlist_browser pulled" {% if hidden %}style="display:none;"{% endif %}>
 <div id="playlist-jump">
-<span style="display: inline-block; float: left">Jump to playlist:</span>
-<nav class="css-menu" id="page_main_nav" style="float: left;">
-<ul>
+<span class="playlist_browser_title desktop-only">Jump to playlist:</span>
+<nav class="css-menu" id="page_main_nav">
+<ul data-role="listview" data-inset="true">
 	<li>Math
 		<ul>
 
-			<li><a href="#arithmetic">Arithmetic</a></li>
+			<li><a href="#arithmetic" data-url="/#arithmetic">Arithmetic</a></li>
             <li><a href="#developmental-math">Developmental Math</a></li>
 			<li class="sub">
 				Pre-Algebra

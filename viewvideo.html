@@ -183,49 +183,58 @@ $(function(){
 {% endblock pagesubmenu %}
 {% block pagecontent %}
 <div id="video-page">
-<article class="video">
-    <div id="description">
-        <h3>
-            <span class="title">{{video.title|escape}}</span>
-        {% if video.description %}
-            <span class="long-description">: {{video.description|escape}}</span>
-        {% endif %}
-        </h3>
+<article class="video" data-role="page">
+    <div data-role="header" class="mobile-only">
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <h1>{{video.title|escape}}</h1>
+        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse"></a>
     </div>
-    <div style="margin-top: -5px;">
-        <nav class="prev_next_nav">
-            {% if previous_video %}
-            <label id="prev_video">
-                <a rel=prev href="/video/{{previous_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Previous Video:</b> {{previous_video.title}}</a>
-            </label>
+    <div data-role="content">
+        <div id="description">
+            <h3>
+                <span class="title desktop-only">{{video.title|escape}}</span>
+            {% if video.description %}
+                <span class="long-description"><span class="desktop-only">: </span>{{video.description|escape}}</span>
             {% endif %}
-            {% if next_video %}
-            <label id="next_video">
-                <a rel=next href="/video/{{next_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Next Video:</b> {{next_video.title}}</a>
-            </label>
+            </h3>
+        </div>
+        <div style="margin-top: -5px;">
+            <nav class="prev_next_nav desktop-only">
+                {% if previous_video %}
+                <label id="prev_video">
+                    <a rel=prev href="/video/{{previous_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Previous Video:</b> {{previous_video.title}}</a>
+                </label>
+                {% endif %}
+                {% if next_video %}
+                <label id="next_video">
+                    <a rel=next href="/video/{{next_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Next Video:</b> {{next_video.title}}</a>
+                </label>
+                {% endif %}
+            </nav>
+    
+            <div id="youtube_blocked" class="desktop-only">
+                {% flv_player_embed video_path %}
+            </div>
+            <div class="youtube-video">
+            {% youtube_player_embed video.youtube_id %}
+            </div>
+    
+            <span class="video_extra_links desktop-only"><nobr>
+            {% if user %}
+                {% possible_points_badge awarded_points video_points_base %}
             {% endif %}
-        </nav>
-
-        <div id="youtube_blocked">
-            {% flv_player_embed video_path %}
+            <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
+            {% if exercise %}
+                | <a href="/exercises?exid={{exercise}}">Exercises</a>
+                {% endif %}</span>
+            </nobr></span>
+            <div class="desktop-only">
+            {% video_comments video playlist comments_page %}
+            {% video_qa video playlist qa_page qa_expand_id %}
+            </div>
         </div>
-
-        {% youtube_player_embed video.youtube_id %}
-
-        <span class="video_extra_links"><nobr>
-        {% if user %}
-            {% possible_points_badge awarded_points video_points_base %}
-        {% endif %}
-        <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
-        {% if exercise %}
-            | <a href="/exercises?exid={{exercise}}">Exercises</a>
-            {% endif %}</span>
-        </nobr></span>
-
-        {% video_comments video playlist comments_page %}
-        {% video_qa video playlist qa_page qa_expand_id %}
-        </div>
-    </article>
+    </div>
+</article>
 </div>
 {% endblock pagecontent %}
 {% block pagefooter %}
