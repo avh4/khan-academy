@@ -4,16 +4,22 @@
             <div id="library-content-main">
             {% for playlist_data in all_playlists %}
             {% if forloop.first %}
-                <div class="clear"><a name="{{ playlist_data.title|slugify|escape }}">&nbsp;</a></div>
+                <div class="clear desktop-only"><a name="{{ playlist_data.title|slugify|escape }}">&nbsp;</a></div>
             {% endif %}
-            <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
-                <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
-                {% column_major_sorted_videos playlist_data.videos %}
-                <div class="clear">
-                {% if playlist_data.next %}
-                    <a name="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
-                {% endif %}
+            <div data-role="page" id="{{ playlist_data.title|slugify|escape }}">
+                <div data-role="header">
+                    <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
                 </div>
+                <div data-role="content">
+                    <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
+                    {% column_major_sorted_videos playlist_data.videos %}
+                    <div class="clear desktop-only">
+                    {% if playlist_data.next %}
+                        <a name="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
             {% endfor %}
             </div>
         </div>

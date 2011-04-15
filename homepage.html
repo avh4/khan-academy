@@ -8,7 +8,7 @@
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
-<div id="homepage" style="position: relative;">
+<div id="homepage">
     <div id="main-video">
         {% youtube_player_embed video_id 480 380 %}
     </div>
@@ -62,23 +62,28 @@
             </tr>
         </table>
     </div>
-
     <div class="clear"></div>
-<hr>
-<h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
+<hr class="desktop-only">
 
-{% if DVD_list %}
-<ul class="menu" id="menu">
-    {% for playlist in DVD_list %}
-	    <li><a href="#{{playlist}}" class="menulink">{{playlist}}</a></li>
-    {% endfor %}
-</ul>
-{% else %}
-<div id="browse-control-anchor"></div>
-{% playlist_browser "browse" %}
-{% playlist_browser "browse-fixed" %}
-{% endif %}
-
+<div data-role="page">
+    <div class="mobile-only" data-role="header"><h1>Khan Academy</h1></div>
+    <div data-role="content">
+        <h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
+        {% if DVD_list %}
+        <ul class="menu" id="menu">
+            {% for playlist in DVD_list %}
+        	    <li><a href="#{{playlist}}" class="menulink">{{playlist}}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div id="browse-control-anchor"></div>
+        {% playlist_browser "browse" %}
+        {% playlist_browser "browse-fixed" %}
+        
+        {% endif %}
+    </div>
+</div>
+<div class="clear"></div>
 {{ library_content }}
 
 </div>

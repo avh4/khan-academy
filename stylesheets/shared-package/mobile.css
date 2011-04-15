@@ -1,0 +1,20 @@
+/* Welcome to my madness */
+header, footer, #back-to-top, #thumbnails_container, 
+#main-video, #homepage-text, #browse-fixed, .video #description
+h2.featured-videos, .desktop-only { display: none; }
+
+#library #library-content .ui-page .ui-content ol { 
+    height: auto !important; 
+    list-style: none !important;
+}
+#library #library-content .ui-page .ui-content ol li {
+    height: auto;
+    width: auto;
+    margin-top: auto !important;
+    margin-left: auto !important;
+}
+
+.video #description { text-align: center; }
+
+.youtube-video { margin: 0 auto; text-align: center; }
+.youtube-video object { width: 90% !important; height: 80% !important; }

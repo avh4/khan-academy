@@ -174,6 +174,7 @@ hr {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 
+.mobile-only { display: none; }
 /* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
 .fancy-scrollbar::-webkit-scrollbar {
   height: 8px;
@@ -2340,7 +2341,9 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     -moz-box-shadow: 0 1px 2px #ccc;
     box-shadow: 0 1px 2px #ccc;
 }
-
+#homepage .playlist_browser_title {
+    display: inline-block; float: left;
+}
 #homepage #browse-fixed {
     position: fixed;
     top: 0;
