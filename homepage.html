@@ -102,5 +102,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {% homepage_javascript %}
+    {% if not is_mobile %}
+        {% homepage_javascript %}
+    {% endif %}
 {% endblock bottompagescript %}

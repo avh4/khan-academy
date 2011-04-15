@@ -33,43 +33,31 @@
 
         <script>var KA_VERSION = '{{ App.version }}';</script>
 
-        {% if not is_mobile %}
-            {% shared_css %}
-            {% shared_javascript %}
-        {% endif %}
-
         {% if is_mobile %}
             {% mobile_css %}
             {% mobile_javascript %}
+        {% else %}
+            {% shared_css %}
+            {% shared_javascript %}
+
+            <script type="text/javascript">
+                // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+                (function(){
+                    var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
+                    for (var i = 0; i < html5elements.length; i++) {
+                        document.createElement(html5elements[i]);
+                    }
+                })();
+
+                $(function(){
+                    // Configure the search form
+                    $('#page_search input[type=text]').placeholder();
+                    initAutocomplete("#page_search input", true);
+                });
+            </script>
+
         {% endif %}
 
-        <script type="text/javascript">
-            // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
-            (function(){
-                var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
-                for (var i = 0; i < html5elements.length; i++) {
-                    document.createElement(html5elements[i]);
-                }
-            })();
-
-            $(function(){
-                // Configure the search form
-                $('#page_search input[type=text]').placeholder();
-                initAutocomplete("#page_search input", true);
-            });
-
-	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
-	    var seedTotalViews = 28402468
-	    var seedDailyViews = 100000;
-
-	    var currentTime = new Date();
-	    var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
-	    var viewsPerSecond = seedDailyViews/24/3600
-	    var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
-
-	    var totalViewsString = addCommas(""+estimatedTotalViews);
-
-        </script>
         {% block pagescript %}
         {% endblock pagescript %}
 
@@ -231,16 +219,24 @@
     	})();
     	</script>
     	<!-- For ChartBeat analytics END -->
-    
-    	<!-- ChartBeat API - get # of users online now BEGIN -->
-    
-       <script type="text/javascript">
-    
+
+        {% if not is_mobile %}
+           <script type="text/javascript">
+                var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
+                var seedTotalViews = 28402468
+                var seedDailyViews = 100000;
+
+                var currentTime = new Date();
+                var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
+                var viewsPerSecond = seedDailyViews/24/3600
+                var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+
+                var totalViewsString = addCommas(""+estimatedTotalViews);
+
                 $('#page_num_visitors').append(totalViewsString);
                 $('#page_visitors').css('display', 'inline');
-    	</script>
-    
-    	<!-- ChartBeat API - get # of users online now END -->
+            </script>
+        {% endif %}
     
     </div>
     </div>
