@@ -57,11 +57,12 @@ class FlaggedFeedback(request_handler.RequestHandler):
         feedback_query = models_discussion.Feedback.all().filter("is_flagged = ", True).filter("deleted = ", False)
 
         feedback_count = feedback_query.count()
-        feedbacks = feedback_query.fetch(25)
+        feedbacks = feedback_query.fetch(50)
 
         template_content = {
                 "feedbacks": feedbacks, 
                 "feedback_count": feedback_count,
+                "has_more": len(feedbacks) < feedback_count,
                 "feedback_type_question": models_discussion.FeedbackType.Question,
                 "feedback_type_comment": models_discussion.FeedbackType.Comment,
                 }

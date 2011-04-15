@@ -44,7 +44,7 @@
 
 <article id="feedback">
 <p>
-    Posts in need of moderator attention: {{ feedback_count|escape }}
+    Showing top <strong>{{feedbacks|length}}</strong> of <strong>{{ feedback_count|escape }}</strong> posts in need of moderator attention.
 </p>
 
 {% if feedbacks %}
@@ -94,6 +94,10 @@
         </tr>
     {% endfor %}
     </table>
+{% endif %}
+
+{% if has_more %}
+    <br/><a href="/discussion/flaggedfeedback">Reload this page</a> to see the next set of posts waiting for moderator attention.
 {% endif %}
 
 </article>
