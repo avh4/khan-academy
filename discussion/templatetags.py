@@ -44,6 +44,10 @@ def mod_tools(target):
 def flag_tools(target):
     return {"target": target}
 
+@register.inclusion_tag(("../discussion/vote_tools.html", "discussion/vote_tools.html"))
+def vote_tools(target):
+    return {"target": target}
+
 @register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
 def author_tools(target):
     return {

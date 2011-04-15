@@ -43,6 +43,7 @@ class Feedback(db.Model):
     is_hidden_by_flags = db.BooleanProperty(default=False)
     flags = db.StringListProperty(default=None)
     flagged_by = db.StringListProperty(default=None)
+    sum_votes = db.IntegerProperty(default=0)
 
     def __init__(self, *args, **kwargs):
         db.Model.__init__(self, *args, **kwargs)
@@ -72,6 +73,10 @@ class Feedback(db.Model):
     def author_nickname(self):
         return get_nickname_for(self.author)
 
+    def add_vote_by(self, vote_type, user):
+        FeedbackVote.add_vote(self, vote_type, user)
+        self.sum_votes = FeedbackVote.count_votes(self)
+
     def add_flag_by(self, flag_type, user):
         if user.email() in self.flagged_by:
             return False
@@ -93,3 +98,43 @@ class Feedback(db.Model):
 class FeedbackNotification(db.Model):
     feedback = db.ReferenceProperty(Feedback)
     user = db.UserProperty()
+
+class FeedbackVote(db.Model):
+    ABSTAIN = 0
+    UP = 1
+    DOWN = 2
+
+    user = db.UserProperty()
+    vote_type = db.IntegerProperty(default=0)
+
+    @staticmethod
+    def add_vote(feedback, vote_type, user):
+        if not feedback:
+            return
+
+        vote = FeedbackVote.get_or_insert(
+                key_name = "vote_by_%s" % user.email(),
+                parent = feedback,
+                user = user,
+                vote_type = vote_type)
+
+        if vote and vote.vote_type != vote_type:
+            # If vote already existed and user has changed vote, update
+            vote.vote_type = vote_type
+            vote.put()
+
+    @staticmethod
+    def count_votes(feedback):
+        if not feedback:
+            return 0
+
+        query_up = FeedbackVote.all()
+        query_up.ancestor(feedback)
+        query_up.filter("vote_type = ", FeedbackVote.UP)
+
+        query_down = FeedbackVote.all()
+        query_down.ancestor(feedback)
+        query_down.filter("vote_type = ", FeedbackVote.DOWN)
+
+        return query_up.count() - query_down.count()
+

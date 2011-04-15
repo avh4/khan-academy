@@ -58,24 +58,13 @@ import activity_summary
 import exercises
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
-
-from discussion import comments
-from discussion import qa
-from discussion import notification
-
-from about import util_about
-from about import blog
-
+from discussion import comments, notification, qa, voting
+from about import blog, util_about
 from jobs import jobs
-
-from badges import util_badges
-from badges import last_action_cache
-
+from badges import util_badges, last_action_cache
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
-
 from topics_list import topics_list, all_topics_list, DVD_list
-
 from custom_exceptions import MissingVideoException, MissingExerciseException
         
 class VideoDataTest(request_handler.RequestHandler):
@@ -1923,6 +1912,7 @@ def real_main():
         ('/discussion/pagequestions', qa.PageQuestions),
         ('/discussion/clearflags', qa.ClearFlags),
         ('/discussion/flagentity', qa.FlagEntity),
+        ('/discussion/voteentity', voting.VoteEntity),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),

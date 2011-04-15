@@ -354,7 +354,7 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     badges = db.StringListProperty() # All awarded badges
     need_to_reassess = db.BooleanProperty()
-    points = db.IntegerProperty()
+    points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()

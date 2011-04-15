@@ -17,6 +17,7 @@ from util_discussion import is_honeypot_empty, is_current_user_moderator
 import app
 import util
 import request_handler
+import privileges
 
 class ModeratorList(request_handler.RequestHandler):
 
@@ -231,6 +232,20 @@ class EditEntity(request_handler.RequestHandler):
 
                         question = feedback.parent()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
+
+class VoteEntity(request_handler.RequestHandler):
+    def post(self):
+        # You have to be logged in to vote
+        user = util.get_current_user()
+        if not user:
+            return
+
+        key = self.request_string("entity_key", default="")
+        flag = self.request_string("flag", default="")
+        if key and models_discussion.FeedbackFlag.is_valid(flag):
+            entity = db.get(key)
+            if entity and entity.add_flag_by(flag, user):
+                entity.put()
 
 class FlagEntity(request_handler.RequestHandler):
     def post(self):
