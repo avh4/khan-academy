@@ -29,3 +29,11 @@ h2.featured-videos, .desktop-only { display: none; }
 #mobile-homepage {
     text-align: center;
 }
+
+#mobile-logo {
+    width: 90%;
+    position: relative;
+    left: -12px;
+}
+
+h2.main-headline { text-align: center; }
