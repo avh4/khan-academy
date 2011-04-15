@@ -174,11 +174,6 @@
                 </div>
                 <div id="sitewide-navigation" class="action-gradient">
                     <nav>
-                      {% if is_mobile %}
-                      <span class="switch-mobile">
-                        <a href="/mobilesite">Mobile Site</a>
-                      </span>
-                      {% endif %}
                       <span class="links">
                           <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected watch-link"{% endifequal %}>Watch</a>
                         <a href="/exercisedashboard" {% ifequal selected_nav_link "practice" %}class="selected practice-link"{% endifequal %}>Practice</a>
