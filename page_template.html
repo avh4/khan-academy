@@ -24,7 +24,7 @@
         <meta property="og:url" content="http://www.khanacademy.org"/>
         <meta property="og:image" content="http://www.khanacademy.org/images/handtreehorizontal_facebook.png"/>
         <meta property="og:site_name" content="khanacademy.org"/>
-        <meta property="fb:admins" content="100000121497109,718859633"/> {# That's Sal and Dean #}
+        <meta property="fb:admins" content="100000121497109,1305017"/> {# Sal/Ben #}
         <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
         <meta property="og:description"
               content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 2100+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
@@ -32,9 +32,15 @@
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
 
         <script>var KA_VERSION = '{{ App.version }}';</script>
-        {% shared_css %}
+
+        {% if not is_mobile %}
+            {% shared_css %}
+        {% endif %}
+
         {% shared_javascript %}
+
         {% if is_mobile %}
+            {% mobile_css %}
             {% mobile_javascript %}
         {% endif %}
 
