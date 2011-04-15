@@ -247,19 +247,19 @@ function graph_update() {
 }
 
 function draw_next_step() {
-	if (steps_given==0) // approaching from the left
+	if (Exercise.steps_given==0) // approaching from the left
 	{
 		present.stroke = "orange";
 		present.marker = "arrow";
 		if (a > 0) present.line([0, 0], [a, 0]);
 		else present.line([a + a, 0], [a, 0]);
 	}
-	if (steps_given==1) // looks like it's approaching y
+	if (Exercise.steps_given==1) // looks like it's approaching y
 	{
 		present.stroke = "purple";
 		present.line([a, 0], [a, l_limtoa]);
 	}
-	if (steps_given==2) // approaching from the right
+	if (Exercise.steps_given==2) // approaching from the right
 	{
 		present.stroke = "green";
 		present.marker = "arrow";

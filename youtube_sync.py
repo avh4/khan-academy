@@ -44,6 +44,7 @@ class YouTubeSync(request_handler.RequestHandler):
             self.response.out.write("Latest sync logs:<br/><br/>")
             for sync_log in latest_logs:
                 self.response.out.write("Step: %s, Generation: %s, Date: %s<br/>" % (sync_log.step, sync_log.generation, sync_log.dt))
+            self.response.out.write("<br/><a href='/admin/youtubesync?start=1'>Start New Sync</a>")
 
     def post(self):
         # Protected for admins only by app.yaml so taskqueue can hit this URL

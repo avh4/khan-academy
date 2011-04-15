@@ -1,0 +1,3 @@
+<div id="simple-student-info">
+    <span class="member-for">Member for: {{ member_for }}</span>. <span class="coached-by">{% if first_coach %}Coached by: {{ first_coach }}{% if additional_coaches %} and {{additional_coaches}} more.{% endif %} (<a href="/coaches" class="simple-link">Add/Remove</a>){% else %}<a href="/coaches">Add a coach</a>{% endif %}</span>
+</div>

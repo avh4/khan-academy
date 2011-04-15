@@ -1,7 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
+from app import App
 from nicknames import get_nickname_for
 
 class FeedbackType:
@@ -45,9 +47,17 @@ class Feedback(db.Model):
     flagged_by = db.StringListProperty(default=None)
     sum_votes = db.IntegerProperty(default=0)
 
+    @staticmethod
+    def memcache_key_for_video(video):
+        return "video_feedback_%s" % video.key()
+
     def __init__(self, *args, **kwargs):
         db.Model.__init__(self, *args, **kwargs)
         self.children_cache = [] # For caching each question's answers during render
+
+    def put(self):
+        memcache.delete(Feedback.memcache_key_for_video(self.first_target()), namespace=App.version)
+        db.Model.put(self)
 
     def is_type(self, type):
         return type in self.types

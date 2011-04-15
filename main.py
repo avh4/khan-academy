@@ -33,10 +33,10 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-import qbrary
 import bulk_update.handler
 import facebook
 import layer_cache
+import request_cache
 import autocomplete
 import coaches
 import api
@@ -66,6 +66,9 @@ from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
 from custom_exceptions import MissingVideoException, MissingExerciseException
+from render import render_block_to_string
+from templatetags import streak_bar, exercise_message, exercise_icon, user_points
+from badges.templatetags import badge_notifications, badge_counts
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -242,19 +245,15 @@ class ViewExercise(request_handler.RequestHandler):
                     
             exercise_videos = exercise_non_summative.related_videos_fetch()
 
-            proficient = exercise.proficient = user_data.is_proficient_at(exid)
-            suggested = exercise.suggested = user_data.is_suggested(exid)
-            reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
-            struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-            endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+            exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                    
             # Note: if they just need a single problem for review they can just print this page.
             num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
             
             # If the user is proficient, assume they want to print a bunch of practice problems.
-            if proficient:
+            if exercise_states['proficient']:
                 num_problems_to_print = exercise.required_streak()
 
             if exercise.summative:
@@ -271,11 +270,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'points': user_data.points,
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
-                'proficient': proficient,
-                'endangered': endangered,
-                'reviewing': reviewing,
-                'struggling': struggling,
-                'suggested': suggested,
+                'exercise_states': exercise_states,
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': user_exercise.key(),
                 'exercise': exercise,
@@ -294,14 +289,10 @@ class ViewExercise(request_handler.RequestHandler):
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
             template_file = exercise_non_summative.name + '.html'
-            if not exercise.summative and exercise.raw_html is not None:
-                exercise.ensure_sanitized()
-                template_file = 'caja_template.html'
-
             self.render_template(template_file, template_values)
         else:
-
             self.redirect(util.create_login_url(self.request.uri))
+            
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
@@ -455,13 +446,17 @@ class LogVideoProgress(request_handler.RequestHandler):
     def get(self):
 
         user = util.get_current_user()
+        user_data = None
         video_points_total = 0
         points_total = 0
 
         if user:
 
-            video_key = self.request.get("video_key")
-            video = db.get(video_key)
+            video = None
+            video_key = self.request_string("video_key", default = "")
+
+            if video_key:
+                video = db.get(video_key)
 
             if video:
 
@@ -558,9 +553,10 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 db.put([user_video, video_log, user_data])
 
-                points_total = user_data.points
-
-        json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
 class PrintProblem(request_handler.RequestHandler):
@@ -805,6 +801,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
     def get(self):
         exid = self.request_string('exid')
+        time_warp = self.request_string('time_warp')
         user = util.get_current_user()
         if user:
             key = self.request_string('key')
@@ -888,7 +885,11 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
 
-            self.redirect("/exercises?exid=%s" % exid)
+            if not self.is_ajax_request():
+                self.redirect("/exercises?exid=%s" % exid)
+            else:
+                self.send_json(user_data, user_exercise, exercise, key, time_warp)
+            
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)
@@ -896,6 +897,54 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+        
+    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        
+        streak_bar_context = streak_bar(user_exercise)
+        streak_bar_html = self.render_template_to_string("streak_bar", streak_bar_context)
+        
+        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
+        exercise_message_html = self.render_template_to_string("exercise_message", exercise_message_context)
+        
+        exercise_icon_context = exercise_icon(exercise, App)
+        exercise_icon_html = self.render_template_to_string("exercise_icon", exercise_icon_context)
+        
+        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
+        badge_count_context = badge_counts(user_data)
+        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
+        
+        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
+        badge_notification_context = badge_notifications()
+        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
+        
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        updated_values = {
+            'exercise_states': exercise_states,
+            'exercise_points':  exercise_points,
+            'key': key,
+            'start_time': time.time(),
+            'streak': user_exercise.streak,
+            'time_warp': time_warp,
+            'problem_number': user_exercise.total_done + 1,
+            'streak_bar_html': streak_bar_html,
+            'exercise_message_html': exercise_message_html,
+            'exercise_icon_html': exercise_icon_html,
+            'badge_count_html': badge_count_html,
+            'badge_notification_html': badge_notification_html,
+            'user_points_html': user_points_html
+            }
+            
+            #
+            #    'exercise_non_summative': exercise_non_summative,
+            #    'read_only': read_only,
+            #    'num_problems_to_print': num_problems_to_print,
+            #
+        json = simplejson.dumps(updated_values)
+        self.response.out.write(json)
 
 class RegisterCorrectness(request_handler.RequestHandler):
 
@@ -1834,12 +1883,16 @@ def real_main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
 
         ('/coaches', coaches.ViewCoaches),
-        ('/registercoach', coaches.RegisterCoach),  
-        ('/unregistercoach', coaches.UnregisterCoach),          
+        ('/students', coaches.ViewStudents), 
+        ('/registercoach', coaches.RegisterCoach),
+        ('/unregistercoach', coaches.UnregisterCoach),
+        ('/unregisterstudent', coaches.UnregisterStudent),
+        ('/requeststudent', coaches.RequestStudent),
+        ('/acceptcoach', coaches.AcceptCoach),
+
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        
         ('/sharedpoints', coaches.ViewSharedPoints),        
-        ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
@@ -1877,29 +1930,6 @@ def real_main():
         ('/deletevideoplaylists', DeleteVideoPlaylists), 
         ('/killliveassociations', KillLiveAssociations),
 
-        # Below are all qbrary related pages
-        ('/qbrary', qbrary.IntroPage),
-        ('/worldhistory', qbrary.IntroPage),
-        ('/managequestions', qbrary.ManageQuestions),
-        ('/subjectmanager', qbrary.SubjectManager),
-        ('/editsubject', qbrary.CreateEditSubject),
-        ('/viewsubject', qbrary.ViewSubject),
-        ('/deletequestion', qbrary.DeleteQuestion),
-        ('/deletesubject', qbrary.DeleteSubject),
-        ('/changepublished', qbrary.ChangePublished),
-        ('/pickquestiontopic', qbrary.PickQuestionTopic),
-        ('/pickquiztopic', qbrary.PickQuizTopic),
-        ('/answerquestion', qbrary.AnswerQuestion),
-        ('/previewquestion', qbrary.PreviewQuestion),
-        ('/rating', qbrary.Rating),
-        ('/viewquestion', qbrary.ViewQuestion),
-        ('/editquestion', qbrary.CreateEditQuestion),
-        ('/addquestion', qbrary.CreateEditQuestion),
-        ('/checkanswer', qbrary.CheckAnswer),
-        ('/sessionaction', qbrary.SessionAction),
-        ('/flagquestion', qbrary.FlagQuestion),
-        ('/viewauthors', qbrary.ViewAuthors),
-
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),
         ('/discussion/pagecomments', comments.PageComments),
@@ -1933,7 +1963,7 @@ def real_main():
 
         ], debug=True)
 
-    application = util.CurrentUserMiddleware(application)
+    application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
 

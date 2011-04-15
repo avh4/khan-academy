@@ -3,6 +3,7 @@
 {% block maincell %}
 <script src="/javascript/exercises/angle_types.js?{{App.version}}"></script>
 <script>
+    Exercise.fAddNoneOfThese = false;
     var exercise = new AngleTypesExercise();
 
     function graph_update() {

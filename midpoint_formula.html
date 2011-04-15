@@ -73,16 +73,16 @@ funcTypes[0] = function() {
 	}
 	
 	draw_next_step = function() {
-		if (steps_given==1) // average x
+		if (Exercise.steps_given==1) // average x
 		{
 			present.stroke = color[3];
 			present.line([x[3], -10], [x[3], 10]);
 		}
-		if (steps_given==3) // average y
+		if (Exercise.steps_given==3) // average y
 		{
 			present.line([-10, y[3]], [10, y[3]]);
 		}
-		if (steps_given==4) // midpoint
+		if (Exercise.steps_given==4) // midpoint
 		{
 			graphPoint(3);
 		}
@@ -125,16 +125,16 @@ funcTypes[1] = function() {
 	}
 	
 	draw_next_step = function() {
-		if (steps_given==1) // otherpt x
+		if (Exercise.steps_given==1) // otherpt x
 		{
 			present.stroke = color[unknown];
 			present.line([x[unknown], -10], [x[unknown], 10]);
 		}
-		if (steps_given==3) // otherpt y
+		if (Exercise.steps_given==3) // otherpt y
 		{
 			present.line([-10, y[unknown]], [10, y[unknown]]);
 		}
-		if (steps_given==4)
+		if (Exercise.steps_given==4)
 		{
 			graphPoint(unknown);
 		}

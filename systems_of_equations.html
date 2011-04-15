@@ -163,8 +163,8 @@ function push_fractions_other_than(num, den, varName, results, count) {
 }
 
 //Fill in the choices
-push_fractions_other_than(intersection[0], intersection[1], "x", possibleAnswers, 5);
-push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers2, 5);
+push_fractions_other_than(intersection[0], intersection[1], "x", Exercise.possibleAnswers, 5);
+push_fractions_other_than(intersection[2], intersection[3], "y", Exercise.possibleAnswers2, 5);
 
 //-->
 </script>
@@ -179,34 +179,58 @@ push_fractions_other_than(intersection[2], intersection[3], "y", possibleAnswers
 	// - 2 sets of choices (x and y each have 5)
 
 	//randomly determine which choice will be the correct choice, the math is funky to ensure an equal probability of being any number from 0-4 inclusive
-	correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
-	correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
 	
-	
+    function check_both_answers()
+    {
+    	if (Exercise.selectedchoice === undefined || Exercise.selectedchoice2 === undefined) 
+    	{
+    			window.alert("Please choose both answers.");
+    			return;
+    	}
+
+    	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice  && Exercise.selectedchoice2==Exercise.correctchoice2);
+    	handleCorrectness(isCorrect);
+    }
+    
+    function select_choice(choice)
+    {
+    	Exercise.selectedchoice = choice;
+    }
+
+    function select_choice2(choice)
+    {
+    	Exercise.selectedchoice2 = choice;
+    }
+        
+	Exercise.correctchoice = Math.round(KhanAcademy.random()*4.98-.49);
+	Exercise.correctchoice2 = Math.round(KhanAcademy.random()*4.98-.49); //every variable with a 2 is for the second set of choices
+
+    var answerChoices = new Array(5);
+    var answerChoices2 = new Array(5);	
 	//Fill in the choices
 	//need to fix it so that the other choices can never be the same as the correct choice
     var numChoices=5;
 	for (var i=0; i<numChoices; i++)
 	{
-		if (i==correctchoice) 
+		if (i==Exercise.correctchoice) 
 		{
 			answerChoices[i]=correct_answer;
 		}
 		else
 		{
 			
-			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers.length-.02)-.49); //where to pick the new wrong choice
-			var new_wrong_choice = possibleAnswers.splice(new_index, 1)[0]
+			var new_index = Math.round(KhanAcademy.random()*(Exercise.getNumPossibleAnswers() -.02)-.49); //where to pick the new wrong choice
+			var new_wrong_choice = Exercise.possibleAnswers.splice(new_index, 1)[0]
 			answerChoices[i]='`'+new_wrong_choice+'`';
 		}
-		if (i==correctchoice2) 
+		if (i==Exercise.correctchoice2) 
 		{
 			answerChoices2[i]=correct_answer2;
 		}
 		else
 		{
-			var new_index = Math.round(KhanAcademy.random()*(possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
-			var new_wrong_choice = possibleAnswers2.splice(new_index, 1)[0]
+			var new_index = Math.round(KhanAcademy.random()*(Exercise.possibleAnswers2.length-.02)-.49); //where to pick the new wrong choice
+			var new_wrong_choice = Exercise.possibleAnswers2.splice(new_index, 1)[0]
 			answerChoices2[i]='`'+new_wrong_choice+'`';
 		}
 

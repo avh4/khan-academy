@@ -852,21 +852,21 @@ function writeGraphicalHint(hint, stuffToDraw)
 {
 	if (stuffToDraw!=null)
 	{
-		graphicalHints[next_step_to_write] = stuffToDraw;
+		graphicalHints[Exercise.next_step_to_write] = stuffToDraw;
 	}
 	writeStep(hint);
 }
 
 function give_next_step() {
 	
-	var justDrawn = graphicalHints[steps_given];
+	var justDrawn = graphicalHints[Exercise.steps_given];
 	if (justDrawn)
 	{
 		for(var k=0; k<justDrawn.length; k++)
 			justDrawn[k].draw();
 	}
-	steps_given++;
-	var toDraw = graphicalHints[steps_given];
+	Exercise.steps_given++;
+	var toDraw = graphicalHints[Exercise.steps_given];
 	if (toDraw)
 	{
 		for(var k=0; k<toDraw.length; k++)
@@ -883,7 +883,7 @@ function give_next_step() {
 
 function show_step() 
 {
-    $(".step" + steps_given).css("visibility", "visible");
+    $(".step" + Exercise.steps_given).css("visibility", "visible");
 }
 
 function randomRotation()

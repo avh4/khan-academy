@@ -28,12 +28,10 @@
     Your coach will give you their coach id. Enter it here to give them access to your Khan Academy data.
 </p>
 
-<p>
 <form action="/registercoach" method="post">
 <input type="text" name="coach">
 <input type="submit" value="Add coach" class="simple-button action-gradient">
 </form>
-</p>
 
 {% if invalid_coach %}
 <p><span style="color:red;font-weight:bold;">We can't find this coach.</span></p>
@@ -46,6 +44,7 @@
 
 {% if coaches %}
 
+    <br/><br/>
     <h2>Your coaches</h2>
 
     <table>
@@ -62,5 +61,26 @@
     </table>
 {% endif %}
 
+{% if coach_requests %}
+    <h2 class="section-headline">New coaches are waiting</h2>
+
+    <p>These coaches have requested you as their student. <strong>If you accept them as your coach, they will have access to your Khan Academy data</strong>.</p>
+
+    <table>
+    {% for coach_request in coach_requests %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach_request.coach_requesting.email|escape }}</td>
+                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
+                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+<h2 class="section-headline">Your Student ID</h2>
+<p>If your coach asks for your student id, it is: {{student_id|escape}}</p>
 </article>
 {% endblock pagecontent %}

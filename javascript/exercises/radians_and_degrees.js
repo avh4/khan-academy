@@ -95,7 +95,7 @@ function DegreesToRadiansExercise() {
             write_text("Convert `" + degree + "&#176;` into radians. Round to the nearest hundredth.");
             
             answer = roundToHundredth(degree * Math.PI / 180);
-            while (getNumPossibleAnswers() < 3) {
+            while (Exercise.getNumPossibleAnswers() < 3) {
                 var offset = getRandomIntRange(10, 35) / 100;
                 if (getRandomIntRange(0, 1))
                     offset *= -1;

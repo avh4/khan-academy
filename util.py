@@ -2,6 +2,7 @@ import datetime
 import math
 import urllib
 import logging
+import request_cache
 
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
@@ -9,34 +10,12 @@ from django.template.defaultfilters import pluralize
 import nicknames
 import facebook_util
 
-_loaded_current_user = False
-_cached_current_user = None
-
-class CurrentUserMiddleware(object):
-    def __init__(self, app):
-        self.app = app    
-
-    def __call__(self, environ, start_response):
-        global _loaded_current_user, _cached_current_user
-
-        _loaded_current_user = False
-        _cached_current_user = None
-
-        return self.app(environ, start_response)
-
+@request_cache.cache_with_key("get_current_user")
 def get_current_user():
-    global _loaded_current_user, _cached_current_user
-
-    if not _loaded_current_user:
-        user = users.get_current_user()
-
-        if not user:
-            user = facebook_util.get_current_facebook_user()
-
-        _loaded_current_user = True
-        _cached_current_user = user
-
-    return _cached_current_user
+    user = users.get_current_user()
+    if not user:
+        user = facebook_util.get_current_facebook_user()
+    return user
 
 def get_nickname_for(user):
     return nicknames.get_nickname_for(user)
@@ -60,7 +39,7 @@ def seconds_between(dt1, dt2):
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
 
-def seconds_to_time_string(seconds_init, short_display = True):
+def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
 
     seconds = seconds_init
 
@@ -80,7 +59,7 @@ def seconds_to_time_string(seconds_init, short_display = True):
         return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
     elif years:
         return "%d year%s" % (years, pluralize(years))
-    elif days and hours:
+    elif days and hours and show_hours:
         return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
         return "%d day%s" % (days, pluralize(days))

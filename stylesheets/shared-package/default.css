@@ -101,6 +101,10 @@ p { font-size: 15px; margin: 18px 0;}
 
 b, strong { font-weight: bold; }
 em { font-style: italic; }
+
+a.simple-link { text-decoration: none; }
+a.simple-link:hover { text-decoration: underline; }
+
 hr {
     background: #CCC;
     border: none;
@@ -642,7 +646,7 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    #social-links a {
+    #top-header #social-links a {
         margin-right: 0;
         display: inline-block;
         height: 24px;
@@ -651,15 +655,15 @@ footer {
         *position: static;
         top: 7px;
     }
-    #social-links .youtube {
+    #top-header #social-links .youtube {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -67px;
     }
-    #social-links .twitter {
+    #top-header #social-links .twitter {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -111px;
     }
-    #social-links .facebook {
+    #top-header #social-links .facebook {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -155px;
     }
@@ -1629,6 +1633,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border-bottom: 1px solid #aaa;
         color: #333;
         margin-bottom: 10px;
+        overflow-x: auto;
         padding: 10px;
         position: relative;
         z-index: 10;

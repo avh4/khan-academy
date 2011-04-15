@@ -1,0 +1,96 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#students {
+    padding: 18px 23px;
+}
+#students p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+#students td {
+    padding: 9px;
+}
+#students tr.even_row td {
+    background-color:#FFFFFF;
+}
+#students tr.odd_row td {
+    background-color:#EFEFEF;
+}
+</style>
+{% endblock pagescript %}
+{% block pagetitle %}Students{% endblock pagetitle %}
+{% block pagecontent %}
+
+<article id="students">
+<h2>Adding a student</h2>
+
+<h5>Option 1: Students can add you as their coach</h5>
+<p><a href="" onclick="$('.add_students_instructions').slideDown('fast'); return false;">Click here for instructions</a>.</p>
+<div style="display:none;" class="add_students_instructions">
+    {% empty_class_instructions 0 %}
+</div>
+
+<h5>Option 2: Request a student</h5>
+<p>
+    Enter your student's student id. This will send them a coaching request which, once approved, will give you access to their Khan Academy data.
+</p>
+
+<form action="/requeststudent" method="post">
+<input type="text" name="student_email">
+<input type="submit" value="Request student" class="simple-button action-gradient">
+</form>
+
+{% if invalid_student %}
+
+    <p><span style="color:red;font-weight:bold;">We can't find this student.</span></p>
+
+    <p style="padding-left:18px;">
+        Make sure you're entering the student's full student id, which looks like <strong>student@gmail.com</strong> or <strong>http://facebookid.khanacademy.org/1067499349</strong>. A student can find their student id by signing in and going to <a href="/coaches">http://www.khanacademy.org/coaches/</a><br/>
+    </p>
+
+{% endif %}
+
+{% if coach_requests %}
+
+    <br/><br/>
+    <h2>Pending coach requests</h2>
+
+    <p>These students need to accept you as their coach from the "Add a coach" screen.</p>
+
+    <table>
+    {% for coach_request in coach_requests %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach_request.student_requested.email|escape }}</td>
+                <td><em>Request pending</em></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+{% if student_emails %}
+
+    <br/>
+    <h2>Your students</h2>
+
+    <table>
+    {% for student_email in student_emails %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ student_email|escape }}</td>
+                <td><a href="/unregisterstudent?student_email={{ student_email|urlencode|escape }}" class="simple-button action-gradient">Remove student</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+</article>
+{% endblock pagecontent %}
+
