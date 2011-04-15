@@ -110,17 +110,17 @@ class RequestHandler(webapp.RequestHandler):
     def user_agent(self):
         return str(self.request.headers['User-Agent'])
 
-    def is_mobile(self):
+    def is_mobile_capable(self):
         user_agent_lower = self.user_agent().lower()
-        is_mobile_device = user_agent_lower.find("ipod") > -1 or \
+        return user_agent_lower.find("ipod") > -1 or \
                 user_agent_lower.find("ipad") > -1 or \
                 user_agent_lower.find("iphone") > -1 or \
                 user_agent_lower.find("webos") > -1 or \
                 user_agent_lower.find("android") > -1
 
-        if is_mobile_device:
+    def is_mobile(self):
+        if self.is_mobile_capable():
             return not self.has_mobile_full_site_cookie()
-
         return False
 
     def has_mobile_full_site_cookie(self):
@@ -196,6 +196,7 @@ class RequestHandler(webapp.RequestHandler):
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
         template_values['is_mobile'] = self.is_mobile()
+        template_values['is_mobile_capable'] = self.is_mobile_capable()
 
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
