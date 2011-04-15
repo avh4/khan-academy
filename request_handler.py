@@ -112,11 +112,39 @@ class RequestHandler(webapp.RequestHandler):
 
     def is_mobile(self):
         user_agent_lower = self.user_agent().lower()
-        return user_agent_lower.find("ipod") > -1 or \
+        is_mobile_device = user_agent_lower.find("ipod") > -1 or \
                 user_agent_lower.find("ipad") > -1 or \
                 user_agent_lower.find("iphone") > -1 or \
                 user_agent_lower.find("webos") > -1 or \
                 user_agent_lower.find("android") > -1
+
+        if is_mobile_device:
+            return not self.has_mobile_full_site_cookie()
+
+        return False
+
+    def has_mobile_full_site_cookie(self):
+        return self.get_cookie_value("mobile_full_site") == "1"
+
+    def set_mobile_full_site_cookie(self, is_mobile):
+        self.set_cookie("mobile_full_site", "1" if is_mobile else "0")
+
+    def get_cookie_value(self, key):
+        cookies = None
+        try:
+            cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+        except Cookie.CookieError, error:
+            logging.debug("Ignoring Cookie Error, skipping get cookie: '%s'" % error)
+
+        if not cookies:
+            return None
+
+        cookie = cookies.get(key)
+
+        if not cookie:
+            return None
+
+        return cookie.value
 
     # Cookie handling from http://appengine-cookbook.appspot.com/recipe/a-simple-cookie-class/
     def set_cookie(self, key, value='', max_age=None,
