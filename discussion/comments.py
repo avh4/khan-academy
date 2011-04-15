@@ -13,6 +13,7 @@ import util_discussion
 import app
 import util
 import request_handler
+import voting
 
 class PageComments(request_handler.RequestHandler):
 
@@ -74,6 +75,8 @@ class AddComment(request_handler.RequestHandler):
 
 def video_comments_context(video, playlist, page=0, comments_hidden=True):
 
+    user = util.get_current_user()
+
     if page > 0:
         comments_hidden = False # Never hide questions if specifying specific page
     else:
@@ -87,10 +90,14 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
     count_total = len(comments)
     comments = comments[((page - 1) * limit_per_page):(page * limit_per_page)]
 
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+    for comment in comments:
+        voting.add_vote_expando_properties(comment, dict_votes)
+
     count_page = len(comments)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": util.get_current_user(),
+            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,

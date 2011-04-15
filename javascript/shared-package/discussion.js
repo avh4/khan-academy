@@ -54,6 +54,31 @@ var Discussion = {
     }
 };
 
+var Voting = {
+
+    init: function() {
+        $(".vote_for").live("click", Voting.voteEntity);
+    },
+
+    voteEntity: function() {
+        var jel = $(this);
+
+        var vote_type = jel.attr("data-vote_type");
+        if (!vote_type) return;
+
+        var key = jel.attr("data-key");
+        if (!key) return false;
+
+        $.post("/discussion/voteentity", {
+            entity_key: key,
+            vote_type: vote_type
+        });
+
+        return false;
+    }
+
+};
+
 var Moderation = {
 
     init: function() {
@@ -583,10 +608,11 @@ var Comments = {
 
 };
 
-$(document).ready(Discussion.init);
-$(document).ready(Comments.init);
-$(document).ready(QA.init);
-$(document).ready(Moderation.init);
+$(Discussion.init);
+$(Comments.init);
+$(QA.init);
+$(Moderation.init);
+$(Voting.init);
 
 // Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
 // we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm

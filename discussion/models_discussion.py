@@ -5,6 +5,7 @@ from google.appengine.api import memcache
 
 from app import App
 from nicknames import get_nickname_for
+import request_cache
 
 class FeedbackType:
     Question="question"
@@ -75,9 +76,15 @@ class Feedback(db.Model):
         keys.filter("targets = ", self.key())
         return keys
 
-    def first_target(self):
+    def first_target_key(self):
         if self.targets:
-            return db.get(self.targets[0])
+            return self.targets[0]
+        return None
+
+    def first_target(self):
+        target_key = self.first_target_key()
+        if target_key:
+            return db.get(target_key)
         return None
 
     def author_nickname(self):
@@ -86,6 +93,7 @@ class Feedback(db.Model):
     def add_vote_by(self, vote_type, user):
         FeedbackVote.add_vote(self, vote_type, user)
         self.sum_votes = FeedbackVote.count_votes(self)
+        return True
 
     def add_flag_by(self, flag_type, user):
         if user.email() in self.flagged_by:
@@ -114,6 +122,8 @@ class FeedbackVote(db.Model):
     UP = 1
     DOWN = 2
 
+    feedback = db.ReferenceProperty(Feedback)
+    video = db.ReferenceProperty()
     user = db.UserProperty()
     vote_type = db.IntegerProperty(default=0)
 
@@ -123,8 +133,9 @@ class FeedbackVote(db.Model):
             return
 
         vote = FeedbackVote.get_or_insert(
-                key_name = "vote_by_%s" % user.email(),
-                parent = feedback,
+                key_name = "by_%s_for_%s" % (user.email(), feedback.key()),
+                feedback = feedback,
+                video = feedback.first_target_key(),
                 user = user,
                 vote_type = vote_type)
 
@@ -134,17 +145,38 @@ class FeedbackVote(db.Model):
             vote.put()
 
     @staticmethod
+    @request_cache.cache_with_key_fxn(lambda user, video: "voting_dict_for_%s" % video.key())
+    def get_dict_for_user_and_video(user, video):
+        query = FeedbackVote.all()
+        query.filter("user =", user)
+        query.filter("video =", video)
+        votes = query.fetch(1000)
+
+        dict = {}
+        for vote in votes:
+            dict[vote.key_for_feedback()] = vote
+
+        return dict
+
+    @staticmethod
     def count_votes(feedback):
         if not feedback:
             return 0
 
-        query_up = FeedbackVote.all()
-        query_up.ancestor(feedback)
-        query_up.filter("vote_type = ", FeedbackVote.UP)
+        query = FeedbackVote.all()
+        query.filter("feedback =", feedback)
+        votes = query.fetch(100000)
 
-        query_down = FeedbackVote.all()
-        query_down.ancestor(feedback)
-        query_down.filter("vote_type = ", FeedbackVote.DOWN)
+        count_up = len(filter(lambda vote: vote.is_up(), votes))
+        count_down = len(filter(lambda vote: vote.is_down(), votes))
 
-        return query_up.count() - query_down.count()
+        return count_up - count_down
 
+    def is_up(self):
+        return self.vote_type == FeedbackVote.UP
+
+    def is_down(self):
+        return self.vote_type == FeedbackVote.DOWN
+
+    def key_for_feedback(self):
+        return FeedbackVote.feedback.get_value_for_datastore(self)

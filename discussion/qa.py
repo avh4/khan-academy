@@ -10,15 +10,17 @@ from mapreduce import operation as op
 
 from django.utils import simplejson
 from collections import defaultdict
+
+from render import render_block_to_string
 import models
 import models_discussion
 import notification
-from render import render_block_to_string
 import util_discussion
 import app
 import util
 import request_handler
 import privileges
+import voting
 
 class ModeratorList(request_handler.RequestHandler):
 
@@ -329,6 +331,7 @@ class DeleteEntity(request_handler.RequestHandler):
 def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
 
     limit_per_page = 5
+    user = util.get_current_user()
 
     if qa_expand_id:
         # If we're showing an initially expanded question,
@@ -347,12 +350,15 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
             util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer), 
             key=lambda feedback: feedback.date)
 
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+
     count_total = len(questions)
     questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]
 
     dict_questions = {}
     # Store each question in this page in a dict for answer population
     for question in questions:
+        voting.add_vote_expando_properties(question, dict_votes)
         dict_questions[question.key()] = question
 
     # Just grab all answers for this video and cache in page's questions
@@ -361,12 +367,13 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         question_key = answer.parent_key()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
+            voting.add_vote_expando_properties(answer, dict_votes)
             question.children_cache.append(answer)
 
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": util.get_current_user(),
+            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,

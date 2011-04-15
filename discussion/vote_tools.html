@@ -1,0 +1,23 @@
+<span class="vote_tools">
+    <span class="control vote_tools_show">
+        {% if target.up_voted %}
+        <strong>
+        {% endif %}
+        <a href="#" class="control vote_for" data-key="{{ target.key|escape }}" data-vote_type="1">Up</a>
+        {% if target.up_voted %}
+        </strong>
+        {% endif %}
+        | 
+        {{ target.sum_votes }}
+        | 
+        {% if target.down_voted %}
+        <strong>
+        {% endif %}
+        <a href="#" class="control vote_for" data-key="{{ target.key|escape }}" data-vote_type="2">Down</a>
+        {% if target.down_voted %}
+        </strong>
+        {% endif %}
+    </span>
+</span>
+
+
