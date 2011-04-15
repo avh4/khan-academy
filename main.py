@@ -1362,6 +1362,16 @@ class SendToLog(request_handler.RequestHandler):
         message = self.request_string("message", default="")
         if message:
             logging.critical("Manually sent to log: %s" % message)
+
+class MobileFullSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(True)
+        self.redirect("/")
+
+class MobileSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(False)
+        self.redirect("/")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1877,6 +1887,9 @@ def real_main():
         ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
         ('/showunusedplaylists', ShowUnusedPlaylists),
         ('/crash', Crash),
+
+        ('/mobilefullsite', MobileFullSite),
+        ('/mobilesite', MobileSite),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),

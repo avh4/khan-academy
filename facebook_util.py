@@ -98,7 +98,7 @@ def get_facebook_profile():
     try:
         cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
     except Cookie.CookieError, error:
-        logging.critical("Ignoring Cookie Error, skipping Facebook login: '%s'" % error)
+        logging.debug("Ignoring Cookie Error, skipping Facebook login: '%s'" % error)
 
     if cookies is None:
         return None
