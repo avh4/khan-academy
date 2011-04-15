@@ -66,8 +66,15 @@
 <hr class="desktop-only">
 
 <div data-role="page">
-    <div class="mobile-only" data-role="header"><h1>Khan Academy</h1></div>
     <div data-role="content">
+        <div id="mobile-homepage" class="mobile-only">
+            <img src="/images/logo-no-highlight.png" />
+            <span id="page_visitors">
+                    <span id="page_num_visitors">
+                        <!-- Content will get populated by javacript at end of page -->
+                    </span>&nbsp;lessons delivered
+            </span>
+        </div>
         <h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
         {% if DVD_list %}
         <ul class="menu" id="menu">

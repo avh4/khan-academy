@@ -17,4 +17,15 @@ h2.featured-videos, .desktop-only { display: none; }
 .video #description { text-align: center; }
 
 .youtube-video { margin: 0 auto; text-align: center; }
-.youtube-video object { width: 90% !important; height: 80% !important; }
+.youtube-video object { width: 90% !important; height: 67% !important; max-height: 300px; }
+
+#page_visitors {
+    font-weight: normal;
+    font-family: Georgia;
+    display: none; /* hidden until AJAX call to chartbeat gets the number */
+    text-decoration: none;
+}
+
+#mobile-homepage {
+    text-align: center;
+}
