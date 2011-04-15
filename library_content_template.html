@@ -8,7 +8,9 @@
             {% endif %}
             <div data-role="page" id="{{ playlist_data.title|slugify|escape }}">
                 <div data-role="header">
+                    <a href="#" data-rel="back" data-icon="arrow-l" class="mobile-only">Back</a>
                     <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
+                    <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="mobile-only"></a>
                 </div>
                 <div data-role="content">
                     <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>

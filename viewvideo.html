@@ -184,7 +184,11 @@ $(function(){
 {% block pagecontent %}
 <div id="video-page">
 <article class="video" data-role="page">
-    <div data-role="header" class="mobile-only"><h1>{{video.title|escape}}</h1></div>
+    <div data-role="header" class="mobile-only">
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <h1>{{video.title|escape}}</h1>
+        <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse"></a>
+    </div>
     <div data-role="content">
         <div id="description">
             <h3>
