@@ -204,6 +204,9 @@ def mobile_javascript():
 @register.inclusion_tag(("shared_css.html", "../shared_css.html"))
 def shared_css():
     return {'App': App}
+@register.inclusion_tag(("mobile_css.html", "../mobile_css.html"))
+def mobile_css():
+    return {'App': App}
 
 @register.inclusion_tag(("playlist_browser.html", "../playlist_browser.html"))
 def playlist_browser(browser_id):

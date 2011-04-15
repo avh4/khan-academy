@@ -2,22 +2,19 @@ var Exercise = {
     fWriteToDoc: true,
     fSupportsAjax: false,
     fRegisteringAnswer: false,
+    fAddNoneOfThese: true,
     fExtendsMultipleChoice: false,
     
     showNextProblem: function() {},
     
     init: function() {
         this.tries=0;
-        this.answerChoices = new Array(5);
         this.possibleAnswers = new Array(); //These are the possible answers
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
         this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
         this.steps_given=0;
         this.next_step_to_write =1;
         this.correctchoice;
-        this.correctchoice2; //used when there are 2 answer choices
-        this.selectedchoice;
-        this.selectedchoice2; 
         this.correct = new Image();
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
@@ -310,48 +307,37 @@ function addWrongChoice(choice)
 }
 
 function renderChoices() {
-	var availAnswers = 1 + Exercise.possibleAnswers.length; // only so many answers available
-	Exercise.answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
-	Exercise.correctchoice = Math.round(KhanAcademy.random()*(Exercise.answerChoices.length-0.02)-.49);
+	var num_choices = Math.min(1 + Exercise.possibleAnswers.length, 5);
+	var answerChoices = new Array(num_choices);
+	Exercise.correctchoice = Math.round(KhanAcademy.random()*(num_choices - 0.02)-.49);
 
-	var possibleWrongIndices=randomIndices(Exercise.getNumPossibleAnswers());
-	for (var i = 0; i < Exercise.answerChoices.length; i++)
-	{
-		if (i==Exercise.correctchoice)
-		{
-			Exercise.answerChoices[i] = '`' + correct_answer + '`';
-		}
+	var possibleWrongIndices = randomIndices(num_choices - 1);
+
+	for (var i = 0; i < num_choices; i++) {
+    	if (i == Exercise.correctchoice)
+		    answerChoices[i] = '`' + correct_answer + '`';		    
 		else
-		{
-			if (possibleWrongIndices.length>0)
-				Exercise.answerChoices[i]='`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';
-			else
-				continue;
-		}
+			answerChoices[i] = '`' + Exercise.possibleAnswers[possibleWrongIndices.pop()]+'`';			    
+	}
+	
+	if(Exercise.fAddNoneOfThese) {
+        // With probability 1/4, the correct answer is "None of these"
+    	if (!getRandomIntRange(0, 3)) {
+            answerChoices[Exercise.correctchoice] = answerChoices[num_choices - 1]	   
+            Exercise.correctchoice = num_choices - 1; 
+    	}
+    	answerChoices[num_choices - 1] = "None of these";	    
 	}
 
     // if you need to rearrange order or answers implement preDisplay function in derived html
     if (window.preDisplay)
-    {
-        preDisplay(Exercise.answerChoices, Exercise.correctchoice);
-    }
+        preDisplay(answerChoices, Exercise.correctchoice);
 
-	for (i = 0; i < Exercise.answerChoices.length; i++)
-    {
-       appendAnswerHtml('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+Exercise.answerChoices[i]+'</input></label></p>');
+	for (i = 0; i < num_choices; i++) {
+       appendAnswerHtml('<p style="white-space:nowrap;margin-top:10px;"><label for="answerChoice'+i+'"><input type="radio" id="answerChoice'+i+'" name="selectAnswer" class="select-choice" tabindex="'+(i+1)+'" data-choice="'+i+'">&nbsp;'+answerChoices[i]+'</input></label></p>');
     }
     
-    var $choices = $('.select-choice');
-    $choices.click(function(e) {
-        if (this != document.activeElement)
-            $(this).focus();
-    });
-
-    $choices.focus(function(e) {
-        $(this).click();
-    });
-
-    $choices.keypress(function(e) {
+    $('.select-choice').keypress(function(e) {
         if (e.which == '13') {
             check_answer_block();
             return false;
@@ -528,16 +514,6 @@ function date_as_string()
 	return date_to_string(d);
 }
 
-function select_choice(choice)
-{
-	Exercise.selectedchoice = choice;
-}
-
-function select_choice2(choice)
-{
-	Exercise.selectedchoice2 = choice;
-}
-
 function getGCD(x,y) 
 {
 	var z;
@@ -691,19 +667,6 @@ function check_answer()
     }
     
 	var isCorrect = (checkedIndex == Exercise.correctchoice)
-	handleCorrectness(isCorrect);
-}
-
-//for problems where the user can give 2 answers
-function check_both_answers()
-{
-	if (Exercise.selectedchoice === undefined || Exercise.selectedchoice2 === undefined) 
-	{
-			window.alert("Please choose both answers.");
-			return;
-	}
-
-	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice  && Exercise.selectedchoice2==Exercise.correctchoice2);
 	handleCorrectness(isCorrect);
 }
 

@@ -1,0 +1,7 @@
+{% if not App.is_dev_server %}
+    <link rel="stylesheet" type="text/css" href="/stylesheets/mobile-package/compressed.css?{{App.version}}" />
+{% else %}
+    <link rel="stylesheet" type="text/css" href="/stylesheets/mobile-package/jquery.mobile-1.0a4.1.css?{{App.version}}" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/mobile-package/mobile.css?{{App.version}}" />
+{% endif %}
+
