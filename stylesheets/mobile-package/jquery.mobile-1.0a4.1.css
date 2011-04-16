@@ -1,8 +1,10 @@
 /*!
  *
  * ***
- * Modified by Ben Kamens -- "images/" becomes "/images/jquery-mobile/"
- * for our internal GAE hosting
+ * Modified by Ben Kamens:
+ *      -"images/" becomes "/images/jquery-mobile/" for our internal GAE hosting
+ *      -added YUI Compressor comments to avoid media query bug
+ *          http://stackoverflow.com/questions/4144706/is-there-a-version-of-yui-compressor-that-deals-correctly-with-media-queries/4838108#4838108
  * ****
  *
  * jQuery Mobile v1.0a4.1
@@ -748,9 +750,9 @@ a.ui-link-inherit {
 /* HD/"retina" sprite
 -----------------------------------------------------------------------------------------------------------*/
 
-@media only screen and (-webkit-min-device-pixel-ratio: 1.5),
-       only screen and (min--moz-device-pixel-ratio: 1.5),
-       only screen and (min-resolution: 240dpi) {
+@media only screen and/*!YUI-Compressor */(-webkit-min-device-pixel-ratio: 1.5),/*!YUI-Compressor */
+       only screen and/*!YUI-Compressor */(min--moz-device-pixel-ratio: 1.5),/*!YUI-Compressor */
+       only screen and/*!YUI-Compressor */(min-resolution: 240dpi) {
 	
 	.ui-icon-plus, .ui-icon-minus, .ui-icon-delete, .ui-icon-arrow-r,
 	.ui-icon-arrow-l, .ui-icon-arrow-u, .ui-icon-arrow-d, .ui-icon-check,
@@ -1634,7 +1636,7 @@ ol.ui-listview .ui-li-jsnumbering:before { content: "" !important; } /* to avoid
 .ui-listview-filter-inset { margin: -15px -5px -15px -5px; background: transparent; }
 
 /* Odd iPad positioning issue. */
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+@media only screen and/*!YUI-Compressor */(min-device-width: 768px) and/*!YUI-Compressor */(max-device-width: 1024px) {
     .ui-li .ui-btn-text { overflow:  visible; }
 }/*
 * jQuery Mobile Framework
