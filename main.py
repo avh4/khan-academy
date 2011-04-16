@@ -1199,8 +1199,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         self.response.out.write("Library content regenerated")  
 
 @layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date(),
-        persist_across_app_versions = True
+        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         ) 
 def library_content_html(bust_cache = False):
 
