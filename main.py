@@ -1461,6 +1461,7 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
+                                                  'is_mobile_allowed': True,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
         self.render_template('homepage.html', template_values)

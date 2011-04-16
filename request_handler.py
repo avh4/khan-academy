@@ -195,8 +195,13 @@ class RequestHandler(webapp.RequestHandler):
         template_values['login_url'] = ('%s&direct=1' % util.create_login_url(template_values['continue']))
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
-        template_values['is_mobile'] = self.is_mobile()
-        template_values['is_mobile_capable'] = self.is_mobile_capable()
+        template_values['is_mobile'] = False
+        template_values['is_mobile_capable'] = False
+
+        if self.is_mobile_capable():
+            template_values['is_mobile_capable'] = True
+            if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
+                template_values['is_mobile'] = self.is_mobile()
 
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
