@@ -16,7 +16,7 @@ from app import App
 #
 # import layer_cache
 #
-# @layer_cache.cache_with_key("calculate_user_averages")
+# @layer_cache.cache()
 # def calculate_user_averages():
 #    ...do lots of long-running work...
 #    return result_for_cache
@@ -24,7 +24,7 @@ from app import App
 #
 # and with expiration every minute:
 #
-# @layer_cache.cache_with_key("calculate_user_averages", expiration=60)
+# @layer_cache.cache(expiration=60)
 # def calculate_user_averages():
 #    ...do lots of long-running work...
 #    return result_for_cache
@@ -52,26 +52,26 @@ from app import App
 # _____Other settings/options:_____
 #
 # Only cache in memcache, not cachepy's in-app memory cache:
-# @layer_cache.cache_with_key(... layer=SINGLE_LAYER_MEMCACHE_ONLY)
+# @layer_cache.cache(... layer=SINGLE_LAYER_MEMCACHE_ONLY)
 #
 # Only cache in cachepy's in-app memory cache, not memcache:
-# @layer_cache.cache_with_key(... layer=SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
+# @layer_cache.cache(... layer=SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
 #
 # Persist the cached values across different uploaded app verions
 # (by default this will not happen w/ memcache):
-# @layer_cache.cache_with_key(... persist_across_app_versions=True)
+# @layer_cache.cache(... persist_across_app_versions=True)
 
 DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 10 # Expire after 10 days by default
 DUAL_LAYER_MEMCACHE_AND_IN_APP_MEMORY_CACHE = 0 # Cache in both memcache and cachepy by default
 SINGLE_LAYER_MEMCACHE_ONLY = 1
 SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY = 2
 
-def cache_with_key(
-        key, 
+def cache(
         expiration=DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS,
         layer = DUAL_LAYER_MEMCACHE_AND_IN_APP_MEMORY_CACHE,
         persist_across_app_versions = False):
     def decorator(target):
+        key = "__layer_cache_%s.%s__" % (target.__module__, target.__name__)
         def wrapper(*args, **kwargs):
             return layer_cache_check_set_return(target, lambda: key, expiration, layer, persist_across_app_versions, *args, **kwargs)
         return wrapper

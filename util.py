@@ -10,7 +10,7 @@ from django.template.defaultfilters import pluralize
 import nicknames
 import facebook_util
 
-@request_cache.cache_with_key("get_current_user")
+@request_cache.cache()
 def get_current_user():
     user = users.get_current_user()
     if not user:
