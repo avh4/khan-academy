@@ -1,7 +1,7 @@
 {% if not App.is_dev_server %}
     <script type="text/javascript" src="/javascript/mobile-package/compressed.js?{{App.version}}"></script>
 {% else %}
+    <script src="/javascript/mobile-package/jquery.js?{{App.version}}"></script>
+    <script src="/javascript/mobile-package/jquery.mobile-1.0a4.1.js?{{App.version}}"></script>
     <script src="/javascript/mobile-package/iscroll-lite.min.js?{{App.version}}"></script>
-    <script type="text/javascript" src="/javascript/shared-package/jquery.js?{{App.version}}"></script>
-    <script src="/javascript/mobile-package/jquery.mobile-1.0a4.1.js"></script>
 {% endif %}

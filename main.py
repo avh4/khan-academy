@@ -1199,8 +1199,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         self.response.out.write("Library content regenerated")  
 
 @layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date(),
-        persist_across_app_versions = True
+        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         ) 
 def library_content_html(bust_cache = False):
 
@@ -1462,6 +1461,7 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
+                                                  'is_mobile_allowed': True,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
         self.render_template('homepage.html', template_values)
