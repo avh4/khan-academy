@@ -1,5 +1,10 @@
-from google.appengine.api import memcache
+import datetime
 import logging
+import pickle
+
+from google.appengine.api import memcache
+from google.appengine.ext import db
+
 import cachepy
 from app import App
 
@@ -66,7 +71,7 @@ from app import App
 # Persist the cached values across different uploaded app verions (disabled by default):
 # @layer_cache.cache(... persist_across_app_versions=True)
 
-DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 10 # Expire after 10 days by default
+DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 25 # Expire after 25 days by default
 
 class Layers:
     Datastore = 1
@@ -112,6 +117,7 @@ def layer_cache_check_set_return(
     bust_cache = kwargs.get("bust_cache", False)
 
     if not bust_cache:
+
         if layer & Layers.InAppMemory:
             result = cachepy.get(key)
             if result is not None:
@@ -120,7 +126,19 @@ def layer_cache_check_set_return(
         if layer & Layers.Memcache:
             result = memcache.get(key, namespace=namespace)
             if result is not None:
-                cachepy.set(key, result)
+                # Found in memcache, fill upward layers
+                if layer & Layers.InAppMemory:
+                    cachepy.set(key, result, expiry=expiration)
+                return result
+
+        if layer & Layers.Datastore:
+            result = KeyValueCache.get(key, namespace=namespace)
+            if result is not None:
+                # Found in datastore, fill upward layers
+                if layer & Layers.InAppMemory:
+                    cachepy.set(key, result, expiry=expiration)
+                if layer & Layers.Memcache:
+                    memcache.set(key, result, time=expiration, namespace=namespace)
                 return result
 
     result = target(*args, **kwargs)
@@ -135,5 +153,64 @@ def layer_cache_check_set_return(
         if not memcache.set(key, result, time=expiration, namespace=namespace):
             logging.error("Memcache set failed for %s" % key)
 
+    if layer & Layers.Datastore:
+        KeyValueCache.set(key, result, time=expiration, namespace=namespace)
+
     return result
+
+class KeyValueCache(db.Model):
+
+    value = db.BlobProperty()
+    created = db.DateTimeProperty()
+    expires = db.DateTimeProperty()
+
+    def is_expired(self):
+        return datetime.datetime.now() > self.expires
+
+    @staticmethod
+    def get_namespaced_key(key, namespace=""):
+        return "%s:%s" % (namespace, key)
+
+    @staticmethod
+    def get(key, namespace=""):
+
+        namespaced_key = KeyValueCache.get_namespaced_key(key, namespace)
+        key_value = KeyValueCache.get_by_key_name(namespaced_key)
+
+        if key_value and not key_value.is_expired():
+            return pickle.loads(key_value.value)
+
+        return None
+
+    @staticmethod
+    def set(key, result, time=DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS, namespace=""):
+
+        namespaced_key = KeyValueCache.get_namespaced_key(key, namespace)
+        dt = datetime.datetime.now()
+
+        dt_expires = datetime.datetime.max
+        if time > 0:
+            dt_expires = dt + datetime.timedelta(seconds=time)
+
+        key_value = KeyValueCache.get_or_insert(
+                key_name = namespaced_key,
+                value = pickle.dumps(result),
+                created = dt,
+                expires = dt_expires)
+
+        if key_value.created != dt:
+            # Already existed, need to overwrite
+            key_value.value = pickle.dumps(result)
+            key_value.created = dt
+            key_value.expires = dt_expires
+            key_value.put()
+
+    @staticmethod
+    def delete(key, namespace=""):
+
+        namespaced_key = KeyValueCache.get_namespaced_key(key, namespace)
+        key_value = KeyValueCache.get_by_key_name(namespaced_key)
+
+        if key_value:
+            db.delete(key_value)
 
