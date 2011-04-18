@@ -22,7 +22,10 @@ def get_facebook_nickname_key(user):
     return "facebook_nickname_%s" % user.email()
 
 @request_cache.cache_with_key_fxn(get_facebook_nickname_key)
-@layer_cache.cache_with_key_fxn(get_facebook_nickname_key, layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore)
+@layer_cache.cache_with_key_fxn(
+        get_facebook_nickname_key, 
+        layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore,
+        persist_across_app_versions=True)
 def get_facebook_nickname(user):
 
     email = user.email()
