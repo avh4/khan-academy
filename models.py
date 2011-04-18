@@ -15,6 +15,7 @@ import points
 from search import Searchable
 from app import App
 import layer_cache
+import request_cache
 from discussion import models_discussion
 
 # Setting stores per-application key-value pairs
@@ -242,6 +243,7 @@ class UserExercise(db.Model):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
 
     @staticmethod
+    @request_cache.cache_with_key_fxn(lambda user: "request_cache_user_exercise_%s" % user.email())
     def get_for_user_use_cache(user):
         user_exercises_key = UserExercise.get_key_for_user(user)
         user_exercises = memcache.get(user_exercises_key)
