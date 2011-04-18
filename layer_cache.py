@@ -146,17 +146,38 @@ def layer_cache_check_set_return(
     # In case the key's value has been changed by target's execution
     key = key_fxn(*args, **kwargs)
 
-    if layer & Layers.InAppMemory:
-        cachepy.set(key, result, expiry=expiration)
+    if isinstance(result, UncachedResult):
+        # Don't cache this result, just return it
+        result = result.result
+    else:
+        # Cache the result
+        if layer & Layers.InAppMemory:
+            cachepy.set(key, result, expiry=expiration)
 
-    if layer & Layers.Memcache:
-        if not memcache.set(key, result, time=expiration, namespace=namespace):
-            logging.error("Memcache set failed for %s" % key)
+        if layer & Layers.Memcache:
+            if not memcache.set(key, result, time=expiration, namespace=namespace):
+                logging.error("Memcache set failed for %s" % key)
 
-    if layer & Layers.Datastore:
-        KeyValueCache.set(key, result, time=expiration, namespace=namespace)
+        if layer & Layers.Datastore:
+            KeyValueCache.set(key, result, time=expiration, namespace=namespace)
 
     return result
+
+# Functions can return an UncachedResult-wrapped object
+# to tell layer_cache to skip caching this specific result.
+#
+# Example:
+#
+# @layer_cache.cache()
+# def slow_and_dangerous():
+#   try:
+#       return SomethingDangerous()
+#   catch:
+#       return UncachedResult(SomethingSafe())
+#
+class UncachedResult():
+    def __init__(self, result):
+        self.result = result
 
 class KeyValueCache(db.Model):
 
