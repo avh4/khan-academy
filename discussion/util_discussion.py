@@ -5,6 +5,7 @@ import request_cache
 import layer_cache
 import models_discussion
 
+@request_cache.cache()
 def is_current_user_moderator():
     return users.is_current_user_admin() or UserData.get_for_current_user().moderator
 
