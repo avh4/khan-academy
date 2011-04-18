@@ -1,7 +1,7 @@
 <div class="vote_tools">
     <div class="control vote_tools_show">
         <a href="#" class="control vote_for" data-key="{{ target.key|escape }}" data-vote_type="1"><img src="/images/vote-up-gray.png" class="vote_up_gray"/><img src="/images/vote-up.png" class="vote_up"/></a>
-        <br/>
+        <div class="sum_votes">{{ target.sum_votes }}</div>
         <a href="#" class="control vote_for" data-key="{{ target.key|escape }}" data-vote_type="2"><img src="/images/vote-down-gray.png" class="vote_down_gray"/><img src="/images/vote-down.png" class="vote_down"></a>
     </div>
 </div>
