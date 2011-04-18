@@ -159,7 +159,7 @@ class Exercise(db.Model):
         query.filter('exercise =', self.key())
         return query
 
-    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
+    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def related_videos_fetch(self):
         exercise_videos = self.related_videos().fetch(10)
         for exercise_video in exercise_videos:
