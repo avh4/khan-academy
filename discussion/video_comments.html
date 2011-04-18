@@ -15,6 +15,7 @@
 
         {% for comment in comments %}
             <div class="comment">
+                {% vote_tools comment %}
                 {{ comment.content|escape|urlize|linebreaksbr_ellipsis:" continue&hellip;"|youtube_timestamp_links }}<br/>
                 <span class="comment_sig sig">{% signature comment %}</span>
             </div>

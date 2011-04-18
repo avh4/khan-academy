@@ -1,5 +1,8 @@
 <nobr>
     {% if target %}
+
+    <span class="sum_votes">255</span>
+
         {% if verb %}
             &ndash;{{ target.author_nickname|escape }} {{ verb }} {{ target.date|timesince_ago }}
         {% else %}
@@ -7,7 +10,6 @@
         {% endif %}
 
         {% flag_tools target %}
-        {% vote_tools target %}
 
         {% if is_mod %}
             {% mod_tools target %}
