@@ -53,7 +53,7 @@ class UserBadge(db.Model):
         query.filter('date >=', dt_a)
         query.filter('date <=', dt_b)
         query.order('date')
-        return query.fetch(1000)
+        return query
 
     @staticmethod
     def count_by_badge_name(name):
