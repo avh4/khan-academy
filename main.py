@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import cgi
 import os
 import datetime
 import time
@@ -8,7 +7,6 @@ import random
 import urllib
 import logging
 import re
-from urlparse import urlparse
 from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
@@ -35,18 +33,16 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-import gdata.youtube
-import gdata.youtube.service
-import gdata.alt.appengine
-import qbrary
 import bulk_update.handler
 import facebook
 import layer_cache
+import request_cache
 import autocomplete
 import coaches
 import api
 import knowledgemap
 import consts
+import youtube_sync
 
 from search import Searchable
 import search
@@ -59,8 +55,9 @@ import points
 import exercise_statistics
 import backfill
 import activity_summary
+import exercises
 
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExercisePlaylist, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 
 from discussion import comments
 from discussion import qa
@@ -68,6 +65,8 @@ from discussion import notification
 
 from about import util_about
 from about import blog
+
+from jobs import jobs
 
 from badges import util_badges
 from badges import last_action_cache
@@ -77,6 +76,10 @@ from profiles import util_profile
 
 from topics_list import topics_list, all_topics_list, DVD_list
 
+from custom_exceptions import MissingVideoException, MissingExerciseException
+from render import render_block_to_string
+from templatetags import streak_bar, exercise_message, exercise_icon, user_points
+from badges.templatetags import badge_notifications, badge_counts
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -134,130 +137,85 @@ class KillLiveAssociations(request_handler.RequestHandler):
             video_playlist.live_association = False
         db.put(all_video_playlists)
 
-
-class UpdateVideoReadableNames(request_handler.RequestHandler):  #Makes sure every video and playlist has a unique "name" that can be used in URLs
-
+class TestUserData(request_handler.RequestHandler):
     def get(self):
         if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        query = Video.all()
-        all_videos = query.fetch(100000)
-        for video in all_videos:
-            potential_id = re.sub('[^a-z0-9]', '-', video.title.lower());
-            potential_id = re.sub('-+$', '', potential_id)  # remove any trailing dashes (see issue 1140)
-            potential_id = re.sub('^-+', '', potential_id)  # remove any leading dashes (see issue 1526)                        
-            if video.readable_id == potential_id: # id is unchanged
-                continue
-            number_to_add = 0
-            current_id = potential_id
-            while True:
-                query = Video.all()
-                query.filter('readable_id=', current_id)
-                if (query.get() is None): #id is unique so use it and break out
-                    video.readable_id = current_id
-                    video.put()
-                    break
-                else: # id is not unique so will have to go through loop again
-                    number_to_add+=1
-                    current_id = potential_id+'-'+number_to_add                       
-        
-class UpdateVideoData(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
             return
 
-        self.response.out.write('<html>')
-        yt_service = gdata.youtube.service.YouTubeService()
-        playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
+        user_1 = users.User('http://facebookid.khanacademy.org/525876620', federated_identity="Logan Williams")
+        user_2 = users.User('http://facebookid.khanacademy.org/100001639389777', federated_identity="Logan Williams")
 
-        # deletes the specified entities, 10 at a time, to avoid:
-        # http://code.google.com/p/googleappengine/issues/detail?id=3397
-        # when using dev_appserver.py --use_sqlite
-        def delete_entities(ents):
-            start = 0
-            while start < len(ents):
-                end = min(start+10, len(ents))
-                db.delete(ents[start:end])
-                start = end
-                
-        # The next block makes all current VideoPlaylist entries false so that we don't get remnant associations
-        query = VideoPlaylist.all()
-        all_video_playlists = []
-        for video_playlist in query:
-            video_playlist.live_association = False
-            all_video_playlists.append(video_playlist)
-        db.put(all_video_playlists)
+        user_1b = users.User('http://facebookid.khanacademy.org/525876620')
+        user_2b = users.User('http://facebookid.khanacademy.org/100001639389777')
 
-        for playlist in playlist_feed.entry:
-            self.response.out.write('<p>Playlist  ' + playlist.id.text)
-            playlist_id = playlist.id.text.replace('http://gdata.youtube.com/feeds/api/users/khanacademy/playlists/', '')
-            playlist_uri = playlist.id.text.replace('users/khanacademy/', '')
-            query = Playlist.all()
-            query.filter('youtube_id =', playlist_id)
-            playlist_data = query.get()
-            if not playlist_data:
-                playlist_data = Playlist(youtube_id=playlist_id)
-                self.response.out.write('<p><strong>Creating Playlist: ' + playlist.title.text + '</strong>')
-            playlist_data.url = playlist_uri
-            playlist_data.title = playlist.title.text
-            playlist_data.description = playlist.description.text
-            playlist_data.put()
-            playlist_data.index()
-            playlist_data.indexed_title_changed()
-            
-            for i in range(0, 4):
-                start_index = i * 50 + 1
-                video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri + '?start-index=' + str(start_index) + '&max-results=50')
-                video_data_list = []
-                for video in video_feed.entry:
+        self.response.out.write("user_1: %s<br/>" % user_1)
+        self.response.out.write("user_2: %s<br/>" % user_2)
+        self.response.out.write("user_1 == user_2: %s<br/>" % (user_1 == user_2))
 
-                    video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0]
-                    query = Video.all()
-                    query.filter('youtube_id =', video_id.decode('windows-1252'))
-                    video_data = query.get()
-                    if not video_data:
-                        video_data = Video(youtube_id=video_id.decode('windows-1252'))
-                        self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('windows-1252') + '</strong>')
-                        video_data.playlists = []
-                    video_data.title = video.media.title.text.decode('windows-1252')
-                    video_data.url = video.media.player.url.decode('windows-1252')
-                    video_data.duration = int(video.media.duration.seconds)
-                    video_data.views = int(video.statistics.view_count)
+        user_data_1 = UserData.get_for(user_1)
+        user_data_2 = UserData.get_for(user_2)
 
-                    if video.media.description.text is not None:
-                        video_data.description = video.media.description.text.decode('windows-1252')
-                    else:
-                        video_data.decription = ' '
+        user_data_1b = UserData.get_for(user_1b)
+        user_data_2b = UserData.get_for(user_2b)
 
-                    if playlist.title.text not in video_data.playlists:
-                        video_data.playlists.append(playlist.title.text.decode('windows-1252'))
-                    video_data.keywords = video.media.keywords.text.decode('windows-1252')
-                    video_data.position = video.position
-                    video_data_list.append(video_data)
-                db.put(video_data_list)
-                for video_data in video_data_list:
-                    video_data.index()
-                    video_data.indexed_title_changed()
+        self.response.out.write("<br/><br/><br/>")
 
-                playlist_videos = []
-                for video_data in video_data_list:                
-                    query = VideoPlaylist.all()
-                    query.filter('playlist =', playlist_data.key())
-                    query.filter('video =', video_data.key())
-                    playlist_video = query.get()
-                    if not playlist_video:
-                        playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
-                        self.response.out.write('<p><strong>Creating VideoPlaylist(' + playlist_data.title + ',' + video_data.title + ')</strong>')
-                    else:
-                        self.response.out.write('<p>Updating VideoPlaylist(' + playlist_video.playlist.title + ',' + playlist_video.video.title + ')')
-                    playlist_video.live_association = True
-                    playlist_video.video_position = int(video_data.position.text)
-                    playlist_videos.append(playlist_video)
-                db.put(playlist_videos)
+        if user_data_1:
+            self.response.out.write("user_data_1: %s<br/>" % user_data_1.key())
+            self.response.out.write("user_data_1.user: %s<br/>" % user_data_1.user)
+        if user_data_2:
+            self.response.out.write("user_data_2: %s<br/>" % user_data_2.key())
+            self.response.out.write("user_data_2.user: %s<br/>" % user_data_2.user)
+        if user_data_1b:
+            self.response.out.write("user_data_1b: %s<br/>" % user_data_1b.key())
+            self.response.out.write("user_data_1b.user: %s<br/>" % user_data_1b.user)
+        else:
+            self.response.out.write("user_data_1b: None<br/>")
+        if user_data_2b:
+            self.response.out.write("user_data_2b: %s<br/>" % user_data_2b.key())
+            self.response.out.write("user_data_2b.user: %s<br/>" % user_data_2b.user)
+        else:
+            self.response.out.write("user_data_2b: None<br/>")
 
+        self.response.out.write("<br/><br/><br/>")
+
+        exercise = Exercise.get_by_name('order_of_operations')
+        user_exercise_1 = None
+        user_exercise_2 = None
+
+        if user_data_1:
+            user_exercise_1 = user_data_1.get_or_insert_exercise(exercise, allow_insert=False)
+            if user_exercise_1:
+                self.response.out.write("user_exercise_1: %s<br/>" % user_exercise_1.key())
+
+        if user_data_2:
+            user_exercise_2 = user_data_2.get_or_insert_exercise(exercise, allow_insert=False)
+            if user_exercise_2:
+                self.response.out.write("user_exercise_2: %s<br/>" % user_exercise_2.key())
+
+
+        if user_exercise_1:
+            self.response.out.write("user_exercise_1.user: %s<br/>" % user_exercise_1.user)
+        if user_exercise_2:
+            self.response.out.write("user_exercise_2.user: %s<br/>" % user_exercise_2.user)
+
+        self.response.out.write("<br/><br/><br/>")
+
+        if user_exercise_1:
+            user_data_from_exercise_1 = UserData.get_for(user_exercise_1.user)
+            self.response.out.write("user_data_from_exercise_1: %s<br/>" % user_data_from_exercise_1.key())
+            if user_data_from_exercise_1:
+                self.response.out.write("user_data_from_exercise_1.user: %s<br/>" % user_data_from_exercise_1.user)
+                self.response.out.write("user_data_from_exercise_1.user == user_data_1.user: %s<br/>" % (user_data_from_exercise_1.user == user_data_1.user))
+
+        self.response.out.write("<br/><br/><br/>")
+
+        if user_exercise_2:
+            user_data_from_exercise_2 = UserData.get_for(user_exercise_2.user)
+            self.response.out.write("user_data_from_exercise_2: %s<br/>" % user_data_from_exercise_2.key())
+            if user_data_from_exercise_2:
+                self.response.out.write("user_data_from_exercise_2.user: %s<br/>" % user_data_from_exercise_2.user)
+                self.response.out.write("user_data_from_exercise_2.user == user_data_2.user: %s<br/>" % (user_data_from_exercise_2.user == user_data_2.user))
 
 class ViewExercise(request_handler.RequestHandler):
 
@@ -275,6 +233,10 @@ class ViewExercise(request_handler.RequestHandler):
                 exid = 'addition_1'
 
             exercise = Exercise.get_by_name(exid)
+
+            if not exercise: 
+                raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
+
             user_exercise = user_data.get_or_insert_exercise(exercise)
 
             if not problem_number:
@@ -294,21 +256,15 @@ class ViewExercise(request_handler.RequestHandler):
                     
             exercise_videos = exercise_non_summative.related_videos_fetch()
 
-            proficient = exercise.proficient = user_data.is_proficient_at(exid)
-            suggested = exercise.suggested = user_data.is_suggested(exid)
-            reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
-            struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-            endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+            exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                    
-            logout_url = users.create_logout_url(self.request.uri)
-            
             # Note: if they just need a single problem for review they can just print this page.
             num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
             
             # If the user is proficient, assume they want to print a bunch of practice problems.
-            if proficient:
+            if exercise_states['proficient']:
                 num_problems_to_print = exercise.required_streak()
 
             if exercise.summative:
@@ -325,11 +281,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'points': user_data.points,
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
-                'proficient': proficient,
-                'endangered': endangered,
-                'reviewing': reviewing,
-                'struggling': struggling,
-                'suggested': suggested,
+                'exercise_states': exercise_states,
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': user_exercise.key(),
                 'exercise': exercise,
@@ -339,7 +291,6 @@ class ViewExercise(request_handler.RequestHandler):
                 'exercise_non_summative': exercise_non_summative,
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'user_exercise': user_exercise,
-                'logout_url': logout_url,
                 'streak': user_exercise.streak,
                 'time_warp': time_warp,
                 'problem_number': problem_number,
@@ -349,122 +300,22 @@ class ViewExercise(request_handler.RequestHandler):
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
             template_file = exercise_non_summative.name + '.html'
-            if not exercise.summative and exercise.raw_html is not None:
-                exercise.ensure_sanitized()
-                template_file = 'caja_template.html'
-
-            path = os.path.join(os.path.dirname(__file__), template_file)
-            self.response.out.write(template.render(path, template_values))
+            self.render_template(template_file, template_values)
         else:
-
             self.redirect(util.create_login_url(self.request.uri))
+            
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-
-class OldViewVideo(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
-        video = None
-        video_id = self.request.get('v')
-        path = self.request.path
-        readable_id  = urllib.unquote(path.rpartition('/')[2])
-        if video_id: # Support for old links
-            query = Video.all()
-            query.filter('youtube_id =', video_id)
-            video = query.get()
-            readable_id = video.readable_id
-            self.redirect("/video/"+urllib.quote(readable_id), True)
-            return
-        
-        if readable_id:
-            readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
-            query = Video.all()
-            query.filter('readable_id =', readable_id)
-            # The following should just be:
-            # video = query.get()
-            # but the database currently contains multiple Video objects for a particular
-            # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
-            # changed and our code was producing youtube_ids that ended with '_player'.
-            # This hack gets the most recent valid Video object.
-            key_id = 0
-            for v in query:
-                if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
-                    video = v
-                    key_id = v.key().id()
-            # End of hack
-            
-        if video is None:
-            error_message = "No video found for ID '%s'" % readable_id
-            logging.error(error_message)
-            report_issue_handler = ReportIssue()
-            report_issue_handler.initialize(self.request, self.response)
-            report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
-                                                           'message': 'Error: %s' % error_message})
-            return
-
-            
-        query = db.GqlQuery("SELECT * FROM VideoPlaylist WHERE video = :1 AND live_association = TRUE", video)
-        video_playlists = query.fetch(5)
-
-        for video_playlist in video_playlists:
-            query = VideoPlaylist.all()
-            query.filter('playlist =', video_playlist.playlist)
-            query.filter('live_association = ', True) 
-            query.order('video_position')
-            video_playlist.videos = query.fetch(500)
-
-            for videos_in_playlist in video_playlist.videos:
-                if videos_in_playlist.video_position == video_playlist.video_position:
-                    videos_in_playlist.current_video = True
-                else:
-                    videos_in_playlist.current_video = False
-                if videos_in_playlist.video_position == video_playlist.video_position - 1:
-                    video_playlist.previous_video = videos_in_playlist.video
-                if videos_in_playlist.video_position == video_playlist.video_position + 1:
-                    video_playlist.next_video = videos_in_playlist.video
-
-        # If a QA question is being expanded, we want to clear notifications for its
-        # answers before we render page_template so the notification icon shows
-        # its updated count. 
-        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
-                
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url,
-                                                  'video': video,
-                                                  'video_playlists': video_playlists, 
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
-        path = os.path.join(os.path.dirname(__file__), 'viewvideo.html')
-        self.response.out.write(template.render(path, template_values))
-
 
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
     
- 
-
 class ViewVideo(request_handler.RequestHandler):
 
     def get(self):
-
-        def report_missing_video(readable_id):
-            error_message = "No video found for ID '%s'" % readable_id
-            logging.error(error_message)
-            report_issue_handler = ReportIssue()
-            report_issue_handler.initialize(self.request, self.response)
-            report_issue_handler.write_response('Defect', {'issue_labels': 'Component-Videos,Video-%s' % readable_id,
-                                                           'message': 'Error: %s' % error_message})
-            return
 
         # This method displays a video in the context of a particular playlist.
         # To do that we first need to find the appropriate playlist.  If we aren't 
@@ -486,8 +337,16 @@ class ViewVideo(request_handler.RequestHandler):
             query = Video.all()
             query.filter('youtube_id =', video_id)
             video = query.get()
+
+            if not video:
+                raise MissingVideoException("Missing video w/ youtube id '%s'" % video_id)
+
             readable_id = video.readable_id
             playlist = video.first_playlist()
+
+            if not playlist:
+                raise MissingVideoException("Missing video w/ youtube id '%s'" % video_id)
+
             redirect_to_canonical_url = True
 
         if playlist_title is not None and len(playlist_title) > 0:
@@ -504,9 +363,12 @@ class ViewVideo(request_handler.RequestHandler):
             # Get video by readable_id just to get the first playlist for the video
             video = Video.get_for_readable_id(readable_id)
             if video is None:
-                report_missing_video(readable_id)
-                return
+                raise MissingVideoException("Missing video '%s'" % readable_id)
+
             playlist = video.first_playlist()
+            if not playlist:
+                raise MissingVideoException("Missing video '%s'" % readable_id)
+
             redirect_to_canonical_url = True
  
         if redirect_to_canonical_url:
@@ -517,7 +379,7 @@ class ViewVideo(request_handler.RequestHandler):
         # the playlist and the video in it that has the readable_id.  Note that we don't 
         # query the Video entities for one with the requested readable_id because in some
         # cases there are multiple Video objects in the datastore with the same readable_id
-        # (e.g. there are 2 "Order of Operations" videos).           
+        # (e.g. there are 2 "Order of Operations" videos).          
             
         videos = VideoPlaylist.get_cached_videos_for_playlist(playlist)
         previous_video = None
@@ -532,8 +394,7 @@ class ViewVideo(request_handler.RequestHandler):
                 next_video = v
 
         if video is None:
-            report_missing_video(readable_id)
-            return
+            raise MissingVideoException("Missing video '%s'" % readable_id)
 
         playlists = VideoPlaylist.get_cached_playlists_for_video(video)
         for p in playlists:
@@ -586,16 +447,27 @@ class ViewVideo(request_handler.RequestHandler):
 
 class LogVideoProgress(request_handler.RequestHandler):
     
+    # LogVideoProgress uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    def get(self):
 
         user = util.get_current_user()
+        user_data = None
         video_points_total = 0
         points_total = 0
 
         if user:
 
-            video_key = self.request.get("video_key")
-            video = db.get(video_key)
+            video = None
+            video_key = self.request_string("video_key", default = "")
+
+            if video_key:
+                video = db.get(video_key)
 
             if video:
 
@@ -692,59 +564,11 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 db.put([user_video, video_log, user_data])
 
-                points_total = user_data.points
-
-        json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
-
-class ViewExerciseVideos(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)
-            exkey = self.request.get('exkey')
-            if exkey:
-                exercise = Exercise.get(db.Key(exkey))
-                query = ExerciseVideo.all()
-                query.filter('exercise =', exercise.key())
-
-                exercise_videos = query.fetch(50)
-
-                logout_url = users.create_logout_url(self.request.uri)
-                first_video = None
-                issue_labels = None
-                if len(exercise_videos) > 0:
-                    first_video = exercise_videos[0].video
-                    issue_labels = 'Component-Videos,Video-%s' % exercise_videos[0].video.youtube_id
-                for exercise_video in exercise_videos:
-                    video = exercise_video.video
-                    video.video_folder = get_mangled_playlist_name(video.playlists[0])  
-
-                if App.offline_mode:
-                    video_path = "/videos/" 
-                else:
-                    video_path = "http://www.archive.org/download/KhanAcademy_"
-            
-                template_values = {
-                    'App' : App,
-                    'points': user_data.points,
-                    'user': user,
-                    'username': user.nickname(),
-                    'logout_url': logout_url,
-                    'exercise': exercise,
-                    'video_path': video_path,                    
-                    'first_video': first_video,
-                    'extitle': exercise.name.replace('_', ' ').capitalize(),
-                    'exercise_videos': exercise_videos,
-                    'issue_labels': issue_labels, 
-                    }   
-
-                path = os.path.join(os.path.dirname(__file__), 'exercisevideos.html')
-                self.response.out.write(template.render(path, template_values))
-        else:
-
-            self.redirect(util.create_login_url(self.request.uri))
 
 class PrintProblem(request_handler.RequestHandler):
     
@@ -761,8 +585,7 @@ class PrintProblem(request_handler.RequestHandler):
                 'problem_number': self.request.get('problem_number')
                 }
         
-        path = os.path.join(os.path.dirname(__file__), exid + '.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template(exid + '.html', template_values)
         
 class PrintExercise(request_handler.RequestHandler):
 
@@ -798,8 +621,6 @@ class PrintExercise(request_handler.RequestHandler):
             endangered = False
             reviewing = False
 
-            logout_url = users.create_logout_url(self.request.uri)
-
             template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
@@ -817,34 +638,17 @@ class PrintExercise(request_handler.RequestHandler):
                 'exercise_videos': exercise_videos,
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'user_exercise': userExercise,
-                'logout_url': logout_url,
                 'time_warp': time_warp,
                 'user_data': user_data,
+                'num_problems': num_problems,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
             
-            path = os.path.join(os.path.dirname(__file__), 'print_template.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('print_template.html', template_values)
                 
         else:
 
             self.redirect(util.create_login_url(self.request.uri))
-
-class ExerciseAdminPage(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        user = util.get_current_user()
-        query = Exercise.all().order('h_position')
-        exercises = query.fetch(200)
-
-        template_values = {'App' : App, 'exercises': exercises}
-
-        path = os.path.join(os.path.dirname(__file__), 'exerciseadmin.html')
-        self.response.out.write(template.render(path, template_values))
-
 
 class ReportIssue(request_handler.RequestHandler):
 
@@ -855,7 +659,6 @@ class ReportIssue(request_handler.RequestHandler):
     def write_response(self, issue_type, extra_template_values):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
 
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
@@ -867,7 +670,6 @@ class ReportIssue(request_handler.RequestHandler):
             'username': user and user.nickname() or "",
             'referer': self.request.headers.get('Referer'),
             'user_agent': user_agent,
-            'logout_url': logout_url,
             }
         template_values.update(extra_template_values)
         page = 'reportissue_template.html'
@@ -889,13 +691,11 @@ class ProvideFeedback(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
 
         template_values = {
             'App' : App,
             'points': user_data.points,
             'username': user and user.nickname() or "",
-            'logout_url': logout_url,
             }
 
         self.render_template("provide_feedback.html", template_values)
@@ -931,25 +731,18 @@ class ViewAllExercises(request_handler.RequestHandler):
                     exercise.review = True
                     exercise.status = "Review"
 
-            logout_url = users.create_logout_url(self.request.uri)
-
             template_values = {
-                'App' : App,
                 'exercises': ex_graph.exercises,
                 'recent_exercises': recent_exercises,
                 'review_exercises': review_exercises,
                 'suggested_exercises': suggested_exercises,
-                'points': user_data.points,
-                'username': user.nickname(),
                 'user_data': user_data,
                 'expanded_all_exercises': user_data.expanded_all_exercises,
                 'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
                 'selected_nav_link': 'practice',
-                'logout_url': logout_url,
                 }
 
-            path = os.path.join(os.path.dirname(__file__), 'viewexercises.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('viewexercises.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -976,161 +769,6 @@ class KnowledgeMap(request_handler.RequestHandler):
     def get(self):
         self.redirect("/exercisedashboard")
 
-class EditExercise(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        exercise_name = self.request.get('name')
-        if exercise_name:
-            query = Exercise.all().order('h_position')
-            exercises = query.fetch(200)
-
-            main_exercise = None
-            for exercise in exercises:
-                if exercise.name == exercise_name:
-                    main_exercise = exercise
-
-            query = ExercisePlaylist.all()
-            query.filter('exercise =', main_exercise.key())
-            exercise_playlists = query.fetch(50)
-
-            query = Playlist.all()
-            all_playlists = query.fetch(50)
-
-            query = ExerciseVideo.all()
-            query.filter('exercise =', main_exercise.key())
-            exercise_videos = query.fetch(50)
-
-            videos = []
-
-            playlist_videos = None
-            for exercise_playlist in exercise_playlists:
-                query = VideoPlaylist.all()
-                query.filter('playlist =', exercise_playlist.playlist)
-                query.order('video_position')
-                playlist_videos = query.fetch(200)
-                for playlist_video in playlist_videos:
-                    videos.append(playlist_video.video)
-
-            template_values = {
-                'App' : App,
-                'exercises': exercises,
-                'exercise_playlists': exercise_playlists,
-                'all_playlists': all_playlists,
-                'exercise_videos': exercise_videos,
-                'playlist_videos': playlist_videos,
-                'videos': videos,
-                'main_exercise': main_exercise,
-                }
-
-            self.render_template("editexercise.html", template_values)
-
-class UpdateExercise(request_handler.RequestHandler):
-    
-    def post(self):
-        self.get()
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        user = util.get_current_user()
-        exercise_name = self.request.get('name')
-        if exercise_name:
-            query = Exercise.all()
-            query.filter('name =', exercise_name)
-            exercise = query.get()
-            if not exercise:
-                exercise = Exercise(name=exercise_name)
-                exercise.prerequisites = []
-                exercise.covers = []
-                exercise.author = user
-                exercise.summative = self.request_bool("summative", default=False)
-                path = os.path.join(os.path.dirname(__file__), exercise_name + '.html')
-                raw_html = self.request.get('raw_html')
-                if not os.path.exists(path) and not exercise.summative and raw_html:
-                    exercise.raw_html = db.Text(raw_html)
-                    exercise.last_modified = datetime.datetime.now()
-                    exercise.ensure_sanitized()
-
-            add_prerequisite = self.request.get('add_prerequisite')
-            delete_prerequisite = self.request.get('delete_prerequisite')
-            add_covers = self.request.get('add_covers')
-            delete_covers = self.request.get('delete_covers')
-            v_position = self.request.get('v_position')
-            h_position = self.request.get('h_position')
-            seconds_per_fast_problem = self.request.get('seconds_per_fast_problem')
-            short_display_name = self.request.get('short_display_name')
-
-            add_video = self.request.get('add_video')
-            delete_video = self.request.get('delete_video')
-            add_playlist = self.request.get('add_playlist')
-            delete_playlist = self.request.get('delete_playlist')
-
-            if add_prerequisite:
-                if add_prerequisite not in exercise.prerequisites:
-                    exercise.prerequisites.append(add_prerequisite)
-            if delete_prerequisite:
-                if delete_prerequisite in exercise.prerequisites:
-                    exercise.prerequisites.remove(delete_prerequisite)
-            if add_covers:
-                if add_covers not in exercise.covers:
-                    exercise.covers.append(add_covers)
-            if delete_covers:
-                if delete_covers in exercise.covers:
-                    exercise.covers.remove(delete_covers)
-            if v_position:
-                exercise.v_position = int(v_position)
-            if h_position:
-                exercise.h_position = int(h_position)
-            if seconds_per_fast_problem:
-                exercise.seconds_per_fast_problem = float(seconds_per_fast_problem)
-            if short_display_name:
-                exercise.short_display_name = short_display_name
-
-            if add_video:
-                query = ExerciseVideo.all()
-                query.filter('video =', db.Key(add_video))
-                query.filter('exercise =', exercise.key())
-                exercise_video = query.get()
-                if not exercise_video:
-                    exercise_video = ExerciseVideo()
-                    exercise_video.exercise = exercise
-                    exercise_video.video = db.Key(add_video)
-                    exercise_video.put()
-            if delete_video:
-                query = ExerciseVideo.all()
-                query.filter('video =', db.Key(delete_video))
-                query.filter('exercise =', exercise.key())
-                exercise_videos = query.fetch(200)
-                for exercise_video in exercise_videos:
-                    exercise_video.delete()
-
-            if add_playlist:
-                query = ExercisePlaylist.all()
-                query.filter('playlist =', db.Key(add_playlist))
-                query.filter('exercise =', exercise.key())
-                exercise_playlist = query.get()
-                if not exercise_playlist:
-                    exercise_playlist = ExercisePlaylist()
-                    exercise_playlist.exercise = exercise
-                    exercise_playlist.playlist = db.Key(add_playlist)
-                    exercise_playlist.put()
-
-            if delete_playlist:
-                query = ExercisePlaylist.all()
-                query.filter('playlist =', db.Key(delete_playlist))
-                query.filter('exercise =', exercise.key())
-                exercise_playlists = query.fetch(200)
-                for exercise_playlist in exercise_playlists:
-                    exercise_playlist.delete()
-
-            exercise.put()
-
-            self.redirect('/editexercise?name=' + exercise_name)
-
 class GraphPage(request_handler.RequestHandler):
 
     def get(self):
@@ -1138,8 +776,7 @@ class GraphPage(request_handler.RequestHandler):
         height = self.request.get('h')
         template_values = {'App' : App, 'width': width, 'height': height}
 
-        path = os.path.join(os.path.dirname(__file__), 'graphpage.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('graphpage.html', template_values)
 
 class AdminViewUser(request_handler.RequestHandler):
 
@@ -1162,20 +799,32 @@ class AdminViewUser(request_handler.RequestHandler):
                     break
 
             template_values = {'App' : App, 'exercise_data': exercisedata, 'user_data': userdata}
-            path = os.path.join(os.path.dirname(__file__), 'adminviewuser.html')
-            self.response.out.write(template.render(path, template_values))
+            self.render_template('adminviewuser.html', template_values)
 
 class RegisterAnswer(request_handler.RequestHandler):
 
+    # RegisterAnswer uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    def get(self):
         exid = self.request_string('exid')
+        time_warp = self.request_string('time_warp')
         user = util.get_current_user()
         if user:
+            key = self.request_string('key')
+
+            if not exid or not key:
+                logging.warning("Missing exid or key data in RegisterAnswer")
+                self.redirect('/exercises?exid=' + exid)
+                return
 
             dt_done = datetime.datetime.now()
-
-            key = self.request_string('key')
             correct = self.request_bool('correct')
+
             problem_number = self.request_int('problem_number')
             start_time = self.request_float('start_time')
             hint_used = self.request_bool('hint_used', default=False)
@@ -1247,7 +896,11 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
 
-            self.redirect_via_refresh_if_webkit("/exercises?exid=%s" % exid)
+            if not self.is_ajax_request():
+                self.redirect("/exercises?exid=%s" % exid)
+            else:
+                self.send_json(user_data, user_exercise, exercise, key, time_warp)
+            
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)
@@ -1255,20 +908,80 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
+        
+    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        
+        streak_bar_context = streak_bar(user_exercise)
+        streak_bar_html = self.render_template_to_string("streak_bar", streak_bar_context)
+        
+        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
+        exercise_message_html = self.render_template_to_string("exercise_message", exercise_message_context)
+        
+        exercise_icon_context = exercise_icon(exercise, App)
+        exercise_icon_html = self.render_template_to_string("exercise_icon", exercise_icon_context)
+        
+        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
+        badge_count_context = badge_counts(user_data)
+        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
+        
+        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
+        badge_notification_context = badge_notifications()
+        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
+        
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        updated_values = {
+            'exercise_states': exercise_states,
+            'exercise_points':  exercise_points,
+            'key': key,
+            'start_time': time.time(),
+            'streak': user_exercise.streak,
+            'time_warp': time_warp,
+            'problem_number': user_exercise.total_done + 1,
+            'streak_bar_html': streak_bar_html,
+            'exercise_message_html': exercise_message_html,
+            'exercise_icon_html': exercise_icon_html,
+            'badge_count_html': badge_count_html,
+            'badge_notification_html': badge_notification_html,
+            'user_points_html': user_points_html
+            }
+            
+            #
+            #    'exercise_non_summative': exercise_non_summative,
+            #    'read_only': read_only,
+            #    'num_problems_to_print': num_problems_to_print,
+            #
+        json = simplejson.dumps(updated_values)
+        self.response.out.write(json)
 
 class RegisterCorrectness(request_handler.RequestHandler):
 
-# A POST request is made via AJAX when the user clicks "Check Answer".
-# This allows us to reset the user's streak if the answer was wrong.  If we wait
-# until he clicks the "Next Problem" button, he can avoid resetting his streak
-# by just reloading the page.
-
+    # RegisterCorrectness uses a GET request to solve the IE-behind-firewall
+    # issue with occasionally stripped POST data.
+    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
+    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
     def post(self):
+        self.get()
+
+    # A GET request is made via AJAX when the user clicks "Check Answer".
+    # This allows us to reset the user's streak if the answer was wrong.  If we wait
+    # until he clicks the "Next Problem" button, he can avoid resetting his streak
+    # by just reloading the page.
+    def get(self):
         user = util.get_current_user()
         if user:
             key = self.request.get('key')
+
+            if not key:
+                logging.warning("Missing key data in RegisterCorrectness")
+                self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
+                return
+
             correct = int(self.request.get('correct'))
+
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
 
@@ -1473,18 +1186,20 @@ class GenerateHomepageContent(request_handler.RequestHandler):
                              os.path.join(os.path.dirname(__file__), 'videolibrary_topic.html'), 
                              os.path.join(os.path.dirname(__file__), 'videolibrary_playlist.html')),
             }
-        path = os.path.join(os.path.dirname(__file__), 'homepage_content_template.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('homepage_content_template.html', template_values)
 
 class GenerateLibraryContent(request_handler.RequestHandler):
+
+    def post(self):
+        # We support posts so we can fire task queues at this handler
+        self.get()
 
     def get(self):
         library_content_html(bust_cache=True)
         self.response.out.write("Library content regenerated")  
 
 @layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date(),
-        persist_across_app_versions = True
+        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         ) 
 def library_content_html(bust_cache = False):
 
@@ -1640,6 +1355,22 @@ class Crash(request_handler.RequestHandler):
         else:
             # Even Watson isn't perfect
             raise Exception("What is Toronto?")
+
+class SendToLog(request_handler.RequestHandler):
+    def post(self):
+        message = self.request_string("message", default="")
+        if message:
+            logging.critical("Manually sent to log: %s" % message)
+
+class MobileFullSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(True)
+        self.redirect("/")
+
+class MobileSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(False)
+        self.redirect("/")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1647,7 +1378,6 @@ class ViewHomePage(request_handler.RequestHandler):
 
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         
         thumbnail_link_sets = [
             [
@@ -1682,6 +1412,13 @@ class ViewHomePage(request_handler.RequestHandler):
             ],
             [
                 { 
+                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html", 
+                    "src": "/images/splashthumbnails/ted_thumbnail.jpg", 
+                    "desc": "Sal on the Khan Academy @ TED",
+                    "youtube_id": "gM95HHI4gLk",
+                    "selected": False,
+                },
+                { 
                     "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
                     "src": "/images/splashthumbnails/tech_award_thumbnail.png", 
                     "desc": "What is the Khan Academy?",
@@ -1693,13 +1430,6 @@ class ViewHomePage(request_handler.RequestHandler):
                     "src": "/images/splashthumbnails/exercises_thumbnail.png", 
                     "desc": "Overview of our exercise software",
                     "youtube_id": "hw5k98GV7po",
-                    "selected": False,
-                },
-                { 
-                    "href": "/video/cnn---google-award-to-khan-academy", 
-                    "src": "/images/splashthumbnails/cnn_thumbnail.png", 
-                    "desc": "CNN: Google award to Khan Academy",
-                    "youtube_id": "QGxgAHer3Ow",
                     "selected": False,
                 },
                 { 
@@ -1731,11 +1461,10 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
-                                                  'logout_url': logout_url,
+                                                  'is_mobile_allowed': True,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
-        path = os.path.join(os.path.dirname(__file__), 'homepage.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('homepage.html', template_values)
         
 class ViewFAQ(request_handler.RequestHandler):
     def get(self):
@@ -1763,12 +1492,11 @@ class ViewStore(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
                                                   
         self.render_template('store.html', template_values)
@@ -1785,7 +1513,6 @@ class ViewSAT(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         playlist_title = "SAT Preparation"
         query = Playlist.all()
         query.filter('title =', playlist_title)
@@ -1800,18 +1527,16 @@ class ViewSAT(request_handler.RequestHandler):
                                                   'username': user and user.nickname() or "",
                                                   'videos': playlist_videos,
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'sat.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
 
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         problem_solving = VideoPlaylist.get_query_for_playlist_title("GMAT: Problem Solving")
         data_sufficiency = VideoPlaylist.get_query_for_playlist_title("GMAT Data Sufficiency")
         template_values = qa.add_template_values({'App': App,
@@ -1820,11 +1545,10 @@ class ViewGMAT(request_handler.RequestHandler):
                                                   'data_sufficiency': data_sufficiency,
                                                   'problem_solving': problem_solving,
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
                                                   
-        path = os.path.join(os.path.dirname(__file__), 'gmat.html')
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('gmat.html', template_values)
                        
 
 class RetargetFeedback(bulk_update.handler.UpdateKind):
@@ -1911,12 +1635,6 @@ class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
         return False
     
     def update(self, playlist):
-        query = ExercisePlaylist.all()
-        query.filter('playlist =', playlist)
-        referrer = query.get()
-        if referrer is not None:
-            logging.debug("Keeping Playlist %s.  It is still referenced by ExercisePlaylist %s", playlist.key().id(), referrer.key().id())
-            return False
         query = VideoPlaylist.all()
         query.filter('playlist =', playlist)
         referrer = query.get()
@@ -1990,12 +1708,11 @@ class ViewInfoPage(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
-                                                  'logout_url': logout_url}, 
+                                                  }, 
                                                   self.request)
         # Get the corresponding page from the info site
         path = urllib.unquote(self.request.path.rpartition('/')[2])
@@ -2015,7 +1732,6 @@ class ViewArticle(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
-        logout_url = users.create_logout_url(self.request.uri)
         video = None
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
@@ -2031,19 +1747,19 @@ class ViewArticle(request_handler.RequestHandler):
                                                   'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'article_url': article_url,
-                                                  'logout_url': logout_url,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
 
         self.render_template("article.html", template_values)
             
 class Login(request_handler.RequestHandler):
-
     def get(self):
         return self.post()
 
     def post(self):
-        cont = self.request.get('continue')
+        cont = self.request_string('continue', default = "/")
+        direct = self.request_bool('direct', default = False)
+
         openid_identifier = self.request.get('openid_identifier')
         if openid_identifier is not None and len(openid_identifier) > 0:
             if App.accepts_openid:
@@ -2055,12 +1771,26 @@ class Login(request_handler.RequestHandler):
         if App.facebook_app_secret is None:
             self.redirect(users.create_login_url(cont))
             return
-        path = os.path.join(os.path.dirname(__file__), 'login.html')
         template_values = {
-                           'App': App,
-                           'continue': cont                              
+                           'continue': cont,
+                           'direct': direct
                            }
-        self.response.out.write(template.render(path, template_values))
+        self.render_template('login.html', template_values)
+
+class PostLogin(request_handler.RequestHandler):
+    def get(self):
+        cont = self.request_string('continue', default = "/")
+
+        # Immediately after login we make sure this user has a UserData entry
+        user = util.get_current_user()
+        if user:
+            UserData.get_or_insert_for(user)
+
+        self.redirect(cont)
+
+class Logout(request_handler.RequestHandler):
+    def get(self):
+        self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):
 
@@ -2126,20 +1856,17 @@ def real_main():
         ('/video_mapping', GenerateVideoMapping),  
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/syncvideodata', UpdateVideoData),
-        ('/readablevideonames', UpdateVideoReadableNames),
         ('/exercises', ViewExercise),
-        ('/editexercise', EditExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisevideos', ViewExerciseVideos),
         ('/viewexercisesonmap', KnowledgeMap),
         ('/testdatastore', DataStoreTest),
-        ('/admin94040', ExerciseAdminPage),
+        ('/editexercise', exercises.EditExercise),
+        ('/updateexercise', exercises.UpdateExercise),
+        ('/admin94040', exercises.ExerciseAdmin),
         ('/adminusers', ViewUsers),
         ('/videoless', VideolessExercises),
         ('/adminuserdata', AdminViewUser),
-        ('/updateexercise', UpdateExercise),
         ('/graphpage.html', GraphPage),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
@@ -2160,6 +1887,9 @@ def real_main():
         ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
         ('/showunusedplaylists', ShowUnusedPlaylists),
         ('/crash', Crash),
+
+        ('/mobilefullsite', MobileFullSite),
+        ('/mobilesite', MobileSite),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
@@ -2169,17 +1899,24 @@ def real_main():
         ('/admin/fixplaylistref', FixPlaylistRef),
         ('/admin/deletestaleplaylists', DeleteStalePlaylists),
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
+        ('/admin/badgestatistics', util_badges.BadgeStatistics),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+        ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
+        ('/admin/youtubesync', youtube_sync.YouTubeSync),
 
         ('/coaches', coaches.ViewCoaches),
-        ('/registercoach', coaches.RegisterCoach),  
-        ('/unregistercoach', coaches.UnregisterCoach),          
+        ('/students', coaches.ViewStudents), 
+        ('/registercoach', coaches.RegisterCoach),
+        ('/unregistercoach', coaches.UnregisterCoach),
+        ('/unregisterstudent', coaches.UnregisterStudent),
+        ('/requeststudent', coaches.RequestStudent),
+        ('/acceptcoach', coaches.AcceptCoach),
+
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        
         ('/sharedpoints', coaches.ViewSharedPoints),        
-        ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
@@ -2209,34 +1946,13 @@ def real_main():
         
         ('/press/.*', ViewArticle),
         ('/login', Login),
+        ('/postlogin', PostLogin),
+        ('/logout', Logout),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 
         ('/deletevideoplaylists', DeleteVideoPlaylists), 
         ('/killliveassociations', KillLiveAssociations),
-
-        # Below are all qbrary related pages
-        ('/qbrary', qbrary.IntroPage),
-        ('/worldhistory', qbrary.IntroPage),
-        ('/managequestions', qbrary.ManageQuestions),
-        ('/subjectmanager', qbrary.SubjectManager),
-        ('/editsubject', qbrary.CreateEditSubject),
-        ('/viewsubject', qbrary.ViewSubject),
-        ('/deletequestion', qbrary.DeleteQuestion),
-        ('/deletesubject', qbrary.DeleteSubject),
-        ('/changepublished', qbrary.ChangePublished),
-        ('/pickquestiontopic', qbrary.PickQuestionTopic),
-        ('/pickquiztopic', qbrary.PickQuizTopic),
-        ('/answerquestion', qbrary.AnswerQuestion),
-        ('/previewquestion', qbrary.PreviewQuestion),
-        ('/rating', qbrary.Rating),
-        ('/viewquestion', qbrary.ViewQuestion),
-        ('/editquestion', qbrary.CreateEditQuestion),
-        ('/addquestion', qbrary.CreateEditQuestion),
-        ('/checkanswer', qbrary.CheckAnswer),
-        ('/sessionaction', qbrary.SessionAction),
-        ('/flagquestion', qbrary.FlagQuestion),
-        ('/viewauthors', qbrary.ViewAuthors),
 
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),
@@ -2248,20 +1964,30 @@ def real_main():
         ('/discussion/editentity', qa.EditEntity),
         ('/discussion/answers', qa.Answers),
         ('/discussion/pagequestions', qa.PageQuestions),
+        ('/discussion/clearflags', qa.ClearFlags),
+        ('/discussion/flagentity', qa.FlagEntity),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
-        ('/discussion/videofeedbacklist', qa.VideoFeedbackList),
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
         ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),
+        ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
 
         ('/badges/view', util_badges.ViewBadges),
+
+        ('/jobs/dev', jobs.FullTimeDeveloper),
+
+        ('/sendtolog', SendToLog),
+        ('/testuserdata', TestUserData),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
         ('/index\.html', PermanentRedirectToHome),
 
         ], debug=True)
+
+    application = request_cache.RequestCacheMiddleware(application)
+
     run_wsgi_app(application)
 
 def profile_main():
@@ -2280,7 +2006,7 @@ def profile_main():
     print "</pre>"
     
 main = real_main
-# Uncomment the following line to enable profiling
+# Uncomment the following line to enable profiling 
 # main = profile_main
 
 if __name__ == '__main__':

@@ -20,7 +20,9 @@ function validateEmail(sEmail)
 function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
     var o = {
                 "label": match.title,
+                "title": match.title,
                 "value": match.url,
+                "key": match.key,
                 "fPlaylist": fPlaylist
             }
 
@@ -30,9 +32,9 @@ function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
     list[list.length] = o;
 }
 
-function initAutocomplete()
+function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
 {
-    var autocompleteWidget = $("#page_search input").autocomplete({
+    var autocompleteWidget = $(selector).autocomplete({
         delay: 150,
         source: function(req, fxnCallback) {
 
@@ -55,9 +57,13 @@ function initAutocomplete()
                     }
 
                     // Add playlist and video matches to list of autocomplete suggestions
-                    for (var ix = 0; ix < data.playlists.length; ix++)
+                    
+                    if (fPlaylists)
                     {
-                        addAutocompleteMatchToList(matches, data.playlists[ix], true, reMatch);
+                        for (var ix = 0; ix < data.playlists.length; ix++)
+                        {
+                            addAutocompleteMatchToList(matches, data.playlists[ix], true, reMatch);
+                        }
                     }
                     for (var ix = 0; ix < data.videos.length; ix++)
                     {
@@ -73,7 +79,10 @@ function initAutocomplete()
             return false;
         },
         select: function(e, ui) {
-            window.location = ui.item.value;
+            if (fxnSelect)
+                fxnSelect(ui.item);
+            else
+                window.location = ui.item.value;
             return false;
         },
         open: function(e, ui) {
@@ -93,7 +102,7 @@ function initAutocomplete()
             }
         }
     }).bind("keydown.autocomplete", function(e) {
-        if (e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.NUMPAD_ENTER)
+        if (!fIgnoreSubmitOnEnter && e.keyCode == $.ui.keyCode.ENTER || e.keyCode == $.ui.keyCode.NUMPAD_ENTER)
         {
             if (!autocompleteWidget.data("autocomplete").selectedItem)
             {
@@ -296,10 +305,10 @@ var VideoStats = {
         var percent = this.getPercentWatched();
         var dtSinceSaveBeforeError = this.dtSinceSave;
 
-        $.ajax({type: "POST",
+        $.ajax({type: "GET",
                 url: "/logvideoprogress", 
                 data: {
-                    video_key: $("#video_key").val(),
+                    video_key: $(".video_key_primary").val(),
                     last_second_watched: this.getSecondsWatched(),
                     seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
                 },
@@ -321,12 +330,12 @@ var VideoStats = {
         try { eval("var dict_json = " + data); }
         catch(e) { return; }
 
-        if (dict_json.video_points && dict_json.points)
+        if (dict_json.video_points && dict_json.user_points_html)
         {
             var jelPoints = $(".video-energy-points");
             jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
-            $("#page_top_nav .energy-points-badge").text(dict_json.points);
+            $("#user-points-container").html(dict_json.user_points_html);
         }
     },
 
@@ -369,12 +378,21 @@ var Drawer = {
         $(window).resize(function(){Drawer.resize();});
         this.resize();
 
-        if (window.KnowledgeMap)
+        if (window.iScroll)
         {
-            $(".exercise-badge").hover(
-                    function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
-                    function(){KnowledgeMap.onBadgeMouseout.apply(this);}
-            );
+            // Mobile device, support single-finger touch scrolling
+            $("#dashboard-drawer").removeClass("drawer-hoverable");
+            var scroller = new iScroll('dashboard-drawer-inner', { hScroll: false, hScrollbar: false, vScrollbar: false });
+        }
+        else
+        {
+            if (window.KnowledgeMap)
+            {
+                $(".exercise-badge").hover(
+                        function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
+                        function(){KnowledgeMap.onBadgeMouseout.apply(this);}
+                );
+            }
         }
     },
 
@@ -433,9 +451,12 @@ var Drawer = {
     },
 
     resize: function() {
-        var jel = $("#dashboard-drawer, #dashboard-map");
+        var jel = $("#dashboard-drawer, #dashboard-drawer-inner, #dashboard-map");
+        var jelDrawerInner = $("#dashboard-drawer-inner");
         var yTop = jel.offset().top;
         jel.height($(window).height() - yTop - $("#footer").height());
+        // Account for padding in the dashboard drawer
+        jelDrawerInner.height(jelDrawerInner.height() - 20);
 
         if (window.KnowledgeMap && KnowledgeMap.map)
             google.maps.event.trigger(KnowledgeMap.map, 'resize');
@@ -463,7 +484,7 @@ var Badges = {
 
     hide: function() {
         var jel = $(".badge-award-container");
-        jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
+        jel.animate({top: -1 * jel.height()}, 500, function(){jel.hide();});
     },
 
     showMoreContext: function(el) {
@@ -525,19 +546,35 @@ var MailingList = {
     }
 }
 
-function fixFacebookLogin()
-{
-    // Older versions of Firefox require an href attribute on the link inside
-    // of our css-menus to stop a .mousedown from closing the menu before .click
-    // can fire.
-    var jel = $("#login-menu a.fb_button");
+var CSSMenus = {
 
-    if (!jel.length)
-    {
-        setTimeout(fixFacebookLogin, 250);
-        return;
+    active_menu: null,
+
+    init: function() {
+        // Make the CSS-only menus click-activated
+        $('.noscript').removeClass('noscript');
+        $('.css-menu > ul > li').click(function() {
+            if (CSSMenus.active_menu) CSSMenus.active_menu.removeClass('css-menu-js-hover');
+
+            if (CSSMenus.active_menu && this == CSSMenus.active_menu[0])
+                CSSMenus.active_menu = null;
+            else
+                CSSMenus.active_menu = $(this).addClass('css-menu-js-hover');
+        });
+
+        $(document).bind("click focusin", function(e){
+            if (CSSMenus.active_menu && $(e.target).closest(".css-menu").length == 0) {
+                CSSMenus.active_menu.removeClass('css-menu-js-hover');
+                CSSMenus.active_menu = null;
+            }
+        });
+
+        // Make the CSS-only menus keyboard-accessible
+        $('.css-menu a').focus(function(e){
+            $(e.target).addClass('css-menu-js-hover').closest(".css-menu > ul > li").addClass('css-menu-js-hover');
+        }).blur(function(e){
+            $(e.target).removeClass('css-menu-js-hover').closest(".css-menu > ul > li").removeClass('css-menu-js-hover');
+        });
     }
-
-    jel.attr("href", "javascript: void 0;");
 }
-$(fixFacebookLogin);
+$(CSSMenus.init);

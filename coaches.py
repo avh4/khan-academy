@@ -13,129 +13,179 @@ from django.utils import simplejson
 
 from app import App
 import app
+import facebook_util
 import util
 import request_handler
 
-from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, ExerciseGraph
+from models import UserData, CoachRequest
 from badges import util_badges
 
 from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
 from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPerMinuteGraph, ClassTimeGraph
 
-def meanstdv(x):
-    n, mean, std = len(x), 0, 0
-    for a in x:
-	mean = mean + a
-    mean = mean / float(n)
-    for a in x:
-	std = std + (a - mean)**2
-    std = sqrt(std / float(n-1))
-    return mean, std
-    
-    
-class Class(db.Model):
-
-    coach = db.StringProperty()
-    blacklist = db.StringListProperty()
-
-    def compute_stats(self, student_data, date):
-        student = student_data.user
-        key = self.coach + ":" + date.strftime('%Y-%m-%d')
-        day_stats = DayStats.get_or_insert(key, class_ref=self, avg_modules_completed=1.0, standard_deviation=0.0) 
-        student_stats = StudentStats.get_or_insert(key+":"+student.email(), day_stats=day_stats, student=student) 
-            
-        student_stats.modules_completed = len(student_data.all_proficient_exercises) + 1       
-        student_stats.put()   
-        modules_completed_list = []
-        for student_stats in StudentStats.all().filter('day_stats =', day_stats):
-           modules_completed_list.append(student_stats.modules_completed)
-        if len(modules_completed_list) > 1:
-            logging.info("modules_completed_list: " + str(modules_completed_list))
-            day_stats.avg_modules_completed, day_stats.standard_deviation = meanstdv(modules_completed_list) 
-            logging.info("day_stats.avg_modules_completed: " + str(day_stats.avg_modules_completed))
-            logging.info("day_stats.standard_deviation: " + str(day_stats.standard_deviation)) 
-            day_stats.put()
-            
-    def get_stats_for_period(self, joined_date, start_date, end_date):
-        stats = []
-        for day_stats in DayStats.all().filter('class_ref =', self).filter('date >=', start_date).filter('date <=', end_date):
-            day_stats.days_until_proficient = (day_stats.date - joined_date.date()).days  
-            stats.append(day_stats)
-        return stats
-
-
-class DayStats(db.Model):
-
-    class_ref = db.ReferenceProperty(Class)
-    date = db.DateProperty(auto_now_add = True)    
-    avg_modules_completed = db.FloatProperty(default = 1.0)
-    standard_deviation = db.FloatProperty(default = 0.0)
-
-    
-class StudentStats(db.Model):
-
-    day_stats = db.ReferenceProperty(DayStats)    
-    student = db.UserProperty()
-    modules_completed = db.IntegerProperty(default = 0)
-    
-    
-    
 class ViewCoaches(request_handler.RequestHandler):
-
     def get(self):
         user = util.get_current_user()
         if user:
+            invalid_coach = self.request_bool("invalid_coach", default = False)
+
             user_data = UserData.get_or_insert_for(user)
-            logout_url = users.create_logout_url(self.request.uri)
+            coach_requests = CoachRequest.get_for_student(user).fetch(1000)
 
             template_values = {
-                'App' : App,
-                'username': user.nickname(),
-                'logout_url': logout_url,
-                'coaches': user_data.coaches
-                }
+                        "coaches": user_data.coaches,
+                        "invalid_coach": invalid_coach,
+                        "coach_requests": coach_requests,
+                        "student_id": user.email(),
+                    }
 
             self.render_template('viewcoaches.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
-            
-            
+
+class ViewStudents(request_handler.RequestHandler):
+    def get(self):
+        user = util.get_current_user()
+        if user:
+
+            invalid_student = self.request_bool("invalid_student", default = False)
+
+            user_data = UserData.get_or_insert_for(user)
+            student_emails = user_data.get_students()
+            coach_requests = CoachRequest.get_for_coach(user)
+
+            template_values = {
+                        "student_emails": student_emails,
+                        "invalid_student": invalid_student,
+                        "coach_requests": coach_requests,
+                    }
+            self.render_template('viewstudents.html', template_values)
+        else:
+            self.redirect(util.create_login_url(self.request.uri))
+
 class RegisterCoach(request_handler.RequestHandler):
-    
     def post(self):
         user = util.get_current_user()
+
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         user_data = UserData.get_or_insert_for(user)
-        coach_email = self.request.get('coach').lower()            
-        user_data.coaches.append(coach_email)
-        user_data.put()
+
+        coach_email = self.request_string("coach", default="")
+        if coach_email:
+            coach_user = users.User(coach_email)
+            coach_user_data = UserData.get_for(coach_user)
+
+            if coach_user_data:
+
+                if coach_email not in user_data.coaches and coach_email.lower() not in user_data.coaches:
+                    user_data.coaches.append(coach_email)
+                    user_data.put()
+
+                self.redirect("/coaches")
+                return
+
+        self.redirect("/coaches?invalid_coach=1")
+
+class RequestStudent(request_handler.RequestHandler):
+    def post(self):
+        user = util.get_current_user()
+
+        if user is None:
+            self.redirect(util.create_login_url(self.request.uri))
+            return
+
+        student_email = self.request_string("student_email")
+        if student_email:
+            student = users.User(student_email)
+            user_data_student = UserData.get_for(student)
+            if user_data_student and not user_data_student.is_coached_by(user):
+                coach_request = CoachRequest.get_or_insert_for(user, student)
+                if coach_request:
+                    self.redirect("/students")
+                    return
+
+        self.redirect("/students?invalid_student=1")
+
+class AcceptCoach(request_handler.RequestHandler):
+    def get(self):
+        user = util.get_current_user()
+
+        if user is None:
+            self.redirect(util.create_login_url(self.request.uri))
+            return
+
+        accept_coach = self.request_bool("accept", default = False)
+        user_data_student = UserData.get_or_insert_for(user)
+
+        coach_email = self.request_string("coach_email")
+        if coach_email:
+            coach = users.User(coach_email)
+            user_data_coach = UserData.get_for(coach)
+            if user_data_coach and not user_data_student.is_coached_by(coach):
+                coach_request = CoachRequest.get_for(coach, user)
+                if coach_request:
+                    coach_request.delete()
+
+                    if accept_coach:
+                        user_data_student.coaches.append(coach.email())
+                        user_data_student.put()
+
         self.redirect("/coaches")
-            
 
 class UnregisterCoach(request_handler.RequestHandler):
-
-    def post(self):
+    def get(self):
         user = util.get_current_user()
+
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
             return
+
         user_data = UserData.get_or_insert_for(user)
         coach_email = self.request.get('coach')
+
         if coach_email:
-            if coach_email in user_data.coaches:
+            try:
                 user_data.coaches.remove(coach_email)
-                user_data.put()
-            elif coach_email.lower() in user_data.coaches:
                 user_data.coaches.remove(coach_email.lower())
-                user_data.put()          
+            except ValueError:
+                pass
+
+            user_data.put()          
+
         self.redirect("/coaches") 
 
+class UnregisterStudent(request_handler.RequestHandler):
+    def get(self):
+        user = util.get_current_user()
+
+        if user is None:
+            self.redirect(util.create_login_url(self.request.uri))
+            return
+
+        user_data = UserData.get_or_insert_for(user)
+        student_email = self.request_string("student_email")
+
+        if student_email:
+
+            student = users.User(student_email)
+            user_data_student = UserData.get_for(student)
+
+            if user_data_student:
+
+                try:
+                    user_data_student.coaches.remove(user.email())
+                    user_data_student.coaches.remove(user.email().lower())
+                except ValueError:
+                    pass
+
+                user_data_student.put()
+
+        self.redirect("/students")
 
 class ViewIndividualReport(request_handler.RequestHandler):
-
     def get(self):
         # Individual reports being replaced by user profile
         self.redirect("/profile")
@@ -147,11 +197,7 @@ class ViewSharedPoints(request_handler.RequestHandler):
 class ViewProgressChart(request_handler.RequestHandler):
     def get(self):    
         self.redirect("/profile?selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
-            
-class ViewStudents(request_handler.RequestHandler):
-    def get(self):
-        self.redirect("/class_profile")
-       
+             
 class ViewClassTime(request_handler.RequestHandler):
     def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassTimeGraph.GRAPH_TYPE)

@@ -1,32 +1,15 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
 <style>
+#coaches {
+    padding: 18px 23px;
+}
 #coaches p {
     margin-top: 1.2em;
     margin-bottom: 1.2em;
 }
-#coaches table {
-    border-top: 2px solid #80C65A;
-    border-spacing: 0;
-    border-collapse: collapse;
-}
-#coaches td, #coaches th {
-    padding: 3px;
-}
-#coaches th {
-    BORDER-RIGHT: #fff 1px solid;
-    PADDING-RIGHT: 5px;
-    BORDER-TOP: #fff 1px solid;
-    PADDING-LEFT: 5px;
-    FONT-SIZE: 11px;
-    PADDING-BOTTOM: 4px;
-    VERTICAL-ALIGN: bottom;
-    COLOR: #333;
-    LINE-HEIGHT: 13px;
-    PADDING-TOP: 4px;
-    BORDER-BOTTOM: #ccc 1px solid;
-    FONT-FAMILY: arial,helvetica,sans-serif;
-    BACKGROUND-COLOR: #d2dded
+#coaches td {
+    padding: 9px;
 }
 #coaches tr.even_row td {
     background-color:#FFFFFF;
@@ -40,34 +23,64 @@
 {% block pagecontent %}
 
 <article id="coaches">
+<h2>Add a coach</h2>
 <p>
-Enter the coach id your coach gives you to allow them to view all of your performance data on the Khan Academy.
+    Your coach will give you their coach id. Enter it here to give them access to your Khan Academy data.
 </p>
-<p>
+
 <form action="/registercoach" method="post">
 <input type="text" name="coach">
-<input type="submit" value="Register Coach" class="simple-button">
+<input type="submit" value="Add coach" class="simple-button action-gradient">
 </form>
+
+{% if invalid_coach %}
+<p><span style="color:red;font-weight:bold;">We can't find this coach.</span></p>
+
+<p style="padding-left:18px;">
+        Make sure you're entering your full coach's full id, which looks like <strong>teacher@gmail.com</strong> or <strong>http://facebookid.khanacademy.org/1067499349</strong>.<br/>
+        If you're entering your coach id correctly and still having trouble, make sure your coach has logged in to the Khan Academy at least once.
 </p>
+{% endif %}
 
 {% if coaches %}
-<form action="/unregistercoach" method="post">
-<table>
-<tr><th>Coach</th><th>Unregister</th></tr>
-{% for coach in coaches %}
-		{% if forloop.counter|divisibleby:2 %}
-		<tr class="even_row" >
-		{% else %}
-		<tr class="odd_row">
-		{% endif %}
 
-		<td>{{coach}}</td>
-		<td><input type="checkbox" name="coach" value="{{coach}}"></td>
-		</tr>
-{% endfor %}
-</table>
-<p><input type="submit" value="Unregister Coach" class="simple-button"></p>
-</form>
+    <br/><br/>
+    <h2>Your coaches</h2>
+
+    <table>
+    {% for coach in coaches %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach|escape }}</td>
+                <td><a href="/unregistercoach?coach={{ coach|urlencode|escape }}" class="simple-button action-gradient">Remove coach</a></td>
+            </tr>
+    {% endfor %}
+    </table>
 {% endif %}
+
+{% if coach_requests %}
+    <h2 class="section-headline">New coaches are waiting</h2>
+
+    <p>These coaches have requested you as their student. <strong>If you accept them as your coach, they will have access to your Khan Academy data</strong>.</p>
+
+    <table>
+    {% for coach_request in coach_requests %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach_request.coach_requesting.email|escape }}</td>
+                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
+                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+<h2 class="section-headline">Your Student ID</h2>
+<p>If your coach asks for your student id, it is: {{student_id|escape}}</p>
 </article>
 {% endblock pagecontent %}

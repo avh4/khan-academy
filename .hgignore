@@ -1,0 +1,14 @@
+syntax: glob
+
+*.pyc
+*combined.js
+*compressed.js
+*combined.css
+*compressed.css
+*.pem
+secrets.py
+datastore/*
+sample_data/bulkloader-*
+*.DS_Store
+index.yaml
+offline/*

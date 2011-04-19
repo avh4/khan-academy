@@ -179,54 +179,83 @@ function handleCorrectness(isCorrect)
 		// we don't worry about it because they might just be having connectivity problems or need to log in again.
 		// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
 		// but it takes longer and is more noticeable.
-		$.post("/registercorrectness", 
-			{
+        
+        var data = {
 				key: $("#key").val(),
 				time_warp: $("#time_warp").val(),
-				correct: ((isCorrect && tries==0 && steps_given==0) ? 1 : 0),
+				correct: ((isCorrect && Exercise.tries==0 && Exercise.steps_given==0) ? 1 : 0),
                 hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
-			}); // Fire and forget, no callback.
+		};
+
+		$.get("/registercorrectness", data);
+
 		correctnessRegistered = true;		
 	}	
 	if (isCorrect)
 	{
 		
-		if (tries==0 && steps_given==0)
+		if (Exercise.tries==0 && Exercise.steps_given==0)
 		{
 			document.getElementById("correct").value="1"
 		}
 
-        $("#hint_used").val(steps_given == 0 ? "0" : "1");
-
-		$("#check-answer-results").show();
-		$("#check-answer-results #nextbutton").show();
-		$("#check-answer-button").hide();
-		document.images.feedback.src = correct.src;
+        $("#hint_used").val(Exercise.steps_given == 0 ? "0" : "1");
 		eraseCookie(notDoneCookie);
-		document.forms['answerform'].correctnextbutton.focus()
 	}
 	else
 	{
-		
-		tries++;
-		$("#check-answer-results").show();
-		$("#check-answer-results #nextbutton").hide();
-		document.images.feedback.src= incorrect.src;
+		Exercise.tries++;
 	}
+	showFeedback(isCorrect);
+}
+
+function showFeedback(isCorrect) {
+    if (isCorrect) {
+		$("#check-answer-button").hide();
+    	$("#next-container").show();
+        $("#next-question-button").focus();
+    	$("#feedback").attr("src", Exercise.correct.src);
+    } else {
+		$("#feedback").attr("src", Exercise.incorrect.src);
+    }
+    $("#feedback").show();
 }
 
 function checkFreeAnswer()
 {
-    var val = document.getElementById("answer").value;
-	var usersAnswer = parseFloatStrict(val);
-	var usersAnswerLocale = parseFloatLocale(val);
-	if (isNaN(usersAnswer) && isNaN(usersAnswerLocale)) 
-	{
-			window.alert("Your answer is not a number.  Please try again.");
-			return;
-	}
-	var isCorrect = ((usersAnswer==parseFloat(correctAnswer)) || (usersAnswerLocale==parseFloat(correctAnswer)));
+    
+    var result = isInputCorrect($("#answer").val(), correctAnswer, 0);
+    if (result != Answer.INVALID)
+    	handleCorrectness(result == Answer.CORRECT);
+}
 
+Answer = {
+    INVALID: 0,
+    CORRECT: 1,
+    INCORRECT: 2
+}
+
+function isInputCorrect(input_str, answer, epsilon) {
+    var usersAnswer = parseFloatStrict(input_str);
+	var usersAnswerLocale = parseFloatLocale(input_str);
+	if (isNaN(usersAnswer) && isNaN(usersAnswerLocale)) {
+		window.alert("Your answer is not a number.  Please try again.");
+		return Answer.INVALID;
+	}
+	
+	var within = Math.abs(usersAnswer - parseFloat(answer)) <= epsilon;
+	var withinLocale = Math.abs(usersAnswerLocale - parseFloat(answer)) <= epsilon;
+	
+	if (within || withinLocale)
+	    return Answer.CORRECT;
+    else
+        return Answer.INCORRECT;
+}
+
+function checkFreeAnswerString()
+{
+    var val = document.getElementById("answer").value;
+	var isCorrect = val===correctAnswer;
 	handleCorrectness(isCorrect);
 }
 
@@ -244,6 +273,7 @@ function parseFloatGeneric(val, str)
 
     return parseFloat(val);    
 }
+
 
 // Replace comma(s?) with . (for locale support)
 function parseFloatLocale(val)
@@ -270,6 +300,7 @@ function isNumericStrict(val)
 
 KhanAcademy = {
     random: Math.random, // Initialized so that it can work before seedRandom is called.
+    is_summative: false,
     
     seedRandom: function(seed) {
         var mathRandom = Math.random;
@@ -278,6 +309,14 @@ KhanAcademy = {
         Math.random = mathRandom;
     },
     
+    updateSeed: function(number) {
+        KhanAcademy.problem_number = number;
+        KhanAcademy.problem_seed = KhanAcademy.problem_number;
+        if (KhanAcademy.is_summative)
+            KhanAcademy.problem_seed += "-summative";
+        KhanAcademy.seedRandom(KhanAcademy.problem_seed);
+    },   
+     
 	onMathMLSupportReady: function(callbackWhenReady) {
 		ASCIIMathMLTranslate = translate;
 		translate = function(callback) {

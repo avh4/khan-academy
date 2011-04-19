@@ -1,0 +1,109 @@
+{% extends "multiple_choice_template.html" %}
+{% block maincode %}
+<script language=Javascript1.2><!--
+/***
+Gives different positive and negative quantities in different formats (percents and decimals) and the student has to order them from least to greatest
+***/
+
+var quantities = new Array();
+var quantDisplays = new Array();
+var correctOrder = new Array();
+var incorrectOrders = new Array();
+
+var PERCENT = 2; //formats as a %
+var DECIMAL = 3; //formats as a decimal
+
+
+function arrayMin(a, x) //returns the index of the smallest number that is larger than x
+{
+	var curMinIndex=-1;
+	var curMinValue=10000;
+	for(var j=0; j<a.length; j++)
+	{
+		if(a[j]>x && a[j]<curMinValue)
+		{
+			curMinIndex=j;
+			curMinValue=a[j];
+		}
+	}
+	return curMinIndex;	
+}
+
+
+function showOrderForDisplay(orderArray)
+{
+	var arrayString = '';
+	for(var i=0; i<orderArray.length; i++)
+	{
+		arrayString+=quantDisplays[orderArray[i]];
+		if(i<(orderArray.length-1))
+			arrayString+='`&nbsp;,&nbsp;`';
+	}
+	return arrayString;	
+	
+	
+}
+
+for(var i=0; i<5; i++)
+{
+	var numerator = getRandomIntRange(1,99) * Math.pow(-1,getRandomIntRange(0,1));
+	var denominator = getRandomIntRange(1,99);
+	var decValue = Math.round(numerator/denominator*100)/100;
+	while (inArray(decValue, quantities))
+	{
+		numerator = getRandomIntRange(1,99) * Math.pow(-1,getRandomIntRange(0,1));
+		denominator = getRandomIntRange(1,99);
+		decValue = Math.round(numerator/denominator*100)/100;
+	} 
+	quantities.push(decValue);
+	var formatType = getRandomIntRange(2,3);
+	if (formatType==DECIMAL)
+		quantDisplays.push(''+decValue);
+	else if (formatType==PERCENT)
+		quantDisplays.push((Math.round(numerator/denominator*1000)/10)+'%');
+}
+
+var curIndex = arrayMin(quantities, -99999);
+correctOrder.push(curIndex);
+
+while(correctOrder.length<quantities.length)
+{
+	curIndex = arrayMin(quantities, quantities[curIndex]);
+	correctOrder.push(curIndex);
+}
+
+setCorrectAnswer(showOrderForDisplay(correctOrder));
+
+while(incorrectOrders.length<6)
+{
+	var ranInd = randomIndices(correctOrder.length);
+	var incorrectOrder = arrayCopy(correctOrder);
+	var m = ranInd[0];
+	var n = ranInd[1];
+	var mValue = correctOrder[m];
+	incorrectOrder[m] = correctOrder[n];
+	incorrectOrder[n] = mValue;
+		
+	var alreadyUsed = false;
+	for(var i=0; i<incorrectOrders.length; i++)
+	{
+		if(arrayEqual(incorrectOrder, incorrectOrders[i]))
+			alreadyUsed = true;
+	}
+	if (alreadyUsed==false)
+	{
+		incorrectOrders.push(incorrectOrder);
+		possibleAnswers.push(showOrderForDisplay(incorrectOrder));
+	}
+}
+
+write_text('Order the following numbers from least to greatest:<center>`'+showOrderForDisplay([0,1,2,3,4])+'`</center>');
+for(var i=0; i<quantities.length; i++)
+	write_step('<center>`'+quantDisplays[i]+' = '+quantities[i]+'`</center>');
+
+//-->
+</script>
+{% endblock maincode %}
+
+{% block maincellwidth %}70%{% endblock maincellwidth %}
+  

@@ -42,6 +42,12 @@ class ViewClassProfile(request_handler.RequestHandler):
             # Sort students alphabetically and sort into 4 chunked up columns for easy table html
             dict_students_sorted = sorted(dict_students, key=lambda dict_student:dict_student["nickname"])
             students_per_row = 4
+
+            if len(dict_students_sorted):
+                # Make sure we have evenly filled out columns
+                while len(dict_students_sorted) % students_per_row:
+                    dict_students_sorted.append(None)
+
             students_per_col = max(1, len(dict_students_sorted) / students_per_row)
             list_cols = [[], [], [], []]
             list_students_columnized = []
@@ -52,7 +58,8 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             for ix in range(0, len(dict_students_sorted)):
                 dict_student = list_cols[ix % students_per_row][(ix / students_per_row) % students_per_col]
-                list_students_columnized.append(dict_student)
+                if dict_student:
+                    list_students_columnized.append(dict_student)
 
             template_values = {
                     'coach': coach,
@@ -120,6 +127,7 @@ class ViewProfile(request_handler.RequestHandler):
                 'user_badges_diamond': user_badges['diamond_badges'],
                 'user_badges_master': user_badges['user_badges_master'],
                 'user_badges': [user_badges['bronze_badges'], user_badges['silver_badges'], user_badges['gold_badges'], user_badges['platinum_badges'], user_badges['diamond_badges'],user_badges['user_badges_master']],
+                'student_user_data': user_data_student,
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False),
             }
 

@@ -16,8 +16,8 @@ writeText('Find the distance between the points <span style="color:green">(' + x
 correctAnswer = simplifiedRoot(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 setCorrectAnswer(correctAnswer);
 
-addWrongChoice(Math.abs(x1 - x2));
-addWrongChoice(Math.abs(y1 - y2));
+addWrongChoice(simplifiedRoot(Math.pow(x2 - x1, 2) * 3));
+addWrongChoice(simplifiedRoot(Math.pow(y2 - y1, 2) * 3));
 
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) + Math.abs(y1 - y2)));
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
@@ -25,8 +25,6 @@ addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2)));
 addWrongChoice(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2));
 
-addWrongChoice(Math.abs(x1 - x2) + Math.abs(y1 - y2));
-addWrongChoice(Math.abs(x1 - x2) * Math.abs(y1 - y2));
 addWrongChoice(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 // all distances should be positive
 // we're not testing integer subtraction here
@@ -75,26 +73,26 @@ function graph_update() {
 }
 
 function draw_next_step() {
-	if (steps_given==0) // x distance
+	if (Exercise.steps_given==0) // x distance
 	{
 		present.stroke = "blue";
 		present.fontfill = "blue";
 		present.line([x1, y1], [x2, y1]);
 		present.text([(x1 + x2)/2, y1], Math.abs(x2 - x1), above);
 	}
-	if (steps_given==1) // y distance
+	if (Exercise.steps_given==1) // y distance
 	{
 		present.stroke = "orange";
 		present.fontfill = "orange";
 		present.line([x2, y1], [x2, y2]);
 		present.text([x2, (y1 + y2)/2], Math.abs(y2 - y1), left);
 	}
-	if (steps_given==2)
+	if (Exercise.steps_given==2)
 	{
 		present.stroke = "red";
 		present.line([x1, y1], [x2, y2]);
 	}
-	if (steps_given==3)
+	if (Exercise.steps_given==3)
 	{
 		present.fontfill = "red";
 		present.text([(x1+x2)/2, (y1+y2)/2], correctAnswer, above);

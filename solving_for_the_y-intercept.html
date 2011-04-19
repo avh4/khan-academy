@@ -2,7 +2,7 @@
 {% block maincode %}
 <script language=Javascript1.2><!--
 var x1= get_random();
-var x2= get_random();
+var x2= 0; 
 var y1= get_random();
 var y2= get_random();
 
@@ -22,7 +22,7 @@ while ((x2==x1)
 	|| (y_min>0))
 {
 	x1= get_random();
-	x2= get_random();
+	x2= 0; 
 	y1= get_random();
 	y2= get_random();
 
@@ -45,7 +45,7 @@ function graph_update() {
 
 	var p1_position=aboveright;
 	var p2_position=aboveright;
-		
+
 	if ((y1>y2) && (x1>x2))
 	{
 		p1_position=aboveright;
@@ -68,26 +68,33 @@ function graph_update() {
 	}
 
 	
-	if (steps_given==0)
+	if (Exercise.steps_given==1)
 	{
 		
-		initPicture(x_min,x_max, y_min, y_max);
-		axes();
-		stroke="red";
-		marker='none';
-		plot("draw_line(x)");
-		stroke="none";
-		marker="dot";
-		line([x1,y1], [x1,y1]);
+		present.initPicture(x_min,x_max, y_min, y_max);
+		present.axes();
+		present.fontsize=16;
+		present.stroke="red";
+		present.marker='none';
+		present.plot("parent.draw_line(x)");
+		present.stroke="none";
+		present.marker="dot";
+		present.line([x1,y1], [x2, y2]);
 
-
-		text([x1,y1], "("+x1+","+y1+")", p1_position);
-		//text([x2,y2], "("+x2+","+y2+")", p2_position);
+		present.text([x1,y1], "(" + x1 +","+y1+")", p1_position);
+		present.text([x2,y2], "(" + x2 +","+y2+")", p2_position);
 		
 	}
-
 }
 
+// for some reason graph_update is commented out in graphutil.give_next_step
+// This is a work-around, it's ok as long as we don't start loading exercises
+// without a page change.
+parent_give_next_step = give_next_step;
+give_next_step = function() {
+    parent_give_next_step();
+    graph_update();
+}
 
 function draw_line(x) {
 	return ( m*x+b);
@@ -125,7 +132,7 @@ for (var i=0; i<5; i++)
 		bad_b_den = get_random();
 	}
 	//possibleAnswers.push('m='+format_fraction(bad_m_num, bad_m_den));
-	possibleAnswers.push('b='+format_fraction(bad_b_num, bad_b_den));
+	Exercise.possibleAnswers.push('b='+format_fraction(bad_b_num, bad_b_den));
 }
 
 
@@ -133,7 +140,7 @@ for (var i=0; i<5; i++)
 //-->
 </script>
 
-
+<iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="300" width="100%"></iframe>
 
 {% endblock maincell %}
 

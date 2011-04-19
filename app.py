@@ -20,9 +20,11 @@ class App(object):
     # during the deployment process.  Minor is always 1 on a dev
     # server.
     version = os.environ['CURRENT_VERSION_ID']
+
     # khanacademy.org
     facebook_app_id = secrets.facebook_app_id
     facebook_app_secret = secrets.facebook_app_secret
+
     remote_api_secret = secrets.remote_api_secret
 
     constant_contact_api_key = secrets.constant_contact_api_key

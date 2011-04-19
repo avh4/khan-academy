@@ -3,11 +3,15 @@
 {% block maincode %}
 <script src="/javascript/exercises/linear_equations.js?{{App.version}}"></script>
 <script src="/javascript/exercises/absolute_value_equations.js?{{App.version}}"></script>
-<script>
-    var exercise = new AbsoluteValueEquationsExercise();
-    exercise.init();
-</script>
-
 {% endblock maincode %}
+{% block maincell %}
+<script>
+    Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    Exercise.showNextProblem = function() {
+        var exercise = new AbsoluteValueEquationsExercise();
+    }
 
+</script>
+{% endblock maincell %}
 

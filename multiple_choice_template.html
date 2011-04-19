@@ -2,46 +2,12 @@
 {% block answerarea %}
 
 <span class="info-box-header">Answer</span>
+<div id="answer_content">
+</div>
+
 <script language=Javascript1.2><!--
-	var availAnswers = 1 + possibleAnswers.length + definiteWrongAnswers.length; // only so many answers available
-	answerChoices = new Array(Math.min(availAnswers, 5)); // at most 5 answers displayed, resize to fit
-	correctchoice = Math.round(KhanAcademy.random()*(answerChoices.length-0.02)-.49);
-	//Fill in the choices
-	//need to fix it so that the other choices can never be the same as the correct choice
 
-	var possibleWrongIndices=randomIndices(possibleAnswers.length);
-	var definiteWrongIndices=randomIndices(definiteWrongAnswers.length);
-	for (var i=0; i<answerChoices.length; i++)
-	{
-		if (i==correctchoice)
-		{
-			answerChoices[i]='`'+correct_answer+'`';
-		}
-		else
-		{
-			if (definiteWrongIndices.length>0)
-			{
-				answerChoices[i]='`'+definiteWrongAnswers[definiteWrongIndices.pop()]+'`';
-			}
-			else if (possibleWrongIndices.length>0)
-			{
-				answerChoices[i]='`'+possibleAnswers[possibleWrongIndices.pop()]+'`';
-			}
-			else
-				continue;
-		}
-	}
-
-    // if you need to rearrange order or answers implement preDisplay function in derived html
-    if (window.preDisplay)
-    {
-        preDisplay(answerChoices, correctchoice);
-    }
-
-	for (i=0; i<answerChoices.length; i++)
-    {
-		document.write('<label for="answerChoice'+i+'" onClick="select_choice('+i+')"><p style="white-space:nowrap;margin-top:10px;"><input type=\"radio\" id="answerChoice'+i+'" class="select-choice" name=\"selectAnswer\" onClick=\"select_choice('+i+')\">&nbsp;'+answerChoices[i]+'</input></p></label>');
-    }
+Exercise.fExtendsMultipleChoice = true;
 
 //-->
 </script>

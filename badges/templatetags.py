@@ -22,13 +22,13 @@ def badge_notifications():
     return {"user_badges": user_badges}
 
 @register.inclusion_tag(("../badges/badge_counts.html", "badges/badge_counts.html"))
-def badge_counts(user_data=None):
+def badge_counts(user_data):
 
     counts_dict = {}
-    if user_data is None:
-        counts_dict = badges.BadgeCategory.empty_count_dict()
-    else:
+    if user_data:
         counts_dict = util_badges.get_badge_counts(user_data)
+    else:
+        counts_dict = badges.BadgeCategory.empty_count_dict()
 
     sum_counts = 0
     for key in counts_dict:

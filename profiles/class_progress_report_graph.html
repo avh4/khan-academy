@@ -119,41 +119,22 @@
                 }
             });
          
-            $('.tableHeader').each(function(i){
+            $('#firstTd').css("width",$('.tableFirstCol').width());//for adjusting first td
+            $('div.tableHeader').each(function(i){
                 if (m < colCount){
          
-                    if (brow == 'mozilla'){
-                        $('#firstTd').css("width",$('.tableFirstCol').width());//for adjusting first td
-                        $(this).css('width',$('#table_div td:eq('+m+')').width());//for assigning width to table Header div
+                    var cellWidth = $('#table_div td:eq('+m+')').width();
+                    if (brow == 'msie'){
+                        cellWidth -= 2; //In IE there is difference of 2 px
                     }
-                    else if (brow == 'msie'){
-                        $('#firstTd').css("width",$('.tableFirstCol').width());
-                        $(this).css('width',$('#table_div td:eq('+m+')').width()-2);//In IE there is difference of 2 px
-                    }
-                    else if (brow == 'safari'){
-                        $('#firstTd').css("width",$('.tableFirstCol').width());
-                        $(this).css('width',$('#table_div td:eq('+m+')').width());
-                    }
-                    else {
-                        $('#firstTd').css("width",$('.tableFirstCol').width());
-                        $(this).css('width',$('#table_div td:eq('+m+')').innerWidth());
-                    }
+                    $(this).width(cellWidth);
                 }
                 m++;
             });
          
-            $('.tableFirstCol').each(function(i){
-                if(brow == 'mozilla'){
-                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').outerHeight());//for providing height using scrollable table column height
-                }
-                else if(brow == 'msie'){
-                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').innerHeight());
-                }
-                else {
-                    $(this).css('height',$('#table_div td:eq('+colCount*n+')').height());
-                }
-                n++;
-            });
+            if (brow == 'chrome' || brow == 'safari') {
+                $("#module-progress #table_div").css('top', '1px');
+            }
         }
     };
 
@@ -166,7 +147,7 @@
         <th id="firstTd" class="tableHeader">Student Progress</th>
         <td>
             <div id="divHeader" class="sizeOnResize" style="overflow:hidden;width:450px; line-height: 15px;">
-                <table cellspacing="0" cellpadding="0" border="1" >
+                <table cellspacing="0" cellpadding="0" border="1" style="width: 100%">
                   <tr>
                     {% for exercise_name in exercise_names %}
                         {% for student_email in exercise_data|hash:exercise_name %}
@@ -175,6 +156,7 @@
                             {% endif %}
                         {% endfor %}
                     {% endfor %}
+                    <th style="background: transparent; border-color: transparent; max-width:5px; min-width: 5px; width: 5px">&nbsp;</th>
                   </tr>
                 </table>
             </div>
@@ -197,17 +179,18 @@
                         {% endif %}
                     {% endfor %}
                 {% endfor %}
+                <td class="tableFirstCol student-email" style="background: transparent; border-color: transparent; max-width:5px; min-width: 5px; width: 5px">&nbsp;</td>
             </table>
           </div>
         </td>
 
         <td valign="top">
-            <div id="table_div" class="sizeOnResize" style="overflow:scroll;height:325px;width:450px;position:relative" onscroll="ProgressReport.onScroll();" >
-                <table style="width:100%" cellspacing="0" cellpadding="0" border="0" >
+            <div id="table_div" class="sizeOnResize fancy-scrollbar" style="overflow:scroll;height:325px;width:450px;position:relative;" onscroll="ProgressReport.onScroll();" >
+                <table style="width:100%;" cellspacing="0" cellpadding="0" border="0">
                     {% for student_email in student_emails %}
                     <tr {% if forloop.first %}id="firstTr"{% endif %}>
                     {% for exercise_name in exercise_names %}            
-                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escapejs }}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name={{ exercise_name|escapejs }}');" data-hover="{{exercise_data|hash:exercise_name|hash:student_email|hash:"hover"|escape}}"></td>
+                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escape }}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name={{ exercise_name|escapejs }}');" data-hover="{{exercise_data|hash:exercise_name|hash:student_email|hash:"hover"|escape}}"></td>
                     {% endfor %}
                     </tr>
                 {% endfor %}

@@ -129,7 +129,7 @@ addWrongChoice(formatFraction(myTriangle.adjLength, myTriangle.opLength*myTriang
 addWrongChoice(formatFraction(Math.pow(myTriangle.adjLength,2)+Math.pow(myTriangle.opLength,2),myTriangle.opLength)); 
 addWrongChoice(formatFraction(Math.pow(myTriangle.adjLength,2)+Math.pow(myTriangle.opLength,2),myTriangle.adjLength));
 
-while (possibleAnswers.length<5)
+while (Exercise.getNumPossibleAnswers() < 5)
 	addWrongChoice(getRandomIntRange(-10,10));
 
 

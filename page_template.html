@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
       xmlns:fb="http://www.facebook.com/2008/fbml">
-    <head>
+      <head>
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
+        <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
+
         <!-- For ChartBeat analytics START -->
         <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
         <!-- For ChartBeat analytics END -->
@@ -22,43 +24,40 @@
         <meta property="og:url" content="http://www.khanacademy.org"/>
         <meta property="og:image" content="http://www.khanacademy.org/images/handtreehorizontal_facebook.png"/>
         <meta property="og:site_name" content="khanacademy.org"/>
-        <meta property="fb:admins" content="100000121497109,718859633"/> {# That's Sal and Dean #}
+        <meta property="fb:admins" content="100000121497109,1305017"/> {# Sal/Ben #}
         <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
         <meta property="og:description"
               content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 2100+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
+
         <script>var KA_VERSION = '{{ App.version }}';</script>
-        {% shared_css %}
-        {% shared_javascript %}
 
-        <script type="text/javascript">
-            // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
-            (function(){
-                var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
-                for (var i = 0; i < html5elements.length; i++) {
-                    document.createElement(html5elements[i]);
-                }
-            })();
+        {% if is_mobile %}
+            {% mobile_css %}
+            {% mobile_javascript %}
+        {% else %}
+            {% shared_css %}
+            {% shared_javascript %}
 
-            $(function(){
-                // Configure the search form
-                $('#page_search input[type=text]').placeholder();
-                initAutocomplete();
-            });
+            <script type="text/javascript">
+                // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+                (function(){
+                    var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
+                    for (var i = 0; i < html5elements.length; i++) {
+                        document.createElement(html5elements[i]);
+                    }
+                })();
 
-	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
-	    var seedTotalViews = 28402468
-	    var seedDailyViews = 100000;
+                $(function(){
+                    // Configure the search form
+                    $('#page_search input[type=text]').placeholder();
+                    initAutocomplete("#page_search input", true);
+                });
+            </script>
 
-	    var currentTime = new Date();
-	    var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
-	    var viewsPerSecond = seedDailyViews/24/3600
-	    var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+        {% endif %}
 
-	    var totalViewsString = addCommas(""+estimatedTotalViews);
-
-        </script>
         {% block pagescript %}
         {% endblock pagescript %}
 
@@ -92,7 +91,10 @@
     
             {% if not username %}
                 FB.Event.subscribe('auth.login', function(response) {
-                    window.location.reload();
+                    if ('{{ continue|escapejs }}')
+                        window.location = '{{ continue|escapejs }}';
+                    else
+                        window.location.reload();
                 });
             {% endif %}
     
@@ -128,44 +130,23 @@
                             {% if username %}
                                 <span id="user-info">
                                     {% username_and_notification username user_data %}
-                                    {% if user_data %}
-                                        {% badge_counts user_data %}
-                                    {% else %}
-                                        {% badge_counts %}
-                                    {% endif %}
-                                {% if points %}
-                                    <span title="{{ points|thousands_separated }} energy points" class="energy-points-badge" onclick="location.href='/profile'">{{ points|thousands_separated }}</span>
-                                {% endif %}
+
+                                    {% badge_counts user_data %}
+                                    
+                                    {% user_points user_data %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
-                                <a id="page_logout" href="{{logout_url}}">Logout</a>
+                                <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                            <nav class="css-menu noscript" id="login-menu">
-                                <ul class="ui-corner-top">
-                                    <li class="ui-corner-top">
-                                        Login
-                                        <ul class="ui-corner-tr ui-corner-bottom">
-                                            <li id="page_login_options">
-                                                <a href="/login?openid_identifier=https://www.google.com/accounts/o8/id">Login with Google</a>
-                                            </li>
-                                            {% if App.facebook_app_secret %}
-                                            <li><fb:login-button>Login with Facebook</fb:login-button></li>
-                                            {% endif %}
-                                            {% if App.accepts_openid %}
-                                            <li>[<a href="{{login_url}}">more login choices...</a>]</li>
-                                            {% endif %}
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </nav>
+                                <a href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator">&nbsp;</span>
                             <a href="/contribute" id="donate-link">Donate</a>
                             <span class="separator">&nbsp;</span>
                             <span id="social-links">
-                                <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Youtube-Subscribe-Header']);" href="http://www.youtube.com/khanacademy"><img src="/images/youtube.png" alt="YouTube" title="YouTube"></a>
-                                <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy"><img src="/images/twitter.png" alt="Twitter" title="Twitter"></a>
-                                <a class="google-analytics-link-track" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy"><img src="/images/facebook.png" alt="Facebook" title="Facebook"></a>
+                                <a class="google-analytics-link-track youtube" onclick="_gaq.push(['_trackEvent', 'Click', 'Youtube-Subscribe-Header']);" href="http://www.youtube.com/khanacademy" title="Youtube"></a>
+                                <a class="google-analytics-link-track twitter" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy" title="Twitter"></a>
+                                <a class="google-analytics-link-track facebook" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy" title="Facebook"></a>
                             </span>
                             <span class="separator">&nbsp;</span>
                             <span id="fb-like-badge">
@@ -175,7 +156,7 @@
                     </div>
                     <div id="logo">
                         <div id="logo-highlight"></div>
-                        <a id="logo-image" href="/"><img src="/images/logo-no-highlight.png?{{App.version}}" alt="Khan Academy"></a>
+                        <a id="logo-image" href="/" title="Take me home!"></a>
                     </div>
                     <div id="stats">
                         <span id="page_visitors">
@@ -191,7 +172,7 @@
                         <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-left placeholder" /><input type="submit" value=" " id="search-submit" />
                     </form>
                 </div>
-                <div id="sitewide-navigation">
+                <div id="sitewide-navigation" class="action-gradient">
                     <nav>
                       <span class="links">
                           <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected watch-link"{% endifequal %}>Watch</a>
@@ -238,16 +219,24 @@
     	})();
     	</script>
     	<!-- For ChartBeat analytics END -->
-    
-    	<!-- ChartBeat API - get # of users online now BEGIN -->
-    
-       <script type="text/javascript">
-    
+
+        {% if not is_mobile %}
+           <script type="text/javascript">
+                var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
+                var seedTotalViews = 28402468
+                var seedDailyViews = 100000;
+
+                var currentTime = new Date();
+                var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
+                var viewsPerSecond = seedDailyViews/24/3600
+                var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+
+                var totalViewsString = addCommas(""+estimatedTotalViews);
+
                 $('#page_num_visitors').append(totalViewsString);
                 $('#page_visitors').css('display', 'inline');
-    	</script>
-    
-    	<!-- ChartBeat API - get # of users online now END -->
+            </script>
+        {% endif %}
     
     </div>
     </div>

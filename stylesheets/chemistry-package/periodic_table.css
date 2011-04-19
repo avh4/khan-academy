@@ -1,0 +1,48 @@
+.periodictable {
+    table-layout: fixed;
+    text-align: center;
+    width: 100%;
+}
+
+.periodictable .empty,
+.periodictable .element {
+    height: 40px;
+    width: 5.55%;
+}
+
+.periodictable .element {
+    border: 1px solid black;
+}
+
+.periodictable .element .atomic_weight {
+    font-size: 9px;
+}
+
+.periodictable .hydrogen { background-color: #99FF99; }
+.periodictable .alkali_metals { background-color: #FA6C68; }
+.periodictable .alkali_earth_metals { background-color: #FFDDAB; }
+.periodictable .transition_metals { background-color: #FCCAC9; }
+.periodictable .noble_gases { background-color: #C8FFF9; }
+.periodictable .lanthanides { background-color: #FCC0FE; }
+.periodictable .actinides { background-color: #FD98D0; }
+.periodictable .halogens { background-color: #FEFF97; }
+.periodictable .non_metals { background-color: #99FF99; }
+.periodictable .other_metals { background-color: #CC66CC; }
+.periodictable .semi_metals { background-color: #FF926D; }
+
+.periodictable .period.highlighted .element {
+    background-color: black;
+}
+
+.periodictable .element.group_highlighted {
+    background-color: black;
+}
+
+.periodictable .element.highlighted { 
+    background-color: black !important;
+    color: white !important;
+}
+
+.periodictable .element .highlighted { 
+    color: yellow;
+}

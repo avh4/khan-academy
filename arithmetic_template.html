@@ -11,7 +11,7 @@
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
      we update MathJax.
   {% endcomment %}
-  <script type="text/javascript" src="/MathJax-git-2011-01-14/MathJax.js">
+  <script type="text/javascript" src="/MathJax-1.1/MathJax.js">
       MathJax.Hub.Config({
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",
@@ -28,42 +28,49 @@
       });
   </script>
   <script type="text/javascript"><!--
+
+{% if exercise.summative %}
+    KhanAcademy.is_summative = true;
+{% endif %}
+
+KhanAcademy.updateSeed({{problem_number|escapejs}});
+
+// Because of legacy code's document.write usage,
+// Exercise.init and display must be called this way
+Exercise.init();  
 $(document).ready(function () {
 	KhanAcademy.onMathMLSupportReady(function() {
-		translate();
+	    {% if exercise.summative %}
+	    Exercise.fSupportsAjax = false;
+	    {% endif %}
+        Exercise.display();
 	});
+
 });
-var username = "{{cookiename}}";
-var currentexercise = "{{exid}}";
-KhanAcademy.problem_number = "{{problem_number}}";
-KhanAcademy.problem_seed = KhanAcademy.problem_number;
-{% if exercise.summative %}
-    {# We use different seeds for summative exercises so they do not reuse content already seen in normal exercises. #}
-    KhanAcademy.problem_seed = KhanAcademy.problem_seed + "-summative";
-{% endif %}
-KhanAcademy.seedRandom(KhanAcademy.problem_seed);
-function submitForm(value)
-{
-	var form = document.forms['answerform'];
-	if (form.beenSubmitted)
-		return false;
-	else
-		form.beenSubmitted = true;
-	form.submit();
-}
+var username = "{{cookiename|escapejs}}";
+var currentexercise = "{{exid|escapejs}}";
+
 // -->
 </script>
 {% endblock pagescript %}
 
 {% block pagecontent %}
-<div id="container" class="single-exercise">
+<div id="container" class="single-exercise" style="overflow: hidden">
 <div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
-<div class="exercise-badge single-exercise" data-id="{{exercise.name}}">
+<div class="exercise-badge single-exercise" data-id="{{exercise.name|escape}}">
 
         {% exercise_icon exercise App %}
 
-		<div class="energy-points-badge">{{exercise_points}}</div>
+		<div id="exercise-points" class="energy-points-badge">{{exercise_points}}</div>
 		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name|escape}}</A></div>
+		<div class="energy-points-badge">{{exercise_points}}</div>
+		<div class="energy-points-badge">{{exercise_points|escape}}</div>
+        <div class="exercise-title">
+            <a href="/exercises?exid={{exercise.name|escape}}">{{ exercise.display_name|escape }}</a>
+            {% if not exercise.live %}
+            <span style="color:red;">(admins only, <a href="/editexercise?name={{ exercise.name|escape }}">deploy</a>)</span>
+            {% endif %}
+        </div>
 		{% streak_bar user_exercise %}
 		<div class="related-content">
             {% if exercise.summative %}
@@ -76,9 +83,7 @@ function submitForm(value)
     </div>
 
     {% if not read_only %}
-        {% if endangered or reviewing or proficient or struggling %}
-            {% exercise_message exercise coaches endangered reviewing proficient struggling %}
-        {% endif %}
+        {% exercise_message exercise coaches exercise_states %}
     {% endif %}
     
 <div id="extras" class="single-exercise">
@@ -102,44 +107,53 @@ function submitForm(value)
 		<table style='float: right;'><tr>
 		{% block graphdisplay %}  {% endblock graphdisplay %}
 		</tr></table>
-		{% block maincell %}{% endblock maincell %}
-		<iframe id="svgedit" name="svgedit" width="100%" height="100%" allowtransparency="true" style="background-color: transparent; position: absolute; top: -26px; left: 0; width: 100%; height: 100%; overflow: hidden; border:none;"></iframe>
+		<div id="question_content_container" style="width: 2000px">
+    		<div id="question_content" style="position:relative; float: left"></div>
+		</div>
+		{% block maincell %}
+		    {% if exercise.summative %}
+    		    <iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>
+		    {% endif %}
+		{% endblock maincell %}
+		<iframe id="svgedit" name="svgedit" width="99%" height="99%" allowtransparency="true" frameBorder="0" scrolling="no" style="background-color: transparent; position: absolute; top: 0; left: 0; width: 99%; height: 99%; overflow: hidden; border:none;"></iframe>
 	</div>
 	<div id="answer_area">
-	   <form id="answerform" action="/registeranswer" method="post">
-	   <div class="info-box">
+	   <form id="answerform" action="/registeranswer" method="GET">
+	   <div class="info-box fancy-scrollbar">
 			{% block answerform %}
 
             {% if read_only %}
-                <span class="info-box-header">Problem #{{ problem_number }}</span>
+                <span class="info-box-header">Problem #{{ problem_number|escape }}</span>
                 <span class="info-box-subheader">You are viewing a problem in {{ exercise.display_name|escape }}.</span>
                 <span class="info-box-sub-description">To see the solution, 
                     <input class="button orange" type="button" value="show the next hint." onclick="evaluate_hint(true, true);"/></span>
                 <span class="info-box-sub-description">To work on problems like this, <a href="/exercises?exid={{ exid }}">start this exercise</a>.</span>
             {% endif %}
 
-			<input type="hidden" id="exid" name="exid" value="{{exid}}">
-			<input type="hidden" id="streak" name="streak" value="{{streak}}">
-			<input type="hidden" id="key" name="key" value="{{key}}">
-			<input type="hidden" id="start_time" name="start_time" value="{{start_time}}">
+			<input type="hidden" id="exid" name="exid" value="{{exid|escape}}">
+			<input type="hidden" id="streak" name="streak" value="{{streak|escape}}">
+			<input type="hidden" id="key" name="key" value="{{key|escape}}">
+			<input type="hidden" id="start_time" name="start_time" value="{{start_time|escape}}">
 			<input type="hidden" id="correct" name="correct" value="0" />
 			<input type="hidden" id="hint_used" name="hint_used" value="0" />
-			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp}}">
-			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number}}">
+			<input type="hidden" id="time_warp" name="time_warp" value="{{time_warp|escape}}">
+			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number|escape}}">
             {% block answerarea %}
                 {% if not read_only %}
-                <span class="info-box-header">Answer</span><input type="text" id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+                <span class="info-box-header">Answer</span><input {% if is_mobile %} type="number" {% else %} type="text" {% endif %}  id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
                 {% endif %}
             {% endblock answerarea %}
-
             {% if not read_only %}
-			<input type="button" class="button green" id="check-answer-button" value="Check Answer" onClick="check_answer_block()">
-			<div id="check-answer-results" style="display: none;">
-                <img src="/images/blank.gif" name="feedback" id="feedback">
-                <div id="nextbutton" class="button" style="position:relative; display: none;">
-                    <input type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="submitForm()">
+            {% block feedbackarea %}
+			<input type="button" class="button green" id="check-answer-button" tabindex="10" value="Check Answer" onClick="check_answer_block()">
+			<div id="check-answer-results">
+                <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
+                <div id="next-container" class="button" style="position:relative; display: none;">
+                    <input id="next-question-button" type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="Exercise.submitForm()">
+                    <img src="/images/throbber.gif" id="throbber" style="display:none;" />
                 </div>
             </div>
+            {% endblock feedbackarea %}
             {% endif %}
 			{% endblock answerform %}
 		<script type="text/javascript"><!--
@@ -224,27 +238,28 @@ function submitForm(value)
 $(document).ready(function() {
     var scratchpad_cookie_name = "show_scratchpad";
 
+    $('#svgedit').css('border', '1px solid #ccc');
+
 	function hideScratchPad() {
 		$('#scratch_pad_hide').css('display', 'none');
 		$('#scratch_pad_show').css('display', 'inline');
 		$('#svgedit').css('display', 'none');
-		$('#question_area').css('min-height', 'auto').css('padding-top', '0');
+		$('#question_area').css('min-height', 'auto').css('padding-left', '0');
         createCookie(scratchpad_cookie_name,"false",365);
         return false;
 	}
 	function showScratchPad() {
 		$('#scratch_pad_show').css('display', 'none');
 		$('#scratch_pad_hide').css('display', 'inline');
-		$('#question_area').css('min-height', '400px').css('padding-top', '54px');
+		$('#question_area').css('min-height', '460px').css('padding-left', '54px');
 		var svgedit = $('#svgedit');
 		svgedit.css('display', 'block');
 		if (!svgedit.attr('src')) {
 			/*
-			NOTE 1: app.yaml redirects svg-editor.html to our custom version in /helperpages/svg-editor.html.
-			NOTE 2: To avoid caching issues, the svg-edit version number below needs to be updated here and
-			in app.yaml whenever we update svg-edit.
+			NOTE: To avoid caching issues, the scratchpad version number below needs to be updated here and
+			in app.yaml whenever we update scratchpad.
 			*/
-			svgedit.attr('src', '/svg-edit-2.5-khan-120310-3/svg-editor.html');
+            svgedit.attr('src', '/scratchpad-2011-04-06/scratchpad.html');
 		}
         createCookie(scratchpad_cookie_name,"true",365);
         return false;
@@ -261,12 +276,9 @@ $(document).ready(function() {
 		return vars;
 	}
 
-	if (!$.browser.msie)
-	{
-		$('#scratch_pad_show').click(showScratchPad);
-		$('#scratch_pad_hide').click(hideScratchPad);
-		$('#scratch_pad_toggle').css('display', 'inline');
-	}
+    $('#scratch_pad_show').click(showScratchPad);
+    $('#scratch_pad_hide').click(hideScratchPad);
+    $('#scratch_pad_toggle').css('display', 'inline');
 
     if(readCookie(scratchpad_cookie_name) == "true")
         showScratchPad();

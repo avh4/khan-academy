@@ -199,7 +199,7 @@ function next_step()
 		var hintString = "";
 		if (doneBorrowing==false)
 		{
-			if (steps_given==0)
+			if (Exercise.steps_given==0)
 				hintString="First we need to make sure that all the digits in the top number are greater than the digit below it";
 			else
 			{
@@ -253,7 +253,7 @@ function next_step()
 			}
 		}
 		document.getElementById("hintbox").innerHTML = hintString;
-		steps_given++;
+		Exercise.steps_given++;
 	}
 }
 

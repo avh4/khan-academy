@@ -2,7 +2,7 @@ import sys, os, traceback, shutil
 from os.path import join
 
 from setup import offline_dir, ka_dir, replace_in_file, get_khanacademy_code
-sys.path.append("Khan Academy/code/khanacademy-read-only")
+sys.path.append("Khan Academy/code/khanacademy-stable")
 from topics_list import DVDs_dict
 
 
@@ -12,10 +12,13 @@ from topics_list import DVDs_dict
 readme_text = """
 This is version %s of the Khan Academy %s DVD.
 The changes since the last version can be seen here:
-http://code.google.com/p/khanacademy/source/list
+https://khanacademy.kilnhg.com/Repo/Website/Group/stable
 
 Click on run.bat to start up the server and load the local version of the 
-Khan Academy homepage in your browser.   
+Khan Academy homepage in your browser.  The first time you run it, it will
+install to your hard drive the code, but not the videos.  If you have trouble
+viewing the videos through the browser, you can always install the video
+player VLC (vlc-1.1.5-win32.exe) to see them directly in the videos folder.
 
 Let us know how this worked for you at the following address:
 khan-academy-comments@googlegroups.com
@@ -52,12 +55,12 @@ def copy_to_staging(DVD_name, staging_drive):
     os.chdir(staging_dir)  
     replace_in_file("run.bat", "rem --use_sqlite giving intermittent errors", '"%~dp0/code/Python25/python.exe" "%~dp0/code/copy_datastore.py"')
     replace_in_file("run.bat",
-        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" --datastore_path="%~dp0/code/dev_appserver.datastore" "%~dp0/code/khanacademy-read-only"',
-        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" "%~dp0/code/khanacademy-read-only"')        
+        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" --datastore_path="%~dp0/code/dev_appserver.datastore" "%~dp0/code/khanacademy-stable"',
+        '"%~dp0/code/Python25/python.exe" "%~dp0/code/google_appengine/dev_appserver.py" "%~dp0/code/khanacademy-stable"')        
     file = open("readme.txt", "w")
     file.write(readme_text % (revision, DVD_name))
     file.close()
-    os.chdir(staging_dir + "/code/khanacademy-read-only")
+    os.chdir(staging_dir + "/code/khanacademy-stable")
     replace_in_file("topics_list.py", "DVDs_dict.get(None)", "DVDs_dict.get('" + DVD_name + "')")    
         
     os.chdir(staging_dir + "/code")

@@ -302,8 +302,8 @@ function next_step()
 {
 	//uncolorNumbers();
 	explanationTerms = [];
-	steps_given++;
-	if (steps_given == 1) {
+	Exercise.steps_given++;
+	if (Exercise.steps_given == 1) {
 		writeExp('The *' + (is_remainder_problem ? 'remainder' : 'quotient') + '* is the answer.', nColor);
 	}
 	else if(divided==false) 
@@ -448,24 +448,32 @@ function next_step()
 			changeColor(curDropDownID, nColor);
 		}
 		curDigit++;
-		curDividend = difference*10+dividendDigits[dividendDigits.length-curDigit];
-		createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, dividendDigits[dividendDigits.length-curDigit]);
-		curDropDownID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
-		curDropDown = digits[curDropDownID].val;
-		curDropDownColor = digits[curDropDownID].color;
-		changeColor(dividendIDs[dividendIDs.length-curDigit], curDropDownColor);
-		writeExp('Bring down the ', nColor);
-		writeExp(curDropDown, curDropDownColor);
-		present.marker="arrow";
-		present.stroke = nColor;
-		present.line(getCoor(mainRow,dividendDigits.length-curDigit+1),getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1)); 
-		changeColor(curProductID, nColor);
-		
-		curProductRow++;
-		divided=false;
-		multiplied=false;
-		subtraction=false;
-
+        var curDividendID = dividendIDs.length-curDigit
+        if (curDividendID < 0) {
+            if (is_remainder_problem) {
+                writeExp('The remainder is ' + difference, differenceColor);
+            } else {
+                writeExp('The quotient is ' + quotient, nColor);
+            }
+        } else {
+            curDividend = difference*10+dividendDigits[curDividendID];
+            createEntry(mainRow-curProductRow, dividendDigits.length-curDigit+1, dividendDigits[dividendDigits.length-curDigit]);
+            curDropDownID = drawDigit(mainRow-curProductRow, dividendDigits.length-curDigit+1,true);
+            curDropDown = digits[curDropDownID].val;
+            curDropDownColor = digits[curDropDownID].color;
+            changeColor(dividendIDs[curDividendID], curDropDownColor);
+            writeExp('Bring down the ', nColor);
+            writeExp(curDropDown, curDropDownColor);
+            present.marker="arrow";
+            present.stroke = nColor;
+            present.line(getCoor(mainRow,dividendDigits.length-curDigit+1),getCoor(mainRow-curProductRow+1,dividendDigits.length-curDigit+1)); 
+            changeColor(curProductID, nColor);
+            
+            curProductRow++;
+            divided=false;
+            multiplied=false;
+            subtraction=false;
+        }
 	}
 	drawExplanation();	
 	

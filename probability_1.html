@@ -376,7 +376,7 @@ switch(getRandomIntRange(1, 4))
 				
 				var intNumerator =0;
 										
-				var StrSet = 'If a number is randomly chosen from the following set, what is the probability that the number is a multiple of ' + intMultiple + '?<br><br><b>{';
+				var StrSet = 'If a number is randomly chosen from the following list, what is the probability that the number is a multiple of ' + intMultiple + '?<br><br><b>[';
 				var StrSetUnderlined = '';
 				for(z=0; z<(intSetSize); z++){
 					StrSet = StrSet + arrSet[z];
@@ -391,7 +391,7 @@ switch(getRandomIntRange(1, 4))
 					
 					if ((z+1)!=intSetSize){StrSetUnderlined=StrSetUnderlined+', '}
 				}
-				StrSet = StrSet+'}</b>';
+				StrSet = StrSet+']</b>';
 				write_text(StrSet);
 				
 				setCorrectAnswer(format_fraction(intNumerator,intSetSize));

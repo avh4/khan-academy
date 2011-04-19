@@ -176,6 +176,7 @@ function initPicture(x_min,x_max,y_min,y_max) {
 	    var node = paper.rect(0, 0, width, height);
 	    
 	    node.attr({
+		"stroke": "white",
 		"stroke-width": 0,
 		"fill": "white"
 	    });
@@ -184,6 +185,31 @@ function initPicture(x_min,x_max,y_min,y_max) {
 	    return node;
 	}
     }
+}
+
+// scale and coord functions for directly manipulating the Raphael paper
+function xscale(x) {
+    return x*xunitlength;
+}
+
+function yscale(y) {
+    return y*yunitlength;
+}
+
+function xcoord(x) {
+    return xscale(x)+origin[0];
+}
+
+function ycoord(y) {
+    return height-yscale(y)-origin[1];
+}
+
+function coord(x, y) {
+    if(x.length) {
+        y = x[1];
+        x = x[0];
+    }
+    return xcoord(x) + ',' + ycoord(y);
 }
 
 function line(p,q,id) { // segment connecting points p,q (coordinates in units)
@@ -271,35 +297,7 @@ function loop(p,d,id) {
 }
 
 function arc(start,end,radius,id) { // coordinates in units
-    var node, v;
-    //alert([fill, stroke, origin, xunitlength, yunitlength, height])
-    if (id!=null) node = svgNodes[id];
-    if (radius==null) {
-	v=[end[0]-start[0],end[1]-start[1]];
-	radius = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
-    }
-    if (typeof node == "undefined" || node==null) {
-	node = paper.path();
-	svgNodes[id] = node;
-    }
-    node.attr("path","M"+(start[0]*xunitlength+origin[0])+","+
-		      (height-start[1]*yunitlength-origin[1])+" A"+radius*xunitlength+","+
-		      radius*yunitlength+" 0 0,0 "+(end[0]*xunitlength+origin[0])+","+
-		      (height-end[1]*yunitlength-origin[1]));
-    node.attr("stroke-width", strokewidth);
-    node.attr("stroke", stroke);
-    node.attr("fill", fill);
-    if (marker=="arrow" || marker=="arrowdot") {
-	u = [(end[1]-start[1])/4,(start[0]-end[0])/4];
-	v = [(end[0]-start[0])/2,(end[1]-start[1])/2];
-	//alert([u,v])
-	v = [start[0]+v[0]+u[0],start[1]+v[1]+u[1]];
-    } else v=[start[0],start[1]];
-    if (marker=="dot" || marker=="arrowdot") {
-	ASdot(start,markersize,markerstroke,markerfill);
-	if (marker=="arrowdot") arrowhead(v,end);
-	ASdot(end,markersize,markerstroke,markerfill);
-    } else if (marker=="arrow") arrowhead(v,end);
+    return arc_elliptical(start, end, radius, radius, id);
 }
 
 function ellipse(center,rx,ry,id) { // coordinates in units
@@ -325,7 +323,7 @@ function arc_elliptical(start,end,rx,ry,id) { // coordinates in units
     if (id!=null) node = svgNodes[id];
     if (rx==null) {
         v=[end[0]-start[0],end[1]-start[1]];
-        rx = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
+        rx = ry = Math.sqrt(v[0]*v[0]+v[1]*v[1]);
     }
     if (typeof node == "undefined" || node==null) {
         node = paper.path();
@@ -368,6 +366,7 @@ function rect(p,q,id,rx,ry) { // opposite corners in units, rounded by radii
     node.attr("stroke-width", strokewidth);
     node.attr("stroke", stroke);
     node.attr("fill", fill);
+    return node;
 }
 
 function text(p,st,pos,id,fontsty) {
@@ -401,13 +400,21 @@ function text(p,st,pos,id,fontsty) {
 	node = paper.text();
 	svgNodes[id] = node;
     }
-    node.attr("x",p[0]*xunitlength+origin[0]+dx);
-    // Magic number: 
-    node.attr("y",height-p[1]*yunitlength-origin[1]+dy);
-    if (paper.type == "SVG") {
+    var textx = p[0]*xunitlength+origin[0]+dx;
+    var texty = height-p[1]*yunitlength-origin[1]+dy;
+
+    if (paper.raphael.vml) {
+	// VML text adjustment from
+	// https://groups.google.com/group/raphaeljs/browse_thread/thread/daf44c4c1557b898
+	textx -= 2; // be careful, use 'minus equal' assignment here
+	texty += 2.2 + fontsize/10;
+    } else {
 	// font-style doesn't work in VML on IE
 	node.attr("font-style",(fontsty!=null?fontsty:fontstyle));
     }
+    node.attr("x", textx);
+    node.attr("y", texty);
+
     node.attr("text",st);
     node.attr("font-family",fontfamily);
     node.attr("font-size",fontsize);
@@ -516,7 +523,7 @@ function axes(dx,dy,labels,gdx,gdy) {
     if (ytick!=null) {dy = ytick}
     //alert(null)
     dx = (dx==null?xunitlength:dx*xunitlength);
-    dy = (dy==null?dx:dy*yunitlength);
+    dy = (dy==null?yunitlength:dy*yunitlength);
     fontsize = Math.min(dx/2,dy/2,16);//alert(fontsize)
     ticklength = fontsize/4;
     if (xgrid!=null) gdx = xgrid;
@@ -699,6 +706,12 @@ function mathjs(st) {
 	st = st.slice(0,j+1)+"factorial("+st.slice(j+1,i)+")"+st.slice(i+1);
     }
     return st;
+}
+
+function functionFrom(exp) {
+    // warning: don't let stuff which is not from user input or the exercise in here
+    eval("var fn = function(x){ with(Math) return "+mathjs(exp)+" }");
+    return fn;
 }
 
 function plot(fun,x_min,x_max,points,id) {

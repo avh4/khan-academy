@@ -3,7 +3,7 @@
 cd /home/ec2-user
 
 # Backup entire datastore
-google_appengine/appcfg.py download_data --application=khanexercises --url=http://khanexercises.appspot.com/remote_api --filename=`date +%F.full.dat` --email=kamens@gmail.com --passin < private_pw > `date +%F.full.log`
+google_appengine/appcfg.py download_data --application=khanexercises --url=http://khanexercises.appspot.com/remote_api --filename=`date +%F.full.dat` --email=kamens@gmail.com --rps_limit=15000 --http_limit=40 --bandwidth_limit=10000000 --batch_size=500 --num_threads=55 --passin < private_pw > `date +%F.full.log`
 
 # Gzip results
 gzip -f *.full.dat
@@ -15,6 +15,10 @@ do
   s3cmd-1.0.0/s3cmd put $f s3://KA-full-backups/$f
 done
 
-# Delete files older than 2 weeks
-find *.gz -mtime +14 -exec rm {} \;
+# Delete files older than 1 week
+find *.gz -mtime +7 -exec rm {} \;
+find *.log -mtime +7 -exec rm {} \;
+find *.dat -mtime +7 -exec rm {} \;
+find *.sql3 -mtime +7 -exec rm {} \;
 
+rm bulkloader-*

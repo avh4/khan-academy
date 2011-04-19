@@ -16,12 +16,20 @@ class SaveExpandedAllExercises(request_handler.RequestHandler):
             user_data.put() 
 
 class SaveMapCoords(request_handler.RequestHandler):
+
+    def get(self):
+        return
+
     def post(self):
         user = util.get_current_user()
         if user:
-            lat = self.request_float("lat")
-            lng = self.request_float("lng")
-            zoom = self.request_int("zoom")
+            try:
+                lat = self.request_float("lat")
+                lng = self.request_float("lng")
+                zoom = self.request_int("zoom")
+            except ValueError:
+                # If any of the above values aren't present in request, don't try to save.
+                return
 
             user_data = UserData.get_or_insert_for(user)
             user_data.map_coords = serializeMapCoords(lat, lng, zoom)

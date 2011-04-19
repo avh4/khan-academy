@@ -52,16 +52,16 @@ for(var i=0; i<6; i++)
 {
 	var y = Math.round(KhanAcademy.random()*200)-100;
 	
-	while ((y==correct_answer) || ($.inArray(y, possibleAnswers) != -1))
+	while ((y==correct_answer) || ($.inArray(y, Exercise.possibleAnswers) != -1))
 	{
 		y = Math.round(KhanAcademy.random()*200)-100;
 	}
-	possibleAnswers.push(y);
+	Exercise.possibleAnswers.push(y);
 }
 
 function draw_next_step() {
 
-	if (steps_given==0)
+	if (Exercise.steps_given==0)
 	{
 		present.fontsize="25";
 		present.stroke="orange";
@@ -73,7 +73,7 @@ function draw_next_step() {
 		present.line([0, correctY], functionPath[correctX+11]);
 		present.text([-10, 9], 'f('+correctX+')='+correctY, right);
 	}
-	if (steps_given==1)
+	if (Exercise.steps_given==1)
 	{
 		present.stroke="#28AE7B";
 		present.fontfill="#28AE7B";
@@ -84,13 +84,13 @@ function draw_next_step() {
 		present.line([0, correctGY], gPath[correctGX+11]);
 		present.text([-10, 7.7], 'g('+correctGX+')='+correctGY, right);
 	}
-	if (steps_given==2)
+	if (Exercise.steps_given==2)
 	{
 		present.fontfill="black";
 		present.text([-10, 6.4], fCoef+'('+correctY+')'+format_coefficient(gCoef)+'('+correctGY+')='+correct_answer, right);
 	
 	}
-	steps_given++;
+	Exercise.steps_given++;
 }
 
 

@@ -1,37 +1,33 @@
 import datetime
 import math
 import urllib
+import logging
+import request_cache
+
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
 
+import nicknames
 import facebook_util
 
-
-"""Returns users.get_current_user() if not None, or a faked User based on the
-user's Facebook account if the user has one, or None.
-"""
+@request_cache.cache()
 def get_current_user():
-
-    appengine_user = users.get_current_user()
-
-    if appengine_user is not None:
-        return appengine_user
-
-    facebook_user = facebook_util.get_current_facebook_user()
-
-    if facebook_user is not None:
-        return facebook_user   
-
-    return None
+    user = users.get_current_user()
+    if not user:
+        user = facebook_util.get_current_facebook_user()
+    return user
 
 def get_nickname_for(user):
-    if facebook_util.is_facebook_email(user.email()):
-        return facebook_util.get_facebook_nickname(user)
-    else:
-        return user.nickname()
+    return nicknames.get_nickname_for(user)
 
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
+
+def create_post_login_url(dest_url):
+    return "/postlogin?continue=%s" % urllib.quote(dest_url)
+
+def create_logout_url(dest_url):
+    return "/logout?continue=%s" % urllib.quote(dest_url)
 
 def seconds_since(dt):
     return seconds_between(dt, datetime.datetime.now())
@@ -43,7 +39,7 @@ def seconds_between(dt1, dt2):
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
 
-def seconds_to_time_string(seconds_init, short_display = True):
+def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
 
     seconds = seconds_init
 
@@ -63,7 +59,7 @@ def seconds_to_time_string(seconds_init, short_display = True):
         return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
     elif years:
         return "%d year%s" % (years, pluralize(years))
-    elif days and hours:
+    elif days and hours and show_hours:
         return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
         return "%d day%s" % (days, pluralize(days))

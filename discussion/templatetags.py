@@ -40,6 +40,10 @@ def mod_tools(target):
                 "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
             }
 
+@register.inclusion_tag(("../discussion/flag_tools.html", "discussion/flag_tools.html"))
+def flag_tools(target):
+    return {"target": target}
+
 @register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
 def author_tools(target):
     return {

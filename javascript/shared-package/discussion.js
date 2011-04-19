@@ -61,6 +61,9 @@ var Moderation = {
         $(".mod_tools .mod_edit").live("click", Moderation.editEntity);
         $(".mod_tools .mod_delete").live("click", Moderation.deleteEntity);
         $(".mod_tools .mod_change").live("click", Moderation.changeEntityType);
+
+        $(".flag_show").live("click", Moderation.showFlagTools);
+        $(".flag_tools .flag_as").live("click", Moderation.flagEntity);
     },
 
     showTools: function() {
@@ -72,6 +75,30 @@ var Moderation = {
         $(".mod_tools_hidden", parent).css("display", "");
 
         return false;
+    },
+
+    showFlagTools: function() {
+
+        if (QA.showNeedsLoginNote(this, "to flag this item.")) return false;
+
+        var parent = $(this).parents(".flag_tools");
+        if (!parent.length) return false;
+
+        $(".flag_tools_show", parent).css("display", "none");
+        $(".flag_tools_hidden", parent).css("display", "");
+
+        return false;
+    },
+
+    flagEntity: function() {
+
+        var flag = $(this).attr("data-flag");
+        if (!flag) return;
+
+        return Moderation.actionWithoutConfirmation(this, 
+                "/discussion/flagentity",
+                {flag: flag},
+                "flagged!");
     },
 
     deleteEntity: function() {
@@ -102,20 +129,27 @@ var Moderation = {
 
         if (!confirm(sConfirm)) return false;
 
+        this.actionWithoutConfirmation(el, sUrl, data, sCompleted);
+
+        return false;
+    },
+
+    actionWithoutConfirmation: function(el, sUrl, data, sCompleted) {
+
         var key = $(el).attr("data-key");
         if (!key) return false;
 
         if (!data) data = {};
         data["entity_key"] = key;
 
-        $.post(sUrl, data, function(){ Moderation.finishedAction(el, sCompleted); });
+        $.post(sUrl, data);
+        Moderation.finishedAction(el, sCompleted);
 
-        Discussion.showThrobberOnRight($(el));
         return false;
     },
 
     finishedAction: function(el, sMsg) {
-        var parent = $(el).parents(".mod_tools_hidden");
+        var parent = $(el).parents(".tools_hidden");
         if (!parent.length) return;
 
         parent.text(sMsg);

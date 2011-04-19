@@ -12,8 +12,6 @@ import logging
 
 CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 3 # Expires after three days
 MAX_RESULTS_PER_TYPE = 10
-VIDEO_TITLE_MEMCACHE_KEY = "video_title_dicts"
-PLAYLIST_TITLE_MEMCACHE_KEY = "playlist_title_dicts"
 
 class Autocomplete(request_handler.RequestHandler):
 
@@ -45,15 +43,15 @@ class Autocomplete(request_handler.RequestHandler):
         json = simplejson.dumps({"query": query, "videos": video_results, "playlists": playlist_results}, ensure_ascii=False)
         self.response.out.write(json)
 
-@layer_cache.cache_with_key(VIDEO_TITLE_MEMCACHE_KEY, expiration=CACHE_EXPIRATION_SECONDS)
+@layer_cache.cache(expiration=CACHE_EXPIRATION_SECONDS)
 def video_title_dicts():
     live_video_dict = {}
     for video_playlist in VideoPlaylist.all().filter('live_association = ', True):
         live_video_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)] = True
 
     live_videos = filter(lambda video: video.key() in live_video_dict, Video.all())
-    return map(lambda video: {"title": video.title, "url": "/video/%s" % video.readable_id}, live_videos)
+    return map(lambda video: {"title": video.title, "key": str(video.key()), "url": "/video/%s" % video.readable_id}, live_videos)
 
-@layer_cache.cache_with_key(PLAYLIST_TITLE_MEMCACHE_KEY, expiration=CACHE_EXPIRATION_SECONDS)
+@layer_cache.cache(expiration=CACHE_EXPIRATION_SECONDS)
 def playlist_title_dicts():
     return map(lambda playlist: {"title": playlist.title, "url": "/#%s" % playlist.title}, Playlist.all())

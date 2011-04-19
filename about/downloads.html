@@ -1,6 +1,6 @@
 {% extends "about_template.html" %}
 {% block aboutcontent %}
-
+<div id="downloads">
 <h1 class="main-headline">Downloads</h1>
 
 <ul>
@@ -17,36 +17,22 @@
     For an offline capable version of the site for Windows, visit the
     <a href="http://code.google.com/p/khanacademy/downloads/list">download page.</a>
     Unzip it and click on run.bat, which will start up the server and load the
-    local version of the Khan Academy homepage in your browser. All the exercises
-    should work at this point.
+    local version of the Khan Academy homepage in your browser.
 </p>
-
 <p>
     Next go to the download_scripts directory and click on the playlist(s) you want to download
     (download_ALL.bat will get everything).  When you're done, the videos you've downloaded
     will work when you click on them in the browser.
 </p>
 
-<p>
-    Once you've downloaded your playlists, feel free to <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/us/">
-    distribute</a> them, as long as it's not done on a for-profit basis.  You could burn a DVD or USB stick and send it to
-    someone without internet access, or order the equivalent from our <a href="#store">store</a>.
-</p>
-
-<a name="store"><h2>DVD Store</h2></a>
-<p>
-    If someone you know has a computer running Windows and a DVD drive, but no internet access, they can still use
-    the Khan Academy offline videos and exercises on DVD.  This is the same as you can download <a href="">here</a>
-    but can be helpful if your internet connection is slow, you don't know how to burn a DVD, or you would just like
-    someone to do the downloading/burning/mailing for you.
-</p>
+<a name="store"><h2>Khan Academy Videos on DVD</h2></a>
 
 <p>
-    To help us gauge interest in this, please leave a <a href="http://code.google.com/p/khanacademy/issues/detail?id=952#makechanges">comment</a>
-    telling us which DVD you would like to purchase.  The prices will probably be around $10 per DVD, or the 7 DVD set for $24. That
-    should be around our breakeven point for burning and mailing them, but if it's off we'll adjust the price to make it that way.
+    We are still trying to figure out if it's possible to automate the delivery of Khan Academy videos on DVD. If you're interested, please leave a <a href="http://code.google.com/p/khanacademy/issues/detail?id=952#makechanges">comment</a>
+    telling us which DVD(s) you would be interested in purchasing.
 </p>
 
+<div class="dvd-list section-headline">
 <strong>Math DVD</strong>
 <ul>
 <li>Arithmetic</li>
@@ -58,44 +44,41 @@
 <li>Statistics</li>
 <li>Pre-Calculus</li>
 </ul>
-
-<br/>
+</div>
+<div class="dvd-list section-headline">
+<strong>Math Worked Examples DVD</strong>
+<ul>
+<li>Developmental Math</li>
+<li>Developmental Math 2</li>
+<li>Algebra I Worked Examples</li>
+<li>ck12.org Algebra 1 Examples</li>
+<li>Singapore Math</li>
+</ul>
+</div>
+<div class="dvd-list section-headline">
 <strong>Advanced Math DVD</strong>
 <ul>
 <li>Calculus</li>
 <li>Differential Equations</li>
 <li>Linear Algebra</li>
 </ul>
-
-<br/>
-<strong>Math Worked Examples DVD</strong>
+</div>
+<div class="dvd-list section-headline">
+<strong>Test Prep DVD</strong>
 <ul>
-<li>Developmental Math</li>
 <li>MA Tests for Education Licensure (MTEL) -Pre-Alg</li>
-<li>Algebra I Worked Examples</li>
-<li>ck12.org Algebra 1 Examples</li>
 <li>California Standards Test: Algebra I</li>
 <li>California Standards Test: Algebra II</li>
 <li>California Standards Test: Geometry</li>
-<li>Singapore Math</li>
+<li>CAHSEE Example Problems</li>
+<li>SAT Preparation</li>
+<li>IIT JEE Questions</li>
+<li>GMAT Data Sufficiency</li>
+<li>GMAT Problem Solving</li>
 </ul>
-
-<br/>
-<strong>Science DVD</strong>
-<ul>
-<li>Cosmology and Astronomy</li>
-<li>Biology</li>
-<li>Physics</li>
-</ul>
-
-<br/>
-<strong>Chemistry DVD</strong>
-<ul>
-<li>Chemistry</li>
-<li>Organic Chemistry</li>
-</ul>
-
-<br/>
+</div>
+<div style="clear: left;"></div>
+<div class="dvd-list section-headline">
 <strong>Finance DVD</strong>
 <ul>
 <li>Finance</li>
@@ -108,19 +91,33 @@
 <li>Current Economics</li>
 <li>Currency</li>
 </ul>
-
-<br/>
-<strong>Test Prep DVD</strong>
+</div>
+<div class="dvd-list section-headline">
+<strong>Science DVD</strong>
 <ul>
-<li>SAT Preparation</li>
-<li>GMAT Data Sufficiency</li>
-<li>GMAT Problem Solving</li>
-<li>CAHSEE Example Problems</li>
+<li>Cosmology and Astronomy</li>
+<li>Biology</li>
+<li>Physics</li>
 </ul>
+</div>
+<div class="dvd-list section-headline">
+<strong>Chemistry DVD</strong>
+<ul>
+<li>Chemistry</li>
+<li>Organic Chemistry</li>
+</ul>
+</div>
+<div class="dvd-list section-headline">
+<strong>Misc DVD</strong>
+<ul>
+<li>Talks and Interviews</li>
+<li>History</li>
+<li>Brain Teasers</li>
+</ul>
+</div>
 
-</br><br/>
-
-<a name="spreadsheets"><h2>Spreadsheets</h2></a>
+<div class="clear"></div>
+<a name="spreadsheets"><h2 class="section-headline">Spreadsheets</h2></a>
 <p>
     These example spreadsheets are mentioned in some Khan Academy videos. Download and work with them while watching.
 </p>
@@ -151,8 +148,6 @@
     <li><a href="http://mujica.org/khan/">Khan Academy on a Stick</a>
     Math and Science lectures from khanacademy.org, as available on September 2010.
     </li>
-    <li><a href="http://www.curriki.org/xwiki/bin/view/Group_KhanAcademyMathGroup/Curriculum">Khan Academy on curriki</a>
-    </li>
     <li><a href="http://itunes.apple.com/us/app/khan-academy-a-classroom-in/id361975619?mt=8">
     Khan Academy: A Classroom In Your Pocket</a> by Irynsoft. An app for the ipod/iphone/ipad.</li>
     <li><a href="http://khanacademy.googlecode.com/files/khanacademy.org%20-%20COMPLETE%20-%202010-12-10.torrent">
@@ -161,6 +156,6 @@
     on code.google.com.  Check here for updates.
     </li>
 </ul>
-
+</div>
 {% endblock aboutcontent %}
 

@@ -6,6 +6,8 @@
             &ndash;{{ target.author_nickname|escape }}, {{ target.date|timesince_ago }}
         {% endif %}
 
+        {% flag_tools target %}
+
         {% if is_mod %}
             {% mod_tools target %}
         {% else %}

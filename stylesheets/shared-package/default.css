@@ -74,6 +74,11 @@ body {
     margin: 0 auto -77px;
     min-width: 1000px;
     max-width: 1200px;
+    position: relative;
+    background: transparent url(/images/content-border.png) no-repeat 0 153px;
+}
+#page-container-inner {
+    background: transparent url(/images/content-border.png) no-repeat right 153px;
 }
 
 /* Basic typography for the entire site */
@@ -96,6 +101,10 @@ p { font-size: 15px; margin: 18px 0;}
 
 b, strong { font-weight: bold; }
 em { font-style: italic; }
+
+a.simple-link { text-decoration: none; }
+a.simple-link:hover { text-decoration: underline; }
+
 hr {
     background: #CCC;
     border: none;
@@ -126,11 +135,6 @@ hr {
     -webkit-border-radius: 5px;
     
     text-shadow: 0 1px 0 #fff;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 .simple-button:hover {
     border-color: #aaa;
@@ -163,6 +167,51 @@ hr {
     box-shadow: 0 1px 3px #ccc;
 }
 
+.action-gradient {
+    background: #eee;
+    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
+    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
+}
+
+.mobile-only { display: none; }
+/* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
+.fancy-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.fancy-scrollbar::-webkit-scrollbar-button:start:decrement,
+.fancy-scrollbar::-webkit-scrollbar-button:end:increment {
+  background: transparent;
+  display: none;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:vertical:start {
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:vertical:end {
+  -webkit-border-bottom-left-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:horizontal:start {
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-track-piece:horizontal:end {
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+}
+.fancy-scrollbar::-webkit-scrollbar-thumb:vertical,
+.fancy-scrollbar::-webkit-scrollbar-thumb:horizontal {
+  background: #ccc;
+  border: 1px solid #aaa;
+  -webkit-border-radius: 4px;
+  display: block;
+  height: 50px;
+}
 /* End of basic typography */
 
 /* Links in the header and footer don't change color when visited. */
@@ -211,6 +260,10 @@ img {
     /* Fix IE image scaling so that it isn't crappy */
 }
 
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
 header, footer {
     display: block;
     width: 100%;
@@ -233,7 +286,8 @@ footer {
         z-index: 10;
     }
     footer #leaves {
-        background: url(/images/footer-leaves.png) no-repeat top center;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: 319px -908px;
         height: 188px;
         padding: 10px 23px;
     }
@@ -259,7 +313,8 @@ footer {
         text-decoration: none;
     }
         footer#footer.short #leaves a {
-            background: url(/images/list-item-green.png) no-repeat center left;
+            background-image: url(/images/non-repeating-sprites.png);
+            background-position: -10px -1142px;
             padding-left: 7px;
             padding-right: 10px;
             color: #555;
@@ -269,11 +324,16 @@ footer {
     }
     footer #copyright {
         float: right;
-        padding-top: 2px;
+        text-align: right;
     }
-    footer#footer #leaves #copyright a {
-        background: transparent;
-        padding: 0;
+    footer#footer #leaves #copyright #creative-commons-link {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -143px -67px;
+        display: inline-block;
+        height: 15px;
+        position: relative;
+        top: 2px;
+        width: 80px;
     }
     footer #copyright img {
         border: 0px;
@@ -296,12 +356,14 @@ footer {
 #top-header #logo {
     height: 42px;
     position: relative;
-    background: url(/images/logo-topper.png?1) no-repeat 0 0;
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -10px -199px;
     width: 317px;
 }
     #top-header #logo #logo-highlight {
         position: absolute;
-        background: url(/images/logo-highlight.png) no-repeat 0px 0px;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -261px;
         width: 592px;
         height: 194px;
         left: -115px;
@@ -312,9 +374,11 @@ footer {
         top: 15px;
         z-index: 1;    
     }
-    #top-header #logo #logo-image img {
+    #top-header #logo #logo-image {
         width: 309px;
         height: 71px;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -465px;
     }
 
 
@@ -359,14 +423,10 @@ footer {
 #sitewide-navigation {
     clear: both;
     margin: 75px 0 0;
-    padding: 9px 0 9px 23px;
+    padding: 9px 0 9px 22px;
     height: 19px;
-    background: #eee;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
-    background: -webkit-gradient( linear, left top, left bottom, from(#f7f7f7), to(#ddd));
-    background: -moz-linear-gradient( top, #f7f7f7, #ddd );
+    border: 1px solid #ddd;
     border-bottom: 1px solid #ccc;
-    border-top: 1px solid #ddd;
 }
 #sitewide-navigation nav {
     font-size: 18px;
@@ -544,7 +604,8 @@ footer {
     right: 0;
     margin-left: 317px;
     min-width: 680px;
-    background: #79A90C url(/images/header-bg.png) repeat-x 0 0;
+    background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -10px;
     height: 42px;
     font-weight: bold;
 }
@@ -562,7 +623,8 @@ footer {
         vertical-align: middle;
     }
     #top-header #top-header-links span.separator, #sitewide-navigation span.separator {
-        background: url(/images/header-separator.png) no-repeat center center;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: 0px -5px;
         padding: 0 5px;
         line-height: 42px;
         font-size: 40px;
@@ -571,9 +633,6 @@ footer {
         position: relative\9;
         top: 7px\9;
         *top: 0;
-    }
-    #sitewide-navigation span.separator {
-        background-image: url(/images/header-separator-grayscale.png);
     }
     #sitewide-navigation span.separator {
         line-height: 0
@@ -588,14 +647,26 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    #social-links a {
+    #top-header #social-links a {
         margin-right: 0;
-    }
-    #social-links img {
-        position: relative;
-        top: -1px;
+        display: inline-block;
         height: 24px;
         width: 24px;
+        position: relative;
+        *position: static;
+        top: 7px;
+    }
+    #top-header #social-links .youtube {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -67px;
+    }
+    #top-header #social-links .twitter {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -111px;
+    }
+    #top-header #social-links .facebook {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -155px;
     }
     
 #top-header #top-header-links #page_auth.page_links {
@@ -681,7 +752,8 @@ footer {
     padding-right: 50px;
 }
     #page_search #search-input {
-        background:url("/images/Search-icon.png") no-repeat scroll 5px 5px #FFFFFF;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -5px -867px;
         border:1px solid #bbb;
         font-size:15px;
         padding: 0;
@@ -698,7 +770,8 @@ footer {
         padding-top: 5px\9;
     }
     #page_search #search-submit {
-        background: url(/images/search-button-blue.png) no-repeat 0 0;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -556px;
         border: none;
         padding: 0;
         margin: 0;
@@ -785,13 +858,14 @@ nav {
 }
 
 nav#page_sub_nav {
-    padding: 9px 23px;
+    padding: 9px 22px;
     min-height: 16px;
     position: relative;
     z-index: 3;
     background: #eee;
     color: #444;
-    border-bottom: 1px solid #ddd;
+    border: 1px solid #ddd;
+    border-top: none;
     text-shadow: 0 1px 0 #fff;
     width: auto;
 }
@@ -954,7 +1028,8 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-		background: url(Search-icon.png) no-repeat 2px 1px #fff;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -5px -867px;
 		border: 1px solid #ddd;
 	}
 	#library #library-nav {
@@ -999,7 +1074,6 @@ a:link.google-analytics-link-track
 				left:10px; /* value = (:before left) + (:before border-left) - (:after border-left) */
 				width:20px;
 				height:11px;
-				background: url(library-nav-nipple.png);
 				z-index: 10;				
 			}
 			#library #library-nav-links .video-count, #library #library-content #library-sub-nav #list-of-lists .video-count {
@@ -1044,7 +1118,8 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.video-link {
 				font-weight: normal;	
-				background: url(/images/list-item-black.png) no-repeat 0 3px;
+				background-image: url(/images/non-repeating-sprites.png);
+                background-position: -56px -36px;
 				padding: 0 2px 0 13px;
 			}
 			#library #library-content #library-content-main a.video-link:hover {
@@ -1088,16 +1163,18 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     #container #dashboard-drawer {
         position: absolute;
-        width: 340px;
+        background: #fff;
+        width: 350px;
         height: 800px;
-        overflow: scroll;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        padding: 10px 5px;
         z-index: 1;
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
+    }
+    #container #dashboard-drawer-inner {
+        margin-right: 2px;
+        overflow: auto;
+        padding: 10px 3px 10px 5px;
     }
     #container #dashboard-drawer h3 .subheader {
         font-weight: normal;
@@ -1167,9 +1244,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
     #container #dashboard-map #map-canvas {
         height: 100%;
-        left: 340px;
+        left: 350px;
         margin-left: 0;
-        margin-right: 340px;
+        margin-right: 350px;
     }
 
 .exercise-badge {
@@ -1178,22 +1255,23 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     margin-left: 1px;
     position: relative;
     width: 320px;
-    height: 78px;
+    height: 79px;
     cursor: pointer;
-    border: 1px dotted #bbb;
+    border: 1px solid #ccc;
     
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
 }
-    .exercise-badge:hover, .exercise-badge-hover {
+    .drawer-hoverable .exercise-badge:hover, .drawer-hoverable .exercise-badge-hover {
         -webkit-box-shadow: 0 0 3px #666;
         -moz-box-shadow: 0 0 3px #666;
         box-shadow: 0 0 3px #666;
         border: 1px solid #aaa;
     }
     .exercise-badge .energy-points-badge {
-        background: url(/images/energy-points-badge.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -680px;
         width: 52px;
         height: 37px;
         text-align: center;
@@ -1221,7 +1299,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: #006699;
         }
     .streak-bar {
-        background: url(/images/streak-meter-empty.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -730px;
         width: 228px;
         height: 30px;
     }
@@ -1291,7 +1370,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin: 10px 0;
     }
     .achievement-badge .energy-points-badge {
-        background: url(/images/energy-points-badge.png) no-repeat;
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -680px;
         width: 52px;
         height: 37px;
         text-align: center;
@@ -1358,6 +1438,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     min-width: 190px;
     text-align: center;
     background: none;
+    border: none;
     opacity: .5;
     filter: alpha(opacity=50);
 }
@@ -1427,7 +1508,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background: background:#e5ecf9;
     border: 1px solid #ccc;
     border-top: none;
-    border-right: none;
+    border-right: 1px solid #ddd;
     border-bottom: 1px solid #ccc;
     border-left-style: dotted;
     cursor: auto;
@@ -1452,7 +1533,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
     .exercise-badge.single-exercise .proficient-badge img {
         position: relative;
-        top: 3px;
+        top: 4px;
         width: 60px;
         height: 62px;
     }
@@ -1508,7 +1589,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-right: 10px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
-    background: transparent url(/images/dashboard-icon-inactive.png) no-repeat 9px 7px;
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -1px -598px;
     color: #333;
     display: block;
     font-size: 10px;
@@ -1516,30 +1598,34 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     text-decoration: none;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
-    background-image: url(/images/dashboard-icon-active.png);
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -81px -598px;
     color: #E35D04;
 }
 #back-to-dashboard.single-exercise {
     background-color: #EEE;
     border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ddd;
     color: #666;
     float: left;
     font-size: 11px;
     height: 70px;
-    padding-left: 3px;
+    padding-left: 2px;
     width: 67px;
 }
 #question_area {
+    margin-left: 10px;
     margin-bottom: 10px;
     position: relative;
     padding: 0;
     float: left;
-    width: 655px;
+    width: 65%;
+    margin-left: 1%;
 }
 #answer_area {
     float: right;
-    max-width: 300px;
-    min-width: 240px;
+    max-width: 27%;
+    min-width: 24%;
     margin-right: 10px;
 }
     #answer_area .info-box {
@@ -1548,6 +1634,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border-bottom: 1px solid #aaa;
         color: #333;
         margin-bottom: 10px;
+        overflow-x: auto;
         padding: 10px;
         position: relative;
         z-index: 10;
@@ -1750,6 +1837,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background-color: #F7F7F7;
     border-color: #CCCCCC;
 }
+#module-progress #firstcol td {
+    line-height: 1;
+    height: 20px;
+}
 #module-progress th {
     color: #555;
     vertical-align: bottom;
@@ -1786,21 +1877,19 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     cursor: pointer;
     background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .25)), to(rgba(255, 255, 255,.1)));
     background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .4), rgba(255, 255, 255,.1));
+    border-color: #fff;
 }
 .progress-legend.proficient,
 #module-progress .proficient {
     background-color: #80C65A;
-    border-color: #bbb #a1a1a1 #a1a1a1 #bbb;
 }
 .progress-legend.struggling,
 #module-progress .struggling {
     background-color: red;
-    border-color: #bbb #a1a1a1 #a1a1a1 #bbb;
 }
 .progress-legend.started,
 #module-progress .started {
     background-color: lightblue;
-    border-color: #ccc #aaa #aaa #ccc;
 }
 .exercise-info-hover, #info-hover-container {
     background: #fff;
@@ -1821,7 +1910,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 #module-progress td.student-email {
     color: #555;
-    vertical-align: top;
+    vertical-align: middle;
     font-size: 11px;
     font-weight: bold;
     background-color: #CCC;
@@ -1882,6 +1971,16 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 /* End One-off page styles */
+/* Download page styles */
+#downloads {
+    padding-bottom: 36px;
+}
+.dvd-list {
+    float: left;
+    margin-right: 2%;
+    width: 23%;
+    min-height: 180px;
+}
 /* Contribute styles */
 #contribute {
     text-align: justify;
@@ -2177,11 +2276,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -webkit-border-radius: 5px;
     
     text-shadow: 0 1px 0 #fff;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 
 .thumbnails_arrow:hover {
@@ -2247,7 +2341,9 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     -moz-box-shadow: 0 1px 2px #ccc;
     box-shadow: 0 1px 2px #ccc;
 }
-
+#homepage .playlist_browser_title {
+    display: inline-block; float: left;
+}
 #homepage #browse-fixed {
     position: fixed;
     top: 0;
@@ -2289,6 +2385,11 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 #login-page a:visited {
     color: #069;
 }
+#login-page .providers-sign-up li {
+    float: left;
+    padding-right: 20px;
+    font-size: 15px;
+}
 #login-page .providers li {
     border: 2px solid #ccc;
     border-bottom-color: #bbb;
@@ -2305,11 +2406,6 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     -moz-box-shadow: 2px 2px 5px #ccc;
     -webkit-box-shadow: 2px 2px 5px #ccc;
     box-shadow: 2px 2px 5px #ccc;
-    
-    background: #eee;
-    background-image: -webkit-gradient(linear, left top, left bottom,  from(#f7f7f7), to(#ddd));
-    background-image: -moz-linear-gradient( top, #f7f7f7, #ddd );
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 #login-page .providers li:hover,
 #login-page .providers li:active {
@@ -2587,35 +2683,3 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     opacity: 0.5;
 }
 /* End Knowledge Map CSS */
-
-/* Use media queries to handle wide browsers */
-@media all and /*!YUI-Compressor */ (min-width: 1200px) {
-    #page-container {
-        margin-left: auto;
-        margin-right: auto;
-        position: relative;
-        background: transparent url(/images/content-border.png) no-repeat 0 153px;
-    }
-    #page-container-inner {
-        background: transparent url(/images/content-border.png) no-repeat right 153px;
-    }
-    #sitewide-navigation {
-        border: 1px solid #ddd;
-        border-bottom: 1px solid #ccc;
-    }
-    nav#page_sub_nav {
-        border-left: 1px solid #ddd;
-        border-right: 1px solid #ddd;
-    }
-    .exercise-badge.single-exercise {
-        border-right: 1px solid #ddd;
-    }
-    #back-to-dashboard.single-exercise {
-        border-left: 1px solid #ddd;
-    }
-    #question_area {
-        margin-left: 1px;
-    }
-}
-
-/* end media queries */

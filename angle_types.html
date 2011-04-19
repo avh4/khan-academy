@@ -1,0 +1,20 @@
+{% extends "multiple_choice_template.html" %}
+
+{% block maincell %}
+<script src="/javascript/exercises/angle_types.js?{{App.version}}"></script>
+<script>
+    Exercise.fAddNoneOfThese = false;
+    var exercise = new AngleTypesExercise();
+
+    function graph_update() {
+        exercise.showProblem();
+    }
+    
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td><iframe name="present" frameborder=0 src="/graphpage.html?w=300&h=300" height="330" width="330"></iframe></td>
+{% endblock graphdisplay %}
+
+

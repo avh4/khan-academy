@@ -1,0 +1,13 @@
+{% extends "multiple_choice_template.html" %}
+
+{% block maincode %}
+<script src="/javascript/exercises/radians_and_degrees.js?{{App.version}}"></script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script>
+    var exercise = new RadiansToDegreesExercise();
+</script>
+{% endblock maincell %}
+
+
