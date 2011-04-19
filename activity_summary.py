@@ -3,6 +3,7 @@ import logging
 
 from mapreduce import control
 from mapreduce import operation as op
+from asynctools import AsyncMultiTask, QueryTask
 
 import request_handler
 import models
@@ -109,8 +110,16 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
     if user_data.last_daily_summary:
         dt_start = max(dt_end - datetime.timedelta(days=2), user_data.last_daily_summary)
 
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
-    video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
+    query_problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+    query_video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+
+    task_runner = AsyncMultiTask()
+    task_runner.append(QueryTask(query_problem_logs, limit=100000))
+    task_runner.append(QueryTask(query_video_logs, limit=100000))
+    task_runner.run()
+
+    problem_logs = task_runner[0].get_result()
+    video_logs = task_runner[1].get_result()
 
     # Chop off hours, minutes, and seconds
     dt_start = datetime.datetime(dt_start.year, dt_start.month, dt_start.day)
