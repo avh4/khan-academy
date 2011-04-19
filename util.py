@@ -84,16 +84,11 @@ def thousands_separated_number(x):
         result = ",%03d%s" % (r, result)
     return "%d%s" % (x, result)
 
-def async_queries(*args, **kwargs):
-    limit = 100000
-    if 'limit' in kwargs:
-        limit = kwargs['limit']
+def async_queries(queries, limit=100000):
 
     task_runner = AsyncMultiTask()
-    for query in args:
+    for query in queries:
         task_runner.append(QueryTask(query, limit=limit))
     task_runner.run()
 
     return task_runner
-
-

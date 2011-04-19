@@ -113,7 +113,7 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
     query_problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
     query_video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
 
-    results = util.async_queries(query_problem_logs, query_video_logs)
+    results = util.async_queries([query_problem_logs, query_video_logs])
 
     problem_logs = results[0].get_result()
     video_logs = results[1].get_result()
