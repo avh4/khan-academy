@@ -1,7 +1,5 @@
 import datetime
 
-from asynctools import AsyncMultiTask, QueryTask
-
 import util
 import models
 import templatefilters
@@ -113,16 +111,12 @@ def recent_activity_for(user, dt_start, dt_end):
     query_problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end)
     query_video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end)
 
-    task_runner = AsyncMultiTask()
-    task_runner.append(QueryTask(query_user_badges, limit=500))
-    task_runner.append(QueryTask(query_problem_logs, limit=500))
-    task_runner.append(QueryTask(query_video_logs, limit=500))
-    task_runner.run()
+    results = util.async_queries(query_user_badges, query_problem_logs, query_video_logs, limit=500)
 
     list_recent_activity_types = [
-            recent_badge_activity(task_runner[0].get_result()),
-            recent_exercise_activity(task_runner[1].get_result()),
-            recent_video_activity(task_runner[2].get_result()),
+            recent_badge_activity(results[0].get_result()),
+            recent_exercise_activity(results[1].get_result()),
+            recent_video_activity(results[2].get_result()),
     ]
     list_recent_activity = [activity for sublist in list_recent_activity_types for activity in sublist]
 
