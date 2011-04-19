@@ -1,5 +1,3 @@
-{% block graph %}
-
 {% if not problem_list %}
     <div class="graph-notification">{{student_nickname|escape}} needs to do a few more problems in {{exercise_display_name|escape}} before we can start displaying this graph.</div>
 {% endif %}
@@ -206,6 +204,3 @@ function exercise_url(point) {
 <div id="highchart-container" class="{% if not problem_list %}empty-chart{% endif %}">
     <div id="highchart"></div>
 </div>
-
-{% endblock graph %}
-

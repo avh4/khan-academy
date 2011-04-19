@@ -1,5 +1,3 @@
-{% block graph %}
-
 {% if not user_exercises %}
     <div class="graph-notification">You don't have any proficient exercises...yet. <a href="/exercisedashboard">Go get some</a>.</div>
 {% endif %}
@@ -98,5 +96,3 @@ var chart;
 <div id="highchart-container" class="{% if not user_exercises %}empty-chart{% endif %}">
     <div id="highchart"></div>
 </div>
-
-{% endblock graph %}
