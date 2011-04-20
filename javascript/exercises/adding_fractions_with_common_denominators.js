@@ -8,7 +8,7 @@
 /*
  * Fraction Addition Namespace
  */
-FractionAddition= function(){}
+FractionAddition = function(){}
 
 /*
  * Class Name: AdditionWithCommonDenominator
@@ -24,7 +24,7 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
     var _commonDenominator;
     var _equation = null;
     var _myColor=getNextColor() ;
-    var _totalColor=getNextColor() ;
+    var _totalColor= "#ccc" ;
     var _raphaelHandle = Raphael('holder',500,200);
     var _reducedNominator;
     var _reducedDenominator;
@@ -41,17 +41,17 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
     var _createEquationWithCommonDenominator = function(){
         var temp;
         _num1 = Math.abs(get_random());
-        _num2 = Math.abs(get_random());      
-        if(_num1 < _num2){
-            _den1 = getRandomIntRange(_num2,_num2 + 10);
-        } else {
-            _den1 = getRandomIntRange(_num1,_num1 + 10);
-        }
+        _num2 = Math.abs(get_random());
+        
+        var max = Math.max(_num1, _num2);
+        _den1 = getRandomIntRange(max, max + 10);
         _den2 = _den1;
         _commonDenominator = _den1;
-        _equation = "`"+ _num1 + "/" + _den1 + "` `+` `" + _num2 + "/" + _den2 + "`";
+        _equation = "`"+ _num1 + "/" + _den1 + "` `+` `" + _num2 + "/" + _den2 + "`"  + " `=` ?";
         $("#dvHintText2").append('`?/' + _den1 + '`');
-        $("#dvHintText4").append(_equation + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" + ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
+        $("#dvHintText4").append(_equation + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" 
+                            + "(" + _num1 + " + " + _num2 + ") / " + _den1  
+                            + "="+ ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
         _writeEquation("#dvQuestion", _equation, true);//Write New Equation
         _unreducedNominator=(_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2);
         temp=get_reduced_fraction(_unreducedNominator,_commonDenominator);
@@ -168,15 +168,12 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
             } else if (_hintsGiven==1) {
                 _createHint(_num2, _den2,  320,95,  90,'holder');
             } else if (_hintsGiven==2) {
-                $("#dvHintText1").css("display","")
-                $("#dvHintText1").append("Since these fractions both have the same denominator, the sum is going to have the same denominator.");
+                $("#dvHintText1").css("display","");
+                $("#dvHintText1").append("Since these fractions have the same denominator, you can just add the numerators and keep the same denominator.");
             } else if (_hintsGiven==3) {
                 $("#dvHintText2").css('color',getNextColor());
                 $("#dvHintText2").css("display","");
             } else if (_hintsGiven==4) {
-                $("#dvHintText3").css("display","");
-                $("#dvHintText3").append("The numerator is simply going to be the sum of the numerators.");
-            } else if (_hintsGiven==5) {
                 $("#dvHintText4").css('color',getNextColor());
                 $("#dvHintText4").css("display","");
             }
@@ -202,8 +199,7 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
             if(_reducedDenominator==1 && $.trim(Denominator) ==''){
                 isCorrect = (_reducedNominator== Nominator) ;
             }else {
-                temp=get_reduced_fraction(Nominator,Denominator);
-                isCorrect = (correct_answer == (temp.numerator  + "/" + temp.denominator));
+                isCorrect = (_reducedNominator/_reducedDenominator == Nominator/Denominator);
             }
             handleCorrectness(isCorrect);
             if(!isCorrect){
