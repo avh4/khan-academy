@@ -1,0 +1,32 @@
+{% extends 'multiple_choice_template.html' %}
+
+{% block maincode %}
+
+    <script type="text/javascript" src="/javascript/exercises/recognizing_conic_sections.js"?{{App.version}}"></script>
+
+    <script type="text/javascript">
+        var exercise = new RecognizingConicSectionsExercise();
+        exercise.init();
+
+        function graph_update() {
+            exercise.graphUpdate();
+        }
+
+    </script>
+
+    <style type="text/css">
+        .hint_orange {
+            color: orange;
+        }
+        .question_text {
+            font-size:24px;
+        }
+    </style>
+
+{% endblock maincode %}
+
+
+{% block graphdisplay %}
+    <iframe style="float:left;" name="present" frameborder=0 src="/graphpage.html?w=360&h=360" height="390" width="390"></iframe>
+
+{% endblock graphdisplay %}
