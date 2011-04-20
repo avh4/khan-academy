@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Modified by Ben Kamens to fix http://code.google.com/p/asynctools/issues/detail?id=14
+#
 
 """The Python datastore API used by app developers.
 
@@ -216,7 +218,7 @@ def next_callback(rpc, entities, exception, callback=None):
             nextrpc.callback = lambda: next_callback(nextrpc, entities, exception, callback=callback)
             rpc.runner.append(nextrpc)
 
-            nextrpc.MakeCall('Next', req, result)
+            nextrpc.make_call('Next', req, result)
 
             if rpc.runner:
                 rpc.runner.append(nextrpc)
