@@ -1,8 +1,8 @@
 function RoundingExercise() {
     var number;
     var number_str;
-    var rounding_num;   // the num you underline
-    var num_to_right;   // the num to the right of it
+    var rounding_num;
+    var num_to_right;
     var answer;
     
     var x_min = 0; 
@@ -26,8 +26,7 @@ function RoundingExercise() {
     generateHints();
 
     function generateProblem() {
-        // var type_index = getRandomIntRange(0, 5);
-        var type_index = 2;
+        var type_index = getRandomIntRange(0, RoundingType.length - 1);
         type = RoundingType[type_index];
         if (type.pos <= 0) {
             number = getRandomIntRange(10, 99);
@@ -63,7 +62,7 @@ function RoundingExercise() {
         }
         
         write_step("Another way to think about this problem is to ask which end of the number line is closer to " + number + ".");
-        write_step("Looking at the number line, we see that the right answer is " + answer + ".");
+        write_step("Looking at the number line, we see that the correct answer is " + answer + ".");
     }
     
     function roundToPosition(num, pos){
@@ -87,7 +86,7 @@ function RoundingExercise() {
         present.line([num_line_padding, num_line_y], [x_max - num_line_padding, num_line_y]);
 
         if (answer > number)
-            first_tick = answer - Math.pow(10, type.pos).toFixed(5);
+            first_tick = answer - Math.pow(10, type.pos);
         else
             first_tick = answer;
 
@@ -97,7 +96,9 @@ function RoundingExercise() {
         for (var i = 0; i < 11; i++) {
             var x = num_line_padding + i * tick_distance;
             present.line([x, num_line_y - tick_height / 2], [x, num_line_y + tick_height / 2]);
-            present.text([x, num_line_y - tick_height], first_tick + i * Math.pow(10, type.pos - 1))
+            var label = first_tick + i * Math.pow(10, type.pos - 1);
+            label = roundToPosition(label, type.pos-1);
+            present.text([x, num_line_y - tick_height], label);
         }
         
         // Draw number
@@ -113,6 +114,6 @@ function RoundingExercise() {
         present.line([num_line_padding + x, num_line_y], [num_line_padding + x, num_line_y]);
         present.text([num_line_padding + x, num_line_y + tick_height], number);
     }
-    
-    
 }
+
+
