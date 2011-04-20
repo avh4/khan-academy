@@ -873,10 +873,6 @@ function give_next_step() {
 			toDraw[k].drawInColor();
 	}
 	
-	
-	
-	//graph_update();
-	
 	show_step();
 	translate(); // Process any ASCII Math -> MathML
 }
@@ -884,6 +880,7 @@ function give_next_step() {
 function show_step() 
 {
     $(".step" + Exercise.steps_given).css("visibility", "visible");
+    Exercise.showCustomStep(Exercise.steps_given);
 }
 
 function randomRotation()

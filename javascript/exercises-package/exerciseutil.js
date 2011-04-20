@@ -156,7 +156,9 @@ var Exercise = {
             $("#throbber").show();
         else
             $("#throbber").hide();
-    }
+    },
+    
+    showCustomStep: function() {}
 };
 
 var selColor = "#AE9CC9";

@@ -104,12 +104,12 @@ var currentexercise = "{{exid|escapejs}}";
 		{% comment %}
 		We use a table here just because existing graphdisplay blocks create a table cell.
 		{% endcomment %}
-		<table style='float: right;'><tr>
-		{% block graphdisplay %}  {% endblock graphdisplay %}
-		</tr></table>
 		<div id="question_content_container" style="width: 2000px">
     		<div id="question_content" style="position:relative; float: left"></div>
 		</div>
+		<table style='float: right;'><tr>
+		{% block graphdisplay %}  {% endblock graphdisplay %}
+		</tr></table>
 		{% block maincell %}
 		    {% if exercise.summative %}
     		    <iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>

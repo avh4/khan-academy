@@ -1,0 +1,29 @@
+{% extends arithmetic_template %}
+
+{% block maincode %}
+<script src="/javascript/exercises/rounding_numbers.js?{{App.version}}"></script>
+{% endblock maincode %}
+
+{% block maincell %}
+<script>
+    // Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    var exercise = new RoundingExercise();
+    
+    function graph_update() {
+        exercise.initGraphHints();
+        Exercise.showCustomStep = exercise.showGraphHints;
+    }
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td><iframe name="present" frameborder=0 src="/graphpage.html?w=700&h=300" height="330" width="730"></iframe></td>
+{% endblock graphdisplay %}
+
+{% block hintfunction %}
+give_next_step()
+{% endblock hintfunction%}
+
+
+
