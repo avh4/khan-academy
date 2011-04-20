@@ -181,7 +181,7 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
                 $("#dvHintText4").css("display","");
             }
             _hintsGiven++;
-            steps_given++;
+            Exercise.steps_given++;
         },
 
         check_answer: function(){

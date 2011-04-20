@@ -296,7 +296,7 @@ function next_step()
     //uncolorNumbers();
     if(curDigit<=dividendDigits.length){
         explanationTerms = [];
-        steps_given++;
+        Exercise.steps_given++;
         if(divided==false)
         {
 
