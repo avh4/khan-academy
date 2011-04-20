@@ -33,24 +33,24 @@ class ClassTimeAnalyzer:
         classtime_table = ClassTimeTable(dt_start_ctz, dt_end_ctz)
 
         # Asynchronously grab all student data at once
-        task_runner = AsyncMultiTask()
+        async_queries = []
         for student_email in student_emails:
             student = users.User(email=student_email)
 
             query_problem_logs = ProblemLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
             query_video_logs = VideoLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
 
-            task_runner.append(QueryTask(query_problem_logs, limit=10000))
-            task_runner.append(QueryTask(query_video_logs, limit=10000))
+            async_queries.append(query_problem_logs)
+            async_queries.append(query_video_logs)
 
         # Wait for all queries to finish
-        task_runner.run()
+        results = util.async_queries(async_queries, limit=10000)
 
         for i, student_email in enumerate(student_emails):
             student = users.User(email=student_email)
 
-            problem_logs = task_runner[i * 2].get_result()
-            video_logs = task_runner[i * 2 + 1].get_result()
+            problem_logs = results[i * 2].get_result()
+            video_logs = results[i * 2 + 1].get_result()
 
             problem_and_video_logs = []
 

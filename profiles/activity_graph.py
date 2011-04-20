@@ -149,7 +149,7 @@ def get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_lo
 def get_badge_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
-    user_badges = models_badges.UserBadge.get_for_user_between_dts(user, dt_start_utc, dt_end_utc)
+    user_badges = models_badges.UserBadge.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(1000)
     badges_dict = util_badges.all_badges_dict()
 
     for user_badge in user_badges:

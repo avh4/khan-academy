@@ -6,6 +6,7 @@ import request_cache
 
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
+from asynctools import AsyncMultiTask, QueryTask
 
 import nicknames
 import facebook_util
@@ -83,4 +84,11 @@ def thousands_separated_number(x):
         result = ",%03d%s" % (r, result)
     return "%d%s" % (x, result)
 
+def async_queries(queries, limit=100000):
 
+    task_runner = AsyncMultiTask()
+    for query in queries:
+        task_runner.append(QueryTask(query, limit=limit))
+    task_runner.run()
+
+    return task_runner
