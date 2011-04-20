@@ -111,7 +111,7 @@ def recent_activity_for(user, dt_start, dt_end):
     query_problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end)
     query_video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end)
 
-    results = util.async_queries([query_user_badges, query_problem_logs, query_video_logs], limit=500)
+    results = util.async_queries([query_user_badges, query_problem_logs, query_video_logs], limit=200)
 
     list_recent_activity_types = [
             recent_badge_activity(results[0].get_result()),
