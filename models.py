@@ -33,7 +33,7 @@ class Setting(db.Model):
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
-            memcache.delete("setting_key_%s" % key)
+            memcache.delete("setting_key_%s" % key, namespace=App.version)
             return setting.value
 
     @staticmethod
