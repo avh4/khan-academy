@@ -396,14 +396,6 @@ class ViewVideo(request_handler.RequestHandler):
         if video is None:
             raise MissingVideoException("Missing video '%s'" % readable_id)
 
-        playlists = VideoPlaylist.get_cached_playlists_for_video(video)
-        for p in playlists:
-            if (playlist is None or p.youtube_id == playlist.youtube_id):
-                p.selected = 'selected'
-                playlist = p
-                playlists.remove(p)
-                break
-
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
@@ -429,7 +421,6 @@ class ViewVideo(request_handler.RequestHandler):
         notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
 
         template_values = qa.add_template_values({'playlist': playlist,
-                                                  'playlists': playlists,
                                                   'video': video,
                                                   'videos': videos,
                                                   'video_path': video_path,
