@@ -47,12 +47,12 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
         _den1 = getRandomIntRange(max, max + 10);
         _den2 = _den1;
         _commonDenominator = _den1;
-        _equation = "`"+ _num1 + "/" + _den1 + "` `+` `" + _num2 + "/" + _den2 + "`"  + " `=` ?";
+        _equation = "`"+ _num1 + "/" + _den1 + "` `+` `" + _num2 + "/" + _den2 + "`";
         $("#dvHintText2").append('`?/' + _den1 + '`');
         $("#dvHintText4").append(_equation + " &nbsp;&nbsp;`=` &nbsp;&nbsp;`" 
                             + "(" + _num1 + " + " + _num2 + ") / " + _den1  
                             + "="+ ((_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2)) + "/" + _commonDenominator + "`");
-        _writeEquation("#dvQuestion", _equation, true);//Write New Equation
+        _writeEquation("#dvQuestion", _equation +  " `=` ?", true);//Write New Equation
         _unreducedNominator=(_num1*_commonDenominator/_den1)+(_num2*_commonDenominator/_den2);
         temp=get_reduced_fraction(_unreducedNominator,_commonDenominator);
         _reducedNominator=temp.numerator;
