@@ -1,3 +1,13 @@
+// Rounding numbers
+// Author: Marcia Lee
+// Date: 2011-04-20
+//
+// Problem speclet:
+//  Round X to the nearest {hundredth, tenth, one, ten, hundred, thousand}.
+//  In the case of the first three, the number is between 10-99 and has 3 decimals.
+//  For the last two, the number is between 100-999.
+//
+
 function RoundingExercise() {
     var number;
     var number_str;
