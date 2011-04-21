@@ -93,10 +93,12 @@ def javascript_sort_key(filename):
         return 2
     elif filename == "raphael.js":
         return 3
-    elif filename == "metautil.js":
+    elif filename == "g.raphael-min.js":
         return 4
-    else:
+    elif filename == "metautil.js":
         return 5
+    else:
+        return 6
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
