@@ -765,9 +765,9 @@ class GraphPage(request_handler.RequestHandler):
     def get(self):
         width = self.request.get('w')
         height = self.request.get('h')
-        template_values = {'App' : App, 'width': width, 'height': height}
+        template_values = {'width': width, 'height': height}
 
-        self.render_template('graphpage.html', template_values)
+        self.render_template_simple('graphpage.html', template_values)
 
 class AdminViewUser(request_handler.RequestHandler):
 

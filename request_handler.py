@@ -205,6 +205,9 @@ class RequestHandler(webapp.RequestHandler):
             if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
                 template_values['is_mobile'] = self.is_mobile()
 
+        self.render_template_simple(template_name, template_values)
+
+    def render_template_simple(self, template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
  
