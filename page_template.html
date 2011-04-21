@@ -5,9 +5,6 @@
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
         <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
 
-        <!-- For ChartBeat analytics START -->
-        <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
-        <!-- For ChartBeat analytics END -->
         {% if video %}<title>{{video.title}} | Khan Academy</title>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
@@ -199,27 +196,6 @@
                 {% badge_notifications %}
             {% endif %}
     
-    	<!-- For ChartBeat analytics START -->
-    	<script type="text/javascript">
-    	var _sf_async_config={uid:10894,domain:"khanacademy.org"};
-    	(function(){
-    	  function loadChartbeat() {
-    	    window._sf_endpt=(new Date()).getTime();
-    	    var e = document.createElement('script');
-    	    e.setAttribute('language', 'javascript');
-    	    e.setAttribute('type', 'text/javascript');
-    	    e.setAttribute('src',
-    	       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
-    	       "static.chartbeat.com/js/chartbeat.js");
-    	    document.body.appendChild(e);
-    	  }
-    	  var oldonload = window.onload;
-    	  window.onload = (typeof window.onload != 'function') ?
-    	     loadChartbeat : function() { oldonload(); loadChartbeat(); };
-    	})();
-    	</script>
-    	<!-- For ChartBeat analytics END -->
-
         {% if not is_mobile %}
            <script type="text/javascript">
                 var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
