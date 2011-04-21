@@ -28,15 +28,21 @@ class Setting(db.Model):
     @staticmethod
     def get_or_set_with_key(key, val = None):
         if val is None:
-            setting = Setting.get_by_key_name(key)
-            if setting is not None:
-                return setting.value
-            return None
+            return Setting.cache_get_by_key_name(key)
         else:
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
+            memcache.delete("setting_key_%s" % key)
             return setting.value
+
+    @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda key: "setting_key_%s" % key, layer=layer_cache.Layers.Memcache)
+    def cache_get_by_key_name(key):
+        setting = Setting.get_by_key_name(key)
+        if setting is not None:
+            return setting.value
+        return None
 
     @staticmethod
     def cached_library_content_date(val = None):
