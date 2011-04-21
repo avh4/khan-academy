@@ -162,13 +162,21 @@ class Answers(request_handler.RequestHandler):
 
     def get(self):
 
+        user = util.get_current_user()
         question_key = self.request.get("question_key")
         question = db.get(question_key)
 
         if question:
-            answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False, False)
+            video = question.first_target()
+            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+
+            answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
+
+            for answer in answers:
+                voting.add_vote_expando_properties(answer, dict_votes)
+
             template_values = {
-                "answers": answer_query,
+                "answers": answers,
                 "is_mod": util_discussion.is_current_user_moderator()
             }
             path = os.path.join(os.path.dirname(__file__), 'question_answers.html')

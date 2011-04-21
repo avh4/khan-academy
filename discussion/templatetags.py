@@ -46,7 +46,12 @@ def flag_tools(target):
 
 @register.inclusion_tag(("../discussion/vote_tools.html", "discussion/vote_tools.html"))
 def vote_tools(target):
-    return {"target": target}
+    sum_original = target.sum_votes
+    if target.up_voted:
+        sum_original -= 1
+    elif target.down_voted:
+        sum_original += 1
+    return {"target": target, "sum_original": sum_original}
 
 @register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
 def author_tools(target):

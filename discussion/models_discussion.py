@@ -118,9 +118,9 @@ class FeedbackNotification(db.Model):
     user = db.UserProperty()
 
 class FeedbackVote(db.Model):
+    DOWN = -1
     ABSTAIN = 0
     UP = 1
-    DOWN = 2
 
     # Feedback reference stored in parent property
     video = db.ReferenceProperty()

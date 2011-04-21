@@ -60,19 +60,30 @@ var Voting = {
         $(".vote_for").live("click", Voting.voteEntity);
     },
 
-    voteEntity: function() {
+    voteEntity: function(e) {
         var jel = $(this);
 
-        var vote_type = jel.attr("data-vote_type");
+        var vote_type = parseInt(jel.attr("data-vote_type"));
         if (!vote_type) return;
 
         var key = jel.attr("data-key");
         if (!key) return false;
 
+        var fAbstain = jel.is(".voted");
+
         $.post("/discussion/voteentity", {
             entity_key: key,
-            vote_type: vote_type
+            vote_type: fAbstain ? 0 : vote_type
         });
+
+        var jelTools = jel.parents(".vote_tools");
+        jelTools.find("a").removeClass("voted");
+
+        var jelVotes = jelTools.find(".sum_votes");
+        var votes = parseInt($.trim(jelVotes.attr("data-sum_original")));
+        jelVotes.html(votes + (fAbstain ? 0 : vote_type));
+
+        if (!fAbstain) jel.addClass("voted");
 
         return false;
     }
@@ -375,7 +386,8 @@ var QA = {
         // doesn't preserve newline content when asking for .text() content below.
         var reBR = /<br>/gi;
         var reBRReverse = /{newline}/g;
-        var htmlEntity = $.browser.msie ? jEntity.html().replace(reBR, "{newline}") : jEntity.html();
+        var jSpan = $("span", jEntity).first();
+        var htmlEntity = $.browser.msie ? jSpan.html().replace(reBR, "{newline}") : jSpan.html();
 
         var jContent = $("<div>").html(htmlEntity);
 
@@ -385,7 +397,7 @@ var QA = {
         // Fill, insert, then focus textarea
         var textEntity = $.browser.msie ? jContent.text().replace(reBRReverse, "\n") : jContent.text();
         jTextarea.val($.trim(textEntity));
-        $("span", jEntity).first().css("display", "none").after(jTextarea);
+        jSpan.css("display", "none").after(jTextarea);
 
         setTimeout(function(){jTextarea.focus();}, 1);
     },
