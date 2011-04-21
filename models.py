@@ -15,6 +15,7 @@ import points
 from search import Searchable
 from app import App
 import layer_cache
+import request_cache
 from discussion import models_discussion
 
 # Setting stores per-application key-value pairs
@@ -27,15 +28,21 @@ class Setting(db.Model):
     @staticmethod
     def get_or_set_with_key(key, val = None):
         if val is None:
-            setting = Setting.get_by_key_name(key)
-            if setting is not None:
-                return setting.value
-            return None
+            return Setting.cache_get_by_key_name(key)
         else:
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
+            memcache.delete("setting_key_%s" % key, namespace=App.version)
             return setting.value
+
+    @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda key: "setting_key_%s" % key, layer=layer_cache.Layers.Memcache)
+    def cache_get_by_key_name(key):
+        setting = Setting.get_by_key_name(key)
+        if setting is not None:
+            return setting.value
+        return None
 
     @staticmethod
     def cached_library_content_date(val = None):
@@ -159,7 +166,7 @@ class Exercise(db.Model):
         query.filter('exercise =', self.key())
         return query
 
-    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
+    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def related_videos_fetch(self):
         exercise_videos = self.related_videos().fetch(10)
         for exercise_video in exercise_videos:
@@ -242,6 +249,7 @@ class UserExercise(db.Model):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
 
     @staticmethod
+    @request_cache.cache_with_key_fxn(lambda user: "request_cache_user_exercise_%s" % user.email())
     def get_for_user_use_cache(user):
         user_exercises_key = UserExercise.get_key_for_user(user)
         user_exercises = memcache.get(user_exercises_key)
@@ -390,6 +398,9 @@ class UserData(db.Model):
 
     @staticmethod    
     def get_for(user):
+        if not user:
+            return None
+
         query = UserData.all()
         query.filter('user =', user)
         query.order('-points') # Temporary workaround for issue 289

@@ -8,7 +8,7 @@
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
-<div id="homepage" style="position: relative;">
+<div id="homepage">
     <div id="main-video">
         {% youtube_player_embed video_id 480 380 %}
     </div>
@@ -62,23 +62,36 @@
             </tr>
         </table>
     </div>
-
     <div class="clear"></div>
-<hr>
-<h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
+<hr class="desktop-only">
 
-{% if DVD_list %}
-<ul class="menu" id="menu">
-    {% for playlist in DVD_list %}
-	    <li><a href="#{{playlist}}" class="menulink">{{playlist}}</a></li>
-    {% endfor %}
-</ul>
-{% else %}
-<div id="browse-control-anchor"></div>
-{% playlist_browser "browse" %}
-{% playlist_browser "browse-fixed" %}
-{% endif %}
-
+<div data-role="page" data-theme"b" {% if is_mobile %}id="browse"{% endif %}>
+    <div data-role="content">
+        <div id="mobile-homepage" class="mobile-only">
+            <img src="/images/logo-horizontal-large.png" id="mobile-logo" />
+            <span id="page_visitors">
+                    <span id="page_num_visitors">
+                        <!-- Content will get populated by javacript at end of page -->
+                    </span>&nbsp;lessons delivered
+            </span>
+        </div>
+        <h2 class="main-headline">Browse our library of over {{approx_vid_count|thousands_separated}} educational videos...</h2>
+        {% if DVD_list %}
+        <ul class="menu" id="menu">
+            {% for playlist in DVD_list %}
+        	    <li><a href="#{{playlist}}" class="menulink">{{playlist}}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div id="browse-control-anchor"></div>
+        {% playlist_browser "browse" %}
+        {% playlist_browser "browse-fixed" %}
+        
+        {% endif %}
+        <a href="/mobilefullsite" class="mobile-only" data-role="button" data-ajax="false">View standard site</a>
+    </div>
+</div>
+<div class="clear"></div>
 {{ library_content }}
 
 </div>
@@ -90,5 +103,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {% homepage_javascript %}
+    {% if not is_mobile %}
+        {% homepage_javascript %}
+    {% endif %}
 {% endblock bottompagescript %}

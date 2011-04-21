@@ -1,5 +1,3 @@
-{% block graph %}
-
 {% if is_graph_empty %}
     <div class="graph-notification">There isn't any class activity for this date.</div>
 {% endif %}
@@ -97,6 +95,3 @@
 <div id="highchart-container" class="x-scrollable {% if is_graph_empty %}empty-chart{% endif %}">
     <div id="highchart" style="min-width:{{ width }}px;"></div>
 </div>
-
-{% endblock graph %}
-

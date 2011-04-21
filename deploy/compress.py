@@ -76,7 +76,8 @@ def combine_package(path, suffix):
         raise Exception("File about to be compressed already exists: %s" % path_combined)
 
     f = open(path_combined, "w")
-    f.write("\n".join(content))
+    separator = "\n" if suffix.endswith(".css") else ";\n"
+    f.write(separator.join(content))
     f.close()
 
     return path_combined
@@ -91,10 +92,16 @@ def javascript_sort_key(filename):
         return 1
     elif filename.startswith("jquery."):
         return 2
-    elif filename == "metautil.js":
-        return 3
-    else:
+    elif filename == "seedrandom.js":
         return 4
+    elif filename == "raphael.js":
+        return 5
+    elif filename == "g.raphael-min.js":
+        return 6
+    elif filename == "metautil.js":
+        return 7
+    else:
+        return 8
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)

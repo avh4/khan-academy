@@ -385,14 +385,6 @@ class ViewVideo(request_handler.RequestHandler):
         if video is None:
             raise MissingVideoException("Missing video '%s'" % readable_id)
 
-        playlists = VideoPlaylist.get_cached_playlists_for_video(video)
-        for p in playlists:
-            if (playlist is None or p.youtube_id == playlist.youtube_id):
-                p.selected = 'selected'
-                playlist = p
-                playlists.remove(p)
-                break
-
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
@@ -418,7 +410,6 @@ class ViewVideo(request_handler.RequestHandler):
         notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
 
         template_values = qa.add_template_values({'playlist': playlist,
-                                                  'playlists': playlists,
                                                   'video': video,
                                                   'videos': videos,
                                                   'video_path': video_path,
@@ -763,9 +754,9 @@ class GraphPage(request_handler.RequestHandler):
     def get(self):
         width = self.request.get('w')
         height = self.request.get('h')
-        template_values = {'App' : App, 'width': width, 'height': height}
+        template_values = {'width': width, 'height': height}
 
-        self.render_template('graphpage.html', template_values)
+        self.render_template_simple('graphpage.html', template_values)
 
 class AdminViewUser(request_handler.RequestHandler):
 
@@ -1188,8 +1179,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         self.response.out.write("Library content regenerated")  
 
 @layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date(),
-        persist_across_app_versions = True
+        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         ) 
 def library_content_html(bust_cache = False):
 
@@ -1351,6 +1341,16 @@ class SendToLog(request_handler.RequestHandler):
         message = self.request_string("message", default="")
         if message:
             logging.critical("Manually sent to log: %s" % message)
+
+class MobileFullSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(True)
+        self.redirect("/")
+
+class MobileSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(False)
+        self.redirect("/")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1441,6 +1441,7 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
+                                                  'is_mobile_allowed': True,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
         self.render_template('homepage.html', template_values)
@@ -1866,6 +1867,9 @@ def real_main():
         ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
         ('/showunusedplaylists', ShowUnusedPlaylists),
         ('/crash', Crash),
+
+        ('/mobilefullsite', MobileFullSite),
+        ('/mobilesite', MobileSite),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),

@@ -1,5 +1,3 @@
-{% block graph %}
-
 {% if not student_emails %}
     <div class="graph-notification">You don't have any students yet.</div>
 {% endif %}
@@ -190,7 +188,7 @@
                     {% for student_email in student_emails %}
                     <tr {% if forloop.first %}id="firstTr"{% endif %}>
                     {% for exercise_name in exercise_names %}            
-                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escapejs }}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name={{ exercise_name|escapejs }}');" data-hover="{{exercise_data|hash:exercise_name|hash:student_email|hash:"hover"|escape}}"></td>
+                    <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"|escape }}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('/profile/graph/exerciseproblems?student_email={{ student_email|escapejs }}&exercise_name={{ exercise_name|escapejs }}');" data-hover="{{exercise_data|hash:exercise_name|hash:student_email|hash:"hover"|escape}}"></td>
                     {% endfor %}
                     </tr>
                 {% endfor %}
@@ -200,7 +198,3 @@
 
     </tr>
 </table>
- 
-{% endblock graph %}
-
-

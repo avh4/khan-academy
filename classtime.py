@@ -3,6 +3,7 @@ import logging
 import copy
 
 from google.appengine.api import users
+from asynctools import AsyncMultiTask, QueryTask
 
 import util
 from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, ExerciseGraph
@@ -31,11 +32,25 @@ class ClassTimeAnalyzer:
 
         classtime_table = ClassTimeTable(dt_start_ctz, dt_end_ctz)
 
+        # Asynchronously grab all student data at once
+        async_queries = []
         for student_email in student_emails:
             student = users.User(email=student_email)
 
-            problem_logs = ProblemLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
-            video_logs = VideoLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
+            query_problem_logs = ProblemLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
+            query_video_logs = VideoLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
+
+            async_queries.append(query_problem_logs)
+            async_queries.append(query_video_logs)
+
+        # Wait for all queries to finish
+        results = util.async_queries(async_queries, limit=10000)
+
+        for i, student_email in enumerate(student_emails):
+            student = users.User(email=student_email)
+
+            problem_logs = results[i * 2].get_result()
+            video_logs = results[i * 2 + 1].get_result()
 
             problem_and_video_logs = []
 

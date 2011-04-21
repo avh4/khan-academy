@@ -11,5 +11,9 @@
         <a href="/about">About</a> <a href="/about/faq">FAQ</a> <a href="/contribute/credits">Credits</a> <a href="/downloads">Downloads</a>
         <span class="sep">|</span>
         <a href="/coaches">Add a Coach</a>
+        {% if is_mobile_capable %}
+            <span class="sep">|</span>
+            <a href="/mobilesite">Mobile Site</a>
+        {% endif %}
     </div>
 </footer>

@@ -156,7 +156,9 @@ var Exercise = {
             $("#throbber").show();
         else
             $("#throbber").hide();
-    }
+    },
+    
+    showCustomStep: function() {}
 };
 
 var selColor = "#AE9CC9";
@@ -720,7 +722,7 @@ function appendAnswerHtml(html) {
 }
 
 function open_left_padding(pixels) {
-    appendQuestionHtml("<div style=\'padding-left: " + pixels + "px\'");
+    appendQuestionHtml("<div style=\'padding-left: " + pixels + "px\'>");
 }
 
 function close_left_padding() {
@@ -831,5 +833,56 @@ function reset_streak() {
 function fade_streaks() {
     $(".unit-rating li.current-rating").animate({opacity: 0.0}, "fast");
     $(".unit-rating li.current-label").animate({opacity: 0.0}, "fast");
+}
+
+function get_reduced_fraction(numerator,denominator){
+    var factorX = 1;
+    var result={};
+    //Find common factors of Numerator and Denominator
+    for ( var x = 2; x <= Math.min( numerator, denominator ); x ++ ) {
+        var check1 = numerator / x;
+        if ( check1 == Math.round( check1 ) ) {
+            var check2 = denominator / x;
+            if ( check2 == Math.round( check2 ) ) {
+                factorX = x;
+            }
+        }
+    }
+
+    result.numerator=(numerator/factorX);  //divide by highest common factor to reduce fraction then multiply by neg to make positive or negative
+    result.denominator=denominator/factorX;  //divide by highest common factor to reduce fraction
+
+    return result;
+}
+
+/*
+* Access Level: Private
+* Function: _rtrim
+* Parameter1 Name: str
+* Parameter1 Type: string
+* Parameter1 Description: string to trim charector in
+* Parameter2 Name: chars
+* Parameter2 Type: String
+* Parameter2 Description: char to br trimmed from string
+*/
+function rtrim(str, chars) {
+    chars = chars || "\\s";
+    return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
+}
+
+
+/*
+* Access Level: Private
+* Function: _ltrim
+* Parameter1 Name: str
+* Parameter1 Type: string
+* Parameter1 Description: string to trim charector in
+* Parameter2 Name: chars
+* Parameter2 Type: String
+* Parameter2 Description: char to br trimmed from string
+*/
+function ltrim(str, chars) {
+    chars = chars || "\\s" || "\\.";
+    return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
 }
 

@@ -375,13 +375,16 @@ var QA = {
         // doesn't preserve newline content when asking for .text() content below.
         var reBR = /<br>/gi;
         var reBRReverse = /{newline}/g;
-        var jContent = $("<div>").html(jEntity.html().replace(reBR, "{newline}"));
+        var htmlEntity = $.browser.msie ? jEntity.html().replace(reBR, "{newline}") : jEntity.html();
+
+        var jContent = $("<div>").html(htmlEntity);
 
         // Remove any artificially inserted ellipsis
         $(".ellipsisExpand", jContent).remove();
 
         // Fill, insert, then focus textarea
-        jTextarea.val($.trim(jContent.text().replace(reBRReverse, "\n")));
+        var textEntity = $.browser.msie ? jContent.text().replace(reBRReverse, "\n") : jContent.text();
+        jTextarea.val($.trim(textEntity));
         $("span", jEntity).first().css("display", "none").after(jTextarea);
 
         setTimeout(function(){jTextarea.focus();}, 1);

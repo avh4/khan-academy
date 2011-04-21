@@ -29,7 +29,7 @@ import request_handler
 import logging
 
 # Authoritative list of all badges
-@layer_cache.cache_with_key("all_badges", layer=layer_cache.SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def all_badges():
     return [
         exercise_completion_count_badges.GettingStartedBadge(),
@@ -102,7 +102,7 @@ def all_badges():
 
     ]
 
-@layer_cache.cache_with_key("all_badges_dict", layer=layer_cache.SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def all_badges_dict():
     dict_badges = {}
     for badge in all_badges():

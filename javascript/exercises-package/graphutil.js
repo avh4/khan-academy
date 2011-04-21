@@ -865,25 +865,23 @@ function give_next_step() {
 		for(var k=0; k<justDrawn.length; k++)
 			justDrawn[k].draw();
 	}
-	Exercise.steps_given++;
-	var toDraw = graphicalHints[Exercise.steps_given];
+
+	var toDraw = graphicalHints[Exercise.steps_given-1];
 	if (toDraw)
 	{
 		for(var k=0; k<toDraw.length; k++)
 			toDraw[k].drawInColor();
 	}
 	
-	
-	
-	//graph_update();
-	
 	show_step();
 	translate(); // Process any ASCII Math -> MathML
+	Exercise.steps_given++;
 }
 
 function show_step() 
 {
     $(".step" + Exercise.steps_given).css("visibility", "visible");
+    Exercise.showCustomStep(Exercise.steps_given);
 }
 
 function randomRotation()

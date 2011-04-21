@@ -7,8 +7,9 @@
 <div id="dpaper"></div>
 
 <script type="text/javascript">
+var paper;
 window.onload = function() {
-    var paper = Raphael("dpaper", {{width}}, {{height}});
+    paper = Raphael("dpaper", {{width}}, {{height}});
     initPaper(paper, {{width}}, {{height}});
     parent.graph_update();
 };

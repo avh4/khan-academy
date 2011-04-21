@@ -1,5 +1,3 @@
-{% block graph %}
-
 {% if is_graph_empty %}
 <div class="graph-notification">This chart doesn't have any focus to show. Go <a href="/#browse">watch some videos</a> and <a href="/exercisedashboard">do some exercises</a>!</div>
 {% endif %}
@@ -152,6 +150,3 @@
 <div id="highchart-container" class="{% if is_graph_empty %}empty-chart{% endif %}">
     <div id="highchart"></div>
 </div>
-
-{% endblock graph %}
-
