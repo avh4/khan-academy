@@ -181,9 +181,11 @@ class RequestHandler(webapp.RequestHandler):
         if user is not None:
             template_values['username'] = user.nickname()
 
-        user_data = UserData.get_for(user)
+        if not template_values.has_key('user_data'):
+            user_data = UserData.get_for(user)
+            template_values['user_data'] = user_data
 
-        template_values['user_data'] = user_data
+        user_data = template_values['user_data']
         template_values['points'] = user_data.points if user_data else 0
 
         if not template_values.has_key('continue'):

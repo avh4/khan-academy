@@ -398,6 +398,9 @@ class UserData(db.Model):
 
     @staticmethod    
     def get_for(user):
+        if not user:
+            return None
+
         query = UserData.all()
         query.filter('user =', user)
         query.order('-points') # Temporary workaround for issue 289
