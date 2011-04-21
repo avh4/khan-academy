@@ -76,7 +76,8 @@ def combine_package(path, suffix):
         raise Exception("File about to be compressed already exists: %s" % path_combined)
 
     f = open(path_combined, "w")
-    f.write(";\n".join(content))
+    separator = "\n" if suffix.endswith(".css") else ";\n"
+    f.write(separator.join(content))
     f.close()
 
     return path_combined
