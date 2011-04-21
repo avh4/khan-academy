@@ -209,6 +209,10 @@ var QA = {
 
         $("input.question_submit, input.answer_submit").live("click", QA.submit);
         $(".question_cancel, .answer_cancel").live("click", QA.cancel);
+        $(".questions_container .question_container")
+            .live("mouseover", QA.hover)
+            .live("mouseout", QA.unhover)
+            .live("click", QA.expand);
 
         $(window).resize(QA.repositionStickyNote);
 
@@ -219,7 +223,6 @@ var QA = {
     initPagesAndQuestions: function() {
         $("form.answers").submit(function(){return false;});
         $("a.questions_page").click(function(){ QA.loadPage($(this).attr("page")); return false; });
-        $(".questions_container .question_container").mouseover(QA.hover).mouseout(QA.unhover).click(QA.expand);
         $(".add_yours").click(QA.expandAndFocus);
         $(".answer_text").focus(QA.focusAnswer).watermark($(".answer_text").attr("watermark"));
     },
@@ -624,10 +627,10 @@ var Comments = {
 };
 
 $(Discussion.init);
-$(Comments.init);
-$(QA.init);
 $(Moderation.init);
 $(Voting.init);
+$(Comments.init);
+$(QA.init);
 
 // Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
 // we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm
