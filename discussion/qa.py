@@ -110,7 +110,7 @@ class PageQuestions(request_handler.RequestHandler):
         playlist = db.get(playlist_key)
 
         user_data = None
-        user = utils.get_current_user()
+        user = util.get_current_user()
         if user:
             user_data = models.UserData.get_for(user)
 
@@ -118,7 +118,7 @@ class PageQuestions(request_handler.RequestHandler):
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
-            json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
+            json = simplejson.dumps({"html": html, "page": page, "qa_expand_id": qa_expand_id}, ensure_ascii=False)
             self.response.out.write(json)
 
         return
@@ -176,7 +176,7 @@ class Answers(request_handler.RequestHandler):
             dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
 
             answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
-            answers = voting.sort(answers)
+            answers = voting.VotingSortOrder.sort(answers)
 
             for answer in answers:
                 voting.add_vote_expando_properties(answer, dict_votes)
@@ -211,6 +211,7 @@ class AddQuestion(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         video = db.get(video_key)
+        question_key = ""
 
         if question_text and video:
             if len(question_text) > 500:
@@ -222,8 +223,10 @@ class AddQuestion(request_handler.RequestHandler):
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
             question.put()
+            question_key = question.key().id()
 
-        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=0" % (video_key, playlist_key))
+        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&qa_expand_id=%s" % 
+                (video_key, playlist_key, question_key))
 
 class EditEntity(request_handler.RequestHandler):
 
@@ -347,21 +350,24 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None)
     limit_per_page = 5
     user = util.get_current_user()
 
-    if qa_expand_id:
-        # If we're showing an initially expanded question,
-        # make sure we're on the correct page
-        question = models_discussion.Feedback.get_by_id(qa_expand_id)
-        if question:
-            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 AND date > :5", models_discussion.FeedbackType.Question, video.key(), False, False, question.date)
-            count_preceding = question_preceding_query.count()
-            page = 1 + (count_preceding / limit_per_page)
-
     if page <= 0:
         page = 1
 
     sort_order = user_data.question_sort_order if user_data else voting.VotingSortOrder.HighestPointsFirst
     questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
     questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
+
+    if qa_expand_id:
+        # If we're showing an initially expanded question,
+        # make sure we're on the correct page
+        question = models_discussion.Feedback.get_by_id(qa_expand_id)
+        if question:
+            count_preceding = 0
+            for question_test in questions:
+                if question_test.key() == question.key():
+                    break
+                count_preceding += 1
+            page = 1 + (count_preceding / limit_per_page)
 
     answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
     answers = voting.VotingSortOrder.sort(answers)

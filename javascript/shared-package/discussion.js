@@ -316,6 +316,9 @@ var QA = {
         QA.initPagesAndQuestions();
         Discussion.hideThrobber();
         VideoControls.initJumpLinks();
+
+        if (dict_json.qa_expand_id && parseInt(dict_json.qa_expand_id) > 0)
+            document.location = "#q_" + dict_json.qa_expand_id;
     },
 
     getQAParent: function(el) {
