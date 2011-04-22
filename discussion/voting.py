@@ -53,6 +53,18 @@ class VoteEntity(request_handler.RequestHandler):
         if not user:
             return
 
+        user_data = UserData.get_or_insert_for(user)
+        if not user_data:
+            return
+
+        vote_type = self.request_int("vote_type", default=FeedbackVote.ABSTAIN)
+        if vote_type == FeedbackVote.UP and not Privileges.can_up_vote(user_data):
+            self.render_json({"error": Privileges.need_points_desc(Privileges.UP_VOTE_THRESHOLD, "up vote")})
+            return
+        elif vote_type == FeedbackVote.DOWN and not Privileges.can_down_vote(user_data):
+            self.render_json({"error": Privileges.need_points_desc(Privileges.DOWN_VOTE_THRESHOLD, "down vote")})
+            return
+
         # We kick off a taskqueue item to perform the actual vote insertion
         # so we don't have to worry about fast writes to the entity group 
         # causing contention problems for the HR datastore, because

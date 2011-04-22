@@ -262,7 +262,7 @@ span.mod_tools_hidden, span.flag_tools_hidden {
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
 }
 
-.video_questions .login_note {
+.video_questions .note {
     position: absolute;
     background-color: yellow;
     padding: 10px;
@@ -271,6 +271,7 @@ span.mod_tools_hidden, span.flag_tools_hidden {
 	-webkit-border-radius:10px;
 	border-radius:10px;
     text-align: center;
+    z-index: 2;
 }
 
 .video_questions .login_note .icon {

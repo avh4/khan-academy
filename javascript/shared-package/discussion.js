@@ -61,6 +61,9 @@ var Voting = {
     },
 
     voteEntity: function(e) {
+
+        if (QA.showNeedsLoginNote(this, "to vote.")) return false;
+
         var jel = $(this);
 
         var vote_type = parseInt(jel.attr("data-vote_type"));
@@ -71,27 +74,46 @@ var Voting = {
 
         var fAbstain = jel.is(".voted");
 
+        var jelParent = jel.parents(".comment, .answer, .question").first();
+        var jelVotes = jelParent.find(".sum_votes");
+        var votes = parseInt($.trim(jelVotes.attr("data-sum_original")));
+
         $.post("/discussion/voteentity", {
             entity_key: key,
             vote_type: fAbstain ? 0 : vote_type
-        });
+            },
+            function(data) { Voting.finishVoteEntity(data, jel, jelParent, jelVotes, votes); }
+        );
 
-        var jelParent = jel.parents(".comment, .answer, .question").first();
-        jelParent.find("a.vote_for").removeClass("voted");
+        Voting.clearVote(jel, jelParent, jelVotes, votes);
 
-        var jelVotes = jelParent.find(".sum_votes");
-        var votes = parseInt($.trim(jelVotes.attr("data-sum_original")));
-        votes += (fAbstain ? 0 : vote_type);
+        var votesNext = votes + (fAbstain ? 0 : vote_type);
 
         if (jelParent.is(".comment"))
-            jelVotes.html(votes + " point" + (votes == 1 ? "" : "s") + ", ");
+            jelVotes.html(votesNext + " point" + (votesNext == 1 ? "" : "s") + ", ");
         else
-            jelVotes.html(votes);
+            jelVotes.html(votesNext);
 
         jelVotes.addClass("sum_votes_changed");
         if (!fAbstain) jel.addClass("voted");
 
         return false;
+    },
+
+    clearVote: function(jel, jelParent, jelVotes, votes) {
+        jelParent.find("a.vote_for").removeClass("voted");
+        jelVotes.removeClass("sum_votes_changed").html(votes);
+    },
+
+    finishVoteEntity: function(data, jel, jelParent, jelVotes, votes) {
+        try { eval("var dict_json = " + data); }
+        catch(e) { return; }
+
+        if (dict_json && dict_json.error)
+        {
+            this.clearVote(jel, jelParent, jelVotes, votes);
+            QA.showInfoNote(jel.get(0), dict_json.error);
+        }
     }
 
 };
@@ -219,6 +241,7 @@ var QA = {
             .live("mouseover", QA.hover)
             .live("mouseout", QA.unhover)
             .live("click", QA.expand);
+        $(".close_note").live("click", QA.closeNote);
 
         $(window).resize(QA.repositionStickyNote);
 
@@ -357,10 +380,22 @@ var QA = {
     },
 
     showNeedsLoginNote: function(el, sMsg) {
-        var jNote = $(".login_note")
+        return this.showNote($(".login_note"), el, sMsg, function(){$(".login_link").focus();});
+    },
+
+    showInfoNote: function(el, sMsg) {
+        return this.showNote($(".info_note"), el, sMsg);
+    },
+
+    closeNote: function() {
+        $(".note").hide();
+        return false;
+    },
+
+    showNote: function(jNote, el, sMsg, fxnCallback) {
         if (jNote.length && el)
         {
-            $(".login_action", jNote).text(sMsg);
+            $(".note_desc", jNote).text(sMsg);
 
             var jTarget = $(el);
             var offset = jTarget.offset();
@@ -371,7 +406,7 @@ var QA = {
             var left = offset.left - offsetContainer.left + (jTarget.width() / 2) - (jNote.width() / 2);
             jNote.css("top", top).css("left", left).css("visibility", "visible").css("display", "");
 
-            setTimeout(function(){$(".login_link").focus();}, 50);
+            setTimeout(fxnCallback, 50);
             return true;
         }
         return false;

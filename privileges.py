@@ -1,3 +1,4 @@
+import util
 
 class Privileges:
 
@@ -11,4 +12,8 @@ class Privileges:
     @staticmethod
     def can_down_vote(user_data):
         return user_data.points >= Privileges.DOWN_VOTE_THRESHOLD
+
+    @staticmethod
+    def need_points_desc(points, verb):
+        return "You need at least %s energy points to %s." % (util.thousands_separated_number(points), verb)
  

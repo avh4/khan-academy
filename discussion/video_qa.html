@@ -142,10 +142,15 @@
         </div>
     </div>
 
+    <div class="info_note note" style="display:none;">
+        <span class="note_desc"></span>
+        <a href="#" class="close_note">Close</a>
+    </div>
     {% if not user %}
-        <div class="login_note" style="display:none;">
+        <div class="login_note note" style="display:none;">
             <a class="login_link" href="{{login_url}}"><img class="icon" src="/images/key-plus.png"/ >Log in first</a>
-            <span class="login_action"></span>
+            <span class="note_desc"></span>
+            <a href="#" class="close_note">Close</a>
         </div>
     {% endif %}
 

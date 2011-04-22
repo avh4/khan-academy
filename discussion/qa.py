@@ -8,7 +8,6 @@ from google.appengine.ext.webapp import template
 from mapreduce import control
 from mapreduce import operation as op
 
-from django.utils import simplejson
 from collections import defaultdict
 
 from render import render_block_to_string
@@ -118,8 +117,7 @@ class PageQuestions(request_handler.RequestHandler):
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
-            json = simplejson.dumps({"html": html, "page": page, "qa_expand_id": qa_expand_id}, ensure_ascii=False)
-            self.response.out.write(json)
+            self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
 
         return
 
@@ -187,8 +185,7 @@ class Answers(request_handler.RequestHandler):
             }
             path = os.path.join(os.path.dirname(__file__), 'question_answers.html')
             html = render_block_to_string(path, 'answers', template_values)
-            json = simplejson.dumps({"html": html}, ensure_ascii=False)
-            self.response.out.write(json)
+            self.render_json({"html": html})
 
         return
 
