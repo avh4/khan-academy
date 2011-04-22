@@ -44,7 +44,6 @@ class RateLimiter:
         modified = False
 
         for date in dates:
-            logging.critical(date)
             if (date_now - date) > datetime.timedelta(seconds=3600):
                 modified = True
                 dates.remove(date)
