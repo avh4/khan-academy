@@ -5,6 +5,7 @@ from google.appengine.ext import db
 from google.appengine.api import taskqueue
 
 from privileges import Privileges
+from rate_limiter import VoteRateLimiter
 from models import UserData
 from models_discussion import FeedbackVote
 import request_handler
@@ -58,6 +59,13 @@ class VoteEntity(request_handler.RequestHandler):
             return
 
         vote_type = self.request_int("vote_type", default=FeedbackVote.ABSTAIN)
+
+        if vote_type != FeedbackVote.ABSTAIN:
+            limiter = VoteRateLimiter(user)
+            if not limiter.increment():
+                self.render_json({"error": limiter.denied_desc()})
+                return
+
         if vote_type == FeedbackVote.UP and not Privileges.can_up_vote(user_data):
             self.render_json({"error": Privileges.need_points_desc(Privileges.UP_VOTE_THRESHOLD, "up vote")})
             return
@@ -85,16 +93,7 @@ class FinishVoteEntity(request_handler.RequestHandler):
             return
 
         user = users.User(email)
-        user_data = UserData.get_for(user)
-
-        if not user_data:
-            return
-
         vote_type = self.request_int("vote_type", default=FeedbackVote.ABSTAIN)
-        if vote_type == FeedbackVote.UP and not Privileges.can_up_vote(user_data):
-            return
-        elif vote_type == FeedbackVote.DOWN and not Privileges.can_down_vote(user_data):
-            return
 
         key = self.request_string("entity_key", default="")
         if key:
