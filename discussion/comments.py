@@ -83,9 +83,10 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
         page = 1
 
     limit_per_page = 10
-    limit_initially_visible = 3 if comments_hidden else limit_per_page
+    limit_initially_visible = 2 if comments_hidden else limit_per_page
 
     comments = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Comment)
+    comments = voting.VotingSortOrder.sort(comments)
 
     count_total = len(comments)
     comments = comments[((page - 1) * limit_per_page):(page * limit_per_page)]

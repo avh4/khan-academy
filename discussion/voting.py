@@ -1,3 +1,5 @@
+import urllib
+
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.api import taskqueue
@@ -7,6 +9,42 @@ from models import UserData
 from models_discussion import FeedbackVote
 import request_handler
 import util
+
+class VotingSortOrder:
+    HighestPointsFirst = 1
+    NewestFirst = 2
+
+    @staticmethod
+    def sort(entities, sort_order=-1):
+        if not sort_order in (VotingSortOrder.HighestPointsFirst, VotingSortOrder.NewestFirst):
+            sort_order = VotingSortOrder.HighestPointsFirst
+
+        if sort_order == VotingSortOrder.NewestFirst:
+            return sorted(entities, key=lambda entity: entity.date, reverse=True)
+        else:
+            return sorted(entities, key=lambda entity: entity.sum_votes, reverse=True)
+
+class UpdateQASort(request_handler.RequestHandler):
+    def get(self):
+        user = util.get_current_user()
+        if not user:
+            return
+
+        user_data = UserData.get_or_insert_for(user)
+        if not user_data:
+            return
+
+        sort = self.request_int("sort", default=VotingSortOrder.HighestPointsFirst)
+        user_data.question_sort_order = sort
+        user_data.put()
+
+        readable_id = self.request_string("readable_id", default="")
+        playlist_title = self.request_string("playlist_title", default="")
+
+        if readable_id and playlist_title:
+            self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist_title)))
+        else:
+            self.redirect("/")
 
 class VoteEntity(request_handler.RequestHandler):
     def post(self):

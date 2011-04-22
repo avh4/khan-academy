@@ -18,8 +18,8 @@ def video_comments(video, playlist, page=0):
     return video_comments_context(video, playlist, page)
 
 @register.inclusion_tag("discussion/video_qa.html")
-def video_qa(video, playlist, page=0, qa_expand_id=None):
-    return video_qa_context(video, playlist, page, qa_expand_id)
+def video_qa(user_data, video, playlist, page=0, qa_expand_id=None):
+    return video_qa_context(user_data, video, playlist, page, qa_expand_id)
 
 @register.inclusion_tag(("../discussion/signature.html", "discussion/signature.html"))
 def signature(target=None, verb=None):

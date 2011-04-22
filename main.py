@@ -1947,6 +1947,7 @@ def real_main():
         ('/discussion/clearflags', qa.ClearFlags),
         ('/discussion/flagentity', qa.FlagEntity),
         ('/discussion/voteentity', voting.VoteEntity),
+        ('/discussion/updateqasort', voting.UpdateQASort),
         ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),

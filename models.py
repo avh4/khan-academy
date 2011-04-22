@@ -386,6 +386,7 @@ class UserData(db.Model):
     last_daily_summary = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
+    question_sort_order = db.IntegerProperty(default = -1)
     
     @staticmethod
     def get_for_current_user():

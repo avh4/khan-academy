@@ -8,6 +8,8 @@
 .video_comments .comments_show_more { padding-left: 6px; }
 .video_comments a.comment_add { outline: none; }
 
+.video_questions { padding-top: 18px; }
+
 .video_questions .question_text, 
 .video_questions .answer_text {
     padding: 10px;

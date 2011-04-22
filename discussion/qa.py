@@ -109,8 +109,13 @@ class PageQuestions(request_handler.RequestHandler):
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
+        user_data = None
+        user = utils.get_current_user()
+        if user:
+            user_data = models.UserData.get_for(user)
+
         if video:
-            template_values = video_qa_context(video, playlist, page, qa_expand_id)
+            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
@@ -170,7 +175,8 @@ class Answers(request_handler.RequestHandler):
             video = question.first_target()
             dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
 
-            answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
+            answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
+            answers = voting.sort(answers)
 
             for answer in answers:
                 voting.add_vote_expando_properties(answer, dict_votes)
@@ -336,7 +342,7 @@ class DeleteEntity(request_handler.RequestHandler):
 
         self.redirect("/discussion/flaggedfeedback")
 
-def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
+def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None):
 
     limit_per_page = 5
     user = util.get_current_user()
@@ -346,17 +352,19 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         # make sure we're on the correct page
         question = models_discussion.Feedback.get_by_id(qa_expand_id)
         if question:
-            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 AND date > :5 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, False, question.date)
+            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 AND date > :5", models_discussion.FeedbackType.Question, video.key(), False, False, question.date)
             count_preceding = question_preceding_query.count()
             page = 1 + (count_preceding / limit_per_page)
 
     if page <= 0:
         page = 1
 
+    sort_order = user_data.question_sort_order if user_data else voting.VotingSortOrder.HighestPointsFirst
     questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
-    answers = sorted(
-            util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer), 
-            key=lambda feedback: feedback.date)
+    questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
+
+    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers = voting.VotingSortOrder.sort(answers)
 
     dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
 
@@ -394,6 +402,7 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
+            "sort_order": sort_order,
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }
