@@ -317,8 +317,11 @@ var QA = {
         Discussion.hideThrobber();
         VideoControls.initJumpLinks();
 
+        var hash = "qa";
         if (dict_json.qa_expand_id && parseInt(dict_json.qa_expand_id) > 0)
-            document.location = "#q_" + dict_json.qa_expand_id;
+            hash = "q_" + dict_json.qa_expand_id;
+
+        document.location = "#" + hash;
     },
 
     getQAParent: function(el) {
@@ -573,6 +576,8 @@ var Comments = {
         Comments.initPages();
         Discussion.hideThrobber();
         VideoControls.initJumpLinks();
+
+        document.location = "#comments";
     },
 
     add: function() {

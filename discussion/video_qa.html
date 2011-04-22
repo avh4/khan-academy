@@ -99,23 +99,14 @@
         {% endfor %}
 
         {% if show_page_controls %}
-        <h3>More questions about this video:</h3>
         <div class="page_controls questions_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ prev_page_1_based }}#qa" class="questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
+                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ prev_page_1_based }}#qa" class="button page questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /> Previous questions</a>
                 {% endifnotequal %}
 
-                {% for page in pages %}
-                    {% ifequal page current_page_1_based %}
-                        <span class="page_current questions_page_current">{{ page }}</span>
-                    {% else %}
-                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ page }}#qa" class="page questions_page" page="{{ page }}">{{ page }}</a>
-                    {% endifequal %}
-                {% endfor %}
-
                 {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ next_page_1_based }}#qa" class="questions_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ next_page_1_based }}#qa" class="button page questions_page" page="{{ next_page_1_based }}">Next questions <img class="icon" src="/images/arrow-right.png" /></a>
                 {% endifnotequal %}
             </span>
         </div>

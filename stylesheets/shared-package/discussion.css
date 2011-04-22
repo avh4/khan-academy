@@ -311,29 +311,6 @@ a.button {
     text-decoration: none;
 }
 
-a.page, span.page_current {
-    display: inline-block;
-    background-image: url(/images/x-repeating-sprites.png);
-    background-position: 0px -72px;
-	padding:3px 5px 2px 5px;
-	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
-	border:1px solid rgba(0,0,0,0.4);
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
-	-moz-box-shadow: 0px 0px 1px rgba(0,0,0,0.25);
-	-webkit-box-shadow: 0px 0px 1px rgba(0,0,0,0.25);
-	box-shadow: 0px 0px 1px rgba(0,0,0,0.25);
-    background-color: #CCCCCC;
-    color: #141414;
-    text-decoration: none;
-}
-a.page:hover, span.page_current {
-    background-color: #006699;
-    color: #ffffff;
-    text-decoration: none;
-}
-
 span.playYouTube {
     padding-right: 16px;
     background:url('/images/play.png') no-repeat right center;
@@ -355,11 +332,12 @@ table.feedback_list th {
 }
 
 img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: transparent; }
-.page_controls img.icon { vertical-align: middle; }
+.page_controls img.icon { position:relative; top:-1px; }
 .button img.icon { background: transparent; }
 #page_sub_nav img.icon { background: #E5ECF9; }
 
 .page_controls { padding: 5px 0; }
+.page_controls a.button { padding: 3px 5px; }
 
 .sig { font-style: italic; padding-left: 7px; color: #898989; }
 img.throbber { position: absolute; }
