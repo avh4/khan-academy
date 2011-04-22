@@ -76,13 +76,19 @@ var Voting = {
             vote_type: fAbstain ? 0 : vote_type
         });
 
-        var jelTools = jel.parents(".vote_tools");
-        jelTools.find("a").removeClass("voted");
+        var jelParent = jel.parents(".comment, .answer, .question").first();
+        jelParent.find("a.vote_for").removeClass("voted");
 
-        var jelVotes = jelTools.find(".sum_votes");
+        var jelVotes = jelParent.find(".sum_votes");
         var votes = parseInt($.trim(jelVotes.attr("data-sum_original")));
-        jelVotes.html(votes + (fAbstain ? 0 : vote_type));
+        votes += (fAbstain ? 0 : vote_type);
 
+        if (jelParent.is(".comment"))
+            jelVotes.html(votes + " point" + (votes == 1 ? "" : "s") + ", ");
+        else
+            jelVotes.html(votes);
+
+        jelVotes.addClass("sum_votes_changed");
         if (!fAbstain) jel.addClass("voted");
 
         return false;

@@ -386,7 +386,9 @@ span.flag_tools_show img.feedback_flag { display:none; }
 span.flag_tools_show:hover img.feedback_flag { display:inline; }
 span.flag_tools_show:hover img.feedback_flag_gray { display:none; }
 
-div.sum_votes { text-align: center; color: #898989; }
+.video_questions .sum_votes { text-align: center; }
+.sum_votes { color: #898989; }
+.sum_votes_changed { color: #E45C02; }
 
 .vote_tools div.vote_tools_show a.vote_for {
     border:none; 
@@ -428,7 +430,34 @@ div.vote_tools {
 
 .comments_container div.vote_tools {
     right: -25px;
+    top: -2px;
+    padding-left: 20px;
 }
+
+.comments_container .comment a.vote_for { padding-bottom: 2px; }
+.comments_container .comment a.vote_for img { display:none; }
+
+.comments_container .comment:hover .vote_tools a img.vote_up, 
+.comments_container .comment:hover .vote_tools a img.vote_down
+{
+    display:none;
+}
+.comments_container .comment:hover .vote_tools a img.vote_up_gray,
+.comments_container .comment:hover .vote_tools a img.vote_down_gray
+{
+    display:inline;
+}
+.comments_container .comment:hover .vote_tools a.voted img.vote_up, 
+.comments_container .comment:hover .vote_tools a.voted img.vote_down
+{
+    display:inline;
+}
+.comments_container .comment:hover .vote_tools a.voted img.vote_up_gray,
+.comments_container .comment:hover .vote_tools a.voted img.vote_down_gray
+{
+    display:none;
+}
+
 
 div.feedback_flag:hover {
     background: #fff url(/images/flag.png) no-repeat 0 0;

@@ -27,7 +27,8 @@ def signature(target=None, verb=None):
                 "target": target, 
                 "verb": verb, 
                 "is_mod": is_current_user_moderator(),
-                "is_author": target and target.author == util.get_current_user()
+                "is_author": target and target.author == util.get_current_user(),
+                "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
             }
 
 @register.inclusion_tag(("../discussion/mod_tools.html", "discussion/mod_tools.html"))
@@ -46,12 +47,21 @@ def flag_tools(target):
 
 @register.inclusion_tag(("../discussion/vote_tools.html", "discussion/vote_tools.html"))
 def vote_tools(target):
+    return { "target": target, "is_comment": target.is_type(models_discussion.FeedbackType.Comment) }
+
+@register.inclusion_tag(("../discussion/vote_sum.html", "discussion/vote_sum.html"))
+def vote_sum(target):
     sum_original = target.sum_votes
     if target.up_voted:
         sum_original -= 1
     elif target.down_voted:
         sum_original += 1
-    return {"target": target, "sum_original": sum_original}
+
+    return {
+            "target": target, 
+            "sum_original": sum_original,
+            "is_comment": target.is_type(models_discussion.FeedbackType.Comment),
+            }
 
 @register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
 def author_tools(target):
