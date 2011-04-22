@@ -27,12 +27,13 @@ class PageComments(request_handler.RequestHandler):
 
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
+        sort_order = self.request_int("sort_order", default=voting.VotingSortOrder.HighestPointsFirst)
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
         if video:
             comments_hidden = (self.request.get("comments_hidden") == "1")
-            template_values = video_comments_context(video, playlist, page, comments_hidden)
+            template_values = video_comments_context(video, playlist, page, comments_hidden, sort_order)
             path = os.path.join(os.path.dirname(__file__), 'video_comments.html')
 
             html = render_block_to_string(path, 'comments', template_values)
@@ -71,9 +72,10 @@ class AddComment(request_handler.RequestHandler):
             comment.types = [models_discussion.FeedbackType.Comment]
             comment.put()
 
-        self.redirect("/discussion/pagecomments?video_key=%s&playlist_key=%s&page=0&comments_hidden=%s" % (video_key, playlist_key, comments_hidden))
+        self.redirect("/discussion/pagecomments?video_key=%s&playlist_key=%s&page=0&comments_hidden=%s&sort_order=%s" % 
+                (video_key, playlist_key, comments_hidden, voting.VotingSortOrder.NewestFirst))
 
-def video_comments_context(video, playlist, page=0, comments_hidden=True):
+def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_order=voting.VotingSortOrder.HighestPointsFirst):
 
     user = util.get_current_user()
 
@@ -86,7 +88,7 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
     limit_initially_visible = 2 if comments_hidden else limit_per_page
 
     comments = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Comment)
-    comments = voting.VotingSortOrder.sort(comments)
+    comments = voting.VotingSortOrder.sort(comments, sort_order=sort_order)
 
     count_total = len(comments)
     comments = comments[((page - 1) * limit_per_page):(page * limit_per_page)]
