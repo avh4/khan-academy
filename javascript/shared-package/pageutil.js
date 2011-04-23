@@ -595,3 +595,22 @@ var IEHtml5 = {
    }
 }
 IEHtml5.init();
+
+var VideoViews = {
+    init: function() {
+        var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
+        var seedTotalViews = 28402468
+        var seedDailyViews = 100000;
+
+        var currentTime = new Date();
+        var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
+        var viewsPerSecond = seedDailyViews/24/3600
+        var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+
+        var totalViewsString = addCommas(""+estimatedTotalViews);
+
+        $('#page_num_visitors').append(totalViewsString);
+        $('#page_visitors').css('display', 'inline');
+    }
+}
+$(VideoViews.init);
