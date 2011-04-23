@@ -8,6 +8,9 @@
         <script type="text/javascript">
             var _sf_startpt=(new Date()).getTime(); // for Chartbeat Analytics
             var KA_VERSION = '{{ App.version }}';
+            var FB_APP_ID = '{{ App.facebook_app_id }}';
+            var URL_CONTINUE = '{{ continue|escapejs }}';
+            var USERNAME = '{{ username|escapejs }}';
         </script>
 
         {% if video %}<title>{{video.title}} | Khan Academy</title>
@@ -64,44 +67,8 @@
     <body>
     <div id="page-container">
     <div id="page-container-inner">
-        {% if App.facebook_app_id %}
-        {# Start Facebook connect stuff #}
+        {# Facebook connect root #}
         <div id="fb-root"></div>
-        <script>
-          window.fbAsyncInit = function() {
-            FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
-                     xfbml: true});
-    
-            {% if not username %}
-                FB.Event.subscribe('auth.login', function(response) {
-                    if ('{{ continue|escapejs }}')
-                        window.location = '{{ continue|escapejs }}';
-                    else
-                        window.location.reload();
-                });
-            {% endif %}
-    
-            FB.getLoginStatus(function(response) {
-               if (response.session) {
-                $('#page_logout').click(function(e) {
-                    FB.logout(function() { 
-                        window.location = $("#page_logout").attr("href"); 
-                    });
-                    e.preventDefault();
-                    return false;
-                });
-               }
-            });
-          };
-          $(function() {
-            var e = document.createElement('script'); e.async = true;
-            e.src = document.location.protocol +
-              '//connect.facebook.net/en_US/all.js';
-            document.getElementById('fb-root').appendChild(e);
-          });
-        </script>
-        {# End Facebook connect stuff #}
-        {% endif %}
     
     	{# Make script-requiring elements visible. #}
     	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>

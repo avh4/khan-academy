@@ -614,3 +614,41 @@ var VideoViews = {
     }
 }
 $(VideoViews.init);
+
+var FacebookHook = {
+    init: function() {
+        if (!FB_APP_ID) return;
+
+        window.fbAsyncInit = function() {
+            FB.init({appId: FB_APP_ID, status: true, cookie: true, xfbml: true});
+
+            if (!USERNAME) {
+                FB.Event.subscribe('auth.login', function(response) {
+                    if (URL_CONTINUE)
+                        window.location = URL_CONTINUE;
+                    else
+                        window.location.reload();
+               });
+            }
+
+            FB.getLoginStatus(function(response) {
+                if (response.session) {
+                    $('#page_logout').click(function(e) {
+                        FB.logout(function() { 
+                            window.location = $("#page_logout").attr("href"); 
+                        });
+                        e.preventDefault();
+                        return false;
+                    });
+                }
+            });
+        };
+
+        $(function() {
+            var e = document.createElement('script'); e.async = true;
+            e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+            document.getElementById('fb-root').appendChild(e);
+        }); 
+    }
+}
+FacebookHook.init();
