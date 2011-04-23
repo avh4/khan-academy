@@ -1,0 +1,19 @@
+{% extends "multiple_choice_template.html" %}
+
+{% block maincell %}
+<script src="/javascript/exercises/adding_vectors.js?{{App.version}}"></script>
+<script>
+    Exercise.fWriteToDoc = false;
+    var exercise = new AddingVectorsExercise();
+    Exercise.showCustomStep = exercise.showGraphHints;
+
+    function graph_update() {
+        exercise.showProblem();
+    }
+    
+</script>
+{% endblock maincell %}
+
+{% block graphdisplay %}
+<td><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="450" width="450"></iframe></td>
+{% endblock graphdisplay %}

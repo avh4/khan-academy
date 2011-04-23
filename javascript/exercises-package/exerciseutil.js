@@ -13,7 +13,7 @@ var Exercise = {
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
         this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
         this.steps_given=0;
-        this.next_step_to_write =1;
+        this.next_step_to_write = 0;
         this.correctchoice;
         this.correct = new Image();
         this.correct.src = "/images/face-smiley.gif";
