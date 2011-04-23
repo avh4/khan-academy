@@ -133,6 +133,12 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
     }
 }
 
+$(function(){
+    // Configure the search form
+    $('#page_search input[type=text]').placeholder();
+    initAutocomplete("#page_search input", true);
+});
+
 function onYouTubePlayerReady(playerID) {
     var player = document.getElementById("idPlayer");
     if (!player) player = document.getElementById("idOVideo");
@@ -578,3 +584,14 @@ var CSSMenus = {
     }
 }
 $(CSSMenus.init);
+
+var IEHtml5 = {
+    init: function() {
+        // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+        var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
+        for (var i = 0; i < html5elements.length; i++) {
+            document.createElement(html5elements[i]);
+        }
+   }
+}
+IEHtml5.init();
