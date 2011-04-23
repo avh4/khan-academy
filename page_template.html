@@ -148,27 +148,6 @@
             {% if username %}
                 {% badge_notifications %}
             {% endif %}
-    
-    	<!-- For ChartBeat analytics START -->
-    	<script type="text/javascript">
-    	var _sf_async_config={uid:10894,domain:"khanacademy.org"};
-    	(function(){
-    	  function loadChartbeat() {
-    	    window._sf_endpt=(new Date()).getTime();
-    	    var e = document.createElement('script');
-    	    e.setAttribute('language', 'javascript');
-    	    e.setAttribute('type', 'text/javascript');
-    	    e.setAttribute('src',
-    	       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
-    	       "static.chartbeat.com/js/chartbeat.js");
-    	    document.body.appendChild(e);
-    	  }
-    	  var oldonload = window.onload;
-    	  window.onload = (typeof window.onload != 'function') ?
-    	     loadChartbeat : function() { oldonload(); loadChartbeat(); };
-    	})();
-    	</script>
-    	<!-- For ChartBeat analytics END -->
     </div>
     </div>
     <div class="push"></div>
@@ -180,11 +159,30 @@
     {% endblock bottompagescript %}
 
 	<script type="text/javascript">
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
+        // Chartbeat
+        var _sf_async_config={uid:10894,domain:"khanacademy.org"};
+        (function(){
+            function loadChartbeat() {
+                window._sf_endpt=(new Date()).getTime();
+                var e = document.createElement('script');
+                e.setAttribute('language', 'javascript');
+                e.setAttribute('type', 'text/javascript');
+                e.setAttribute('src',
+                   (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
+                   "static.chartbeat.com/js/chartbeat.js");
+                document.body.appendChild(e);
+            }
+            var oldonload = window.onload;
+            window.onload = (typeof window.onload != 'function') ?
+                loadChartbeat : function() { oldonload(); loadChartbeat(); };
+        })();
+
+        // GA
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
 	</script>
 
     </body>
