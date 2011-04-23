@@ -59,7 +59,7 @@ function RoundingExercise() {
 
     function roundToPosition(num, pos){
         var factor = Math.pow(10, -1 * pos).toFixed(5);
-        return Math.round(num * factor) / factor;
+        return Math.round((num * factor).toFixed(5)) / factor;
     }
     
     var x_max = 700;
