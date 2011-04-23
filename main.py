@@ -325,7 +325,7 @@ class ViewVideo(request_handler.RequestHandler):
         video = None
         playlist = None
         video_id = self.request.get('v')
-        playlist_title = self.request.get('playlist')
+        playlist_title = self.request_string('playlist', default="") or self.request_string('p', default="")
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
         readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
@@ -1863,6 +1863,7 @@ def real_main():
         ('/registercorrectness', RegisterCorrectness),
         ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
+        ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),

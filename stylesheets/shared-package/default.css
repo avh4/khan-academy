@@ -1116,13 +1116,13 @@ a:link.google-analytics-link-track
                 white-space: nowrap;
                 color: #666666;
             }
-			#library #library-content #library-content-main a.video-link {
+			#library #library-content #library-content-main a.v-l {
 				font-weight: normal;	
 				background-image: url(/images/non-repeating-sprites.png);
                 background-position: -56px -36px;
 				padding: 0 2px 0 13px;
 			}
-			#library #library-content #library-content-main a.video-link:hover {
+			#library #library-content #library-content-main a.v-l:hover {
                 color: black;
 			}
 
