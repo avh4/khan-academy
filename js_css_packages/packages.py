@@ -63,7 +63,7 @@ javascript = {
 
 stylesheets = {
     "shared": {
-        "hashed-filename": "hashed-@shared@.js", # @content@ will be replaced with hash by deploy script
+        "hashed-filename": "hashed-@shared@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "default.css",
             "rating.css",
@@ -75,7 +75,7 @@ stylesheets = {
         ]
     },
     "mobile": {
-        "hashed-filename": "hashed-@mobile@.js", # @content@ will be replaced with hash by deploy script
+        "hashed-filename": "hashed-@mobile@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "jquery.mobile-1.0a4.1.css",
             "mobile.css",
