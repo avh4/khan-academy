@@ -15,6 +15,10 @@ HASHED_FILENAME_PREFIX = "hashed-"
 PATH_PACKAGES = "js_css_packages/packages.py"
 PATH_PACKAGES_TEMP = "js_css_packages/packages.compresstemp.py"
 
+def revert_js_css_hashes():
+    print "Reverting %s" % PATH_PACKAGES
+    popen_results(['hg', 'revert', PATH_PACKAGES])
+
 def compress_all_javascript(path):
     dict_packages = packages.javascript
     compress_all_packages(path, dict_packages, ".js")
@@ -83,7 +87,7 @@ def hash_package(name, path, path_compressed, suffix):
     hash_sig = md5.new(content).hexdigest()
     path_hashed = os.path.join(path, "hashed-%s%s" % (hash_sig, suffix))
     
-    print "Copying %s into %s\n" % (path_compressed, path_hashed)
+    print "Copying %s into %s" % (path_compressed, path_hashed)
     shutil.copyfile(path_compressed, path_hashed)
 
     if not os.path.exists(path_hashed):
@@ -94,7 +98,7 @@ def hash_package(name, path, path_compressed, suffix):
     return path_hashed
 
 def insert_hash_sig(name, hash_sig, suffix):
-    print "Inserting %s sig (%s) into %s" % (name, hash_sig, PATH_PACKAGES)
+    print "Inserting %s sig (%s) into %s\n" % (name, hash_sig, PATH_PACKAGES)
 
     f = open(PATH_PACKAGES, "r")
     content = f.read()

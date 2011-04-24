@@ -92,11 +92,13 @@ def main():
         version = options.version
 
     print "Deploying version " + str(version)
+    compress.revert_js_css_hashes()
     compress_js()
     compress_css()
 
     if not options.dryrun:
         deploy(version)
+        compress.revert_js_css_hashes()
 
 if __name__ == "__main__":
     main()
