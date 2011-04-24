@@ -33,24 +33,24 @@ function SigFig1Exercise() {
 
     function generateNormalNumber() {
         var result = "";
-        var num_leading_zeros = getRandomIntRange(0, 2) ? 0 : getRandomIntRange(1, 2);
-        var num_trailing_zeros = getRandomIntRange(0, 2) ? 0 : getRandomIntRange(1, 2);
+        var num_leading_zeros = getRandomIntRange(0, 1) ? getRandomIntRange(0, 2) : 0;
+        var num_trailing_zeros = getRandomIntRange(0, 5) ? getRandomIntRange(0, 3) : 0;            
         var num_between = 6 - num_leading_zeros - num_trailing_zeros;
-        var decimal;
         
         for (var i = 0; i < num_leading_zeros; i++)
-            result += "0";
+            result += 0;
         for (var i = 0; i < num_between; i++)
-            result += !getRandomIntRange(0, 2) ? 0 : getRandomIntRange(1, 9);
+            result += !getRandomIntRange(0, 3) ? 0 : getRandomIntRange(1, 9);
         for (var i = 0; i < num_trailing_zeros; i++)
-            result += "0";
-            
+            result += 0;
+        
+        var decimal;
         if (result[0] == "0")
             decimal = 1;
         else
-            decimal = getRandomIntRange(-3, result.length);
+            decimal = getRandomIntRange(-10, 6);
             
-        if (decimal >= 0)
+        if (decimal > 0)
             result = result.substring(0, decimal) + "." + result.substring(decimal);
             
         return result;
@@ -59,10 +59,10 @@ function SigFig1Exercise() {
     function generateZeroNumber() {
         // To generate the trickier numbers like 0.00 or just plain old 0
         var result = "0";
-        var num_zeros = getRandomIntRange(1, 3);
-        if (num_zeros != 1) {
+        var num_zeros = getRandomIntRange(0, 2);
+        if (num_zeros) {
             result += ".";
-            for (var i = 1; i < num_zeros; i++)
+            for (var i = 0; i < num_zeros; i++)
                 result += "0";
         }
         return result;
