@@ -37,11 +37,11 @@
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
 
         {% if is_mobile %}
-            {% mobile_css %}
-            {% mobile_javascript %}
+            {% css_package "mobile" %}
+            {% js_package "mobile" %}
         {% else %}
-            {% shared_css %}
-            {% shared_javascript %}
+            {% css_package "shared" %}
+            {% js_package "shared" %}
         {% endif %}
 
         {% block pagescript %}

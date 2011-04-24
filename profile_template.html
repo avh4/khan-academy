@@ -42,7 +42,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {% profile_javascript %}
+    {% js_package "profile" %}
     <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
 {% endblock bottompagescript %}
 

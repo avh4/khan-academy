@@ -42,12 +42,12 @@ def hg_pull_up():
 def compress_js():
     print "Compressing javascript"
     path = os.path.join(os.path.dirname(__file__), "..", "javascript")
-    compress.compress_all_packages(path, ".js")
+    compress.compress_all_javascript(path)
 
 def compress_css():
     print "Compressing stylesheets"
     path = os.path.join(os.path.dirname(__file__), "..", "stylesheets")
-    compress.compress_all_packages(path, ".css")
+    compress.compress_all_stylesheets(path)
 
 def deploy(version):
     print "Deploying version " + str(version)
@@ -92,11 +92,13 @@ def main():
         version = options.version
 
     print "Deploying version " + str(version)
+    compress.revert_js_css_hashes()
     compress_js()
     compress_css()
 
     if not options.dryrun:
         deploy(version)
+        compress.revert_js_css_hashes()
 
 if __name__ == "__main__":
     main()
