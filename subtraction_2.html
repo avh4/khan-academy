@@ -200,7 +200,7 @@ function next_step()
 		if (doneBorrowing==false)
 		{
 			if (Exercise.steps_given==0)
-				hintString="First we need to make sure that all the digits in the top number are greater than the digit below it";
+				hintString="First we need to make sure that all the digits in the top number are greater than or equal to the digit below it";
 			else
 			{
 				if (needsToBorrow!=-1) //We need to borrow
@@ -229,7 +229,7 @@ function next_step()
 					}
 					if (doneBorrowing == true)
 					{
-						hintString="All the top digits are greater than all the bottom digits, so we can start subtracting."; 
+						hintString="All the top digits are greater than or equal to all the bottom digits, so we can start subtracting."; 
 					}
 				}
 			}
