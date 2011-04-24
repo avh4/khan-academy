@@ -51,7 +51,14 @@ javascript = {
             "knowledgemap.js",
         ]
     },
-
+    "mobile": {
+        "hashed-filename": "hash-@mobile-js@.js", # Will be replaced by deploy script
+        "files": [
+            "jquery.js",
+            "jquery.mobile-1.0a4.1.js",
+            "iscroll-lite.min.js",
+        ]
+    },
 }
 
 stylesheets = {
@@ -66,5 +73,12 @@ stylesheets = {
             "profile.css",
             "jquery-ui-1.8.4.custom.css",
         ]
-    }
+    },
+    "mobile": {
+        "hashed-filename": "hash-@mobile-css@.js", # Will be replaced by deploy script
+        "files": [
+            "jquery.mobile-1.0a4.1.css",
+            "mobile.css",
+        ]
+    },
 }
