@@ -6,7 +6,13 @@
 
 {% block maincell %}
 <script>
-    var exercise = new DegreesToRadiansExercise();
+    Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    Exercise.showNextProblem = function() {
+        var exercise = new DegreesToRadiansExercise();
+    }
+
+
 </script>
 {% endblock maincell %}
 

@@ -2,6 +2,8 @@
 // Author: Marcia Lee
 // Date: 2011-04-21
 //
+// Video spec:
+//  http://vimeo.com/22678065
 // Problem speclet:
 //  What is a + b? (where the i, j components are non-zero #'s between -10 and 10)
 //  Hints: You can either sum i, j components or solve graphically.

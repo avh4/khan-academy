@@ -6,7 +6,12 @@
 
 {% block maincell %}
 <script>
-    var exercise = new EvaluatingExpressionsExercise();
+    Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    Exercise.showNextProblem = function() {
+        var exercise = new EvaluatingExpressionsExercise();
+    }
+
 </script>
 {% endblock maincell %}
 
