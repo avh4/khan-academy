@@ -67,6 +67,13 @@ class VoteEntity(request_handler.RequestHandler):
             self.render_json({"error": Privileges.need_points_desc(Privileges.DOWN_VOTE_THRESHOLD, "down vote")})
             return
 
+        entity_key = self.request_string("entity_key", default="")
+        if entity_key:
+            entity = db.get(entity_key)
+            if entity and entity.author.email() == user.email():
+                self.render_json({"error": "You cannot vote for your own posts."})
+                return
+
         if vote_type != FeedbackVote.ABSTAIN:
             limiter = VoteRateLimiter(user)
             if not limiter.increment():
@@ -81,7 +88,7 @@ class VoteEntity(request_handler.RequestHandler):
                 params={
                     "email": user.email(),
                     "vote_type": self.request_int("vote_type", default=FeedbackVote.ABSTAIN),
-                    "entity_key": self.request_string("entity_key", default="")
+                    "entity_key": entity_key
                 }
         )
 
