@@ -2,8 +2,8 @@ import util
 
 class Privileges:
 
-    UP_VOTE_THRESHOLD = 1000
-    DOWN_VOTE_THRESHOLD = 10000
+    UP_VOTE_THRESHOLD = 5000
+    DOWN_VOTE_THRESHOLD = 20000
 
     @staticmethod
     def can_up_vote(user_data):
