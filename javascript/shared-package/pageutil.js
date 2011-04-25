@@ -140,11 +140,19 @@ $(function(){
 });
 
 function onYouTubePlayerReady(playerID) {
-    var player = document.getElementById("idPlayer");
+    var player = null;
+    if (!player) player = $(".mirosubs-widget object").get(0);
+    if (!player) player = document.getElementById("idPlayer");
     if (!player) player = document.getElementById("idOVideo");
 
     VideoControls.player = player;
     VideoStats.player = player;
+    // The UniSub (aka mirosubs) widget replaces the YouTube player with a copy 
+    // and that will cause onYouTubePlayerReady() to be called again.  So, we trigger 
+    // 'playerready' events on any objects that are using the player so that they can 
+    // take appropriate action to use the new player.
+    $(VideoControls).trigger('playerready');
+    $(VideoStats).trigger('playerready');
 }
 
 function onYouTubePlayerStateChange(state) {
@@ -255,7 +263,13 @@ var VideoStats = {
         this.dtSinceSave = new Date();
 
         // Listen to state changes in player to detect final end of video
-        this.listenToPlayerStateChange();
+        if (this.player) this.listenToPlayerStateChange();
+        // If the player isn't ready yet or if it is replaced in the future,
+        // listen to the state changes once it is ready/replaced.
+        var me = this;
+        $(this).bind("playerready", function() {
+            me.listenToPlayerStateChange();
+        });
 
         if (!this.fIntervalStarted)
         {
@@ -267,21 +281,13 @@ var VideoStats = {
     },
 
     listenToPlayerStateChange: function() {
-        if (this.player)
+        if (!this.fAlternativePlayer && !this.player.fStateChangeHookAttached)
         {
-            if (!this.fAlternativePlayer && !this.player.fStateChangeHookAttached)
-            {
-                // YouTube player is ready, add event listener
-                this.player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
+            // YouTube player is ready, add event listener
+            this.player.addEventListener("onStateChange", "onYouTubePlayerStateChange");
 
-                // Multiple calls should be idempotent
-                this.player.fStateChangeHookAttached = true;
-            }
-        }
-        else
-        {
-            // YouTube player isn't ready yet, try again soon
-            setTimeout(function(){VideoStats.listenToPlayerStateChange();}, 1000);
+            // Multiple calls should be idempotent
+            this.player.fStateChangeHookAttached = true;
         }
     },
 
