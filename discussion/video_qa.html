@@ -7,10 +7,10 @@
                 {% ifequal sort_order 2 %}
                     Newest questions first
                 {% else %}
-                    Highest points first
+                    Highest votes first
                 {% endifequal %}
                 <ul>
-                    <li><a href="/discussion/updateqasort?sort=1&readable_id={{video.readable_id}}&playlist_title={{playlist.title|urlencode}}#qa">Highest points first</a></li>
+                    <li><a href="/discussion/updateqasort?sort=1&readable_id={{video.readable_id}}&playlist_title={{playlist.title|urlencode}}#qa">Highest votes first</a></li>
                     <li><a href="/discussion/updateqasort?sort=2&readable_id={{video.readable_id}}&playlist_title={{playlist.title|urlencode}}#qa">Newest questions first</a></li>
                 </ul>
             </li>
