@@ -11,7 +11,7 @@ var Exercise = {
         this.tries=0;
         this.possibleAnswers = new Array(); //These are the possible answers
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-        this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
+        this.checkboxChoices = new Array(); //This is used in exercises with checkbox answers
         this.steps_given=0;
         this.next_step_to_write = 0;
         this.correctchoice;

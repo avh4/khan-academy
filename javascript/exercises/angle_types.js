@@ -50,7 +50,6 @@ function AngleTypesExercise() {
     }
     
     this.showProblem = function() {
-        this.graph = present;
     	present.initPicture(-1, 1, -1, 1);
     	present.marker = "arrow";
     	
