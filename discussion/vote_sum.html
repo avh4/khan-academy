@@ -1,5 +1,5 @@
 {% if is_comment %}
-<span class="sum_votes" data-sum_original="{{ sum_original }}">{% if target.sum_votes %}{{ target.sum_votes }} point{{ target.sum_votes|pluralize }}, {% else %}&nbsp;{% endif %}</span>
+<span class="sum_votes" data-sum_original="{{ sum_original }}">{% if target.sum_votes_incremented %}{{ target.sum_votes_incremented }} point{{ target.sum_votes_incremented|pluralize }}, {% else %}&nbsp;{% endif %}</span>
 {% else %}
-<div class="sum_votes" data-sum_original="{{ sum_original }}">{{ target.sum_votes }}</div>
+<div class="sum_votes" data-sum_original="{{ sum_original }}">{{ target.sum_votes_incremented }}</div>
 {% endif %}

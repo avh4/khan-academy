@@ -51,7 +51,7 @@ def vote_tools(target):
 
 @register.inclusion_tag(("../discussion/vote_sum.html", "discussion/vote_sum.html"))
 def vote_sum(target):
-    sum_original = target.sum_votes
+    sum_original = target.sum_votes_incremented()
     if target.up_voted:
         sum_original -= 1
     elif target.down_voted:

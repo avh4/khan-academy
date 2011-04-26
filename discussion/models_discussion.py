@@ -60,6 +60,11 @@ class Feedback(db.Model):
         memcache.delete(Feedback.memcache_key_for_video(self.first_target()), namespace=App.version)
         db.Model.put(self)
 
+    def sum_votes_incremented(self):
+        # Always add an extra vote when displaying vote counts to convey the author's implicit "vote"
+        # and make the site a little more positive.
+        return self.sum_votes + 1
+
     def is_type(self, type):
         return type in self.types
 
