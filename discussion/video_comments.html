@@ -31,11 +31,11 @@
         <div class="page_controls comments_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ prev_page_1_based }}#comments" class="button comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /> Previous comments</a>
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ prev_page_1_based }}#comments" class="button comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /> Comments with higher votes</a>
                 {% endifnotequal %}
 
                 {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ next_page_1_based }}#comments" class="button comments_page" page="{{ next_page_1_based }}">Next comments <img class="icon" src="/images/arrow-right.png" /></a>
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ next_page_1_based }}#comments" class="button comments_page" page="{{ next_page_1_based }}">Comments with lower votes <img class="icon" src="/images/arrow-right.png" /></a>
                 {% endifnotequal %}
             </span>
         </div>
