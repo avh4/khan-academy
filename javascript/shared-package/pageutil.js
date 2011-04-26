@@ -139,22 +139,6 @@ $(function(){
         initAutocomplete("#page_search input", true);
 });
 
-function onYouTubePlayerReady(playerID) {
-    var player = null;
-    if (!player) player = $(".mirosubs-widget object").get(0);
-    if (!player) player = document.getElementById("idPlayer");
-    if (!player) player = document.getElementById("idOVideo");
-
-    VideoControls.player = player;
-    VideoStats.player = player;
-    // The UniSub (aka mirosubs) widget replaces the YouTube player with a copy 
-    // and that will cause onYouTubePlayerReady() to be called again.  So, we trigger 
-    // 'playerready' events on any objects that are using the player so that they can 
-    // take appropriate action to use the new player.
-    $(VideoControls).trigger('playerready');
-    $(VideoStats).trigger('playerready');
-}
-
 function onYouTubePlayerStateChange(state) {
     VideoStats.playerStateChange(state);
 }
@@ -373,6 +357,22 @@ var VideoStats = {
         this.cachedDuration = parseFloat(duration);
     }
 };
+
+function onYouTubePlayerReady(playerID) {
+    var player = null;
+    if (!player) player = $(".mirosubs-widget object").get(0);
+    if (!player) player = document.getElementById("idPlayer");
+    if (!player) player = document.getElementById("idOVideo");
+
+    VideoControls.player = player;
+    VideoStats.player = player;
+    // The UniSub (aka mirosubs) widget replaces the YouTube player with a copy 
+    // and that will cause onYouTubePlayerReady() to be called again.  So, we trigger 
+    // 'playerready' events on any objects that are using the player so that they can 
+    // take appropriate action to use the new player.
+    $(VideoControls).trigger('playerready');
+    $(VideoStats).trigger('playerready');
+}
 
 var Drawer = {
 
