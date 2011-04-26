@@ -2,6 +2,7 @@ from google.appengine.ext import webapp
 
 from app import App
 from js_css_packages import packages
+import util
 
 register = webapp.template.create_template_register()
 
@@ -16,7 +17,7 @@ def js_package(package_name):
             list_js.append("<script type='text/javascript' src='%s/%s'></script>" % (src_dir, filename))
         return "".join(list_js)
     else:
-        return "<script type='text/javascript' src='%s/%s'></script>" % (src_dir, package["hashed-filename"])
+        return "<script type='text/javascript' src='%s/%s'></script>" % (util.static_url(src_dir), package["hashed-filename"])
 
 @register.simple_tag
 def css_package(package_name):
@@ -29,4 +30,4 @@ def css_package(package_name):
             list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" % (src_dir, filename))
         return "".join(list_css)
     else:
-        return "<link rel='stylesheet' type='text/css' href='%s/%s'/>" % (src_dir, package["hashed-filename"])
+        return "<link rel='stylesheet' type='text/css' href='%s/%s'/>" % (util.static_url(src_dir), package["hashed-filename"])

@@ -30,6 +30,10 @@
   
 <script language=Javascript1.2><!--
 $(document).ready(function () {
+    Exercise.init();
+    Exercise.fSupportsAjax = false;
+    Exercise.display();
+    
 	var iframe = null;
 	if (parent) 
 		iframe = parent.document.getElementById("problem{{problem_number}}");
@@ -63,6 +67,9 @@ KhanAcademy.seedRandom(KhanAcademy.problem_number);
 		{% comment %}
 		We use a table here just because existing graphdisplay blocks create a table cell.
 		{% endcomment %}
+		<div id="question_content_container" style="width: 2000px">
+    		<div id="question_content" style="position:relative; float: left"></div>
+		</div>
 		<table style='float: right;'><tr>
 		{% block graphdisplay %}  {% endblock graphdisplay %}			
 		</tr></table>
