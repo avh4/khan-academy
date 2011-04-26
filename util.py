@@ -8,6 +8,7 @@ from google.appengine.api import users
 from django.template.defaultfilters import pluralize
 from asynctools import AsyncMultiTask, QueryTask
 
+from app import App
 import nicknames
 import facebook_util
 
@@ -92,3 +93,9 @@ def async_queries(queries, limit=100000):
     task_runner.run()
 
     return task_runner
+
+def static_url(relative_url):
+    if App.is_dev_server:
+        return relative_url
+    else:
+        return "http://static.khanacademy.org%s" % relative_url

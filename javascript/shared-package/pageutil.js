@@ -135,8 +135,8 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
 
 $(function(){
     // Configure the search form
-    $('#page_search input[type=text]').placeholder();
-    initAutocomplete("#page_search input", true);
+    if ($('#page_search input[type=text]').placeholder().length)
+        initAutocomplete("#page_search input", true);
 });
 
 function onYouTubePlayerReady(playerID) {
@@ -623,7 +623,7 @@ $(VideoViews.init);
 
 var FacebookHook = {
     init: function() {
-        if (!FB_APP_ID) return;
+        if (!window.FB_APP_ID) return;
 
         window.fbAsyncInit = function() {
             FB.init({appId: FB_APP_ID, status: true, cookie: true, xfbml: true});
