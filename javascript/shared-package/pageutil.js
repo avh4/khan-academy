@@ -176,6 +176,16 @@ var VideoControls = {
         }
     },
 
+    play: function() {
+        if (VideoControls.player && VideoControls.player.playVideo)
+            VideoControls.player.playVideo();
+    },
+
+    pause: function() {
+        if (VideoControls.player && VideoControls.player.pauseVideo)
+            VideoControls.player.pauseVideo();
+    },
+
     scrollToPlayer: function() {
         // If user has scrolled below the youtube video, scroll to top of video
         // when a play link is clicked.

@@ -158,7 +158,9 @@ $(function(){
     $('.subtitles-link').click(function() {
         $('.youtube-video').css('marginBottom', '30px');
         $('.subtitles-link').hide();
-        $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js');
+        VideoControls.pause();
+        $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', 
+            function(){ setTimeout(function() { VideoControls.play(); }, 3000); });
         return false;
     });
 });
