@@ -155,14 +155,18 @@ $(function(){
             menu.hide();
         e.preventDefault();
     });
+    $('.subtitles-link').click(function() {
+        $('.youtube-video').css('marginBottom', '30px');
+        $('.subtitles-link').hide();
+        $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js');
+        return false;
+    });
 });
 
 {% if user %}
     $(function(){VideoStats.startLoggingProgress();});
 {% endif %}
 
-</script>
-<script type="text/javascript" src="http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js">
 </script>
 {% endblock pagescript %}
 {% block pagesubmenu %}
@@ -228,7 +232,9 @@ $(function(){
             <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
             {% if exercise %}
                 | <a href="/exercises?exid={{exercise}}">Exercises</a>
-                {% endif %}</span>
+                {% endif %}
+                <span class="subtitles-link">| <a href="#">Subtitles</a></span>
+                </span>
             </nobr></span>
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
