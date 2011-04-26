@@ -187,6 +187,10 @@ def reports_navigation(coach_email, current_report="classreport"):
 def playlist_browser(browser_id):
     return {'browser_id': browser_id}
 
+@register.simple_tag
+def static_url(relative_url):
+    return util.static_url(relative_url)
+
 @register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
 def empty_class_instructions(class_is_empty=True):
     user = util.get_current_user()
