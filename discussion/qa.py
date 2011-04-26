@@ -105,6 +105,7 @@ class PageQuestions(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         qa_expand_id = int(self.request.get("qa_expand_id")) if self.request.get("qa_expand_id") else -1
+        sort = self.request_int("sort", default=-1)
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
@@ -114,7 +115,7 @@ class PageQuestions(request_handler.RequestHandler):
             user_data = models.UserData.get_for(user)
 
         if video:
-            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id)
+            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
             self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
@@ -342,7 +343,7 @@ class DeleteEntity(request_handler.RequestHandler):
 
         self.redirect("/discussion/flaggedfeedback")
 
-def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None):
+def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
 
     limit_per_page = 5
     user = util.get_current_user()
@@ -350,7 +351,12 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None)
     if page <= 0:
         page = 1
 
-    sort_order = user_data.question_sort_order if user_data else voting.VotingSortOrder.HighestPointsFirst
+    sort_order = voting.VotingSortOrder.HighestPointsFirst
+    if user_data:
+        sort_order = user_data.question_sort_order
+    if sort_override >= 0:
+        sort_order = sort_override
+
     questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
     questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
 
@@ -414,5 +420,6 @@ def add_template_values(dict, request):
     dict["comments_page"] = int(request.get("comments_page")) if request.get("comments_page") else 0
     dict["qa_page"] = int(request.get("qa_page")) if request.get("qa_page") else 0
     dict["qa_expand_id"] = int(request.get("qa_expand_id")) if request.get("qa_expand_id") else -1
+    dict["sort"] = int(request.get("sort")) if request.get("sort") else -1
 
     return dict

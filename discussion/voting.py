@@ -28,22 +28,19 @@ class VotingSortOrder:
 class UpdateQASort(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
-        if not user:
-            return
-
-        user_data = UserData.get_or_insert_for(user)
-        if not user_data:
-            return
-
         sort = self.request_int("sort", default=VotingSortOrder.HighestPointsFirst)
-        user_data.question_sort_order = sort
-        user_data.put()
+
+        if user:
+            user_data = UserData.get_or_insert_for(user)
+            if user_data:
+                user_data.question_sort_order = sort
+                user_data.put()
 
         readable_id = self.request_string("readable_id", default="")
         playlist_title = self.request_string("playlist_title", default="")
 
         if readable_id and playlist_title:
-            self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist_title)))
+            self.redirect("/video/%s?playlist=%s&sort=%s" % (urllib.quote(readable_id), urllib.quote(playlist_title), sort))
         else:
             self.redirect("/")
 

@@ -323,6 +323,7 @@ var QA = {
                 {
                     video_key: $("#video_key").val(), 
                     playlist_key: $("#playlist_key").val(),
+                    sort: $("#sort").val(),
                     page: page
                 }, 
                 QA.finishLoadPage);
