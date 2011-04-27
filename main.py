@@ -314,7 +314,7 @@ class ViewVideo(request_handler.RequestHandler):
         video = None
         playlist = None
         video_id = self.request.get('v')
-        playlist_title = self.request.get('playlist')
+        playlist_title = self.request_string('playlist', default="") or self.request_string('p', default="")
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
         readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
@@ -1363,28 +1363,28 @@ class ViewHomePage(request_handler.RequestHandler):
             [
                 { 
                     "href": "/video/khan-academy-on-the-gates-notes", 
-                    "src": "/images/splashthumbnails/gates_thumbnail.png", 
+                    "class": "thumb-gates_thumbnail", 
                     "desc": "Khan Academy on the Gates Notes",
                     "youtube_id": "UuMTSU9DcqQ",
                     "selected": False,
                 },
                 { 
                     "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs", 
-                    "src": "/images/splashthumbnails/overview_thumbnail.png", 
+                    "class": "thumb-overview_thumbnail", 
                     "desc": "Overview of our video library",
                     "youtube_id": "dsFQ9kM1qDs",
                     "selected": False,
                 },
                 { 
                     "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference", 
-                    "src": "/images/splashthumbnails/gel_thumbnail.png", 
+                    "class": "thumb-gel_thumbnail", 
                     "desc": "Sal Khan talk at GEL 2010",
                     "youtube_id": "yTXKCzrFh3c",
                     "selected": False,
                 },
                 { 
                     "href": "/video/khan-academy-on-pbs-newshour--edited", 
-                    "src": "/images/splashthumbnails/pbs_thumbnail.png", 
+                    "class": "thumb-pbs_thumbnail", 
                     "desc": "Khan Academy on PBS Newshour",
                     "youtube_id": "4jXv03sktik",
                     "selected": False,
@@ -1393,28 +1393,28 @@ class ViewHomePage(request_handler.RequestHandler):
             [
                 { 
                     "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html", 
-                    "src": "/images/splashthumbnails/ted_thumbnail.jpg", 
+                    "class": "thumb-ted_thumbnail", 
                     "desc": "Sal on the Khan Academy @ TED",
                     "youtube_id": "gM95HHI4gLk",
                     "selected": False,
                 },
                 { 
                     "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
-                    "src": "/images/splashthumbnails/tech_award_thumbnail.png", 
+                    "class": "thumb-tech_award_thumbnail", 
                     "desc": "What is the Khan Academy?",
                     "youtube_id": "p6l8-1kHUsA",
                     "selected": False,
                 },
                 { 
                     "href": "/video/khan-academy-exercise-software", 
-                    "src": "/images/splashthumbnails/exercises_thumbnail.png", 
+                    "class": "thumb-exercises_thumbnail", 
                     "desc": "Overview of our exercise software",
                     "youtube_id": "hw5k98GV7po",
                     "selected": False,
                 },
                 { 
                     "href": "/video/forbes--names-you-need-to-know---khan-academy", 
-                    "src": "/images/splashthumbnails/forbes_thumbnail.png", 
+                    "class": "thumb-forbes_thumbnail", 
                     "desc": "Forbes names you need to know",
                     "youtube_id": "UkfppuS0Plg",
                     "selected": False,
@@ -1852,6 +1852,7 @@ def real_main():
         ('/registercorrectness', RegisterCorrectness),
         ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
+        ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),

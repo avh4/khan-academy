@@ -87,33 +87,41 @@ class Badge:
         return ""
 
     def icon_src(self):
+        src = "/images/badges/half-moon-small.png"
+
         if self.badge_category == BadgeCategory.BRONZE:
-            return "/images/badges/meteorite-small.png"
+            src = "/images/badges/meteorite-small.png"
         elif self.badge_category == BadgeCategory.SILVER:
-            return "/images/badges/moon-small.png"
+            src = "/images/badges/moon-small.png"
         elif self.badge_category == BadgeCategory.GOLD:
-            return "/images/badges/earth-small.png"
+            src = "/images/badges/earth-small.png"
         elif self.badge_category == BadgeCategory.PLATINUM:
-            return "/images/badges/sun-small.png"
+            src = "/images/badges/sun-small.png"
         elif self.badge_category == BadgeCategory.DIAMOND:
-            return "/images/badges/eclipse-small.png"
+            src = "/images/badges/eclipse-small.png"
         elif self.badge_category == BadgeCategory.MASTER:
-            return "/images/badges/master-challenge-blue.png"
-        return "/images/badges/half-moon-small.png"
+            src = "/images/badges/master-challenge-blue.png"
+
+        return util.static_url(src)
 
     def chart_icon_src(self):
+
+        src = "/images/badges/meteorite-small-chart.png"
+
         if self.badge_category == BadgeCategory.BRONZE:
-            return "/images/badges/meteorite-small-chart.png"
+            src = "/images/badges/meteorite-small-chart.png"
         elif self.badge_category == BadgeCategory.SILVER:
-            return "/images/badges/moon-small-chart.png"
+            src = "/images/badges/moon-small-chart.png"
         elif self.badge_category == BadgeCategory.GOLD:
-            return "/images/badges/earth-small-chart.png"
+            src = "/images/badges/earth-small-chart.png"
         elif self.badge_category == BadgeCategory.PLATINUM:
-            return "/images/badges/sun-small-chart.png"
+            src = "/images/badges/sun-small-chart.png"
         elif self.badge_category == BadgeCategory.DIAMOND:
-            return "/images/badges/eclipse-small-chart.png"
+            src = "/images/badges/eclipse-small-chart.png"
         elif self.badge_category == BadgeCategory.MASTER:
-            return "/images/badges/master-challenge-blue-chart.png"
+            src = "/images/badges/master-challenge-blue-chart.png"
+
+        return util.static_url(src)
 
     def type_label(self):
         if self.badge_category == BadgeCategory.BRONZE:

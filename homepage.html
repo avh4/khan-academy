@@ -43,7 +43,7 @@
                             <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}
                                 <td style="width:25%" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}" {% if thumbnail_link|hash:"selected" %}class="selected"{% endif %}>
-                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><img src="{{ thumbnail_link|hash:"src"|escape }}" /></a>
+                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><div class="thumb {{ thumbnail_link|hash:"class"|escape }}"></div></a>
                                     <div class="thumbnail_label">
                                         <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link">{{ thumbnail_link|hash:"desc"|escape }}</a>
                                     </div>
@@ -68,7 +68,7 @@
 <div data-role="page" data-theme"b" {% if is_mobile %}id="browse"{% endif %}>
     <div data-role="content">
         <div id="mobile-homepage" class="mobile-only">
-            <img src="/images/logo-horizontal-large.png" id="mobile-logo" />
+            <img src="{% static_url "/images/logo-horizontal-large.png" %}" id="mobile-logo" />
             <span id="page_visitors">
                     <span id="page_num_visitors">
                         <!-- Content will get populated by javacript at end of page -->
@@ -104,6 +104,6 @@
 
 {% block bottompagescript %}
     {% if not is_mobile %}
-        {% homepage_javascript %}
+        {% js_package "homepage" %}
     {% endif %}
 {% endblock bottompagescript %}

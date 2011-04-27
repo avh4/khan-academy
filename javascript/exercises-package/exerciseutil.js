@@ -13,7 +13,7 @@ var Exercise = {
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
         this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
         this.steps_given=0;
-        this.next_step_to_write =1;
+        this.next_step_to_write = 0;
         this.correctchoice;
         this.correct = new Image();
         this.correct.src = "/images/face-smiley.gif";
@@ -854,35 +854,3 @@ function get_reduced_fraction(numerator,denominator){
 
     return result;
 }
-
-/*
-* Access Level: Private
-* Function: _rtrim
-* Parameter1 Name: str
-* Parameter1 Type: string
-* Parameter1 Description: string to trim charector in
-* Parameter2 Name: chars
-* Parameter2 Type: String
-* Parameter2 Description: char to br trimmed from string
-*/
-function rtrim(str, chars) {
-    chars = chars || "\\s";
-    return str.replace(new RegExp("[" + chars + "]+$", "g"), "");
-}
-
-
-/*
-* Access Level: Private
-* Function: _ltrim
-* Parameter1 Name: str
-* Parameter1 Type: string
-* Parameter1 Description: string to trim charector in
-* Parameter2 Name: chars
-* Parameter2 Type: String
-* Parameter2 Description: char to br trimmed from string
-*/
-function ltrim(str, chars) {
-    chars = chars || "\\s" || "\\.";
-    return str.replace(new RegExp("^[" + chars + "]+", "g"), "");
-}
-

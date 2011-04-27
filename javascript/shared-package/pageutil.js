@@ -133,6 +133,12 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
     }
 }
 
+$(function(){
+    // Configure the search form
+    if ($('#page_search input[type=text]').placeholder().length)
+        initAutocomplete("#page_search input", true);
+});
+
 function onYouTubePlayerReady(playerID) {
     var player = document.getElementById("idPlayer");
     if (!player) player = document.getElementById("idOVideo");
@@ -578,3 +584,71 @@ var CSSMenus = {
     }
 }
 $(CSSMenus.init);
+
+var IEHtml5 = {
+    init: function() {
+        // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+        var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
+        for (var i = 0; i < html5elements.length; i++) {
+            document.createElement(html5elements[i]);
+        }
+   }
+}
+IEHtml5.init();
+
+var VideoViews = {
+    init: function() {
+        var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
+        var seedTotalViews = 28402468
+        var seedDailyViews = 100000;
+
+        var currentTime = new Date();
+        var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
+        var viewsPerSecond = seedDailyViews/24/3600
+        var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+
+        var totalViewsString = addCommas(""+estimatedTotalViews);
+
+        $('#page_num_visitors').append(totalViewsString);
+        $('#page_visitors').css('display', 'inline');
+    }
+}
+$(VideoViews.init);
+
+var FacebookHook = {
+    init: function() {
+        if (!window.FB_APP_ID) return;
+
+        window.fbAsyncInit = function() {
+            FB.init({appId: FB_APP_ID, status: true, cookie: true, xfbml: true});
+
+            if (!USERNAME) {
+                FB.Event.subscribe('auth.login', function(response) {
+                    if (URL_CONTINUE)
+                        window.location = URL_CONTINUE;
+                    else
+                        window.location.reload();
+               });
+            }
+
+            FB.getLoginStatus(function(response) {
+                if (response.session) {
+                    $('#page_logout').click(function(e) {
+                        FB.logout(function() { 
+                            window.location = $("#page_logout").attr("href"); 
+                        });
+                        e.preventDefault();
+                        return false;
+                    });
+                }
+            });
+        };
+
+        $(function() {
+            var e = document.createElement('script'); e.async = true;
+            e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+            document.getElementById('fb-root').appendChild(e);
+        }); 
+    }
+}
+FacebookHook.init();

@@ -1,194 +1,207 @@
-/*
-* Author: Ali Muzaffar
-* Date: 11 March 2011
-* Description: Significant Figures.
-*/
+// Significant figures 1
+// Author: Marcia Lee
+// Date: 2011-04-22
+//
+// Problem speclet:
+//  Just so you know, since I'd forgotten:
+//  Non-zero digits are significant
+//  Zeros between non-zeros are significant
+//  Leading zeros are NOT significant
+//  If there is a decimal, trailing zeros are significant
+//  In other words, if there is no decimal, trailing zeros are not significant
+//
 
-//namespace: SignificantFigures
-SignificantFigures= function(){}
-
-
-//class: CountSignificantFigures
-SignificantFigures.CountSignificantFigures = new function(){
-    //Private Members
-    var _equation = null;
-    var _hintStep = 0;
-    var _stringNumberForHint = '';
-    var _combinations=[
-    "----",
-    "---",
-    "--",
-    "-",
-    "0.00-",
-    "-.-",
-    "-.--",
-    "-.---",
-    "0.0-",
-    "-.-",
-    "0.000-",
-    "-.----",
-    "--.-",
-    "--.--",
-    "0.--",
-    "--.---",
-    "---.-",
-    "---.--",
-    "---.---",
-    "---.----",
-    "----.----"];
-    var _lHints = [
-    'Digits from 1-9 are always significant.',
-    'Zeros between two other significant digits are always significant.',
-    'Zeros to the right of the decimal place and another significant digit are significant.',
-    'Zeros used solely for spacing the decimal point are not significant.',
-    'Significant digit(s) : ',
-    '....So there are' 
-    ];
-
-    //Private Methods
+function SigFig1Exercise() {
+    var number_str = "";
+    var answer;
+    var index_first_non_zero;
+    var index_last_non_zero;
+    var index_decimal;
     
-    /*
-     * Function:_randOrder
-     * Access Level: Private
-     * Parameters: none
-     * Description:Function used to set radom sort order of an array.
-     */
-    var _randOrder = function (){
-        return (Math.round(Math.random())-0.5);
+    generateProblem();
+    
+    function generateProblem() {
+        if (getRandomIntRange(0, 5))
+            number_str = generateNormalNumber();
+        else
+            number_str = generateZeroNumber();
+            
+        answer = countNumSigFig(number_str);
+        setCorrectAnswer(answer);
+        write_text("How many significant figures does " + number_str + " have?");
     }
 
-
-    /*
-     * Access Level: Private
-     * Function: _getSignificantNumbers
-     * Parameter1 Name: Number
-     * Parameter1 Type: float/integer
-     * Parameter1 Description: Numbers to finr significant figure in
-     */
-    var _getSignificantNumbers = function(Number) {
-        var lStringNumber = String(Number);
-        lStringNumber = lStringNumber.replace('-', '');
-        if(lStringNumber.match(/^[0-9]+\.[0-9]+$/)) {
-            lStringNumber = ltrim(lStringNumber, '0.');
-            _stringNumberForHint = lStringNumber;
-            lStringNumber = lStringNumber.replace('.', '');
-        } else {
-            lStringNumber = rtrim(lStringNumber, '0');
-            lStringNumber = ltrim(lStringNumber, '0');
-            _stringNumberForHint = lStringNumber;
-        }
-        return lStringNumber.length;
-    }
-
-
-    /*
-     * Access Level: Private
-     * Function: _createNumber
-     * Parameter: none
-     */
-    var _createNumber = function(){
-        var lStringifiedNumber = '';
-        _combinations.sort( _randOrder );
-        var combination = _combinations[getRandomIntRange(0,12)];
-        for(var i=0; i<combination.length; i++){
-            if(combination.substring(i,i+1)=="-"){
-                lStringifiedNumber += (getRandomIntRange(0,9)).toString();
-            } else {
-                lStringifiedNumber += combination.substring(i,i+1);
-            }
-        }
-        if(getRandomIntRange(0,8) > 5){
-            lStringifiedNumber = "-" + lStringifiedNumber;
-        }
-        _equation = 'Find the  number of significant figures in: ' + lStringifiedNumber;
-        _writeEquation("#dvQuestion", _equation, false); //Write New Equation        
-        setCorrectAnswer(_getSignificantNumbers(lStringifiedNumber));
-        _createHints(_stringNumberForHint, lStringifiedNumber);
-    }
-
-
-    /*
-     * Function:_writeEquation
-     * Access Level: Private
-     *
-     * Parameters1 Name: Selector
-     * Parameters1 Type: String
-     * Parameters1 Detail: String Contain The Jquery Selector Of Div where expression need to be displayed.
-     *
-     * Parameters2 Name: Equation
-     * Parameters2 Type: String
-     * Parameters2 Detail: Expression that need to be displayed.
-     *
-     * Parameters3 Name: Equation
-     * Parameters3 Type: String
-     * Parameters3 Detail: To check if expression should be centered aligned.
-     *
-     * Description:Formats and generates the question to be asked.
-     */
-    var _writeEquation = function(Selector,Equation, IsCentered){
-        if(IsCentered){
-            $(Selector).append('<center><span style="font-family: arial; font-size: 200%; font-weight: bold;">' + Equation + '</span></center>');
-        } else {
-            $(Selector).append('<span style="font-family: arial; font-size: 200%; font-weight: bold;">' + Equation + '</span>');
-        }
-    }
-
-
-    /*
-     * Access Level: Private
-     * Function: _createHints
-     * Parameter1 Name: SignificantNumbers
-     * Parameter2 Name: StringifiedNumber
-     */
-    var _createHints = function(SignificantNumbers, StringifiedNumber) {
-        var lHint = 'Significant digit(s) : ';
-        var str='';
-        lHint += StringifiedNumber.replace(SignificantNumbers, '<span style="color: ' + getNextColor() + '; " >' + SignificantNumbers + '</span>.');
-        _lHints[_lHints.length-2] = lHint;
-        if((SignificantNumbers.indexOf('.')!=-1)){
-            if(SignificantNumbers.length-1==1){
-                _lHints[_lHints.length-1] = 'There is <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length-1) + '</span> significant figure.';
-            } else {
-                _lHints[_lHints.length-1] = 'There are <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length-1) + '</span> significant figures.';
-            }
-        } else {
-            if(SignificantNumbers.length==1){
-                _lHints[_lHints.length-1] = 'There is <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length) + '</span> significant figure.';
-            } else {
-                _lHints[_lHints.length-1] = 'There are <span style="color: ' + getNextColor() + '; " >' + (SignificantNumbers.length) + '</span> significant figures.';
-            }
-        }
-        str+="<div id='hint0' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[0] + "</div>";
-        str+="<div id='hint1' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[1] + "</div>";
-        str+="<div id='hint2' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[2] + "</div>";
-        str+="<div id='hint3' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[3] + "</div>";
-        str+="<div id='hint4' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[4] + "</div>";
-        str+="<div id='hint5' style='display:none; font-size: 150%; font-weight: bold;color:#999;'><br/>" + _lHints[5] + "</div>";
-        $('#dvHint').html(str);        
-    }   
-    return {
-        /*
-         * Access Level: Public
-         * Function: init
-         */
-        init: function(){
-            _createNumber();
-        },
+    function generateNormalNumber() {
+        var result = "";
+        var num_leading_zeros = getRandomIntRange(0, 1) ? getRandomIntRange(0, 2) : 0;
+        var num_trailing_zeros = getRandomIntRange(0, 5) ? getRandomIntRange(0, 3) : 0;            
+        var num_between = 6 - num_leading_zeros - num_trailing_zeros;
         
-        /*
-         * Access Level: Public
-         * Function: init
-         */
-        next_step: function(){
-            if(_hintStep<=5){ 
-                $('#hint'+_hintStep).css('display','block');
-                _hintStep++;
-            }
-            steps_given++;
-        }
-    };
-};
+        for (var i = 0; i < num_leading_zeros; i++)
+            result += 0;
+        for (var i = 0; i < num_between; i++)
+            result += !getRandomIntRange(0, 3) ? 0 : getRandomIntRange(1, 9);
+        for (var i = 0; i < num_trailing_zeros; i++)
+            result += 0;
+        
+        var decimal;
+        if (result[0] == "0")
+            decimal = 1;
+        else
+            decimal = getRandomIntRange(-10, 6);
+            
+        if (decimal > 0)
+            result = result.substring(0, decimal) + "." + result.substring(decimal);
+            
+        return result;
+    }
 
-$(document).ready(function(){
-    SignificantFigures.CountSignificantFigures.init();
-});
+    function generateZeroNumber() {
+        // To generate the trickier numbers like 0.00 or just plain old 0
+        var result = "0";
+        var num_zeros = getRandomIntRange(0, 2);
+        if (num_zeros) {
+            result += ".";
+            for (var i = 0; i < num_zeros; i++)
+                result += "0";
+        }
+        return result;
+    }
+    
+    function countNumSigFig(str) {
+        index_first_non_zero = 0;
+        index_last_non_zero = number_str.length - 1;
+        index_decimal = str.indexOf(".");
+        // Special case if the entire number is zeros
+        if (number_str.search(/[1-9]/) == -1) {
+            if (index_decimal == -1)
+                return 1;
+            else
+                return number_str.length - index_decimal;
+        }
+        
+        // Find first non zero char (to ignore leading zeros)
+        for (; index_first_non_zero < str.length; index_first_non_zero++) {
+            var c = str[index_first_non_zero];
+            if (c != "0" && c != ".")
+                break;
+        }
+
+        // Find last non zero char (to maybe ignore trailing zeros)
+        for (; index_last_non_zero >= 0; index_last_non_zero--) {
+            var c = str[index_last_non_zero];
+            if (c != "0" && c != ".")
+                break;
+        }
+
+        // If there is a decimal, count trailing zeros
+        if (index_decimal == -1)
+            return index_last_non_zero - index_first_non_zero + 1;
+        else if (index_decimal > index_first_non_zero)
+            return str.length - index_first_non_zero - 1;
+        else
+            return str.length - index_first_non_zero;
+    }
+
+    var color_leading = "orange";
+    var color_sig = "blue";
+    var color_trailing = "brown";
+    var color_decimal = "red";
+    var raphael_numbers = [];
+    var optional_hints_given = [false, false];
+    var done_hinting = false;
+    
+    function highlightNum(start, end, color) {
+        for (var i = start; i < end; i++) {
+            if (i != index_decimal) 
+                raphael_numbers[i].attr({"font-size": 30, "stroke": color, "fill": color});
+        }
+    }
+
+    function showNumber() {
+        for (var i = 0; i < number_str.length; i++) {
+            raphael_numbers[raphael_numbers.length] = present.paper.text(10 + i * 20, 20, number_str[i]).attr({"font-size": 30});
+        }        
+    }
+    
+    function getSignificantHint() {
+        var hint;
+        if (number_str.search(/[1-9]/) == -1) {
+            if (index_decimal == -1) {
+                hint = "In this special case with only zeros and no decimal, there is 1 significant figure.";
+                highlightNum(number_str.length - 1, number_str.length, color_sig);
+            } else {
+                hint = "In this special case with only zeros and a decimal, all " + answer + " zeros are significant.";
+                raphael_numbers[index_decimal].attr({"font-size": 30, "stroke": color_decimal, "fill": color_decimal}); 
+                highlightNum(0, number_str.length, color_sig);
+            }
+            optional_hints_given[0] = true;
+            optional_hints_given[1] = true;
+        } else {
+            hint = "Identify the non-zero digits and any zeros between them. These are all significant.";
+            highlightNum(index_first_non_zero, index_last_non_zero + 1, color_sig);                    
+        }
+        return hint;
+    }
+    
+    function getLeadingHint() {
+        highlightNum(0, index_first_non_zero, color_leading);
+        return "Leading zeros are not significant.";
+    }
+    
+    function getTrailingHint() {
+        var hint;
+        if (index_decimal == -1) {
+            hint = "Since there is no decimal, trailing zeros are not significant."
+            color = color_trailing;                        
+        } else {
+            hint = "Since there is a decimal, trailing zeros are significant."
+            color = color_sig;  
+            raphael_numbers[index_decimal].attr({"font-size": 30, "stroke": color_decimal, "fill": color_decimal});   
+        }
+        highlightNum(index_last_non_zero + 1, number_str.length, color);
+        optional_hints_given[0] = true;
+        return hint;
+    }
+    
+    function getFinalHint() {
+        optional_hints_given[1] = true;
+        return number_str + " has " + answer + " significant figure" + (answer == 1 ? "" : "s") + ".";
+    }
+    
+    this.showGraphHints = function(hint_num) {
+        var hint = "";
+
+        switch (hint_num) {
+            case 0:
+                showNumber();
+                break;
+            case 1:
+                hint = getSignificantHint();
+                break;
+            case 2:
+                if (index_first_non_zero) {
+                    hint = getLeadingHint();
+                    break;
+                }
+            case 3:
+                if (index_last_non_zero != number_str.length - 1 && !optional_hints_given[0]){
+                    hint = getTrailingHint();
+                    break;
+                }
+            case 4:
+                if (!optional_hints_given[1]) {
+                    hint = getFinalHint();
+                }
+            default:
+        }
+
+        if (hint_num > 0 && hint_num < 5 && !done_hinting) {
+            present.paper.text(10, 30 + (hint_num) * 30, hint).attr({"font-size": 15, "text-anchor": "start"});
+            if (optional_hints_given[1])
+                done_hinting = true;
+        }
+    }
+}
+
+

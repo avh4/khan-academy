@@ -183,34 +183,13 @@ def streak_bar(user_exercise):
 def reports_navigation(coach_email, current_report="classreport"):
     return {'coach_email': coach_email, 'current_report': current_report }
     
-@register.inclusion_tag(("shared_javascript.html", "../shared_javascript.html"))
-def shared_javascript():
-    return {'App': App}
-@register.inclusion_tag(("exercises_javascript.html", "../exercises_javascript.html"))
-def exercises_javascript():
-    return {'App': App}
-@register.inclusion_tag(("maps_javascript.html", "../maps_javascript.html"))
-def maps_javascript():
-    return {'App': App}
-@register.inclusion_tag(("profile_javascript.html", "../profile_javascript.html"))
-def profile_javascript():
-    return {'App': App}
-@register.inclusion_tag(("homepage_javascript.html", "../homepage_javascript.html"))
-def homepage_javascript():
-    return {'App': App}
-@register.inclusion_tag(("mobile_javascript.html", "../mobile_javascript.html"))
-def mobile_javascript():
-    return {'App': App}
-@register.inclusion_tag(("shared_css.html", "../shared_css.html"))
-def shared_css():
-    return {'App': App}
-@register.inclusion_tag(("mobile_css.html", "../mobile_css.html"))
-def mobile_css():
-    return {'App': App}
-
 @register.inclusion_tag(("playlist_browser.html", "../playlist_browser.html"))
 def playlist_browser(browser_id):
     return {'browser_id': browser_id}
+
+@register.simple_tag
+def static_url(relative_url):
+    return util.static_url(relative_url)
 
 @register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
 def empty_class_instructions(class_is_empty=True):
@@ -227,4 +206,5 @@ webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
 webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
+webapp.template.register_template_library('js_css_packages.templatetags')
 

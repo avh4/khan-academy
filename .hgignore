@@ -5,6 +5,8 @@ syntax: glob
 *compressed.js
 *combined.css
 *compressed.css
+hashed-*.css
+hashed-*.js
 *.pem
 secrets.py
 datastore/*

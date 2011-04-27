@@ -4,7 +4,7 @@
             <div id="library-content-main">
             {% for playlist_data in all_playlists %}
             {% if forloop.first %}
-                <div class="clear desktop-only"><a name="{{ playlist_data.title|slugify|escape }}">&nbsp;</a></div>
+                <div class="clear desktop-only"><a name="{{ playlist_data.title|slugify|escape }}" id="{{ playlist_data.title|slugify|escape }}">&nbsp;</a></div>
             {% endif %}
             <div data-role="page" id="{{ playlist_data.title|slugify|escape }}" data-theme="b">
                 <div data-role="header">

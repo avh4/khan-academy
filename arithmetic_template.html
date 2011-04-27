@@ -5,7 +5,7 @@
     /* Temporary styles to fit new exercises into old template, will be removed when new template is dropped in. */
     #page_sub_nav {display: none;}
 </style>
-  {% exercises_javascript %}
+  {% js_package "exercises" %}
   {% comment %}
      We can't append App.version to MathJax.js because it confuses MathJax.  Instead we map
      /MathJax-version to /MathJax in app.yaml and update the version there and here whenever
