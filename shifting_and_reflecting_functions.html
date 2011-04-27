@@ -1,6 +1,9 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincode %}
+<div id="raphael_container" style="float: right"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(500, 500);
 
 var mOrig; // if 1, then orig. func. is up-facing
 
@@ -136,7 +139,7 @@ function graph_update() {
 	present.plot(finFunc);
 }
 
-
+graph_update();
 
 //-->
 </script>
@@ -150,9 +153,7 @@ What is <font color="blue">`g(x)`</font> in terms of <font color="red">`f(x)`</f
 </div>
 
 <table><tr>
-    <td style="width:560px">
-        <iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
-	</td><td>
+    <td>
 		<!--Based on the code from even and odd functions.
 		Note that here, the hintX numbers X represent number of hints given. 
 		These are steps which are all part of one problem.

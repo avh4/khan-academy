@@ -1,6 +1,10 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincode %}
+<div id="raphael_container" style="float: right"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(500, 500);
+Exercise.fAddNoneOfThese = false;
 
 var correctX = Math.round(KhanAcademy.random()*18)-9;
 var correctY = Math.round(KhanAcademy.random()*18)-9;
@@ -60,6 +64,7 @@ function graph_update() {
 	}
 }
 
+graph_update();
 
 //-->
 </script>
@@ -68,10 +73,6 @@ function graph_update() {
 {% block maincell %}
 
 Which of the coordinate pairs is <b>not</b> graphed?<br>
-
-<center><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
-</center>
-
 
 
 {% endblock maincell %}

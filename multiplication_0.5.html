@@ -1,6 +1,9 @@
 {% extends arithmetic_template %}
 {% block maincode %}
+<div id="raphael_container"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(400, 600);
 var term1 = 0;
 var term2 = 0;
 var term1color = getNextColor();
@@ -50,19 +53,6 @@ var tFunction = function()
 
 //This checks the history and regenerates random numbers if the current ones have already been used recently 
 checkHistory(cFunction, eFunction, tFunction, 20);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function graph_update()
 {
@@ -134,9 +124,7 @@ function next_step()
 	
 }
 
+graph_update();
 //-->
 </script>
 {% endblock maincode %}
-
-{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=600" height="650" width="100%"></iframe>{% endblock maincell %}
-  

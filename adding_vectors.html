@@ -6,8 +6,8 @@
 <div id="raphael_container" style="float: right;"></div>
 
 <script>
-    var present = window;
-    RaphaelWrapper.init();
+    
+    RaphaelWrapper.init(400, 400);
     Exercise.fWriteToDoc = false;
     var exercise = new AddingVectorsExercise();
     Exercise.showCustomStep = exercise.showGraphHints;

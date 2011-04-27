@@ -1,6 +1,9 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincode %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(500, 400);
 Exercise.fAddNoneOfThese = false;
 var curExp;
 
@@ -211,7 +214,7 @@ function draw_next_step()
 	Exercise.steps_given++;
 }
 
-
+graph_update();
 //-->
 </script>
 {% endblock maincode %}
@@ -220,16 +223,14 @@ function draw_next_step()
 
 <script language=Javascript1.2><!--
 
-writeText('<span style="color:blue">`f(x)`</span> is graphed below. Is <span style="color:blue">`f(x)`</span> even, odd, or neither?');
+writeText('<span style="color:blue">`f(x)`</span> is graphed. Is <span style="color:blue">`f(x)`</span> even, odd, or neither?');
 
 //-->
 </script>
 <br>
 
 <table><tr>
-    <td style="width:550px">
-        <iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=400" height="430" width="100%"></iframe>
-    </td><td>
+    <td>
         <div id="hint0" style="font-family:sans-serif;font-size:16;display:none;">
         `f(a)=-f(-a)`,<br/>so the function is odd.<br/>
         Notice that the graph looks "flipped" across the origin.</div>

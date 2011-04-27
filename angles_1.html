@@ -1363,8 +1363,8 @@ write_text("What is "+writeVariable(goal)+"?");
 for(var i=0; i<explanationStack.length; i++)
 	write_step('<b>'+(i+1)+':</b> '+getReasonString(explanationStack[i][1]));
 
-var present = window;
-RaphaelWrapper.init();
+
+RaphaelWrapper.init(400, 400);
 graph_update();
 
 Exercise.showCustomStep = function(hint_num) {
