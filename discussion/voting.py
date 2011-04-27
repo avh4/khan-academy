@@ -72,7 +72,7 @@ class VoteEntity(request_handler.RequestHandler):
                 return
 
         if vote_type != FeedbackVote.ABSTAIN:
-            limiter = VoteRateLimiter(user)
+            limiter = VoteRateLimiter(user_data)
             if not limiter.increment():
                 self.render_json({"error": limiter.denied_desc()})
                 return

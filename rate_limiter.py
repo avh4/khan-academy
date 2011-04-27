@@ -1,3 +1,5 @@
+from google.appengine.api import users
+
 import datetime
 import logging
 
@@ -5,13 +7,15 @@ from google.appengine.api import memcache
 
 class RateLimiter:
     
-    def __init__(self, user, hourly_limit, desc):
+    def __init__(self, user_data, hourly_limit, desc):
         self.hourly_limit = hourly_limit
         self.desc = desc
-        self.user = user
+        self.user_data = user_data
 
     def is_allowed(self):
-        return len(self.purge()) < self.hourly_limit
+        return len(self.purge()) < self.hourly_limit or \
+                users.is_current_user_admin() or \
+                self.user_data.moderator
 
     def increment(self):
         if not self.is_allowed():
@@ -21,7 +25,7 @@ class RateLimiter:
         return True
 
     def get_key(self):
-        return "rate_limiter_%s_%s" % (self.__class__.__name__, self.user.email()) 
+        return "rate_limiter_%s_%s" % (self.__class__.__name__, self.user_data.user.email()) 
 
     def add_new(self):
         key = self.get_key()
@@ -57,5 +61,5 @@ class RateLimiter:
         return self.desc % self.hourly_limit
 
 class VoteRateLimiter(RateLimiter):
-    def __init__(self, user):
-        RateLimiter.__init__(self, user, 10, "You can only vote %s times every hour.")
+    def __init__(self, user_data):
+        RateLimiter.__init__(self, user_data, 10, "You can only vote %s times every hour.")

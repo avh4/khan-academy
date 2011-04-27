@@ -1,3 +1,5 @@
+from google.appengine.api import users
+
 import util
 
 class Privileges:
@@ -6,12 +8,18 @@ class Privileges:
     DOWN_VOTE_THRESHOLD = 20000
 
     @staticmethod
+    def has_privilege(user_data, points_required):
+        return users.is_current_user_admin() or \
+                user_data.moderator or \
+                user_data.points >= points_required
+
+    @staticmethod
     def can_up_vote(user_data):
-        return user_data.points >= Privileges.UP_VOTE_THRESHOLD
+        return Privileges.has_privilege(user_data, Privileges.UP_VOTE_THRESHOLD)
     
     @staticmethod
     def can_down_vote(user_data):
-        return user_data.points >= Privileges.DOWN_VOTE_THRESHOLD
+        return Privileges.has_privilege(user_data, Privileges.DOWN_VOTE_THRESHOLD)
 
     @staticmethod
     def need_points_desc(points, verb):
