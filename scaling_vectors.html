@@ -4,21 +4,17 @@
 <script src="/javascript/exercises/vectors.js?{{App.version}}"></script>
 <script src="/javascript/exercises/scaling_vectors.js?{{App.version}}"></script>
 
-<div id="dpaper"></div>
+<div id="raphael_container"></div>
 
 <script>
+    // Need this line because of old iframe named "present"
     var present = window;
-    $(document).ready(function() {
-        var paper = Raphael(document.getElementById("dpaper"), 400, 400);
-        initPaper(paper, 400, 400);
-        
-        Exercise.fWriteToDoc = false;
-        Exercise.fAddNoneOfThese = false;
-        
-        var exercise = new ScalingVectorsExercise();
-        exercise.showProblem();
-        Exercise.showCustomStep = exercise.showGraphHints;
-    });
-
+    RaphaelWrapper.init();
+    
+    Exercise.fWriteToDoc = false;
+    Exercise.fAddNoneOfThese = false;
+    
+    var exercise = new ScalingVectorsExercise();
+    Exercise.showCustomStep = exercise.showGraphHints;
 </script>
 {% endblock maincell %}

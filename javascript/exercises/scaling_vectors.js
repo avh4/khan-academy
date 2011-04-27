@@ -14,19 +14,8 @@ function ScalingVectorsExercise() {
     var coeff;
     var correct_index;
     
-    this.showProblem = function() {
-        initPlane();
-        present.fontsize = "15";
-        present.fontfamily = "sans-serif";
-        present.fontstyle = "bold";
-        present.marker = "arrow";
-        
-        for (var i = 0; i < vectors.length; i++) {
-            drawVector(vectors[i], i);
-        }
-    }
-
     generateProblem();
+    showProblem();
     generateHints();
             
     function generateProblem() {
@@ -54,6 +43,18 @@ function ScalingVectorsExercise() {
         setCorrectAnswer("\\vec{" + vectors[correct_index].name + "}");
         for (var i = 1; i < num_vectors; i++) {
             addWrongChoice("\\vec{" +vectors[i].name + "}");
+        }
+    }
+    
+    function showProblem() {
+        initPlane();
+        present.fontsize = "15";
+        present.fontfamily = "sans-serif";
+        present.fontstyle = "bold";
+        present.marker = "arrow";
+        
+        for (var i = 0; i < vectors.length; i++) {
+            drawVector(vectors[i], i);
         }
     }
     

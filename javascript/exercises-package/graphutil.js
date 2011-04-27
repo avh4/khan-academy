@@ -1,3 +1,11 @@
+RaphaelWrapper = {
+    init: function(width, height) {
+        var paper = Raphael(document.getElementById("raphael_container"), width, height);
+        initPaper(paper, width, height);
+        return paper;
+    }
+};
+
 var toDraw = {};
 var randInt = getRandomIntRange(5,9);
 

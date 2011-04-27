@@ -4,7 +4,12 @@
 {% endblock maincode %}
 
 {% block maincell %}
+
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
+var present = window;
+RaphaelWrapper.init(400, 400);
 var x = [];
 var y = [];
 
@@ -159,13 +164,10 @@ function graphPoint(pt)
 	present.text([x[pt], y[pt]], namePoint(x[pt], y[pt]), aboveright);
 }
 
+graph_update();
 //-->
 </script>
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="450" width="450"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block answerarea %}
 <span class="info-box-header">Answer</span>

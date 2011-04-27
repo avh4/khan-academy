@@ -4,10 +4,14 @@
 {% endblock maincode %}
 
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
 ///////////////////////////////////////////////////////////////////////////////////////
 //////Your code goes below here							///////
 ///////////////////////////////////////////////////////////////////////////////////////
+var present = window;
+RaphaelWrapper.init(400, 400);
 
 function type1()
 {
@@ -99,15 +103,9 @@ pickType(1,2);
 
 randomRotation();
 
-
-
 //-->
 </script>
 
 
 
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe></td>
-{% endblock graphdisplay %}

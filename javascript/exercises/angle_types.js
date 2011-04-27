@@ -10,6 +10,7 @@
 
 function AngleTypesExercise() {
     generateProblem();
+    showProblem();
     generateHints();
     
     function generateProblem() {
@@ -49,7 +50,7 @@ function AngleTypesExercise() {
         writeStep(this.hint);
     }
     
-    this.showProblem = function() {
+    function showProblem(){
     	present.initPicture(-1, 1, -1, 1);
     	present.marker = "arrow";
     	

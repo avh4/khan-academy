@@ -799,13 +799,6 @@ function overline(x)
 }
 
 
-function draw_next_step() {
-    if (explanationStack.length <= Exercise.steps_given) return;
-	drawVariable(explanationStack[Exercise.steps_given][0]);
-	Exercise.steps_given++;
-    show_step();
-}
-
 /**
  * Iframe calls this function to render the graph.
  */
@@ -1351,6 +1344,8 @@ function randomArraySplice(a) //Takes a random element out of the array and retu
 {% endblock maincode %}
 
 {% block maincell %}
+
+<div id="raphael_container" style="float: right;"></div>
 <script language=Javascript1.2><!--
 
 var initString = "<ul>";
@@ -1367,15 +1362,24 @@ write_text("What is "+writeVariable(goal)+"?");
 
 for(var i=0; i<explanationStack.length; i++)
 	write_step('<b>'+(i+1)+':</b> '+getReasonString(explanationStack[i][1]));
-	
+
+var present = window;
+RaphaelWrapper.init();
+graph_update();
+
+Exercise.showCustomStep = function(hint_num) {
+    if (hint_num >= explanationStack.length) return;
+    drawVariable(explanationStack[hint_num][0]);
+}
+
 //-->
 </script>
+
 {% endblock maincell %}
 
 
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe></td>
-{% endblock graphdisplay %}
+{% block hintfunction %}
+give_next_step()
+{% endblock hintfunction%}
 
 
-{% block hintfunction %}draw_next_step(){% endblock hintfunction %}

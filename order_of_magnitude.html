@@ -2,6 +2,8 @@
 {% block maincode %}
 {% endblock maincode %}
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
 /**
 Order of Magnitude (Multiplication and Division)
@@ -10,6 +12,10 @@ Approximating order of magnitude of product and quotient of large ints
 @Author: Aakash Prasad (aakash.prasad91@gmail.com)
 **/
 //Randomly select problem type (1 == mult, 2 == div) 
+
+var present = window;
+RaphaelWrapper.init(400, 400);
+
 var type = Math.ceil(Math.random()*2);
 if (type == 1) {
 	//Multiplication
@@ -84,10 +90,6 @@ if (type == 1) {
 	write_step("The largest power of 10 contained in " + formatNum(Math.floor(term1 / term2)) + " is " + formatNum(mag));	
 }
 
-function draw_next_step() {
-	give_next_step();
-}
-
 function formatNum(num) {
 	if (num >= 1) {
 	num = Math.floor(num);
@@ -107,12 +109,9 @@ function formatNum(num) {
 	return rtn;
 }
 
+graph_update();
 //-->
 </script>
 {% endblock maincell %}
 
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="420" width="420"></iframe></td>
-{% endblock graphdisplay %}
-
-{% block hintfunction %}draw_next_step(){% endblock hintfunction %}
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}

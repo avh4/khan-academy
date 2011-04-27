@@ -1,6 +1,8 @@
 {% extends "multiple_choice_template.html" %}
 
-{% block maincode %}
+{% block maincell %}
+<div id="raphael_container" style="float: right"></div>
+
 <script language=Javascript1.2><!--
 // Probability
 
@@ -9,6 +11,9 @@
 // 2. Marbles
 // 3. Set of Numbers
 // 4. Area
+
+var present = window;
+RaphaelWrapper.init(400, 400);
 
 graph_update = function() { } // we'll fill it in in case 4
 
@@ -631,15 +636,11 @@ switch(getRandomIntRange(1, 4))
 		break;
 }
 
+graph_update();
+
 //-->
 </script>
-{% endblock maincode %}
 
-{% block maincell %}
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block maincellwidth %}70%{% endblock maincellwidth %}

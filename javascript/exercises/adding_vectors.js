@@ -22,6 +22,7 @@ function AddingVectorsExercise() {
 	var origin = [0, 0];
     
     generateProblem();
+    showProblem();
     generateHints();
     
     function generateProblem() {
@@ -73,7 +74,7 @@ function AddingVectorsExercise() {
         write_step("` = " + outputVector(sum) + "`");
     }
     
-    this.showProblem = function() {
+    function showProblem(){
         this.graph = present;
     	initPlane();
 

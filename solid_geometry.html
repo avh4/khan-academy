@@ -7,20 +7,18 @@
   .multiple_of_pi { display: none; }
 </style>
 <script src="/javascript/exercises/solid_geometry.js?{{App.version}}"></script>
-<script>
-SolidGeometryExercise.init();
+<div id="raphael_container" style="float: right;"></div>
 
-function graph_update() {
-    SolidGeometryExercise.graphUpdate();
-}
+<script>
+var present = window;
+RaphaelWrapper.init();
+SolidGeometryExercise.init();
+SolidGeometryExercise.graphUpdate();
+
 </script>
 {% endblock maincell %}
 
 {% block hintfunction %}SolidGeometryExercise.getHint();{% endblock hintfunction %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" id="present" frameborder=0 src="/graphpage.html?w=300&h=300" height="330" width="330"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block answerarea %}
 <span class="info-box-header">Answer</span>
