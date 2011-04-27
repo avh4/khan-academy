@@ -407,7 +407,8 @@ var QA = {
             var left = offset.left - offsetContainer.left + (jTarget.width() / 2) - (jNote.width() / 2);
             jNote.css("top", top).css("left", left).css("visibility", "visible").css("display", "");
 
-            setTimeout(fxnCallback, 50);
+            if (fxnCallback) setTimeout(fxnCallback, 50);
+
             return true;
         }
         return false;
