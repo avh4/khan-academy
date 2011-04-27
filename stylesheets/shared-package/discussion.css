@@ -139,7 +139,10 @@
 	border-color:#D2DDED transparent transparent;
 }
 
-.video_questions .question_container .mod_tools, .video_question_notifications .mod_tools {
+.video_questions .question_container .mod_tools, .video_question_notifications .mod_tools,
+.video_questions .question_container .mod_tools, .video_question_notifications .flag_tools,
+.video_questions .question_container .mod_tools, .video_question_notifications .vote_tools
+{
     display: none;
 }
 
