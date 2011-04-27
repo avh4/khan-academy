@@ -54,6 +54,70 @@ var Discussion = {
     }
 };
 
+var Voting = {
+
+    init: function() {
+        $(".vote_for").live("click", Voting.voteEntity);
+    },
+
+    voteEntity: function(e) {
+
+        if (QA.showNeedsLoginNote(this, "to vote.")) return false;
+
+        var jel = $(this);
+
+        var vote_type = parseInt(jel.attr("data-vote_type"));
+        if (!vote_type) return;
+
+        var key = jel.attr("data-key");
+        if (!key) return false;
+
+        var fAbstain = jel.is(".voted");
+
+        var jelParent = jel.parents(".comment, .answer, .question").first();
+        var jelVotes = jelParent.find(".sum_votes");
+        var votes = parseInt($.trim(jelVotes.attr("data-sum_original")));
+
+        $.post("/discussion/voteentity", {
+            entity_key: key,
+            vote_type: fAbstain ? 0 : vote_type
+            },
+            function(data) { Voting.finishVoteEntity(data, jel, jelParent, jelVotes, votes); }
+        );
+
+        Voting.clearVote(jel, jelParent, jelVotes, votes);
+
+        var votesNext = votes + (fAbstain ? 0 : vote_type);
+
+        if (jelParent.is(".comment"))
+            jelVotes.html(votesNext + " point" + (votesNext == 1 ? "" : "s") + ", ");
+        else
+            jelVotes.html(votesNext);
+
+        jelVotes.addClass("sum_votes_changed");
+        if (!fAbstain) jel.addClass("voted");
+
+        return false;
+    },
+
+    clearVote: function(jel, jelParent, jelVotes, votes) {
+        jelParent.find("a.vote_for").removeClass("voted");
+        jelVotes.removeClass("sum_votes_changed").html(votes);
+    },
+
+    finishVoteEntity: function(data, jel, jelParent, jelVotes, votes) {
+        try { eval("var dict_json = " + data); }
+        catch(e) { return; }
+
+        if (dict_json && dict_json.error)
+        {
+            this.clearVote(jel, jelParent, jelVotes, votes);
+            QA.showInfoNote(jel.get(0), dict_json.error);
+        }
+    }
+
+};
+
 var Moderation = {
 
     init: function() {
@@ -173,6 +237,11 @@ var QA = {
 
         $("input.question_submit, input.answer_submit").live("click", QA.submit);
         $(".question_cancel, .answer_cancel").live("click", QA.cancel);
+        $(".questions_container .question_container")
+            .live("mouseover", QA.hover)
+            .live("mouseout", QA.unhover)
+            .live("click", QA.expand);
+        $(".close_note").live("click", QA.closeNote);
 
         $(window).resize(QA.repositionStickyNote);
 
@@ -183,7 +252,6 @@ var QA = {
     initPagesAndQuestions: function() {
         $("form.answers").submit(function(){return false;});
         $("a.questions_page").click(function(){ QA.loadPage($(this).attr("page")); return false; });
-        $(".questions_container .question_container").mouseover(QA.hover).mouseout(QA.unhover).click(QA.expand);
         $(".add_yours").click(QA.expandAndFocus);
         $(".answer_text").focus(QA.focusAnswer).watermark($(".answer_text").attr("watermark"));
     },
@@ -255,6 +323,7 @@ var QA = {
                 {
                     video_key: $("#video_key").val(), 
                     playlist_key: $("#playlist_key").val(),
+                    sort: $("#sort").val(),
                     page: page
                 }, 
                 QA.finishLoadPage);
@@ -271,6 +340,12 @@ var QA = {
         QA.initPagesAndQuestions();
         Discussion.hideThrobber();
         VideoControls.initJumpLinks();
+
+        var hash = "qa";
+        if (dict_json.qa_expand_id && parseInt(dict_json.qa_expand_id) > 0)
+            hash = "q_" + dict_json.qa_expand_id;
+
+        document.location = "#" + hash;
     },
 
     getQAParent: function(el) {
@@ -306,10 +381,22 @@ var QA = {
     },
 
     showNeedsLoginNote: function(el, sMsg) {
-        var jNote = $(".login_note")
+        return this.showNote($(".login_note"), el, sMsg, function(){$(".login_link").focus();});
+    },
+
+    showInfoNote: function(el, sMsg) {
+        return this.showNote($(".info_note"), el, sMsg);
+    },
+
+    closeNote: function() {
+        $(".note").hide();
+        return false;
+    },
+
+    showNote: function(jNote, el, sMsg, fxnCallback) {
         if (jNote.length && el)
         {
-            $(".login_action", jNote).text(sMsg);
+            $(".note_desc", jNote).text(sMsg);
 
             var jTarget = $(el);
             var offset = jTarget.offset();
@@ -320,7 +407,8 @@ var QA = {
             var left = offset.left - offsetContainer.left + (jTarget.width() / 2) - (jNote.width() / 2);
             jNote.css("top", top).css("left", left).css("visibility", "visible").css("display", "");
 
-            setTimeout(function(){$(".login_link").focus();}, 50);
+            if (fxnCallback) setTimeout(fxnCallback, 50);
+
             return true;
         }
         return false;
@@ -350,7 +438,8 @@ var QA = {
         // doesn't preserve newline content when asking for .text() content below.
         var reBR = /<br>/gi;
         var reBRReverse = /{newline}/g;
-        var htmlEntity = $.browser.msie ? jEntity.html().replace(reBR, "{newline}") : jEntity.html();
+        var jSpan = $("span", jEntity).first();
+        var htmlEntity = $.browser.msie ? jSpan.html().replace(reBR, "{newline}") : jSpan.html();
 
         var jContent = $("<div>").html(htmlEntity);
 
@@ -360,7 +449,7 @@ var QA = {
         // Fill, insert, then focus textarea
         var textEntity = $.browser.msie ? jContent.text().replace(reBRReverse, "\n") : jContent.text();
         jTextarea.val($.trim(textEntity));
-        $("span", jEntity).first().css("display", "none").after(jTextarea);
+        jSpan.css("display", "none").after(jTextarea);
 
         setTimeout(function(){jTextarea.focus();}, 1);
     },
@@ -524,6 +613,8 @@ var Comments = {
         Comments.initPages();
         Discussion.hideThrobber();
         VideoControls.initJumpLinks();
+
+        document.location = "#comments";
     },
 
     add: function() {
@@ -586,10 +677,11 @@ var Comments = {
 
 };
 
-$(document).ready(Discussion.init);
-$(document).ready(Comments.init);
-$(document).ready(QA.init);
-$(document).ready(Moderation.init);
+$(Discussion.init);
+$(Moderation.init);
+$(Voting.init);
+$(Comments.init);
+$(QA.init);
 
 // Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
 // we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm

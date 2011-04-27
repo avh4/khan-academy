@@ -1,0 +1,9 @@
+<div class="vote_tools">
+    <div class="control vote_tools_show">
+        <a href="#" class="control vote_for {% if target.up_voted %}voted{% endif %}" title="Vote up, this is encouraging or helpful (click again to undo)" data-key="{{ target.key|escape }}" data-vote_type="1"><img src="/images/vote-up-gray.png" class="vote_up_gray"/><img src="/images/vote-up.png" class="vote_up"/></a>
+        {% if not is_comment %}
+            {% vote_sum target %}
+        {% endif %}
+        <a href="#" class="control vote_for {% if target.down_voted %}voted{% endif %}" title="Vote down, this is not encouraging or helpful (click again to undo)" data-key="{{ target.key|escape }}" data-vote_type="-1"><img src="/images/vote-down-gray.png" class="vote_down_gray"/><img src="/images/vote-down.png" class="vote_down"></a>
+    </div>
+</div>

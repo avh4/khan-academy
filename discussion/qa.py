@@ -8,16 +8,18 @@ from google.appengine.ext.webapp import template
 from mapreduce import control
 from mapreduce import operation as op
 
-from django.utils import simplejson
 from collections import defaultdict
+
+from render import render_block_to_string
 import models
 import models_discussion
 import notification
-from render import render_block_to_string
 import util_discussion
 import app
 import util
 import request_handler
+import privileges
+import voting
 
 class ModeratorList(request_handler.RequestHandler):
 
@@ -103,15 +105,20 @@ class PageQuestions(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         qa_expand_id = int(self.request.get("qa_expand_id")) if self.request.get("qa_expand_id") else -1
+        sort = self.request_int("sort", default=-1)
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
+        user_data = None
+        user = util.get_current_user()
+        if user:
+            user_data = models.UserData.get_for(user)
+
         if video:
-            template_values = video_qa_context(video, playlist, page, qa_expand_id)
+            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
             path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
             html = render_block_to_string(path, 'questions', template_values)
-            json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
-            self.response.out.write(json)
+            self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
 
         return
 
@@ -159,19 +166,27 @@ class Answers(request_handler.RequestHandler):
 
     def get(self):
 
+        user = util.get_current_user()
         question_key = self.request.get("question_key")
         question = db.get(question_key)
 
         if question:
-            answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False, False)
+            video = question.first_target()
+            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+
+            answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
+            answers = voting.VotingSortOrder.sort(answers)
+
+            for answer in answers:
+                voting.add_vote_expando_properties(answer, dict_votes)
+
             template_values = {
-                "answers": answer_query,
+                "answers": answers,
                 "is_mod": util_discussion.is_current_user_moderator()
             }
             path = os.path.join(os.path.dirname(__file__), 'question_answers.html')
             html = render_block_to_string(path, 'answers', template_values)
-            json = simplejson.dumps({"html": html}, ensure_ascii=False)
-            self.response.out.write(json)
+            self.render_json({"html": html})
 
         return
 
@@ -194,6 +209,7 @@ class AddQuestion(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         video = db.get(video_key)
+        question_key = ""
 
         if question_text and video:
             if len(question_text) > 500:
@@ -205,8 +221,10 @@ class AddQuestion(request_handler.RequestHandler):
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
             question.put()
+            question_key = question.key().id()
 
-        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=0" % (video_key, playlist_key))
+        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&qa_expand_id=%s" % 
+                (video_key, playlist_key, question_key))
 
 class EditEntity(request_handler.RequestHandler):
 
@@ -241,6 +259,20 @@ class EditEntity(request_handler.RequestHandler):
 
                         question = feedback.parent()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
+
+class VoteEntity(request_handler.RequestHandler):
+    def post(self):
+        # You have to be logged in to vote
+        user = util.get_current_user()
+        if not user:
+            return
+
+        key = self.request_string("entity_key", default="")
+        flag = self.request_string("flag", default="")
+        if key and models_discussion.FeedbackFlag.is_valid(flag):
+            entity = db.get(key)
+            if entity and entity.add_flag_by(flag, user):
+                entity.put()
 
 class FlagEntity(request_handler.RequestHandler):
     def post(self):
@@ -311,26 +343,39 @@ class DeleteEntity(request_handler.RequestHandler):
 
         self.redirect("/discussion/flaggedfeedback")
 
-def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
+def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
 
     limit_per_page = 5
+    user = util.get_current_user()
+
+    if page <= 0:
+        page = 1
+
+    sort_order = voting.VotingSortOrder.HighestPointsFirst
+    if user_data:
+        sort_order = user_data.question_sort_order
+    if sort_override >= 0:
+        sort_order = sort_override
+
+    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
+    questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
 
     if qa_expand_id:
         # If we're showing an initially expanded question,
         # make sure we're on the correct page
         question = models_discussion.Feedback.get_by_id(qa_expand_id)
         if question:
-            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4 AND date > :5 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, False, question.date)
-            count_preceding = question_preceding_query.count()
+            count_preceding = 0
+            for question_test in questions:
+                if question_test.key() == question.key():
+                    break
+                count_preceding += 1
             page = 1 + (count_preceding / limit_per_page)
 
-    if page <= 0:
-        page = 1
+    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers = voting.VotingSortOrder.sort(answers)
 
-    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
-    answers = sorted(
-            util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer), 
-            key=lambda feedback: feedback.date)
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
 
     count_total = len(questions)
     questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]
@@ -338,6 +383,7 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
     dict_questions = {}
     # Store each question in this page in a dict for answer population
     for question in questions:
+        voting.add_vote_expando_properties(question, dict_votes)
         dict_questions[question.key()] = question
 
     # Just grab all answers for this video and cache in page's questions
@@ -346,12 +392,13 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
         question_key = answer.parent_key()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
+            voting.add_vote_expando_properties(answer, dict_votes)
             question.children_cache.append(answer)
 
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": util.get_current_user(),
+            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,
@@ -364,6 +411,7 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
+            "sort_order": sort_order,
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }
@@ -372,5 +420,6 @@ def add_template_values(dict, request):
     dict["comments_page"] = int(request.get("comments_page")) if request.get("comments_page") else 0
     dict["qa_page"] = int(request.get("qa_page")) if request.get("qa_page") else 0
     dict["qa_expand_id"] = int(request.get("qa_expand_id")) if request.get("qa_expand_id") else -1
+    dict["sort"] = int(request.get("sort")) if request.get("sort") else -1
 
     return dict

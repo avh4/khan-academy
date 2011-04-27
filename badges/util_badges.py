@@ -259,7 +259,7 @@ def badge_update_map(user_data):
     awarded = update_with_no_context(user, user_data, action_cache=action_cache)
 
     # Update all exercise-context badges
-    for user_exercise in models.UserExercise.get_for_user_use_cache(user):
+    for user_exercise in models.UserExercise.get_for_user(user):
         awarded = update_with_user_exercise(user, user_data, user_exercise, action_cache=action_cache) or awarded
 
     # Update all playlist-context badges
