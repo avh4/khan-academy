@@ -272,6 +272,7 @@ span.mod_tools_hidden, span.flag_tools_hidden {
 	border-radius:10px;
     text-align: center;
     z-index: 2;
+    max-width: 150px;
 }
 
 .video_questions .login_note .icon {
