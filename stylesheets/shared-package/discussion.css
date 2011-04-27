@@ -379,7 +379,13 @@ span.flag_tools_show:hover img.feedback_flag_gray { display:none; }
     width:18px;
     text-align: center;
 }
-a.vote_for { margin-left:auto; margin-right:auto; }
+
+a.vote_for {
+    margin-left:auto;
+    margin-right:auto;
+    *margin: 0;
+}
+
 a.vote_for img.vote_up, a.vote_for img.vote_down { display:none; }
 
 .vote_tools a.voted img.vote_up, .vote_tools a.voted img.vote_down { display:inline; }
