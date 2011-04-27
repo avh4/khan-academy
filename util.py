@@ -1,3 +1,4 @@
+import os
 import datetime
 import math
 import urllib
@@ -95,7 +96,7 @@ def async_queries(queries, limit=100000):
     return task_runner
 
 def static_url(relative_url):
-    if App.is_dev_server:
+    if App.is_dev_server or not os.environ['HTTP_HOST'].lower().endswith(".khanacademy.org"):
         return relative_url
     else:
         return "http://static.khanacademy.org%s" % relative_url
