@@ -1882,6 +1882,7 @@ def real_main():
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
         ('/admin/badgestatistics', util_badges.BadgeStatistics),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
+        ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),

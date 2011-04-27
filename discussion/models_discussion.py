@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import logging
+
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
@@ -47,6 +49,7 @@ class Feedback(db.Model):
     flags = db.StringListProperty(default=None)
     flagged_by = db.StringListProperty(default=None)
     sum_votes = db.IntegerProperty(default=0)
+    inner_score = db.FloatProperty(default=0.0)
 
     @staticmethod
     def memcache_key_for_video(video):
@@ -97,8 +100,29 @@ class Feedback(db.Model):
 
     def add_vote_by(self, vote_type, user):
         FeedbackVote.add_vote(self, vote_type, user)
+        self.update_votes_and_score()
+
+    def update_votes_and_score(self):
+        self.recalculate_votes()
+        self.recalculate_score()
+        self.put()
+
+        if self.is_type(FeedbackType.Answer):
+            question = self.parent()
+            question.recalculate_score()
+            question.put()
+
+    def recalculate_votes(self):
         self.sum_votes = FeedbackVote.count_votes(self)
-        return True
+
+    def recalculate_score(self):
+        score = float(self.sum_votes)
+
+        if self.is_type(FeedbackType.Question):
+            for answer in db.get(self.children_keys().fetch(1000)):
+                score += 0.5 * float(answer.sum_votes)
+
+        self.inner_score = float(score)
 
     def add_flag_by(self, flag_type, user):
         if user.email() in self.flagged_by:

@@ -3,6 +3,8 @@ import urllib
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.api import taskqueue
+from mapreduce import control
+from mapreduce import operation as op
 
 from privileges import Privileges
 from rate_limiter import VoteRateLimiter
@@ -23,7 +25,7 @@ class VotingSortOrder:
         if sort_order == VotingSortOrder.NewestFirst:
             return sorted(entities, key=lambda entity: entity.date, reverse=True)
         else:
-            return sorted(entities, key=lambda entity: entity.sum_votes, reverse=True)
+            return sorted(entities, key=lambda entity: entity.inner_score, reverse=True)
 
 class UpdateQASort(request_handler.RequestHandler):
     def get(self):
@@ -102,8 +104,29 @@ class FinishVoteEntity(request_handler.RequestHandler):
         key = self.request_string("entity_key", default="")
         if key:
             entity = db.get(key)
-            if entity and entity.add_vote_by(vote_type, user):
-                entity.put()
+            if entity:
+                entity.add_vote_by(vote_type, user)
+
+class StartNewVoteMapReduce(request_handler.RequestHandler):
+
+    def get(self):
+
+        # Admin-only restriction is handled by /admin/* URL pattern
+        # so this can be called by a cron job.
+
+        # Start a new Mapper task for calling badge_update_map
+        mapreduce_id = control.start_map(
+                name = "UpdateFeedbackVotes",
+                handler_spec = "discussion.voting.vote_update_map",
+                reader_spec = "mapreduce.input_readers.DatastoreInputReader",
+                reader_parameters = {"entity_kind": "discussion.models_discussion.Feedback"},
+                queue_name = "backfill-mapreduce-queue",
+                )
+
+        self.response.out.write("OK: " + str(mapreduce_id))
+
+def vote_update_map(feedback):
+    feedback.update_votes_and_score()
 
 def add_vote_expando_properties(feedback, dict_votes):
     feedback.up_voted = False
