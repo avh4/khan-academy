@@ -29,8 +29,9 @@
   </script>
   
 <script language=Javascript1.2><!--
+var present = window; // Need this line because of asciisvg
+Exercise.init();
 $(document).ready(function () {
-    Exercise.init();
     Exercise.fSupportsAjax = false;
     Exercise.display();
     
