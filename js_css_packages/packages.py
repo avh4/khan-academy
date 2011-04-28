@@ -7,8 +7,13 @@ javascript = {
             "jquery.ui.menu.js",
             "jquery.watermark.js",
             "jquery.placeholder.js",
-            "discussion.js",
             "pageutil.js",
+        ]
+    },
+    "video": {
+        "hashed-filename": "hashed-@video@.js", # @content@ will be replaced with hash by deploy script
+        "files": [
+            "discussion.js",
         ]
     },
     "homepage": {
@@ -68,7 +73,6 @@ stylesheets = {
             "default.css",
             "rating.css",
             "stylesheet.css",
-            "discussion.css",
             "menu.css",
             "profile.css",
             "jquery-ui-1.8.4.custom.css",
@@ -79,6 +83,12 @@ stylesheets = {
         "files": [
             "jquery.mobile-1.0a4.1.css",
             "mobile.css",
+        ]
+    },
+    "video": {
+        "hashed-filename": "hashed-@video@.css", # @content@ will be replaced with hash by deploy script
+        "files": [
+            "discussion.css",
         ]
     },
 }

@@ -1,5 +1,8 @@
 {% extends "page_template.html" %}
 {% block pagescript %}
+
+{% css_package "video" %}
+
 <style>
     .breadcrumbs_nav {
         font-weight: bold;
@@ -237,6 +240,11 @@ $(function(){
 </article>
 </div>
 {% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {% js_package "video" %}
+{% endblock bottompagescript %}
+
 {% block pagefooter %}
 {% include "page_footer_short.html" %}
 {% endblock %}
