@@ -2,7 +2,7 @@
 
 {% block pagetitle %}
     New answers to your questions 
-    <a href="/discussion/videofeedbacknotificationfeed?email={{ email }}"><img src="/images/feed.gif" class="icon" />RSS</a>
+    <a href="/discussion/videofeedbacknotificationfeed?email={{ email }}"><img src="{% static_url "/images/feed.gif" %}" class="icon" />RSS</a>
 {% endblock pagetitle %}
 
 {% block pagecontent %}

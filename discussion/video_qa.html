@@ -102,11 +102,11 @@
         <div class="page_controls questions_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ prev_page_1_based }}#qa" class="button page questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /> {% ifequal sort_order 2 %}Newer questions{% else %}Q&A with higher votes{% endifequal %}</a>
+                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ prev_page_1_based }}#qa" class="button page questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="{% static_url "/images/arrow-left.png" %}" /> {% ifequal sort_order 2 %}Newer questions{% else %}Q&A with higher votes{% endifequal %}</a>
                 {% endifnotequal %}
 
                 {% ifnotequal current_page_1_based pages_total %}
-                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ next_page_1_based }}#qa" class="button page questions_page" page="{{ next_page_1_based }}">{% ifequal sort_order 2 %}Older questions{% else %}Q&A with lower votes{% endifequal %} <img class="icon" src="/images/arrow-right.png" /></a>
+                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ next_page_1_based }}#qa" class="button page questions_page" page="{{ next_page_1_based }}">{% ifequal sort_order 2 %}Older questions{% else %}Q&A with lower votes{% endifequal %} <img class="icon" src="{% static_url "/images/arrow-right.png" %}" /></a>
                 {% endifnotequal %}
             </span>
         </div>
@@ -149,7 +149,7 @@
     </div>
     {% if not user %}
         <div class="login_note note" style="display:none;">
-            <a class="login_link" href="{{login_url}}"><img class="icon" src="/images/key-plus.png"/ >Log in first</a>
+            <a class="login_link" href="{{login_url}}"><img class="icon" src="{% static_url "/images/key-plus.png" %}"/ >Log in first</a>
             <span class="note_desc"></span>
             <a href="#" class="close_note">Close</a>
         </div>

@@ -31,11 +31,11 @@
         <div class="page_controls comments_page_controls">
             <span>
                 {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ prev_page_1_based }}#comments" class="button comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /> Comments with higher votes</a>
+                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ prev_page_1_based }}#comments" class="button comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="{% static_url "/images/arrow-left.png" %}" /> Comments with higher votes</a>
                 {% endifnotequal %}
 
                 {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ next_page_1_based }}#comments" class="button comments_page" page="{{ next_page_1_based }}">Comments with lower votes <img class="icon" src="/images/arrow-right.png" /></a>
+                <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ next_page_1_based }}#comments" class="button comments_page" page="{{ next_page_1_based }}">Comments with lower votes <img class="icon" src="{% static_url "/images/arrow-right.png" %}" /></a>
                 {% endifnotequal %}
             </span>
         </div>
@@ -49,14 +49,14 @@
     </div>
     
     {% if user %}
-        <a href="#" class="control comment_add"><img class="icon" src="/images/balloon-plus.png" />Add a comment</a>
+    <a href="#" class="control comment_add"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Add a comment</a>
     {% else %}
-        <a href="{{login_url}}" class="control"><img class="icon" src="/images/balloon-plus.png" />Log in to add a comment</a>
+    <a href="{{login_url}}" class="control"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Log in to add a comment</a>
     {% endif %}
 
     {% if comments_hidden %}
         <span class="comments_show_more">
-             <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="/images/balloons.png" />Show more</a>
+            <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="{% static_url "/images/balloons.png" %}" />Show more</a>
         </span>
     {% endif %}
 
