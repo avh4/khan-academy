@@ -336,7 +336,6 @@ table.feedback_list th {
     text-align: left;
 }
 
-img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: transparent; }
 .page_controls img.icon { position:relative; top:-1px; }
 .button img.icon { background: transparent; }
 #page_sub_nav img.icon { background: #E5ECF9; }
@@ -349,13 +348,6 @@ img.throbber { position: absolute; }
 form { display: inline; }
 a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
 a.control:hover { color: #DD6900; }
-
-#top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
-#top-header #top-header-links span.username_and_notification { vertical-align:baseline; position:relative; top:2px; }
-#top-header #top-header-links span.username_and_notification span.user-name { vertical-align:baseline; }
-#top-header #top-header-links span.username_and_notification span.user-notification { vertical-align:baseline; }
-#top-header #top-header-links span.username_and_notification_shift { left: 12px; }
-#top-header #user-info img { position:relative; top:-1px; }
 
 div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
@@ -449,30 +441,6 @@ div.vote_tools {
     display:none;
 }
 
-
 div.feedback_flag:hover {
     background: #fff url(/images/flag.png) no-repeat 0 0;
-}
-
-a.notification_link {
-    text-decoration: none;
-    border-bottom: 0;
-}
-
-a.notification_link span.notification_bubble {
-    width: 16px;
-    height: 16px;
-    position: relative;
-    top: 9px;
-    left: -12px;
-    background: url('/images/brightness-low.png') no-repeat;
-    text-align: center;
-    font-size: 11px;
-    padding-top: 2px;
-    
-    /* X-browser inline-block support */
-    display:-moz-inline-stack;
-    display:inline-block;
-    zoom:1;
-    *display:inline;
 }
