@@ -373,6 +373,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
             page = 1 + (count_preceding / limit_per_page)
 
     answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers.reverse() # Answers are initially in date descending -- we want ascending before the points sort
     answers = voting.VotingSortOrder.sort(answers)
 
     dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
