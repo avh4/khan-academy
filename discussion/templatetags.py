@@ -7,7 +7,7 @@ import models_discussion
 from comments import video_comments_context
 from qa import video_qa_context
 from util_discussion import is_current_user_moderator
-
+import voting
 import app
 import util
 
@@ -15,11 +15,33 @@ register = webapp.template.create_template_register()
 
 @register.inclusion_tag("discussion/video_comments.html")
 def video_comments(video, playlist, page=0):
-    return video_comments_context(video, playlist, page)
+    return {
+            "video": video,
+            "playlist": playlist,
+            "page": 0,
+            "user": util.get_current_user(),
+            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
+            }
 
 @register.inclusion_tag("discussion/video_qa.html")
 def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_override=-1):
-    return video_qa_context(user_data, video, playlist, page, qa_expand_id, sort_override)
+
+    sort_order = voting.VotingSortOrder.HighestPointsFirst
+    if user_data:
+        sort_order = user_data.question_sort_order
+    if sort_override >= 0:
+        sort_order = sort_override
+
+    return {
+            "user_data": user_data,
+            "video": video,
+            "playlist": playlist,
+            "page": page,
+            "qa_expand_id": qa_expand_id,
+            "sort_order": sort_order,
+            "user": util.get_current_user(),
+            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
+            }
 
 @register.inclusion_tag(("../discussion/signature.html", "discussion/signature.html"))
 def signature(target=None, verb=None):

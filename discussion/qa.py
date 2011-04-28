@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from django.template.loader import render_to_string
 from mapreduce import control
 from mapreduce import operation as op
 
@@ -116,8 +117,8 @@ class PageQuestions(request_handler.RequestHandler):
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
-            path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
-            html = render_block_to_string(path, 'questions', template_values)
+            path = os.path.join(os.path.dirname(__file__), 'video_qa_content.html')
+            html = render_to_string(path, template_values)
             self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
 
         return
