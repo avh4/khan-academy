@@ -982,20 +982,9 @@ a:link.google-analytics-link-track
     text-shadow: none;
 }
 
-/* Typography */
-
 #library a {
 	text-decoration: none;
-	font-weight: bold;
-	}
-
-
-
-
-
-
-
-
+}
 
 /* Clear Floated Elements
 ----------------------------------------------------------------------------------------------------*/
