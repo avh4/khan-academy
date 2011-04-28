@@ -16,8 +16,8 @@
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",
 	skipStartupTypeset: true,
-        extensions: ["mml2jax.js"],
-	jax: ["input/MathML", "output/HTML-CSS"],
+        extensions: ["mml2jax.js", "tex2jax.js"],
+	jax: ["input/TeX", "input/MathML", "output/HTML-CSS"],
 	"HTML-CSS": {
 		scale: 100,
 		availableFonts:["STIX", "TeX"],
@@ -32,9 +32,6 @@
 var present = window; // Need this line because of asciisvg
 Exercise.init();
 $(document).ready(function () {
-    Exercise.fSupportsAjax = false;
-    Exercise.display();
-    
 	var iframe = null;
 	if (parent) 
 		iframe = parent.document.getElementById("problem{{problem_number}}");
@@ -54,6 +51,8 @@ $(document).ready(function () {
 		translate(resizeIframe);
 	}
 	KhanAcademy.onMathMLSupportReady(translateAndResize);
+	Exercise.fSupportsAjax = false;
+    Exercise.display();
 });
 KhanAcademy.problem_number = "{{problem_number}}";
 KhanAcademy.seedRandom(KhanAcademy.problem_number);
