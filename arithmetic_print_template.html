@@ -64,15 +64,9 @@ KhanAcademy.seedRandom(KhanAcademy.problem_number);
 	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; display: inline-block; vertical-align: top; width: 65%; min-width: 610px;">
 {% block maincode %}
 {% endblock maincode %}
-		{% comment %}
-		We use a table here just because existing graphdisplay blocks create a table cell.
-		{% endcomment %}
 		<div id="question_content_container" style="width: 2000px">
     		<div id="question_content" style="position:relative; float: left"></div>
 		</div>
-		<table style='float: right;'><tr>
-		{% block graphdisplay %}  {% endblock graphdisplay %}			
-		</tr></table>
 		{% block maincell %}{% endblock maincell %}
 	</div>
 	<div id='answer_area' style="display: inline-block; padding: 1em;">
