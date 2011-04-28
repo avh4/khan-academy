@@ -121,6 +121,18 @@
         position: relative;
         top: -1px;    
     }
+    .youtube-video {
+        position: relative;
+    }
+    .subtitles-warning {
+        display: none;
+        margin-left: 200px;
+        padding-left: 8px;
+        padding-top: 0px;
+        position: absolute;
+        bottom: -30px;
+        right: 0px;
+    }
     
 </style>
 <script>
@@ -158,9 +170,27 @@ $(function(){
     $('.subtitles-link').click(function() {
         $('.youtube-video').css('marginBottom', '30px');
         $('.subtitles-link').hide();
-        VideoControls.pause();
-        $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', 
-            function(){ setTimeout(function() { VideoControls.play(); }, 3000); });
+        $('.subtitles-warning').show();
+        $('.mirosubs-videoTab').show();
+        if ($('.mirosubs-videoTab').length == 0) {
+            $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', function() { 
+                // Workaround bug where subtitles are not displayed if video was already playing until
+                // video is paused and restarted.  We wait 3 secs to give subtitles a chance to load.
+                setTimeout(function() {
+                    if (VideoControls.player && VideoControls.player.getPlayerState() == 1 /* playing */) {
+                        VideoControls.pause();
+                        VideoControls.play();                 
+                    } 
+                }, 3000);
+            });
+        }
+        return false;
+    });
+    $('.close-subtitles-link').click(function() {
+        $('.mirosubs-videoTab').hide();
+        $('.subtitles-warning').hide();
+        $('.subtitles-link').show();
+        $('.youtube-video').css('marginBottom', '0px');
         return false;
     });
 });
@@ -225,6 +255,11 @@ $(function(){
             </div>
             <div class="youtube-video">
             {% youtube_player_embed video.youtube_id %}
+                <div class="subtitles-warning">
+                    &lArr; Use this menu to view and help create subtitles for this video in many different languages.
+                    You'll probably want to hide YouTube's captions if using these subtitles. 
+                    <a href="#" class="close-subtitles-link">Close subtitles</a>
+                </div>
             </div>
     
             <span class="video_extra_links desktop-only"><nobr>
