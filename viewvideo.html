@@ -167,7 +167,14 @@ $(function(){
             menu.hide();
         e.preventDefault();
     });
-    $('.subtitles-link').click(function() {
+    
+    $('.subtitles-link').click(showSubtitles);
+    var SHOW_SUBTITLES_COOKIE = 'show_subtitles';
+    if (readCookie(SHOW_SUBTITLES_COOKIE)) {
+        showSubtitles();
+    }    
+    function showSubtitles() {
+        createCookie(SHOW_SUBTITLES_COOKIE, true, 365);
         $('.youtube-video').css('marginBottom', '30px');
         $('.subtitles-link').hide();
         $('.subtitles-warning').show();
@@ -185,8 +192,9 @@ $(function(){
             });
         }
         return false;
-    });
+    }    
     $('.close-subtitles-link').click(function() {
+        eraseCookie(SHOW_SUBTITLES_COOKIE);
         $('.mirosubs-videoTab').hide();
         $('.subtitles-warning').hide();
         $('.subtitles-link').show();
