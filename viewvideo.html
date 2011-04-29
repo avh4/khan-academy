@@ -1,7 +1,10 @@
 {% extends "page_template.html" %}
-{% block pagescript %}
 
-{% css_package "video" %}
+{% block pagecss %}
+    {% css_package "video" %}
+{% endblock pagecss %}
+
+{% block pagescript %}
 
 <style>
     .breadcrumbs_nav {

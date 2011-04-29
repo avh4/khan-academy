@@ -41,6 +41,7 @@
             {% js_package "mobile" %}
         {% else %}
             {% css_package "shared" %}
+            {% block pagecss %}{% endblock pagecss %}
             {% js_package "shared" %}
         {% endif %}
 
