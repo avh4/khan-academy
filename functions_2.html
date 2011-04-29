@@ -1,9 +1,9 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincell %}
-<div id="raphael_container"></div>
+<div id="raphael_container" style="float: right"></div>
 
 <script language=Javascript1.2><!--
-RaphaelWrapper.init(550, 550);
+RaphaelWrapper.init(500, 500);
 
 var currentY = Math.round(KhanAcademy.random()*10)-5;
 var gY = Math.round(KhanAcademy.random()*10)-7;
@@ -125,7 +125,8 @@ graph_update()
 </script>
 
 <script language=Javascript1.2><!--
-document.write('<font size=5>`'+format_first_coefficient(fCoef)+'`<font color=\"orange\" style=bold>`f('+correctX+')`</font>`'+format_coefficient(gCoef)+'`<font color=\"#28AE7B\" style=bold>`g('+correctGX+')`</font>`=?`</font>');
+write_text("<span style=\"font-size:20px;\">Solve.</span>");
+write_text('<span style=\"font-size:20px;\">`' +format_first_coefficient(fCoef)+'`<font color=\"orange\" style=bold>`f('+correctX+')`</font>`'+format_coefficient(gCoef)+'`<font color=\"#28AE7B\" style=bold>`g('+correctGX+')`</font>`=?`</span>');
 //-->
 </script>
 
