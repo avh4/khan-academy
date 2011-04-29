@@ -5,6 +5,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from django.template.loader import render_to_string
 from mapreduce import control
 from mapreduce import operation as op
 
@@ -116,8 +117,8 @@ class PageQuestions(request_handler.RequestHandler):
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
-            path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
-            html = render_block_to_string(path, 'questions', template_values)
+            path = os.path.join(os.path.dirname(__file__), 'video_qa_content.html')
+            html = render_to_string(path, template_values)
             self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
 
         return
@@ -373,6 +374,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
             page = 1 + (count_preceding / limit_per_page)
 
     answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers.reverse() # Answers are initially in date descending -- we want ascending before the points sort
     answers = voting.VotingSortOrder.sort(answers)
 
     dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
@@ -412,8 +414,6 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
             "sort_order": sort_order,
-            "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
-            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }
 
 def add_template_values(dict, request):

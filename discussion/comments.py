@@ -4,11 +4,11 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from django.template.loader import render_to_string
 
 from django.utils import simplejson
 
 import models_discussion
-from render import render_block_to_string
 import util_discussion
 import app
 import util
@@ -32,11 +32,11 @@ class PageComments(request_handler.RequestHandler):
         playlist = db.get(playlist_key)
 
         if video:
-            comments_hidden = (self.request.get("comments_hidden") == "1")
+            comments_hidden = self.request_bool("comments_hidden", default=True)
             template_values = video_comments_context(video, playlist, page, comments_hidden, sort_order)
-            path = os.path.join(os.path.dirname(__file__), 'video_comments.html')
+            path = os.path.join(os.path.dirname(__file__), 'video_comments_content.html')
 
-            html = render_block_to_string(path, 'comments', template_values)
+            html = render_to_string(path, template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
             self.response.out.write(json)
 
@@ -114,5 +114,4 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_o
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }
