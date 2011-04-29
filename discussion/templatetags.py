@@ -41,6 +41,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "sort_order": sort_order,
             "user": util.get_current_user(),
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
+            "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
 
 @register.inclusion_tag(("../discussion/signature.html", "discussion/signature.html"))

@@ -114,5 +114,4 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_o
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }
