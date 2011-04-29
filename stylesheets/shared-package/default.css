@@ -101,6 +101,10 @@ p { font-size: 15px; margin: 18px 0;}
 
 b, strong { font-weight: bold; }
 em { font-style: italic; }
+
+a.simple-link { text-decoration: none; }
+a.simple-link:hover { text-decoration: underline; }
+
 hr {
     background: #CCC;
     border: none;
@@ -170,6 +174,7 @@ hr {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f7f7', endColorstr='#dddddd');
 }
 
+.mobile-only { display: none; }
 /* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
 .fancy-scrollbar::-webkit-scrollbar {
   height: 8px;
@@ -642,7 +647,7 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    #social-links a {
+    #top-header #social-links a {
         margin-right: 0;
         display: inline-block;
         height: 24px;
@@ -651,15 +656,15 @@ footer {
         *position: static;
         top: 7px;
     }
-    #social-links .youtube {
+    #top-header #social-links .youtube {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -67px;
     }
-    #social-links .twitter {
+    #top-header #social-links .twitter {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -111px;
     }
-    #social-links .facebook {
+    #top-header #social-links .facebook {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -155px;
     }
@@ -702,6 +707,43 @@ footer {
     #top-header #top-header-links #page_auth .css-menu > ul > li:after {
         background-image: url(/images/pulldown-green.png);
     }
+
+    #top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
+    #top-header #top-header-links span.username_and_notification { vertical-align:baseline; position:relative; top:2px; }
+    #top-header #top-header-links span.username_and_notification span.user-name { vertical-align:baseline; }
+    #top-header #top-header-links span.username_and_notification span.user-notification { vertical-align:baseline; }
+    #top-header #top-header-links span.username_and_notification_shift { left: 12px; }
+    #top-header #user-info img { position:relative; top:-1px; }
+
+    #top-header #top-header-links .page_links a.notification_link {
+        text-decoration: none;
+        border-bottom: 0;
+    }
+
+    #top-header a.notification_link span.notification_bubble {
+        width: 16px;
+        height: 16px;
+        position: relative;
+        top: 9px;
+        left: -9px;
+        background: #DD6900;
+        text-align: center;
+        font-size: 11px;
+
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+
+        opacity: 0.75;
+        filter:alpha(opacity=75);
+        
+        /* X-browser inline-block support */
+        display:-moz-inline-stack;
+        display:inline-block;
+        zoom:1;
+        *display:inline;
+    }
+
     #login-menu .fb_button, #login-menu .fb_button_rtl {
         background-image: none;
         background: transparent;
@@ -796,6 +838,14 @@ img.rounded-background,
     -moz-box-shadow: 0 1px 3px #ccc;
     -webkit-box-shadow: 0 1px 3px #ccc;
     box-shadow: 0 1px 3px #ccc;
+}
+
+img.icon {
+    vertical-align: bottom;
+    width: 16px;
+    height: 16px;
+    padding-right: 2px;
+    background: transparent;
 }
 
 hr.thin {
@@ -977,20 +1027,9 @@ a:link.google-analytics-link-track
     text-shadow: none;
 }
 
-/* Typography */
-
 #library a {
 	text-decoration: none;
-	font-weight: bold;
-	}
-
-
-
-
-
-
-
-
+}
 
 /* Clear Floated Elements
 ----------------------------------------------------------------------------------------------------*/
@@ -1111,13 +1150,13 @@ a:link.google-analytics-link-track
                 white-space: nowrap;
                 color: #666666;
             }
-			#library #library-content #library-content-main a.video-link {
+			#library #library-content #library-content-main a.vl {
 				font-weight: normal;	
 				background-image: url(/images/non-repeating-sprites.png);
                 background-position: -56px -36px;
 				padding: 0 2px 0 13px;
 			}
-			#library #library-content #library-content-main a.video-link:hover {
+			#library #library-content #library-content-main a.vl:hover {
                 color: black;
 			}
 
@@ -1629,6 +1668,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border-bottom: 1px solid #aaa;
         color: #333;
         margin-bottom: 10px;
+        overflow-x: auto;
         padding: 10px;
         position: relative;
         z-index: 10;
@@ -2229,20 +2269,35 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     outline: none;
 }
 
-#thumbnails td img {
+#thumbnails td div.thumb {
+    background: url(/images/splashthumbnails/splash_thumbnail_sprites.png) no-repeat top left;
     width: 200px;
     height: 100px;
     border: 1px solid #aaa;
+    margin-left: auto;
+    margin-right: auto;
     -webkit-box-shadow: 1px 2px 2px #ccc;
     -moz-box-shadow: 1px 2px 2px #ccc;
     box-shadow: 1px 2px 2px #ccc;
 }
 
-#thumbnails td.selected img {
+#thumbnails td.selected div.thumb {
     -webkit-box-shadow: 1px 2px 6px #aaa;
     -moz-box-shadow: 1px 2px 6px #aaa;
     box-shadow: 1px 2px 6px #aaa;
 }
+
+#thumbnails td div.thumb-cnn_thumbnail { background-position: 0 0; }
+#thumbnails td div.thumb-exercises_thumbnail { background-position: 0 -150px; }
+#thumbnails td div.thumb-forbes_thumbnail { background-position: 0 -300px; }
+#thumbnails td div.thumb-fortune_thumbnail { background-position: 0 -450px; }
+#thumbnails td div.thumb-gates_thumbnail { background-position: 0 -600px; }
+#thumbnails td div.thumb-gel_thumbnail { background-position: 0 -750px; }
+#thumbnails td div.thumb-overview_thumbnail { background-position: 0 -900px; }
+#thumbnails td div.thumb-pbs_thumbnail { background-position: 0 -1050px; }
+#thumbnails td div.thumb-tech_award_thumbnail { background-position: 0 -1200px; }
+#thumbnails td div.thumb-ted_thumbnail { background-position: 0 -1350px; }
+#thumbnails td div.thumb-translation_thumbnail { background-position: 0 -1500px; } 
 
 #thumbnails td div.thumbnail_label {
     padding: 2px 2px 0;
@@ -2335,7 +2390,9 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     -moz-box-shadow: 0 1px 2px #ccc;
     box-shadow: 0 1px 2px #ccc;
 }
-
+#homepage .playlist_browser_title {
+    display: inline-block; float: left;
+}
 #homepage #browse-fixed {
     position: fixed;
     top: 0;
@@ -2675,3 +2732,49 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     opacity: 0.5;
 }
 /* End Knowledge Map CSS */
+
+input.button, a.button {
+    display: inline-block;
+	background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -72px;
+	padding:5px 10px 6px 10px;
+	font-weight:bold;
+	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+	border:1px solid rgba(0,0,0,0.4);
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	-moz-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+	-webkit-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+    background-color: #CCCCCC;
+    color: #141414;
+}
+input.button:hover, a.button:hover {
+    background-color: #006699;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+input.buttonDisabled, input.buttonDisabled:hover {
+    background: #ddd;
+    color: gray;
+}
+
+a.button {
+    font-size: 11px;
+    font-family: Lucida Grande;
+    text-decoration: none;
+}
+.button img.icon { background: transparent; }
+
+img.throbber { position: absolute; }
+
+form { display: inline; }
+
+a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
+a.control:hover { color: #DD6900; }
+
+div.clearFloat { overflow:hidden; height:1px; clear:both; }
+
+

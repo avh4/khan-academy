@@ -4,6 +4,7 @@ import datetime
 import Cookie
 import urllib
 
+from django.utils import simplejson
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -13,6 +14,7 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 import util
 from app import App
 from models import UserData
+from render import render_block_to_string
 
 class RequestHandler(webapp.RequestHandler):
 
@@ -109,13 +111,41 @@ class RequestHandler(webapp.RequestHandler):
     def user_agent(self):
         return str(self.request.headers['User-Agent'])
 
-    def is_mobile(self):
+    def is_mobile_capable(self):
         user_agent_lower = self.user_agent().lower()
         return user_agent_lower.find("ipod") > -1 or \
                 user_agent_lower.find("ipad") > -1 or \
                 user_agent_lower.find("iphone") > -1 or \
                 user_agent_lower.find("webos") > -1 or \
                 user_agent_lower.find("android") > -1
+
+    def is_mobile(self):
+        if self.is_mobile_capable():
+            return not self.has_mobile_full_site_cookie()
+        return False
+
+    def has_mobile_full_site_cookie(self):
+        return self.get_cookie_value("mobile_full_site") == "1"
+
+    def set_mobile_full_site_cookie(self, is_mobile):
+        self.set_cookie("mobile_full_site", "1" if is_mobile else "0")
+
+    def get_cookie_value(self, key):
+        cookies = None
+        try:
+            cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+        except Cookie.CookieError, error:
+            logging.debug("Ignoring Cookie Error, skipping get cookie: '%s'" % error)
+
+        if not cookies:
+            return None
+
+        cookie = cookies.get(key)
+
+        if not cookie:
+            return None
+
+        return cookie.value
 
     # Cookie handling from http://appengine-cookbook.appspot.com/recipe/a-simple-cookie-class/
     def set_cookie(self, key, value='', max_age=None,
@@ -152,9 +182,11 @@ class RequestHandler(webapp.RequestHandler):
         if user is not None:
             template_values['username'] = user.nickname()
 
-        user_data = UserData.get_for(user)
+        if not template_values.has_key('user_data'):
+            user_data = UserData.get_for(user)
+            template_values['user_data'] = user_data
 
-        template_values['user_data'] = user_data
+        user_data = template_values['user_data']
         template_values['points'] = user_data.points if user_data else 0
 
         if not template_values.has_key('continue'):
@@ -166,8 +198,24 @@ class RequestHandler(webapp.RequestHandler):
         template_values['login_url'] = ('%s&direct=1' % util.create_login_url(template_values['continue']))
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
-        template_values['is_mobile'] = self.is_mobile()
+        template_values['is_mobile'] = False
+        template_values['is_mobile_capable'] = False
 
+        if self.is_mobile_capable():
+            template_values['is_mobile_capable'] = True
+            if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
+                template_values['is_mobile'] = self.is_mobile()
+
+        self.render_template_simple(template_name, template_values)
+
+    def render_template_simple(self, template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
  
+    def render_template_to_string(self, name, context):
+        path = os.path.join(os.path.dirname(__file__), name + ".html")
+        return render_block_to_string(path, name + "_block", context).strip()
+
+    def render_json(self, obj):
+        json = simplejson.dumps(obj, ensure_ascii=False)
+        self.response.out.write(json)

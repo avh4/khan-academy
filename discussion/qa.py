@@ -1,20 +1,26 @@
 import os
+import logging
 
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from django.template.loader import render_to_string
+from mapreduce import control
+from mapreduce import operation as op
 
-from django.utils import simplejson
 from collections import defaultdict
+
+from render import render_block_to_string
 import models
 import models_discussion
 import notification
-from render import render_block_to_string
-from util_discussion import is_honeypot_empty, is_current_user_moderator
+import util_discussion
 import app
 import util
 import request_handler
+import privileges
+import voting
 
 class ModeratorList(request_handler.RequestHandler):
 
@@ -25,8 +31,6 @@ class ModeratorList(request_handler.RequestHandler):
             return
 
         mods = models.UserData.gql("WHERE moderator = :1", True)
-
-        path = os.path.join(os.path.dirname(__file__), 'mod_list.html')
         self.render_template('discussion/mod_list.html', {"mods" : mods})
 
     def post(self):
@@ -43,6 +47,46 @@ class ModeratorList(request_handler.RequestHandler):
             db.put(user_data)
 
         self.redirect("/discussion/moderatorlist")
+
+class FlaggedFeedback(request_handler.RequestHandler):
+
+    def get(self):
+
+        if not util_discussion.is_current_user_moderator():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+
+        # Show all non-deleted feedback flagged for moderator attention
+        feedback_query = models_discussion.Feedback.all().filter("is_flagged = ", True).filter("deleted = ", False)
+
+        feedback_count = feedback_query.count()
+        feedbacks = feedback_query.fetch(50)
+
+        template_content = {
+                "feedbacks": feedbacks, 
+                "feedback_count": feedback_count,
+                "has_more": len(feedbacks) < feedback_count,
+                "feedback_type_question": models_discussion.FeedbackType.Question,
+                "feedback_type_comment": models_discussion.FeedbackType.Comment,
+                }
+
+        self.render_template("discussion/flagged_feedback.html", template_content)
+
+def feedback_flag_update_map(feedback):
+    feedback.recalculate_flagged()
+    yield op.db.Put(feedback)
+
+class StartNewFlagUpdateMapReduce(request_handler.RequestHandler):
+    def get(self):
+        mapreduce_id = control.start_map(
+                name = "FeedbackFlagUpdate",
+                handler_spec = "discussion.qa.feedback_flag_update_map",
+                reader_spec = "mapreduce.input_readers.DatastoreInputReader",
+                reader_parameters = {"entity_kind": "discussion.models_discussion.Feedback"},
+                shard_count = 64,
+                queue_name = "backfill-mapreduce-queue",
+                )
+        self.response.out.write("OK: " + str(mapreduce_id))
 
 class ExpandQuestion(request_handler.RequestHandler):
 
@@ -62,15 +106,20 @@ class PageQuestions(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         qa_expand_id = int(self.request.get("qa_expand_id")) if self.request.get("qa_expand_id") else -1
+        sort = self.request_int("sort", default=-1)
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
+        user_data = None
+        user = util.get_current_user()
+        if user:
+            user_data = models.UserData.get_for(user)
+
         if video:
-            template_values = video_qa_context(video, playlist, page, qa_expand_id)
-            path = os.path.join(os.path.dirname(__file__), 'video_qa.html')
-            html = render_block_to_string(path, 'questions', template_values)
-            json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
-            self.response.out.write(json)
+            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
+            path = os.path.join(os.path.dirname(__file__), 'video_qa_content.html')
+            html = render_to_string(path, template_values)
+            self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
 
         return
 
@@ -84,7 +133,7 @@ class AddAnswer(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        if not is_honeypot_empty(self.request):
+        if not util_discussion.is_honeypot_empty(self.request):
             # Honeypot caught a spammer (in case this is ever public or spammers
             # have google accounts)!
             return
@@ -109,7 +158,7 @@ class AddAnswer(request_handler.RequestHandler):
             # limit of 1MB per entity.  This is *highly* unlikely for a legitimate piece of feedback,
             # and we're choosing to crash in this case until someone legitimately runs into this.
             # See Issue 841.
-            db.put(answer)
+            answer.put()
             notification.new_answer_for_video_question(video, question, answer)
 
         self.redirect("/discussion/answers?question_key=%s" % question_key)
@@ -118,19 +167,27 @@ class Answers(request_handler.RequestHandler):
 
     def get(self):
 
+        user = util.get_current_user()
         question_key = self.request.get("question_key")
         question = db.get(question_key)
 
         if question:
-            answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, question.key(), False)
+            video = question.first_target()
+            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+
+            answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
+            answers = voting.VotingSortOrder.sort(answers)
+
+            for answer in answers:
+                voting.add_vote_expando_properties(answer, dict_votes)
+
             template_values = {
-                "answers": answer_query,
-                "is_mod": is_current_user_moderator()
+                "answers": answers,
+                "is_mod": util_discussion.is_current_user_moderator()
             }
             path = os.path.join(os.path.dirname(__file__), 'question_answers.html')
             html = render_block_to_string(path, 'answers', template_values)
-            json = simplejson.dumps({"html": html}, ensure_ascii=False)
-            self.response.out.write(json)
+            self.render_json({"html": html})
 
         return
 
@@ -144,7 +201,7 @@ class AddQuestion(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        if not is_honeypot_empty(self.request):
+        if not util_discussion.is_honeypot_empty(self.request):
             # Honeypot caught a spammer (in case this is ever public or spammers
             # have google accounts)!
             return
@@ -153,6 +210,7 @@ class AddQuestion(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         video = db.get(video_key)
+        question_key = ""
 
         if question_text and video:
             if len(question_text) > 500:
@@ -163,9 +221,11 @@ class AddQuestion(request_handler.RequestHandler):
             question.content = question_text
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
-            db.put(question)
+            question.put()
+            question_key = question.key().id()
 
-        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=0" % (video_key, playlist_key))
+        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&qa_expand_id=%s" % 
+                (video_key, playlist_key, question_key))
 
 class EditEntity(request_handler.RequestHandler):
 
@@ -182,10 +242,10 @@ class EditEntity(request_handler.RequestHandler):
         if key and text:
             feedback = db.get(key)
             if feedback:
-                if is_current_user_moderator() or feedback.author == user:
+                if feedback.author == user or util_discussion.is_current_user_moderator():
 
                     feedback.content = text
-                    db.put(feedback)
+                    feedback.put()
 
                     # Redirect to appropriate list of entities depending on type of 
                     # feedback entity being edited.
@@ -201,12 +261,54 @@ class EditEntity(request_handler.RequestHandler):
                         question = feedback.parent()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
 
+class VoteEntity(request_handler.RequestHandler):
+    def post(self):
+        # You have to be logged in to vote
+        user = util.get_current_user()
+        if not user:
+            return
+
+        key = self.request_string("entity_key", default="")
+        flag = self.request_string("flag", default="")
+        if key and models_discussion.FeedbackFlag.is_valid(flag):
+            entity = db.get(key)
+            if entity and entity.add_flag_by(flag, user):
+                entity.put()
+
+class FlagEntity(request_handler.RequestHandler):
+    def post(self):
+        # You have to at least be logged in to flag
+        user = util.get_current_user()
+        if not user:
+            return
+
+        key = self.request_string("entity_key", default="")
+        flag = self.request_string("flag", default="")
+        if key and models_discussion.FeedbackFlag.is_valid(flag):
+            entity = db.get(key)
+            if entity and entity.add_flag_by(flag, user):
+                entity.put()
+
+class ClearFlags(request_handler.RequestHandler):
+    def post(self):
+        if not util_discussion.is_current_user_moderator():
+            return
+
+        key = self.request.get("entity_key")
+        if key:
+            entity = db.get(key)
+            if entity:
+                entity.clear_flags()
+                entity.put()
+
+        self.redirect("/discussion/flaggedfeedback")
+
 class ChangeEntityType(request_handler.RequestHandler):
 
     def post(self):
 
         # Must be a moderator to change types of anything
-        if not is_current_user_moderator():
+        if not util_discussion.is_current_user_moderator():
             return
 
         key = self.request.get("entity_key")
@@ -215,7 +317,13 @@ class ChangeEntityType(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 entity.types = [target_type]
-                db.put(entity)
+
+                if self.request_bool("clear_flags", default=False):
+                    entity.clear_flags()
+
+                entity.put()
+
+        self.redirect("/discussion/flaggedfeedback")
 
 class DeleteEntity(request_handler.RequestHandler):
 
@@ -230,50 +338,70 @@ class DeleteEntity(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 # Must be a moderator or author of entity to delete
-                if is_current_user_moderator() or entity.author == user:
+                if entity.author == user or util_discussion.is_current_user_moderator():
                     entity.deleted = True
-                    db.put(entity)
+                    entity.put()
 
-def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
+        self.redirect("/discussion/flaggedfeedback")
+
+def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
 
     limit_per_page = 5
+    user = util.get_current_user()
+
+    if page <= 0:
+        page = 1
+
+    sort_order = voting.VotingSortOrder.HighestPointsFirst
+    if user_data:
+        sort_order = user_data.question_sort_order
+    if sort_override >= 0:
+        sort_order = sort_override
+
+    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
+    questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
 
     if qa_expand_id:
         # If we're showing an initially expanded question,
         # make sure we're on the correct page
         question = models_discussion.Feedback.get_by_id(qa_expand_id)
         if question:
-            question_preceding_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND date > :4 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False, question.date)
-            count_preceding = question_preceding_query.count()
+            count_preceding = 0
+            for question_test in questions:
+                if question_test.key() == question.key():
+                    break
+                count_preceding += 1
             page = 1 + (count_preceding / limit_per_page)
 
-    if page <= 0:
-        page = 1
+    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers.reverse() # Answers are initially in date descending -- we want ascending before the points sort
+    answers = voting.VotingSortOrder.sort(answers)
 
-    question_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date DESC", models_discussion.FeedbackType.Question, video.key(), False)
-    answer_query = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 ORDER BY date", models_discussion.FeedbackType.Answer, video.key(), False)
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
 
-    count_total = question_query.count()
-    questions = question_query.fetch(limit_per_page, (page - 1) * limit_per_page)
+    count_total = len(questions)
+    questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]
 
     dict_questions = {}
     # Store each question in this page in a dict for answer population
     for question in questions:
+        voting.add_vote_expando_properties(question, dict_votes)
         dict_questions[question.key()] = question
 
     # Just grab all answers for this video and cache in page's questions
-    for answer in answer_query:
+    for answer in answers:
         # Grab the key only for each answer, don't run a full gql query on the ReferenceProperty
         question_key = answer.parent_key()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
+            voting.add_vote_expando_properties(answer, dict_votes)
             question.children_cache.append(answer)
 
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": util.get_current_user(),
-            "is_mod": is_current_user_moderator(),
+            "user": user,
+            "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,
             "questions": questions,
@@ -285,13 +413,13 @@ def video_qa_context(video, playlist=None, page=0, qa_expand_id=None):
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
             "qa_expand_id": qa_expand_id,
-            "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
-            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
+            "sort_order": sort_order,
            }
 
 def add_template_values(dict, request):
     dict["comments_page"] = int(request.get("comments_page")) if request.get("comments_page") else 0
     dict["qa_page"] = int(request.get("qa_page")) if request.get("qa_page") else 0
     dict["qa_expand_id"] = int(request.get("qa_expand_id")) if request.get("qa_expand_id") else -1
+    dict["sort"] = int(request.get("sort")) if request.get("sort") else -1
 
     return dict

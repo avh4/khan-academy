@@ -2,8 +2,8 @@ import os
 import logging
 
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template
 
-from render import render_block_to_string
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
 from profiles import class_exercises_over_time_graph, class_progress_report_graph, class_energy_points_per_minute_graph, class_time_graph
 
@@ -15,7 +15,7 @@ def profile_graph_control():
 
 def render_graph_html_and_context(filename, context):
     path = os.path.join(os.path.dirname(__file__), filename)
-    return {"html": render_block_to_string(path, 'graph', context), "context": context}
+    return {"html": template.render(path, context), "context": context}
 
 # Profile Graph Types
 @register.simple_tag

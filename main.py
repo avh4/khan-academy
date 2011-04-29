@@ -33,10 +33,10 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-import qbrary
 import bulk_update.handler
 import facebook
 import layer_cache
+import request_cache
 import autocomplete
 import coaches
 import api
@@ -58,25 +58,17 @@ import activity_summary
 import exercises
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
-
-from discussion import comments
-from discussion import qa
-from discussion import notification
-
-from about import util_about
-from about import blog
-
+from discussion import comments, notification, qa, voting
+from about import blog, util_about
 from jobs import jobs
-
-from badges import util_badges
-from badges import last_action_cache
-
+from badges import util_badges, last_action_cache
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
-
 from topics_list import topics_list, all_topics_list, DVD_list
-
 from custom_exceptions import MissingVideoException, MissingExerciseException
+from render import render_block_to_string
+from templatetags import streak_bar, exercise_message, exercise_icon, user_points
+from badges.templatetags import badge_notifications, badge_counts
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -253,19 +245,15 @@ class ViewExercise(request_handler.RequestHandler):
                     
             exercise_videos = exercise_non_summative.related_videos_fetch()
 
-            proficient = exercise.proficient = user_data.is_proficient_at(exid)
-            suggested = exercise.suggested = user_data.is_suggested(exid)
-            reviewing = exercise.review = user_data.is_reviewing(exid, user_exercise, self.get_time())
-            struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-            endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+            exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                    
             # Note: if they just need a single problem for review they can just print this page.
             num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
             
             # If the user is proficient, assume they want to print a bunch of practice problems.
-            if proficient:
+            if exercise_states['proficient']:
                 num_problems_to_print = exercise.required_streak()
 
             if exercise.summative:
@@ -282,11 +270,7 @@ class ViewExercise(request_handler.RequestHandler):
                 'points': user_data.points,
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
-                'proficient': proficient,
-                'endangered': endangered,
-                'reviewing': reviewing,
-                'struggling': struggling,
-                'suggested': suggested,
+                'exercise_states': exercise_states,
                 'cookiename': user.nickname().replace('@', 'at'),
                 'key': user_exercise.key(),
                 'exercise': exercise,
@@ -305,14 +289,10 @@ class ViewExercise(request_handler.RequestHandler):
                 'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
                 }
             template_file = exercise_non_summative.name + '.html'
-            if not exercise.summative and exercise.raw_html is not None:
-                exercise.ensure_sanitized()
-                template_file = 'caja_template.html'
-
             self.render_template(template_file, template_values)
         else:
-
             self.redirect(util.create_login_url(self.request.uri))
+            
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
@@ -334,7 +314,7 @@ class ViewVideo(request_handler.RequestHandler):
         video = None
         playlist = None
         video_id = self.request.get('v')
-        playlist_title = self.request.get('playlist')
+        playlist_title = self.request_string('playlist', default="") or self.request_string('p', default="")
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
         readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
@@ -405,14 +385,6 @@ class ViewVideo(request_handler.RequestHandler):
         if video is None:
             raise MissingVideoException("Missing video '%s'" % readable_id)
 
-        playlists = VideoPlaylist.get_cached_playlists_for_video(video)
-        for p in playlists:
-            if (playlist is None or p.youtube_id == playlist.youtube_id):
-                p.selected = 'selected'
-                playlist = p
-                playlists.remove(p)
-                break
-
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
@@ -438,7 +410,6 @@ class ViewVideo(request_handler.RequestHandler):
         notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
 
         template_values = qa.add_template_values({'playlist': playlist,
-                                                  'playlists': playlists,
                                                   'video': video,
                                                   'videos': videos,
                                                   'video_path': video_path,
@@ -466,13 +437,17 @@ class LogVideoProgress(request_handler.RequestHandler):
     def get(self):
 
         user = util.get_current_user()
+        user_data = None
         video_points_total = 0
         points_total = 0
 
         if user:
 
-            video_key = self.request.get("video_key")
-            video = db.get(video_key)
+            video = None
+            video_key = self.request_string("video_key", default = "")
+
+            if video_key:
+                video = db.get(video_key)
 
             if video:
 
@@ -569,9 +544,10 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 db.put([user_video, video_log, user_data])
 
-                points_total = user_data.points
-
-        json = simplejson.dumps({"points": points_total, "video_points": video_points_total}, ensure_ascii=False)
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
 class PrintProblem(request_handler.RequestHandler):
@@ -778,9 +754,9 @@ class GraphPage(request_handler.RequestHandler):
     def get(self):
         width = self.request.get('w')
         height = self.request.get('h')
-        template_values = {'App' : App, 'width': width, 'height': height}
+        template_values = {'width': width, 'height': height}
 
-        self.render_template('graphpage.html', template_values)
+        self.render_template_simple('graphpage.html', template_values)
 
 class AdminViewUser(request_handler.RequestHandler):
 
@@ -816,6 +792,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
     def get(self):
         exid = self.request_string('exid')
+        time_warp = self.request_string('time_warp')
         user = util.get_current_user()
         if user:
             key = self.request_string('key')
@@ -899,7 +876,11 @@ class RegisterAnswer(request_handler.RequestHandler):
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
 
-            self.redirect("/exercises?exid=%s" % exid)
+            if not self.is_ajax_request():
+                self.redirect("/exercises?exid=%s" % exid)
+            else:
+                self.send_json(user_data, user_exercise, exercise, key, time_warp)
+            
         else:
             # Redirect to display the problem again which requires authentication
             self.redirect('/exercises?exid=' + exid)
@@ -907,6 +888,54 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
         return datetime.datetime.now() + datetime.timedelta(days=time_warp)
+        
+    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        
+        streak_bar_context = streak_bar(user_exercise)
+        streak_bar_html = self.render_template_to_string("streak_bar", streak_bar_context)
+        
+        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
+        exercise_message_html = self.render_template_to_string("exercise_message", exercise_message_context)
+        
+        exercise_icon_context = exercise_icon(exercise, App)
+        exercise_icon_html = self.render_template_to_string("exercise_icon", exercise_icon_context)
+        
+        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
+        badge_count_context = badge_counts(user_data)
+        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
+        
+        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
+        badge_notification_context = badge_notifications()
+        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
+        
+        user_points_context = user_points(user_data)
+        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        
+        updated_values = {
+            'exercise_states': exercise_states,
+            'exercise_points':  exercise_points,
+            'key': key,
+            'start_time': time.time(),
+            'streak': user_exercise.streak,
+            'time_warp': time_warp,
+            'problem_number': user_exercise.total_done + 1,
+            'streak_bar_html': streak_bar_html,
+            'exercise_message_html': exercise_message_html,
+            'exercise_icon_html': exercise_icon_html,
+            'badge_count_html': badge_count_html,
+            'badge_notification_html': badge_notification_html,
+            'user_points_html': user_points_html
+            }
+            
+            #
+            #    'exercise_non_summative': exercise_non_summative,
+            #    'read_only': read_only,
+            #    'num_problems_to_print': num_problems_to_print,
+            #
+        json = simplejson.dumps(updated_values)
+        self.response.out.write(json)
 
 class RegisterCorrectness(request_handler.RequestHandler):
 
@@ -1150,8 +1179,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         self.response.out.write("Library content regenerated")  
 
 @layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date(),
-        persist_across_app_versions = True
+        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         ) 
 def library_content_html(bust_cache = False):
 
@@ -1313,6 +1341,16 @@ class SendToLog(request_handler.RequestHandler):
         message = self.request_string("message", default="")
         if message:
             logging.critical("Manually sent to log: %s" % message)
+
+class MobileFullSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(True)
+        self.redirect("/")
+
+class MobileSite(request_handler.RequestHandler):
+    def get(self):
+        self.set_mobile_full_site_cookie(False)
+        self.redirect("/")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1325,28 +1363,28 @@ class ViewHomePage(request_handler.RequestHandler):
             [
                 { 
                     "href": "/video/khan-academy-on-the-gates-notes", 
-                    "src": "/images/splashthumbnails/gates_thumbnail.png", 
+                    "class": "thumb-gates_thumbnail", 
                     "desc": "Khan Academy on the Gates Notes",
                     "youtube_id": "UuMTSU9DcqQ",
                     "selected": False,
                 },
                 { 
                     "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs", 
-                    "src": "/images/splashthumbnails/overview_thumbnail.png", 
+                    "class": "thumb-overview_thumbnail", 
                     "desc": "Overview of our video library",
                     "youtube_id": "dsFQ9kM1qDs",
                     "selected": False,
                 },
                 { 
                     "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference", 
-                    "src": "/images/splashthumbnails/gel_thumbnail.png", 
+                    "class": "thumb-gel_thumbnail", 
                     "desc": "Sal Khan talk at GEL 2010",
                     "youtube_id": "yTXKCzrFh3c",
                     "selected": False,
                 },
                 { 
                     "href": "/video/khan-academy-on-pbs-newshour--edited", 
-                    "src": "/images/splashthumbnails/pbs_thumbnail.png", 
+                    "class": "thumb-pbs_thumbnail", 
                     "desc": "Khan Academy on PBS Newshour",
                     "youtube_id": "4jXv03sktik",
                     "selected": False,
@@ -1355,28 +1393,28 @@ class ViewHomePage(request_handler.RequestHandler):
             [
                 { 
                     "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html", 
-                    "src": "/images/splashthumbnails/ted_thumbnail.jpg", 
+                    "class": "thumb-ted_thumbnail", 
                     "desc": "Sal on the Khan Academy @ TED",
                     "youtube_id": "gM95HHI4gLk",
                     "selected": False,
                 },
                 { 
                     "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
-                    "src": "/images/splashthumbnails/tech_award_thumbnail.png", 
+                    "class": "thumb-tech_award_thumbnail", 
                     "desc": "What is the Khan Academy?",
                     "youtube_id": "p6l8-1kHUsA",
                     "selected": False,
                 },
                 { 
                     "href": "/video/khan-academy-exercise-software", 
-                    "src": "/images/splashthumbnails/exercises_thumbnail.png", 
+                    "class": "thumb-exercises_thumbnail", 
                     "desc": "Overview of our exercise software",
                     "youtube_id": "hw5k98GV7po",
                     "selected": False,
                 },
                 { 
                     "href": "/video/forbes--names-you-need-to-know---khan-academy", 
-                    "src": "/images/splashthumbnails/forbes_thumbnail.png", 
+                    "class": "thumb-forbes_thumbnail", 
                     "desc": "Forbes names you need to know",
                     "youtube_id": "UkfppuS0Plg",
                     "selected": False,
@@ -1403,6 +1441,7 @@ class ViewHomePage(request_handler.RequestHandler):
                                                   'thumbnail_link_sets': thumbnail_link_sets,
                                                   'library_content': library_content,
                                                   'DVD_list': DVD_list,
+                                                  'is_mobile_allowed': True,
                                                   'approx_vid_count': consts.APPROX_VID_COUNT, }, 
                                                   self.request)
         self.render_template('homepage.html', template_values)
@@ -1813,6 +1852,7 @@ def real_main():
         ('/registercorrectness', RegisterCorrectness),
         ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
+        ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
@@ -1828,6 +1868,9 @@ def real_main():
         ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
         ('/showunusedplaylists', ShowUnusedPlaylists),
         ('/crash', Crash),
+
+        ('/mobilefullsite', MobileFullSite),
+        ('/mobilesite', MobileSite),
         
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
@@ -1837,18 +1880,25 @@ def real_main():
         ('/admin/fixplaylistref', FixPlaylistRef),
         ('/admin/deletestaleplaylists', DeleteStalePlaylists),
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
+        ('/admin/badgestatistics', util_badges.BadgeStatistics),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
+        ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+        ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
 
         ('/coaches', coaches.ViewCoaches),
-        ('/registercoach', coaches.RegisterCoach),  
-        ('/unregistercoach', coaches.UnregisterCoach),          
+        ('/students', coaches.ViewStudents), 
+        ('/registercoach', coaches.RegisterCoach),
+        ('/unregistercoach', coaches.UnregisterCoach),
+        ('/unregisterstudent', coaches.UnregisterStudent),
+        ('/requeststudent', coaches.RequestStudent),
+        ('/acceptcoach', coaches.AcceptCoach),
+
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        
         ('/sharedpoints', coaches.ViewSharedPoints),        
-        ('/students', coaches.ViewStudents), 
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
@@ -1886,29 +1936,6 @@ def real_main():
         ('/deletevideoplaylists', DeleteVideoPlaylists), 
         ('/killliveassociations', KillLiveAssociations),
 
-        # Below are all qbrary related pages
-        ('/qbrary', qbrary.IntroPage),
-        ('/worldhistory', qbrary.IntroPage),
-        ('/managequestions', qbrary.ManageQuestions),
-        ('/subjectmanager', qbrary.SubjectManager),
-        ('/editsubject', qbrary.CreateEditSubject),
-        ('/viewsubject', qbrary.ViewSubject),
-        ('/deletequestion', qbrary.DeleteQuestion),
-        ('/deletesubject', qbrary.DeleteSubject),
-        ('/changepublished', qbrary.ChangePublished),
-        ('/pickquestiontopic', qbrary.PickQuestionTopic),
-        ('/pickquiztopic', qbrary.PickQuizTopic),
-        ('/answerquestion', qbrary.AnswerQuestion),
-        ('/previewquestion', qbrary.PreviewQuestion),
-        ('/rating', qbrary.Rating),
-        ('/viewquestion', qbrary.ViewQuestion),
-        ('/editquestion', qbrary.CreateEditQuestion),
-        ('/addquestion', qbrary.CreateEditQuestion),
-        ('/checkanswer', qbrary.CheckAnswer),
-        ('/sessionaction', qbrary.SessionAction),
-        ('/flagquestion', qbrary.FlagQuestion),
-        ('/viewauthors', qbrary.ViewAuthors),
-
         # Below are all discussion related pages
         ('/discussion/addcomment', comments.AddComment),
         ('/discussion/pagecomments', comments.PageComments),
@@ -1919,11 +1946,17 @@ def real_main():
         ('/discussion/editentity', qa.EditEntity),
         ('/discussion/answers', qa.Answers),
         ('/discussion/pagequestions', qa.PageQuestions),
+        ('/discussion/clearflags', qa.ClearFlags),
+        ('/discussion/flagentity', qa.FlagEntity),
+        ('/discussion/voteentity', voting.VoteEntity),
+        ('/discussion/updateqasort', voting.UpdateQASort),
+        ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
         ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),
+        ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
 
         ('/badges/view', util_badges.ViewBadges),
 
@@ -1938,7 +1971,7 @@ def real_main():
 
         ], debug=True)
 
-    application = util.CurrentUserMiddleware(application)
+    application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
 

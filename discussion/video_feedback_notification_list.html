@@ -1,8 +1,12 @@
 {% extends "../page_template.html" %}
 
+{% block pagescript %}
+    {% css_package "video" %}
+{% endblock pagescript %}
+
 {% block pagetitle %}
     New answers to your questions 
-    <a href="/discussion/videofeedbacknotificationfeed?email={{ email }}"><img src="/images/feed.gif" class="icon" />RSS</a>
+    <a href="/discussion/videofeedbacknotificationfeed?email={{ email }}"><img src="{% static_url "/images/feed.gif" %}" class="icon" />RSS</a>
 {% endblock pagetitle %}
 
 {% block pagecontent %}

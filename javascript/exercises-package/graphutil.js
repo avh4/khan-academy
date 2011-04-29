@@ -852,38 +852,36 @@ function writeGraphicalHint(hint, stuffToDraw)
 {
 	if (stuffToDraw!=null)
 	{
-		graphicalHints[next_step_to_write] = stuffToDraw;
+		graphicalHints[Exercise.next_step_to_write] = stuffToDraw;
 	}
 	writeStep(hint);
 }
 
 function give_next_step() {
 	
-	var justDrawn = graphicalHints[steps_given];
+	var justDrawn = graphicalHints[Exercise.steps_given];
 	if (justDrawn)
 	{
 		for(var k=0; k<justDrawn.length; k++)
 			justDrawn[k].draw();
 	}
-	steps_given++;
-	var toDraw = graphicalHints[steps_given];
+
+	var toDraw = graphicalHints[Exercise.steps_given-1];
 	if (toDraw)
 	{
 		for(var k=0; k<toDraw.length; k++)
 			toDraw[k].drawInColor();
 	}
 	
-	
-	
-	//graph_update();
-	
 	show_step();
 	translate(); // Process any ASCII Math -> MathML
+	Exercise.steps_given++;
 }
 
 function show_step() 
 {
-    $(".step" + steps_given).css("visibility", "visible");
+    $(".step" + Exercise.steps_given).css("visibility", "visible");
+    Exercise.showCustomStep(Exercise.steps_given);
 }
 
 function randomRotation()

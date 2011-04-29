@@ -234,7 +234,7 @@ function getBotValue(col)
 function next_step()
 {
 
-	if (steps_given==0)
+	if (Exercise.steps_given==0)
 	{
 		var shift = topNumber['.'].col - botNumber['.'].col;
 		if(shift>0)
@@ -282,7 +282,7 @@ function next_step()
 		drawObject(answer[curCol], nColor);
 		curCol++;
 	}		
-	steps_given++;
+	Exercise.steps_given++;
 }
 
 //returns an integer between 0 and max, inclusive

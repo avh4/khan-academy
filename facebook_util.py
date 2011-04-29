@@ -10,33 +10,35 @@ from google.appengine.api import urlfetch
 
 from app import App
 import facebook
+import layer_cache
+import request_cache
 
 FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
 
 def is_facebook_email(email):
     return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
 
+def get_facebook_nickname_key(user):
+    return "facebook_nickname_%s" % user.email()
+
+@request_cache.cache_with_key_fxn(get_facebook_nickname_key)
+@layer_cache.cache_with_key_fxn(
+        get_facebook_nickname_key, 
+        layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore,
+        persist_across_app_versions=True)
 def get_facebook_nickname(user):
 
     email = user.email()
-
-    memcache_key = "facebook_nickname_%s" % email
-    name = memcache.get(memcache_key)
-    if name is not None:
-        return name
-
     id = email.replace(FACEBOOK_ID_EMAIL_PREFIX, "")
     graph = facebook.GraphAPI()
 
     try:
         profile = graph.get_object(id)
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
-        name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
-        memcache.set(memcache_key, name)
+        return unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
     except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError):
-        name = email
-
-    return name
+        # In the event of an FB error, don't cache the result.
+        return layer_cache.UncachedResult(email)
 
 def get_current_facebook_user():
 
@@ -94,7 +96,14 @@ def get_facebook_profile():
     if App.facebook_app_secret is None:
         return None
 
-    cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+    cookies = None
+    try:
+        cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+    except Cookie.CookieError, error:
+        logging.debug("Ignoring Cookie Error, skipping Facebook login: '%s'" % error)
+
+    if cookies is None:
+        return None
 
     morsel_key = "fbs_" + App.facebook_app_id
     morsel = cookies.get(morsel_key)

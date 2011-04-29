@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
       xmlns:fb="http://www.facebook.com/2008/fbml">
-    <head>
+      <head>
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
-        <!-- For ChartBeat analytics START -->
-        <script type="text/javascript">var _sf_startpt=(new Date()).getTime()</script>
-        <!-- For ChartBeat analytics END -->
+        <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
+
+        <script type="text/javascript">
+            var _sf_startpt=(new Date()).getTime(); // for Chartbeat Analytics
+            var KA_VERSION = '{{ App.version }}';
+            var FB_APP_ID = '{{ App.facebook_app_id }}';
+            var URL_CONTINUE = '{{ continue|escapejs }}';
+            var USERNAME = '{{ username|escapejs }}';
+        </script>
+
         {% if video %}<title>{{video.title}} | Khan Academy</title>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
         {% else %}{% if exercise %}<title>{{exercise.display_name|escape}} | Khan Academy</title>
-	{% else %}<title>Khan Academy</title>
+	{% else %}<title>{% block meta_page_title %}{% endblock meta_page_title %}Khan Academy</title>
 	{% endif %}
         {% endif %}
         <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -->
@@ -22,46 +29,22 @@
         <meta property="og:url" content="http://www.khanacademy.org"/>
         <meta property="og:image" content="http://www.khanacademy.org/images/handtreehorizontal_facebook.png"/>
         <meta property="og:site_name" content="khanacademy.org"/>
-        <meta property="fb:admins" content="100000121497109,718859633"/> {# That's Sal and Dean #}
+        <meta property="fb:admins" content="100000121497109,1305017"/> {# Sal/Ben #}
         <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
         <meta property="og:description"
               content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 2100+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
         <link rel="shortcut icon" href="/favicon.ico">
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
-        <script>var KA_VERSION = '{{ App.version }}';</script>
-        {% shared_css %}
-        {% shared_javascript %}
+
         {% if is_mobile %}
-            {% mobile_javascript %}
+            {% css_package "mobile" %}
+            {% js_package "mobile" %}
+        {% else %}
+            {% css_package "shared" %}
+            {% block pagecss %}{% endblock pagecss %}
+            {% js_package "shared" %}
         {% endif %}
 
-        <script type="text/javascript">
-            // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
-            (function(){
-                var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
-                for (var i = 0; i < html5elements.length; i++) {
-                    document.createElement(html5elements[i]);
-                }
-            })();
-
-            $(function(){
-                // Configure the search form
-                $('#page_search input[type=text]').placeholder();
-                initAutocomplete("#page_search input", true);
-            });
-
-	    var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
-	    var seedTotalViews = 28402468
-	    var seedDailyViews = 100000;
-
-	    var currentTime = new Date();
-	    var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
-	    var viewsPerSecond = seedDailyViews/24/3600
-	    var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
-
-	    var totalViewsString = addCommas(""+estimatedTotalViews);
-
-        </script>
         {% block pagescript %}
         {% endblock pagescript %}
 
@@ -85,44 +68,8 @@
     <body>
     <div id="page-container">
     <div id="page-container-inner">
-        {% if App.facebook_app_id %}
-        {# Start Facebook connect stuff #}
+        {# Facebook connect root #}
         <div id="fb-root"></div>
-        <script>
-          window.fbAsyncInit = function() {
-            FB.init({appId: '{{App.facebook_app_id}}', status: true, cookie: true,
-                     xfbml: true});
-    
-            {% if not username %}
-                FB.Event.subscribe('auth.login', function(response) {
-                    if ('{{ continue|escapejs }}')
-                        window.location = '{{ continue|escapejs }}';
-                    else
-                        window.location.reload();
-                });
-            {% endif %}
-    
-            FB.getLoginStatus(function(response) {
-               if (response.session) {
-                $('#page_logout').click(function(e) {
-                    FB.logout(function() { 
-                        window.location = $("#page_logout").attr("href"); 
-                    });
-                    e.preventDefault();
-                    return false;
-                });
-               }
-            });
-          };
-          (function() {
-            var e = document.createElement('script'); e.async = true;
-            e.src = document.location.protocol +
-              '//connect.facebook.net/en_US/all.js';
-            document.getElementById('fb-root').appendChild(e);
-          }());
-        </script>
-        {# End Facebook connect stuff #}
-        {% endif %}
     
     	{# Make script-requiring elements visible. #}
     	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
@@ -134,14 +81,10 @@
                             {% if username %}
                                 <span id="user-info">
                                     {% username_and_notification username user_data %}
-                                    {% if user_data %}
-                                        {% badge_counts user_data %}
-                                    {% else %}
-                                        {% badge_counts %}
-                                    {% endif %}
-                                {% if points %}
-                                    <span title="{{ points|thousands_separated }} energy points" class="energy-points-badge" onclick="location.href='/profile'">{{ points|thousands_separated }}</span>
-                                {% endif %}
+
+                                    {% badge_counts user_data %}
+                                    
+                                    {% user_points user_data %}
                                 </span>
                                 <span class="separator">&nbsp;</span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
@@ -206,38 +149,6 @@
             {% if username %}
                 {% badge_notifications %}
             {% endif %}
-    
-    	<!-- For ChartBeat analytics START -->
-    	<script type="text/javascript">
-    	var _sf_async_config={uid:10894,domain:"khanacademy.org"};
-    	(function(){
-    	  function loadChartbeat() {
-    	    window._sf_endpt=(new Date()).getTime();
-    	    var e = document.createElement('script');
-    	    e.setAttribute('language', 'javascript');
-    	    e.setAttribute('type', 'text/javascript');
-    	    e.setAttribute('src',
-    	       (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
-    	       "static.chartbeat.com/js/chartbeat.js");
-    	    document.body.appendChild(e);
-    	  }
-    	  var oldonload = window.onload;
-    	  window.onload = (typeof window.onload != 'function') ?
-    	     loadChartbeat : function() { oldonload(); loadChartbeat(); };
-    	})();
-    	</script>
-    	<!-- For ChartBeat analytics END -->
-    
-    	<!-- ChartBeat API - get # of users online now BEGIN -->
-    
-       <script type="text/javascript">
-    
-                $('#page_num_visitors').append(totalViewsString);
-                $('#page_visitors').css('display', 'inline');
-    	</script>
-    
-    	<!-- ChartBeat API - get # of users online now END -->
-    
     </div>
     </div>
     <div class="push"></div>
@@ -249,11 +160,30 @@
     {% endblock bottompagescript %}
 
 	<script type="text/javascript">
-	  (function() {
-	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	  })();
+        // Chartbeat
+        var _sf_async_config={uid:10894,domain:"khanacademy.org"};
+        (function(){
+            function loadChartbeat() {
+                window._sf_endpt=(new Date()).getTime();
+                var e = document.createElement('script');
+                e.setAttribute('language', 'javascript');
+                e.setAttribute('type', 'text/javascript');
+                e.setAttribute('src',
+                   (("https:" == document.location.protocol) ? "https://s3.amazonaws.com/" : "http://") +
+                   "static.chartbeat.com/js/chartbeat.js");
+                document.body.appendChild(e);
+            }
+            var oldonload = window.onload;
+            window.onload = (typeof window.onload != 'function') ?
+                loadChartbeat : function() { oldonload(); loadChartbeat(); };
+        })();
+
+        // GA
+        (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
 	</script>
 
     </body>

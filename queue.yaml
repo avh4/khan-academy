@@ -5,6 +5,9 @@ queue:
 - name: badge-mapreduce-queue
   rate: 5/s
 
+- name: badge-statistics-queue
+  rate: 5/s
+
 - name: exercise-statistics-mapreduce-queue
   rate: 5/s
 
@@ -12,4 +15,7 @@ queue:
   rate: 5/s
 
 - name: youtube-sync-queue
+  rate: 5/s
+
+- name: voting-queue
   rate: 5/s

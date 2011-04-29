@@ -1,0 +1,38 @@
+{% extends arithmetic_template %}
+{% block answerarea %}
+
+<span class="info-box-header">Answer</span>
+ <div><div style='padding-left: 7px;'><input autocomplete="off" id='txtNominator' type='text' style='width:25px;' /></div><div style='width: 43px; border-top: solid 3px black;'></div><div style='padding-left: 7px;'><input autocomplete="off" id='txtDenominator' type='text' style='width:25px;' /></div></div>
+ <script type="text/javascript" charset="utf-8"> 
+ $(document).ready(function(){    
+    $('#txtNominator').focus();
+    $('#txtNominator').keypress(function(e) {
+        if(e.keyCode == 13) {
+            Exercise.logAnswer();
+            return false;
+        }
+    });
+    
+    $('#txtNominator').keydown(function(e) {
+        var Nominator = document.getElementById("txtNominator").value;
+        if(e.keyCode==191 || e.charCode==47){
+            e.preventDefault();
+            if(isNaN(Nominator) || $.trim(Nominator) ==''){
+                document.getElementById("txtNominator").value='';
+                alert("Enter a valid numerator.");
+            } else{
+                $('#txtDenominator').focus();
+            }
+        }
+    });
+
+    $('#txtDenominator').keypress(function(e) {
+        if(e.keyCode == 13) {
+            Exercise.logAnswer();
+            return false;
+        }
+    });
+})
+</script>
+{% endblock answerarea %}
+

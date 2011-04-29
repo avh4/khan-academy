@@ -1,71 +1,18 @@
-
-<div class="video_comments">
-
+<div class="video_comments requires_script">
+    <a name="comments"></a>
     <strong>Comments:</strong>
 
-    <div class="comments_container">
-    {% block comments %}
-
-        {% if not comments %}
-            <div class="comment">
-                Thank you, Sal!<br/>
-                <span class="comment_sig sig">{% signature %}</span>
-            </div>
-        {% endif %}
-
-        {% for comment in comments %}
-            <div class="comment">
-                {{ comment.content|escape|urlize|linebreaksbr_ellipsis:" continue&hellip;"|youtube_timestamp_links }}<br/>
-                <span class="comment_sig sig">{% signature comment %}</span>
-            </div>
-
-            {% if not forloop.last %}
-                {% ifequal forloop.counter limit_initially_visible %}
-                    <div class="comments_hidden" style="display:none;">
-                {% endifequal %}
-            {% endif %}
-        {% endfor %}
-
-        {% if show_page_controls %}
-        <div class="page_controls comments_page_controls">
-            <span>
-                {% ifnotequal current_page_1_based 1 %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ prev_page_1_based }}" class="comments_page" page="{{ prev_page_1_based }}"><img class="icon" src="/images/arrow-left.png" /></a>
-                {% endifnotequal %}
-
-                {% for page in pages %}
-                    {% ifequal page current_page_1_based %}
-                        <span class="page_current comments_page_current">{{ page }}</span>
-                    {% else %}
-                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ page }}" class="page comments_page" page="{{ page }}">{{ page }}</a>
-                    {% endifequal %}
-                {% endfor %}
-
-                {% ifnotequal current_page_1_based pages_total %}
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page={{ next_page_1_based }}" class="comments_page" page="{{ next_page_1_based }}"><img class="icon" src="/images/arrow-right.png" /></a>
-                {% endifnotequal %}
-            </span>
-        </div>
-        {% endif %}
-
-        {% if comments_hidden %}
-            </div>
-        {% endif %}
-
-    {% endblock %}
-    </div>
+    <div class="comments_container"><em>Loading...</em> <img class="icon" src="{% static_url "/images/throbber.gif" %}"/></div>
     
     {% if user %}
-        <a href="#" class="control comment_add"><img class="icon" src="/images/balloon-plus.png" />Add a comment</a>
+    <a href="#" class="control comment_add"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Add a comment</a>
     {% else %}
-        <a href="{{login_url}}" class="control"><img class="icon" src="/images/balloon-plus.png" />Log in to add a comment</a>
+    <a href="{{login_url}}" class="control"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Log in to add a comment</a>
     {% endif %}
 
-    {% if comments_hidden %}
-        <span class="comments_show_more">
-             <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="/images/balloons.png" />Show more</a>
-        </span>
-    {% endif %}
+    <span class="comments_show_more">
+        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="{% static_url "/images/balloons.png" %}" />Show more</a>
+    </span>
 
     <div class="comment_form" style="display:none;">
         <form class="comments" name="comments">
@@ -77,4 +24,3 @@
         </form>
     </div>
 </div>
-

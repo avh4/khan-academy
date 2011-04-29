@@ -1,46 +1,46 @@
 <div id="{{ browser_id|escape }}" class="playlist_browser pulled" {% if hidden %}style="display:none;"{% endif %}>
 <div id="playlist-jump">
-<span style="display: inline-block; float: left">Jump to playlist:</span>
-<nav class="css-menu" id="page_main_nav" style="float: left;">
-<ul>
+<span class="playlist_browser_title desktop-only">Jump to playlist:</span>
+<nav class="css-menu" id="page_main_nav">
+<ul data-role="listview" data-inset="true">
 	<li>Math
 		<ul>
 
-			<li><a href="#Arithmetic">Arithmetic</a></li>
-            <li><a href="#Developmental Math">Developmental Math</a></li>
+			<li><a href="#arithmetic" data-url="/#arithmetic">Arithmetic</a></li>
+            <li><a href="#developmental-math">Developmental Math</a></li>
 			<li class="sub">
 				Pre-Algebra
 				<ul>
-					<li class="topline"><a href="#Pre-algebra">Core Pre-Algebra</a></li>
-					<li><a href="#MA Tests for Education Licensure (MTEL) -Pre-Alg">Worked Examples 1</a></li>
+					<li class="topline"><a href="#pre-algebra">Core Pre-Algebra</a></li>
+					<li><a href="#ma-tests-for-education-licensure-mtel-pre-alg">Worked Examples 1</a></li>
 
 				</ul>
 			</li>
-			<li><a href="#Brain Teasers">Brain Teasers</a></li>
+			<li><a href="#brain-teasers">Brain Teasers</a></li>
 			<li class="sub">
 				Algebra
 				<ul>
-					<li class="topline"><a href="#Algebra">Core Algebra</a></li>
-					<li><a href="#California Standards Test: Algebra I">Worked Examples 1</a></li>
-					<li><a href="#ck12.org Algebra 1 Examples">Worked Examples 2</a></li>
-					<li><a href="#California Standards Test: Algebra II">Worked Examples 3</a></li>
+					<li class="topline"><a href="#algebra">Core Algebra</a></li>
+					<li><a href="#california-standards-test-algebra-i">Worked Examples 1</a></li>
+					<li><a href="#ck12org-algebra-1-examples">Worked Examples 2</a></li>
+					<li><a href="#california-standards-test-algebra-ii">Worked Examples 3</a></li>
 
 				</ul>
 			</li>
 			<li class="sub">
 				Geometry
 				<ul>
-					<li class="topline"><a href="#Geometry">Core Geometry</a></li>
-					<li><a href="#California Standards Test: Geometry">Worked Examples 1</a></li>
+					<li class="topline"><a href="#geometry">Core Geometry</a></li>
+					<li><a href="#california-standards-test-geometry">Worked Examples 1</a></li>
 				</ul>
 			</li>
-			<li><a href="#Trigonometry">Trigonometry</a></li>
-			<li><a href="#Probability">Probability</a></li>
-			<li><a href="#Statistics">Statistics</a></li>
-			<li><a href="#Precalculus">Pre-Calculus</a></li>
-			<li><a href="#Calculus">Calculus</a></li>
-			<li><a href="#Differential Equations">Differential Equations</a></li>
-			<li><a href="#Linear Algebra">Linear Algebra (Advanced)</a></li>
+			<li><a href="#trigonometry">Trigonometry</a></li>
+			<li><a href="#probability">Probability</a></li>
+			<li><a href="#statistics">Statistics</a></li>
+			<li><a href="#precalculus">Precalculus</a></li>
+			<li><a href="#calculus">Calculus</a></li>
+			<li><a href="#differential-equations">Differential Equations</a></li>
+			<li><a href="#linear-algebra">Linear Algebra</a></li>
 
 		</ul>
 	</li>
@@ -48,30 +48,30 @@
 	<li>
 		Science
 		<ul>
-			<li><a href="#Biology">Biology</a></li>
-			<li><a href="#Chemistry">Chemistry</a></li>
-			<li><a href="#Physics">Physics</a></li>
-			<li><a href="#Organic Chemistry">Organic Chemistry</a></li>
-			<li><a href="#Cosmology and Astronomy">Cosmology and Astronomy</a></li>
+			<li><a href="#biology">Biology</a></li>
+			<li><a href="#chemistry">Chemistry</a></li>
+			<li><a href="#physics">Physics</a></li>
+			<li><a href="#organic-chemistry">Organic Chemistry</a></li>
+			<li><a href="#cosmology-and-astronomy">Cosmology and Astronomy</a></li>
 		</ul>
 	</li>
 
 	<li>
-		Humanities & Other
+		Humanities &amp; Other
 		<ul>
-			<li><a href="#History">History</a></li>
+			<li><a href="#history">History</a></li>
 			<li class="sub">
 				Finance
 				<ul>
-					<li class="topline"><a href="#Finance">Core Finance</a></li>
-					<li><a href="#Banking and Money">Banking and Money</a></li>
-					<li><a href="#Valuation and Investing">Valuation and Investing</a></li>
-					<li><a href="#Venture Capital and Capital Markets">Venture Capital and Capital Markets</a></li>
-					<li><a href="#Credit Crisis">Credit Crisis</a></li>
-					<li><a href="#Paulson Bailout">Paulson Bailout</a></li>
-					<li><a href="#Geithner Plan">Geithner Plan</a></li>
-					<li><a href="#Current Economics">Current Economics</a></li>
-					<li><a href="#Currency">Currency</a></li>
+					<li class="topline"><a href="#finance">Core Finance</a></li>
+					<li><a href="#banking-and-money">Banking and Money</a></li>
+					<li><a href="#valuation-and-investing">Valuation and Investing</a></li>
+					<li><a href="#venture-capital-and-capital-markets">Venture Capital and Capital Markets</a></li>
+					<li><a href="#credit-crisis">Credit Crisis</a></li>
+					<li><a href="#paulson-bailout">Paulson Bailout</a></li>
+					<li><a href="#geithner-plan">Geithner Plan</a></li>
+					<li><a href="#current-economics">Current Economics</a></li>
+					<li><a href="#currency">Currency</a></li>
 				</ul>
 
 			</li>
@@ -83,11 +83,11 @@
 		<ul>
 			<li><a href="/sat">SAT Math</a></li>
 			<li><a href="/gmat">GMAT</a></li>
-            <li><a href="#CAHSEE Example Problems">CAHSEE</a></li>
-            <li><a href="#IIT JEE Questions">IIT JEE</a></li>
+            <li><a href="#cahsee-example-problems">CAHSEE</a></li>
+            <li><a href="#iit-jee-questions">IIT JEE</a></li>
 		</ul>
 	</li>
-	<li class="solo"><a href="#Khan Academy-Related Talks and Interviews" class="menulink">Talks and Interviews</a></li>
+	<li class="solo"><a href="#khan-academy-related-talks-and-interviews" class="menulink">Talks and Interviews</a></li>
 </ul>
 </nav>
 </div>

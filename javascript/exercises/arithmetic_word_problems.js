@@ -39,7 +39,7 @@ function ArithmeticWordProblemsExercise() {
     stores = [
         { name: 'office supply', items: [ {i:'pen', is:'pens'}, {i:'pencil', is:'pencils'}, {i:'notebook', is:'notebooks'}] },
         { name: 'hardware', items: [ {i:'hammer', is:'hammers'}, {i:'nail', is:'nails'}, {i:'saw', is:'saws'}] },
-        { name: 'grocery', items: [ {i:'banana', is:'bananas'}, {i:'loaf of bread', is:'loaves of bread'}, {i:'gallon of milk', is:'gallons of milk'}, {i:'potato', is:'potatos'}] },
+        { name: 'grocery', items: [ {i:'banana', is:'bananas'}, {i:'loaf of bread', is:'loaves of bread'}, {i:'gallon of milk', is:'gallons of milk'}, {i:'potato', is:'potatoes'}] },
         { name: 'gift', items: [ {i:'toy', is:'toys'}, {i:'game', is:'games'}, {i:'souvenirs', is:'souvenirs'}] },
         { name: 'toy', items: [ {i:'stuffed animal', is:'stuffed animals'}, {i:'video game', is:'video games'}, {i:'race car', is:'race cars'}, {i: 'doll', is:'dolls'}] }
     ];
@@ -129,7 +129,7 @@ function ArithmeticWordProblemsExercise() {
 
         setCorrectAnswer(this.fps[0][1]);
 
-        writeText(this.replace("@n bought @0 @o1s from the @s store. @P also bought a @o2 for @e dollars. @P spent a total of @t dollars. How much did each @o1 cost?"));
+        writeText(this.replace("@n bought @0 @o1s, all costing the same amount, from the @s store. @P also bought a @o2 for @e dollars. @P spent a total of @t dollars. How much did each @o1 cost?"));
         writeStep(this.replace("<li>Of the @t dollars, @p spent @e dollars on a @o2 so @p must have spent `@t - @e = @x` dollars on @o1s.</li>"));
         writeStep(this.replace("<li>@P spent @x dollars on @0 @o1s, so @p must have spent `@x \\divide @0 = @1` dollars on each @o1.</li>"));
     };

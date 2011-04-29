@@ -4,6 +4,7 @@ import logging
 from mapreduce import control
 from mapreduce import operation as op
 
+import util
 import request_handler
 import models
 import consts
@@ -109,8 +110,13 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
     if user_data.last_daily_summary:
         dt_start = max(dt_end - datetime.timedelta(days=2), user_data.last_daily_summary)
 
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
-    video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
+    query_problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+    query_video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+
+    results = util.async_queries([query_problem_logs, query_video_logs])
+
+    problem_logs = results[0].get_result()
+    video_logs = results[1].get_result()
 
     # Chop off hours, minutes, and seconds
     dt_start = datetime.datetime(dt_start.year, dt_start.month, dt_start.day)

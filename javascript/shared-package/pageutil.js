@@ -133,6 +133,12 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
     }
 }
 
+$(function(){
+    // Configure the search form
+    if ($('#page_search input[type=text]').placeholder().length)
+        initAutocomplete("#page_search input", true);
+});
+
 function onYouTubePlayerReady(playerID) {
     var player = document.getElementById("idPlayer");
     if (!player) player = document.getElementById("idOVideo");
@@ -330,12 +336,12 @@ var VideoStats = {
         try { eval("var dict_json = " + data); }
         catch(e) { return; }
 
-        if (dict_json.video_points && dict_json.points)
+        if (dict_json.video_points && dict_json.user_points_html)
         {
             var jelPoints = $(".video-energy-points");
             jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
-            $("#top-header .energy-points-badge").text(dict_json.points);
+            $("#user-points-container").html(dict_json.user_points_html);
         }
     },
 
@@ -484,7 +490,7 @@ var Badges = {
 
     hide: function() {
         var jel = $(".badge-award-container");
-        jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
+        jel.animate({top: -1 * jel.height()}, 500, function(){jel.hide();});
     },
 
     showMoreContext: function(el) {
@@ -578,3 +584,71 @@ var CSSMenus = {
     }
 }
 $(CSSMenus.init);
+
+var IEHtml5 = {
+    init: function() {
+        // Create a dummy version of each HTML5 element we use so that IE 6-8 can style them.
+        var html5elements = ['header', 'footer', 'nav', 'article', 'section', 'menu'];
+        for (var i = 0; i < html5elements.length; i++) {
+            document.createElement(html5elements[i]);
+        }
+   }
+}
+IEHtml5.init();
+
+var VideoViews = {
+    init: function() {
+        var seedTime = new Date(2011,3,22);  //Seed Date is set to October 31, 2010  0-January, 11-december
+        var seedTotalViews = 50397618;
+        var seedDailyViews = 170000;
+
+        var currentTime = new Date();
+        var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
+        var viewsPerSecond = seedDailyViews/24/3600
+        var estimatedTotalViews = Math.round(seedTotalViews + secondsSince*viewsPerSecond)
+
+        var totalViewsString = addCommas(""+estimatedTotalViews);
+
+        $('#page_num_visitors').append(totalViewsString);
+        $('#page_visitors').css('display', 'inline');
+    }
+}
+$(VideoViews.init);
+
+var FacebookHook = {
+    init: function() {
+        if (!window.FB_APP_ID) return;
+
+        window.fbAsyncInit = function() {
+            FB.init({appId: FB_APP_ID, status: true, cookie: true, xfbml: true});
+
+            if (!USERNAME) {
+                FB.Event.subscribe('auth.login', function(response) {
+                    if (URL_CONTINUE)
+                        window.location = URL_CONTINUE;
+                    else
+                        window.location.reload();
+               });
+            }
+
+            FB.getLoginStatus(function(response) {
+                if (response.session) {
+                    $('#page_logout').click(function(e) {
+                        FB.logout(function() { 
+                            window.location = $("#page_logout").attr("href"); 
+                        });
+                        e.preventDefault();
+                        return false;
+                    });
+                }
+            });
+        };
+
+        $(function() {
+            var e = document.createElement('script'); e.async = true;
+            e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+            document.getElementById('fb-root').appendChild(e);
+        }); 
+    }
+}
+FacebookHook.init();

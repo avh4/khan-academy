@@ -15,6 +15,7 @@ import points
 from search import Searchable
 from app import App
 import layer_cache
+import request_cache
 from discussion import models_discussion
 
 # Setting stores per-application key-value pairs
@@ -27,15 +28,21 @@ class Setting(db.Model):
     @staticmethod
     def get_or_set_with_key(key, val = None):
         if val is None:
-            setting = Setting.get_by_key_name(key)
-            if setting is not None:
-                return setting.value
-            return None
+            return Setting.cache_get_by_key_name(key)
         else:
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
+            memcache.delete("setting_key_%s" % key, namespace=App.version)
             return setting.value
+
+    @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda key: "setting_key_%s" % key, layer=layer_cache.Layers.Memcache)
+    def cache_get_by_key_name(key):
+        setting = Setting.get_by_key_name(key)
+        if setting is not None:
+            return setting.value
+        return None
 
     @staticmethod
     def cached_library_content_date(val = None):
@@ -159,25 +166,12 @@ class Exercise(db.Model):
         query.filter('exercise =', self.key())
         return query
 
-    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.SINGLE_LAYER_MEMCACHE_ONLY)
+    @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def related_videos_fetch(self):
         exercise_videos = self.related_videos().fetch(10)
         for exercise_video in exercise_videos:
             exercise_video.video # Pre-cache video entity
         return exercise_videos
-
-    _CURRENT_SANITIZER = "http://caja.appspot.com/"
-    def ensure_sanitized(self):
-        if self.last_sanitized >= self.last_modified and self.sanitizer_used == Exercise._CURRENT_SANITIZER:
-            return
-        cajoled = cajole.cajole(self.raw_html)
-        if 'error' in cajoled:
-            raise Exception(cajoled['html'])
-        self.safe_html = db.Text(cajoled['html'])
-        self.safe_js = db.Text(cajoled['js'])
-        self.last_sanitized = datetime.datetime.now()
-        self.sanitizer = Exercise._CURRENT_SANITIZER
-        self.put()
 
     @classmethod
     def all(cls, live_only = False):
@@ -255,13 +249,18 @@ class UserExercise(db.Model):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
 
     @staticmethod
+    def get_for_user(user):
+        query = UserExercise.all()
+        query.filter('user =', user)
+        return query.fetch(1000)
+
+    @staticmethod
+    @request_cache.cache_with_key_fxn(lambda user: "request_cache_user_exercise_%s" % user.email())
     def get_for_user_use_cache(user):
         user_exercises_key = UserExercise.get_key_for_user(user)
         user_exercises = memcache.get(user_exercises_key)
         if user_exercises is None:
-            query = UserExercise.all()
-            query.filter('user =', user)
-            user_exercises = query.fetch(1000)
+            user_exercises = UserExercise.get_for_user(user)
             memcache.set(user_exercises_key, user_exercises)
         return user_exercises
 
@@ -342,6 +341,34 @@ class UserExercise(db.Model):
                     user_data.need_to_reassess = True
                     user_data.put()
 
+class CoachRequest(db.Model):
+    coach_requesting = db.UserProperty()
+    student_requested = db.UserProperty()
+
+    @staticmethod
+    def key_for(coach, student):
+        return "%s_request_for_%s" % (coach.email(), student.email())
+
+    @staticmethod
+    def get_for(coach, student):
+        return CoachRequest.get_by_key_name(CoachRequest.key_for(coach, student))
+
+    @staticmethod
+    def get_or_insert_for(coach, student):
+        return CoachRequest.get_or_insert(
+                key_name = CoachRequest.key_for(coach, student),
+                coach_requesting = coach,
+                student_requested = student,
+                )
+
+    @staticmethod
+    def get_for_student(student):
+        return CoachRequest.all().filter("student_requested = ", student)
+
+    @staticmethod
+    def get_for_coach(coach):
+        return CoachRequest.all().filter("coach_requesting = ", coach)
+
 class UserData(db.Model):
 
     user = db.UserProperty()       
@@ -354,7 +381,7 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     badges = db.StringListProperty() # All awarded badges
     need_to_reassess = db.BooleanProperty()
-    points = db.IntegerProperty()
+    points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()
@@ -363,6 +390,7 @@ class UserData(db.Model):
     last_daily_summary = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
+    question_sort_order = db.IntegerProperty(default = -1)
     
     @staticmethod
     def get_for_current_user():
@@ -375,6 +403,9 @@ class UserData(db.Model):
 
     @staticmethod    
     def get_for(user):
+        if not user:
+            return None
+
         query = UserData.all()
         query.filter('user =', user)
         query.order('-points') # Temporary workaround for issue 289
@@ -438,6 +469,21 @@ class UserData(db.Model):
 
         return userExercise
         
+    def get_exercise_states(self, exercise, user_exercise, current_time):
+        proficient = exercise.proficient = self.is_proficient_at(exercise.name)
+        suggested = exercise.suggested = self.is_suggested(exercise.name)
+        reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
+        struggling = UserExercise.is_struggling_with(user_exercise, exercise)
+        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+        
+        return {
+            'proficient': proficient,
+            'suggested': suggested,
+            'reviewing': reviewing,
+            'struggling': struggling,
+            'endangered': endangered
+        }
+        
     def reassess_from_graph(self, ex_graph):
         all_proficient_exercises = []
         for ex in ex_graph.get_proficient_exercises():
@@ -499,6 +545,9 @@ class UserData(db.Model):
    
     def get_students(self):
         return map(lambda student_data: student_data.user.email(), self.get_students_data())
+
+    def is_coached_by(self, coach):
+        return coach.email() in self.coaches or coach.email().lower() in self.coaches
 
     def add_points(self, points):
         if self.points == None:

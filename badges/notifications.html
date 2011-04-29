@@ -1,11 +1,16 @@
+<div id="badge-notification-container" class="badge-award-container" style="display:none;">
+{% block badge_notification_block %}
+    {% if user_badges %}
+        <h3 class="ui-corner-top">New badge{{ user_badges|length|pluralize }} <span style="font-weight:normal; float: right; font-size: 12px;">(<a href="#" onclick="Badges.hide();return false;">close</a>)</span></h3>
+        {% for user_badge in user_badges %}
+            {% if user_badge.badge %}
+                {% badge_block user_badge.badge %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}
+</div>
+
 {% if user_badges %}
-    <div style="display:none;" class="badge-award-container">
-    <h3 class="ui-corner-top">New badge{{ user_badges|length|pluralize }} <span style="font-weight:normal; float: right; font-size: 12px;">(<a href="#" onclick="Badges.hide();return false;">close</a>)</span></h3>
-    {% for user_badge in user_badges %}
-        {% if user_badge.badge %}
-            {% badge_block user_badge.badge %}
-        {% endif %}
-    {% endfor %}
-    </div>
     <script>$(Badges.show);</script>
 {% endif %}

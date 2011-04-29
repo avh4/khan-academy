@@ -6,7 +6,12 @@
 
 {% block maincell %}
 <script>
-    var exercise = new RadiansToDegreesExercise();
+    Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    Exercise.showNextProblem = function() {
+        var exercise = new RadiansToDegreesExercise();
+    }
+    
 </script>
 {% endblock maincell %}
 

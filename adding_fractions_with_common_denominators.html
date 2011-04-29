@@ -1,0 +1,19 @@
+{% extends "fraction_template.html" %}
+{% block maincode %}
+<div id="dvQuestion"></div>
+{% endblock maincode %}
+
+{% block maincell %}
+<div id="holder" style="padding-left:120px;"></div> 
+<div id="dvHintText1" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:#999;"></div>
+<div id="dvHintText2" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:red;"></div>
+<div id="dvHintText3" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:#999;"></div>
+<div id="dvHintText4" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:orange;"></div>
+<script type="text/javascript" src="/javascript/exercises/adding_fractions_with_common_denominators.js"></script>
+
+<script>
+    Exercise.checkAnswer = FractionAddition.AdditionWithCommonDenominator.check_answer;
+</script>
+{% endblock maincell %}
+
+{% block hintfunction %}FractionAddition.AdditionWithCommonDenominator.next_step(){% endblock hintfunction %}

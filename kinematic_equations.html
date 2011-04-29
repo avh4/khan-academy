@@ -38,6 +38,28 @@ write_text("<p>Solve for `" + solving + "` to the nearest tenth.</p><p>Make sure
 printMotion(motion, [unknown, solving]);
 
 hintWithNo[unknown](motion, solving);
+
+function checkKinematicsAnswer() {
+    // Answer checking is slightly more lenient here.
+    // We allow +-1.0 error...
+    highlight_answer();
+    var usersAnswerUnit = document.getElementById("answerunit").value;
+    var result = isInputCorrect($("#answer").val(), motion[solving], 1.0);
+    
+    if (result == Answer.INVALID || !usersAnswerUnit) {
+        if (!usersAnswerUnit)
+            alert("Please choose the units.");
+        return Answer.INVALID;
+    }
+    
+    if (result == Answer.CORRECT && usersAnswerUnit == kunits[solving])
+        return Answer.CORRECT;
+    else
+        return Answer.INCORRECT;
+}
+
+Exercise.checkAnswer = checkKinematicsAnswer;
+
 //-->
 </script>
 
@@ -45,7 +67,7 @@ hintWithNo[unknown](motion, solving);
 
 {% block answerarea %}
 <span class="info-box-header">Answer</span>
-<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+<input type="text" size=10 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}">
 <select id="answerunit">
   <option value=""></option>
   <option value="m">m</option>
@@ -54,19 +76,6 @@ hintWithNo[unknown](motion, solving);
   <option value="m/(s^2)">m/s^2</option>
 </select></br>
 {% endblock answerarea %}
-
-{% block checkanswer %}
-// Answer checking is slightly more lenient here.
-// We allow +-1.0 error...
-highlight_answer();
-
-var usersAnswerUnit = document.getElementById("answerunit").value;
-
-var isCorrect = (isInputCorrect($("#answer").val(), motion[solving], 1.0)
-				&& (usersAnswerUnit == kunits[solving]) );
-
-handleCorrectness(isCorrect);
-{% endblock checkanswer %}
 
 {% block hintfunction %}give_next_step(){% endblock hintfunction %}
 

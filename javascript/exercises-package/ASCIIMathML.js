@@ -734,7 +734,7 @@ function AMprocessNode(n, linebreaks) {
     n.parentNode.nodeName!="pre" && n.parentNode.nodeName!="PRE" &&
     n.parentNode.nodeName!="script" && n.parentNode.nodeName!="SCRIPT") {
     str = n.nodeValue;
-    if (!(str == null)) {
+    if (str != null && str.replace) {
       str = str.replace(/\r\n\r\n/g,"\n\n");
       if (doubleblankmathdelimiter) {
         str = str.replace(/\x20\x20\./g," "+AMdelimiter1+".");

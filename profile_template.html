@@ -5,10 +5,10 @@
         <span id="high-level-stats">
             {% block high_level_stats %}{% endblock high_level_stats %}
         </span>
-        <span id="user-info">
+        {% block profile_name %}<span id="user-info">
             <img src="/images/darth.png" />
-            <span id="name">{% block profile_name %}{% endblock profile_name %}</span>
-        </span>
+            <span id="name"></span>
+        </span>{% endblock profile_name %}
     </div>
 {% endblock pagesubmenu %}
 
@@ -42,7 +42,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {% profile_javascript %}
+    {% js_package "profile" %}
     <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
 {% endblock bottompagescript %}
 

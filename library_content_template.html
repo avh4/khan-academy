@@ -4,16 +4,24 @@
             <div id="library-content-main">
             {% for playlist_data in all_playlists %}
             {% if forloop.first %}
-                <div class="clear"><a name="{{ playlist_data.title|escape }}">&nbsp;</a></div>
+                <div class="clear desktop-only"><a name="{{ playlist_data.title|slugify|escape }}" id="{{ playlist_data.title|slugify|escape }}">&nbsp;</a></div>
             {% endif %}
-            <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
-                <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
-                {% column_major_sorted_videos playlist_data.videos %}
-                <div class="clear">
-                {% if playlist_data.next %}
-                    <a name="{{ playlist_data.next.title|escape }}">&nbsp;</a>
-                {% endif %}
+            <div data-role="page" id="{{ playlist_data.title|slugify|escape }}" data-theme="b">
+                <div data-role="header">
+                    <a href="#" data-rel="back" data-icon="arrow-l" class="mobile-only">Back</a>
+                    <h2 class='playlist-heading {% if forloop.first %}playlist-heading-first{% endif %}'>{{playlist_data.title|escape}}</h2>
+                    <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="mobile-only"></a>
                 </div>
+                <div data-role="content">
+                    <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
+                    {% column_major_sorted_videos playlist_data.videos %}
+                    <div class="clear desktop-only">
+                    {% if playlist_data.next %}
+                        <a name="{{ playlist_data.next.title|slugify|escape }}" id="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
             {% endfor %}
             </div>
         </div>

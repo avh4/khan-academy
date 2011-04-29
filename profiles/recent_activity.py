@@ -75,12 +75,10 @@ class RecentVideoActivity(RecentActivity):
                     return True
         return False
 
-def recent_badge_activity(user, dt_start, dt_end):
+def recent_badge_activity(user_badges):
 
     badges_dict = util_badges.all_badges_dict()
-
     list_badge_activity = []
-    user_badges = models_badges.UserBadge.get_for_user_between_dts(user, dt_start, dt_end)
 
     for user_badge in user_badges:
         badge = badges_dict.get(user_badge.badge_name)
@@ -89,24 +87,18 @@ def recent_badge_activity(user, dt_start, dt_end):
 
     return list_badge_activity
 
-def recent_exercise_activity(user, dt_start, dt_end):
+def recent_exercise_activity(problem_logs):
 
     list_exercise_activity = []
-
-    # We fetch all of the results here to avoid making tons of RPC calls.
-    problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end).fetch(500000)
 
     for problem_log in problem_logs:
         list_exercise_activity.append(RecentExerciseActivity(problem_log))
 
     return list_exercise_activity
 
-def recent_video_activity(user, dt_start, dt_end):
+def recent_video_activity(video_logs):
 
     list_video_activity = []
-
-    # We fetch all of the results here to avoid making tons of RPC calls.
-    video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end).fetch(500000)
 
     for video_log in video_logs:
         list_video_activity.append(RecentVideoActivity(video_log))
@@ -115,10 +107,16 @@ def recent_video_activity(user, dt_start, dt_end):
 
 def recent_activity_for(user, dt_start, dt_end):
 
+    query_user_badges = models_badges.UserBadge.get_for_user_between_dts(user, dt_start, dt_end)
+    query_problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end)
+    query_video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end)
+
+    results = util.async_queries([query_user_badges, query_problem_logs, query_video_logs], limit=200)
+
     list_recent_activity_types = [
-            recent_badge_activity(user, dt_start, dt_end), 
-            recent_exercise_activity(user, dt_start, dt_end), 
-            recent_video_activity(user, dt_start, dt_end),
+            recent_badge_activity(results[0].get_result()),
+            recent_exercise_activity(results[1].get_result()),
+            recent_video_activity(results[2].get_result()),
     ]
     list_recent_activity = [activity for sublist in list_recent_activity_types for activity in sublist]
 

@@ -1,7 +1,10 @@
+import datetime
+import sys
+
 from google.appengine.api import users
+from google.appengine.api import taskqueue
 from mapreduce import control
 from mapreduce import operation as op
-import sys
 
 import util
 import models
@@ -26,7 +29,7 @@ import request_handler
 import logging
 
 # Authoritative list of all badges
-@layer_cache.cache_with_key("all_badges", layer=layer_cache.SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def all_badges():
     return [
         exercise_completion_count_badges.GettingStartedBadge(),
@@ -99,7 +102,7 @@ def all_badges():
 
     ]
 
-@layer_cache.cache_with_key("all_badges_dict", layer=layer_cache.SINGLE_LAYER_IN_APP_MEMORY_CACHE_ONLY)
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def all_badges_dict():
     dict_badges = {}
     for badge in all_badges():
@@ -198,7 +201,30 @@ class ViewBadges(request_handler.RequestHandler):
 
         self.render_template('viewbadges.html', template_values)
     
-   
+# /admin/badgestatistics is called periodically by a cron job
+class BadgeStatistics(request_handler.RequestHandler):
+
+    def get(self):
+        # Admin-only restriction is handled by /admin/* URL pattern
+        # so this can be called by a cron job.
+        taskqueue.add(url='/admin/badgestatistics', queue_name='badge-statistics-queue', params={'start': '1'})
+        self.response.out.write("Badge statistics task started.")
+
+    def post(self):
+        if not self.request_bool("start", default=False):
+            return
+
+        for badge in all_badges():
+
+            badge_stat = models_badges.BadgeStat.get_or_insert_for(badge.name)
+            if badge_stat:
+                time_delta = datetime.datetime.now() - badge_stat.dt_last_calculated
+
+                # Calculate if it's been at least an hour since last calculation.
+                # (We're not recalculating due to a failed task)
+                if badge_stat.count_awarded == 0 or time_delta.seconds > 3600:
+                    badge_stat.recalculate()
+                    badge_stat.put()
 
 # /admin/startnewbadgemapreduce is called periodically by a cron job
 class StartNewBadgeMapReduce(request_handler.RequestHandler):
@@ -233,7 +259,7 @@ def badge_update_map(user_data):
     awarded = update_with_no_context(user, user_data, action_cache=action_cache)
 
     # Update all exercise-context badges
-    for user_exercise in models.UserExercise.get_for_user_use_cache(user):
+    for user_exercise in models.UserExercise.get_for_user(user):
         awarded = update_with_user_exercise(user, user_data, user_exercise, action_cache=action_cache) or awarded
 
     # Update all playlist-context badges

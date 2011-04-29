@@ -1,5 +1,3 @@
-{% block graph %}
-
 {% if not dict_student_exercises %}
     <div class="graph-notification">Your students don't have any proficient exercises...yet. Point them to <a href="/exercisedashboard">the exercise dashboard</a>.</div>
 {% endif %}
@@ -205,6 +203,3 @@
 <div id="highchart-container" class="{% if not dict_student_exercises %}empty-chart{% endif %}">
     <div id="highchart"></div>
 </div>
-
-{% endblock graph %}
-
