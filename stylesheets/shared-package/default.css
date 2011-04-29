@@ -715,7 +715,7 @@ footer {
     #top-header #top-header-links span.username_and_notification_shift { left: 12px; }
     #top-header #user-info img { position:relative; top:-1px; }
 
-    #top-header a.notification_link {
+    #top-header #top-header-links .page_links a.notification_link {
         text-decoration: none;
         border-bottom: 0;
     }
