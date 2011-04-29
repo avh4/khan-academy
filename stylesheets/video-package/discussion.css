@@ -382,6 +382,7 @@ a.vote_for {
     *margin: 0;
 }
 
+a.vote_for img { width: 18px; height: 13px; }
 a.vote_for img.vote_up, a.vote_for img.vote_down { display:none; }
 
 .vote_tools a.voted img.vote_up, .vote_tools a.voted img.vote_down { display:inline; }
