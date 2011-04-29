@@ -7,6 +7,7 @@ var Exercise = {
     
     showNextProblem: function() {},
     
+    // Must return one of Answer.INVALID, Answer.CORRECT, or Answer.INCORRECT
     checkAnswer: checkFreeAnswer,
     
     logAnswer: function() {
