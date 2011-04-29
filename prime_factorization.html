@@ -1,4 +1,4 @@
-{% extends "multiple_choice_template.html" %}
+{% extends arithmetic_template %}
 {% block maincode %}
 <script language=Javascript1.2><!--
 var number = getRandomIntRange(10, 100);
@@ -17,6 +17,8 @@ var xSpace = 1.5;
 
 var i = 0;
 
+var answer = [];
+
 function find_factors(x)
 {
     if (inArray(x, allprimes)) {
@@ -25,6 +27,8 @@ function find_factors(x)
         } else {
             primefzn = primefzn + "&times;" + x;
         }
+        
+        answer[answer.length] = x;
         return;
     }
     var maxf = Math.sqrt(x);
@@ -44,48 +48,6 @@ function find_factors(x)
 factors.push(number);
 find_factors(number);
 setCorrectAnswer(primefzn);
-
-var wrongChoice = "";
-while (Exercise.getNumPossibleAnswers() < 3)
-{
-    var twos = getRandomIntRange(1, 3);
-    var threes = getRandomIntRange(0, 2);
-    for (var m=0; m<twos; m++)
-    {
-        wrongChoice = wrongChoice + "&times;2";
-    }
-    for (m=0; m<threes; m++)
-    {
-        wrongChoice = wrongChoice + "&times;3";
-    }
-    addWrongChoice(wrongChoice.substring(7));
-    wrongChoice = "";
-}
-while (Exercise.getNumPossibleAnswers() < 6)
-{
-    twos = getRandomIntRange(0, 2);
-    var smallprimes = getRandomIntRange(1, 3);
-    
-    for (m=0; m<twos; m++)
-    {
-        wrongChoice = wrongChoice + "&times;2";
-    }
-    
-    var primeidx = getRandomIntRange(0, 2);
-    for (m=0; m<smallprimes; m++)
-    {
-        wrongChoice = wrongChoice + "&times;" + allprimes[primeidx];
-        primeidx = getRandomIntRange(primeidx + 1, 4);
-    }
-    addWrongChoice(wrongChoice.substring(7));
-    wrongChoice = "";
-}
-if (factors.length > 3) {
-    addWrongChoice(factors[1] + "&times;" + factors[2]);
-    if (factors.length > 5) {
-        addWrongChoice(factors[1] + "&times;" + factors[3] + "&times;" + factors[4]);
-    }
-}
 
 function draw_factor_row() {
     // i odd - left branch
@@ -166,6 +128,42 @@ function draw_next_step()
 	Exercise.steps_given++;
 }
 
+function cmpNum(a, b) {
+    return a - b;
+}
+
+function checkPrimeFactAnswer() {
+    var input = $("#answer").val();
+    if (input == "") {
+        alert("Please enter your answer.");
+        return Answer.INVALID;
+    }
+    input = input.split(" ").join("").toLowerCase();
+    var num_x = input.match(/x/g);
+    var input_array = input.split("x");
+    
+    for (var i = 0; i < input_array.length; i++) {
+        var factor = input_array[i];
+        if (factor == "" || factor.match(/[^0-9]/g)) {
+            alert("Please enter a well-formed answer.");
+            return Answer.INVALID;
+        }
+    }
+    
+    if (input_array.length != answer.length)
+        return Answer.INCORRECT;
+    
+    input_array.sort(cmpNum);
+    answer.sort(cmpNum);
+    
+    for (var i = 0; i < input_array.length; i++) {
+        if (input_array[i] != answer[i])
+            return Answer.INCORRECT;
+    }
+    return Answer.CORRECT;
+}
+
+Exercise.checkAnswer = checkPrimeFactAnswer;
 
 //-->
 </script>
@@ -175,6 +173,7 @@ function draw_next_step()
 <script language=Javascript1.2><!--
 
 write_text('What is the prime factorization of `' + number + '`?');
+write_text("Type each factor separated by an x, like this: 2 x 3.");
 //-->
 </script>
 <br>
