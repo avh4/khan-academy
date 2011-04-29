@@ -5,7 +5,7 @@
 .video_comments div.comment_form .comment_text { width:350px; }
 
 
-.video_comments .comments_show_more { padding-left: 6px; }
+.video_comments .comments_show_more { padding-left: 6px; display:none; }
 .video_comments a.comment_add { outline: none; }
 
 .video_questions { padding-top: 18px; }

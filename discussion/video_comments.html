@@ -10,11 +10,9 @@
     <a href="{{login_url}}" class="control"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Log in to add a comment</a>
     {% endif %}
 
-    {% if comments_hidden %}
-        <span class="comments_show_more">
-            <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="{% static_url "/images/balloons.png" %}" />Show more</a>
-        </span>
-    {% endif %}
+    <span class="comments_show_more">
+        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="{% static_url "/images/balloons.png" %}" />Show more</a>
+    </span>
 
     <div class="comment_form" style="display:none;">
         <form class="comments" name="comments">
