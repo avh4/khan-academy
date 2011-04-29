@@ -598,9 +598,9 @@ IEHtml5.init();
 
 var VideoViews = {
     init: function() {
-        var seedTime = new Date(2010,9,31);  //Seed Date is set to October 31, 2010  0-January, 11-december
-        var seedTotalViews = 28402468
-        var seedDailyViews = 100000;
+        var seedTime = new Date(2011,3,22);  //Seed Date is set to October 31, 2010  0-January, 11-december
+        var seedTotalViews = 50397618;
+        var seedDailyViews = 170000;
 
         var currentTime = new Date();
         var secondsSince = (currentTime.getTime()-seedTime.getTime())/1000;
