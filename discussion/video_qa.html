@@ -37,7 +37,6 @@
                 {% honeypots %}
                 <input type="hidden" id="video_key" class="video_key_primary" name="video_key" value="{{ video.key }}" />
                 <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
-                <input type="hidden" id="sort" name="sort" value="{{ sort_order }}" />
                 <div class="question_placeholder requires_script">
                     <textarea name="question_text" class="question_text" rows="3" cols="40" 
                                 watermark="Ask a question about this video"></textarea>
@@ -46,6 +45,10 @@
            </form>
         </div>
     </div>
+
+    <input type="hidden" id="sort" value="{{ sort_order }}" />
+    <input type="hidden" id="qa_page" value="{{ page }}" />
+    <input type="hidden" id="qa_expand_id" value="{{ qa_expand_id }}" />
 
     <div class="info_note note" style="display:none;">
         <span class="note_desc"></span>
@@ -61,4 +64,3 @@
 
 </div>
 <br/>
-

@@ -245,7 +245,7 @@ var QA = {
 
         $(window).resize(QA.repositionStickyNote);
 
-        QA.loadPage(0, true);
+        QA.loadPage($("#qa_page").val() || 0, true, $("#qa_expand_id").val());
         QA.enable();
     },
 
@@ -312,7 +312,7 @@ var QA = {
         QA.enable();
     },
 
-    loadPage: function(page, fInitialLoad) {
+    loadPage: function(page, fInitialLoad, qa_expand_id) {
 
         try { page = parseInt(page); }
         catch(e) { return; }
@@ -324,6 +324,7 @@ var QA = {
                     video_key: $("#video_key").val(), 
                     playlist_key: $("#playlist_key").val(),
                     sort: $("#sort").val(),
+                    qa_expand_id: qa_expand_id,
                     page: page
                 }, 
                 function(data) { QA.finishLoadPage(data, fInitialLoad); });
