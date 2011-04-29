@@ -1,7 +1,7 @@
-{% extends "units.html" %}
-
+{% extends arithmetic_template %}
 
 {% block maincell %}
+<script type="text/javascript" src="/javascript/wordproblems.js?{{App.version}}"></script>
 <script language=Javascript1.2><!--
 
 //type 1-4 for LEVEL1
@@ -119,7 +119,7 @@ eval("type"+getRandomIntRange(1,4)+"()");
 
 {% endblock maincell %}
 
-{% block answerarea %}<br>Answer:<input type="text" size=10 id="answer"  name="answer" onkeypress="if (event.keyCode == 13) {checkFreeAnswer(); return false;}"></br>{% endblock answerarea %}
-{% block checkanswer %}highlight_answer();checkFreeAnswer(){% endblock checkanswer %}
-
+{% block hintfunction %}
+give_next_step()
+{% endblock hintfunction%}
 

@@ -6,15 +6,16 @@
  <script type="text/javascript" charset="utf-8"> 
  $(document).ready(function(){    
     $('#txtNominator').focus();
-    $('#txtNominator').keyup(function(e) {
+    $('#txtNominator').keypress(function(e) {
         if(e.keyCode == 13) {
-            check_answer_block();
+            Exercise.logAnswer();
+            return false;
         }
     });
-
-    $('#txtNominator').keypress(function(e) {
+    
+    $('#txtNominator').keydown(function(e) {
         var Nominator = document.getElementById("txtNominator").value;
-        if(e.keyCode==191 || e.keyCode==47){
+        if(e.keyCode==191 || e.charCode==47){
             e.preventDefault();
             if(isNaN(Nominator) || $.trim(Nominator) ==''){
                 document.getElementById("txtNominator").value='';
@@ -22,14 +23,13 @@
             } else{
                 $('#txtDenominator').focus();
             }
-
         }
-
     });
 
-    $('#txtDenominator').keyup(function(e) {
+    $('#txtDenominator').keypress(function(e) {
         if(e.keyCode == 13) {
-            check_answer_block();
+            Exercise.logAnswer();
+            return false;
         }
     });
 })

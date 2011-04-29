@@ -193,12 +193,12 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
             if(isNaN(Nominator) || $.trim(Nominator) ==''){
                 alert("Enter a valid numerator.");
                 $('#txtNominator').focus();
-                return;
+                return Answer.INVALID;
             } else if(_unreducedNominator==0 && $.trim(Denominator) ==''){
 
             } else if(isNaN(Denominator) || $.trim(Denominator) ==''){
                 alert("Enter a valid denominator.");
-                return;
+                return Answer.INVALID;
             }
             var isCorrect = false;
             if(_reducedNominator==0 && $.trim(Denominator) ==''){
@@ -207,9 +207,11 @@ FractionSubtraction.SubtractionWithCommonDenominator = new function(){
                 isCorrect = (_reducedNominator/_reducedDenominator == Nominator/Denominator);
             }
 
-            handleCorrectness(isCorrect);
-            if(!isCorrect){
-                $('#txtNominator').focus();
+            if (isCorrect) {
+                return Answer.CORRECT;
+            } else {
+                $('#txtNominator').focus();                
+                return Answer.INCORRECT;
             }
         }
     };
