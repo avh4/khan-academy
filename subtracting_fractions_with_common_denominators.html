@@ -11,7 +11,9 @@
 <div id="dvHintText3" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:#999;"></div>
 <div id="dvHintText4" style="display:none; padding-left:10px; padding-top:10px; font-size:150%; color:orange;"></div>
 <script type="text/javascript" src="/javascript/exercises/subtracting_fractions_with_common_denominators.js"></script>
+<script>
+    Exercise.checkAnswer = FractionSubtraction.SubtractionWithCommonDenominator.check_answer;
+</script>
 {% endblock maincell %}
 
-{% block checkanswer %} FractionSubtraction.SubtractionWithCommonDenominator.check_answer(){% endblock checkanswer%}
 {% block hintfunction %}FractionSubtraction.SubtractionWithCommonDenominator.next_step(){% endblock hintfunction %}

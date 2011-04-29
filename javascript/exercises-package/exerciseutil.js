@@ -7,6 +7,14 @@ var Exercise = {
     
     showNextProblem: function() {},
     
+    checkAnswer: checkFreeAnswer,
+    
+    logAnswer: function() {
+        var result = Exercise.checkAnswer();
+        if (result != Answer.INVALID)
+            handleCorrectness(result == Answer.CORRECT);
+    },
+    
     init: function() {
         this.tries=0;
         this.possibleAnswers = new Array(); //These are the possible answers
@@ -19,6 +27,7 @@ var Exercise = {
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
         this.incorrect.src = "/images/face-sad.gif";
+        
     },
     
     display: function() {
@@ -341,7 +350,7 @@ function renderChoices() {
     
     $('.select-choice').keypress(function(e) {
         if (e.which == '13') {
-            check_answer_block();
+            Exercise.logAnswer();
             return false;
         }
     });
@@ -659,17 +668,25 @@ function randomFromArray(a)
 	return a[index];
 }
 
-function check_answer()
+function checkFreeAnswer() {
+    highlight_answer();
+    return isInputCorrect($("#answer").val(), correctAnswer, 0);
+}
+
+function checkMultipleChoiceAnswer()
 {
     var checkedIndex = $(":radio[name='selectAnswer']").index($(":radio[name='selectAnswer']:checked")); 
     
     if (checkedIndex == -1) {
         window.alert("Please choose your answer.");
-        return;
+        return Answer.INVALID;
     }
     
-	var isCorrect = (checkedIndex == Exercise.correctchoice)
-	handleCorrectness(isCorrect);
+	var isCorrect = (checkedIndex == Exercise.correctchoice);
+	if (isCorrect)
+	    return Answer.CORRECT;
+	else
+	    return Answer.INCORRECT;
 }
 
 function randomizeCheckboxChoices(){
