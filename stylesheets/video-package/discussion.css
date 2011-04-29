@@ -282,40 +282,6 @@ span.mod_tools_hidden, span.flag_tools_hidden {
     background-color: yellow;
 }
 
-input.button, a.button {
-    display: inline-block;
-	background-image: url(/images/x-repeating-sprites.png);
-    background-position: 0px -72px;
-	padding:5px 10px 6px 10px;
-	font-weight:bold;
-	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
-	border:1px solid rgba(0,0,0,0.4);
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
-	-moz-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
-	-webkit-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
-	box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
-    background-color: #CCCCCC;
-    color: #141414;
-}
-input.button:hover, a.button:hover {
-    background-color: #006699;
-    color: #ffffff;
-    text-decoration: none;
-}
-
-input.buttonDisabled, input.buttonDisabled:hover {
-    background: #ddd;
-    color: gray;
-}
-
-a.button {
-    font-size: 11px;
-    font-family: Lucida Grande;
-    text-decoration: none;
-}
-
 span.playYouTube {
     padding-right: 16px;
     background:url('/images/play.png') no-repeat right center;
@@ -337,19 +303,12 @@ table.feedback_list th {
 }
 
 .page_controls img.icon { position:relative; top:-1px; }
-.button img.icon { background: transparent; }
 #page_sub_nav img.icon { background: #E5ECF9; }
 
 .page_controls { padding: 5px 0; }
 .page_controls a.button { padding: 3px 5px; }
 
 .sig { font-style: italic; padding-left: 7px; color: #898989; }
-img.throbber { position: absolute; }
-form { display: inline; }
-a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
-a.control:hover { color: #DD6900; }
-
-div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 span.flag_tools_show img {
     width: 14px;
