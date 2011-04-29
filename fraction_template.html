@@ -12,6 +12,19 @@
             return false;
         }
     });
+    
+    $('#txtNominator').keydown(function(e) {
+        var Nominator = document.getElementById("txtNominator").value;
+        if(e.keyCode==191 || e.charCode==47){
+            e.preventDefault();
+            if(isNaN(Nominator) || $.trim(Nominator) ==''){
+                document.getElementById("txtNominator").value='';
+                alert("Enter a valid numerator.");
+            } else{
+                $('#txtDenominator').focus();
+            }
+        }
+    });
 
     $('#txtDenominator').keypress(function(e) {
         if(e.keyCode == 13) {
