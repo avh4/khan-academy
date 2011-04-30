@@ -48,15 +48,9 @@ var wrongAnswers = new Array();
 correct_answer = fCoef*correctY + gCoef*correctGY;
 correctAnswer = correct_answer;
 
-for(var i=0; i<6; i++)
-{
-	var y = Math.round(KhanAcademy.random()*200)-100;
-	
-	while ((y==correct_answer) || ($.inArray(y, Exercise.possibleAnswers) != -1))
-	{
-		y = Math.round(KhanAcademy.random()*200)-100;
-	}
-	Exercise.possibleAnswers.push(y);
+while (Exercise.getNumPossibleAnswers() < 6) {
+    var y = Math.round(KhanAcademy.random()*200)-100;
+    addWrongChoice(y);
 }
 
 function draw_next_step() {
