@@ -211,10 +211,14 @@ class RequestHandler(webapp.RequestHandler):
     def render_template_simple(self, template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         self.response.out.write(template.render(path, template_values))
+
+    def render_template_to_string(self, template_name, template_values):
+        path = os.path.join(os.path.dirname(__file__), template_name)
+        return template.render(path, template_values)
  
-    def render_template_to_string(self, name, context):
-        path = os.path.join(os.path.dirname(__file__), name + ".html")
-        return render_block_to_string(path, name + "_block", context).strip()
+    def render_template_block_to_string(self, template_name, block, context):
+        path = os.path.join(os.path.dirname(__file__), template_name)
+        return render_block_to_string(path, block, context).strip()
 
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)

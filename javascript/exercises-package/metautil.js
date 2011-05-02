@@ -221,14 +221,6 @@ function showFeedback(isCorrect) {
     $("#feedback").show();
 }
 
-function checkFreeAnswer()
-{
-    
-    var result = isInputCorrect($("#answer").val(), correctAnswer, 0);
-    if (result != Answer.INVALID)
-    	handleCorrectness(result == Answer.CORRECT);
-}
-
 Answer = {
     INVALID: 0,
     CORRECT: 1,

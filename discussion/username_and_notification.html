@@ -9,8 +9,7 @@
             {% endif %}
         >
             {% if count %}
-            <img src="{% static_url "/images/email.png" %}" class="icon" style="width:16px;height:11px;"/>
-                <span class="notification_bubble">{{ count }}</span></a>
+            <img src="{% static_url "/images/email.png" %}" class="icon" style="width:16px;height:11px;"/><span class="notification_bubble">{{ count }}</span></a>
             {% else %}
             <img src="{% static_url "/images/email-gray.png" %}" class="icon" style="width:16px;height:11px;"/></a>
             {% endif %}

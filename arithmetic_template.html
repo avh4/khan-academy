@@ -132,12 +132,12 @@ var currentexercise = "{{exid|escapejs}}";
 			<input type="hidden" id="problem_number" name="problem_number" value="{{problem_number|escape}}">
             {% block answerarea %}
                 {% if not read_only %}
-                <span class="info-box-header">Answer</span><input {% if is_mobile %} type="number" {% else %} type="text" {% endif %}  id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+                <span class="info-box-header">Answer</span><input {% if is_mobile %} type="number" {% else %} type="text" {% endif %}  id="answer" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}">
                 {% endif %}
             {% endblock answerarea %}
             {% if not read_only %}
             {% block feedbackarea %}
-			<input type="button" class="button green" id="check-answer-button" tabindex="10" value="Check Answer" onClick="check_answer_block()">
+			<input type="button" class="button green" id="check-answer-button" tabindex="10" value="Check Answer" onClick="Exercise.logAnswer()">
 			<div id="check-answer-results">
                 <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
                 <div id="next-container" class="button" style="position:relative; display: none;">
@@ -149,14 +149,6 @@ var currentexercise = "{{exid|escapejs}}";
             {% endif %}
 			{% endblock answerform %}
 		<script type="text/javascript"><!--
-			// some modules already have a check_answer...
-			function check_answer_block() {
-				{% block checkanswer %}
-				highlight_answer();
-				checkFreeAnswer();
-				{% endblock checkanswer %}
-			}
-
 			var elForm = document.forms['answerform'];
 			if (elForm)
 			{

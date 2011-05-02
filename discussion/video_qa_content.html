@@ -1,0 +1,91 @@
+{% for question in questions %}
+    <a name="q_{{question.key.id}}"></a>
+    <div class="question_container
+        {% ifequal qa_expand_id question.key.id %}
+            question_container_expanded
+        {% endifequal %}
+    ">
+        <input type="hidden" name="entity_key" value="{{ question.key }}" />
+        <div class="question" data-question_id="{{ question.key.id }}">
+            {% vote_tools question %}
+            {% ifnotequal qa_expand_id question.key.id %}
+                <a class="question_link" href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
+                    <span>{{ question.content|escape|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
+                </a>
+            {% endifnotequal %}
+            <span
+            {% ifnotequal qa_expand_id question.key.id %}
+                class="question_content_urlized" style="display:none;"
+            {% endifnotequal %}
+            >{{ question.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
+        </div>
+
+        {% ifnotequal qa_expand_id question.key.id %}
+            <div class="question_answer_count
+            {% if not question.children_cache %}
+                unanswered
+            {% endif %}
+            ">
+                <table><tr>
+                <td style="vertical-align: middle;">
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
+                </td>
+                <td>
+                    <span class="question_answer_count_add_yours">
+                        <input type="button" class="button add_yours" value="Add yours" />
+                    </span>
+                </td>
+                </tr></table>
+            </div>
+        {% endifnotequal %}
+        
+        <div class="question_sig sig">
+            {% signature question "asked" %}
+        </div>
+
+        {% feedback_controls_question "Edit this question" question %}
+
+        <div class="answers_and_form_container"
+            {% ifnotequal qa_expand_id question.key.id %}
+                style="display:none;"
+            {% endifnotequal %}
+        >
+            <div class="answers_container">
+                {% question_answers question.children_cache %}
+            </div>
+
+            <div class="answer_container">
+                <div class="answer_form">
+                    <form class="answer">
+                        {% honeypots %}
+                        <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+                        <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
+                        <input type="hidden" name="question_key" value="{{ question.key }}" />
+                        <div class="answer_placeholder">
+                            <textarea name="answer_text" class="answer_text" rows="2" cols="40" watermark="Answer this question"></textarea>
+                        </div>
+                        {% feedback_controls_answer "Answer this question" %}
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="clearFloat">&nbsp;</div>
+{% endfor %}
+
+{% if show_page_controls %}
+<div class="page_controls questions_page_controls">
+    <span>
+        {% ifnotequal current_page_1_based 1 %}
+        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ prev_page_1_based }}#qa" class="button page questions_page" page="{{ prev_page_1_based }}"><img class="icon" src="{% static_url "/images/arrow-left.png" %}" /> {% ifequal sort_order 2 %}Newer questions{% else %}Q&A with higher votes{% endifequal %}</a>
+        {% endifnotequal %}
+
+        {% ifnotequal current_page_1_based pages_total %}
+        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_page={{ next_page_1_based }}#qa" class="button page questions_page" page="{{ next_page_1_based }}">{% ifequal sort_order 2 %}Older questions{% else %}Q&A with lower votes{% endifequal %} <img class="icon" src="{% static_url "/images/arrow-right.png" %}" /></a>
+        {% endifnotequal %}
+    </span>
+</div>
+{% endif %}
+

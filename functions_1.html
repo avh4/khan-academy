@@ -30,15 +30,9 @@ var wrongAnswers = new Array();
 
 setCorrectAnswer(correctY);
 
-for(var i=0; i<6; i++)
-{
-	var y = Math.round(KhanAcademy.random()*18)-9;
-	
-	while (y==correctY)
-	{
-		y = Math.round(KhanAcademy.random()*18)-9;
-	}
-	Exercise.possibleAnswers.push(y);
+while (Exercise.getNumPossibleAnswers() < 6) {
+    var y = Math.round(KhanAcademy.random()*18)-9;
+    addWrongChoice(y);
 }
 
 function draw_next_step() {

@@ -23,6 +23,6 @@ SolidGeometryExercise.graphUpdate();
 {% block answerarea %}
 <span class="info-box-header">Answer</span>
 <div class="multiple_of_pi">Enter your answer as a multiple of `pi`.</div>
-<input type="text" id="answer" size="12" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}">
+<input type="text" id="answer" size="12" autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}">
 <span class="multiple_of_pi" title="Enter your answer as a multiple of pi">&nbsp;`pi`&nbsp;</span>
 {% endblock answerarea %}

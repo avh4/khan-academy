@@ -5,7 +5,7 @@
 .video_comments div.comment_form .comment_text { width:350px; }
 
 
-.video_comments .comments_show_more { padding-left: 6px; }
+.video_comments .comments_show_more { padding-left: 6px; display:none; }
 .video_comments a.comment_add { outline: none; }
 
 .video_questions { padding-top: 18px; }
@@ -282,40 +282,6 @@ span.mod_tools_hidden, span.flag_tools_hidden {
     background-color: yellow;
 }
 
-input.button, a.button {
-    display: inline-block;
-	background-image: url(/images/x-repeating-sprites.png);
-    background-position: 0px -72px;
-	padding:5px 10px 6px 10px;
-	font-weight:bold;
-	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
-	border:1px solid rgba(0,0,0,0.4);
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
-	-moz-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
-	-webkit-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
-	box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
-    background-color: #CCCCCC;
-    color: #141414;
-}
-input.button:hover, a.button:hover {
-    background-color: #006699;
-    color: #ffffff;
-    text-decoration: none;
-}
-
-input.buttonDisabled, input.buttonDisabled:hover {
-    background: #ddd;
-    color: gray;
-}
-
-a.button {
-    font-size: 11px;
-    font-family: Lucida Grande;
-    text-decoration: none;
-}
-
 span.playYouTube {
     padding-right: 16px;
     background:url('/images/play.png') no-repeat right center;
@@ -336,28 +302,13 @@ table.feedback_list th {
     text-align: left;
 }
 
-img.icon { vertical-align: bottom; width: 16px; height: 16px; padding-right: 2px; background: transparent; }
 .page_controls img.icon { position:relative; top:-1px; }
-.button img.icon { background: transparent; }
 #page_sub_nav img.icon { background: #E5ECF9; }
 
 .page_controls { padding: 5px 0; }
 .page_controls a.button { padding: 3px 5px; }
 
 .sig { font-style: italic; padding-left: 7px; color: #898989; }
-img.throbber { position: absolute; }
-form { display: inline; }
-a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
-a.control:hover { color: #DD6900; }
-
-#top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
-#top-header #top-header-links span.username_and_notification { vertical-align:baseline; position:relative; top:2px; }
-#top-header #top-header-links span.username_and_notification span.user-name { vertical-align:baseline; }
-#top-header #top-header-links span.username_and_notification span.user-notification { vertical-align:baseline; }
-#top-header #top-header-links span.username_and_notification_shift { left: 12px; }
-#top-header #user-info img { position:relative; top:-1px; }
-
-div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 span.flag_tools_show img {
     width: 14px;
@@ -390,6 +341,7 @@ a.vote_for {
     *margin: 0;
 }
 
+a.vote_for img { width: 18px; height: 13px; }
 a.vote_for img.vote_up, a.vote_for img.vote_down { display:none; }
 
 .vote_tools a.voted img.vote_up, .vote_tools a.voted img.vote_down { display:inline; }
@@ -449,30 +401,6 @@ div.vote_tools {
     display:none;
 }
 
-
 div.feedback_flag:hover {
     background: #fff url(/images/flag.png) no-repeat 0 0;
-}
-
-a.notification_link {
-    text-decoration: none;
-    border-bottom: 0;
-}
-
-a.notification_link span.notification_bubble {
-    width: 16px;
-    height: 16px;
-    position: relative;
-    top: 9px;
-    left: -12px;
-    background: url('/images/brightness-low.png') no-repeat;
-    text-align: center;
-    font-size: 11px;
-    padding-top: 2px;
-    
-    /* X-browser inline-block support */
-    display:-moz-inline-stack;
-    display:inline-block;
-    zoom:1;
-    *display:inline;
 }

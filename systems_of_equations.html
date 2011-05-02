@@ -185,11 +185,14 @@ push_fractions_other_than(intersection[2], intersection[3], "y", Exercise.possib
     	if (Exercise.selectedchoice === undefined || Exercise.selectedchoice2 === undefined) 
     	{
     			window.alert("Please choose both answers.");
-    			return;
+    			return Answer.INVALID;
     	}
 
     	var isCorrect = (Exercise.selectedchoice==Exercise.correctchoice  && Exercise.selectedchoice2==Exercise.correctchoice2);
-    	handleCorrectness(isCorrect);
+    	if (isCorrect)
+    	    return Answer.CORRECT;
+    	else
+    	    return Answer.INCORRECT;
     }
     
     function select_choice(choice)
@@ -255,14 +258,15 @@ push_fractions_other_than(intersection[2], intersection[3], "y", Exercise.possib
 
     $choices.keypress(function(e) {
         if (e.which == '13') {
-            check_answer_block();
+            Exercise.logAnswer();
             return false;
         }
     });
+    
+    Exercise.checkAnswer = check_both_answers;
 
 //-->
 </script>
 </table>
 {% endblock answerarea %}
-{% block checkanswer %}check_both_answers(){% endblock checkanswer%}
 {% block hintfunction %}give_next_step(){% endblock hintfunction %}
