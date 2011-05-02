@@ -469,7 +469,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                     pass # Ignore if we can't parse
 
                 # Cap seconds_watched at duration of video
-                seconds_watched = min(seconds_watched, video.duration)
+                seconds_watched = max(0, min(seconds_watched, video.duration))
 
                 last_second_watched = 0
                 try:
