@@ -11,6 +11,9 @@ from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
+from google.appengine.dist import use_library
+use_library('django', '0.96')
+
 import django.conf
 
 try:
