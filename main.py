@@ -22,8 +22,8 @@ try:
         ),
         TEMPLATE_DIRS=(os.path.dirname(__file__),)
     )
-except EnvironmentError:
-    pass
+except EnvironmentError, error:
+    logging.critical("Environment error during load: %s" % error)
 
 from django.template.loader import render_to_string
 from django.utils import simplejson
