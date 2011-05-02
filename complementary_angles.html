@@ -5,17 +5,14 @@
 {% endblock maincode %}
 
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script>
+    
+    RaphaelWrapper.init(400, 400);
     var exercise = new ComplementarySupplementaryAnglesExercise(IS_COMP);
-    function graph_update() {
-        exercise.showProblem();
-    }
 </script>
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td><iframe name="present" frameborder=0 src="/graphpage.html?w=300&h=300" height="330" width="330"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block hintfunction %}
 give_next_step()

@@ -166,12 +166,10 @@ if (type == 0) {
 function draw_next_step() {
 	give_next_step();
 }
+
+graph_update();
 //-->
 </script>
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="420" width="420"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

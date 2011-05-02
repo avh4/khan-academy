@@ -1,7 +1,11 @@
 {% extends arithmetic_template %}
 {% block maincode %}
-<script>
+<div id="raphael_container"></div>
 
+<script>
+    
+    RaphaelWrapper.init(500, 400);
+    
     var num;
 
     generateNewProblem(function(){
@@ -102,18 +106,20 @@
 
     function drawNumLine()
     {
+        present.stroke = "#000";
         present.line([numLinePadding, numLineY], [xMax-numLinePadding, numLineY]);
         present.fontsize = smallSize;
         for(var i=numLineMin; i<=numLineMax; i++)
         {
             var x = numLinePadding + (i-numLineMin)*slashSpacing;
-            present.line([x,numLineY-slashHeight/2],[x,numLineY+slashHeight/2]);
+            var y1 = numLineY - slashHeight/2;
+            var y2 = numLineY + slashHeight/2;
+            present.line([x, y1],[x, y2]);
             present.text([x,numLineY], i, above);
         }
         present.fontsize = standardSize;
     }
 
+    graph_update();
 </script>
 {% endblock maincode %}
-
-{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}

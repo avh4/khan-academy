@@ -1,6 +1,9 @@
 {% extends "systems_of_equations.html" %}
 {% block maincode %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(290, 290);
 var x1= get_random();
 var x2= get_random();
 var y1= get_random();
@@ -153,11 +156,10 @@ for (var i=0; i<5; i++)
 	Exercise.possibleAnswers.push('m='+format_fraction(bad_m_num, bad_m_den));
 	Exercise.possibleAnswers2.push('b='+format_fraction(bad_b_num, bad_b_den));
 }
+
+graph_update();
 //-->
 </script>
-
-
-<iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe>
 
 {% endblock maincell %}
 

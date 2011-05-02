@@ -1,6 +1,8 @@
 {% extends arithmetic_template %}
 {% block maincode %}
+<div id="raphael_container" style="float: right"></div>
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(400, 500);
 var number = getRandomIntRange(10, 100);
 var factors = new Array();
 var primefs = new Array();
@@ -90,20 +92,7 @@ function draw_factorization()
 }
 function graph_update() {
 
-    present.setBorder(0);
 
-    present.initPicture(0, 16, 0, 16);
-    present.stroke = "black";
-    present.fontstyle = "normal"
-    present.fontsize = 24;
-    
-    present.text([factorX + xSpace, treeYLevel], factors[0], below, "factor0");
-    
-    treeYLevel -= ySpace;
-    treeX += xSpace;
-    
-    i=1;
-    draw_factor_row();
 }
 function draw_next_step()
 {
@@ -113,7 +102,20 @@ function draw_next_step()
 	}
 	else if (Exercise.steps_given==1)
 	{
-		document.getElementById('present').style.display = 'block';
+	    present.setBorder(0);
+
+        present.initPicture(0, 16, 0, 16);
+        present.stroke = "black";
+        present.fontstyle = "normal"
+        present.fontsize = 24;
+
+        present.text([factorX + xSpace, treeYLevel], factors[0], below, "factor0");
+
+        treeYLevel -= ySpace;
+        treeX += xSpace;
+
+        i=1;
+        draw_factor_row();
 	}
 	else if (i < factors.length)
 	{
@@ -177,6 +179,5 @@ write_text("Type each factor separated by an x, like this: 2 x 3.");
 </script>
 <br>
 <div id="hint0" style="display:none;font-family:sans-serif;font-size:14pt">Let's do a factorization tree!</div>
-<iframe id="present" name="present" style="display:none" frameborder=0 src="/graphpage.html?w=500&h=500" height="530" width="100%"></iframe>
 {% endblock maincell %}
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

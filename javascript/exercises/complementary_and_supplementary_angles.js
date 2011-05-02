@@ -54,9 +54,10 @@ function ComplementarySupplementaryAnglesExercise(t) {
     }
     
     generateProblem();
+    showProblem();
     generateHints();
     
-    this.showProblem = function() {
+    function showProblem() {
         this.graph = present;
     	present.initPicture(-1.1, 1.1, -1.1, 1.1);
     	present.marker = "arrow";

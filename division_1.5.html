@@ -1,6 +1,9 @@
 {% extends arithmetic_template %}
 {% block maincode %}
+<div id="raphael_container"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(400, 600);
 var counter = 0;
 var selectedArray = new Array();
 var answer = 0; 
@@ -460,10 +463,8 @@ function next_step()
 	
 }
 
-
+graph_update();
 //-->
 </script>
 {% endblock maincode %}
-
-{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=555" height="600" width="100%"></iframe>{% endblock maincell %}
-  
+ 

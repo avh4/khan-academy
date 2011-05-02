@@ -1,7 +1,13 @@
 {% extends "multiple_choice_template.html" %}
 
 {% block maincell %}
+
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
+
+RaphaelWrapper.init(400, 400);
+
 var drawFunction = null;
 var color1 = getNextColor();
 var color2 = getNextColor();
@@ -252,15 +258,10 @@ var tFunction = function() {
 checkHistory(cFunction, eFunction, tFunction, 4);
 
 eval('type'+problemType+'()');
-
+graph_update();
 
 //-->
 </script>
 
-
-
 {% endblock maincell %}
 
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe></td>
-{% endblock graphdisplay %}

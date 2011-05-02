@@ -26,6 +26,7 @@
 		imageFont: null
 	}
       });
+      var present = window; // Need this line because of asciisvg
   </script>
   <script type="text/javascript"><!--
 
@@ -98,22 +99,13 @@ var currentexercise = "{{exid|escapejs}}";
 
 <div>
 	<div id='question_area'>
-{% block maincode %}
+        {% block maincode %}
 
-{% endblock maincode %}
-		{% comment %}
-		We use a table here just because existing graphdisplay blocks create a table cell.
-		{% endcomment %}
+        {% endblock maincode %}
 		<div id="question_content_container" style="width: 2000px">
     		<div id="question_content" style="position:relative; float: left"></div>
 		</div>
-		<table style='float: right;'><tr>
-		{% block graphdisplay %}  {% endblock graphdisplay %}
-		</tr></table>
 		{% block maincell %}
-		    {% if exercise.summative %}
-    		    <iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>
-		    {% endif %}
 		{% endblock maincell %}
 		<iframe id="svgedit" name="svgedit" width="99%" height="99%" allowtransparency="true" frameBorder="0" scrolling="no" style="background-color: transparent; position: absolute; top: 0; left: 0; width: 99%; height: 99%; overflow: hidden; border:none;"></iframe>
 	</div>
