@@ -752,15 +752,6 @@ class KnowledgeMap(request_handler.RequestHandler):
     def get(self):
         self.redirect("/exercisedashboard")
 
-class GraphPage(request_handler.RequestHandler):
-
-    def get(self):
-        width = self.request.get('w')
-        height = self.request.get('h')
-        template_values = {'width': width, 'height': height}
-
-        self.render_template_simple('graphpage.html', template_values)
-
 class AdminViewUser(request_handler.RequestHandler):
 
     def get(self):
@@ -1850,7 +1841,6 @@ def real_main():
         ('/adminusers', ViewUsers),
         ('/videoless', VideolessExercises),
         ('/adminuserdata', AdminViewUser),
-        ('/graphpage.html', GraphPage),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
         ('/resetstreak', ResetStreak),
