@@ -4,7 +4,6 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from django.template.loader import render_to_string
 
 from django.utils import simplejson
 
@@ -34,9 +33,8 @@ class PageComments(request_handler.RequestHandler):
         if video:
             comments_hidden = self.request_bool("comments_hidden", default=True)
             template_values = video_comments_context(video, playlist, page, comments_hidden, sort_order)
-            path = os.path.join(os.path.dirname(__file__), 'video_comments_content.html')
 
-            html = render_to_string(path, template_values)
+            html = self.render_template_to_string("discussion/video_comments_content.html", template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
             self.response.out.write(json)
 
