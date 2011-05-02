@@ -9,7 +9,13 @@ google_appengine/appcfg.py download_data --application=khanexercises --url=http:
 gzip -f *.full.dat
 gzip -f *.full.log
 
-for f in *.full.*.gz
+for f in *.full.dat.gz
+do
+  echo "Splitting $f"
+  split -b4000m $f $f-
+done
+
+for f in *.full.dat.gz-*
 do
   echo "Moving $f to s3 bucket"
   s3cmd-1.0.0/s3cmd put $f s3://KA-full-backups/$f
