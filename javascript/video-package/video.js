@@ -37,10 +37,21 @@ var Video = {
             e.preventDefault();
         });
         
-        $('.subtitles-link').click(function() { Video.showSubtitles(); return false; });
-        $('.close-subtitles-link').click(function() { Video.hideSubtitles(); return false; });
+        $('.and-more').click(function(){
+            $(this).hide();
+            $('.more-content').show();
+            return false;
+        });
 
+        $('.subtitles-link').click(function() { Video.toggleSubtitles(); return false; });
         if (readCookie(this.SHOW_SUBTITLES_COOKIE))
+            this.showSubtitles();
+    },
+
+    toggleSubtitles: function() {
+        if ($('.subtitles-warning').is(":visible"))
+            this.hideSubtitles();
+        else
             this.showSubtitles();
     },
 
@@ -49,7 +60,6 @@ var Video = {
 
         $('.mirosubs-videoTab').hide();
         $('.subtitles-warning').hide();
-        $('.subtitles-link').show();
         $('.youtube-video').css('marginBottom', '0px');
     },
 
@@ -57,7 +67,6 @@ var Video = {
         createCookie(this.SHOW_SUBTITLES_COOKIE, true, 365);
 
         $('.youtube-video').css('marginBottom', '30px');
-        $('.subtitles-link').hide();
         $('.subtitles-warning').show();
         $('.mirosubs-videoTab').show();
 

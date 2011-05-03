@@ -129,4 +129,9 @@
     bottom: -30px;
     right: 0px;
 }
-
+.extra-link-bar .more-content {
+    display: none;
+}
+.extra-link-bar a {
+    color: #069;
+}

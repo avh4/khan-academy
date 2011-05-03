@@ -62,7 +62,7 @@
                 <div class="subtitles-warning">
                     &lArr; Use this menu to view and help create subtitles for this video in many different languages.
                     You'll probably want to hide YouTube's captions if using these subtitles. 
-                    <a href="#" class="close-subtitles-link">Close subtitles</a>
+                    <a href="#" class="subtitles-link">Close subtitles</a>
                 </div>
             </div>
     
@@ -70,11 +70,13 @@
             {% if user %}
                 {% possible_points_badge awarded_points video_points_base %}
             {% endif %}
-            <span class="extra-link-bar"><a href="{{video_path}}">Download</a>
-            {% if exercise %}
-                | <a href="/exercises?exid={{exercise}}">Exercises</a>
-                {% endif %}
-                <span class="subtitles-link">| <a href="#">Subtitles</a></span>
+                <span class="extra-link-bar">
+                    {% if exercise %}
+                        <a href="/exercises?exid={{exercise}}">Exercises</a>,
+                    {% endif %}
+                    <span class="subtitles-link"><a href="#">Subtitles</a></span>{% if exercise %},{% endif %}
+                    <span class="and-more">and <a class="more-link" href="#">more</a></span>
+                    <span class="more-content">or <a href="{{video_path}}">Download</a></span>
                 </span>
             </nobr></span>
             <div class="desktop-only">
