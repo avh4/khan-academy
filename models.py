@@ -4,6 +4,7 @@ import datetime, logging
 import math
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.datastore import entity_pb
 
 from google.appengine.ext import db
 import object_property
@@ -628,6 +629,19 @@ class Video(Searchable, db.Model):
             video_dict[fxn_key(video)] = video
         return video_dict
 
+    def related_exercises(self):
+        exercise_videos = None
+        query = ExerciseVideo.all()
+        query.filter('video =', self.key())
+        return query
+
+    @layer_cache.cache_with_key_fxn(lambda self: "related_exercise_%s" % self.key(), layer=layer_cache.Layers.Memcache)
+    def get_related_exercise(self):
+        exercise_video = self.related_exercises().get()
+        if exercise_video:
+            exercise_video.exercise # Pre-cache exercise entity
+        return exercise_video or ExerciseVideo()
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
@@ -856,7 +870,7 @@ class VideoPlaylist(db.Model):
 
         videos = memcache.get(key, namespace=namespace)
 
-        if videos is None:
+        if not videos:
             videos = []
             query = VideoPlaylist.all()
             query.filter('playlist =', playlist)

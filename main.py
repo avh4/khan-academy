@@ -393,10 +393,9 @@ class ViewVideo(request_handler.RequestHandler):
         else:
             video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
 
-        exercise_videos = ExerciseVideo.all().filter('video =', video)
-        exercise_video = exercise_videos.get()
         exercise = None
-        if exercise_video:
+        exercise_video = video.get_related_exercise()
+        if exercise_video and exercise_video.exercise:
             exercise = exercise_video.exercise.name            
                             
         if video.description == video.title:
@@ -420,7 +419,6 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'video_points_base': consts.VIDEO_POINTS_BASE,
                                                   'awarded_points': awarded_points,
                                                   'exercise': exercise,
-                                                  'exercise_videos': exercise_videos,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
                                                   'selected_nav_link': 'watch',
@@ -1461,6 +1459,14 @@ class Donate(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
 
+class ViewTOS(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('tos.html', {"selected_nav_link": "tos"})
+
+class ViewPrivacyPolicy(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
+
 class ViewStore(request_handler.RequestHandler):
 
     def get(self):
@@ -1817,6 +1823,8 @@ def real_main():
         ('/about/blog/.*', blog.ViewBlogPost),
         ('/about/the-team', util_about.ViewAboutTheTeam),
         ('/about/getting-started', util_about.ViewGettingStarted),
+        ('/about/tos', ViewTOS ),
+        ('/about/privacy-policy', ViewPrivacyPolicy ),
         ('/contribute', ViewContribute ),
         ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),
