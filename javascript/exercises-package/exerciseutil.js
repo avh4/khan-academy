@@ -334,7 +334,7 @@ function renderChoices() {
 	
 	if(Exercise.fAddNoneOfThese) {
         // With probability 1/4, the correct answer is "None of these"
-    	if (!getRandomIntRange(0, 3)) {
+        if (!getRandomIntRange(0, 3)) {
             answerChoices[Exercise.correctchoice] = answerChoices[num_choices - 1]	   
             Exercise.correctchoice = num_choices - 1; 
     	}
@@ -674,9 +674,20 @@ function checkFreeAnswer() {
     return isInputCorrect($("#answer").val(), correctAnswer, 0);
 }
 
+function replaceNoneOfThese() {
+    var label = $("#answer_content label:last");
+    label.fadeOut("fast");
+    label.html(label.html().replace("None of these", "`" + correct_answer + "`"));
+    label.find(":radio").attr("checked", "checked");
+    translate();
+    label.fadeIn("fast");
+}
+
 function checkMultipleChoiceAnswer()
 {
-    var checkedIndex = $(":radio[name='selectAnswer']").index($(":radio[name='selectAnswer']:checked")); 
+    var radios = $(":radio[name='selectAnswer']");
+    var selected = radios.filter(":checked");
+    var checkedIndex = radios.index(selected); 
     
     if (checkedIndex == -1) {
         window.alert("Please choose your answer.");
@@ -684,8 +695,11 @@ function checkMultipleChoiceAnswer()
     }
     
 	var isCorrect = (checkedIndex == Exercise.correctchoice);
-	if (isCorrect)
+	if (isCorrect) {
+        if (Exercise.fAddNoneOfThese && (checkedIndex == radios.length - 1))
+    	    replaceNoneOfThese();
 	    return Answer.CORRECT;
+    }
 	else
 	    return Answer.INCORRECT;
 }
