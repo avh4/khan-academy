@@ -1468,6 +1468,14 @@ class Donate(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
 
+class ViewTOS(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('tos.html', {"selected_nav_link": "tos"})
+
+class ViewPrivacyPolicy(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
+
 class ViewStore(request_handler.RequestHandler):
 
     def get(self):
@@ -1824,6 +1832,8 @@ def real_main():
         ('/about/blog/.*', blog.ViewBlogPost),
         ('/about/the-team', util_about.ViewAboutTheTeam),
         ('/about/getting-started', util_about.ViewGettingStarted),
+        ('/about/tos', ViewTOS ),
+        ('/about/privacy-policy', ViewPrivacyPolicy ),
         ('/contribute', ViewContribute ),
         ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),
