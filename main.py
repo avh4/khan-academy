@@ -393,10 +393,9 @@ class ViewVideo(request_handler.RequestHandler):
         else:
             video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
 
-        exercise_videos = ExerciseVideo.all().filter('video =', video)
-        exercise_video = exercise_videos.get()
         exercise = None
-        if exercise_video:
+        exercise_video = video.get_related_exercise()
+        if exercise_video and exercise_video.exercise:
             exercise = exercise_video.exercise.name            
                             
         if video.description == video.title:
@@ -420,7 +419,6 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'video_points_base': consts.VIDEO_POINTS_BASE,
                                                   'awarded_points': awarded_points,
                                                   'exercise': exercise,
-                                                  'exercise_videos': exercise_videos,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
                                                   'selected_nav_link': 'watch',
