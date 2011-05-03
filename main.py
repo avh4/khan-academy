@@ -406,11 +406,6 @@ class ViewVideo(request_handler.RequestHandler):
         if user_video is not None:
             awarded_points = user_video.points()
 
-        # If a QA question is being expanded, we want to clear notifications for its
-        # answers before we render page_template so the notification icon shows
-        # its updated count. 
-        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
-
         template_values = qa.add_template_values({'playlist': playlist,
                                                   'video': video,
                                                   'videos': videos,
