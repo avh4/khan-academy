@@ -1,6 +1,9 @@
 {% extends arithmetic_template %}
 {% block maincode %}
+<div id="raphael_container"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(400, 400);
 var counter = 0;
 var topNumber = new Array();
 var bottomNumber = new Array(); 
@@ -469,9 +472,7 @@ function getFontString(text, font)
 	return ('<FONT class=\"'+font+'\">'+text+'</FONT>');
 }
 
+graph_update();
 //-->
 </script>
 {% endblock maincode %}
-
-{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=435" height="470" width="100%"></iframe>{% endblock maincell %}
-  

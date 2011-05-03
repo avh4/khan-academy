@@ -4,7 +4,13 @@
 {% endblock maincode %}
 
 {% block maincell %}
-<script language=Javascript1.2><!--
+
+
+<div id="raphael_container" style="float: right;"></div>
+
+<script>
+
+RaphaelWrapper.init(400, 400);
 
 degree = getRandomIntRange(2, 3);
 coefs = new Array();
@@ -103,7 +109,6 @@ write_step('<p>Looks like <span style="color:blue">the slope at `x=' + a + '`</s
 
 function graph_update() {
 	initPlane();
-	
 	present.stroke = "red";
 	present.plot(polyn);
 }
@@ -121,12 +126,10 @@ function draw_next_step() {
 	}
 	give_next_step();
 }
+
+graph_update();
 //-->
 </script>
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" id="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="430" width="430"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

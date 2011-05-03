@@ -1,6 +1,11 @@
 {% extends arithmetic_template %}
 {% block maincode %}
+<div id="raphael_container"></div>
+
 <script language=Javascript1.2><!--
+
+RaphaelWrapper.init(400, 400);
+
 var term1 = 1;
 var term2 = 1;
 var operator = 1;
@@ -165,9 +170,8 @@ function next_step()
 	Exercise.steps_given++;
 }
 
+graph_update();
 //-->
 </script>
 {% endblock maincode %}
 
-{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="450" width="100%"></iframe>{% endblock maincell %}
-  

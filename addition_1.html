@@ -1,6 +1,9 @@
 {% extends arithmetic_template %}
 {% block maincode %}
-<script language=Javascript1.2><!--
+<div id="raphael_container"></div>
+
+<script>
+    RaphaelWrapper.init(400, 300);
 
 var term1 = 0;
 var term2 = 0;
@@ -118,9 +121,9 @@ function next_step()
 	Exercise.steps_given++;
 }
 
+graph_update();
+
 //-->
 </script>
 {% endblock maincode %}
-
-{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
-  
+ 

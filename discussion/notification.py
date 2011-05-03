@@ -13,6 +13,7 @@ import util_discussion
 import request_handler
 import models
 import models_discussion
+import voting
 
 class VideoFeedbackNotificationList(request_handler.RequestHandler):
 
@@ -32,6 +33,9 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
         for answer in answers:
 
             video = answer.first_target()
+
+            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+            voting.add_vote_expando_properties(answer, dict_votes)
 
             if video == None or type(video).__name__ != "Video":
                 continue

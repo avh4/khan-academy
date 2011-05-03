@@ -29,6 +29,7 @@ var ExerciseRangeOfAFunction = {
         for(var i = 0; i < this.equation.hints.length; i++){
             writeStep(this.equation.hints[i]);
         }
+        initPlane();
     },
 
     plot: function(){
@@ -176,8 +177,4 @@ var ExerciseRangeOfAFunction = {
         }
         return e;
     }
-}
-
-function graph_update(){
-    initPlane();
 }

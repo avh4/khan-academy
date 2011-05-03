@@ -17,7 +17,7 @@
                     {% column_major_sorted_videos playlist_data.videos %}
                     <div class="clear desktop-only">
                     {% if playlist_data.next %}
-                        <a name="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
+                        <a name="{{ playlist_data.next.title|slugify|escape }}" id="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
                     {% endif %}
                     </div>
                 </div>

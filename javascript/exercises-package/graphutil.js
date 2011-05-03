@@ -1,3 +1,11 @@
+RaphaelWrapper = {
+    init: function(width, height) {
+        var paper = Raphael(document.getElementById("raphael_container"), width, height);
+        initPaper(paper, width, height);
+        return paper;
+    }
+};
+
 var toDraw = {};
 var randInt = getRandomIntRange(5,9);
 
@@ -955,14 +963,7 @@ function rotateGraph(degrees) {
 	}
 }
 
-
-
-
 function initGraph() {
-	
-	//var dimensionMax = .25;
-	//var dimensionMin = 0;
-	
 	var xMax = .25;
 	var yMax = .25;
 	var xMin = 0;
@@ -975,8 +976,6 @@ function initGraph() {
 		yMax = Math.max(yMax, curPoint.y);
 		xMin = Math.min(xMin, curPoint.x);
 		yMin = Math.min(yMin, curPoint.y);
-		//dimensionMax = Math.max(dimensionMax, Math.max(curPoint.x, curPoint.y));
-		//dimensionMin = Math.min(dimensionMin, Math.min(curPoint.x, curPoint.y));
 	}
 	
 	
@@ -986,7 +985,6 @@ function initGraph() {
 	if ((xMax-xMin)>(yMax-yMin))
 	{
 		var margin = .25*(xMax-xMin);
-		//alert([xMin-margin, xMax+margin, yCenter-margin-(xMax-xMin)/2, yCenter+margin+(xMax-xMin)/2]);
 		present.initPicture(xMin-margin, xMax+margin, yCenter-margin-(xMax-xMin)/2, yCenter+margin+(xMax-xMin)/2);
 	}
 	else
@@ -996,19 +994,14 @@ function initGraph() {
 		
 	}
 	
-	//var margin = .25*(dimensionMax - dimensionMin);
 	present.strokewidth = "2";
-	//present.initPicture(dimensionMin-margin,dimensionMax+margin, dimensionMin-margin,dimensionMax+margin);
 	for(var k=0; k < initialObjectsToDraw.length; k++)
 	{
 		initialObjectsToDraw[k].draw();
 	}
-
-
 }
 
 function graph_update() {
-	
 	initGraph();
 }
 

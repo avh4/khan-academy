@@ -707,6 +707,43 @@ footer {
     #top-header #top-header-links #page_auth .css-menu > ul > li:after {
         background-image: url(/images/pulldown-green.png);
     }
+
+    #top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
+    #top-header #top-header-links span.username_and_notification { vertical-align:baseline; position:relative; top:2px; }
+    #top-header #top-header-links span.username_and_notification span.user-name { vertical-align:baseline; }
+    #top-header #top-header-links span.username_and_notification span.user-notification { vertical-align:baseline; }
+    #top-header #top-header-links span.username_and_notification_shift { left: 12px; }
+    #top-header #user-info img { position:relative; top:-1px; }
+
+    #top-header #top-header-links .page_links a.notification_link {
+        text-decoration: none;
+        border-bottom: 0;
+    }
+
+    #top-header a.notification_link span.notification_bubble {
+        width: 16px;
+        height: 16px;
+        position: relative;
+        top: 9px;
+        left: -9px;
+        background: #DD6900;
+        text-align: center;
+        font-size: 11px;
+
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+
+        opacity: 0.75;
+        filter:alpha(opacity=75);
+        
+        /* X-browser inline-block support */
+        display:-moz-inline-stack;
+        display:inline-block;
+        zoom:1;
+        *display:inline;
+    }
+
     #login-menu .fb_button, #login-menu .fb_button_rtl {
         background-image: none;
         background: transparent;
@@ -801,6 +838,14 @@ img.rounded-background,
     -moz-box-shadow: 0 1px 3px #ccc;
     -webkit-box-shadow: 0 1px 3px #ccc;
     box-shadow: 0 1px 3px #ccc;
+}
+
+img.icon {
+    vertical-align: bottom;
+    width: 16px;
+    height: 16px;
+    padding-right: 2px;
+    background: transparent;
 }
 
 hr.thin {
@@ -982,20 +1027,9 @@ a:link.google-analytics-link-track
     text-shadow: none;
 }
 
-/* Typography */
-
 #library a {
 	text-decoration: none;
-	font-weight: bold;
-	}
-
-
-
-
-
-
-
-
+}
 
 /* Clear Floated Elements
 ----------------------------------------------------------------------------------------------------*/
@@ -1934,7 +1968,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #coaches, #students, #donate, #individual_report, 
 .achievement-badges-container, #login-page, 
 #about-us, #homepage, #video-page, #contribute,
-#credits, #report-problem {
+#credits, #report-problem, #tos, #privacy-policy {
     padding: 0 23px;
     background: transparent;
     position: relative;
@@ -2698,3 +2732,49 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     opacity: 0.5;
 }
 /* End Knowledge Map CSS */
+
+input.button, a.button {
+    display: inline-block;
+	background-image: url(/images/x-repeating-sprites.png);
+    background-position: 0px -72px;
+	padding:5px 10px 6px 10px;
+	font-weight:bold;
+	text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+	border:1px solid rgba(0,0,0,0.4);
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	-moz-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+	-webkit-box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+	box-shadow: 0px 0px 2px rgba(0,0,0,0.5);
+    background-color: #CCCCCC;
+    color: #141414;
+}
+input.button:hover, a.button:hover {
+    background-color: #006699;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+input.buttonDisabled, input.buttonDisabled:hover {
+    background: #ddd;
+    color: gray;
+}
+
+a.button {
+    font-size: 11px;
+    font-family: Lucida Grande;
+    text-decoration: none;
+}
+.button img.icon { background: transparent; }
+
+img.throbber { position: absolute; }
+
+form { display: inline; }
+
+a.control, a.control:visited, a.control:focus, a.control:link { color: #069; }
+a.control:hover { color: #DD6900; }
+
+div.clearFloat { overflow:hidden; height:1px; clear:both; }
+
+

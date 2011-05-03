@@ -16,3 +16,6 @@ queue:
 
 - name: youtube-sync-queue
   rate: 5/s
+
+- name: voting-queue
+  rate: 5/s

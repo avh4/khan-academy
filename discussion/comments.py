@@ -8,11 +8,11 @@ from google.appengine.ext.webapp import template
 from django.utils import simplejson
 
 import models_discussion
-from render import render_block_to_string
 import util_discussion
 import app
 import util
 import request_handler
+import voting
 
 class PageComments(request_handler.RequestHandler):
 
@@ -26,15 +26,15 @@ class PageComments(request_handler.RequestHandler):
 
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
+        sort_order = self.request_int("sort_order", default=voting.VotingSortOrder.HighestPointsFirst)
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
         if video:
-            comments_hidden = (self.request.get("comments_hidden") == "1")
-            template_values = video_comments_context(video, playlist, page, comments_hidden)
-            path = os.path.join(os.path.dirname(__file__), 'video_comments.html')
+            comments_hidden = self.request_bool("comments_hidden", default=True)
+            template_values = video_comments_context(video, playlist, page, comments_hidden, sort_order)
 
-            html = render_block_to_string(path, 'comments', template_values)
+            html = self.render_template_to_string("discussion/video_comments_content.html", template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
             self.response.out.write(json)
 
@@ -70,9 +70,12 @@ class AddComment(request_handler.RequestHandler):
             comment.types = [models_discussion.FeedbackType.Comment]
             comment.put()
 
-        self.redirect("/discussion/pagecomments?video_key=%s&playlist_key=%s&page=0&comments_hidden=%s" % (video_key, playlist_key, comments_hidden))
+        self.redirect("/discussion/pagecomments?video_key=%s&playlist_key=%s&page=0&comments_hidden=%s&sort_order=%s" % 
+                (video_key, playlist_key, comments_hidden, voting.VotingSortOrder.NewestFirst))
 
-def video_comments_context(video, playlist, page=0, comments_hidden=True):
+def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_order=voting.VotingSortOrder.HighestPointsFirst):
+
+    user = util.get_current_user()
 
     if page > 0:
         comments_hidden = False # Never hide questions if specifying specific page
@@ -80,17 +83,22 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
         page = 1
 
     limit_per_page = 10
-    limit_initially_visible = 3 if comments_hidden else limit_per_page
+    limit_initially_visible = 2 if comments_hidden else limit_per_page
 
     comments = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Comment)
+    comments = voting.VotingSortOrder.sort(comments, sort_order=sort_order)
 
     count_total = len(comments)
     comments = comments[((page - 1) * limit_per_page):(page * limit_per_page)]
 
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+    for comment in comments:
+        voting.add_vote_expando_properties(comment, dict_votes)
+
     count_page = len(comments)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": util.get_current_user(),
+            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,
@@ -104,5 +112,4 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True):
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "login_url": util.create_login_url("/video?v=%s" % video.youtube_id)
            }

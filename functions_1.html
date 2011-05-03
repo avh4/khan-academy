@@ -1,6 +1,9 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincode %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(500, 500);
 
 var currentY = Math.round(KhanAcademy.random()*10)-5;
 var functionPath =new Array();
@@ -27,15 +30,9 @@ var wrongAnswers = new Array();
 
 setCorrectAnswer(correctY);
 
-for(var i=0; i<6; i++)
-{
-	var y = Math.round(KhanAcademy.random()*18)-9;
-	
-	while (y==correctY)
-	{
-		y = Math.round(KhanAcademy.random()*18)-9;
-	}
-	Exercise.possibleAnswers.push(y);
+while (Exercise.getNumPossibleAnswers() < 6) {
+    var y = Math.round(KhanAcademy.random()*18)-9;
+    addWrongChoice(y);
 }
 
 function draw_next_step() {
@@ -73,7 +70,7 @@ function graph_update() {
 	present.path(functionPath);
 }
 
-
+graph_update();
 
 //-->
 </script>
@@ -82,15 +79,9 @@ function graph_update() {
 {% block maincell %}
 
 <script language=Javascript1.2><!--
-document.write('<font color=\"orange\" style=bold size=6>`f('+correctX+')=?`</font>');
+write_text('<span style=\"font-size: 32px;\">Solve for <span style=\"color: orange;\">`f('+correctX+')`</span></span>');
 //-->
 </script>
-
-
-<center><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
-</center>
-
-
 
 {% endblock maincell %}
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

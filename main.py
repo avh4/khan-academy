@@ -11,6 +11,9 @@ from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
+from google.appengine.dist import use_library
+use_library('django', '0.96')
+
 import django.conf
 
 try:
@@ -58,24 +61,13 @@ import activity_summary
 import exercises
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
-
-from discussion import comments
-from discussion import qa
-from discussion import notification
-
-from about import util_about
-from about import blog
-
+from discussion import comments, notification, qa, voting
+from about import blog, util_about
 from jobs import jobs
-
-from badges import util_badges
-from badges import last_action_cache
-
+from badges import util_badges, last_action_cache
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
-
 from topics_list import topics_list, all_topics_list, DVD_list
-
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
@@ -401,10 +393,9 @@ class ViewVideo(request_handler.RequestHandler):
         else:
             video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
 
-        exercise_videos = ExerciseVideo.all().filter('video =', video)
-        exercise_video = exercise_videos.get()
         exercise = None
-        if exercise_video:
+        exercise_video = video.get_related_exercise()
+        if exercise_video and exercise_video.exercise:
             exercise = exercise_video.exercise.name            
                             
         if video.description == video.title:
@@ -428,7 +419,6 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'video_points_base': consts.VIDEO_POINTS_BASE,
                                                   'awarded_points': awarded_points,
                                                   'exercise': exercise,
-                                                  'exercise_videos': exercise_videos,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
                                                   'selected_nav_link': 'watch',
@@ -477,7 +467,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                     pass # Ignore if we can't parse
 
                 # Cap seconds_watched at duration of video
-                seconds_watched = min(seconds_watched, video.duration)
+                seconds_watched = max(0, min(seconds_watched, video.duration))
 
                 last_second_watched = 0
                 try:
@@ -556,7 +546,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                 db.put([user_video, video_log, user_data])
 
         user_points_context = user_points(user_data)
-        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
         
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
@@ -905,13 +895,13 @@ class RegisterAnswer(request_handler.RequestHandler):
         exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
         
         streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = self.render_template_to_string("streak_bar", streak_bar_context)
+        streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)
         
         exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-        exercise_message_html = self.render_template_to_string("exercise_message", exercise_message_context)
+        exercise_message_html = self.render_template_block_to_string("exercise_message.html", "exercise_message_block", exercise_message_context)
         
         exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = self.render_template_to_string("exercise_icon", exercise_icon_context)
+        exercise_icon_html = self.render_template_block_to_string("exercise_icon.html", "exercise_icon_block", exercise_icon_context)
         
         badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
         badge_count_context = badge_counts(user_data)
@@ -922,7 +912,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
         
         user_points_context = user_points(user_data)
-        user_points_html = self.render_template_to_string("user_points", user_points_context)
+        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
         
         updated_values = {
             'exercise_states': exercise_states,
@@ -1007,177 +997,6 @@ class ResetStreak(request_handler.RequestHandler):
             userExercise.put()
         else:
             self.redirect(util.create_login_url(self.request.uri))
-
-
-class ViewUsers(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        user = util.get_current_user()
-        query = UserData.all()
-        count = 0
-        for user in query:
-            count = count + 1
-
-        self.response.out.write('Users ' + str(count))
-
-class GenerateHomepageContent(request_handler.RequestHandler):
-
-
-    def get(self):
-        def get_playlist(playlist_title):
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
-            query.order('video_position')
-            playlist_videos = query.fetch(500)
-            videos = []
-            for playlist_video in playlist_videos:
-                videos.append(playlist_video.video)
-            
-            return { 
-                    'id': playlist_title+"_playlist",
-                    'title': playlist_title,
-                    'description': playlist.description,
-                    'videos': videos
-                    }
-        
-        tree = {
-                'title': "Videos by Topic",
-                'children': 
-                [
-                 {
-                  'title': "Math",
-                  'children': [
-                                get_playlist('Arithmetic'),
-                                get_playlist('Developmental Math'),
-                                {
-                                 'title': 'Pre-algebra',
-                                 'children': [
-                                                get_playlist('Pre-algebra'),
-                                                get_playlist('MA Tests for Education Licensure (MTEL) -Pre-Alg')
-                                              ]
-                                },
-#                                ]
-#                  }
-#                 ]
-#                }
-        
-                                {
-                                 'title': 'Algebra',
-                                 'children': [
-                                                get_playlist('Algebra'),
-                                                get_playlist('Algebra I Worked Examples'),
-                                                get_playlist('ck12.org Algebra 1 Examples'),
-                                                get_playlist('California Standards Test: Algebra I'),
-                                                get_playlist('California Standards Test: Algebra II'),
-                                              ]
-                                },
-                                get_playlist('Probability'),
-                                get_playlist('Statistics'),
-                                {
-                                 'title': 'Geometry',
-                                 'children': [
-                                                get_playlist('Geometry'),
-                                                get_playlist('California Standards Test: Geometry'),
-                                              ]
-                                },
-                                get_playlist('Trigonometry'),
-                                get_playlist('Precalculus'),
-                                get_playlist('Calculus'),
-                                get_playlist('Differential Equations'),
-                                get_playlist('Linear Algebra'),
-                               ]
-                  },
-                 {
-                  'title': "Science",
-                  'children': [
-                                {
-                                 'title': 'Chemistry',
-                                 'children': [
-                                                get_playlist('Chemistry'),
-                                                get_playlist('Organic Chemistry'),
-                                              ]
-                                },
-                                get_playlist('Biology'),
-                                get_playlist('Physics'),
-                               ]
-                  },
-                  get_playlist('History'),
-                 {
-                  'title': "Economics",
-                  'children': [
-                                get_playlist('Finance'),
-                                get_playlist('Valuation and Investing'),
-                                get_playlist('Banking and Money'),
-                                get_playlist('Venture Capital and Capital Markets'),
-                                {
-                                 'title': 'Current Economics',
-                                 'children': [
-                                                get_playlist('Current Economics'),
-                                                get_playlist('Credit Crisis'),
-                                                get_playlist('Paulson Bailout'),
-                                                get_playlist('Geithner Plan'),
-                                              ]
-                                },
-                               ]
-                  },
-                 {
-                  'title': "Test Preparation",
-                  'children': [
-                                get_playlist('SAT Preparation'),
-                                get_playlist('GMAT: Problem Solving'),
-                                get_playlist('GMAT Data Sufficiency'),
-                               ]
-                  },
-                  get_playlist('Brain Teasers'),
-                  get_playlist('Khan Academy-Related Talks and Interviews'),
-                 ]
-                }
-        
-        def get_activities(node):
-            videos = node.get('videos', [])
-            activities = {}
-            for v in videos:
-                activities[v.readable_id] = v
-            for child in node.get('children', []):
-                activities.update(get_activities(child))
-            node['num_activities'] = len(activities)
-            return activities
-        
-        tree['num_activities'] = len(get_activities(tree))
-                
-        def iterator(nodes, depth, topic_template_path, playlist_template_path = None):
-            if playlist_template_path is None:
-                playlist_template_path = topic_template_path
-            for node in nodes:
-                template_values = node.copy()
-                if template_values.get('id') is None:
-                    template_values['id'] = template_values['title']
-                if node.get('videos'):
-                    yield render_to_string(playlist_template_path, template_values)
-                else:
-                    children = iterator(node['children'], depth+1, topic_template_path, playlist_template_path)
-                    template_values.update({
-                                            'children': children
-                                            })
-                    html = render_to_string(topic_template_path, template_values)
-                    yield html
-
-        template_values = {
-            'App' : App,
-            'toc': iterator([tree], 0,
-                             os.path.join(os.path.dirname(__file__), 'videolibrary_toc.html')),
-            'contents': iterator([tree], 0,
-                             os.path.join(os.path.dirname(__file__), 'videolibrary_topic.html'), 
-                             os.path.join(os.path.dirname(__file__), 'videolibrary_playlist.html')),
-            }
-        self.render_template('homepage_content_template.html', template_values)
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
@@ -1477,6 +1296,14 @@ class ViewCredits(request_handler.RequestHandler):
 class Donate(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
+
+class ViewTOS(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('tos.html', {"selected_nav_link": "tos"})
+
+class ViewPrivacyPolicy(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
 
 class ViewStore(request_handler.RequestHandler):
 
@@ -1834,6 +1661,8 @@ def real_main():
         ('/about/blog/.*', blog.ViewBlogPost),
         ('/about/the-team', util_about.ViewAboutTheTeam),
         ('/about/getting-started', util_about.ViewGettingStarted),
+        ('/about/tos', ViewTOS ),
+        ('/about/privacy-policy', ViewPrivacyPolicy ),
         ('/contribute', ViewContribute ),
         ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),
@@ -1855,7 +1684,6 @@ def real_main():
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),
-        ('/adminusers', ViewUsers),
         ('/videoless', VideolessExercises),
         ('/adminuserdata', AdminViewUser),
         ('/graphpage.html', GraphPage),
@@ -1893,6 +1721,7 @@ def real_main():
         ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
         ('/admin/badgestatistics', util_badges.BadgeStatistics),
         ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
+        ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
@@ -1958,6 +1787,9 @@ def real_main():
         ('/discussion/pagequestions', qa.PageQuestions),
         ('/discussion/clearflags', qa.ClearFlags),
         ('/discussion/flagentity', qa.FlagEntity),
+        ('/discussion/voteentity', voting.VoteEntity),
+        ('/discussion/updateqasort', voting.UpdateQASort),
+        ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
         ('/discussion/deleteentity', qa.DeleteEntity),
         ('/discussion/changeentitytype', qa.ChangeEntityType),
         ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),

@@ -18,7 +18,7 @@
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
         {% else %}{% if exercise %}<title>{{exercise.display_name|escape}} | Khan Academy</title>
-	{% else %}<title>Khan Academy</title>
+	{% else %}<title>{% block meta_page_title %}{% endblock meta_page_title %}Khan Academy</title>
 	{% endif %}
         {% endif %}
         <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -->
@@ -41,6 +41,7 @@
             {% js_package "mobile" %}
         {% else %}
             {% css_package "shared" %}
+            {% block pagecss %}{% endblock pagecss %}
             {% js_package "shared" %}
         {% endif %}
 

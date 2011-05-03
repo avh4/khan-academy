@@ -187,12 +187,12 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
             if(isNaN(Nominator) || $.trim(Nominator) ==''){
                 alert("Enter a valid numerator.");
                 $('#txtNominator').focus();
-                return ;
+                return Answer.INVALID;
             } else if(_reducedDenominator==1 && $.trim(Denominator) ==''){
 
             } else if(isNaN(Denominator) || $.trim(Denominator) ==''){
                 alert("Enter a valid denominator.");
-                return ;
+                return Answer.INVALID;
             }
             var isCorrect = false,temp;           
 
@@ -201,9 +201,12 @@ FractionAddition.AdditionWithCommonDenominator = new function(){
             }else {
                 isCorrect = (_reducedNominator/_reducedDenominator == Nominator/Denominator);
             }
-            handleCorrectness(isCorrect);
-            if(!isCorrect){
+            
+            if (isCorrect) {
+                return Answer.CORRECT;
+            } else {
                 $('#txtNominator').focus();
+                return Answer.INCORRECT;                
             }
         }
     };

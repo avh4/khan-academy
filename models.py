@@ -249,14 +249,18 @@ class UserExercise(db.Model):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
 
     @staticmethod
+    def get_for_user(user):
+        query = UserExercise.all()
+        query.filter('user =', user)
+        return query.fetch(1000)
+
+    @staticmethod
     @request_cache.cache_with_key_fxn(lambda user: "request_cache_user_exercise_%s" % user.email())
     def get_for_user_use_cache(user):
         user_exercises_key = UserExercise.get_key_for_user(user)
         user_exercises = memcache.get(user_exercises_key)
         if user_exercises is None:
-            query = UserExercise.all()
-            query.filter('user =', user)
-            user_exercises = query.fetch(1000)
+            user_exercises = UserExercise.get_for_user(user)
             memcache.set(user_exercises_key, user_exercises)
         return user_exercises
 
@@ -377,7 +381,7 @@ class UserData(db.Model):
     assigned_exercises = db.StringListProperty()
     badges = db.StringListProperty() # All awarded badges
     need_to_reassess = db.BooleanProperty()
-    points = db.IntegerProperty()
+    points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()
@@ -386,6 +390,7 @@ class UserData(db.Model):
     last_daily_summary = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
+    question_sort_order = db.IntegerProperty(default = -1)
     
     @staticmethod
     def get_for_current_user():
@@ -623,6 +628,19 @@ class Video(Searchable, db.Model):
             video_dict[fxn_key(video)] = video
         return video_dict
 
+    def related_exercises(self):
+        exercise_videos = None
+        query = ExerciseVideo.all()
+        query.filter('video =', self.key())
+        return query
+
+    @layer_cache.cache_with_key_fxn(lambda self: "related_exercise_%s" % self.key(), layer=layer_cache.Layers.Memcache)
+    def get_related_exercise(self):
+        exercise_video = self.related_exercises().get()
+        if exercise_video:
+            exercise_video.exercise # Pre-cache exercise entity
+        return exercise_video or ExerciseVideo()
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()
@@ -851,7 +869,7 @@ class VideoPlaylist(db.Model):
 
         videos = memcache.get(key, namespace=namespace)
 
-        if videos is None:
+        if not videos:
             videos = []
             query = VideoPlaylist.all()
             query.filter('playlist =', playlist)

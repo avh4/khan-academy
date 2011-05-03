@@ -4,7 +4,12 @@
 {% endblock maincode %}
 
 {% block maincell %}
+
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
+
+RaphaelWrapper.init(400, 400);
 var x = [];
 var y = [];
 
@@ -159,31 +164,34 @@ function graphPoint(pt)
 	present.text([x[pt], y[pt]], namePoint(x[pt], y[pt]), aboveright);
 }
 
+function checkMidpointAnswer() {
+    // custom short-answer since there's no real need for multiple choice here
+    highlight_answer();
+
+    var isXCorrect = isInputCorrect($("#answer").val(), correctX, 0);
+    var isYCorrect = isInputCorrect($("#answery").val(), correctY, 0);
+
+    if (isXCorrect == Answer.INVALID || isYCorrect == Answer.INVALID) {
+        return Answer.INVALID;
+    } else {
+        if ((isXCorrect == Answer.CORRECT) && (isYCorrect == Answer.CORRECT))
+            return Answer.CORRECT;
+        else
+            return Answer.INCORRECT;
+    }
+}
+
+Exercise.checkAnswer = checkMidpointAnswer;
+
+graph_update();
 //-->
 </script>
 {% endblock maincell %}
 
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="450" width="450"></iframe></td>
-{% endblock graphdisplay %}
-
 {% block answerarea %}
 <span class="info-box-header">Answer</span>
-(<input type="text" size=4 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"/>,
-<input type="text" size=4 id="answery"  autocomplete="off" name="answery" onkeypress="if (event.keyCode == 13) {check_answer_block(); return false;}"/>)</br>
+(<input type="text" size=4 id="answer"  autocomplete="off" name="answer" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}"/>,
+<input type="text" size=4 id="answery"  autocomplete="off" name="answery" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}"/>)</br>
 {% endblock answerarea %}
-
-{% block checkanswer %}
-// custom short-answer since there's no real need for multiple choice here
-highlight_answer();
-
-var isXCorrect = isInputCorrect($("#answer").val(), correctX, 0);
-var isYCorrect = isInputCorrect($("#answery").val(), correctY, 0);
-
-if (isXCorrect != Answer.INVALID && isYCorrect != Answer.INVALID) {
-    handleCorrectness((isXCorrect == Answer.CORRECT) && (isYCorrect == Answer.CORRECT));
-}
-
-{% endblock checkanswer %}
 
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

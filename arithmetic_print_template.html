@@ -16,8 +16,8 @@
 	showProcessingMessages: true,
 	delayStartupUntil: "onload",
 	skipStartupTypeset: true,
-        extensions: ["mml2jax.js"],
-	jax: ["input/MathML", "output/HTML-CSS"],
+        extensions: ["mml2jax.js", "tex2jax.js"],
+	jax: ["input/TeX", "input/MathML", "output/HTML-CSS"],
 	"HTML-CSS": {
 		scale: 100,
 		availableFonts:["STIX", "TeX"],
@@ -29,11 +29,9 @@
   </script>
   
 <script language=Javascript1.2><!--
+var present = window; // Need this line because of asciisvg
+Exercise.init();
 $(document).ready(function () {
-    Exercise.init();
-    Exercise.fSupportsAjax = false;
-    Exercise.display();
-    
 	var iframe = null;
 	if (parent) 
 		iframe = parent.document.getElementById("problem{{problem_number}}");
@@ -53,6 +51,8 @@ $(document).ready(function () {
 		translate(resizeIframe);
 	}
 	KhanAcademy.onMathMLSupportReady(translateAndResize);
+	Exercise.fSupportsAjax = false;
+    Exercise.display();
 });
 KhanAcademy.problem_number = "{{problem_number}}";
 KhanAcademy.seedRandom(KhanAcademy.problem_number);
@@ -64,16 +64,10 @@ KhanAcademy.seedRandom(KhanAcademy.problem_number);
 	<div id='question_area' style="position: relative; padding-top: 75px; padding-left: 50px; display: inline-block; vertical-align: top; width: 65%; min-width: 610px;">
 {% block maincode %}
 {% endblock maincode %}
-		{% comment %}
-		We use a table here just because existing graphdisplay blocks create a table cell.
-		{% endcomment %}
 		<div id="question_content_container" style="width: 2000px">
     		<div id="question_content" style="position:relative; float: left"></div>
 		</div>
-		<table style='float: right;'><tr>
-		{% block graphdisplay %}  {% endblock graphdisplay %}			
-		</tr></table>
-		{% block maincell %}<iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>{% endblock maincell %}
+		{% block maincell %}{% endblock maincell %}
 	</div>
 	<div id='answer_area' style="display: inline-block; padding: 1em;">
 		<form id="answerform" action="/registeranswer" method="post">

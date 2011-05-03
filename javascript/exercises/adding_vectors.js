@@ -19,11 +19,10 @@ function AddingVectorsExercise() {
     var a_color_tag = outputColorTag(a_color);
     var b_color_tag = outputColorTag(b_color);
     var end_tag = "</span>";
-    var i_hat = "\\hat{i}";
-    var j_hat = "\\hat{j}";
 	var origin = [0, 0];
     
     generateProblem();
+    showProblem();
     generateHints();
     
     function generateProblem() {
@@ -75,7 +74,7 @@ function AddingVectorsExercise() {
         write_step("` = " + outputVector(sum) + "`");
     }
     
-    this.showProblem = function() {
+    function showProblem(){
         this.graph = present;
     	initPlane();
 
@@ -107,35 +106,5 @@ function AddingVectorsExercise() {
                 break;
             default:
         }
-    }
-    
-    function isOutOfBounds(vector) {
-        return vector.x >=10 || vector.x <= -10 || vector.y >= 10 || vector.y <= -10;
-    }
-    
-    function outputVector(v) {
-        var i = format_first_coefficient(v.x);
-        var j = format_coefficient(v.y);
-        if (v.x) {
-            i += i_hat;
-            j = format_coefficient(v.y);
-        } else {
-            i = "";
-            j = format_first_coefficient(v.y);
-        }
-            
-        if (v.y)
-            j += j_hat;
-        else
-            j = "";            
-            
-        if (!i && !j)
-            j = "0";
-
-        return i + j;
-    }
-    
-    function outputColorTag(color) {
-        return "<span style='color: " + color + "'>";
     }
 }

@@ -1,5 +1,11 @@
 {% extends "page_template.html" %}
+
+{% block pagecss %}
+    {% css_package "video" %}
+{% endblock pagecss %}
+
 {% block pagescript %}
+
 <style>
     .breadcrumbs_nav {
         font-weight: bold;
@@ -283,13 +289,18 @@ $(function(){
             </nobr></span>
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
-            {% video_qa video playlist qa_page qa_expand_id %}
+            {% video_qa user_data video playlist qa_page qa_expand_id sort %}
             </div>
         </div>
     </div>
 </article>
 </div>
 {% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {% js_package "video" %}
+{% endblock bottompagescript %}
+
 {% block pagefooter %}
 {% include "page_footer_short.html" %}
 {% endblock %}

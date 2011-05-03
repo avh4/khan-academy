@@ -7,11 +7,20 @@ var Exercise = {
     
     showNextProblem: function() {},
     
+    // Must return one of Answer.INVALID, Answer.CORRECT, or Answer.INCORRECT
+    checkAnswer: checkFreeAnswer,
+    
+    logAnswer: function() {
+        var result = Exercise.checkAnswer();
+        if (result != Answer.INVALID)
+            handleCorrectness(result == Answer.CORRECT);
+    },
+    
     init: function() {
         this.tries=0;
         this.possibleAnswers = new Array(); //These are the possible answers
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-        this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
+        this.checkboxChoices = new Array(); //This is used in exercises with checkbox answers
         this.steps_given=0;
         this.next_step_to_write = 0;
         this.correctchoice;
@@ -19,6 +28,7 @@ var Exercise = {
         this.correct.src = "/images/face-smiley.gif";
         this.incorrect = new Image();
         this.incorrect.src = "/images/face-sad.gif";
+        
     },
     
     display: function() {
@@ -316,7 +326,7 @@ function renderChoices() {
     
     $('.select-choice').keypress(function(e) {
         if (e.which == '13') {
-            check_answer_block();
+            Exercise.logAnswer();
             return false;
         }
     });
@@ -634,17 +644,25 @@ function randomFromArray(a)
 	return a[index];
 }
 
-function check_answer()
+function checkFreeAnswer() {
+    highlight_answer();
+    return isInputCorrect($("#answer").val(), correctAnswer, 0);
+}
+
+function checkMultipleChoiceAnswer()
 {
     var checkedIndex = $(":radio[name='selectAnswer']").index($(":radio[name='selectAnswer']:checked")); 
     
     if (checkedIndex == -1) {
         window.alert("Please choose your answer.");
-        return;
+        return Answer.INVALID;
     }
     
-	var isCorrect = (checkedIndex == Exercise.correctchoice)
-	handleCorrectness(isCorrect);
+	var isCorrect = (checkedIndex == Exercise.correctchoice);
+	if (isCorrect)
+	    return Answer.CORRECT;
+	else
+	    return Answer.INCORRECT;
 }
 
 function randomizeCheckboxChoices(){
