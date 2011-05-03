@@ -676,11 +676,12 @@ function checkFreeAnswer() {
 
 function replaceNoneOfThese() {
     var label = $("#answer_content label:last");
-    label.fadeOut("fast");
-    label.html(label.html().replace("None of these", "`" + correct_answer + "`"));
-    label.find(":radio").attr("checked", "checked");
-    translate();
-    label.fadeIn("fast");
+    label.fadeOut("fast", function() {
+        label.html(label.html().replace("None of these", "`" + correct_answer + "`"));
+        label.find(":radio").attr("checked", "checked");
+        translate();
+        label.fadeIn("fast");        
+    });
 }
 
 function checkMultipleChoiceAnswer()
