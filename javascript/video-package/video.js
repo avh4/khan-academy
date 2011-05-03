@@ -66,7 +66,7 @@ var Video = {
     showSubtitles: function() {
         createCookie(this.SHOW_SUBTITLES_COOKIE, true, 365);
 
-        $('.youtube-video').css('marginBottom', '30px');
+        $('.youtube-video').css('marginBottom', '32px');
         $('.subtitles-warning').show();
         $('.mirosubs-videoTab').show();
 
