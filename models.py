@@ -978,7 +978,7 @@ class ExerciseGraph(object):
                     ex.prerequisites_ex.append(ex_prereq)
         for user_ex in user_exercises:
             ex = self.exercise_by_name.get(user_ex.exercise)
-            if ex:
+            if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
                 ex.user_exercise = user_ex
                 ex.streak = user_ex.streak
                 ex.longest_streak = user_ex.longest_streak
