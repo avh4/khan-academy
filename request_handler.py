@@ -15,6 +15,7 @@ import util
 from app import App
 from models import UserData
 from render import render_block_to_string
+from nicknames import get_nickname_for
 
 class RequestHandler(webapp.RequestHandler):
 
@@ -180,7 +181,7 @@ class RequestHandler(webapp.RequestHandler):
 
         user = util.get_current_user()
         if user is not None:
-            template_values['username'] = user.nickname()
+            template_values['username'] = get_nickname_for(user)
 
         if not template_values.has_key('user_data'):
             user_data = UserData.get_for(user)

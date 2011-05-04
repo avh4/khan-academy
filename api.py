@@ -227,7 +227,6 @@ class ViewImport(request_handler.RequestHandler):
         user_data = UserData.get_for_current_user()
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'student_email' : self.request.get('student_email'),
                                                   }, 

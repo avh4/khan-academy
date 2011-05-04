@@ -47,11 +47,14 @@ def get_current_facebook_user():
     if profile is not None:
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
-        
+
         # We create a fake user, substituting the user's Facebook uid for their email 
-        # and their name for their OpenID identifier since Facebook isn't an
-        # OpenID provider at the moment, and GAE displays the OpenID identifier as the nickname().
-        return users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"], federated_identity = name)
+        user = users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"])
+
+        # Cache any future lookup of current user's facebook nickname in this request
+        request_cache.set(get_facebook_nickname_key(user), name)
+
+        return user
 
     return None
 

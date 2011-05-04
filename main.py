@@ -85,24 +85,6 @@ class VideoDataTest(request_handler.RequestHandler):
             self.response.out.write('<P>Title: ' + video.title)
 
 
-class DataStoreTest(request_handler.RequestHandler):
-
-    def get(self):
-        if users.is_current_user_admin():
-            self.response.out.write('<html>')
-            user = util.get_current_user()
-            if user:
-                problems_done = ProblemLog.all()
-                for problem in problems_done:
-                    self.response.out.write('<P>' + problem.user.nickname() + ' ' + problem.exercise + ' done:' + str(problem.time_done) + ' taken:' + str(problem.time_taken) + ' correct:'
-                                            + str(problem.correct))
-        else:
-            self.redirect(users.create_login_url(self.request.uri))
-
-
-# Setting this up to make sure the old Video-Playlist associations are flushed before the bulk upload from the local datastore (with the new associations)
-
-
 class DeleteVideoPlaylists(request_handler.RequestHandler):
 # Deletes at most 200 Video-Playlist associations that are no longer live.  Should be run every-now-and-then to make sure the table doesn't get too big
     def get(self):
@@ -188,7 +170,6 @@ class ViewExercise(request_handler.RequestHandler):
             template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_template.html',
-                'username': user.nickname(),
                 'user_data': user_data,
                 'points': user_data.points,
                 'exercise_points': exercise_points,
@@ -520,7 +501,6 @@ class PrintExercise(request_handler.RequestHandler):
             template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
-                'username': user.nickname(),
                 'points': user_data.points,
                 'proficient': proficient,
                 'endangered': endangered,
@@ -563,7 +543,6 @@ class ReportIssue(request_handler.RequestHandler):
         template_values = {
             'App' : App,
             'points': user_data.points,
-            'username': user and user.nickname() or "",
             'referer': self.request.headers.get('Referer'),
             'user_agent': user_agent,
             }
@@ -591,7 +570,6 @@ class ProvideFeedback(request_handler.RequestHandler):
         template_values = {
             'App' : App,
             'points': user_data.points,
-            'username': user and user.nickname() or "",
             }
 
         self.render_template("provide_feedback.html", template_values)
@@ -664,29 +642,6 @@ class KnowledgeMap(request_handler.RequestHandler):
 
     def get(self):
         self.redirect("/exercisedashboard")
-
-class AdminViewUser(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        username = self.request.get('u')
-        if username:
-
-            userdata = None
-            exercisedata = None
-            query = UserData.all()
-            for user_data in query:
-                if user_data.user.nickname() == username:
-                    userdata = user_data
-                    query = UserExercise.all()
-                    query.filter('user =', userdata.user)
-                    exercisedata = query.fetch(300)
-                    break
-
-            template_values = {'App' : App, 'exercise_data': exercisedata, 'user_data': userdata}
-            self.render_template('adminviewuser.html', template_values)
 
 class RegisterAnswer(request_handler.RequestHandler):
 
@@ -1170,7 +1125,6 @@ class ViewHomePage(request_handler.RequestHandler):
         
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'user_data': user_data,
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'video_id': movie_youtube_id,
@@ -1218,7 +1172,6 @@ class ViewStore(request_handler.RequestHandler):
         user_data = UserData.get_for_current_user()
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   }, 
                                                   self.request)
@@ -1226,11 +1179,9 @@ class ViewStore(request_handler.RequestHandler):
         self.render_template('store.html', template_values)
         
 class ViewHowToHelp(request_handler.RequestHandler):
-
     def get(self):
         self.redirect("/contribute", True)
         return
-
 
 class ViewSAT(request_handler.RequestHandler):
 
@@ -1248,7 +1199,6 @@ class ViewSAT(request_handler.RequestHandler):
         playlist_videos = query.fetch(500)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'videos': playlist_videos,
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   }, 
@@ -1265,7 +1215,6 @@ class ViewGMAT(request_handler.RequestHandler):
         data_sufficiency = VideoPlaylist.get_query_for_playlist_title("GMAT Data Sufficiency")
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'data_sufficiency': data_sufficiency,
                                                   'problem_solving': problem_solving,
                                                   'login_url': util.create_login_url(self.request.uri),
@@ -1427,30 +1376,6 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
         else:
             return False
             
-class ViewInfoPage(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  }, 
-                                                  self.request)
-        # Get the corresponding page from the info site
-        path = urllib.unquote(self.request.path.rpartition('/')[2])
-        scraped = urllib.urlopen('http://info.khanacademy.org/' + path).read()
-        # Convert it to a template that extends page_template.html
-        scraped = '{% extends "info_page_template.html" %}' + scraped
-        scraped = scraped.replace('<td id="sites-canvas-wrapper">', '{% block pagecontent %}')
-        scraped = scraped.replace('</td> \n<td id="sites-chrome-sidebar-right" class="sites-layout-sidebar-right">', '{% endblock pagecontent %}')
-
-        # Render the template
-        t = template.Template(scraped)
-        c = template.Context(template_values)        
-        self.response.out.write(t.render(c))
-
 class ViewArticle(request_handler.RequestHandler):
 
     def get(self):
@@ -1468,7 +1393,6 @@ class ViewArticle(request_handler.RequestHandler):
         
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'article_url': article_url,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
@@ -1586,12 +1510,10 @@ def real_main():
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
         ('/viewexercisesonmap', KnowledgeMap),
-        ('/testdatastore', DataStoreTest),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
-        ('/adminuserdata', AdminViewUser),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
         ('/resetstreak', ResetStreak),
@@ -1602,8 +1524,6 @@ def real_main():
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
         ('/store', ViewStore),        
-        ('/info/how-to-help', ViewHowToHelp),
-        ('/info/.*', ViewInfoPage),
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),
         ('/search', Search),
