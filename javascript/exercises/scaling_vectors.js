@@ -47,7 +47,7 @@ function ScalingVectorsExercise() {
     }
     
     function showProblem() {
-        initPlane();
+        RaphaelWrapper.drawPlane(-12, 12, -12, 12);
         present.fontsize = "15";
         present.fontfamily = "sans-serif";
         present.fontstyle = "bold";
