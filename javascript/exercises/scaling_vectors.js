@@ -77,8 +77,13 @@ function ScalingVectorsExercise() {
         min_y = Math.min(min_y, max_y);
         max_y = Math.max(min_y, max_y);
 
-        var x_val = getRandomIntRange(min_x, max_x);
-        var y_val = getRandomIntRange(min_y, max_y);
+        var x_val = 0;
+        var y_val = 0;
+        
+        while (!x_val && !y_val) {
+            x_val = getRandomIntRange(min_x, max_x);
+            y_val = getRandomIntRange(min_y, max_y);
+        }
         return {x: x_val, y: y_val};
     }
     
