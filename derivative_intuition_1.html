@@ -1,0 +1,11 @@
+{% extends "multiple_choice_template.html" %}
+
+{% block maincell %}
+<script src="/javascript/exercises/derivatives.js?{{App.version}}"></script>
+<script src="/javascript/exercises/derivative_intuition_1.js?{{App.version}}"></script>
+
+<script>
+    var exercise = new DerivativeIntuitionExercise();
+    
+</script>
+{% endblock maincell %}

@@ -370,6 +370,28 @@ function getNumPossibleAnswers() {
     return Exercise.possibleAnswers.length;
 }
 
+// choose(["a", "b", "c"], 1) ==> [["a"], ["b"], ["c"]]
+// choose(["a", "b", "c"], 1) ==> [["a", "b"], ["a", "c"], ["b", "c"]]
+// Returns all combinations of size k
+function choose(set, k) {
+    if (k == 0)
+        return [[]];
+    if (set.length == 0) 
+        return [];
+    
+    var first = set.slice(0, 1);
+    var rest = set.slice(1);
+    
+    var combosWithFirst = choose(rest, k - 1);
+    for (var i = 0; i < combosWithFirst.length; i++) {
+        combosWithFirst[i] = first.concat(combosWithFirst[i]);
+    }
+    
+    var combosWithout = choose(rest, k);
+
+    return combosWithFirst.concat(combosWithout);
+}
+
 function arrayEqual(a,b) //return true if the elements in the array are equal
 {
 	for(var i=0; i<a.length && i<b.length; i++)
