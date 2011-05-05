@@ -1165,6 +1165,10 @@ class ViewPrivacyPolicy(request_handler.RequestHandler):
     def get(self):
         self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
 
+class ViewDMCA(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('dmca.html', {"selected_nav_link": "dmca"})
+
 class ViewStore(request_handler.RequestHandler):
 
     def get(self):
@@ -1493,6 +1497,7 @@ def real_main():
         ('/about/getting-started', util_about.ViewGettingStarted),
         ('/about/tos', ViewTOS ),
         ('/about/privacy-policy', ViewPrivacyPolicy ),
+        ('/about/dmca', ViewDMCA ),
         ('/contribute', ViewContribute ),
         ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),

@@ -1968,7 +1968,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #coaches, #students, #donate, #individual_report, 
 .achievement-badges-container, #login-page, 
 #about-us, #homepage, #video-page, #contribute,
-#credits, #report-problem, #tos, #privacy-policy {
+#credits, #report-problem, #tos, #privacy-policy,
+#dmca {
     padding: 0 23px;
     background: transparent;
     position: relative;
