@@ -48,7 +48,6 @@ function Polynomial(degree) {
     }
     
     this.toString = function() {
-        console.log(polyn_str);
         return polyn_str;
     }
     
