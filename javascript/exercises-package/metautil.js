@@ -8,6 +8,12 @@ function roundNumber(n, precision)
 	return Math.round(n*Math.pow(10,precision))/Math.pow(10,precision);	
 }
 
+// compares two doubles out to epsilon
+function doublesEquals(first, second) 
+{
+	return Math.abs(first-second) <= .000001;	
+}
+
 //Randomly choose a problem type
 function pickType(low,high)
 {
