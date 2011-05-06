@@ -1,0 +1,15 @@
+{% extends "multiple_choice_template.html" %}
+ 
+{% block maincode %}
+<script src="/javascript/exercises/completing_the_square.js?{{App.version}}"></script> 
+{% endblock maincode %}
+ 
+{% block maincell %}
+<script> 
+    Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    Exercise.showNextProblem = function() {
+        var exercise = new CompletingTheSquareExercise();
+    }
+</script> 
+{% endblock maincell %}
