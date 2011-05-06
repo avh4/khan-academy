@@ -88,9 +88,9 @@ function RecognizingConicSectionsExercise() {
     function drawProblem() {
         appendQuestionHtml("<div id=\"raphael_container\" style=\"float: left;\"></div>");
         RaphaelWrapper.init(360, 360);
+        present.initPicture(-10,10, -10, 10);
         if (problem_type == WHICH_GRAPH) {
             drawWhichGraphDisplay();
-
         }
         else if (problem_type == WHICH_TYPE) {
             drawWhichTypeDisplay();
@@ -98,8 +98,6 @@ function RecognizingConicSectionsExercise() {
     }
 
     function drawWhichTypeDisplay() {
-        initPlane(); // draws XY axes and 10x10 grid for math 
-
         present.stroke = "blue";
 
         //center x & y of the shape
@@ -143,9 +141,6 @@ function RecognizingConicSectionsExercise() {
     }
 
     function drawWhichGraphDisplay() {
-        //background for showing 4 smaller graph sections
-        initQuarterGrid();
-
         //graph labels
         label_pos = present.belowright;
         present.fontsize = 24;
@@ -301,7 +296,6 @@ function RecognizingConicSectionsExercise() {
     }
 
     function generateHints() {
-
         //TODO: hardcoded width will break if exercise page layout changes
         //currently based on question area width of 655 with 400 for graph.
         document.write("<div style='float:left; padding-left: 20px; width:255px'>");
@@ -339,27 +333,5 @@ function RecognizingConicSectionsExercise() {
 
     function showWhichGraphProblem() {
         write_text("<span class='question_text'>Which conic section is " + (currentSection=="Ellipse"?"an ":"a ") + "<span class='hint_orange'>" + currentSection + "</span>?</span>");
-    }
-
-    /* a modified version of the standard initPlane() helper function which draws no axes
-     * and instead draws dark dividing rectangles around the quadrants. used for showing
-     * multiple shapes in one graph area when the position is irrelevant */
-    function initQuarterGrid() {
-        present.initPicture(-10,10, -10, 10);
-        
-        present.stroke = "#DDDDDD";
-        present.strokewidth = "2";
-        for(var i=-10; i<11; i++)
-        {
-            present.line([i,-11], [i,11]);
-            present.line([-11,i], [11,i]);
-        }
-
-        //draw dark rectangles around each quadrant
-        present.stroke = "#333333";
-        present.rect([-10, -10], [0, 0]);
-        present.rect([0, 0], [10, 10]);
-        present.rect([0, -10], [10, 0]);
-        present.rect([-10, 0], [0, 10]);
     }
 }
