@@ -2,15 +2,13 @@
 
 {% block maincode %}
 
-    <script type="text/javascript" src="/javascript/exercises/recognizing_conic_sections.js"?{{App.version}}"></script>
+    <script type="text/javascript" src="/javascript/exercises/recognizing_conic_sections.js?{{App.version}}"></script>
 
     <script type="text/javascript">
+        Exercise.fAddNoneOfThese = false;
         var exercise = new RecognizingConicSectionsExercise();
         exercise.init();
 
-        function graph_update() {
-            exercise.graphUpdate();
-        }
 
     </script>
 

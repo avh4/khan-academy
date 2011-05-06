@@ -78,12 +78,16 @@ function RecognizingConicSectionsExercise() {
             generateWhichGraphProblem();
             showWhichGraphProblem();
         }
+        
+        drawProblem();
         //hints are conveniently the same for both problem types
         generateHints();
     };
 
 
-    this.graphUpdate = function() {
+    function drawProblem() {
+        appendQuestionHtml("<div id=\"raphael_container\" style=\"float: left;\"></div>");
+        RaphaelWrapper.init(360, 360);
         if (problem_type == WHICH_GRAPH) {
             drawWhichGraphDisplay();
 
@@ -300,7 +304,7 @@ function RecognizingConicSectionsExercise() {
 
         //TODO: hardcoded width will break if exercise page layout changes
         //currently based on question area width of 655 with 400 for graph.
-        document.write("<div style='float:right;width:255px'>");
+        document.write("<div style='float:left; padding-left: 20px; width:255px'>");
 
         write_step("A <span class='hint_orange'>circle</span> is perfectly round, where every point is exactly the same distance from its center.");
         write_step("An <span class='hint_orange'>ellipse</span> is like a circle that's been stretched or squished in one direction.");
