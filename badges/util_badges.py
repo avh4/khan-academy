@@ -146,6 +146,7 @@ def get_user_badges(user = None):
                     user_badge_last.list_context_names.append(user_badge.target_context_name)
             else:
                 user_badge.badge = badges_dict.get(user_badge.badge_name)
+                user_badge.badge.is_owned = True
                 user_badge.count = 1
                 user_badge.list_context_names = [user_badge.target_context_name]
                 user_badge.list_context_names_hidden = []

@@ -46,8 +46,12 @@ def badge_counts(user_data):
 
 @register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
 def badge_block(badge, user_badge=None, show_frequency=False):
+
+    if badge.is_hidden_if_unknown and not badge.is_owned:
+        return {} # Don't render anything for this hidden badge
+
     extended_description = badge.extended_description()
-    if badge.is_teaser_if_unknown and user_badge is None:
+    if badge.is_teaser_if_unknown and not badge.is_owned:
         extended_description = "???"
 
     frequency = None
