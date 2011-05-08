@@ -98,6 +98,7 @@ class AwardCustomBadge(request_handler.RequestHandler):
                 if user_data:
                     if not custom_badge_awarded.is_already_owned_by(user_data):
                         custom_badge_awarded.award_to(user, user_data)
+                        user_data.put()
                         emails_awarded.append(email)
         
         template_values = {
