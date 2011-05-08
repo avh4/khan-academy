@@ -64,7 +64,7 @@ from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from jobs import jobs
-from badges import util_badges, last_action_cache
+from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
@@ -1628,6 +1628,8 @@ def real_main():
         ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
 
         ('/badges/view', util_badges.ViewBadges),
+        ('/badges/custom/create', custom_badges.CreateCustomBadge),
+        ('/badges/custom/award', custom_badges.AwardCustomBadge),
 
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
