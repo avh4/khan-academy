@@ -3,6 +3,7 @@ import logging
 from google.appengine.api import users
 
 import request_handler
+import util_badges
 from badges import Badge, BadgeContextType, BadgeCategory
 from models_badges import CustomBadgeType
 from models import UserData
@@ -57,6 +58,10 @@ class CreateCustomBadge(request_handler.RequestHandler):
 
         # Create custom badge
         if CustomBadgeType.insert(name, description, full_description, points, badge_category):
+
+            util_badges.all_badges(bust_cache=True)
+            util_badges.all_badges_dict(bust_cache=True)
+
             self.redirect("/badges/custom/award")
             return
 

@@ -31,7 +31,7 @@ import logging
 
 # Authoritative list of all badges
 @layer_cache.cache()
-def all_badges():
+def all_badges(bust_cache = False):
     list_badges = [
         exercise_completion_count_badges.GettingStartedBadge(),
         exercise_completion_count_badges.MakingProgressBadge(),
@@ -107,7 +107,7 @@ def all_badges():
     return list_badges
 
 @layer_cache.cache()
-def all_badges_dict():
+def all_badges_dict(bust_cache = False):
     dict_badges = {}
     for badge in all_badges():
         dict_badges[badge.name] = badge
