@@ -52,8 +52,9 @@ var Exercise = {
         if (this.fExtendsMultipleChoice) {
             $("#answer_content").html("");
             renderChoices();
-        } else
-            $("#answer").val("")
+        } else if ($("#answer").length) {
+            $("#answer").val("").focus();
+        }
             
         translate();
         
@@ -154,7 +155,6 @@ var Exercise = {
             $("#badge-notification-container").html(data.badge_notification_html)
             Badges.show()
         }
-    
     },
     
     getNumPossibleAnswers: function() {

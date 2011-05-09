@@ -56,31 +56,30 @@ functions[0] = function() {
 	
 	if (getRandomIntRange(0, 1)) { // 50% chance of approaching -inf rather than inf
 		a = 'oo';
-		if (n_order > d_order) {
-			// check signs of coefficients
-			if (n_coefs[n_order] * d_coefs[d_order] > 0) {
-				limtoa = 'oo';
-			} else {
-				limtoa = '-oo';
-			}
-		} else if (d_order > n_order) {
-			limtoa = 0;
-		} else {
-			limtoa = format_fraction(n_coefs[n_order], d_coefs[d_order]);
-		}
 	} else {
 		a = '-oo';
-		if (n_order > d_order) {
-			if (n_coefs[n_order] * d_coefs[d_order] > 0) {
-				limtoa = '-oo';
-			} else {
-				limtoa = 'oo';
-			}
-		} else if (d_order > n_order) {
-			limtoa = 0;
-		} else {
-			limtoa = format_fraction(n_coefs[n_order], d_coefs[d_order]);
+	}
+
+	if (n_order > d_order) {
+		// check signs of coefficients
+		var sign = n_coefs[n_order] * d_coefs[d_order];
+
+		// on negative limits, odd orders will flip sign
+		if (a == '-oo') {
+			var n_sign = (n_order % 2) ? -1 : 1;
+			var d_sign = (d_order % 2) ? -1 : 1;
+			sign = sign * n_sign * d_sign;
 		}
+
+		if (sign > 0) {
+			limtoa = 'oo';
+		} else {
+			limtoa = '-oo';
+		}
+	} else if (d_order > n_order) {
+		limtoa = 0;
+	} else {
+		limtoa = format_fraction(n_coefs[n_order], d_coefs[d_order]);
 	}
 	
 	// don't need curFunc
