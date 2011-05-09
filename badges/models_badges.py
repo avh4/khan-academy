@@ -30,6 +30,30 @@ class BadgeStat(db.Model):
         self.count_awarded = UserBadge.count_by_badge_name(self.badge_name)
         self.dt_last_calculated = datetime.datetime.now()
 
+class CustomBadgeType(db.Model):
+    description = db.StringProperty()
+    full_description = db.TextProperty()
+    points = db.IntegerProperty(default = 0)
+    category = db.IntegerProperty(default = 0)
+
+    @staticmethod
+    def insert(name, description, full_description, points, badge_category):
+
+        if not name or not description or not full_description or points < 0 or badge_category < 0:
+            return None
+
+        custom_badge_type = CustomBadgeType.get_by_key_name(key_names = name)
+        if not custom_badge_type:
+            return CustomBadgeType.get_or_insert(
+                    key_name = name,
+                    description = description,
+                    full_description = full_description,
+                    points = points,
+                    category = badge_category,
+                    )
+
+        return None
+
 class UserBadge(db.Model):
     user = db.UserProperty()
     date = db.DateTimeProperty(auto_now_add=True)
