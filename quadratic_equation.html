@@ -173,12 +173,13 @@ for (var i=0; i<5; i++)
 	var bad_a = get_random();
 	var bad_b = get_random();
 	var bad_c = get_random();
+
 	var good_gcd = getGCD(Math.abs(A), getGCD(Math.abs(B), Math.abs(C)));
 	var bad_gcd = getGCD(Math.abs(bad_a), getGCD(Math.abs(bad_b), Math.abs(bad_c)));
 
-	while (	(A*bad_gcd)==(bad_a*good_gcd) &&
+	while ((	(A*bad_gcd)==(bad_a*good_gcd) &&
 		(B*bad_gcd)==(bad_b*good_gcd) &&
-		(C*bad_gcd)==(bad_c*good_gcd) )
+		(C*bad_gcd)==(bad_c*good_gcd) ) || (((bad_b * bad_b) - (4 * bad_a * bad_c)) < 0))
 	{
 		bad_a = get_random();
 		bad_b = get_random();
