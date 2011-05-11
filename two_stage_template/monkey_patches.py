@@ -54,12 +54,12 @@ def patch_tag_parsing():
         return new_parse
 
     # Patch all custom tags
-    for key in templatetags.register.tags.keys():
+    for key in templatetags.register.tags:
         old_parse = templatetags.register.tags[key]
         templatetags.register.tags[key] = get_new_parse(old_parse)
 
     # Patch all default tags
-    for key in defaulttags.register.tags.keys():
+    for key in defaulttags.register.tags:
         old_parse = defaulttags.register.tags[key]
         defaulttags.register.tags[key] = get_new_parse(old_parse)
 
