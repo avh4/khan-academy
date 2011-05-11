@@ -1,0 +1,56 @@
+{% extends arithmetic_template %}
+{% block answerarea %}
+<script>
+
+    function updateMatrix() {
+        var num_rows = $("#num_rows").val();
+        var num_cols = $("#num_cols").val();
+        
+        console.log("updating matrix: " + num_rows + " by " + num_cols);
+
+        var row_html = "";
+        for (var i = 0; i < num_cols; i++) {
+            row_html += $("#sample_cell").html();
+        }
+        
+        var matrix_html = "";
+        for (var i = 0; i < num_rows; i++) {
+            matrix_html += row_html;
+            matrix_html += "<div></div>"
+        }
+        $("#matrix").html(matrix_html);
+    }
+    
+    $(document).ready(function() {
+        $("#num_rows").val(2);
+        $("#num_cols").val(2);
+        
+        $("#num_rows").change(updateMatrix);
+        $("#num_cols").change(updateMatrix);
+        
+        updateMatrix();
+    });
+</script>
+
+<span class="info-box-header">Answer</span>
+{% if not read_only %}
+<div>
+    <input id="num_rows" {% if is_mobile %} type="number" {% else %} type="text" size="1" {% endif %} autocomplete="off" onkeypress="if (event.keyCode == 13) {console.log('pressed enter'); return false;}"> x
+    <input id="num_cols" {% if is_mobile %} type="number" {% else %} type="text" size="1" {% endif %} autocomplete="off" onkeypress="if (event.keyCode == 13) {console.log('pressed enter'); return false;}"> matrix
+</div>
+
+<div style="clear: both; height: 10px"></div>
+
+<div style="float: left;">
+    <div id="matrix" style="padding-left: 10px; padding-bottom: 5px"></div>
+</div>
+
+<div style="clear: both"></div>
+
+<div id="sample_cell" style="display: none"><input {% if is_mobile %} type="number" {% else %} type="text" size="2" {% endif %} autocomplete="off" onkeypress="if (event.keyCode == 13) {console.log('pressed enter'); return false;}"></div>
+
+<div style="clear: both;"></div>
+{% endif %}
+{% endblock answerarea %}
+
+{% block hintfunction %}give_next_step(){% endblock hintfunction %}
