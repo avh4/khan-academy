@@ -1,0 +1,15 @@
+<html>
+    <body>
+        {% if sheep %}
+            Yup
+            {% if monkeys %}
+                {% for monkey in monkeys %}
+                    Grr: {{monkey}}
+                {% endfor %}
+            {% endif %}
+            Nope
+        {% endif %}
+
+        {% playlist_browser zebras %}
+    </body>
+</html>

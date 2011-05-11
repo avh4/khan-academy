@@ -46,6 +46,7 @@ import api
 import knowledgemap
 import consts
 import youtube_sync
+import two_stage_template
 
 from search import Searchable
 import search
@@ -205,7 +206,7 @@ def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
-    
+
 class ViewVideo(request_handler.RequestHandler):
 
     def get(self):
@@ -1525,6 +1526,7 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
+        ('/twostagetest', two_stage_template.TwoStageTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
