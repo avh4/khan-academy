@@ -1,4 +1,5 @@
 import logging
+import os
 
 from google.appengine.ext.webapp import template
 from google.appengine.api import memcache
@@ -83,7 +84,8 @@ class TwoPassTemplate():
                 template_value_fxn_names[key] = val.target_name
                 del template_values[key]
 
-        return (handler.render_template_to_string(template_name, template_values), template_value_fxn_names)
+        path = os.path.join(os.path.dirname(__file__), "..", template_name)
+        return (template.render(path, template_values), template_value_fxn_names)
 
 class TwoPassTest(request_handler.RequestHandler):
 
