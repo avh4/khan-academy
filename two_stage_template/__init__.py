@@ -6,48 +6,80 @@ import layer_cache
 import request_handler
 import monkey_patches
 
-def two_stage_render():
+def two_pass_render():
     def decorator(target):
-
+        # Monkey patch up django template
         monkey_patches.patch()
 
-        def wrapper(handler, *args, **kwargs):
-            cached_template = FirstStageTemplates.get(handler, target, *args, **kwargs)
-            handler.response.out.write(cached_template.render({}))
+        def wrapper(handler):
+            cached_template = TwoPassTemplate.get_first_pass(handler, target)
+            handler.response.out.write(cached_template.render_second_pass(handler))
 
         return wrapper
     return decorator
 
-class FirstStageTemplates():
+def two_pass_variable():
+    def decorator(target):
+        def wrapper(*args, **kwargs):
+            first_pass_call = kwargs.get("first_pass_call", True)
+            def inner_wrapper(*args, **kwargs):
+                return target(*args, **kwargs)
+            inner_wrapper.target_name = target.__name__
+            return inner_wrapper
+        return wrapper
+    return decorator
+
+class TwoPassTemplate():
+
+    def __init__(self, source, template_value_fxns):
+        self.source = source
+        self.template_value_fxns = template_value_fxns
+
+    def render_second_pass(self, handler):
+        compiled_template = template.Template(self.source)
+        second_pass_template_values = {}
+
+        for key in self.template_value_fxns:
+            fxn = getattr(handler, self.template_value_fxns[key])
+            second_pass_template_values[key] = fxn()(handler)
+
+        return compiled_template.render(second_pass_template_values)
 
     @staticmethod
-    def get(handler, target, *args, **kwargs):
-        template_source = FirstStageTemplates.get_source(handler, target, *args, **kwargs)
-        compiled_template = template.Template(template_source)
-        return compiled_template
+    def get_first_pass(handler, target):
+        template_source, template_value_fxns = TwoPassTemplate.render_first_pass(handler, target)
+        return TwoPassTemplate(template_source, template_value_fxns)
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(
-            lambda handler, *args, **kwargs: "first_stage_template[%s]" % handler.request.path, 
-            layer=layer_cache.Layers.Memcache
-            )
-    def get_source(handler, target, *args, **kwargs):
+#    @layer_cache.cache_with_key_fxn(
+#            lambda handler, target: "first_pass_template[%s]" % handler.request.path, 
+#            layer=layer_cache.Layers.Memcache
+#            )
+    def render_first_pass(handler, target):
+        template_name, template_values = target(handler)
 
-        template_name, template_values = target(handler, *args, **kwargs)
-
-        # Remove callable keys for first stage render
+        template_value_fxns = {}
+        # Remove callable keys for first pass render
         for key in template_values.keys():
             if callable(template_values[key]):
+                template_value_fxns[key] = template_values[key].target_name
                 del template_values[key]
 
-        return handler.render_template_to_string(template_name, template_values)
+        return (handler.render_template_to_string(template_name, template_values), template_value_fxns)
 
-class TwoStageTest(request_handler.RequestHandler):
+class TwoPassTest(request_handler.RequestHandler):
 
-    @two_stage_render()
+    @two_pass_variable()
+    def sheep(self, i=0):
+        return i + self.request_int("inc", default=1)
+
+    @two_pass_render()
     def get(self):
+
+        i = 5
+
         template_values = {
-            "sheep": (lambda: 1),
+            "sheep": self.sheep(i),
             "monkey": "ooh ooh aah aah",
         }
 

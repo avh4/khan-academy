@@ -1526,7 +1526,7 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
-        ('/twostagetest', two_stage_template.TwoStageTest),
+        ('/twostagetest', two_stage_template.TwoPassTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
