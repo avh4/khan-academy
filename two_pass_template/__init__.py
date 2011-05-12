@@ -15,7 +15,7 @@ def two_pass_handler():
         monkey_patches.patch()
 
         def wrapper(handler):
-            cached_template = TwoPassTemplate.after_first_pass(handler, target)
+            cached_template = TwoPassTemplate.render_first_pass(handler, target)
             handler.response.out.write(cached_template.render_second_pass(handler))
 
         return wrapper
@@ -57,22 +57,27 @@ def two_pass_variable():
 
 class TwoPassTemplate():
 
-    def __init__(self, source, first_pass_fake_closure, template_value_fxn_names):
+    def __init__(self, source, first_pass_fake_closure, template_value_fxn_names, template_values):
         self.source = source
         self.first_pass_fake_closure = first_pass_fake_closure
         self.template_value_fxn_names = template_value_fxn_names
+        self.template_values = template_values
 
     def render_second_pass(self, handler):
         compiled_template = template.Template(self.source)
-        second_pass_template_values = {}
 
+        template_values = {}
+        for key in self.template_values:
+            template_values[key] = self.template_values[key]
+
+        # Add second pass template values
         for key in self.template_value_fxn_names:
             fxn_name = self.template_value_fxn_names[key]
             wrapped_fxn = getattr(handler, fxn_name)
             variable_context = self.first_pass_fake_closure[fxn_name]
-            second_pass_template_values[key] = wrapped_fxn(first_pass_call=False, variable_context=variable_context)(handler)
+            template_values[key] = wrapped_fxn(first_pass_call=False, variable_context=variable_context)(handler)
 
-        return compiled_template.render(second_pass_template_values)
+        return compiled_template.render(template.Context(template_values))
 
     @staticmethod
 #    @layer_cache.cache_with_key_fxn(
@@ -105,12 +110,7 @@ class TwoPassTemplate():
         first_pass_fake_closure = copy.deepcopy(current_first_pass_fake_closure)
         current_first_pass_fake_closure = None
 
-        return (first_pass_source, first_pass_fake_closure, template_value_fxn_names)
-
-    @staticmethod
-    def after_first_pass(handler, target):
-        template_source, first_pass_fake_closure, template_value_fxn_names = TwoPassTemplate.render_first_pass(handler, target)
-        return TwoPassTemplate(template_source, first_pass_fake_closure, template_value_fxn_names)
+        return TwoPassTemplate(first_pass_source, first_pass_fake_closure, template_value_fxn_names, template_values)
 
 class TwoPassTest(request_handler.RequestHandler):
 
@@ -137,6 +137,7 @@ class TwoPassTest(request_handler.RequestHandler):
             "donkey": self.donkey(gorilla),
             "zebras": self.zebras(),
             "monkey": "ooh ooh aah aah",
+            "monkeys": ["a", "b"],
         }
 
         return ("two_pass_template/two_pass_test.html", template_values)
