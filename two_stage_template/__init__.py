@@ -14,36 +14,31 @@ def two_pass_handler():
         monkey_patches.patch()
 
         def wrapper(handler):
-            cached_template = TwoPassTemplate.get_first_pass(handler, target)
+            cached_template = TwoPassTemplate.after_first_pass(handler, target)
             handler.response.out.write(cached_template.render_second_pass(handler))
 
         return wrapper
     return decorator
 
 class TwoPassVariableContext:
-    def __init__(self, target, args):
-        self.target_name = target.__name__
-        self.args = args
-
-    def prepend_args(self, args):
-        args = list(args)
-        args.extend(self.args)
+    def __init__(self, target_name, args):
+        self.target_name = target_name
         self.args = args
 
 def two_pass_variable():
     def decorator(target):
-        def wrapper(*args, **kwargs):
+        def wrapper(handler, *args, **kwargs):
             first_pass_call = kwargs.get("first_pass_call", True)
+            variable_context_key = "two_pass_template_context[%s][%s]" % (handler.request.path, target.__name__)
 
             if first_pass_call:
-                variable_context = TwoPassVariableContext(target, args[1:])
-                memcache.set("5some magic key", variable_context, namespace=App.version)
+                variable_context = TwoPassVariableContext(target.__name__, args)
+                memcache.set(variable_context_key, variable_context, namespace=App.version)
                 return variable_context
             else:
-                def inner_wrapper(*args, **kwargs):
-                    variable_context = memcache.get("5some magic key", namespace=App.version)
-                    variable_context.prepend_args(args)
-                    return target(*variable_context.args)
+                def inner_wrapper(handler, *args, **kwargs):
+                    variable_context = memcache.get(variable_context_key, namespace=App.version)
+                    return target(handler, *variable_context.args)
                 return inner_wrapper
 
         return wrapper
@@ -66,13 +61,13 @@ class TwoPassTemplate():
         return compiled_template.render(second_pass_template_values)
 
     @staticmethod
-    def get_first_pass(handler, target):
+    def after_first_pass(handler, target):
         template_source, template_value_fxn_names = TwoPassTemplate.render_first_pass(handler, target)
         return TwoPassTemplate(template_source, template_value_fxn_names)
 
     @staticmethod
 #    @layer_cache.cache_with_key_fxn(
-#            lambda handler, target: "first_pass_template[%s]" % handler.request.path, 
+#            lambda handler, target: "two_pass_template[%s]" % handler.request.path, 
 #            layer=layer_cache.Layers.Memcache
 #            )
     def render_first_pass(handler, target):
@@ -96,13 +91,19 @@ class TwoPassTest(request_handler.RequestHandler):
     def sheep(self, monkey):
         return monkey + self.request_int("inc", default=1)
 
+    @two_pass_variable()
+    def donkey(self, gorilla):
+        return gorilla + self.request_int("inc", default=1)
+
     @two_pass_handler()
     def get(self):
 
         monkey = 5
+        gorilla = 6
 
         template_values = {
             "sheep": self.sheep(monkey),
+            "donkey": self.donkey(gorilla),
             "monkey": "ooh ooh aah aah",
         }
 
