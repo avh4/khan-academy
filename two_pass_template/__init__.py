@@ -1,8 +1,8 @@
+import copy
 import logging
 import os
 
 from google.appengine.ext.webapp import template
-from google.appengine.api import memcache
 
 from app import App
 import layer_cache
@@ -21,6 +21,17 @@ def two_pass_handler():
         return wrapper
     return decorator
 
+current_first_pass_fake_closure = None
+class FirstPassFakeClosure:
+    def __init__(self):
+        self.dict = {}
+
+    def __getitem__(self, name):
+        return self.dict[name]
+
+    def __setitem__(self, name, context):
+        self.dict[name] = context
+
 class TwoPassVariableContext:
     def __init__(self, target_name, args):
         self.target_name = target_name
@@ -30,15 +41,14 @@ def two_pass_variable():
     def decorator(target):
         def wrapper(handler, *args, **kwargs):
             first_pass_call = kwargs.get("first_pass_call", True)
-            variable_context_key = "two_pass_template_context[%s][%s]" % (handler.request.path, target.__name__)
 
             if first_pass_call:
                 variable_context = TwoPassVariableContext(target.__name__, args)
-                memcache.set(variable_context_key, variable_context, namespace=App.version)
+                current_first_pass_fake_closure[target.__name__] = variable_context
                 return variable_context
             else:
+                variable_context = kwargs.get("variable_context", TwoPassVariableContext("", []))
                 def inner_wrapper(handler, *args, **kwargs):
-                    variable_context = memcache.get(variable_context_key, namespace=App.version)
                     return target(handler, *variable_context.args)
                 return inner_wrapper
 
@@ -47,8 +57,9 @@ def two_pass_variable():
 
 class TwoPassTemplate():
 
-    def __init__(self, source, template_value_fxn_names):
+    def __init__(self, source, first_pass_fake_closure, template_value_fxn_names):
         self.source = source
+        self.first_pass_fake_closure = first_pass_fake_closure
         self.template_value_fxn_names = template_value_fxn_names
 
     def render_second_pass(self, handler):
@@ -56,15 +67,12 @@ class TwoPassTemplate():
         second_pass_template_values = {}
 
         for key in self.template_value_fxn_names:
-            wrapped_fxn = getattr(handler, self.template_value_fxn_names[key])
-            second_pass_template_values[key] = wrapped_fxn(first_pass_call=False)(handler)
+            fxn_name = self.template_value_fxn_names[key]
+            wrapped_fxn = getattr(handler, fxn_name)
+            variable_context = self.first_pass_fake_closure[fxn_name]
+            second_pass_template_values[key] = wrapped_fxn(first_pass_call=False, variable_context=variable_context)(handler)
 
         return compiled_template.render(second_pass_template_values)
-
-    @staticmethod
-    def after_first_pass(handler, target):
-        template_source, template_value_fxn_names = TwoPassTemplate.render_first_pass(handler, target)
-        return TwoPassTemplate(template_source, template_value_fxn_names)
 
     @staticmethod
 #    @layer_cache.cache_with_key_fxn(
@@ -72,27 +80,37 @@ class TwoPassTemplate():
 #            layer=layer_cache.Layers.Memcache
 #            )
     def render_first_pass(handler, target):
+        global current_first_pass_fake_closure
+        current_first_pass_fake_closure = FirstPassFakeClosure()
 
         template_name, template_values = target(handler)
-        template_value_fxn_names = {}
 
         # Remove two pass variable contexts for first pass render,
         # and keep references around for second pass
+        template_value_fxn_names = {}
         for key in template_values.keys():
             val = template_values[key]
             if isinstance(val, TwoPassVariableContext):
                 template_value_fxn_names[key] = val.target_name
                 del template_values[key]
 
-        path = os.path.join(os.path.dirname(__file__), "..", template_name)
+        monkey_patches.enable_first_pass_variable_resolution(True)
 
         try:
-            monkey_patches.enable_first_pass_variable_resolution(True)
+            path = os.path.join(os.path.dirname(__file__), "..", template_name)
             first_pass_source = template.render(path, template_values)
         finally:
             monkey_patches.enable_first_pass_variable_resolution(False)
 
-        return (first_pass_source, template_value_fxn_names)
+        first_pass_fake_closure = copy.deepcopy(current_first_pass_fake_closure)
+        current_first_pass_fake_closure = None
+
+        return (first_pass_source, first_pass_fake_closure, template_value_fxn_names)
+
+    @staticmethod
+    def after_first_pass(handler, target):
+        template_source, first_pass_fake_closure, template_value_fxn_names = TwoPassTemplate.render_first_pass(handler, target)
+        return TwoPassTemplate(template_source, first_pass_fake_closure, template_value_fxn_names)
 
 class TwoPassTest(request_handler.RequestHandler):
 
