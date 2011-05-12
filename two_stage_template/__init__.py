@@ -57,7 +57,6 @@ class TwoPassTemplate():
             )
     def render_first_pass(handler, target):
 
-        logging.critical("DOING HARD WORK")
         template_name, template_values = target(handler)
 
         template_value_fxns = {}
