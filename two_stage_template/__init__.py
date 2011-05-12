@@ -51,15 +51,18 @@ class TwoPassTemplate():
         return TwoPassTemplate(template_source, template_value_fxns)
 
     @staticmethod
-#    @layer_cache.cache_with_key_fxn(
-#            lambda handler, target: "first_pass_template[%s]" % handler.request.path, 
-#            layer=layer_cache.Layers.Memcache
-#            )
+    @layer_cache.cache_with_key_fxn(
+            lambda handler, target: "first_pass_template[%s]" % handler.request.path, 
+            layer=layer_cache.Layers.Memcache
+            )
     def render_first_pass(handler, target):
+
+        logging.critical("DOING HARD WORK")
         template_name, template_values = target(handler)
 
         template_value_fxns = {}
-        # Remove callable keys for first pass render
+        # Remove callable keys for first pass render,
+        # and keep references around for second pass
         for key in template_values.keys():
             if callable(template_values[key]):
                 template_value_fxns[key] = template_values[key].target_name
