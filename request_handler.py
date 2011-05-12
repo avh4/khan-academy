@@ -210,7 +210,7 @@ class RequestHandler(webapp.RequestHandler):
         self.render_template_simple(template_name, template_values)
 
     def render_template_simple(self, template_name, template_values):
-        self.response.out.write(self.render_template_to_string(path, template_values))
+        self.response.out.write(self.render_template_to_string(template_name, template_values))
 
     def render_template_to_string(self, template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)

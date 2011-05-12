@@ -85,7 +85,14 @@ class TwoPassTemplate():
                 del template_values[key]
 
         path = os.path.join(os.path.dirname(__file__), "..", template_name)
-        return (template.render(path, template_values), template_value_fxn_names)
+
+        try:
+            monkey_patches.enable_first_pass_variable_resolution(True)
+            first_pass_source = template.render(path, template_values)
+        finally:
+            monkey_patches.enable_first_pass_variable_resolution(False)
+
+        return (first_pass_source, template_value_fxn_names)
 
 class TwoPassTest(request_handler.RequestHandler):
 
@@ -97,6 +104,10 @@ class TwoPassTest(request_handler.RequestHandler):
     def donkey(self, gorilla):
         return gorilla + self.request_int("inc", default=1)
 
+    @two_pass_variable()
+    def zebras(self):
+        return "hrm"
+
     @two_pass_handler()
     def get(self):
 
@@ -106,6 +117,7 @@ class TwoPassTest(request_handler.RequestHandler):
         template_values = {
             "sheep": self.sheep(monkey),
             "donkey": self.donkey(gorilla),
+            "zebras": self.zebras(),
             "monkey": "ooh ooh aah aah",
         }
 

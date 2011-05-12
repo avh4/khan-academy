@@ -7,7 +7,10 @@ import django.template.defaulttags as defaulttags
 import templatetags
 
 class TwoPassVariableDoesNotExist(Exception):
-    pass
+    ENABLED = False
+
+def enable_first_pass_variable_resolution(enabled):
+    TwoPassVariableDoesNotExist.ENABLED = enabled
 
 def patch_variable_resolution():
     resolve_var_old = template.resolve_variable
@@ -16,8 +19,12 @@ def patch_variable_resolution():
         try:
             return resolve_var_old(path, context)
         except template.VariableDoesNotExist:
-            # Throw different type of VariableDoesNotExist exception that we catch later
-            raise TwoPassVariableDoesNotExist
+            if TwoPassVariableDoesNotExist.ENABLED:
+                # Throw different type of VariableDoesNotExist exception that we catch later
+                raise TwoPassVariableDoesNotExist
+            else:
+                # Throw original exception
+                raise
 
     template.resolve_variable = resolve_var_new
 
