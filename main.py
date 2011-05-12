@@ -46,7 +46,7 @@ import api
 import knowledgemap
 import consts
 import youtube_sync
-import two_stage_template
+import two_pass_template
 
 from search import Searchable
 import search
@@ -1526,7 +1526,7 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
-        ('/twostagetest', two_stage_template.TwoPassTest),
+        ('/twopasstest', two_pass_template.TwoPassTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),

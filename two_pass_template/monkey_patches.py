@@ -6,7 +6,7 @@ import django.template.defaulttags as defaulttags
 
 import templatetags
 
-class TwoStageVariableDoesNotExist(Exception):
+class TwoPassVariableDoesNotExist(Exception):
     pass
 
 def patch_variable_resolution():
@@ -17,7 +17,7 @@ def patch_variable_resolution():
             return resolve_var_old(path, context)
         except template.VariableDoesNotExist:
             # Throw different type of VariableDoesNotExist exception that we catch later
-            raise TwoStageVariableDoesNotExist
+            raise TwoPassVariableDoesNotExist
 
     template.resolve_variable = resolve_var_new
 
@@ -27,7 +27,7 @@ def patch_node_rendering():
         def new_render(*args, **kw_args):
             try:
                 return old_render(*args, **kw_args)
-            except TwoStageVariableDoesNotExist:
+            except TwoPassVariableDoesNotExist:
                 self = args[0]
                 if hasattr(self, "raw_template_text"):
                     return self.raw_template_text
@@ -38,9 +38,9 @@ def patch_node_rendering():
     # Patch rendering for all subclasses of Node
     subclasses = template.Node.__subclasses__()
     for subclass in subclasses:
-        if not hasattr(subclass, "two_stage_patched"):
+        if not hasattr(subclass, "two_pass_patched"):
             subclass.render = get_new_render(subclass.render)
-            subclass.two_stage_patched = True
+            subclass.two_pass_patched = True
 
 def patch_tag_parsing():
 

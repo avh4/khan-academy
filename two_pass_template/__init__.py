@@ -107,5 +107,5 @@ class TwoPassTest(request_handler.RequestHandler):
             "monkey": "ooh ooh aah aah",
         }
 
-        return ("two_stage_template/two_stage_test.html", template_values)
+        return ("two_pass_template/two_pass_test.html", template_values)
 
