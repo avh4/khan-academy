@@ -87,7 +87,22 @@ class TwoPassTemplate():
         handler.add_global_template_values(template_values)
         self.replace_blocks_during_second_pass(compiled_template)
 
-        return compiled_template.render(template.Context(template_values))
+        # Need the following settings swap to correctly render a template in App Engine land.
+        # See http://code.google.com/p/googleappengine/source/browse/trunk/python/google/appengine/ext/webapp/template.py
+        abspath = os.path.abspath(os.path.join(__file__, ".."))
+        directory, file_name = os.path.split(abspath)
+        new_settings = {
+            'TEMPLATE_DIRS': (directory,),
+            'TEMPLATE_DEBUG': False,
+            'DEBUG': False,
+        }
+        old_settings = template._swap_settings(new_settings)
+        try:
+            result = compiled_template.render(template.Context(template_values))
+        finally:
+            template._swap_settings(old_settings)
+
+        return result
 
     def replace_blocks_during_second_pass(self, compiled_template):
         block_nodes_compiled = compiled_template.nodelist.get_nodes_by_type(BlockNode)
@@ -132,8 +147,7 @@ class TwoPassTemplate():
 
         try:
             monkey_patches.enable_first_pass_variable_resolution(True)
-            first_pass_template = template.load(path)
-            first_pass_source = first_pass_template.render(template.Context(template_values))
+            first_pass_source = template.render(path, template_values)
         finally:
             monkey_patches.enable_first_pass_variable_resolution(False)
 
