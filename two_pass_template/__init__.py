@@ -9,6 +9,7 @@ from app import App
 import layer_cache
 import request_handler
 import monkey_patches
+import pickle_context
 
 def two_pass_handler():
     def decorator(target):
@@ -73,18 +74,14 @@ class TwoPassTemplate():
     def render_second_pass(self, handler):
         compiled_template = template.Template(self.source)
 
-        template_values = {}
-        for key in self.template_values:
-            template_values[key] = self.template_values[key]
-
         # Add second pass template values
         for key in self.template_value_fxn_names:
             fxn_name = self.template_value_fxn_names[key]
             wrapped_fxn = getattr(handler, fxn_name)
             variable_context = self.first_pass_fake_closure[fxn_name]
-            template_values[key] = wrapped_fxn(first_pass_call=False, variable_context=variable_context)(handler)
+            self.template_values[key] = wrapped_fxn(first_pass_call=False, variable_context=variable_context)(handler)
 
-        handler.add_global_template_values(template_values)
+        handler.add_global_template_values(self.template_values)
         self.replace_blocks_during_second_pass(compiled_template)
 
         # Need the following settings swap to correctly render a template in App Engine land.
@@ -98,7 +95,7 @@ class TwoPassTemplate():
         }
         old_settings = template._swap_settings(new_settings)
         try:
-            result = compiled_template.render(template.Context(template_values))
+            result = compiled_template.render(template.Context(self.template_values))
         finally:
             template._swap_settings(old_settings)
 
@@ -154,7 +151,10 @@ class TwoPassTemplate():
         first_pass_fake_closure = copy.deepcopy(current_first_pass_fake_closure)
         current_first_pass_fake_closure = None
 
-        return TwoPassTemplate(template_name, first_pass_source, first_pass_fake_closure, template_value_fxn_names, template_values)
+        template_values_pickled = pickle_context.PickleContextDict()
+        template_values_pickled.add_pickled(template_values)
+
+        return TwoPassTemplate(template_name, first_pass_source, first_pass_fake_closure, template_value_fxn_names, template_values_pickled)
 
 class TwoPassTest(request_handler.RequestHandler):
 
