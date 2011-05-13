@@ -225,3 +225,11 @@ class RequestHandler(webapp.RequestHandler):
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)
         self.response.out.write(json)
+
+    def render_jsonp(self, obj):
+        json = obj if type(obj) == str else simplejson.dumps(obj, ensure_ascii=False, indent=4)
+        callback = self.request_string("callback")
+        if callback:
+            self.response.out.write("%s(%s)" % (callback, json))
+        else:
+            self.response.out.write(json)
