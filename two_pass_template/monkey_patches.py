@@ -85,6 +85,7 @@ def patch():
     patched = True
 
 # Get raw template text for token
+# See inspiration at http://www.holovaty.com/writing/django-two-phased-rendering/
 def raw_template_text_parse(parser, token):
     tag_mapping = {
         template.TOKEN_TEXT: ('', ''),
@@ -103,6 +104,7 @@ def raw_template_text_parse(parser, token):
         token_name = list(token.split_contents())[0]
         end_token_name = 'end' + token_name
         end_stack = [end_token_name]
+        list_raw_tokens_search = []
 
         while parser.tokens:
             token_next = parser.next_token()
@@ -110,7 +112,7 @@ def raw_template_text_parse(parser, token):
             if not token_next:
                 raise Exception("Missing end of block token for raw template text parser")
 
-            list_raw_tokens.append(token_next)
+            list_raw_tokens_search.append(token_next)
 
             if token_next.token_type == template.TOKEN_BLOCK:
                 if token_next.contents == end_token_name:
@@ -121,6 +123,11 @@ def raw_template_text_parse(parser, token):
                     token_next_name = list(token_next.split_contents())[0]
                     if token_next_name == token_name:
                         end_stack.append(end_token_name)
+
+
+        if len(end_stack) <= 0:
+            # Found end token
+            list_raw_tokens.extend(list_raw_tokens_search)
 
         # Restore original token state
         parser.tokens = tokens_orig

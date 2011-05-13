@@ -10,7 +10,10 @@
             Nope
         {% endif %}
 
+        {% block testblock %}
+            {% video_qa user_data video playlist qa_page qa_expand_id sort %}
+        {% endblock testblock %}
+
         {% playlist_browser zebras %}
-        {% video_qa user_data video playlist qa_page qa_expand_id sort %}
     </body>
 </html>

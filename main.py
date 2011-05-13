@@ -209,6 +209,7 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
+    @two_pass_template.two_pass_handler()
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -321,7 +322,9 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'selected_nav_link': 'watch',
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
-        self.render_template('viewvideo.html', template_values)
+
+#        self.render_template("viewvideo.html", template_values)
+        return ('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
     
