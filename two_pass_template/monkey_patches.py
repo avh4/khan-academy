@@ -60,15 +60,17 @@ def patch_tag_parsing():
             return node
         return new_parse
 
+    # Patch all default tags
+    for key in template.libraries:
+        reg = template.libraries[key]
+        for tag_key in reg.tags:
+            old_parse = reg.tags[tag_key]
+            reg.tags[tag_key] = get_new_parse(old_parse)
+
     # Patch all custom tags
     for key in templatetags.register.tags:
         old_parse = templatetags.register.tags[key]
         templatetags.register.tags[key] = get_new_parse(old_parse)
-
-    # Patch all default tags
-    for key in defaulttags.register.tags:
-        old_parse = defaulttags.register.tags[key]
-        defaulttags.register.tags[key] = get_new_parse(old_parse)
 
 patched = False
 def patch():
