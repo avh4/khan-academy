@@ -6,16 +6,15 @@
             Yup({{sheep}} vs. {{donkey}})
             {% if monkeys %}
                 {% for a in monkeys %}
-                    Grr: {{monkey}}
+                    Grr?! {{monkey}}
                 {% endfor %}
             {% endif %}
             Nope
         {% endif %}
 
         {% block testblock %}
-            {% video_qa user_data video playlist qa_page qa_expand_id sort %}
+            {% playlist_browser zebras %}
         {% endblock testblock %}
 
-        {% playlist_browser zebras %}
     </body>
 </html>

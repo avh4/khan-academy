@@ -118,8 +118,15 @@ class TwoPassTemplate():
                     block_node_compiled.nodelist = block_node_match.nodelist
 
     @staticmethod
+    def first_pass_key(handler, target):
+        if App.is_dev_server:
+            return "two_pass_template[%s][%s][%s]" % (target.__name__, handler.request.path, App.last_modified_date())
+        else:
+            return "two_pass_template[%s][%s]" % (target.__name__, handler.request.path)
+
+    @staticmethod
     @layer_cache.cache_with_key_fxn(
-            lambda handler, target: "two_pass_template[%s][%s]" % (target.__name__, handler.request.path), 
+            lambda handler, target: TwoPassTemplate.first_pass_key(handler, target),
             layer=layer_cache.Layers.Memcache)
     def render_first_pass(handler, target):
         global current_first_pass_fake_closure
