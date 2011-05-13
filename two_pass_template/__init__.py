@@ -129,10 +129,10 @@ class TwoPassTemplate():
                 del template_values[key]
 
         path = os.path.join(os.path.dirname(__file__), "..", template_name)
-        first_pass_template = template.load(path)
 
         try:
             monkey_patches.enable_first_pass_variable_resolution(True)
+            first_pass_template = template.load(path)
             first_pass_source = first_pass_template.render(template.Context(template_values))
         finally:
             monkey_patches.enable_first_pass_variable_resolution(False)
