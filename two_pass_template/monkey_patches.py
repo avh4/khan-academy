@@ -38,6 +38,8 @@ def patch_node_rendering():
                 self = args[0]
                 if hasattr(self, "raw_template_text"):
                     return self.raw_template_text
+                elif isinstance(self, template.VariableNode):
+                    return "{{%s}}" % self.filter_expression
                 else:
                     return ""
         return new_render
