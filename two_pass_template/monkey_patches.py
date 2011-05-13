@@ -8,15 +8,16 @@ import templateext
 
 import templatetags
 
-MONKEY_PATCHES_ENABLED = False
+IS_IN_FIRST_TEMPLATE_PASS = False
 
 class TwoPassVariableDoesNotExist(Exception):
     pass
 
-def enable_first_pass_variable_resolution(enabled):
-    global MONKEY_PATCHES_ENABLED
-    MONKEY_PATCHES_ENABLED = enabled
+def enable_first_pass(enabled):
+    global IS_IN_FIRST_TEMPLATE_PASS
+    IS_IN_FIRST_TEMPLATE_PASS = enabled
 
+# Patch up variable resolution to raise our special VariableDoesNotExist exception during first pass rendering
 def patch_variable_resolution():
     resolve_var_old = template.resolve_variable
 
@@ -24,7 +25,7 @@ def patch_variable_resolution():
         try:
             return resolve_var_old(path, context)
         except template.VariableDoesNotExist:
-            if MONKEY_PATCHES_ENABLED:
+            if IS_IN_FIRST_TEMPLATE_PASS:
                 # Throw different type of VariableDoesNotExist exception that we catch later
                 raise TwoPassVariableDoesNotExist
             else:
@@ -33,6 +34,7 @@ def patch_variable_resolution():
 
     template.resolve_variable = resolve_var_new
 
+# Patch up node rendering to return raw template text version of each tag if special VariableDoesNotExist encountered
 def patch_node_rendering():
 
     def get_new_render(old_render):
@@ -56,11 +58,12 @@ def patch_node_rendering():
             subclass.render = get_new_render(subclass.render)
             subclass.two_pass_patched = True
 
+# Patch up tag parsing to keep raw template text version of each tag available
 def patch_tag_parsing():
 
     def get_new_parse(old_parse):
         def new_parse(parser, token):
-            if not MONKEY_PATCHES_ENABLED:
+            if not IS_IN_FIRST_TEMPLATE_PASS:
                 return old_parse(parser, token)
             else:
                 raw_template_text = raw_template_text_parse(parser, token)
@@ -82,6 +85,7 @@ def patch_tag_parsing():
         old_parse = templatetags.register.tags[key]
         templatetags.register.tags[key] = get_new_parse(old_parse)
 
+# Patch up HTML and JS escaping to protect against template injection
 def patch_escaping():
 
     # Patch HTML escaping
@@ -89,7 +93,7 @@ def patch_escaping():
 
     def escape_html_new(value):
         v = escape_html_old(value)
-        if not MONKEY_PATCHES_ENABLED:
+        if not IS_IN_FIRST_TEMPLATE_PASS:
             return v
         else:
             return v.replace("{", "&#123;").replace("}", "&#125;")

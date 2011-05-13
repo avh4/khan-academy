@@ -150,10 +150,10 @@ class TwoPassTemplate():
         path = os.path.join(os.path.dirname(__file__), "..", template_name)
 
         try:
-            monkey_patches.enable_first_pass_variable_resolution(True)
+            monkey_patches.enable_first_pass(True)
             first_pass_source = template.render(path, template_values)
         finally:
-            monkey_patches.enable_first_pass_variable_resolution(False)
+            monkey_patches.enable_first_pass(False)
 
         first_pass_fake_closure = copy.deepcopy(current_first_pass_fake_closure)
         current_first_pass_fake_closure = None
