@@ -189,6 +189,7 @@ class TwoPassTest(request_handler.RequestHandler):
             "zebras": self.zebras(),
             "monkey": "ooh ooh aah aah",
             "monkeys": ["a", "b"],
+            "unsafe_string": "unsafe_{{monkey}}"
         }
 
         return ("two_pass_template/two_pass_test.html", template_values)

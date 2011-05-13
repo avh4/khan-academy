@@ -2,6 +2,9 @@
     <body>
         FB_ID = "{{App.facebook_app_id}}";
 
+        {{ unsafe_string|escape }}
+        <script>var test = '{{unsafe_string|escapejs}}';</script>
+
         {% if sheep %}
             Yup({{sheep}} vs. {{donkey}})
             {% if monkeys %}
