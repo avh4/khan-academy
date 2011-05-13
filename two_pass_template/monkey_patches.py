@@ -55,11 +55,14 @@ def patch_tag_parsing():
 
     def get_new_parse(old_parse):
         def new_parse(parser, token):
-            raw_template_text = raw_template_text_parse(parser, token)
-            node = old_parse(parser, token)
-            if node:
-                node.raw_template_text = raw_template_text
-            return node
+            if not TwoPassVariableDoesNotExist.ENABLED:
+                return old_parse(parser, token)
+            else:
+                raw_template_text = raw_template_text_parse(parser, token)
+                node = old_parse(parser, token)
+                if node:
+                    node.raw_template_text = raw_template_text
+                return node
         return new_parse
 
     # Patch all default tags
@@ -101,7 +104,7 @@ def raw_template_text_parse(parser, token):
     if token.token_type == template.TOKEN_BLOCK:
 
         # Store original token state for restoration since we're parsing twice
-        tokens_orig = copy.deepcopy(parser.tokens)
+        tokens_orig = copy.copy(parser.tokens)
 
         token_name = list(token.split_contents())[0]
         end_token_name = 'end' + token_name
