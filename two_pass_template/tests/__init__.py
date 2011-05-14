@@ -2,6 +2,7 @@ import logging
 import string
 import StringIO
 
+import django.template as template
 from two_pass_template import two_pass_variable, two_pass_handler
 import request_handler
 
@@ -55,6 +56,10 @@ class TwoPassTemplateTest(request_handler.RequestHandler):
 
         return ("two_pass_template/tests/test_complex.html", template_values)
 
+    @two_pass_handler()
+    def test_missing_variable(self):
+        return ("two_pass_template/tests/test_complex.html", {})
+
     @staticmethod
     def assert_equal_no_whitespace(result, expected):
         for c in string.whitespace:
@@ -102,10 +107,8 @@ class TwoPassTemplateTest(request_handler.RequestHandler):
                         {%endif%}
                         Nope
                     {%endif%}
-
                     
-                        {{zebras}}
-                    
+                        {{zebras|cut:zebras}}
 
                 </body>
             </html>
@@ -124,12 +127,18 @@ class TwoPassTemplateTest(request_handler.RequestHandler):
                                 Grr?! on trees
                                 Grr?! on trees
                         Nope
-                        hrm
                 </body>
             </html>
         """
-        logging.critical(result)
         self.assert_equal_no_whitespace(result, expected)
+
+        self.response.out = StringIO.StringIO()
+        caught = False
+        try:
+            self.test_missing_variable()
+        except template.VariableDoesNotExist:
+            caught = True
+        assert(caught)
 
         self.response.out = StringIO.StringIO()
         self.response.out.write("All tests passed.")
