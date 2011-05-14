@@ -46,7 +46,9 @@ import api
 import knowledgemap
 import consts
 import youtube_sync
-import two_pass_template
+
+from two_pass_template import two_pass_handler
+from two_pass_template.tests import TwoPassTemplateTest
 
 from search import Searchable
 import search
@@ -209,7 +211,7 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
-    @two_pass_template.two_pass_handler()
+    @two_pass_handler()
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -1529,7 +1531,7 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
-        ('/twopasstest', two_pass_template.TwoPassTest),
+        ('/twopasstest', TwoPassTemplateTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),

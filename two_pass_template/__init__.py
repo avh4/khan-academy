@@ -7,7 +7,6 @@ from django.template.loader_tags import BlockNode
 
 from app import App
 import layer_cache
-import request_handler
 import monkey_patches
 import pickle_context
 
@@ -16,11 +15,11 @@ def two_pass_handler():
         # Monkey patch up django template
         monkey_patches.patch()
 
-        def wrapper(handler):
+        def wrapper(handler, first_pass_override=False):
             cached_template = TwoPassTemplate.render_first_pass(handler, target)
 
             if cached_template:
-                if handler.request_bool("first_pass", default=False):
+                if first_pass_override or handler.request_bool("first_pass", default=False):
                     handler.response.out.write(cached_template.source)
                 else:
                     handler.response.out.write(cached_template.render_second_pass(handler))
@@ -162,35 +161,3 @@ class TwoPassTemplate():
         template_values_pickled.add_pickled(template_values)
 
         return TwoPassTemplate(template_name, first_pass_source, first_pass_fake_closure, template_value_fxn_names, template_values_pickled)
-
-class TwoPassTest(request_handler.RequestHandler):
-
-    @two_pass_variable()
-    def sheep(self, monkey):
-        return monkey + self.request_int("inc", default=1)
-
-    @two_pass_variable()
-    def donkey(self, gorilla):
-        return gorilla + self.request_int("inc", default=1)
-
-    @two_pass_variable()
-    def zebras(self):
-        return "hrm"
-
-    @two_pass_handler()
-    def get(self):
-
-        monkey = 5
-        gorilla = 6
-
-        template_values = {
-            "sheep": self.sheep(monkey),
-            "donkey": self.donkey(gorilla),
-            "zebras": self.zebras(),
-            "monkey": "ooh ooh aah aah",
-            "monkeys": ["a", "b"],
-            "unsafe_string": "unsafe_{{monkey}}"
-        }
-
-        return ("two_pass_template/two_pass_test.html", template_values)
-
