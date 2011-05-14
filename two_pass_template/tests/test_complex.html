@@ -1,12 +1,10 @@
 <html>
     <body>
-        FB_ID = "{{App.facebook_app_id}}";
-
         {{ unsafe_string|escape }}
         <script>var test = '{{unsafe_string|escapejs}}';</script>
 
         {% if sheep %}
-            Yup({{sheep}} vs. {{donkey}})
+            Test({{sheep}} vs. {{donkey}})
             {% if monkeys %}
                 {% for a in monkeys %}
                     Grr?! {{monkey}}
@@ -16,7 +14,7 @@
         {% endif %}
 
         {% block testblock %}
-            {% playlist_browser zebras %}
+            {{zebras}}
         {% endblock testblock %}
 
     </body>
