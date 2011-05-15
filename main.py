@@ -1053,9 +1053,6 @@ class ViewHomePage(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        
         thumbnail_link_sets = [
             [
                 { 
@@ -1129,17 +1126,14 @@ class ViewHomePage(request_handler.RequestHandler):
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library_content_html()
         
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'user_data': user_data,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'video_id': movie_youtube_id,
-                                                  'thumbnail_link_sets': thumbnail_link_sets,
-                                                  'library_content': library_content,
-                                                  'DVD_list': DVD_list,
-                                                  'is_mobile_allowed': True,
-                                                  'approx_vid_count': consts.APPROX_VID_COUNT, }, 
-                                                  self.request)
+        template_values = {
+                            'video_id': movie_youtube_id,
+                            'thumbnail_link_sets': thumbnail_link_sets,
+                            'library_content': library_content,
+                            'DVD_list': DVD_list,
+                            'is_mobile_allowed': True,
+                            'approx_vid_count': consts.APPROX_VID_COUNT,
+                        }
         self.render_template('homepage.html', template_values)
         
 class ViewFAQ(request_handler.RequestHandler):
