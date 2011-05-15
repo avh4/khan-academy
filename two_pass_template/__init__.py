@@ -119,7 +119,7 @@ class TwoPassTemplate():
     @staticmethod
     def first_pass_key(handler, target):
         if App.is_dev_server:
-            return "two_pass_template[%s][%s][%s]" % (target.__name__, handler.request.path, "")#App.last_modified_date())
+            return "two_pass_template[%s][%s][%s]" % (target.__name__, handler.request.path, App.last_modified_date())
         else:
             return "two_pass_template[%s][%s]" % (target.__name__, handler.request.path)
 
