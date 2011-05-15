@@ -163,7 +163,7 @@ $(function(){
     });
 });
 
-{% if user %}
+{% if username %}
     $(function(){VideoStats.startLoggingProgress();});
 {% endif %}
 
@@ -226,7 +226,7 @@ $(function(){
             </div>
     
             <span class="video_extra_links desktop-only"><nobr>
-            {% if user %}
+            {% if username %}
                 {% possible_points_badge awarded_points video_points_base %}
             {% endif %}
             <span class="extra-link-bar"><a href="{{video_path}}">Download</a>

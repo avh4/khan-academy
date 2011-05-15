@@ -47,7 +47,7 @@ import knowledgemap
 import consts
 import youtube_sync
 
-from two_pass_template import two_pass_handler
+from two_pass_template import two_pass_handler, two_pass_variable
 from two_pass_template.tests import TwoPassTemplateTest
 
 from search import Searchable
@@ -171,7 +171,6 @@ class ViewExercise(request_handler.RequestHandler):
                 num_problems_to_print = 0
 
             template_values = {
-                'App' : App,
                 'arithmetic_template': 'arithmetic_template.html',
                 'user_data': user_data,
                 'points': user_data.points,
@@ -306,18 +305,12 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
-        awarded_points = 0
-        if user_video is not None:
-            awarded_points = user_video.points()
-
         template_values = qa.add_template_values({'playlist': playlist,
                                                   'video': video,
                                                   'videos': videos,
                                                   'video_path': video_path,
-                                                  'user': util.get_current_user(),
                                                   'video_points_base': consts.VIDEO_POINTS_BASE,
-                                                  'awarded_points': awarded_points,
+                                                  'awarded_points': self.awarded_points(video),
                                                   'exercise': exercise,
                                                   'previous_video': previous_video,
                                                   'next_video': next_video,
@@ -325,8 +318,15 @@ class ViewVideo(request_handler.RequestHandler):
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
                                                  self.request)
 
-#        self.render_template("viewvideo.html", template_values)
         return ('viewvideo.html', template_values)
+
+    @two_pass_variable()
+    def awarded_points(self, video):
+        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
+        awarded_points = 0
+        if user_video:
+            awarded_points = user_video.points()
+        return awarded_points
 
 class LogVideoProgress(request_handler.RequestHandler):
     
