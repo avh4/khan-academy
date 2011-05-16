@@ -5,14 +5,14 @@ import django.template as template
 import django.utils.html as html
 import templateext
 
-IS_IN_FIRST_TEMPLATE_PASS = False
+FIRST_PASS_ENABLED = False
 
 class TwoPassVariableDoesNotExist(Exception):
     pass
 
 def enable_first_pass(enabled):
-    global IS_IN_FIRST_TEMPLATE_PASS
-    IS_IN_FIRST_TEMPLATE_PASS = enabled
+    global FIRST_PASS_ENABLED
+    FIRST_PASS_ENABLED = enabled
 
 # Patch up variable resolution to raise our special VariableDoesNotExist exception during first pass rendering
 def patch_variable_resolution():
@@ -22,7 +22,7 @@ def patch_variable_resolution():
         try:
             return resolve_var_old(path, context)
         except template.VariableDoesNotExist:
-            if IS_IN_FIRST_TEMPLATE_PASS:
+            if FIRST_PASS_ENABLED:
                 # Throw different type of VariableDoesNotExist exception that we catch later
                 raise TwoPassVariableDoesNotExist
             else:
@@ -36,16 +36,19 @@ def patch_node_rendering():
 
     def get_new_render(old_render):
         def new_render(*args, **kw_args):
-            try:
+            if FIRST_PASS_ENABLED:
+                try:
+                    return old_render(*args, **kw_args)
+                except TwoPassVariableDoesNotExist:
+                    self = args[0]
+                    if hasattr(self, "raw_template_text"):
+                        return self.raw_template_text
+                    elif isinstance(self, template.VariableNode):
+                        return "{{%s}}" % self.filter_expression
+                    else:
+                        return ""
+            else:
                 return old_render(*args, **kw_args)
-            except TwoPassVariableDoesNotExist:
-                self = args[0]
-                if hasattr(self, "raw_template_text"):
-                    return self.raw_template_text
-                elif isinstance(self, template.VariableNode):
-                    return "{{%s}}" % self.filter_expression
-                else:
-                    return ""
         return new_render
 
     # Patch rendering for all subclasses of Node
@@ -60,7 +63,7 @@ def patch_tag_parsing():
 
     def get_new_parse(old_parse):
         def new_parse(parser, token):
-            if not IS_IN_FIRST_TEMPLATE_PASS:
+            if not FIRST_PASS_ENABLED:
                 return old_parse(parser, token)
             else:
                 raw_template_text = raw_template_text_parse(parser, token)
@@ -92,7 +95,7 @@ def patch_escaping():
 
     def escape_html_new(value):
         v = escape_html_old(value)
-        if not IS_IN_FIRST_TEMPLATE_PASS:
+        if not FIRST_PASS_ENABLED:
             return v
         else:
             return v.replace("{", "&#123;").replace("}", "&#125;")
