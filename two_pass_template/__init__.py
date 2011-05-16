@@ -11,13 +11,14 @@ import layer_cache
 import monkey_patches
 import pickle_context
 
-def two_pass_handler():
+def two_pass_handler(key_fxn=lambda handler: handler.request.path):
+
     def decorator(target):
         # Monkey patch up django template
         monkey_patches.patch()
 
         def wrapper(handler, first_pass_override=False):
-            cached_template = TwoPassTemplate.render_first_pass(handler, target)
+            cached_template = TwoPassTemplate.render_first_pass(handler, target, key_fxn)
 
             if cached_template:
                 if first_pass_override or handler.request_bool("first_pass", default=False):
@@ -93,17 +94,17 @@ class TwoPassTemplate():
                     block_node_compiled.nodelist = block_node_match.nodelist
 
     @staticmethod
-    def first_pass_key(handler, target):
+    def first_pass_key(key_fxn, handler, target):
         if App.is_dev_server:
-            return "two_pass_template[%s][%s][%s]" % (target.__name__, handler.request.path, App.last_modified_date())
+            return "two_pass[%s][%s][%s]" % (target.__name__, key_fxn(handler), App.last_modified_date())
         else:
-            return "two_pass_template[%s][%s]" % (target.__name__, handler.request.path)
+            return "two_pass[%s][%s]" % (target.__name__, key_fxn(handler))
 
     @staticmethod
     @layer_cache.cache_with_key_fxn(
-            lambda handler, target: TwoPassTemplate.first_pass_key(handler, target),
+            lambda handler, target, key_fxn: TwoPassTemplate.first_pass_key(key_fxn, handler, target),
             layer=layer_cache.Layers.Memcache)
-    def render_first_pass(handler, target):
+    def render_first_pass(handler, target, key_fxn):
         pair = target(handler)
         if not pair:
             return None
