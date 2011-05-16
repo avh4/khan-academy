@@ -210,7 +210,7 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
-    @two_pass_handler(key_fxn=lambda self: "%s[%s]" % (self.request.path, Setting.cached_library_content_date()))
+    @two_pass_handler(key_fxn=lambda self: "%s[%s]" % (self.request.url, Setting.cached_library_content_date()))
     def get(self):
 
         # This method displays a video in the context of a particular playlist.

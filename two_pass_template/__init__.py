@@ -11,7 +11,7 @@ import layer_cache
 import monkey_patches
 import pickle_context
 
-def two_pass_handler(key_fxn=lambda handler: handler.request.path):
+def two_pass_handler(key_fxn=lambda handler: handler.request.url):
 
     def decorator(target):
         # Monkey patch up django template
