@@ -1,4 +1,5 @@
 import copy
+import inspect
 import logging
 import os
 
@@ -27,60 +28,35 @@ def two_pass_handler():
         return wrapper
     return decorator
 
-current_first_pass_fake_closure = None
-class FirstPassFakeClosure:
-    def __init__(self):
-        self.dict = {}
-
-    def __getitem__(self, name):
-        return self.dict[name]
-
-    def __setitem__(self, name, context):
-        self.dict[name] = context
-
-class TwoPassVariableContext:
-    def __init__(self, target_name, args):
-        self.target_name = target_name
-        self.args = args
-
-def two_pass_variable():
+def second_pass_context(last=False):
     def decorator(target):
-        def wrapper(handler, *args, **kwargs):
-            first_pass_call = kwargs.get("first_pass_call", True)
-
-            if first_pass_call:
-                variable_context = TwoPassVariableContext(target.__name__, args)
-                current_first_pass_fake_closure[target.__name__] = variable_context
-                return variable_context
-            else:
-                variable_context = kwargs.get("variable_context", TwoPassVariableContext("", []))
-                def inner_wrapper(handler, *args, **kwargs):
-                    return target(handler, *variable_context.args)
-                return inner_wrapper
-
-        return wrapper
+        target.second_pass_context = True
+        target.second_pass_last = last
+        return target
     return decorator
 
 class TwoPassTemplate():
 
-    def __init__(self, name, source, first_pass_fake_closure, template_value_fxn_names, template_values):
+    def __init__(self, name, source, template_values):
         self.name = name
         self.source = source
-        self.first_pass_fake_closure = first_pass_fake_closure
-        self.template_value_fxn_names = template_value_fxn_names
         self.template_values = template_values
+
+    @staticmethod
+    def get_second_pass_context_fxns(handler):
+        fxns = []
+        for member in inspect.getmembers(handler):
+            fxn = member[1]
+            if fxn and hasattr(fxn, "second_pass_context"):
+                fxns.append(fxn)
+        return sorted(fxns, key=lambda f: f.second_pass_last)
 
     def render_second_pass(self, handler):
         compiled_template = template.Template(self.source)
 
-        # Add second pass template values
-        for key in self.template_value_fxn_names:
-            fxn_name = self.template_value_fxn_names[key]
-            wrapped_fxn = getattr(handler, fxn_name)
-            variable_context = self.first_pass_fake_closure[fxn_name]
-            self.template_values[key] = wrapped_fxn(first_pass_call=False, variable_context=variable_context)(handler)
+        for fxn in TwoPassTemplate.get_second_pass_context_fxns(handler):
+            self.template_values = fxn(self.template_values)
 
-        handler.add_global_template_values(self.template_values)
         self.replace_blocks_during_second_pass(compiled_template)
 
         # Need the following settings swap to correctly render a template in App Engine land.
@@ -128,23 +104,11 @@ class TwoPassTemplate():
             lambda handler, target: TwoPassTemplate.first_pass_key(handler, target),
             layer=layer_cache.Layers.Memcache)
     def render_first_pass(handler, target):
-        global current_first_pass_fake_closure
-        current_first_pass_fake_closure = FirstPassFakeClosure()
-
         pair = target(handler)
         if not pair:
             return None
 
         template_name, template_values = pair
-
-        # Remove two pass variable contexts for first pass render,
-        # and keep references around for second pass
-        template_value_fxn_names = {}
-        for key in template_values.keys():
-            val = template_values[key]
-            if isinstance(val, TwoPassVariableContext):
-                template_value_fxn_names[key] = val.target_name
-                del template_values[key]
 
         path = os.path.join(os.path.dirname(__file__), "..", template_name)
 
@@ -154,10 +118,7 @@ class TwoPassTemplate():
         finally:
             monkey_patches.enable_first_pass(False)
 
-        first_pass_fake_closure = copy.deepcopy(current_first_pass_fake_closure)
-        current_first_pass_fake_closure = None
-
         template_values_pickled = pickle_context.PickleContextDict()
         template_values_pickled.add_pickled(template_values)
 
-        return TwoPassTemplate(template_name, first_pass_source, first_pass_fake_closure, template_value_fxn_names, template_values_pickled)
+        return TwoPassTemplate(template_name, first_pass_source, template_values_pickled)

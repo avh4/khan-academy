@@ -11,7 +11,9 @@ class PickleContextVal:
 
     def val(self):
         if self.pickled:
-            return pickle.loads(self.value)
+            self.value = pickle.loads(self.value)
+            self.pickled = False
+            return self.value
         else:
             return self.value
 
@@ -20,6 +22,7 @@ class PickleContextDict(dict):
 
     def __getitem__(self, key):
         pickle_context_val = super(PickleContextDict, self).__getitem__(key)
+
         return pickle_context_val.val()
 
     def __setitem__(self, key, value, pickled=False):

@@ -2,11 +2,8 @@ import copy
 import logging
 
 import django.template as template
-import django.template.defaulttags as defaulttags
 import django.utils.html as html
 import templateext
-
-import templatetags
 
 IS_IN_FIRST_TEMPLATE_PASS = False
 
@@ -79,6 +76,8 @@ def patch_tag_parsing():
         for tag_key in reg.tags:
             old_parse = reg.tags[tag_key]
             reg.tags[tag_key] = get_new_parse(old_parse)
+
+    import templatetags
 
     # Patch all custom tags
     for key in templatetags.register.tags:

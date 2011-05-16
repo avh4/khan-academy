@@ -47,9 +47,6 @@ import knowledgemap
 import consts
 import youtube_sync
 
-from two_pass_template import two_pass_handler, two_pass_variable
-from two_pass_template.tests import TwoPassTemplateTest
-
 from search import Searchable
 import search
 
@@ -75,6 +72,9 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
+
+from two_pass_template import two_pass_handler, second_pass_context
+from two_pass_template.tests import TwoPassTemplateTest
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -305,28 +305,33 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        template_values = qa.add_template_values({'playlist': playlist,
-                                                  'video': video,
-                                                  'videos': videos,
-                                                  'video_path': video_path,
-                                                  'video_points_base': consts.VIDEO_POINTS_BASE,
-                                                  'awarded_points': self.awarded_points(video),
-                                                  'exercise': exercise,
-                                                  'previous_video': previous_video,
-                                                  'next_video': next_video,
-                                                  'selected_nav_link': 'watch',
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
+        template_values = {
+                            'playlist': playlist,
+                            'video': video,
+                            'videos': videos,
+                            'video_path': video_path,
+                            'video_points_base': consts.VIDEO_POINTS_BASE,
+                            'exercise': exercise,
+                            'previous_video': previous_video,
+                            'next_video': next_video,
+                            'selected_nav_link': 'watch',
+                            'issue_labels': ('Component-Videos,Video-%s' % readable_id),
+                        }
 
         return ('viewvideo.html', template_values)
 
-    @two_pass_variable()
-    def awarded_points(self, video):
+    @second_pass_context()
+    def user_video_context(self, context):
+        video = context["video"]
+
         user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points()
-        return awarded_points
+
+        context["awarded_points"] = awarded_points
+
+        return qa.add_template_values(context, self.request)
 
 class LogVideoProgress(request_handler.RequestHandler):
     

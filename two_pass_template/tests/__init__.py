@@ -3,7 +3,7 @@ import string
 import StringIO
 
 import django.template as template
-from two_pass_template import two_pass_variable, two_pass_handler
+from two_pass_template import second_pass_context, two_pass_handler
 import request_handler
 
 class TwoPassTemplateTest(request_handler.RequestHandler):
@@ -15,40 +15,41 @@ class TwoPassTemplateTest(request_handler.RequestHandler):
         }
         return ("two_pass_template/tests/test_simple.html", template_values)
 
-    @two_pass_variable()
-    def unsafe_string_two(self):
-        return "<script>"
+    @second_pass_context()
+    def unsafe_string_two(self, context):
+        context["unsafe_string_two"] = "<script>"
+        return context
 
     @two_pass_handler()
     def test_unsafe(self):
         template_values = {
             "unsafe_string": "{{<script>}}",
-            "unsafe_string_two": self.unsafe_string_two(),
         }
         return ("two_pass_template/tests/test_unsafe.html", template_values)
 
-    @two_pass_variable()
-    def sheep(self, monkey):
-        return monkey + 1
+    @second_pass_context()
+    def sheep(self, context):
+        if context.has_key("num_monkeys"):
+            context["sheep"] = context["num_monkeys"] + 1
+        return context
 
-    @two_pass_variable()
-    def donkey(self, gorilla):
-        return gorilla + 1
+    @second_pass_context()
+    def donkey(self, context):
+        if context.has_key("gorilla"):
+            context["donkey"] = context["gorilla"] + 1
+        return context
 
-    @two_pass_variable()
-    def zebras(self):
-        return "hrm"
+    @second_pass_context()
+    def zebras(self, context):
+        context["zebras"] = "hrm"
+        return context
 
     @two_pass_handler()
     def test_complex(self):
 
-        monkey = 5
-        gorilla = 6
-
         template_values = {
-            "sheep": self.sheep(monkey),
-            "donkey": self.donkey(gorilla),
-            "zebras": self.zebras(),
+            "num_monkeys": 5,
+            "gorilla": 6,
             "monkey": "on trees",
             "monkeys": ["a", "b"],
             "unsafe_string": "unsafe_{{monkey}}"
@@ -58,7 +59,7 @@ class TwoPassTemplateTest(request_handler.RequestHandler):
 
     @two_pass_handler()
     def test_missing_variable(self):
-        return ("two_pass_template/tests/test_complex.html", {})
+        return ("two_pass_template/tests/test_missing.html", {})
 
     @staticmethod
     def assert_equal_no_whitespace(result, expected):
