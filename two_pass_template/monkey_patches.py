@@ -73,19 +73,12 @@ def patch_tag_parsing():
                 return node
         return new_parse
 
-    # Patch all default tags
+    # Patch all tags
     for key in template.libraries:
         reg = template.libraries[key]
         for tag_key in reg.tags:
             old_parse = reg.tags[tag_key]
             reg.tags[tag_key] = get_new_parse(old_parse)
-
-    import templatetags
-
-    # Patch all custom tags
-    for key in templatetags.register.tags:
-        old_parse = templatetags.register.tags[key]
-        templatetags.register.tags[key] = get_new_parse(old_parse)
 
 # Patch up HTML and JS escaping to protect against template injection
 def patch_escaping():
