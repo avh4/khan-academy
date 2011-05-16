@@ -67,6 +67,7 @@ var ExerciseRangeOfAFunction = {
 //
     getRandomEquation: function(){
         var equation_type = getRandomIntRange(0, 3)
+	
 //f(x) = a^x + b
         if(equation_type == 0){
             var a = nonZeroRandomInt(-4, 4);
@@ -121,7 +122,8 @@ var ExerciseRangeOfAFunction = {
 //f(x) = ax^2 + b * (x-c)/(x-c)
         if(equation_type == 2){
             var a = nonZeroRandomInt(-3, 3);
-            var c = getRandomIntRange(-2, 2);
+	    //c cannot be 0, because if it was, the hole will be at the min/max of the function, so the range will also have a hole.
+            var c = nonZeroRandomInt(-2, 2);
             var b = getRandomIntRange(-2, 2) - (a * c * c);
             var relationship
             if(a > 0){
@@ -137,7 +139,7 @@ var ExerciseRangeOfAFunction = {
                 hints: ["When `x ne "+c+"`, the `(x"+format_constant(-c)+")` terms cancel, and `f(x) = "+format_first_coefficient(a)+"x^2"+format_constant(b)+"`",
                         "When `x = "+c+"`, we can't divide by `(x"+format_constant(-c)+")`, so `f(x)` is undefined there",
                         "This means `f(x)` has a hole at `x="+c+"`, where `f(x)` would otherwise be equal to `"+format_first_coefficient(a)+"x^2"+format_constant(b)+" = "+format_first_coefficient(a)+"("+c+"^2)"+format_constant(b)+"="+(a*c*c+b)+"`",
-                        "Even though there is a hole at `("+c+", "+(a*c*c+b)+")`, `f("+(-c)+") = "+(a*c*c+b)+"` too, so the range of `f(x)` includes 9",
+                        "Even though there is a hole at `("+c+", "+(a*c*c+b)+")`, `f("+(-c)+") = "+(a*c*c+b)+"` too, so the range of `f(x)` includes `" + (a*c*c+b) +"`",
                         "`x^2` is always non-negative, so `"+format_first_coefficient(a)+"x^2` will always be "+relationship+"`0`",
                         "`"+format_first_coefficient(a)+"x^2"+format_constant(b)+"` will always be "+relationship+"`"+b+"`",
                         "The range of `f(x)` is all real numbers "+relationship+"`"+b+"`"],

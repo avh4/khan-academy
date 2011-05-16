@@ -436,9 +436,9 @@ switch(getRandomIntRange(1, 4))
 					z++;
 				} 
 			
-				write_step('<br>First, count the quantity of numbers in the set that are multiples of ' + intMultiple);
+				write_step('<br>First, count the quantity of numbers in the list that are multiples of ' + intMultiple);
 				write_step('<br>There are ' + intNumerator + ' multiples of ' + intMultiple + '<br>' + StrSetUnderlined)
-				write_step('<br>There are ' + intSetSize + ' numbers in the set.')  
+				write_step('<br>There are ' + intSetSize + ' numbers in the list.')  
 				write_step('<br>Therefore the probability is' + equation_string(intNumerator+'/'+intSetSize+'='+ format_fraction(intNumerator,intSetSize)))
 				
 				break;
@@ -492,7 +492,7 @@ switch(getRandomIntRange(1, 4))
 				
 				var intNumerator =0;
 										
-				var StrSet = 'If a number is randomly chosen from the following set, what is the probability that the number is prime?<br><br><b>{';
+				var StrSet = 'If a number is randomly chosen from the following list, what is the probability that the number is prime?<br><br><b>[';
 				var StrSetUnderlined = '';
 				for(z=0; z<(intSetSize); z++){
 					StrSet = StrSet + arrSet[z];
@@ -507,7 +507,7 @@ switch(getRandomIntRange(1, 4))
 					
 					if ((z+1)!=intSetSize){StrSetUnderlined=StrSetUnderlined+', '}
 				}
-				StrSet = StrSet+'}</b>';
+				StrSet = StrSet+']</b>';
 				write_text(StrSet);
 				
 				setCorrectAnswer(format_fraction(intNumerator,intSetSize));
@@ -543,9 +543,9 @@ switch(getRandomIntRange(1, 4))
 					z++;
 				} 
 			
-				write_step('<br>First, count the quantity of numbers in the set that are prime');
-				write_step('<br>There are ' + intNumerator + ' prime numbers in the set<br>' + StrSetUnderlined)
-				write_step('<br>There are ' + intSetSize + ' numbers in the set.')  
+				write_step('<br>First, count the quantity of numbers in the list that are prime');
+				write_step('<br>There are ' + intNumerator + ' prime numbers in the list<br>' + StrSetUnderlined)
+				write_step('<br>There are ' + intSetSize + ' numbers in the list.')  
 				write_step('<br>Therefore the probability is' + equation_string(intNumerator+'/'+intSetSize+'='+ format_fraction(intNumerator,intSetSize)))
 				break;		
 		}
