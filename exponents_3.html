@@ -85,7 +85,9 @@ if (get_random(4)<=4 && exp!=0 && Math.abs(exp)<4)
 	}
 	else
 	{
-		addWrongChoice(-1*baseNumerator);
+		if(Math.abs(-1*baseNumerator) != correctAnswer){ // makes sure the negative root isn't listed
+		                addWrongChoice(-1*baseNumerator);
+		}
 		addWrongChoice(format_fraction(1, baseNumerator));
 		addWrongChoice(format_fraction(answerNumerator, answerDenominator*exp));
 		addWrongChoice(format_fraction(answerNumerator*exp, answerDenominator));
