@@ -1490,7 +1490,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
         self.redirect(redirect_target, True)
                         
 def real_main():    
-    webapp.template.register_template_library('templatefilters')
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
