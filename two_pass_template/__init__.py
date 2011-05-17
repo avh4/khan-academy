@@ -88,7 +88,7 @@ class TwoPassTemplate():
             if not has_cached:
                 # If this machine's first render of the template came during a second pass,
                 # don't cache the result.
-                template.template_cache[abspath] = None
+                del template.template_cache[abspath]
 
             block_nodes_original = original_template.nodelist.get_nodes_by_type(BlockNode)
 
