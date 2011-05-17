@@ -81,7 +81,15 @@ class TwoPassTemplate():
         block_nodes_compiled = compiled_template.nodelist.get_nodes_by_type(BlockNode)
         if block_nodes_compiled:
             path = os.path.join(os.path.dirname(__file__), "..", self.name)
+            abspath = os.path.abspath(path)
+
+            has_cached = template.template_cache.has_key(abspath)
             original_template = template.load(path)
+            if not has_cached:
+                # If this machine's first render of the template came during a second pass,
+                # don't cache the result.
+                template.template_cache[abspath] = None
+
             block_nodes_original = original_template.nodelist.get_nodes_by_type(BlockNode)
 
             for block_node_compiled in block_nodes_compiled:
