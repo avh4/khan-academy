@@ -723,7 +723,7 @@ class UserVideo(db.Model):
 
     # Number of seconds actually spent watching this video, regardless of jumping around to various
     # scrubber positions. This value can exceed the total duration of the video if it is watched
-    # many times, and it doesn't necessarily match the percent wached.
+    # many times, and it doesn't necessarily match the percent watched.
     seconds_watched = db.IntegerProperty(default = 0)
 
     last_watched = db.DateTimeProperty(auto_now_add = True)
