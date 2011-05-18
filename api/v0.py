@@ -1,5 +1,5 @@
 
-# The v0 API is officially deprecated as of June 2011. v1 is the new place to be.
+# This v0 API is officially deprecated as of June 2011. v1 is the new place to be.
 # We're keeping it around for at least 6 months so old clients can transition to the next version.
 
 import logging
