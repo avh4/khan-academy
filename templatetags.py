@@ -202,6 +202,7 @@ def empty_class_instructions(class_is_empty=True):
 
 register.tag(highlight)
 
+webapp.template.register_template_library('templatetags')    
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
 webapp.template.register_template_library('profiles.templatetags')

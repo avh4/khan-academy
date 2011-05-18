@@ -16,6 +16,7 @@ from app import App
 from models import UserData
 from render import render_block_to_string
 from nicknames import get_nickname_for
+from two_pass_template import second_pass_context
 
 class RequestHandler(webapp.RequestHandler):
 
@@ -173,7 +174,8 @@ class RequestHandler(webapp.RequestHandler):
     def delete_cookie(self, key, path='/', domain=None):
         self.set_cookie(key, '', path=path, domain=domain, max_age=0)
 
-    def render_template(self, template_name, template_values):
+    @second_pass_context(last=True)
+    def add_global_template_values(self, template_values):
         template_values['App'] = App
         template_values['None'] = None
         template_values['points'] = None
@@ -207,11 +209,14 @@ class RequestHandler(webapp.RequestHandler):
             if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
                 template_values['is_mobile'] = self.is_mobile()
 
+        return template_values
+
+    def render_template(self, template_name, template_values):
+        self.add_global_template_values(template_values)
         self.render_template_simple(template_name, template_values)
 
     def render_template_simple(self, template_name, template_values):
-        path = os.path.join(os.path.dirname(__file__), template_name)
-        self.response.out.write(template.render(path, template_values))
+        self.response.out.write(self.render_template_to_string(template_name, template_values))
 
     def render_template_to_string(self, template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)

@@ -10,7 +10,12 @@ function generateFunction(x)
     // Generate a differentiable expression object
     // {fofx, dfofx, wrongs}
     // x being the name of the variable we differentiate with respect to
-    return funcGens[getRandomInt(funcGens.length-1)](x);
+    // ensure that the function isn't just 0 as well
+    var f = funcGens[getRandomInt(funcGens.length-1)](x);
+    while (f.fofx === '0') {
+    	f = funcGens[getRandomInt(funcGens.length-1)](x);
+    }
+    return f;
 }
 
 function polyCoefs(low_deg, high_deg)
@@ -40,8 +45,12 @@ function polyExp(low_deg, high_deg, coefs, x)
             }
         }
     }
-	
-    return cleanExp(fofx, x);
+
+    fofx = cleanExp(fofx, x);
+    if (fofx == '') {
+       fofx = '0';
+    }
+    return fofx;
 }
 
 function dPolydx(low_deg, high_deg, coefs, x)

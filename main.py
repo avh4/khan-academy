@@ -72,6 +72,9 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
+
+from two_pass_template import two_pass_handler, second_pass_context
+from two_pass_template.tests import TwoPassTemplateTest
         
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -168,7 +171,6 @@ class ViewExercise(request_handler.RequestHandler):
                 num_problems_to_print = 0
 
             template_values = {
-                'App' : App,
                 'arithmetic_template': 'arithmetic_template.html',
                 'user_data': user_data,
                 'points': user_data.points,
@@ -205,9 +207,10 @@ def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
-    
+
 class ViewVideo(request_handler.RequestHandler):
 
+    @two_pass_handler(key_fxn=lambda self: "%s[%s]" % (self.request.url, Setting.cached_library_content_date()))
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -302,25 +305,33 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
+        template_values = {
+                            'playlist': playlist,
+                            'video': video,
+                            'videos': videos,
+                            'video_path': video_path,
+                            'video_points_base': consts.VIDEO_POINTS_BASE,
+                            'exercise': exercise,
+                            'previous_video': previous_video,
+                            'next_video': next_video,
+                            'selected_nav_link': 'watch',
+                            'issue_labels': ('Component-Videos,Video-%s' % readable_id),
+                        }
+
+        return ('viewvideo.html', template_values)
+
+    @second_pass_context()
+    def user_video_context(self, context):
+        video = context["video"]
+
         user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
         awarded_points = 0
-        if user_video is not None:
+        if user_video:
             awarded_points = user_video.points()
 
-        template_values = qa.add_template_values({'playlist': playlist,
-                                                  'video': video,
-                                                  'videos': videos,
-                                                  'video_path': video_path,
-                                                  'user': util.get_current_user(),
-                                                  'video_points_base': consts.VIDEO_POINTS_BASE,
-                                                  'awarded_points': awarded_points,
-                                                  'exercise': exercise,
-                                                  'previous_video': previous_video,
-                                                  'next_video': next_video,
-                                                  'selected_nav_link': 'watch',
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
-        self.render_template('viewvideo.html', template_values)
+        context["awarded_points"] = awarded_points
+
+        return qa.add_template_values(context, self.request)
 
 class LogVideoProgress(request_handler.RequestHandler):
     
@@ -1047,9 +1058,6 @@ class ViewHomePage(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        
         thumbnail_link_sets = [
             [
                 { 
@@ -1123,17 +1131,14 @@ class ViewHomePage(request_handler.RequestHandler):
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library_content_html()
         
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'user_data': user_data,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'video_id': movie_youtube_id,
-                                                  'thumbnail_link_sets': thumbnail_link_sets,
-                                                  'library_content': library_content,
-                                                  'DVD_list': DVD_list,
-                                                  'is_mobile_allowed': True,
-                                                  'approx_vid_count': consts.APPROX_VID_COUNT, }, 
-                                                  self.request)
+        template_values = {
+                            'video_id': movie_youtube_id,
+                            'thumbnail_link_sets': thumbnail_link_sets,
+                            'library_content': library_content,
+                            'DVD_list': DVD_list,
+                            'is_mobile_allowed': True,
+                            'approx_vid_count': consts.APPROX_VID_COUNT,
+                        }
         self.render_template('homepage.html', template_values)
         
 class ViewFAQ(request_handler.RequestHandler):
@@ -1485,8 +1490,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
         self.redirect(redirect_target, True)
                         
 def real_main():    
-    webapp.template.register_template_library('templatefilters')
-    webapp.template.register_template_library('templatetags')    
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1525,6 +1528,7 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
+        ('/twopasstest', TwoPassTemplateTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),

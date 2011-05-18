@@ -102,4 +102,5 @@ register.filter(in_list)
 register.filter(find_column_index)
 register.filter(column_height)
 
+webapp.template.register_template_library('templatefilters')
 webapp.template.register_template_library('discussion.templatefilters')
