@@ -42,7 +42,6 @@ import layer_cache
 import request_cache
 import autocomplete
 import coaches
-import api
 import knowledgemap
 import consts
 import youtube_sync
@@ -1591,14 +1590,6 @@ def real_main():
         ('/profile/graph/classtime', util_profile.ClassTimeGraph),
         ('/class_profile', util_profile.ViewClassProfile),
 
-        ('/api/export', api.Export),
-        ('/api/import', api.ViewImport),
-        ('/api/importuserdata', api.ImportUserData),
-        ('/api/playlists', api.Playlists),          
-        ('/api/playlistvideos', api.PlaylistVideos), 
-        ('/api/videolibrary', api.VideoLibrary), 
-        ('/api/videolibrarylastupdated', api.VideoLibraryLastUpdated), 
-        
         ('/press/.*', ViewArticle),
         ('/login', Login),
         ('/postlogin', PostLogin),
