@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime, logging
 import math
+import urllib
 from google.appengine.api import users
 from google.appengine.api import memcache
 
@@ -17,6 +18,7 @@ from app import App
 import layer_cache
 import request_cache
 from discussion import models_discussion
+from topics_list import all_topics_list
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -651,6 +653,18 @@ class Playlist(Searchable, db.Model):
     INDEX_ONLY = ['title', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
+
+    @property
+    def api_url(self):
+        return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
+
+    @staticmethod
+    def get_for_all_topics():
+        playlists = []
+        for playlist in Playlist.all().fetch(1000):
+            if playlist.title in all_topics_list:
+                playlists.append(playlist)
+        return playlists
 
 class UserPlaylist(db.Model):
     user = db.UserProperty()

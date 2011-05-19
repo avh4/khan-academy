@@ -21,38 +21,106 @@ import layer_cache
 import coaches
 from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video, ExerciseVideo, Setting    
 from discussion import qa
-from topics_list import all_topics_list
 
 from api import api_app
 from api.decorators import jsonp
+
 from flask import request
 
-@api_app.route("/api/v0/playlists", methods=['GET'])
-@api_app.route("/api/playlists", methods=['GET'])
+@api_app.route("/api/v0/playlists", methods=["GET"])
+@api_app.route("/api/playlists", methods=["GET"])
 @jsonp
-def playlists():
+def playlists_v0():
     return get_playlists_json()
 
-@api_app.route("/api/v0/playlistvideos", methods=['GET'])
-@api_app.route("/api/playlistvideos", methods=['GET'])
+@api_app.route("/api/v0/playlistvideos", methods=["GET"])
+@api_app.route("/api/playlistvideos", methods=["GET"])
 @jsonp
-def playlist_videos():
+def playlist_videos_v0():
     playlist_title = request.values["playlist"]
     return get_playlist_videos_json(playlist_title)
 
-@api_app.route("/api/v0/videolibrary", methods=['GET'])
-@api_app.route("/api/videolibrary", methods=['GET'])
+@api_app.route("/api/v0/videolibrary", methods=["GET"])
+@api_app.route("/api/videolibrary", methods=["GET"])
 @jsonp
-def video_library():
+def video_library_v0():
     return zlib.decompress(get_video_library_json_compressed())
 
-@api_app.route("/api/v0/videolibrarylastupdated", methods=['GET'])
-@api_app.route("/api/videolibrarylastupdated", methods=['GET'])
+@api_app.route("/api/v0/videolibrarylastupdated", methods=["GET"])
+@api_app.route("/api/videolibrarylastupdated", methods=["GET"])
 @jsonp
-def video_library_last_updated():
+def video_library_last_updated_v0():
     return Setting.cached_library_content_date()
 
-class JsonApiDict():
+@layer_cache.cache_with_key_fxn(
+        lambda: "json_playlists_%s" % Setting.cached_library_content_date(), 
+        layer=layer_cache.Layers.Memcache)
+def get_playlists_json():
+    return json.dumps(get_playlist_api_dicts(), indent=4)
+
+@layer_cache.cache_with_key_fxn(
+        lambda playlist_title: "json_playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()), 
+        layer=layer_cache.Layers.Memcache)
+def get_playlist_videos_json(playlist_title):
+    query = Playlist.all()
+    query.filter('title =', playlist_title)
+    playlist = query.get()
+
+    video_query = Video.all()
+    video_query.filter('playlists = ', playlist_title)
+    video_key_dict = Video.get_dict(video_query, lambda video: video.key())
+
+    video_playlist_query = VideoPlaylist.all()
+    video_playlist_query.filter('playlist =', playlist)
+    video_playlist_query.filter('live_association =', True)
+    video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
+
+    return json.dumps(get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict), indent=4)
+
+@layer_cache.cache_with_key_fxn(
+        lambda: "json_video_library_%s" % Setting.cached_library_content_date(), 
+        layer=layer_cache.Layers.Memcache)
+def get_video_library_json_compressed():
+    playlist_api_dicts = []
+    playlists = Playlist.get_for_all_topics()
+    video_key_dict = Video.get_dict(Video.all(), lambda video: video.key())
+
+    video_playlist_query = VideoPlaylist.all()
+    video_playlist_query.filter('live_association =', True)
+    video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
+
+    for playlist in playlists:
+        playlist_api_dict = ApiDict.playlist(playlist)
+        playlist_api_dict["videos"] = get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict)
+        playlist_api_dicts.append(playlist_api_dict)
+
+    # We compress this huge json payload so it'll fit in memcache
+    return zlib.compress(json.dumps(playlist_api_dicts, indent=4))
+
+def get_playlist_api_dicts():
+    playlist_api_dicts = []
+    for playlist in Playlist.get_for_all_topics():
+        playlist_api_dicts.append(ApiDict.playlist(playlist))
+    return playlist_api_dicts
+
+def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict):
+
+    video_api_dicts = []
+    video_playlists = sorted(video_playlist_key_dict[playlist.key()].values(), key=lambda video_playlist: video_playlist.video_position)
+    c_videos = len(video_playlists)
+
+    for ix in range(0, c_videos):
+        video_playlist = video_playlists[ix]
+
+        video = video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlist)]
+        video_prev = None if ix <= 0 else video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlists[ix - 1])]# video_playlists[ix - 1].video
+        video_next = None if ix + 1 >= (c_videos) else video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlists[ix + 1])]# video_playlists[ix + 1].video
+
+        video_api_dicts.append(ApiDict.video(video, video_playlist.video_position, playlist.title, video_prev, video_next))
+
+    return video_api_dicts
+
+class ApiDict():
     @staticmethod
     def video(video, video_position, playlist_title, video_prev, video_next):
 
@@ -97,78 +165,4 @@ class JsonApiDict():
             'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist.title)),
         }
 
-@layer_cache.cache_with_key_fxn(
-        lambda: "json_playlists_%s" % Setting.cached_library_content_date(), 
-        layer=layer_cache.Layers.Memcache)
-def get_playlists_json():
-    return json.dumps(get_playlist_api_dicts(), indent=4)
-
-@layer_cache.cache_with_key_fxn(
-        lambda playlist_title: "json_playlistvideos_%s_%s" % (playlist_title, Setting.cached_library_content_date()), 
-        layer=layer_cache.Layers.Memcache)
-def get_playlist_videos_json(playlist_title):
-    query = Playlist.all()
-    query.filter('title =', playlist_title)
-    playlist = query.get()
-
-    video_query = Video.all()
-    video_query.filter('playlists = ', playlist_title)
-    video_key_dict = Video.get_dict(video_query, lambda video: video.key())
-
-    video_playlist_query = VideoPlaylist.all()
-    video_playlist_query.filter('playlist =', playlist)
-    video_playlist_query.filter('live_association =', True)
-    video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
-
-    return json.dumps(get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict), indent=4)
-
-@layer_cache.cache_with_key_fxn(
-        lambda: "json_video_library_%s" % Setting.cached_library_content_date(), 
-        layer=layer_cache.Layers.Memcache)
-def get_video_library_json_compressed():
-    playlist_api_dicts = []
-    playlists = get_all_topic_playlists()
-    video_key_dict = Video.get_dict(Video.all(), lambda video: video.key())
-
-    video_playlist_query = VideoPlaylist.all()
-    video_playlist_query.filter('live_association =', True)
-    video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
-
-    for playlist in playlists:
-        playlist_api_dict = JsonApiDict.playlist(playlist)
-        playlist_api_dict["videos"] = get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict)
-        playlist_api_dicts.append(playlist_api_dict)
-
-    # We compress this huge json payload so it'll fit in memcache
-    return zlib.compress(json.dumps(playlist_api_dicts, indent=4))
-
-def get_all_topic_playlists():
-    playlists = []
-    for playlist in Playlist.all().fetch(1000):
-        if playlist.title in all_topics_list:
-            playlists.append(playlist)
-    return playlists
-
-def get_playlist_api_dicts():
-    playlist_api_dicts = []
-    for playlist in get_all_topic_playlists():
-        playlist_api_dicts.append(JsonApiDict.playlist(playlist))
-    return playlist_api_dicts
-
-def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_dict):
-
-    video_api_dicts = []
-    video_playlists = sorted(video_playlist_key_dict[playlist.key()].values(), key=lambda video_playlist: video_playlist.video_position)
-    c_videos = len(video_playlists)
-
-    for ix in range(0, c_videos):
-        video_playlist = video_playlists[ix]
-
-        video = video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)]
-        video_prev = None if ix <= 0 else video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlists[ix - 1])]# video_playlists[ix - 1].video
-        video_next = None if ix + 1 >= (c_videos) else video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlists[ix + 1])]# video_playlists[ix + 1].video
-
-        video_api_dicts.append(JsonApiDict.video(video, video_playlist.video_position, playlist.title, video_prev, video_next))
-
-    return video_api_dicts
 

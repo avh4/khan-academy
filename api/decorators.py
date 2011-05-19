@@ -1,14 +1,17 @@
-import simplejson
+
+#TODO: handle JSON required-object-wrapping security
 
 from functools import wraps
+
 from flask import request
 from flask import current_app
+from api.jsonify import jsonify
 
 def jsonp(func):
     @wraps(func)
     def jsonp_enabled(*args, **kwargs):
         obj = func(*args, **kwargs)
-        json = obj if type(obj) == str else simplejson.dumps(obj, ensure_ascii=False, indent=None if request.is_xhr else 4)
+        json = obj if type(obj) == str else jsonify(obj)
 
         val = json
         callback = request.values.get("callback")
@@ -17,3 +20,4 @@ def jsonp(func):
 
         return current_app.response_class(val, mimetype="application/json")
     return jsonp_enabled
+
