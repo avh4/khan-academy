@@ -13,4 +13,3 @@ for filename in os.listdir(package_dir):
 
 from flask import Flask
 api_app = Flask('api')
-

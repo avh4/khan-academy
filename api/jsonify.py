@@ -29,7 +29,6 @@ def dumps(obj):
                 value = obj.__getattribute__(property)
                 valueClass = str(value.__class__)
                 if is_visible_class_name(valueClass):
-                    logging.critical("B")
                     value = dumps(value)
                     if value != None:
                         properties[property] = value
