@@ -1,7 +1,7 @@
 import logging
 
 # Each leaf node in PLAYLIST_STRUCTURE is a tuple of form:
-#   ("<Playlist short description for jump bar>", "<Playlist title>", "<Jump bar URL override (optional)>")
+#   ("<Playlist short description for playlist jump bar>", "<Playlist title>", "<Playlist jump bar URL override (optional)>")
 
 PLAYLIST_STRUCTURE = [
     {
