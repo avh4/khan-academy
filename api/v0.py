@@ -112,9 +112,9 @@ def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_di
     for ix in range(0, c_videos):
         video_playlist = video_playlists[ix]
 
-        video = video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlist)]
-        video_prev = None if ix <= 0 else video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlists[ix - 1])]# video_playlists[ix - 1].video
-        video_next = None if ix + 1 >= (c_videos) else video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlists[ix + 1])]# video_playlists[ix + 1].video
+        video = video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)]
+        video_prev = None if ix <= 0 else video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlists[ix - 1])]# video_playlists[ix - 1].video
+        video_next = None if ix + 1 >= (c_videos) else video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlists[ix + 1])]# video_playlists[ix + 1].video
 
         video_api_dicts.append(ApiDict.video(video, video_playlist.video_position, playlist.title, video_prev, video_next))
 
