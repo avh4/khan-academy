@@ -17,5 +17,5 @@ def playlist_videos_v1(playlist_name):
 @api_app.route("/api/v1/playlists/library", methods=["GET"])
 @jsonp
 def playlists_library_v1():
-    return models.Playlist.get_for_all_topics()[0]
+    pass
 
