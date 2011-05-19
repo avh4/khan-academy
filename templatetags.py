@@ -4,10 +4,12 @@ import cgi
 import math
 from google.appengine.ext import webapp
 from django import template
+from django.template.defaultfilters import escape, slugify
 
 from app import App
 import consts
 import util
+import topics_list
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -185,7 +187,51 @@ def reports_navigation(coach_email, current_report="classreport"):
     
 @register.inclusion_tag(("playlist_browser.html", "../playlist_browser.html"))
 def playlist_browser(browser_id):
-    return {'browser_id': browser_id}
+    return {'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE}
+
+@register.simple_tag
+def playlist_browser_sub_structure(sub_structure, class_name="", level=0):
+
+    type_structure = type(sub_structure)
+    link_class_attribute = ""
+
+    if type_structure == dict and level > 1:
+        class_name += " sub"
+
+    if type_structure == tuple and level == 1:
+        class_name += " solo"
+        link_class_attribute = " class='menulink'"
+
+    class_attribute = ""
+    if class_name:
+        class_attribute = " class='%s'" % class_name
+
+    if type_structure == tuple:
+        href = "#%s" % slugify(escape(sub_structure[1]))
+
+        if len(sub_structure) >= 3:
+            href = sub_structure[2]
+
+        return "<li%s><a href='%s'%s>%s</a></li>" % (class_attribute, href, link_class_attribute, escape(sub_structure[0]))
+
+    elif type_structure == list:
+        s = ""
+
+        class_next = "topline"
+        for sub_sub_structure in sub_structure:
+            s += playlist_browser_sub_structure(sub_sub_structure, class_name=class_next, level=level + 1)
+            class_next = ""
+
+        return s
+    elif type_structure == dict:
+        s = ""
+
+        for key in sub_structure:
+            s += "<li%s>%s <ul>%s</ul></li>" % (class_attribute, escape(key), playlist_browser_sub_structure(sub_structure[key], level=level + 1))
+
+        return s
+
+    return ""
 
 @register.simple_tag
 def static_url(relative_url):

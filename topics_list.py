@@ -3,84 +3,90 @@ import logging
 # Each leaf node in PLAYLIST_STRUCTURE is a tuple of form:
 #   ("<Playlist short description for jump bar>", "<Playlist title>", "<Jump bar URL override (optional)>")
 
-PLAYLIST_STRUCTURE = {
-    "Math": [
-        ("Arithmetic", "Arithmetic"),
-        {
-            "Developmental Math": [
-                ("Developmental Math 1", "Developmental Math"),
-                ("Developmental Math 2", "Developmental Math 2"),
-            ]
-        },
-        {
-            "Pre-Algebra": [
-                ("Core Pre-Algebra", "Pre-algebra"),
-                ("Worked Examples 1", "MA Tests for Education Licensure (MTEL) -Pre-Alg"),
-            ]
-        },
-        ("Brain Teasers", "Brain Teasers"),
-        {
-            "Algebra": [
-                ("Core Algebra", "Algebra"),
-                ("Worked Examples 1", "California Standards Test: Algebra I"),
-                ("Worked Examples 2", "ck12.org Algebra 1 Examples"),
-                ("Worked Examples 3", "California Standards Test: Algebra II"),
-                ("Worked Examples 4", "Algebra I Worked Examples"),
-            ]
-        },
-        {
-            "Geometry": [
-                ("Core Geometry", "Geometry"),
-                ("Worked Examples 1", "California Standards Test: Geometry"),
-            ]
-        },
-        ("Trigonometry", "Trigonometry"),
-        ("Probability", "Probability"),
-        ("Statistics", "Statistics"),
-        ("Precalculus", "Precalculus"),
-        ("Calculus", "Calculus"),
-        ("Differential Equations", "Differential Equations"),
-        ("Linear Algebra", "Linear Algebra"),
-    ],
-    "Science": [
-        ("Biology", "Biology"),
-        ("Chemistry", "Chemistry"),
-        ("Physics", "Physics"),
-        ("Organic Chemistry", "Organic Chemistry"),
-        ("Cosmology and Astronomy", "Cosmology and Astronomy"),
-    ],
-    "Humanities & Other": [
-        ("History", "History"),
-        {
-            "Finance": [
-                ("Core Finance", "Finance"),
-                ("Banking and Money", "Banking and Money"),
-                ("Valuation and Investing", "Valuation and Investing"),
-                ("Venture Capital and Capital Markets", "Venture Capital and Capital Markets"),
-                ("Credit Crisis", "Credit Crisis"),
-                ("Paulson Bailout", "Paulson Bailout"),
-                ("Geithner Plan", "Geithner Plan"),
-                ("Current Economics", "Current Economics"),
-                ("Currency", "Currency"),
-            ]
-        },
-    ],
-    "Test Prep": [
-        ("SAT Math", "SAT Preparation", "/sat"),
-        {
-            "GMAT": [
-                ("Problem Solving", "GMAT: Problem Solving", "/gmat"),
-                ("Data Sufficiency", "GMAT Data Sufficiency", "/gmat"),
-            ]
-        },
-        ("CAHSEE", "CAHSEE Example Problems"),
-        ("IIT JEE", "IIT JEE Questions"),
-        ("Singapore Math", "Singapore Math"),
-    ],
-    "Talks and Interviews": [
-        ("Talks and Interviews", "Khan Academy-Related Talks and Interviews")
-    ]
-}
+PLAYLIST_STRUCTURE = [
+    {
+        "Math": [
+            ("Arithmetic", "Arithmetic"),
+            {
+                "Developmental Math": [
+                    ("Developmental Math 1", "Developmental Math"),
+                    ("Developmental Math 2", "Developmental Math 2"),
+                ]
+            },
+            {
+                "Pre-Algebra": [
+                    ("Core Pre-Algebra", "Pre-algebra"),
+                    ("Worked Examples 1", "MA Tests for Education Licensure (MTEL) -Pre-Alg"),
+                ]
+            },
+            ("Brain Teasers", "Brain Teasers"),
+            {
+                "Algebra": [
+                    ("Core Algebra", "Algebra"),
+                    ("Worked Examples 1", "California Standards Test: Algebra I"),
+                    ("Worked Examples 2", "ck12.org Algebra 1 Examples"),
+                    ("Worked Examples 3", "California Standards Test: Algebra II"),
+                    ("Worked Examples 4", "Algebra I Worked Examples"),
+                ]
+            },
+            {
+                "Geometry": [
+                    ("Core Geometry", "Geometry"),
+                    ("Worked Examples 1", "California Standards Test: Geometry"),
+                ]
+            },
+            ("Trigonometry", "Trigonometry"),
+            ("Probability", "Probability"),
+            ("Statistics", "Statistics"),
+            ("Precalculus", "Precalculus"),
+            ("Calculus", "Calculus"),
+            ("Differential Equations", "Differential Equations"),
+            ("Linear Algebra", "Linear Algebra"),
+        ]
+    },
+    {
+        "Science": [
+            ("Biology", "Biology"),
+            ("Chemistry", "Chemistry"),
+            ("Physics", "Physics"),
+            ("Organic Chemistry", "Organic Chemistry"),
+            ("Cosmology and Astronomy", "Cosmology and Astronomy"),
+        ],
+    },
+    {
+        "Humanities & Other": [
+            ("History", "History"),
+            {
+                "Finance": [
+                    ("Core Finance", "Finance"),
+                    ("Banking and Money", "Banking and Money"),
+                    ("Valuation and Investing", "Valuation and Investing"),
+                    ("Venture Capital and Capital Markets", "Venture Capital and Capital Markets"),
+                    ("Credit Crisis", "Credit Crisis"),
+                    ("Paulson Bailout", "Paulson Bailout"),
+                    ("Geithner Plan", "Geithner Plan"),
+                    ("Current Economics", "Current Economics"),
+                    ("Currency", "Currency"),
+                ]
+            },
+        ],
+    },
+    {
+        "Test Prep": [
+            ("SAT Math", "SAT Preparation", "/sat"),
+            {
+                "GMAT": [
+                    ("Problem Solving", "GMAT: Problem Solving", "/gmat#problem_solving"),
+                    ("Data Sufficiency", "GMAT Data Sufficiency", "/gmat"),
+                ]
+            },
+            ("CAHSEE", "CAHSEE Example Problems"),
+            ("IIT JEE", "IIT JEE Questions"),
+            ("Singapore Math", "Singapore Math"),
+        ],
+    },
+    ("Talks and Interviews", "Khan Academy-Related Talks and Interviews")
+]
 
 # Each DVD needs to stay under 4.4GB
 
