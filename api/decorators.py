@@ -1,6 +1,4 @@
 
-#TODO: handle JSON required-object-wrapping security
-
 from functools import wraps
 
 from flask import request
