@@ -228,6 +228,13 @@ class Exercise(db.Model):
         memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
 
+    @staticmethod
+    def get_dict(query, fxn_key):
+        exercise_dict = {}
+        for exercise in query.fetch(10000):
+            exercise_dict[fxn_key(exercise)] = exercise
+        return exercise_dict
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -952,6 +959,19 @@ class ExerciseVideo(db.Model):
 
     def key_for_video(self):
         return ExerciseVideo.video.get_value_for_datastore(self)
+
+    @staticmethod
+    def get_key_dict(query):
+        exercise_video_key_dict = {}
+        for exercise_video in query.fetch(10000):
+            video_key = ExerciseVideo.video.get_value_for_datastore(exercise_video)
+
+            if not exercise_video_key_dict.has_key(video_key):
+                exercise_video_key_dict[video_key] = {}
+
+            exercise_video_key_dict[video_key][ExerciseVideo.exercise.get_value_for_datastore(exercise_video)] = exercise_video
+
+        return exercise_video_key_dict
 
 class ExerciseGraph(object):
 

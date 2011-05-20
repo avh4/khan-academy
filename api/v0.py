@@ -31,14 +31,14 @@ from flask import request
 @route("/api/playlists", methods=["GET"])
 @jsonp
 @jsonify
-def playlists_v0():
+def playlists():
     return get_playlists_json()
 
 @route("/api/v0/playlistvideos", methods=["GET"])
 @route("/api/playlistvideos", methods=["GET"])
 @jsonp
 @jsonify
-def playlist_videos_v0():
+def playlist_videos():
     playlist_title = request.values["playlist"]
     return get_playlist_videos_json(playlist_title)
 
@@ -46,14 +46,14 @@ def playlist_videos_v0():
 @route("/api/videolibrary", methods=["GET"])
 @jsonp
 @jsonify
-def video_library_v0():
+def video_library():
     return zlib.decompress(get_video_library_json_compressed())
 
 @route("/api/v0/videolibrarylastupdated", methods=["GET"])
 @route("/api/videolibrarylastupdated", methods=["GET"])
 @jsonp
 @jsonify
-def video_library_last_updated_v0():
+def video_library_last_updated():
     return Setting.cached_library_content_date()
 
 @layer_cache.cache_with_key_fxn(
