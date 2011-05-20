@@ -131,6 +131,16 @@ def exercises():
 def exercises(exercise_name):
     return models.Exercise.get_by_name(exercise_name)
 
+@route("/api/v1/exercises/<exercise_name>/videos", methods=["GET"])
+@jsonp
+@jsonify
+def exercise_videos(exercise_name):
+    exercise = models.Exercise.get_by_name(exercise_name)
+    if exercise:
+        exercise_videos = exercise.related_videos()
+        return map(lambda exercise_video: exercise_video.video, exercise_videos)
+    return []
+
 def fully_populated_playlists():
     playlists = models.Playlist.get_for_all_topics()
     video_key_dict = models.Video.get_dict(models.Video.all(), lambda video: video.key())
