@@ -1,7 +1,9 @@
+import copy
 import logging
 
 import models
 import layer_cache
+import topics_list
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress
@@ -57,7 +59,29 @@ def playlist_videos_v1(playlist_title):
 @compress
 @jsonify
 def playlists_library_v1():
-    playlist_api_dicts = []
+    playlists = fully_populated_playlists()
+
+    playlist_dict = {}
+    for playlist in playlists:
+        playlist_dict[playlist.title] = playlist
+
+    playlist_structure = copy.deepcopy(topics_list.PLAYLIST_STRUCTURE)
+    replace_playlist_values(playlist_structure, playlist_dict)
+
+    return playlist_structure
+
+@route("/api/v1/playlists/library/list", methods=["GET"])
+@jsonp
+@decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
+@layer_cache.cache_with_key_fxn(
+    lambda: "api_library_list_%s" % models.Setting.cached_library_content_date(), 
+    layer=layer_cache.Layers.Memcache)
+@compress
+@jsonify
+def playlists_library_list_v1():
+    return fully_populated_playlists()
+
+def fully_populated_playlists():
     playlists = models.Playlist.get_for_all_topics()
     video_key_dict = models.Video.get_dict(models.Video.all(), lambda video: video.key())
 
@@ -74,3 +98,18 @@ def playlists_library_v1():
             playlist.videos.append(video)
 
     return playlists
+
+def replace_playlist_values(structure, playlist_dict):
+    if type(structure) == list:
+        for sub_structure in structure:
+            replace_playlist_values(sub_structure, playlist_dict)
+    else:
+        for key in structure:
+            val = structure[key]
+            if type(val) == str:
+                # Replace string playlist title with real playlist object
+                structure[key] = playlist_dict[val]
+            else:
+                replace_playlist_values(structure[key], playlist_dict)
+
+

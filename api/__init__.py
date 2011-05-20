@@ -1,4 +1,5 @@
 import sys, os
+import logging
 
 package_dir = "packages"
 
@@ -13,4 +14,9 @@ for filename in os.listdir(package_dir):
 
 from flask import Flask
 api_app = Flask('api')
-route = api_app.route
+
+def route(rule, **options):
+    def fix_endpoint_names_for_decorated_functions(f):
+        return api_app.add_url_rule(rule, rule, f, **options)
+    return fix_endpoint_names_for_decorated_functions
+

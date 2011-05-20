@@ -190,48 +190,36 @@ def playlist_browser(browser_id):
     return {'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE}
 
 @register.simple_tag
-def playlist_browser_sub_structure(sub_structure, class_name="", level=0):
-
-    type_structure = type(sub_structure)
-    link_class_attribute = ""
-
-    if type_structure == dict and level > 1:
-        class_name += " sub"
-
-    if type_structure == tuple and level == 1:
-        class_name += " solo"
-        link_class_attribute = " class='menulink'"
-
-    class_attribute = ""
-    if class_name:
-        class_attribute = " class='%s'" % class_name
-
-    if type_structure == tuple:
-        href = "#%s" % slugify(escape(sub_structure[1]))
-
-        if len(sub_structure) >= 3:
-            href = sub_structure[2]
-
-        return "<li%s><a href='%s'%s>%s</a></li>" % (class_attribute, href, link_class_attribute, escape(sub_structure[0]))
-
-    elif type_structure == list:
+def playlist_browser_structure(structure, class_name="", level=0):
+    if type(structure) == list:
         s = ""
-
         class_next = "topline"
-        for sub_sub_structure in sub_structure:
-            s += playlist_browser_sub_structure(sub_sub_structure, class_name=class_next, level=level + 1)
+        for sub_structure in structure:
+            s += playlist_browser_structure(sub_structure, class_name=class_next, level=level)
             class_next = ""
-
         return s
-    elif type_structure == dict:
+    else:
         s = ""
+        for key in structure:
+            val = structure[key]
+            if type(val) == str:
+                href = "#%s" % escape(slugify(val))
 
-        for key in sub_structure:
-            s += "<li%s>%s <ul>%s</ul></li>" % (class_attribute, escape(key), playlist_browser_sub_structure(sub_structure[key], level=level + 1))
+                # We have two special case playlist URLs to worry about for now. Should remove later.
+                if val.startswith("SAT"):
+                    href = "/sat"
+                elif val.startswith("GMAT"):
+                    href = "/gmat"
 
+                if level == 0:
+                    s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(key))
+                else:
+                    s += "<li class='%s'><a href='%s'>%s</a></li>" % (class_name, href, escape(key))
+            else:
+                if level > 0:
+                    class_name += " sub"
+                s += "<li class='%s'>%s <ul>%s</ul></li>" % (class_name, escape(key), playlist_browser_structure(val, level=level + 1))
         return s
-
-    return ""
 
 @register.simple_tag
 def static_url(relative_url):

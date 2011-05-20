@@ -6,86 +6,86 @@ import logging
 PLAYLIST_STRUCTURE = [
     {
         "Math": [
-            ("Arithmetic", "Arithmetic"),
+            {"Arithmetic": "Arithmetic"},
             {
                 "Developmental Math": [
-                    ("Developmental Math 1", "Developmental Math"),
-                    ("Developmental Math 2", "Developmental Math 2"),
+                    {"Developmental Math 1": "Developmental Math"},
+                    {"Developmental Math 2": "Developmental Math 2"},
                 ]
             },
             {
                 "Pre-Algebra": [
-                    ("Core Pre-Algebra", "Pre-algebra"),
-                    ("Worked Examples 1", "MA Tests for Education Licensure (MTEL) -Pre-Alg"),
+                    {"Core Pre-Algebra": "Pre-algebra"},
+                    {"Worked Examples 1": "MA Tests for Education Licensure (MTEL) -Pre-Alg"},
                 ]
             },
-            ("Brain Teasers", "Brain Teasers"),
+            {"Brain Teasers": "Brain Teasers"},
             {
                 "Algebra": [
-                    ("Core Algebra", "Algebra"),
-                    ("Worked Examples 1", "California Standards Test: Algebra I"),
-                    ("Worked Examples 2", "ck12.org Algebra 1 Examples"),
-                    ("Worked Examples 3", "California Standards Test: Algebra II"),
-                    ("Worked Examples 4", "Algebra I Worked Examples"),
+                    {"Core Algebra": "Algebra"},
+                    {"Worked Examples 1": "California Standards Test: Algebra I"},
+                    {"Worked Examples 2": "ck12.org Algebra 1 Examples"},
+                    {"Worked Examples 3": "California Standards Test: Algebra II"},
+                    {"Worked Examples 4": "Algebra I Worked Examples"},
                 ]
             },
             {
                 "Geometry": [
-                    ("Core Geometry", "Geometry"),
-                    ("Worked Examples 1", "California Standards Test: Geometry"),
+                    {"Core Geometry": "Geometry"},
+                    {"Worked Examples 1": "California Standards Test: Geometry"},
                 ]
             },
-            ("Trigonometry", "Trigonometry"),
-            ("Probability", "Probability"),
-            ("Statistics", "Statistics"),
-            ("Precalculus", "Precalculus"),
-            ("Calculus", "Calculus"),
-            ("Differential Equations", "Differential Equations"),
-            ("Linear Algebra", "Linear Algebra"),
+            {"Trigonometry": "Trigonometry"},
+            {"Probability": "Probability"},
+            {"Statistics": "Statistics"},
+            {"Precalculus": "Precalculus"},
+            {"Calculus": "Calculus"},
+            {"Differential Equations": "Differential Equations"},
+            {"Linear Algebra": "Linear Algebra"},
         ]
     },
     {
         "Science": [
-            ("Biology", "Biology"),
-            ("Chemistry", "Chemistry"),
-            ("Physics", "Physics"),
-            ("Organic Chemistry", "Organic Chemistry"),
-            ("Cosmology and Astronomy", "Cosmology and Astronomy"),
+            {"Biology": "Biology"},
+            {"Chemistry": "Chemistry"},
+            {"Physics": "Physics"},
+            {"Organic Chemistry": "Organic Chemistry"},
+            {"Cosmology and Astronomy": "Cosmology and Astronomy"},
         ],
     },
     {
         "Humanities & Other": [
-            ("History", "History"),
+            {"History": "History"},
             {
                 "Finance": [
-                    ("Core Finance", "Finance"),
-                    ("Banking and Money", "Banking and Money"),
-                    ("Valuation and Investing", "Valuation and Investing"),
-                    ("Venture Capital and Capital Markets", "Venture Capital and Capital Markets"),
-                    ("Credit Crisis", "Credit Crisis"),
-                    ("Paulson Bailout", "Paulson Bailout"),
-                    ("Geithner Plan", "Geithner Plan"),
-                    ("Current Economics", "Current Economics"),
-                    ("Currency", "Currency"),
+                    {"Core Finance": "Finance"},
+                    {"Banking and Money": "Banking and Money"},
+                    {"Valuation and Investing": "Valuation and Investing"},
+                    {"Venture Capital and Capital Markets": "Venture Capital and Capital Markets"},
+                    {"Credit Crisis": "Credit Crisis"},
+                    {"Paulson Bailout": "Paulson Bailout"},
+                    {"Geithner Plan": "Geithner Plan"},
+                    {"Current Economics": "Current Economics"},
+                    {"Currency": "Currency"},
                 ]
             },
         ],
     },
     {
         "Test Prep": [
-            ("SAT Math", "SAT Preparation", "/sat"),
+            {"SAT Math": "SAT Preparation"},
             {
                 "GMAT": [
-                    ("Problem Solving", "GMAT: Problem Solving", "/gmat#problem_solving"),
-                    ("Data Sufficiency", "GMAT Data Sufficiency", "/gmat"),
+                    {"Problem Solving": "GMAT: Problem Solving"},
+                    {"Data Sufficiency": "GMAT Data Sufficiency"},
                 ]
             },
-            ("CAHSEE", "CAHSEE Example Problems"),
-            ("IIT JEE", "IIT JEE Questions"),
-            ("Singapore Math", "Singapore Math"),
+            {"CAHSEE": "CAHSEE Example Problems"},
+            {"IIT JEE": "IIT JEE Questions"},
+            {"Singapore Math": "Singapore Math"},
         ],
     },
-    ("Talks and Interviews", "Khan Academy-Related Talks and Interviews")
+    {"Talks and Interviews": "Khan Academy-Related Talks and Interviews"}
 ]
 
 # Each DVD needs to stay under 4.4GB
@@ -165,12 +165,13 @@ def append_playlist_titles(playlist_titles, obj):
     type_obj = type(obj)
     if type_obj == dict:
         for key in obj:
-            append_playlist_titles(playlist_titles, obj[key])
+            if type(obj[key]) == str:
+                playlist_titles.append(obj[key])
+            else:
+                append_playlist_titles(playlist_titles, obj[key])
     elif type_obj == list:
         for val in obj:
             append_playlist_titles(playlist_titles, val)
-    elif type_obj == tuple:
-        playlist_titles.append(obj[1])
 
 if DVD_list:
     topics_list = all_topics_list = DVD_list
