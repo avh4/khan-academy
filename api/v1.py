@@ -141,6 +141,16 @@ def exercise_videos(exercise_name):
         return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
 
+@route("/api/v1/videos/<video_id>/exercises", methods=["GET"])
+@jsonp
+@jsonify
+def video_exercises(video_id):
+    video = models.Video.all().filter("youtube_id =", video_id).get()
+    if video:
+        exercise_videos = video.related_exercises()
+        return map(lambda exercise_video: exercise_video.exercise, exercise_videos)
+    return []
+
 def fully_populated_playlists():
     playlists = models.Playlist.get_for_all_topics()
     video_key_dict = models.Video.get_dict(models.Video.all(), lambda video: video.key())
