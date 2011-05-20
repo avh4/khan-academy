@@ -1,5 +1,5 @@
 # Based on http://appengine-cookbook.appspot.com/recipe/extended-jsonify-function-for-dbmodel,
-# with modifications for flask.
+# with modifications for flask and performance.
 import logging
 
 from flask import request
@@ -7,9 +7,10 @@ import simplejson
 from google.appengine.ext import db
 from datetime import datetime
 
+SIMPLE_TYPES = (int, long, float, bool, basestring)
 def dumps(obj):
-    if isinstance(obj, str):
-        return str(obj)
+    if isinstance(obj, SIMPLE_TYPES):
+        return obj
     elif obj == None:
         return None
     elif isinstance(obj, list):
@@ -19,10 +20,11 @@ def dumps(obj):
         return items
     elif isinstance(obj, datetime):
         return obj.ctime()
+
     properties = dict();
     if isinstance(obj, db.Model):
         properties['kind'] = obj.kind()
-        properties['key']  = str(obj.key())
+
     for property in dir(obj):
         if is_visible_property(property):
             try:
@@ -34,8 +36,9 @@ def dumps(obj):
                         properties[property] = value
                     else:
                         properties[property] = ""
+            except:
+                continue
 
-            except: continue
     if len(properties) == 0:
         return str(obj)
     else:

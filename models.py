@@ -564,7 +564,6 @@ class UserData(db.Model):
         return self.count_feedback_notification
     
 class Video(Searchable, db.Model):
-
     youtube_id = db.StringProperty()
     url = db.StringProperty()
     title = db.StringProperty()
@@ -584,15 +583,13 @@ class Video(Searchable, db.Model):
     # this date may be much later than the actual YouTube upload date.
     date_added = db.DateTimeProperty(auto_now_add=True)
 
-    playlist_title_context = None
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
 
     @property
-    def ka_url(self, playlist_title=None):
-        playlist_title = playlist_title or self.playlist_title_context or self.first_playlist().title
-        return "http://www.khanacademy.org/video/%s?playlist=%s" % (self.readable_id, urllib.quote_plus(playlist_title))
+    def ka_url(self):
+        return "http://www.khanacademy.org/video/%s"
     
     @staticmethod
     def get_for_readable_id(readable_id):

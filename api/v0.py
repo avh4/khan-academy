@@ -22,33 +22,37 @@ import coaches
 from models import UserExercise, Exercise, UserData, ProblemLog, UserVideo, Playlist, VideoPlaylist, Video, ExerciseVideo, Setting    
 from discussion import qa
 
-from api import api_app
-from api.decorators import jsonp
+from api import route
+from api.decorators import jsonp, jsonify
 
 from flask import request
 
-@api_app.route("/api/v0/playlists", methods=["GET"])
-@api_app.route("/api/playlists", methods=["GET"])
+@route("/api/v0/playlists", methods=["GET"])
+@route("/api/playlists", methods=["GET"])
 @jsonp
+@jsonify
 def playlists_v0():
     return get_playlists_json()
 
-@api_app.route("/api/v0/playlistvideos", methods=["GET"])
-@api_app.route("/api/playlistvideos", methods=["GET"])
+@route("/api/v0/playlistvideos", methods=["GET"])
+@route("/api/playlistvideos", methods=["GET"])
 @jsonp
+@jsonify
 def playlist_videos_v0():
     playlist_title = request.values["playlist"]
     return get_playlist_videos_json(playlist_title)
 
-@api_app.route("/api/v0/videolibrary", methods=["GET"])
-@api_app.route("/api/videolibrary", methods=["GET"])
+@route("/api/v0/videolibrary", methods=["GET"])
+@route("/api/videolibrary", methods=["GET"])
 @jsonp
+@jsonify
 def video_library_v0():
     return zlib.decompress(get_video_library_json_compressed())
 
-@api_app.route("/api/v0/videolibrarylastupdated", methods=["GET"])
-@api_app.route("/api/videolibrarylastupdated", methods=["GET"])
+@route("/api/v0/videolibrarylastupdated", methods=["GET"])
+@route("/api/videolibrarylastupdated", methods=["GET"])
 @jsonp
+@jsonify
 def video_library_last_updated_v0():
     return Setting.cached_library_content_date()
 
