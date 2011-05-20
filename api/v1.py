@@ -6,7 +6,7 @@ import layer_cache
 import topics_list
 
 from api import route
-from api.decorators import jsonify, jsonp, compress, decompress
+from api.decorators import jsonify, jsonp, compress, decompress, etag
 
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
@@ -89,6 +89,7 @@ def playlist_exercises(playlist_title):
     return playlist_exercises
 
 @route("/api/v1/playlists/library", methods=["GET"])
+@etag(lambda: models.Setting.cached_library_content_date())
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(
@@ -109,6 +110,7 @@ def playlists_library():
     return playlist_structure
 
 @route("/api/v1/playlists/library/list", methods=["GET"])
+@etag(lambda: models.Setting.cached_library_content_date())
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(

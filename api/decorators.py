@@ -1,10 +1,29 @@
 import logging
+import hashlib
 import zlib
 from functools import wraps
 
 from flask import request
 from flask import current_app
 import api.jsonify as apijsonify
+
+def etag(func_tag_content):
+    def etag_wrapper(func):
+        @wraps(func)
+        def etag_enabled(*args, **kwargs):
+            etag_server = hashlib.md5(func_tag_content()).hexdigest()
+            etag_client = request.headers.get("If-None-Match")
+            if etag_client and etag_client == etag_server:
+                return current_app.response_class(status=304)
+            
+            result = func(*args, **kwargs)
+            if isinstance(result, current_app.response_class):
+                result.headers["ETag"] = etag_server
+                return result
+            else:
+                return current_app.response_class(result, headers={"Etag": etag_server})
+        return etag_enabled
+    return etag_wrapper
 
 def jsonify(func):
     @wraps(func)
