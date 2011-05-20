@@ -78,8 +78,9 @@ def playlist_exercises(playlist_title):
     for video_key in video_keys:
         if exercise_video_key_dict.has_key(video_key):
             for exercise_key in exercise_video_key_dict[video_key]:
-                exercise = exercise_key_dict[exercise_key]
-                playlist_exercise_dict[exercise_key] = exercise
+                if exercise_key_dict.has_key(exercise_key):
+                    exercise = exercise_key_dict[exercise_key]
+                    playlist_exercise_dict[exercise_key] = exercise
 
     playlist_exercises = []
     for exercise_key in playlist_exercise_dict:
@@ -117,6 +118,12 @@ def playlists_library():
 @jsonify
 def playlists_library_list():
     return fully_populated_playlists()
+
+@route("/api/v1/exercises", methods=["GET"])
+@jsonp
+@jsonify
+def exercises():
+    return models.Exercise.get_all_use_cache()
 
 def fully_populated_playlists():
     playlists = models.Playlist.get_for_all_topics()
