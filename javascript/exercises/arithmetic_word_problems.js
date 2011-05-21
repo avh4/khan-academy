@@ -97,6 +97,7 @@ function ArithmeticWordProblemsExercise() {
         str = str.replace(/\@o2s/g, this.item2.is);
         str = str.replace(/\@o1/g, this.item1.i);
         str = str.replace(/\@o2/g, this.item2.i);
+        str = str.replace(/\@det0/g, (this.fps[0][0] == 2)?'both':'all');
         return str;
     };
 
@@ -129,7 +130,7 @@ function ArithmeticWordProblemsExercise() {
 
         setCorrectAnswer(this.fps[0][1]);
 
-        writeText(this.replace("@n bought @0 @o1s, all costing the same amount, from the @s store. @P also bought a @o2 for @e dollars. @P spent a total of @t dollars. How much did each @o1 cost?"));
+        writeText(this.replace("@n bought @0 @o1s, @det0 costing the same amount, from the @s store. @P also bought a @o2 for @e dollars. @P spent a total of @t dollars. How much did each @o1 cost?"));
         writeStep(this.replace("<li>Of the @t dollars, @p spent @e dollars on a @o2 so @p must have spent `@t - @e = @x` dollars on @o1s.</li>"));
         writeStep(this.replace("<li>@P spent @x dollars on @0 @o1s, so @p must have spent `@x \\divide @0 = @1` dollars on each @o1.</li>"));
     };

@@ -118,6 +118,12 @@ class PageQuestions(request_handler.RequestHandler):
             html = self.render_template_to_string("discussion/video_qa_content.html", template_values)
             self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
 
+        if qa_expand_id > 0:
+            # If a QA question is being expanded, we want to clear notifications for its
+            # answers before we render page_template so the notification icon shows
+            # its updated count. 
+            notification.clear_question_answers_for_current_user(qa_expand_id)
+
         return
 
 class AddAnswer(request_handler.RequestHandler):

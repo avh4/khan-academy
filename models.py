@@ -258,14 +258,14 @@ class UserExercise(db.Model):
     @request_cache.cache_with_key_fxn(lambda user: "request_cache_user_exercise_%s" % user.email())
     def get_for_user_use_cache(user):
         user_exercises_key = UserExercise.get_key_for_user(user)
-        user_exercises = memcache.get(user_exercises_key)
+        user_exercises = memcache.get(user_exercises_key, namespace=App.version)
         if user_exercises is None:
             user_exercises = UserExercise.get_for_user(user)
-            memcache.set(user_exercises_key, user_exercises)
+            memcache.set(user_exercises_key, user_exercises, namespace=App.version)
         return user_exercises
 
     def clear_memcache(self):
-        memcache.delete(UserExercise.get_key_for_user(self.user))
+        memcache.delete(UserExercise.get_key_for_user(self.user), namespace=App.version)
     
     def put(self):
         self.clear_memcache()
@@ -723,7 +723,7 @@ class UserVideo(db.Model):
 
     # Number of seconds actually spent watching this video, regardless of jumping around to various
     # scrubber positions. This value can exceed the total duration of the video if it is watched
-    # many times, and it doesn't necessarily match the percent wached.
+    # many times, and it doesn't necessarily match the percent watched.
     seconds_watched = db.IntegerProperty(default = 0)
 
     last_watched = db.DateTimeProperty(auto_now_add = True)
@@ -978,7 +978,7 @@ class ExerciseGraph(object):
                     ex.prerequisites_ex.append(ex_prereq)
         for user_ex in user_exercises:
             ex = self.exercise_by_name.get(user_ex.exercise)
-            if ex:
+            if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
                 ex.user_exercise = user_ex
                 ex.streak = user_ex.streak
                 ex.longest_streak = user_ex.longest_streak

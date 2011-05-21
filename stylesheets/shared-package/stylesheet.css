@@ -324,7 +324,11 @@ DIV.titlebox
 }
 
 /*used in add2.jsp*/
-TD.answer     {border-top:3px solid #666666;}
+TD.answer     
+{
+	border-top:3px solid #666666;
+	padding-top: 6px;
+}
 
 TD.colHeadL, TH.colHeadL
 {

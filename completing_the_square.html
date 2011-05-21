@@ -1,0 +1,32 @@
+{% extends arithmetic_template %}
+ 
+{% block maincode %}
+<script src="/javascript/exercises/completing_the_square.js?{{App.version}}"></script> 
+{% endblock maincode %}
+ 
+{% block maincell %}
+<script> 
+    Exercise.fSupportsAjax = true;
+    Exercise.fWriteToDoc = false;
+    Exercise.showNextProblem = function() {
+        $("#answer_a").val("").focus();
+        $("#answer_b").val("");
+        var exercise = new CompletingTheSquareExercise();
+        Exercise.checkAnswer = exercise.checkAnswer;
+    }
+
+</script> 
+{% endblock maincell %}
+
+{% block hintfunction %}
+give_next_step()
+{% endblock hintfunction%}
+
+{% block answerarea %}
+    {% if not read_only %}
+    <span class="info-box-header">Answer</span>
+    <span style="font-size: 20px">a = </span><input {% if is_mobile %} type="number" {% else %} type="text" size="10" {% endif %}  id="answer_a" autocomplete="off" name="answer_a" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}">
+    <div style="clear"></div>
+    <span style="font-size: 20px">b = </span><input {% if is_mobile %} type="number" {% else %} type="text" size="10" {% endif %}  id="answer_b" autocomplete="off" name="answer_b" onkeypress="if (event.keyCode == 13) {Exercise.logAnswer(); return false;}">
+    {% endif %}
+{% endblock answerarea %}

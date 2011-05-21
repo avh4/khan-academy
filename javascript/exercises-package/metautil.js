@@ -8,6 +8,12 @@ function roundNumber(n, precision)
 	return Math.round(n*Math.pow(10,precision))/Math.pow(10,precision);	
 }
 
+// compares two doubles out to epsilon
+function doublesEquals(first, second) 
+{
+	return Math.abs(first-second) <= .000001;	
+}
+
 //Randomly choose a problem type
 function pickType(low,high)
 {
@@ -54,11 +60,11 @@ function writeStep(step)
 function simplifiedRoot(x)
 {
 	var factor = perfect_square_factor(x);
-	if (factor.length==1)
+	if (factor.length==1 && x!=1 && x!=0)
 	{
 		return 'sqrt('+x+')';
 	}
-	else if (factor[0]==1)
+	else if (factor[0]==1 || factor[0] == 0)
 	{
 		return Math.sqrt(x);
 	}

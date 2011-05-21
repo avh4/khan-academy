@@ -227,7 +227,6 @@ class ViewImport(request_handler.RequestHandler):
         user_data = UserData.get_for_current_user()
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'student_email' : self.request.get('student_email'),
                                                   }, 
@@ -357,20 +356,20 @@ def get_playlist_video_api_dicts(playlist, video_key_dict, video_playlist_key_di
 
 class Playlists(request_handler.RequestHandler):
     def get(self): 
-        self.response.out.write(get_playlists_json())        
+        self.render_jsonp(get_playlists_json())
 
 class PlaylistVideos(request_handler.RequestHandler):
     def get(self): 
         playlist_title = self.request_string('playlist')
-        self.response.out.write(get_playlist_videos_json(playlist_title))
+        self.render_jsonp(get_playlist_videos_json(playlist_title))
 
 class VideoLibrary(request_handler.RequestHandler):
     def get(self):
-        self.response.out.write(zlib.decompress(get_video_library_json_compressed()))
+        self.render_jsonp(zlib.decompress(get_video_library_json_compressed()))
 
 class VideoLibraryLastUpdated(request_handler.RequestHandler):
     def get(self):
-        self.response.out.write(json.dumps(Setting.cached_library_content_date(), indent=4))
+        self.render_jsonp(Setting.cached_library_content_date())
  
 class VideosForExercise(request_handler.RequestHandler):
 
@@ -391,6 +390,6 @@ class VideosForExercise(request_handler.RequestHandler):
                          }         
             exercise_videos.append(video_dict)
 
-       self.response.out.write(json.dumps(exercise_videos, indent=4))
+       self.render_jsonp(exercise_videos)
        
         

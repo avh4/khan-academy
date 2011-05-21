@@ -64,7 +64,7 @@ from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from jobs import jobs
-from badges import util_badges, last_action_cache
+from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
@@ -72,7 +72,7 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
-        
+
 class VideoDataTest(request_handler.RequestHandler):
 
     def get(self):
@@ -83,24 +83,6 @@ class VideoDataTest(request_handler.RequestHandler):
         videos = Video.all()
         for video in videos:
             self.response.out.write('<P>Title: ' + video.title)
-
-
-class DataStoreTest(request_handler.RequestHandler):
-
-    def get(self):
-        if users.is_current_user_admin():
-            self.response.out.write('<html>')
-            user = util.get_current_user()
-            if user:
-                problems_done = ProblemLog.all()
-                for problem in problems_done:
-                    self.response.out.write('<P>' + problem.user.nickname() + ' ' + problem.exercise + ' done:' + str(problem.time_done) + ' taken:' + str(problem.time_taken) + ' correct:'
-                                            + str(problem.correct))
-        else:
-            self.redirect(users.create_login_url(self.request.uri))
-
-
-# Setting this up to make sure the old Video-Playlist associations are flushed before the bulk upload from the local datastore (with the new associations)
 
 
 class DeleteVideoPlaylists(request_handler.RequestHandler):
@@ -128,86 +110,6 @@ class KillLiveAssociations(request_handler.RequestHandler):
         for video_playlist in all_video_playlists:
             video_playlist.live_association = False
         db.put(all_video_playlists)
-
-class TestUserData(request_handler.RequestHandler):
-    def get(self):
-        if not users.is_current_user_admin():
-            return
-
-        user_1 = users.User('http://facebookid.khanacademy.org/525876620', federated_identity="Logan Williams")
-        user_2 = users.User('http://facebookid.khanacademy.org/100001639389777', federated_identity="Logan Williams")
-
-        user_1b = users.User('http://facebookid.khanacademy.org/525876620')
-        user_2b = users.User('http://facebookid.khanacademy.org/100001639389777')
-
-        self.response.out.write("user_1: %s<br/>" % user_1)
-        self.response.out.write("user_2: %s<br/>" % user_2)
-        self.response.out.write("user_1 == user_2: %s<br/>" % (user_1 == user_2))
-
-        user_data_1 = UserData.get_for(user_1)
-        user_data_2 = UserData.get_for(user_2)
-
-        user_data_1b = UserData.get_for(user_1b)
-        user_data_2b = UserData.get_for(user_2b)
-
-        self.response.out.write("<br/><br/><br/>")
-
-        if user_data_1:
-            self.response.out.write("user_data_1: %s<br/>" % user_data_1.key())
-            self.response.out.write("user_data_1.user: %s<br/>" % user_data_1.user)
-        if user_data_2:
-            self.response.out.write("user_data_2: %s<br/>" % user_data_2.key())
-            self.response.out.write("user_data_2.user: %s<br/>" % user_data_2.user)
-        if user_data_1b:
-            self.response.out.write("user_data_1b: %s<br/>" % user_data_1b.key())
-            self.response.out.write("user_data_1b.user: %s<br/>" % user_data_1b.user)
-        else:
-            self.response.out.write("user_data_1b: None<br/>")
-        if user_data_2b:
-            self.response.out.write("user_data_2b: %s<br/>" % user_data_2b.key())
-            self.response.out.write("user_data_2b.user: %s<br/>" % user_data_2b.user)
-        else:
-            self.response.out.write("user_data_2b: None<br/>")
-
-        self.response.out.write("<br/><br/><br/>")
-
-        exercise = Exercise.get_by_name('order_of_operations')
-        user_exercise_1 = None
-        user_exercise_2 = None
-
-        if user_data_1:
-            user_exercise_1 = user_data_1.get_or_insert_exercise(exercise, allow_insert=False)
-            if user_exercise_1:
-                self.response.out.write("user_exercise_1: %s<br/>" % user_exercise_1.key())
-
-        if user_data_2:
-            user_exercise_2 = user_data_2.get_or_insert_exercise(exercise, allow_insert=False)
-            if user_exercise_2:
-                self.response.out.write("user_exercise_2: %s<br/>" % user_exercise_2.key())
-
-
-        if user_exercise_1:
-            self.response.out.write("user_exercise_1.user: %s<br/>" % user_exercise_1.user)
-        if user_exercise_2:
-            self.response.out.write("user_exercise_2.user: %s<br/>" % user_exercise_2.user)
-
-        self.response.out.write("<br/><br/><br/>")
-
-        if user_exercise_1:
-            user_data_from_exercise_1 = UserData.get_for(user_exercise_1.user)
-            self.response.out.write("user_data_from_exercise_1: %s<br/>" % user_data_from_exercise_1.key())
-            if user_data_from_exercise_1:
-                self.response.out.write("user_data_from_exercise_1.user: %s<br/>" % user_data_from_exercise_1.user)
-                self.response.out.write("user_data_from_exercise_1.user == user_data_1.user: %s<br/>" % (user_data_from_exercise_1.user == user_data_1.user))
-
-        self.response.out.write("<br/><br/><br/>")
-
-        if user_exercise_2:
-            user_data_from_exercise_2 = UserData.get_for(user_exercise_2.user)
-            self.response.out.write("user_data_from_exercise_2: %s<br/>" % user_data_from_exercise_2.key())
-            if user_data_from_exercise_2:
-                self.response.out.write("user_data_from_exercise_2.user: %s<br/>" % user_data_from_exercise_2.user)
-                self.response.out.write("user_data_from_exercise_2.user == user_data_2.user: %s<br/>" % (user_data_from_exercise_2.user == user_data_2.user))
 
 class ViewExercise(request_handler.RequestHandler):
 
@@ -266,9 +168,7 @@ class ViewExercise(request_handler.RequestHandler):
                 num_problems_to_print = 0
 
             template_values = {
-                'App' : App,
                 'arithmetic_template': 'arithmetic_template.html',
-                'username': user.nickname(),
                 'user_data': user_data,
                 'points': user_data.points,
                 'exercise_points': exercise_points,
@@ -304,7 +204,7 @@ def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
-    
+
 class ViewVideo(request_handler.RequestHandler):
 
     def get(self):
@@ -403,27 +303,24 @@ class ViewVideo(request_handler.RequestHandler):
 
         user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
         awarded_points = 0
-        if user_video is not None:
+        if user_video:
             awarded_points = user_video.points()
 
-        # If a QA question is being expanded, we want to clear notifications for its
-        # answers before we render page_template so the notification icon shows
-        # its updated count. 
-        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
+        template_values = {
+                            'playlist': playlist,
+                            'video': video,
+                            'videos': videos,
+                            'video_path': video_path,
+                            'video_points_base': consts.VIDEO_POINTS_BASE,
+                            'exercise': exercise,
+                            'previous_video': previous_video,
+                            'next_video': next_video,
+                            'selected_nav_link': 'watch',
+                            'awarded_points': awarded_points,
+                            'issue_labels': ('Component-Videos,Video-%s' % readable_id),
+                        }
+        template_values = qa.add_template_values(template_values, self.request)
 
-        template_values = qa.add_template_values({'playlist': playlist,
-                                                  'video': video,
-                                                  'videos': videos,
-                                                  'video_path': video_path,
-                                                  'user': util.get_current_user(),
-                                                  'video_points_base': consts.VIDEO_POINTS_BASE,
-                                                  'awarded_points': awarded_points,
-                                                  'exercise': exercise,
-                                                  'previous_video': previous_video,
-                                                  'next_video': next_video,
-                                                  'selected_nav_link': 'watch',
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
         self.render_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
@@ -605,7 +502,6 @@ class PrintExercise(request_handler.RequestHandler):
             template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
-                'username': user.nickname(),
                 'points': user_data.points,
                 'proficient': proficient,
                 'endangered': endangered,
@@ -648,7 +544,6 @@ class ReportIssue(request_handler.RequestHandler):
         template_values = {
             'App' : App,
             'points': user_data.points,
-            'username': user and user.nickname() or "",
             'referer': self.request.headers.get('Referer'),
             'user_agent': user_agent,
             }
@@ -676,7 +571,6 @@ class ProvideFeedback(request_handler.RequestHandler):
         template_values = {
             'App' : App,
             'points': user_data.points,
-            'username': user and user.nickname() or "",
             }
 
         self.render_template("provide_feedback.html", template_values)
@@ -749,29 +643,6 @@ class KnowledgeMap(request_handler.RequestHandler):
 
     def get(self):
         self.redirect("/exercisedashboard")
-
-class AdminViewUser(request_handler.RequestHandler):
-
-    def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        username = self.request.get('u')
-        if username:
-
-            userdata = None
-            exercisedata = None
-            query = UserData.all()
-            for user_data in query:
-                if user_data.user.nickname() == username:
-                    userdata = user_data
-                    query = UserExercise.all()
-                    query.filter('user =', userdata.user)
-                    exercisedata = query.fetch(300)
-                    break
-
-            template_values = {'App' : App, 'exercise_data': exercisedata, 'user_data': userdata}
-            self.render_template('adminviewuser.html', template_values)
 
 class RegisterAnswer(request_handler.RequestHandler):
 
@@ -1177,9 +1048,6 @@ class ViewHomePage(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        
         thumbnail_link_sets = [
             [
                 { 
@@ -1253,18 +1121,14 @@ class ViewHomePage(request_handler.RequestHandler):
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library_content_html()
         
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'user_data': user_data,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'video_id': movie_youtube_id,
-                                                  'thumbnail_link_sets': thumbnail_link_sets,
-                                                  'library_content': library_content,
-                                                  'DVD_list': DVD_list,
-                                                  'is_mobile_allowed': True,
-                                                  'approx_vid_count': consts.APPROX_VID_COUNT, }, 
-                                                  self.request)
+        template_values = {
+                            'video_id': movie_youtube_id,
+                            'thumbnail_link_sets': thumbnail_link_sets,
+                            'library_content': library_content,
+                            'DVD_list': DVD_list,
+                            'is_mobile_allowed': True,
+                            'approx_vid_count': consts.APPROX_VID_COUNT,
+                        }
         self.render_template('homepage.html', template_values)
         
 class ViewFAQ(request_handler.RequestHandler):
@@ -1296,6 +1160,10 @@ class ViewPrivacyPolicy(request_handler.RequestHandler):
     def get(self):
         self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
 
+class ViewDMCA(request_handler.RequestHandler):
+    def get(self):
+        self.render_template('dmca.html', {"selected_nav_link": "dmca"})
+
 class ViewStore(request_handler.RequestHandler):
 
     def get(self):
@@ -1303,7 +1171,6 @@ class ViewStore(request_handler.RequestHandler):
         user_data = UserData.get_for_current_user()
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   }, 
                                                   self.request)
@@ -1311,11 +1178,9 @@ class ViewStore(request_handler.RequestHandler):
         self.render_template('store.html', template_values)
         
 class ViewHowToHelp(request_handler.RequestHandler):
-
     def get(self):
         self.redirect("/contribute", True)
         return
-
 
 class ViewSAT(request_handler.RequestHandler):
 
@@ -1333,7 +1198,6 @@ class ViewSAT(request_handler.RequestHandler):
         playlist_videos = query.fetch(500)
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'videos': playlist_videos,
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   }, 
@@ -1350,7 +1214,6 @@ class ViewGMAT(request_handler.RequestHandler):
         data_sufficiency = VideoPlaylist.get_query_for_playlist_title("GMAT Data Sufficiency")
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'data_sufficiency': data_sufficiency,
                                                   'problem_solving': problem_solving,
                                                   'login_url': util.create_login_url(self.request.uri),
@@ -1512,30 +1375,6 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
         else:
             return False
             
-class ViewInfoPage(request_handler.RequestHandler):
-
-    def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  }, 
-                                                  self.request)
-        # Get the corresponding page from the info site
-        path = urllib.unquote(self.request.path.rpartition('/')[2])
-        scraped = urllib.urlopen('http://info.khanacademy.org/' + path).read()
-        # Convert it to a template that extends page_template.html
-        scraped = '{% extends "info_page_template.html" %}' + scraped
-        scraped = scraped.replace('<td id="sites-canvas-wrapper">', '{% block pagecontent %}')
-        scraped = scraped.replace('</td> \n<td id="sites-chrome-sidebar-right" class="sites-layout-sidebar-right">', '{% endblock pagecontent %}')
-
-        # Render the template
-        t = template.Template(scraped)
-        c = template.Context(template_values)        
-        self.response.out.write(t.render(c))
-
 class ViewArticle(request_handler.RequestHandler):
 
     def get(self):
@@ -1553,7 +1392,6 @@ class ViewArticle(request_handler.RequestHandler):
         
         template_values = qa.add_template_values({'App': App,
                                                   'points': user_data.points,
-                                                  'username': user and user.nickname() or "",
                                                   'login_url': util.create_login_url(self.request.uri),
                                                   'article_url': article_url,
                                                   'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
@@ -1642,8 +1480,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
         self.redirect(redirect_target, True)
                         
 def real_main():    
-    webapp.template.register_template_library('templatefilters')
-    webapp.template.register_template_library('templatetags')    
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1654,6 +1490,7 @@ def real_main():
         ('/about/getting-started', util_about.ViewGettingStarted),
         ('/about/tos', ViewTOS ),
         ('/about/privacy-policy', ViewPrivacyPolicy ),
+        ('/about/dmca', ViewDMCA ),
         ('/contribute', ViewContribute ),
         ('/contribute/credits', ViewCredits ),
         ('/frequently-asked-questions', util_about.ViewFAQ),
@@ -1671,12 +1508,10 @@ def real_main():
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
         ('/viewexercisesonmap', KnowledgeMap),
-        ('/testdatastore', DataStoreTest),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
-        ('/adminuserdata', AdminViewUser),
         ('/registeranswer', RegisterAnswer),
         ('/registercorrectness', RegisterCorrectness),
         ('/resetstreak', ResetStreak),
@@ -1687,8 +1522,6 @@ def real_main():
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
         ('/store', ViewStore),        
-        ('/info/how-to-help', ViewHowToHelp),
-        ('/info/.*', ViewInfoPage),
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),
         ('/search', Search),
@@ -1788,11 +1621,12 @@ def real_main():
         ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
 
         ('/badges/view', util_badges.ViewBadges),
+        ('/badges/custom/create', custom_badges.CreateCustomBadge),
+        ('/badges/custom/award', custom_badges.AwardCustomBadge),
 
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/sendtolog', SendToLog),
-        ('/testuserdata', TestUserData),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),

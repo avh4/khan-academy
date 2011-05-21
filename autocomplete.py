@@ -1,4 +1,8 @@
+import logging
+
 from google.appengine.ext import db
+from django.template.defaultfilters import slugify
+from django.utils import simplejson
 
 import app
 from app import App
@@ -6,9 +10,6 @@ import request_handler
 import consts
 import layer_cache
 from models import Video, Playlist, VideoPlaylist
-
-from django.utils import simplejson
-import logging
 
 CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 3 # Expires after three days
 MAX_RESULTS_PER_TYPE = 10
@@ -54,4 +55,4 @@ def video_title_dicts():
 
 @layer_cache.cache(expiration=CACHE_EXPIRATION_SECONDS)
 def playlist_title_dicts():
-    return map(lambda playlist: {"title": playlist.title, "url": "/#%s" % playlist.title}, Playlist.all())
+    return map(lambda playlist: {"title": playlist.title, "url": "/#%s" % slugify(playlist.title.lower())}, Playlist.all())

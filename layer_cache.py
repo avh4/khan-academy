@@ -85,7 +85,7 @@ def cache(
     def decorator(target):
         key = "__layer_cache_%s.%s__" % (target.__module__, target.__name__)
         def wrapper(*args, **kwargs):
-            return layer_cache_check_set_return(target, lambda: key, expiration, layer, persist_across_app_versions, *args, **kwargs)
+            return layer_cache_check_set_return(target, lambda *args, **kwargs: key, expiration, layer, persist_across_app_versions, *args, **kwargs)
         return wrapper
     return decorator
 

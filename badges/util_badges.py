@@ -12,6 +12,7 @@ import badges
 import models_badges
 import last_action_cache
 
+import custom_badges
 import streak_badges
 import timed_problem_badges
 import exercise_completion_badges
@@ -29,9 +30,9 @@ import request_handler
 import logging
 
 # Authoritative list of all badges
-@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
-def all_badges():
-    return [
+@layer_cache.cache()
+def all_badges(bust_cache = False):
+    list_badges = [
         exercise_completion_count_badges.GettingStartedBadge(),
         exercise_completion_count_badges.MakingProgressBadge(),
         exercise_completion_count_badges.HardAtWorkBadge(),
@@ -102,8 +103,11 @@ def all_badges():
 
     ]
 
-@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
-def all_badges_dict():
+    list_badges.extend(custom_badges.CustomBadge.all())
+    return list_badges
+
+@layer_cache.cache()
+def all_badges_dict(bust_cache = False):
     dict_badges = {}
     for badge in all_badges():
         dict_badges[badge.name] = badge
@@ -146,6 +150,10 @@ def get_user_badges(user = None):
                     user_badge_last.list_context_names.append(user_badge.target_context_name)
             else:
                 user_badge.badge = badges_dict.get(user_badge.badge_name)
+
+                if user_badge.badge:
+                    user_badge.badge.is_owned = True
+
                 user_badge.count = 1
                 user_badge.list_context_names = [user_badge.target_context_name]
                 user_badge.list_context_names_hidden = []

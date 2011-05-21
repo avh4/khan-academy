@@ -28,8 +28,13 @@ addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
 
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2)));
 addWrongChoice(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2));
-
 addWrongChoice(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+while (getNumPossibleAnswers() < 4) {
+	// the above wrong choices won't fill up the answers for problem #85
+	var randNum = simplifiedRoot(x2 - x1 + nonZeroRandomInt(-5, 5));
+	addWrongChoice(randNum);
+}
+
 // all distances should be positive
 // we're not testing integer subtraction here
 if ((x2 - x1) > 0) {
@@ -72,7 +77,8 @@ function graph_update() {
 	
 	present.ASdot([x2, y2], 3, "purple", "purple");
 	present.fontfill = "purple";
-	present.text([x2, y2], "(" + x2 + ", " + y2 + ")", aboveright);
+    var textPos = (y1 == y2) ? belowright : aboveright;
+    present.text([x2, y2], "(" + x2 + ", " + y2 + ")", textPos);
     
 }
 
