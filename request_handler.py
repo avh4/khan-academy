@@ -16,7 +16,6 @@ from app import App
 from models import UserData
 from render import render_block_to_string
 from nicknames import get_nickname_for
-from two_pass_template import second_pass_context
 
 class RequestHandler(webapp.RequestHandler):
 
@@ -174,7 +173,6 @@ class RequestHandler(webapp.RequestHandler):
     def delete_cookie(self, key, path='/', domain=None):
         self.set_cookie(key, '', path=path, domain=domain, max_age=0)
 
-    @second_pass_context(last=True)
     def add_global_template_values(self, template_values):
         template_values['App'] = App
         template_values['None'] = None
