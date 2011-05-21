@@ -73,9 +73,6 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 
-from two_pass_template import two_pass_handler, second_pass_context
-from two_pass_template.tests import TwoPassTemplateTest
-        
 class VideoDataTest(request_handler.RequestHandler):
 
     def get(self):
@@ -210,7 +207,6 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
-    @two_pass_handler(key_fxn=lambda self: "%s[%s]" % (self.request.url, Setting.cached_library_content_date()))
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -305,6 +301,11 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
+        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
+        awarded_points = 0
+        if user_video:
+            awarded_points = user_video.points()
+
         template_values = {
                             'playlist': playlist,
                             'video': video,
@@ -315,23 +316,12 @@ class ViewVideo(request_handler.RequestHandler):
                             'previous_video': previous_video,
                             'next_video': next_video,
                             'selected_nav_link': 'watch',
+                            'awarded_points': awarded_points,
                             'issue_labels': ('Component-Videos,Video-%s' % readable_id),
                         }
+        template_values = qa.add_template_values(template_values, self.request)
 
-        return ('viewvideo.html', template_values)
-
-    @second_pass_context()
-    def user_video_context(self, context):
-        video = context["video"]
-
-        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
-        awarded_points = 0
-        if user_video:
-            awarded_points = user_video.points()
-
-        context["awarded_points"] = awarded_points
-
-        return qa.add_template_values(context, self.request)
+        self.render_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
     
@@ -1528,7 +1518,6 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
-        ('/twopasstest', TwoPassTemplateTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
