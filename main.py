@@ -46,6 +46,9 @@ import knowledgemap
 import consts
 import youtube_sync
 
+from oauth_provider import oauth_request
+from oauth_provider.decorators import oauth_required
+
 from search import Searchable
 import search
 
@@ -1448,6 +1451,15 @@ class Logout(request_handler.RequestHandler):
     def get(self):
         self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
+class Protected(request_handler.RequestHandler):
+    @oauth_required
+    def get(self):
+        self.post()
+
+    @oauth_required
+    def post(self):
+        self.response.out.write("returning private data")
+
 class Search(request_handler.RequestHandler):
 
     def get(self):        
@@ -1629,6 +1641,11 @@ def real_main():
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/sendtolog', SendToLog),
+
+        ('/request_token', oauth_request.RequestTokenHandler),
+        ('/access_token', oauth_request.AccessTokenHandler),
+        ('/authorize', oauth_request.AuthorizeHandler),    
+        ('/protected', Protected),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
