@@ -1043,6 +1043,47 @@ class MobileSite(request_handler.RequestHandler):
     def get(self):
         self.set_mobile_full_site_cookie(False)
         self.redirect("/")
+
+class TransferUserProgress(request_handler.RequestHandler):
+    def get(self):
+        # Quick admin-only ability to copy some of the key progress from one user
+        # to another in case somebody changes email addresses and really must have
+        # their data transferred. We don't officially support this behavior,
+        # and lots of historical data will be lost between the accounts.
+        # It is not a full transition, but a utility to be used in exceptional circumstances.
+
+        if not users.is_current_user_admin():
+            return
+
+        email_source = self.request_string("email_source", default="")
+        email_target = self.request_string("email_target", default="")
+
+        user_data_source = UserData.get_for(users.User(email_source))
+        user_data_target = UserData.get_for(users.User(email_target))
+
+        if user_data_source and user_data_target:
+            # Don't accidentally get the arguments backwards
+            if user_data_source.points > user_data_target.points:
+
+                attrs = [
+                        "joined", "proficient_exercises", "all_proficient_exercises",
+                        "suggested_exercises", "badges", "points",
+                        "total_seconds_watched", "videos_completed"
+                        ]
+                attr_log = []
+
+                for attr in attrs:
+                    attr_log.append("<b>%s</b>: %s <b>replaced with</b> %s" % 
+                            (attr, getattr(user_data_target, attr), getattr(user_data_source, attr)))
+                    setattr(user_data_target, attr, getattr(user_data_source, attr))
+
+                user_data_target.put()
+
+                self.response.out.write("Transferred progress from %s to %s<br/><br/>%s"
+                        % (email_source, email_target, "<br/><br/>".join(attr_log)))
+                return
+
+        self.response.out.write("Not transferred.")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1549,6 +1590,7 @@ def real_main():
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
+        ('/admin/transferuserprogress', TransferUserProgress),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
