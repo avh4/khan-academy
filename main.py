@@ -75,9 +75,6 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 
-from two_pass_template import two_pass_handler, second_pass_context
-from two_pass_template.tests import TwoPassTemplateTest
-        
 class VideoDataTest(request_handler.RequestHandler):
 
     def get(self):
@@ -212,7 +209,6 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
-    @two_pass_handler(key_fxn=lambda self: "%s[%s]" % (self.request.url, Setting.cached_library_content_date()))
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -307,6 +303,11 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
+        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
+        awarded_points = 0
+        if user_video:
+            awarded_points = user_video.points()
+
         template_values = {
                             'playlist': playlist,
                             'video': video,
@@ -317,23 +318,12 @@ class ViewVideo(request_handler.RequestHandler):
                             'previous_video': previous_video,
                             'next_video': next_video,
                             'selected_nav_link': 'watch',
+                            'awarded_points': awarded_points,
                             'issue_labels': ('Component-Videos,Video-%s' % readable_id),
                         }
+        template_values = qa.add_template_values(template_values, self.request)
 
-        return ('viewvideo.html', template_values)
-
-    @second_pass_context()
-    def user_video_context(self, context):
-        video = context["video"]
-
-        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
-        awarded_points = 0
-        if user_video:
-            awarded_points = user_video.points()
-
-        context["awarded_points"] = awarded_points
-
-        return qa.add_template_values(context, self.request)
+        self.render_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
     
@@ -1055,6 +1045,47 @@ class MobileSite(request_handler.RequestHandler):
     def get(self):
         self.set_mobile_full_site_cookie(False)
         self.redirect("/")
+
+class TransferUserProgress(request_handler.RequestHandler):
+    def get(self):
+        # Quick admin-only ability to copy some of the key progress from one user
+        # to another in case somebody changes email addresses and really must have
+        # their data transferred. We don't officially support this behavior,
+        # and lots of historical data will be lost between the accounts.
+        # It is not a full transition, but a utility to be used in exceptional circumstances.
+
+        if not users.is_current_user_admin():
+            return
+
+        email_source = self.request_string("email_source", default="")
+        email_target = self.request_string("email_target", default="")
+
+        user_data_source = UserData.get_for(users.User(email_source))
+        user_data_target = UserData.get_for(users.User(email_target))
+
+        if user_data_source and user_data_target:
+            # Don't accidentally get the arguments backwards
+            if user_data_source.points > user_data_target.points:
+
+                attrs = [
+                        "joined", "proficient_exercises", "all_proficient_exercises",
+                        "suggested_exercises", "badges", "points",
+                        "total_seconds_watched", "videos_completed"
+                        ]
+                attr_log = []
+
+                for attr in attrs:
+                    attr_log.append("<b>%s</b>: %s <b>replaced with</b> %s" % 
+                            (attr, getattr(user_data_target, attr), getattr(user_data_source, attr)))
+                    setattr(user_data_target, attr, getattr(user_data_source, attr))
+
+                user_data_target.put()
+
+                self.response.out.write("Transferred progress from %s to %s<br/><br/>%s"
+                        % (email_source, email_target, "<br/><br/>".join(attr_log)))
+                return
+
+        self.response.out.write("Not transferred.")
             
 class ViewHomePage(request_handler.RequestHandler):
 
@@ -1539,7 +1570,6 @@ def real_main():
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo),
-        ('/twopasstest', TwoPassTemplateTest),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
@@ -1571,6 +1601,7 @@ def real_main():
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
+        ('/admin/transferuserprogress', TransferUserProgress),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
