@@ -165,6 +165,9 @@ function eraseCookie(name) {
 }
 
 function onYouTubePlayerReady(playerID) {
+    // Ensure UniSub widget will know about ready players if/when it loads.
+    (window.unisubs_readyAPIIDs = window.unisubs_readyAPIIDs || []).push((playerID == "undefined" || !playerID) ? '' : playerID);
+
     var player = null;
     if (!player) player = $(".mirosubs-widget object").get(0);
     if (!player) player = document.getElementById("idPlayer");
@@ -178,6 +181,7 @@ function onYouTubePlayerReady(playerID) {
     // take appropriate action to use the new player.
     $(VideoControls).trigger('playerready');
     $(VideoStats).trigger('playerready');
+    
 }
 
 function onYouTubePlayerStateChange(state) {
