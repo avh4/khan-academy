@@ -69,7 +69,7 @@
             </div>
     
             <span class="video_extra_links desktop-only"><nobr>
-            {% if user %}
+            {% if username %}
                 {% possible_points_badge awarded_points video_points_base %}
             {% endif %}
                 <span class="extra-link-bar">
@@ -93,7 +93,7 @@
 
 {% block bottompagescript %}
     {% js_package "video" %}
-    {% if user %}
+    {% if username %}
         <script>$(function(){VideoStats.startLoggingProgress();});</script>
     {% endif %}
     <script type="text/javascript">document.write(unescape('%3Cscript type="text/javascript" src="'+document.location.protocol+'//dnn506yrbagrg.cloudfront.net/pages/scripts/0011/5719.js"%3E%3C%2Fscript%3E'))</script>
