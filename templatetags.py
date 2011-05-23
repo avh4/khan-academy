@@ -7,6 +7,7 @@ from django import template
 from django.template.defaultfilters import escape, slugify
 
 from app import App
+from templatefilters import seconds_to_time_string
 import consts
 import util
 import topics_list
@@ -134,7 +135,7 @@ def simple_student_info(user_data):
     return { 
             "first_coach": user_data.coaches[0] if coach_count >= 1 else None,
             "additional_coaches": coach_count - 1 if coach_count > 1 else None,
-            "member_for": util.seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
+            "member_for": seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
            }
 
 @register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))

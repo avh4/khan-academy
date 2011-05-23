@@ -4,6 +4,7 @@ import util
 import models
 import templatefilters
 from badges import util_badges, models_badges
+from templatefilters import seconds_to_time_string
 
 # Number of hours until activity is no longer considered "recent" for profiles
 HOURS_RECENT_ACTIVITY = 48
@@ -64,7 +65,7 @@ class RecentVideoActivity(RecentActivity):
         self.seconds_watched = video_log.seconds_watched
 
     def time_watched(self):
-        return util.seconds_to_time_string(self.seconds_watched, False)
+        return seconds_to_time_string(self.seconds_watched, False)
 
     def combine_with(self, recent_activity):
         if self.__class__ == recent_activity.__class__:

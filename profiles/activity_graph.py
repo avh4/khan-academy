@@ -8,6 +8,7 @@ import models
 import activity_summary
 import util
 from badges import models_badges, util_badges
+from templatefilters import seconds_to_time_string
 
 class ActivityBucketType:
     HOUR = 0
@@ -103,7 +104,7 @@ def get_exercise_activity_data(user, bucket_list, bucket_type, daily_activity_lo
 
     for bucket in bucket_list:
         if dict_bucket[bucket]:
-            dict_bucket[bucket]["time_spent"] = util.seconds_to_time_string(dict_bucket[bucket]["seconds"], False)
+            dict_bucket[bucket]["time_spent"] = seconds_to_time_string(dict_bucket[bucket]["seconds"], False)
 
     add_bucket_html_summary(dict_bucket, "exercise_names", 5)
 
@@ -140,7 +141,7 @@ def get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_lo
 
     for bucket in bucket_list:
         if dict_bucket[bucket]:
-            dict_bucket[bucket]["time_spent"] = util.seconds_to_time_string(dict_bucket[bucket]["seconds"], False)
+            dict_bucket[bucket]["time_spent"] = seconds_to_time_string(dict_bucket[bucket]["seconds"], False)
 
     add_bucket_html_summary(dict_bucket, "video_titles", 5)
 

@@ -1,12 +1,10 @@
 import os
 import datetime
-import math
 import urllib
 import logging
 import request_cache
 
 from google.appengine.api import users
-from django.template.defaultfilters import pluralize
 from asynctools import AsyncMultiTask, QueryTask
 
 from app import App
@@ -41,40 +39,6 @@ def seconds_between(dt1, dt2):
 
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
-
-def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
-
-    seconds = seconds_init
-
-    years = math.floor(seconds / (86400 * 365))
-    seconds -= years * (86400 * 365)
-
-    days = math.floor(seconds / 86400)
-    seconds -= days * 86400
-
-    hours = math.floor(seconds / 3600)
-    seconds -= hours * 3600
-
-    minutes = math.floor(seconds / 60)
-    seconds -= minutes * 60
-
-    if years and days:
-        return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
-    elif years:
-        return "%d year%s" % (years, pluralize(years))
-    elif days and hours and show_hours:
-        return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
-    elif days:
-        return "%d day%s" % (days, pluralize(days))
-    elif hours:
-        if not short_display and minutes:
-            return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
-        else:
-            return "%d hour%s" % (hours, pluralize(hours))
-    else:
-        if not short_display and seconds and not minutes:
-            return "%d second%s" % (seconds, pluralize(seconds))
-        return "%d minute%s" % (minutes, pluralize(minutes))
 
 def thousands_separated_number(x):
     # See http://stackoverflow.com/questions/1823058/how-to-print-number-with-commas-as-thousands-separators-in-python-2-x
