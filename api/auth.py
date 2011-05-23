@@ -1,5 +1,6 @@
 import logging
 from functools import wraps
+import urllib
 
 from google.appengine.ext import db
 
@@ -7,6 +8,8 @@ from flask import request, redirect
 from flask import current_app
 
 import util
+from app import App
+
 from api import route
 from oauth_provider.decorators import is_valid_request, validate_token
 from oauth_provider.oauth import OAuthError, build_authenticate_header
@@ -16,6 +19,7 @@ from oauth_provider.stores import check_valid_callback
 class OAuthMap(db.Model):
     request_token = db.StringProperty()
     access_token = db.StringProperty()
+    token_secret = db.StringProperty()
     expires = db.DateTimeProperty()
 
     facebook_authorization_code = db.StringProperty()
@@ -47,8 +51,17 @@ def oauth_error(e):
     return current_app.response_class(e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
 
 # Flask-friendly port of oauth_providers.oauth_request.RequestTokenHandler
+@route("/api/auth/request_token_finish", methods=["GET"])
+def request_token_finish():
+    dict_return = {
+            "token secret": request.values.get("oauth_token_secret"),
+            "token": request.values.get("oauth_token"),
+            "code": request.values.get("code"),
+        }
+    return urllib.urlencode(dict_return)
+
 @route("/api/auth/request_token", methods=["GET", "POST"])
-def request_token():
+def request_token_start():
     webapp_req = webapp_patched_request(request)
 
     oauth_server, oauth_request = initialize_server_request(webapp_req)
@@ -59,10 +72,18 @@ def request_token():
     try:
         # create a request token
         token = oauth_server.fetch_request_token(oauth_request)
-        # return the token
-        return current_app.response_class(token.to_string(), status=200)
     except OAuthError, err:
         return oauth_error(err)
+
+    continue_url = "http://local.kamenstestapp.appspot.com:8084/api/auth/request_token_finish?%s" % token.to_string()
+
+    is_facebook_auth = True
+    if is_facebook_auth:
+        params = {
+                    "client_id": App.facebook_app_id,
+                    "redirect_uri": continue_url,
+                    }
+        return redirect("https://www.facebook.com/dialog/oauth?%s" % urllib.urlencode(params))
 
 # Flask-friendly port of oauth_providers.oauth_request.AuthorizeHandler that doesn't
 # require user authorization.
@@ -141,7 +162,7 @@ def authorize():
     except OAuthError, err:
         return oauth_error(err)
 
-# Flask-friendly port of oauth_providers.oauth_request.AcessTokenHandler
+# Flask-friendly port of oauth_providers.oauth_request.AccessTokenHandler
 @route("/api/auth/access_token", methods=["GET", "POST"])
 def authorize():
     webapp_req = webapp_patched_request(request)
