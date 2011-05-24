@@ -184,12 +184,9 @@ def replace_playlist_values(structure, playlist_dict):
         for sub_structure in structure:
             replace_playlist_values(sub_structure, playlist_dict)
     else:
-        for key in structure:
-            val = structure[key]
-            if type(val) == str:
-                # Replace string playlist title with real playlist object
-                structure[key] = playlist_dict[val]
-            else:
-                replace_playlist_values(structure[key], playlist_dict)
-
+        if structure.has_key("items"):
+            replace_playlist_values(structure["items"], playlist_dict)
+        elif structure.has_key("playlist"):
+            # Replace string playlist title with real playlist object
+            structure["playlist"] = playlist_dict[structure["playlist"]]
 
