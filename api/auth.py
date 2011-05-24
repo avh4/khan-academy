@@ -3,14 +3,18 @@ from functools import wraps
 import urllib
 import urllib2
 import cgi
+import os
 
 from google.appengine.ext import db
+from google.appengine.api import oauth as google_oauth
+from google.appengine.api import users
 
 import flask
 from flask import request, redirect
 from flask import current_app
 
 from app import App
+import layer_cache
 
 from api import route
 from oauth_provider.decorators import is_valid_request, validate_token
@@ -101,6 +105,36 @@ def oauth_required(func):
 
         return oauth_error(OAuthError("Invalid OAuth parameters"))
     return wrapper
+
+# Utility request handler to let Google authorize the OAuth token/request and 
+# return the authorized user's email.
+@route("/api/auth/current_google_oauth_email")
+def current_google_oauth_email():
+    user = google_oauth.get_current_user()
+    if user:
+        return user.email()
+    return ""
+
+def get_current_google_user_from_oauth():
+    oauth_map = current_oauth_map()
+    if oauth_map:
+        email = get_google_email_from_oauth_map(oauth_map)
+        if email:
+            return users.User(email)
+    return None
+
+@layer_cache.cache_with_key_fxn(lambda oauth_map: "google_email_from_oauth_token_%s" % oauth_map.google_access_token, layer=layer_cache.Layers.Memcache)
+def get_google_email_from_oauth_map(oauth_map):
+    # Start Google request token process
+    email = ""
+
+    try:
+        google_client = GoogleOAuthClient()
+        email = google_client.access_user_email(oauth_map)
+    except Exception, e:
+        raise OAuthError(e.message)
+
+    return email
 
 def current_oauth_map():
     if hasattr(flask.g, "oauth_map"):
@@ -415,3 +449,20 @@ class GoogleOAuthClient(object):
         response = get_response(oauth_request.to_url())
 
         return OAuthToken.from_string(response)
+
+    def access_user_email(self, oauth_map):
+
+        token = OAuthToken(oauth_map.google_access_token, oauth_map.google_access_token_secret)
+
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                GoogleOAuthClient.Consumer,
+                token = token,
+                http_url = "http://www.khanacademy.org/api/auth/current_google_oauth_email"
+                )
+
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)
+
+        response = get_response(oauth_request.to_url())
+
+        return response.strip()
+

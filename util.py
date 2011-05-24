@@ -11,6 +11,7 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
+from api.auth import get_current_google_user_from_oauth
 
 @request_cache.cache()
 def get_current_user():
@@ -21,7 +22,7 @@ def get_current_user():
         return get_current_user_from_cookies_unsafe()
 
 def get_current_user_from_oauth():
-    user = oauth.get_current_user()
+    user = get_current_google_user_from_oauth()
     if not user:
         user = facebook_util.get_current_facebook_user_from_oauth()
     return user
