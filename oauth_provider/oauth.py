@@ -411,7 +411,7 @@ class OAuthServer(object):
         return token
 
     def fetch_access_token(self, oauth_request):
-        logger.warning("!!! IN OAuthServer.fetch_access_token OAuth Params: %s"%oauth_request.parameters)
+        logger.debug("!!! IN OAuthServer.fetch_access_token OAuth Params: %s"%oauth_request.parameters)
 
         """Processes an access_token request and returns the
         access token on success.

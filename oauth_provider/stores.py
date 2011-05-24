@@ -44,7 +44,7 @@ class GAEOAuthDataStore(oauth.OAuthDataStore):
         elif token_type == 'access':
             token_type = Token.ACCESS
         
-        logger.warning("!!! In GAEOAuthDataStore.lookup_token  key_:%s, token_type: %s"%(token,token_type))
+        logger.debug("!!! In GAEOAuthDataStore.lookup_token  key_:%s, token_type: %s"%(token,token_type))
 
         request_tokens = Token.all()\
             .filter('key_ =',token)\
@@ -64,7 +64,7 @@ class GAEOAuthDataStore(oauth.OAuthDataStore):
         if oauth_token is None:
             return None
         
-        logger.warning("!!! In GAEOAuthDataStore.lookup_nonce  key_:%s, consumer_key: %s, token_key:%s"%(nonce,oauth_consumer.key_,oauth_token.key_))
+        logger.debug("!!! In GAEOAuthDataStore.lookup_nonce  key_:%s, consumer_key: %s, token_key:%s"%(nonce,oauth_consumer.key_,oauth_token.key_))
         
         nonces = Nonce.all()\
             .filter('consumer_key =',oauth_consumer.key_)\
@@ -87,7 +87,7 @@ class GAEOAuthDataStore(oauth.OAuthDataStore):
 
 
     def fetch_request_token(self, oauth_consumer, oauth_callback):
-        logger.warning("!!! In MockOAuthDataStore.fetch_request_token  args: %s"%locals())
+        logger.debug("!!! In MockOAuthDataStore.fetch_request_token  args: %s"%locals())
         
         if oauth_consumer.key != self.consumer.key:
             raise OAuthError('Consumer key does not match.')
@@ -122,7 +122,7 @@ class GAEOAuthDataStore(oauth.OAuthDataStore):
         
 
     def fetch_access_token(self, oauth_consumer, oauth_token, oauth_verifier):
-        logger.warning("!!! IN MockOAuthDataStore.fetch_access_token  args: %s"%locals())
+        logger.debug("!!! IN MockOAuthDataStore.fetch_access_token  args: %s"%locals())
 
         if oauth_consumer.key_ == self.consumer.key_ \
         and oauth_token.key_ == self.request_token.key_ \

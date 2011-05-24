@@ -17,18 +17,18 @@ logger.setLevel(logging.DEBUG)
 class RequestTokenHandler(webapp.RequestHandler):
     """HTTP request handler with OAuth support."""
     def get(self, *args):
-        logger.warning("!!!START REQUEST!!!")
+        logger.debug("!!!START REQUEST!!!")
         """Handler method for OAuth GET requests."""   
-        logger.warning("!!!Req URL: %s"%self.request.url)
+        logger.debug("!!!Req URL: %s"%self.request.url)
      
-        logger.warning("!!!Entering REQUEST_TOKEN_URL")
+        logger.debug("!!!Entering REQUEST_TOKEN_URL")
         
         oauth_server, oauth_request = initialize_server_request(self.request)
         if oauth_server is None:
             send_oauth_error(oauth.OAuthError('Invalid request parameters.'), self.response)
             return
         else:
-            logger.warning("!!!OAuth Params: %s"%oauth_request.parameters)
+            logger.debug("!!!OAuth Params: %s"%oauth_request.parameters)
             
         try:
             # create a request token
@@ -40,7 +40,7 @@ class RequestTokenHandler(webapp.RequestHandler):
             logger.exception("Error when trying to do a request_token")
             send_oauth_error(err, self.response)
             return
-        logger.warning("!!!End request")
+        logger.debug("!!!End request")
         return
 
     def post(self, *args):
@@ -51,9 +51,9 @@ class RequestTokenHandler(webapp.RequestHandler):
 class AuthorizeHandler(webapp.RequestHandler):
     """HTTP request handler with OAuth support."""
     def get(self, *args):
-        logger.warning("!!!START REQUEST!!!")
+        logger.debug("!!!START REQUEST!!!")
         """Handler method for OAuth GET requests."""   
-        logger.warning("!!!Req URL: %s"%self.request.url)
+        logger.debug("!!!Req URL: %s"%self.request.url)
      
         # user authorization
         
@@ -63,13 +63,13 @@ class AuthorizeHandler(webapp.RequestHandler):
         #the approval , redirect to the callback with an error parameter
         
         
-        logger.warning("!!!Entering AUTHORIZATION_URL")
+        logger.debug("!!!Entering AUTHORIZATION_URL")
         # get the request token
         oauth_server, oauth_request = initialize_server_request(self.request)
         if oauth_server is None:
             return send_oauth_error(oauth.OAuthError('Invalid request parameters.'), self.response)
         else:
-            logger.warning("!!!OAuth Params: %s"%oauth_request.parameters)
+            logger.debug("!!!OAuth Params: %s"%oauth_request.parameters)
         try:
             # get the request token
             token = oauth_server.fetch_request_token(oauth_request)
@@ -93,14 +93,14 @@ class AuthorizeHandler(webapp.RequestHandler):
             callback = token.callback
             if callback == OUT_OF_BAND:
                 callback = None
-        logger.warning("!!!Callback : %s"%callback)
+        logger.debug("!!!Callback : %s"%callback)
         try:
             user = users.get_current_user()
-            logger.warning("!!!User logged in ")
+            logger.debug("!!!User logged in ")
             if user:
                 if self.request.get('authorize_access'):
                     if int(self.request.get('authorize_access'))==1:
-                        logger.warning("User has clicked authorize_access")
+                        logger.debug("User has clicked authorize_access")
                         #check if they want to :s`authorize the token
                         token = oauth_server.authorize_token(token, user)
                         # return the token key
@@ -117,13 +117,13 @@ class AuthorizeHandler(webapp.RequestHandler):
                         else: # access is not authorized i.e. error
                             query_args = 'error=%s' % args['error']
                         
-                        logger.warning('Redirecting to: %s%s%s' % (callback, url_delimiter, query_args))
+                        logger.debug('Redirecting to: %s%s%s' % (callback, url_delimiter, query_args))
                         self.redirect(('%s%s%s' % (callback, url_delimiter, query_args)))
                     else:
                         self.response.set_status(200, 'OK')
                         self.response.out.write("Successfully authorised : %s"%token.to_string(only_key=True))
                 else:
-                    logger.warning("User has logged in but not authorized_access yet")
+                    logger.debug("User has logged in but not authorized_access yet")
                     #display the authorize view
                     path = os.path.join(os.path.dirname(__file__),'templates',
                                         'authorize.html')
@@ -131,7 +131,7 @@ class AuthorizeHandler(webapp.RequestHandler):
                                                             {'token':token}))
             
             else:
-                logger.warning("!!!User not logged in - fwd to login page ")
+                logger.debug("!!!User not logged in - fwd to login page ")
                 
                 #handle the fact that this might be a POST request and the 
                 #required oauth_token (and possibly oauth_callback for
@@ -156,7 +156,7 @@ class AuthorizeHandler(webapp.RequestHandler):
         except oauth.OAuthError, err:
             logger.exception("Error when trying to do an authorization")
             send_oauth_error(err, self.response)
-        logger.warning("!!!End request")
+        logger.debug("!!!End request")
         return
 
     
@@ -167,25 +167,25 @@ class AuthorizeHandler(webapp.RequestHandler):
 class AccessTokenHandler(webapp.RequestHandler):
     """HTTP request handler with OAuth support."""
     def get(self, *args):
-        logger.warning("!!!START REQUEST!!!")
+        logger.debug("!!!START REQUEST!!!")
         """Handler method for OAuth GET requests."""   
-        logger.warning("!!!Req URL: %s"%self.request.url)
+        logger.debug("!!!Req URL: %s"%self.request.url)
         
         # access token
-        logger.warning("!!!Entering ACESS_TOKEN_URL")
+        logger.debug("!!!Entering ACESS_TOKEN_URL")
 
         oauth_server, oauth_request = initialize_server_request(self.request)
         if oauth_server is None:
             return send_oauth_error(oauth.OAuthError('Invalid request parameters.'), self.response)
         else:
-            logger.warning("!!!OAuth Params: %s"%oauth_request.parameters)
+            logger.debug("!!!OAuth Params: %s"%oauth_request.parameters)
         
         try:
             # create an access token
             token = oauth_server.fetch_access_token(oauth_request)
 
             if token == None:
-                logger.warning("!!! oauth_server.fetch_access_token returning None")
+                logger.debug("!!! oauth_server.fetch_access_token returning None")
                 send_oauth_error(oauth.OAuthError("Cannot find corresponding access token."), self.response)
                 return
             # send okay response
@@ -194,7 +194,7 @@ class AccessTokenHandler(webapp.RequestHandler):
             self.response.out.write(token.to_string())
         except oauth.OAuthError, err:
             send_oauth_error(err, self.response)
-        logger.warning("!!!End request")
+        logger.debug("!!!End request")
 
         return
     
@@ -209,7 +209,7 @@ class AuthorizationView(webapp.RequestHandler):
     consumer"""
 
     def get(self):
-        logger.warning("!!!Start TomboyPublicApi request")
+        logger.debug("!!!Start TomboyPublicApi request")
         hostname = self.request.headers.get('host')
         self.response.out.write("""
               <html>
@@ -220,7 +220,7 @@ class AuthorizationView(webapp.RequestHandler):
               </html>
               """%(hostname,hostname,hostname,hostname,hostname))
             
-        logger.warning("!!!End TomboyApi request")
+        logger.debug("!!!End TomboyApi request")
     
         return
 
