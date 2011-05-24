@@ -1,91 +1,225 @@
 import logging
 
-# Each leaf node in PLAYLIST_STRUCTURE is a tuple of form:
-#   ("<Playlist short description for playlist jump bar>", "<Playlist title>", "<Playlist jump bar URL override (optional)>")
-
 PLAYLIST_STRUCTURE = [
     {
-        "Math": [
-            {"Arithmetic": "Arithmetic"},
-            {
-                "Developmental Math": [
-                    {"Developmental Math 1": "Developmental Math"},
-                    {"Developmental Math 2": "Developmental Math 2"},
-                ]
-            },
-            {
-                "Pre-Algebra": [
-                    {"Core Pre-Algebra": "Pre-algebra"},
-                    {"Worked Examples 1": "MA Tests for Education Licensure (MTEL) -Pre-Alg"},
-                ]
-            },
-            {"Brain Teasers": "Brain Teasers"},
-            {
-                "Algebra": [
-                    {"Core Algebra": "Algebra"},
-                    {"Worked Examples 1": "California Standards Test: Algebra I"},
-                    {"Worked Examples 2": "ck12.org Algebra 1 Examples"},
-                    {"Worked Examples 3": "California Standards Test: Algebra II"},
-                    {"Worked Examples 4": "Algebra I Worked Examples"},
-                ]
-            },
-            {
-                "Geometry": [
-                    {"Core Geometry": "Geometry"},
-                    {"Worked Examples 1": "California Standards Test: Geometry"},
-                ]
-            },
-            {"Trigonometry": "Trigonometry"},
-            {"Probability": "Probability"},
-            {"Statistics": "Statistics"},
-            {"Precalculus": "Precalculus"},
-            {"Calculus": "Calculus"},
-            {"Differential Equations": "Differential Equations"},
-            {"Linear Algebra": "Linear Algebra"},
-        ]
+        "name": "Math",
+        "items":
+            [
+                {
+                    "name": "Arithmetic",
+                    "playlist": "Arithmetic"
+                },
+                {
+                    "name": "Developmental Math",
+                    "items": [
+                        {
+                            "name": "Developmental Math 1",
+                            "playlist": "Developmental Math"
+                        },
+                        {
+                            "name": "Developmental Math 2",
+                            "playlist": "Developmental Math 2"
+                        },
+                    ]
+                },
+                {
+                    "name": "Pre-Algebra",
+                    "items": [
+                        {
+                            "name": "Core Pre-Algebra",
+                            "playlist": "Pre-algebra"
+                        },
+                        {
+                            "name": "Worked Examples 1",
+                            "playlist": "MA Tests for Education Licensure (MTEL) -Pre-Alg"
+                        },
+                    ]
+                },
+                {
+                    "name": "Brain Teasers",
+                    "playlist": "Brain Teasers"
+                },
+                {
+                    "name": "Algebra",
+                    "items": [
+                        {
+                            "name": "Core Algebra",
+                            "playlist": "Algebra"
+                        },
+                        {
+                            "name": "Worked Examples 1",
+                            "playlist": "California Standards Test: Algebra I"
+                        },
+                        {
+                            "name": "Worked Examples 2",
+                            "playlist": "ck12.org Algebra 1 Examples"
+                        },
+                        {
+                            "name": "Worked Examples 3",
+                            "playlist": "California Standards Test: Algebra II"
+                        },
+                        {
+                            "name": "Worked Examples 4",
+                            "playlist": "Algebra I Worked Examples"
+                        },
+                    ]
+                },
+                {
+                    "name": "Geometry",
+                    "items": [
+                        {
+                            "name": "Core Geometry",
+                            "playlist": "Geometry"
+                        },
+                        {
+                            "name": "Worked Examples 1",
+                            "playlist": "California Standards Test: Geometry"
+                        },
+                    ]
+                },
+                {
+                    "name": "Trigonometry",
+                    "playlist": "Trigonometry"
+                },
+                {
+                    "name": "Probability",
+                    "playlist": "Probability"
+                },
+                {
+                    "name": "Statistics",
+                    "playlist": "Statistics"
+                },
+                {
+                    "name": "Precalculus",
+                    "playlist": "Precalculus"
+                },
+                {
+                    "name": "Calculus",
+                    "playlist": "Calculus"
+                },
+                {
+                    "name": "Differential Equations",
+                    "playlist": "Differential Equations"
+                },
+                {
+                    "name": "Linear Algebra",
+                    "playlist": "Linear Algebra"
+                },
+            ]
     },
     {
-        "Science": [
-            {"Biology": "Biology"},
-            {"Chemistry": "Chemistry"},
-            {"Physics": "Physics"},
-            {"Organic Chemistry": "Organic Chemistry"},
-            {"Cosmology and Astronomy": "Cosmology and Astronomy"},
+        "name": "Science",
+        "items": [
+            {
+                "name": "Biology",
+                "playlist": "Biology"
+            },
+            {
+                "name": "Chemistry",
+                "playlist": "Chemistry"
+            },
+            {
+                "name": "Physics",
+                "playlist": "Physics"
+            },
+            {
+                "name": "Organic Chemistry",
+                "playlist": "Organic Chemistry"
+            },
+            {
+                "name": "Cosmology and Astronomy",
+                "playlist": "Cosmology and Astronomy"
+            },
         ],
     },
     {
-        "Humanities & Other": [
-            {"History": "History"},
+        "name": "Humanities & Other",
+        "items": [
             {
-                "Finance": [
-                    {"Core Finance": "Finance"},
-                    {"Banking and Money": "Banking and Money"},
-                    {"Valuation and Investing": "Valuation and Investing"},
-                    {"Venture Capital and Capital Markets": "Venture Capital and Capital Markets"},
-                    {"Credit Crisis": "Credit Crisis"},
-                    {"Paulson Bailout": "Paulson Bailout"},
-                    {"Geithner Plan": "Geithner Plan"},
-                    {"Current Economics": "Current Economics"},
-                    {"Currency": "Currency"},
-                ]
+                "name": "History",
+                "playlist": "History"
+            },
+            {
+                "name": "Finance",
+                "items": [
+                    {
+                        "name": "Core Finance",
+                        "playlist": "Finance"
+                    },
+                    {
+                        "name": "Banking and Money",
+                        "playlist": "Banking and Money"
+                    },
+                    {
+                        "name": "Valuation and Investing",
+                        "playlist": "Valuation and Investing"
+                    },
+                    {
+                        "name": "Venture Capital and Capital Markets",
+                        "playlist": "Venture Capital and Capital Markets"
+                    },
+                    {
+                        "name": "Credit Crisis",
+                        "playlist": "Credit Crisis"
+                    },
+                    {
+                        "name": "Paulson Bailout",
+                        "playlist": "Paulson Bailout"
+                    },
+                    {
+                        "name": "Geithner Plan",
+                        "playlist": "Geithner Plan"
+                    },
+                    {
+                        "name": "Current Economics",
+                        "playlist": "Current Economics"
+                    },
+                    {
+                        "name": "Currency",
+                        "playlist": "Currency"
+                    },
+                ],
             },
         ],
     },
     {
-        "Test Prep": [
-            {"SAT Math": "SAT Preparation"},
+        "name": "Test Prep",
+        "items": [
             {
-                "GMAT": [
-                    {"Problem Solving": "GMAT: Problem Solving"},
-                    {"Data Sufficiency": "GMAT Data Sufficiency"},
+                "name": "SAT Math",
+                "playlist": "SAT Preparation"
+            },
+            {
+                "name": "GMAT",
+                "items": [
+                    {
+                        "name": "Problem Solving",
+                        "playlist": "GMAT: Problem Solving"
+                    },
+                    {
+                        "name": "Data Sufficiency",
+                        "playlist": "GMAT Data Sufficiency"
+                    },
                 ]
             },
-            {"CAHSEE": "CAHSEE Example Problems"},
-            {"IIT JEE": "IIT JEE Questions"},
-            {"Singapore Math": "Singapore Math"},
+            {
+                "name": "CAHSEE",
+                "playlist": "CAHSEE Example Problems"
+            },
+            {
+                "name": "IIT JEE",
+                "playlist": "IIT JEE Questions"
+            },
+            {
+                "name": "Singapore Math",
+                "playlist": "Singapore Math"
+            },
         ],
     },
-    {"Talks and Interviews": "Khan Academy-Related Talks and Interviews"}
+    {
+        "name": "Talks and Interviews",
+        "playlist": "Khan Academy-Related Talks and Interviews"
+    }
 ]
 
 # Each DVD needs to stay under 4.4GB
@@ -164,11 +298,10 @@ def sorted_playlist_titles():
 def append_playlist_titles(playlist_titles, obj):
     type_obj = type(obj)
     if type_obj == dict:
-        for key in obj:
-            if type(obj[key]) == str:
-                playlist_titles.append(obj[key])
-            else:
-                append_playlist_titles(playlist_titles, obj[key])
+        if obj.has_key("items"):
+            append_playlist_titles(playlist_titles, obj["items"])
+        else:
+            playlist_titles.append(obj["playlist"])
     elif type_obj == list:
         for val in obj:
             append_playlist_titles(playlist_titles, val)
@@ -177,4 +310,6 @@ if DVD_list:
     topics_list = all_topics_list = DVD_list
 else:
     topics_list = all_topics_list = sorted_playlist_titles()
+
+logging.critical(topics_list)
 

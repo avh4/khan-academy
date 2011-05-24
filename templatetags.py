@@ -193,33 +193,43 @@ def playlist_browser(browser_id):
 @register.simple_tag
 def playlist_browser_structure(structure, class_name="", level=0):
     if type(structure) == list:
+
         s = ""
         class_next = "topline"
         for sub_structure in structure:
             s += playlist_browser_structure(sub_structure, class_name=class_next, level=level)
             class_next = ""
         return s
+
     else:
+
         s = ""
-        for key in structure:
-            val = structure[key]
-            if type(val) == str:
-                href = "#%s" % escape(slugify(val))
+        name = structure["name"]
 
-                # We have two special case playlist URLs to worry about for now. Should remove later.
-                if val.startswith("SAT"):
-                    href = "/sat"
-                elif val.startswith("GMAT"):
-                    href = "/gmat"
+        if structure.has_key("playlist"):
 
-                if level == 0:
-                    s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(key))
-                else:
-                    s += "<li class='%s'><a href='%s'>%s</a></li>" % (class_name, href, escape(key))
+            playlist_title = structure["playlist"]
+            href = "#%s" % escape(slugify(playlist_title))
+
+            # We have two special case playlist URLs to worry about for now. Should remove later.
+            if playlist_title.startswith("SAT"):
+                href = "/sat"
+            elif playlist_title.startswith("GMAT"):
+                href = "/gmat"
+
+            if level == 0:
+                s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(name))
             else:
-                if level > 0:
-                    class_name += " sub"
-                s += "<li class='%s'>%s <ul>%s</ul></li>" % (class_name, escape(key), playlist_browser_structure(val, level=level + 1))
+                s += "<li class='%s'><a href='%s'>%s</a></li>" % (class_name, href, escape(name))
+
+        else:
+            items = structure["items"]
+
+            if level > 0:
+                class_name += " sub"
+
+            s += "<li class='%s'>%s <ul>%s</ul></li>" % (class_name, escape(name), playlist_browser_structure(items, level=level + 1))
+
         return s
 
 @register.simple_tag
