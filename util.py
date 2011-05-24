@@ -13,9 +13,24 @@ import facebook_util
 
 @request_cache.cache()
 def get_current_user():
+    path = os.environ.get("PATH_INFO")
+    if path and path.lower().startswith("/api/"):
+        return get_current_user_from_oauth()
+    else:
+        return get_current_user_from_cookies_unsafe()
+
+def get_current_user_from_oauth():
+    user = None # oauth.get_current_user()
+    if not user:
+        user = facebook_util.get_current_facebook_user_from_oauth()
+    return user
+
+# get_current_user_from_cookies_unsafe is labeled unsafe because it should
+# never be used in our JSONP-enabled API. All calling code should just use get_current_user.
+def get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if not user:
-        user = facebook_util.get_current_facebook_user()
+        user = facebook_util.get_current_facebook_user_from_cookies()
     return user
 
 def get_nickname_for(user):

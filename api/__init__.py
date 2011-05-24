@@ -1,7 +1,7 @@
 import sys, os
 import logging
 
-package_dir = "packages"
+package_dir = os.path.abspath(os.path.join(__file__, "..", "packages"))
 
 # Allow unzipped packages to be imported
 # from packages folder

@@ -9,10 +9,12 @@ from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth import oauth_required
 
+import util
+
 @route("/api/v1/protected", methods=["GET", "POST"])
 @oauth_required
 def protected():
-    return "this data is protected"
+    return "this data is protected: " + util.get_current_user().email()
 
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
