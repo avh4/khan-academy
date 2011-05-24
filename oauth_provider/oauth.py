@@ -24,7 +24,6 @@ THE SOFTWARE.
 
 import logging
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 import cgi
 import urllib

@@ -14,7 +14,7 @@ from app import App
 
 from api import route
 from oauth_provider.decorators import is_valid_request, validate_token
-from oauth_provider.oauth import OAuthError, build_authenticate_header
+from oauth_provider.oauth import OAuthClient, OAuthConsumer, OAuthToken, OAuthRequest, OAuthError, OAuthSignatureMethod_HMAC_SHA1, build_authenticate_header
 from oauth_provider.utils import initialize_server_request
 from oauth_provider.stores import check_valid_callback
 
@@ -23,19 +23,34 @@ from oauth_provider.stores import check_valid_callback
 # don't have to handle each auth provider independently. We behave as one single OAuth set of endpoints
 # for them to interact with.
 
-# OAuthMap creates a mapping between our OAuth credentials and our identity providers.
+# OAuthMap creates a mapping between our OAuth credentials and our identity providers'.
 class OAuthMap(db.Model):
 
+    # Our tokens
     request_token = db.StringProperty()
     request_token_secret = db.StringProperty()
-
     access_token = db.StringProperty()
     access_token_secret = db.StringProperty()
 
-    expires = db.DateTimeProperty()
-
+    # Facebook tokens
     facebook_authorization_code = db.StringProperty()
     facebook_access_token = db.StringProperty()
+
+    # Google tokens
+    google_request_token = db.StringProperty()
+    google_request_token_secret = db.StringProperty()
+    google_access_token = db.StringProperty()
+    google_access_token_secret = db.StringProperty()
+    google_verification_code = db.StringProperty()
+
+    # Expiration
+    expires = db.DateTimeProperty()
+
+    def uses_facebook(self):
+        return self.facebook_authorization_code
+
+    def uses_google(self):
+        return self.google_request_token
 
     @staticmethod
     def get_by_id_safe(request_id):
@@ -93,8 +108,10 @@ def current_oauth_map():
     return None
 
 def oauth_error(e):
-    return current_app.response_class(e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
+    return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
 
+# REQUEST TOKEN GATHERING
+#
 # Flask-friendly version of oauth_providers.oauth_request.RequestTokenHandler that redirects to Google/Facebook
 # to gather the appropriate request tokens.
 @route("/api/auth/request_token", methods=["GET", "POST"])
@@ -109,8 +126,8 @@ def request_token_start():
     try:
         # Create our request token
         token = oauth_server.fetch_request_token(oauth_request)
-    except OAuthError, err:
-        return oauth_error(err)
+    except OAuthError, e:
+        return oauth_error(e)
 
     # Start a new OAuth mapping
     oauth_map = OAuthMap()
@@ -118,36 +135,60 @@ def request_token_start():
     oauth_map.request_token = token.key_
     oauth_map.put()
 
-    continue_url = "http://local.kamenstestapp.appspot.com:8084/api/auth/token_redirect_target?oauth_map_id=%s" % oauth_map.key().id()
+    is_facebook_auth = False
 
-    is_facebook_auth = True
     if is_facebook_auth:
+
+        # Start Facebook request token process
         params = {
                     "client_id": App.facebook_app_id,
-                    "redirect_uri": continue_url,
+                    "redirect_uri": "http://local.kamenstestapp.appspot.com:8084/api/auth/facebook_token_callback?oauth_map_id=%s" % oauth_map.key().id(),
                     }
         return redirect("https://www.facebook.com/dialog/oauth?%s" % urllib.urlencode(params))
 
-# Associate our request token and Google/Facebook's request token before redirecting
-@route("/api/auth/token_redirect_target", methods=["GET"])
-def token_redirect_target():
+    else:
 
+        # Start Google request token process
+        try:
+            google_client = GoogleOAuthClient()
+            google_token = google_client.fetch_request_token(oauth_map)
+        except Exception, e:
+            return oauth_error(OAuthError(e.message))
+
+        oauth_map.google_request_token = google_token.key
+        oauth_map.google_request_token_secret = google_token.secret
+        oauth_map.put()
+
+        return "NEED TO REDIRECT HERE. request_token=%s&token_secret=%s" % (oauth_map.request_token, oauth_map.request_token_secret)
+
+# Associate our request or access token with Facebook's tokens
+@route("/api/auth/facebook_token_callback", methods=["GET"])
+def facebook_token_callback():
     oauth_map = OAuthMap.get_by_id_safe(request.values.get("oauth_map_id"))
 
     if not oauth_map:
         return oauth_error(OAuthError("Unable to find OAuthMap by id."))
 
-    if oauth_map.facebook_authorization_code:
-        oauth_map.facebook_authorization_code = request.values.get("code")
-        oauth_map.put()
-        access_token = request.values.get("access_token")
-        access_token_secret = request.values.get("token_secret")
-        return "NEED TO REDIRECT HERE. access_token=%s&token_secret=%s" % (access_token, access_token_secret)
-    else:
+    if not oauth_map.facebook_authorization_code:
         oauth_map.facebook_authorization_code = request.values.get("code")
         oauth_map.put()
         return "NEED TO REDIRECT HERE. request_token=%s&token_secret=%s" % (oauth_map.request_token, oauth_map.request_token_secret)
 
+@route("/api/auth/google_token_callback", methods=["GET"])
+def google_token_callback():
+    oauth_map = OAuthMap.get_by_id_safe(request.values.get("oauth_map_id"))
+
+    if not oauth_map:
+        return oauth_error(OAuthError("Unable to find OAuthMap by id."))
+
+    if not oauth_map.google_verification_code:
+        oauth_map.google_verification_code = request.values.get("verifier")
+        oauth_map.put()
+
+    return "NEED TO REDIRECT HERE. authorized request_token=%s&token_secret=%s" % (oauth_map.request_token, oauth_map.request_token_secret)
+
+# TOKEN AUTHORIZATION
+#
 # Flask-friendly version of oauth_providers.oauth_request.AuthorizeHandler that doesn't
 # require user authorization, just logging in.
 #
@@ -165,8 +206,8 @@ def authorize():
     try:
         # get the request token
         token = oauth_server.fetch_request_token(oauth_request)
-    except OAuthError, err:
-        return oauth_error(err)
+    except OAuthError, e:
+        return oauth_error(e)
 
     try:
         callback = oauth_server.get_callback(oauth_request)
@@ -174,7 +215,7 @@ def authorize():
         if not check_valid_callback(callback):
             return oauth_error(OAuthError("Invalid callback URL"))
 
-    except OAuthError,err:
+    except OAuthError, e:
         callback = None
         
     try:
@@ -188,17 +229,28 @@ def authorize():
             # for security reasons later, there's no reason we can't.
             token = oauth_server.authorize_token(token, user)
 
-            if callback:
-                if "?" in callback:
-                    url_delimiter = "&"
-                else:
-                    url_delimiter = "?"
+            oauth_map = OAuthMap.get_from_request_token(token.key_)
+            if not oauth_map:
+                raise OAuthError("Unable to find oauth_map from request token during authorization.")
 
-                query_args = token.to_string(only_key=True)
-                
-                return redirect(('%s%s%s' % (callback, url_delimiter, query_args)))
+            if oauth_map.uses_google():
+
+                params = { "oauth_token": oauth_map.google_request_token }
+                return redirect("http://www.khanacademy.org/_ah/OAuthAuthorizeToken?%s" % urllib.urlencode(params))
+
             else:
-                return current_app.response_class("Successfully authorized: %s" % token.to_string(only_key=True), status=200)
+
+                if callback:
+                    if "?" in callback:
+                        url_delimiter = "&"
+                    else:
+                        url_delimiter = "?"
+
+                    query_args = token.to_string(only_key=True)
+                    
+                    return redirect(('%s%s%s' % (callback, url_delimiter, query_args)))
+                else:
+                    return current_app.response_class("Successfully authorized: %s" % token.to_string(only_key=True), status=200)
 
         else:
 
@@ -225,9 +277,11 @@ def authorize():
 
             return redirect(util.create_login_url(continue_url))
     
-    except OAuthError, err:
-        return oauth_error(err)
+    except OAuthError, e:
+        return oauth_error(e)
 
+# ACCESS TOKEN GATHERING
+#
 # Flask-friendly version of oauth_providers.oauth_request.AccessTokenHandler
 # that creates our access token and then redirects to Google/Facebook to let them
 # create theirs.
@@ -255,13 +309,16 @@ def access_token():
         oauth_map.access_token_secret = token.secret
         oauth_map.put()
 
-    except OAuthError, err:
-        return oauth_error(err)
+    except OAuthError, e:
+        raise
+        return oauth_error(e)
 
-    continue_url = "http://local.kamenstestapp.appspot.com:8084/api/auth/token_redirect_target?oauth_map_id=%s" % oauth_map.key().id()
+    if oauth_map.uses_facebook():
 
-    is_facebook_auth = True
-    if is_facebook_auth:
+        # Start Facebook access token process
+
+        continue_url = "http://local.kamenstestapp.appspot.com:8084/api/auth/facebook_token_callback?oauth_map_id=%s" % oauth_map.key().id()
+
         params = {
                     "client_id": App.facebook_app_id,
                     "client_secret": App.facebook_app_secret,
@@ -269,17 +326,12 @@ def access_token():
                     "code": oauth_map.facebook_authorization_code,
                     }
 
-        response = ""
         try:
-            file = urllib2.urlopen("https://graph.facebook.com/oauth/access_token?%s" % urllib.urlencode(params))
-            response = file.read()
+            response = get_response("https://graph.facebook.com/oauth/access_token", params)
         except Exception, e:
             return oauth_error(OAuthError(e.message))
-        finally:
-            file.close()
 
-        response_params = cgi.parse_qs(response)
-        logging.critical("response_params: %s" % response_params)
+        response_params = get_parsed_params(response)
         if not response_params or not response_params.get("access_token"):
             return oauth_error(OAuthError("Cannot get access_token from Facebook's /oauth/access_token response"))
          
@@ -289,3 +341,77 @@ def access_token():
         oauth_map.put()
 
         return "NEED TO REDIRECT HERE. access_token=%s&token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
+
+    elif oauth_map.uses_google():
+
+        # Start Google access token process
+        try:
+            google_client = GoogleOAuthClient()
+            google_token = google_client.fetch_access_token(oauth_map)
+        except Exception, e:
+            raise
+            return oauth_error(OAuthError(e.message))
+
+        oauth_map.google_access_token = google_token.key
+        oauth_map.google_access_token_secret = google_token.secret
+        oauth_map.put()
+
+        return "NEED TO REDIRECT HERE. access_token=%s&token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
+
+def get_response(url, params={}):
+    if params:
+        if "?" in url:
+            url += "&"
+        else:
+            url += "?"
+        url += urllib.urlencode(params)
+
+    response = ""
+    file = None
+    try:
+        file = urllib2.urlopen(url)
+        response = file.read()
+    finally:
+        if file:
+            file.close()
+
+    return response
+
+def get_parsed_params(resp):
+    if not resp:
+        return {}
+    return cgi.parse_qs(resp)
+
+class GoogleOAuthClient(object):
+
+    Consumer = OAuthConsumer(App.google_consumer_key, App.google_consumer_secret)
+
+    def fetch_request_token(self, oauth_map):
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                GoogleOAuthClient.Consumer,
+                http_url = "http://www.khanacademy.org/_ah/OAuthGetRequestToken",
+                callback = "http://localhost:8084/api/auth/google_token_callback?oauth_map_id=%s" % oauth_map.key().id()
+                )
+
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, None)
+
+        response = get_response(oauth_request.to_url())
+
+        return OAuthToken.from_string(response)
+
+    def fetch_access_token(self, oauth_map):
+
+        token = OAuthToken(oauth_map.google_request_token, oauth_map.google_request_token_secret)
+
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                GoogleOAuthClient.Consumer,
+                token = token,
+                verifier = oauth_map.google_verification_code,
+                http_url = "http://www.khanacademy.org/_ah/OAuthGetAccessToken"
+                )
+
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)
+
+        response = get_response(oauth_request.to_url())
+
+        return OAuthToken.from_string(response)

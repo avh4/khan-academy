@@ -311,5 +311,3 @@ if DVD_list:
 else:
     topics_list = all_topics_list = sorted_playlist_titles()
 
-logging.critical(topics_list)
-
