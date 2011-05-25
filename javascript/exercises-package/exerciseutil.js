@@ -42,20 +42,10 @@ var Exercise = {
 
         var ix = 0;
         var jelStep = $(".step" + ix);
-        var steps = [];
         while (jelStep.length) {
-            $("<div></div").addClass("hiddenStep" + ix)
-                            .data("oldParent", jelStep.parent())
-                            .data("oldPrev", jelStep.prev())
-                            .data("step", jelStep)
-                            .appendTo($("#hint_content"));
-            steps.push(jelStep);
+            jelStep.data("hint", jelStep.contents()).empty();
             jelStep = $(".step" + (++ix));
         }
-        
-        $.each(steps, function(index, jel) {
-            jel.remove();
-        });
 
         this.hintsRemoved = true;
     },
@@ -69,18 +59,10 @@ var Exercise = {
         if (!this.hintsRemoved) return;
 
         var ix = 0;
-        var jelHiddenStep = $(".hiddenStep" + ix);
-        while (jelHiddenStep.length) {
-            var jelOldParent = jelHiddenStep.data("oldParent");
-            var jelOldPrev = jelHiddenStep.data("oldPrev");
-            var jelStep = jelHiddenStep.data("step");
-
-            if (jelOldPrev){
-                jelStep.insertAfter(jelOldPrev);
-            } else if (jelOldParent) {
-                jelOldParent.append(jelStep);
-            }
-            jelHiddenStep = $(".hiddenStep" + (++ix));
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            jelStep.append(jelStep.data("hint"));
+            jelStep = $(".step" + (++ix));
         }
 
         this.hintsRemoved = false;
