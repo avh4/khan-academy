@@ -175,6 +175,7 @@ var currentexercise = "{{exid|escapejs}}";
 				if(confirmed || confirm(confirmation_text))
 				{
 					relabel_hint();
+					Exercise.restoreHintsToDOM();
 					{% block hintfunction %}next_step(){% endblock hintfunction %};
 					if (!fSkipResetStreak)
 						reset_streak();

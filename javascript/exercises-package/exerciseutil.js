@@ -30,7 +30,51 @@ var Exercise = {
         this.incorrect.src = "/images/face-sad.gif";
         
     },
+
+    removeHintsFromDOM: function() {
+
+        // Gross Mozilla-only hack for old exercise framework
+        // to avoid copying and pasting visibility:hidden content
+        // as a really easy way to cheat by looking at hints.
+        if (!$.browser.mozilla) return;
+
+        if (this.hintsRemoved) return;
+
+        var ix = 0;
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            jelStep.data("oldParent", jelStep.parent()).data("oldPrev", jelStep.prev());
+            jelStep = $(".step" + (++ix));
+        }
+
+        this.hintsRemoved = true;
+    },
     
+    restoreHintsToDOM: function() {
+
+        // Second part of gross Mozilla-only hack for old exercise framework
+        // to avoid copying and pasting visibility:hidden content.
+        if (!$.browser.mozilla) return;
+
+        if (!this.hintsRemoved) return;
+
+        var ix = 0;
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            var jelOldParent = jelStep.data("oldParent");
+            var jelOldPrev = jelStep.data("oldPrev");
+
+            if (jelOldPrev)
+                jelStep.insertBefore(jelOldPrev);
+            else if (jelOldParent)
+                jelOldParent.prepend(jelStep);
+
+            jelStep = $(".step" + (++ix));
+        }
+
+        this.hintsRemoved = false;
+    },
+
     display: function() {
         // set vals to 0 after document is ready
         $("#correct").val(0);
@@ -55,14 +99,17 @@ var Exercise = {
         } else if ($("#answer").length) {
             $("#answer").val("").focus();
         }
-            
         translate();
         
         if (this.fSupportsAjax) {
             $("#old_question_content").animate({"left": -500}, 250, function() {
                 $("#old_question_content").remove();
-                $("#question_content").animate({"left": 0}, 250);    
+                $("#question_content").animate({"left": 0}, 250);
+                Exercise.removeHintsFromDOM();
             });
+        }
+        else {
+            Exercise.removeHintsFromDOM();
         }
     },
     
