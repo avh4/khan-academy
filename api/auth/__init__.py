@@ -76,7 +76,6 @@ def authorize_token():
 
     try:
         callback = oauth_server.get_callback(oauth_request)
-        
         if not check_valid_callback(callback):
             return oauth_error_response(OAuthError("Invalid callback URL"))
 
@@ -88,7 +87,6 @@ def authorize_token():
         user = util.get_current_user_from_cookies_unsafe()
 
         if user:
-
             # For now we don't require user intervention to authorize our tokens,
             # since the user already authorized FB/Google. If we need to do this
             # for security reasons later, there's no reason we can't.
@@ -99,46 +97,13 @@ def authorize_token():
                 raise OAuthError("Unable to find oauth_map from request token during authorization.")
 
             if oauth_map.uses_google():
-
                 return google_authorize_token_handler(oauth_map)
-
             else:
-
                 if callback:
-                    if "?" in callback:
-                        url_delimiter = "&"
-                    else:
-                        url_delimiter = "?"
-
-                    query_args = token.to_string(only_key=True)
-                    
-                    return redirect(('%s%s%s' % (callback, url_delimiter, query_args)))
+                    return redirect(callback)
                 else:
                     return current_app.response_class("Successfully authorized: %s" % token.to_string(only_key=True), status=200)
-
         else:
-
-            # Handle the fact that this might be a POST request and the 
-            # required oauth_token (and possibly oauth_callback for
-            # OAuth 1.0 requests) will not be on the request.uri
-            # Hence we add it to it before redirecting to the login page
-            
-            continue_url = request.url
-            
-            if 'oauth_token' not in continue_url:
-                if '?' not in continue_url:
-                    continue_url += "?"
-                else:
-                    continue_url += "&"
-                continue_url += token.to_string(only_key=True)
-
-            if 'oauth_callback' not in continue_url:
-                if '?' not in continue_url:
-                    continue_url += "?"
-                else:
-                    continue_url += "&"
-                continue_url += "oauth_callback=%s" % (callback)
-
             return redirect(util.create_login_url(continue_url))
     
     except OAuthError, e:
