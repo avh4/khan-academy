@@ -12,7 +12,7 @@ from app import App
 import facebook
 import layer_cache
 import request_cache
-from api.auth import current_oauth_map
+from api.auth.auth_util import current_oauth_map
 
 FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
 

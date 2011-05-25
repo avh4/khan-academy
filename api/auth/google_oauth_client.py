@@ -1,0 +1,62 @@
+import logging
+
+from app import App
+
+from api.auth.auth_util import get_response
+
+from oauth_provider.oauth import OAuthConsumer, OAuthToken, OAuthRequest, OAuthSignatureMethod_HMAC_SHA1
+
+class GoogleOAuthClient(object):
+
+    Consumer = OAuthConsumer(App.google_consumer_key, App.google_consumer_secret)
+
+    def fetch_request_token(self, oauth_map):
+        logging.critical("fetching request token")
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                GoogleOAuthClient.Consumer,
+                http_url = "http://www.khanacademy.org/_ah/OAuthGetRequestToken",
+                callback = "http://localhost:8084/api/auth/google_token_callback?oauth_map_id=%s" % oauth_map.key().id()
+                )
+
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, None)
+
+        response = get_response(oauth_request.to_url())
+
+        return OAuthToken.from_string(response)
+
+    def fetch_access_token(self, oauth_map):
+
+        logging.critical("authorizing")
+        token = OAuthToken(oauth_map.google_request_token, oauth_map.google_request_token_secret)
+        logging.critical("CONSUMER KEY: %s" % GoogleOAuthClient.Consumer.key)
+
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                GoogleOAuthClient.Consumer,
+                token = token,
+                verifier = oauth_map.google_verification_code,
+                http_url = "http://www.khanacademy.org/_ah/OAuthGetAccessToken"
+                )
+
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)
+
+        response = get_response(oauth_request.to_url())
+
+        return OAuthToken.from_string(response)
+
+    def access_user_email(self, oauth_map):
+
+        token = OAuthToken(oauth_map.google_access_token, oauth_map.google_access_token_secret)
+
+        oauth_request = OAuthRequest.from_consumer_and_token(
+                GoogleOAuthClient.Consumer,
+                token = token,
+                http_url = "http://www.khanacademy.org/api/auth/current_google_oauth_email"
+                )
+
+        oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)
+
+        response = get_response(oauth_request.to_url())
+
+        return response.strip()
+
+

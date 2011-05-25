@@ -12,7 +12,6 @@ from decorators import oauth_required
 from consts import OUT_OF_BAND
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 class RequestTokenHandler(webapp.RequestHandler):
     """HTTP request handler with OAuth support."""

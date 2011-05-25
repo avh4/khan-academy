@@ -7,7 +7,7 @@ import topics_list
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
-from api.auth import oauth_required
+from api.auth.decorators import oauth_required
 
 import util
 

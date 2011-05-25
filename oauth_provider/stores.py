@@ -11,7 +11,6 @@ from models import Nonce, Token, Consumer, Resource, generate_random
 from consts import VERIFIER_SIZE, MAX_URL_LENGTH, OUT_OF_BAND
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 def set_trace():
   import pdb, sys
