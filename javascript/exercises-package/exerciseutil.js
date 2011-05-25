@@ -43,7 +43,13 @@ var Exercise = {
         var ix = 0;
         var jelStep = $(".step" + ix);
         while (jelStep.length) {
-            jelStep.data("oldParent", jelStep.parent()).data("oldPrev", jelStep.prev());
+            $("<div></div").addClass("hiddenStep" + ix)
+                            .data("oldParent", jelStep.parent())
+                            .data("oldPrev", jelStep.prev())
+                            .data("step", jelStep)
+                            .appendTo($("#hint_content"));
+    
+            jelStep.remove();
             jelStep = $(".step" + (++ix));
         }
 
@@ -59,17 +65,22 @@ var Exercise = {
         if (!this.hintsRemoved) return;
 
         var ix = 0;
-        var jelStep = $(".step" + ix);
-        while (jelStep.length) {
-            var jelOldParent = jelStep.data("oldParent");
-            var jelOldPrev = jelStep.data("oldPrev");
+        var jelHiddenStep = $(".hiddenStep" + ix);
+        while (jelHiddenStep.length) {
+            var jelOldParent = jelHiddenStep.data("oldParent");
+            var jelOldPrev = jelHiddenStep.data("oldPrev");
+            var jelStep = jelHiddenStep.data("step");
 
-            if (jelOldPrev)
-                jelStep.insertBefore(jelOldPrev);
-            else if (jelOldParent)
-                jelOldParent.prepend(jelStep);
-
-            jelStep = $(".step" + (++ix));
+            if (jelOldPrev){
+                console.log("previous branch");
+                // jelStep.insertBefore(jelOldPrev);
+                jelStep.insertAfter(jelOldPrev);
+            } else if (jelOldParent) {
+                console.log("parent branch");
+                // jelOldParent.prepend(jelStep);
+                jelOldParent.append(jelStep);
+            }
+            jelHiddenStep = $(".hiddenStep" + (++ix));
         }
 
         this.hintsRemoved = false;
