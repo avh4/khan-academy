@@ -1,3 +1,5 @@
+import datetime
+import logging
 import urllib
 
 from flask import request, redirect
@@ -39,7 +41,15 @@ def facebook_access_token_handler(oauth_map):
      
     # Associate our access token and Google/Facebook's
     oauth_map.facebook_access_token = response_params["access_token"][0]
-    # Add EXPIRES handling here
+
+    expires_seconds = 0
+    try:
+        expires_seconds = int(response_params["expires"][0])
+    except ValueError:
+        pass
+
+    if expires_seconds:
+        oauth_map.expires = datetime.datetime.now() + datetime.timedelta(seconds=expires_seconds)
     oauth_map.put()
 
     return "NEED TO REDIRECT HERE. access_token=%s&token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)

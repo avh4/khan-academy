@@ -1,3 +1,6 @@
+import datetime
+import logging
+
 from google.appengine.ext import db
 
 # OAuthMap creates a mapping between our OAuth credentials and our identity providers'.
@@ -29,6 +32,16 @@ class OAuthMap(db.Model):
     def uses_google(self):
         return self.google_request_token
 
+    def is_expired(self):
+        return self.expires and self.expires < datetime.datetime.now()
+
+    @staticmethod
+    def if_not_expired(oauth_map):
+        if oauth_map and oauth_map.is_expired():
+            logging.warning("Not returning expired OAuthMap.")
+            return None
+        return oauth_map
+
     @staticmethod
     def get_by_id_safe(request_id):
         if not request_id:
@@ -37,18 +50,18 @@ class OAuthMap(db.Model):
             parsed_id = int(request_id)
         except ValueError:
             return None
-        return OAuthMap.get_by_id(parsed_id)
+        return OAuthMap.if_not_expired(OAuthMap.get_by_id(parsed_id))
 
     @staticmethod
     def get_from_request_token(request_token):
         if not request_token:
             return None
-        return OAuthMap.all().filter("request_token =", request_token).get()
+        return OAuthMap.if_not_expired(OAuthMap.all().filter("request_token =", request_token).get())
 
     @staticmethod
     def get_from_access_token(access_token):
         if not access_token:
             return None
-        return OAuthMap.all().filter("access_token =", access_token).get()
+        return OAuthMap.if_not_expired(OAuthMap.all().filter("access_token =", access_token).get())
 
 
