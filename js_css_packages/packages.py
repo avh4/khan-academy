@@ -13,6 +13,7 @@ javascript = {
     "video": {
         "hashed-filename": "hashed-@video@.js", # @content@ will be replaced with hash by deploy script
         "files": [
+            "video.js",
             "discussion.js",
         ]
     },
@@ -88,6 +89,7 @@ stylesheets = {
     "video": {
         "hashed-filename": "hashed-@video@.css", # @content@ will be replaced with hash by deploy script
         "files": [
+            "video.css",
             "discussion.css",
         ]
     },
