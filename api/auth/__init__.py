@@ -29,32 +29,41 @@ import util
 # hands off to Google/Facebook to gather the appropriate request tokens.
 @route("/api/auth/request_token", methods=["GET", "POST"])
 def request_token():
-    webapp_req = webapp_patched_request(request)
 
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    # Force the use of cookie-based auth for request_token and authorize_token parts of API authentication *only*
+    user = util.get_current_user_from_cookies_unsafe()
 
-    if oauth_server is None:
-        return oauth_error_response(OAuthError('Invalid request parameters.'))
+    if user:
 
-    try:
-        # Create our request token
-        token = oauth_server.fetch_request_token(oauth_request)
-    except OAuthError, e:
-        return oauth_error_response(e)
+        webapp_req = webapp_patched_request(request)
 
-    # Start a new OAuth mapping
-    oauth_map = OAuthMap()
-    oauth_map.request_token_secret = token.secret
-    oauth_map.request_token = token.key_
-    oauth_map.callback_url = request.values.get("oauth_callback")
-    oauth_map.put()
+        oauth_server, oauth_request = initialize_server_request(webapp_req)
 
-    is_facebook_auth = False
+        if oauth_server is None:
+            return oauth_error_response(OAuthError('Invalid request parameters.'))
 
-    if is_facebook_auth:
-        return facebook_request_token_handler(oauth_map)
+        try:
+            # Create our request token
+            token = oauth_server.fetch_request_token(oauth_request)
+        except OAuthError, e:
+            return oauth_error_response(e)
+
+        # Start a new OAuth mapping
+        oauth_map = OAuthMap()
+        oauth_map.request_token_secret = token.secret
+        oauth_map.request_token = token.key_
+        oauth_map.callback_url = request.values.get("oauth_callback")
+        oauth_map.put()
+
+        if util.is_facebook_user(user):
+            return facebook_request_token_handler(oauth_map)
+        else:
+            return google_request_token_handler(oauth_map)
+
     else:
-        return google_request_token_handler(oauth_map)
+
+        # Ask user to login, then redirect to start of request_token process.
+        return redirect(util.create_login_url(request.url))
 
 # Token authorization endpoint
 #
@@ -69,6 +78,11 @@ def authorize_token():
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
 
+    # Force the use of cookie-based auth for request_token and authorize_token parts of API authentication *only*
+    user = util.get_current_user_from_cookies_unsafe()
+    if not user:
+        return oauth_error(OAuthError("User not logged in during authorize_token process."))
+
     try:
         # get the request token
         token = oauth_server.fetch_request_token(oauth_request)
@@ -76,30 +90,23 @@ def authorize_token():
         return oauth_error_response(e)
 
     try:
-        # Force the use of cookie-based auth for this and *only* this part of API authentication
-        user = util.get_current_user_from_cookies_unsafe()
+        # For now we don't require user intervention to authorize our tokens,
+        # since the user already authorized FB/Google. If we need to do this
+        # for security reasons later, there's no reason we can't.
+        token = oauth_server.authorize_token(token, user)
 
-        if user:
-            # For now we don't require user intervention to authorize our tokens,
-            # since the user already authorized FB/Google. If we need to do this
-            # for security reasons later, there's no reason we can't.
-            token = oauth_server.authorize_token(token, user)
+        oauth_map = OAuthMap.get_from_request_token(token.key_)
+        if not oauth_map:
+            raise OAuthError("Unable to find oauth_map from request token during authorization.")
 
-            oauth_map = OAuthMap.get_from_request_token(token.key_)
-            if not oauth_map:
-                raise OAuthError("Unable to find oauth_map from request token during authorization.")
+        oauth_map.verifier = token.verifier
+        oauth_map.put()
 
-            oauth_map.verifier = token.verifier
-            oauth_map.put()
-
-            if oauth_map.uses_google():
-                return google_authorize_token_handler(oauth_map)
-            else:
-                return facebook_authorize_token_handler(oauth_map)
-
+        if oauth_map.uses_google():
+            return google_authorize_token_handler(oauth_map)
         else:
-            return redirect(util.create_login_url(request.url))
-    
+            return facebook_authorize_token_handler(oauth_map)
+
     except OAuthError, e:
         return oauth_error_response(e)
 

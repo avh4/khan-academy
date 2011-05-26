@@ -38,6 +38,9 @@ def get_current_user_from_cookies_unsafe():
 def get_nickname_for(user):
     return nicknames.get_nickname_for(user)
 
+def is_facebook_user(user):
+    return user and facebook_util.is_facebook_email(user.email())
+
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
 
