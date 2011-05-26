@@ -53,6 +53,10 @@ def request_token():
         oauth_map.request_token_secret = token.secret
         oauth_map.request_token = token.key_
         oauth_map.callback_url = requested_oauth_callback()
+        
+        if request.values.get("view") == "mobile":
+            oauth_map.view = "mobile"
+
         oauth_map.put()
 
         if util.is_facebook_user(user):

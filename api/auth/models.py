@@ -29,6 +29,10 @@ class OAuthMap(db.Model):
     # Our internal callback URL
     callback_url = db.StringProperty()
 
+    # Our view options for interacting w/ identity providers
+    # that provide special views for mobile, etc
+    view = db.StringProperty(default="normal")
+
     # Expiration
     expires = db.DateTimeProperty()
 
@@ -40,6 +44,9 @@ class OAuthMap(db.Model):
 
     def is_expired(self):
         return self.expires and self.expires < datetime.datetime.now()
+
+    def is_mobile_view(self):
+        return self.view == "mobile"
 
     def callback_url_with_request_token_params(self, include_verifier = False):
         params_callback = {

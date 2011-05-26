@@ -58,6 +58,11 @@ def google_request_token_handler(oauth_map):
 
 def google_authorize_token_handler(oauth_map):
     params = { "oauth_token": oauth_map.google_request_token }
+
+    if oauth_map.is_mobile_view():
+        # Add google-specific mobile view identifier
+        params["btmpl"] = "mobile"
+
     return redirect("http://www.khanacademy.org/_ah/OAuthAuthorizeToken?%s" % urllib.urlencode(params))
 
 def google_access_token_handler(oauth_map):
