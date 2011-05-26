@@ -1467,13 +1467,7 @@ class Login(request_handler.RequestHandler):
 class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
-
-        template_values = {
-                    "continue": cont,
-                    "login_url_google": users.create_login_url(cont),
-                }
-
-        self.render_template('login_mobile_oauth.html', template_values)
+        self.render_template('login_mobile_oauth.html', { "continue": cont })
 
 class PostLogin(request_handler.RequestHandler):
     def get(self):
