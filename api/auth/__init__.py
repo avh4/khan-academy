@@ -8,7 +8,7 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import webapp_patched_request, oauth_error_response
+from api.auth.auth_util import webapp_patched_request, oauth_error_response, append_url_params
 from api.auth.google_util import google_request_token_handler, google_authorize_token_handler, google_access_token_handler
 from api.auth.facebook_util import facebook_request_token_handler, facebook_access_token_handler
 
@@ -75,14 +75,6 @@ def authorize_token():
         return oauth_error_response(e)
 
     try:
-        callback = oauth_server.get_callback(oauth_request)
-        if not check_valid_callback(callback):
-            return oauth_error_response(OAuthError("Invalid callback URL"))
-
-    except OAuthError, e:
-        callback = None
-        
-    try:
         # Force the use of cookie-based auth for this and *only* this part of API authentication
         user = util.get_current_user_from_cookies_unsafe()
 
@@ -99,12 +91,14 @@ def authorize_token():
             if oauth_map.uses_google():
                 return google_authorize_token_handler(oauth_map)
             else:
+                callback = request.values.get("oauth_callback")
+
                 if callback:
-                    return redirect(callback)
+                    return redirect(append_url_params(callback, {"verifier": token.verifier}))
                 else:
                     return current_app.response_class("Successfully authorized: %s" % token.to_string(only_key=True), status=200)
         else:
-            return redirect(util.create_login_url(continue_url))
+            return redirect(util.create_login_url(request.url))
     
     except OAuthError, e:
         return oauth_error_response(e)
