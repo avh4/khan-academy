@@ -11,11 +11,6 @@ from api.auth.decorators import oauth_required
 
 import util
 
-@route("/api/v1/protected", methods=["GET", "POST"])
-@oauth_required
-def protected():
-    return "this data is protected: " + util.get_current_user().email()
-
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
 @layer_cache.cache_with_key_fxn(
@@ -190,3 +185,12 @@ def replace_playlist_values(structure, playlist_dict):
             # Replace string playlist title with real playlist object
             structure["playlist"] = playlist_dict[structure["playlist"]]
 
+@route("/api/v1/users/me", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_data_me():
+    user = util.get_current_user()
+    if user:
+        return models.UserData.get_for(user)
+    return None
