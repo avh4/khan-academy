@@ -31,7 +31,6 @@ class GoogleOAuthClient(object):
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
                 token = token,
-                verifier = oauth_map.google_verification_code,
                 http_url = "http://www.khanacademy.org/_ah/OAuthGetAccessToken"
                 )
 
