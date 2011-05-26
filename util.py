@@ -4,13 +4,11 @@ import math
 import urllib
 import logging
 import request_cache
-import layer_cache
 
 from google.appengine.api import users
 from django.template.defaultfilters import pluralize
 from asynctools import AsyncMultiTask, QueryTask
 
-from models import UserData
 from app import App
 import nicknames
 import facebook_util
@@ -18,31 +16,8 @@ import facebook_util
 @request_cache.cache()
 def get_current_user():
     user = users.get_current_user()
-    if user is not None and user.user_id() is not None:
-        # It's a Google account, so get the first user to join with that email address.
-        return get_first_matching_user(user)
-        
     if not user:
         user = facebook_util.get_current_facebook_user()
-    return user
-
-@layer_cache.cache_with_key_fxn(lambda user: "layer_cache_key_util_get_first_matching_user(User(%s,%s))" % (user.user_id(),user.email()))
-def get_first_matching_user(user):
-    # When a user's personal Google account is replaced by their transitioned Google Apps account with the same email,
-    # the Google user ID changes and the new User object's are not considered equal to the old User object's with the same
-    # email, so querying the datastore for entities referring to the new User object return nothing.  To avoid losing the user's 
-    # history we want to use the old User object instead.  This method finds that old User object by using an inequality
-    # query of the UserData entities to find users with matching email addresses and then returns the User object of the first
-    # of those users to join. 
-    email = user.email()
-    gt_user = users.User(email[:-1] + chr(ord(email[-1])-1) + chr(127))
-    lt_user = users.User(email + chr(0))
-    first_to_join = None
-    for ud in UserData.all().filter("user >", gt_user).filter("user <", lt_user):
-        if first_to_join is None or ud.joined < first_to_join.joined:
-            first_to_join = ud
-    if first_to_join is not None:
-        return first_to_join.user
     return user
 
 def get_nickname_for(user):
