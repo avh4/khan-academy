@@ -210,9 +210,9 @@ var KnowledgeMap = {
         var countSuggested = this.nodeStatusCount("Suggested", nodeSource, nodeTarget);
         var countReview = this.nodeStatusCount("Review", nodeSource, nodeTarget);
 
-        var color = this.colors.gray;
-        var weight = 1.0;
-        var opacity = 0.48;
+        var color = this.colors.green;
+        var weight = 5.0;
+        var opacity = 0.6;
 
         if (countProficient == 2)
         {
