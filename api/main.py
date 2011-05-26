@@ -9,15 +9,20 @@ from api import v1
 
 def real_main():
     if App.is_dev_server:
-        # Run debugged app
-        from werkzeug_debugger_appengine import get_debugged_app
-        api_app.debug=True
-        debugged_app = get_debugged_app(api_app)
-        CGIHandler().run(debugged_app)
-    else:
-        # Run production app
-        from google.appengine.ext.webapp.util import run_wsgi_app
-        run_wsgi_app(api_app)
+        try:
+            # Run debugged app
+            from werkzeug_debugger_appengine import get_debugged_app
+            api_app.debug = True
+            debugged_app = get_debugged_app(api_app)
+            CGIHandler().run(debugged_app)
+            return
+        except Exception, e:
+            api_app.debug = False
+            logging.warning("Error running debugging version of werkzeug app, running production version: %s" % e)
+
+    # Run production app
+    from google.appengine.ext.webapp.util import run_wsgi_app
+    run_wsgi_app(api_app)
 
 def profile_main():
     # This is the main function for profiling
