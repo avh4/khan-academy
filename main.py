@@ -1464,6 +1464,17 @@ class Login(request_handler.RequestHandler):
                            }
         self.render_template('login.html', template_values)
 
+class MobileOAuthLogin(request_handler.RequestHandler):
+    def get(self):
+        cont = self.request_string('continue', default = "/")
+
+        template_values = {
+                    "continue": cont,
+                    "login_url_google": users.create_login_url(cont),
+                }
+
+        self.render_template('login_mobile_oauth.html', template_values)
+
 class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
@@ -1623,6 +1634,7 @@ def real_main():
 
         ('/press/.*', ViewArticle),
         ('/login', Login),
+        ('/login/mobileoauth', MobileOAuthLogin),
         ('/postlogin', PostLogin),
         ('/logout', Logout),
         

@@ -63,7 +63,7 @@ def request_token():
     else:
 
         # Ask user to login, then redirect to start of request_token process.
-        return redirect(util.create_login_url(request.url))
+        return redirect(util.create_mobile_oauth_login_url(request.url))
 
 # Token authorization endpoint
 #
@@ -71,6 +71,7 @@ def request_token():
 # require user authorization for our side of the OAuth. Just log in, and we'll authorize.
 @route("/api/auth/authorize", methods=["GET", "POST"])
 def authorize_token():
+
     webapp_req = webapp_patched_request(request)
 
     oauth_server, oauth_request = initialize_server_request(webapp_req)
@@ -117,6 +118,7 @@ def authorize_token():
 # create theirs before associating the two.
 @route("/api/auth/access_token", methods=["GET", "POST"])
 def access_token():
+
     webapp_req = webapp_patched_request(request)
 
     oauth_server, oauth_request = initialize_server_request(webapp_req)

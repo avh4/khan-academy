@@ -6,11 +6,11 @@ from api import auth
 
 from api import v0
 from api import v1
-from werkzeug_debugger_appengine import get_debugged_app
 
 def real_main():
     if App.is_dev_server:
         # Run debugged app
+        from werkzeug_debugger_appengine import get_debugged_app
         api_app.debug=True
         debugged_app = get_debugged_app(api_app)
         CGIHandler().run(debugged_app)

@@ -44,6 +44,9 @@ def is_facebook_user(user):
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
 
+def create_mobile_oauth_login_url(dest_url):
+    return "/login/mobileoauth?continue=%s" % urllib.quote(dest_url)
+
 def create_post_login_url(dest_url):
     return "/postlogin?continue=%s" % urllib.quote(dest_url)
 
