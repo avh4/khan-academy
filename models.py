@@ -967,9 +967,13 @@ class ExerciseGraph(object):
             if ex:
                 ex.assigned = True
         for ex in exercises:
+            #
+            ex.cover_test = []
+            #
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
                 if ex_cover:
+                    ex.cover_test.append(ex_cover)
                     ex_cover.coverers.append(ex)
             ex.prerequisites_ex = []
             for prereq in ex.prerequisites:
