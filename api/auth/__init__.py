@@ -30,17 +30,17 @@ import util
 @route("/api/auth/request_token", methods=["GET", "POST"])
 def request_token():
 
+    webapp_req = webapp_patched_request(request)
+
+    oauth_server, oauth_request = initialize_server_request(webapp_req)
+
+    if oauth_server is None:
+        return oauth_error_response(OAuthError('Invalid request parameters.'))
+
     # Force the use of cookie-based auth for request_token and authorize_token parts of API authentication *only*
     user = util.get_current_user_from_cookies_unsafe()
 
     if user:
-
-        webapp_req = webapp_patched_request(request)
-
-        oauth_server, oauth_request = initialize_server_request(webapp_req)
-
-        if oauth_server is None:
-            return oauth_error_response(OAuthError('Invalid request parameters.'))
 
         try:
             # Create our request token
