@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <title>Login to Khan Academy</title>
+
+        {% css_package "shared" %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+
+        <style>
+            #login-page {
+                text-align: center;
+                padding-top: 54px;
+            }
+
+            #login-inner-content {
+                margin-left: auto;
+                margin-right: auto;
+                max-width: 475px;
+            }
+
+            #login-page .providers li {
+                margin-right: 0;
+            }
+            
+            #login-page .providers li.facebook {
+                float: right;
+            }
+        </style>
+
+        <link rel="stylesheet" type="text/css" media="screen" href="/javascript/jQueryOpenIdPlugin/openid.css?{{App.version}}" />
+        <script type="text/javascript" src="/javascript/jQueryOpenIdPlugin/jquery.openid.js?{{App.version}}"></script>
+        <script type="text/javascript">
+            $(function () {
+               $("form.openid:eq(0)").openid(); 
+            });            
+        </script>
+    </head>
+    <body>
+
+        <div id="login-page">
+            <div id="login-inner-content">
+                <img src="/images/logo-no-highlight.png" /><br/><br/>
+
+                <form class="openid" method="post" action="{{ login_url_google }}">
+                    <ul class="providers"> 
+                        <li class="direct action-gradient" title="Google">
+                            <div class="sign-in-text">Login with:</div>
+                            <img width="205" height="70" src="/images/google-logo-large.png" />
+                        </li>
+                        <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();" class="action-gradient facebook">
+                            <div class="sign-in-text">Login with:</div>
+                            <img width="205" height="70" src="/images/facebook-logo-large.png" />
+                        </li>
+                    </ul>
+                </form>
+
+                <div id="fb-root"></div>
+                <div id="real_fb_button" style="display:none;"><fb:login-button></fb:login-button></div>
+            </div>
+        </div>
+
+        <script>
+            var FacebookHook = {
+                init: function() {
+                    window.fbAsyncInit = function() {
+                        FB.init({appId: {{ App.facebook_app_id|escapejs }}, status: true, cookie: true, xfbml: true});
+
+                        FB.Event.subscribe('auth.login', function(response) {
+                            window.location = "{{ continue|escapejs }}";
+                        });
+                    };
+
+                    $(function() {
+                        var e = document.createElement('script'); e.async = true;
+                        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+                        document.getElementById('fb-root').appendChild(e);
+                    }); 
+                }
+            }
+            FacebookHook.init();
+        </script>
+    </body>
+</html>
