@@ -36,7 +36,7 @@ def authorize_token_redirect(oauth_map):
         "oauth_token_secret": oauth_map.request_token_secret,
         "oauth_callback": oauth_map.callback_url_with_request_token_params(),
     }
-    return redirect(append_url_params("http://local.kamenstestapp.appspot.com:8084/api/auth/authorize", params))
+    return redirect(append_url_params("/api/auth/authorize", params))
 
 def current_oauth_map():
     if hasattr(flask.g, "oauth_map"):

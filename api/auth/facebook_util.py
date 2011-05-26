@@ -13,7 +13,6 @@ from api.auth.models import OAuthMap
 
 from oauth_provider.oauth import OAuthError
 
-KA_URL_BASE = "http://local.kamenstestapp.appspot.com:8084"
 FB_URL_OAUTH_DIALOG = "https://www.facebook.com/dialog/oauth"
 FB_URL_ACCESS_TOKEN = "https://graph.facebook.com/oauth/access_token"
 
@@ -77,4 +76,4 @@ def facebook_token_callback():
     return authorize_token_redirect(oauth_map)
 
 def get_facebook_token_callback_url(oauth_map):
-    return "%s/api/auth/facebook_token_callback?oauth_map_id=%s" % (KA_URL_BASE, oauth_map.key().id())
+    return "%sapi/auth/facebook_token_callback?oauth_map_id=%s" % (request.host_url, oauth_map.key().id())

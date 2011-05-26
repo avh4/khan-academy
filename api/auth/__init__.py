@@ -49,7 +49,7 @@ def request_token():
     oauth_map.callback_url = request.values.get("oauth_callback")
     oauth_map.put()
 
-    is_facebook_auth = True
+    is_facebook_auth = False
 
     if is_facebook_auth:
         return facebook_request_token_handler(oauth_map)

@@ -1,7 +1,8 @@
 import logging
 
-from app import App
+from flask import request
 
+from app import App
 from api.auth.auth_util import get_response
 
 from oauth_provider.oauth import OAuthConsumer, OAuthToken, OAuthRequest, OAuthSignatureMethod_HMAC_SHA1
@@ -14,7 +15,7 @@ class GoogleOAuthClient(object):
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
                 http_url = "http://www.khanacademy.org/_ah/OAuthGetRequestToken",
-                callback = "http://localhost:8084/api/auth/google_token_callback?oauth_map_id=%s" % oauth_map.key().id()
+                callback = "%sapi/auth/google_token_callback?oauth_map_id=%s" % (request.host_url, oauth_map.key().id())
                 )
 
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, None)
