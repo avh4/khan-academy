@@ -1,5 +1,8 @@
+import logging
+
 from wsgiref.handlers import CGIHandler
 
+import request_cache
 from app import App
 from api import api_app
 from api import auth
@@ -8,12 +11,15 @@ from api import v0
 from api import v1
 
 def real_main():
+
+    wsgi_app = request_cache.RequestCacheMiddleware(api_app)
+
     if App.is_dev_server:
         try:
             # Run debugged app
             from werkzeug_debugger_appengine import get_debugged_app
             api_app.debug = True
-            debugged_app = get_debugged_app(api_app)
+            debugged_app = get_debugged_app(wsgi_app)
             CGIHandler().run(debugged_app)
             return
         except Exception, e:
@@ -22,7 +28,7 @@ def real_main():
 
     # Run production app
     from google.appengine.ext.webapp.util import run_wsgi_app
-    run_wsgi_app(api_app)
+    run_wsgi_app(wsgi_app)
 
 def profile_main():
     # This is the main function for profiling
