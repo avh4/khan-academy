@@ -26,7 +26,7 @@ class GoogleOAuthClient(object):
 
     def fetch_access_token(self, oauth_map):
 
-        token = OAuthToken(oauth_map.google_requ/st_token, oauth_map.google_request_token_secret)
+        token = OAuthToken(oauth_map.google_request_token, oauth_map.google_request_token_secret)
 
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
