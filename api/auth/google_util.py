@@ -1,5 +1,4 @@
 import urllib
-import logging
 
 from google.appengine.api import oauth as google_oauth
 from google.appengine.api import users
@@ -11,7 +10,7 @@ from oauth_provider.oauth import OAuthError
 import layer_cache
 
 from api import route
-from api.auth.auth_util import current_oauth_map, authorize_token_redirect, access_token_response, append_url_params, oauth_error_response
+from api.auth.auth_util import current_oauth_map, authorize_token_redirect, access_token_response, append_url_params
 from api.auth.google_oauth_client import GoogleOAuthClient
 from api.auth.models import OAuthMap
 
@@ -81,5 +80,9 @@ def google_token_callback():
 
     if not oauth_map:
         return oauth_error_response(OAuthError("Unable to find OAuthMap by id."))
+
+    if not oauth_map.google_verification_code:
+        oauth_map.google_verification_code = request.values.get("oauth_verifier")
+        oauth_map.put()
 
     return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))

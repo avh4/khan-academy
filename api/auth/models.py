@@ -24,6 +24,7 @@ class OAuthMap(db.Model):
     google_request_token_secret = db.StringProperty()
     google_access_token = db.StringProperty()
     google_access_token_secret = db.StringProperty()
+    google_verification_code = db.StringProperty()
 
     # Our internal callback URL
     callback_url = db.StringProperty()
