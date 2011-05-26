@@ -38,6 +38,9 @@ def authorize_token_redirect(oauth_map):
     }
     return redirect(append_url_params("/api/auth/authorize", params))
 
+def requested_oauth_callback():
+    return request.values.get("oauth_callback") or ("%sapi/auth/default_callback" % request.host_url)
+
 def current_oauth_map():
     if hasattr(flask.g, "oauth_map"):
         return flask.g.oauth_map

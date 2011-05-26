@@ -47,7 +47,7 @@ class OAuthMap(db.Model):
             "token_secret": self.request_token_secret
         }
         
-        if include_verifier:
+        if include_verifier and self.verifier:
             params_callback["verifier"] = self.verifier
 
         return append_url_params(self.callback_url, params_callback)

@@ -8,7 +8,7 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import webapp_patched_request, oauth_error_response, append_url_params
+from api.auth.auth_util import webapp_patched_request, oauth_error_response, append_url_params, requested_oauth_callback
 from api.auth.google_util import google_request_token_handler, google_authorize_token_handler, google_access_token_handler
 from api.auth.facebook_util import facebook_request_token_handler, facebook_authorize_token_handler, facebook_access_token_handler
 
@@ -52,7 +52,7 @@ def request_token():
         oauth_map = OAuthMap()
         oauth_map.request_token_secret = token.secret
         oauth_map.request_token = token.key_
-        oauth_map.callback_url = request.values.get("oauth_callback")
+        oauth_map.callback_url = requested_oauth_callback()
         oauth_map.put()
 
         if util.is_facebook_user(user):
@@ -148,3 +148,12 @@ def access_token():
         return facebook_access_token_handler(oauth_map)
     elif oauth_map.uses_google():
         return google_access_token_handler(oauth_map)
+
+# Default callback
+#
+# If user doesn't supply an oauth_callback parameter, we'll send 'em here
+# when redirecting after request_token creation and authorization.
+@route("/api/auth/default_callback", methods=["GET"])
+def default_callback():
+    return "OK"
+
