@@ -1430,7 +1430,7 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
         
-        (old_email, new_email) = get_email_params()
+        (old_email, new_email) = self.get_email_params()
         # When a user's personal Google account is replaced by their transitioned Google Apps account with the same email,
         # the Google user ID changes and the new User object's are not considered equal to the old User object's with the same
         # email, so querying the datastore for entities referring to users with the same email return nothing. However an inequality
@@ -1443,7 +1443,7 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         return False
     
     def update(self, entity):
-        (old_email, new_email) = get_email_params()
+        (old_email, new_email) = self.get_email_params()
         if entity.user.email() != old_email:
             # This should never occur, but just in case, don't change or reput the entity.
             return False 
