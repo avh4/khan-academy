@@ -4,7 +4,7 @@ import urllib
 import urllib2
 
 import flask
-from flask import current_app, redirect
+from flask import current_app, request, redirect
 
 from oauth_provider.oauth import build_authenticate_header, OAuthError
 
@@ -24,14 +24,17 @@ def access_token_response(oauth_map):
 
     return "access_token=%s&token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
 
-def authorize_token_redirect(oauth_map, ka_callback_url):
+def authorize_token_redirect(oauth_map):
     if not oauth_map:
         raise OAuthError("Missing oauth_map while returning authorize_token_redirect")
+
+    if not oauth_map.callback_url:
+        raise OAuthError("Missing callback URL during authorize_token_redirect")
 
     params = {
         "oauth_token": oauth_map.request_token,
         "oauth_token_secret": oauth_map.request_token_secret,
-        "oauth_callback": ka_callback_url,
+        "oauth_callback": oauth_map.callback_url_with_request_token_params(),
     }
     return redirect(append_url_params("http://local.kamenstestapp.appspot.com:8084/api/auth/authorize", params))
 

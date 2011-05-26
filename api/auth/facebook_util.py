@@ -19,15 +19,15 @@ FB_URL_ACCESS_TOKEN = "https://graph.facebook.com/oauth/access_token"
 
 def facebook_request_token_handler(oauth_map):
     # Start Facebook request token process
-    oauth_map.callback_url = request.values.get("oauth_callback")
-    oauth_map.put()
-
     params = {
                 "client_id": App.facebook_app_id,
                 "redirect_uri": get_facebook_token_callback_url(oauth_map),
             }
 
     return redirect("%s?%s" % (FB_URL_OAUTH_DIALOG, urllib.urlencode(params)))
+
+def facebook_authorize_token_handler(oauth_map):
+    return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
 
 def facebook_access_token_handler(oauth_map):
     # Start Facebook access token process
@@ -74,11 +74,7 @@ def facebook_token_callback():
         oauth_map.facebook_authorization_code = request.values.get("code")
         oauth_map.put()
 
-    callback_params = {"request_token": oauth_map.request_token, "token_secret": oauth_map.request_token_secret}
-
-    ka_callback_url = append_url_params(oauth_map.callback_url, callback_params)
-
-    return authorize_token_redirect(oauth_map, ka_callback_url)
+    return authorize_token_redirect(oauth_map)
 
 def get_facebook_token_callback_url(oauth_map):
     return "%s/api/auth/facebook_token_callback?oauth_map_id=%s" % (KA_URL_BASE, oauth_map.key().id())

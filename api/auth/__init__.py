@@ -10,7 +10,7 @@ from api import route
 from api.auth.models import OAuthMap
 from api.auth.auth_util import webapp_patched_request, oauth_error_response, append_url_params
 from api.auth.google_util import google_request_token_handler, google_authorize_token_handler, google_access_token_handler
-from api.auth.facebook_util import facebook_request_token_handler, facebook_access_token_handler
+from api.auth.facebook_util import facebook_request_token_handler, facebook_authorize_token_handler, facebook_access_token_handler
 
 from oauth_provider.oauth import OAuthError
 from oauth_provider.utils import initialize_server_request
@@ -46,6 +46,7 @@ def request_token():
     oauth_map = OAuthMap()
     oauth_map.request_token_secret = token.secret
     oauth_map.request_token = token.key_
+    oauth_map.callback_url = request.values.get("oauth_callback")
     oauth_map.put()
 
     is_facebook_auth = True
@@ -88,15 +89,14 @@ def authorize_token():
             if not oauth_map:
                 raise OAuthError("Unable to find oauth_map from request token during authorization.")
 
+            oauth_map.verifier = token.verifier
+            oauth_map.put()
+
             if oauth_map.uses_google():
                 return google_authorize_token_handler(oauth_map)
             else:
-                callback = request.values.get("oauth_callback")
+                return facebook_authorize_token_handler(oauth_map)
 
-                if callback:
-                    return redirect(append_url_params(callback, {"verifier": token.verifier}))
-                else:
-                    return current_app.response_class("Successfully authorized: %s" % token.to_string(only_key=True), status=200)
         else:
             return redirect(util.create_login_url(request.url))
     

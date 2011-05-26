@@ -11,7 +11,6 @@ class GoogleOAuthClient(object):
     Consumer = OAuthConsumer(App.google_consumer_key, App.google_consumer_secret)
 
     def fetch_request_token(self, oauth_map):
-        logging.critical("fetching request token")
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
                 http_url = "http://www.khanacademy.org/_ah/OAuthGetRequestToken",
@@ -26,9 +25,7 @@ class GoogleOAuthClient(object):
 
     def fetch_access_token(self, oauth_map):
 
-        logging.critical("authorizing")
         token = OAuthToken(oauth_map.google_request_token, oauth_map.google_request_token_secret)
-        logging.critical("CONSUMER KEY: %s" % GoogleOAuthClient.Consumer.key)
 
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,

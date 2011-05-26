@@ -3,6 +3,8 @@ import logging
 
 from google.appengine.ext import db
 
+from api.auth.auth_util import append_url_params
+
 # OAuthMap creates a mapping between our OAuth credentials and our identity providers'.
 class OAuthMap(db.Model):
 
@@ -11,6 +13,7 @@ class OAuthMap(db.Model):
     request_token_secret = db.StringProperty()
     access_token = db.StringProperty()
     access_token_secret = db.StringProperty()
+    verifier = db.StringProperty()
 
     # Facebook tokens
     facebook_authorization_code = db.StringProperty()
@@ -37,6 +40,17 @@ class OAuthMap(db.Model):
 
     def is_expired(self):
         return self.expires and self.expires < datetime.datetime.now()
+
+    def callback_url_with_request_token_params(self, include_verifier = False):
+        params_callback = {
+            "request_token": self.request_token, 
+            "token_secret": self.request_token_secret
+        }
+        
+        if include_verifier:
+            params_callback["verifier"] = self.verifier
+
+        return append_url_params(self.callback_url, params_callback)
 
     @staticmethod
     def if_not_expired(oauth_map):

@@ -10,7 +10,7 @@ from oauth_provider.oauth import OAuthError
 import layer_cache
 
 from api import route
-from api.auth.auth_util import current_oauth_map
+from api.auth.auth_util import current_oauth_map, authorize_token_redirect, access_token_response, append_url_params
 from api.auth.google_oauth_client import GoogleOAuthClient
 from api.auth.models import OAuthMap
 
@@ -54,7 +54,7 @@ def google_request_token_handler(oauth_map):
     oauth_map.google_request_token_secret = google_token.secret
     oauth_map.put()
 
-    return "NEED TO REDIRECT HERE. request_token=%s&token_secret=%s" % (oauth_map.request_token, oauth_map.request_token_secret)
+    return authorize_token_redirect(oauth_map)
 
 def google_authorize_token_handler(oauth_map):
     params = { "oauth_token": oauth_map.google_request_token }
@@ -72,7 +72,7 @@ def google_access_token_handler(oauth_map):
     oauth_map.google_access_token_secret = google_token.secret
     oauth_map.put()
 
-    return "NEED TO REDIRECT HERE. access_token=%s&token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
+    return access_token_response(oauth_map)
 
 @route("/api/auth/google_token_callback", methods=["GET"])
 def google_token_callback():
@@ -85,4 +85,4 @@ def google_token_callback():
         oauth_map.google_verification_code = request.values.get("verifier")
         oauth_map.put()
 
-    return "NEED TO REDIRECT HERE. authorized request_token=%s&token_secret=%s" % (oauth_map.request_token, oauth_map.request_token_secret)
+    return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
