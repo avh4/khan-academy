@@ -86,7 +86,7 @@ def get_profile_from_cookies():
         fb_user_dict = facebook.get_user_from_cookie(
             {morsel_key: morsel.value}, App.facebook_app_id, App.facebook_app_secret)
         if fb_user_dict:
-            return get_profile_from_token(fb_user_dict["access_token"])
+            return get_profile_from_fb_token(fb_user_dict["access_token"])
     
     return None
 
