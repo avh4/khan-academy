@@ -242,3 +242,20 @@ def user_videos_all():
 
     return None
 
+@route("/api/v1/users/videos/<youtube_id>", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_videos_specific(youtube_id):
+    user = util.get_current_user()
+
+    if user and youtube_id:
+        user_data_student = get_visible_user_data_from_request(user)
+        video = models.Video.all().filter("youtube_id =", youtube_id).get()
+
+        if user_data_student and video:
+            user_videos = models.UserVideo.all().filter("user =", user_data_student.user).filter("video =", video)
+            return user_videos.get()
+
+    return None
+
