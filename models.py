@@ -803,6 +803,9 @@ class VideoLog(db.Model):
         user = user_data.user
         user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
 
+        # Cap seconds_watched at duration of video
+        seconds_watched = max(0, min(seconds_watched, video.duration))
+
         video_points_previous = points.VideoPointCalculator(user_video)
 
         action_cache=last_action_cache.LastActionCache.get_for_user(user)

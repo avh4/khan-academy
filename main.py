@@ -342,22 +342,18 @@ class LogVideoProgress(request_handler.RequestHandler):
 
             video = None
             video_key = self.request_string("video_key", default = "")
+            user_data = UserData.get_or_insert_for(user)
 
             if video_key:
                 video = db.get(video_key)
 
-            if video:
-                user_data = UserData.get_or_insert_for(user)
+            if video and user_data:
 
                 # Seconds watched is restricted by both the scrubber's position
                 # and the amount of time spent on the video page
                 # so we know how *much* of each video each student has watched
                 seconds_watched = int(self.request_float("seconds_watched", default=0))
-
-                # Cap seconds_watched at duration of video
-                seconds_watched = max(0, min(seconds_watched, video.duration))
-
-                last_second_watched = self.request_int("last_second_watched", default=0)
+                last_second_watched = int(self.request_float("last_second_watched", default=0))
 
                 video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
