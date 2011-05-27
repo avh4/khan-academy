@@ -1,6 +1,10 @@
 import copy
 import logging
 
+from google.appengine.api import users
+
+from flask import request
+
 import models
 import layer_cache
 import topics_list
@@ -185,6 +189,19 @@ def replace_playlist_values(structure, playlist_dict):
             # Replace string playlist title with real playlist object
             structure["playlist"] = playlist_dict[structure["playlist"]]
 
+# Return specific user data requests from request
+# IFF currently logged in user has permission to view
+def get_visible_user_data_from_request(user_coach):
+
+    email_student = request.values.get("email")
+    user_student = users.User(email_student)
+    user_data_student = models.UserData.get_for(user_student)
+
+    if user_data_student and (user_student.email() == user_coach.email() or user_data_student.is_coached_by(user_coach)):
+        return user_data_student
+
+    return None
+
 @route("/api/v1/users/me", methods=["GET", "POST"])
 @oauth_required
 @jsonp
@@ -194,3 +211,34 @@ def user_data_me():
     if user:
         return models.UserData.get_for(user)
     return None
+
+@route("/api/v1/users", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_data_other():
+    user = util.get_current_user()
+
+    if user:
+        user_data_student = get_visible_user_data_from_request(user)
+        if user_data_student:
+            return user_data_student
+
+    return None
+
+@route("/api/v1/users/videos", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_videos_all():
+    user = util.get_current_user()
+
+    if user:
+        user_data_student = get_visible_user_data_from_request(user)
+
+        if user_data_student:
+            user_videos = models.UserVideo.all().filter("user =", user_data_student.user)
+            return user_videos.fetch(10000)
+
+    return None
+

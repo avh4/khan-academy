@@ -602,7 +602,7 @@ class Video(Searchable, db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/video/%s"
+        return "http://www.khanacademy.org/video/%s" % self.readable_id
     
     @staticmethod
     def get_for_readable_id(readable_id):
