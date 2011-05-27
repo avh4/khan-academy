@@ -677,6 +677,8 @@ class Playlist(Searchable, db.Model):
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
 
+    _serialize_blacklist = ["readable_id"]
+
     @property
     def api_url(self):
         return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
