@@ -1,5 +1,7 @@
+import cgi
 import logging
 import urllib2
+import urlparse
 import webbrowser
 
 from oauth import OAuthConsumer, OAuthToken, OAuthRequest, OAuthSignatureMethod_HMAC_SHA1
@@ -35,10 +37,17 @@ class TestOAuthClient(object):
 
     def access_resource(self, relative_url, access_token):
 
+        full_url = self.server_url + relative_url
+        url = urlparse.urlparse(full_url)
+        query_params = cgi.parse_qs(url.query)
+        for key in query_params:
+            query_params[key] = query_params[key][0]
+
         oauth_request = OAuthRequest.from_consumer_and_token(
                 self.consumer,
                 token = access_token,
-                http_url = "%s%s" % (self.server_url, relative_url)
+                http_url = full_url,
+                parameters = query_params
                 )
 
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), self.consumer, access_token)
