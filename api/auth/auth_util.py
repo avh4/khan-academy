@@ -22,7 +22,7 @@ def access_token_response(oauth_map):
     if not oauth_map:
         raise OAuthError("Missing oauth_map while returning access_token_response")
 
-    return "access_token=%s&token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
+    return "oauth_token=%s&oauth_token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
 
 def authorize_token_redirect(oauth_map):
     if not oauth_map:

@@ -50,8 +50,8 @@ class OAuthMap(db.Model):
 
     def callback_url_with_request_token_params(self, include_verifier = False):
         params_callback = {
-            "request_token": self.request_token, 
-            "token_secret": self.request_token_secret
+            "oauth_token": self.request_token, 
+            "oauth_token_secret": self.request_token_secret
         }
         
         if include_verifier and self.verifier:

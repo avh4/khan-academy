@@ -194,6 +194,9 @@ def replace_playlist_values(structure, playlist_dict):
 def get_visible_user_data_from_request(user_coach):
 
     email_student = request.values.get("email")
+    if not email_student:
+        return None
+
     user_student = util.get_current_user() if email_student == "me" else users.User(email_student)
     user_data_student = models.UserData.get_for(user_student)
 
