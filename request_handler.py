@@ -13,7 +13,6 @@ from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from custom_exceptions import MissingVideoException, MissingExerciseException
 import util
 from app import App
-from models import UserData
 from render import render_block_to_string
 from nicknames import get_nickname_for
 
@@ -235,3 +234,5 @@ class RequestHandler(webapp.RequestHandler):
             self.response.out.write("%s(%s)" % (callback, json))
         else:
             self.response.out.write(json)
+
+from models import UserData

@@ -796,6 +796,87 @@ class VideoLog(db.Model):
 
         return query
 
+    @staticmethod
+    def add_entry(user_data, video, seconds_watched, last_second_watched):
+
+        user = user_data.user
+        user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
+
+        video_points_previous = points.VideoPointCalculator(user_video)
+
+        action_cache=last_action_cache.LastActionCache.get_for_user(user)
+
+        last_video_log = action_cache.get_last_video_log()
+
+        # If the last video logged is not this video and the times being credited
+        # overlap, don't give points for this video. Can only get points for one video
+        # at a time.
+        if last_video_log and last_video_log.key_for_video() != video.key():
+            dt_now = datetime.datetime.now()
+            if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
+                return
+
+        video_log = VideoLog()
+        video_log.user = user
+        video_log.video = video
+        video_log.video_title = video.title
+        video_log.seconds_watched = seconds_watched
+
+        if last_second_watched > user_video.last_second_watched:
+            user_video.last_second_watched = last_second_watched
+
+        if seconds_watched > 0:
+            user_video.seconds_watched += seconds_watched
+            user_data.total_seconds_watched += seconds_watched
+
+            # Update seconds_watched of all associated UserPlaylists
+            query = VideoPlaylist.all()
+            query.filter('video =', video)
+            query.filter('live_association = ', True)
+
+            first_video_playlist = True
+            for video_playlist in query:
+                user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
+                user_playlist.title = video_playlist.playlist.title
+                user_playlist.seconds_watched += seconds_watched
+                user_playlist.last_watched = datetime.datetime.now()
+                user_playlist.put()
+
+                video_log.playlist_titles.append(user_playlist.title)
+
+                if first_video_playlist:
+                    action_cache.push_video_log(video_log)
+
+                util_badges.update_with_user_playlist(
+                        user, 
+                        user_data, 
+                        user_playlist,
+                        include_other_badges = first_video_playlist,
+                        action_cache = action_cache)
+
+                first_video_playlist = False
+
+        user_video.last_watched = datetime.datetime.now()
+        user_video.duration = video.duration
+
+        user_data.last_activity = user_video.last_watched
+
+        video_points_total = points.VideoPointCalculator(user_video)
+        video_points_received = video_points_total - video_points_previous
+
+        if not user_video.completed and video_points_total >= consts.VIDEO_POINTS_BASE:
+            # Just finished this video for the first time
+            user_video.completed = True
+            user_data.videos_completed = -1
+
+        if video_points_received > 0:
+            video_log.points_earned = video_points_received
+            user_data.add_points(video_points_received)
+
+        db.put([user_video, video_log, user_data])
+
+        return video_points_total
+
     def time_started(self):
         return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
 
@@ -1154,3 +1235,5 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
+
+from badges import util_badges, last_action_cache

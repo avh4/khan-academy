@@ -49,10 +49,10 @@ import youtube_sync
 from search import Searchable
 import search
 
+import request_handler
 from app import App
 import app
 import util
-import request_handler
 import points
 import exercise_statistics
 import backfill
@@ -347,99 +347,19 @@ class LogVideoProgress(request_handler.RequestHandler):
                 video = db.get(video_key)
 
             if video:
-
                 user_data = UserData.get_or_insert_for(user)
-                user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
 
-                video_points_previous = points.VideoPointCalculator(user_video)
-
-                seconds_watched = 0
-                try:
-                    # Seconds watched is restricted by both the scrubber's position
-                    # and the amount of time spent on the video page
-                    # so we know how *much* of each video each student has watched
-                    seconds_watched = int(float(self.request.get("seconds_watched")))
-                except ValueError:
-                    pass # Ignore if we can't parse
+                # Seconds watched is restricted by both the scrubber's position
+                # and the amount of time spent on the video page
+                # so we know how *much* of each video each student has watched
+                seconds_watched = int(self.request_float("seconds_watched", default=0))
 
                 # Cap seconds_watched at duration of video
                 seconds_watched = max(0, min(seconds_watched, video.duration))
 
-                last_second_watched = 0
-                try:
-                    last_second_watched = int(float(self.request.get("last_second_watched")))
-                except ValueError:
-                    pass # Ignore if we can't parse
+                last_second_watched = self.request_int("last_second_watched", default=0)
 
-                action_cache=last_action_cache.LastActionCache.get_for_user(user)
-                last_video_log = action_cache.get_last_video_log()
-
-                # If the last video logged is not this video and the times being credited
-                # overlap, don't give points for this video. Can only get points for one video
-                # at a time.
-                if last_video_log and last_video_log.key_for_video() != video.key():
-                    dt_now = datetime.datetime.now()
-                    if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
-                        return
-
-                video_log = VideoLog()
-                video_log.user = user
-                video_log.video = video
-                video_log.video_title = video.title
-                video_log.seconds_watched = seconds_watched
-
-                if last_second_watched > user_video.last_second_watched:
-                    user_video.last_second_watched = last_second_watched
-
-                if seconds_watched > 0:
-                    user_video.seconds_watched += seconds_watched
-                    user_data.total_seconds_watched += seconds_watched
-
-                    # Update seconds_watched of all associated UserPlaylists
-                    query = VideoPlaylist.all()
-                    query.filter('video =', video)
-                    query.filter('live_association = ', True)
-
-                    first_video_playlist = True
-                    for video_playlist in query:
-                        user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
-                        user_playlist.title = video_playlist.playlist.title
-                        user_playlist.seconds_watched += seconds_watched
-                        user_playlist.last_watched = datetime.datetime.now()
-                        user_playlist.put()
-
-                        video_log.playlist_titles.append(user_playlist.title)
-
-                        if first_video_playlist:
-                            action_cache.push_video_log(video_log)
-
-                        util_badges.update_with_user_playlist(
-                                user, 
-                                user_data, 
-                                user_playlist,
-                                include_other_badges = first_video_playlist,
-                                action_cache = action_cache)
-
-                        first_video_playlist = False
-
-                user_video.last_watched = datetime.datetime.now()
-                user_video.duration = video.duration
-
-                user_data.last_activity = user_video.last_watched
-
-                video_points_total = points.VideoPointCalculator(user_video)
-                video_points_received = video_points_total - video_points_previous
-
-                if not user_video.completed and video_points_total >= consts.VIDEO_POINTS_BASE:
-                    # Just finished this video for the first time
-                    user_video.completed = True
-                    user_data.videos_completed = -1
-
-                if video_points_received > 0:
-                    video_log.points_earned = video_points_received
-                    user_data.add_points(video_points_received)
-
-                db.put([user_video, video_log, user_data])
+                video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
         user_points_context = user_points(user_data)
         user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
