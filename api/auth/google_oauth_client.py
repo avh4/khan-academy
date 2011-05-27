@@ -48,7 +48,7 @@ class GoogleOAuthClient(object):
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
                 token = token,
-                http_url = "http://www.khanacademy.org/api/auth/current_google_oauth_email"
+                http_url = "%sapi/auth/current_google_oauth_email" % request.host_url
                 )
 
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)
