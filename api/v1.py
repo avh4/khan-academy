@@ -194,7 +194,7 @@ def replace_playlist_values(structure, playlist_dict):
 def get_visible_user_data_from_request(user_coach):
 
     email_student = request.values.get("email")
-    user_student = users.User(email_student)
+    user_student = util.get_current_user() if email_student == "me" else users.User(email_student)
     user_data_student = models.UserData.get_for(user_student)
 
     if user_data_student and (user_student.email() == user_coach.email() or user_data_student.is_coached_by(user_coach)):
@@ -258,6 +258,30 @@ def user_videos_specific(youtube_id):
             return user_videos.get()
 
     return None
+
+@route("/api/v1/users/videos/<youtube_id>/log", methods=["POST"])
+@oauth_required
+@jsonp
+@jsonify
+def log_user_video(youtube_id):
+    user = util.get_current_user()
+
+    if user and youtube_id:
+        user_data= models.UserData.get_for(user)
+        video = models.Video.all().filter("youtube_id =", youtube_id).get()
+
+        seconds_watched = last_second_watched = 0
+
+        try:
+            seconds_watched = int(float(request.values.get("seconds_watched")))
+            last_second_watched = int(float(request.values.get("last_second_watched")))
+        except ValueError:
+            pass
+
+        if user_data and video:
+            return models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
+
+    return 0
 
 @route("/api/v1/users/exercises", methods=["GET", "POST"])
 @oauth_required
@@ -323,5 +347,3 @@ def user_playlists_specific(playlist_title):
             return user_playlists.get()
 
     return None
-
-
