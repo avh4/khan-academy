@@ -762,6 +762,7 @@ class UserVideo(db.Model):
     duration = db.IntegerProperty(default = 0)
     completed = db.BooleanProperty(default = False)
 
+    @property
     def points(self):
         return points.VideoPointCalculator(self)
 
