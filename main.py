@@ -303,7 +303,7 @@ class ViewVideo(request_handler.RequestHandler):
         user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
         awarded_points = 0
         if user_video:
-            awarded_points = user_video.points()
+            awarded_points = user_video.points
 
         template_values = {
                             'playlist': playlist,
