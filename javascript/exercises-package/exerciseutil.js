@@ -30,7 +30,44 @@ var Exercise = {
         this.incorrect.src = "/images/face-sad.gif";
         
     },
+
+    removeHintsFromDOM: function() {
+
+        // Gross Mozilla-only hack for old exercise framework
+        // to avoid copying and pasting visibility:hidden content
+        // as a really easy way to cheat by looking at hints.
+        if (!$.browser.mozilla) return;
+
+        if (this.hintsRemoved) return;
+
+        var ix = 0;
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            jelStep.data("hint", jelStep.contents()).empty();
+            jelStep = $(".step" + (++ix));
+        }
+
+        this.hintsRemoved = true;
+    },
     
+    restoreHintsToDOM: function() {
+
+        // Second part of gross Mozilla-only hack for old exercise framework
+        // to avoid copying and pasting visibility:hidden content.
+        if (!$.browser.mozilla) return;
+
+        if (!this.hintsRemoved) return;
+
+        var ix = 0;
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            jelStep.append(jelStep.data("hint"));
+            jelStep = $(".step" + (++ix));
+        }
+
+        this.hintsRemoved = false;
+    },
+
     display: function() {
         // set vals to 0 after document is ready
         $("#correct").val(0);
@@ -55,14 +92,17 @@ var Exercise = {
         } else if ($("#answer").length) {
             $("#answer").val("").focus();
         }
-            
         translate();
         
         if (this.fSupportsAjax) {
             $("#old_question_content").animate({"left": -500}, 250, function() {
                 $("#old_question_content").remove();
-                $("#question_content").animate({"left": 0}, 250);    
+                $("#question_content").animate({"left": 0}, 250);
+                Exercise.removeHintsFromDOM();
             });
+        }
+        else {
+            Exercise.removeHintsFromDOM();
         }
     },
     
@@ -155,6 +195,7 @@ var Exercise = {
             $("#badge-notification-container").html(data.badge_notification_html)
             Badges.show()
         }
+    
     },
     
     getNumPossibleAnswers: function() {
@@ -275,31 +316,6 @@ function generateNewProblem(randomProblemGenerator, range, salt)
 		}
 		return id;
 	}
-}
-
-function createCookie(name,value,days) {
-	if (days) {
-		var date = new Date();
-		date.setTime(date.getTime()+(days*24*60*60*1000));
-		var expires = "; expires="+date.toGMTString();
-	}
-	else var expires = "";
-	document.cookie = name+"="+value+expires+"; path=/";
-}
-
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-	}
-	return null;
-}
-
-function eraseCookie(name) {
-	createCookie(name,"",-1);
 }
 
 function equivInArray(target, arr) {
