@@ -40,10 +40,9 @@
             <div id="login-inner-content">
                 <img src="/images/logo-no-highlight.png" /><br/><br/>
 
-                <form class="openid" method="GET" action="{{ google_login_base_url|escape }}">
-                    <input type="hidden" name="continue" value="{{ continue|escape }}"/>
+                <form class="openid" method="GET" action="{{ google_login_url|escape }}">
                     <ul class="providers"> 
-                        <li class="direct action-gradient" title="Google">
+                        <li class="action-gradient" title="Google" onclick="javascript:window.location='{{ google_login_url|escapejs }}'; return false;">
                             <div class="sign-in-text">Login with:</div>
                             <img width="205" height="70" src="/images/google-logo-large.png" />
                         </li>

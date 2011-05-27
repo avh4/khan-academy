@@ -1383,12 +1383,11 @@ class Login(request_handler.RequestHandler):
 class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
-        google_login_url = users.create_login_url("/")
-        google_login_base_url = google_login_url[:google_login_url.find("?")]
+        google_login_url = users.create_login_url(cont)
 
         self.render_template('login_mobile_oauth.html', {
             "continue": cont,
-            "google_login_base_url": google_login_base_url
+            "google_login_url": google_login_url
         })
 
 class PostLogin(request_handler.RequestHandler):
