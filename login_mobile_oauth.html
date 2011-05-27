@@ -40,7 +40,7 @@
             <div id="login-inner-content">
                 <img src="/images/logo-no-highlight.png" /><br/><br/>
 
-                <form class="openid" method="GET" action="/_ah/login">
+                <form class="openid" method="GET" action="{{ google_login_base_url|escape }}">
                     <input type="hidden" name="continue" value="{{ continue|escape }}"/>
                     <ul class="providers"> 
                         <li class="direct action-gradient" title="Google">
