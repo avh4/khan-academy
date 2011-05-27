@@ -259,3 +259,36 @@ def user_videos_specific(youtube_id):
 
     return None
 
+@route("/api/v1/users/exercises", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_exercises_all():
+    user = util.get_current_user()
+
+    if user:
+        user_data_student = get_visible_user_data_from_request(user)
+
+        if user_data_student:
+            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user)
+            return user_exercises.fetch(10000)
+
+    return None
+
+@route("/api/v1/users/exercises/<exercise_name>", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_exercises_specific(exercise_name):
+    user = util.get_current_user()
+
+    if user and exercise_name:
+        user_data_student = get_visible_user_data_from_request(user)
+
+        if user_data_student:
+            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name)
+            return user_exercises.get()
+
+    return None
+
+

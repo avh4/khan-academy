@@ -26,8 +26,8 @@ def dumps(obj):
         properties['kind'] = obj.kind()
 
     serialize_blacklist = []
-    if hasattr(obj, "serialize_blacklist"):
-        serialize_blacklist = obj.serialize_blacklist
+    if hasattr(obj, "_serialize_blacklist"):
+        serialize_blacklist = obj._serialize_blacklist
 
     for property in dir(obj):
         if is_visible_property(property, serialize_blacklist):

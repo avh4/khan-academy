@@ -253,6 +253,8 @@ class UserExercise(db.Model):
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
+    _serialize_blacklist = ["review_interval_secs", "exercise_model"]
+
     @staticmethod
     def get_key_for_user(user):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
@@ -401,7 +403,7 @@ class UserData(db.Model):
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
 
-    serialize_blacklist = [
+    _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator"
