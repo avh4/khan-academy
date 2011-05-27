@@ -91,6 +91,11 @@ class Exercise(db.Model):
     last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
     sanitizer_used = db.StringProperty()
 
+    _serialize_blacklist = [
+            "author", "raw_html", "last_modified", "safe_html", "safe_js",
+            "last_sanitized", "sanitizer_used"
+            ]
+
     @staticmethod
     def get_by_name(name):
         dict_exercises = Exercise.__get_dict_use_cache_unsafe__()

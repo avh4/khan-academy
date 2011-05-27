@@ -202,7 +202,7 @@ def get_visible_user_data_from_request(user_coach):
 
     return None
 
-@route("/api/v1/users/me", methods=["GET", "POST"])
+@route("/api/v1/users/me", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -212,7 +212,7 @@ def user_data_me():
         return models.UserData.get_for(user)
     return None
 
-@route("/api/v1/users", methods=["GET", "POST"])
+@route("/api/v1/users", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -226,7 +226,7 @@ def user_data_other():
 
     return None
 
-@route("/api/v1/users/videos", methods=["GET", "POST"])
+@route("/api/v1/users/videos", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -242,7 +242,7 @@ def user_videos_all():
 
     return None
 
-@route("/api/v1/users/videos/<youtube_id>", methods=["GET", "POST"])
+@route("/api/v1/users/videos/<youtube_id>", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -283,7 +283,7 @@ def log_user_video(youtube_id):
 
     return 0
 
-@route("/api/v1/users/exercises", methods=["GET", "POST"])
+@route("/api/v1/users/exercises", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -299,7 +299,7 @@ def user_exercises_all():
 
     return None
 
-@route("/api/v1/users/exercises/<exercise_name>", methods=["GET", "POST"])
+@route("/api/v1/users/exercises/<exercise_name>", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -315,7 +315,7 @@ def user_exercises_specific(exercise_name):
 
     return None
 
-@route("/api/v1/users/playlists", methods=["GET", "POST"])
+@route("/api/v1/users/playlists", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
@@ -331,7 +331,7 @@ def user_playlists_all():
 
     return None
 
-@route("/api/v1/users/playlists/<playlist_title>", methods=["GET", "POST"])
+@route("/api/v1/users/playlists/<playlist_title>", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
