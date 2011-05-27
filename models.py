@@ -400,6 +400,12 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
+
+    serialize_blacklist = [
+            "assigned_exercises", "badges", "count_feedback_notification",
+            "last_daily_summary", "need_to_reassess", "videos_completed",
+            "moderator"
+    ]
     
     @staticmethod
     def get_for_current_user():

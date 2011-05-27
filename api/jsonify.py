@@ -25,8 +25,12 @@ def dumps(obj):
     if isinstance(obj, db.Model):
         properties['kind'] = obj.kind()
 
+    serialize_blacklist = []
+    if hasattr(obj, "serialize_blacklist"):
+        serialize_blacklist = obj.serialize_blacklist
+
     for property in dir(obj):
-        if is_visible_property(property):
+        if is_visible_property(property, serialize_blacklist):
             try:
                 value = obj.__getattribute__(property)
                 valueClass = str(value.__class__)
@@ -44,8 +48,8 @@ def dumps(obj):
     else:
         return properties
 
-def is_visible_property(property):
-    return property[0] != '_' and not property.startswith("INDEX_")
+def is_visible_property(property, serialize_blacklist):
+    return property[0] != '_' and not property.startswith("INDEX_") and not property in serialize_blacklist
 
 def is_visible_class_name(class_name):
     return not(
