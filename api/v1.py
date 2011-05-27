@@ -291,4 +291,37 @@ def user_exercises_specific(exercise_name):
 
     return None
 
+@route("/api/v1/users/playlists", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_playlists_all():
+    user = util.get_current_user()
+
+    if user:
+        user_data_student = get_visible_user_data_from_request(user)
+
+        if user_data_student:
+            user_playlists = models.UserPlaylist.all().filter("user =", user_data_student.user)
+            return user_playlists.fetch(10000)
+
+    return None
+
+@route("/api/v1/users/playlists/<playlist_title>", methods=["GET", "POST"])
+@oauth_required
+@jsonp
+@jsonify
+def user_playlists_specific(playlist_title):
+    user = util.get_current_user()
+
+    if user and playlist_title:
+        user_data_student = get_visible_user_data_from_request(user)
+        playlist = models.Playlist.all().filter("title =", playlist_title).get()
+
+        if user_data_student and playlist:
+            user_playlists = models.UserPlaylist.all().filter("user =", user_data_student.user).filter("playlist =", playlist)
+            return user_playlists.get()
+
+    return None
+
 
