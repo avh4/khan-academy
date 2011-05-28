@@ -3,6 +3,7 @@ import time
 import logging
 
 from django.template.defaultfilters import pluralize
+from templatefilters import seconds_to_time_string
 
 import models
 import util
@@ -49,7 +50,7 @@ def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
         if total_seconds > 0:
             dict_playlist_seconds[key_playlist]["percentage"] = int(float(dict_playlist_seconds[key_playlist]["seconds"]) / float(total_seconds) * 100.0)
 
-        dict_playlist_seconds[key_playlist]["time_spent"] = util.seconds_to_time_string(dict_playlist_seconds[key_playlist]["seconds"], False)
+        dict_playlist_seconds[key_playlist]["time_spent"] = seconds_to_time_string(dict_playlist_seconds[key_playlist]["seconds"], False)
 
         tooltip_more = ""
         c_videos_tooltip = 0
@@ -57,7 +58,7 @@ def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
         for key_video in dict_playlist_seconds[key_playlist]["videos"]:
             if c_videos_tooltip < c_videos_tooltip_max:
                 video_title = dict_playlist_seconds[key_playlist]["videos"][key_video]["video_title"]
-                time_spent = util.seconds_to_time_string(dict_playlist_seconds[key_playlist]["videos"][key_video]["seconds"], False)
+                time_spent = seconds_to_time_string(dict_playlist_seconds[key_playlist]["videos"][key_video]["seconds"], False)
                 tooltip_more += "<em>%s</em><br> - %s" % (video_title, time_spent) + "<br/>"
             elif c_videos_tooltip == c_videos_tooltip_max:
                 tooltip_more += "<em>...and %d more</em>" % (len(dict_playlist_seconds[key_playlist]["videos"]) - c_videos_tooltip_max)
@@ -104,7 +105,7 @@ def get_exercise_focus_data(user, user_data, daily_activity_logs, dt_start_utc, 
             percentage = int(float(dict_exercise_seconds[key_exercise]["seconds"]) / float(total_seconds) * 100.0)
         if percentage:
             dict_exercise_seconds[key_exercise]["percentage"] = percentage
-            dict_exercise_seconds[key_exercise]["time_spent"] = util.seconds_to_time_string(dict_exercise_seconds[key_exercise]["seconds"], False)
+            dict_exercise_seconds[key_exercise]["time_spent"] = seconds_to_time_string(dict_exercise_seconds[key_exercise]["seconds"], False)
 
             correct = dict_exercise_seconds[key_exercise]["correct"]
             dict_exercise_seconds[key_exercise]["s_correct_problems"] = "%d correct problem%s without a hint" % (correct, pluralize(correct))

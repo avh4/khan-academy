@@ -11,6 +11,8 @@ except:
     class secrets(object):
         facebook_app_id = None
         facebook_app_secret = None
+        google_consumer_key = None
+        google_consumer_secret = None
         remote_api_secret = None
         constant_contact_api_key = None
         constant_contact_username = None
@@ -28,6 +30,9 @@ class App(object):
     # khanacademy.org
     facebook_app_id = secrets.facebook_app_id
     facebook_app_secret = secrets.facebook_app_secret
+
+    google_consumer_key = secrets.google_consumer_key
+    google_consumer_secret = secrets.google_consumer_secret
 
     remote_api_secret = secrets.remote_api_secret
 

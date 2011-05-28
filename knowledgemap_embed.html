@@ -46,7 +46,7 @@ $(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_co
             </td>
             <td class="prereqs">
                 <ul>
-                    {% for prereq in exercise.cover_test %}
+                    {% for prereq in exercise.prerequisites_ex %}
                     <li data-prereq="{{ prereq.name }}">
                         <a href="/exercises?exid={{prereq.name }}">{{ prereq.display_name }}</a>
                     </li>

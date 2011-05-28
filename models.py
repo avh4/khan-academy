@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import datetime, logging
 import math
+import urllib
 from google.appengine.api import users
 from google.appengine.api import memcache
 
@@ -17,6 +18,7 @@ from app import App
 import layer_cache
 import request_cache
 from discussion import models_discussion
+from topics_list import all_topics_list
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -88,6 +90,11 @@ class Exercise(db.Model):
     safe_js = db.TextProperty()
     last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
     sanitizer_used = db.StringProperty()
+
+    _serialize_blacklist = [
+            "author", "raw_html", "last_modified", "safe_html", "safe_js",
+            "last_sanitized", "sanitizer_used"
+            ]
 
     @staticmethod
     def get_by_name(name):
@@ -226,6 +233,13 @@ class Exercise(db.Model):
         memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
 
+    @staticmethod
+    def get_dict(query, fxn_key):
+        exercise_dict = {}
+        for exercise in query.fetch(10000):
+            exercise_dict[fxn_key(exercise)] = exercise
+        return exercise_dict
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -243,6 +257,8 @@ class UserExercise(db.Model):
     summative = db.BooleanProperty(default=False)
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
+
+    _serialize_blacklist = ["review_interval_secs", "exercise_model"]
 
     @staticmethod
     def get_key_for_user(user):
@@ -391,6 +407,12 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
+
+    _serialize_blacklist = [
+            "assigned_exercises", "badges", "count_feedback_notification",
+            "last_daily_summary", "need_to_reassess", "videos_completed",
+            "moderator", "expanded_all_exercises", "question_sort_order"
+    ]
     
     @staticmethod
     def get_for_current_user():
@@ -562,7 +584,6 @@ class UserData(db.Model):
         return self.count_feedback_notification
     
 class Video(Searchable, db.Model):
-
     youtube_id = db.StringProperty()
     url = db.StringProperty()
     title = db.StringProperty()
@@ -585,6 +606,10 @@ class Video(Searchable, db.Model):
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
+
+    @property
+    def ka_url(self):
+        return "http://www.khanacademy.org/video/%s" % self.readable_id
     
     @staticmethod
     def get_for_readable_id(readable_id):
@@ -651,6 +676,20 @@ class Playlist(Searchable, db.Model):
     INDEX_ONLY = ['title', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
+
+    _serialize_blacklist = ["readable_id"]
+
+    @property
+    def api_url(self):
+        return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
+
+    @staticmethod
+    def get_for_all_topics():
+        playlists = []
+        for playlist in Playlist.all().fetch(1000):
+            if playlist.title in all_topics_list:
+                playlists.append(playlist)
+        return playlists
 
 class UserPlaylist(db.Model):
     user = db.UserProperty()
@@ -730,6 +769,7 @@ class UserVideo(db.Model):
     duration = db.IntegerProperty(default = 0)
     completed = db.BooleanProperty(default = False)
 
+    @property
     def points(self):
         return points.VideoPointCalculator(self)
 
@@ -763,6 +803,90 @@ class VideoLog(db.Model):
         query.order('time_watched')
 
         return query
+
+    @staticmethod
+    def add_entry(user_data, video, seconds_watched, last_second_watched):
+
+        user = user_data.user
+        user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
+
+        # Cap seconds_watched at duration of video
+        seconds_watched = max(0, min(seconds_watched, video.duration))
+
+        video_points_previous = points.VideoPointCalculator(user_video)
+
+        action_cache=last_action_cache.LastActionCache.get_for_user(user)
+
+        last_video_log = action_cache.get_last_video_log()
+
+        # If the last video logged is not this video and the times being credited
+        # overlap, don't give points for this video. Can only get points for one video
+        # at a time.
+        if last_video_log and last_video_log.key_for_video() != video.key():
+            dt_now = datetime.datetime.now()
+            if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
+                return
+
+        video_log = VideoLog()
+        video_log.user = user
+        video_log.video = video
+        video_log.video_title = video.title
+        video_log.seconds_watched = seconds_watched
+
+        if last_second_watched > user_video.last_second_watched:
+            user_video.last_second_watched = last_second_watched
+
+        if seconds_watched > 0:
+            user_video.seconds_watched += seconds_watched
+            user_data.total_seconds_watched += seconds_watched
+
+            # Update seconds_watched of all associated UserPlaylists
+            query = VideoPlaylist.all()
+            query.filter('video =', video)
+            query.filter('live_association = ', True)
+
+            first_video_playlist = True
+            for video_playlist in query:
+                user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
+                user_playlist.title = video_playlist.playlist.title
+                user_playlist.seconds_watched += seconds_watched
+                user_playlist.last_watched = datetime.datetime.now()
+                user_playlist.put()
+
+                video_log.playlist_titles.append(user_playlist.title)
+
+                if first_video_playlist:
+                    action_cache.push_video_log(video_log)
+
+                util_badges.update_with_user_playlist(
+                        user, 
+                        user_data, 
+                        user_playlist,
+                        include_other_badges = first_video_playlist,
+                        action_cache = action_cache)
+
+                first_video_playlist = False
+
+        user_video.last_watched = datetime.datetime.now()
+        user_video.duration = video.duration
+
+        user_data.last_activity = user_video.last_watched
+
+        video_points_total = points.VideoPointCalculator(user_video)
+        video_points_received = video_points_total - video_points_previous
+
+        if not user_video.completed and video_points_total >= consts.VIDEO_POINTS_BASE:
+            # Just finished this video for the first time
+            user_video.completed = True
+            user_data.videos_completed = -1
+
+        if video_points_received > 0:
+            video_log.points_earned = video_points_received
+            user_data.add_points(video_points_received)
+
+        db.put([user_video, video_log, user_data])
+
+        return video_points_total
 
     def time_started(self):
         return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
@@ -936,6 +1060,19 @@ class ExerciseVideo(db.Model):
     def key_for_video(self):
         return ExerciseVideo.video.get_value_for_datastore(self)
 
+    @staticmethod
+    def get_key_dict(query):
+        exercise_video_key_dict = {}
+        for exercise_video in query.fetch(10000):
+            video_key = ExerciseVideo.video.get_value_for_datastore(exercise_video)
+
+            if not exercise_video_key_dict.has_key(video_key):
+                exercise_video_key_dict[video_key] = {}
+
+            exercise_video_key_dict[video_key][ExerciseVideo.exercise.get_value_for_datastore(exercise_video)] = exercise_video
+
+        return exercise_video_key_dict
+
 class ExerciseGraph(object):
 
     def __init__(self, user_data, user=None):
@@ -967,13 +1104,9 @@ class ExerciseGraph(object):
             if ex:
                 ex.assigned = True
         for ex in exercises:
-            #
-            ex.cover_test = []
-            #
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
                 if ex_cover:
-                    ex.cover_test.append(ex_cover)
                     ex_cover.coverers.append(ex)
             ex.prerequisites_ex = []
             for prereq in ex.prerequisites:
@@ -1113,3 +1246,5 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
+
+from badges import util_badges, last_action_cache

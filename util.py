@@ -1,30 +1,51 @@
 import os
 import datetime
-import math
 import urllib
 import logging
 import request_cache
 
 from google.appengine.api import users
-from django.template.defaultfilters import pluralize
+from google.appengine.api import oauth
 from asynctools import AsyncMultiTask, QueryTask
 
 from app import App
 import nicknames
 import facebook_util
+from api.auth.google_util import get_current_google_user_from_oauth
 
 @request_cache.cache()
 def get_current_user():
+    path = os.environ.get("PATH_INFO")
+    if path and path.lower().startswith("/api/"):
+        return get_current_user_from_oauth()
+    else:
+        return get_current_user_from_cookies_unsafe()
+
+def get_current_user_from_oauth():
+    user = get_current_google_user_from_oauth()
+    if not user:
+        user = facebook_util.get_current_facebook_user_from_oauth()
+    return user
+
+# get_current_user_from_cookies_unsafe is labeled unsafe because it should
+# never be used in our JSONP-enabled API. All calling code should just use get_current_user.
+def get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if not user:
-        user = facebook_util.get_current_facebook_user()
+        user = facebook_util.get_current_facebook_user_from_cookies()
     return user
 
 def get_nickname_for(user):
     return nicknames.get_nickname_for(user)
 
+def is_facebook_user(user):
+    return user and facebook_util.is_facebook_email(user.email())
+
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)
+
+def create_mobile_oauth_login_url(dest_url):
+    return "/login/mobileoauth?continue=%s" % urllib.quote(dest_url)
 
 def create_post_login_url(dest_url):
     return "/postlogin?continue=%s" % urllib.quote(dest_url)
@@ -41,40 +62,6 @@ def seconds_between(dt1, dt2):
 
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
-
-def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
-
-    seconds = seconds_init
-
-    years = math.floor(seconds / (86400 * 365))
-    seconds -= years * (86400 * 365)
-
-    days = math.floor(seconds / 86400)
-    seconds -= days * 86400
-
-    hours = math.floor(seconds / 3600)
-    seconds -= hours * 3600
-
-    minutes = math.floor(seconds / 60)
-    seconds -= minutes * 60
-
-    if years and days:
-        return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
-    elif years:
-        return "%d year%s" % (years, pluralize(years))
-    elif days and hours and show_hours:
-        return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
-    elif days:
-        return "%d day%s" % (days, pluralize(days))
-    elif hours:
-        if not short_display and minutes:
-            return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
-        else:
-            return "%d hour%s" % (hours, pluralize(hours))
-    else:
-        if not short_display and seconds and not minutes:
-            return "%d second%s" % (seconds, pluralize(seconds))
-        return "%d minute%s" % (minutes, pluralize(minutes))
 
 def thousands_separated_number(x):
     # See http://stackoverflow.com/questions/1823058/how-to-print-number-with-commas-as-thousands-separators-in-python-2-x
