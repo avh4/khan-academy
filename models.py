@@ -411,7 +411,7 @@ class UserData(db.Model):
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
-            "moderator"
+            "moderator", "expanded_all_exercises", "question_sort_order"
     ]
     
     @staticmethod
