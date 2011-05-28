@@ -1342,6 +1342,18 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
             raise Exception("parameter 'new' is required")
         return (old_email, new_email)
         
+    def get(self):
+        (old_email, new_email) = self.get_email_params()
+        if new_email == old_email:
+            return bulk_update.handler.UpdateKind.get(self)
+        self.response.out.write("To prevent a CSRF attack from changing email addresses, you initiate an email address change from the browser. ")
+        self.response.out.write("Instead, run the following from remote_api_shell.py.<pre>\n")
+        self.response.out.write("import bulk_update.handler\n")
+        self.response.out.write("bulk_update.handler.start_task('%s',{'kind':'%s', 'old':'%s', 'new':'%s'})\n" 
+                                % (self.request.path, self.request.get('kind'), old_email, new_email))
+        self.response.out.write("</pre>and then check the logs in the admin console")
+
+        
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
         
