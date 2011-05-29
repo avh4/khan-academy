@@ -16,7 +16,7 @@ from app import App
 from render import render_block_to_string
 from nicknames import get_nickname_for
 
-class RequestHandler(webapp.RequestHandler):
+class RequestInputHandler(object):
 
     def request_string(self, key, default = ''):
         return self.request.get(key, default_value=default)
@@ -53,6 +53,8 @@ class RequestHandler(webapp.RequestHandler):
             return self.request_int(key) == 1
         else:
             return self.request_int(key, 1 if default else 0) == 1
+
+class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
     def is_ajax_request(self):
         # jQuery sets X-Requested-With header for this detection.

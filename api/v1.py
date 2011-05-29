@@ -193,7 +193,7 @@ def replace_playlist_values(structure, playlist_dict):
 # IFF currently logged in user has permission to view
 def get_visible_user_data_from_request(user_coach):
 
-    email_student = request.values.get("email")
+    email_student = request.request_string("email")
     if not email_student:
         return None
 
@@ -273,13 +273,8 @@ def log_user_video(youtube_id):
         user_data= models.UserData.get_for(user)
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
-        seconds_watched = last_second_watched = 0
-
-        try:
-            seconds_watched = int(float(request.values.get("seconds_watched")))
-            last_second_watched = int(float(request.values.get("last_second_watched")))
-        except ValueError:
-            pass
+        seconds_watched = int(request.request_float("seconds_watched", default = 0))
+        last_second_watched = int(request.request_float("last_second_watched", default = 0))
 
         if user_data and video:
             return models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
