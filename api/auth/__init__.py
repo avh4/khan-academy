@@ -8,7 +8,7 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import webapp_patched_request, oauth_error_response, append_url_params, requested_oauth_callback
+from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback
 from api.auth.google_util import google_request_token_handler, google_authorize_token_handler, google_access_token_handler
 from api.auth.facebook_util import facebook_request_token_handler, facebook_authorize_token_handler, facebook_access_token_handler
 
@@ -30,9 +30,7 @@ import util
 @route("/api/auth/request_token", methods=["GET", "POST"])
 def request_token():
 
-    webapp_req = webapp_patched_request(request)
-
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    oauth_server, oauth_request = initialize_server_request(request)
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
@@ -76,9 +74,7 @@ def request_token():
 @route("/api/auth/authorize", methods=["GET", "POST"])
 def authorize_token():
 
-    webapp_req = webapp_patched_request(request)
-
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    oauth_server, oauth_request = initialize_server_request(request)
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
@@ -123,9 +119,7 @@ def authorize_token():
 @route("/api/auth/access_token", methods=["GET", "POST"])
 def access_token():
 
-    webapp_req = webapp_patched_request(request)
-
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    oauth_server, oauth_request = initialize_server_request(request)
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))

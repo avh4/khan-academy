@@ -3,7 +3,7 @@ from functools import wraps
 import flask
 from flask import request
 
-from api.auth.auth_util import webapp_patched_request, oauth_error_response
+from api.auth.auth_util import oauth_error_response
 from api.auth.models import OAuthMap
 
 from oauth_provider.decorators import is_valid_request, validate_token
@@ -16,11 +16,9 @@ import util
 def oauth_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        webapp_req = webapp_patched_request(request)
-
-        if is_valid_request(webapp_req):
+        if is_valid_request(request):
             try:
-                consumer, token, parameters = validate_token(webapp_req)
+                consumer, token, parameters = validate_token(request)
                 if consumer and token:
                     # Store the OAuthMap containing all auth info in the request global
                     # for easy access during the rest of this request.

@@ -5,6 +5,7 @@ from wsgiref.handlers import CGIHandler
 import request_cache
 from app import App
 from api import api_app
+from api import api_request_class
 from api import auth
 
 from api import v0
