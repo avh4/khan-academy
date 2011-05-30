@@ -39,6 +39,10 @@ class RequestInputHandler(object):
             else:
                 raise # No value available and no default supplied, raise error
 
+    def request_date_iso(self, key, default = None):
+        # Try to parse date in ISO 8601 format
+        return self.request_date(key, "%Y-%m-%dT%H:%M:%S", default)
+
     def request_float(self, key, default = None):
         try:        
             return float(self.request_string(key))

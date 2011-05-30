@@ -1,4 +1,5 @@
 import copy
+import datetime
 import logging
 
 from google.appengine.api import users
@@ -343,5 +344,36 @@ def user_playlists_specific(playlist_title):
         if user_data_student and playlist:
             user_playlists = models.UserPlaylist.all().filter("user =", user_data_student.user).filter("playlist =", playlist)
             return user_playlists.get()
+
+    return None
+
+@route("/api/v1/users/exercises/<exercise_name>/problems", methods=["GET"])
+@oauth_required
+@jsonp
+@jsonify
+def users_problems(exercise_name):
+    user = util.get_current_user()
+
+    if user and exercise_name:
+        user_data_student = get_visible_user_data_from_request(user)
+        exercise = models.Exercise.get_by_name(exercise_name)
+
+        if user_data_student and exercise:
+
+            problem_log_query = models.ProblemLog.all()
+            problem_log_query.filter("user =", user)
+            problem_log_query.filter("exercise =", exercise.name)
+
+            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
+            if dt_start != datetime.datetime.min:
+                problem_log_query.filter("time_done >=", dt_start)
+
+            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
+            if dt_end != datetime.datetime.min:
+                problem_log_query.filter("time_done <", dt_end)
+
+            problem_log_query.order("-time_done")
+
+            return problem_log_query.fetch(500)
 
     return None
