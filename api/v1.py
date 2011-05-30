@@ -337,11 +337,11 @@ def user_playlists_specific(playlist_title):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/problems", methods=["GET"])
+@route("/api/v1/user/exercises/<exercise_name>/log", methods=["GET"])
 @oauth_required
 @jsonp
 @jsonify
-def users_problems(exercise_name):
+def user_problem_logs(exercise_name):
     user = util.get_current_user()
 
     if user and exercise_name:
@@ -362,8 +362,39 @@ def users_problems(exercise_name):
             if dt_end != datetime.datetime.min:
                 problem_log_query.filter("time_done <", dt_end)
 
-            problem_log_query.order("-time_done")
+            problem_log_query.order("time_done")
 
             return problem_log_query.fetch(500)
+
+    return None
+
+@route("/api/v1/user/videos/<youtube_id>/log", methods=["GET"])
+@oauth_required
+@jsonp
+@jsonify
+def user_video_logs(youtube_id):
+    user = util.get_current_user()
+
+    if user and youtube_id:
+        user_data_student = get_visible_user_data_from_request()
+        video = models.Video.all().filter("youtube_id =", youtube_id).get()
+
+        if user_data_student and video:
+
+            video_log_query = models.VideoLog.all()
+            video_log_query.filter("user =", user)
+            video_log_query.filter("video =", video)
+
+            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
+            if dt_start != datetime.datetime.min:
+                video_log_query.filter("time_watched >=", dt_start)
+
+            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
+            if dt_end != datetime.datetime.min:
+                video_log_query.filter("time_watched <", dt_end)
+
+            video_log_query.order("time_watched")
+
+            return video_log_query.fetch(500)
 
     return None

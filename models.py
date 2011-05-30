@@ -782,6 +782,8 @@ class VideoLog(db.Model):
     points_earned = db.IntegerProperty(default = 0)
     playlist_titles = db.StringListProperty()
 
+    _serialize_blacklist = ["video"]
+
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):
         query = VideoLog.all()
