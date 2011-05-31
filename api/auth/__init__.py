@@ -65,7 +65,7 @@ def request_token():
     else:
 
         # Ask user to login, then redirect to start of request_token process.
-        return redirect(util.create_mobile_oauth_login_url(request.url))
+        return redirect(util.create_mobile_oauth_login_url(oauth_request.to_url()))
 
 # Token authorization endpoint
 #
