@@ -207,7 +207,7 @@ def get_visible_user_data_from_request():
     return None
 
 @route("/api/v1/user", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_data_other():
@@ -221,7 +221,7 @@ def user_data_other():
     return None
 
 @route("/api/v1/user/videos", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_videos_all():
@@ -237,7 +237,7 @@ def user_videos_all():
     return None
 
 @route("/api/v1/user/videos/<youtube_id>", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_videos_specific(youtube_id):
@@ -254,7 +254,7 @@ def user_videos_specific(youtube_id):
     return None
 
 @route("/api/v1/user/videos/<youtube_id>/log", methods=["POST"])
-@oauth_required
+@oauth_required(require_anointed_consumer=True)
 @jsonp
 @jsonify
 def log_user_video(youtube_id):
@@ -273,7 +273,7 @@ def log_user_video(youtube_id):
     return 0
 
 @route("/api/v1/user/exercises", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_exercises_all():
@@ -289,7 +289,7 @@ def user_exercises_all():
     return None
 
 @route("/api/v1/user/exercises/<exercise_name>", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
@@ -305,7 +305,7 @@ def user_exercises_specific(exercise_name):
     return None
 
 @route("/api/v1/user/playlists", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_playlists_all():
@@ -321,7 +321,7 @@ def user_playlists_all():
     return None
 
 @route("/api/v1/user/playlists/<playlist_title>", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_playlists_specific(playlist_title):
@@ -338,7 +338,7 @@ def user_playlists_specific(playlist_title):
     return None
 
 @route("/api/v1/user/exercises/<exercise_name>/log", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_problem_logs(exercise_name):
@@ -369,7 +369,7 @@ def user_problem_logs(exercise_name):
     return None
 
 @route("/api/v1/user/videos/<youtube_id>/log", methods=["GET"])
-@oauth_required
+@oauth_required()
 @jsonp
 @jsonify
 def user_video_logs(youtube_id):

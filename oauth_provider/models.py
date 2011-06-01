@@ -34,6 +34,10 @@ class Consumer(db.Model):
     description = db.TextProperty()
     website = db.StringProperty()
 
+    # True if we've given this consumer the right to make
+    # protected API calls, such as those that update user history.
+    anointed = db.BooleanProperty(default = False)
+
     key_ = db.StringProperty()
     secret = db.StringProperty()
 

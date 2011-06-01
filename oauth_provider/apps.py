@@ -52,7 +52,8 @@ class Register(request_handler.RequestHandler):
                         description = description,
                         website = website,
                         user = user,
-                        status = ACCEPTED
+                        status = ACCEPTED,
+                        anointed = False
                         )
                 consumer.generate_random_codes()
 
