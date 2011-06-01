@@ -23,12 +23,13 @@ def facebook_request_token_handler(oauth_map):
                 "redirect_uri": get_facebook_token_callback_url(oauth_map),
             }
 
+    if oauth_map.is_mobile_view():
+        # Add FB-specific mobile view identifier
+        params["display"] = "touch"
+
     return redirect("%s?%s" % (FB_URL_OAUTH_DIALOG, urllib.urlencode(params)))
 
-def facebook_authorize_token_handler(oauth_map):
-    return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
-
-def facebook_access_token_handler(oauth_map):
+def retrieve_facebook_access_token(oauth_map):
     # Start Facebook access token process
     params = {
                 "client_id": App.facebook_app_id,
@@ -40,11 +41,11 @@ def facebook_access_token_handler(oauth_map):
     try:
         response = get_response(FB_URL_ACCESS_TOKEN, params)
     except Exception, e:
-        return oauth_error_response(OAuthError(e.message))
+        raise OAuthError(e.message)
 
     response_params = get_parsed_params(response)
     if not response_params or not response_params.get("access_token"):
-        return oauth_error_response(OAuthError("Cannot get access_token from Facebook's /oauth/access_token response"))
+        raise OAuthError("Cannot get access_token from Facebook's /oauth/access_token response")
      
     # Associate our access token and Google/Facebook's
     oauth_map.facebook_access_token = response_params["access_token"][0]
@@ -57,9 +58,8 @@ def facebook_access_token_handler(oauth_map):
 
     if expires_seconds:
         oauth_map.expires = datetime.datetime.now() + datetime.timedelta(seconds=expires_seconds)
-    oauth_map.put()
 
-    return access_token_response(oauth_map)
+    return oauth_map
 
 # Associate our request or access token with Facebook's tokens
 @route("/api/auth/facebook_token_callback", methods=["GET"])
@@ -69,9 +69,17 @@ def facebook_token_callback():
     if not oauth_map:
         return oauth_error_response(OAuthError("Unable to find OAuthMap by id."))
 
-    if not oauth_map.facebook_authorization_code:
-        oauth_map.facebook_authorization_code = request.values.get("code")
-        oauth_map.put()
+    if oauth_map.facebook_authorization_code:
+        return oauth_error_response(OAuthError("Request token already has facebook authorization code."))
+
+    oauth_map.facebook_authorization_code = request.values.get("code")
+
+    try:
+        oauth_map = retrieve_facebook_access_token(oauth_map)
+    except OAuthError, e:
+        return oauth_error_response(e)
+
+    oauth_map.put()
 
     return authorize_token_redirect(oauth_map)
 

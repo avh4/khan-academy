@@ -48,7 +48,7 @@ class GoogleOAuthClient(object):
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
                 token = token,
-                http_url = "%sapi/auth/current_google_oauth_email" % request.host_url
+                http_url = "%sapi/auth/current_google_oauth_email" % request.host_url.replace("8084", "8088")
                 )
 
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)

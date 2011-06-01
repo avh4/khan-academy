@@ -221,11 +221,13 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def render_template_simple(self, template_name, template_values):
         self.response.out.write(self.render_template_to_string(template_name, template_values))
 
-    def render_template_to_string(self, template_name, template_values):
+    @staticmethod
+    def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         return template.render(path, template_values)
  
-    def render_template_block_to_string(self, template_name, block, context):
+    @staticmethod
+    def render_template_block_to_string(template_name, block, context):
         path = os.path.join(os.path.dirname(__file__), template_name)
         return render_block_to_string(path, block, context).strip()
 

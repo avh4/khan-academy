@@ -23,8 +23,7 @@ def current_google_oauth_email():
         return user.email()
     return ""
 
-def get_current_google_user_from_oauth():
-    oauth_map = current_oauth_map()
+def get_google_user_from_oauth_map(oauth_map):
     if oauth_map and oauth_map.uses_google():
         email = get_google_email_from_oauth_map(oauth_map)
         if email:
@@ -54,30 +53,25 @@ def google_request_token_handler(oauth_map):
     oauth_map.google_request_token_secret = google_token.secret
     oauth_map.put()
 
-    return authorize_token_redirect(oauth_map)
-
-def google_authorize_token_handler(oauth_map):
     params = { "oauth_token": oauth_map.google_request_token }
-
     if oauth_map.is_mobile_view():
         # Add google-specific mobile view identifier
         params["btmpl"] = "mobile"
 
     return redirect("http://www.khanacademy.org/_ah/OAuthAuthorizeToken?%s" % urllib.urlencode(params))
 
-def google_access_token_handler(oauth_map):
+def retrieve_google_access_token(oauth_map):
     # Start Google access token process
     try:
         google_client = GoogleOAuthClient()
         google_token = google_client.fetch_access_token(oauth_map)
     except Exception, e:
-        return oauth_error_response(OAuthError(e.message))
+        raise OAuthError(e.message)
 
     oauth_map.google_access_token = google_token.key
     oauth_map.google_access_token_secret = google_token.secret
-    oauth_map.put()
 
-    return access_token_response(oauth_map)
+    return oauth_map
 
 @route("/api/auth/google_token_callback", methods=["GET"])
 def google_token_callback():
@@ -86,8 +80,16 @@ def google_token_callback():
     if not oauth_map:
         return oauth_error_response(OAuthError("Unable to find OAuthMap by id."))
 
-    if not oauth_map.google_verification_code:
-        oauth_map.google_verification_code = request.values.get("oauth_verifier")
-        oauth_map.put()
+    if oauth_map.google_verification_code:
+        return oauth_error_response(OAuthError("Request token already has google verification code."))
 
-    return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
+    oauth_map.google_verification_code = request.values.get("oauth_verifier")
+
+    try:
+        oauth_map = retrieve_google_access_token(oauth_map)
+    except OAuthError, e:
+        return oauth_error_response(e)
+
+    oauth_map.put()
+
+    return authorize_token_redirect(oauth_map)
