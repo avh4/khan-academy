@@ -1,4 +1,5 @@
 import copy
+import datetime
 import logging
 
 from google.appengine.api import users
@@ -191,53 +192,43 @@ def replace_playlist_values(structure, playlist_dict):
 
 # Return specific user data requests from request
 # IFF currently logged in user has permission to view
-def get_visible_user_data_from_request(user_coach):
+def get_visible_user_data_from_request():
 
-    email_student = request.values.get("email")
-    if not email_student:
-        return None
+    user = util.get_current_user()
 
-    user_student = util.get_current_user() if email_student == "me" else users.User(email_student)
+    email_student = request.request_string("email")
+    user_student = users.User(email_student) if email_student else user
+
     user_data_student = models.UserData.get_for(user_student)
 
-    if user_data_student and (user_student.email() == user_coach.email() or user_data_student.is_coached_by(user_coach)):
+    if user_data_student and (user_student.email() == user.email() or user_data_student.is_coached_by(user)):
         return user_data_student
 
     return None
 
-@route("/api/v1/users/me", methods=["GET"])
-@oauth_required
-@jsonp
-@jsonify
-def user_data_me():
-    user = util.get_current_user()
-    if user:
-        return models.UserData.get_for(user)
-    return None
-
-@route("/api/v1/users", methods=["GET"])
-@oauth_required
+@route("/api/v1/user", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_data_other():
     user = util.get_current_user()
 
     if user:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
         if user_data_student:
             return user_data_student
 
     return None
 
-@route("/api/v1/users/videos", methods=["GET"])
-@oauth_required
+@route("/api/v1/user/videos", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_videos_all():
     user = util.get_current_user()
 
     if user:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
             user_videos = models.UserVideo.all().filter("user =", user_data_student.user)
@@ -245,15 +236,15 @@ def user_videos_all():
 
     return None
 
-@route("/api/v1/users/videos/<youtube_id>", methods=["GET"])
-@oauth_required
+@route("/api/v1/user/videos/<youtube_id>", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_videos_specific(youtube_id):
     user = util.get_current_user()
 
     if user and youtube_id:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
         if user_data_student and video:
@@ -262,8 +253,8 @@ def user_videos_specific(youtube_id):
 
     return None
 
-@route("/api/v1/users/videos/<youtube_id>/log", methods=["POST"])
-@oauth_required
+@route("/api/v1/user/videos/<youtube_id>/log", methods=["POST"])
+@oauth_required(require_anointed_consumer=True)
 @jsonp
 @jsonify
 def log_user_video(youtube_id):
@@ -273,28 +264,23 @@ def log_user_video(youtube_id):
         user_data= models.UserData.get_for(user)
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
-        seconds_watched = last_second_watched = 0
-
-        try:
-            seconds_watched = int(float(request.values.get("seconds_watched")))
-            last_second_watched = int(float(request.values.get("last_second_watched")))
-        except ValueError:
-            pass
+        seconds_watched = int(request.request_float("seconds_watched", default = 0))
+        last_second_watched = int(request.request_float("last_second_watched", default = 0))
 
         if user_data and video:
             return models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
     return 0
 
-@route("/api/v1/users/exercises", methods=["GET"])
-@oauth_required
+@route("/api/v1/user/exercises", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_exercises_all():
     user = util.get_current_user()
 
     if user:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
             user_exercises = models.UserExercise.all().filter("user =", user_data_student.user)
@@ -302,15 +288,15 @@ def user_exercises_all():
 
     return None
 
-@route("/api/v1/users/exercises/<exercise_name>", methods=["GET"])
-@oauth_required
+@route("/api/v1/user/exercises/<exercise_name>", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
     user = util.get_current_user()
 
     if user and exercise_name:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
             user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name)
@@ -318,15 +304,15 @@ def user_exercises_specific(exercise_name):
 
     return None
 
-@route("/api/v1/users/playlists", methods=["GET"])
-@oauth_required
+@route("/api/v1/user/playlists", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_playlists_all():
     user = util.get_current_user()
 
     if user:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
             user_playlists = models.UserPlaylist.all().filter("user =", user_data_student.user)
@@ -334,19 +320,81 @@ def user_playlists_all():
 
     return None
 
-@route("/api/v1/users/playlists/<playlist_title>", methods=["GET"])
-@oauth_required
+@route("/api/v1/user/playlists/<playlist_title>", methods=["GET"])
+@oauth_required()
 @jsonp
 @jsonify
 def user_playlists_specific(playlist_title):
     user = util.get_current_user()
 
     if user and playlist_title:
-        user_data_student = get_visible_user_data_from_request(user)
+        user_data_student = get_visible_user_data_from_request()
         playlist = models.Playlist.all().filter("title =", playlist_title).get()
 
         if user_data_student and playlist:
             user_playlists = models.UserPlaylist.all().filter("user =", user_data_student.user).filter("playlist =", playlist)
             return user_playlists.get()
+
+    return None
+
+@route("/api/v1/user/exercises/<exercise_name>/log", methods=["GET"])
+@oauth_required()
+@jsonp
+@jsonify
+def user_problem_logs(exercise_name):
+    user = util.get_current_user()
+
+    if user and exercise_name:
+        user_data_student = get_visible_user_data_from_request()
+        exercise = models.Exercise.get_by_name(exercise_name)
+
+        if user_data_student and exercise:
+
+            problem_log_query = models.ProblemLog.all()
+            problem_log_query.filter("user =", user)
+            problem_log_query.filter("exercise =", exercise.name)
+
+            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
+            if dt_start != datetime.datetime.min:
+                problem_log_query.filter("time_done >=", dt_start)
+
+            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
+            if dt_end != datetime.datetime.min:
+                problem_log_query.filter("time_done <", dt_end)
+
+            problem_log_query.order("time_done")
+
+            return problem_log_query.fetch(500)
+
+    return None
+
+@route("/api/v1/user/videos/<youtube_id>/log", methods=["GET"])
+@oauth_required()
+@jsonp
+@jsonify
+def user_video_logs(youtube_id):
+    user = util.get_current_user()
+
+    if user and youtube_id:
+        user_data_student = get_visible_user_data_from_request()
+        video = models.Video.all().filter("youtube_id =", youtube_id).get()
+
+        if user_data_student and video:
+
+            video_log_query = models.VideoLog.all()
+            video_log_query.filter("user =", user)
+            video_log_query.filter("video =", video)
+
+            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
+            if dt_start != datetime.datetime.min:
+                video_log_query.filter("time_watched >=", dt_start)
+
+            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
+            if dt_end != datetime.datetime.min:
+                video_log_query.filter("time_watched <", dt_end)
+
+            video_log_query.order("time_watched")
+
+            return video_log_query.fetch(500)
 
     return None

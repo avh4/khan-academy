@@ -8,15 +8,13 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import webapp_patched_request, oauth_error_response, append_url_params, requested_oauth_callback
-from api.auth.google_util import google_request_token_handler, google_authorize_token_handler, google_access_token_handler
-from api.auth.facebook_util import facebook_request_token_handler, facebook_authorize_token_handler, facebook_access_token_handler
+from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response
+from api.auth.google_util import google_request_token_handler
+from api.auth.facebook_util import facebook_request_token_handler
 
 from oauth_provider.oauth import OAuthError
 from oauth_provider.utils import initialize_server_request
 from oauth_provider.stores import check_valid_callback
-
-import util
 
 # Our API's OAuth authentication and authorization is designed to encapsulate the OAuth support
 # of our identity providers (Google/Facebook), so each of our mobile apps and client applications 
@@ -30,44 +28,41 @@ import util
 @route("/api/auth/request_token", methods=["GET", "POST"])
 def request_token():
 
-    webapp_req = webapp_patched_request(request)
-
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    oauth_server, oauth_request = initialize_server_request(request)
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
 
-    # Force the use of cookie-based auth for request_token and authorize_token parts of API authentication *only*
-    user = util.get_current_user_from_cookies_unsafe()
+    try:
+        # Create our request token
+        token = oauth_server.fetch_request_token(oauth_request)
+    except OAuthError, e:
+        return oauth_error_response(e)
 
-    if user:
+    # Start a new OAuth mapping
+    oauth_map = OAuthMap()
+    oauth_map.request_token_secret = token.secret
+    oauth_map.request_token = token.key_
+    oauth_map.callback_url = requested_oauth_callback()
+    
+    if request.values.get("view") == "mobile":
+        oauth_map.view = "mobile"
 
-        try:
-            # Create our request token
-            token = oauth_server.fetch_request_token(oauth_request)
-        except OAuthError, e:
-            return oauth_error_response(e)
+    oauth_map.put()
 
-        # Start a new OAuth mapping
-        oauth_map = OAuthMap()
-        oauth_map.request_token_secret = token.secret
-        oauth_map.request_token = token.key_
-        oauth_map.callback_url = requested_oauth_callback()
-        
-        if request.values.get("view") == "mobile":
-            oauth_map.view = "mobile"
+    return redirect("/login/mobileoauth?oauth_map_id=%s" % oauth_map.key().id())
 
-        oauth_map.put()
+@route("/api/auth/request_token_callback/<provider>/<oauth_map_id>", methods=["GET"])
+def request_token_callback(provider, oauth_map_id):
 
-        if util.is_facebook_user(user):
-            return facebook_request_token_handler(oauth_map)
-        else:
-            return google_request_token_handler(oauth_map)
+    oauth_map = OAuthMap.get_by_id_safe(oauth_map_id)
+    if not oauth_map:
+        return oauth_error_response(OAuthError("Unable to find OAuthMap by id during request token callback."))
 
-    else:
-
-        # Ask user to login, then redirect to start of request_token process.
-        return redirect(util.create_mobile_oauth_login_url(request.url))
+    if provider == "google":
+        return google_request_token_handler(oauth_map)
+    elif provider == "facebook":
+        return facebook_request_token_handler(oauth_map)
 
 # Token authorization endpoint
 #
@@ -76,17 +71,10 @@ def request_token():
 @route("/api/auth/authorize", methods=["GET", "POST"])
 def authorize_token():
 
-    webapp_req = webapp_patched_request(request)
-
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    oauth_server, oauth_request = initialize_server_request(request)
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
-
-    # Force the use of cookie-based auth for request_token and authorize_token parts of API authentication *only*
-    user = util.get_current_user_from_cookies_unsafe()
-    if not user:
-        return oauth_error(OAuthError("User not logged in during authorize_token process."))
 
     try:
         # get the request token
@@ -94,23 +82,25 @@ def authorize_token():
     except OAuthError, e:
         return oauth_error_response(e)
 
+    oauth_map = OAuthMap.get_from_request_token(token.key_)
+    if not oauth_map:
+        raise OAuthError("Unable to find oauth_map from request token during authorization.")
+
+    # Get user from oauth map using either FB or Google access token
+    user = oauth_map.get_user()
+    if not user:
+        return oauth_error_response(OAuthError("User not logged in during authorize_token process."))
+
     try:
         # For now we don't require user intervention to authorize our tokens,
         # since the user already authorized FB/Google. If we need to do this
         # for security reasons later, there's no reason we can't.
         token = oauth_server.authorize_token(token, user)
 
-        oauth_map = OAuthMap.get_from_request_token(token.key_)
-        if not oauth_map:
-            raise OAuthError("Unable to find oauth_map from request token during authorization.")
-
         oauth_map.verifier = token.verifier
         oauth_map.put()
 
-        if oauth_map.uses_google():
-            return google_authorize_token_handler(oauth_map)
-        else:
-            return facebook_authorize_token_handler(oauth_map)
+        return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
 
     except OAuthError, e:
         return oauth_error_response(e)
@@ -123,9 +113,7 @@ def authorize_token():
 @route("/api/auth/access_token", methods=["GET", "POST"])
 def access_token():
 
-    webapp_req = webapp_patched_request(request)
-
-    oauth_server, oauth_request = initialize_server_request(webapp_req)
+    oauth_server, oauth_request = initialize_server_request(request)
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
@@ -148,10 +136,7 @@ def access_token():
     except OAuthError, e:
         return oauth_error_response(e)
 
-    if oauth_map.uses_facebook():
-        return facebook_access_token_handler(oauth_map)
-    elif oauth_map.uses_google():
-        return google_access_token_handler(oauth_map)
+    return access_token_response(oauth_map)
 
 # Default callback
 #

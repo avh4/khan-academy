@@ -16,7 +16,7 @@ from app import App
 from render import render_block_to_string
 from nicknames import get_nickname_for
 
-class RequestHandler(webapp.RequestHandler):
+class RequestInputHandler(object):
 
     def request_string(self, key, default = ''):
         return self.request.get(key, default_value=default)
@@ -39,6 +39,10 @@ class RequestHandler(webapp.RequestHandler):
             else:
                 raise # No value available and no default supplied, raise error
 
+    def request_date_iso(self, key, default = None):
+        # Try to parse date in ISO 8601 format
+        return self.request_date(key, "%Y-%m-%dT%H:%M:%S", default)
+
     def request_float(self, key, default = None):
         try:        
             return float(self.request_string(key))
@@ -53,6 +57,8 @@ class RequestHandler(webapp.RequestHandler):
             return self.request_int(key) == 1
         else:
             return self.request_int(key, 1 if default else 0) == 1
+
+class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
     def is_ajax_request(self):
         # jQuery sets X-Requested-With header for this detection.
@@ -215,11 +221,13 @@ class RequestHandler(webapp.RequestHandler):
     def render_template_simple(self, template_name, template_values):
         self.response.out.write(self.render_template_to_string(template_name, template_values))
 
-    def render_template_to_string(self, template_name, template_values):
+    @staticmethod
+    def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         return template.render(path, template_values)
  
-    def render_template_block_to_string(self, template_name, block, context):
+    @staticmethod
+    def render_template_block_to_string(template_name, block, context):
         path = os.path.join(os.path.dirname(__file__), template_name)
         return render_block_to_string(path, block, context).strip()
 

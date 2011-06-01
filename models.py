@@ -96,6 +96,10 @@ class Exercise(db.Model):
             "last_sanitized", "sanitizer_used"
             ]
 
+    @property
+    def ka_url(self):
+        return "http://www.khanacademy.org/exercises?exid=%s" % self.name
+
     @staticmethod
     def get_by_name(name):
         dict_exercises = Exercise.__get_dict_use_cache_unsafe__()
@@ -411,7 +415,8 @@ class UserData(db.Model):
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
-            "moderator", "expanded_all_exercises", "question_sort_order"
+            "moderator", "expanded_all_exercises", "question_sort_order",
+            "last_login"
     ]
     
     @staticmethod
@@ -680,7 +685,7 @@ class Playlist(Searchable, db.Model):
     _serialize_blacklist = ["readable_id"]
 
     @property
-    def api_url(self):
+    def ka_url(self):
         return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
 
     @staticmethod
@@ -781,6 +786,8 @@ class VideoLog(db.Model):
     seconds_watched = db.IntegerProperty(default = 0)
     points_earned = db.IntegerProperty(default = 0)
     playlist_titles = db.StringListProperty()
+
+    _serialize_blacklist = ["video"]
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):

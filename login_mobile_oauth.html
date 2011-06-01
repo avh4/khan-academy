@@ -35,48 +35,23 @@
         </script>
     </head>
     <body>
-
         <div id="login-page">
             <div id="login-inner-content">
                 <img src="/images/logo-no-highlight.png" /><br/><br/>
 
                 <form class="openid" method="GET" action="{{ google_login_url|escape }}">
                     <ul class="providers"> 
-                        <li class="action-gradient" title="Google" onclick="javascript:window.location='{{ google_login_url|escapejs }}'; return false;">
+                        <li class="action-gradient" title="Google" onclick="javascript:window.location='/api/auth/request_token_callback/google/{{ oauth_map_id|escape }}'; return false;">
                             <div class="sign-in-text">Login with:</div>
                             <img width="205" height="70" src="/images/google-logo-large.png" />
                         </li>
-                        <li title="Facebook" onclick="javascript:$('#real_fb_button a').click();" class="action-gradient facebook">
+                        <li class="action-gradient facebook" title="Facebook" onclick="javascript:window.location='/api/auth/request_token_callback/facebook/{{ oauth_map_id|escape }}'; return false;">
                             <div class="sign-in-text">Login with:</div>
                             <img width="205" height="70" src="/images/facebook-logo-large.png" />
                         </li>
                     </ul>
                 </form>
-
-                <div id="fb-root"></div>
-                <div id="real_fb_button" style="display:none;"><fb:login-button></fb:login-button></div>
             </div>
         </div>
-
-        <script>
-            var FacebookHook = {
-                init: function() {
-                    window.fbAsyncInit = function() {
-                        FB.init({appId: {{ App.facebook_app_id|escapejs }}, status: true, cookie: true, xfbml: true});
-
-                        FB.Event.subscribe('auth.login', function(response) {
-                            window.location = "{{ continue|escapejs }}";
-                        });
-                    };
-
-                    $(function() {
-                        var e = document.createElement('script'); e.async = true;
-                        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-                        document.getElementById('fb-root').appendChild(e);
-                    }); 
-                }
-            }
-            FacebookHook.init();
-        </script>
     </body>
 </html>

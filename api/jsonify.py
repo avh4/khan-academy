@@ -19,7 +19,7 @@ def dumps(obj):
             items.append(dumps(item))
         return items
     elif isinstance(obj, datetime):
-        return obj.ctime()
+        return obj.isoformat()
 
     properties = dict();
     if isinstance(obj, db.Model):

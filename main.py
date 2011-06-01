@@ -71,6 +71,7 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
+from oauth_provider import apps as oauth_apps
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -959,47 +960,6 @@ class MobileSite(request_handler.RequestHandler):
         self.set_mobile_full_site_cookie(False)
         self.redirect("/")
 
-class TransferUserProgress(request_handler.RequestHandler):
-    def get(self):
-        # Quick admin-only ability to copy some of the key progress from one user
-        # to another in case somebody changes email addresses and really must have
-        # their data transferred. We don't officially support this behavior,
-        # and lots of historical data will be lost between the accounts.
-        # It is not a full transition, but a utility to be used in exceptional circumstances.
-
-        if not users.is_current_user_admin():
-            return
-
-        email_source = self.request_string("email_source", default="")
-        email_target = self.request_string("email_target", default="")
-
-        user_data_source = UserData.get_for(users.User(email_source))
-        user_data_target = UserData.get_for(users.User(email_target))
-
-        if user_data_source and user_data_target:
-            # Don't accidentally get the arguments backwards
-            if user_data_source.points > user_data_target.points:
-
-                attrs = [
-                        "joined", "proficient_exercises", "all_proficient_exercises",
-                        "suggested_exercises", "badges", "points",
-                        "total_seconds_watched", "videos_completed"
-                        ]
-                attr_log = []
-
-                for attr in attrs:
-                    attr_log.append("<b>%s</b>: %s <b>replaced with</b> %s" % 
-                            (attr, getattr(user_data_target, attr), getattr(user_data_source, attr)))
-                    setattr(user_data_target, attr, getattr(user_data_source, attr))
-
-                user_data_target.put()
-
-                self.response.out.write("Transferred progress from %s to %s<br/><br/>%s"
-                        % (email_source, email_target, "<br/><br/>".join(attr_log)))
-                return
-
-        self.response.out.write("Not transferred.")
-            
 class ViewHomePage(request_handler.RequestHandler):
 
     def get(self):
@@ -1428,12 +1388,8 @@ class Login(request_handler.RequestHandler):
 
 class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
-        cont = self.request_string('continue', default = "/")
-        google_login_url = users.create_login_url(cont)
-
         self.render_template('login_mobile_oauth.html', {
-            "continue": cont,
-            "google_login_url": google_login_url
+            "oauth_map_id": self.request_string("oauth_map_id", default="")
         })
 
 class PostLogin(request_handler.RequestHandler):
@@ -1561,7 +1517,6 @@ def real_main():
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
-        ('/admin/transferuserprogress', TransferUserProgress),
         ('/admin/changeemail', ChangeEmail),
 
         ('/coaches', coaches.ViewCoaches),
@@ -1599,6 +1554,8 @@ def real_main():
         ('/login/mobileoauth', MobileOAuthLogin),
         ('/postlogin', PostLogin),
         ('/logout', Logout),
+
+        ('/api-apps/register', oauth_apps.Register),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 
