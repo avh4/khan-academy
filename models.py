@@ -96,6 +96,10 @@ class Exercise(db.Model):
             "last_sanitized", "sanitizer_used"
             ]
 
+    @property
+    def ka_url(self):
+        return "http://www.khanacademy.org/exercises?exid=%s" % self.name
+
     @staticmethod
     def get_by_name(name):
         dict_exercises = Exercise.__get_dict_use_cache_unsafe__()
