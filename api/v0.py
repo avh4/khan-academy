@@ -27,14 +27,12 @@ from api.decorators import jsonp, jsonify
 
 from flask import request
 
-@route("/api/v0/playlists", methods=["GET"])
 @route("/api/playlists", methods=["GET"])
 @jsonp
 @jsonify
 def playlists():
     return get_playlists_json()
 
-@route("/api/v0/playlistvideos", methods=["GET"])
 @route("/api/playlistvideos", methods=["GET"])
 @jsonp
 @jsonify
@@ -42,14 +40,12 @@ def playlist_videos():
     playlist_title = request.values["playlist"]
     return get_playlist_videos_json(playlist_title)
 
-@route("/api/v0/videolibrary", methods=["GET"])
 @route("/api/videolibrary", methods=["GET"])
 @jsonp
 @jsonify
 def video_library():
     return zlib.decompress(get_video_library_json_compressed())
 
-@route("/api/v0/videolibrarylastupdated", methods=["GET"])
 @route("/api/videolibrarylastupdated", methods=["GET"])
 @jsonp
 @jsonify
