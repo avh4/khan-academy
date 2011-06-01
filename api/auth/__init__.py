@@ -16,9 +16,6 @@ from oauth_provider.oauth import OAuthError
 from oauth_provider.utils import initialize_server_request
 from oauth_provider.stores import check_valid_callback
 
-import util
-import request_handler
-
 # Our API's OAuth authentication and authorization is designed to encapsulate the OAuth support
 # of our identity providers (Google/Facebook), so each of our mobile apps and client applications 
 # don't have to handle each auth provider independently. We behave as one single OAuth set of endpoints

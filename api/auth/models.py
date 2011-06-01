@@ -3,7 +3,6 @@ import logging
 
 from google.appengine.ext import db
 
-import util
 from api.auth.auth_util import append_url_params
 
 # OAuthMap creates a mapping between our OAuth credentials and our identity providers'.
@@ -81,7 +80,6 @@ class OAuthMap(db.Model):
             parsed_id = int(request_id)
         except ValueError:
             return None
-        logging.critical("A")
         return OAuthMap.if_not_expired(OAuthMap.get_by_id(parsed_id))
 
     @staticmethod
