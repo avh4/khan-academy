@@ -3,6 +3,7 @@ import datetime
 import util
 import logging
 from badges import Badge, BadgeContextType, BadgeCategory
+from templatefilters import seconds_to_time_string
 
 # All badges awarded for completing being a member of the Khan Academy for various periods of time
 # from TenureBadge
@@ -20,7 +21,7 @@ class TenureBadge(Badge):
         return True
 
     def extended_description(self):
-        return "Remain a member of the Khan Academy for %s" % util.seconds_to_time_string(self.seconds_required)
+        return "Remain a member of the Khan Academy for %s" % seconds_to_time_string(self.seconds_required)
 
 class YearOneBadge(TenureBadge):
     def __init__(self):

@@ -1,11 +1,15 @@
-{% extends "pythagorean_theorem_1.html" %}
+{% extends "multiple_choice_template.html" %}
 
 
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
 <script language=Javascript1.2><!--
 ///////////////////////////////////////////////////////////////////////////////////////
 //////Your code goes below here							///////
 ///////////////////////////////////////////////////////////////////////////////////////
+
+RaphaelWrapper.init(300, 300);
+
 function trigTriangle()
 {
 	var triangle = this;
@@ -157,6 +161,7 @@ if (myTriangle.adjLength==myTriangle.opLength)
 
 {% endblock problemsetup %}
 randomRotation();
+initGraph();
 //-->
 </script>
 {% endblock maincell %}

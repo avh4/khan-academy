@@ -2,10 +2,15 @@
 
 
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
+
 <script language=Javascript1.2><!--
 ///////////////////////////////////////////////////////////////////////////////////////
 //////Your code goes below here							///////
 ///////////////////////////////////////////////////////////////////////////////////////
+
+
+RaphaelWrapper.init(400, 400);
 
 function type3()
 {
@@ -292,7 +297,7 @@ pickType(3,5);
 
 randomRotation();
 
-
+initGraph();
 
 //-->
 </script>

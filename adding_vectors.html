@@ -1,19 +1,16 @@
 {% extends "multiple_choice_template.html" %}
 
 {% block maincell %}
+<script src="/javascript/exercises/vectors.js?{{App.version}}"></script>
 <script src="/javascript/exercises/adding_vectors.js?{{App.version}}"></script>
+<div id="raphael_container" style="float: right;"></div>
+
 <script>
+    
+    RaphaelWrapper.init(400, 400);
     Exercise.fWriteToDoc = false;
     var exercise = new AddingVectorsExercise();
     Exercise.showCustomStep = exercise.showGraphHints;
-
-    function graph_update() {
-        exercise.showProblem();
-    }
     
 </script>
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="450" width="450"></iframe></td>
-{% endblock graphdisplay %}

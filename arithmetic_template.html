@@ -26,6 +26,7 @@
 		imageFont: null
 	}
       });
+      var present = window; // Need this line because of asciisvg
   </script>
   <script type="text/javascript"><!--
 
@@ -98,22 +99,13 @@ var currentexercise = "{{exid|escapejs}}";
 
 <div>
 	<div id='question_area'>
-{% block maincode %}
+        {% block maincode %}
 
-{% endblock maincode %}
-		{% comment %}
-		We use a table here just because existing graphdisplay blocks create a table cell.
-		{% endcomment %}
+        {% endblock maincode %}
 		<div id="question_content_container" style="width: 2000px">
     		<div id="question_content" style="position:relative; float: left"></div>
 		</div>
-		<table style='float: right;'><tr>
-		{% block graphdisplay %}  {% endblock graphdisplay %}
-		</tr></table>
 		{% block maincell %}
-		    {% if exercise.summative %}
-    		    <iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=300" height="350" width="100%"></iframe>
-		    {% endif %}
 		{% endblock maincell %}
 		<iframe id="svgedit" name="svgedit" width="99%" height="99%" allowtransparency="true" frameBorder="0" scrolling="no" style="background-color: transparent; position: absolute; top: 0; left: 0; width: 99%; height: 99%; overflow: hidden; border:none;"></iframe>
 	</div>
@@ -146,13 +138,13 @@ var currentexercise = "{{exid|escapejs}}";
             {% if not read_only %}
             {% block feedbackarea %}
 			<input type="button" class="button green" id="check-answer-button" tabindex="10" value="Check Answer" onClick="Exercise.logAnswer()">
-			<div id="check-answer-results">
-                <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
-                <div id="next-container" class="button" style="position:relative; display: none;">
+			<span id="check-answer-results">
+                <span id="next-container" class="button" style="position:relative; display: none;">
                     <input id="next-question-button" type="button" class="button green" name="correctnextbutton" value="Correct! Next Question..." onClick="Exercise.submitForm()">
                     <img src="/images/throbber.gif" id="throbber" style="display:none;" />
-                </div>
-            </div>
+                </span><br />
+                <img src="/images/blank.gif" name="feedback" id="feedback" style="display: none">
+            </span>
             {% endblock feedbackarea %}
             {% endif %}
 			{% endblock answerform %}
@@ -183,6 +175,7 @@ var currentexercise = "{{exid|escapejs}}";
 				if(confirmed || confirm(confirmation_text))
 				{
 					relabel_hint();
+					Exercise.restoreHintsToDOM();
 					{% block hintfunction %}next_step(){% endblock hintfunction %};
 					if (!fSkipResetStreak)
 						reset_streak();

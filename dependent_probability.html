@@ -1,5 +1,6 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincode %}
+
 <script language=Javascript1.2><!--
 // Dependent Probability
 // Author: Joey Chang
@@ -14,7 +15,6 @@
 // C - % chance of unfair coins coming up heads
 // D - number of times chosen coin is flipped
 //
-
 
 var ExerciseDependentProbability = {
 
@@ -172,9 +172,5 @@ ExerciseDependentProbability.init();
 //-->
 </script>
 {% endblock maincode %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=260&h=260" height="290" width="290"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block maincellwidth %}70%{% endblock maincellwidth %}

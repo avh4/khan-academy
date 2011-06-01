@@ -1,11 +1,14 @@
-{% extends "pythagorean_theorem_1.html" %}
+{% extends "multiple_choice_template.html" %}
 
 
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
 <script language=Javascript1.2><!--
 ///////////////////////////////////////////////////////////////////////////////////////
 //////Your code goes below here							///////
 ///////////////////////////////////////////////////////////////////////////////////////
+
+RaphaelWrapper.init(300, 300);
 function trigTriangle()
 {
 		
@@ -137,7 +140,7 @@ while (Exercise.getNumPossibleAnswers() < 5)
 writeText(mainAngle.regStr+' = '+myTriangle.radianMeasure+' radians');
 writeText(sideGiven.regStr+' = `'+sideGiven.length+'`');
 writeText(solveFor.regStr+' = ?');
-writeText('( `sin ('+myTriangle.radianMeasure+') ='+myTriangle.sinValue+', cos ('+myTriangle.radianMeasure+') ='+myTriangle.cosValue+', tan ('+myTriangle.radianMeasure+') ='+myTriangle.tanValue+'`)');
+writeText(' `(sin ('+myTriangle.radianMeasure+') ='+myTriangle.sinValue+', cos ('+myTriangle.radianMeasure+') ='+myTriangle.cosValue+', tan ('+myTriangle.radianMeasure+') ='+myTriangle.tanValue+')`');
 
 
 if (sideGiven == myTriangle.adjSide)
@@ -209,6 +212,7 @@ else
 
 
 randomRotation();
+initGraph();
 
 //-->
 </script>

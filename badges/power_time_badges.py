@@ -5,6 +5,7 @@ import logging
 
 from badges import Badge, BadgeContextType, BadgeCategory
 from exercise_badges import ExerciseBadge
+from templatefilters import seconds_to_time_string
 
 # All badges awarded for watching a specific amount of playlist time *and* 
 # completing a certain number of exercise problems within a set amount of time 
@@ -53,7 +54,7 @@ class PowerTimeBadge(Badge):
         return True
 
     def extended_description(self):
-        return "Correctly answer %s problems and watch %s of video in %s" % (self.problems_required, util.seconds_to_time_string(self.video_seconds_required), util.seconds_to_time_string(self.seconds_allotted))
+        return "Correctly answer %s problems and watch %s of video in %s" % (self.problems_required, seconds_to_time_string(self.video_seconds_required), seconds_to_time_string(self.seconds_allotted))
 
 class PowerFifteenMinutesBadge(PowerTimeBadge):
 

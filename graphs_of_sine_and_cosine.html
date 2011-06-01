@@ -1,6 +1,9 @@
 {% extends "multiple_choice_template.html" %}
 {% block maincode %}
+<div id="raphael_container"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(600, 300);
 
 var A = nonZeroRandomInt(1,4);
 var B = Math.pow(2,getRandomIntRange(-1,2));
@@ -155,7 +158,7 @@ function draw_next_step()
 	Exercise.steps_given++;
 }
 
-
+graph_update();
 //-->
 </script>
 {% endblock maincode %}
@@ -163,13 +166,11 @@ function draw_next_step()
 {% block maincell %}
 
 <script language=Javascript1.2><!--
-writeText('Which of the choices is the function graphed below?');
+writeText('Which of the choices is the function graphed above?');
 
 //-->
 </script>
 <br>
-
-<iframe name="present" frameborder=0 src="/graphpage.html?w=600&h=300" height="650" width="100%"></iframe>
 
 {% endblock maincell %}
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

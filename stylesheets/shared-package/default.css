@@ -1653,13 +1653,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: relative;
     padding: 0;
     float: left;
-    width: 65%;
+    width: 63%;
     margin-left: 1%;
 }
 #answer_area {
     float: right;
-    max-width: 27%;
-    min-width: 24%;
+    width: 27%;
     margin-right: 10px;
 }
     #answer_area .info-box {
@@ -1766,6 +1765,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         }
     #answer_area .info-box #check-answer-results #feedback {
         padding: 10px 0 5px;
+    }
+    #answer_area .info-box input#answer {
+        width: 100px;
     }
     .exercise.button, #answer_area input.button {
         background-color: #CCCCCC;
@@ -1968,7 +1970,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #coaches, #students, #donate, #individual_report, 
 .achievement-badges-container, #login-page, 
 #about-us, #homepage, #video-page, #contribute,
-#credits, #report-problem {
+#credits, #report-problem, #tos, #privacy-policy,
+#dmca {
     padding: 0 23px;
     background: transparent;
     position: relative;

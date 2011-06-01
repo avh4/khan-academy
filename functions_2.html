@@ -1,6 +1,9 @@
 {% extends "multiple_choice_template.html" %}
-{% block maincode %}
+{% block maincell %}
+<div id="raphael_container" style="float: right"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(500, 500);
 
 var currentY = Math.round(KhanAcademy.random()*10)-5;
 var gY = Math.round(KhanAcademy.random()*10)-7;
@@ -48,15 +51,9 @@ var wrongAnswers = new Array();
 correct_answer = fCoef*correctY + gCoef*correctGY;
 correctAnswer = correct_answer;
 
-for(var i=0; i<6; i++)
-{
-	var y = Math.round(KhanAcademy.random()*200)-100;
-	
-	while ((y==correct_answer) || ($.inArray(y, Exercise.possibleAnswers) != -1))
-	{
-		y = Math.round(KhanAcademy.random()*200)-100;
-	}
-	Exercise.possibleAnswers.push(y);
+while (Exercise.getNumPossibleAnswers() < 6) {
+    var y = Math.round(KhanAcademy.random()*200)-100;
+    addWrongChoice(y);
 }
 
 function draw_next_step() {
@@ -116,24 +113,16 @@ function graph_update() {
 	present.path(gPath);
 }
 
-
+graph_update()
 
 //-->
 </script>
-{% endblock maincode %}
-
-{% block maincell %}
 
 <script language=Javascript1.2><!--
-document.write('<font size=5>`'+format_first_coefficient(fCoef)+'`<font color=\"orange\" style=bold>`f('+correctX+')`</font>`'+format_coefficient(gCoef)+'`<font color=\"#28AE7B\" style=bold>`g('+correctGX+')`</font>`=?`</font>');
+write_text("<span style=\"font-size:20px;\">Solve.</span>");
+write_text('<span style=\"font-size:20px;\">`' +format_first_coefficient(fCoef)+'`<font color=\"orange\" style=bold>`f('+correctX+')`</font>`'+format_coefficient(gCoef)+'`<font color=\"#28AE7B\" style=bold>`g('+correctGX+')`</font>`=?`</span>');
 //-->
 </script>
-
-
-<center><iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="550"></iframe>
-</center>
-
-
 
 {% endblock maincell %}
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

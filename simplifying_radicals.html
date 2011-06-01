@@ -24,18 +24,18 @@ function type1()
 	}
 	else if (factor[0]==1)
 	{
-		write_step(equation_string(coef+' sqrt('+base+')='+coef+'*'+Math.sqrt(factor[1])));
-		write_step(equation_string(coef+'*'+Math.sqrt(factor[1])+'='+(coef*Math.sqrt(factor[1]))));
+		write_step(equation_string('='+coef+'*'+Math.sqrt(factor[1])));
+		write_step(equation_string('='+(coef*Math.sqrt(factor[1]))));
 		correct_answer = (coef*Math.sqrt(factor[1]));
 		addWrongChoice(''+(coef*base));
 		
 	}
 	else 
 	{
-		write_step(equation_string(coef+ ' sqrt('+base+')='+coef+' sqrt('+factor[1]+'*'+factor[0]+')'));
-		write_step(equation_string(coef+' sqrt('+factor[1]+'*'+factor[0]+')='+coef+'* sqrt('+factor[1]+')*sqrt('+factor[0]+')'));
-		write_step(equation_string(coef+'* sqrt('+factor[1]+')*sqrt('+factor[0]+')='+coef+'*'+Math.sqrt(factor[1])+'sqrt('+factor[0]+')'));
-		write_step(equation_string(coef+'*'+Math.sqrt(factor[1])+'sqrt('+factor[0]+')='+(coef*Math.sqrt(factor[1]))+' sqrt('+factor[0]+')'));
+		write_step(equation_string(coef+' sqrt('+factor[1]+'*'+factor[0]+')'));
+		write_step(equation_string(coef+'* sqrt('+factor[1]+')*sqrt('+factor[0]+')'));
+		write_step(equation_string(coef+'*'+Math.sqrt(factor[1])+'sqrt('+factor[0]+')'));
+		write_step(equation_string((coef*Math.sqrt(factor[1]))+' sqrt('+factor[0]+')'));
 		correct_answer = (coef*Math.sqrt(factor[1]))+' sqrt('+factor[0]+')';
 		addWrongChoice(''+(coef*Math.round(Math.sqrt(base))));
 	}

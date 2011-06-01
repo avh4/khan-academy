@@ -1,6 +1,9 @@
 {% extends arithmetic_template %}
 {% block maincode %}
+<div id="raphael_container" style="float: right"></div>
+
 <script language=Javascript1.2><!--
+RaphaelWrapper.init(500, 500);
 currentexercise = "linegraph";
 
 var x1 = get_random();
@@ -104,7 +107,7 @@ function checkAnswer()
         $("#check-answer-results").hide();
 }
 
-
+graph_update();
 
 //-->
 </script>
@@ -112,10 +115,9 @@ function checkAnswer()
 {% block maincell %}<ul>Adjust the slope and y-intercept of the line until it connects the two points.  This
 module is special in that you really can't get the question wrong--you just need to keep trying.  The whole point is to help you visualize
 what the slope and y-intercept do to a line.<P>
-<iframe name="present" frameborder=0 src="/graphpage.html?w=500&h=500" height="550" width="100%"></iframe>
 {% endblock maincell %}
 {% block answerarea %}
-		<div style="text-align:right;">
+		<div>
 		<nobr><input type="button" class="button" value="-" onClick="slope(-1)"> Slope <input type="button" class="button" value="+" onClick="slope(+1)">&nbsp;&nbsp;&nbsp;&nbsp;
 		<input type="button" class="button" value="-" onClick="intercept(-1)"> Y-Intercept <input type="button" class="button" value="+" onClick="intercept(+1)"></nobr><br>
 		</div>

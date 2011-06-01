@@ -4,7 +4,11 @@
 {% endblock maincode %}
 
 {% block maincell %}
+<div id="raphael_container" style="float: right;"></div>
 <script language=Javascript1.2><!--
+
+RaphaelWrapper.init(400, 400);
+
 var x1 = getRandomIntRange(-9, 9);
 var y1 = getRandomIntRange(-9, 9);
 
@@ -24,8 +28,13 @@ addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * Math.abs(y1 - y2)));
 
 addWrongChoice(simplifiedRoot(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2)));
 addWrongChoice(Math.abs(x1 - x2) * 3 * Math.abs(y1 - y2));
-
 addWrongChoice(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+while (getNumPossibleAnswers() < 4) {
+	// the above wrong choices won't fill up the answers for problem #85
+	var randNum = simplifiedRoot(x2 - x1 + nonZeroRandomInt(-5, 5));
+	addWrongChoice(randNum);
+}
+
 // all distances should be positive
 // we're not testing integer subtraction here
 if ((x2 - x1) > 0) {
@@ -68,7 +77,8 @@ function graph_update() {
 	
 	present.ASdot([x2, y2], 3, "purple", "purple");
 	present.fontfill = "purple";
-	present.text([x2, y2], "(" + x2 + ", " + y2 + ")", aboveright);
+    var textPos = (y1 == y2) ? belowright : aboveright;
+    present.text([x2, y2], "(" + x2 + ", " + y2 + ")", textPos);
     
 }
 
@@ -99,12 +109,11 @@ function draw_next_step() {
 	}
 	give_next_step();
 }
+
+graph_update();
+
 //-->
 </script>
 {% endblock maincell %}
-
-{% block graphdisplay %}
-<td valign=top><iframe name="present" frameborder=0 src="/graphpage.html?w=400&h=400" height="430" width="420"></iframe></td>
-{% endblock graphdisplay %}
 
 {% block hintfunction %}draw_next_step(){% endblock hintfunction %}

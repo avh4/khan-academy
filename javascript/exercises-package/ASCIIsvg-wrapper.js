@@ -434,6 +434,7 @@ function ASdot(center,radius,s,f) { // coordinates in units, radius in pixel
     node.attr("stroke-width", strokewidth);
     node.attr("stroke", s);
     node.attr("fill", f);
+    return node;
 }
 
 function dot(center, typ, label, pos, id) {

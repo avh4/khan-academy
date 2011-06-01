@@ -1,4 +1,8 @@
+import datetime
 import os
+import logging
+from stat import ST_MTIME, ST_MODE, S_ISDIR
+
 from google.appengine.api import users
 
 try:
@@ -7,6 +11,8 @@ except:
     class secrets(object):
         facebook_app_id = None
         facebook_app_secret = None
+        google_consumer_key = None
+        google_consumer_secret = None
         remote_api_secret = None
         constant_contact_api_key = None
         constant_contact_username = None
@@ -25,6 +31,9 @@ class App(object):
     facebook_app_id = secrets.facebook_app_id
     facebook_app_secret = secrets.facebook_app_secret
 
+    google_consumer_key = secrets.google_consumer_key
+    google_consumer_secret = secrets.google_consumer_secret
+
     remote_api_secret = secrets.remote_api_secret
 
     constant_contact_api_key = secrets.constant_contact_api_key
@@ -40,5 +49,29 @@ class App(object):
     if is_dev_server:
         accepts_openid = False # Change to True when we plan to support it on the live server.
     offline_mode = False
-     
-       
+
+    # Last modified date of entire app subdirectory. Only to be used in dev server.
+    @staticmethod
+    def last_modified_date(top = None):
+
+        if not App.is_dev_server:
+            raise Exception("last_modified_date should not be called on the production servers")
+
+        if not top:
+            top = os.path.abspath(os.path.join(__file__, ".."))
+
+        dt = os.stat(top)[ST_MTIME]
+
+        for f in os.listdir(top):
+            pathname = os.path.join(top, f)
+            try:
+                mode = os.stat(pathname)[ST_MODE]
+                if S_ISDIR(mode):
+                    # It's a directory, recurse into it
+                    dt_subdir = App.last_modified_date(pathname)
+                    if dt_subdir > dt:
+                        dt = dt_subdir
+            except OSError:
+                pass
+
+        return dt

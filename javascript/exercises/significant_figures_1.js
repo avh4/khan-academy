@@ -82,14 +82,14 @@ function SigFig1Exercise() {
         
         // Find first non zero char (to ignore leading zeros)
         for (; index_first_non_zero < str.length; index_first_non_zero++) {
-            var c = str[index_first_non_zero];
+            var c = str.charAt(index_first_non_zero);
             if (c != "0" && c != ".")
                 break;
         }
 
         // Find last non zero char (to maybe ignore trailing zeros)
         for (; index_last_non_zero >= 0; index_last_non_zero--) {
-            var c = str[index_last_non_zero];
+            var c = str.charAt(index_last_non_zero);
             if (c != "0" && c != ".")
                 break;
         }

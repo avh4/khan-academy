@@ -13,10 +13,10 @@ from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from custom_exceptions import MissingVideoException, MissingExerciseException
 import util
 from app import App
-from models import UserData
 from render import render_block_to_string
+from nicknames import get_nickname_for
 
-class RequestHandler(webapp.RequestHandler):
+class RequestInputHandler(object):
 
     def request_string(self, key, default = ''):
         return self.request.get(key, default_value=default)
@@ -39,6 +39,10 @@ class RequestHandler(webapp.RequestHandler):
             else:
                 raise # No value available and no default supplied, raise error
 
+    def request_date_iso(self, key, default = None):
+        # Try to parse date in ISO 8601 format
+        return self.request_date(key, "%Y-%m-%dT%H:%M:%S", default)
+
     def request_float(self, key, default = None):
         try:        
             return float(self.request_string(key))
@@ -53,6 +57,8 @@ class RequestHandler(webapp.RequestHandler):
             return self.request_int(key) == 1
         else:
             return self.request_int(key, 1 if default else 0) == 1
+
+class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
     def is_ajax_request(self):
         # jQuery sets X-Requested-With header for this detection.
@@ -172,7 +178,7 @@ class RequestHandler(webapp.RequestHandler):
     def delete_cookie(self, key, path='/', domain=None):
         self.set_cookie(key, '', path=path, domain=domain, max_age=0)
 
-    def render_template(self, template_name, template_values):
+    def add_global_template_values(self, template_values):
         template_values['App'] = App
         template_values['None'] = None
         template_values['points'] = None
@@ -180,7 +186,7 @@ class RequestHandler(webapp.RequestHandler):
 
         user = util.get_current_user()
         if user is not None:
-            template_values['username'] = user.nickname()
+            template_values['username'] = get_nickname_for(user)
 
         if not template_values.has_key('user_data'):
             user_data = UserData.get_for(user)
@@ -206,16 +212,35 @@ class RequestHandler(webapp.RequestHandler):
             if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
                 template_values['is_mobile'] = self.is_mobile()
 
+        return template_values
+
+    def render_template(self, template_name, template_values):
+        self.add_global_template_values(template_values)
         self.render_template_simple(template_name, template_values)
 
     def render_template_simple(self, template_name, template_values):
+        self.response.out.write(self.render_template_to_string(template_name, template_values))
+
+    @staticmethod
+    def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
-        self.response.out.write(template.render(path, template_values))
+        return template.render(path, template_values)
  
-    def render_template_to_string(self, name, context):
-        path = os.path.join(os.path.dirname(__file__), name + ".html")
-        return render_block_to_string(path, name + "_block", context).strip()
+    @staticmethod
+    def render_template_block_to_string(template_name, block, context):
+        path = os.path.join(os.path.dirname(__file__), template_name)
+        return render_block_to_string(path, block, context).strip()
 
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)
         self.response.out.write(json)
+
+    def render_jsonp(self, obj):
+        json = obj if type(obj) == str else simplejson.dumps(obj, ensure_ascii=False, indent=4)
+        callback = self.request_string("callback")
+        if callback:
+            self.response.out.write("%s(%s)" % (callback, json))
+        else:
+            self.response.out.write(json)
+
+from models import UserData

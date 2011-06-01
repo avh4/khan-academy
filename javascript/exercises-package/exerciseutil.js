@@ -20,7 +20,7 @@ var Exercise = {
         this.tries=0;
         this.possibleAnswers = new Array(); //These are the possible answers
         this.possibleAnswers2 = new Array();  //This is used in exercises where the user has to select 2 choices
-        this.checkboxChoices = new Array(); //THis is used in exercises with checkbox answers
+        this.checkboxChoices = new Array(); //This is used in exercises with checkbox answers
         this.steps_given=0;
         this.next_step_to_write = 0;
         this.correctchoice;
@@ -30,7 +30,44 @@ var Exercise = {
         this.incorrect.src = "/images/face-sad.gif";
         
     },
+
+    removeHintsFromDOM: function() {
+
+        // Gross Mozilla-only hack for old exercise framework
+        // to avoid copying and pasting visibility:hidden content
+        // as a really easy way to cheat by looking at hints.
+        if (!$.browser.mozilla) return;
+
+        if (this.hintsRemoved) return;
+
+        var ix = 0;
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            jelStep.data("hint", jelStep.contents()).empty();
+            jelStep = $(".step" + (++ix));
+        }
+
+        this.hintsRemoved = true;
+    },
     
+    restoreHintsToDOM: function() {
+
+        // Second part of gross Mozilla-only hack for old exercise framework
+        // to avoid copying and pasting visibility:hidden content.
+        if (!$.browser.mozilla) return;
+
+        if (!this.hintsRemoved) return;
+
+        var ix = 0;
+        var jelStep = $(".step" + ix);
+        while (jelStep.length) {
+            jelStep.append(jelStep.data("hint"));
+            jelStep = $(".step" + (++ix));
+        }
+
+        this.hintsRemoved = false;
+    },
+
     display: function() {
         // set vals to 0 after document is ready
         $("#correct").val(0);
@@ -52,16 +89,20 @@ var Exercise = {
         if (this.fExtendsMultipleChoice) {
             $("#answer_content").html("");
             renderChoices();
-        } else
-            $("#answer").val("")
-            
+        } else if ($("#answer").length) {
+            $("#answer").val("").focus();
+        }
         translate();
         
         if (this.fSupportsAjax) {
             $("#old_question_content").animate({"left": -500}, 250, function() {
                 $("#old_question_content").remove();
-                $("#question_content").animate({"left": 0}, 250);    
+                $("#question_content").animate({"left": 0}, 250);
+                Exercise.removeHintsFromDOM();
             });
+        }
+        else {
+            Exercise.removeHintsFromDOM();
         }
     },
     
@@ -277,31 +318,6 @@ function generateNewProblem(randomProblemGenerator, range, salt)
 	}
 }
 
-function createCookie(name,value,days) {
-	if (days) {
-		var date = new Date();
-		date.setTime(date.getTime()+(days*24*60*60*1000));
-		var expires = "; expires="+date.toGMTString();
-	}
-	else var expires = "";
-	document.cookie = name+"="+value+expires+"; path=/";
-}
-
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-	}
-	return null;
-}
-
-function eraseCookie(name) {
-	createCookie(name,"",-1);
-}
-
 function equivInArray(target, arr) {
 	for (var i = 0; i < arr.length; i++) {
 		if (mathFormat(target) == mathFormat(arr[i]))
@@ -334,7 +350,7 @@ function renderChoices() {
 	
 	if(Exercise.fAddNoneOfThese) {
         // With probability 1/4, the correct answer is "None of these"
-    	if (!getRandomIntRange(0, 3)) {
+        if (!getRandomIntRange(0, 3)) {
             answerChoices[Exercise.correctchoice] = answerChoices[num_choices - 1]	   
             Exercise.correctchoice = num_choices - 1; 
     	}
@@ -368,6 +384,28 @@ function addIncorrectCheckboxChoice(choice){
 
 function getNumPossibleAnswers() {
     return Exercise.possibleAnswers.length;
+}
+
+// choose(["a", "b", "c"], 1) ==> [["a"], ["b"], ["c"]]
+// choose(["a", "b", "c"], 1) ==> [["a", "b"], ["a", "c"], ["b", "c"]]
+// Returns all combinations of size k
+function choose(set, k) {
+    if (k == 0)
+        return [[]];
+    if (set.length == 0) 
+        return [];
+    
+    var first = set.slice(0, 1);
+    var rest = set.slice(1);
+    
+    var combosWithFirst = choose(rest, k - 1);
+    for (var i = 0; i < combosWithFirst.length; i++) {
+        combosWithFirst[i] = first.concat(combosWithFirst[i]);
+    }
+    
+    var combosWithout = choose(rest, k);
+
+    return combosWithFirst.concat(combosWithout);
 }
 
 function arrayEqual(a,b) //return true if the elements in the array are equal
@@ -674,9 +712,21 @@ function checkFreeAnswer() {
     return isInputCorrect($("#answer").val(), correctAnswer, 0);
 }
 
+function replaceNoneOfThese() {
+    var label = $("#answer_content label:last");
+    label.fadeOut("fast", function() {
+        label.html(label.html().replace("None of these", "`" + correct_answer + "`"));
+        label.find(":radio").attr("checked", "checked");
+        translate();
+        label.fadeIn("fast");        
+    });
+}
+
 function checkMultipleChoiceAnswer()
 {
-    var checkedIndex = $(":radio[name='selectAnswer']").index($(":radio[name='selectAnswer']:checked")); 
+    var radios = $(":radio[name='selectAnswer']");
+    var selected = radios.filter(":checked");
+    var checkedIndex = radios.index(selected); 
     
     if (checkedIndex == -1) {
         window.alert("Please choose your answer.");
@@ -684,8 +734,11 @@ function checkMultipleChoiceAnswer()
     }
     
 	var isCorrect = (checkedIndex == Exercise.correctchoice);
-	if (isCorrect)
+	if (isCorrect) {
+        if (Exercise.fAddNoneOfThese && (checkedIndex == radios.length - 1))
+    	    replaceNoneOfThese();
 	    return Answer.CORRECT;
+    }
 	else
 	    return Answer.INCORRECT;
 }

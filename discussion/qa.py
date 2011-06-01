@@ -5,13 +5,11 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
-from django.template.loader import render_to_string
 from mapreduce import control
 from mapreduce import operation as op
 
 from collections import defaultdict
 
-from render import render_block_to_string
 import models
 import models_discussion
 import notification
@@ -117,9 +115,14 @@ class PageQuestions(request_handler.RequestHandler):
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
-            path = os.path.join(os.path.dirname(__file__), 'video_qa_content.html')
-            html = render_to_string(path, template_values)
+            html = self.render_template_to_string("discussion/video_qa_content.html", template_values)
             self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
+
+        if qa_expand_id > 0:
+            # If a QA question is being expanded, we want to clear notifications for its
+            # answers before we render page_template so the notification icon shows
+            # its updated count. 
+            notification.clear_question_answers_for_current_user(qa_expand_id)
 
         return
 
@@ -185,8 +188,8 @@ class Answers(request_handler.RequestHandler):
                 "answers": answers,
                 "is_mod": util_discussion.is_current_user_moderator()
             }
-            path = os.path.join(os.path.dirname(__file__), 'question_answers.html')
-            html = render_block_to_string(path, 'answers', template_values)
+
+            html = self.render_template_block_to_string('discussion/question_answers.html', 'answers', template_values)
             self.render_json({"html": html})
 
         return

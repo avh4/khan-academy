@@ -27,7 +27,7 @@
         {% for mod in mods %}
             <tr>
                 <td>
-                    {{ mod.user.nickname|escape }}
+                    {{ mod.user.email|escape }}
                 </td>
                 <td width="100%">
                     <form method="POST" action="/discussion/moderatorlist">

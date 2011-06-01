@@ -40,58 +40,31 @@ def get_facebook_nickname(user):
         # In the event of an FB error, don't cache the result.
         return layer_cache.UncachedResult(email)
 
-def get_current_facebook_user():
+def get_current_facebook_user_from_cookies():
+    return get_user_from_profile(get_profile_from_cookies())
 
-    profile = get_facebook_profile()
+def get_facebook_user_from_oauth_map(oauth_map):
+    if oauth_map:
+        return get_user_from_profile(get_profile_from_fb_token(oauth_map.facebook_access_token))
+    return None
+
+def get_user_from_profile(profile):
 
     if profile is not None:
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
-        
+
         # We create a fake user, substituting the user's Facebook uid for their email 
-        # and their name for their OpenID identifier since Facebook isn't an
-        # OpenID provider at the moment, and GAE displays the OpenID identifier as the nickname().
-        return users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"], federated_identity = name)
+        user = users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"])
+
+        # Cache any future lookup of current user's facebook nickname in this request
+        request_cache.set(get_facebook_nickname_key(user), name)
+
+        return user
 
     return None
 
-def get_facebook_profile():
-
-    def get_profile_from_fb_user(fb_user):
-
-        expires = int(fb_user["expires"])
-        if expires == 0 and time.time() > expires:
-            return None
-
-        if not fb_user["access_token"]:
-            logging.debug("Empty access token for fb_user")
-            return None
-
-        memcache_key = "facebook_profile_for_%s" % fb_user["access_token"]        
-        profile = memcache.get(memcache_key)
-        if profile is not None:
-            return profile
-
-        c_facebook_tries_left = 3
-        while not profile and c_facebook_tries_left > 0:
-            try:
-                graph = facebook.GraphAPI(fb_user["access_token"])
-                profile = graph.get_object("me")
-            except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError), error:
-                if type(error) == urllib2.HTTPError and error.code == 400:
-                    c_facebook_tries_left = 0
-                    logging.debug("Ignoring '%s'. Assuming access_token is no longer valid: %s" % (error, fb_user["access_token"]))
-                else:
-                    c_facebook_tries_left -= 1
-                    logging.debug("Ignoring Facebook graph error '%s'. Tries left: %s" % (error, c_facebook_tries_left))
-
-        if profile:
-            try:
-                memcache.set(memcache_key, profile)
-            except Exception, error:
-                logging.warning("Facebook profile memcache set failed: %s", error)
-
-        return profile
+def get_profile_from_cookies():
 
     if App.facebook_app_secret is None:
         return None
@@ -107,14 +80,46 @@ def get_facebook_profile():
 
     morsel_key = "fbs_" + App.facebook_app_id
     morsel = cookies.get(morsel_key)
-    if morsel is None:
+    if morsel:
+        fb_user_dict = facebook.get_user_from_cookie(
+            {morsel_key: morsel.value}, App.facebook_app_id, App.facebook_app_secret)
+        if fb_user_dict:
+            return get_profile_from_fb_token(fb_user_dict["access_token"])
+    
+    return None
+
+def get_profile_from_fb_token(access_token):
+
+    if App.facebook_app_secret is None:
         return None
 
-    morsel_value = morsel.value
-    fb_user = facebook.get_user_from_cookie(
-        {morsel_key: morsel_value}, App.facebook_app_id, App.facebook_app_secret)
+    if not access_token:
+        logging.debug("Empty access token")
+        return None
 
-    if fb_user:
-        return get_profile_from_fb_user(fb_user)
+    memcache_key = "facebook_profile_for_%s" % access_token
+    profile = memcache.get(memcache_key)
+    if profile is not None:
+        return profile
 
-    return None
+    c_facebook_tries_left = 3
+    while not profile and c_facebook_tries_left > 0:
+        try:
+            graph = facebook.GraphAPI(access_token)
+            profile = graph.get_object("me")
+        except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError), error:
+            if type(error) == urllib2.HTTPError and error.code == 400:
+                c_facebook_tries_left = 0
+                logging.debug("Ignoring '%s'. Assuming access_token is no longer valid: %s" % (error, access_token))
+            else:
+                c_facebook_tries_left -= 1
+                logging.debug("Ignoring Facebook graph error '%s'. Tries left: %s" % (error, c_facebook_tries_left))
+
+    if profile:
+        try:
+            memcache.set(memcache_key, profile)
+        except Exception, error:
+            logging.warning("Facebook profile memcache set failed: %s", error)
+
+    return profile
+

@@ -1,3 +1,29 @@
+RaphaelWrapper = {
+    init: function(width, height) {
+        var paper = Raphael(document.getElementById("raphael_container"), width, height);
+        initPaper(paper, width, height);
+        return paper;
+    },
+    
+    drawPlane: function(min_x, max_x, min_y, max_y) {
+        present.initPicture(min_x, max_x, min_y, max_y);
+    	present.fontstyle = "normal";
+    	present.fontsize = "10";
+    	present.stroke = "#DDDDDD";
+    	present.strokewidth = "2";
+
+    	for(var i = min_x; i <= max_x; i++) {
+    		if (i!=0) {
+    			present.line([i, min_y], [i,max_y]);
+    			present.line([min_x,i], [max_x,i]);
+    			present.text([i, .1], i, below);
+    			present.text([0, i], i, right);
+    		}
+    	}
+    	present.axes();
+    }
+};
+
 var toDraw = {};
 var randInt = getRandomIntRange(5,9);
 
@@ -45,27 +71,11 @@ function getNextLabel()
 	return pointLabels[nextPointIndex];
 }
 
-function initPlane()
-{
-	present.initPicture(-10,10, -10, 10);
-	
-	present.fontstyle = "normal";
-	present.fontsize = "10";
-	
-	present.stroke = "#DDDDDD";
-	present.strokewidth = "2";
-	for(var i=-10; i<11; i++)
-	{
-		if (i!=0)
-		{
-			present.line([i,-11], [i,11]);
-			present.line([-11,i], [11,i]);
-			present.text([i, .1], i, below);
-			present.text([0, i], i, right);
-		}
-	}
-	present.axes();
+// Legacy -- 
+function initPlane() {
+    RaphaelWrapper.drawPlane(-10,10, -10, 10);
 }
+
 function graphPoint(x,y, labelPosition)
 {
 	
@@ -955,14 +965,7 @@ function rotateGraph(degrees) {
 	}
 }
 
-
-
-
 function initGraph() {
-	
-	//var dimensionMax = .25;
-	//var dimensionMin = 0;
-	
 	var xMax = .25;
 	var yMax = .25;
 	var xMin = 0;
@@ -975,8 +978,6 @@ function initGraph() {
 		yMax = Math.max(yMax, curPoint.y);
 		xMin = Math.min(xMin, curPoint.x);
 		yMin = Math.min(yMin, curPoint.y);
-		//dimensionMax = Math.max(dimensionMax, Math.max(curPoint.x, curPoint.y));
-		//dimensionMin = Math.min(dimensionMin, Math.min(curPoint.x, curPoint.y));
 	}
 	
 	
@@ -986,7 +987,6 @@ function initGraph() {
 	if ((xMax-xMin)>(yMax-yMin))
 	{
 		var margin = .25*(xMax-xMin);
-		//alert([xMin-margin, xMax+margin, yCenter-margin-(xMax-xMin)/2, yCenter+margin+(xMax-xMin)/2]);
 		present.initPicture(xMin-margin, xMax+margin, yCenter-margin-(xMax-xMin)/2, yCenter+margin+(xMax-xMin)/2);
 	}
 	else
@@ -996,19 +996,14 @@ function initGraph() {
 		
 	}
 	
-	//var margin = .25*(dimensionMax - dimensionMin);
 	present.strokewidth = "2";
-	//present.initPicture(dimensionMin-margin,dimensionMax+margin, dimensionMin-margin,dimensionMax+margin);
 	for(var k=0; k < initialObjectsToDraw.length; k++)
 	{
 		initialObjectsToDraw[k].draw();
 	}
-
-
 }
 
 function graph_update() {
-	
 	initGraph();
 }
 

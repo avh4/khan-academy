@@ -68,8 +68,13 @@ def main():
         ])
     run_wsgi_app(application)
     
-and then visit /admin/myupdate?ModelClass.
+and then visit /admin/myupdate?kind=ModelClass.
 
+You may also start the update by calling:
+
+bulk_update.handler.start_task('/admin/myupdate', {'kind': 'ModelClass'})
+
+ 
 """
 
 import cgi
@@ -80,28 +85,55 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.api import memcache
-from google.appengine.api.labs import taskqueue
+from google.appengine.api import taskqueue
 from google.appengine.runtime import DeadlineExceededError
 
+KEY_FORMAT = "bulk_update_%s"
+
+def start_task(task_path, task_params):
+    if _is_in_progress(task_path):
+        logging.info('Task %s is already in progress.' % task_path)
+        return False
+    _set_in_progress(task_path, True)
+    taskqueue.add(url=task_path, params=task_params)
+    logging.info('Task %s(%s) started.' % (task_path, task_params))
+    return True
+
+def cancel_task(task_path):
+    _set_in_progress(task_path, False)
+    
+def _set_in_progress(task_path, val):
+    memcache.set(KEY_FORMAT % task_path, val)
+    
+def _is_in_progress(task_path):
+    result = memcache.get(KEY_FORMAT % task_path)
+    return result
+    
 class UpdateKind(webapp.RequestHandler):
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
         if self.request.get('cancel'):
-            self.set_in_progress(False)
+            cancel_task(self.request.path)
             self.response.out.write('Your request to interrupt has been filed.')
-        elif self.is_in_progress():
+        elif _is_in_progress(self.request.path):
             self.response.out.write('Your request is already in progress.')
         else:
-            self.set_in_progress(True)
-            taskqueue.add(url=self.request.path, params=self.request.params)
-            self.response.out.write('Your request has been added to task queue.  Monitor the log for status updates. ')
-            cancel_uri = self.request.path_url + '?' + self.request.query_string + '&cancel=1'
-            self.response.out.write('To interrupt the request, <a href="%s">click here</a>.' % cancel_uri)
+            if start_task(self.request.path, self.request.params):
+                self.response.out.write('Your request has been added to task queue.  Monitor the log for status updates. ')
+            else:
+                cancel_uri = self.request.path_url + '?' + self.request.query_string + '&cancel=1'
+                self.response.out.write('To interrupt the request, <a href="%s">click here</a>.' % cancel_uri)
 
     def post(self):        
-        if not self.is_in_progress():
+        # To prevent CSRF attacks, all requests must be from the task queue
+        if 'X-AppEngine-QueueName' not in self.request.headers:
+            logging.error("Potential CSRF attack detected")
+            self.response.set_status(403, message="Potential CSRF attack detected due to missing header.")
+            return
+        
+        if not _is_in_progress(self.request.path):
             logging.info('Cancelled.')
             return
         cursor = self.request.get('cursor')
@@ -131,7 +163,7 @@ class UpdateKind(webapp.RequestHandler):
                     do_update()
                 new_cursor = query.cursor()
                 count = count + 1
-            self.set_in_progress(False)
+            _set_in_progress(self.request.path, False)
             logging.info('Finished! %d %s processed.', count, kind)
             done = True
         except DeadlineExceededError:
@@ -143,7 +175,7 @@ class UpdateKind(webapp.RequestHandler):
                 return
             if new_cursor == cursor:
                 logging.error('Stopped due to lack of progress at %d %s with cursor = %s', count, kind, new_cursor)
-                self.set_in_progress(False)
+                _set_in_progress(self.request.path, False)
             else:
                 logging.info('Processed %d %s so far.  Continuing in a new task...', count, kind)
                 new_params = {}
@@ -153,17 +185,6 @@ class UpdateKind(webapp.RequestHandler):
                 new_params['count']= count
                 taskqueue.add(url=self.request.path, params=new_params)
                 
-    def get_memcache_key(self):
-        result = self.request.path
-        return result
-    
-    def set_in_progress(self, val):
-        memcache.set(self.get_memcache_key(), val)
-        
-    def is_in_progress(self):
-        result = memcache.get(self.get_memcache_key())
-        return result
-    
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
         return db.GqlQuery('select __key__ from %s' % kind)
