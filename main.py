@@ -1291,6 +1291,52 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
         else:
             return False
             
+class ChangeEmail(bulk_update.handler.UpdateKind):
+    
+    def get_email_params(self):
+        old_email = self.request.params['old']
+        new_email = self.request.params['new']
+        if old_email is None or len(old_email) == 0:
+            raise Exception("parameter 'old' is required")
+        if new_email is None or len(new_email) == 0:
+            raise Exception("parameter 'new' is required")
+        return (old_email, new_email)
+        
+    def get(self):
+        (old_email, new_email) = self.get_email_params()
+        if new_email == old_email:
+            return bulk_update.handler.UpdateKind.get(self)
+        self.response.out.write("To prevent a CSRF attack from changing email addresses, you initiate an email address change from the browser. ")
+        self.response.out.write("Instead, run the following from remote_api_shell.py.<pre>\n")
+        self.response.out.write("import bulk_update.handler\n")
+        self.response.out.write("bulk_update.handler.start_task('%s',{'kind':'%s', 'old':'%s', 'new':'%s'})\n" 
+                                % (self.request.path, self.request.get('kind'), old_email, new_email))
+        self.response.out.write("</pre>and then check the logs in the admin console")
+
+        
+    def get_keys_query(self, kind):
+        """Returns a keys-only query to get the keys of the entities to update"""
+        
+        (old_email, new_email) = self.get_email_params()
+        # When a user's personal Google account is replaced by their transitioned Google Apps account with the same email,
+        # the Google user ID changes and the new User object's are not considered equal to the old User object's with the same
+        # email, so querying the datastore for entities referring to users with the same email return nothing. However an inequality
+        # query will return the relevant entities.
+        gt_user = users.User(old_email[:-1] + chr(ord(old_email[-1])-1) + chr(127))
+        lt_user = users.User(old_email + chr(0))
+        return db.GqlQuery(('select __key__ from %s where user > :1 and user < :2' % kind), gt_user, lt_user)
+
+    def use_transaction(self):
+        return False
+    
+    def update(self, entity):
+        (old_email, new_email) = self.get_email_params()
+        if entity.user.email() != old_email:
+            # This should never occur, but just in case, don't change or reput the entity.
+            return False 
+        entity.user = users.User(new_email)
+        return True
+
 class ViewArticle(request_handler.RequestHandler):
 
     def get(self):
@@ -1471,6 +1517,7 @@ def real_main():
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
+        ('/admin/changeemail', ChangeEmail),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
