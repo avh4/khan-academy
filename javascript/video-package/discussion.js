@@ -5,7 +5,7 @@ var Discussion = {
         VideoControls.initJumpLinks();
     },
 
-    showThrobberOnRight: function(jTarget) {
+    showThrobber: function(jTarget, fOnLeft) {
         if (!Discussion.jThrobber)
         {
             Discussion.jThrobber = $("<img style='display:none;' src='/images/throbber.gif' class='throbber'/>");
@@ -15,9 +15,11 @@ var Discussion = {
         if (!jTarget.length) return;
 
         var offset = jTarget.offset();
-        Discussion.jThrobber.css("top", (offset.top + (jTarget.height() / 2) - 8) + "px").css(
-                                "left", (offset.left + jTarget.width() + 4) + "px").css(
-                                "display", "");
+
+        var top = offset.top + (jTarget.height() / 2) - 8;
+        var left = fOnLeft ? (offset.left - 16 - 4) : (offset.left + jTarget.width() + 4);
+
+        Discussion.jThrobber.css("top", top).css("left", left).css("display", "");
     },
 
     hideThrobber: function() {
@@ -288,7 +290,7 @@ var QA = {
                 function(data) {fxnCallback(data, jText[0]);});
 
         QA.disable();
-        Discussion.showThrobberOnRight($("." + type + "_cancel", parent));
+        Discussion.showThrobber($("." + type + "_cancel", parent));
     },
 
     finishSubmitQuestion: function(data, el) {
@@ -329,7 +331,7 @@ var QA = {
                 }, 
                 function(data) { QA.finishLoadPage(data, fInitialLoad); });
 
-        Discussion.showThrobberOnRight($(".questions_page_controls span"));
+        if (!fInitialLoad) Discussion.showThrobber($(".questions_page_controls span"));
     },
 
     finishLoadPage: function(data, fInitialLoad) {
@@ -339,7 +341,7 @@ var QA = {
         $(".questions_container").html(dict_json.html);
         QA.page = dict_json.page;
         QA.initPagesAndQuestions();
-        Discussion.hideThrobber();
+        if (!fInitialLoad) Discussion.hideThrobber();
         VideoControls.initJumpLinks();
 
         var hash = "qa";
@@ -603,7 +605,7 @@ var Comments = {
                 }, 
                 function(data) { Comments.finishLoadPage(data, fInitialLoad); });
 
-        Discussion.showThrobberOnRight($(".comments_page_controls span"));
+        if (!fInitialLoad) Discussion.showThrobber($(".comments_page_controls span"));
     },
 
     finishLoadPage: function(data, fInitialLoad) {
@@ -613,7 +615,7 @@ var Comments = {
         $(".comments_container").html(dict_json.html);
         Comments.page = dict_json.page;
         Comments.initPages();
-        Discussion.hideThrobber();
+        if (!fInitialLoad) Discussion.hideThrobber();
         VideoControls.initJumpLinks();
 
         if (!fInitialLoad)
@@ -651,7 +653,7 @@ var Comments = {
                 Comments.finishSubmit);
 
         Comments.disable();
-        Discussion.showThrobberOnRight($(".comment_cancel"));
+        Discussion.showThrobber($(".comment_cancel"));
     },
 
     finishSubmit: function(data) {

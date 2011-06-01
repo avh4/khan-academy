@@ -61,6 +61,7 @@ var Video = {
         $('.mirosubs-videoTab').hide();
         $('.subtitles-warning').hide();
         $('.youtube-video').css('marginBottom', '0px');
+        Discussion.hideThrobber();
     },
 
     showSubtitles: function() {
@@ -72,6 +73,10 @@ var Video = {
 
         if ($('.mirosubs-videoTab').length == 0)
         {
+            setTimeout(function() {
+                Discussion.showThrobber($(".subtitles-warning"), true);
+            }, 1);
+
             $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', function() { 
                 // Workaround bug where subtitles are not displayed if video was already playing until
                 // video is paused and restarted.  We wait 3 secs to give subtitles a chance to load.
@@ -79,8 +84,8 @@ var Video = {
                     if (VideoControls.player && VideoControls.player.getPlayerState() == 1 /* playing */)
                     {
                         VideoControls.pause();
-                        VideoControls.play();                 
-                    } 
+                        VideoControls.play();
+                    }
                 }, 3000);
             });
         }
