@@ -685,7 +685,7 @@ class Playlist(Searchable, db.Model):
     _serialize_blacklist = ["readable_id"]
 
     @property
-    def api_url(self):
+    def ka_url(self):
         return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
 
     @staticmethod
