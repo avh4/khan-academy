@@ -214,7 +214,13 @@ def get_user_from_cookie(cookies, app_id, app_secret):
     payload = "".join(k + "=" + args[k] for k in sorted(args.keys())
                       if k != "sig")
     sig = hashlib.md5(payload + app_secret).hexdigest()
-    expires = int(args["expires"])
+
+    try:
+        expires = int(args["expires"])
+    except KeyError:
+        logging.warning("Malformed Facebook cookie is missing expires key.")
+        return None
+
     if sig == args.get("sig") and (expires == 0 or time.time() < expires):
         return args
     else:
