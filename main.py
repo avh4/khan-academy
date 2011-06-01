@@ -71,6 +71,7 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
+from oauth_provider import apps as oauth_apps
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -1552,6 +1553,8 @@ def real_main():
         ('/login/mobileoauth', MobileOAuthLogin),
         ('/postlogin', PostLogin),
         ('/logout', Logout),
+
+        ('/api-apps/register', oauth_apps.Register),
         
         # These are dangerous, should be able to clean things manually from the remote python shell
 

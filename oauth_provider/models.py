@@ -32,29 +32,27 @@ class Resource(db.Model):
 class Consumer(db.Model):
     name = db.StringProperty()
     description = db.TextProperty()
+    website = db.StringProperty()
 
     key_ = db.StringProperty()
     secret = db.StringProperty()
 
     status = db.IntegerProperty(choices=[state[0] for state in CONSUMER_STATES], default=PENDING)
     user = db.UserProperty(required=False)
-    #user = models.ForeignKey(User, null=True, blank=True, related_name='consumers')
-
-    #objects = ConsumerManager()
         
     def __unicode__(self):
         return u"Consumer %s with key %s" % (self.name, self.key)
 
     def generate_random_codes(self):
         
-        key = generate_random(length=KEY_SIZE)
+        key_ = generate_random(length=KEY_SIZE)
         secret = generate_random(length=SECRET_SIZE)
 
-        while Consumer.all().filter('key =',key).filter('secret =',secret).count():
-            key = generate_random(length=KEY_SIZE)
+        while Consumer.all().filter('key_ =', key_).filter('secret =', secret).count():
+            key_ = generate_random(length=KEY_SIZE)
             secret = generate_random(length=SECRET_SIZE)
 
-        self.key = key
+        self.key_ = key_
         self.secret = secret
         self.put()
 
