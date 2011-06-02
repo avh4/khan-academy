@@ -2,6 +2,7 @@ import cgi
 import logging
 import urllib
 import urllib2
+import urlparse
 
 import flask
 from flask import current_app, request, redirect
@@ -30,6 +31,37 @@ def authorize_token_redirect(oauth_map):
         "oauth_callback": oauth_map.callback_url_with_request_token_params(),
     }
     return redirect(append_url_params("/api/auth/authorize", params))
+
+def custom_scheme_redirect(url_redirect):
+    # urlparse.urlsplit doesn't currently handle custom schemes,
+    # which we want our callback URLs to support so mobile apps can register
+    # their own callback scheme handlers.
+    # See http://bugs.python.org/issue9374
+    # and http://stackoverflow.com/questions/1417958/parse-custom-uris-with-urlparse-python
+
+    scheme = urlparse.urlsplit(url_redirect)[0]
+
+    scheme_lists = [urlparse.uses_netloc, urlparse.uses_query, urlparse.uses_fragment, urlparse.uses_params, urlparse.uses_relative]
+    scheme_lists_modified = []
+
+    # Modify urlparse's internal scheme lists so it properly handles custom schemes
+    if scheme:
+        for scheme_list in scheme_lists:
+            if scheme not in scheme_list:
+                scheme_list.append(scheme)
+                scheme_lists_modified.append(scheme_list)
+
+    # Clear cache before re-parsing url_redirect
+    urlparse.clear_cache()
+
+    # Grab flask/werkzeug redirect result
+    redirect_result = redirect(url_redirect)
+
+    # Restore previous urlparse scheme list
+    for scheme_list in scheme_lists_modified:
+        scheme_list.remove(scheme)
+
+    return redirect_result
 
 def requested_oauth_callback():
     return request.values.get("oauth_callback") or ("%sapi/auth/default_callback" % request.host_url)
