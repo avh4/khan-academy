@@ -55,7 +55,7 @@ class OAuthMap(db.Model):
         }
         
         if include_verifier and self.verifier:
-            params_callback["verifier"] = self.verifier
+            params_callback["oauth_verifier"] = self.verifier
 
         return append_url_params(self.callback_url, params_callback)
 
