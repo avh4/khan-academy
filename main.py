@@ -1389,7 +1389,8 @@ class Login(request_handler.RequestHandler):
 class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
         self.render_template('login_mobile_oauth.html', {
-            "oauth_map_id": self.request_string("oauth_map_id", default="")
+            "oauth_map_id": self.request_string("oauth_map_id", default=""),
+            "view": self.request_string("view", default="")
         })
 
 class PostLogin(request_handler.RequestHandler):
