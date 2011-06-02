@@ -50,7 +50,7 @@ def request_token():
 
     oauth_map.put()
 
-    return redirect("/login/mobileoauth?oauth_map_id=%s" % oauth_map.key().id())
+    return redirect("/login/mobileoauth?oauth_map_id=%s&view=%s" % (oauth_map.key().id(), oauth_map.view))
 
 @route("/api/auth/request_token_callback/<provider>/<oauth_map_id>", methods=["GET"])
 def request_token_callback(provider, oauth_map_id):
