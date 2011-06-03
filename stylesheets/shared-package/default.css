@@ -2443,6 +2443,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     font-size: 15px;
 }
 #login-page .providers li {
+    float: left;
     border: 2px solid #ccc;
     border-bottom-color: #bbb;
     text-align: left;
