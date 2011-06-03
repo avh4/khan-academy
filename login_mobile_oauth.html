@@ -6,6 +6,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
 
         <style>
+            {% ifequal view "mobile" %} body { background-image: none; } {% endifequal %}
             #login-page {
                 text-align: center;
                 padding-top: 54px;
@@ -19,6 +20,16 @@
 
             #login-page .providers li {
                 margin-right: 0;
+                line-height: 0;
+                padding: 0;
+            }
+
+            #login-page .providers li a {
+                outline: none;
+                border: 0;
+                text-decoration: none;
+                padding: 10px;
+                display: block;
             }
             
             #login-page .providers li.facebook {
@@ -27,12 +38,6 @@
         </style>
 
         <link rel="stylesheet" type="text/css" media="screen" href="/javascript/jQueryOpenIdPlugin/openid.css?{{App.version}}" />
-        <script type="text/javascript" src="/javascript/jQueryOpenIdPlugin/jquery.openid.js?{{App.version}}"></script>
-        <script type="text/javascript">
-            $(function () {
-               $("form.openid:eq(0)").openid(); 
-            });            
-        </script>
     </head>
     <body>
         <div id="login-page">
@@ -41,13 +46,17 @@
 
                 <form class="openid" method="GET" action="{{ google_login_url|escape }}">
                     <ul class="providers"> 
-                        <li class="action-gradient" title="Google" onclick="javascript:window.location='/api/auth/request_token_callback/google/{{ oauth_map_id|escape }}'; return false;">
-                            <div class="sign-in-text">Login with:</div>
-                            <img width="205" height="70" src="/images/google-logo-large.png" />
+                        <li class="action-gradient" title="Google">
+                            <a href="/api/auth/request_token_callback/google/{{ oauth_map_id|escape }}">
+                                <div class="sign-in-text">Login with:</div>
+                                <img width="205" height="70" src="/images/google-logo-large.png" />
+                            </a>
                         </li>
-                        <li class="action-gradient facebook" title="Facebook" onclick="javascript:window.location='/api/auth/request_token_callback/facebook/{{ oauth_map_id|escape }}'; return false;">
-                            <div class="sign-in-text">Login with:</div>
-                            <img width="205" height="70" src="/images/facebook-logo-large.png" />
+                        <li class="action-gradient facebook" title="Facebook">
+                            <a href="/api/auth/request_token_callback/facebook/{{ oauth_map_id|escape }}">
+                                <div class="sign-in-text">Login with:</div>
+                                <img width="205" height="70" src="/images/facebook-logo-large.png" />
+                            </a>
                         </li>
                     </ul>
                 </form>

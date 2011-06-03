@@ -8,7 +8,7 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response
+from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response, custom_scheme_redirect
 from api.auth.google_util import google_request_token_handler
 from api.auth.facebook_util import facebook_request_token_handler
 
@@ -50,7 +50,7 @@ def request_token():
 
     oauth_map.put()
 
-    return redirect("/login/mobileoauth?oauth_map_id=%s" % oauth_map.key().id())
+    return redirect("/login/mobileoauth?oauth_map_id=%s&view=%s" % (oauth_map.key().id(), oauth_map.view))
 
 @route("/api/auth/request_token_callback/<provider>/<oauth_map_id>", methods=["GET"])
 def request_token_callback(provider, oauth_map_id):
@@ -100,7 +100,7 @@ def authorize_token():
         oauth_map.verifier = token.verifier
         oauth_map.put()
 
-        return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
+        return custom_scheme_redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
 
     except OAuthError, e:
         return oauth_error_response(e)

@@ -27,12 +27,18 @@ class CustomBadge(Badge):
         self.full_description = custom_badge_type.full_description
         self.points = custom_badge_type.points
         self.badge_category = custom_badge_type.category
+        self.custom_icon_src = custom_badge_type.icon_src
 
     def is_satisfied_by(self, *args, **kwargs):
         return False # Custom badges are only handed out manually
 
     def extended_description(self):
         return self.full_description
+
+    def icon_src(self):
+        if self.custom_icon_src:
+            return self.custom_icon_src
+        return Badge.icon_src(self)
 
 class CreateCustomBadge(request_handler.RequestHandler):
     def get(self):
@@ -55,9 +61,10 @@ class CreateCustomBadge(request_handler.RequestHandler):
         full_description = self.request_string("full_description")
         points = self.request_int("points", default = -1)
         badge_category = self.request_int("badge_category", default = -1)
+        icon_src = self.request_string("icon_src", default="")
 
         # Create custom badge
-        if CustomBadgeType.insert(name, description, full_description, points, badge_category):
+        if CustomBadgeType.insert(name, description, full_description, points, badge_category, icon_src):
 
             util_badges.all_badges(bust_cache=True)
             util_badges.all_badges_dict(bust_cache=True)

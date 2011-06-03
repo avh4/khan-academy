@@ -35,11 +35,15 @@ class CustomBadgeType(db.Model):
     full_description = db.TextProperty()
     points = db.IntegerProperty(default = 0)
     category = db.IntegerProperty(default = 0)
+    icon_src = db.StringProperty(default = "")
 
     @staticmethod
-    def insert(name, description, full_description, points, badge_category):
+    def insert(name, description, full_description, points, badge_category, icon_src = ""):
 
         if not name or not description or not full_description or points < 0 or badge_category < 0:
+            return None
+
+        if icon_src and not icon_src.startswith("/"):
             return None
 
         custom_badge_type = CustomBadgeType.get_by_key_name(key_names = name)
@@ -50,6 +54,7 @@ class CustomBadgeType(db.Model):
                     full_description = full_description,
                     points = points,
                     category = badge_category,
+                    icon_src = icon_src
                     )
 
         return None
