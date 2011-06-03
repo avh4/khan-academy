@@ -125,7 +125,7 @@ def access_token():
             return oauth_error_response(OAuthError("Cannot find corresponding access token."))
 
         # Grab the mapping of access tokens to our identity providers 
-        oauth_map = OAuthMap.get_from_request_token(request.values.get("oauth_token"))
+        oauth_map = OAuthMap.get_from_request_token(oauth_request.get_parameter("oauth_token"))
         if not oauth_map:
             return oauth_error_response(OAuthError("Cannot find oauth mapping for request token."))
 
