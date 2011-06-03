@@ -1,8 +1,9 @@
 import cgi
 import logging
 import urllib
-import urllib2
 import urlparse
+
+from google.appengine.api import urlfetch
 
 import flask
 from flask import current_app, request, redirect
@@ -72,18 +73,21 @@ def current_oauth_map():
     return None
 
 def get_response(url, params={}):
-    url = append_url_params(url, params)
+    url_with_params = append_url_params(url, params)
 
-    response = ""
-    file = None
+    result = None
     try:
-        file = urllib2.urlopen(url)
-        response = file.read()
-    finally:
-        if file:
-            file.close()
+        result = urlfetch.fetch(url_with_params, deadline=10)
+    except urlfetch.DownloadError, e:
+        raise OAuthError("Error in get_response for url %s, urlfetch download error: %s" % (url, e.message))
 
-    return response
+    if result:
+        if result.status_code == 200:
+            return result.content
+        else:
+            raise OAuthError("Error in get_response, received status %s for url %s" % (result.status_code, url))
+
+    return ""
 
 def append_url_params(url, params={}):
     if params:
