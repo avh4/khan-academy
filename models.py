@@ -418,6 +418,10 @@ class UserData(db.Model):
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login"
     ]
+
+    @property
+    def nickname(self):
+        return util.get_nickname_for(self.user)
     
     @staticmethod
     def get_for_current_user():
