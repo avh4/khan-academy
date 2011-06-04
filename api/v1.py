@@ -9,10 +9,11 @@ from flask import request
 import models
 import layer_cache
 import topics_list
+from badges import util_badges
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
-from api.auth.decorators import oauth_required
+from api.auth.decorators import oauth_required, oauth_optional
 
 import util
 
@@ -218,7 +219,7 @@ def user_data_other():
         if user_data_student:
             return user_data_student
 
-    return None
+    return {"hi": "no user!"}
 
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()
@@ -398,3 +399,17 @@ def user_video_logs(youtube_id):
             return video_log_query.fetch(500)
 
     return None
+
+#1:
+#@route("/api/v1/badges", methods=["GET"])
+#@oauth_optional # Needs implementation
+#@jsonp
+#@jsonify
+#def badges():
+    # Make sure this is just all possible badges for current user, and that earned badges
+    # have accompanying userbadge data
+#    return util_badges.get_user_badges()["possible_badges"]
+
+#2: Add badge_counts @property to UserData
+
+#3: Make video/log POST return {points: 123, badges: {...badges...}}
