@@ -218,7 +218,7 @@ def user_data_other():
         if user_data_student:
             return user_data_student
 
-    return {"hi": "no user!"}
+    return None
 
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()
