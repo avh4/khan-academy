@@ -9,6 +9,7 @@ from flask import request
 import models
 import layer_cache
 import topics_list
+from badges import badges
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
@@ -399,3 +400,8 @@ def user_video_logs(youtube_id):
 
     return None
 
+@route("/api/v1/badges/categories", methods=["GET"])
+@jsonp
+@jsonify
+def badge_categories():
+    return badges.BadgeCategory.all()

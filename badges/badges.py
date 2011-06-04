@@ -12,7 +12,7 @@ class BadgeContextType:
     EXERCISE = 1
     PLAYLIST = 2
 
-class BadgeCategory:
+class BadgeCategory(object):
     # Sorted by astronomical size...
     BRONZE = 0 # Meteorite, "Common"
     SILVER = 1 # Moon, "Uncommon"
@@ -21,15 +21,27 @@ class BadgeCategory:
     DIAMOND = 4 # Black Hole, "Legendary"
     MASTER = 5 # Summative/Academic Achievement
 
+    _serialize_blacklist = [
+            "BRONZE", "SILVER", "GOLD",
+            "PLATINUM", "DIAMOND", "MASTER",
+            ]
+
+    def __init__(self, category):
+        self.category = category
+
     @staticmethod
     def empty_count_dict():
         count_dict = {}
-        for category in BadgeCategory.list():
+        for category in BadgeCategory.list_categories():
             count_dict[category] = 0
         return count_dict
 
     @staticmethod
-    def list():
+    def all():
+        return map(lambda category: BadgeCategory(category), BadgeCategory.list_categories())
+
+    @staticmethod
+    def list_categories():
         return [
             BadgeCategory.BRONZE,
             BadgeCategory.SILVER,
@@ -39,8 +51,12 @@ class BadgeCategory:
             BadgeCategory.MASTER,
         ]
 
+    @property
+    def description(self):
+        return BadgeCategory.get_description(self.category)
+
     @staticmethod
-    def description(category):
+    def get_description(category):
         if category == BadgeCategory.BRONZE:
             return "Meteorite badges are common and easy to earn when just getting started."
         elif category == BadgeCategory.SILVER:
@@ -55,8 +71,12 @@ class BadgeCategory:
             return "Challenge Patches are special awards for completing challenge exercises."
         return ""
 
+    @property
+    def icon_src(self):
+        return BadgeCategory.get_icon_src(self.category)
+
     @staticmethod
-    def icon_src(category):
+    def get_icon_src(category):
         src = "/images/badges/half-moon-small.png"
 
         if category == BadgeCategory.BRONZE:
@@ -74,8 +94,12 @@ class BadgeCategory:
 
         return util.static_url(src)
 
+    @property
+    def chart_icon_src(self):
+        return BadgeCategory.get_chart_icon_src(self.category)
+
     @staticmethod
-    def chart_icon_src(category):
+    def get_chart_icon_src(category):
         src = "/images/badges/meteorite-small-chart.png"
 
         if category == BadgeCategory.BRONZE:
@@ -93,20 +117,24 @@ class BadgeCategory:
 
         return util.static_url(src)
 
+    @property
+    def type_label(self):
+        return BadgeCategory.get_type_label(self.category)
+
     @staticmethod
-    def type_label(category):
+    def get_type_label(category):
         if category == BadgeCategory.BRONZE:
-            return "Meteorite (Common)"
+            return "Meteorite"
         elif category == BadgeCategory.SILVER:
-            return "Moon (Uncommon)"
+            return "Moon"
         elif category == BadgeCategory.GOLD:
-            return "Earth (Rare)"
+            return "Earth"
         elif category == BadgeCategory.PLATINUM:
-            return "Sun (Epic)"
+            return "Sun"
         elif category == BadgeCategory.DIAMOND:
-            return "Black Hole (Legendary)"
+            return "Black Hole"
         elif category == BadgeCategory.MASTER:
-            return "Challenge Patches (Challenge Completion)"
+            return "Challenge Patches"
         return "Common"
 
 # Badge is the base class used by various badge subclasses (ExerciseBadge, PlaylistBadge, TimedProblemBadge, etc).
@@ -152,16 +180,16 @@ class Badge:
             return name_with_context
 
     def category_description(self):
-        return BadgeCategory.description(self.badge_category)
+        return BadgeCategory.get_description(self.badge_category)
 
     def icon_src(self):
-        return BadgeCategory.icon_src(self.badge_category)
+        return BadgeCategory.get_icon_src(self.badge_category)
 
     def chart_icon_src(self):
-        return BadgeCategory.chart_icon_src(self.badge_category)
+        return BadgeCategory.get_chart_icon_src(self.badge_category)
 
     def type_label(self):
-        return BadgeCategory.type_label(self.badge_category)
+        return BadgeCategory.get_type_label(self.badge_category)
 
     def name_with_target_context(self, target_context_name):
         if target_context_name is None:
