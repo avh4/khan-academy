@@ -147,7 +147,12 @@ class BadgeCategory(object):
 # the whole system.
 # These functions are highly optimized and should only ever use data that is already stored in UserData or is passed as optional keyword arguments
 # that have already been calculated / retrieved.
-class Badge:
+class Badge(object):
+
+    _serialize_whitelist = [
+            "points", "badge_category", "description",
+            "safe_extended_description", "name", "user_badges"
+            ]
 
     def __init__(self):
         # Initialized by subclasses:
@@ -166,6 +171,8 @@ class Badge:
 
         # Hide the badge from all badge lists if it hasn't been achieved yet
         self.is_hidden_if_unknown = False
+
+        self.is_owned = False
         
     @staticmethod
     def add_target_context_name(name, target_context_name):
@@ -196,6 +203,16 @@ class Badge:
             return self.name
         else:
             return Badge.add_target_context_name(self.name, target_context_name)
+
+    def is_hidden(self):
+        return self.is_hidden_if_unknown and not self.is_owned
+
+    @property
+    def safe_extended_description(self):
+        desc = self.extended_description()
+        if self.is_teaser_if_unknown and not self.is_owned:
+            desc = "???"
+        return desc
 
     # Overridden by individual badge implementations
     def extended_description(self):

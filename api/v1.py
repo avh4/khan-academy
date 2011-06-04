@@ -9,13 +9,12 @@ from flask import request
 import models
 import layer_cache
 import topics_list
-from badges import badges
+from badges import badges, util_badges, models_badges
+import util
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
-
-import util
 
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
@@ -399,6 +398,30 @@ def user_video_logs(youtube_id):
             return video_log_query.fetch(500)
 
     return None
+
+@route("/api/v1/badges", methods=["GET"])
+@oauth_optional()
+@jsonp
+@jsonify
+def badges():
+    badges_dict = util_badges.all_badges_dict()
+
+    user = util.get_current_user()
+    if user:
+
+        user_badges = models_badges.UserBadge.get_for(user)
+
+        for user_badge in user_badges:
+
+            badge = badges_dict.get(user_badge.badge_name)
+
+            if badge:
+                if not hasattr(badge, "user_badges"):
+                    badge.user_badges = []
+                badge.user_badges.append(user_badge)
+                badge.is_owned = True
+
+    return sorted(filter(lambda badge: not badge.is_hidden(), badges_dict.values()), key=lambda badge: badge.name)
 
 @route("/api/v1/badges/categories", methods=["GET"])
 @jsonp
