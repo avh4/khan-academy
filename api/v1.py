@@ -195,6 +195,8 @@ def replace_playlist_values(structure, playlist_dict):
 def get_visible_user_data_from_request():
 
     user = util.get_current_user()
+    if not user:
+        return None
 
     email_student = request.request_string("email")
     user_student = users.User(email_student) if email_student else user
@@ -409,17 +411,20 @@ def badges_list():
     user = util.get_current_user()
     if user:
 
-        user_badges = models_badges.UserBadge.get_for(user)
+        user_data_student = get_visible_user_data_from_request()
+        if user_data_student:
 
-        for user_badge in user_badges:
+            user_badges = models_badges.UserBadge.get_for(user_data_student.user)
 
-            badge = badges_dict.get(user_badge.badge_name)
+            for user_badge in user_badges:
 
-            if badge:
-                if not hasattr(badge, "user_badges"):
-                    badge.user_badges = []
-                badge.user_badges.append(user_badge)
-                badge.is_owned = True
+                badge = badges_dict.get(user_badge.badge_name)
+
+                if badge:
+                    if not hasattr(badge, "user_badges"):
+                        badge.user_badges = []
+                    badge.user_badges.append(user_badge)
+                    badge.is_owned = True
 
     return sorted(filter(lambda badge: not badge.is_hidden(), badges_dict.values()), key=lambda badge: badge.name)
 
