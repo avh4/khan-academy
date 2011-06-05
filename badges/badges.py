@@ -90,6 +90,29 @@ class BadgeCategory(object):
         elif category == BadgeCategory.DIAMOND:
             src = "/images/badges/eclipse-small.png"
         elif category == BadgeCategory.MASTER:
+            src = "/images/badges/master-challenge-blue-small.png"
+
+        return util.static_url(src)
+
+    @property
+    def large_icon_src(self):
+        return BadgeCategory.get_large_icon_src(self.category)
+
+    @staticmethod
+    def get_large_icon_src(category):
+        src = "/images/badges/half-moon.png"
+
+        if category == BadgeCategory.BRONZE:
+            src = "/images/badges/meteorite.png"
+        elif category == BadgeCategory.SILVER:
+            src = "/images/badges/moon.png"
+        elif category == BadgeCategory.GOLD:
+            src = "/images/badges/earth.png"
+        elif category == BadgeCategory.PLATINUM:
+            src = "/images/badges/sun.png"
+        elif category == BadgeCategory.DIAMOND:
+            src = "/images/badges/eclipse.png"
+        elif category == BadgeCategory.MASTER:
             src = "/images/badges/master-challenge-blue.png"
 
         return util.static_url(src)
