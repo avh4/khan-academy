@@ -20,6 +20,11 @@ def dumps(obj):
         return items
     elif isinstance(obj, datetime):
         return obj.isoformat()
+    elif isinstance(obj, dict):
+        properties = {}
+        for key in obj:
+            properties[key] = dumps(obj[key])
+        return properties
 
     properties = dict();
     if isinstance(obj, db.Model):
