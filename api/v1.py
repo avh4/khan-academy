@@ -403,7 +403,7 @@ def user_video_logs(youtube_id):
 @oauth_optional()
 @jsonp
 @jsonify
-def badges():
+def badges_list():
     badges_dict = util_badges.all_badges_dict()
 
     user = util.get_current_user()
