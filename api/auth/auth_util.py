@@ -11,6 +11,7 @@ from flask import current_app, request, redirect
 from oauth_provider.oauth import build_authenticate_header, OAuthError
 
 def oauth_error_response(e):
+    logging.error("Returning oauth_error: %s" % e.message)
     return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
 
 def access_token_response(oauth_map):
