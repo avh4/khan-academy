@@ -59,7 +59,7 @@ html {
 }
 
 body {
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12px;
     margin: 0;
     color: #444;
@@ -83,7 +83,7 @@ body {
 
 /* Basic typography for the entire site */
 
-h1, h2, h3, h4, h5 { color: #111; font-weight: normal; }
+h1, h2, h3, h4, h5 { color: #111; font-family: "MuseoSans500", sans-serif; }
 h1 {font-size:25px; margin-bottom: 18px;}
     .main-headline, .section-headline { padding-top: 18px; }
     h1.main-headline {font-size: 32px; position: relative; line-height: 37px; z-index: 10;}
@@ -267,6 +267,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 header, footer {
     display: block;
     width: 100%;
+    font-family: "MuseoSans300", sans-serif;
 }
 
 footer {
