@@ -11,7 +11,6 @@ from flask import current_app, request, redirect
 from oauth_provider.oauth import build_authenticate_header, OAuthError
 
 def oauth_error_response(e):
-    logging.error("Returning oauth_error: %s" % e.message)
     return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
 
 def access_token_response(oauth_map):
@@ -77,16 +76,40 @@ def get_response(url, params={}):
     url_with_params = append_url_params(url, params)
 
     result = None
-    try:
-        result = urlfetch.fetch(url_with_params, deadline=10)
-    except urlfetch.DownloadError, e:
-        raise OAuthError("Error in get_response for url %s, urlfetch download error: %s" % (url, e.message))
+
+    # Be extra forgiving w/ timeouts during API auth consumer calls
+    # in case Facebook or Google is slow.
+    c_tries_left = 3
+    while not result and c_tries_left > 0:
+
+        try:
+            result = urlfetch.fetch(url_with_params, deadline=10)
+
+        except urlfetch.DownloadError, e:
+
+            if "timed out" in e.message:
+
+                c_tries_left -= 1
+                logging.debug("Trying to get response for %s again due to timeout." % url)
+
+            else:
+
+                c_tries_left = 0
+                error_msg = "Error in get_response for url %s, urlfetch download error: %s" % (url, e.message)
+
+                logging.debug(error_msg)
+                raise OAuthError(error_msg)
 
     if result:
+
         if result.status_code == 200:
             return result.content
         else:
             raise OAuthError("Error in get_response, received status %s for url %s" % (result.status_code, url))
+
+    elif c_tries_left == 0:
+
+        raise OAuthError("Failed to get response for %s due to timeouts." % url)
 
     return ""
 
