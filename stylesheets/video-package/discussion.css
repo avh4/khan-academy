@@ -1,5 +1,5 @@
 
-.video_comments { text-align: right; }
+.video_comments { text-align: left; }
 .video_comments .comment { padding: 2px 0; position: relative; }
 .video_comments div.comment_form { width:350px; margin-left: auto; }
 .video_comments div.comment_form .comment_text { width:350px; }
@@ -327,7 +327,7 @@ span.flag_tools_show:hover img.feedback_flag_gray { display:none; }
 .sum_votes_changed { color: #E45C02; }
 
 .vote_tools div.vote_tools_show a.vote_for {
-    border:none; 
+	border:none; 
     outline:none; 
     display:block; 
     height:13px; 
@@ -372,9 +372,9 @@ div.vote_tools {
 }
 
 .comments_container div.vote_tools {
-    right: -25px;
+    left: -25px;
     top: -2px;
-    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .comments_container .comment a.vote_for { padding-bottom: 2px; }
