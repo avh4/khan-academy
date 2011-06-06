@@ -1,7 +1,7 @@
 
 .video_comments { text-align: left; }
 .video_comments .comment { padding: 2px 0; position: relative; }
-.video_comments div.comment_form { width:350px; margin-left: auto; }
+.video_comments div.comment_form { width:350px; margin-right: auto; }
 .video_comments div.comment_form .comment_text { width:350px; }
 
 
