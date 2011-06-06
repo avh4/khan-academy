@@ -37,7 +37,7 @@
     {% else %}
 
     <p>
-        Register an app to use with the <a href="https://github.com/khan/khan-api/wiki/Khan-Academy-API">Khan Academy API</a>.
+        Register an app to use with the <a href="https://github.com/khan/khan-api/wiki/Khan-Academy-API">Khan Academy API</a>. The more contact information you provide, the more likely we'll be able to contact you in the event of any technical issues or problems with your usage of the API.
     </p>
 
     <p>
@@ -67,6 +67,14 @@
             <tr>
                 <td>Website:</td>
                 <td colspan="2"><input type="text" name="website" value="{{ website|escape }}"/></td>
+            </tr>
+            <tr>
+                <td>Phone:</td>
+                <td colspan="2"><input type="text" name="phone" value="{{ phone|escape }}"/></td>
+            </tr>
+            <tr>
+                <td>Company:</td>
+                <td colspan="2"><input type="text" name="company" value="{{ company|escape }}"/></td>
             </tr>
 
             <tr>
