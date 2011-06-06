@@ -20,6 +20,11 @@ def dumps(obj):
         return items
     elif isinstance(obj, datetime):
         return obj.isoformat()
+    elif isinstance(obj, dict):
+        properties = {}
+        for key in obj:
+            properties[key] = dumps(obj[key])
+        return properties
 
     properties = dict();
     if isinstance(obj, db.Model):
@@ -29,7 +34,11 @@ def dumps(obj):
     if hasattr(obj, "_serialize_blacklist"):
         serialize_blacklist = obj._serialize_blacklist
 
-    for property in dir(obj):
+    serialize_list = dir(obj)
+    if hasattr(obj, "_serialize_whitelist"):
+        serialize_list = obj._serialize_whitelist
+
+    for property in serialize_list:
         if is_visible_property(property, serialize_blacklist):
             try:
                 value = obj.__getattribute__(property)

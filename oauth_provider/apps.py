@@ -14,13 +14,17 @@ class Register(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
 
     def post(self):
+
         user = util.get_current_user()
         if user:
             name = self.request_string("name", default="").strip()
             description = self.request_string("description", default="").strip()
             website = self.request_string("website", default="").strip()
 
-            name_error = description_error = None
+            name_error = description_error = agree_error = None
+
+            if not self.request_bool("agree", default=False):
+                agree_error = "You must agree to our terms of service."
 
             if not name:
                 name_error = "You need a name for your app."
@@ -33,7 +37,7 @@ class Register(request_handler.RequestHandler):
                 if consumer:
                     name_error = "This name is already taken."
 
-            if name_error or description_error:
+            if name_error or description_error or agree_error:
 
                 self.render_template("oauth_provider/register_app.html",
                         {
@@ -41,7 +45,8 @@ class Register(request_handler.RequestHandler):
                             "description": description,
                             "website": website,
                             "name_error": name_error,
-                            "description_error": description_error
+                            "description_error": description_error,
+                            "agree_error": agree_error,
                         })
 
             else:

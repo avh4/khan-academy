@@ -12,7 +12,7 @@ class BadgeContextType:
     EXERCISE = 1
     PLAYLIST = 2
 
-class BadgeCategory:
+class BadgeCategory(object):
     # Sorted by astronomical size...
     BRONZE = 0 # Meteorite, "Common"
     SILVER = 1 # Moon, "Uncommon"
@@ -21,16 +21,144 @@ class BadgeCategory:
     DIAMOND = 4 # Black Hole, "Legendary"
     MASTER = 5 # Summative/Academic Achievement
 
+    _serialize_blacklist = [
+            "BRONZE", "SILVER", "GOLD",
+            "PLATINUM", "DIAMOND", "MASTER",
+            ]
+
+    def __init__(self, category):
+        self.category = category
+
     @staticmethod
     def empty_count_dict():
         count_dict = {}
-        count_dict[BadgeCategory.BRONZE] = 0
-        count_dict[BadgeCategory.SILVER] = 0
-        count_dict[BadgeCategory.GOLD] = 0
-        count_dict[BadgeCategory.PLATINUM] = 0
-        count_dict[BadgeCategory.DIAMOND] = 0
-        count_dict[BadgeCategory.MASTER] = 0
+        for category in BadgeCategory.list_categories():
+            count_dict[category] = 0
         return count_dict
+
+    @staticmethod
+    def all():
+        return map(lambda category: BadgeCategory(category), BadgeCategory.list_categories())
+
+    @staticmethod
+    def list_categories():
+        return [
+            BadgeCategory.BRONZE,
+            BadgeCategory.SILVER,
+            BadgeCategory.GOLD,
+            BadgeCategory.PLATINUM,
+            BadgeCategory.DIAMOND,
+            BadgeCategory.MASTER,
+        ]
+
+    @property
+    def description(self):
+        return BadgeCategory.get_description(self.category)
+
+    @staticmethod
+    def get_description(category):
+        if category == BadgeCategory.BRONZE:
+            return "Meteorite badges are common and easy to earn when just getting started."
+        elif category == BadgeCategory.SILVER:
+            return "Moon badges are uncommon and represent an investment in learning."
+        elif category == BadgeCategory.GOLD:
+            return "Earth badges are rare. They require a significant amount of learning."
+        elif category == BadgeCategory.PLATINUM:
+            return "Sun badges are epic. Earning them is a true challenge, and they require impressive dedication."
+        elif category == BadgeCategory.DIAMOND:
+            return "Black Hole badges are legendary and unknown. They are the most unique Khan Academy awards."
+        elif category == BadgeCategory.MASTER:
+            return "Challenge Patches are special awards for completing challenge exercises."
+        return ""
+
+    @property
+    def icon_src(self):
+        return BadgeCategory.get_icon_src(self.category)
+
+    @staticmethod
+    def get_icon_src(category):
+        src = "/images/badges/half-moon-small.png"
+
+        if category == BadgeCategory.BRONZE:
+            src = "/images/badges/meteorite-small.png"
+        elif category == BadgeCategory.SILVER:
+            src = "/images/badges/moon-small.png"
+        elif category == BadgeCategory.GOLD:
+            src = "/images/badges/earth-small.png"
+        elif category == BadgeCategory.PLATINUM:
+            src = "/images/badges/sun-small.png"
+        elif category == BadgeCategory.DIAMOND:
+            src = "/images/badges/eclipse-small.png"
+        elif category == BadgeCategory.MASTER:
+            src = "/images/badges/master-challenge-blue-small.png"
+
+        return util.static_url(src)
+
+    @property
+    def large_icon_src(self):
+        return BadgeCategory.get_large_icon_src(self.category)
+
+    @staticmethod
+    def get_large_icon_src(category):
+        src = "/images/badges/half-moon.png"
+
+        if category == BadgeCategory.BRONZE:
+            src = "/images/badges/meteorite.png"
+        elif category == BadgeCategory.SILVER:
+            src = "/images/badges/moon.png"
+        elif category == BadgeCategory.GOLD:
+            src = "/images/badges/earth.png"
+        elif category == BadgeCategory.PLATINUM:
+            src = "/images/badges/sun.png"
+        elif category == BadgeCategory.DIAMOND:
+            src = "/images/badges/eclipse.png"
+        elif category == BadgeCategory.MASTER:
+            src = "/images/badges/master-challenge-blue.png"
+
+        return util.static_url(src)
+
+    @property
+    def chart_icon_src(self):
+        return BadgeCategory.get_chart_icon_src(self.category)
+
+    @staticmethod
+    def get_chart_icon_src(category):
+        src = "/images/badges/meteorite-small-chart.png"
+
+        if category == BadgeCategory.BRONZE:
+            src = "/images/badges/meteorite-small-chart.png"
+        elif category == BadgeCategory.SILVER:
+            src = "/images/badges/moon-small-chart.png"
+        elif category == BadgeCategory.GOLD:
+            src = "/images/badges/earth-small-chart.png"
+        elif category == BadgeCategory.PLATINUM:
+            src = "/images/badges/sun-small-chart.png"
+        elif category == BadgeCategory.DIAMOND:
+            src = "/images/badges/eclipse-small-chart.png"
+        elif category == BadgeCategory.MASTER:
+            src = "/images/badges/master-challenge-blue-chart.png"
+
+        return util.static_url(src)
+
+    @property
+    def type_label(self):
+        return BadgeCategory.get_type_label(self.category)
+
+    @staticmethod
+    def get_type_label(category):
+        if category == BadgeCategory.BRONZE:
+            return "Meteorite"
+        elif category == BadgeCategory.SILVER:
+            return "Moon"
+        elif category == BadgeCategory.GOLD:
+            return "Earth"
+        elif category == BadgeCategory.PLATINUM:
+            return "Sun"
+        elif category == BadgeCategory.DIAMOND:
+            return "Black Hole"
+        elif category == BadgeCategory.MASTER:
+            return "Challenge Patches"
+        return "Common"
 
 # Badge is the base class used by various badge subclasses (ExerciseBadge, PlaylistBadge, TimedProblemBadge, etc).
 # 
@@ -42,7 +170,12 @@ class BadgeCategory:
 # the whole system.
 # These functions are highly optimized and should only ever use data that is already stored in UserData or is passed as optional keyword arguments
 # that have already been calculated / retrieved.
-class Badge:
+class Badge(object):
+
+    _serialize_whitelist = [
+            "points", "badge_category", "description",
+            "safe_extended_description", "name", "user_badges"
+            ]
 
     def __init__(self):
         # Initialized by subclasses:
@@ -61,6 +194,8 @@ class Badge:
 
         # Hide the badge from all badge lists if it hasn't been achieved yet
         self.is_hidden_if_unknown = False
+
+        self.is_owned = False
         
     @staticmethod
     def add_target_context_name(name, target_context_name):
@@ -75,77 +210,32 @@ class Badge:
             return name_with_context
 
     def category_description(self):
-        if self.badge_category == BadgeCategory.BRONZE:
-            return "Meteorite badges are common and easy to earn when just getting started."
-        elif self.badge_category == BadgeCategory.SILVER:
-            return "Moon badges are uncommon and represent an investment in learning."
-        elif self.badge_category == BadgeCategory.GOLD:
-            return "Earth badges are rare. They require a significant amount of learning."
-        elif self.badge_category == BadgeCategory.PLATINUM:
-            return "Sun badges are epic. Earning them is a true challenge, and they require impressive dedication."
-        elif self.badge_category == BadgeCategory.DIAMOND:
-            return "Black Hole badges are legendary and unknown. They are the most unique Khan Academy awards."
-        elif self.badge_category == BadgeCategory.MASTER:
-            return "Challenge Patches are special awards for completing challenge exercises."
-        return ""
+        return BadgeCategory.get_description(self.badge_category)
 
     def icon_src(self):
-        src = "/images/badges/half-moon-small.png"
-
-        if self.badge_category == BadgeCategory.BRONZE:
-            src = "/images/badges/meteorite-small.png"
-        elif self.badge_category == BadgeCategory.SILVER:
-            src = "/images/badges/moon-small.png"
-        elif self.badge_category == BadgeCategory.GOLD:
-            src = "/images/badges/earth-small.png"
-        elif self.badge_category == BadgeCategory.PLATINUM:
-            src = "/images/badges/sun-small.png"
-        elif self.badge_category == BadgeCategory.DIAMOND:
-            src = "/images/badges/eclipse-small.png"
-        elif self.badge_category == BadgeCategory.MASTER:
-            src = "/images/badges/master-challenge-blue.png"
-
-        return util.static_url(src)
+        return BadgeCategory.get_icon_src(self.badge_category)
 
     def chart_icon_src(self):
-
-        src = "/images/badges/meteorite-small-chart.png"
-
-        if self.badge_category == BadgeCategory.BRONZE:
-            src = "/images/badges/meteorite-small-chart.png"
-        elif self.badge_category == BadgeCategory.SILVER:
-            src = "/images/badges/moon-small-chart.png"
-        elif self.badge_category == BadgeCategory.GOLD:
-            src = "/images/badges/earth-small-chart.png"
-        elif self.badge_category == BadgeCategory.PLATINUM:
-            src = "/images/badges/sun-small-chart.png"
-        elif self.badge_category == BadgeCategory.DIAMOND:
-            src = "/images/badges/eclipse-small-chart.png"
-        elif self.badge_category == BadgeCategory.MASTER:
-            src = "/images/badges/master-challenge-blue-chart.png"
-
-        return util.static_url(src)
+        return BadgeCategory.get_chart_icon_src(self.badge_category)
 
     def type_label(self):
-        if self.badge_category == BadgeCategory.BRONZE:
-            return "Meteorite (Common)"
-        elif self.badge_category == BadgeCategory.SILVER:
-            return "Moon (Uncommon)"
-        elif self.badge_category == BadgeCategory.GOLD:
-            return "Earth (Rare)"
-        elif self.badge_category == BadgeCategory.PLATINUM:
-            return "Sun (Epic)"
-        elif self.badge_category == BadgeCategory.DIAMOND:
-            return "Black Hole (Legendary)"
-        elif self.badge_category == BadgeCategory.MASTER:
-            return "Challenge Patches (Challenge Completion)"
-        return "Common"
+        return BadgeCategory.get_type_label(self.badge_category)
 
     def name_with_target_context(self, target_context_name):
         if target_context_name is None:
             return self.name
         else:
             return Badge.add_target_context_name(self.name, target_context_name)
+
+    def is_hidden(self):
+        return self.is_hidden_if_unknown and not self.is_owned
+
+    @property
+    def safe_extended_description(self):
+        desc = self.extended_description()
+        if self.is_teaser_if_unknown and not self.is_owned:
+            desc = "???"
+        return desc
 
     # Overridden by individual badge implementations
     def extended_description(self):
