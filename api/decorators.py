@@ -30,6 +30,10 @@ def jsonify(func):
     @wraps(func)
     def jsonified(*args, **kwargs):
         obj = func(*args, **kwargs)
+
+        if isinstance(obj, current_app.response_class):
+            return obj
+
         return obj if type(obj) == str else apijsonify.jsonify(obj)
     return jsonified
 
@@ -37,6 +41,10 @@ def jsonp(func):
     @wraps(func)
     def jsonp_enabled(*args, **kwargs):
         val = func(*args, **kwargs)
+
+        if isinstance(val, current_app.response_class):
+            return val
+
         callback = request.values.get("callback")
         if callback:
             val = "%s(%s)" % (callback, val)
