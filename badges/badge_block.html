@@ -1,5 +1,5 @@
 {% if badge %}
-    <div class="achievement-badge category-{{badge.badge_category}} {% if user_badge or badge.is_owned %}achievement-badge-owned{% endif %}" title="{{ badge.type_label|escape }}: {{ extended_description|escape }}">
+    <div class="achievement-badge category-{{badge.badge_category}} {% if user_badge or badge.is_owned %}achievement-badge-owned{% endif %}" title="{{ badge.type_label|escape }}: {{ extended_description|escape }}" name="{{ badge.description|escape }}">
         <div id="outline-box">
         <img src="{{ badge.icon_src }}" id="badge-icon"/>
         <div class="achievement-title">{{ badge.description|escape }}{% if frequency %} <span class="frequency">(x{{ frequency }})</span>{% endif %}</div>
@@ -32,6 +32,37 @@
             {% endif %}
         </div>
         {% if badge.points %}<div class="energy-points-badge">{{ badge.points }}</div>{% endif %}
-        </div>
+       
+{% if user_badge %}
+		<script>
+			$(function() {
+
+				$( ".share_link" ).click(function() {
+					$(this).next(".sharebar").toggle("slide", {}, 500 );	
+					return false;
+				});
+
+				$(".sharebar").hide();
+				$('[name="share_container-{{ badge.description|escape }}"]').hide();
+				
+			//	$(".achievement-badge-owned").hide();
+				
+				$('[name*="{{ badge.description|escape }}"]').hover(
+				  function () {
+				    $('[name="share_container-{{ badge.description|escape }}"]').show();
+				  },
+				  function () {
+				    $('[name="share_container-{{ badge.description|escape }}"]').hide();
+				  }
+				);
+				
+			});
+			</script>
+			<span name="share_container-{{ badge.description|escape }}">
+			<span class="share_link" style="margin-left:5px; position:absolute;z-index:1"/> Share </span> <span class="sharebar" style="z-index:0; padding-left:40px;"> Twitter Facebook</span>
+			</span>
+{% endif %}
+ 		</div>
     </div>
+	
 {% endif %}
