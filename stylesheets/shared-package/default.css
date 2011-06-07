@@ -123,8 +123,8 @@ hr {
 .simple-button {
     color: #333 !important;
     cursor: pointer !important;
-    border: 1px solid #ccc;
-    border-bottom: 1px solid #bbb;
+    border: 1px solid #ccc !important;
+    border-bottom: 1px solid #bbb !important;
     padding: 5px 10px;
     position: relative;
     margin: 0;
@@ -142,8 +142,15 @@ hr {
     left: 1px;
     top: 1px;
 }
-
 .simple-button.with-icon {
+    padding-left: 30px;
+}
+.simple-button.with-icon img {
+    position: absolute;
+    left: 7px;
+    top: 3px;
+}
+.simple-button.social-button {
     display: block;
     text-transform: uppercase;
     margin-bottom: 9px;
@@ -152,7 +159,7 @@ hr {
     max-width: 200px;
     padding-top: 7px;
 }
-    .simple-button.with-icon img {
+    .simple-button.social-button img {
         vertical-align: middle;
         width: 24px;
         height: 24px;

@@ -134,4 +134,6 @@
 }
 .extra-link-bar a {
     color: #069;
+    margin-left: 5px;
 }
+.simple-button.with-icon.download-icon img { top: 5px; }
