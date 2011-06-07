@@ -64,7 +64,7 @@ body {
     margin: 0;
     color: #444;
     line-height: 18px;
-    background: #fff url(/images/page-bg.png) repeat-x;
+    background: url(/images/light-page-bg.png) repeat-x;
 }
 
 #page-container {
@@ -75,10 +75,10 @@ body {
     min-width: 1000px;
     max-width: 1200px;
     position: relative;
-    background: transparent url(/images/content-border.png) no-repeat 0 153px;
+    background: transparent url(/images/content-border.png) no-repeat 0 82px;
 }
 #page-container-inner {
-    background: transparent url(/images/content-border.png) no-repeat right 153px;
+    background: transparent url(/images/content-border.png) no-repeat right 82px;
 }
 
 /* Basic typography for the entire site */
@@ -350,34 +350,26 @@ footer {
 }
 
 #top-header {
-    height: 42px;
+    height: 82px;
     position: relative\9;
 }
 
 #top-header #logo {
-    height: 42px;
+    height: 100px;
     position: relative;
     background-image: url(/images/non-repeating-sprites.png);
-    background-position: -10px -199px;
+    background-position: -10px -261px;
     width: 317px;
 }
-    #top-header #logo #logo-highlight {
-        position: absolute;
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -261px;
-        width: 592px;
-        height: 194px;
-        left: -115px;
-    }
     #top-header #logo #logo-image{
         position: absolute;
-        left: 23px;
-        top: 15px;
+        left: 10px;
+        top: 6px;
         z-index: 1;    
     }
     #top-header #logo #logo-image {
-        width: 309px;
-        height: 71px;
+        width: 280px;
+        height: 65px;
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -465px;
     }
@@ -386,16 +378,15 @@ footer {
 #top-header #stats {
     position: relative;
     z-index: 2;
-    color: #999;
+    color: #777;
 }
     #top-header #stats #page_visitors {
         position: absolute;
-        left: 84px;
-        top: 50px;
-        font-size:15px;
+        left: 123px;
+        top: -75px;
+        font-size:13px;
         font-style: italic;
         font-weight: normal;
-        font-family: Georgia;
         display: none; /* hidden until AJAX call to chartbeat gets the number */
         text-decoration: none;
     }
@@ -404,6 +395,7 @@ footer {
     margin-right: 0;
     position: relative;
     top: -3px;
+    text-shadow: 0 1px 0 #f7f7f7;
 }
     #user-info ul {
         display: block;
@@ -416,21 +408,21 @@ footer {
     #user-info a.notification_link img {
         position: relative;
     }
-    #user-info .user-name {
-        color: white;
-        text-shadow: 0 -1px 0 rgba(0,0,0, .4);
-    }
 
+#nav-and-search {
+    /* We're positioning this absolutely because of the iframe jumpy nonsense from the facebook button */
+    position: absolute;
+    right: 10px;
+    top: 45px;
+}
 #sitewide-navigation {
-    clear: both;
-    margin: 75px 0 0;
-    padding: 9px 0 9px 22px;
+    float:right;
+    margin: 0;
+    padding: 5px 0;
     height: 19px;
-    border: 1px solid #ddd;
-    border-bottom: 1px solid #ccc;
 }
 #sitewide-navigation nav {
-    font-size: 18px;
+    font-size: 16px;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .9);
     position: relative;
     width: auto;
@@ -438,8 +430,9 @@ footer {
 }
     #sitewide-navigation a {
         text-decoration: none;
+        text-transform: uppercase;
         color: #333;
-        margin-right: 23px;
+        margin-left: 23px;
         display: block;
         float: left;
     }
@@ -453,9 +446,10 @@ footer {
     }
 
 #page_sub_nav .breadcrumbs_nav {
-        font-weight: bold;
-        text-transform: uppercase;
+        font-weight: normal;
+        font-size: 16px;
         width: auto;
+        float: right;
     }
     #page_sub_nav .breadcrumbs_nav > a, 
     #page_sub_nav .breadcrumbs_nav .breadcrumb-separator, 
@@ -465,7 +459,7 @@ footer {
     }
     #page_sub_nav .breadcrumbs_nav a {
         text-decoration: none;
-        margin-right: 23px;
+        margin-left: 23px;
     }
         #page_sub_nav .breadcrumbs_nav a#faq {
             padding-top: 0;
@@ -478,6 +472,7 @@ footer {
         color: #333;
         text-shadow: none;
         position: relative;
+        font-family: "MuseoSans500";
     }        
     #page_sub_nav .breadcrumbs_nav #video_menu {
         text-transform: none;
@@ -501,7 +496,7 @@ footer {
     }
     #sitewide-navigation a.selected:before {
         border-bottom-color: #ccc;
-        top: 23px;
+        top: 27px;
     }
         #sitewide-navigation a.practice-link.selected:before {left: 29px;}
         #sitewide-navigation a.coach-link.selected:before {left: 23px;}
@@ -535,8 +530,8 @@ footer {
     top: 21px;
 }
 #sitewide-navigation a.selected:after {
-    border-bottom-color: #eee;
-    top: 24px;
+    border-bottom-color: #fff;
+    top: 28px;
 }
     #sitewide-navigation a.practice-link.selected:after {left: 30px;}
     #sitewide-navigation a.coach-link.selected:after {left: 24px;}
@@ -600,15 +595,10 @@ footer {
 #top-header #top-header-links {
     position: absolute;
     top: 0;
-    left: 0;
-    bottom: 0;
     right: 0;
-    margin-left: 317px;
+    left: 0;
+    margin-left: 290px;
     min-width: 680px;
-    background-image: url(/images/x-repeating-sprites.png);
-    background-position: 0px -10px;
-    height: 42px;
-    font-weight: bold;
 }
     #top-header #top-header-links #fb-like-badge, #sitewide-navigation #fb-like-badge {
         display: inline-block;
@@ -624,11 +614,12 @@ footer {
         vertical-align: middle;
     }
     #top-header #top-header-links span.separator, #sitewide-navigation span.separator {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: 0px -5px;
-        padding: 0 5px;
-        line-height: 42px;
-        font-size: 40px;
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #f7f7f7;
+        padding: 0;
+        margin: 0 8px;
+        display: inline-block;
+        height: 20px;
         
         /* For IE */
         position: relative\9;
@@ -640,10 +631,10 @@ footer {
     }
     #top-header #top-header-links .page_links a {
         text-decoration: none;
-        color: #fff;
+        color: #666;
     }
         #top-header #top-header-links .page_links > a {
-            text-shadow: 0 -1px 0 rgba(0,0,0, .4);
+            text-shadow: 0 1px 0 #f7f7f7;
         }
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
@@ -673,8 +664,8 @@ footer {
 #top-header #top-header-links #page_auth.page_links {
     float: right;
     display: block;
-    height: 100%;
     position: relative;
+    margin: 6px 6px 0 0;
     z-index: 101;
 }
     #top-header #top-header-links #page_auth.page_links #login-menu {
@@ -780,24 +771,23 @@ footer {
 
 #search-box {
     position: relative;
+    float: right;
 }
 #page_search {
     display: block;
-    float: right;
-    clear: right;
-    margin-top: 22px;
-    padding-top: 0;
-    padding-right: 50px;
+    padding: 0;
 }
     #page_search #search-input {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -5px -867px;
+        background-color: #f9f9f9;
         border:1px solid #bbb;
-        font-size:15px;
+        font-size:10px;
+        font-style: italic;
         padding: 0;
-        padding-left: 23px;
-        height: 27px;
-        width: 270px;
+        padding-left: 25px;
+        height: 24px;
+        width: 160px;
 
         /* For jquery-ui autocomplete */
         z-index: 100;
@@ -806,17 +796,13 @@ footer {
         /* For IE */
         height: 22px\9;
         padding-top: 5px\9;
+        
+        -webkit-box-shadow: inset 0 1px 3px #ccc, 0 1px 0 #fff;
+        -moz-box-shadow: inset 0 1px 3px #ccc, 0 1px 0 #fff;
+        box-shadow: inset 0 1px 3px #ccc, 0 1px 0 #fff;
     }
     #page_search #search-submit {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -556px;
-        border: none;
-        padding: 0;
-        margin: 0;
-        width: 29px;
-        height: 29px;
-        position: absolute;
-        color: transparent;
+        display: none;
     }
     #page_search input.ui-autocomplete-loading {
         background-image: url("/images/throbber.gif")
@@ -904,16 +890,19 @@ nav {
 }
 
 nav#page_sub_nav {
-    padding: 9px 22px;
+    padding: 9px 10px;
     min-height: 16px;
     position: relative;
     z-index: 3;
-    background: #eee;
+    background: #fff;
     color: #444;
     border: 1px solid #ddd;
-    border-top: none;
-    text-shadow: 0 1px 0 #fff;
+    border-top-color: #cecece;
     width: auto;
+    
+    -webkit-box-shadow: 0 -1px 0 #eee;
+    -moz-box-shadow: 0 -1px 0 #eee;
+    box-shadow: 0 -2px 0 #eee;
 }
 
 header ul {
@@ -1355,7 +1344,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .achievement-badge-counts {
     position: relative;
     top: 2px;
-    text-shadow: 0 -1px 0 rgba(0,0,0, .4);
 }
 
 .achievement-badge {
@@ -1479,7 +1467,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
     .achievement-badge.category-5 #badge-icon {
         width: 100px;
-        height: 100px;
+        #top-header #top-header-links #page_auth.page_linkspx;
         margin: 0 auto;
     }
     .achievement-badge.category-5 .achievement-title {
@@ -1742,6 +1730,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             padding: 3px 5px 2px;
             color: white;
             font-weight: bold;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
             text-shadow: 0px -1px 0px #666;
             
             -webkit-border-radius: 5px;
@@ -1973,9 +1962,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #about-us, #homepage, #video-page, #contribute,
 #credits, #report-problem, #tos, #privacy-policy,
 #dmca {
-    padding: 0 23px;
-    background: transparent;
+    padding: 0 19px;
+    background: #fff;
     position: relative;
+    margin: 0 1px;
 }
 #about-us {
     *position: static;
