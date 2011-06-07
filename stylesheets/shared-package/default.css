@@ -123,8 +123,8 @@ hr {
 .simple-button {
     color: #333 !important;
     cursor: pointer !important;
-    border: 1px solid #ccc;
-    border-bottom: 1px solid #bbb;
+    border: 1px solid #ccc !important;
+    border-bottom: 1px solid #bbb !important;
     padding: 5px 10px;
     position: relative;
     margin: 0;
@@ -142,7 +142,14 @@ hr {
     left: 1px;
     top: 1px;
 }
-
+.simple-button.with-icon {
+    padding-left: 30px;
+}
+.simple-button.with-icon img {
+    position: absolute;
+    left: 7px;
+    top: 3px;
+}
 .simple-button.social-button {
     display: block;
     text-transform: uppercase;
@@ -2022,12 +2029,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #contribute {
     text-align: justify;
 }
-#contribute .social-button {
+#contribute .simple-button .with-icon {
     float: left;
     width: auto;
     margin-right: 10px;
 }
-#contribute .social-button img {
+#contribute .simple-button .with-icon img {
     position: relative;
     top: -2px;
 }

@@ -71,11 +71,24 @@
             {% endif %}
                 <span class="extra-link-bar">
                     {% if exercise %}
-                        <a href="/exercises?exid={{exercise}}">Exercises</a>,
+                        <a href="/exercises?exid={{exercise}}" class="simple-button action-gradient with-icon">
+                            <img src="/images/exercise-icon-small.png" />
+                            Exercises
+                        </a>
                     {% endif %}
-                    <span class="subtitles-link"><a href="#">Subtitles</a></span>{% if exercise %},{% endif %}
-                    <span class="and-more">and <a class="more-link" href="#">more</a></span>
-                    <span class="more-content">or <a href="{{video_path}}">Download</a></span>
+                    <span class="subtitles-link">
+                        <a href="#" class="simple-button action-gradient with-icon">
+                            <img src="/images/subtitles-icon-small.png" />
+                            Subtitles
+                        </a>
+                    </span>
+                    <span class="and-more">&nbsp;and <a class="more-link" href="#">more</a></span>
+                    <span class="more-content">&nbsp;or 
+                        <a href="{{video_path}}" class="simple-button action-gradient with-icon download-icon">
+                            <img src="/images/download-icon-small.png" />
+                            Download
+                        </a>
+                    </span>
                 </span>
             </nobr></span>
             <div class="desktop-only">
