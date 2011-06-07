@@ -143,7 +143,7 @@ hr {
     top: 1px;
 }
 
-.simple-button.social-button {
+.simple-button.with-icon {
     display: block;
     text-transform: uppercase;
     margin-bottom: 9px;
@@ -152,7 +152,7 @@ hr {
     max-width: 200px;
     padding-top: 7px;
 }
-    .simple-button.social-button img {
+    .simple-button.with-icon img {
         vertical-align: middle;
         width: 24px;
         height: 24px;
@@ -2022,12 +2022,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #contribute {
     text-align: justify;
 }
-#contribute .social-button {
+#contribute .simple-button .with-icon {
     float: left;
     width: auto;
     margin-right: 10px;
 }
-#contribute .social-button img {
+#contribute .simple-button .with-icon img {
     position: relative;
     top: -2px;
 }
