@@ -381,7 +381,10 @@ def user_problem_logs(exercise_name):
             problem_log_query.filter("user =", user)
             problem_log_query.filter("exercise =", exercise.name)
 
-            filter_query_by_request_dates(problem_log_query, "time_done")
+            try:
+                filter_query_by_request_dates(problem_log_query, "time_done")
+            except ValueError, e:
+                return api_consumer_error_response(e)
 
             problem_log_query.order("time_done")
 
@@ -406,7 +409,10 @@ def user_video_logs(youtube_id):
             video_log_query.filter("user =", user)
             video_log_query.filter("video =", video)
 
-            filter_query_by_request_dates(video_log_query, "time_watched")
+            try:
+                filter_query_by_request_dates(video_log_query, "time_watched")
+            except ValueError, e:
+                return api_consumer_error_response(e)
 
             video_log_query.order("time_watched")
 
