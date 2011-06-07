@@ -4,7 +4,7 @@ import logging
 
 from google.appengine.api import users
 
-from flask import request
+from flask import request, current_app
 
 import models
 import layer_cache
@@ -15,6 +15,9 @@ import util
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
+
+def api_consumer_error_response(e):
+    return current_app.response_class("API error. %s" % e.message, status=500)
 
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
@@ -222,6 +225,22 @@ def user_data_other():
 
     return None
 
+def filter_query_by_request_dates(query, property):
+
+    if request.request_string("dt_start"):
+        try:
+            dt_start = request.request_date_iso("dt_start")
+            query.filter("%s >=" % property, dt_start)
+        except ValueError:
+            raise ValueError("Invalid date format sent to dt_start, use ISO 8601.")
+
+    if request.request_string("dt_end"):
+        try:
+            dt_end = request.request_date_iso("dt_end")
+            query.filter("%s <=" % property, dt_end)
+        except ValueError:
+            raise ValueError("Invalid date format sent to dt_end, use ISO 8601.")
+
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()
 @jsonp
@@ -233,8 +252,14 @@ def user_videos_all():
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
-            user_videos = models.UserVideo.all().filter("user =", user_data_student.user)
-            return user_videos.fetch(10000)
+            user_videos_query = models.UserVideo.all().filter("user =", user_data_student.user)
+
+            try:
+                filter_query_by_request_dates(user_videos_query, "last_watched")
+            except ValueError, e:
+                return api_consumer_error_response(e)
+
+            return user_videos_query.fetch(10000)
 
     return None
 
@@ -356,13 +381,7 @@ def user_problem_logs(exercise_name):
             problem_log_query.filter("user =", user)
             problem_log_query.filter("exercise =", exercise.name)
 
-            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
-            if dt_start != datetime.datetime.min:
-                problem_log_query.filter("time_done >=", dt_start)
-
-            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
-            if dt_end != datetime.datetime.min:
-                problem_log_query.filter("time_done <", dt_end)
+            filter_query_by_request_dates(problem_log_query, "time_done")
 
             problem_log_query.order("time_done")
 
@@ -387,13 +406,7 @@ def user_video_logs(youtube_id):
             video_log_query.filter("user =", user)
             video_log_query.filter("video =", video)
 
-            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
-            if dt_start != datetime.datetime.min:
-                video_log_query.filter("time_watched >=", dt_start)
-
-            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
-            if dt_end != datetime.datetime.min:
-                video_log_query.filter("time_watched <", dt_end)
+            filter_query_by_request_dates(video_log_query, "time_watched")
 
             video_log_query.order("time_watched")
 
