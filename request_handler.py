@@ -40,8 +40,20 @@ class RequestInputHandler(object):
                 raise # No value available and no default supplied, raise error
 
     def request_date_iso(self, key, default = None):
+        s_date = self.request_string(key)
+
+        # Pull out milliseconds b/c Python 2.5 doesn't play nicely w/ milliseconds in date format strings
+        if "." in s_date:
+            s_date = s_date[:s_date.find(".")]
+
         # Try to parse date in ISO 8601 format
-        return self.request_date(key, "%Y-%m-%dT%H:%M:%S", default)
+        try:
+            return datetime.datetime.strptime(s_date, "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            if default is not None:
+                return default
+            else:
+                raise # No value available and no default supplied, raise error
 
     def request_float(self, key, default = None):
         try:        
