@@ -999,7 +999,7 @@ article.video p#keywords {
 }
 
 span.video_extra_links {
-    float: left;
+    float: right;
 }
 span.video_extra_links span.extra-link-bar {
     position: relative;

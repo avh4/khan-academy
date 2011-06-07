@@ -1,5 +1,5 @@
 <div class="vote_tools">
-    <div class="control vote_tools_show">
+    <div class="control vote_tools_show" >
         <a href="#" class="control vote_for {% if target.up_voted %}voted{% endif %}" title="Vote up, this is encouraging or helpful (click again to undo)" data-key="{{ target.key|escape }}" data-vote_type="1"><img src="{% static_url "/images/vote-up-gray.png" %}" class="vote_up_gray"/><img src="{% static_url "/images/vote-up.png" %}" class="vote_up"/></a>
         {% if not is_comment %}
             {% vote_sum target %}
