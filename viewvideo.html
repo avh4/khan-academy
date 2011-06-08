@@ -93,19 +93,32 @@
                   
 					
 				
-                        <a href="{{video_path}}" class="simple-button action-gradient with-icon download-icon share-link">
+                        <a href="javascript:void(0);" class="simple-button action-gradient with-icon download-icon share-link">
                             <img src="/images/share-icon-small.png" />
                             Share
                         </a>
-                    
+                    	<div class="sharepop" style="float:right;position:relative;right:0;">
+
+							<div class="triangle-isosceles top" style="width:100px;">
+								FB Twitter Mail
+							</div>
+
+						</div>
 					
                 </span>
 
 					<script>
 					$(document).ready(function(){
-
+					
+					$('.sharepop').hide();
+					
+					$('.share-link').click(function() {
+						$(this).next(".sharepop").toggle("slide",{direction:'up'},"fast");	
+						return false;
+					});
+					
 					$('.download-link').CreateBubblePopup({
-														selectable: false,
+												
 														
 														position : 'top',
 														align	 : 'center',
@@ -159,6 +172,7 @@
 					</script>
 
             </nobr></span>
+
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
             {% video_qa user_data video playlist qa_page qa_expand_id sort %}
