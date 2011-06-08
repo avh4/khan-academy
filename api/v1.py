@@ -19,6 +19,30 @@ from api.auth.decorators import oauth_required, oauth_optional
 def api_consumer_error_response(e):
     return current_app.response_class("API error. %s" % e.message, status=500)
 
+def points_and_earned_badges(points):
+
+    badge_counts = badges.BadgeCategory.empty_count_dict()
+    badges_earned = []
+
+    user = util.get_current_user()
+    if user:
+        badge_counts = util_badges.get_badge_counts(models.UserData.get_for(user))
+
+        user_badges = badges.UserBadgeNotifier.pop_for_user(user)
+        badges_dict = util_badges.all_badges_dict()
+
+        for user_badge in user_badges:
+            badge = badges_dict.get(user_badge.badge_name)
+
+            if badge:
+                if not hasattr(badge, "user_badges"):
+                    badge.user_badges = []
+                badge.user_badges.append(user_badge)
+                badge.is_owned = True
+                badges_earned.append(badge)
+
+    return {"points": points, "badge_counts": badge_counts, "badges_earned": badges_earned}
+
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
 @layer_cache.cache_with_key_fxn(
@@ -286,6 +310,7 @@ def user_videos_specific(youtube_id):
 @jsonify
 def log_user_video(youtube_id):
     user = util.get_current_user()
+    points = 0
 
     if user and youtube_id:
         user_data= models.UserData.get_for(user)
@@ -295,9 +320,9 @@ def log_user_video(youtube_id):
         last_second_watched = int(request.request_float("last_second_watched", default = 0))
 
         if user_data and video:
-            return models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
+            points = models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-    return 0
+    return points_and_earned_badges(points)
 
 @route("/api/v1/user/exercises", methods=["GET"])
 @oauth_required()
