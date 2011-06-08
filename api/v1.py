@@ -11,7 +11,6 @@ import layer_cache
 import topics_list
 from badges import badges, util_badges, models_badges
 import util
-import search
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
