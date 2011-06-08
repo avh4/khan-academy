@@ -53,21 +53,6 @@ def add_action_results_property(obj, dict_results):
 def playlists():
     return models.Playlist.get_for_all_topics()
 
-@route("/api/v1/playlists/search", methods=["GET"])
-@jsonp
-@jsonify
-def search_playlists():
-    q = request.request_string("q", default="")
-    q = q.strip()
-
-    if len(q) < search.SEARCH_PHRASE_MIN_LENGTH:
-        return api_error_response(ValueError("Query too short"))
-
-    playlists = models.Playlist.search(q, limit=50)
-    videos = models.Video.search(q, limit=50)
-
-    return {"playlists": playlists, "videos": videos}
-
 @route("/api/v1/playlists/<playlist_title>/videos", methods=["GET"])
 @jsonp
 @layer_cache.cache_with_key_fxn(
