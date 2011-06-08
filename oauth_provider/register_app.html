@@ -9,7 +9,8 @@
         #register td { padding: 9px; vertical-align: top; }
         #register input, #register textarea { width: 300px; }
         #register textarea { height: 40px; }
-        #register td.submit input { width: auto; }
+        #register td.input_auto input { width: auto; }
+        #register td.agree { width: 300px; }
         #register td.error { color: red; }
     </style>
 {% endblock pagescript %}
@@ -36,7 +37,7 @@
     {% else %}
 
     <p>
-        Register an app to use with the <a href="https://github.com/khan/khan-api/wiki/Khan-Academy-API">Khan Academy API</a>.
+        Register an app to use with the <a href="https://github.com/khan/khan-api/wiki/Khan-Academy-API">Khan Academy API</a>. The more contact information you provide, the more likely we'll be able to contact you in the event of any technical issues or problems with your usage of the API.
     </p>
 
     <p>
@@ -47,7 +48,7 @@
         <table>
             <tr>
                 <td>You:</td>
-                <td><em>{{ username|escape }}</em></td>
+                <td colspan="2"><em>{{ username|escape }}</em></td>
             </tr>
             <tr>
                 <td>Your app's name*:</td>
@@ -65,11 +66,27 @@
             </tr>
             <tr>
                 <td>Website:</td>
-                <td><input type="text" name="website" value="{{ website|escape }}"/></td>
+                <td colspan="2"><input type="text" name="website" value="{{ website|escape }}"/></td>
+            </tr>
+            <tr>
+                <td>Phone:</td>
+                <td colspan="2"><input type="text" name="phone" value="{{ phone|escape }}"/></td>
+            </tr>
+            <tr>
+                <td>Company:</td>
+                <td colspan="2"><input type="text" name="company" value="{{ company|escape }}"/></td>
+            </tr>
+
+            <tr>
+                <td>&nbsp;</td>
+                <td class="agree input_auto" colspan="2"><input type="checkbox" value="1" id="agree" name="agree"/> <label for="agree">I agree that Khan Academy has the right to shut down my app's access to the API at any time based solely on Khan Academy's judgment of API misuse and abuse.</label></td>
             </tr>
             <tr>
                 <td>&nbsp;</td>
-                <td class="submit"><input type="submit" class="simple-button action-gradient" value="Register App"/></td>
+                <td class="input_auto"><input type="submit" class="simple-button action-gradient" value="Register App"/></td>
+                {% if agree_error %}
+                <td class="error">{{ agree_error|escape }}</td>
+                {% endif %}
             </tr>
         </table>
     </form>

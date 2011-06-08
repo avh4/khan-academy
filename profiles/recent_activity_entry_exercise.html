@@ -1,4 +1,12 @@
 <li class="exercise {% if recent_activity.earned_proficiency %}complete{% endif %}">
+
+	<span class="recent-share">
+	<a href="#" class="simple-button action-gradient with-icon download-icon share-link" style="font-size:12px;">
+        <img src="/images/share-icon-small.png" />
+        Share
+    </a>
+	</span>
+
     <span class="activity-image"><img src="/images/generic-exercise-icon-inset.png" /></span>
     Answered <span class="problem-count"><a href="/profile/graph/exerciseproblems?student_email={{ student_email|escape }}&exercise_name={{ recent_activity.problem_log.exercise }}">{{ recent_activity.c_problems }} problem{{ recent_activity.c_problems|pluralize }}</a></span> 
     {% if recent_activity.earned_proficiency %}

@@ -2,9 +2,9 @@
     <h2>Recent Activity</h2>
     {% if list_recent_activity %}
     <div id="activity-list">
-        <ul>
+  		<ul>
             {% for recent_activity in list_recent_activity %}
-
+			
                 {% ifequal recent_activity.s_type "Badge" %}
                     <li>{% profile_recent_activity_entry_badge student recent_activity %}</li>
                 {% endifequal %}
@@ -20,6 +20,38 @@
             {% endfor %}
         </ul>
     </div>
+	 <script>
+		$(".recent-share").hide();
+		$(".achievement").hover(
+			function () {
+			    $(this).find(".recent-share").show();
+			  //	$(this).attr("style","background-color:#222222");
+				},
+			function () {
+			    $(this).find(".recent-share").hide();
+			  });
+			
+		$(".exercise").hover(
+			function () {
+			    $(this).find(".recent-share").show();
+			  //	$(this).attr("style","background-color:#222222");
+				},
+			function () {
+		    $(this).find(".recent-share").hide();
+			  });
+			
+		$(".video").hover(
+			function () {
+			    $(this).find(".recent-share").show();
+			  //	$(this).attr("style","background-color:#222222");
+				},
+			function () {
+			    $(this).find(".recent-share").hide();
+			  });
+		
+			
+			
+	  </script>
     {% else %}
         <br/>Recent <a href="/#browse">video</a>, <a href="/exercisedashboard">exercise</a>, and <a href="/badges/view">badge</a> activity will show up here.
     {% endif %}

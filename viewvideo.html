@@ -65,26 +65,48 @@
                 </div>
             </div>
     
-            <span class="video_extra_links desktop-only"><nobr>
+            <span class="video_extra_links desktop-only" ><nobr>
             {% if username %}
                 {% possible_points_badge awarded_points video_points_base %}
             {% endif %}
-               
+               <span class="extra-link-bar">
                     {% if exercise %}
-                        <span style="margin-left:2px;"><a href="/exercises?exid={{exercise}}"><img class="exercise-link"  src="/images/exercises.png" /></a></span>
-                    {% endif %}
-                    <span ><a href="#"><img class="subtitles-link" src="/images/subtitles.png" /></a></span>{% if exercise %}{% endif %}
-                    <!--<span class="and-more">and <a class="more-link" href="#">more</a></span>
-                    <span class="more-content">or <a href="{{video_path}}">Download</a></span> -->
-                    <span ><a href="{{video_path}}"><img class="download-link" src="/images/Download.png" /></a></span>
-					<span ><img class="twitter-link" src="/images/twitter.png" /></span>
-					<span ><img class="facebook-link" src="/images/facebook.png" /></span>
+					 
+                        <a href="/exercises?exid={{exercise}}" class="simple-button action-gradient with-icon exercise-link">
+                            <img  src="/images/exercise-icon-small.png" />
+                            Exercises
+                        </a>
 					
+                    {% endif %}
+
+                    
+                        <a href="#" class="simple-button action-gradient with-icon subtitles-link">
+                            <img src="/images/subtitles-icon-small.png" />
+                            Subtitles
+                        </a>
+
+                   
+                        <a href="{{video_path}}" class="simple-button action-gradient with-icon download-icon download-link">
+                            <img src="/images/download-icon-small.png" />
+                            Download
+                        </a>
+                  
+					
+				
+                        <a href="{{video_path}}" class="simple-button action-gradient with-icon download-icon share-link">
+                            <img src="/images/share-icon-small.png" />
+                            Share
+                        </a>
+                    
+					
+                </span>
+
 					<script>
 					$(document).ready(function(){
 
 					$('.download-link').CreateBubblePopup({
-
+														selectable: false,
+														
 														position : 'top',
 														align	 : 'center',
 														innerHtml: 'Download this video',
@@ -133,8 +155,9 @@
 													});
 					});
 					//-->
+					
 					</script>
-			
+
             </nobr></span>
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
