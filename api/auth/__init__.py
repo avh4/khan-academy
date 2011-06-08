@@ -53,7 +53,13 @@ def request_token():
 
     oauth_map.put()
 
-    return redirect("/login/mobileoauth?oauth_map_id=%s&view=%s" % (oauth_map.key().id(), oauth_map.view))
+    chooser_url = "/login/mobileoauth?oauth_map_id=%s&view=%s" % (oauth_map.key().id(), oauth_map.view)
+
+    oauth_consumer = oauth_server._get_consumer(oauth_request)
+    if oauth_consumer and oauth_consumer.anointed:
+        chooser_url += "&an=1"
+
+    return redirect(chooser_url)
 
 @route("/api/auth/request_token_callback/<provider>/<oauth_map_id>", methods=["GET"])
 def request_token_callback(provider, oauth_map_id):
