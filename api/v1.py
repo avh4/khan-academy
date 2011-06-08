@@ -11,12 +11,13 @@ import layer_cache
 import topics_list
 from badges import badges, util_badges, models_badges
 import util
+import search
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
 
-def api_consumer_error_response(e):
+def api_error_response(e):
     return current_app.response_class("API error. %s" % e.message, status=500)
 
 def add_action_results_property(obj, dict_results):
@@ -51,6 +52,21 @@ def add_action_results_property(obj, dict_results):
 @jsonify
 def playlists():
     return models.Playlist.get_for_all_topics()
+
+@route("/api/v1/playlists/search", methods=["GET"])
+@jsonp
+@jsonify
+def search_playlists():
+    q = request.request_string("q", default="")
+    q = q.strip()
+
+    if len(q) < search.SEARCH_PHRASE_MIN_LENGTH:
+        return api_error_response(ValueError("Query too short"))
+
+    playlists = models.Playlist.search(q, limit=50)
+    videos = models.Video.search(q, limit=50)
+
+    return {"playlists": playlists, "videos": videos}
 
 @route("/api/v1/playlists/<playlist_title>/videos", methods=["GET"])
 @jsonp
@@ -281,7 +297,7 @@ def user_videos_all():
             try:
                 filter_query_by_request_dates(user_videos_query, "last_watched")
             except ValueError, e:
-                return api_consumer_error_response(e)
+                return api_error_response(e)
 
             return user_videos_query.fetch(10000)
 
@@ -413,7 +429,7 @@ def user_problem_logs(exercise_name):
             try:
                 filter_query_by_request_dates(problem_log_query, "time_done")
             except ValueError, e:
-                return api_consumer_error_response(e)
+                return api_error_response(e)
 
             problem_log_query.order("time_done")
 
@@ -441,7 +457,7 @@ def user_video_logs(youtube_id):
             try:
                 filter_query_by_request_dates(video_log_query, "time_watched")
             except ValueError, e:
-                return api_consumer_error_response(e)
+                return api_error_response(e)
 
             video_log_query.order("time_watched")
 
