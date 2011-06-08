@@ -481,3 +481,9 @@ def badges_list():
 @jsonify
 def badge_categories():
     return badges.BadgeCategory.all()
+
+@route("/api/v1/badges/categories/<category>", methods=["GET"])
+@jsonp
+@jsonify
+def badge_category(category):
+    return filter(lambda badge_category: str(badge_category.category) == category, badges.BadgeCategory.all())
