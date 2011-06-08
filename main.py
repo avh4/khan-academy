@@ -356,7 +356,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                 seconds_watched = int(self.request_float("seconds_watched", default=0))
                 last_second_watched = int(self.request_float("last_second_watched", default=0))
 
-                video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
+                user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
         user_points_context = user_points(user_data)
         user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)

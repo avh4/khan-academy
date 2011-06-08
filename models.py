@@ -840,7 +840,7 @@ class VideoLog(db.Model):
         if last_video_log and last_video_log.key_for_video() != video.key():
             dt_now = datetime.datetime.now()
             if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
-                return
+                return (None, None, 0)
 
         video_log = VideoLog()
         video_log.user = user
@@ -901,7 +901,7 @@ class VideoLog(db.Model):
 
         db.put([user_video, video_log, user_data])
 
-        return video_points_total
+        return (user_video, video_log, video_points_total)
 
     def time_started(self):
         return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
