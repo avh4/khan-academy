@@ -5,6 +5,7 @@ import math
 import urllib
 from google.appengine.api import users
 from google.appengine.api import memcache
+from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
@@ -694,7 +695,7 @@ class Playlist(Searchable, db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
+        return "http://www.khanacademy.org/#%s" % urllib.quote(slugify(self.title))
 
     @staticmethod
     def get_for_all_topics():
@@ -955,6 +956,10 @@ class ProblemLog(db.Model):
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
+
+    @property
+    def ka_url(self):
+        return "http://www.khanacademy.org/exercises?exid=%s&read_only=1&problem_number=%s" % (self.exercise, self.problem_number)
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):
