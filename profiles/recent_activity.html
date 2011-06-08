@@ -49,7 +49,19 @@
 			    $(this).find(".recent-share").hide();
 			  });
 		
+		$('.sharepop').hide();
+				
+		$('.recent-share').click(function() {
+		//	$(this).find(".sharepop").toggle("slide",{direction:'up'},"fast");	
+			if ($(this).next(".sharepop").is(":visible"))
+			$(this).animate({"margin-right": "-=155px"}, "fast");
+			else
+			$(this).animate({"margin-right": "+=155px"}, "fast");
 			
+			$(this).next(".sharepop").toggle("slide",{direction:'left'},"fast");	
+			
+			return false;
+				});
 			
 	  </script>
     {% else %}

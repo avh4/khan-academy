@@ -5,7 +5,17 @@
         <img src="/images/share-icon-small.png" />
         Share
     </a>
-	</span>    
+	</span>
+	
+	<div class="sharepop" style="position:absolute;right:0;font-size:12px;padding-top:10px;">
+
+		<div class="triangle-isosceles left" style="height:25px;padding-left:5px;">
+
+			FB Twitter Mail
+
+		</div>
+
+	</div>    
 
 <span class="activity-image"><img src="/images/video-camera-icon-inset.png" /></span>
     Watched <span class="video-minutes">{{ recent_activity.time_watched|escape }}</span> of <a href="/video?v={{recent_activity.video_log.video.youtube_id}}">{{ recent_activity.video_log.video_title|escape }}</a>
