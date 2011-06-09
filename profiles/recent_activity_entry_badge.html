@@ -1,19 +1,17 @@
 <li class="achievement">
+	
 	<span class="recent-share">
-	<a href="#" class="simple-button action-gradient with-icon download-icon share-link" style="font-size:12px;">
+	<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
         <img src="/images/share-icon-small.png" />
         Share
     </a>
 	</span>
 	
-	<div class="sharepop" style="position:absolute;right:0;font-size:12px;padding-top:10px;">
-
-		<div class="triangle-isosceles left" style="height:25px;padding-left:5px;">
-
-			FB Twitter Mail
-
+	<div class="sharepop">
+		<div class="triangle-isosceles top">
+			<a href="javascript:void(0);" class="facebookShare" onclick="Profile.facebookBadge('{{ recent_activity.badge.description|escape }}','{{ recent_activity.badge.icon_src }}','{{ recent_activity.badge.extended_description|escape }}');"></a>
+			<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ recent_activity.badge.description|escape }}%20badge&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
 		</div>
-
 	</div>
 	
     <span class="activity-image"><img src="/images/generic-badge-icon-inset.png" /></span>
@@ -23,6 +21,4 @@
     {% endif %}
     <span class="time">{{ recent_activity.timestamp|escape }}</span>
 		
-	
-	
 </li>

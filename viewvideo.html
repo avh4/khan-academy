@@ -85,130 +85,34 @@
                             Subtitles
                         </a>
 
-                   
                         <a href="{{video_path}}" class="simple-button action-gradient with-icon download-icon download-link">
                             <img src="/images/download-icon-small.png" />
                             Download
                         </a>
                   
-					
-				
                         <a href="javascript:void(0);" class="simple-button action-gradient with-icon download-icon share-link">
                             <img src="/images/share-icon-small.png" />
                             Share
                         </a>
-                    	<div class="sharepop" style="float:right;position:relative;right:0;">
 
-							<div class="triangle-isosceles top" style="width:100px;">
-								FB Twitter Mail
+                    	<div class="sharepop">
+							<div class="triangle-isosceles top">
+							<a href="javascript:void(0);" class="facebookShare" onclick="Video.facebook('{{video.title|escape}}','{{video.description}}');"></a>
+							<a class="twitterShare" href="http://twitter.com/share?text=just%20learned%20about%20{{video.title|escape}}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy"> </a>
 							</div>
-
 						</div>
 					
                 </span>
 
-					<script>
-					$(document).ready(function(){
-					
-					$('.sharepop').hide();
-					
-					$('.share-link').click(function() {
-						$(this).next(".sharepop").toggle("slide",{direction:'up'},"fast");	
-						return false;
-					});
-					
-					$('.download-link').CreateBubblePopup({
-												
-														
-														position : 'top',
-														align	 : 'center',
-														innerHtml: 'Download this video',
-														innerHtmlStyle: {
-																			color:'#FFFFFF', 
-																			'text-align':'center'
-																		},
-
-														themeName: 	'all-black',
-														themePath: 	'/images/jspopup/jquerybubblepopup-theme'
-
-													});
-
-					//-->
-
-					$('.exercise-link').CreateBubblePopup({
-
-														position : 'top',
-														align	 : 'center',
-														innerHtml: 'View exercises',
-														innerHtmlStyle: {
-																			color:'#FFFFFF', 
-																			'text-align':'center'
-																		},
-
-														themeName: 	'all-black',
-														themePath: 	'/images/jspopup/jquerybubblepopup-theme'
-
-													});
-
-					//-->
-
-					$('.subtitles-link').CreateBubblePopup({
-
-														position : 'top',
-														align	 : 'center',
-														innerHtml: 'Toggle subtitles',
-														innerHtmlStyle: {
-																			color:'#FFFFFF', 
-																			'text-align':'center'
-																		},
-
-														themeName: 	'all-black',
-														themePath: 	'/images/jspopup/jquerybubblepopup-theme'
-
-													});
-					});
-					//-->
-					
-					</script>
 
             </nobr></span>
-
+			
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
             {% video_qa user_data video playlist qa_page qa_expand_id sort %}
             </div>
         </div>
     </div>
-	<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
-	
-	<div>
-		<a href="http://twitter.com/share" class="twitter-share-button"
-	      data-text="Learned about {{video.title|escape}}"
-	      data-related="khanacademy:Trying to make a world-class education available to anyone, anywhere."
-	      data-via="khanacademy"
-		  data-count="none">Tweet</a>
-	</div>
-<a href="javascript:void(0);" onclick="
-FB.ui(
-   {
-     method: 'feed',
-     name: '{{video.title|escape}}',
-     link: document.URL,
-     picture: 'http://www.khanacademy.org/images/handtreehorizontal_facebook.png',
-     caption: 'KhanAcademy.org',
-     description: '{{video.description}}',
-     message: 'I just learned about {{video.title|escape}} on Khan Academy'
-   },
-   function(response) {
-     if (response && response.post_id) {
-       
-     } else {
-      
-     }
-   }
- );">Facebook</a>
-
-
 	
 </article>
 </div>

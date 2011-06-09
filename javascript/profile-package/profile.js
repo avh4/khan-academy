@@ -6,7 +6,60 @@ var Profile = {
     fLoadedGraph: false,
 
     init: function() {
+		
+		
+			$(".recent-share").hide();
+			$('.sharepop').hide();
+			
+			$(".achievement").hover(
+				function () {
+				    $(this).find(".recent-share").show();
+					},
+				function () {
+				    $(this).find(".recent-share").hide();
+					$(this).find(".sharepop").hide();
+				  });
 
+			$(".exercise").hover(
+				function () {
+				    $(this).find(".recent-share").show();
+					},
+				function () {
+			    	$(this).find(".recent-share").hide();
+					$(this).find(".sharepop").hide();
+				  });
+
+			$(".video").hover(
+				function () {
+				    $(this).find(".recent-share").show();
+					},
+				function () {
+				    $(this).find(".recent-share").hide();
+					$(this).find(".sharepop").hide();
+				  });
+
+		
+
+			$('.recent-share').click(function() {
+				$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+				return false;
+					});
+			/*--We're using a custom Twitter button, this code enables a popup--*/
+			$('.twitterShare').click(function(event) {
+			  var width  = 550,
+			 		height = 370,
+			        left   = ($(window).width()  - width)  / 2,
+			        top    = ($(window).height() - height) / 2,
+			        url    = this.href,
+			        opts   = 'status=1' +
+			                 ',width='  + width  +
+			                 ',height=' + height +
+			                 ',top='    + top    +
+			                 ',left='   + left;
+				    window.open(url, 'twitter', opts);
+				    return false;
+			  });
+		
         if ($.address)
             $.address.externalChange(function(){ Profile.historyChange(); });
 
@@ -49,7 +102,80 @@ var Profile = {
             }
         }, 1000);
     },
+	
+	facebookBadge:function(desc,icon,ext) {
+		
+		FB.ui(
+		   {
+		     method: 'feed',
+		     name: 'I just earned the '+desc+' badge at Khan Academy!',
+		     link: 'http://www.KhanAcademy.org',
+		     picture: 'http://khanacademy.org/'+icon,
+		     caption: 'KhanAcademy.org',
+		     description: 'You can earn this too if you '+ext
+		 
+		   },
+		   function(response) {
+		     if (response && response.post_id) {
 
+		     } else {
+
+		     }
+		   }
+		 );	
+		return false;
+		
+	},
+	
+	facebookVideo: function(name, desc,url) {
+		
+		FB.ui(
+		   {
+		     method: 'feed',
+		     name: name,
+		     link: 'http://www.khanacademy.org/'+url,
+		     picture: 'http://www.khanacademy.org/images/handtreehorizontal_facebook.png',
+		     caption: 'KhanAcademy.org',
+		     description: desc ,
+		     message: 'I just learned about '+name+' on Khan Academy'
+		   },
+		   function(response) {
+		     if (response && response.post_id) {
+
+		     } else {
+
+		     }
+		   }
+		 );	
+		return false;
+		
+	},
+	
+	facebookExercise: function(amount,plural,prof,exer) {
+		
+		FB.ui(
+		   {
+		     method: 'feed',
+		     name: amount+' question'+plural+' answered!',
+		     link: 'http://www.khanacademy.org/exercisedashboard',
+		     picture: 'http://www.khanacademy.org/images/proficient-badge-complete.png',
+		     caption: 'KhanAcademy.org',
+		     description: 'I just answered '+amount+' question'+plural+' '+prof+' '+exer+' on KhanAcademy.org' ,
+		     message: 'I\'ve been practicing '+exer+' on http://KhanAcademy.org'
+		   },
+		   function(response) {
+		     if (response && response.post_id) {
+
+		     } else {
+
+		     }
+		   }
+		 );	
+		return false;
+		
+	},
+	
+	
     highlightPoints: function(chart, fxnHighlight) {
 
         if (!chart) return;

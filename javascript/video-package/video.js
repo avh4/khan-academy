@@ -46,14 +46,103 @@ var Video = {
         $('.subtitles-link').click(function() { Video.toggleSubtitles(); return false; });
         if (readCookie(this.SHOW_SUBTITLES_COOKIE))
             this.showSubtitles();
-    },
 
+		Video.createPopups();
+		
+		$('.sharepop').hide();
+		
+		$('.share-link').click(function() {
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+			return false;
+		});
+		
+		$('.twitterShare').click(function(event) {
+		  var width  = 550,
+		   		height = 370,
+		        left   = ($(window).width()  - width)  / 2,
+		        top    = ($(window).height() - height) / 2,
+		        url    = this.href,
+		        opts   = 'status=1' +
+		                 ',width='  + width  +
+		                 ',height=' + height +
+		                 ',top='    + top    +
+		                 ',left='   + left;
+
+		    window.open(url, 'twitter', opts);
+
+		    return false;
+		  });
+	
+    },
+	
     toggleSubtitles: function() {
         if ($('.subtitles-warning').is(":visible"))
             this.hideSubtitles();
         else
             this.showSubtitles();
     },
+
+	facebook:function(name, desc) {
+		
+		FB.ui(
+		   {
+		     method: 'feed',
+		     name: name,
+		     link: document.URL,
+		     picture: 'http://www.khanacademy.org/images/handtreehorizontal_facebook.png',
+		     caption: 'KhanAcademy.org',
+		     description: desc ,
+		     message: 'I just learned about '+name+' on Khan Academy'
+		   },
+		   function(response) {
+		     if (response && response.post_id) {
+
+		     } else {
+
+		     }
+		   }
+		 );	
+		return false;
+		
+	},
+
+	createPopups: function() {
+		$('.download-link').CreateBubblePopup({
+					position : 'top',
+					align	 : 'center',
+					innerHtml: 'Download this video',
+					innerHtmlStyle: {
+							color:'#FFFFFF', 
+							'text-align':'center'
+									},
+					themeName: 	'all-black',
+					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
+		});
+
+		$('.exercise-link').CreateBubblePopup({
+					position : 'top',
+					align	 : 'center',
+					innerHtml: 'View exercises',
+					innerHtmlStyle: {
+							color:'#FFFFFF', 
+							'text-align':'center'
+									},
+					themeName: 	'all-black',
+					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
+		});
+		
+		$('.subtitles-link').CreateBubblePopup({
+					position : 'top',
+					align	 : 'center',
+					innerHtml: 'Toggle subtitles',
+					innerHtmlStyle: {
+							color:'#FFFFFF', 
+							'text-align':'center'
+									},
+					themeName: 	'all-black',
+					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
+		});
+	},
 
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);

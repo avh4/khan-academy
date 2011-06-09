@@ -1,26 +1,19 @@
 <li class="exercise {% if recent_activity.earned_proficiency %}complete{% endif %}">
 
-	
-
 	<span class="recent-share">
-	<a href="#" class="simple-button action-gradient with-icon download-icon share-link" style="font-size:12px;">
+	<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
         <img src="/images/share-icon-small.png" />
         Share
     </a>
 	</span>
 	
-	
-	<div class="sharepop" style="position:absolute;right:0;font-size:12px;padding-top:10px;">
-
-		<div class="triangle-isosceles left" style="height:25px;padding-left:5px;">
-
-			FB Twitter Mail
-
+	<div class="sharepop">
+		<div class="triangle-isosceles top">
+			<a href="javascript:void(0);" class="facebookShare" onclick="Profile.facebookExercise('{{ recent_activity.c_problems }}','{{ recent_activity.c_problems|pluralize }}',{% if recent_activity.earned_proficiency %}'to achieve proficiency in'{% else %} 'in'{% endif %},'{{ recent_activity.exercise_display_name|escape }}');"></a>
+			<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org%2Fexercisedashboard&amp;text=just%20answered%20{{ recent_activity.c_problems }}%20question{{ recent_activity.c_problems|pluralize }}%20right%20{% if recent_activity.earned_proficiency %}to%20achieve%20proficiency%20in{% else %}in{% endif %}%20{{ recent_activity.exercise_display_name|escape }}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
 		</div>
-
 	</div>
 	
-
     <span class="activity-image"><img src="/images/generic-exercise-icon-inset.png" /></span>
     Answered <span class="problem-count"><a href="/profile/graph/exerciseproblems?student_email={{ student_email|escape }}&exercise_name={{ recent_activity.problem_log.exercise }}">{{ recent_activity.c_problems }} problem{{ recent_activity.c_problems|pluralize }}</a></span> 
     {% if recent_activity.earned_proficiency %}

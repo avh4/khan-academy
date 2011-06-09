@@ -1,5 +1,5 @@
 {% if badge %}
-    <div class="achievement-badge category-{{badge.badge_category}} {% if user_badge or badge.is_owned %}achievement-badge-owned{% endif %}" title="{{ badge.type_label|escape }}: {{ extended_description|escape }}" name="{{ badge.description|escape }}">
+    <div class="achievement-badge category-{{badge.badge_category}} {% if user_badge or badge.is_owned %}achievement-badge-owned{% endif %}" title="{{ badge.type_label|escape }}: {{ extended_description|escape }}">
         <div id="outline-box">
         <img src="{{ badge.icon_src }}" id="badge-icon"/>
         <div class="achievement-title">{{ badge.description|escape }}{% if frequency %} <span class="frequency">(x{{ frequency }})</span>{% endif %}</div>
@@ -32,80 +32,7 @@
             {% endif %}
         </div>
         {% if badge.points %}<div class="energy-points-badge">{{ badge.points }}</div>{% endif %}
-       
-{% if user_badge %}
-		<script>
-			$(function() {
-
-				$( ".share_link" ).click(function() {
-					$(this).next(".sharebar").toggle("slide", {}, 500 );	
-					return false;
-				});
-
-				$(".sharebar").hide();
-			//	$('[name="share_container-{{ badge.description|escape }}"]').hide();
-				
-			//	$(".achievement-badge-owned").hide();
-				
-			/*	$('[name*="{{ badge.description|escape }}"]').hover(
-				  function () {
-				    $('[name="share_container-{{ badge.description|escape }}"]').show();
-				  },
-				  function () {
-				    $('[name="share_container-{{ badge.description|escape }}"]').hide();
-				  }
-				);*/
-				
-			});
-			</script>
-			
-			
-{% endif %}
- 		</div>
-{% if user_badge %}		
-		<span name="share_container-{{ badge.description|escape }}" style="position:absolute;bottom:25px;left:5px;width:250px;">
-		<span style="position:absolute;z-index:1;" class ="share_link">
-			<a href="#" class="simple-button action-gradient with-icon download-icon">
-                  <img src="/images/share-icon-small.png" />
-                    Share
-                </a>
-		</span>
-		 
-		<span class="sharebar" style="z-index:0; position:absolute;padding-left:100px;"> 
-			<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script>
-
-			
-				<a href="http://twitter.com/share" class="twitter-share-button"
-			      data-text="I just earned the {{ badge.description|escape }} badge!"
-			      data-related="khanacademy:Trying to make a world-class education available to anyone, anywhere."
-			      data-via="khanacademy"
-				  data-count="none">Tweet</a>
-			
-		
-			<a href="javascript:void(0);" onclick="
-			FB.ui(
-			   {
-			     method: 'feed',
-			     name: 'I just earned the {{ badge.description|escape }} badge at Khan Academy!',
-			     link: 'http://www.KhanAcademy.org',
-			     picture: 'http://khanacademy.org/{{ badge.icon_src }}',
-			     caption: 'KhanAcademy.org',
-			     description: 'You can earn this too if you {{ extended_description|escape }}',
-			     message: 'I just learned about {{video.title|escape}} on Khan Academy'
-			   },
-			   function(response) {
-			     if (response && response.post_id) {
-
-			     } else {
-
-			     }
-			   }
-			 );"> <img src="/images/fbrec.png">  </a>	
-			
-		</span>
-		
-		</span>
-{% endif %}
+        </div>
     </div>
-	
+
 {% endif %}

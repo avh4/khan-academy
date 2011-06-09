@@ -20,50 +20,6 @@
             {% endfor %}
         </ul>
     </div>
-	 <script>
-		$(".recent-share").hide();
-		$(".achievement").hover(
-			function () {
-			    $(this).find(".recent-share").show();
-			  //	$(this).attr("style","background-color:#222222");
-				},
-			function () {
-			    $(this).find(".recent-share").hide();
-			  });
-			
-		$(".exercise").hover(
-			function () {
-			    $(this).find(".recent-share").show();
-			  //	$(this).attr("style","background-color:#222222");
-				},
-			function () {
-		    $(this).find(".recent-share").hide();
-			  });
-			
-		$(".video").hover(
-			function () {
-			    $(this).find(".recent-share").show();
-			  //	$(this).attr("style","background-color:#222222");
-				},
-			function () {
-			    $(this).find(".recent-share").hide();
-			  });
-		
-		$('.sharepop').hide();
-				
-		$('.recent-share').click(function() {
-		//	$(this).find(".sharepop").toggle("slide",{direction:'up'},"fast");	
-			if ($(this).next(".sharepop").is(":visible"))
-			$(this).animate({"margin-right": "-=155px"}, "fast");
-			else
-			$(this).animate({"margin-right": "+=155px"}, "fast");
-			
-			$(this).next(".sharepop").toggle("slide",{direction:'left'},"fast");	
-			
-			return false;
-				});
-			
-	  </script>
     {% else %}
         <br/>Recent <a href="/#browse">video</a>, <a href="/exercisedashboard">exercise</a>, and <a href="/badges/view">badge</a> activity will show up here.
     {% endif %}

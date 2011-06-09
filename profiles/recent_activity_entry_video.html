@@ -1,23 +1,26 @@
 <li class="video">
 
+	
+
 	<span class="recent-share">
-	<a href="#" class="simple-button action-gradient with-icon download-icon share-link" style="font-size:12px;">
+	<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
         <img src="/images/share-icon-small.png" />
         Share
     </a>
 	</span>
 	
-	<div class="sharepop" style="position:absolute;right:0;font-size:12px;padding-top:10px;">
-
-		<div class="triangle-isosceles left" style="height:25px;padding-left:5px;">
-
-			FB Twitter Mail
-
+	<div class="sharepop">
+		<div class="triangle-isosceles top">
+			<a href="javascript:void(0);" class="facebookShare" onclick="Profile.facebookVideo('{{ recent_activity.video_log.video_title|escape }}','{{ recent_activity.video.description}}','/video?v={{recent_activity.video_log.video.youtube_id}}');"></a>
+			<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org%2Fvideo?v={{recent_activity.video_log.video.youtube_id}}&amp;text=just%20learned%20about%20{{recent_activity.video_log.video.title|escape}}&amp;related=khanacademy:Trying%20to%20make%20a%20world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
 		</div>
-
-	</div>    
+	</div>
+	   
 
 <span class="activity-image"><img src="/images/video-camera-icon-inset.png" /></span>
     Watched <span class="video-minutes">{{ recent_activity.time_watched|escape }}</span> of <a href="/video?v={{recent_activity.video_log.video.youtube_id}}">{{ recent_activity.video_log.video_title|escape }}</a>
     <span class="time">{{ recent_activity.timestamp|escape }}</span>
+
+
+
 </li>
