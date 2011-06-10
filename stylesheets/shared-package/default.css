@@ -151,7 +151,6 @@ hr {
     top: 3px;
 }
 .simple-button.social-button {
-    display: block;
     text-transform: uppercase;
     margin-bottom: 9px;
     font-size: 12px;
@@ -1007,6 +1006,8 @@ article.video p#keywords {
 
 span.video_extra_links {
     float: right;
+    position: relative;
+    z-index: 100;
 }
 span.video_extra_links span.extra-link-bar {
     position: relative;
