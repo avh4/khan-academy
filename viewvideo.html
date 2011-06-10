@@ -65,11 +65,9 @@
                 </div>
             </div>
     
-            <span class="video_extra_links desktop-only" ><nobr>
-            {% if username %}
-                {% possible_points_badge awarded_points video_points_base %}
-            {% endif %}
-               <span class="extra-link-bar">
+            <div class="video_extra_links desktop-only" style="float:right;"><nobr>
+           
+               <div class="extra-link-bar" style="float:right; margin-top:5px;position:relative;">
                     {% if exercise %}
 					 
                         <a href="/exercises?exid={{exercise}}" class="simple-button action-gradient with-icon exercise-link">
@@ -95,17 +93,19 @@
                             Share
                         </a>
 
-                    	<div class="sharepop">
-							<div class="triangle-isosceles top">
+                    	<span class="sharepop">
+							<span class="triangle-isosceles top">
 							<a href="javascript:void(0);" class="facebookShare" onclick="Video.facebook('{{video.title|escape}}','{{video.description}}');"></a>
 							<a class="twitterShare" href="http://twitter.com/share?text=just%20learned%20about%20{{video.title|escape}}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy"> </a>
 							</div>
 						</div>
 					
-                </span>
+                </div>
 
-
-            </nobr></span>
+				 {% if username %}
+		                {% possible_points_badge awarded_points video_points_base %}
+		            {% endif %}
+            </nobr></div>
 			
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
