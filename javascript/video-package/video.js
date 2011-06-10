@@ -56,22 +56,6 @@ var Video = {
 			return false;
 		});
 		
-		$('.twitterShare').click(function(event) {
-		  var width  = 550,
-		   		height = 370,
-		        left   = ($(window).width()  - width)  / 2,
-		        top    = ($(window).height() - height) / 2,
-		        url    = this.href,
-		        opts   = 'status=1' +
-		                 ',width='  + width  +
-		                 ',height=' + height +
-		                 ',top='    + top    +
-		                 ',left='   + left;
-
-		    window.open(url, 'twitter', opts);
-
-		    return false;
-		  });
 	
     },
 	
@@ -107,10 +91,10 @@ var Video = {
 	},
 
 	createPopups: function() {
-		$('.download-link').CreateBubblePopup({
+		$('.download-link,.exercise-link,.subtitles-link').CreateBubblePopup({
 					position : 'top',
 					align	 : 'center',
-					innerHtml: 'Download this video',
+					innerHtml: $(this).attr("title")+'',
 					innerHtmlStyle: {
 							color:'#FFFFFF', 
 							'text-align':'center'
@@ -119,29 +103,7 @@ var Video = {
 					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
 		});
 
-		$('.exercise-link').CreateBubblePopup({
-					position : 'top',
-					align	 : 'center',
-					innerHtml: 'View exercises',
-					innerHtmlStyle: {
-							color:'#FFFFFF', 
-							'text-align':'center'
-									},
-					themeName: 	'all-black',
-					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
-		});
-		
-		$('.subtitles-link').CreateBubblePopup({
-					position : 'top',
-					align	 : 'center',
-					innerHtml: 'Toggle subtitles',
-					innerHtmlStyle: {
-							color:'#FFFFFF', 
-							'text-align':'center'
-									},
-					themeName: 	'all-black',
-					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
-		});
+	
 	},
 
     hideSubtitles: function() {

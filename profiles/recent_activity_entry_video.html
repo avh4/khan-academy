@@ -11,7 +11,7 @@
 	
 	<div class="sharepop">
 		<div class="triangle-isosceles top">
-			<a href="javascript:void(0);" class="facebookShare" onclick="Profile.facebookVideo('{{ recent_activity.video_log.video_title|escape }}','{{ recent_activity.video.description}}','/video?v={{recent_activity.video_log.video.youtube_id}}');"></a>
+			<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookVideo('{{ recent_activity.video_log.video_title|escape }}','{{ recent_activity.video.description}}','/video?v={{recent_activity.video_log.video.youtube_id}}');"></a>
 			<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org%2Fvideo?v={{recent_activity.video_log.video.youtube_id}}&amp;text=just%20learned%20about%20{{recent_activity.video_log.video.title|escape}}&amp;related=khanacademy:Trying%20to%20make%20a%20world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
 		</div>
 	</div>
