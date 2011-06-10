@@ -66,30 +66,6 @@ var Video = {
     },
 	
 
-	facebook:function(name, desc) {
-		
-		FB.ui(
-		   {
-		     method: 'feed',
-		     name: name,
-		     link: document.URL,
-		     picture: 'http://www.khanacademy.org/images/handtreehorizontal_facebook.png',
-		     caption: 'KhanAcademy.org',
-		     description: desc ,
-		     message: 'I just learned about '+name+' on Khan Academy'
-		   },
-		   function(response) {
-		     if (response && response.post_id) {
-
-		     } else {
-
-		     }
-		   }
-		 );	
-		return false;
-		
-	},
-
 	createPopups: function() {
 		
 		$(".download-link, .subtitles-link").each(function() {

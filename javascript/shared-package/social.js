@@ -34,7 +34,6 @@ var Social = {
 		return false;
 		
 	},
-	
 	facebookVideo: function(name, desc,url) {
 		
 		FB.ui(
