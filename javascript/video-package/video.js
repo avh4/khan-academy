@@ -47,7 +47,6 @@ var Video = {
         if (readCookie(this.SHOW_SUBTITLES_COOKIE))
             this.showSubtitles();
 
-		Video.createPopups();
 	
 		$('.sharepop').hide();
 		
@@ -65,29 +64,6 @@ var Video = {
             this.showSubtitles();
     },
 	
-
-	createPopups: function() {
-		
-		$(".download-link, .subtitles-link").each(function() {
-		$(this).CreateBubblePopup({
-						position : 'top',
-				
-							align	 : 'center',
-							innerHtml: $(this).attr("title"),
-							innerHtmlStyle: {
-									color:'#FFFFFF', 
-									'text-align':'center'
-											},
-							divStyle: {
-									margin:'-5px' 
-											},
-							themeName: 	'all-black',
-							themePath: 	'/images/jspopup/jquerybubblepopup-theme'
-				});
-		
-		});
-		
-	},
 
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);
