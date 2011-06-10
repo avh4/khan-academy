@@ -65,8 +65,12 @@
                 </div>
             </div>
     
-            <div class="video_extra_links desktop-only" style="float:right;"><nobr>
+            <span class="video_extra_links desktop-only" style="float:right;"><nobr>
            
+				{% if username %}
+		                {% possible_points_badge awarded_points video_points_base %}
+		            {% endif %}
+
                <div class="extra-link-bar" style="float:right; margin-top:5px;position:relative;">
                     {% if exercise %}
 					 
@@ -102,10 +106,8 @@
 					
                 </div>
 
-				 {% if username %}
-		                {% possible_points_badge awarded_points video_points_base %}
-		            {% endif %}
-            </nobr></div>
+				 
+            </nobr></span>
 			
             <div class="desktop-only">
             {% video_comments video playlist comments_page %}
