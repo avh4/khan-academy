@@ -123,6 +123,7 @@ hr {
 .simple-button {
     color: #333 !important;
     cursor: pointer !important;
+    display: inline-block;
     border: 1px solid #ccc !important;
     border-bottom: 1px solid #bbb !important;
     padding: 5px 10px;
@@ -151,7 +152,6 @@ hr {
     top: 3px;
 }
 .simple-button.social-button {
-    display: block;
     text-transform: uppercase;
     margin-bottom: 9px;
     font-size: 12px;
@@ -1007,6 +1007,8 @@ article.video p#keywords {
 
 span.video_extra_links {
     float: right;
+    position: relative;
+    z-index: 100;
 }
 span.video_extra_links span.extra-link-bar {
     position: relative;
