@@ -103,12 +103,12 @@ var Profile = {
         }, 1000);
     },
 	
-	facebookBadge:function(desc,icon,ext) {
+	facebookBadge:function(desc,icon,ext,activity) {
 		
 		FB.ui(
 		   {
 		     method: 'feed',
-		     name: 'I just earned the '+desc+' badge at Khan Academy!',
+		     name: 'I just earned the '+desc+' badge in '+activity+' at Khan Academy!',
 		     link: 'http://www.KhanAcademy.org',
 		     picture: 'http://khanacademy.org/'+icon,
 		     caption: 'KhanAcademy.org',

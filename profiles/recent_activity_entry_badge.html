@@ -9,8 +9,8 @@
 	
 	<div class="sharepop">
 		<div class="triangle-isosceles top">
-			<a href="javascript:void(0);" class="facebookShare" onclick="Profile.facebookBadge('{{ recent_activity.badge.description|escape }}','{{ recent_activity.badge.icon_src }}','{{ recent_activity.badge.extended_description|escape }}');"></a>
-			<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ recent_activity.badge.description|escape }}%20badge&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
+			<a href="javascript:void(0);" class="facebookShare" onclick="Profile.facebookBadge('{{ recent_activity.badge.description|escape }}','{{ recent_activity.badge.icon_src }}','{{ recent_activity.badge.extended_description|escape }}',{% if recent_activity.user_badge.target_context_name %}'{{ recent_activity.user_badge.target_context_name|escape }}'{% else %}''{% endif %});"></a>
+			<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ recent_activity.badge.description|escape }}%20badge%20in%20{% if recent_activity.user_badge.target_context_name %}{{ recent_activity.user_badge.target_context_name|escape }}{% endif %}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
 		</div>
 	</div>
 	
