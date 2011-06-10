@@ -56,6 +56,7 @@ var Video = {
 			return false;
 		});
 		
+
 	
     },
 	
@@ -91,19 +92,51 @@ var Video = {
 	},
 
 	createPopups: function() {
-		$('.download-link,.exercise-link,.subtitles-link').CreateBubblePopup({
+		$('.download-link').CreateBubblePopup({
 					position : 'top',
 					align	 : 'center',
-					innerHtml: $(this).attr("title")+'',
+					innerHtml: 'Download this video',
 					innerHtmlStyle: {
 							color:'#FFFFFF', 
 							'text-align':'center'
 									},
+					divStyle: {
+							margin:'-5px' 
+							},
 					themeName: 	'all-black',
 					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
 		});
 
-	
+		$('.exercise-link').CreateBubblePopup({
+					position : 'top',
+					align	 : 'center',
+					innerHtml: 'View related exercises',
+					innerHtmlStyle: {
+							color:'#FFFFFF', 
+							'text-align':'center'
+									},
+					divStyle: {
+							margin:'-5px' 
+							},
+					themeName: 	'all-black',
+					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
+		});
+		
+		$('.subtitles-link').CreateBubblePopup({
+					position : 'top',
+		
+					align	 : 'center',
+					innerHtml: 'Toggle subtitles and translations',
+					innerHtmlStyle: {
+							color:'#FFFFFF', 
+							'text-align':'center'
+									},
+					divStyle: {
+							margin:'-5px' 
+									},
+					themeName: 	'all-black',
+					themePath: 	'/images/jspopup/jquerybubblepopup-theme'
+		});
 	},
 
     hideSubtitles: function() {

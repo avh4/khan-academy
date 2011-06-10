@@ -74,7 +74,7 @@
                <div class="extra-link-bar">
                     {% if exercise %}
 					 
-                        <a href="/exercises?exid={{exercise}}" title="View related exercises" class="simple-button action-gradient with-icon exercise-link">
+                        <a href="/exercises?exid={{exercise}}" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
                             <img  src="/images/exercise-icon-small.png" />
                             Exercises
                         </a>
@@ -82,12 +82,12 @@
                     {% endif %}
 
                     
-                        <a href="#" title="Toggle subtitles and translations" class="simple-button action-gradient with-icon subtitles-link">
+                        <a href="#" title="Toggle subtitles and translations" style="z-index:101;" class="simple-button action-gradient with-icon subtitles-link">
                             <img src="/images/subtitles-icon-small.png" />
                             Subtitles
                         </a>
 
-                        <a href="{{video_path}}" title="Download this lesson" class="simple-button action-gradient with-icon download-icon download-link">
+                        <a href="{{video_path}}" title="Download this lesson" style="z-index:101;" class="simple-button action-gradient with-icon download-icon download-link">
                             <img src="/images/download-icon-small.png" />
                             Download
                         </a>
