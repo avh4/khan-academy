@@ -48,10 +48,12 @@ var Video = {
             this.showSubtitles();
 
 		Video.createPopups();
-		
+	
 		$('.sharepop').hide();
 		
 		$('.share-link').click(function() {
+		//	alert($(this).next(".sharepop").is("visible:"));
+		//	alert("Debug");
 			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
 			return false;
 		});
@@ -66,6 +68,7 @@ var Video = {
         else
             this.showSubtitles();
     },
+	
 
 	facebook:function(name, desc) {
 		

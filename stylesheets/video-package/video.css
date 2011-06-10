@@ -142,13 +142,16 @@
 .simple-button.with-icon.download-icon img { top: 5px; }
 
 .extra-link-bar .sharepop {
+	position:absolute;
 	float:right;
 	margin-top:10px;
 	width:60px;
-	position:absolute;
+	height:35px;
 	right:5px;
+	top:20px;
 	padding:0px;
-	z-index:3;
+	z-index:30;
+	
 	}
 .extra-link-bar .triangle-isosceles.top{
 	width:60px;
