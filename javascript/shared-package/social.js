@@ -17,7 +17,13 @@ var Social = {
 			window.open(url, 'twitter', opts);
 			return false;
 		});
-		   
+		 
+		$('.sharepop').hide();
+		$('.notif-share').click(function() {
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+			return false;
+				});
+		
     },
 	facebookBadge:function(desc,icon,ext,activity) {
 		
