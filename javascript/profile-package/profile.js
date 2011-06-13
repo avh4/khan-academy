@@ -7,7 +7,7 @@ var Profile = {
 
     init: function() {
 		
-		$(".recent-share").hide();
+		$('.recent-share').hide();
 		$('.sharepop').hide();
 			
 		$(".achievement,.exercise,.video").hover(
@@ -20,7 +20,7 @@ var Profile = {
 			  });
 
 		$('.recent-share').click(function() {
-			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+			 $(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
 			return false;
 				});
 		

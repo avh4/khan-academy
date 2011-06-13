@@ -455,15 +455,7 @@ div.graph-notification {
     margin: 0;
 }
 
-.recent-share {position:absolute;left:180px;top:25px;text-align:center;font-size:12px;}
-/*.recent-share {
-	text-align:center;
-	font-size:12px;
-	position:relative;
-	top:60px;
-	display:inline-block;
-	margin-left:-10px;
-	}*/
+.recent-share {z-index:5;position:absolute;left:180px;top:25px;text-align:center;font-size:12px;}
 .ach-text {
 	position:relative;
 	top:-50px;
@@ -474,8 +466,8 @@ div.graph-notification {
 /*.recent-share .share-link {width:60px; padding: 5px 4px 5px 22px;}
 .recent-share img {width:15px;margin-top:3px;}	*/
 	
-.sharepop {position:absolute;left:27px;float:right;font-size:12px;margin-top:10px;width:50px;}
-.triangle-isosceles.top{position:absolute;left:0;width:50px;height:25px;padding:5px;}
+.sharepop {z-index:3;position:absolute;left:188px;float:right;font-size:12px;height:30px;width:60px;}
+.triangle-isosceles.top{position:absolute;top:16px;width:50px;height:25px;padding:5px;}
 
 .badge-share-container {position:absolute;bottom:25px;left:5px;width:250px;}
 
