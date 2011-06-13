@@ -388,6 +388,7 @@
             max-width: 60px;
             max-height: 60px;
             vertical-align: middle;
+			position:absolute;
         }
         #individual_report #recent-activity #activity-list > ul > li span.time {
             font-size: 75%;
@@ -454,17 +455,24 @@ div.graph-notification {
     margin: 0;
 }
 
-/*.recent-share {float:right;text-align:center; padding-top:10px;font-size:12px;}*/
-.recent-share {
+.recent-share {position:absolute;left:180px;top:25px;text-align:center;font-size:12px;}
+/*.recent-share {
 	text-align:center;
 	font-size:12px;
-/*	position:relative;
+	position:relative;
 	top:60px;
-*/	display:inline-block;
-/*	margin-left:-10px;*/
-	}
-.recent-share .share-link {width:60px; padding: 5px 4px 5px 22px;}
-.recent-share img {width:15px;margin-top:3px;}	
+	display:inline-block;
+	margin-left:-10px;
+	}*/
+.ach-text {
+	position:relative;
+	top:-50px;
+	left:70px;
+	height:1px;
+}	
+	
+/*.recent-share .share-link {width:60px; padding: 5px 4px 5px 22px;}
+.recent-share img {width:15px;margin-top:3px;}	*/
 	
 .sharepop {position:absolute;left:27px;float:right;font-size:12px;margin-top:10px;width:50px;}
 .triangle-isosceles.top{position:absolute;left:0;width:50px;height:25px;padding:5px;}

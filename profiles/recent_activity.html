@@ -6,45 +6,15 @@
             {% for recent_activity in list_recent_activity %}
 			
                 {% ifequal recent_activity.s_type "Badge" %}
-                    <li style="background:black;width:100%;">{% profile_recent_activity_entry_badge student recent_activity %}<span class="recent-share">
-					<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
-				        <img src="/images/share-icon-small.png" />
-				        Share
-				    </a>
-					</span><div class="sharepop">
-						<div class="triangle-isosceles top">
-							<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookBadge('{{ recent_activity.badge.description|escape }}','{{ recent_activity.badge.icon_src }}','{{ recent_activity.badge.extended_description|escape }}',{% if recent_activity.user_badge.target_context_name %}'{{ recent_activity.user_badge.target_context_name|escape }}'{% else %}''{% endif %});"></a>
-							<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ recent_activity.badge.description|escape }}%20badge%20in%20{% if recent_activity.user_badge.target_context_name %}{{ recent_activity.user_badge.target_context_name|escape }}{% endif %}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
-						</div>
-					</div></li>
+                    <li>{% profile_recent_activity_entry_badge student recent_activity %}</li>
                 {% endifequal %}
 
                 {% ifequal recent_activity.s_type "Exercise" %}
-                    <li>{% profile_recent_activity_entry_exercise student recent_activity %}<span class="recent-share">
-					<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
-				        <img src="/images/share-icon-small.png" />
-				        Share
-				    </a>
-					</span><div class="sharepop">
-						<div class="triangle-isosceles top">
-							<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookBadge('{{ recent_activity.badge.description|escape }}','{{ recent_activity.badge.icon_src }}','{{ recent_activity.badge.extended_description|escape }}',{% if recent_activity.user_badge.target_context_name %}'{{ recent_activity.user_badge.target_context_name|escape }}'{% else %}''{% endif %});"></a>
-							<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ recent_activity.badge.description|escape }}%20badge%20in%20{% if recent_activity.user_badge.target_context_name %}{{ recent_activity.user_badge.target_context_name|escape }}{% endif %}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
-						</div>
-					</div></li>
+                    <li>{% profile_recent_activity_entry_exercise student recent_activity %}</li>
                 {% endifequal %}
 
                 {% ifequal recent_activity.s_type "Video" %}
-                    <li>{% profile_recent_activity_entry_video student recent_activity %}<span class="recent-share">
-					<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
-				        <img src="/images/share-icon-small.png" />
-				        Share
-				    </a>
-					</span><div class="sharepop">
-						<div class="triangle-isosceles top">
-							<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookBadge('{{ recent_activity.badge.description|escape }}','{{ recent_activity.badge.icon_src }}','{{ recent_activity.badge.extended_description|escape }}',{% if recent_activity.user_badge.target_context_name %}'{{ recent_activity.user_badge.target_context_name|escape }}'{% else %}''{% endif %});"></a>
-							<a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ recent_activity.badge.description|escape }}%20badge%20in%20{% if recent_activity.user_badge.target_context_name %}{{ recent_activity.user_badge.target_context_name|escape }}{% endif %}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"/> </a>
-						</div>
-					</div></li>
+                    <li>{% profile_recent_activity_entry_video student recent_activity %}</li>
                 {% endifequal %}
 
             {% endfor %}

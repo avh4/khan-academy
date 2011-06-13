@@ -7,17 +7,16 @@ var Profile = {
 
     init: function() {
 		
-		// $(".recent-share").hide();
+		$(".recent-share").hide();
 		$('.sharepop').hide();
 			
-		$(".ach-container").hover(
+		$(".achievement,.exercise,.video").hover(
 			function () {
-			   // $(this).find(".recent-share").show();
-				alert("ddd");
+			    $(this).find(".recent-share").show();
 				},
 			function () {
 			    $(this).find(".recent-share").hide();
-				$(this).next(".sharepop").hide();
+				$(this).find(".sharepop").hide();
 			  });
 
 		$('.recent-share').click(function() {
