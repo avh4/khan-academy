@@ -1506,7 +1506,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .achievement-badge.category-5 #outline-box {
         border-top: none;
     }
-    
+.badge-award-container {width:302px;}    
 .badge-award-container .achievement-badge.category-5, .achievement-badge.category-5.achievement-badge-owned {
     border: none;
     -webkit-box-shadow: none;

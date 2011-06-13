@@ -373,10 +373,11 @@
         font-size: 18px;
         color: #555;
         margin-bottom: 5px;
+		margin-top:10px;
     }
          #individual_report #recent-activity #activity-list > ul > li span.activity-image {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             background: #ccc;
             display: inline-block;
             -webkit-border-radius: 5px;
@@ -384,8 +385,8 @@
             border-radius: 5px;
          }
         #individual_report #recent-activity #activity-list > ul > li img {
-            max-width: 50px;
-            max-height: 50px;
+            max-width: 60px;
+            max-height: 60px;
             vertical-align: middle;
         }
         #individual_report #recent-activity #activity-list > ul > li span.time {
@@ -453,9 +454,20 @@ div.graph-notification {
     margin: 0;
 }
 
-.recent-share {float:right;text-align:center; padding-top:10px;font-size:12px;}
-.sharepop {position:absolute;right:30px;float:right;font-size:12px;margin-top:40px;width:50px;}
-.triangle-isosceles.top{position:absolute;right:0;width:50px;height:25px;padding:5px;}
+/*.recent-share {float:right;text-align:center; padding-top:10px;font-size:12px;}*/
+.recent-share {
+	text-align:center;
+	font-size:12px;
+/*	position:relative;
+	top:60px;
+*/	display:inline-block;
+/*	margin-left:-10px;*/
+	}
+.recent-share .share-link {width:60px; padding: 5px 4px 5px 22px;}
+.recent-share img {width:15px;margin-top:3px;}	
+	
+.sharepop {position:absolute;left:27px;float:right;font-size:12px;margin-top:10px;width:50px;}
+.triangle-isosceles.top{position:absolute;left:0;width:50px;height:25px;padding:5px;}
 
 .badge-share-container {position:absolute;bottom:25px;left:5px;width:250px;}
 
