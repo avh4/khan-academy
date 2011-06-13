@@ -6,7 +6,7 @@
 var chart;
 
 function exercise_url(point) {
-    return "/exercises?exid={{ exid|escapejs }}&read_only=1&problem_number=" + point.x + (point.exercise_non_summative ? "&exid_non_summative=" + point.exercise_non_summative : ""); 
+    return "/exercises?exid={{ exid|escapejs }}&problem_number=" + point.x + (point.exercise_non_summative ? "&exid_non_summative=" + point.exercise_non_summative : ""); 
 }
 
 			$(document).ready(function() {
