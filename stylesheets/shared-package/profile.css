@@ -463,9 +463,6 @@ div.graph-notification {
 	height:1px;
 }	
 	
-/*.recent-share .share-link {width:60px; padding: 5px 4px 5px 22px;}
-.recent-share img {width:15px;margin-top:3px;}	*/
-	
 .sharepop {z-index:3;position:absolute;left:188px;float:right;font-size:12px;height:30px;width:60px;}
 .triangle-isosceles.top{position:absolute;top:16px;width:50px;height:25px;padding:5px;}
 

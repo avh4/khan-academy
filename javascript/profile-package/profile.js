@@ -20,8 +20,11 @@ var Profile = {
 			  });
 
 		$('.recent-share').click(function() {
-			 $(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
-			return false;
+		if ( $.browser.msie && (parseInt($.browser.version, 10) < 8) )
+			$(this).next(".sharepop").toggle();
+		else			
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+		return false;
 				});
 		
         if ($.address)
