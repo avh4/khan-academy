@@ -46,7 +46,7 @@ class RequestInputHandler(object):
         if "." in s_date:
             s_date = s_date[:s_date.find(".")]
 
-        # Try to parse date in ISO 8601 format
+        # Try to parse date in our approved ISO 8601 format
         try:
             return datetime.datetime.strptime(s_date, "%Y-%m-%dT%H:%M:%S")
         except ValueError:
