@@ -5,6 +5,7 @@ import math
 import urllib
 from google.appengine.api import users
 from google.appengine.api import memcache
+from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
@@ -694,7 +695,7 @@ class Playlist(Searchable, db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
+        return "http://www.khanacademy.org/#%s" % urllib.quote(slugify(self.title))
 
     @staticmethod
     def get_for_all_topics():
@@ -840,7 +841,7 @@ class VideoLog(db.Model):
         if last_video_log and last_video_log.key_for_video() != video.key():
             dt_now = datetime.datetime.now()
             if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
-                return
+                return (None, None, 0)
 
         video_log = VideoLog()
         video_log.user = user
@@ -901,7 +902,7 @@ class VideoLog(db.Model):
 
         db.put([user_video, video_log, user_data])
 
-        return video_points_total
+        return (user_video, video_log, video_points_total)
 
     def time_started(self):
         return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
@@ -955,6 +956,10 @@ class ProblemLog(db.Model):
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
+
+    @property
+    def ka_url(self):
+        return "http://www.khanacademy.org/exercises?exid=%s&problem_number=%s" % (self.exercise, self.problem_number)
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):

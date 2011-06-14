@@ -119,6 +119,10 @@ def badges_with_context_type(badge_context_type):
 def get_badge_counts(user_data):
 
     count_dict = badges.BadgeCategory.empty_count_dict()
+
+    if not user_data:
+        return count_dict
+
     badges_dict = all_badges_dict()
 
     for badge_name_with_context in user_data.badges:

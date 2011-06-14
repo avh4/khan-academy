@@ -320,6 +320,9 @@ class UserBadgeNotifier:
 
     @staticmethod
     def pop_for_user(user):
+        if not user:
+            return []
+
         user_badges = memcache.get(UserBadgeNotifier.key_for_user(user)) or []
 
         if len(user_badges) > 0:

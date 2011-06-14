@@ -73,7 +73,9 @@
 
                 <div class="clear">&nbsp;</div>
 
-                <p>By logging in, you agree to give this application access to your personal Khan Academy usage data.</p>
+                {% if not anointed %}
+                    <p>By logging in, you agree to give this application access to your personal Khan Academy usage data.</p>
+                {% endif %}
             </div>
         </div>
     </body>

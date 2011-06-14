@@ -118,7 +118,6 @@ class ViewExercise(request_handler.RequestHandler):
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
-            problem_number = self.request.get('problem_number')
             time_warp = self.request.get('time_warp')
 
             user_data = UserData.get_or_insert_for(user)
@@ -133,11 +132,10 @@ class ViewExercise(request_handler.RequestHandler):
 
             user_exercise = user_data.get_or_insert_exercise(exercise)
 
-            if not problem_number:
-                problem_number = user_exercise.total_done+1
+            problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
             # When viewing a problem out-of-order, show read-only view
-            read_only = self.request_bool('read_only', default=False) or problem_number != (user_exercise.total_done + 1)
+            read_only = problem_number != (user_exercise.total_done + 1)
 
             exercise_non_summative = exercise.non_summative_exercise(problem_number)
 
@@ -356,7 +354,7 @@ class LogVideoProgress(request_handler.RequestHandler):
                 seconds_watched = int(self.request_float("seconds_watched", default=0))
                 last_second_watched = int(self.request_float("last_second_watched", default=0))
 
-                video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
+                user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
         user_points_context = user_points(user_data)
         user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
@@ -1393,6 +1391,7 @@ class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
         self.render_template('login_mobile_oauth.html', {
             "oauth_map_id": self.request_string("oauth_map_id", default=""),
+            "anointed": self.request_bool("an", default=False),
             "view": self.request_string("view", default="")
         })
 

@@ -4,7 +4,7 @@ import logging
 
 from google.appengine.api import users
 
-from flask import request
+from flask import request, current_app
 
 import models
 import layer_cache
@@ -15,6 +15,33 @@ import util
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
+
+def api_error_response(e):
+    return current_app.response_class("API error. %s" % e.message, status=500)
+
+def add_action_results_property(obj, dict_results):
+    badges_earned = []
+
+    user = util.get_current_user()
+    if user:
+        badge_counts = util_badges.get_badge_counts(models.UserData.get_for(user))
+
+        user_badges = badges.UserBadgeNotifier.pop_for_user(user)
+        badges_dict = util_badges.all_badges_dict()
+
+        for user_badge in user_badges:
+            badge = badges_dict.get(user_badge.badge_name)
+
+            if badge:
+                if not hasattr(badge, "user_badges"):
+                    badge.user_badges = []
+                badge.user_badges.append(user_badge)
+                badge.is_owned = True
+                badges_earned.append(badge)
+
+    dict_results["badges_earned"] = badges_earned
+
+    obj.action_results = dict_results
 
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
@@ -222,6 +249,22 @@ def user_data_other():
 
     return None
 
+def filter_query_by_request_dates(query, property):
+
+    if request.request_string("dt_start"):
+        try:
+            dt_start = request.request_date_iso("dt_start")
+            query.filter("%s >=" % property, dt_start)
+        except ValueError:
+            raise ValueError("Invalid date format sent to dt_start, use ISO 8601.")
+
+    if request.request_string("dt_end"):
+        try:
+            dt_end = request.request_date_iso("dt_end")
+            query.filter("%s <=" % property, dt_end)
+        except ValueError:
+            raise ValueError("Invalid date format sent to dt_end, use ISO 8601.")
+
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()
 @jsonp
@@ -233,8 +276,14 @@ def user_videos_all():
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
-            user_videos = models.UserVideo.all().filter("user =", user_data_student.user)
-            return user_videos.fetch(10000)
+            user_videos_query = models.UserVideo.all().filter("user =", user_data_student.user)
+
+            try:
+                filter_query_by_request_dates(user_videos_query, "last_watched")
+            except ValueError, e:
+                return api_error_response(e)
+
+            return user_videos_query.fetch(10000)
 
     return None
 
@@ -261,6 +310,8 @@ def user_videos_specific(youtube_id):
 @jsonify
 def log_user_video(youtube_id):
     user = util.get_current_user()
+    points = 0
+    video_log = None
 
     if user and youtube_id:
         user_data= models.UserData.get_for(user)
@@ -270,9 +321,12 @@ def log_user_video(youtube_id):
         last_second_watched = int(request.request_float("last_second_watched", default = 0))
 
         if user_data and video:
-            return models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
+            user_video, video_log, video_points_total = models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-    return 0
+            if video_log:
+                add_action_results_property(video_log, {"user_video": user_video, "user_data": models.UserData.get_for(user)})
+
+    return video_log
 
 @route("/api/v1/user/exercises", methods=["GET"])
 @oauth_required()
@@ -356,13 +410,10 @@ def user_problem_logs(exercise_name):
             problem_log_query.filter("user =", user)
             problem_log_query.filter("exercise =", exercise.name)
 
-            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
-            if dt_start != datetime.datetime.min:
-                problem_log_query.filter("time_done >=", dt_start)
-
-            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
-            if dt_end != datetime.datetime.min:
-                problem_log_query.filter("time_done <", dt_end)
+            try:
+                filter_query_by_request_dates(problem_log_query, "time_done")
+            except ValueError, e:
+                return api_error_response(e)
 
             problem_log_query.order("time_done")
 
@@ -387,13 +438,10 @@ def user_video_logs(youtube_id):
             video_log_query.filter("user =", user)
             video_log_query.filter("video =", video)
 
-            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
-            if dt_start != datetime.datetime.min:
-                video_log_query.filter("time_watched >=", dt_start)
-
-            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
-            if dt_end != datetime.datetime.min:
-                video_log_query.filter("time_watched <", dt_end)
+            try:
+                filter_query_by_request_dates(video_log_query, "time_watched")
+            except ValueError, e:
+                return api_error_response(e)
 
             video_log_query.order("time_watched")
 
@@ -433,3 +481,9 @@ def badges_list():
 @jsonify
 def badge_categories():
     return badges.BadgeCategory.all()
+
+@route("/api/v1/badges/categories/<category>", methods=["GET"])
+@jsonp
+@jsonify
+def badge_category(category):
+    return filter(lambda badge_category: str(badge_category.category) == category, badges.BadgeCategory.all())
