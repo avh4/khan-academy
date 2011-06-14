@@ -147,8 +147,9 @@
 	margin-top:10px;
 	width:60px;
 	height:35px;
-	right:5px;
-	top:20px;
+	left:auto;
+	right:10px;
+	top:5px;
 	padding:0px;
 	z-index:30;
 	

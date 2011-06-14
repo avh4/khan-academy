@@ -11,11 +11,11 @@
 		             <img src="/images/share-icon-small.png" />
 		                     Share
 		             </a>
-				   <span class="sharepop" style="position:relative;right:7px;top:-10px;z-index:100;height:30px;">
-				 						<span class="triangle-isosceles top">
+				   <div class="sharepop" style="float:none;position:relative;right:90px;top:10px;z-index:100;padding:1px;height:40px;margin-left:33px;width:70px;">
+				 						<div class="triangle-isosceles top" style="position:absolute;right:0px;top:0px;">
 				 							<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookBadge('{{ user_badge.badge.description|escape }}','{{ user_badge.badge.icon_src }}','{{ user_badge.badge.extended_description|escape }}',{% if user_badge.target_context_name %}'{{ user_badge.target_context_name|escape }}'{% else %}''{% endif %});"></a> <a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ user_badge.badge.description|escape }}%20badge%20in%20{% if user_badge.target_context_name %}{{ user_badge.target_context_name|escape }}{% endif %}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare"></a>
-				 						</span>
-				 					</span> 
+				 						</div>
+				 					</div> 
 					
 				</div>
 				<hr style="margin:0px; padding:0px;"/>
