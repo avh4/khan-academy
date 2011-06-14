@@ -28,8 +28,6 @@ def class_progress_report_graph_context(user_data):
     if not user_data:
         return {}
 
-    user = user_data.user
-
     list_student_data = user_data.get_students_data()
     student_emails = map(lambda student_data: student_data.user.email(), list_student_data)
     class_exercises = get_class_exercises(list_student_data)
@@ -107,5 +105,4 @@ def class_progress_report_graph_context(user_data):
             'student_emails': student_emails,
             'exercise_names': exercises_found_names,
             'exercise_data': exercise_data,
-            'coach_email': user.email(),
         }

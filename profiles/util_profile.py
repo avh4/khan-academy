@@ -11,6 +11,7 @@ import util
 import models
 import consts
 from badges import util_badges
+from models import StudyGroup
 
 class ViewClassProfile(request_handler.RequestHandler):
 
@@ -25,7 +26,13 @@ class ViewClassProfile(request_handler.RequestHandler):
                 coach = users.User(email=coach_email)
 
             user_data_coach = models.UserData.get_or_insert_for(coach)
-            students_data = user_data_coach.get_students_data()
+            
+            students_data = None
+            group_id = self.request_string("group_id")
+            if group_id:
+                students_data = StudyGroup.get(group_id).get_students_data()
+            else:
+                students_data = user_data_coach.get_students_data()
 
             class_points = 0
             if students_data:
@@ -38,7 +45,9 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
-
+            if group_id:
+                initial_graph_url += 'group_id=%s' % group_id
+            
             # Sort students alphabetically and sort into 4 chunked up columns for easy table html
             dict_students_sorted = sorted(dict_students, key=lambda dict_student:dict_student["nickname"])
             students_per_row = 4
@@ -64,6 +73,7 @@ class ViewClassProfile(request_handler.RequestHandler):
             template_values = {
                     'coach': coach,
                     'coach_email': coach.email(),
+                    'group_id': group_id,
                     'coach_nickname': util.get_nickname_for(coach),
                     'dict_students': dict_students,
                     'students_per_row': students_per_row,
@@ -355,6 +365,11 @@ class ClassExercisesOverTimeGraph(ClassProfileGraph):
 class ClassProgressReportGraph(ClassProfileGraph):
     GRAPH_TYPE = "classprogressreport"
     def graph_html_and_context(self, user_data_coach):
+        group_id = self.request_string('group_id')
+        logging.critical("group_id was '%s'", group_id)
+        logging.critical(self.request)
+        if group_id:
+            user_data_coach = StudyGroup.get(group_id)
         return templatetags.class_profile_progress_report_graph(user_data_coach)
 
 class ClassTimeGraph(ClassProfileDateGraph):
