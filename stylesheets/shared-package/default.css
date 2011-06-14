@@ -151,7 +151,6 @@ hr {
     top: 3px;
 }
 .simple-button.social-button {
-    display: block;
     text-transform: uppercase;
     margin-bottom: 9px;
     font-size: 12px;
@@ -1007,6 +1006,8 @@ article.video p#keywords {
 
 span.video_extra_links {
     float: right;
+    position: relative;
+    z-index: 100;
 }
 span.video_extra_links span.extra-link-bar {
     position: relative;
@@ -1372,7 +1373,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     margin-left: 15px;
     position: relative;
     width: 300px;
-    height: 90px;
+    height: 120px;
     opacity: 0.75;
     filter:alpha(opacity=75);
     
@@ -1505,7 +1506,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .achievement-badge.category-5 #outline-box {
         border-top: none;
     }
-    
+.badge-award-container {width:302px;}    
 .badge-award-container .achievement-badge.category-5, .achievement-badge.category-5.achievement-badge-owned {
     border: none;
     -webkit-box-shadow: none;
@@ -2788,4 +2789,40 @@ a.control:hover { color: #DD6900; }
 
 div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
+.triangle-isosceles {
+	position:relative;
+	color:#000;
+	background:#000000; /* default background for browsers without gradient support */
+	-webkit-border-radius:7px;
+	-moz-border-radius:7px;
+	border-radius:7px;
+}
 
+.triangle-isosceles.top {
+	width:150px;
+	height:50px;
+
+}
+
+
+.triangle-isosceles:after {
+	content:"";
+	position:absolute;
+	bottom:0px; /* value = - border-top-width - border-bottom-width */
+	border-width:10px 10px 0; /* vary these values to change the angle of the vertex */
+	border-style:solid;
+	border-color:#000000 transparent;
+    /* reduce the damage in FF3.0 */
+    display:block; 
+    width:0;
+}
+
+.triangle-isosceles.top:after {
+	top:-5px; /* value = - border-top-width - border-bottom-width */
+	right:25px; /* controls horizontal position */
+	bottom:auto;
+	left:auto;
+	border-width:0 5px 5px; /* vary these values to change the angle of the vertex */
+	border-color:#000000 transparent;
+	
+}
