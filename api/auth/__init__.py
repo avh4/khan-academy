@@ -8,9 +8,10 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response, custom_scheme_redirect
+from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response, custom_scheme_redirect, set_current_oauth_map_in_session
 from api.auth.google_util import google_request_token_handler
 from api.auth.facebook_util import facebook_request_token_handler
+from api.auth.decorators import oauth_required
 
 from oauth_provider.oauth import OAuthError
 from oauth_provider.utils import initialize_server_request
@@ -155,3 +156,9 @@ def access_token():
 def default_callback():
     return "OK"
 
+# Use OAuth token to login via session cookie
+@route("/api/auth/token_to_session", methods=["GET"])
+@oauth_required(require_anointed_consumer=True)
+def token_to_session():
+    set_current_oauth_map_in_session()
+    return redirect(request.request_string("continue", default="/"))

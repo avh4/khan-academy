@@ -46,14 +46,24 @@ var Video = {
         $('.subtitles-link').click(function() { Video.toggleSubtitles(); return false; });
         if (readCookie(this.SHOW_SUBTITLES_COOKIE))
             this.showSubtitles();
-    },
 
+	
+		$('.sharepop').hide();
+		
+		$('.share-link').click(function() {
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+			return false;
+		});
+	
+    },
+	
     toggleSubtitles: function() {
         if ($('.subtitles-warning').is(":visible"))
             this.hideSubtitles();
         else
             this.showSubtitles();
     },
+	
 
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);

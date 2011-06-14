@@ -1,14 +1,19 @@
 import cgi
 import logging
+import os
 import urllib
 import urlparse
 
 from google.appengine.api import urlfetch
 
 import flask
-from flask import current_app, request, redirect
+from flask import current_app, request, redirect, session
+from flask.session import Session
 
+from app import App
+from api.auth.models import OAuthMap
 from oauth_provider.oauth import build_authenticate_header, OAuthError
+import cookie_util
 
 def oauth_error_response(e):
     return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
@@ -67,10 +72,55 @@ def custom_scheme_redirect(url_redirect):
 def requested_oauth_callback():
     return request.values.get("oauth_callback") or ("%sapi/auth/default_callback" % request.host_url)
 
+def allow_cookie_based_auth():
+    # Don't allow cookie-based authentication for API calls which
+    # may return JSONP
+    path = os.environ.get("PATH_INFO")
+    return not path or not path.lower().startswith("/api/")
+
 def current_oauth_map():
+    oauth_map = None
+
     if hasattr(flask.g, "oauth_map"):
-        return flask.g.oauth_map
+        oauth_map = flask.g.oauth_map
+
+    if not oauth_map and allow_cookie_based_auth():
+        oauth_map = current_oauth_map_from_session_unsafe()
+
+    return oauth_map
+
+class RequestMock(object):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+def current_oauth_map_from_session_unsafe():
+
+    # We have to use plain 'ole cookie handling before we switch over to a Flask-only
+    # app, at which point we can strictly rely on Flask sessions.
+    session_cookie_name = "session"
+    session_cookie_value = cookie_util.get_cookie_value(session_cookie_name)
+    if session_cookie_value and App.flask_secret_key:
+
+        # Strip double quotes
+        if session_cookie_value.startswith("\""):
+            session_cookie_value = session_cookie_value[1:-1]
+
+        # Fake little Flask request object to load up the Flask session cookie.
+        fake_request = RequestMock(cookies={session_cookie_name: unicode(session_cookie_value)})
+
+        # Flask's sessions are secured by the secret key.
+        session_cookie = Session.load_cookie(fake_request, session_cookie_name, secret_key=App.flask_secret_key)
+        if session_cookie and session_cookie.has_key("oam"):
+
+            oauth_map_id = session_cookie["oam"]
+            oauth_map = OAuthMap.get_by_id_safe(oauth_map_id)
+            if oauth_map:
+                return oauth_map
+
     return None
+
+def set_current_oauth_map_in_session():
+    session["oam"] = flask.g.oauth_map.key().id()
 
 def get_response(url, params={}):
     url_with_params = append_url_params(url, params)
@@ -126,4 +176,3 @@ def get_parsed_params(resp):
     if not resp:
         return {}
     return cgi.parse_qs(resp)
-

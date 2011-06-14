@@ -998,7 +998,7 @@ class ProblemLog(db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/exercises?exid=%s&read_only=1&problem_number=%s" % (self.exercise, self.problem_number)
+        return "http://www.khanacademy.org/exercises?exid=%s&problem_number=%s" % (self.exercise, self.problem_number)
 
     @staticmethod
     def get_for_user_between_dts(user, dt_a, dt_b):
