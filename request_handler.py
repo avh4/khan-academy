@@ -1,7 +1,6 @@
 import os
 import logging
 import datetime
-import Cookie
 import urllib
 
 from django.utils import simplejson
@@ -15,6 +14,7 @@ import util
 from app import App
 from render import render_block_to_string
 from nicknames import get_nickname_for
+import cookie_util
 
 class RequestInputHandler(object):
 
@@ -148,43 +148,15 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def set_mobile_full_site_cookie(self, is_mobile):
         self.set_cookie("mobile_full_site", "1" if is_mobile else "0")
 
-    def get_cookie_value(self, key):
-        cookies = None
-        try:
-            cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
-        except Cookie.CookieError, error:
-            logging.debug("Ignoring Cookie Error, skipping get cookie: '%s'" % error)
-
-        if not cookies:
-            return None
-
-        cookie = cookies.get(key)
-
-        if not cookie:
-            return None
-
-        return cookie.value
+    @staticmethod
+    def get_cookie_value(key):
+        return cookie_util.get_cookie_value(key)
 
     # Cookie handling from http://appengine-cookbook.appspot.com/recipe/a-simple-cookie-class/
     def set_cookie(self, key, value='', max_age=None,
                    path='/', domain=None, secure=None, httponly=False,
                    version=None, comment=None):
-        cookies = Cookie.BaseCookie()
-        cookies[key] = value
-        for var_name, var_value in [
-            ('max-age', max_age),
-            ('path', path),
-            ('domain', domain),
-            ('secure', secure),
-            ('HttpOnly', httponly),
-            ('version', version),
-            ('comment', comment),
-            ]:
-            if var_value is not None and var_value is not False:
-                cookies[key][var_name] = str(var_value)
-            if max_age is not None:
-                cookies[key]['expires'] = max_age
-        header_value = cookies[key].output(header='').lstrip()
+        header_value = cookie_util.set_cookie_value(key, value, max_age, path, domain, secure, httponly, version, comment)
         self.response.headers._headers.append(('Set-Cookie', header_value))
 
     def delete_cookie(self, key, path='/', domain=None):
