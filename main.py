@@ -495,45 +495,49 @@ class ViewAllExercises(request_handler.RequestHandler):
         user = util.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
-            
-            ex_graph = ExerciseGraph(user_data)
-            if user_data.reassess_from_graph(ex_graph):
-                user_data.put()
-
-            recent_exercises = ex_graph.get_recent_exercises()
-            review_exercises = ex_graph.get_review_exercises(self.get_time())
-            suggested_exercises = ex_graph.get_suggested_exercises()
-            proficient_exercises = ex_graph.get_proficient_exercises()
-
-            for exercise in ex_graph.exercises:
-                exercise.suggested = False
-                exercise.proficient = False
-                exercise.review = False
-                exercise.status = ""
-                if exercise in suggested_exercises:
-                    exercise.suggested = True
-                    exercise.status = "Suggested"
-                if exercise in proficient_exercises:
-                    exercise.proficient = True
-                    exercise.status = "Proficient"
-                if exercise in review_exercises:
-                    exercise.review = True
-                    exercise.status = "Review"
-
-            template_values = {
-                'exercises': ex_graph.exercises,
-                'recent_exercises': recent_exercises,
-                'review_exercises': review_exercises,
-                'suggested_exercises': suggested_exercises,
-                'user_data': user_data,
-                'expanded_all_exercises': user_data.expanded_all_exercises,
-                'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
-                'selected_nav_link': 'practice',
-                }
-
-            self.render_template('viewexercises.html', template_values)
         else:
-            self.redirect(util.create_login_url(self.request.uri))
+            user_data = None
+        
+        ex_graph = ExerciseGraph(user_data) # user_data == None is valid
+        if user_data and user_data.reassess_from_graph(ex_graph):
+            user_data.put()
+
+        recent_exercises = ex_graph.get_recent_exercises()
+        review_exercises = ex_graph.get_review_exercises(self.get_time())
+        suggested_exercises = ex_graph.get_suggested_exercises()
+        proficient_exercises = ex_graph.get_proficient_exercises()
+
+        for exercise in ex_graph.exercises:
+            exercise.suggested = False
+            exercise.proficient = False
+            exercise.review = False
+            exercise.status = ""
+            if exercise in suggested_exercises:
+                exercise.suggested = True
+                exercise.status = "Suggested"
+            if exercise in proficient_exercises:
+                exercise.proficient = True
+                exercise.status = "Proficient"
+            if exercise in review_exercises:
+                exercise.review = True
+                exercise.status = "Review"
+        
+        template_values = {
+            'exercises': ex_graph.exercises,
+            'recent_exercises': recent_exercises,
+            'review_exercises': review_exercises,
+            'suggested_exercises': suggested_exercises,
+            # 'user_data': user_data,
+            'expanded_all_exercises': 
+                user_data.expanded_all_exercises if user_data else False
+            'map_coords': knowledgemap.deserializeMapCoords(
+                user_data.map_coords if user_data else None),
+            'selected_nav_link': 'practice',
+            }
+
+        self.render_template('viewexercises.html', template_values)
+        # else:
+        #     self.redirect(util.create_login_url(self.request.uri))
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')

@@ -1096,92 +1096,101 @@ class ExerciseVideo(db.Model):
 class ExerciseGraph(object):
 
     def __init__(self, user_data, user=None):
-        if user is None:
-            user = util.get_current_user()
-        user_exercises = UserExercise.get_for_user_use_cache(user)
-        exercises = Exercise.get_all_use_cache()
-        self.exercises = exercises
-        self.exercise_by_name = {}        
-        for ex in exercises:
-            self.exercise_by_name[ex.name] = ex
-            ex.coverers = []
-            ex.user_exercise = None
-            ex.next_review = None  # Not set initially
-            ex.is_review_candidate = False
-            ex.is_ancestor_review_candidate = None  # Not set initially
-            ex.proficient = None # Not set initially
-            ex.suggested = None # Not set initially
-            ex.assigned = False
-            ex.streak = 0
-            ex.longest_streak = 0
-            ex.total_done = 0
-        for name in user_data.proficient_exercises:
-            ex = self.exercise_by_name.get(name)
-            if ex:
-                ex.proficient = True
-        for name in user_data.assigned_exercises:
-            ex = self.exercise_by_name.get(name)
-            if ex:
-                ex.assigned = True
-        for ex in exercises:
-            for covered in ex.covers:
-                ex_cover = self.exercise_by_name.get(covered)
-                if ex_cover:
-                    ex_cover.coverers.append(ex)
-            ex.prerequisites_ex = []
-            for prereq in ex.prerequisites:
-                ex_prereq = self.exercise_by_name.get(prereq)
-                if ex_prereq:
-                    ex.prerequisites_ex.append(ex_prereq)
-        for user_ex in user_exercises:
-            ex = self.exercise_by_name.get(user_ex.exercise)
-            if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
-                ex.user_exercise = user_ex
-                ex.streak = user_ex.streak
-                ex.longest_streak = user_ex.longest_streak
-                ex.total_done = user_ex.total_done
-                ex.last_done = user_ex.last_done
+        if (user_data is None):
+            exercises = Exercise.get_all_use_cache()
+            self.exercises = exercises
+            self.exercise_by_name = {}        
+            self.anonymous_user = True
 
-        def compute_proficient(ex):
-            # Consider an exercise proficient if it is explicitly proficient or
-            # the user has never missed a problem and a covering ancestor is proficient
-            if ex.proficient is not None:
+        else: # user_data is not None
+            if user is None:
+                user = util.get_current_user()
+            user_exercises = UserExercise.get_for_user_use_cache(user)
+            exercises = Exercise.get_all_use_cache()
+            self.exercises = exercises
+            self.exercise_by_name = {}        
+            for ex in exercises:
+                self.exercise_by_name[ex.name] = ex
+                ex.coverers = []
+                ex.user_exercise = None
+                ex.next_review = None  # Not set initially
+                ex.is_review_candidate = False
+                ex.is_ancestor_review_candidate = None  # Not set initially
+                ex.proficient = None # Not set initially
+                ex.suggested = None # Not set initially
+                ex.assigned = False
+                ex.streak = 0
+                ex.longest_streak = 0
+                ex.total_done = 0
+            for name in user_data.proficient_exercises:
+                ex = self.exercise_by_name.get(name)
+                if ex:
+                    ex.proficient = True
+            for name in user_data.assigned_exercises:
+                ex = self.exercise_by_name.get(name)
+                if ex:
+                    ex.assigned = True
+            for ex in exercises:
+                for covered in ex.covers:
+                    ex_cover = self.exercise_by_name.get(covered)
+                    if ex_cover:
+                        ex_cover.coverers.append(ex)
+                ex.prerequisites_ex = []
+                for prereq in ex.prerequisites:
+                    ex_prereq = self.exercise_by_name.get(prereq)
+                    if ex_prereq:
+                        ex.prerequisites_ex.append(ex_prereq)
+            for user_ex in user_exercises:
+                ex = self.exercise_by_name.get(user_ex.exercise)
+                if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
+                    ex.user_exercise = user_ex
+                    ex.streak = user_ex.streak
+                    ex.longest_streak = user_ex.longest_streak
+                    ex.total_done = user_ex.total_done
+                    ex.last_done = user_ex.last_done
+
+            def compute_proficient(ex):
+                # Consider an exercise proficient if it is explicitly proficient or
+                # the user has never missed a problem and a covering ancestor is proficient
+                if ex.proficient is not None:
+                    return ex.proficient
+                ex.proficient = False
+                if ex.streak == ex.total_done:
+                    for c in ex.coverers:
+                        if compute_proficient(c) is True:
+                            ex.proficient = True
+                            break
                 return ex.proficient
-            ex.proficient = False
-            if ex.streak == ex.total_done:
-                for c in ex.coverers:
-                    if compute_proficient(c) is True:
-                        ex.proficient = True
-                        break
-            return ex.proficient
 
-        for ex in exercises:
-            compute_proficient(ex)
-            
-        def compute_suggested(ex):
-            if ex.suggested is not None:
-                return ex.suggested
-            if ex.proficient is True:
-                ex.suggested = False
-                return ex.suggested
-            ex.suggested = True
-            # Don't suggest exs that are covered by suggested exs
-            for c in ex.coverers:
-                if compute_suggested(c) is True:
+            for ex in exercises:
+                compute_proficient(ex)
+                
+            def compute_suggested(ex):
+                if ex.suggested is not None:
+                    return ex.suggested
+                if ex.proficient is True:
                     ex.suggested = False
                     return ex.suggested
-            # Don't suggest exs if the user isn't proficient in all prereqs
-            for prereq in ex.prerequisites_ex:
-                if not prereq.proficient:
-                    ex.suggested = False
-                    break            
-            return ex.suggested 
-            
-        for ex in exercises:
-            compute_suggested(ex)
-            ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
+                ex.suggested = True
+                # Don't suggest exs that are covered by suggested exs
+                for c in ex.coverers:
+                    if compute_suggested(c) is True:
+                        ex.suggested = False
+                        return ex.suggested
+                # Don't suggest exs if the user isn't proficient in all prereqs
+                for prereq in ex.prerequisites_ex:
+                    if not prereq.proficient:
+                        ex.suggested = False
+                        break            
+                return ex.suggested 
+                
+            for ex in exercises:
+                compute_suggested(ex)
+                ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
 
     def get_review_exercises(self, now):
+        if self.anonymous_user:
+            return []
 
 # An exercise ex should be reviewed iff all of the following are true:
 #   * ex and all of ex's covering ancestors either
@@ -1236,6 +1245,9 @@ class ExerciseGraph(object):
         return review_exercises
     
     def get_proficient_exercises(self):
+        if self.anonymous_user:
+            return []
+
         proficient_exercises = []
         for ex in self.exercises:
             if ex.proficient:
@@ -1243,6 +1255,9 @@ class ExerciseGraph(object):
         return proficient_exercises
 
     def get_summative_exercises(self):
+        if self.anonymous_user:
+            return []
+
         summative_exercises = []
         for ex in self.exercises:
             if ex.summative:
@@ -1260,6 +1275,9 @@ class ExerciseGraph(object):
         return suggested_exercises
 
     def get_recent_exercises(self, n_recent=2):
+        if self.anonymous_user:
+            return []
+
         recent_exercises = sorted(self.exercises, reverse=True,
                 key=lambda ex: ex.last_done if hasattr(ex, "last_done") else datetime.datetime.min)
         
