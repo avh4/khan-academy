@@ -11,22 +11,28 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
+import unregistered_util
 
 from api.auth.google_util import get_google_user_from_oauth_map
-from api.auth.auth_util import current_oauth_map
+from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
 def get_current_user():
-    path = os.environ.get("PATH_INFO")
-    if path and path.lower().startswith("/api/"):
-        return get_current_user_from_oauth()
-    else:
-        return get_current_user_from_cookies_unsafe()
+    user = None
 
-def get_current_user_from_oauth():
-    user = get_google_user_from_oauth_map(current_oauth_map())
+    oauth_map = current_oauth_map()
+    if oauth_map:
+        user = get_current_user_from_oauth_map(oauth_map)
+
+    if not user and allow_cookie_based_auth():
+        user = get_current_user_from_cookies_unsafe()
+
+    return user
+
+def get_current_user_from_oauth_map(oauth_map):
+    user = get_google_user_from_oauth_map(oauth_map)
     if not user:
-        user = facebook_util.get_facebook_user_from_oauth_map(current_oauth_map())
+        user = facebook_util.get_facebook_user_from_oauth_map(oauth_map)
     return user
 
 # get_current_user_from_cookies_unsafe is labeled unsafe because it should
@@ -35,8 +41,10 @@ def get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
+    if not user:
+        user = unregistered_util.get_current_user_from_cookies()
     return user
-
+        
 def get_nickname_for(user):
     return nicknames.get_nickname_for(user)
 
