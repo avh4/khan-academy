@@ -2026,7 +2026,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 .progress-legend.started,
 #module-progress .started {
-    background-color: darkblue;
+    background-color: lightblue;
 }
 .exercise-info-hover, #info-hover-container {
     background: #fff;
