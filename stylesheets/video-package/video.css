@@ -13,6 +13,9 @@
 }
 #video_menu ol {
     z-index: 2;
+    position: absolute;
+    right: 3px;
+    top: 5px;
 }
 #video_dropdown ol {
     max-height: 20em;
@@ -115,7 +118,7 @@
 }
 #page_sub_nav .breadcrumbs_nav #video_dropdown {
     position: relative;
-    top: -1px;    
+    top: -1px;
 }
 .youtube-video {
     position: relative;
