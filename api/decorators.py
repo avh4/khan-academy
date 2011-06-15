@@ -7,11 +7,16 @@ from flask import request
 from flask import current_app
 import api.jsonify as apijsonify
 
+from app import App
+
 def etag(func_tag_content):
     def etag_wrapper(func):
         @wraps(func)
         def etag_enabled(*args, **kwargs):
-            etag_server = "\"%s\"" % hashlib.md5(func_tag_content()).hexdigest()
+
+            etag_inner_content = "%s:%s" % (func_tag_content(), App.version)
+            etag_server = "\"%s\"" % hashlib.md5(etag_inner_content).hexdigest()
+
             etag_client = request.headers.get("If-None-Match")
             if etag_client and etag_client == etag_server:
                 return current_app.response_class(status=304)
