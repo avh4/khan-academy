@@ -23,10 +23,13 @@ def get_class_exercises(list_student_data):
 
     return class_exercise_dict
 
-def class_progress_report_graph_context(user_data):
+def class_progress_report_graph_context(user_data, studygroup):
 
     if not user_data:
         return {}
+        
+    if studygroup:
+        user_data = studygroup
 
     list_student_data = user_data.get_students_data()
     student_emails = map(lambda student_data: student_data.user.email(), list_student_data)

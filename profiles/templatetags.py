@@ -37,20 +37,20 @@ def profile_exercise_progress_graph(user_data_student):
 
 # Class profile graph types
 @register.simple_tag
-def class_profile_exercises_over_time_graph(user_data_coach):
-    return render_graph_html_and_context("class_exercises_over_time_graph.html", class_exercises_over_time_graph.class_exercises_over_time_graph_context(user_data_coach))
+def class_profile_exercises_over_time_graph(user_data_coach, studygroup):
+    return render_graph_html_and_context("class_exercises_over_time_graph.html", class_exercises_over_time_graph.class_exercises_over_time_graph_context(user_data_coach, studygroup))
 @register.simple_tag
-def class_profile_progress_report_graph(user_data_coach):
-    return render_graph_html_and_context("class_progress_report_graph.html", class_progress_report_graph.class_progress_report_graph_context(user_data_coach))
+def class_profile_progress_report_graph(user_data_coach, studygroup):
+    return render_graph_html_and_context("class_progress_report_graph.html", class_progress_report_graph.class_progress_report_graph_context(user_data_coach, studygroup))
 @register.simple_tag
-def class_profile_energy_points_per_minute_graph(user_data_coach):
-    return render_graph_html_and_context("class_energy_points_per_minute_graph.html", class_energy_points_per_minute_graph.class_energy_points_per_minute_graph_context(user_data_coach))
+def class_profile_energy_points_per_minute_graph(user_data_coach, studygroup):
+    return render_graph_html_and_context("class_energy_points_per_minute_graph.html", class_energy_points_per_minute_graph.class_energy_points_per_minute_graph_context(user_data_coach, studygroup))
 @register.simple_tag
-def class_profile_energy_points_per_minute_update(user_data_coach):
-    return class_energy_points_per_minute_graph.class_energy_points_per_minute_update(user_data_coach)
+def class_profile_energy_points_per_minute_update(user_data_coach, studygroup):
+    return class_energy_points_per_minute_graph.class_energy_points_per_minute_update(user_data_coach, studygroup)
 @register.simple_tag
-def class_profile_time_graph(user_data_coach, dt, tz_offset):
-    return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset))
+def class_profile_time_graph(user_data_coach, dt, tz_offset, studygroup):
+    return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset, studygroup))
 # End class profile graph types
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))

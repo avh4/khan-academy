@@ -3,7 +3,37 @@
 {% block profile_name %}
 <span id="user-info">
     <img src="/images/darth.png" />
-    <span id="name">{{ coach_nickname|escape }}'s class</span>
+    <select id="studygroups-box">
+        {% for group in study_groups %}
+        <option value="{{group.key}}" {% ifequal group.key group_id %}selected="selected"{% endifequal %}>{{group.name}}</option>
+        {% endfor %}
+    </select>
+    
+    <script type="text/javascript">
+    
+        var ClassProfile = {
+            updateGroupId: function(group_id) {
+                var group = ClassProfile.groups[group_id];
+                this.updateGroupStats(group.nstudents, group.class_points);
+            },
+            updateGroupStats: function(nstudents, class_points) {
+                // todo: possibly add some effects here?
+                $('#count_students').html(nstudents);
+                $('.energy-points-badge').html(class_points);
+            },
+            groups: {}
+        };
+
+        {% for group in study_groups %}
+        ClassProfile.groups['{{group.key}}'] = { nstudents: {{group.nstudents}}, class_points: '{{group.class_points}}' };
+        {% endfor %}
+         
+        $(function() {
+            $("#studygroups-box").change(Profile.updateStudyGroup)
+                                 .val('{{group_id}}'); // won't be needed once above is fixed
+        });
+
+    </script>
 </span>
 {% endblock profile_name %}
 
@@ -13,12 +43,12 @@
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
-            {{ count_students }}<br />
+            <span id="count_students">{{ study_groups.0.nstudents }}</span><br />
             <span class="label">Students</span>
         </span>
     </span>
     <span id="energy-points">
-        <span title="{{class_points}} energy points" class="energy-points-badge">{{ class_points|thousands_separated }}</span><br />
+        <span class="energy-points-badge">{{ study_groups.0.class_points }}</span><br />
         <span class="label">Class Energy Points</span>
     </span>
 {% endblock high_level_stats %}

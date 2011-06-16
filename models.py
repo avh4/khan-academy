@@ -391,10 +391,10 @@ class CoachRequest(db.Model):
         return CoachRequest.all().filter("coach_requesting = ", coach)
 
 class StudyGroup(db.Model):
-  
+
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
-  
+
     @staticmethod
     def create_group_from_students(coach_email):
         coach = users.User(coach_email)
@@ -411,6 +411,15 @@ class StudyGroup(db.Model):
                 s.studygroups.append(study_group.key())
                 s.put()
 
+    @staticmethod
+    def remove_student(student_email, studygroup_key):
+        u = users.User(student_email)
+        ud = UserData.get_or_insert_for(u)
+        print(ud.studygroups)
+        ud.studygroups = [g for g in ud.studygroups if str(g) != studygroup_key]
+        print(ud.studygroups)
+        ud.put()
+
     def delete(self, *args):
         self.remove_all_students()
         db.Model.delete(self, *args)
@@ -424,9 +433,12 @@ class StudyGroup(db.Model):
     def students(self):
         return UserData.gql("WHERE studygroups = :1", self.key())
 
-    # this method has the same interface as the method on UserData
+    # these methods have the same interface as the methods on UserData
     def get_students_data(self):
         return [s for s in self.students]
+
+    def get_students(self):
+        return map(lambda student_data: student_data.user.email(), self.get_students_data())
 
 class UserData(db.Model):
 

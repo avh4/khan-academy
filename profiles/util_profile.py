@@ -14,6 +14,9 @@ from badges import util_badges
 from models import StudyGroup
 
 class ViewClassProfile(request_handler.RequestHandler):
+    @staticmethod
+    def class_points(students):
+        return reduce(lambda a,b: a + b, map(lambda s: s.points, students))
 
     def get(self):
         user = util.get_current_user()
@@ -26,18 +29,29 @@ class ViewClassProfile(request_handler.RequestHandler):
                 coach = users.User(email=coach_email)
 
             user_data_coach = models.UserData.get_or_insert_for(coach)
+            students_data = user_data_coach.get_students_data()
             
-            students_data = None
+            study_groups = StudyGroup.gql("WHERE coaches = :1", user_data_coach.key())
+            
+            # all this stuff is for the class points and the student listing? CHANGE IT.
+            # need email for every student for the bottom thing
+            study_groups_list = [{
+                'key': 'allstudents',
+                'name': 'All students',
+                'nstudents': len(students_data),
+                'class_points': self.class_points(students_data)
+            }];
+            for group in study_groups:
+                students = [s for s in students_data if group.key() in s.studygroups]
+                study_groups_list.append({
+                    'key': str(group.key()),
+                    'name': group.name,
+                    'nstudents': len(students),
+                    'class_points': self.class_points(students)
+                })
+            
             group_id = self.request_string("group_id")
-            if group_id:
-                students_data = StudyGroup.get(group_id).get_students_data()
-            else:
-                students_data = user_data_coach.get_students_data()
-
-            class_points = 0
-            if students_data:
-                class_points = reduce(lambda a,b: a + b, map(lambda student_data: student_data.points, students_data))
-
+            
             dict_students = map(lambda student_data: { 
                 "email": student_data.user.email(),
                 "nickname": util.get_nickname_for(student_data.user),
@@ -74,12 +88,12 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'coach': coach,
                     'coach_email': coach.email(),
                     'group_id': group_id,
+                    'study_groups': study_groups_list,
                     'coach_nickname': util.get_nickname_for(coach),
                     'dict_students': dict_students,
                     'students_per_row': students_per_row,
                     'list_students_columnized': list_students_columnized,
                     'count_students': len(dict_students),
-                    'class_points': class_points,
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),
@@ -242,6 +256,17 @@ class ClassProfileGraph(ProfileGraph):
                     (self.GRAPH_TYPE, urllib.quote(coach.email()), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
+    
+    def get_study_group(self, user_data_coach):
+        group_id = self.request_string("group_id")
+        if group_id:
+            try:
+                study_groups = StudyGroup.gql("WHERE coaches = :1", user_data_coach.key())
+                return filter(lambda x: str(x.key()) == group_id, study_groups)[0]
+            except:
+                return None
+        else:
+            return None
 
 class ProfileDateToolsGraph(ProfileGraph):
 
@@ -360,28 +385,28 @@ class ExerciseProgressGraph(ProfileGraph):
 class ClassExercisesOverTimeGraph(ClassProfileGraph):
     GRAPH_TYPE = "classexercisesovertime"
     def graph_html_and_context(self, user_data_coach):
-        return templatetags.class_profile_exercises_over_time_graph(user_data_coach)
+        group = self.get_study_group(user_data_coach)
+        return templatetags.class_profile_exercises_over_time_graph(user_data_coach, group)
 
 class ClassProgressReportGraph(ClassProfileGraph):
     GRAPH_TYPE = "classprogressreport"
     def graph_html_and_context(self, user_data_coach):
-        group_id = self.request_string('group_id')
-        logging.critical("group_id was '%s'", group_id)
-        logging.critical(self.request)
-        if group_id:
-            user_data_coach = StudyGroup.get(group_id)
-        return templatetags.class_profile_progress_report_graph(user_data_coach)
+        group = self.get_study_group(user_data_coach)
+        return templatetags.class_profile_progress_report_graph(user_data_coach, group)
 
 class ClassTimeGraph(ClassProfileDateGraph):
     GRAPH_TYPE = "classtime"
     def graph_html_and_context(self, user_data_coach):
-        return templatetags.class_profile_time_graph(user_data_coach, self.get_date(), self.tz_offset())
+        group = self.get_study_group(user_data_coach)
+        return templatetags.class_profile_time_graph(user_data_coach, self.get_date(), self.tz_offset(), group)
 
 class ClassEnergyPointsPerMinuteGraph(ClassProfileGraph):
     GRAPH_TYPE = "classenergypointsperminute"
     def graph_html_and_context(self, user_data_coach):
-        return templatetags.class_profile_energy_points_per_minute_graph(user_data_coach)
+        group = self.get_study_group(user_data_coach)
+        return templatetags.class_profile_energy_points_per_minute_graph(user_data_coach, group)
 
     def json_update(self, user_data_coach):
-        return templatetags.class_profile_energy_points_per_minute_update(user_data_coach)
+        group = self.get_study_group(user_data_coach)
+        return templatetags.class_profile_energy_points_per_minute_update(user_data_coach, group)
 
