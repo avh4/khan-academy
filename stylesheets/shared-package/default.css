@@ -291,10 +291,9 @@ footer {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: 319px -908px;
         height: 188px;
-        padding: 10px 23px;
     }
     footer.short #leaves {
-        height: auto;
+        height: 38px;
     }
     footer ul.page_links {
         float: left;
@@ -310,11 +309,11 @@ footer {
     footer.short span.sep {
         padding-right: 10px;
     }
-    footer#footer #leaves a {
+    footer a {
         color: white;
         text-decoration: none;
     }
-        footer#footer.short #leaves a {
+        footer.short a {
             background-image: url(/images/non-repeating-sprites.png);
             background-position: -10px -1142px;
             padding-left: 7px;
@@ -327,8 +326,9 @@ footer {
     footer #copyright {
         float: right;
         text-align: right;
+        padding: 10px 23px 0 0;
     }
-    footer#footer #leaves #copyright #creative-commons-link {
+    footer #creative-commons-link {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -143px -67px;
         display: inline-block;
@@ -342,7 +342,11 @@ footer {
         position: relative;
         top: -1px;
     }
-    .small-social-links a {
+    footer.short .footer-links {
+        display: inline-block;
+        padding: 0 0 0 23px;
+    }
+    footer.short .small-social-links a {
         margin-right: 0;
         display: inline-block;
         height: 24px;
@@ -350,16 +354,17 @@ footer {
         position: relative;
         *position: static;
         top: 7px;
+        padding-right: 0;
     }
-    .small-social-links .youtube {
+    footer.short .small-social-links .youtube {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -67px;
     }
-    .small-social-links .twitter {
+    footer.short .small-social-links .twitter {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -111px;
     }
-    .small-social-links .facebook {
+    footer.short .small-social-links .facebook {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -155px;
     }
@@ -695,27 +700,6 @@ footer {
         }
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
-    }
-    .small-social-links a {
-        margin-right: 0;
-        display: inline-block;
-        height: 24px;
-        width: 24px;
-        position: relative;
-        *position: static;
-        top: 7px;
-    }
-    .small-social-links .youtube {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -67px;
-    }
-    .small-social-links .twitter {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -111px;
-    }
-    .small-social-links .facebook {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -155px;
     }
     
 #top-header #top-header-links #page_auth.page_links {
