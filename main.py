@@ -1488,7 +1488,6 @@ def real_main():
         ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
-        ('/video', ViewVideo),
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
