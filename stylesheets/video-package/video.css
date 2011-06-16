@@ -135,7 +135,39 @@
 }
 .extra-link-bar .more-content {
     display: none;
+	
 }
 .extra-link-bar a {
     color: #069;
+    margin-left: 5px;
 }
+.simple-button.with-icon.download-icon img { top: 5px; }
+
+.extra-link-bar .sharepop {
+	position:absolute;
+	float:right;
+	margin-top:10px;
+	width:60px;
+	height:35px;
+	left:auto;
+	right:10px;
+	top:5px;
+	padding:0px;
+	z-index:30;
+	
+	}
+.extra-link-bar .triangle-isosceles.top{
+	width:60px;
+	height:25px;
+	position:absolute;
+	padding-left:0px;
+	}
+
+.twitterShare {background: url(/images/twitter.png);background-repeat:no-repeat; float:right;height:24px; padding:0px;width:24px;display:block;text-decoration: none;}
+.facebookShare {background: url(/images/facebook.png);background-repeat:no-repeat; float:left;height:24px; padding:0px;width:24px;display:block;text-decoration: none;}
+.extra-link-bar {
+	float:right; 
+	margin-top:5px;
+	position:relative;
+	}
+.video_extra_links {float:right;}

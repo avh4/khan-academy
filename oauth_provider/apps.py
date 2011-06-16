@@ -20,6 +20,8 @@ class Register(request_handler.RequestHandler):
             name = self.request_string("name", default="").strip()
             description = self.request_string("description", default="").strip()
             website = self.request_string("website", default="").strip()
+            phone = self.request_string("phone", default="").strip()
+            company = self.request_string("company", default="").strip()
 
             name_error = description_error = agree_error = None
 
@@ -44,6 +46,8 @@ class Register(request_handler.RequestHandler):
                             "name": name,
                             "description": description,
                             "website": website,
+                            "phone": phone,
+                            "company": company,
                             "name_error": name_error,
                             "description_error": description_error,
                             "agree_error": agree_error,
@@ -58,6 +62,8 @@ class Register(request_handler.RequestHandler):
                         website = website,
                         user = user,
                         status = ACCEPTED,
+                        phone = phone,
+                        company = company,
                         anointed = False
                         )
                 consumer.generate_random_codes()

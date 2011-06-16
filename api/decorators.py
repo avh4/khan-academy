@@ -7,11 +7,16 @@ from flask import request
 from flask import current_app
 import api.jsonify as apijsonify
 
+from app import App
+
 def etag(func_tag_content):
     def etag_wrapper(func):
         @wraps(func)
         def etag_enabled(*args, **kwargs):
-            etag_server = "\"%s\"" % hashlib.md5(func_tag_content()).hexdigest()
+
+            etag_inner_content = "%s:%s" % (func_tag_content(), App.version)
+            etag_server = "\"%s\"" % hashlib.md5(etag_inner_content).hexdigest()
+
             etag_client = request.headers.get("If-None-Match")
             if etag_client and etag_client == etag_server:
                 return current_app.response_class(status=304)
@@ -30,6 +35,10 @@ def jsonify(func):
     @wraps(func)
     def jsonified(*args, **kwargs):
         obj = func(*args, **kwargs)
+
+        if isinstance(obj, current_app.response_class):
+            return obj
+
         return obj if type(obj) == str else apijsonify.jsonify(obj)
     return jsonified
 
@@ -37,6 +46,10 @@ def jsonp(func):
     @wraps(func)
     def jsonp_enabled(*args, **kwargs):
         val = func(*args, **kwargs)
+
+        if isinstance(val, current_app.response_class):
+            return val
+
         callback = request.values.get("callback")
         if callback:
             val = "%s(%s)" % (callback, val)

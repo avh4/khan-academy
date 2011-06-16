@@ -6,7 +6,27 @@ var Profile = {
     fLoadedGraph: false,
 
     init: function() {
+		
+		$('.recent-share').hide();
+		$('.sharepop').hide();
+			
+		$(".achievement,.exercise,.video").hover(
+			function () {
+			    $(this).find(".recent-share").show();
+				},
+			function () {
+			    $(this).find(".recent-share").hide();
+				$(this).find(".sharepop").hide();
+			  });
 
+		$('.recent-share').click(function() {
+		if ( $.browser.msie && (parseInt($.browser.version, 10) < 8) )
+			$(this).next(".sharepop").toggle();
+		else			
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+		return false;
+				});
+		
         if ($.address)
             $.address.externalChange(function(){ Profile.historyChange(); });
 
@@ -49,7 +69,8 @@ var Profile = {
             }
         }, 1000);
     },
-
+	
+	
     highlightPoints: function(chart, fxnHighlight) {
 
         if (!chart) return;

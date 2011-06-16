@@ -124,8 +124,8 @@ hr {
 .simple-button {
     color: #333 !important;
     cursor: pointer !important;
-    border: 1px solid #ccc;
-    border-bottom: 1px solid #bbb;
+    border: 1px solid #ccc !important;
+    border-bottom: 1px solid #bbb !important;
     padding: 5px 10px;
     position: relative;
     margin: 0;
@@ -143,9 +143,15 @@ hr {
     left: 1px;
     top: 1px;
 }
-
+.simple-button.with-icon {
+    padding-left: 30px;
+}
+.simple-button.with-icon img {
+    position: absolute;
+    left: 7px;
+    top: 3px;
+}
 .simple-button.social-button {
-    display: block;
     text-transform: uppercase;
     margin-bottom: 9px;
     font-size: 12px;
@@ -1062,7 +1068,9 @@ article.video p#keywords {
 }
 
 span.video_extra_links {
-    float: left;
+    float: right;
+    position: relative;
+    z-index: 100;
 }
 span.video_extra_links span.extra-link-bar {
     position: relative;
@@ -1575,7 +1583,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .achievement-badge.category-5 #outline-box {
         border-top: none;
     }
-    
+.badge-award-container {width:302px;}    
 .badge-award-container .achievement-badge.category-5, .achievement-badge.category-5.achievement-badge-owned {
     border: none;
     -webkit-box-shadow: none;
@@ -2152,12 +2160,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #contribute {
     text-align: justify;
 }
-#contribute .social-button {
+#contribute .simple-button .with-icon {
     float: left;
     width: auto;
     margin-right: 10px;
 }
-#contribute .social-button img {
+#contribute .simple-button .with-icon img {
     position: relative;
     top: -2px;
 }
@@ -2912,4 +2920,40 @@ a.control:hover { color: #DD6900; }
 
 div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
+.triangle-isosceles {
+	position:relative;
+	color:#000;
+	background:#000000; /* default background for browsers without gradient support */
+	-webkit-border-radius:7px;
+	-moz-border-radius:7px;
+	border-radius:7px;
+}
 
+.triangle-isosceles.top {
+	width:150px;
+	height:50px;
+
+}
+
+
+.triangle-isosceles:after {
+	content:"";
+	position:absolute;
+	bottom:0px; /* value = - border-top-width - border-bottom-width */
+	border-width:10px 10px 0; /* vary these values to change the angle of the vertex */
+	border-style:solid;
+	border-color:#000000 transparent;
+    /* reduce the damage in FF3.0 */
+    display:block; 
+    width:0;
+}
+
+.triangle-isosceles.top:after {
+	top:-5px; /* value = - border-top-width - border-bottom-width */
+	right:25px; /* controls horizontal position */
+	bottom:auto;
+	left:auto;
+	border-width:0 5px 5px; /* vary these values to change the angle of the vertex */
+	border-color:#000000 transparent;
+	
+}

@@ -217,6 +217,11 @@ indexes:
   - name: __key__
     direction: desc
 
+- kind: UserVideo
+  properties:
+  - name: user
+  - name: last_watched
+
 - kind: Video
   properties:
   - name: __key__

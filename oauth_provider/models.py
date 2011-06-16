@@ -33,6 +33,8 @@ class Consumer(db.Model):
     name = db.StringProperty()
     description = db.TextProperty()
     website = db.StringProperty()
+    phone = db.StringProperty()
+    company = db.StringProperty()
 
     # True if we've given this consumer the right to make
     # protected API calls, such as those that update user history.

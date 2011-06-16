@@ -2,9 +2,9 @@
     <h2>Recent Activity</h2>
     {% if list_recent_activity %}
     <div id="activity-list">
-        <ul>
+  		<ul style="width:100%">
             {% for recent_activity in list_recent_activity %}
-
+			
                 {% ifequal recent_activity.s_type "Badge" %}
                     <li>{% profile_recent_activity_entry_badge student recent_activity %}</li>
                 {% endifequal %}
