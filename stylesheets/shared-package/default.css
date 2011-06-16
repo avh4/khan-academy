@@ -87,7 +87,7 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; }
 h1, h2, h3, h4, h5 { color: #111; font-family: "MuseoSans500", sans-serif; }
 h1 {font-size:25px; margin-bottom: 18px;}
     .main-headline, .section-headline { padding-top: 18px; }
-    h1.main-headline {font-size: 30px; position: relative; line-height: 37px; z-index: 10;}
+    h1.main-headline {font-size: 32px; position: relative; line-height: 37px; z-index: 10;}
     h1.main-headline a { text-decoration: none; }
     h1.main-headline a:visited {color: #069;}
     h1.main-headline a:hover {text-decoration: underline;}
@@ -332,7 +332,7 @@ footer {
     footer #copyright {
         float: right;
         text-align: right;
-        padding: 10px 23px 0 0;
+        padding: 10px 10px 0 0;
     }
     footer #creative-commons-link {
         background-image: url(/images/non-repeating-sprites.png);
@@ -341,7 +341,7 @@ footer {
         height: 15px;
         position: relative;
         top: 3px;
-        width: 80px;
+        width: 64px;
     }
     footer #copyright img {
         border: 0px;
@@ -350,7 +350,7 @@ footer {
     }
     footer.short .footer-links {
         display: inline-block;
-        padding: 0 0 0 23px;
+        padding: 0 0 0 10px;
     }
     footer.short .small-social-links a {
         margin-right: 0;
@@ -373,6 +373,10 @@ footer {
     footer.short .small-social-links .facebook {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -155px;
+    }
+    footer.short .inner {
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
 #page_brand  {
@@ -1072,11 +1076,6 @@ span.video_extra_links {
     position: relative;
     z-index: 100;
 }
-span.video_extra_links span.extra-link-bar {
-    position: relative;
-    top: 5px;
-    padding-left: 5px;
-}
 span.video_extra_links div.video-energy-points {
     float: left;
 }
@@ -1654,7 +1653,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
     .exercise-badge.single-exercise .proficient-badge img {
         position: relative;
-        top: 4px;
+        top: 3px;
         width: 60px;
         height: 62px;
     }
@@ -2098,6 +2097,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -moz-box-shadow: 0 -2px 0 #eee;
     box-shadow: 0 -2px 0 #eee;
 }
+
 .light #coaches, .light #students, .light #donate, .light #individual_report, .light 
 .achievement-badges-container, .light #login-page, .light #about-us, 
 .light #homepage, .light #video-page, .light #contribute,
@@ -2318,7 +2318,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #about-blog h2 a {
     text-decoration: none;
-    text-shadow: 1px 1px 2px #aaa;
 }
     #about-blog h2 a:visited {
         color: #069;
@@ -2958,4 +2957,18 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 	border-width:0 5px 5px; /* vary these values to change the angle of the vertex */
 	border-color:#000000 transparent;
 	
+}
+
+@media screen and (min-width: 1200px) {
+    #homepage, #contribute, #container, #page_sub_nav, #container .exercise-badge.single-exercise {
+        -moz-border-radius-topleft: 4px;
+        -moz-border-radius-topright: 4px;
+        -webkit-border-top-left-radius: 4px;
+        -webkit-border-top-right-radius: 4px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+    }
+    #page-container, #page-container-inner {
+        background-position-y: 107px; 
+    }
 }
