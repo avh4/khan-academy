@@ -342,6 +342,27 @@ footer {
         position: relative;
         top: -1px;
     }
+    .small-social-links a {
+        margin-right: 0;
+        display: inline-block;
+        height: 24px;
+        width: 24px;
+        position: relative;
+        *position: static;
+        top: 7px;
+    }
+    .small-social-links .youtube {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -67px;
+    }
+    .small-social-links .twitter {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -111px;
+    }
+    .small-social-links .facebook {
+        background-image: url(/images/non-repeating-sprites.png);
+        background-position: -10px -155px;
+    }
 
 #page_brand  {
     position: relative;
@@ -675,7 +696,7 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    #top-header #social-links a {
+    .small-social-links a {
         margin-right: 0;
         display: inline-block;
         height: 24px;
@@ -684,15 +705,15 @@ footer {
         *position: static;
         top: 7px;
     }
-    #top-header #social-links .youtube {
+    .small-social-links .youtube {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -67px;
     }
-    #top-header #social-links .twitter {
+    .small-social-links .twitter {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -111px;
     }
-    #top-header #social-links .facebook {
+    .small-social-links .facebook {
         background-image: url(/images/non-repeating-sprites.png);
         background-position: -10px -155px;
     }
