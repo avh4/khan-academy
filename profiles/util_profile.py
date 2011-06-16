@@ -62,38 +62,12 @@ class ViewClassProfile(request_handler.RequestHandler):
             if group_id:
                 initial_graph_url += 'group_id=%s' % group_id
             
-            # Sort students alphabetically and sort into 4 chunked up columns for easy table html
-            dict_students_sorted = sorted(dict_students, key=lambda dict_student:dict_student["nickname"])
-            students_per_row = 4
-
-            if len(dict_students_sorted):
-                # Make sure we have evenly filled out columns
-                while len(dict_students_sorted) % students_per_row:
-                    dict_students_sorted.append(None)
-
-            students_per_col = max(1, len(dict_students_sorted) / students_per_row)
-            list_cols = [[], [], [], []]
-            list_students_columnized = []
-
-            for ix in range(0, len(dict_students_sorted)):
-                dict_student = dict_students_sorted[ix]
-                list_cols[(ix / students_per_col) % students_per_row].append(dict_student)
-
-            for ix in range(0, len(dict_students_sorted)):
-                dict_student = list_cols[ix % students_per_row][(ix / students_per_row) % students_per_col]
-                if dict_student:
-                    list_students_columnized.append(dict_student)
-
             template_values = {
                     'coach': coach,
                     'coach_email': coach.email(),
                     'group_id': group_id,
                     'study_groups': study_groups_list,
                     'coach_nickname': util.get_nickname_for(coach),
-                    'dict_students': dict_students,
-                    'students_per_row': students_per_row,
-                    'list_students_columnized': list_students_columnized,
-                    'count_students': len(dict_students),
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),

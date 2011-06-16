@@ -110,30 +110,6 @@
     </ul>
 {% endblock graph_accordion %}
 
-{% block profile_extended_sections %}
-    <div id="students-list">
-        <h2 class="student-profiles">Students <span style="font-size:12px;font-style:normal;">(<a href="/students">Add or remove</a>)</span></h2>
-        <div id="student-list">
-            <table>
-                {% for dict_student in list_students_columnized %}
-                    {% if not forloop.counter0|mod:students_per_row %}
-                        {% if not forloop.first %}
-                            </tr>
-                        {% endif %}
-                    <tr>
-                    {% endif %}
-                        <td>
-                            <a href="/profile?student_email={{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
-                        </td>
-                    {% if forloop.last %}
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-            </table>
-        </div>
-    </div>
-{% endblock profile_extended_sections %}
-
 {% block profile_is_empty %}
 {% empty_class_instructions 1 %}
 {% endblock profile_is_empty %}
