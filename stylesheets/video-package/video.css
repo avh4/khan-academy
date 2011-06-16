@@ -27,6 +27,7 @@
 #video_dropdown li {
     white-space: nowrap;
     font-weight: normal;
+    padding: 3px 0;
 }
 #video_dropdown li[data-selected=selected] a {
     font-weight: bold;
