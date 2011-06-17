@@ -16,7 +16,7 @@ from models import StudyGroup
 class ViewClassProfile(request_handler.RequestHandler):
     @staticmethod
     def class_points(students):
-        return reduce(lambda a,b: a + b, map(lambda s: s.points, students))
+        return reduce(lambda a,b: a + b, map(lambda s: s.points, students), 0)
 
     def get(self):
         user = util.get_current_user()
@@ -33,8 +33,6 @@ class ViewClassProfile(request_handler.RequestHandler):
             
             study_groups = StudyGroup.gql("WHERE coaches = :1", user_data_coach.key())
             
-            # all this stuff is for the class points and the student listing? CHANGE IT.
-            # need email for every student for the bottom thing
             study_groups_list = [{
                 'key': 'allstudents',
                 'name': 'All students',
