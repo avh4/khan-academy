@@ -20,6 +20,7 @@ import layer_cache
 import request_cache
 from discussion import models_discussion
 from topics_list import all_topics_list
+import unregistered_util
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -747,19 +748,25 @@ class UserVideo(db.Model):
     @staticmethod
     def get_for_video_and_user(video, user, insert_if_missing=False):
 
-        if not user:
-            return None
-
         key = UserVideo.get_key_name(video, user)
 
-        if insert_if_missing:
-            return UserVideo.get_or_insert(
-                        key_name = key,
-                        user = user,
-                        video = video,
-                        duration = video.duration)
-        else:
-            return UserVideo.get_by_key_name(key)
+# This is called from three places. Two of them use `util.get_current_user()`
+# and the other uses `insert_if_missing=True` so in any case we should insert
+# if missing
+
+#         if insert_if_missing:
+#             return UserVideo.get_or_insert(
+#                         key_name = key,
+#                         user = user,
+#                         video = video,
+#                         duration = video.duration)
+#         else:
+#             return UserVideo.get_by_key_name(key)
+        return UserVideo.get_or_insert(
+                    key_name = key,
+                    user = user,
+                    video = video,
+                    duration = video.duration)
 
     @staticmethod
     def count_completed_for_user(user):
@@ -1100,7 +1107,9 @@ class ExerciseGraph(object):
             user = util.get_current_user()
         user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
+        logging.critical(exercises)
         self.exercises = exercises
+        logging.critical(self.exercises)
         self.exercise_by_name = {}        
         for ex in exercises:
             self.exercise_by_name[ex.name] = ex

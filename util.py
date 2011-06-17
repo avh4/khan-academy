@@ -29,6 +29,16 @@ def get_current_user():
 
     return user
 
+@request_cache.cache()
+def get_or_create_current_user():
+    user = get_current_user()
+
+    if not user:
+        user = unregistered_util.create()
+
+    return user
+
+
 def get_current_user_from_oauth_map(oauth_map):
     user = get_google_user_from_oauth_map(oauth_map)
     if not user:
@@ -43,6 +53,8 @@ def get_current_user_from_cookies_unsafe():
         user = facebook_util.get_current_facebook_user_from_cookies()
     if not user:
         user = unregistered_util.get_current_user_from_cookies()
+    if not user:
+        user = unregistered_util.create_phantom_user()
     return user
         
 def get_nickname_for(user):
