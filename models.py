@@ -618,6 +618,11 @@ class Video(Searchable, db.Model):
     # this date may be much later than the actual YouTube upload date.
     date_added = db.DateTimeProperty(auto_now_add=True)
 
+    # True if video download has been prepped.
+    download_available = db.BooleanProperty(default=False)
+
+    _serialize_blacklist = ["download_available"]
+
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
@@ -625,6 +630,15 @@ class Video(Searchable, db.Model):
     @property
     def ka_url(self):
         return "http://www.khanacademy.org/video/%s" % self.readable_id
+
+    @property
+    def download_urls(self):
+        if self.download_available:
+            return {
+                    "flv": "https://s3.amazonaws.com/KA-youtube-unconverted/%s/%s.flv" % (self.youtube_id, self.youtube_id),
+                    "m3u8": "https://s3.amazonaws.com/KA-youtube-converted/%s/%s.m3u8" % (self.youtube_id, self.youtube_id),
+                    }
+        return None
     
     @staticmethod
     def get_for_readable_id(readable_id):

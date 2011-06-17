@@ -178,6 +178,26 @@ def exercise_videos(exercise_name):
         return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
 
+@route("/api/v1/videos/<video_id>", methods=["GET"])
+@jsonp
+@jsonify
+def video(video_id):
+    return models.Video.all().filter("youtube_id =", video_id).get()
+
+@route("/api/v1/videos/<video_id>/download_available", methods=["POST"])
+@oauth_required(require_anointed_consumer=True)
+@jsonp
+@jsonify
+def video_download_available(video_id):
+    video = models.Video.all().filter("youtube_id =", video_id).get()
+    logging.critical("A")
+    if video:
+        logging.critical("B")
+        video.download_available = request.request_bool("available", default=False)
+        logging.critical("C: %s" % video.download_available)
+        video.put()
+    return video
+
 @route("/api/v1/videos/<video_id>/exercises", methods=["GET"])
 @jsonp
 @jsonify
