@@ -61,10 +61,8 @@
     float: left;
     margin-right: 1em;
     text-align: left;
-    background: url(/images/list-item-black-left.png) no-repeat 0 4px;
-    padding-top: 1px;
+    background: url(/images/list-item-black-left.png) no-repeat 0 6px;
     padding-left: 10px;
-    height: 20px;
 }
 #playlists {
     display: block;
@@ -75,10 +73,8 @@
     float: right;
     margin-left: 1em;
     text-align: right;
-    background: url(/images/list-item-black.png) no-repeat 100% 4px;
-    padding-top: 1px;
+    background: url(/images/list-item-black.png) no-repeat 100% 6px;
     padding-right: 10px;
-    height: 20px;
 }
 
 #youtube_blocked {
