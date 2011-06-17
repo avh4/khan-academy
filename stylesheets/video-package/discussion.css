@@ -43,7 +43,7 @@
 .video_questions div.question_answer_count {
     float: right;
 	position:relative;
-    top: -25px;
+    top: -10px;
     left: 25px;
 	padding: 4px 0px 4px 12px;
 	background:#D2DDED;
