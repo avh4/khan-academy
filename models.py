@@ -634,8 +634,8 @@ class Video(Searchable, db.Model):
     def download_urls(self):
         if self.download_available:
             return {
-                    "flv": "https://s3.amazonaws.com/KA-youtube-unconverted/%s/%s.flv" % (self.youtube_id, self.youtube_id),
-                    "m3u8": "https://s3.amazonaws.com/KA-youtube-converted/%s/%s.m3u8" % (self.youtube_id, self.youtube_id),
+                    "mp4": "http://s3.amazonaws.com/KA-youtube-converted/%s/%s.mp4" % (self.youtube_id, self.youtube_id),
+                    "png": "http://s3.amazonaws.com/KA-youtube-converted/%s/%s.png" % (self.youtube_id, self.youtube_id),
                     }
         return None
     
