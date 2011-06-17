@@ -631,9 +631,12 @@ class Video(Searchable, db.Model):
         return "http://www.khanacademy.org/video/%s" % self.readable_id
 
     @property
-    def download_url(self):
+    def download_urls(self):
         if self.download_available:
-            return "http://www.archive.org/download/KhanAcademy_dl/%s.flv" % self.youtube_id 
+            return {
+                    "flv": "https://s3.amazonaws.com/KA-youtube-unconverted/%s/%s.flv" % (self.youtube_id, self.youtube_id),
+                    "m3u8": "https://s3.amazonaws.com/KA-youtube-converted/%s/%s.m3u8" % (self.youtube_id, self.youtube_id),
+                    }
         return None
     
     @staticmethod
