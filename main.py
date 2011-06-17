@@ -115,7 +115,11 @@ class KillLiveAssociations(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
+        user = util.get_or_create_current_user()
+        
+        if unregistered_util.is_phantom_email(user.email()):
+            self.set_cookie("ureg_id", user)
+
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
@@ -497,13 +501,14 @@ class ProvideFeedback(request_handler.RequestHandler):
 class ViewAllExercises(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        logging.critical(user)
+        user = util.get_or_create_current_user()
+        
+        if unregistered_util.is_phantom_email(user.email()):
+            self.set_cookie("ureg_id", user)
+
         user_data = UserData.get_or_insert_for(user)
-        logging.critical(user_data.badge_counts)
         
         ex_graph = ExerciseGraph(user_data)
-        logging.critical(ex_graph.exercises)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
 
