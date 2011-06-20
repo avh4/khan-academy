@@ -1,7 +1,6 @@
 import os
 import datetime
 import urllib
-import logging
 import request_cache
 
 from google.appengine.api import users
@@ -11,13 +10,14 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
-import unregistered_util
+from phantom_users.util import create_phantom_user, create_phantom_user, \
+  get_phantom_user_from_cookies, is_phantom_email
 
 from api.auth.google_util import get_google_user_from_oauth_map
 from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
-def get_current_user():
+def get_current_user(allow_phantoms=False):
     user = None
 
     oauth_map = current_oauth_map()
@@ -25,17 +25,15 @@ def get_current_user():
         user = get_current_user_from_oauth_map(oauth_map)
 
     if not user and allow_cookie_based_auth():
-        user = get_current_user_from_cookies_unsafe()
+        user = get_current_user_from_cookies_unsafe(allow_phantoms=allow_phantoms)
 
     return user
 
 @request_cache.cache()
 def get_or_create_current_user():
-    user = get_current_user()
-
+    user = get_current_user(allow_phantoms=True)
     if not user:
-        user = unregistered_util.create()
-
+        user = create_phantom_user()
     return user
 
 def get_current_user_from_oauth_map(oauth_map):
@@ -46,14 +44,12 @@ def get_current_user_from_oauth_map(oauth_map):
 
 # get_current_user_from_cookies_unsafe is labeled unsafe because it should
 # never be used in our JSONP-enabled API. All calling code should just use get_current_user.
-def get_current_user_from_cookies_unsafe():
+def get_current_user_from_cookies_unsafe(allow_phantoms=False):
     user = users.get_current_user()
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
-    if not user:
-        user = unregistered_util.get_current_user_from_cookies()
-    if not user:
-        user = unregistered_util.create_phantom_user()
+    if not user and allow_phantoms:
+        user = get_phantom_user_from_cookies()
     return user
         
 def get_nickname_for(user):
@@ -61,6 +57,9 @@ def get_nickname_for(user):
 
 def is_facebook_user(user):
     return user and facebook_util.is_facebook_email(user.email())
+
+def is_phantom_user(user):
+    return user and is_phantom_email(user.email())
 
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)

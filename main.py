@@ -58,7 +58,6 @@ import exercise_statistics
 import backfill
 import activity_summary
 import exercises
-import unregistered_util
 
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
@@ -117,87 +116,84 @@ class ViewExercise(request_handler.RequestHandler):
     def get(self):
         user = util.get_or_create_current_user()
         
-        if unregistered_util.is_phantom_email(user.email()):
+        if util.is_phantom_user(user):
             self.set_cookie("ureg_id", user)
 
-        if user:
-            exid = self.request.get('exid')
-            key = self.request.get('key')
-            time_warp = self.request.get('time_warp')
+        exid = self.request.get('exid')
+        key = self.request.get('key')
+        time_warp = self.request.get('time_warp')
 
-            user_data = UserData.get_or_insert_for(user)
+        user_data = UserData.get_or_insert_for(user)
 
-            if not exid:
-                exid = 'addition_1'
+        if not exid:
+            exid = 'addition_1'
 
-            exercise = Exercise.get_by_name(exid)
+        exercise = Exercise.get_by_name(exid)
 
-            if not exercise: 
-                raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
+        if not exercise: 
+            raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
 
-            user_exercise = user_data.get_or_insert_exercise(exercise)
+        user_exercise = user_data.get_or_insert_exercise(exercise)
 
-            problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
+        problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
-            # When viewing a problem out-of-order, show read-only view
-            read_only = problem_number != (user_exercise.total_done + 1)
+        # When viewing a problem out-of-order, show read-only view
+        read_only = problem_number != (user_exercise.total_done + 1)
 
-            exercise_non_summative = exercise.non_summative_exercise(problem_number)
+        exercise_non_summative = exercise.non_summative_exercise(problem_number)
 
-            # If read-only and an explicit exid is provided for non-summative content, use
-            # overriding exercise
-            if read_only:
-                exid_non_summative = self.request_string('exid_non_summative', default=None)
-                if exid_non_summative:
-                    exercise_non_summative = Exercise.get_by_name(exid_non_summative)
-                    
-            exercise_videos = exercise_non_summative.related_videos_fetch()
+        # If read-only and an explicit exid is provided for non-summative content, use
+        # overriding exercise
+        if read_only:
+            exid_non_summative = self.request_string('exid_non_summative', default=None)
+            if exid_non_summative:
+                exercise_non_summative = Exercise.get_by_name(exid_non_summative)
+                
+        exercise_videos = exercise_non_summative.related_videos_fetch()
 
-            exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-                   
-            # Note: if they just need a single problem for review they can just print this page.
-            num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
-            
-            # If the user is proficient, assume they want to print a bunch of practice problems.
-            if exercise_states['proficient']:
-                num_problems_to_print = exercise.required_streak()
+        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+               
+        # Note: if they just need a single problem for review they can just print this page.
+        num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
+        
+        # If the user is proficient, assume they want to print a bunch of practice problems.
+        if exercise_states['proficient']:
+            num_problems_to_print = exercise.required_streak()
 
-            if exercise.summative:
-                # Make sure UserExercise has proper summative value even before it's been set.
-                user_exercise.summative = True
-                # We can't currently print summative exercises.
-                num_problems_to_print = 0
+        if exercise.summative:
+            # Make sure UserExercise has proper summative value even before it's been set.
+            user_exercise.summative = True
+            # We can't currently print summative exercises.
+            num_problems_to_print = 0
 
-            template_values = {
-                'arithmetic_template': 'arithmetic_template.html',
-                'user_data': user_data,
-                'points': user_data.points,
-                'exercise_points': exercise_points,
-                'coaches': user_data.coaches,
-                'exercise_states': exercise_states,
-                'cookiename': user.nickname().replace('@', 'at'),
-                'key': user_exercise.key(),
-                'exercise': exercise,
-                'exid': exid,
-                'start_time': time.time(),
-                'exercise_videos': exercise_videos,
-                'exercise_non_summative': exercise_non_summative,
-                'extitle': exid.replace('_', ' ').capitalize(),
-                'user_exercise': user_exercise,
-                'streak': user_exercise.streak,
-                'time_warp': time_warp,
-                'problem_number': problem_number,
-                'read_only': read_only,
-                'selected_nav_link': 'practice',
-                'num_problems_to_print': num_problems_to_print,
-                'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
-                }
-            template_file = exercise_non_summative.name + '.html'
-            self.render_template(template_file, template_values)
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
+        template_values = {
+            'arithmetic_template': 'arithmetic_template.html',
+            'user_data': user_data,
+            'points': user_data.points,
+            'exercise_points': exercise_points,
+            'coaches': user_data.coaches,
+            'exercise_states': exercise_states,
+            'cookiename': user.nickname().replace('@', 'at'),
+            'key': user_exercise.key(),
+            'exercise': exercise,
+            'exid': exid,
+            'start_time': time.time(),
+            'exercise_videos': exercise_videos,
+            'exercise_non_summative': exercise_non_summative,
+            'extitle': exid.replace('_', ' ').capitalize(),
+            'user_exercise': user_exercise,
+            'streak': user_exercise.streak,
+            'time_warp': time_warp,
+            'problem_number': problem_number,
+            'read_only': read_only,
+            'selected_nav_link': 'practice',
+            'num_problems_to_print': num_problems_to_print,
+            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
+            }
+        template_file = exercise_non_summative.name + '.html'
+        self.render_template(template_file, template_values)
             
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -304,9 +300,9 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, util.get_or_create_current_user())
+        user_video = UserVideo.get_for_video_and_user(video, util.get_or_create_current_user(), insert_if_missing=True)
         
-        if unregistered_util.is_phantom_email(user_video.user.email()):
+        if util.is_phantom_user(user_video.user):
             self.set_cookie("ureg_id", user_video.user)
 
         awarded_points = 0
@@ -341,7 +337,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         user_data = None
         video_points_total = 0
         points_total = 0
@@ -392,7 +388,7 @@ class PrintExercise(request_handler.RequestHandler):
 
     def get(self):
         
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
@@ -503,12 +499,12 @@ class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
         user = util.get_or_create_current_user()
         
-        if unregistered_util.is_phantom_email(user.email()):
+        if util.is_phantom_user(user):
             self.set_cookie("ureg_id", user)
 
         user_data = UserData.get_or_insert_for(user)
         
-        ex_graph = ExerciseGraph(user_data)
+        ex_graph = ExerciseGraph(user_data)#, user)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
 
@@ -580,7 +576,7 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get(self):
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         if user:
             key = self.request_string('key')
 
@@ -738,7 +734,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # until he clicks the "Next Problem" button, he can avoid resetting his streak
     # by just reloading the page.
     def get(self):
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         if user:
             key = self.request.get('key')
 
@@ -775,7 +771,7 @@ class ResetStreak(request_handler.RequestHandler):
 # clicks on the Hint button. 
 
     def post(self):
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         if user:
             key = self.request.get('key')
             userExercise = db.get(key)

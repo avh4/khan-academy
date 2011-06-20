@@ -16,6 +16,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
     def get(self):
         user = util.get_current_user()
+        logging.critical(user)
         if user:
             coach = user
 
@@ -172,7 +173,7 @@ class ProfileGraph(request_handler.RequestHandler):
         student = None
         user_data_student = None
 
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         if user:
             student = user
 
