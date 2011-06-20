@@ -10,7 +10,7 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
-from phantom_users.phantom_util import create_phantom_user, create_phantom_user, \
+from phantom_users.phantom_util import create_phantom_user, \
   get_phantom_user_from_cookies, is_phantom_email
 
 from api.auth.google_util import get_google_user_from_oauth_map

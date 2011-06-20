@@ -505,7 +505,7 @@ class ViewAllExercises(request_handler.RequestHandler):
 
         user_data = UserData.get_or_insert_for(user)
         
-        ex_graph = ExerciseGraph(user_data)#, user)
+        ex_graph = ExerciseGraph(user_data, user)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
 
