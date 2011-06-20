@@ -1,5 +1,4 @@
 import datetime
-import logging
 import urllib
 
 from django.utils import simplejson
@@ -16,7 +15,6 @@ class ViewClassProfile(request_handler.RequestHandler):
 
     def get(self):
         user = util.get_current_user()
-        logging.critical(user)
         if user:
             coach = user
 
