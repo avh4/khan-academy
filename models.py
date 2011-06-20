@@ -1116,6 +1116,7 @@ class ExerciseGraph(object):
     def __init__(self, user_data, user=None):
         if user is None:
             user = util.get_current_user(allow_phantoms=True)
+
         user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises

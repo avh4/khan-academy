@@ -15,11 +15,13 @@ register = webapp.template.create_template_register()
 
 @register.inclusion_tag("discussion/video_comments.html")
 def video_comments(video, playlist, page=0):
+    user = util.get_current_user()
     return {
             "video": video,
             "playlist": playlist,
             "page": 0,
-            "user": util.get_current_user(),
+            "user": user,
+            "logged_in": user and not util.is_phantom_user(user),
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             }
 
@@ -32,6 +34,8 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
     if sort_override >= 0:
         sort_order = sort_override
 
+    user = util.get_current_user()
+
     return {
             "user_data": user_data,
             "video": video,
@@ -39,7 +43,8 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "page": page,
             "qa_expand_id": qa_expand_id,
             "sort_order": sort_order,
-            "user": util.get_current_user(),
+            "user": user,
+            "logged_in": user and not util.is_phantom_user(user),
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
