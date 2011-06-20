@@ -171,6 +171,8 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         user = util.get_current_user(allow_phantoms=True)
         if user is not None:
             template_values['username'] = get_nickname_for(user)
+            if not util.is_phantom_user(user):
+                template_values['logged_in'] = True
 
         if not template_values.has_key('user_data'):
             user_data = UserData.get_for(user)

@@ -54,7 +54,7 @@
         <span class="note_desc"></span>
         <a href="#" class="close_note">Close</a>
     </div>
-    {% if not user %}
+    {% if not logged_in %}
         <div class="login_note note" style="display:none;">
             <a class="login_link" href="{{login_url}}"><img class="icon" src="{% static_url "/images/key-plus.png" %}"/ >Log in first</a>
             <span class="note_desc"></span>
