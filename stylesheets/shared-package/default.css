@@ -2826,3 +2826,27 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 	border-color:#000000 transparent;
 	
 }
+
+.notification-bar {
+    background-color:#75E8FF;
+    width:100%;
+    height:35px;
+    text-align:center;
+/*    padding-top:5px;*/
+    vertical-align:middle;
+    outline:solid 2px #1700AD;
+}
+
+.notification-bar-content {
+    vertical-align:middle;
+    font-size:150%;
+    position:relative;
+    top:5px;
+}
+
+.notification-bar-close{
+    float:right;
+    position:relative;
+    top:5px;
+    right:20px;
+}

@@ -63,6 +63,7 @@ from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from jobs import jobs
+from phantom_users import util_notify
 from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
@@ -655,6 +656,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 user_exercise, 
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
+
+            #util_notify.update(user)
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])

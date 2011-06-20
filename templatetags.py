@@ -120,6 +120,7 @@ def exercise_message(exercise, coaches, exercise_states):
 def user_points(user_data):
     if user_data:
         points = user_data.points
+        if poin
     else:
         points = 0
     return {"points": points}
@@ -250,6 +251,7 @@ register.tag(highlight)
 webapp.template.register_template_library('templatetags')    
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
+webapp.template.register_template_library('phantom_users.templatetags')
 webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
 webapp.template.register_template_library('js_css_packages.templatetags')
