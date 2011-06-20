@@ -646,6 +646,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                     user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
                     problem_log.earned_proficiency = True
+                    util_notify.update(user, user_data, user_exercise, False, True)
             else:
                 # Just in case RegisterCorrectness didn't get called.
                 user_exercise.reset_streak()
@@ -1599,6 +1600,8 @@ def real_main():
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
+        
+        ('/notifierstate', util_notify.ToggleNotify),
 
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
