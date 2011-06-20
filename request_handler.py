@@ -168,7 +168,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         template_values['points'] = None
         template_values['username'] = ""
 
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         if user is not None:
             template_values['username'] = get_nickname_for(user)
 

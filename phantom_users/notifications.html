@@ -1,0 +1,8 @@
+<div class="notification-bar" style="display:none;position:fixed;z-index:200;left:0px;top:0px;width:100%;">
+	<span class="notification-bar-content">{{login_notifications}}</span>
+	<span class="notification-bar-close">X</span>
+</div>
+
+{% if login_notifications %}
+    <script>$(Notifications.show);</script>
+{% endif %}
