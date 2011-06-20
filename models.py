@@ -21,6 +21,7 @@ import request_cache
 from discussion import models_discussion
 from topics_list import all_topics_list
 import unregistered_util
+from phantom_users import util_notify
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -584,6 +585,8 @@ class UserData(db.Model):
     def add_points(self, points):
         if self.points == None:
             self.points = 0
+        if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
+            util_notify.update(self.user,self,None,True)
         self.points += points
         
 

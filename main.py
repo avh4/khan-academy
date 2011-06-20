@@ -661,7 +661,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-            #util_notify.update(user)
+            util_notify.update(user,user_data,user_exercise)
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])

@@ -120,7 +120,6 @@ def exercise_message(exercise, coaches, exercise_states):
 def user_points(user_data):
     if user_data:
         points = user_data.points
-        if poin
     else:
         points = 0
     return {"points": points}
