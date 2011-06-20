@@ -555,6 +555,57 @@ var Badges = {
     }
 }
 
+
+var Notifications = {
+
+    show: function() {
+        var jel = $(".notification-bar");
+        $(jel).click(function(){
+            window.location = "/login?"+window.location.href;
+            return false;
+        });
+        $(".notification-bar-close").click(function(){
+            Notifications.hide();
+            return false;
+            });
+        setTimeout(function(){
+            jel.css("visibility", "hidden").css("display", "");
+            jel.css("top",-1*jel.height());
+            $(".notification-bar-content").text("You're not logged in.")
+            $("body").css("background-position","0px 35px");
+            $("body").css("top","35px");
+            $("#top-header").css("margin-top","35px");
+            jel.css("display", "").css("visibility", "visible");
+            jel.animate({top: 0}, 500, function(){jel.show()});
+        }, 100);
+    },
+
+    hide: function() {
+        var jel = $(".notification-bar");
+        jel.animate({top: -1 * jel.height()}, 500, function(){jel.hide();});
+        $("body").css("background-position","0px 0px");
+        $("body").css("top","0px");
+        $("#top-header").css("margin-top","0px");
+    },
+
+    showMoreContext: function(el) {
+        var jelLink = $(el).parents(".badge-context-hidden-link");
+        var jelBadge = jelLink.parents(".achievement-badge")
+        var jelContext = $(".badge-context-hidden", jelBadge);
+
+        if (jelLink.length && jelBadge.length && jelContext.length)
+        {
+            $(".ellipsis", jelLink).remove();
+            jelLink.html(jelLink.text());
+            jelContext.css("display", "");
+            jelBadge.css("min-height", jelBadge.css("height")).css("height", "auto");
+            jelBadge.nextAll(".achievement-badge").first().css("clear", "both");
+        }
+    }
+}
+
+
+
 var Timezone = {
     tz_offset: null,
 

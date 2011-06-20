@@ -585,6 +585,7 @@ class UserData(db.Model):
         if self.points == None:
             self.points = 0
         self.points += points
+        
 
     def get_videos_completed(self):
         if self.videos_completed < 0:
