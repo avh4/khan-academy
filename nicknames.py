@@ -1,4 +1,4 @@
-from phantom_users.util import is_phantom_email
+from phantom_users.phantom_util import is_phantom_email
 import facebook_util
 
 def get_nickname_for(user):
