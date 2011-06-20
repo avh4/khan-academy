@@ -83,7 +83,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 class ViewProfile(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
+        user = util.get_or_create_current_user()
         if user:
             student = user
             user_data_student = None
