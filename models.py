@@ -633,10 +633,14 @@ class Video(Searchable, db.Model):
     @property
     def download_urls(self):
         if self.download_available:
+
+            download_url_base = "http://s3.us.archive.org/KA-youtube-converted"
+
             return {
-                    "mp4": "http://s3.amazonaws.com/KA-youtube-converted/%s/%s.mp4" % (self.youtube_id, self.youtube_id),
-                    "png": "http://s3.amazonaws.com/KA-youtube-converted/%s/%s.png" % (self.youtube_id, self.youtube_id),
+                    "mp4": "%s/%s/%s.mp4" % (download_url_base, self.youtube_id, self.youtube_id),
+                    "png": "%s/%s/%s.png" % (download_url_base, self.youtube_id, self.youtube_id),
                     }
+
         return None
     
     @staticmethod
