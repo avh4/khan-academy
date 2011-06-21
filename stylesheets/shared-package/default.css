@@ -2828,10 +2828,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar {
-    background-color:#80BA02;
+    background-color:#069;
     width:100%;
     height:35px;
     text-align:center;
+    color:#eee;
 /*    padding-top:5px;*/
     vertical-align:middle;
     outline:solid 2px #557D00;
@@ -2844,9 +2845,33 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     top:5px;
 }
 
+.notification-bar-content a:link{
+    text-decoration:underline; 
+    color:#DD6900;   
+}
+
+.notification-bar-content a:visited{
+    text-decoration:underline;  
+    color:#DD6900;  
+}
+
+.notification-bar-content a:hover{
+    text-decoration:underline;  
+    border-bottom:none;  
+    color:#DD6900;
+}
+
 .notification-bar-close{
     float:right;
     position:relative;
     top:5px;
     right:20px;
+}
+
+.notification-bar-close a:link{
+    color:white;
+}
+
+.notification-bar-close a:visited{
+    color:white;
 }
