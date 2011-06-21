@@ -62,7 +62,6 @@ import exercises
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
-from jobs import jobs
 from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
