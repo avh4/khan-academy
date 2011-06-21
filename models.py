@@ -505,7 +505,7 @@ class UserData(db.Model):
         return userExercise
         
     def get_exercise_states(self, exercise, user_exercise, current_time):
-        proficient = exercise.proficient = self.is_proficient_at(exercise.name)
+        proficient = exercise.proficient = self.is_proficient_at(exercise.name, self.user)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
         struggling = UserExercise.is_struggling_with(user_exercise, exercise)
@@ -675,7 +675,10 @@ class Video(Searchable, db.Model):
         return None
 
     def current_user_points(self):
-        user_video = UserVideo.get_for_video_and_user(self, util.get_current_user(allow_phantoms=True))
+        user = util.get_current_user(allow_phantoms=True)
+        if not user:
+            return 0
+        user_video = UserVideo.get_for_video_and_user(self, user)
         if user_video:
             return points.VideoPointCalculator(user_video)
         else:
