@@ -325,8 +325,8 @@ class UserBadgeNotifier:
 
         user_badges = memcache.get(UserBadgeNotifier.key_for_user(user)) or []
 
-        if len(user_badges) > 0:
-                                  memcache.delete(UserBadgeNotifier.key_for_user(user))
+        # if len(user_badges) > 0:
+        #     memcache.delete(UserBadgeNotifier.key_for_user(user))
               
         return user_badges
 

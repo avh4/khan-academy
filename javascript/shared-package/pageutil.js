@@ -586,22 +586,15 @@ var Notifications = {
         $("body").css("background-position","0px 0px");
         $("body").css("top","0px");
         $("#top-header").css("margin-top","0px");
+        
+        var fVisible = $('.notification-bar').is(':visible');
+
+        $.post("/notifierstate", {
+            "hidden": fVisible ? "0" : "1"
+        }); // Fire and forget
     },
 
-    showMoreContext: function(el) {
-        var jelLink = $(el).parents(".badge-context-hidden-link");
-        var jelBadge = jelLink.parents(".achievement-badge")
-        var jelContext = $(".badge-context-hidden", jelBadge);
-
-        if (jelLink.length && jelBadge.length && jelContext.length)
-        {
-            $(".ellipsis", jelLink).remove();
-            jelLink.html(jelLink.text());
-            jelContext.css("display", "");
-            jelBadge.css("min-height", jelBadge.css("height")).css("height", "auto");
-            jelBadge.nextAll(".achievement-badge").first().css("clear", "both");
-        }
-    }
+  
 }
 
 

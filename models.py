@@ -354,14 +354,16 @@ class UserExercise(db.Model):
 
         if proficient:
             if self.exercise not in user_data.proficient_exercises:
-                    user_data.proficient_exercises.append(self.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
+                user_data.proficient_exercises.append(self.exercise)
+                user_data.need_to_reassess = True
+                user_data.put()
+
         else:
             if self.exercise in user_data.proficient_exercises:
-                    user_data.proficient_exercises.remove(self.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
+                user_data.proficient_exercises.remove(self.exercise)
+                user_data.need_to_reassess = True
+                user_data.put()
+                    
 
 class CoachRequest(db.Model):
     coach_requesting = db.UserProperty()
@@ -407,6 +409,7 @@ class UserData(db.Model):
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
     map_coords = db.StringProperty()
+    hide_notifications = db.BooleanProperty(default=True)
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()

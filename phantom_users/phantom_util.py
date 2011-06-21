@@ -32,7 +32,7 @@ def get_phantom_user_from_cookies():
     try:
         cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
     except Cookie.CookieError, error:
-        logging.debug("Ignoring Cookie Error: '%s'" % error)
+        logging.critical("Ignoring Cookie Error: '%s'" % error)
 
     morsel_key = "ureg_id"
     morsel = cookies.get(morsel_key)
