@@ -2276,6 +2276,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     text-align: center;
 }
 
+#thumbnails > * {
+    width: 100%;
+}
+
 #thumbnails td a {
     outline: none;
 }
