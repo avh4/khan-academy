@@ -90,7 +90,8 @@
                                 <span class="separator">&nbsp;</span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                                <a href="{{ login_url|escape }}">Login</a>
+                            	<span class="achievement-badge-counts" style="top:30px;left:-80px;"></span> <!--Fix for unregistered users-->
+								<a href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator">&nbsp;</span>
                             <a href="/contribute" id="donate-link">Donate</a>
