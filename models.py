@@ -415,9 +415,7 @@ class StudyGroup(db.Model):
     def remove_student(student_email, studygroup_key):
         u = users.User(student_email)
         ud = UserData.get_or_insert_for(u)
-        print(ud.studygroups)
         ud.studygroups = [g for g in ud.studygroups if str(g) != studygroup_key]
-        print(ud.studygroups)
         ud.put()
 
     def delete(self, *args):
