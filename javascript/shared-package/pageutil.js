@@ -560,7 +560,7 @@ var Notifications = {
 
     show: function() {
         var jel = $(".notification-bar");
-        $(jel).click(function(){
+        $(".notification-bar-login").click(function(){
             window.location = "/login?"+window.location.href;
             return false;
         });

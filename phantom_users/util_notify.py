@@ -38,20 +38,20 @@ def update(user,user_data,user_exercise,threshold = False, isProf = False):
     
     # Every 20 questions
     if numquest != None and numquest % 20 == 0:
-        notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions so far! <a href='#'>Login</a> or <a href='#'>register</a> to save your progress")
+        notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions so far! <span class='notification-bar-login'><a href='#'>Login</a> or <a href='#'>register</a></span> to save your progress")
     #Proficiency
     if isProf:
-        notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". <a href='#'>Login</a> or <a href='#'>register</a> to save your progress")
+        notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". <span class='notification-bar-login'><a href='#'>Login</a> or <a href='#'>register</a></span> to save your progress")
     #First Badge
     if numbadge != None and len(numbadge) == 1 and (len(user_badges) > 0):
-        notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! You should <a href='#'>login</a> or <a href='#'>register</a> to save your progress")
+        notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! You should <span class='notification-bar-login'><a href='#'>login</a> or <a href='#'>register</a></span> to save your progress")
     #Every 5 badges
     if numbadge != None and len(numbadge) % 5 == 0 and (len(user_badges) > 0):
-        notifications.UserLoginNotifier.push_for_user(user,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far. Have you considered <a href='#'>logging</a> in or <a href='#'>registering</a> so you don't lose your progress?")
+        notifications.UserLoginNotifier.push_for_user(user,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far. Have you considered <span class='notification-bar-login'><a href='#'>logging</a></span> in or <a href='#'>registering</a> so you don't lose your progress?")
     #Every 2.5k points
     if numpoint != None and threshold:
         numpoint = 2500*(numpoint/2500)+2500
-        notifications.UserLoginNotifier.push_for_user(user,"You've earned over <a href='/profile'>"+str(numpoint)+ " points</a>! If you want to keep them, you'll need to <a href='#'>login</a> or <a href='#'>register</a>.")
+        notifications.UserLoginNotifier.push_for_user(user,"You've earned over <a href='/profile'>"+str(numpoint)+ " points</a>! If you want to keep them, you'll need to <span class='notification-bar-login'><a href='#'>login</a> or <a href='#'>register</a></span>.")
 
     #notifications.UserLoginNotifier.push_for_user(user,"You need to login!!!")
 
