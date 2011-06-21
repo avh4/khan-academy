@@ -637,8 +637,8 @@ class Video(Searchable, db.Model):
             download_url_base = "http://www.archive.org/download/KA-youtube-converted"
 
             return {
-                    "mp4": "%s/%s.mp4" % (download_url_base, self.youtube_id, self.youtube_id),
-                    "png": "%s/%s.png" % (download_url_base, self.youtube_id, self.youtube_id),
+                    "mp4": "%s/%s.mp4" % (download_url_base, self.youtube_id),
+                    "png": "%s/%s.png" % (download_url_base, self.youtube_id),
                     }
 
         return None
