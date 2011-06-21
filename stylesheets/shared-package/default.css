@@ -2828,13 +2828,13 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar {
-    background-color:#75E8FF;
+    background-color:#80BA02;
     width:100%;
     height:35px;
     text-align:center;
 /*    padding-top:5px;*/
     vertical-align:middle;
-    outline:solid 2px #1700AD;
+    outline:solid 2px #557D00;
 }
 
 .notification-bar-content {

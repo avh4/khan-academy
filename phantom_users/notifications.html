@@ -1,6 +1,6 @@
 <div class="notification-bar" style="display:none;position:fixed;z-index:200;left:0px;top:0px;width:100%;">
 	<span class="notification-bar-content">{{login_notifications}}</span>
-	<span class="notification-bar-close">X</span>
+	<span class="notification-bar-close">(<a href="#" onclick="Notifications.hide();return false;">close</a>)</span>
 </div>
 
 {% if login_notifications %}
