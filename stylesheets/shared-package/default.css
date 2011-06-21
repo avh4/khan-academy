@@ -289,8 +289,8 @@ footer {
     }
     footer.short {
         color: #555;
-        background: #eee;
-        border-top: 1px solid #bbb;
+        background: url(/images/light-page-bg.png) repeat-x 0 -20px;
+        border-top: 1px solid #C6D1AD;
         z-index: 10;
     }
     footer #leaves {
