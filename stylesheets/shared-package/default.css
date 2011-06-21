@@ -303,8 +303,6 @@ footer {
     }
     footer ul.page_links {
         float: left;
-        padding: 7px;
-        list-style: url(/images/list-item-green.png);
         padding: 0 20px;
         margin: 0;
     }
@@ -320,14 +318,13 @@ footer {
         text-decoration: none;
     }
         footer.short a {
-            background-image: url(/images/non-repeating-sprites.png);
-            background-position: -10px -1142px;
             padding-left: 7px;
             padding-right: 10px;
             color: #555;
         }
     footer#footer #leaves a:hover {
         color: black;
+        text-decoration: underline;
     }
     footer #copyright {
         float: right;
