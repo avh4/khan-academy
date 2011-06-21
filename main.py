@@ -1432,6 +1432,10 @@ class Search(request_handler.RequestHandler):
                            })
         self.render_template("searchresults.html", template_values)
 
+class RedirectToJobvite(request_handler.RequestHandler):
+    def get(self):
+        self.redirect("http://hire.jobvite.com/CompanyJobs/Careers.aspx?k=JobListing&c=qd69Vfw7")
+
 class PermanentRedirectToHome(request_handler.RequestHandler):
     def get(self):
 
@@ -1591,7 +1595,8 @@ def real_main():
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
 
-        ('/jobs/dev', jobs.FullTimeDeveloper),
+        ('/jobs', RedirectToJobvite),
+        ('/jobs/.*', RedirectToJobvite),
 
         ('/sendtolog', SendToLog),
 
