@@ -150,23 +150,40 @@ class AcceptCoach(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        accept_coach = self.request_bool("accept", default = False)
-        user_data_student = UserData.get_or_insert_for(user)
+        user_data = UserData.get_or_insert_for(user)
 
+        accept_coach = self.request_bool("accept", default = False)
         coach_email = self.request_string("coach_email")
+        student_email = self.request_string('student_email')
+
+        if bool(coach_email) == bool(student_email):
+            raise Exception('must provide coach_email xor student_email')
+
         if coach_email:
+            student = user
+            user_data_student = user_data
             coach = users.User(coach_email)
             user_data_coach = UserData.get_for(coach)
-            if user_data_coach and not user_data_student.is_coached_by(coach):
-                coach_request = CoachRequest.get_for(coach, user)
-                if coach_request:
-                    coach_request.delete()
+        elif student_email:
+            student = users.User(student_email)
+            user_data_student = UserData.get_for(student)
+            coach = user
+            user_data_coach = user_data
+        
+        if user_data_coach and not user_data_student.is_coached_by(coach):
+            coach_request = CoachRequest.get_for(coach, student)
+            logging.critical(coach_request)
+            if coach_request:
+                coach_request.delete()
 
-                    if accept_coach:
-                        user_data_student.coaches.append(coach.email())
-                        user_data_student.put()
+                if user==student and accept_coach:
+                    user_data_student.coaches.append(coach.email())
+                    user_data_student.put()
 
-        self.redirect("/coaches")
+        if self.is_ajax_request():
+            return
+        else:
+            self.redirect("/coaches")
 
 class UnregisterCoach(request_handler.RequestHandler):
     def get(self):

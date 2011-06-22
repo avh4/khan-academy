@@ -355,7 +355,24 @@ var StudentLists = {
         else if (StudentLists.currentGroup == 'requests') {
             var email = rowEl.find('.student-name').html();
             $.ajax({
-                url: '',
+                type: 'GET',
+                url: '/acceptcoach',
+                data: 'accept=0&student_email='+email,
+                success: function(data, status, jqxhr) {
+                    // update data model
+                    requests = [];
+                    for (i in StudentLists.coach_requests) {
+                        var request = StudentLists.coach_requests[i];
+                        if (request != email) {
+                            requests.push(request);
+                        }
+                    }
+                    StudentLists.coach_requests = requests;
+                    
+                    // update UI
+                    rowEl.remove();
+                    StudentLists.redrawListView('requests');
+                }
             });
         }
         else {
