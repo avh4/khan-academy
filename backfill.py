@@ -31,4 +31,3 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
                 )
         self.response.out.write("OK: " + str(mapreduce_id))
 
-
