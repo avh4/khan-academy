@@ -39,6 +39,7 @@ class ViewCoaches(request_handler.RequestHandler):
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
                         "student_id": user.email(),
+                        'selected_nav_link': 'coach'
                     }
 
             self.render_template('viewcoaches.html', template_values)
@@ -54,7 +55,7 @@ class ViewStudents(request_handler.RequestHandler):
 
             user_data = UserData.get_or_insert_for(user)
             
-            coach_requests = CoachRequest.get_for_coach(user)
+            coach_requests = [x.student_requested.email() for x in CoachRequest.get_for_coach(user)]
 
             study_groups_models = StudyGroup.gql("WHERE coaches = :1", user_data.key())
             
@@ -75,16 +76,14 @@ class ViewStudents(request_handler.RequestHandler):
             }, students_data)
             students.sort(key=lambda s: s['nickname'])
             
-            students_json = json.dumps(students)
-            study_groups_json = json.dumps(study_groups_list)
-            
             template_values = {
                 "students": students,
-                "students_json": students_json,
+                "students_json": json.dumps(students),
                 "study_groups": study_groups_list,
-                "study_groups_json": study_groups_json,
+                "study_groups_json": json.dumps(study_groups_list),
                 "invalid_student": invalid_student,
                 "coach_requests": coach_requests,
+                "coach_requests_json": json.dumps(coach_requests),
                 'selected_nav_link': 'coach'
             }
             self.render_template('viewstudentlists.html', template_values)
@@ -114,8 +113,11 @@ class RegisterCoach(request_handler.RequestHandler):
 
                 self.redirect("/coaches")
                 return
-
-        self.redirect("/coaches?invalid_coach=1")
+        
+        if self.is_ajax_request():
+            raise Exception('todo: write something better')
+        else:
+            self.redirect("/coaches?invalid_coach=1")
 
 class RequestStudent(request_handler.RequestHandler):
     def post(self):
@@ -135,7 +137,10 @@ class RequestStudent(request_handler.RequestHandler):
                     self.redirect("/students")
                     return
 
-        self.redirect("/students?invalid_student=1")
+        if self.is_ajax_request():
+            raise Exception('todo: write something better')
+        else:
+            self.redirect("/students?invalid_student=1")
 
 class AcceptCoach(request_handler.RequestHandler):
     def get(self):
