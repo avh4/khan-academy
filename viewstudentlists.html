@@ -186,7 +186,7 @@ var Util = {
                 qs.push(key + kvjoin + hash[key])
         }
         return qs.join(eljoin);
-    },
+    }
 };
 
 var StudentLists = {
@@ -276,7 +276,7 @@ var StudentLists = {
         addStudentTextBox.init();
 
         // create lists
-        $('#newlist-button').click(function(ev) {
+        $('#newlist-button').click(function(event) {
             event.preventDefault();
             $('#newlist-box').show().focus();
         });
@@ -435,7 +435,7 @@ var StudentLists = {
 
             title = 'Requests';
             $('#delete-group').hide();
-            countstring = 'potential student'
+            countstring = 'potential student';
         }
         else {
             $('#requested-students').hide();
