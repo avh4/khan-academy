@@ -172,7 +172,6 @@ class AcceptCoach(request_handler.RequestHandler):
         
         if user_data_coach and not user_data_student.is_coached_by(coach):
             coach_request = CoachRequest.get_for(coach, student)
-            logging.critical(coach_request)
             if coach_request:
                 coach_request.delete()
 
