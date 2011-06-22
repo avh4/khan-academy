@@ -10,10 +10,10 @@
 {% block pagecontent %}
 <div id="homepage">
     <div id="main-video">
-        {% youtube_player_embed video_id 480 380 %}
+        {% youtube_player_embed video_id 480 328 %}
     </div>
-    <div id="homepage-text">
-        <h1 class="main-headline"><a href="/#browse">Watch.</a> <a href="/exercisedashboard">Practice.</a> Learn almost anything&mdash;for free.</h1>
+    <div id="homepage-text" class="visited-no-recolor">
+        <h2 class="section-headline"><a href="/#browse">Watch.</a> <a href="/exercisedashboard">Practice.</a> Learn almost anything&mdash;for free.</h1>
         <p>
             What started out as Sal making a few algebra videos for his cousins has grown 
             to over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> and <a href="/exercisedashboard">100 self-paced exercises</a> and assessments covering 
@@ -38,7 +38,7 @@
                     </div>
                 </td>
                 <td width="94%">
-                    <div id="thumbnails">
+                    <div id="thumbnails" class="visited-no-recolor">
                         {% for thumbnail_link_set in thumbnail_link_sets %}
                             <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}

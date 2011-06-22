@@ -96,9 +96,6 @@
         white-space: nowrap;
         text-overflow: ellipsis;
     }
-    .video #description h3 span.title {
-        color: #e45c02;
-    }
     .video #description h3 span.long-description {
         color: #555;
         font-weight: normal;
@@ -164,6 +161,6 @@
 .extra-link-bar {
 	float:right; 
 	position:relative;
-	top: 2px;
+	top: 1px;
 }
 .video_extra_links {float:right;}

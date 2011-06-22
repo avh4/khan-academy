@@ -87,15 +87,16 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; }
 h1, h2, h3, h4, h5 { color: #111; font-family: "MuseoSans500", sans-serif; }
 h1 {font-size:25px; margin-bottom: 18px;}
     .main-headline, .section-headline { padding-top: 18px; }
+    .main-headline a, .section-headline a { text-decoration: none;}
+    .main-headline a:hover, .section-headline a:hover { text-decoration: underline;}
+    .main-headline a:visited, .section-headline a:visited { color: #7EA800 };
     h1.main-headline {font-size: 32px; position: relative; line-height: 37px; z-index: 10;}
-    h1.main-headline a { text-decoration: none; }
-    h1.main-headline a:visited {color: #0075b1;}
-    h1.main-headline a:hover {text-decoration: underline;}
+    
 h2 {font-size:20px; margin-bottom: 18px;}
 h3 {font-size:18px; margin-bottom: 18px;}
 h4 {font-size:15px; margin-bottom: 18px;}
 h5 {font-size: 15px; margin-bottom: -18px;}
-p { font-size: 15px; margin: 18px 0;}
+p { font-size: 13px; margin: 18px 0;}
 
 .pulls { margin-bottom: 9px; } /* "Pulls" the next block element up by halving the margin. */
 .pulled { margin-top: 9px; margin-bottom: 27px; } /* Preserves vertical rhythm. Not always necessary */
@@ -126,6 +127,7 @@ hr {
     cursor: pointer !important;
     border: 1px solid #ccc !important;
     border-bottom: 1px solid #bbb !important;
+    line-height: 22px;
     padding: 5px 10px;
     position: relative;
     margin: 0;
@@ -142,6 +144,7 @@ hr {
     color: #0075b1 !important;
     left: 1px;
     top: 1px;
+    text-decoration: none !important;
 }
 .simple-button.with-icon {
     padding-left: 30px;
@@ -152,6 +155,7 @@ hr {
     top: 3px;
 }
 .simple-button.social-button {
+    display: inline-block;
     text-transform: uppercase;
     margin-bottom: 9px;
     font-size: 12px;
@@ -222,16 +226,18 @@ hr {
 /* End of basic typography */
 
 /* Links in the header and footer don't change color when visited. */
-a:link, header a:visited, footer a:visited {
-    color: #0075b1;
+a:link, header a:visited, footer a:visited, .visited-no-recolor a:visited {
+    color: #005987;
+    text-decoration: none;
 }
 
 a:visited {
-    color: #DD6900;
+    color: #678D00;
 }
 
 a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
-    color: #DD6900;
+    color: #678D00;
+    text-decoration: underline;
 }
 
 /*
@@ -289,7 +295,7 @@ footer {
     }
     footer.short {
         color: #555;
-        background: url(/images/light-page-bg.png) repeat-x 0 -20px;
+        background: url(/images/light-page-bg.png) repeat-x 0 -30px;
         border-top: 1px solid #C6D1AD;
         z-index: 10;
     }
@@ -397,7 +403,7 @@ footer {
 }
     #top-header #logo #logo-image{
         position: absolute;
-        left: 10px;
+        left: 5px;
         top: 6px;
         z-index: 1;    
     }
@@ -422,8 +428,9 @@ footer {
         color: #ddd;
     }
     #top-header #stats #page_visitors {
+        font-family: Georgia, serif;
         position: absolute;
-        left: 118px;
+        left: 117px;
         top: -75px;
         font-size:13px;
         font-style: italic;
@@ -460,6 +467,7 @@ footer {
 }
 #sitewide-navigation {
     float:right;
+    font-family: "MuseoSans500", Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 3px 0;
     height: 19px;
@@ -472,18 +480,12 @@ footer {
     z-index: 10;
 }
     #sitewide-navigation a {
-        text-decoration: none;
+        color: #263500;
         text-transform: uppercase;
         margin-left: 23px;
         display: block;
         float: left;
     }
-        #sitewide-navigation a, #page_sub_nav a {
-            color: #282d32;
-        }
-            .light #sitewide-navigation a {
-                color: #282d32;
-            }
             .dark #sitewide-navigation a {
                 color: #ddd;
                 text-shadow: 0 -1px 0 #1A222D;
@@ -495,9 +497,6 @@ footer {
             .dark #sitewide-navigation a.selected {
                 color: #fff;
             }
-        #sitewide-navigation a:hover, #page_sub_nav a:hover {
-            color: #689909;
-        }
 
 #page_sub_nav .breadcrumbs_nav {
         font-weight: normal;
@@ -513,7 +512,6 @@ footer {
         float: left;
     }
     #page_sub_nav .breadcrumbs_nav a {
-        text-decoration: none;
         margin-left: 23px;
     }
         #page_sub_nav .breadcrumbs_nav a#faq {
@@ -662,8 +660,8 @@ footer {
         vertical-align: middle;
     }
     #top-header #top-header-links span.separator, #sitewide-navigation span.separator {
-        border-left: 1px solid #ccc;
-        border-right: 1px solid #f2f2f2;
+        border-left: 1px solid #C6D1AD;
+        border-right: 1px solid #E9EFDD;
         padding: 0;
         margin: 0 8px;
         display: inline-block;
@@ -671,10 +669,6 @@ footer {
         
         /* For IE */
         *top: 0;
-    }
-    .light #top-header #top-header-links span.separator {
-        border-left: 1px solid #ccc;
-        border-right: 1px solid #f2f2f2;
     }
     .dark #top-header #top-header-links span.separator {
         border-left: 1px solid #1B242F;
@@ -684,8 +678,7 @@ footer {
         line-height: 0
     }
     #top-header #top-header-links .page_links a {
-        text-decoration: none;
-        color: #4D5862;
+        color: #263500;
     }
         .dark #top-header #top-header-links .page_links a {
             text-shadow: 0 -1px 0 #1A222D;
@@ -742,7 +735,6 @@ footer {
     #top-header #user-info img { position:relative; top:-1px; }
 
     #top-header #top-header-links .page_links a.notification_link {
-        text-decoration: none;
         border-bottom: 0;
     }
 
@@ -830,10 +822,6 @@ footer {
         /* For IE */
         height: 22px\9;
         padding-top: 5px\9;
-        
-        -webkit-box-shadow: inset 0 1px 3px #ccc, 0 1px 0 #eee;
-        -moz-box-shadow: inset 0 1px 3px #ccc, 0 1px 0 #eee;
-        box-shadow: inset 0 1px 3px #ccc, 0 1px 0 #eee;
     }
     .dark #top-header #page_search #search-input {
         background-image: url(/images/non-repeating-sprites.png);
@@ -960,10 +948,8 @@ nav#page_sub_nav {
     border-top-color: #C6D1AD;
     width: auto;
 }
-    .light nav#page_sub_nav {
-        -webkit-box-shadow: 0 -2px 0 #DDE9C1;
-        -moz-box-shadow: 0 -2px 0 #DDE9C1;
-        box-shadow: 0 -2px 0 #DDE9C1;
+    nav#page_sub_nav a {
+        color: #222;
     }
     .dark nav#page_sub_nav {
         -webkit-box-shadow: 0 -2px 0 #1A222C;
@@ -1078,10 +1064,6 @@ a:link.google-analytics-link-track
 
 .text-inset:hover {
     text-shadow: none;
-}
-
-#library a {
-	text-decoration: none;
 }
 
 /* Clear Floated Elements
@@ -1242,16 +1224,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #container {
     overflow: hidden;
     position: relative;
-    
-    -webkit-box-shadow: 0 -2px 0 #eee;
-    -moz-box-shadow: 0 -2px 0 #eee;
-    box-shadow: 0 -2px 0 #eee;
 }
-    .light #container {
-        -webkit-box-shadow: 0 -2px 0 #DDE9C1;
-        -moz-box-shadow: 0 -2px 0 #DDE9C1;
-        box-shadow: 0 -2px 0 #DDE9C1;
-    }
     .dark #container {
         -webkit-box-shadow: 0 -2px 0 #1A222C;
         -moz-box-shadow: 0 -2px 0 #1A222C;
@@ -1394,7 +1367,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         width: 170px;
     }
         .exercise-badge .exercise-title a {
-            text-decoration: none;
             color: #006699;
         }
         .exercise-badge .exercise-title a:hover {
@@ -1697,9 +1669,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     text-align: left;
     padding-left: 10px;
 }
-    #back-to-dashboard-link a, #back-to-dashboard-link a:visited {
-        color: #0075b1;
-    }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
     background-image: url(/images/non-repeating-sprites.png);
     background-position: -1px -598px;
@@ -1707,7 +1676,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     display: block;
     font-size: 10px;
     padding: 48px 0 0 4px;
-    text-decoration: none;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
     background-image: url(/images/non-repeating-sprites.png);
@@ -1721,10 +1689,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border-top: 1px solid #C6D1AD;
     border-bottom: 1px solid #ddd;
     
-    -webkit-box-shadow: 0 -1px 0 #eee;
-    -moz-box-shadow: 0 -1px 0 #eee;
-    box-shadow: 0 -2px 0 #eee;
-    
     color: #666;
     float: left;
     font-size: 11px;
@@ -1732,12 +1696,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-left: 2px;
     width: 67px;
 }
-
-    .light #back-to-dashboard.single-exercise {
-        -webkit-box-shadow: 0 -2px 0 #DDE9C1;
-        -moz-box-shadow: 0 -2px 0 #DDE9C1;
-        box-shadow: 0 -2px 0 #DDE9C1;
-    }
     .dark #back-to-dashboard.single-exercise {
         -webkit-box-shadow: 0 -2px 0 #1A222C;
         -moz-box-shadow: 0 -2px 0 #1A222C;
@@ -1828,10 +1786,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         #user-info .energy-points-badge,
         #profile-header #high-level-stats .energy-points-badge {
             background: #0075b1;
-            border-right: 1px solid #0075b1;
-            border-top: 1px solid #00a1f3;
-            border-left: 1px solid #0075b1;
-            border-bottom: 1px solid #004c73;
             float: right;
             line-height: 18px;
             text-align: center;
@@ -1839,7 +1793,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            text-shadow: 0px -1px 0px #666;
+            text-shadow: 0px -1px 0px #004163;
             
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
@@ -2073,21 +2027,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     position: relative;
     margin: 0 1px;
     border-top: 1px solid #C6D1AD;
-    
-    -webkit-box-shadow: 0 -2px 0 #eee;
-    -moz-box-shadow: 0 -2px 0 #eee;
-    box-shadow: 0 -2px 0 #eee;
 }
 
-.light #coaches, .light #students, .light #donate, .light #individual_report, .light 
-.achievement-badges-container, .light #login-page, .light #about-us, 
-.light #homepage, .light #video-page, .light #contribute,
-.light #credits, .light #report-problem, .light #tos, .light #privacy-policy,
-.light #dmca {
-    -webkit-box-shadow: 0 -2px 0 #DDE9C1;
-    -moz-box-shadow: 0 -2px 0 #DDE9C1;
-    box-shadow: 0 -2px 0 #DDE9C1;
-}
 .dark #coaches, .dark #students, .dark #donate, .dark #individual_report, .dark 
 .achievement-badges-container, .dark #login-page, .dark #about-us, 
 .dark #homepage, .dark #video-page, .dark #contribute,
@@ -2172,10 +2113,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #the-team .col1, #the-team .col2 {
     padding-top: 18px;
 }
-#the-team .col1 p {
-    font-size: 15px;
-    line-height: 22px;
-}
+
 #the-team .general-contact ul {
     margin-bottom: 18px;
 }
@@ -2297,22 +2235,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         display: block;
     }
 
-#about-blog h2 a {
-    text-decoration: none;
-}
-    #about-blog h2 a:visited {
-        color: #0075b1;
-    }
 /* Homepage styles */
 
 #homepage hr {
     margin: 0 0 18px 0;
 }
 #homepage-text {
-    max-width: 463px;
-}
-#homepage-text p {
-    font-size: 15px;
+    max-width: 48%;
 }
 #homepage-text p.call-to-action-buttons {
     margin-bottom: 26px; /* Account for the padding the buttons */
@@ -2321,12 +2250,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     display: inline-block;
     font-size: 12px;
     text-decoration: none;
-}
-#homepage-text a.call-to-action:visited {
-    color: #333;
-}
-#homepage-text a.call-to-action:hover {
-    color: #0075b1;
 }
 
 #back-to-top {
@@ -2426,11 +2349,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding: 2px 2px 0;
 }
 
-#thumbnails td div.thumbnail_label a {
-    color: #006699;
-    text-decoration: none;
-}
-
 #thumbnails td.selected div.thumbnail_label {
     font-weight: bold;
 }
@@ -2504,14 +2422,9 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 
 #homepage .playlist_browser {
     padding: 4px 10px;
-    background: #eee;
-    border: 1px solid #ccc;
-    border-bottom: 1px solid #aaa;
+    background: #E9EFDD;
+    border: 1px solid #C6D1AD;
     margin-bottom: 0;
-    
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    -moz-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
 }
 #homepage .playlist_browser_title {
     display: inline-block; float: left;
@@ -2527,8 +2440,9 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 #homepage #main-video {
     position: absolute;
     margin-top: 18px;
-    left: 490px;
-    right: 23px;
+    min-width: 45%;
+    max-width: 45%;
+    right: 21px;
 }
 #homepage #main-video object, #homepage #main-video embed {
     width: 100%;
