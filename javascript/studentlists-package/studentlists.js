@@ -127,7 +127,9 @@ var StudentLists = {
             event.preventDefault();
             $('#newlist-box').show().focus();
         });
-        $('#newlist-box').keyup(StudentLists.newListBoxKeyUp);
+        $('#newlist-box').keypress(StudentLists.newListBoxKeyPress)
+                         .keyup(StudentLists.newListBoxKeyup)
+                         .focusout(StudentLists.newListBoxBlur);
 
         // delete list
         $('#delete-group').click(StudentLists.deleteGroupClick);
@@ -228,21 +230,33 @@ var StudentLists = {
         }
     },
 
-    newListBoxKeyUp: function(event) {
+    newListBoxKeyPress: function(event) {
         if (event.which == '13') { // enter
             event.preventDefault();
             StudentLists.newListBoxSubmit(event);
         }
-        else if (event.which == '27') { // escape
+    },
+    
+    newListBoxKeyup: function(event) {
+        if (event.which == '27') { // escape
             StudentLists.newListBoxHide();
         }
+    },
+    
+    newListBoxBlur: function(event) {
+        StudentLists.newListBoxHide();
     },
 
     newListBoxSubmit: function(event) {
         var $target = $('#newlist-box');
         var listname = $target.val();
+        
+        if (!listname) {
+            StudentLists.newListBoxHide();
+            return;
+        }
+        
         $target.attr('disabled', 'disabled');
-
         $.ajax({
             type: 'POST',
             url: '/creategroup',
@@ -252,9 +266,6 @@ var StudentLists = {
                 var group = data;
                 StudentLists.addGroup(group);
 
-                $target.removeAttr('disabled');
-                StudentLists.newListBoxHide();
-
                 // add a new item to the sidebar
                 var $el = $('<li class="group-'+group.key+'"><a href="students?group_id='+group.key+'" class="bullet">'+group.name+'</a></li>');
                 $('#custom-groups').append($el);
@@ -262,12 +273,14 @@ var StudentLists = {
 
                 // add a new item to the dropdown menu
                 StudentLists.redrawListsMenu();
-            }
+            },
+            complete: StudentLists.newListBoxHide
         });
     },
 
     newListBoxHide: function() {
-        $('#newlist-box').val('').hide();
+        $('#newlist-box').val('').blur().hide().removeAttr('disabled');
+        $('#newlist-button').focus();
     },
 
     listClick: function(event) {
