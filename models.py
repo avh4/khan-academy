@@ -115,6 +115,7 @@ class Exercise(db.Model):
             return name.replace('_', ' ').capitalize()
         return ""
 
+    @property
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
@@ -128,7 +129,7 @@ class Exercise(db.Model):
     def short_name(self):
         if self.short_display_name:
             return self.short_display_name[:11]
-        return self.display_name()[:11]
+        return self.display_name[:11]
 
     def is_visible_to_current_user(self):
         return self.live or users.is_current_user_admin()
