@@ -256,6 +256,7 @@ class UserExercise(db.Model):
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
+    total_correct = db.IntegerProperty(default = 0)
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
     proficient_date = db.DateTimeProperty()
@@ -346,7 +347,7 @@ class UserExercise(db.Model):
         else:
             self.last_review = datetime.datetime.min
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
-        
+
     def set_proficient(self, proficient, user_data):
         if not proficient and self.longest_streak < self.required_streak():
             # Not proficient and never has been so nothing to do
