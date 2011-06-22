@@ -1,13 +1,14 @@
 var Util = {
     toDict: function(sequence, key_extractor) {
+        var key_extractor_fn = null;
         if ((typeof key_extractor) == "string")
             key_extractor_fn = function(el) {return el[key_extractor];};
         else
             key_extractor_fn = key_extractor;
 
         var dict = {};
-        for (i in sequence) {
-            item = sequence[i];
+        for (var i in sequence) {
+            var item = sequence[i];
             dict[key_extractor_fn(item)] = item;
         }
         return dict;
@@ -45,7 +46,7 @@ var StudentLists = {
 
     isStudentInGroup: function(student_id, group_id) {
         var student = StudentLists.students_by_id[student_id];
-        for (i in student.study_groups) {
+        for (var i in student.study_groups) {
             if (student.study_groups[i].key == group_id) {
                 return true;
             }
@@ -63,8 +64,8 @@ var StudentLists = {
             StudentLists.removeStudentFromGroup(s, group_id);
         });
 
-        groups = [];
-        for (i in StudentLists.study_groups) {
+        var groups = [];
+        for (var i in StudentLists.study_groups) {
             var group = StudentLists.study_groups[i];
             if (group.key != group_id) {
                 groups.push(group);
@@ -84,8 +85,8 @@ var StudentLists = {
     },
 
     removeStudentFromGroup: function(student, group_id) {
-        groups = [];
-        for (i in student.study_groups) {
+        var groups = [];
+        for (var i in student.study_groups) {
             var group = student.study_groups[i];
             if (group.key != group_id) {
                 groups.push(group);
@@ -206,8 +207,8 @@ var StudentLists = {
                 data: 'accept=0&student_email='+email,
                 success: function(data, status, jqxhr) {
                     // update data model
-                    requests = [];
-                    for (i in StudentLists.coach_requests) {
+                    var requests = [];
+                    for (var i in StudentLists.coach_requests) {
                         var request = StudentLists.coach_requests[i];
                         if (request != email) {
                             requests.push(request);
@@ -388,7 +389,7 @@ var StudentLists = {
 
         // check the right boxes
         $('.list-option input').removeAttr('checked');
-        for (i in student.study_groups) {
+        for (var i in student.study_groups) {
             var group = student.study_groups[i];
             $('#checkbox-'+group.key).attr('checked', true);
         }
