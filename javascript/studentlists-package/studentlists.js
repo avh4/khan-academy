@@ -337,8 +337,8 @@ var StudentLists = {
         event.stopPropagation();
         event.preventDefault();
 
-        var $el = $(this);
-        var student_id = $el.parents('.student-row').attr('id')
+        var $menuButton = $(this);
+        var student_id = $menuButton.parents('.student-row').attr('id')
                                .substring("student-".length);
         var student = StudentLists.students_by_id[student_id];
         if(StudentLists.currentStudent == student) {
@@ -346,14 +346,14 @@ var StudentLists = {
             return true;
         }
         StudentLists.currentStudent = student;
-        $el.addClass('active');
+        $menuButton.addClass('active');
 
         // get dropdown in position
         StudentLists.dropdownEl.show();
 
-        var offset = $el.offset();
-        offset.top += $el.outerHeight() - 1;
-        offset.left -= $el.width();
+        var offset = $menuButton.offset();
+        offset.top += $menuButton.outerHeight() - 1;
+        offset.left += ($menuButton.outerWidth() - StudentLists.dropdownEl.outerWidth());
         StudentLists.dropdownEl.offset(offset);
 
         // check the right boxes
