@@ -22,12 +22,6 @@ def is_phantom_email(email):
 def get_phantom_nickname_key(user):
     return "phantom_nickname_%s" % user.email()
 
-# @request_cache.cache_with_key_fxn(get_phantom_nickname_key)
-# @layer_cache.cache_with_key_fxn(
-#         get_phantom_nickname_key, 
-#         layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore,
-#         persist_across_app_versions=True)
-
 def get_phantom_user_from_cookies():
     cookies = None
     try:
