@@ -13,6 +13,16 @@ var Util = {
         }
         return dict;
     },
+    
+    bindEventsToObject: function(source, events, handler) {
+        for (var i in events) {
+            (function(method) {
+                source.bind(events[i], function(event) {
+                    handler[method](event);
+                });
+            })(events[i]);
+        }
+    },
 
     parseQueryString: function(url) {
         var qs = {};
@@ -123,14 +133,12 @@ var StudentLists = {
         addStudentTextBox.init();
 
         // create lists
+        addListTextBox.init();
         $('#newlist-button').click(function(event) {
             event.preventDefault();
-            $('#newlist-box').show().focus();
+            addListTextBox.element.show().focus();
         });
-        $('#newlist-box').keypress(StudentLists.newListBoxKeyPress)
-                         .keyup(StudentLists.newListBoxKeyup)
-                         .focusout(StudentLists.newListBoxBlur);
-
+        
         // delete list
         $('#delete-group').click(StudentLists.deleteGroupClick);
 
@@ -228,59 +236,6 @@ var StudentLists = {
             var group_id = StudentLists.currentGroup;
             StudentLists.removeStudentFromGroupAjax(student, group_id);
         }
-    },
-
-    newListBoxKeyPress: function(event) {
-        if (event.which == '13') { // enter
-            event.preventDefault();
-            StudentLists.newListBoxSubmit(event);
-        }
-    },
-    
-    newListBoxKeyup: function(event) {
-        if (event.which == '27') { // escape
-            StudentLists.newListBoxHide();
-        }
-    },
-    
-    newListBoxBlur: function(event) {
-        StudentLists.newListBoxHide();
-    },
-
-    newListBoxSubmit: function(event) {
-        var $target = $('#newlist-box');
-        var listname = $target.val();
-        
-        if (!listname) {
-            StudentLists.newListBoxHide();
-            return;
-        }
-        
-        $target.attr('disabled', 'disabled');
-        $.ajax({
-            type: 'POST',
-            url: '/creategroup',
-            data: 'group_name=' + listname,
-            dataType: 'json',
-            success: function(data, status, jqxhr) {
-                var group = data;
-                StudentLists.addGroup(group);
-
-                // add a new item to the sidebar
-                var $el = $('<li class="group-'+group.key+'"><a href="students?group_id='+group.key+'" class="bullet">'+group.name+'</a></li>');
-                $('#custom-groups').append($el);
-                $el.find('a').click(StudentLists.listClick);
-
-                // add a new item to the dropdown menu
-                StudentLists.redrawListsMenu();
-            },
-            complete: StudentLists.newListBoxHide
-        });
-    },
-
-    newListBoxHide: function() {
-        $('#newlist-box').val('').blur().hide().removeAttr('disabled');
-        $('#newlist-button').focus();
     },
 
     listClick: function(event) {
@@ -460,6 +415,67 @@ var StudentLists = {
                 }
             }
         });
+    }
+};
+
+var addListTextBox = {
+    element: null,
+    
+    init: function() {
+        this.element = $('#newlist-box');
+        Util.bindEventsToObject(this.element, ['keypress', 'keyup', 'focusout'], this);
+    },
+    
+    keypress: function(event) {
+        if (event.which == '13') { // enter
+            event.preventDefault();
+            this.createList(event);
+        }
+    },
+    
+    keyup: function(event) {
+        if (event.which == '27') { // escape
+            this.hide();
+        }
+    },
+    
+    focusout: function(event) {
+        this.hide();
+    },
+
+    createList: function(event) {
+        var listname = this.element.val();
+        
+        if (!listname) {
+            this.hide();
+            return;
+        }
+        
+        this.element.attr('disabled', 'disabled');
+        $.ajax({
+            type: 'POST',
+            url: '/creategroup',
+            data: 'group_name=' + listname,
+            dataType: 'json',
+            success: function(data, status, jqxhr) {
+                var group = data;
+                StudentLists.addGroup(group);
+
+                // add a new item to the sidebar
+                var $el = $('<li class="group-'+group.key+'"><a href="students?group_id='+group.key+'" class="bullet">'+group.name+'</a></li>');
+                $('#custom-groups').append($el);
+                $el.find('a').click(StudentLists.listClick);
+
+                // add a new item to the dropdown menu
+                StudentLists.redrawListsMenu();
+            },
+            complete: function(){addListTextBox.hide();}
+        });
+    },
+
+    hide: function() {
+        this.element.val('').hide().removeAttr('disabled');
+        $('#newlist-button').focus();
     }
 };
 
