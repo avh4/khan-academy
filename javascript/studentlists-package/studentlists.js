@@ -346,6 +346,7 @@ var StudentLists = {
             return true;
         }
         StudentLists.currentStudent = student;
+        $el.addClass('active');
 
         // get dropdown in position
         StudentLists.dropdownEl.show();
@@ -366,6 +367,7 @@ var StudentLists = {
     hideMenu: function() {
         StudentLists.dropdownEl.hide();
         StudentLists.currentStudent = null;
+        $('.active.edit-lists').removeClass('active');
     },
 
     listOptionClick: function(event) {

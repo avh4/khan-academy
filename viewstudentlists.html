@@ -8,6 +8,7 @@
     margin-top: 1.2em;
     margin-bottom: 1.2em;
 }
+
 #sidebar {
     float: left;
     width: 180px;
@@ -16,44 +17,6 @@
     text-decoration: none;
     color: inherit;
 }
-#students-container {
-    margin-left:200px;
-    max-width: 600px;
-}
-
-.students-header {
-    padding-bottom: 0.5em;
-    margin-bottom: 0;
-    border-bottom: 1pt solid #aaaaaa;
-}
-h2 {
-    display: inline;
-}
-#nstudents {
-    margin-left: .5em;
-}
-#textbox-container {
-    background: #eeeeee;
-    padding-top: 1em;
-    padding-bottom: 0.5em;
-    padding-left: .5em;
-    padding-right: .5em;
-}
-
-.student-name {
-    font-size: 160%;
-    margin-bottom: .25em;
-}
-.group-name {
-    color: #888888;
-}
-.student-row {
-    margin-top: 1.4em;
-    margin-bottom: 1.4em;
-    min-height: 3em;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-}
 .grouplinks {
     margin-bottom: 1.6em;
 }
@@ -61,7 +24,6 @@ h2 {
     font-size: 130%;
     margin-bottom: .5em;
 }
-
 .bullet {
     padding-left: 15px;
 }
@@ -80,6 +42,41 @@ h2 {
     margin-left: 15px;
 }
 
+#students-container {
+    margin-left:200px;
+    max-width: 600px;
+}
+.students-header {
+    padding-bottom: 0.5em;
+    margin-bottom: 0;
+    border-bottom: 1pt solid #aaaaaa;
+}
+h2 {
+    display: inline;
+}
+#nstudents {
+    margin-left: .5em;
+}
+#textbox-container {
+    background: #eeeeee;
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+    padding-left: .5em;
+    padding-right: .5em;
+    margin-bottom: 1.4em;
+}
+
+.student-row {
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    min-height: 3em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.student-name {
+    font-size: 160%;
+    margin-bottom: .25em;
+}
 .float-right {
     float: right;
 }
@@ -89,13 +86,19 @@ h2 {
     top: -8px;
 }
 a.edit-lists {
+    color: #ffffff;
     text-decoration: none;
-    color: inherit;
     border: 1pt solid #ffffff;
     padding: 4px;
 }
+.student-row:hover a.edit-lists {
+    color: #000000;
+}
+a.edit-lists.active {
+    color: #000000;
+    border: 1pt solid #dddddd;
+}
 a.edit-lists:hover {
-    text-decoration: none;
     color: inherit;
     border: 1pt solid #dddddd;
 }
