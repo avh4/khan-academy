@@ -121,8 +121,6 @@ var StudentLists = {
 
     // *********** UI methods
 
-    dropdownEl: null,
-    currentStudent: null,
     currentGroup: null,
 
     init: function() {
@@ -131,6 +129,7 @@ var StudentLists = {
         StudentLists.generateStudentIndices();
 
         addStudentTextBox.init();
+        editListsMenu.init();
 
         // create lists
         addListTextBox.init();
@@ -145,19 +144,8 @@ var StudentLists = {
         // change visible list
         $('.bullet').click(StudentLists.listClick);
 
-        // lists dropdown menu
-        $('.edit-lists').click(StudentLists.openListsMenuClick);
-        StudentLists.dropdownEl = $('.edit-lists-options');
-        StudentLists.redrawListsMenu();
-        StudentLists.dropdownEl.click(function(event) {event.stopPropagation();});
-        $('html').click(StudentLists.hideMenu);
-
         // inline delete student-group
         $('.student-row .delete-button').click(StudentLists.deleteStudentClick);
-
-        // quick removal of students from groups via label
-        // $('.removecross').click(StudentLists.groupLabelClick);
-
 
         // show initial page
         // todo: remember this with a cookie!
@@ -314,109 +302,6 @@ var StudentLists = {
         var qs = Util.parseQueryString(url);
         var student = StudentLists.students_by_email[qs['student_email']];
         StudentLists.removeStudentFromGroupAjax(student, qs['group_id']);
-    },
-
-    //*********** list dropdown menu methods
-
-    redrawListsMenu: function() {
-        var menu = StudentLists.dropdownEl;
-        menu.children().remove();
-
-        // add a line for each group
-        jQuery.each(StudentLists.study_groups, function() {
-            var group = this;
-            var el = '<label class="list-option"><input type="checkbox" id="checkbox-' + group.key + '" />' + group.name + '</label>';
-            menu.append(el);
-        });
-
-        // wire up events
-        menu.find('input').click(StudentLists.listOptionClick);
-    },
-
-    openListsMenuClick: function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        var $menuButton = $(this);
-        var student_id = $menuButton.parents('.student-row').attr('id')
-                               .substring("student-".length);
-        var student = StudentLists.students_by_id[student_id];
-        if(StudentLists.currentStudent == student) {
-            StudentLists.hideMenu();
-            return true;
-        }
-        StudentLists.currentStudent = student;
-        $menuButton.addClass('active');
-
-        // get dropdown in position
-        StudentLists.dropdownEl.show();
-
-        var offset = $menuButton.offset();
-        offset.top += $menuButton.outerHeight() - 1;
-        offset.left += ($menuButton.outerWidth() - StudentLists.dropdownEl.outerWidth());
-        StudentLists.dropdownEl.offset(offset);
-
-        // check the right boxes
-        $('.list-option input').removeAttr('checked');
-        for (var i in student.study_groups) {
-            var group = student.study_groups[i];
-            $('#checkbox-'+group.key).attr('checked', true);
-        }
-    },
-
-    hideMenu: function() {
-        StudentLists.dropdownEl.hide();
-        StudentLists.currentStudent = null;
-        $('.active.edit-lists').removeClass('active');
-    },
-
-    listOptionClick: function(event) {
-        var group_id = $(this).attr('id').substring("checkbox-".length);
-        if ($(this).attr('checked')) {
-            StudentLists.addStudentToGroupAjax(StudentLists.currentStudent, group_id);
-            // todo: make group label appear under student
-        }
-        else {
-            StudentLists.removeStudentFromGroupAjax(StudentLists.currentStudent, group_id);
-            // todo: remove group label from under student
-        }
-    },
-
-    addStudentToGroupAjax: function(student, group_id) {
-        $.ajax({
-            type: 'POST',
-            url: '/addstudenttogroup',
-            data: 'student_email='+student.email+'&group_id='+group_id,
-            success: function() {
-                // update data model
-                StudentLists.addStudentToGroup(student, group_id);
-
-                // todo: add group label
-                // $('#student-'+student.key).find('.group-'+group_id).hide();
-            }
-        });
-    },
-
-    removeStudentFromGroupAjax: function(student, group_id) {
-        $.ajax({
-            type: 'POST',
-            url: '/removestudentfromgroup',
-            data: 'student_email='+student.email+'&group_id='+group_id,
-            success: function() {
-                // update data model
-                StudentLists.removeStudentFromGroup(student, group_id);
-
-                // update view
-
-                // hide label
-                // $('#student-'+student.key).find('.group-'+group_id).hide();
-
-                // hide row from screen if visible
-                if (StudentLists.currentGroup == group_id) {
-                    $('#student-'+student.key).hide();
-                }
-            }
-        });
     }
 };
 
@@ -525,5 +410,80 @@ var addStudentTextBox = {
         else if (event.which == '27') {
             this.element.blur();
         }
+    }
+};
+
+var editListsMenu = {
+    init: function() {
+        $('.student-row .css-menu > ul > li').click(function(event){editListsMenu.addChildrenToDropdown(event);});
+    },
+    
+    addChildrenToDropdown: function(event) {
+        if(event.target != event.currentTarget) {
+            // stopPropagation etc don't work on dynamically generated children.
+            // http://api.jquery.com/event.stopPropagation/#comment-82290989
+            return true;
+        }
+        var $menu = $(event.currentTarget);
+        var $ul = $menu.find('ul');
+        if ($ul.length == 0) {
+            $ul = $('<ul></ul>');
+            $menu.append($ul);
+        }
+        $ul.children().remove();
+        
+        // add a line for each group
+        jQuery.each(StudentLists.study_groups, function(i, group) {
+            var $el = $('<li><label><input type="checkbox">' + group.name + '</label></li>');
+            var $input = $el.find('input');
+            
+            // get student
+            var student_id = $menu.parents('.student-row').attr('id').substring('student-'.length);
+            if(StudentLists.isStudentInGroup(student_id, group.key)) {
+                $input.attr('checked', true);
+            }
+            
+            $ul.append($el);
+            $input.click(function(event){editListsMenu.itemClick(event);})
+                  .data('group', group);
+        });
+    },
+    
+    itemClick: function(event) {
+        var $input = $(event.currentTarget);
+        var group = $input.data('group');
+        var student_id = $input.parents('.student-row').attr('id').substring('student-'.length);
+        var student = StudentLists.students_by_id[student_id];
+        if ($input.attr('checked'))
+            this.addStudentToGroupAjax(student, group.key);
+        else
+            this.removeStudentFromGroupAjax(student, group.key);
+    },
+    
+    addStudentToGroupAjax: function(student, group_id) {
+        $.ajax({
+            type: 'POST',
+            url: '/addstudenttogroup',
+            data: 'student_email='+student.email+'&group_id='+group_id,
+            success: function() {
+                StudentLists.addStudentToGroup(student, group_id);
+            }
+        });
+    },
+
+    removeStudentFromGroupAjax: function(student, group_id) {
+        $.ajax({
+            type: 'POST',
+            url: '/removestudentfromgroup',
+            data: 'student_email='+student.email+'&group_id='+group_id,
+            success: function() {
+                StudentLists.removeStudentFromGroup(student, group_id);
+
+                // hide row from screen if visible
+                if (StudentLists.currentGroup == group_id) {
+                    $('#student-'+student.key).fadeOut();
+                }
+            }
+        });
     }
 };

@@ -80,16 +80,13 @@ h2 {
 .float-right {
     float: right;
 }
+
+
 .float-edit {
     margin-right: 2em;
     position: relative;
-    top: -8px;
+    top: 4px;
 }
-
-.lists-css-menu > ul > li > ul > li {
-    padding: 4px;
-}
-
 .lists-css-menu > ul > li:after {
     background-image: none;
 }
@@ -101,10 +98,15 @@ h2 {
     background-image: url(/images/non-repeating-sprites.png);
     background-position: -72px -67px;
 }
-
 .student-row:hover .lists-css-menu > ul > li {
     color: #000000;
 }
+.lists-css-menu > ul > li > ul > li > label {
+    display: block;
+    padding: 4px;
+    cursor: pointer;
+}
+
 
 #newlist-box {
     display: none;
@@ -185,11 +187,6 @@ $(function() {
                     <ul data-role="listview" data-inset="true">
                         <li>
                             Edit Lists
-                            <ul>
-                                <li><label><input type="checkbox">Troublemakers</label></li>
-                                <li><label><input type="checkbox">Troublemakers</label></li>
-                                <li><label><input type="checkbox">Troublemakers</label></li>
-                            </ul>
                         </li>
                     </ul>
                 </div>
