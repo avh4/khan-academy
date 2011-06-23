@@ -52,14 +52,16 @@ def create_phantom_user():
 
 def allow_phantoms(method):
     def wrapper(self):
-        user = get_current_user(allow_phantoms=True)
+        user = util.get_current_user(allow_phantoms=True)
         if not user:
             user = create_phantom_user()
         
         if util.is_phantom_user(user):
             # we set a 20 digit random string as the cookie, not the entire fake email
             cookie = user.email().split('http://nouserid.khanacademy.org/')[1]
+            # set the cookie on the user's computer
             self.set_cookie('ureg_id', cookie)
+            # pretend the user already had the cookie set
             self.request.cookies['ureg_id'] = cookie
         method(self)
     return wrapper

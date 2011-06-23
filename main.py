@@ -496,7 +496,7 @@ class ViewAllExercises(request_handler.RequestHandler):
 
     @allow_phantoms
     def get(self):
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         
         user_data = UserData.get_or_insert_for(user)
         
