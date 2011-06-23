@@ -483,19 +483,17 @@ var addStudentTextBox = {
     element: null,
 
     init: function() {
-        addStudentTextBox.element = $('#textbox-container input');
-
-        addStudentTextBox.element.focusin(this.focusin);
-        addStudentTextBox.element.focusout(this.focusout);
-        addStudentTextBox.element.keyup(this.keyup);
+        this.element = $('#textbox-container input');
+        
+        Util.bindEventsToObject(this.element, ['focusin', 'focusout', 'keyup'], this);
     },
 
     focusin: function(event) {
-        addStudentTextBox.element.val("");
+        this.element.val('');
     },
 
     focusout: function(event) {
-        addStudentTextBox.element.val("Type a student's email address to propose becoming their coach");
+        this.element.val("Type a student's email address to propose becoming their coach");
     },
 
     keyup: function(event) {
@@ -523,7 +521,7 @@ var addStudentTextBox = {
             });
         }
         else if (event.which == '27') {
-            addStudentTextBox.element.blur();
+            this.element.blur();
         }
     }
 };
