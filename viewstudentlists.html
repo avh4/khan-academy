@@ -85,39 +85,25 @@ h2 {
     position: relative;
     top: -8px;
 }
-a.edit-lists {
-    color: #ffffff;
-    text-decoration: none;
-    border: 1pt solid #ffffff;
+
+.lists-css-menu > ul > li > ul > li {
     padding: 4px;
 }
-.student-row:hover a.edit-lists {
+
+.lists-css-menu > ul > li:after {
+    background-image: none;
+}
+.lists-css-menu > ul > li.css-menu-js-hover:after {
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -72px -67px;
+}
+.student-row:hover .css-menu > ul > li:after {
+    background-image: url(/images/non-repeating-sprites.png);
+    background-position: -72px -67px;
+}
+
+.student-row:hover .lists-css-menu > ul > li {
     color: #000000;
-}
-a.edit-lists.active {
-    color: #000000;
-    border: 1pt solid #dddddd;
-}
-a.edit-lists:hover {
-    color: inherit;
-    border: 1pt solid #dddddd;
-}
-.edit-lists-options {
-    position: absolute;
-    z-index: 1000;
-    display: none;
-    border: 1px solid #dddddd;
-}
-.list-option {
-    display: block;
-    padding: 4px;
-    background: #ffffff;
-}
-.list-option:hover {
-    background: #dddddd;
-}
-.list-option input {
-    margin: 5px;
 }
 
 #newlist-box {
@@ -145,6 +131,7 @@ a.edit-lists:hover {
 #requested-student-tmpl {
     display: none;
 }
+
 </style>
 <script type="text/javascript" charset="utf-8">
 $(function() {
@@ -194,7 +181,18 @@ $(function() {
         {% for student in students %}
         <div class="student-row" id="student-{{ student.key }}">
             <span class="float-right">
-                <a href="" class="edit-lists float-edit">Edit Lists</a>
+                <div class="css-menu float-edit lists-css-menu">
+                    <ul data-role="listview" data-inset="true">
+                        <li>
+                            Edit Lists
+                            <ul>
+                                <li><label><input type="checkbox">Troublemakers</label></li>
+                                <li><label><input type="checkbox">Troublemakers</label></li>
+                                <li><label><input type="checkbox">Troublemakers</label></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
                 <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
             </span>
             <div><span class="student-name">{{ student.nickname }}</span> <span class="student-email">{{ student.email|escape }}</span></div>
