@@ -12,6 +12,7 @@ from google.appengine.api import urlfetch
 from app import App
 import layer_cache
 import request_cache
+import util
 
 PHANTOM_ID_EMAIL_PREFIX = "http://nouserid.khanacademy.org/"
 
@@ -38,7 +39,7 @@ def get_phantom_user_from_cookies():
     morsel = cookies.get(morsel_key)
     if morsel:
         try:
-            return users.User(morsel.value)
+            return users.User(PHANTOM_ID_EMAIL_PREFIX+morsel.value)
         except UserNotFoundError:
             return None
     else:
@@ -48,3 +49,17 @@ def create_phantom_user():
     rs = os.urandom(20)
     random_string = hashlib.md5(rs).hexdigest()
     return users.User(PHANTOM_ID_EMAIL_PREFIX+random_string)
+
+def allow_phantoms(method):
+    def wrapper(self):
+        user = get_current_user(allow_phantoms=True)
+        if not user:
+            user = create_phantom_user()
+        
+        if util.is_phantom_user(user):
+            # we set a 20 digit random string as the cookie, not the entire fake email
+            cookie = user.email().split('http://nouserid.khanacademy.org/')[1]
+            self.set_cookie('ureg_id', cookie)
+            self.request.cookies['ureg_id'] = cookie
+        method(self)
+    return wrapper

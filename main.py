@@ -73,6 +73,7 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
+from phantom_users.phantom_util import allow_phantoms
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -114,12 +115,10 @@ class KillLiveAssociations(request_handler.RequestHandler):
 
 class ViewExercise(request_handler.RequestHandler):
 
+    @allow_phantoms
     def get(self):
-        user = util.get_or_create_current_user()
+        user = util.get_current_user()
         
-        if util.is_phantom_user(user):
-            self.set_cookie("ureg_id", user)
-
         exid = self.request.get('exid')
         key = self.request.get('key')
         time_warp = self.request.get('time_warp')
@@ -207,6 +206,7 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
+    @allow_phantoms
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -301,11 +301,8 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, util.get_or_create_current_user(), insert_if_missing=True)
+        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user(allow_phantoms=True), insert_if_missing=True)
         
-        if util.is_phantom_user(user_video.user):
-            self.set_cookie("ureg_id", user_video.user)
-
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points
@@ -497,12 +494,10 @@ class ProvideFeedback(request_handler.RequestHandler):
 
 class ViewAllExercises(request_handler.RequestHandler):
 
+    @allow_phantoms
     def get(self):
-        user = util.get_or_create_current_user()
+        user = util.get_current_user()
         
-        if util.is_phantom_user(user):
-            self.set_cookie("ureg_id", user)
-
         user_data = UserData.get_or_insert_for(user)
         
         ex_graph = ExerciseGraph(user_data, user)

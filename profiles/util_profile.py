@@ -10,6 +10,7 @@ import util
 import models
 import consts
 from badges import util_badges
+from phantom_users.phantom_util import allow_phantoms
 
 class ViewClassProfile(request_handler.RequestHandler):
 
@@ -81,11 +82,9 @@ class ViewClassProfile(request_handler.RequestHandler):
 
 class ViewProfile(request_handler.RequestHandler):
 
+    @allow_phantoms
     def get(self):
-        user = util.get_or_create_current_user()
-
-        if util.is_phantom_user(user):
-            self.set_cookie("ureg_id", user)
+        user = util.get_current_user()
 
         student = user
         user_data_student = None
@@ -173,22 +172,21 @@ class ProfileGraph(request_handler.RequestHandler):
         user_data_student = None
 
         user = util.get_current_user(allow_phantoms=True)
-        if user:
-            student = user
+        student = user
 
-            student_email = self.request_string("student_email")
-            if student_email and student_email != student.email():
-                student_override = users.User(email=student_email)
-                user_data_student = models.UserData.get_or_insert_for(student_override)
-                if (not users.is_current_user_admin()) and user.email() not in user_data_student.coaches and user.email().lower() not in user_data_student.coaches:
-                    # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
-                    user_data_student = None
-                else:
-                    # Allow access to this student's profile
-                    student = student_override
+        student_email = self.request_string("student_email")
+        if student_email and student_email != student.email():
+            student_override = users.User(email=student_email)
+            user_data_student = models.UserData.get_or_insert_for(student_override)
+            if (not users.is_current_user_admin()) and user.email() not in user_data_student.coaches and user.email().lower() not in user_data_student.coaches:
+                # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
+                user_data_student = None
+            else:
+                # Allow access to this student's profile
+                student = student_override
 
-            if not user_data_student:
-                user_data_student = models.UserData.get_or_insert_for(student)
+        if not user_data_student:
+            user_data_student = models.UserData.get_or_insert_for(student)
 
         return (student, user_data_student)
 
