@@ -117,7 +117,7 @@ class ViewExercise(request_handler.RequestHandler):
 
     @allow_phantoms
     def get(self):
-        user = util.get_current_user()
+        user = util.get_current_user(allow_phantoms=True)
         
         exid = self.request.get('exid')
         key = self.request.get('key')
