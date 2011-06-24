@@ -429,7 +429,7 @@ var addStudentTextBox = {
     }
 };
 
-ar addToGroupTextBox = {
+var addToGroupTextBox = {
     element: null,
     
     init: function() {
