@@ -89,13 +89,13 @@ h2 {
     top: 4px;
 }
 .lists-css-menu > ul > li:after {
-    background-image: none;
+    visibility: hidden;
 }
 .lists-css-menu > ul > li.css-menu-js-hover:after {
-    background-image: url(/images/non-repeating-sprites.png);
+    visibility: visible;
 }
 .student-row:hover .css-menu > ul > li:after {
-    background-image: url(/images/non-repeating-sprites.png);
+    visibility: visible;
 }
 .student-row:hover .lists-css-menu > ul > li {
     color: #000000;
@@ -111,8 +111,9 @@ h2 {
 .lists-css-menu input {
     margin-right: .5em;
 }
-
-
+.student-row .css-menu {
+    z-index: auto;
+}
 
 #newlist-box {
     display: none;
