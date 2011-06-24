@@ -1,4 +1,6 @@
+import datetime
 import logging
+import pickle
 import simplejson
 import StringIO
 import sys
@@ -15,42 +17,46 @@ request_id = None
 class RequestStatsHandler(RequestHandler):
 
     def get(self):
+
+        self.response.headers["Content-Type"] = "application/json"
+
         request_stats = RequestStats.get(self.request.get("request_id"))
-        if request_stats:
-            self.response.out.write(request_stats.request_id)
-            self.response.out.write("<hr><hr><hr><hr><hr><hr>")
-            self.response.out.write("<hr><hr><hr><hr><hr><hr>")
-            self.response.out.write(request_stats.profiler_results)
-            self.response.out.write("<hr><hr><hr><hr><hr><hr>")
-            self.response.out.write("<hr><hr><hr><hr><hr><hr>")
-            self.response.out.write(request_stats.appstats_results)
-        else:
-            self.response.out.write("NOPE")
+
+        dict_request_stats = {}
+        for property in RequestStats.serialized_properties:
+            dict_request_stats[property] = request_stats.__getattribute__(property)
+
+        self.response.out.write(simplejson.dumps(dict_request_stats))
 
 class RequestStats(object):
 
-    def __init__(self, request_id, middleware):
+    serialized_properties = ["request_id", "path", "query_string", "s_dt", "profiler_results", "appstats_results"]
+
+    def __init__(self, request_id, environ, middleware):
         self.request_id = request_id
+        self.path = environ.get("PATH_INFO")
+        self.query_string = environ.get("QUERY_STRING")
+        self.s_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Store compressed results so we stay under the memcache 1MB limit
-        self.compressed_profiler_results = RequestStats.compress(RequestStats.calc_profiler_results(middleware))
-        self.compressed_appstats_results = RequestStats.compress(RequestStats.calc_appstats_results(middleware))
-
-    @property
-    def profiler_results(self):
-        return RequestStats.decompress(self.compressed_profiler_results)
-
-    @property
-    def appstats_results(self):
-        return RequestStats.decompress(self.compressed_appstats_results)
+        self.profiler_results = RequestStats.calc_profiler_results(middleware)
+        self.appstats_results = RequestStats.calc_appstats_results(middleware)
 
     def store(self):
-        result = memcache.set(RequestStats.memcache_key(self.request_id), self)
+        # Store compressed results so we stay under the memcache 1MB limit
+        pickled = pickle.dumps(self)
+        compressed_pickled = zlib.compress(pickled)
+
+        return memcache.set(RequestStats.memcache_key(self.request_id), compressed_pickled)
 
     @staticmethod
     def get(request_id):
         if request_id:
-            return memcache.get(RequestStats.memcache_key(request_id))
+            compressed_pickled = memcache.get(RequestStats.memcache_key(request_id))
+
+            if compressed_pickled:
+                pickled = zlib.decompress(compressed_pickled)
+                return pickle.loads(pickled)
+
         return None
 
     @staticmethod
@@ -60,26 +66,23 @@ class RequestStats(object):
         return "__gae_mini_profiler_request_%s" % request_id
 
     @staticmethod
-    def compress(v):
-        return zlib.compress(v.encode('utf-8'))
-
-    @staticmethod
-    def decompress(v):
-        return zlib.decompress(v).decode('utf-8')
-
-    @staticmethod
     def calc_profiler_results(middleware):
         import pstats
 
         stats = pstats.Stats(middleware.prof)
         stats.sort_stats("cumulative")
 
-        dict_list = []
+        results = {
+            "total_calls": stats.total_calls,
+            "total_ms": stats.total_tt,
+            "calls": []
+        }
+
         width, list_func_names = stats.get_print_list([80])
         for func_name in list_func_names:
             primitive_call_count, total_call_count, total_time, cumulative_time, callers = stats.stats[func_name]
 
-            dict_list.append({
+            results["calls"].append({
                 "primitive call count": primitive_call_count, 
                 "total call count": total_call_count, 
                 "total time": total_time, 
@@ -90,14 +93,14 @@ class RequestStats(object):
                 "callers": str(callers),
             })
 
-        return simplejson.dumps(dict_list)
+        return results
         
     @staticmethod
     def calc_appstats_results(middleware):
         if middleware.recorder:
-            return simplejson.dumps(middleware.recorder.json())
+            return {"json": middleware.recorder.json()}
 
-        return ""
+        return None
 
 class ProfilerMiddleware(object):
 
@@ -164,7 +167,7 @@ class ProfilerMiddleware(object):
                     yield value
 
             # Store stats for later access
-            RequestStats(request_id, self).store()
+            RequestStats(request_id, environ, self).store()
 
             # Just in case we're using up memory in the recorder and profiler
             self.recorder = None

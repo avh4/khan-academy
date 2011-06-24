@@ -5,7 +5,8 @@ var GaeMiniProfiler = {
         $.get(
                 "/gae_mini_profiler/request_stats",
                 { "request_id": request_id },
-                function(data) { GaeMiniProfiler.finishDisplay(data); }
+                function(data) { GaeMiniProfiler.finishDisplay(data); },
+                "json"
         );
     },
 
