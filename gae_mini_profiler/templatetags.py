@@ -15,8 +15,7 @@ def profiler_includes():
     path = os.path.join(os.path.dirname(__file__), "includes.html")
     return template.render(path, {
         "request_id": profiler.request_id,
-        "js_path": "/javascript/gae_mini_profiler/profiler.js",
-        "css_path": "/stylesheets/gae_mini_profiler/profiler.css",
+        "js_path": "/gae_mini_profiler/static/js/profiler.js",
+        "css_path": "/gae_mini_profiler/static/css/profiler.css",
     })
-
 

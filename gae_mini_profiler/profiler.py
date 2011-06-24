@@ -74,7 +74,7 @@ class RequestStats(object):
 
         results = {
             "total_calls": stats.total_calls,
-            "total_ms": stats.total_tt,
+            "total_time": stats.total_tt,
             "calls": []
         }
 
@@ -83,12 +83,12 @@ class RequestStats(object):
             primitive_call_count, total_call_count, total_time, cumulative_time, callers = stats.stats[func_name]
 
             results["calls"].append({
-                "primitive call count": primitive_call_count, 
-                "total call count": total_call_count, 
-                "total time": total_time, 
-                "per call": (total_time / total_call_count) if total_call_count else "",
-                "cumulative time": cumulative_time, 
-                "per call cumulative": (cumulative_time / primitive_call_count) if primitive_call_count else "",
+                "primitive_call_count": primitive_call_count, 
+                "total_call_count": total_call_count, 
+                "total_time": total_time, 
+                "per_call": (total_time / total_call_count) if total_call_count else "",
+                "cumulative_time": cumulative_time, 
+                "per_call_cumulative": (cumulative_time / primitive_call_count) if primitive_call_count else "",
                 "func_desc": pstats.func_std_string(func_name),
                 "callers": str(callers),
             })
