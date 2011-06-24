@@ -46,7 +46,6 @@ class RequestStats(object):
 
     def store(self):
         result = memcache.set(RequestStats.memcache_key(self.request_id), self)
-        logging.critical("STORING! %s" % result)
 
     @staticmethod
     def get(request_id):
