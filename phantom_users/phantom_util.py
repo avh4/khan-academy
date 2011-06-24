@@ -74,7 +74,6 @@ def allow_phantoms(method):
         if not user:
             user = create_phantom_user()
         
-        #if util.is_phantom_user(user):
             # we set a 20 digit random string as the cookie, not the entire fake email
             cookie = user.email().split(PHANTOM_ID_EMAIL_PREFIX)[1]
             # set the cookie on the user's computer
