@@ -3,7 +3,37 @@
 {% block profile_name %}
 <span id="user-info">
     <img src="/images/darth.png" />
-    <span id="name">{{ coach_nickname|escape }}'s class</span>
+    <select id="studygroups-box">
+        {% for group in study_groups %}
+        <option value="{{group.key}}" {% ifequal group.key group_id %}selected="selected"{% endifequal %}>{{group.name}}</option>
+        {% endfor %}
+    </select>
+    
+    <script type="text/javascript">
+    
+        var ClassProfile = {
+            updateGroupId: function(group_id) {
+                var group = ClassProfile.groups[group_id];
+                this.updateGroupStats(group.nstudents, group.class_points);
+            },
+            updateGroupStats: function(nstudents, class_points) {
+                // todo: possibly add some effects here?
+                $('#count_students').html(nstudents);
+                $('.energy-points-badge').html(class_points);
+            },
+            groups: {}
+        };
+
+        {% for group in study_groups %}
+        ClassProfile.groups['{{group.key}}'] = { nstudents: {{group.nstudents}}, class_points: '{{group.class_points}}' };
+        {% endfor %}
+         
+        $(function() {
+            $("#studygroups-box").change(Profile.updateStudyGroup)
+                                 .val('{{group_id}}'); // won't be needed once above is fixed
+        });
+
+    </script>
 </span>
 {% endblock profile_name %}
 
@@ -13,12 +43,12 @@
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
-            {{ count_students }}<br />
+            <span id="count_students">{{ study_groups.0.nstudents }}</span><br />
             <span class="label">Students</span>
         </span>
     </span>
     <span id="energy-points">
-        <span title="{{class_points}} energy points" class="energy-points-badge">{{ class_points|thousands_separated }}</span><br />
+        <span class="energy-points-badge">{{ study_groups.0.class_points }}</span><br />
         <span class="label">Class Energy Points</span>
     </span>
 {% endblock high_level_stats %}
@@ -26,7 +56,7 @@
 {% block graph_accordion %}
     <ul id="nav-accordion">
         <li>
-            {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type %}
+            {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type group_id %}
             <p class="accordion-content">
                 Shows you which exercises your class has worked on and completed.
                 <span class="graph-options">
@@ -37,7 +67,7 @@
             </p>
         </li>
         <li>
-            {% profile_class_graph_link coach "Daily Activity Report" "classtime" selected_graph_type %}
+            {% profile_class_graph_link coach "Daily Activity Report" "classtime" selected_graph_type group_id %}
             <p class="accordion-content">
                 Shows your total class activity on a specific date.
                 {% profile_graph_calendar_picker coach "classtime" %}
@@ -45,7 +75,7 @@
             </p>
         </li>
         <li>
-            {% profile_class_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
+            {% profile_class_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type group_id %}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
                 <span class="instructions">Highlight a <a href="#" class="highlight-section show-students-highlight">specific student</a> or a <a href="#" class="highlight-section show-exercises-highlight">specific exercise</a>.</span><br />
 
@@ -72,37 +102,13 @@
             </div>
         </li>
         <li>
-            {% profile_class_graph_link coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type %}
+            {% profile_class_graph_link coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type group_id %}
             <p class="accordion-content">
                 Shows your total class energy points per minute as a continuously updating rolling average.
             </p>
         </li>
     </ul>
 {% endblock graph_accordion %}
-
-{% block profile_extended_sections %}
-    <div id="students-list">
-        <h2 class="student-profiles">Students <span style="font-size:12px;font-style:normal;">(<a href="/students">Add or remove</a>)</span></h2>
-        <div id="student-list">
-            <table>
-                {% for dict_student in list_students_columnized %}
-                    {% if not forloop.counter0|mod:students_per_row %}
-                        {% if not forloop.first %}
-                            </tr>
-                        {% endif %}
-                    <tr>
-                    {% endif %}
-                        <td>
-                            <a href="/profile?student_email={{ dict_student|hash:"email"|escape }}">{{ dict_student|hash:"nickname"|escape }}</a>
-                        </td>
-                    {% if forloop.last %}
-                    </tr>
-                    {% endif %}
-                {% endfor %}
-            </table>
-        </div>
-    </div>
-{% endblock profile_extended_sections %}
 
 {% block profile_is_empty %}
 {% empty_class_instructions 1 %}

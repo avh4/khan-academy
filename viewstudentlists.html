@@ -1,0 +1,234 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#students {
+    padding: 18px 23px;
+}
+#students p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+
+#sidebar {
+    float: left;
+    width: 180px;
+}
+#sidebar > ul a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+.grouplinks {
+    margin-bottom: 1.6em;
+}
+.grouplinks li {
+    font-size: 130%;
+    margin-bottom: .5em;
+}
+.bullet {
+    padding-left: 15px;
+}
+/* todo: these images maybe need to be bigger! */
+.bullet:hover {
+    background: url('images/list-item-green.png');
+    background-repeat: no-repeat;
+    background-position-y: 5px;
+}
+.bullet-active {
+    background: url('images/list-item-black.png');
+    background-repeat: no-repeat;
+    background-position-y: 5px;
+}
+#sidebar .simple-button {
+    margin-left: 15px;
+}
+
+#students-container {
+    margin-left:200px;
+    max-width: 600px;
+}
+.students-header {
+    padding-bottom: 0.5em;
+    margin-bottom: 0;
+    border-bottom: 1pt solid #aaaaaa;
+}
+h2 {
+    display: inline;
+}
+#nstudents {
+    margin-left: .5em;
+}
+#textbox-container {
+    background: #eeeeee;
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+    padding-left: .5em;
+    padding-right: .5em;
+    margin-bottom: 1.4em;
+}
+
+.student-row {
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    min-height: 3em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.student-name {
+    font-size: 160%;
+    margin-bottom: .25em;
+}
+.float-right {
+    float: right;
+}
+.float-edit {
+    margin-right: 2em;
+    position: relative;
+    top: -8px;
+}
+a.edit-lists {
+    color: #ffffff;
+    text-decoration: none;
+    border: 1pt solid #ffffff;
+    padding: 4px;
+}
+.student-row:hover a.edit-lists {
+    color: #000000;
+}
+a.edit-lists.active {
+    color: #000000;
+    border: 1pt solid #dddddd;
+}
+a.edit-lists:hover {
+    color: inherit;
+    border: 1pt solid #dddddd;
+}
+.edit-lists-options {
+    position: absolute;
+    z-index: 1000;
+    display: none;
+    border: 1px solid #dddddd;
+}
+.list-option {
+    display: block;
+    padding: 4px;
+    background: #ffffff;
+}
+.list-option:hover {
+    background: #dddddd;
+}
+.list-option input {
+    margin: 5px;
+}
+
+#newlist-box {
+    display: none;
+    margin-left: 15px;
+    margin-bottom: 10px;
+}
+
+.delete-button {
+    width: 28px;
+    height: 28px;
+    opacity:0.2;filter:alpha(opacity=20);
+}
+.delete-button:hover {
+    opacity:0.6;filter:alpha(opacity=60);
+}
+
+.student-email {
+    margin-left: .5em;
+}
+
+#requested-students {
+    display: none;
+}
+#requested-student-tmpl {
+    display: none;
+}
+</style>
+<script type="text/javascript" charset="utf-8">
+$(function() {
+    StudentLists.students= {{students_json}};
+    StudentLists.study_groups= {{study_groups_json}};
+    StudentLists.coach_requests = {{coach_requests_json}};
+    StudentLists.init();
+});    
+</script>
+{% js_package "studentlists" %}
+{% endblock pagescript %}
+{% block pagetitle %}Students{% endblock pagetitle %}
+{% block pagecontent %}
+
+<article id="students">
+
+<div id="sidebar">
+    <ul class="grouplinks">
+        <li id="group-allstudents"><a href="/students" class="bullet bullet-active">All students</a></li>
+        <li id="group-requests"><a href="/students?group_id=requests" class="bullet">Requests</a></li>
+    </ul>
+    <ul id="custom-groups" class="grouplinks">
+        {% for group in study_groups %}
+        <li class="group-{{group.key}}"><a href="students?group_id={{group.key}}" class="bullet">{{group.name}}</a></li>
+        {% endfor %}
+    </ul>
+    <input type="textbox" id="newlist-box" />
+    <a id="newlist-button" href="#" class="simple-button action-gradient">Create a new list</a>
+</div>
+<div id="students-container">
+
+    <div class="students-header">
+        <span class="float-right">
+
+            <a id="delete-group" href=""><img src="images/round_delete.png" class="delete-button" title="Delete this list"/></a>
+        </span>
+        <h2>Students</h2>
+        <span id='nstudents'>n students</span>
+    </div>
+
+    <div id="textbox-container">
+        {# <span class="float-right"><a class="simple-button action-gradient">Bulk add</a></span> #}
+        <input type="text" id="request-student" size="80" data-blur-val="Type a student's email address to propose becoming their coach"/>
+        <input type="text" id="add-to-group" size="80" data-blur-val="Type a student's name to add them to this list"/>
+    </div>
+
+    <div id="actual-students">
+        {% for student in students %}
+        <div class="student-row" id="student-{{ student.key }}">
+            <span class="float-right">
+                <a href="" class="edit-lists float-edit">Edit Lists</a>
+                <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
+            </span>
+            <div><span class="student-name">{{ student.nickname }}</span> <span class="student-email">{{ student.email|escape }}</span></div>
+            {# {% for group in student.study_groups %} #}
+            {#         <span class="group-name group-{{group.key}}">{{ group.name }}[<a class="removecross" href="/removestudentfromgroup?student_email={{student.email|urlencode|escape}}&amp;group_id={{group.key}}">x</a>]</span> #}
+            {#         {% endfor %} #}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="requested-students">
+        {% for email in coach_requests %}
+        <div class="student-row">
+            <span class="float-right">
+                <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
+            </span>
+            <div><span class="student-name">{{ email }}</span></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="tmpl" style="display:none">
+        <div class="student-row">
+            <span class="float-right">
+                <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
+            </span>
+            <div><span class="student-name">email goes here</span></div>
+        </div>
+    </div>
+    <div class="edit-lists-options" />
+</div>
+
+</article>
+{% endblock pagecontent %}
+

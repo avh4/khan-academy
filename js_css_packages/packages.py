@@ -66,6 +66,12 @@ javascript = {
             "iscroll-lite.min.js",
         ]
     },
+    "studentlists": {
+        "hashed-filename": "hashed-@studentlists@.js", # @content@ will be replaced with hash by deploy script
+        "files": [
+            "studentlists.js",
+        ]
+    },
 }
 
 stylesheets = {

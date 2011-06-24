@@ -14,15 +14,20 @@ class ExerciseData:
         def display_name(self):
             return models.Exercise.to_display_name(self.name)
 
-def class_exercises_over_time_graph_context(user_data):
+def class_exercises_over_time_graph_context(user_data, studygroup):
 
     if not user_data:
         return {}
-
-    user = user_data.user
+    
+    # todo: change this to something sane
+    start_date = user_data.joined
     end_date = None
 
-    student_emails = user_data.get_students()
+    if studygroup:
+        student_emails = studygroup.get_students()
+    else:
+        student_emails = user_data.get_students()
+        
     dict_student_exercises = {}
     dict_exercises = {}
 
@@ -35,9 +40,9 @@ def class_exercises_over_time_graph_context(user_data):
         query.filter('user =', student)
         query.filter('proficient_date >', None)
         query.order('proficient_date')
-
+        
         for user_exercise in query:
-            days_until_proficient = (user_exercise.proficient_date - user_data.joined).days
+            days_until_proficient = (user_exercise.proficient_date - start_date).days
             proficient_date = user_exercise.proficient_date.strftime('%m/%d/%Y')
             data = ExerciseData(student_nickname, user_exercise.exercise, user_exercise.exercise, days_until_proficient, proficient_date)
             dict_student_exercises[student_nickname]["exercises"].append(data)
