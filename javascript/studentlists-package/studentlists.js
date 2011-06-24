@@ -499,7 +499,7 @@ var addToGroupTextBox = {
         
         var student = StudentLists.students_by_email[text];
         var group_id = StudentLists.currentGroup;
-        StudentLists.addStudentToGroupAjax(student, group_id);
+        editListsMenu.addStudentToGroupAjax(student, group_id);
         
         this.element.val('');
     }
@@ -560,6 +560,11 @@ var editListsMenu = {
             data: 'student_email='+student.email+'&group_id='+group_id,
             success: function() {
                 StudentLists.addStudentToGroup(student, group_id);
+                
+                // show row on screen if visible
+                if (StudentLists.currentGroup == group_id) {
+                    $('#student-'+student.key).fadeIn();
+                }
             }
         });
     },
