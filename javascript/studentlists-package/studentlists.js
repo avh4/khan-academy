@@ -500,15 +500,17 @@ var addStudentTextBox = {
     init: function() {
         this.element = $('#request-student');
         
-        Util.bindEventsToObject(this.element, ['focusin', 'focusout', 'keyup', 'keypress'], this);
+        this.blur();
+        
+        Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
     },
 
-    focusin: function(event) {
+    focus: function(event) {
         this.element.val('');
     },
 
-    focusout: function(event) {
-        this.element.val("Type a student's email address to propose becoming their coach");
+    blur: function(event) {
+        this.element.val(this.element.data('blur-val'));
     },
 
     keypress: function(event) {
@@ -550,6 +552,8 @@ var addToGroupTextBox = {
     init: function() {
         this.element = $('#add-to-group');
         
+        this.blur();
+        
         this.element.autocomplete({
             source: addToGroupTextBox.generateSource(),
             select: function(event, selected) {addToGroupTextBox.addStudent(event, selected);}
@@ -562,7 +566,7 @@ var addToGroupTextBox = {
             this._trigger("selected", e, { item: this.active });
         };
         
-        Util.bindEventsToObject(this.element, ['focusin', 'keypress', 'keyup', 'blur'], this);
+        Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
     },
     
     generateSource: function() {
@@ -591,13 +595,13 @@ var addToGroupTextBox = {
         }
     },
     
-    focusin: function(event) {
+    focus: function(event) {
         this.element.val('');
     },
 
     blur: function(event) {
         // todo: stop this happening during clicking of an autocomplete item
-        this.element.val("Type a student's name to add them to this list");
+        this.element.val(this.element.data('blur-val'));
     },
     
     addStudent: function(event, selected) {
