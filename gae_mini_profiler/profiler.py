@@ -164,7 +164,7 @@ class ProfilerMiddleware(object):
                     yield value
 
             # Store stats for later access
-            #RequestStats(request_id, self).store()
+            RequestStats(request_id, self).store()
 
             # Just in case we're using up memory in the recorder and profiler
             self.recorder = None
