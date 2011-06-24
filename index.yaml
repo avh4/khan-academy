@@ -153,12 +153,6 @@ indexes:
   properties:
   - name: exercise
   - name: user
-  - name: correct
-
-- kind: ProblemLog
-  properties:
-  - name: exercise
-  - name: user
   - name: time_done
 
 - kind: ProblemLog
