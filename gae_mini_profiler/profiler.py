@@ -71,18 +71,16 @@ class RequestStats(object):
     def calc_profiler_results(middleware):
         import pstats
 
-        out = StringIO.StringIO()
-
-        stats = pstats.Stats(middleware.prof, stream=out)
+        stats = pstats.Stats(middleware.prof)
         stats.sort_stats("cumulative")
-        stats.print_stats(80)
-        stats.print_callers()
 
-        result = out.getvalue()
+        dict_list = []
+        width, list = stats.get_print_list([80])
+        for func in list:
+            cc, nc, tt, ct, callers = stats.stats[func]
+            dict_list.append({"cc": str(cc), "nc": str(nc), "tt": str(tt), "ct": str(ct), "callers": str(callers)})
 
-        out.close()
-
-        return result
+        return simplejson.dumps(dict_list)
         
     @staticmethod
     def calc_appstats_results(middleware):
