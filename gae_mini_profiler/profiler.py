@@ -75,10 +75,20 @@ class RequestStats(object):
         stats.sort_stats("cumulative")
 
         dict_list = []
-        width, list = stats.get_print_list([80])
-        for func in list:
-            cc, nc, tt, ct, callers = stats.stats[func]
-            dict_list.append({"cc": str(cc), "nc": str(nc), "tt": str(tt), "ct": str(ct), "callers": str(callers)})
+        width, list_func_names = stats.get_print_list([80])
+        for func_name in list_func_names:
+            primitive_call_count, total_call_count, total_time, cumulative_time, callers = stats.stats[func_name]
+
+            dict_list.append({
+                "primitive call count": primitive_call_count, 
+                "total call count": total_call_count, 
+                "total time": total_time, 
+                "per call": (total_time / total_call_count) if total_call_count else "",
+                "cumulative time": cumulative_time, 
+                "per call cumulative": (cumulative_time / primitive_call_count) if primitive_call_count else "",
+                "func_desc": pstats.func_std_string(func_name),
+                "callers": str(callers),
+            })
 
         return simplejson.dumps(dict_list)
         
