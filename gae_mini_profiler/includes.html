@@ -1,0 +1,3 @@
+<link rel="stylesheet" type="text/css" href="{{ css_path|escape }}" />
+<script type="text/javascript" src="{{ js_path|escape }}"></script>
+<script type="text/javascript">$.ajax("/gae_mini_profiler/request_stats?request_id={{ request_id|urlencode|escapejs }}");</script>

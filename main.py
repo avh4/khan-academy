@@ -40,6 +40,7 @@ import bulk_update.handler
 import facebook
 import layer_cache
 import request_cache
+from gae_mini_profiler import profiler
 import autocomplete
 import coaches
 import knowledgemap
@@ -1453,7 +1454,7 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
                         
-def real_main():    
+def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1605,28 +1606,10 @@ def real_main():
 
         ], debug=True)
 
+    application = profiler.ProfilerMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
-
-def profile_main():
-    # This is the main function for profiling
-    # We've renamed our original main() above to real_main()
-    import cProfile, pstats
-    prof = cProfile.Profile()
-    prof = prof.runctx("real_main()", globals(), locals())
-    print "<pre>"
-    stats = pstats.Stats(prof)
-    stats.sort_stats("cumulative")  # time or cumulative
-    stats.print_stats(80)  # 80 = how many to print
-    # The rest is optional.
-    # stats.print_callees()
-    stats.print_callers()
-    print "</pre>"
-    
-main = real_main
-# Uncomment the following line to enable profiling 
-# main = profile_main
 
 if __name__ == '__main__':
     main()

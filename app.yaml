@@ -91,6 +91,9 @@ handlers:
 - url: /api/.*
   script: api/main.py
 
+- url: /gae_mini_profiler/.*
+  script: gae_mini_profiler/main.py
+
 - url: .*
   script: main.py
   
