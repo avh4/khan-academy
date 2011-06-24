@@ -18,6 +18,7 @@ var Util = {
         for (var i in events) {
             (function(method) {
                 source.bind(events[i], function(event) {
+                    // console.log('firing ' + method + ' on: ', handler);
                     handler[method](event);
                 });
             })(events[i]);
@@ -129,6 +130,7 @@ var StudentLists = {
         StudentLists.generateStudentIndices();
 
         addStudentTextBox.init();
+        addToGroupTextBox.init();
         editListsMenu.init();
 
         // create lists
@@ -140,13 +142,13 @@ var StudentLists = {
         
         // delete list
         $('#delete-group').click(StudentLists.deleteGroupClick);
-
+        
         // change visible list
         $('.bullet').click(StudentLists.listClick);
-
+        
         // inline delete student-group
         $('.student-row .delete-button').click(StudentLists.deleteStudentClick);
-
+        
         // show initial page
         // todo: remember this with a cookie!
         $('#group-allstudents a').click();
@@ -287,6 +289,15 @@ var StudentLists = {
                 $('#delete-group').show();
             }
         }
+        
+        if (StudentLists.currentGroup == 'requests' || StudentLists.currentGroup == 'allstudents') {
+            addStudentTextBox.element.show();
+            addToGroupTextBox.element.hide();
+        }
+        else {
+            addStudentTextBox.element.hide();
+            addToGroupTextBox.element.show();
+        }
 
         var nstudentsStr = nstudents.toString() + ' '
                                                 + countstring
@@ -370,20 +381,22 @@ var addStudentTextBox = {
     element: null,
 
     init: function() {
-        this.element = $('#textbox-container input');
+        this.element = $('#request-student');
         
-        Util.bindEventsToObject(this.element, ['focusin', 'focusout', 'keyup'], this);
+        this.blur();
+        
+        Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
     },
 
-    focusin: function(event) {
+    focus: function(event) {
         this.element.val('');
     },
 
-    focusout: function(event) {
-        this.element.val("Type a student's email address to propose becoming their coach");
+    blur: function(event) {
+        this.element.val(this.element.data('blur-val'));
     },
 
-    keyup: function(event) {
+    keypress: function(event) {
         if (event.which == '13') {
             var email = addStudentTextBox.element.val();
             $.ajax({
@@ -407,11 +420,91 @@ var addStudentTextBox = {
                 }
             });
         }
-        else if (event.which == '27') {
+    },
+    
+    keyup: function(event) {
+        if (event.which == '27') {
             this.element.blur();
         }
     }
 };
+
+ar addToGroupTextBox = {
+    element: null,
+    
+    init: function() {
+        this.element = $('#add-to-group');
+        
+        this.blur();
+        
+        this.element.autocomplete({
+            source: addToGroupTextBox.generateSource(),
+            select: function(event, selected) {addToGroupTextBox.addStudent(event, selected);}
+        });
+        
+        this.element.data("autocomplete").menu.select = function(e) {
+            // jquery-ui.js's ui.autocomplete widget relies on an implementation of ui.menu
+            // that is overridden by our jquery.ui.menu.js.  We need to trigger "selected"
+            // here for this specific autocomplete box, not "select."
+            this._trigger("selected", e, { item: this.active });
+        };
+        
+        Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
+    },
+    
+    generateSource: function() {
+        var source = [];
+        jQuery.each(StudentLists.students, function(i, student) {
+            source.push({label:student.nickname + ' (' + student.email + ')', value:student.email});
+        });
+        return source;
+    },
+    
+    updateSource: function() {
+        this.element.data('autocomplete').options.source = this.generateSource();
+        this.element.data('autocomplete')._initSource();
+    },
+    
+    keypress: function(event) {
+        if (event.which == '13') { // enter
+            event.preventDefault();
+            this.addStudent(event);
+        }
+    },
+    
+    keyup: function(event) {
+        if (event.which == '27') {
+            this.element.blur();
+        }
+    },
+    
+    focus: function(event) {
+        this.element.val('');
+    },
+
+    blur: function(event) {
+        // todo: stop this happening during clicking of an autocomplete item
+        this.element.val(this.element.data('blur-val'));
+    },
+    
+    addStudent: function(event, selected) {
+        var text;
+        if (selected) {
+            text = selected.item.value;
+            event.preventDefault();
+        }
+        else {
+            text = this.element.val();
+        }
+        
+        var student = StudentLists.students_by_email[text];
+        var group_id = StudentLists.currentGroup;
+        StudentLists.addStudentToGroupAjax(student, group_id);
+        
+        this.element.val('');
+    }
+};
+
 
 var editListsMenu = {
     init: function() {

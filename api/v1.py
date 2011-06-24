@@ -145,7 +145,6 @@ def playlists_library():
     return playlist_structure
 
 @route("/api/v1/playlists/library/list", methods=["GET"])
-@etag(lambda: models.Setting.cached_library_content_date())
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(
@@ -177,6 +176,23 @@ def exercise_videos(exercise_name):
         exercise_videos = exercise.related_videos()
         return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
+
+@route("/api/v1/videos/<video_id>", methods=["GET"])
+@jsonp
+@jsonify
+def video(video_id):
+    return models.Video.all().filter("youtube_id =", video_id).get()
+
+@route("/api/v1/videos/<video_id>/download_available", methods=["POST"])
+@oauth_required(require_anointed_consumer=True)
+@jsonp
+@jsonify
+def video_download_available(video_id):
+    video = models.Video.all().filter("youtube_id =", video_id).get()
+    if video:
+        video.download_available = request.request_bool("available", default=False)
+        video.put()
+    return video
 
 @route("/api/v1/videos/<video_id>/exercises", methods=["GET"])
 @jsonp

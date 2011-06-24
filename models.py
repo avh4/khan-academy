@@ -115,6 +115,7 @@ class Exercise(db.Model):
             return name.replace('_', ' ').capitalize()
         return ""
 
+    @property
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
@@ -128,7 +129,7 @@ class Exercise(db.Model):
     def short_name(self):
         if self.short_display_name:
             return self.short_display_name[:11]
-        return self.display_name()[:11]
+        return self.display_name[:11]
 
     def is_visible_to_current_user(self):
         return self.live or users.is_current_user_admin()
@@ -255,6 +256,7 @@ class UserExercise(db.Model):
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
+    total_correct = db.IntegerProperty(default = 0)
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
     proficient_date = db.DateTimeProperty()
@@ -345,7 +347,7 @@ class UserExercise(db.Model):
         else:
             self.last_review = datetime.datetime.min
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
-        
+
     def set_proficient(self, proficient, user_data):
         if not proficient and self.longest_streak < self.required_streak():
             # Not proficient and never has been so nothing to do
@@ -680,9 +682,16 @@ class Video(Searchable, db.Model):
         return "http://www.khanacademy.org/video/%s" % self.readable_id
 
     @property
-    def download_url(self):
+    def download_urls(self):
         if self.download_available:
-            return "http://www.archive.org/download/KhanAcademy_dl/%s.flv" % self.youtube_id 
+
+            download_url_base = "http://www.archive.org/download/KA-youtube-converted"
+
+            return {
+                    "mp4": "%s/%s.mp4" % (download_url_base, self.youtube_id),
+                    "png": "%s/%s.png" % (download_url_base, self.youtube_id),
+                    }
+
         return None
     
     @staticmethod

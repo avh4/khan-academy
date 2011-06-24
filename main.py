@@ -62,7 +62,6 @@ import exercises
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
-from jobs import jobs
 from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
@@ -625,13 +624,13 @@ class RegisterAnswer(request_handler.RequestHandler):
             if exercise.summative:
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
-            if user_exercise.total_done:
-                user_exercise.total_done = user_exercise.total_done + 1
-            else:
-                user_exercise.total_done = 1
+            user_exercise.total_done += 1
 
             if correct:
-                user_exercise.streak = user_exercise.streak + 1
+
+                user_exercise.total_correct += 1
+                user_exercise.streak += 1
+
                 if user_exercise.streak > user_exercise.longest_streak:
                     user_exercise.longest_streak = user_exercise.streak
                 if user_exercise.streak >= exercise.required_streak() and not proficient:
@@ -919,7 +918,7 @@ class ExerciseAndVideoEntityList(request_handler.RequestHandler):
         self.response.out.write("Exercises:\n")
 
         for exercise in Exercise.all():
-            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name() + "\n")
+            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name + "\n")
 
         self.response.out.write("\n\nVideos:\n")
         for playlist_title in all_topics_list:
@@ -1432,6 +1431,10 @@ class Search(request_handler.RequestHandler):
                            })
         self.render_template("searchresults.html", template_values)
 
+class RedirectToJobvite(request_handler.RequestHandler):
+    def get(self):
+        self.redirect("http://hire.jobvite.com/CompanyJobs/Careers.aspx?k=JobListing&c=qd69Vfw7")
+
 class PermanentRedirectToHome(request_handler.RequestHandler):
     def get(self):
 
@@ -1488,7 +1491,7 @@ def real_main():
         ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
-        ('/video', ViewVideo),
+        ('/video', ViewVideo), # Backwards URL compatibility
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
@@ -1596,7 +1599,8 @@ def real_main():
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
 
-        ('/jobs/dev', jobs.FullTimeDeveloper),
+        ('/jobs', RedirectToJobvite),
+        ('/jobs/.*', RedirectToJobvite),
 
         ('/sendtolog', SendToLog),
 
