@@ -81,44 +81,38 @@ h2 {
 .float-right {
     float: right;
 }
-.float-edit {
+
+
+.lists-css-menu {
     margin-right: 2em;
     position: relative;
-    top: -8px;
+    top: 4px;
 }
-a.edit-lists {
-    color: #ffffff;
-    text-decoration: none;
-    border: 1pt solid #ffffff;
-    padding: 4px;
+.lists-css-menu > ul > li:after {
+    visibility: hidden;
 }
-.student-row:hover a.edit-lists {
+.lists-css-menu > ul > li.css-menu-js-hover:after {
+    visibility: visible;
+}
+.student-row:hover .css-menu > ul > li:after {
+    visibility: visible;
+}
+.student-row:hover .lists-css-menu > ul > li {
     color: #000000;
 }
-a.edit-lists.active {
-    color: #000000;
-    border: 1pt solid #dddddd;
-}
-a.edit-lists:hover {
-    color: inherit;
-    border: 1pt solid #dddddd;
-}
-.edit-lists-options {
-    position: absolute;
-    z-index: 1000;
-    display: none;
-    border: 1px solid #dddddd;
-}
-.list-option {
+.lists-css-menu > ul > li > ul > li > label {
     display: block;
     padding: 4px;
-    background: #ffffff;
+    cursor: pointer;
 }
-.list-option:hover {
-    background: #dddddd;
+.lists-css-menu > ul > li > ul > li:hover {
+    background: white;
 }
-.list-option input {
-    margin: 5px;
+.lists-css-menu input {
+    margin-right: .5em;
+}
+.student-row .css-menu {
+    z-index: auto;
 }
 
 #newlist-box {
@@ -146,6 +140,7 @@ a.edit-lists:hover {
 #requested-student-tmpl {
     display: none;
 }
+
 </style>
 <script type="text/javascript" charset="utf-8">
 $(function() {
@@ -196,13 +191,14 @@ $(function() {
         {% for student in students %}
         <div class="student-row" id="student-{{ student.key }}">
             <span class="float-right">
-                <a href="" class="edit-lists float-edit">Edit Lists</a>
+                <div class="css-menu lists-css-menu">
+                    <ul>
+                        <li>Edit Lists</li>
+                    </ul>
+                </div>
                 <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
             </span>
             <div><span class="student-name">{{ student.nickname }}</span> <span class="student-email">{{ student.email|escape }}</span></div>
-            {# {% for group in student.study_groups %} #}
-            {#         <span class="group-name group-{{group.key}}">{{ group.name }}[<a class="removecross" href="/removestudentfromgroup?student_email={{student.email|urlencode|escape}}&amp;group_id={{group.key}}">x</a>]</span> #}
-            {#         {% endfor %} #}
         </div>
         {% endfor %}
     </div>
