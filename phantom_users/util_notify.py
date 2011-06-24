@@ -24,7 +24,7 @@ def update(user,user_data,user_exercise,threshold = False, isProf = False):
     numquest = None
     numbadge = None
     numpoint = None
-    # user_badges = memcache.get(badges.UserBadgeNotifier.key_for_user(user)) or []
+
     if user_exercise != None:
         numquest = user_exercise.total_done
         prof = str(user_exercise.exercise)
@@ -54,6 +54,7 @@ def update(user,user_data,user_exercise,threshold = False, isProf = False):
         notifications.UserLoginNotifier.push_for_user(user,"You've earned over <a href='/profile'>"+str(numpoint)+ " points</a>! If you want to keep them, you'll need to <span class='notification-bar-login'><a href='#'>login</a> or <a href='#'>register</a></span>.")
 
     #notifications.UserLoginNotifier.push_for_user(user,"You need to login!!!")
+
 
 #Toggle Notify allows the user to close the notification bar (by deleting the memcache) until a new notification occurs. 
 class ToggleNotify(request_handler.RequestHandler):
