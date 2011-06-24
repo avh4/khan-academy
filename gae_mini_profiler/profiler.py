@@ -104,6 +104,7 @@ class ProfilerMiddleware(object):
     def __init__(self, app):
         template.register_template_library('gae_mini_profiler.templatetags')
         self.app = app
+        self.app_clean = app
         self.prof = None
         self.recorder = None
 
@@ -115,6 +116,9 @@ class ProfilerMiddleware(object):
 
         global request_id
         request_id = None
+
+        # Start w/ a non-profiled app at the beginning of each request
+        self.app = self.app_clean
         self.prof = None
         self.recorder = None
 
@@ -160,7 +164,7 @@ class ProfilerMiddleware(object):
                     yield value
 
             # Store stats for later access
-            RequestStats(request_id, self).store()
+            #RequestStats(request_id, self).store()
 
             # Just in case we're using up memory in the recorder and profiler
             self.recorder = None
