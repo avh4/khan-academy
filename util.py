@@ -29,13 +29,6 @@ def get_current_user(allow_phantoms=False):
 
     return user
 
-@request_cache.cache()
-def get_or_create_current_user():
-    user = get_current_user(allow_phantoms=True)
-    if not user:
-        user = create_phantom_user()
-    return user
-
 def get_current_user_from_oauth_map(oauth_map):
     user = get_google_user_from_oauth_map(oauth_map)
     if not user:
