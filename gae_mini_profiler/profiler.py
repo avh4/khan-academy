@@ -117,8 +117,11 @@ class ProfilerMiddleware(object):
             import os
             request_id = base64.b64encode(os.urandom(30))
 
-            # Turn on AppStats monitoring for this request
+            # Configure AppStats output
             from google.appengine.ext.appstats import recording
+            recording.config.MAX_REPR = 150
+
+            # Turn on AppStats monitoring for this request
             old_app = self.app
             def wrapped_appstats_app(environ, start_response):
                 # Use this wrapper to grab the app stats recorder for RequestStats.save()
@@ -135,9 +138,9 @@ class ProfilerMiddleware(object):
 
             self.recorder = recording.recorder
 
+            # If we're dealing w/ a generator, profile all of the .next calls as well
             if type(result) == GeneratorType:
 
-                # If we're dealing w/ a generator, profile all of the .next calls as well
                 while True:
                     try:
                         yield self.prof.runcall(result.next)
