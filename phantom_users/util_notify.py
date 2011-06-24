@@ -17,7 +17,10 @@ from badges import badges
 import logging
 import string
 
-def update(user,user_data,user_exercise,threshold = False, isProf = False):
+def update(user_data,user_exercise,threshold = False, isProf = False):
+    if user_data == None:
+        return False
+    
     if not phantom_util.is_phantom_email(user.email()):
         return False
 
@@ -27,17 +30,19 @@ def update(user,user_data,user_exercise,threshold = False, isProf = False):
 
     if user_exercise != None:
         numquest = user_exercise.total_done
-        prof = str(user_exercise.exercise)
+        prof = str(user_exercise.exercise.to_display_name())
         prof = string.replace(prof,"_"," ")
         prof = prof.title() # clean up 'subtraction_1' to 'Subtraction 1', etc
-    if user_data != None:
-        numbadge = user_data.badges
-        user_badges = memcache.get(badges.UserBadgeNotifier.key_for_user(user)) or [] #Only allow badge notifications when earned
-        numpoint = user_data.points
+    
+    user = user_data.user
+    numbadge = user_data.badges
+    user_badges = memcache.get(badges.UserBadgeNotifier.key_for_user(user)) or [] #Only allow badge notifications when earned
+    numpoint = user_data.points
+    
     #numprof = proficient_exercises
     
-    # Every 20 questions
-    if numquest != None and numquest % 20 == 0:
+    # Every 10 questions
+    if numquest != None and numquest % 10 == 0:
         notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions so far! <span class='notification-bar-login'><a href='#'>Login</a> or <a href='#'>register</a></span> to save your progress")
     #Proficiency
     if isProf:

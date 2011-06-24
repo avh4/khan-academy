@@ -10,6 +10,7 @@ import re
 from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
+#import cloner.Clone
 
 from google.appengine.dist import use_library
 use_library('django', '0.96')
@@ -74,7 +75,7 @@ from templatetags import streak_bar, exercise_message, exercise_icon, user_point
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import allow_phantoms
-
+import cloner
 class VideoDataTest(request_handler.RequestHandler):
 
     def get(self):
@@ -653,7 +654,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-            util_notify.update(user,user_data,user_exercise)
+            util_notify.update(user_data,user_exercise)
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
@@ -1597,7 +1598,7 @@ def real_main():
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
         
         ('/notifierstate', util_notify.ToggleNotify),
-
+        ('/transferaccount', cloner.Clone),
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/sendtolog', SendToLog),

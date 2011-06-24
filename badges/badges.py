@@ -284,7 +284,7 @@ class Badge(object):
                     points_earned = self.points)
 
             user_badge.put()
-
+            # call notifications
         UserBadgeNotifier.push_for_user(user, user_badge)
 
     def frequency(self):

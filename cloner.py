@@ -2,6 +2,8 @@ import models
 from badges.models_badges import UserBadge
 from badges.badges import Badge
 import logging
+from google.appengine.ext import webapp
+import request_handler
 
 def clone_new_user(userData, newUser):
     #Clone UserData
@@ -30,8 +32,6 @@ def clone_new_user(userData, newUser):
     #Clone UserBadge
     query = UserBadge.all()
     query.filter('user =', userData.user)
-    query.order('badge_name')
-    query.order('-date')
     for b in query:
         name_with_context = "["+b.target_context_name+"]" or ""
         key_name = newUser.email() + ":" + b.badge_name + name_with_context
@@ -57,3 +57,11 @@ def clone_entity(e, store, **extra_args):
     if store:
         klass(**props).put()
     return klass(**props)
+
+
+class Clone(request_handler.RequestHandler):
+    def get(self):
+        #user = util.get_current_user()
+        title = "Please wait while we copy your data to your new account."
+        self.render_template('phantom_users/transfer.html', {"title":title})   
+        

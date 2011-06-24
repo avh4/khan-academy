@@ -358,7 +358,7 @@ class UserExercise(db.Model):
                 user_data.proficient_exercises.append(self.exercise)
                 user_data.need_to_reassess = True
                 user_data.put()
-                util_notify.update(user_data.user, user_data, self, False, True)
+                util_notify.update(user_data, self, False, True)
 
         else:
             if self.exercise in user_data.proficient_exercises:
@@ -596,7 +596,7 @@ class UserData(db.Model):
         if self.points == None:
             self.points = 0
         if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
-            util_notify.update(self.user,self,None,True)
+            util_notify.update(self,None,True)
         self.points += points
         
 
