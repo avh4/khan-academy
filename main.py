@@ -624,13 +624,13 @@ class RegisterAnswer(request_handler.RequestHandler):
             if exercise.summative:
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
-            if user_exercise.total_done:
-                user_exercise.total_done = user_exercise.total_done + 1
-            else:
-                user_exercise.total_done = 1
+            user_exercise.total_done += 1
 
             if correct:
-                user_exercise.streak = user_exercise.streak + 1
+
+                user_exercise.total_correct += 1
+                user_exercise.streak += 1
+
                 if user_exercise.streak > user_exercise.longest_streak:
                     user_exercise.longest_streak = user_exercise.streak
                 if user_exercise.streak >= exercise.required_streak() and not proficient:
@@ -918,7 +918,7 @@ class ExerciseAndVideoEntityList(request_handler.RequestHandler):
         self.response.out.write("Exercises:\n")
 
         for exercise in Exercise.all():
-            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name() + "\n")
+            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name + "\n")
 
         self.response.out.write("\n\nVideos:\n")
         for playlist_title in all_topics_list:
