@@ -2,11 +2,16 @@
 .g-m-p-corner {
     padding: 4px;
     cursor: pointer;
+    text-align: right;
 }
 
 .g-m-p-corner .ms,
 .g-m-p .ms {
     color: #777;
+}
+
+.g-m-p-corner .entry.ajax {
+    border-top: 1px dotted #DDD;
 }
 
 .g-m-p {

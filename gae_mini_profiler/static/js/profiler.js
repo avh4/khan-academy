@@ -28,11 +28,12 @@ var GaeMiniProfiler = {
     finishFetch: function(data) {
         var jCorner = this.renderCorner(data);
 
-        if (jCorner) {
+        if (!jCorner.data("attached")) {
             $('body')
                 .append(jCorner)
                 .click(function(e) { return GaeMiniProfiler.collapse(e); });
-            jCorner.click(function() { GaeMiniProfiler.expand(data); return false; });
+            jCorner
+                .data("attached", true);
         }
     },
 
@@ -48,25 +49,24 @@ var GaeMiniProfiler = {
 
     expand: function(data) {
         var jPopup = $(".g-m-p");
-        
-        if (!jPopup.length) {
-            jPopup = this.renderPopup(data);
+    
+        if (jPopup.length)
+            jPopup.remove();
+        else
+            $(document).keyup(function(e) { if (e.which == 27) GaeMiniProfiler.collapse() });
 
-            if (jPopup) {
-                $('body').append(jPopup);
-                $(document).keyup(function(e) { if (e.which == 27) GaeMiniProfiler.collapse() });
-                jPopup
-                    .find(".profile-link").click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
-                    .find(".rpc-link").click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
-                    .click(function(e) { e.stopPropagation(); });
-            }
-        }
+        jPopup = this.renderPopup(data);
+        $('body').append(jPopup);
 
-        if (jPopup.length) {
-            jPopup
-                .slideDown("fast");
-            $(".g-m-p-corner").slideUp("fast");
-        }
+        jPopup
+            .find(".profile-link")
+                .click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
+            .find(".rpc-link")
+                .click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
+            .click(function(e) { e.stopPropagation(); })
+            .slideDown("fast");
+
+        $(".g-m-p-corner").slideUp("fast");
     },
 
     toggleSection: function(elLink, selector) {
@@ -92,8 +92,22 @@ var GaeMiniProfiler = {
     },
 
     renderCorner: function(data) {
-        if (data && data.profiler_results)
-            return $("#profilerCornerTemplate").tmpl(data);
+        if (data && data.profiler_results) {
+            var jCorner = $(".g-m-p-corner");
+
+            var fFirst = false;
+            if (!jCorner.length) {
+                jCorner = $("#profilerCornerTemplate").tmpl();
+                fFirst = true;
+            }
+
+            return jCorner.append(
+                    $("#profilerCornerEntryTemplate")
+                        .tmpl(data)
+                        .addClass(fFirst ? "" : "ajax")
+                        .click(function() { GaeMiniProfiler.expand(data); return false; })
+                    );
+        }
         return null;
     },
 };

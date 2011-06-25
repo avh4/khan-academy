@@ -30,7 +30,7 @@ class RequestStatsHandler(RequestHandler):
 
 class RequestStats(object):
 
-    serialized_properties = ["request_id", "url", "s_dt", "profiler_results", "appstats_results"]
+    serialized_properties = ["request_id", "url", "url_short", "s_dt", "profiler_results", "appstats_results"]
 
     def __init__(self, request_id, environ, middleware):
         self.request_id = request_id
@@ -38,6 +38,10 @@ class RequestStats(object):
         self.url = environ.get("PATH_INFO")
         if environ.get("QUERY_STRING"):
             self.url += "?%s" % environ.get("QUERY_STRING")
+
+        self.url_short = self.url
+        if len(self.url_short) > 30:
+            self.url_short = self.url_short[:30] + "..."
 
         self.s_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
