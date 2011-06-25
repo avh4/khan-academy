@@ -82,6 +82,10 @@
             <a href="#rpc-link" class="rpc-link link uses_script">Remote Procedure Calls</a>
             <div class="summary">
                 ${appstats_results.total_time} <span class="ms">ms</span> spent in ${appstats_results.total_call_count} RPCs
+
+                {{if appstats_results.likely_dupes}}
+                    <span class="dupe">(likely dupes)</span>
+                {{/if}}
             </div>
         </div>
 
@@ -129,7 +133,14 @@
                         </div>
                     </td>
                     <td class="right">${$value.total_time}</td>
-                    <td>${$value.request}</td>
+                    <td>
+                        {{if $value.likely_dupe}}
+                            <span class="dupe">Likely duplicate of previous RPC</span>
+                        {{/if}}
+                        <span title="${$value.request}">
+                            ${$value.request_short}
+                        </span>
+                    </td>
                     <td>${$value.response}</td>
                 </tr>
                 {{/each}}

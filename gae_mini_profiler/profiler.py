@@ -154,6 +154,9 @@ class RequestStats(object):
             total_time = 0
             calls = []
             service_totals_dict = {}
+            likely_dupes = False
+
+            dict_requests = {}
 
             for trace in middleware.recorder.traces:
                 total_call_count += 1
@@ -177,13 +180,27 @@ class RequestStats(object):
                                 frame.line_number(), 
                                 frame.function_name()))
 
+                request = trace.request_data_summary()
+                request_short = request
+                if len(request_short) > 100:
+                    request_short = request_short[:100] + "..."
+
+                likely_dupe = dict_requests.has_key(request)
+                likely_dupes = likely_dupes or likely_dupe
+
+                dict_requests[request] = True
+
+                response = trace.response_data_summary()[:100]
+
                 calls.append({
                     "service": trace.service_call_name(),
                     "start_offset": RequestStats.milliseconds_fmt(trace.start_offset_milliseconds()),
                     "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
-                    "request": trace.request_data_summary(),
-                    "response": trace.response_data_summary(),
+                    "request": request,
+                    "request_short": request_short,
+                    "response": response,
                     "stack_frames_desc": stack_frames_desc,
+                    "likely_dupe": likely_dupe,
                 })
 
             service_totals = []
@@ -200,6 +217,7 @@ class RequestStats(object):
                         "total_time": RequestStats.milliseconds_fmt(total_time),
                         "calls": calls,
                         "service_totals": service_totals,
+                        "likely_dupes": likely_dupes,
                     }
 
         return None
@@ -236,9 +254,10 @@ class ProfilerWSGIMiddleware(object):
                 headers.append(("X-MiniProfiler-Id", request_id))
                 return start_response(status, headers, exc_info)
 
-            # Configure AppStats output
+            # Configure AppStats output, keeping a high level of request
+            # content so we can detect dupe RPCs more accurately
             from google.appengine.ext.appstats import recording
-            recording.config.MAX_REPR = 150
+            recording.config.MAX_REPR = 750
 
             # Turn on AppStats monitoring for this request
             old_app = self.app

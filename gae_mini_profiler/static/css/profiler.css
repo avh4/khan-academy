@@ -74,6 +74,11 @@
     float: right;
 }
 
+.g-m-p .dupe {
+    font-weight: bold;
+    color: red;
+}
+
 .g-m-p .summary {
     float:right;
 }
