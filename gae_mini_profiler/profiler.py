@@ -72,7 +72,9 @@ class RequestStats(object):
     def calc_profiler_results(middleware):
         import pstats
 
-        stats = pstats.Stats(middleware.prof)
+        # Make sure nothing is printed to stdout
+        output = StringIO.StringIO()
+        stats = pstats.Stats(middleware.prof, stream=output)
         stats.sort_stats("cumulative")
 
         def ms_fmt(f):
@@ -99,8 +101,9 @@ class RequestStats(object):
                 "per_call_cumulative": ms_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
                 "func_desc": func_desc,
                 "func_desc_short": func_desc[func_desc.rfind("/")+1:],
-                "callers": str(callers),
             })
+
+        output.close()
 
         return results
         
