@@ -49,6 +49,23 @@
         </div>
 
         <div class="rpc-details details fancy-scrollbar" style="display:none;">
+            <table class="rpc-service-totals">
+                <thead>
+                    <tr>
+                        <th class="left">service type</th>
+                        <th class="right">calls</th>
+                        <th class="right headerSortDown">total ms</th>
+                    </tr>
+                </thead>
+                {{each appstats_results.service_totals}}
+                <tr>
+                    <td>${$value.service_prefix}</td>
+                    <td class="right">${$value.total_call_count}</td>
+                    <td class="right">${$value.total_time}</td>
+                </tr>
+                {{/each}}
+            </table>
+
             <table>
                 <thead>
                     <tr>

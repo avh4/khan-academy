@@ -119,10 +119,22 @@ class RequestStats(object):
             total_call_count = 0
             total_time = 0
             calls = []
+            service_totals_dict = {}
 
             for trace in middleware.recorder.traces:
                 total_call_count += 1
                 total_time += trace.duration_milliseconds()
+
+                service_prefix = trace.service_call_name()
+
+                if "." in service_prefix:
+                    service_prefix = service_prefix[:service_prefix.find(".")]
+
+                if not service_totals_dict.has_key(service_prefix):
+                    service_totals_dict[service_prefix] = {"total_call_count": 0, "total_time": 0}
+
+                service_totals_dict[service_prefix]["total_call_count"] += 1
+                service_totals_dict[service_prefix]["total_time"] += trace.duration_milliseconds()
 
                 calls.append({
                     "service": trace.service_call_name(),
@@ -132,10 +144,20 @@ class RequestStats(object):
                     "response": trace.response_data_summary(),
                 })
 
+            service_totals = []
+            for service_prefix in service_totals_dict:
+                service_totals.append({
+                    "service_prefix": service_prefix,
+                    "total_call_count": service_totals_dict[service_prefix]["total_call_count"],
+                    "total_time": RequestStats.milliseconds_fmt(service_totals_dict[service_prefix]["total_time"]),
+                })
+            service_totals = sorted(service_totals, reverse=True, key=lambda service_total: service_total["total_time"])
+
             return  {
                         "total_call_count": total_call_count,
                         "total_time": RequestStats.milliseconds_fmt(total_time),
                         "calls": calls,
+                        "service_totals": service_totals,
                     }
 
         return None

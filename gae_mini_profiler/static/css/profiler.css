@@ -33,6 +33,10 @@
     overflow-y: scroll;
 }
 
+.g-m-p .details table {
+    margin-top: 18px;
+}
+
 .g-m-p .details th {
     font-weight: bold;
     cursor: pointer;
