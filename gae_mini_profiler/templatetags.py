@@ -12,7 +12,7 @@ def profiler_includes():
     if not profiler.request_id:
         return ""
 
-    path = os.path.join(os.path.dirname(__file__), "includes.html")
+    path = os.path.join(os.path.dirname(__file__), "templates/includes.html")
     return template.render(path, {
         "request_id": profiler.request_id,
         "js_path": "/gae_mini_profiler/static/js/profiler.js",
