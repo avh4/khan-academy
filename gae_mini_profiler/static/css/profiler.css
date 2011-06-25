@@ -1,18 +1,7 @@
 
 .g-m-p-corner {
-    position: absolute;
-    top: 0px;
-    left: 0px;
     padding: 4px;
-    background: #F7F7F7;
-    border-right: 1px solid black;
-    border-bottom: 1px solid black;
-    z-index: 1000;
     cursor: pointer;
-
-    -webkit-border-bottom-right-radius: 15px;
-    -moz-border-radius-bottomright: 15px;
-    border-bottom-right-radius: 15px;
 }
 
 .g-m-p-corner .ms,
@@ -21,25 +10,42 @@
 }
 
 .g-m-p {
+    min-width: 410px;
+    padding: 9px;
+    padding-bottom: 18px;
+}
+
+.g-m-p, .g-m-p-corner {
     position: absolute;
     left: 9px;
     top: 0px;
-    min-width: 410px;
-    padding: 9px;
+
     background: #F7F7F7;
+
+    border-top: 0;
     border-left: 1px solid #CCC;
     border-bottom: 1px solid #DDD;
     border-right: 1px solid #DDD;
+
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
     -webkit-box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25);
+
+    -webkit-border-bottom-left-radius: 12px;
+    -moz-border-radius-bottomleft: 12px;
+    border-bottom-left-radius: 12px;
+
+    -webkit-border-bottom-right-radius: 12px;
+    -moz-border-radius-bottomright: 12px;
+    border-bottom-right-radius: 12px;
+
     z-index: 1000;
 }
 
 .g-m-p .title {
     font-weight: bold;
-    border-bottom: 1px solid black;
-    margin-bottom: 27px;
+    border-bottom: 1px solid #CCC;
+    margin-bottom: 18px;
 }
 
 .g-m-p .url {
@@ -57,7 +63,18 @@
 .g-m-p .details {
     max-width: 800px;
     max-height: 500px;
+    margin-bottom: 18px;
     overflow: auto;
+}
+
+.g-m-p .expand.expanded {
+    border-bottom: 1px solid #DDD;
+}
+
+.g-m-p .expand.expanded a {
+    text-decoration: none;
+    border-bottom: 0;
+    font-weight: bold;
 }
 
 .g-m-p .details table {

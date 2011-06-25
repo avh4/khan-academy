@@ -41,8 +41,8 @@ var GaeMiniProfiler = {
                 $('body').append(jPopup);
                 $(document).keyup(function(e) { if (e.which == 27) GaeMiniProfiler.collapse() });
                 jPopup
-                    .find(".profile-link").click(function() { GaeMiniProfiler.toggleProfile(); return false; }).end()
-                    .find(".rpc-link").click(function() { GaeMiniProfiler.toggleRPC(); return false; }).end()
+                    .find(".profile-link").click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
+                    .find(".rpc-link").click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
                     .click(function(e) { e.stopPropagation(); });
             }
         }
@@ -54,26 +54,22 @@ var GaeMiniProfiler = {
         }
     },
 
-    toggleProfile: function() {
-        $(".rpc-details:visible").slideUp(50);
+    toggleSection: function(elLink, selector) {
 
-        $(".profiler-details").slideToggle("fast", function() {
-            if (!GaeMiniProfiler.toggleProfile.fCalled) {
-                $(".profiler-details table").tablesorter();
-                GaeMiniProfiler.toggleProfile.fCalled = true;
-            }
-        });
-    },
+        var fWasVisible = $(selector).is(":visible");
 
-    toggleRPC: function() {
-        $(".profiler-details:visible").slideUp(50);
+        $(".expand").removeClass("expanded");
+        $(".details:visible").slideUp(50)
 
-        $(".rpc-details").slideToggle("fast", function() {
-            if (!GaeMiniProfiler.toggleRPC.fCalled) {
-                $(".rpc-details table").tablesorter();
-                GaeMiniProfiler.toggleRPC.fCalled = true;
-            }
-        });
+        if (!fWasVisible) {
+            $(elLink).parents(".expand").addClass("expanded");
+            $(selector).slideDown("fast", function() {
+                if (!GaeMiniProfiler.toggleSection["called_" + selector]) {
+                    $(selector + " table").tablesorter();
+                    GaeMiniProfiler.toggleSection["called_" + selector] = true;
+                }
+            });
+        }
     },
 
     renderPopup: function(data) {
