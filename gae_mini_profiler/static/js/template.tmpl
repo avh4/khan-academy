@@ -1,23 +1,23 @@
 <script id="profilerTemplate" type="text/x-jquery-tmpl">
-    <div class="g-m-p profiler-result">
-        <div class="profiler-title">
-            <span class="profiler-url">
+    <div class="g-m-p">
+        <div class="title">
+            <span class="url">
                 ${url}
             </span>
-            <div class="profiler-total">
+            <div class="total">
                 ${profiler_results.total_time} ms
             </div>
         </div>
 
-        <div class="profiler-expand">
-            <a href="#" class="profile-link">Profile</a>
-            <div class="profiler-summary">
+        <div class="expand">
+            <a href="#" class="profile-link link">Profile</a>
+            <div class="summary">
                 ${profiler_results.total_time} ms in ${profiler_results.total_call_count} function calls
             </div>
         </div>
 
-        <div class="profiler-details fancy-scrollbar" style="display:none;">
-            <table class="tablesorter">
+        <div class="profiler-details details fancy-scrollbar" style="display:none;">
+            <table>
                 <thead>
                     <tr>
                         <th class="left">function</th>
@@ -41,11 +41,34 @@
             </table>
         </div>
 
-        <div class="rpc-expand">
-            <a href="#" class="rpc-link">Remote Procedure Calls</a>
-            <div class="rpc-summary">
+        <div class="expand">
+            <a href="#" class="rpc-link link">Remote Procedure Calls</a>
+            <div class="summary">
                 ${appstats_results.total_time} ms in ${appstats_results.total_call_count} RPCs
             </div>
+        </div>
+
+        <div class="rpc-details details fancy-scrollbar" style="display:none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="left">service</th>
+                        <th class="right headerSortDown">start</th>
+                        <th class="right">ms</th>
+                        <th class="left">request</th>
+                        <th class="left">response</th>
+                    </tr>
+                </thead>
+                {{each appstats_results.calls}}
+                <tr>
+                    <td>${$value.service}</td>
+                    <td class="right">${$value.start_offset}</td>
+                    <td class="right">${$value.total_time}</td>
+                    <td>${$value.request}</td>
+                    <td>${$value.response}</td>
+                </tr>
+                {{/each}}
+            </table>
         </div>
 
     </div>

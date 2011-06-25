@@ -126,6 +126,7 @@ class RequestStats(object):
 
                 calls.append({
                     "service": trace.service_call_name(),
+                    "start_offset": RequestStats.milliseconds_fmt(trace.start_offset_milliseconds()),
                     "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
                     "request": trace.request_data_summary(),
                     "response": trace.response_data_summary(),

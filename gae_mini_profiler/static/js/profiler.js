@@ -17,17 +17,31 @@ var GaeMiniProfiler = {
             $('body').append(jPopup);
             jPopup
                 .find(".profile-link").click(function(){ GaeMiniProfiler.toggleProfile(); return false; }).end()
+                .find(".rpc-link").click(function(){ GaeMiniProfiler.toggleRPC(); return false; }).end()
                 .show();
         }
     },
 
     toggleProfile: function() {
-        if (!GaeMiniProfiler.toggleProfile.fCalled) {
-            $(".profiler-details table").tablesorter();
-            GaeMiniProfiler.toggleProfile.fCalled = true;
-        }
+        $(".rpc-details:visible").slideUp(50);
 
-        $(".profiler-details").slideToggle("fast");
+        $(".profiler-details").slideToggle("fast", function() {
+            if (!GaeMiniProfiler.toggleProfile.fCalled) {
+                $(".profiler-details table").tablesorter();
+                GaeMiniProfiler.toggleProfile.fCalled = true;
+            }
+        });
+    },
+
+    toggleRPC: function() {
+        $(".profiler-details:visible").slideUp(50);
+
+        $(".rpc-details").slideToggle("fast", function() {
+            if (!GaeMiniProfiler.toggleRPC.fCalled) {
+                $(".rpc-details table").tablesorter();
+                GaeMiniProfiler.toggleRPC.fCalled = true;
+            }
+        });
     },
 
     renderPopup: function(data) {
