@@ -5,21 +5,49 @@ var GaeMiniProfiler = {
         $.get(
                 "/gae_mini_profiler/request_stats",
                 { "request_id": request_id },
-                function(data) { GaeMiniProfilerTemplate.init(function() {GaeMiniProfiler.finishDisplay(data);}); },
+                function(data) { GaeMiniProfilerTemplate.init(function() { GaeMiniProfiler.finishDisplay(data); }); },
                 "json"
         );
     },
 
     finishDisplay: function(data) {
-        var jPopup = this.renderPopup(data);
+        var jCorner = this.renderCorner(data);
 
-        if (jPopup) {
-            $('body').append(jPopup);
-            jPopup
-                .find(".profile-link").click(function(){ GaeMiniProfiler.toggleProfile(); return false; }).end()
-                .find(".rpc-link").click(function(){ GaeMiniProfiler.toggleRPC(); return false; }).end()
-                .show();
+        if (jCorner) {
+            $('body')
+                .append(jCorner)
+                .click(function(e) { return GaeMiniProfiler.collapse(e); });
+            jCorner.click(function() { GaeMiniProfiler.expand(data); $(this).hide(); return false; });
         }
+    },
+
+    collapse: function(e) {
+        if ($(".g-m-p").is(":visible")) {
+            $(".g-m-p").slideUp("fast");
+            $(".g-m-p-corner").show();
+            return false;
+        }
+
+        return true;
+    },
+
+    expand: function(data) {
+        var jPopup = $(".g-m-p");
+        
+        if (!jPopup.length) {
+            jPopup = this.renderPopup(data);
+
+            if (jPopup) {
+                $('body').append(jPopup);
+                $(document).keyup(function(e) { if (e.which == 27) GaeMiniProfiler.collapse() });
+                jPopup
+                    .find(".profile-link").click(function() { GaeMiniProfiler.toggleProfile(); return false; }).end()
+                    .find(".rpc-link").click(function() { GaeMiniProfiler.toggleRPC(); return false; }).end()
+                    .click(function(e) { e.stopPropagation(); });
+            }
+        }
+
+        if (jPopup.length) jPopup.slideDown("fast");
     },
 
     toggleProfile: function() {
@@ -45,12 +73,14 @@ var GaeMiniProfiler = {
     },
 
     renderPopup: function(data) {
-        if (data && data.profiler_results)
-            return $("#profilerTemplate").tmpl(data);
-        else
-            return null;
-    }
+        return $("#profilerTemplate").tmpl(data);
+    },
 
+    renderCorner: function(data) {
+        if (data && data.profiler_results)
+            return $("#profilerCornerTemplate").tmpl(data);
+        return null;
+    },
 };
 
 var GaeMiniProfilerTemplate = {

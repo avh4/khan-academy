@@ -1,5 +1,11 @@
+<script id="profilerCornerTemplate" type="text/x-jquery-tmpl">
+    <div class="g-m-p-corner">
+        ${profiler_results.total_time} <span class="ms">ms</span>
+    </div>
+</script>
+
 <script id="profilerTemplate" type="text/x-jquery-tmpl">
-    <div class="g-m-p">
+    <div class="g-m-p" style="display:none;">
         <div class="title">
             <span class="url">
                 ${url}
@@ -10,9 +16,9 @@
         </div>
 
         <div class="expand">
-            <a href="#" class="profile-link link">Profile</a>
+            <a href="#profile-link" class="profile-link link uses_script">Profile</a>
             <div class="summary">
-                ${profiler_results.total_time} ms in ${profiler_results.total_call_count} function calls
+                ${profiler_results.total_time} ms spent in ${profiler_results.total_call_count} function calls
             </div>
         </div>
 
@@ -22,10 +28,10 @@
                     <tr>
                         <th class="left">function</th>
                         <th class="right">calls</th>
-                        <th class="right headerSortDown">total ms</th>
-                        <th class="right">total per call</th>
-                        <th class="right">own ms</th>
-                        <th class="right">own per call</th>
+                        <th class="right headerSortDown"><nobr>total ms</nobr></th>
+                        <th class="right"><nobr>total per call</nobr></th>
+                        <th class="right"><nobr>own ms</nobr></th>
+                        <th class="right"><nobr>own per call</nobr></th>
                     </tr>
                 </thead>
                 {{each profiler_results.calls}}
@@ -42,9 +48,9 @@
         </div>
 
         <div class="expand">
-            <a href="#" class="rpc-link link">Remote Procedure Calls</a>
+            <a href="#rpc-link" class="rpc-link link uses_script">Remote Procedure Calls</a>
             <div class="summary">
-                ${appstats_results.total_time} ms in ${appstats_results.total_call_count} RPCs
+                ${appstats_results.total_time} ms spent in ${appstats_results.total_call_count} RPCs
             </div>
         </div>
 
@@ -52,9 +58,9 @@
             <table class="rpc-service-totals">
                 <thead>
                     <tr>
-                        <th class="left">service type</th>
+                        <th class="left"><nobr>service type</nobr></th>
                         <th class="right">calls</th>
-                        <th class="right headerSortDown">total ms</th>
+                        <th class="right headerSortDown"><nobr>total ms</nobr></th>
                     </tr>
                 </thead>
                 {{each appstats_results.service_totals}}
