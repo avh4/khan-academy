@@ -56,7 +56,7 @@
                             <div class="callers-content">
                                 {{each $value.callers_desc}}
                                     <div>
-                                        <span title="${$value.func_desc}">${$value.func_desc_short}</span>
+                                        <span title="${$value.func_desc}"><nobr>${$value.func_desc_short}</nobr></span>
                                     </div>
                                 {{/each}}
                             </div>
@@ -116,7 +116,18 @@
                 {{each appstats_results.calls}}
                 <tr>
                     <td>${$value.service}</td>
-                    <td class="right">${$value.start_offset}</td>
+                    <td class="right">
+                        <a class="callers-link uses_script" href="#callers">${$value.start_offset}</a>
+
+                        <div class="callers" style="display:none;">
+                            <span class="callers-label">Called by</span>
+                            <div class="callers-content">
+                                {{each $value.stack_frames_desc}}
+                                <div><nobr>${$value}</nobr></div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    </td>
                     <td class="right">${$value.total_time}</td>
                     <td>${$value.request}</td>
                     <td>${$value.response}</td>

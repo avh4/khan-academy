@@ -99,6 +99,12 @@ class RequestStats(object):
         return s[s.rfind("/") + 1:]
 
     @staticmethod
+    def short_rpc_file_fmt(s):
+        if not s:
+            return ""
+        return s[s.find("/"):]
+
+    @staticmethod
     def calc_profiler_results(middleware):
         import pstats
 
@@ -164,12 +170,20 @@ class RequestStats(object):
                 service_totals_dict[service_prefix]["total_call_count"] += 1
                 service_totals_dict[service_prefix]["total_time"] += trace.duration_milliseconds()
 
+                stack_frames_desc = []
+                for frame in trace.call_stack_:
+                    stack_frames_desc.append("%s:%s %s" % 
+                            (RequestStats.short_rpc_file_fmt(frame.class_or_file_name()), 
+                                frame.line_number(), 
+                                frame.function_name()))
+
                 calls.append({
                     "service": trace.service_call_name(),
                     "start_offset": RequestStats.milliseconds_fmt(trace.start_offset_milliseconds()),
                     "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
                     "request": trace.request_data_summary(),
                     "response": trace.response_data_summary(),
+                    "stack_frames_desc": stack_frames_desc,
                 })
 
             service_totals = []
@@ -190,7 +204,7 @@ class RequestStats(object):
 
         return None
 
-class ProfilerMiddleware(object):
+class ProfilerWSGIMiddleware(object):
 
     def __init__(self, app):
         template.register_template_library('gae_mini_profiler.templatetags')

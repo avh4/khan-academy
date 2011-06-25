@@ -1606,7 +1606,7 @@ def main():
 
         ], debug=True)
 
-    application = profiler.ProfilerMiddleware(application)
+    application = profiler.ProfilerWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
