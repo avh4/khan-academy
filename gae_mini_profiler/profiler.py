@@ -151,7 +151,7 @@ class RequestStats(object):
                     "total_call_count": service_totals_dict[service_prefix]["total_call_count"],
                     "total_time": RequestStats.milliseconds_fmt(service_totals_dict[service_prefix]["total_time"]),
                 })
-            service_totals = sorted(service_totals, reverse=True, key=lambda service_total: service_total["total_time"])
+            service_totals = sorted(service_totals, reverse=True, key=lambda service_total: float(service_total["total_time"]))
 
             return  {
                         "total_call_count": total_call_count,

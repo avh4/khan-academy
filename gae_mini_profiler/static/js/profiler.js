@@ -17,14 +17,14 @@ var GaeMiniProfiler = {
             $('body')
                 .append(jCorner)
                 .click(function(e) { return GaeMiniProfiler.collapse(e); });
-            jCorner.click(function() { GaeMiniProfiler.expand(data); $(this).hide(); return false; });
+            jCorner.click(function() { GaeMiniProfiler.expand(data); return false; });
         }
     },
 
     collapse: function(e) {
         if ($(".g-m-p").is(":visible")) {
             $(".g-m-p").slideUp("fast");
-            $(".g-m-p-corner").show();
+            $(".g-m-p-corner").slideDown("fast");
             return false;
         }
 
@@ -47,7 +47,11 @@ var GaeMiniProfiler = {
             }
         }
 
-        if (jPopup.length) jPopup.slideDown("fast");
+        if (jPopup.length) {
+            jPopup
+                .slideDown("fast");
+            $(".g-m-p-corner").slideUp("fast");
+        }
     },
 
     toggleProfile: function() {

@@ -11,14 +11,14 @@
                 ${url}
             </span>
             <div class="total">
-                ${profiler_results.total_time} ms
+                ${profiler_results.total_time} <span class="ms">ms</span>
             </div>
         </div>
 
         <div class="expand">
             <a href="#profile-link" class="profile-link link uses_script">Profile</a>
             <div class="summary">
-                ${profiler_results.total_time} ms spent in ${profiler_results.total_call_count} function calls
+                ${profiler_results.total_time} <span class="ms">ms</span> spent in ${profiler_results.total_call_count} function calls
             </div>
         </div>
 
@@ -50,7 +50,7 @@
         <div class="expand">
             <a href="#rpc-link" class="rpc-link link uses_script">Remote Procedure Calls</a>
             <div class="summary">
-                ${appstats_results.total_time} ms spent in ${appstats_results.total_call_count} RPCs
+                ${appstats_results.total_time} <span class="ms">ms</span> spent in ${appstats_results.total_call_count} RPCs
             </div>
         </div>
 
