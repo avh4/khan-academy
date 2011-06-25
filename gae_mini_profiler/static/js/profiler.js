@@ -40,14 +40,15 @@ var GaeMiniProfiler = {
     collapse: function(e) {
         if ($(".g-m-p").is(":visible")) {
             $(".g-m-p").slideUp("fast");
-            $(".g-m-p-corner").slideDown("fast");
+            $(".g-m-p-corner").slideDown("fast")
+                .find(".expanded").removeClass("expanded");
             return false;
         }
 
         return true;
     },
 
-    expand: function(data) {
+    expand: function(elEntry, data) {
         var jPopup = $(".g-m-p");
     
         if (jPopup.length)
@@ -58,15 +59,18 @@ var GaeMiniProfiler = {
         jPopup = this.renderPopup(data);
         $('body').append(jPopup);
 
+        var jCorner = $(".g-m-p-corner");
+        jCorner.find(".expanded").removeClass("expanded");
+        $(elEntry).addClass("expanded");
+
         jPopup
             .find(".profile-link")
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
             .find(".rpc-link")
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
             .click(function(e) { e.stopPropagation(); })
+            .css("left", jCorner.offset().left + jCorner.width() + 18)
             .slideDown("fast");
-
-        $(".g-m-p-corner").slideUp("fast");
     },
 
     toggleSection: function(elLink, selector) {
@@ -105,7 +109,7 @@ var GaeMiniProfiler = {
                     $("#profilerCornerEntryTemplate")
                         .tmpl(data)
                         .addClass(fFirst ? "" : "ajax")
-                        .click(function() { GaeMiniProfiler.expand(data); return false; })
+                        .click(function() { GaeMiniProfiler.expand(this, data); return false; })
                     );
         }
         return null;
