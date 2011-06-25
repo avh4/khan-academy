@@ -27,7 +27,7 @@ var GaeMiniProfiler = {
             GaeMiniProfiler.toggleProfile.fCalled = true;
         }
 
-        $(".profiler-details").slideToggle();
+        $(".profiler-details").slideToggle("fast");
     },
 
     renderPopup: function(data) {
