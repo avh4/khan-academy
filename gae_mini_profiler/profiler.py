@@ -69,6 +69,14 @@ class RequestStats(object):
         return "__gae_mini_profiler_request_%s" % request_id
 
     @staticmethod
+    def seconds_fmt(f):
+        return RequestStats.milliseconds_fmt(f * 1000)
+
+    @staticmethod
+    def milliseconds_fmt(f):
+        return ("%.5f" % f).rstrip("0").rstrip(".")
+
+    @staticmethod
     def calc_profiler_results(middleware):
         import pstats
 
@@ -77,12 +85,9 @@ class RequestStats(object):
         stats = pstats.Stats(middleware.prof, stream=output)
         stats.sort_stats("cumulative")
 
-        def ms_fmt(f):
-            return "%.5f" % (f * 1000)
-
         results = {
             "total_call_count": stats.total_calls,
-            "total_time": ms_fmt(stats.total_tt),
+            "total_time": RequestStats.seconds_fmt(stats.total_tt),
             "calls": []
         }
 
@@ -95,10 +100,10 @@ class RequestStats(object):
             results["calls"].append({
                 "primitive_call_count": primitive_call_count, 
                 "total_call_count": total_call_count, 
-                "total_time": ms_fmt(total_time), 
-                "per_call": ms_fmt(total_time / total_call_count) if total_call_count else "",
-                "cumulative_time": ms_fmt(cumulative_time), 
-                "per_call_cumulative": ms_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
+                "total_time": RequestStats.seconds_fmt(total_time), 
+                "per_call": RequestStats.seconds_fmt(total_time / total_call_count) if total_call_count else "",
+                "cumulative_time": RequestStats.seconds_fmt(cumulative_time), 
+                "per_call_cumulative": RequestStats.seconds_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
                 "func_desc": func_desc,
                 "func_desc_short": func_desc[func_desc.rfind("/")+1:],
             })
@@ -110,7 +115,27 @@ class RequestStats(object):
     @staticmethod
     def calc_appstats_results(middleware):
         if middleware.recorder:
-            return {"json": middleware.recorder.json()}
+
+            total_call_count = 0
+            total_time = 0
+            calls = []
+
+            for trace in middleware.recorder.traces:
+                total_call_count += 1
+                total_time += trace.duration_milliseconds()
+
+                calls.append({
+                    "service": trace.service_call_name(),
+                    "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
+                    "request": trace.request_data_summary(),
+                    "response": trace.response_data_summary(),
+                })
+
+            return  {
+                        "total_call_count": total_call_count,
+                        "total_time": RequestStats.milliseconds_fmt(total_time),
+                        "calls": calls,
+                    }
 
         return None
 
