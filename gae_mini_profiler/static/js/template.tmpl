@@ -10,22 +10,24 @@
         </div>
 
         <div class="profiler-expand">
-            <a href="#">Profile</a>
+            <a href="#" class="profile-link">Profile</a>
             <div class="profiler-summary">
-                ${profiler_results.total_time} ms in ${profiler_results.total_call_count} fxn calls
+                ${profiler_results.total_time} ms in ${profiler_results.total_call_count} function calls
             </div>
         </div>
 
-        <div class="profiler-details fancy-scrollbar">
-            <table>
-                <tr>
-                    <th class="left">fxn</th>
-                    <th class="right">calls</th>
-                    <th class="right">total ms</th>
-                    <th class="right">total per call</th>
-                    <th class="right">own ms</th>
-                    <th class="right">own per call</th>
-                </tr>
+        <div class="profiler-details fancy-scrollbar" style="display:none;">
+            <table class="tablesorter">
+                <thead>
+                    <tr>
+                        <th class="left">function</th>
+                        <th class="right">calls</th>
+                        <th class="right headerSortDown">total ms</th>
+                        <th class="right">total per call</th>
+                        <th class="right">own ms</th>
+                        <th class="right">own per call</th>
+                    </tr>
+                </thead>
                 {{each profiler_results.calls}}
                 <tr>
                     <td title="${$value.func_desc}">${$value.func_desc_short}</td>
