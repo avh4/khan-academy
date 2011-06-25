@@ -168,7 +168,6 @@ var StudentLists = {
                     StudentLists.removeGroup(StudentLists.currentGroup);
                     StudentLists.redrawListsMenu();
                     $('#group-allstudents a').click();
-
                 }
             });
         }
@@ -224,7 +223,7 @@ var StudentLists = {
         }
         else {
             var group_id = StudentLists.currentGroup;
-            StudentLists.removeStudentFromGroupAjax(student, group_id);
+            editListsMenu.removeStudentFromGroupAjax(student, group_id);
         }
     },
 
@@ -304,15 +303,6 @@ var StudentLists = {
                                                 + (nstudents==1 ? '' : 's');
         $('#nstudents').html(nstudentsStr);
         $('.students-header h2').html(title);
-    },
-
-    groupLabelClick: function(event) {
-        event.stopPropagation();
-        event.preventDefault();
-        var url = unescape($(event.currentTarget).attr('href'));
-        var qs = Util.parseQueryString(url);
-        var student = StudentLists.students_by_email[qs['student_email']];
-        StudentLists.removeStudentFromGroupAjax(student, qs['group_id']);
     }
 };
 
@@ -384,6 +374,11 @@ var addStudentTextBox = {
         this.element = $('#request-student');
         
         this.blur();
+        $('#addstudent-error').hide().find('a').click(function(event) {
+            event.preventDefault();
+            $('#addstudent-error').fadeOut();
+        });
+        
         
         Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
     },
@@ -417,6 +412,9 @@ var addStudentTextBox = {
                     el.fadeIn();
 
                     $('#group-requests a').click();
+                },
+                error: function(jqxhr) {
+                    $('#addstudent-error').slideDown();
                 }
             });
         }

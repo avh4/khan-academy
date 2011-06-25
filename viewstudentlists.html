@@ -142,6 +142,23 @@ h2 {
     display: none;
 }
 
+#addstudent-error {
+    margin-top: -1.4em;
+    border: 1pt solid red;
+    padding: .6em;
+    margin-bottom: 1.4em;
+}
+
+#addstudent-error .float-right {
+    margin-left: 1em;
+}
+
+#addstudent-error ul, #addstudent-error li {
+    list-style: circle;
+    margin: .3em;
+    margin-left: .8em;
+}
+
 </style>
 <script type="text/javascript" charset="utf-8">
 $(function() {
@@ -186,6 +203,14 @@ $(function() {
         {# <span class="float-right"><a class="simple-button action-gradient">Bulk add</a></span> #}
         <input type="text" id="request-student" size="80" data-blur-val="Type a student's email address to propose becoming their coach"/>
         <input type="text" id="add-to-group" size="80" data-blur-val="Type a student's name to add them to this list"/>
+    </div>
+    <div id="addstudent-error">
+        <span class="float-right">(<a href="">close</a>)</span>
+        No student was found with that ID. The student may not have created a profile yet. Also, check that the student ID is correct. Here are some examples of student IDs:<br>
+        <ul>
+            <li>student@gmail.com</li>
+            <li>http://facebookid.khanacademy.org/123456789</li>
+        </ul>
     </div>
 
     <div id="actual-students">

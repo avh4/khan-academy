@@ -134,11 +134,12 @@ class RequestStudent(request_handler.RequestHandler):
             if user_data_student and not user_data_student.is_coached_by(user):
                 coach_request = CoachRequest.get_or_insert_for(user, student)
                 if coach_request:
-                    self.redirect("/students")
+                    if not self.is_ajax_request():
+                        self.redirect("/students")
                     return
 
         if self.is_ajax_request():
-            raise Exception('todo: write something better')
+            self.response.set_status(404)
         else:
             self.redirect("/students?invalid_student=1")
 
