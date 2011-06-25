@@ -18,6 +18,11 @@
                 ${profiler_results.total_time} <span class="ms">ms</span>
             </div>
         </div>
+        <div class="date_and_share">
+            <span class="date">${s_dt}</span>
+            -
+            <a class="share" href="/gae_mini_profiler/shared?request_id=${encodeURIComponent(request_id)}">Share</a>
+        </div>
 
         <div class="expand">
             <a href="#profile-link" class="profile-link link uses_script">Profile</a>

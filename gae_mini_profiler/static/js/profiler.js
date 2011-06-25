@@ -1,31 +1,33 @@
 
 var GaeMiniProfiler = {
 
-    init: function(request_id) {
+    init: function(requestId, fShowImmediately) {
         // Fetch profile results for any ajax calls
         // (see http://code.google.com/p/mvc-mini-profiler/source/browse/MvcMiniProfiler/UI/Includes.js)
         $(document).ajaxComplete(function (e, xhr, settings) {
             if (xhr) {
-                var request_id = xhr.getResponseHeader('X-MiniProfiler-Id');
-                if (request_id) {
-                    GaeMiniProfiler.fetch(request_id);
+                var requestId = xhr.getResponseHeader('X-MiniProfiler-Id');
+                if (requestId) {
+                    GaeMiniProfiler.fetch(requestId);
                 }
             }
         });
 
-        GaeMiniProfiler.fetch(request_id);
+        GaeMiniProfiler.fetch(requestId, fShowImmediately);
     },
 
-    fetch: function(request_id) {
+    fetch: function(requestId, fShowImmediately) {
         $.get(
-                "/gae_mini_profiler/request_stats",
-                { "request_id": request_id },
-                function(data) { GaeMiniProfilerTemplate.init(function() { GaeMiniProfiler.finishFetch(data); }); },
+                "/gae_mini_profiler/request",
+                { "request_id": requestId },
+                function(data) {
+                    GaeMiniProfilerTemplate.init(function() { GaeMiniProfiler.finishFetch(data, fShowImmediately); });
+                },
                 "json"
         );
     },
 
-    finishFetch: function(data) {
+    finishFetch: function(data, fShowImmediately) {
         var jCorner = this.renderCorner(data);
 
         if (!jCorner.data("attached")) {
@@ -35,6 +37,9 @@ var GaeMiniProfiler = {
             jCorner
                 .data("attached", true);
         }
+
+        if (fShowImmediately)
+            jCorner.find(".entry").first().click();
     },
 
     collapse: function(e) {

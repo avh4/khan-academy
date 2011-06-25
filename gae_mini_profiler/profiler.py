@@ -16,6 +16,16 @@ from gae_mini_profiler import config
 # request_id is a per-request identifier accessed by a couple other pieces of gae_mini_profiler
 request_id = None
 
+class SharedStatsHandler(RequestHandler):
+
+    def get(self):
+        path = os.path.join(os.path.dirname(__file__), "templates/shared.html")
+        self.response.out.write(
+            template.render(path, {
+                "request_id": self.request.get("request_id")
+            })
+        )
+
 class RequestStatsHandler(RequestHandler):
 
     def get(self):
@@ -23,6 +33,8 @@ class RequestStatsHandler(RequestHandler):
         self.response.headers["Content-Type"] = "application/json"
 
         request_stats = RequestStats.get(self.request.get("request_id"))
+        if not request_stats:
+            return
 
         dict_request_stats = {}
         for property in RequestStats.serialized_properties:
