@@ -1,16 +1,31 @@
 
 var GaeMiniProfiler = {
 
-    display: function(request_id) {
+    init: function(request_id) {
+        // Fetch profile results for any ajax calls
+        // (see http://code.google.com/p/mvc-mini-profiler/source/browse/MvcMiniProfiler/UI/Includes.js)
+        $(document).ajaxComplete(function (e, xhr, settings) {
+            if (xhr) {
+                var request_id = xhr.getResponseHeader('X-MiniProfiler-Id');
+                if (request_id) {
+                    GaeMiniProfiler.fetch(request_id);
+                }
+            }
+        });
+
+        GaeMiniProfiler.fetch(request_id);
+    },
+
+    fetch: function(request_id) {
         $.get(
                 "/gae_mini_profiler/request_stats",
                 { "request_id": request_id },
-                function(data) { GaeMiniProfilerTemplate.init(function() { GaeMiniProfiler.finishDisplay(data); }); },
+                function(data) { GaeMiniProfilerTemplate.init(function() { GaeMiniProfiler.finishFetch(data); }); },
                 "json"
         );
     },
 
-    finishDisplay: function(data) {
+    finishFetch: function(data) {
         var jCorner = this.renderCorner(data);
 
         if (jCorner) {

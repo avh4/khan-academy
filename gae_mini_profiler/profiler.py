@@ -192,6 +192,12 @@ class ProfilerMiddleware(object):
             import os
             request_id = base64.b64encode(os.urandom(30))
 
+            # Send request id in headers so jQuery ajax calls can pick
+            # up profiles.
+            def profiled_start_response(status, headers, exc_info = None):
+                headers.append(("X-MiniProfiler-Id", request_id))
+                return start_response(status, headers, exc_info)
+
             # Configure AppStats output
             from google.appengine.ext.appstats import recording
             recording.config.MAX_REPR = 150
@@ -209,7 +215,7 @@ class ProfilerMiddleware(object):
             self.prof = cProfile.Profile()
 
             # Get profiled wsgi result
-            result = self.prof.runcall(lambda *args, **kwargs: self.app(environ, start_response), None, None)
+            result = self.prof.runcall(lambda *args, **kwargs: self.app(environ, profiled_start_response), None, None)
 
             self.recorder = recording.recorder
 
