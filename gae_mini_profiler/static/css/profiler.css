@@ -1,2 +1,92 @@
 
+.g-m-p.profiler-result {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 9px;
+    background: white;
+    border: 1px solid black;
+    z-index: 1000;
+}
 
+.g-m-p.profiler-result .profiler-title {
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
+.g-m-p.profiler-result .profiler-url {
+    font-size: 125%;
+}
+
+.g-m-p.profiler-result .profiler-total {
+    float: right;
+}
+
+.g-m-p.profiler-result .profiler-expand {
+    margin-top: 27px;
+}
+
+.g-m-p.profiler-result .rpc-summary,
+.g-m-p.profiler-result .profiler-summary {
+    float:right;
+}
+
+.g-m-p.profiler-result .profiler-details {
+    max-height: 500px;
+    overflow-y: scroll;
+}
+
+.g-m-p.profiler-result .profiler-details th {
+    font-weight: bold;
+}
+
+.g-m-p.profiler-result .profiler-details th,
+.g-m-p.profiler-result .profiler-details td {
+    padding-right: 18px;
+}
+
+.g-m-p.profiler-result .profiler-details .left {
+    text-align: left;
+}
+
+.g-m-p.profiler-result .profiler-details .right {
+    text-align: right;
+}
+
+/* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
+.g-m-p .fancy-scrollbar::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-button:start:decrement,
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-button:end:increment {
+  background: transparent;
+  display: none;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-track-piece:vertical:start {
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-track-piece:vertical:end {
+  -webkit-border-bottom-left-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-track-piece:horizontal:start {
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-bottom-left-radius: 4px;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-track-piece:horizontal:end {
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+}
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-thumb:vertical,
+.g-m-p .fancy-scrollbar::-webkit-scrollbar-thumb:horizontal {
+  background: #ccc;
+  border: 1px solid #aaa;
+  -webkit-border-radius: 4px;
+  display: block;
+  height: 50px;
+}

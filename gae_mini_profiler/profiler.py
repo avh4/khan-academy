@@ -30,12 +30,15 @@ class RequestStatsHandler(RequestHandler):
 
 class RequestStats(object):
 
-    serialized_properties = ["request_id", "path", "query_string", "s_dt", "profiler_results", "appstats_results"]
+    serialized_properties = ["request_id", "url", "s_dt", "profiler_results", "appstats_results"]
 
     def __init__(self, request_id, environ, middleware):
         self.request_id = request_id
-        self.path = environ.get("PATH_INFO")
-        self.query_string = environ.get("QUERY_STRING")
+
+        self.url = environ.get("PATH_INFO")
+        if environ.get("QUERY_STRING"):
+            self.url += "?%s" % environ.get("QUERY_STRING")
+
         self.s_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.profiler_results = RequestStats.calc_profiler_results(middleware)
@@ -70,11 +73,15 @@ class RequestStats(object):
         import pstats
 
         stats = pstats.Stats(middleware.prof)
+        stats.strip_dirs()
         stats.sort_stats("cumulative")
+
+        def ms_fmt(f):
+            return "%.5f" % (f * 1000)
 
         results = {
             "total_calls": stats.total_calls,
-            "total_time": stats.total_tt,
+            "total_time": ms_fmt(stats.total_tt),
             "calls": []
         }
 
@@ -85,10 +92,10 @@ class RequestStats(object):
             results["calls"].append({
                 "primitive_call_count": primitive_call_count, 
                 "total_call_count": total_call_count, 
-                "total_time": total_time, 
-                "per_call": (total_time / total_call_count) if total_call_count else "",
-                "cumulative_time": cumulative_time, 
-                "per_call_cumulative": (cumulative_time / primitive_call_count) if primitive_call_count else "",
+                "total_time": ms_fmt(total_time), 
+                "per_call": ms_fmt(total_time / total_call_count) if total_call_count else "",
+                "cumulative_time": ms_fmt(cumulative_time), 
+                "per_call_cumulative": ms_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
                 "func_desc": pstats.func_std_string(func_name),
                 "callers": str(callers),
             })

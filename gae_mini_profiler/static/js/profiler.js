@@ -21,7 +21,7 @@ var GaeMiniProfiler = {
 
     renderPopup: function(data) {
         if (data && data.profiler_results)
-            return $("#profilerTemplate").tmpl({monkeys: data.profiler_results.total_time});
+            return $("#profilerTemplate").tmpl(data);
         else
             return null;
     }

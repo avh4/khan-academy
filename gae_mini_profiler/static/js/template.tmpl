@@ -1,5 +1,49 @@
 <script id="profilerTemplate" type="text/x-jquery-tmpl">
-    <div class="profiler-result" style="display:none;position:absolute;top:10px;left:10px;width:400px;border:1px solid green;">
-        ${monkeys} here
+    <div class="g-m-p profiler-result">
+        <div class="profiler-title">
+            <span class="profiler-url">
+                ${url}
+            </span>
+            <div class="profiler-total">
+                ${profiler_results.total_time} ms
+            </div>
+        </div>
+
+        <div class="profiler-expand">
+            <a href="#">Profile</a>
+            <div class="profiler-summary">
+                stuff
+            </div>
+        </div>
+
+        <div class="profiler-details fancy-scrollbar">
+            <table>
+                <tr>
+                    <th class="left">fxn</th>
+                    <th class="right">calls</th>
+                    <th class="right">total ms</th>
+                    <th class="right">total per call</th>
+                    <th class="right">own ms</th>
+                    <th class="right">own per call</th>
+                </tr>
+                {{each profiler_results.calls}}
+                <tr>
+                    <td>${$value.func_desc}</td>
+                    <td class="right">${$value.total_call_count}</td>
+                    <td class="right">${$value.cumulative_time}</td>
+                    <td class="right">${$value.per_call_cumulative}</td>
+                    <td class="right">${$value.total_time}</td>
+                    <td class="right">${$value.per_call}</td>
+                </tr>
+                {{/each}}
+            </table>
+        </div>
+
+        <div class="rpc-expand">
+            <a href="#">RPC Stats</a>
+            <div class="rpc-summary">
+                stuff
+            </div>
+        </div>
     </div>
 </script>
