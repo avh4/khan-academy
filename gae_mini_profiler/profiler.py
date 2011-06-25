@@ -1,5 +1,6 @@
 import datetime
 import logging
+import os
 import pickle
 import simplejson
 import StringIO
@@ -7,9 +8,10 @@ import sys
 from types import GeneratorType
 import zlib
 
-from google.appengine.api import users
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
+
+from gae_mini_profiler import config
 
 # request_id is a per-request identifier accessed by a couple other pieces of gae_mini_profiler
 request_id = None
@@ -175,10 +177,6 @@ class ProfilerMiddleware(object):
         self.prof = None
         self.recorder = None
 
-    def should_profile(self):
-        user = users.get_current_user()
-        return user and user.email() == "test@example.com"
-
     def __call__(self, environ, start_response):
 
         global request_id
@@ -189,7 +187,7 @@ class ProfilerMiddleware(object):
         self.prof = None
         self.recorder = None
 
-        if self.should_profile():
+        if config.should_profile(environ):
 
             # Set a random ID for this request so we can look up stats later
             import base64
