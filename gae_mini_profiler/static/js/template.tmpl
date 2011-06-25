@@ -12,7 +12,7 @@
         <div class="profiler-expand">
             <a href="#">Profile</a>
             <div class="profiler-summary">
-                stuff
+                ${profiler_results.total_time} ms in ${profiler_results.total_call_count} fxn calls
             </div>
         </div>
 
@@ -28,7 +28,7 @@
                 </tr>
                 {{each profiler_results.calls}}
                 <tr>
-                    <td>${$value.func_desc}</td>
+                    <td title="${$value.func_desc}">${$value.func_desc_short}</td>
                     <td class="right">${$value.total_call_count}</td>
                     <td class="right">${$value.cumulative_time}</td>
                     <td class="right">${$value.per_call_cumulative}</td>

@@ -73,14 +73,13 @@ class RequestStats(object):
         import pstats
 
         stats = pstats.Stats(middleware.prof)
-        stats.strip_dirs()
         stats.sort_stats("cumulative")
 
         def ms_fmt(f):
             return "%.5f" % (f * 1000)
 
         results = {
-            "total_calls": stats.total_calls,
+            "total_call_count": stats.total_calls,
             "total_time": ms_fmt(stats.total_tt),
             "calls": []
         }
@@ -89,6 +88,8 @@ class RequestStats(object):
         for func_name in list_func_names:
             primitive_call_count, total_call_count, total_time, cumulative_time, callers = stats.stats[func_name]
 
+            func_desc = pstats.func_std_string(func_name)
+
             results["calls"].append({
                 "primitive_call_count": primitive_call_count, 
                 "total_call_count": total_call_count, 
@@ -96,7 +97,8 @@ class RequestStats(object):
                 "per_call": ms_fmt(total_time / total_call_count) if total_call_count else "",
                 "cumulative_time": ms_fmt(cumulative_time), 
                 "per_call_cumulative": ms_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
-                "func_desc": pstats.func_std_string(func_name),
+                "func_desc": func_desc,
+                "func_desc_short": func_desc[func_desc.rfind("/")+1:],
                 "callers": str(callers),
             })
 
