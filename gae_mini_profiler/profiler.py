@@ -95,6 +95,10 @@ class RequestStats(object):
         return ("%.5f" % f).rstrip("0").rstrip(".")
 
     @staticmethod
+    def short_method_fmt(s):
+        return s[s.rfind("/") + 1:]
+
+    @staticmethod
     def calc_profiler_results(middleware):
         import pstats
 
@@ -115,6 +119,11 @@ class RequestStats(object):
 
             func_desc = pstats.func_std_string(func_name)
 
+            callers_names = map(lambda func_name: pstats.func_std_string(func_name), callers.keys())
+            callers_desc = map(
+                    lambda name: {"func_desc": name, "func_desc_short": RequestStats.short_method_fmt(name)}, 
+                    callers_names)
+
             results["calls"].append({
                 "primitive_call_count": primitive_call_count, 
                 "total_call_count": total_call_count, 
@@ -123,7 +132,8 @@ class RequestStats(object):
                 "cumulative_time": RequestStats.seconds_fmt(cumulative_time), 
                 "per_call_cumulative": RequestStats.seconds_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
                 "func_desc": func_desc,
-                "func_desc_short": func_desc[func_desc.rfind("/")+1:],
+                "func_desc_short": RequestStats.short_method_fmt(func_desc),
+                "callers_desc": callers_desc,
             })
 
         output.close()

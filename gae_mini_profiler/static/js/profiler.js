@@ -73,6 +73,8 @@ var GaeMiniProfiler = {
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
             .find(".rpc-link")
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
+            .find(".callers-link")
+                .click(function() { $(this).parents("td").find(".callers").slideToggle("fast"); return false; }).end()
             .click(function(e) { e.stopPropagation(); })
             .css("left", jCorner.offset().left + jCorner.width() + 18)
             .slideDown("fast");

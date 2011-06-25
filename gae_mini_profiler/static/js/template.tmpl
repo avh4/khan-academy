@@ -44,14 +44,36 @@
                     </tr>
                 </thead>
                 {{each profiler_results.calls}}
+
                 <tr>
                     <td title="${$value.func_desc}">${$value.func_desc_short}</td>
-                    <td class="right">${$value.total_call_count}</td>
+                    <td class="right">
+                        {{if $value.callers_desc.length}}
+                        <a class="callers-link uses_script" href="#callers">${$value.total_call_count}</a>
+
+                        <div class="callers" style="display:none;">
+                            <span class="callers-label">Called by</span>
+                            <div class="callers-content">
+                                {{each $value.callers_desc}}
+                                    <div>
+                                        <span title="${$value.func_desc}">${$value.func_desc_short}</span>
+                                    </div>
+                                {{/each}}
+                            </div>
+                        </div>
+
+                        {{else}}
+
+                        ${$value.total_call_count}
+
+                        {{/if}}
+                    </td>
                     <td class="right">${$value.cumulative_time}</td>
                     <td class="right">${$value.per_call_cumulative}</td>
                     <td class="right">${$value.total_time}</td>
                     <td class="right">${$value.per_call}</td>
                 </tr>
+
                 {{/each}}
             </table>
         </div>

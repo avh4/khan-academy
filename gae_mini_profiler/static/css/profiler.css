@@ -107,6 +107,10 @@
     background-color: #F7F7F7;
 }
 
+.g-m-p .details table .callers-label {
+    color: #CCC;
+}
+
 .g-m-p .details th {
     background-color: #F7F7F7;
     font-weight: bold;
