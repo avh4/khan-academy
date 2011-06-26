@@ -16,11 +16,21 @@ var GaeMiniProfiler = {
         GaeMiniProfiler.fetch(requestId, fShowImmediately);
     },
 
-    fetch: function(requestId, fShowImmediately) {
+    fetch: function(requestId, fShowImmediately, fSecondTry) {
         $.get(
                 "/gae_mini_profiler/request",
                 { "request_id": requestId },
                 function(data) {
+                    if (!data && !fSecondTry) {
+                        // App Engine is occasionally reporting a "200 Good to
+                        // go" response in the dev environment after local code
+                        // changes, for the first request only. Hackish
+                        // workaround.
+                        // http://code.google.com/p/app-engine-patch/issues/detail?id=252
+                        GaeMiniProfiler.fetch(requestId, fShowImmediately, true);
+                        return;
+                    }
+
                     GaeMiniProfilerTemplate.init(function() { GaeMiniProfiler.finishFetch(data, fShowImmediately); });
                 },
                 "json"

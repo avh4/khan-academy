@@ -102,6 +102,8 @@
 
 .g-m-p .details table {
     margin-top: 18px;
+    border-spacing: 0;
+    font-size: 12px;
 }
 
 .g-m-p .details table tr:nth-child(odd) {
