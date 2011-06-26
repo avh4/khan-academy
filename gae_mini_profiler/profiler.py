@@ -54,8 +54,8 @@ class RequestStats(object):
             self.url += "?%s" % environ.get("QUERY_STRING")
 
         self.url_short = self.url
-        if len(self.url_short) > 30:
-            self.url_short = self.url_short[:30] + "..."
+        if len(self.url_short) > 26:
+            self.url_short = self.url_short[:26] + "..."
 
         self.s_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
