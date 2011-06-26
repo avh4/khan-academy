@@ -24,6 +24,22 @@
     padding-bottom: 18px;
 }
 
+.g-m-p, .g-m-p-corner, .g-m-p-shared {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: #444;
+    line-height: 18px;
+}
+
+.g-m-p a, .g-m-p-corner a, .g-m-p-shared a {
+    color: #069;
+    text-decoration: none;
+}
+
+.g-m-p a.uses_script, .g-m-p-corner a.uses_script, .g-m-p-shared a.uses_script {
+    border-bottom: dotted 1px #069
+}
+
 .g-m-p, .g-m-p-corner {
     position: absolute;
     left: 9px;
@@ -52,8 +68,11 @@
 }
 
 .g-m-p .title {
+    font-size: 1.25em;
+    text-align: left;
     font-weight: bold;
     border-bottom: 1px solid #CCC;
+    padding: 0;
 }
 
 .g-m-p .date_and_share {
@@ -118,10 +137,13 @@
     color: #CCC;
 }
 
-.g-m-p .details th {
+.g-m-p .details th, .g-m-p .details th.header {
+    font-size: 12px;
     background-color: #F7F7F7;
     font-weight: bold;
     cursor: pointer;
+    float: none;
+    position: static;
 }
 
 .g-m-p .details th.headerSortUp,
@@ -132,6 +154,7 @@
 .g-m-p .details th,
 .g-m-p .details td {
     padding-right: 18px;
+    vertical-align: top;
 }
 
 .g-m-p .details .left {
@@ -140,12 +163,6 @@
 
 .g-m-p .details .right {
     text-align: right;
-}
-
-.g-m-p-shared {
-    font-family: Helvetica, Arial, sans-serif;
-    font-size: 12px;
-    color: #444;
 }
 
 .g-m-p-shared .shared-teaser-container {
