@@ -25,6 +25,7 @@ from phantom_users import util_notify
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
 # across all GAE instances.
+
 class Setting(db.Model):
 
     value = db.StringProperty()
@@ -357,6 +358,7 @@ class UserExercise(db.Model):
                 user_data.proficient_exercises.append(self.exercise)
                 user_data.need_to_reassess = True
                 user_data.put()
+                util_notify.update(user_data, self, False, True)
 
         else:
             if self.exercise in user_data.proficient_exercises:
@@ -586,11 +588,17 @@ class UserData(db.Model):
     def is_coached_by(self, coach):
         return coach.email() in self.coaches or coach.email().lower() in self.coaches
 
+    
+    
+    
+
+    
+    
     def add_points(self, points):
         if self.points == None:
             self.points = 0
         if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
-            util_notify.update(self.user,self,None,True)
+            util_notify.update(self,None,True)
         self.points += points
         
 

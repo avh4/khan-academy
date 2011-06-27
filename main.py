@@ -10,6 +10,7 @@ import re
 from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
+#import cloner.Clone
 
 from google.appengine.dist import use_library
 use_library('django', '0.96')
@@ -35,6 +36,7 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+from google.appengine.api import taskqueue
 
 import bulk_update.handler
 import facebook
@@ -74,7 +76,7 @@ from templatetags import streak_bar, exercise_message, exercise_icon, user_point
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import allow_phantoms
-
+import cloner
 class VideoDataTest(request_handler.RequestHandler):
 
     def get(self):
@@ -647,7 +649,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                     user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
                     problem_log.earned_proficiency = True
-                    util_notify.update(user, user_data, user_exercise, False, True)
+                    
             else:
                 # Just in case RegisterCorrectness didn't get called.
                 user_exercise.reset_streak()
@@ -659,7 +661,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-            util_notify.update(user,user_data,user_exercise)
+            util_notify.update(user_data,user_exercise)
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
@@ -1460,6 +1462,31 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
             redirect_target = dict_redirects[relative_path]
 
         self.redirect(redirect_target, True)
+
+class TransferHandler(webapp.RequestHandler):
+    def get(self):
+    #     title = "Please wait while we copy your data to your new account."
+    #     message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
+    #     sub_message_html = "This process can take a long time, thank you for your patience."
+    #     self.response.out.write(template.render('phantom_users/transfer.html',
+    #                                             {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html}))
+    # 
+    # def post(self):
+        key = self.request.get('key')
+        # logging.critical("Test")
+        # Add the task to the default queue.
+        newUser = users.User("ParkerTKTest@aol.com")
+        userData = UserData.get_for_current_user()
+        # logging.critical(newUser)
+        # logging.critical(userData)
+        taskqueue.add(url='/transferaccount', name='UserData', params={'key': key, 'data': "UserData", 'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='UserExercise', params={'key': key, 'data': "UserExercise",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='ProblemLog', params={'key': key, 'data': "ProblemLog",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='VideoLog', params={'key': key, 'data': "VideoLog",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='UserVideo', params={'key': key, 'data': "UserVideo",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='UserBadge', params={'key': key, 'data': "UserBadge",'newUser':newUser, 'userData':userData})
+        
+        self.redirect('/transferaccount')
                         
 def real_main():    
     webapp.template.register_template_library('templateext')    
@@ -1603,7 +1630,8 @@ def real_main():
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
         
         ('/notifierstate', util_notify.ToggleNotify),
-
+        ('/transferaccount', cloner.Clone),
+        ('/newaccount', TransferHandler),
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/sendtolog', SendToLog),
