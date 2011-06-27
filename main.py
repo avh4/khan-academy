@@ -67,7 +67,6 @@ import exercises
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
-from jobs import jobs
 from phantom_users import util_notify
 from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
@@ -510,10 +509,10 @@ class ViewAllExercises(request_handler.RequestHandler):
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
 
-            recent_exercises = ex_graph.get_recent_exercises()
-            review_exercises = ex_graph.get_review_exercises(self.get_time())
-            suggested_exercises = ex_graph.get_suggested_exercises()
-            proficient_exercises = ex_graph.get_proficient_exercises()
+        recent_exercises = ex_graph.get_recent_exercises()
+        review_exercises = ex_graph.get_review_exercises(self.get_time())
+        suggested_exercises = ex_graph.get_suggested_exercises()
+        proficient_exercises = ex_graph.get_proficient_exercises()
 
         for exercise in ex_graph.exercises:
             exercise.phantom = False
@@ -547,10 +546,6 @@ class ViewAllExercises(request_handler.RequestHandler):
             }
 
         self.render_template('viewexercises.html', template_values)
-
-            self.render_template('viewexercises.html', template_values)
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
