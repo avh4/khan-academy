@@ -36,6 +36,7 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+from google.appengine.api import taskqueue
 
 import bulk_update.handler
 import facebook
@@ -1455,6 +1456,31 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
             redirect_target = dict_redirects[relative_path]
 
         self.redirect(redirect_target, True)
+
+class TransferHandler(webapp.RequestHandler):
+    def get(self):
+    #     title = "Please wait while we copy your data to your new account."
+    #     message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
+    #     sub_message_html = "This process can take a long time, thank you for your patience."
+    #     self.response.out.write(template.render('phantom_users/transfer.html',
+    #                                             {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html}))
+    # 
+    # def post(self):
+        key = self.request.get('key')
+        # logging.critical("Test")
+        # Add the task to the default queue.
+        newUser = users.User("ParkerTKTest@aol.com")
+        userData = UserData.get_for_current_user()
+        # logging.critical(newUser)
+        # logging.critical(userData)
+        taskqueue.add(url='/transferaccount', name='UserData', params={'key': key, 'data': "UserData", 'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='UserExercise', params={'key': key, 'data': "UserExercise",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='ProblemLog', params={'key': key, 'data': "ProblemLog",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='VideoLog', params={'key': key, 'data': "VideoLog",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='UserVideo', params={'key': key, 'data': "UserVideo",'newUser':newUser, 'userData':userData})
+        taskqueue.add(url='/transferaccount', name='UserBadge', params={'key': key, 'data': "UserBadge",'newUser':newUser, 'userData':userData})
+        
+        self.redirect('/transferaccount')
                         
 def real_main():    
     webapp.template.register_template_library('templateext')    
@@ -1599,6 +1625,7 @@ def real_main():
         
         ('/notifierstate', util_notify.ToggleNotify),
         ('/transferaccount', cloner.Clone),
+        ('/newaccount', TransferHandler),
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/sendtolog', SendToLog),

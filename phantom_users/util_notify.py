@@ -20,7 +20,7 @@ import string
 def update(user_data,user_exercise,threshold = False, isProf = False):
     if user_data == None:
         return False
-    
+    user = user_data.user
     if not phantom_util.is_phantom_email(user.email()):
         return False
 
@@ -31,10 +31,8 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     if user_exercise != None:
         numquest = user_exercise.total_done
         prof = str(user_exercise.exercise.to_display_name())
-        prof = string.replace(prof,"_"," ")
-        prof = prof.title() # clean up 'subtraction_1' to 'Subtraction 1', etc
     
-    user = user_data.user
+    
     numbadge = user_data.badges
     user_badges = memcache.get(badges.UserBadgeNotifier.key_for_user(user)) or [] #Only allow badge notifications when earned
     numpoint = user_data.points

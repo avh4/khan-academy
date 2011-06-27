@@ -1,7 +1,7 @@
 //	HYPE.documents["TreeCopyFade"]
 
 (function HYPE_DocumentLoader() {
-	var resourcesFolderName = "TreeCopyFade_Resources";
+	var resourcesFolderName = "../images/TreeCopyFade_Resources";
 	var documentName = "TreeCopyFade";
 	var documentLoaderFilename = "treecopyfade_hype_generated_script.js";
 
@@ -27,7 +27,7 @@
 		var headElement = document.getElementsByTagName('head')[0];
 		var scriptElement = document.createElement('script');
 		scriptElement.type= 'text/javascript';
-		scriptElement.src = resourcesFolderName + '/' + 'HYPE.js';
+		scriptElement.src = '/javascript/' + 'HYPE.js';
 		headElement.appendChild(scriptElement);
 		return;
 	}
