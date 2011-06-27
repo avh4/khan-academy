@@ -104,6 +104,9 @@ builtins:
 - appstats: on
 - datastore_admin: on
 
+inbound_services:
+- warmup
+
 admin_console:
   pages:
     - name: AppStats
