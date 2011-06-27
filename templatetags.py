@@ -96,9 +96,9 @@ def related_videos(exercise_videos, show_points=False):
 
 @register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
 def exercise_icon(exercise, App):
-    s_prefix = "proficient-badge"
+    s_prefix = "node"
     if exercise.summative:
-        s_prefix = "challenge"
+        s_prefix = "node-challenge"
 
     src = ""
     if exercise.review:
@@ -147,7 +147,7 @@ def streak_bar(user_exercise):
     if hasattr(user_exercise, "longest_streak"):
         longest_streak = user_exercise.longest_streak
 
-    streak_max_width = 228
+    streak_max_width = 227
 
     streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * streak))
     longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * longest_streak))

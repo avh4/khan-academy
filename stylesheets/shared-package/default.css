@@ -1396,16 +1396,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border: 1px solid #aaa;
     }
     .exercise-badge .energy-points-badge {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -680px;
-        width: 52px;
-        height: 37px;
-        line-height: 21px;
-        text-align: center;
-        padding-top: 1px;
-        color: white;
-        font-weight: bold;
-        text-shadow: 0px -1px 0px #666;
+        padding: 0;
+		width: 48px;
+		height: 20px;
+        line-height: 19px;
         position: absolute;
         left: 265px;
         top: 5px;
@@ -1437,7 +1431,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .exercise-badge .streak-bar {
          position: absolute;
          left: 85px;
-         bottom: 4px;
+         bottom: 5px;
     }
 
 .achievement-badge-counts {
@@ -1496,18 +1490,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin: 10px 0;
     }
     .achievement-badge .energy-points-badge {
-        background-image: url(/images/non-repeating-sprites.png);
-        background-position: -10px -680px;
-        width: 52px;
-        height: 37px;
-        text-align: center;
-        padding-top: 1px;
-        color: white;
-        font-weight: bold;
-        text-shadow: 0px -1px 0px #666;
+        padding: 1px 0 0;
+        width: 48px;
+        height: 21px;
+        line-height: 19px;
         position: absolute;
         right: 5px;
-        top: 5px;
+        top: 7px;
     }
     .achievement-badge .achievement-title {
         font-weight: bold;
@@ -1836,7 +1825,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         #answer_area .info-box #related-video-list .video-energy-points,
         .video_extra_links .video-energy-points,
         #user-info .energy-points-badge,
-        #profile-header #high-level-stats .energy-points-badge {
+        #profile-header #high-level-stats .energy-points-badge,
+        .energy-points-badge {
             background: #0075b1;
             float: right;
             line-height: 18px;
@@ -1845,7 +1835,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            text-shadow: 0px -1px 0px #004163;
             
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
