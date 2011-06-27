@@ -5,6 +5,8 @@ from google.appengine.api import users
 enabled_profiler_emails = [
     "kamens@gmail.com",
     "jasonrosoff@gmail.com",
+    "joelburget@gmail.com",
+    "dmnd@desmondbrand.com",
 ]
 
 # Customize should_profile to return true whenever a request should be profiled.
