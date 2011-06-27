@@ -68,4 +68,4 @@ MIN_REVIEW_INTERVAL_DAYS = 1
 MAX_GRAPH_DAY_RANGE = 30
 
 # Approximate Video Count to display on content pages
-APPROX_VID_COUNT = 2100
+APPROX_VID_COUNT = 2400
