@@ -1657,7 +1657,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .exercise-badge.single-exercise .energy-points-badge {
     left: auto;
     right: 5px;
-    top: 21px;
+    top: 22px;
+    height:21px;
+    padding-top: 1px;
 }
 .exercise-badge.single-exercise .exercise-title {
     font-size:18px;
