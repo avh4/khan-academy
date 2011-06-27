@@ -15,6 +15,9 @@ var Util = {
     },
     
     bindEventsToObject: function(source, events, handler) {
+        if (typeof(events) === 'string') {
+            events = events.split(" ");
+        }
         for (var i in events) {
             (function(method) {
                 source.bind(events[i], function(event) {
@@ -311,7 +314,7 @@ var addListTextBox = {
     
     init: function() {
         this.element = $('#newlist-box');
-        Util.bindEventsToObject(this.element, ['keypress', 'keyup', 'focusout'], this);
+        Util.bindEventsToObject(this.element, 'keypress keyup focusout', this);
     },
     
     keypress: function(event) {
@@ -353,9 +356,6 @@ var addListTextBox = {
                 var $el = $('<li class="group-'+group.key+'"><a href="students?group_id='+group.key+'" class="bullet">'+group.name+'</a></li>');
                 $('#custom-groups').append($el);
                 $el.find('a').click(StudentLists.listClick);
-
-                // add a new item to the dropdown menu
-                StudentLists.redrawListsMenu();
             },
             complete: function(){addListTextBox.hide();}
         });
@@ -380,7 +380,7 @@ var addStudentTextBox = {
         });
         
         
-        Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
+        Util.bindEventsToObject(this.element, 'focus blur keyup keypress', this);
     },
 
     focus: function(event) {
@@ -447,7 +447,7 @@ var addToGroupTextBox = {
             this._trigger("selected", e, { item: this.active });
         };
         
-        Util.bindEventsToObject(this.element, ['focus', 'blur', 'keyup', 'keypress'], this);
+        Util.bindEventsToObject(this.element, 'focus blur keyup keypress', this);
     },
     
     generateSource: function() {
