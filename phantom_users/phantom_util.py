@@ -72,13 +72,13 @@ def allow_phantoms(method):
         method(self, *args, **kwargs)
     return wrapper
 
-def disallow_phantoms(method, redirect_to='/'):
+def disallow_phantoms(method, redirect_to='/login'):
     '''Decorator used to redirect phantom users.'''
 
     def wrapper(self, *args, **kwargs):
         user = util.get_current_user()
 
-        if is_phantom_user(user):
+        if util.is_phantom_user(user):
             self.redirect(redirect_to)
         else:
             method(self, *args, **kwargs)

@@ -19,6 +19,7 @@ import util
 import request_handler
 import privileges
 import voting
+from phantom_users.phantom_util import disallow_phantoms
 
 class ModeratorList(request_handler.RequestHandler):
 
@@ -128,6 +129,7 @@ class PageQuestions(request_handler.RequestHandler):
 
 class AddAnswer(request_handler.RequestHandler):
 
+    @disallow_phantoms
     def post(self):
 
         user = util.get_current_user()
@@ -196,6 +198,7 @@ class Answers(request_handler.RequestHandler):
 
 class AddQuestion(request_handler.RequestHandler):
 
+    @disallow_phantoms
     def post(self):
 
         user = util.get_current_user()
@@ -232,6 +235,7 @@ class AddQuestion(request_handler.RequestHandler):
 
 class EditEntity(request_handler.RequestHandler):
 
+    @disallow_phantoms
     def post(self):
 
         user = util.get_current_user()
@@ -265,6 +269,7 @@ class EditEntity(request_handler.RequestHandler):
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
 
 class VoteEntity(request_handler.RequestHandler):
+    @disallow_phantoms
     def post(self):
         # You have to be logged in to vote
         user = util.get_current_user()
@@ -279,6 +284,7 @@ class VoteEntity(request_handler.RequestHandler):
                 entity.put()
 
 class FlagEntity(request_handler.RequestHandler):
+    @disallow_phantoms
     def post(self):
         # You have to at least be logged in to flag
         user = util.get_current_user()
@@ -330,6 +336,7 @@ class ChangeEntityType(request_handler.RequestHandler):
 
 class DeleteEntity(request_handler.RequestHandler):
 
+    @disallow_phantoms
     def post(self):
 
         user = util.get_current_user()

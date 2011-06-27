@@ -13,6 +13,7 @@ import app
 import util
 import request_handler
 import voting
+from phantom_users.phantom_util import disallow_phantoms
 
 class PageComments(request_handler.RequestHandler):
 
@@ -40,6 +41,7 @@ class PageComments(request_handler.RequestHandler):
 
 class AddComment(request_handler.RequestHandler):
 
+    @disallow_phantoms
     def post(self):
 
         user = util.get_current_user()
