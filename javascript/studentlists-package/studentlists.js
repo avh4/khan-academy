@@ -139,7 +139,6 @@ var StudentLists = {
         // create lists
         addListTextBox.init();
         $('#newlist-button').click(function(event) {
-            event.preventDefault();
             addListTextBox.element.show().focus();
         });
         
@@ -169,7 +168,6 @@ var StudentLists = {
                 success: function(data, status, jqxhr) {
                     $('#custom-groups .group-'+StudentLists.currentGroup).remove();
                     StudentLists.removeGroup(StudentLists.currentGroup);
-                    StudentLists.redrawListsMenu();
                     $('#group-allstudents a').click();
                 }
             });
@@ -506,7 +504,14 @@ var addToGroupTextBox = {
 
 var editListsMenu = {
     init: function() {
-        $('.student-row .css-menu > ul > li').click(function(event){editListsMenu.addChildrenToDropdown(event);});
+        $('.lists-css-menu > ul > li').click(function(event){editListsMenu.addChildrenToDropdown(event);});
+        
+        $('.lists-css-menu .list-option-newlist').click(function(event) {
+            // if this is called synchronously, the css-menu doesn't disappear.
+            setTimeout(function() {
+                $('#newlist-button').click();
+            }, 50);
+        });
     },
     
     addChildrenToDropdown: function(event) {
@@ -521,11 +526,11 @@ var editListsMenu = {
             $ul = $('<ul></ul>');
             $menu.append($ul);
         }
-        $ul.children().remove();
+        $ul.children('.list-option').remove();
         
         // add a line for each group
         jQuery.each(StudentLists.study_groups, function(i, group) {
-            var $el = $('<li><label><input type="checkbox">' + group.name + '</label></li>');
+            var $el = $('<li class="list-option"><label><input type="checkbox">' + group.name + '</label></li>');
             var $input = $el.find('input');
             
             // get student
@@ -534,7 +539,7 @@ var editListsMenu = {
                 $input.attr('checked', true);
             }
             
-            $ul.append($el);
+            $ul.prepend($el);
             $input.click(function(event){editListsMenu.itemClick(event);})
                   .data('group', group);
         });

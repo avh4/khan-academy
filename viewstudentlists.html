@@ -106,6 +106,12 @@ h2 {
     padding: 4px;
     cursor: pointer;
 }
+.lists-css-menu .list-option-newlist {
+    display: block;
+    padding: 4px;
+    cursor: pointer;
+    border-top: 1pt solid #ddd;
+}
 .lists-css-menu > ul > li > ul > li:hover {
     background: white;
 }
@@ -219,7 +225,11 @@ $(function() {
             <span class="float-right">
                 <div class="css-menu lists-css-menu">
                     <ul>
-                        <li>Edit Lists</li>
+                        <li>Edit Lists
+                            <ul>
+                                <li class="list-option-newlist">+ Create a new list...</li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
                 <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
