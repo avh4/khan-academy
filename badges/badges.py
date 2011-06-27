@@ -316,7 +316,7 @@ class UserBadgeNotifier:
 
     @staticmethod
     def pop_for_current_user():
-        return UserBadgeNotifier.pop_for_user(util.get_current_user(allow_phantoms=True))
+        return UserBadgeNotifier.pop_for_user(util.get_current_user())
 
     @staticmethod
     def pop_for_user(user):

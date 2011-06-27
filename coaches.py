@@ -22,8 +22,10 @@ from badges import util_badges
 
 from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
 from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPerMinuteGraph, ClassTimeGraph
+from phantom_users.phantom_util import disallow_phantoms
 
 class ViewCoaches(request_handler.RequestHandler):
+    @disallow_phantoms
     def get(self):
         user = util.get_current_user()
         if user:
@@ -44,6 +46,7 @@ class ViewCoaches(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
 
 class ViewStudents(request_handler.RequestHandler):
+    @disallow_phantoms
     def get(self):
         user = util.get_current_user()
         if user:
@@ -64,6 +67,7 @@ class ViewStudents(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
 
 class RegisterCoach(request_handler.RequestHandler):
+    @disallow_phantoms
     def post(self):
         user = util.get_current_user()
 
@@ -90,6 +94,7 @@ class RegisterCoach(request_handler.RequestHandler):
         self.redirect("/coaches?invalid_coach=1")
 
 class RequestStudent(request_handler.RequestHandler):
+    @disallow_phantoms
     def post(self):
         user = util.get_current_user()
 
@@ -110,6 +115,7 @@ class RequestStudent(request_handler.RequestHandler):
         self.redirect("/students?invalid_student=1")
 
 class AcceptCoach(request_handler.RequestHandler):
+    @disallow_phantoms
     def get(self):
         user = util.get_current_user()
 
@@ -136,6 +142,7 @@ class AcceptCoach(request_handler.RequestHandler):
         self.redirect("/coaches")
 
 class UnregisterCoach(request_handler.RequestHandler):
+    @disallow_phantoms
     def get(self):
         user = util.get_current_user()
 
@@ -158,6 +165,7 @@ class UnregisterCoach(request_handler.RequestHandler):
         self.redirect("/coaches") 
 
 class UnregisterStudent(request_handler.RequestHandler):
+    @disallow_phantoms
     def get(self):
         user = util.get_current_user()
 

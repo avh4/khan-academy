@@ -17,7 +17,7 @@ from api.auth.google_util import get_google_user_from_oauth_map
 from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
-def get_current_user(allow_phantoms=False):
+def get_current_user(bust_cache=False):
     user = None
 
     oauth_map = current_oauth_map()
@@ -25,7 +25,7 @@ def get_current_user(allow_phantoms=False):
         user = get_current_user_from_oauth_map(oauth_map)
 
     if not user and allow_cookie_based_auth():
-        user = get_current_user_from_cookies_unsafe(allow_phantoms=allow_phantoms)
+        user = get_current_user_from_cookies_unsafe()
 
     return user
 
@@ -37,11 +37,11 @@ def get_current_user_from_oauth_map(oauth_map):
 
 # get_current_user_from_cookies_unsafe is labeled unsafe because it should
 # never be used in our JSONP-enabled API. All calling code should just use get_current_user.
-def get_current_user_from_cookies_unsafe(allow_phantoms=False):
+def get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
-    if not user and allow_phantoms:
+    if not user:
         user = get_phantom_user_from_cookies()
     return user
         

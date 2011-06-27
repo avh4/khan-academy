@@ -11,6 +11,7 @@ from templatefilters import seconds_to_time_string
 import consts
 import util
 import topics_list
+from inspect import getmembers
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -101,7 +102,9 @@ def exercise_icon(exercise, App):
         s_prefix = "challenge"
 
     src = ""
-    if exercise.review:
+    if exercise.phantom:
+        src = "/images/proficient-badge-phantom.png"
+    elif exercise.review:
         src = "/images/proficient-badge-review.png" # No reviews for summative exercises yet
     elif exercise.suggested:
         src = "/images/%s-suggested.png" % s_prefix
@@ -140,12 +143,15 @@ def simple_student_info(user_data):
 
 @register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))
 def streak_bar(user_exercise):
-
     streak = user_exercise.streak
     longest_streak = 0
 
     if hasattr(user_exercise, "longest_streak"):
         longest_streak = user_exercise.longest_streak
+
+    if hasattr(user_exercise, 'status') and user_exercise.status == 'Phantom':
+        streak = 0
+        longest_streak = 0
 
     streak_max_width = 228
 
