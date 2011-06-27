@@ -914,7 +914,7 @@ class ViewHomePage(request_handler.RequestHandler):
                 { 
                     "href": "/video/khan-academy-on-pbs-newshour--edited", 
                     "class": "thumb-pbs_thumbnail", 
-                    "desc": "Khan Academy on PBS Newshour",
+                    "desc": "Khan Academy on PBS NewsHour",
                     "youtube_id": "4jXv03sktik",
                     "selected": False,
                 },
@@ -944,7 +944,7 @@ class ViewHomePage(request_handler.RequestHandler):
                 { 
                     "href": "/video/forbes--names-you-need-to-know---khan-academy", 
                     "class": "thumb-forbes_thumbnail", 
-                    "desc": "Forbes names you need to know",
+                    "desc": "Forbes Names You Need To Know",
                     "youtube_id": "UkfppuS0Plg",
                     "selected": False,
                 },
