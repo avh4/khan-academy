@@ -247,7 +247,8 @@ var StudentLists = {
     redrawListView: function() {
         // show or hide students depending on group membership
         var nstudents = 0;
-        var title = 'Students';
+        var title;
+        var titleHref;
         var countstring = 'student';
 
         if(StudentLists.currentGroup == 'requests') {
@@ -256,6 +257,7 @@ var StudentLists = {
             nstudents = $('#requested-students .student-row').length;
 
             title = 'Requests';
+            $('.students-header h2 a').removeAttr('href');
             $('#delete-group').hide();
             countstring = 'potential student';
         }
@@ -269,6 +271,7 @@ var StudentLists = {
 
                 nstudents = all.length;
                 title = 'All students';
+                titleHref = '/class_profile';
                 $('#delete-group').hide();
             }
             else {
@@ -286,6 +289,7 @@ var StudentLists = {
 
                 var group = StudentLists.study_groups_by_id[StudentLists.currentGroup];
                 title = group.name;
+                titleHref = '/class_profile?group_id=' + group.key
                 $('#delete-group').show();
             }
         }
@@ -303,7 +307,7 @@ var StudentLists = {
                                                 + countstring
                                                 + (nstudents==1 ? '' : 's');
         $('#nstudents').html(nstudentsStr);
-        $('.students-header h2').html(title);
+        $('.students-header h2 a').html(title).attr('href', titleHref);
     }
 };
 
