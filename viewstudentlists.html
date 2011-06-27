@@ -224,7 +224,10 @@ $(function() {
                 </div>
                 <a href=""><img src="images/round_delete.png" class="delete-button" /></a>
             </span>
-            <div><span class="student-name">{{ student.nickname }}</span> <span class="student-email">{{ student.email|escape }}</span></div>
+            <div>
+                <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}">{{ student.nickname }}</a></span>
+                <span class="student-email">{{ student.email|escape }}</span>
+            </div>
         </div>
         {% endfor %}
     </div>
