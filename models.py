@@ -450,6 +450,19 @@ class UserData(db.Model):
         self.in_migration = True
         self.put()
 
+    def stop_migration(self):
+        self.in_migration = False
+        self.put()
+        
+    @staticmethod
+    def add_to_copied(copied):
+        data = UserData.get_for_current_user()
+        list = data.copied_info
+        list.append(copied)
+        data.copied_info = list
+        data.put()
+        #self.put()
+        
     @staticmethod    
     def get_for(user):
         if not user:

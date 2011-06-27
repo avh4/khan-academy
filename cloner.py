@@ -9,6 +9,7 @@ from google.appengine.api import users
 def clone_userdata(userData, newUser):
     #Clone UserData
     c = clone_entity(userData, True, key_name='user_email_key_'+newUser.email(), user=newUser)
+    models.UserData.add_to_copied("UserData")
 
 def clone_userexercise(userData, newUser):
     #Clone UserExercise
@@ -16,6 +17,7 @@ def clone_userexercise(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, key_name=b.get_key_for_user(newUser), user=newUser)
+    models.UserData.add_to_copied("UserExercise")
 
 def clone_problemlog(userData, newUser):
     #Clone ProblemLog
@@ -23,6 +25,7 @@ def clone_problemlog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
+    models.UserData.add_to_copied("ProblemLog")
 
 def clone_videolog(userData, newUser):
     #Clone VideoLog
@@ -30,6 +33,7 @@ def clone_videolog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
+    models.UserData.add_to_copied("VideoLog")
 
 def clone_uservideo(userData, newUser):
     #Clone UserVideo
@@ -38,6 +42,7 @@ def clone_uservideo(userData, newUser):
     for b in query:
         tkey = b.get_key_name(b.video,newUser)
         b = clone_entity(b, True, key_name=tkey, user=newUser)
+    models.UserData.add_to_copied("UserVideo")
 
 def clone_userbadge(userData, newUser):
     #Clone UserBadge
@@ -47,6 +52,7 @@ def clone_userbadge(userData, newUser):
         name_with_context = "["+b.target_context_name+"]" or ""
         key_name = newUser.email() + ":" + b.badge_name + name_with_context
         b = clone_entity(b, True, key_name=key_name, user=newUser)
+    models.UserData.add_to_copied("UserBadge")
         
 
 def clone_entity(e, store, **extra_args):
@@ -83,7 +89,7 @@ class Clone(request_handler.RequestHandler):
         # userData = self.request.get('userData') 
         # newUser = self.request.get('newUser')
         userData = models.UserData.get_for_current_user()
-        newUser = users.User("Test@test.com")
+        newUser = users.User("New@test.com")
         # logging.critical(datatype)
         # logging.critical(userData)
         # logging.critical(newUser)

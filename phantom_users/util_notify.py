@@ -39,12 +39,12 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     
     #numprof = proficient_exercises
     
-    #Proficiency
-    if isProf:
-        notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". <span class='notification-bar-login'><a href='#'>Login</a> or <a href='#'>register</a></span> to save your progress")
     # Every 10 questions
     if numquest != None and numquest % 10 == 0:
         notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions so far! <span class='notification-bar-login'><a href='#'>Login</a> or <a href='#'>register</a></span> to save your progress")
+    #Proficiency
+    if isProf:
+        notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". <span class='notification-bar-login'><a href='#'>Login</a> or <a href='#'>register</a></span> to save your progress")
     #First Badge
     if numbadge != None and len(numbadge) == 1 and (len(user_badges) > 0):
         notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! You should <span class='notification-bar-login'><a href='#'>login</a> or <a href='#'>register</a></span> to save your progress")
