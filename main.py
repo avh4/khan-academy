@@ -1480,7 +1480,7 @@ class TransferHandler(webapp.RequestHandler):
         userData = UserData.get_for_current_user()
         logging.critical(userData.user)
         logging.critical(userData)
-        #userData.start_migration()
+        userData.start_migration()
         
         
         taskqueue.add(url='/transferaccount', name='UserData', params={'key': key, 'data': "UserData"})
