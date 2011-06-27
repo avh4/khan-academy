@@ -1567,7 +1567,6 @@ def main():
         ('/notifierstate', util_notify.ToggleNotify),
         ('/transferaccount', cloner.Clone),
         ('/newaccount', TransferHandler),
-        ('/jobs/dev', jobs.FullTimeDeveloper),
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
