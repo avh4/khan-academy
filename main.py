@@ -1467,18 +1467,22 @@ class TransferHandler(webapp.RequestHandler):
     # 
     # def post(self):
         key = self.request.get('key')
+        
         # logging.critical("Test")
         # Add the task to the default queue.
-        newUser = users.User("ParkerTKTest@aol.com")
+        # newUser = users.User("ParkerTKTest@aol.com")
         userData = UserData.get_for_current_user()
-        # logging.critical(newUser)
-        # logging.critical(userData)
-        taskqueue.add(url='/transferaccount', name='UserData', params={'key': key, 'data': "UserData", 'newUser':newUser, 'userData':userData})
-        taskqueue.add(url='/transferaccount', name='UserExercise', params={'key': key, 'data': "UserExercise",'newUser':newUser, 'userData':userData})
-        taskqueue.add(url='/transferaccount', name='ProblemLog', params={'key': key, 'data': "ProblemLog",'newUser':newUser, 'userData':userData})
-        taskqueue.add(url='/transferaccount', name='VideoLog', params={'key': key, 'data': "VideoLog",'newUser':newUser, 'userData':userData})
-        taskqueue.add(url='/transferaccount', name='UserVideo', params={'key': key, 'data': "UserVideo",'newUser':newUser, 'userData':userData})
-        taskqueue.add(url='/transferaccount', name='UserBadge', params={'key': key, 'data': "UserBadge",'newUser':newUser, 'userData':userData})
+        logging.critical(userData.user)
+        logging.critical(userData)
+        #userData.start_migration()
+        
+        
+        taskqueue.add(url='/transferaccount', name='UserData', params={'key': key, 'data': "UserData"})
+        taskqueue.add(url='/transferaccount', name='UserExercise', params={'key': key, 'data': "UserExercise"})
+        taskqueue.add(url='/transferaccount', name='ProblemLog', params={'key': key, 'data': "ProblemLog"})
+        taskqueue.add(url='/transferaccount', name='VideoLog', params={'key': key, 'data': "VideoLog"})
+        taskqueue.add(url='/transferaccount', name='UserVideo', params={'key': key, 'data': "UserVideo"})
+        taskqueue.add(url='/transferaccount', name='UserBadge', params={'key': key, 'data': "UserBadge"})
         
         self.redirect('/transferaccount')
                         

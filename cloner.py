@@ -83,10 +83,10 @@ class Clone(request_handler.RequestHandler):
         # userData = self.request.get('userData') 
         # newUser = self.request.get('newUser')
         userData = models.UserData.get_for_current_user()
-        newUser = users.User("ParkerTest@test.com")
-        logging.critical(datatype)
-        logging.critical(userData)
-        logging.critical(newUser)
+        newUser = users.User("Test@test.com")
+        # logging.critical(datatype)
+        # logging.critical(userData)
+        # logging.critical(newUser)
         
         
         if datatype == "UserData":

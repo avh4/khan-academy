@@ -418,6 +418,8 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
+    in_migration = db.BooleanProperty(default=False)
+    copied_info = db.StringListProperty()
 
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
@@ -442,6 +444,11 @@ class UserData(db.Model):
             if user_data is not None:
                 return user_data
         return UserData()
+
+
+    def start_migration(self):
+        self.in_migration = True
+        self.put()
 
     @staticmethod    
     def get_for(user):
