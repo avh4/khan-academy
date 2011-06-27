@@ -4,6 +4,7 @@ import logging
 import unicodedata
 import urllib2
 import hashlib
+from functools import wraps
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -53,6 +54,7 @@ def allow_phantoms(method):
     experiment, and would be forced to login otherwise.
     '''
 
+    @wraps(method)
     def wrapper(self, *args, **kwargs):
         user = util.get_current_user()
 
@@ -75,6 +77,7 @@ def allow_phantoms(method):
 def disallow_phantoms(method, redirect_to='/login'):
     '''Decorator used to redirect phantom users.'''
 
+    @wraps(method)
     def wrapper(self, *args, **kwargs):
         user = util.get_current_user()
 

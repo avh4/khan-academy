@@ -45,10 +45,7 @@ def dumps(obj):
                 valueClass = str(value.__class__)
                 if is_visible_class_name(valueClass):
                     value = dumps(value)
-                    if value != None:
-                        properties[property] = value
-                    else:
-                        properties[property] = ""
+                    properties[property] = value
             except:
                 continue
 

@@ -205,9 +205,6 @@ var VideoControls = {
     initThumbnails: function() {
 
         var jelThumbnails = $("#thumbnails");
-        
-        this.thumbnailResize(jelThumbnails);
-        $(window).resize(function(){ VideoControls.thumbnailResize(jelThumbnails); });
 
         jelThumbnails.cycle({ 
             fx:     'scrollHorz', 
@@ -220,15 +217,12 @@ var VideoControls = {
             next: '#arrow-right'
         });
 
+        // We want #thumbnails to be full width even though the cycle plugin doesn't
+        jelThumbnails.css({ width: "" });
+
         $(".thumbnail_link", jelThumbnails).click(VideoControls.thumbnailClick);
     },
 
-    thumbnailResize: function(jelThumbnails) {
-        var width = jelThumbnails.parent().width();
-        jelThumbnails.width(width);
-        $("table", jelThumbnails).width(width);
-    },
-    
     thumbnailClick: function() {
         var jelParent = $(this).parents("td").first();
         var youtubeId = jelParent.attr("data-youtube-id");

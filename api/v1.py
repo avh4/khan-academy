@@ -145,7 +145,6 @@ def playlists_library():
     return playlist_structure
 
 @route("/api/v1/playlists/library/list", methods=["GET"])
-@etag(lambda: models.Setting.cached_library_content_date())
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(
@@ -190,11 +189,8 @@ def video(video_id):
 @jsonify
 def video_download_available(video_id):
     video = models.Video.all().filter("youtube_id =", video_id).get()
-    logging.critical("A")
     if video:
-        logging.critical("B")
         video.download_available = request.request_bool("available", default=False)
-        logging.critical("C: %s" % video.download_available)
         video.put()
     return video
 

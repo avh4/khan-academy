@@ -1129,7 +1129,7 @@ a:link.google-analytics-link-track
 		border-top: 0;
 	}
 		#library #library-content #library-content-main {
-			padding: 0;
+			padding: 0 0 38px;
 		}
 			#library #library-content #library-content-main h2 {
 				margin-top: 0;
@@ -2274,6 +2274,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #thumbnails_container td {
     text-align: center;
+}
+
+#thumbnails > * {
+    width: 100%;
 }
 
 #thumbnails td a {
