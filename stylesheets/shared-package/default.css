@@ -131,6 +131,7 @@ hr {
     line-height: 22px;
     padding: 5px 10px;
     position: relative;
+    *position: static;
     margin: 0;
     text-decoration: none;
     
@@ -1236,12 +1237,14 @@ a:link.google-analytics-link-track
                 text-overflow: ellipsis;
                 white-space: nowrap;
                 color: #666666;
+                line-height: 18px;
             }
 			#library #library-content #library-content-main a.vl {
 				font-weight: normal;	
 				background-image: url(/images/non-repeating-sprites.png);
                 background-position: -56px -36px;
 				padding: 0 2px 0 13px;
+				line-height: 18px;
 			}
 			#library #library-content #library-content-main a.vl:hover {
                 color: black;
@@ -2126,6 +2129,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 /* Contribute styles */
 #contribute {
     text-align: justify;
+    *position: static;
 }
 #contribute .simple-button .with-icon {
     float: left;
