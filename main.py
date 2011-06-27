@@ -42,11 +42,14 @@ import bulk_update.handler
 import facebook
 import layer_cache
 import request_cache
+from gae_mini_profiler import profiler
 import autocomplete
 import coaches
 import knowledgemap
 import consts
 import youtube_sync
+import warmup
+import library
 
 from search import Searchable
 import search
@@ -507,10 +510,10 @@ class ViewAllExercises(request_handler.RequestHandler):
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
 
-        recent_exercises = ex_graph.get_recent_exercises()
-        review_exercises = ex_graph.get_review_exercises(self.get_time())
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
+            recent_exercises = ex_graph.get_recent_exercises()
+            review_exercises = ex_graph.get_review_exercises(self.get_time())
+            suggested_exercises = ex_graph.get_suggested_exercises()
+            proficient_exercises = ex_graph.get_proficient_exercises()
 
         for exercise in ex_graph.exercises:
             exercise.phantom = False
@@ -544,6 +547,10 @@ class ViewAllExercises(request_handler.RequestHandler):
             }
 
         self.render_template('viewexercises.html', template_values)
+
+            self.render_template('viewexercises.html', template_values)
+        else:
+            self.redirect(util.create_login_url(self.request.uri))
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -635,13 +642,13 @@ class RegisterAnswer(request_handler.RequestHandler):
             if exercise.summative:
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
-            if user_exercise.total_done:
-                user_exercise.total_done = user_exercise.total_done + 1
-            else:
-                user_exercise.total_done = 1
+            user_exercise.total_done += 1
 
             if correct:
-                user_exercise.streak = user_exercise.streak + 1
+
+                user_exercise.total_correct += 1
+                user_exercise.streak += 1
+
                 if user_exercise.streak > user_exercise.longest_streak:
                     user_exercise.longest_streak = user_exercise.streak
                 if user_exercise.streak >= exercise.required_streak() and not proficient:
@@ -794,84 +801,8 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         self.get()
 
     def get(self):
-        library_content_html(bust_cache=True)
+        library.library_content_html(bust_cache=True)
         self.response.out.write("Library content regenerated")  
-
-@layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
-        ) 
-def library_content_html(bust_cache = False):
-
-    # No cache found -- regenerate HTML
-    all_playlists = []
-
-    dict_videos = {}
-    dict_videos_counted = {}
-    dict_playlists = {}
-    dict_playlists_by_title = {}
-    dict_video_playlists = {}
-
-    for video in Video.all():
-        dict_videos[video.key()] = video
-
-    for playlist in Playlist.all():
-        dict_playlists[playlist.key()] = playlist
-        if playlist.title in topics_list:
-            dict_playlists_by_title[playlist.title] = playlist
-
-    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
-        playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
-        video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
-
-        if dict_videos.has_key(video_key) and dict_playlists.has_key(playlist_key):
-            video = dict_videos[video_key]
-            playlist = dict_playlists[playlist_key]
-            fast_video_playlist_dict = {"video":video, "playlist":playlist}
-
-            if dict_video_playlists.has_key(playlist_key):
-                dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
-            else:
-                dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
-
-            dict_videos_counted[video_key] = True
-
-    # Update count of all distinct videos associated w/ a live playlist
-    Setting.count_videos(len(dict_videos_counted.keys()))
-
-    for topic in topics_list:
-
-        playlist = dict_playlists_by_title[topic]
-        playlist_key = playlist.key()
-        playlist_videos = dict_video_playlists[playlist_key]
-
-        playlist_data = {
-                 'title': topic,
-                 'topic': topic,
-                 'playlist': playlist,
-                 'videos': playlist_videos,
-                 'next': None
-                 }
-
-        all_playlists.append(playlist_data)
-
-    playlist_data_prev = None
-    for playlist_data in all_playlists:
-        if playlist_data_prev:
-            playlist_data_prev['next'] = playlist_data
-        playlist_data_prev = playlist_data
-
-    # Separating out the columns because the formatting is a little different on each column
-    template_values = {
-        'App' : App,
-        'all_playlists': all_playlists,
-        }
-    path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
-    html = template.render(path, template_values)
-
-    # Set shared date of last generated content
-    Setting.cached_library_content_date(str(datetime.datetime.now()))
-
-    return html
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
@@ -932,7 +863,7 @@ class ExerciseAndVideoEntityList(request_handler.RequestHandler):
         self.response.out.write("Exercises:\n")
 
         for exercise in Exercise.all():
-            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name() + "\n")
+            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name + "\n")
 
         self.response.out.write("\n\nVideos:\n")
         for playlist_title in all_topics_list:
@@ -1046,7 +977,7 @@ class ViewHomePage(request_handler.RequestHandler):
         movie_youtube_id = selected_thumbnail["youtube_id"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
-        library_content = library_content_html()
+        library_content = library.library_content_html()
         
         template_values = {
                             'video_id': movie_youtube_id,
@@ -1445,6 +1376,10 @@ class Search(request_handler.RequestHandler):
                            })
         self.render_template("searchresults.html", template_values)
 
+class RedirectToJobvite(request_handler.RequestHandler):
+    def get(self):
+        self.redirect("http://hire.jobvite.com/CompanyJobs/Careers.aspx?k=JobListing&c=qd69Vfw7")
+
 class PermanentRedirectToHome(request_handler.RequestHandler):
     def get(self):
 
@@ -1488,7 +1423,7 @@ class TransferHandler(webapp.RequestHandler):
         
         self.redirect('/transferaccount')
                         
-def real_main():    
+def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1634,36 +1569,23 @@ def real_main():
         ('/newaccount', TransferHandler),
         ('/jobs/dev', jobs.FullTimeDeveloper),
 
+        ('/jobs', RedirectToJobvite),
+        ('/jobs/.*', RedirectToJobvite),
+
         ('/sendtolog', SendToLog),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
         ('/index\.html', PermanentRedirectToHome),
 
+        ('/_ah/warmup.*', warmup.Warmup),
+
         ], debug=True)
 
+    application = profiler.ProfilerWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
-
-def profile_main():
-    # This is the main function for profiling
-    # We've renamed our original main() above to real_main()
-    import cProfile, pstats
-    prof = cProfile.Profile()
-    prof = prof.runctx("real_main()", globals(), locals())
-    print "<pre>"
-    stats = pstats.Stats(prof)
-    stats.sort_stats("cumulative")  # time or cumulative
-    stats.print_stats(80)  # 80 = how many to print
-    # The rest is optional.
-    # stats.print_callees()
-    stats.print_callers()
-    print "</pre>"
-    
-main = real_main
-# Uncomment the following line to enable profiling 
-# main = profile_main
 
 if __name__ == '__main__':
     main()
