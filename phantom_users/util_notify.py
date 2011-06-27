@@ -30,7 +30,7 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
 
     if user_exercise != None:
         numquest = user_exercise.total_done
-        prof = str(user_exercise.exercise.to_display_name())
+        prof = str(user_exercise.exercise)
     
     
     numbadge = user_data.badges
