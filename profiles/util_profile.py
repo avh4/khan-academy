@@ -171,7 +171,7 @@ class ProfileGraph(request_handler.RequestHandler):
         student = None
         user_data_student = None
 
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         student = user
 
         student_email = self.request_string("student_email")

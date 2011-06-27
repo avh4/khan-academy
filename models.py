@@ -505,6 +505,7 @@ class UserData(db.Model):
         return userExercise
         
     def get_exercise_states(self, exercise, user_exercise, current_time):
+        phantom = exercise.phantom = util.is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name, self.user)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
@@ -512,6 +513,7 @@ class UserData(db.Model):
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
         
         return {
+            'phantom': phantom,
             'proficient': proficient,
             'suggested': suggested,
             'reviewing': reviewing,
@@ -675,7 +677,7 @@ class Video(Searchable, db.Model):
         return None
 
     def current_user_points(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if not user:
             return 0
         user_video = UserVideo.get_for_video_and_user(self, user)
@@ -1118,7 +1120,7 @@ class ExerciseGraph(object):
 
     def __init__(self, user_data, user=None):
         if user is None:
-            user = util.get_current_user(allow_phantoms=True)
+            user = util.get_current_user()
 
         user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
@@ -1133,6 +1135,7 @@ class ExerciseGraph(object):
             ex.is_ancestor_review_candidate = None  # Not set initially
             ex.proficient = None # Not set initially
             ex.suggested = None # Not set initially
+            ex.phantom = False
             ex.assigned = False
             ex.streak = 0
             ex.longest_streak = 0
@@ -1202,6 +1205,11 @@ class ExerciseGraph(object):
         for ex in exercises:
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
+
+        phantom = util.is_phantom_user(user)
+        for ex in exercises:
+            ex.phantom = phantom
+                
 
     def get_review_exercises(self, now):
 

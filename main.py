@@ -117,7 +117,7 @@ class ViewExercise(request_handler.RequestHandler):
 
     @allow_phantoms
     def get(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         
         exid = self.request.get('exid')
         key = self.request.get('key')
@@ -301,7 +301,7 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user(allow_phantoms=True), insert_if_missing=True)
+        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user(), insert_if_missing=True)
         
         awarded_points = 0
         if user_video:
@@ -335,7 +335,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         user_data = None
         video_points_total = 0
         points_total = 0
@@ -386,7 +386,7 @@ class PrintExercise(request_handler.RequestHandler):
 
     def get(self):
         
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if user:
             exid = self.request.get('exid')
             key = self.request.get('key')
@@ -496,7 +496,8 @@ class ViewAllExercises(request_handler.RequestHandler):
 
     @allow_phantoms
     def get(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
+        phantom = util.is_phantom_user(user)
         
         user_data = UserData.get_or_insert_for(user)
         
@@ -510,19 +511,24 @@ class ViewAllExercises(request_handler.RequestHandler):
         proficient_exercises = ex_graph.get_proficient_exercises()
 
         for exercise in ex_graph.exercises:
+            exercise.phantom = False
             exercise.suggested = False
             exercise.proficient = False
             exercise.review = False
             exercise.status = ""
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            if exercise in review_exercises:
-                exercise.review = True
-                exercise.status = "Review"
+            if phantom:
+                exercise.phantom = True
+                exercise.status = "Phantom"
+            else:
+                if exercise in suggested_exercises:
+                    exercise.suggested = True
+                    exercise.status = "Suggested"
+                if exercise in proficient_exercises:
+                    exercise.proficient = True
+                    exercise.status = "Proficient"
+                if exercise in review_exercises:
+                    exercise.review = True
+                    exercise.status = "Review"
 
         template_values = {
             'exercises': ex_graph.exercises,
@@ -572,7 +578,7 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get(self):
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if user:
             key = self.request_string('key')
 
@@ -733,7 +739,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # until he clicks the "Next Problem" button, he can avoid resetting his streak
     # by just reloading the page.
     def get(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if user:
             key = self.request.get('key')
 
@@ -770,7 +776,7 @@ class ResetStreak(request_handler.RequestHandler):
 # clicks on the Hint button. 
 
     def post(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if user:
             key = self.request.get('key')
             userExercise = db.get(key)

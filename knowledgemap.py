@@ -7,7 +7,7 @@ from models import UserData
 
 class SaveExpandedAllExercises(request_handler.RequestHandler):
     def post(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if user:
             expanded = self.request_bool("expanded")
 
@@ -21,7 +21,7 @@ class SaveMapCoords(request_handler.RequestHandler):
         return
 
     def post(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
         if user:
             try:
                 lat = self.request_float("lat")

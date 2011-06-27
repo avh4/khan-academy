@@ -58,7 +58,7 @@ def update(user,user_data,user_exercise,threshold = False, isProf = False):
 #Toggle Notify allows the user to close the notification bar (by deleting the memcache) until a new notification occurs. 
 class ToggleNotify(request_handler.RequestHandler):
     def post(self):
-        user = util.get_current_user(allow_phantoms=True)
+        user = util.get_current_user()
 
         if user:
             memcache.delete(UserLoginNotifier.key_for_user(user))

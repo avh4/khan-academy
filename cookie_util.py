@@ -39,3 +39,20 @@ def set_cookie_value(key, value='', max_age=None,
         if max_age is not None:
             cookies[key]['expires'] = max_age
     return cookies[key].output(header='').lstrip()
+
+def set_request_cookie(key, value):
+    ''' Set a cookie for the remainder of the request
+    This does NOT set a cookie on the user's computer. This only makes it
+    appear that it's set on their computer while their request is being
+    completed. For instance this is currently used when a phantom user is
+    created to make it appear that the user already has the phantom user cookie
+    set on their computer.
+    '''
+    try:
+        allcookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
+    except Cookie.CookieError, error:
+        logging.critical("Ignoring Cookie Error: '%s'" % error)
+
+    # now set a fake cookie for this request
+    allcookies[key] = value
+    os.environ['HTTP_COOKIE'] = allcookies.output()
