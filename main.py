@@ -79,8 +79,11 @@ from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import allow_phantoms
 import cloner
+from data_migration import data_migration
+
 class VideoDataTest(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
@@ -93,6 +96,7 @@ class VideoDataTest(request_handler.RequestHandler):
 
 class DeleteVideoPlaylists(request_handler.RequestHandler):
 # Deletes at most 200 Video-Playlist associations that are no longer live.  Should be run every-now-and-then to make sure the table doesn't get too big
+    @data_migration
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
@@ -107,6 +111,7 @@ class DeleteVideoPlaylists(request_handler.RequestHandler):
 
 
 class KillLiveAssociations(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
@@ -120,6 +125,7 @@ class KillLiveAssociations(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
 
     @allow_phantoms
+    @data_migration
     def get(self):
         user = util.get_current_user()
         
@@ -211,6 +217,7 @@ def get_mangled_playlist_name(playlist_name):
 class ViewVideo(request_handler.RequestHandler):
 
     @allow_phantoms
+    @data_migration
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -334,9 +341,11 @@ class LogVideoProgress(request_handler.RequestHandler):
     # issue with occasionally stripped POST data.
     # See http://code.google.com/p/khanacademy/issues/detail?id=3098
     # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
+    @data_migration
     def post(self):
         self.get()
 
+    @data_migration
     def get(self):
 
         user = util.get_current_user()
@@ -371,6 +380,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
 class PrintProblem(request_handler.RequestHandler):
     
+    @data_migration
     def get(self):
         
         exid = self.request.get('exid')
@@ -388,6 +398,7 @@ class PrintProblem(request_handler.RequestHandler):
         
 class PrintExercise(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         
         user = util.get_current_user()
@@ -450,6 +461,7 @@ class PrintExercise(request_handler.RequestHandler):
 
 class ReportIssue(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         issue_type = self.request.get('type')
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
@@ -485,6 +497,7 @@ class ReportIssue(request_handler.RequestHandler):
 
 class ProvideFeedback(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
@@ -499,6 +512,7 @@ class ProvideFeedback(request_handler.RequestHandler):
 class ViewAllExercises(request_handler.RequestHandler):
 
     @allow_phantoms
+    @data_migration
     def get(self):
         user = util.get_current_user()
         phantom = util.is_phantom_user(user)
@@ -554,6 +568,7 @@ class ViewAllExercises(request_handler.RequestHandler):
 
 class VideolessExercises(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         query = Exercise.all().order('h_position')
         exercises = query.fetch(200)
@@ -567,6 +582,7 @@ class VideolessExercises(request_handler.RequestHandler):
 
 class KnowledgeMap(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         self.redirect("/exercisedashboard")
 
@@ -576,9 +592,11 @@ class RegisterAnswer(request_handler.RequestHandler):
     # issue with occasionally stripped POST data.
     # See http://code.google.com/p/khanacademy/issues/detail?id=3098
     # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
+    @data_migration
     def post(self):
         self.get()
 
+    @data_migration
     def get(self):
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
@@ -735,6 +753,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # issue with occasionally stripped POST data.
     # See http://code.google.com/p/khanacademy/issues/detail?id=3098
     # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
+    @data_migration
     def post(self):
         self.get()
 
@@ -742,6 +761,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # This allows us to reset the user's streak if the answer was wrong.  If we wait
     # until he clicks the "Next Problem" button, he can avoid resetting his streak
     # by just reloading the page.
+    @data_migration
     def get(self):
         user = util.get_current_user()
         if user:
@@ -779,6 +799,7 @@ class ResetStreak(request_handler.RequestHandler):
 # This resets the user's streak through an AJAX post request when the user
 # clicks on the Hint button. 
 
+    @data_migration
     def post(self):
         user = util.get_current_user()
         if user:
@@ -791,16 +812,19 @@ class ResetStreak(request_handler.RequestHandler):
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
+    @data_migration
     def post(self):
         # We support posts so we can fire task queues at this handler
         self.get()
 
+    @data_migration
     def get(self):
         library.library_content_html(bust_cache=True)
         self.response.out.write("Library content regenerated")  
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
 
         playlists = Playlist.all()
@@ -817,6 +841,7 @@ class ShowUnusedPlaylists(request_handler.RequestHandler):
 
 class GenerateVideoMapping(request_handler.RequestHandler):
 
+    @data_migration
     def get(self): 
         video_mapping = {}
         for playlist_title in all_topics_list:            
@@ -839,6 +864,7 @@ class GenerateVideoMapping(request_handler.RequestHandler):
         
 class YoutubeVideoList(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         for playlist_title in all_topics_list:            
             query = Playlist.all()
@@ -854,6 +880,7 @@ class YoutubeVideoList(request_handler.RequestHandler):
 
 class ExerciseAndVideoEntityList(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         self.response.out.write("Exercises:\n")
 
@@ -874,6 +901,7 @@ class ExerciseAndVideoEntityList(request_handler.RequestHandler):
                 self.response.out.write(str(v.key().id()) + "\t" + v.title + "\n")
 
 class Crash(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         if self.request_bool("capability_disabled", default=False):
             raise CapabilityDisabledError("Simulate scheduled GAE downtime")
@@ -882,23 +910,27 @@ class Crash(request_handler.RequestHandler):
             raise Exception("What is Toronto?")
 
 class SendToLog(request_handler.RequestHandler):
+    @data_migration
     def post(self):
         message = self.request_string("message", default="")
         if message:
             logging.critical("Manually sent to log: %s" % message)
 
 class MobileFullSite(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.set_mobile_full_site_cookie(True)
         self.redirect("/")
 
 class MobileSite(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.set_mobile_full_site_cookie(False)
         self.redirect("/")
 
 class ViewHomePage(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
 
         thumbnail_link_sets = [
@@ -985,40 +1017,49 @@ class ViewHomePage(request_handler.RequestHandler):
         self.render_template('homepage.html', template_values)
         
 class ViewFAQ(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.redirect("/about/faq", True)
         return
 
 class ViewGetInvolved(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.redirect("/contribute", True)
 
 class ViewContribute(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.render_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.render_template('viewcredits.html', {"selected_nav_link": "contribute"})
 
 class Donate(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.redirect("/contribute", True)
 
 class ViewTOS(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.render_template('tos.html', {"selected_nav_link": "tos"})
 
 class ViewPrivacyPolicy(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
 
 class ViewDMCA(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.render_template('dmca.html', {"selected_nav_link": "dmca"})
 
 class ViewStore(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
@@ -1031,12 +1072,14 @@ class ViewStore(request_handler.RequestHandler):
         self.render_template('store.html', template_values)
         
 class ViewHowToHelp(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.redirect("/contribute", True)
         return
 
 class ViewSAT(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
@@ -1060,6 +1103,7 @@ class ViewSAT(request_handler.RequestHandler):
 
 class ViewGMAT(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
@@ -1242,6 +1286,7 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
             prop = "user"
         return (old_email, new_email, prop)
         
+    @data_migration
     def get(self):
         (old_email, new_email, prop) = self.get_email_params()
         if new_email == old_email:
@@ -1279,6 +1324,7 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
 
 class ViewArticle(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):
         user = util.get_current_user()
         user_data = UserData.get_for_current_user()
@@ -1302,9 +1348,11 @@ class ViewArticle(request_handler.RequestHandler):
         self.render_template("article.html", template_values)
             
 class Login(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         return self.post()
 
+    @data_migration
     def post(self):
         cont = self.request_string('continue', default = "/")
         direct = self.request_bool('direct', default = False)
@@ -1327,6 +1375,7 @@ class Login(request_handler.RequestHandler):
         self.render_template('login.html', template_values)
 
 class MobileOAuthLogin(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.render_template('login_mobile_oauth.html', {
             "oauth_map_id": self.request_string("oauth_map_id", default=""),
@@ -1335,6 +1384,7 @@ class MobileOAuthLogin(request_handler.RequestHandler):
         })
 
 class PostLogin(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         cont = self.request_string('continue', default = "/")
 
@@ -1346,11 +1396,13 @@ class PostLogin(request_handler.RequestHandler):
         self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):
 
+    @data_migration
     def get(self):        
         query = self.request.get('page_search_query')
         template_values = { 'page_search_query': query }
@@ -1372,10 +1424,12 @@ class Search(request_handler.RequestHandler):
         self.render_template("searchresults.html", template_values)
 
 class RedirectToJobvite(request_handler.RequestHandler):
+    @data_migration
     def get(self):
         self.redirect("http://hire.jobvite.com/CompanyJobs/Careers.aspx?k=JobListing&c=qd69Vfw7")
 
 class PermanentRedirectToHome(request_handler.RequestHandler):
+    @data_migration
     def get(self):
 
         redirect_target = "/"
@@ -1393,7 +1447,9 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
 
+
 class TransferHandler(request_handler.RequestHandler):
+    @data_migration
     def get(self):
     #     title = "Please wait while we copy your data to your new account."
     #     message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
