@@ -203,20 +203,11 @@ var Profile = {
         if (!el) return;
         Profile.loadGraphStudyGroupAware(el.href);
     },
-
-    // called whenever user selects study group dropdown
-    updateStudyGroup: function() {
-        var url = $("#nav-accordion .ui-state-active").attr('href');
-        Profile.loadGraphStudyGroupAware(url);
-        if (ClassProfile) {
-            ClassProfile.updateGroupId($('#studygroups-box').val());
-        }
-    },
     
     loadGraphStudyGroupAware: function(url) {
-        var studygroupsEl = $('#studygroups-box');
-        if (studygroupsEl.length == 1) {
-            var group_id = studygroupsEl.val();
+        var $dropdown = $('#studentlists_dropdown ol');
+        if ($dropdown.length == 1) {
+            var group_id = $dropdown.data('selected').key;
             var qs = this.parseQueryString(url);
             if (group_id != 'allstudents')
                 qs['group_id'] = group_id;
@@ -293,7 +284,7 @@ var Profile = {
     },
     
     parseQueryString: function(url) {
-        var qs = {}
+        var qs = {};
         var parts = url.split('?');
         if(parts.length == 2) {
             var querystring = parts[1].split('&');
@@ -312,7 +303,7 @@ var Profile = {
         qs = [];
         for(var key in hash) {
             if(hash.hasOwnProperty(key))
-                qs.push(key + kvjoin + hash[key])
+                qs.push(key + kvjoin + hash[key]);
         }
         return qs.join(eljoin);
     }

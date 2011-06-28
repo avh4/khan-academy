@@ -13,6 +13,8 @@ import consts
 from badges import util_badges
 from models import StudyGroup
 
+import simplejson as json
+
 class ViewClassProfile(request_handler.RequestHandler):
     @staticmethod
     def class_points(students):
@@ -48,7 +50,11 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'class_points': self.class_points(students)
                 })
             
-            group_id = self.request_string("group_id")
+            group_id = self.request_string('group_id', 'allstudents')
+            current_group = None
+            for group in study_groups_list:
+                if group['key'] == group_id:
+                    current_group = group
             
             dict_students = map(lambda student_data: { 
                 "email": student_data.user.email(),
@@ -64,7 +70,9 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'coach': coach,
                     'coach_email': coach.email(),
                     'group_id': group_id,
+                    'group': current_group,
                     'study_groups': study_groups_list,
+                    'study_groups_json': json.dumps(study_groups_list),
                     'coach_nickname': util.get_nickname_for(coach),
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,

@@ -1,39 +1,154 @@
 {% extends "profile_template.html" %}
 {% block meta_page_title %}Class Profile | {% endblock meta_page_title %}
+
+{% block pagescript %}
+<style type="text/css" media="screen">
+.breadcrumbs_nav {
+    font-weight: bold;
+}
+#studentlists_dropdown {
+    display: block;
+    float: left;
+    text-indent: 0;
+    padding-left: 5px;
+    margin: 15px 0 15px 0;
+}
+#studentlists_dropdown .ui-button {
+    display: block;
+}
+#studentlists_menu {
+    position: relative;
+}
+#studentlists_menu ol {
+    z-index: 2;
+}
+#studentlists_dropdown ol {
+    max-height: 20em;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#studentlists_dropdown li {
+    white-space: nowrap;
+    font-weight: normal;
+}
+#studentlists_dropdown li[data-selected=selected] a {
+    font-weight: bold;
+}
+#studentlists_dropdown .ui-button-text, 
+#studentlists_dropdown .ui-menu-item a {
+    font-weight: normal;
+    line-height: inherit;
+    padding: 0px 25px 0px 1ex;
+}
+#studentlists_dropdown .ui-menu-item a {
+    padding: 1px 25px 1px 10px;
+    margin-right: 0px;
+    margin-left: 0px;
+    text-transform: none;
+}
+#studentlists_dropdown a:link:hover, #studentlists_dropdown a:link:focus, #studentlists_dropdown a:visited:hover, #studentlists_dropdown a:visited:focus {
+    color: #DD6900;
+}
+</style>
+<script type="text/javascript">
+var ClassProfile = {
+    groups: {{study_groups_json}},
+    
+    init: function() {
+      var $dropdown = $('#studentlists_dropdown ol');
+      if ($dropdown.length > 0) {
+          var menu = $dropdown.menu();
+
+          // Set the width explicitly before positioning it absolutely to satisfy IE7.
+          menu.width(menu.width()).hide().css('position', 'absolute');
+
+          menu.bind("menuselect", this.updateStudyGroup);
+
+          $(document).bind("click focusin", function(e){
+              if ($(e.target).closest("#studentlists_dropdown").length == 0) {
+                  menu.hide();
+              }
+          });
+
+          var button = $('#studentlists_dropdown > a').button({
+              icons: {
+                  secondary: 'ui-icon-triangle-1-s'
+              }
+          }).show().click(function(e){
+              if (menu.css('display') == 'none')
+                  menu.show().menu("activate", e, $('#studentlists_dropdown li[data-selected=selected]')).focus();
+              else
+                  menu.hide();
+              e.preventDefault();
+          });
+
+          // get initially selected group
+          var group_id = $dropdown.children('li[data-selected=selected]').data('group_id');
+          var group = ClassProfile.getGroupFromId(group_id);
+          $dropdown.data('selected', group);
+      }
+    },
+    
+    getGroupFromId: function (group_id) {
+        var group;
+        jQuery.each(this.groups, function(i,g) {
+            if (g.key == group_id) {
+                group = g;
+                return false;
+            }
+        });
+        return group;
+    },
+    
+    // called whenever user selects study group dropdown
+    updateStudyGroup: function(event, ui) {
+        // change which item has the selected attribute
+        // weird stuff happening with .data(), just use attr for now...
+        var $dropdown = $('#studentlists_dropdown ol');
+        $dropdown.children('li[data-selected=selected]').removeAttr('data-selected');
+        $(ui.item).attr('data-selected', 'selected');
+        
+        // store which item is selected
+        var group = ClassProfile.getGroupFromId(ui.item.data('group_id'));
+        $dropdown.data('selected', group);
+        
+        // update appearance of dropdown
+        $('#studentlists_dropdown .ui-button-text').html(group.name);
+        $dropdown.hide();
+        
+        // update rest of page
+        $('#count_students').html(group.nstudents);
+        $('.energy-points-badge').html(group.class_points);
+        // url of currently selected graph
+        var url = $("#nav-accordion .ui-state-active").attr('href');
+        Profile.loadGraphStudyGroupAware(url);
+    }
+};
+
+$(function() {
+    ClassProfile.init();
+})
+</script>
+{% endblock pagescript %}
+
 {% block profile_name %}
 <span id="user-info">
-    <img src="/images/darth.png" />
-    <select id="studygroups-box">
-        {% for group in study_groups %}
-        <option value="{{group.key}}" {% ifequal group.key group_id %}selected="selected"{% endifequal %}>{{group.name}}</option>
-        {% endfor %}
-    </select>
+    <span class="breadcrumbs_nav">
+        <span id="studentlists_dropdown" class="selected">
+            <a>{{ group.name|escape }}</a>
+            <div id="studentlists_menu">
+                <ol>
+                    {% for group in study_groups %}
+                    <li data-selected="{% ifequal group.key group_id %}selected{% endifequal %}" data-group_id={{group.key}}>
+                        <a href="/class_profile?group_id={{group.key}}">{{group.name|escape}}</a>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </span>
+    </span>
     
-    <script type="text/javascript">
-    
-        var ClassProfile = {
-            updateGroupId: function(group_id) {
-                var group = ClassProfile.groups[group_id];
-                this.updateGroupStats(group.nstudents, group.class_points);
-            },
-            updateGroupStats: function(nstudents, class_points) {
-                // todo: possibly add some effects here?
-                $('#count_students').html(nstudents);
-                $('.energy-points-badge').html(class_points);
-            },
-            groups: {}
-        };
 
-        {% for group in study_groups %}
-        ClassProfile.groups['{{group.key}}'] = { nstudents: {{group.nstudents}}, class_points: '{{group.class_points}}' };
-        {% endfor %}
-         
-        $(function() {
-            $("#studygroups-box").change(Profile.updateStudyGroup)
-                                 .val('{{group_id}}'); // won't be needed once above is fixed
-        });
-
-    </script>
 </span>
 {% endblock profile_name %}
 
