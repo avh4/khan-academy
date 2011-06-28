@@ -1,4 +1,21 @@
 {% extends "page_template.html" %}
+{% block pagescript %}
+{% ifequal view "mobile" %}
+	<style>
+		#top-header, .coached-by, footer { display: none; }
+		#page-container { min-width: 768px; }
+		#individual_report { padding: 0 10px; }
+		#individual_report #achievements { margin-top: 18px; min-width: 0; }
+		#vital-statistics { display: none; }
+		#individual_report #achievements #achievement-list > ul li {
+			min-width: 0;
+			width: 125px;
+			margin-right: 0;
+		}
+		.ach-text { max-width: 600px; }
+	</style>
+{% endifequal %}
+{% endblock pagescript %}
 
 {% block pagesubmenu %}
     <div id="profile-header">

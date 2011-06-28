@@ -75,6 +75,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'exercises': models.Exercise.get_all_use_cache(),
                     'is_profile_empty': len(dict_students) <= 0,
                     'selected_nav_link': 'coach',
+                    "view": self.request_string("view", default=""),
                     }
             self.render_template('viewclassprofile.html', template_values)
         else:
@@ -129,6 +130,7 @@ class ViewProfile(request_handler.RequestHandler):
                 'user_badges': [user_badges['bronze_badges'], user_badges['silver_badges'], user_badges['gold_badges'], user_badges['platinum_badges'], user_badges['diamond_badges'],user_badges['user_badges_master']],
                 'student_user_data': user_data_student,
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False),
+                "view": self.request_string("view", default=""),
             }
 
             self.render_template('viewprofile.html', template_values)
