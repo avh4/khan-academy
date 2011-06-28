@@ -18,11 +18,16 @@ import cookie_util
 def oauth_error_response(e):
     return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
 
-def access_token_response(oauth_map):
+def access_token_response(oauth_map, is_anointed=False):
     if not oauth_map:
         raise OAuthError("Missing oauth_map while returning access_token_response")
 
-    return "oauth_token=%s&oauth_token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
+    response = "oauth_token=%s&oauth_token_secret=%s" % (oauth_map.access_token, oauth_map.access_token_secret)
+
+    if is_anointed and oauth_map.uses_facebook():
+        response += "&facebook_access_token=%s" % oauth_map.facebook_access_token
+
+    return response
 
 def authorize_token_redirect(oauth_map):
     if not oauth_map:
