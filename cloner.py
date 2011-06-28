@@ -8,16 +8,19 @@ from google.appengine.api import users
 
 def clone_userdata(userData, newUser):
     #Clone UserData
-    c = clone_entity(userData, True, key_name='user_email_key_'+newUser.email(), user=newUser)
-    models.UserData.add_to_copied("UserData")
-
+    key = "user_email_key_%s" % newUser.email()
+    c = clone_entity(userData, True, key_name=key, user=newUser)
+    userData.userdata_copied()
+    userData.stop_migration()
+    
 def clone_userexercise(userData, newUser):
     #Clone UserExercise
     query = models.UserExercise.all()
     query.filter('user =', userData.user)
     for b in query:
-        b = clone_entity(b, True, key_name=b.get_key_for_user(newUser), user=newUser)
-    models.UserData.add_to_copied("UserExercise")
+        b = clone_entity(b, True, key_name=b.exercise, user=newUser)
+    userData.userexercise_copied()
+    userData.stop_migration()
 
 def clone_problemlog(userData, newUser):
     #Clone ProblemLog
@@ -25,7 +28,8 @@ def clone_problemlog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
-    models.UserData.add_to_copied("ProblemLog")
+    userData.problemlog_copied()
+    userData.stop_migration()
 
 def clone_videolog(userData, newUser):
     #Clone VideoLog
@@ -33,7 +37,8 @@ def clone_videolog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
-    models.UserData.add_to_copied("VideoLog")
+    userData.videolog_copied()
+    userData.stop_migration()
 
 def clone_uservideo(userData, newUser):
     #Clone UserVideo
@@ -42,7 +47,8 @@ def clone_uservideo(userData, newUser):
     for b in query:
         tkey = b.get_key_name(b.video,newUser)
         b = clone_entity(b, True, key_name=tkey, user=newUser)
-    models.UserData.add_to_copied("UserVideo")
+    userData.uservideo_copied()
+    userData.stop_migration()
 
 def clone_userbadge(userData, newUser):
     #Clone UserBadge
@@ -52,7 +58,8 @@ def clone_userbadge(userData, newUser):
         name_with_context = "["+b.target_context_name+"]" or ""
         key_name = newUser.email() + ":" + b.badge_name + name_with_context
         b = clone_entity(b, True, key_name=key_name, user=newUser)
-    models.UserData.add_to_copied("UserBadge")
+    userData.userbadge_copied()
+    userData.stop_migration()
         
 
 def clone_entity(e, store, **extra_args):
@@ -82,16 +89,15 @@ class Clone(request_handler.RequestHandler):
         message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
         sub_message_html = "This process can take a long time, thank you for your patience."
         self.render_template('phantom_users/transfer.html',
-                                                {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html})
-    
+            {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html})
+            
     def post(self):
         datatype = self.request.get('data')
-        # userData = self.request.get('userData') 
-        # newUser = self.request.get('newUser')
-        userData = models.UserData.get_for_current_user()
-        newUser = users.User("New@test.com")
+        currentuser = self.request.get('currentuser')
+        userData = models.UserData.get_for(users.User(currentuser))
+        newUser = users.User("derp@bar.com")
         # logging.critical(datatype)
-        # logging.critical(userData)
+        # logging.critical(userData.user)
         # logging.critical(newUser)
         
         
