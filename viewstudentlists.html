@@ -45,7 +45,7 @@
 
 #students-container {
     margin-left:200px;
-    max-width: 600px;
+    max-width: 640px;
 }
 .students-header {
     padding-bottom: 0.5em;
@@ -156,21 +156,29 @@ h2 a:hover, .student-name a:hover {
     display: none;
 }
 
-#addstudent-error {
+.alert {
+    display: none;
     margin-top: -1.4em;
-    border: 1pt solid red;
     padding: .6em;
     margin-bottom: 1.4em;
 }
-
-#addstudent-error .float-right {
+.alert.error {
+    border: 1pt solid #C00000
+}
+.alert.note {
+    border: 1pt solid #ddd;
+}
+.close-button {
     margin-left: 1em;
 }
-
-#addstudent-error ul, #addstudent-error li {
+.note ul, .note li {
     list-style: circle;
     margin: .3em;
     margin-left: .8em;
+}
+
+#empty-class {
+    display: none;
 }
 
 </style>
@@ -202,6 +210,7 @@ $(function() {
     <input type="textbox" id="newlist-box" />
     <a id="newlist-button" class="simple-button action-gradient">Create a new list</a>
 </div>
+
 <div id="students-container">
 
     <div class="students-header">
@@ -218,13 +227,18 @@ $(function() {
         <input type="text" id="request-student" size="80" data-blur-val="Type a student's email address to propose becoming their coach"/>
         <input type="text" id="add-to-group" size="80" data-blur-val="Type a student's name to add them to this list"/>
     </div>
-    <div id="addstudent-error">
-        <span class="float-right">(<a href="">close</a>)</span>
+    
+    <div class="alert error" id="addstudent-error">
+        <span class="float-right close-button">(<a href="">close</a>)</span>
         No student was found with that ID. The student may not have created a profile yet. Also, check that the student ID is correct. Here are some examples of student IDs:<br>
         <ul>
             <li>student@gmail.com</li>
             <li>http://facebookid.khanacademy.org/123456789</li>
         </ul>
+    </div>
+    <div class="alert note" id="notaccepted-note">
+        <span class="float-right close-button">(<a href="">close</a>)</span>
+        The students below have not yet accepted your request to coach them. To start coaching them, have them click 'add a coach' at the bottom of any screen, then click the 'accept coach' button.
     </div>
 
     <div id="actual-students">
@@ -260,6 +274,8 @@ $(function() {
         </div>
         {% endfor %}
     </div>
+    
+    {% empty_class_instructions 1 %}
 
     <div id="tmpl" style="display:none">
         <div class="student-row">
@@ -269,7 +285,6 @@ $(function() {
             <div><span class="student-name">email goes here</span></div>
         </div>
     </div>
-    <div class="edit-lists-options" />
 </div>
 
 </article>

@@ -151,9 +151,19 @@ var StudentLists = {
         // inline delete student-group
         $('.student-row .delete-button').click(StudentLists.deleteStudentClick);
         
+        // alerts
+        $('.alert .close-button').click(function(event) {
+            event.preventDefault();
+            $(event.target).parents('.alert').fadeOut();
+        });
+        
         // show initial page
         // todo: remember this with a cookie!
         $('#group-allstudents a').click();
+        
+        if(StudentLists.students.length < 2) {
+            $('#newlist-button').hide();
+        }
     },
 
     deleteGroupClick: function(event) {
@@ -240,7 +250,7 @@ var StudentLists = {
 
         $('.bullet-active').removeClass('bullet-active');
         $selectedList.addClass('bullet-active');
-
+        
         StudentLists.redrawListView();
     },
 
@@ -255,6 +265,12 @@ var StudentLists = {
             $('#actual-students').hide();
             $('#requested-students').show();
             nstudents = $('#requested-students .student-row').length;
+            if(nstudents > 0) {
+                $('#notaccepted-note').show();
+            } else {
+                $('#request-note').show();
+            }
+            $('#empty-class').hide();
 
             title = 'Requests';
             $('.students-header h2 a').removeAttr('href');
@@ -273,6 +289,9 @@ var StudentLists = {
                 title = 'All students';
                 titleHref = '/class_profile';
                 $('#delete-group').hide();
+                if(StudentLists.students.length == 0) {
+                    $('#empty-class').show();
+                }
             }
             else {
                 $('#actual-students .student-row').each(function() {
@@ -285,6 +304,7 @@ var StudentLists = {
                     else {
                         el.hide();
                     }
+                    $('#empty-class').hide();
                 });
 
                 var group = StudentLists.study_groups_by_id[StudentLists.currentGroup];
@@ -374,14 +394,7 @@ var addStudentTextBox = {
 
     init: function() {
         this.element = $('#request-student');
-        
         this.blur();
-        $('#addstudent-error').hide().find('a').click(function(event) {
-            event.preventDefault();
-            $('#addstudent-error').fadeOut();
-        });
-        
-        
         Util.bindEventsToObject(this.element, 'focus blur keyup keypress', this);
     },
 
