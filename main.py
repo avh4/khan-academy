@@ -1393,7 +1393,7 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
 
-class TransferHandler(webapp.RequestHandler):
+class TransferHandler(request_handler.RequestHandler):
     def get(self):
     #     title = "Please wait while we copy your data to your new account."
     #     message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
@@ -1408,18 +1408,19 @@ class TransferHandler(webapp.RequestHandler):
         # Add the task to the default queue.
         # newUser = users.User("ParkerTKTest@aol.com")
         userData = UserData.get_for_current_user()
-        logging.critical(userData.user)
-        logging.critical(userData)
+        currentuser = userData.user
+        #logging.critical(userData.user)
+        #logging.critical(userData)
         userData.start_migration()
         
         
-        taskqueue.add(url='/transferaccount', name='UserData', params={'key': key, 'data': "UserData"})
-        taskqueue.add(url='/transferaccount', name='UserExercise', params={'key': key, 'data': "UserExercise"})
-        taskqueue.add(url='/transferaccount', name='ProblemLog', params={'key': key, 'data': "ProblemLog"})
-        taskqueue.add(url='/transferaccount', name='VideoLog', params={'key': key, 'data': "VideoLog"})
-        taskqueue.add(url='/transferaccount', name='UserVideo', params={'key': key, 'data': "UserVideo"})
-        taskqueue.add(url='/transferaccount', name='UserBadge', params={'key': key, 'data': "UserBadge"})
-        
+        taskqueue.add(url='/transferaccount', name='UserData', params={'currentuser': currentuser, 'key': key, 'data': "UserData"})
+        taskqueue.add(url='/transferaccount', name='UserExercise', params={'currentuser': currentuser, 'key': key, 'data': "UserExercise"})
+        taskqueue.add(url='/transferaccount', name='ProblemLog', params={'currentuser': currentuser, 'key': key, 'data': "ProblemLog"})
+        taskqueue.add(url='/transferaccount', name='VideoLog', params={'currentuser': currentuser, 'key': key, 'data': "VideoLog"})
+        taskqueue.add(url='/transferaccount', name='UserVideo', params={'currentuser': currentuser, 'key': key, 'data': "UserVideo"})
+        taskqueue.add(url='/transferaccount', name='UserBadge', params={'currentuser': currentuser, 'key': key, 'data': "UserBadge"})
+        #         
         self.redirect('/transferaccount')
                         
 def main():
