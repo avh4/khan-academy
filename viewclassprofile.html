@@ -3,29 +3,45 @@
 
 {% block pagescript %}
 <style type="text/css" media="screen">
+#profile-header {
+    min-height: 50px;
+}
+#user-info {
+    margin-top: 15px;
+}
+#page_sub_nav .breadcrumbs_nav > a,
+#page_sub_nav .breadcrumbs_nav > span,
+#page_sub_nav .breadcrumbs_nav .breadcrumb-separator {
+    display: block;
+    float: left;
+    margin-right: 15px;
+}
+#page_sub_nav .breadcrumbs_nav .breadcrumb-separator {
+    margin-right: 10px;
+}
 .breadcrumbs_nav {
     font-weight: bold;
 }
+.breadcrumb-separator {
+    margin-right: 9px;
+}
 #studentlists_dropdown {
-    display: block;
-    float: left;
     text-indent: 0;
     padding-left: 5px;
-    margin: 15px 0 15px 0;
 }
 #studentlists_dropdown .ui-button {
     display: block;
+}
+#studentlists_dropdown ol {
+    max-height: 20em;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 #studentlists_menu {
     position: relative;
 }
 #studentlists_menu ol {
     z-index: 2;
-}
-#studentlists_dropdown ol {
-    max-height: 20em;
-    overflow-y: auto;
-    overflow-x: hidden;
 }
 #studentlists_dropdown li {
     white-space: nowrap;
@@ -46,47 +62,52 @@
     margin-left: 0px;
     text-transform: none;
 }
-#studentlists_dropdown a:link:hover, #studentlists_dropdown a:link:focus, #studentlists_dropdown a:visited:hover, #studentlists_dropdown a:visited:focus {
+#studentlists_dropdown a:link:hover,
+#studentlists_dropdown a:link:focus,
+#studentlists_dropdown a:visited:hover,
+#studentlists_dropdown a:visited:focus {
     color: #DD6900;
 }
+
 </style>
 <script type="text/javascript">
 var ClassProfile = {
     groups: {{study_groups_json}},
     
     init: function() {
-      var $dropdown = $('#studentlists_dropdown ol');
-      if ($dropdown.length > 0) {
-          var menu = $dropdown.menu();
+        $('#studentlists_dropdown').css('display', 'inline-block');
+        var $dropdown = $('#studentlists_dropdown ol');
+        if ($dropdown.length > 0) {
+            var menu = $dropdown.menu();
 
-          // Set the width explicitly before positioning it absolutely to satisfy IE7.
-          menu.width(menu.width()).hide().css('position', 'absolute');
-
-          menu.bind("menuselect", this.updateStudyGroup);
-
-          $(document).bind("click focusin", function(e){
-              if ($(e.target).closest("#studentlists_dropdown").length == 0) {
-                  menu.hide();
-              }
-          });
-
-          var button = $('#studentlists_dropdown > a').button({
-              icons: {
-                  secondary: 'ui-icon-triangle-1-s'
-              }
-          }).show().click(function(e){
-              if (menu.css('display') == 'none')
-                  menu.show().menu("activate", e, $('#studentlists_dropdown li[data-selected=selected]')).focus();
-              else
-                  menu.hide();
-              e.preventDefault();
-          });
-
-          // get initially selected group
-          var group_id = $dropdown.children('li[data-selected=selected]').data('group_id');
-          var group = ClassProfile.getGroupFromId(group_id);
-          $dropdown.data('selected', group);
-      }
+            // Set the width explicitly before positioning it absolutely to satisfy IE7.
+            menu.width(menu.width()).hide().css('position', 'absolute');
+            
+            menu.bind("menuselect", this.updateStudyGroup);
+            
+            $(document).bind("click focusin", function(e){
+                if ($(e.target).closest("#studentlists_dropdown").length == 0) {
+                    menu.hide();
+                }
+            });
+            
+            var button = $('#studentlists_dropdown > a').button({
+                icons: {
+                    secondary: 'ui-icon-triangle-1-s'
+                }
+            }).show().click(function(e){
+                if (menu.css('display') == 'none')
+                    menu.show().menu("activate", e, $('#studentlists_dropdown li[data-selected=selected]')).focus();
+                else
+                    menu.hide();
+                e.preventDefault();
+            });
+            
+            // get initially selected group
+            var group_id = $dropdown.children('li[data-selected=selected]').data('group_id');
+            var group = ClassProfile.getGroupFromId(group_id);
+            $dropdown.data('selected', group);
+        }
     },
     
     getGroupFromId: function (group_id) {
@@ -134,21 +155,24 @@ $(function() {
 {% block profile_name %}
 <span id="user-info">
     <span class="breadcrumbs_nav">
-        <span id="studentlists_dropdown" class="selected">
-            <a>{{ group.name|escape }}</a>
-            <div id="studentlists_menu">
-                <ol>
-                    {% for group in study_groups %}
-                    <li data-selected="{% ifequal group.key group_id %}selected{% endifequal %}" data-group_id={{group.key}}>
-                        <a href="/class_profile?group_id={{group.key}}">{{group.name|escape}}</a>
-                    </li>
-                    {% endfor %}
-                </ol>
-            </div>
+        <a href="/students">Students</a>
+        <span class="breadcrumb-separator">&#187;</span>
+        <span>
+            <span>Class stats for</span>
+            <span id="studentlists_dropdown" style="display:none;" class="selected">
+                <a>{{ group.name|escape }}</a>
+                <div id="studentlists_menu">
+                    <ol>
+                        {% for group in study_groups %}
+                        <li data-selected="{% ifequal group.key group_id %}selected{% endifequal %}" data-group_id={{group.key}}>
+                            <a href="/class_profile?group_id={{group.key}}">{{group.name|escape}}</a>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </span>
         </span>
     </span>
-    
-
 </span>
 {% endblock profile_name %}
 
