@@ -280,6 +280,9 @@ var StudentLists = {
         else {
             $('#requested-students').hide();
             $('#actual-students').show();
+            
+            $('#notaccepted-note').hide();
+            $('#request-note').hide();
 
             if(StudentLists.currentGroup=='allstudents') {
                 var all = $('#actual-students .student-row');
