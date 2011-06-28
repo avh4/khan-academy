@@ -91,12 +91,21 @@ handlers:
 - url: /api/.*
   script: api/main.py
 
+- url: /gae_mini_profiler/static
+  static_dir: gae_mini_profiler/static
+
+- url: /gae_mini_profiler/.*
+  script: gae_mini_profiler/main.py
+
 - url: .*
   script: main.py
   
 builtins:
 - appstats: on
 - datastore_admin: on
+
+inbound_services:
+- warmup
 
 admin_console:
   pages:
