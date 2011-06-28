@@ -1460,6 +1460,11 @@ def main():
         ('/requeststudent', coaches.RequestStudent),
         ('/acceptcoach', coaches.AcceptCoach),
 
+        ('/creategroup', coaches.CreateGroup),
+        ('/deletegroup', coaches.DeleteGroup),
+        ('/removestudentfromgroup', coaches.RemoveStudentFromGroup),
+        ('/addstudenttogroup', coaches.AddStudentToGroup),
+
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        
         ('/sharedpoints', coaches.ViewSharedPoints),        

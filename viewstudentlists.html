@@ -1,0 +1,292 @@
+{% extends "page_template.html" %}
+{% block pagescript %}
+<style>
+#students {
+    padding: 18px 23px;
+}
+#students p {
+    margin-top: 1.2em;
+    margin-bottom: 1.2em;
+}
+
+#sidebar {
+    float: left;
+    width: 180px;
+}
+#sidebar > ul a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+.grouplinks {
+    margin-bottom: 1.6em;
+}
+.grouplinks li {
+    font-size: 130%;
+    margin-bottom: .5em;
+}
+.bullet {
+    padding-left: 15px;
+}
+/* todo: these images maybe need to be bigger! */
+.bullet:hover {
+    background: url('images/list-item-green.png');
+    background-repeat: no-repeat;
+    background-position-y: 5px;
+}
+.bullet-active {
+    background: url('images/list-item-black.png');
+    background-repeat: no-repeat;
+    background-position-y: 5px;
+}
+#sidebar .simple-button {
+    margin-left: 15px;
+}
+
+#students-container {
+    margin-left:200px;
+    max-width: 640px;
+}
+.students-header {
+    padding-bottom: 0.5em;
+    margin-bottom: 0;
+    border-bottom: 1pt solid #aaaaaa;
+}
+h2 {
+    display: inline;
+}
+h2 a:link, h2 a:visited, .student-name a:link, .student-name a:visited {
+    color: #000 ! important;
+    text-decoration: none;
+}
+h2 a:hover, .student-name a:hover {
+    color: #000;
+    text-decoration: underline;
+}
+#nstudents {
+    margin-left: .5em;
+}
+#textbox-container {
+    background: #eeeeee;
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+    padding-left: .5em;
+    padding-right: .5em;
+    margin-bottom: 1.4em;
+}
+
+.student-row {
+    padding-top: 0.7em;
+    padding-bottom: 0.7em;
+    min-height: 3em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+.student-name {
+    font-size: 160%;
+    margin-bottom: .25em;
+}
+.float-right {
+    float: right;
+}
+
+
+.lists-css-menu {
+    margin-right: 2em;
+    position: relative;
+    top: 4px;
+}
+.lists-css-menu > ul > li:after {
+    visibility: hidden;
+    margin-left: 5px;
+}
+.lists-css-menu > ul > li.css-menu-js-hover:after {
+    visibility: visible;
+}
+.student-row:hover .css-menu > ul > li:after {
+    visibility: visible;
+}
+.student-row:hover .lists-css-menu > ul > li {
+    color: #000000;
+}
+.lists-css-menu > ul > li > ul > li > label {
+    display: block;
+    padding: 4px;
+    cursor: pointer;
+}
+.lists-css-menu .list-option-newlist {
+    display: block;
+    padding: 4px;
+    cursor: pointer;
+    border-top: 1pt solid #ddd;
+}
+.lists-css-menu > ul > li > ul > li:hover {
+    background: white;
+}
+.lists-css-menu input {
+    margin-right: .5em;
+}
+.student-row .css-menu {
+    z-index: auto;
+}
+
+#newlist-box {
+    display: none;
+    margin-left: 15px;
+    margin-bottom: 10px;
+}
+
+.delete-button {
+    width: 28px;
+    height: 28px;
+    opacity:0.2;filter:alpha(opacity=20);
+}
+.delete-button:hover {
+    opacity:0.6;filter:alpha(opacity=60);
+}
+
+.student-email {
+    margin-left: .5em;
+}
+
+#requested-students {
+    display: none;
+}
+#requested-student-tmpl {
+    display: none;
+}
+
+.alert {
+    display: none;
+    margin-top: -1.4em;
+    padding: .6em;
+    margin-bottom: 1.4em;
+}
+.alert.error {
+    border: 1pt solid #C00000
+}
+.alert.note {
+    border: 1pt solid #ddd;
+}
+.close-button {
+    margin-left: 1em;
+}
+.note ul, .note li {
+    list-style: circle;
+    margin: .3em;
+    margin-left: .8em;
+}
+
+#empty-class {
+    display: none;
+}
+
+</style>
+<script type="text/javascript" charset="utf-8">
+$(function() {
+    StudentLists.students= {{students_json}};
+    StudentLists.study_groups= {{study_groups_json}};
+    StudentLists.coach_requests = {{coach_requests_json}};
+    StudentLists.init();
+});    
+</script>
+{% js_package "studentlists" %}
+{% endblock pagescript %}
+{% block pagetitle %}Students{% endblock pagetitle %}
+{% block pagecontent %}
+
+<article id="students">
+
+<div id="sidebar">
+    <ul class="grouplinks">
+        <li id="group-allstudents"><a href="/students" class="bullet bullet-active">All students</a></li>
+        <li id="group-requests"><a href="/students?group_id=requests" class="bullet" title="Students that appear here have not yet responded to your request to coach them">Requests</a></li>
+    </ul>
+    <ul id="custom-groups" class="grouplinks">
+        {% for group in study_groups %}
+        <li class="group-{{group.key}}"><a href="students?group_id={{group.key}}" class="bullet">{{group.name}}</a></li>
+        {% endfor %}
+    </ul>
+    <input type="textbox" id="newlist-box" />
+    <a id="newlist-button" class="simple-button action-gradient">Create a new list</a>
+</div>
+
+<div id="students-container">
+
+    <div class="students-header">
+        <span class="float-right">
+
+            <a id="delete-group" href=""><img src="images/round_delete.png" class="delete-button" title="Delete this list (the students will still appear in 'All students')"/></a>
+        </span>
+        <h2><a href="/class_profile?study_group=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
+        <span id='nstudents'>n students</span>
+    </div>
+
+    <div id="textbox-container">
+        {# <span class="float-right"><a class="simple-button action-gradient">Bulk add</a></span> #}
+        <input type="text" id="request-student" size="80" data-blur-val="Type a student's email address to propose becoming their coach"/>
+        <input type="text" id="add-to-group" size="80" data-blur-val="Type a student's name to add them to this list"/>
+    </div>
+    
+    <div class="alert error" id="addstudent-error">
+        <span class="float-right close-button">(<a href="">close</a>)</span>
+        No student was found with that ID. The student may not have created a profile yet. Also, check that the student ID is correct. Here are some examples of student IDs:<br>
+        <ul>
+            <li>student@gmail.com</li>
+            <li>http://facebookid.khanacademy.org/123456789</li>
+        </ul>
+    </div>
+    <div class="alert note" id="notaccepted-note">
+        <span class="float-right close-button">(<a href="">close</a>)</span>
+        The students below have not yet accepted your request to coach them. To start coaching them, have them click 'add a coach' at the bottom of any screen, then click the 'accept coach' button.
+    </div>
+
+    <div id="actual-students">
+        {% for student in students %}
+        <div class="student-row" id="student-{{ student.key }}">
+            <span class="float-right">
+                <div class="css-menu lists-css-menu">
+                    <ul>
+                        <li>Edit Lists
+                            <ul>
+                                <li class="list-option-newlist">+ Create a new list...</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <a href="" title="Remove this student from this list"><img src="images/round_delete.png" class="delete-button" /></a>
+            </span>
+            <div>
+                <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname }}</a></span>
+                <span class="student-email">{{ student.email|escape }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="requested-students">
+        {% for email in coach_requests %}
+        <div class="student-row">
+            <span class="float-right">
+                <a href="" title="Cancel the request to coach this student"><img src="images/round_delete.png" class="delete-button" /></a>
+            </span>
+            <div><span class="student-name">{{ email }}</span></div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% empty_class_instructions 1 %}
+
+    <div id="tmpl" style="display:none">
+        <div class="student-row">
+            <span class="float-right">
+                <a href="" title="Cancel the request to coach this student"><img src="images/round_delete.png" class="delete-button" /></a>
+            </span>
+            <div><span class="student-name">email goes here</span></div>
+        </div>
+    </div>
+</div>
+
+</article>
+{% endblock pagecontent %}
+
