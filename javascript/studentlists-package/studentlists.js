@@ -139,6 +139,8 @@ var StudentLists = {
         // create lists
         addListTextBox.init();
         $('#newlist-button').click(function(event) {
+            event.stopPropagation();
+            event.preventDefault();
             addListTextBox.element.show().focus();
         });
         
