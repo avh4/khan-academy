@@ -144,7 +144,7 @@ var StudentLists = {
     deleteStudentClick: function(event) {
         event.preventDefault();
         var rowEl = $(event.currentTarget).parents('.student-row');
-        var student_id = rowEl.attr('id').substring('student-'.length);
+        var student_id = rowEl.data('student_id');
         var student = StudentLists.Data.students_by_id[student_id];
 
         if (StudentLists.currentList == 'allstudents') {
@@ -256,7 +256,7 @@ var StudentLists = {
             else {
                 $('#actual-students .student-row').each(function() {
                     var el = $(this);
-                    var student_id = el.attr('id').substring('student-'.length);
+                    var student_id = el.data('student_id');
                     if(StudentLists.Data.isStudentInList(student_id, StudentLists.currentList)) {
                         el.show();
                         nstudents++;
@@ -538,7 +538,7 @@ var editListsMenu = {
             var $input = $el.find('input');
             
             // get student
-            var student_id = $menu.parents('.student-row').attr('id').substring('student-'.length);
+            var student_id = $menu.closest('.student-row').data('student_id');
             if(StudentLists.Data.isStudentInList(student_id, studentList.key)) {
                 $input.attr('checked', true);
             }
@@ -552,7 +552,7 @@ var editListsMenu = {
     itemClick: function(event) {
         var $input = $(event.currentTarget);
         var studentList = $input.data('student-list');
-        var student_id = $input.parents('.student-row').attr('id').substring('student-'.length);
+        var student_id = $input.closest('.student-row').data('student_id');
         var student = StudentLists.Data.students_by_id[student_id];
         if ($input.attr('checked'))
             this.addStudentToListAjax(student, studentList.key);
@@ -570,7 +570,7 @@ var editListsMenu = {
                 
                 // show row on screen if visible
                 if (StudentLists.currentList == list_id) {
-                    $('#student-'+student.key).fadeIn();
+                    $('.student-row[data-student_id='+student.key+']').fadeIn();
                 }
             }
         });
@@ -586,7 +586,7 @@ var editListsMenu = {
 
                 // hide row from screen if visible
                 if (StudentLists.currentList == list_id) {
-                    $('#student-'+student.key).fadeOut();
+                    $('.student-row[data-student_id='+student.key+']').fadeOut();
                 }
             }
         });
