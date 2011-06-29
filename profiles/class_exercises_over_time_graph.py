@@ -14,7 +14,7 @@ class ExerciseData:
         def display_name(self):
             return models.Exercise.to_display_name(self.name)
 
-def class_exercises_over_time_graph_context(user_data, studygroup):
+def class_exercises_over_time_graph_context(user_data, student_list):
 
     if not user_data:
         return {}
@@ -23,8 +23,8 @@ def class_exercises_over_time_graph_context(user_data, studygroup):
     start_date = user_data.joined
     end_date = None
 
-    if studygroup:
-        student_emails = studygroup.get_students()
+    if student_list:
+        student_emails = student_list.get_students()
     else:
         student_emails = user_data.get_students()
         

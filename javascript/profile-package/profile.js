@@ -201,18 +201,18 @@ var Profile = {
     // called whenever user clicks graph type accordion
     loadGraphFromLink: function(el) {
         if (!el) return;
-        Profile.loadGraphStudyGroupAware(el.href);
+        Profile.loadGraphStudentListAware(el.href);
     },
     
-    loadGraphStudyGroupAware: function(url) {
+    loadGraphStudentListAware: function(url) {
         var $dropdown = $('#studentlists_dropdown ol');
         if ($dropdown.length == 1) {
-            var group_id = $dropdown.data('selected').key;
+            var list_id = $dropdown.data('selected').key;
             var qs = this.parseQueryString(url);
-            if (group_id != 'allstudents')
-                qs['group_id'] = group_id;
+            if (list_id != 'allstudents')
+                qs['list_id'] = list_id;
             else
-                delete qs['group_id'];
+                delete qs['list_id'];
         
             url = this.baseGraphHref(url) + '?' + this.reconstructQueryString(qs);
         }

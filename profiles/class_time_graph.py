@@ -9,13 +9,13 @@ import models
 import classtime
 import util
 
-def class_time_graph_context(user_data, dt_utc, tz_offset, studygroup):
+def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
 
     if not user_data:
         return {}
     
-    if studygroup:
-        student_emails = studygroup.get_students()
+    if student_list:
+        student_emails = student_list.get_students()
     else:
         student_emails = user_data.get_students()
     

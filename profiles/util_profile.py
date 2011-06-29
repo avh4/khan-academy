@@ -11,7 +11,7 @@ import util
 import models
 import consts
 from badges import util_badges
-from models import StudyGroup
+from models import StudentList
 
 import simplejson as json
 
@@ -33,28 +33,28 @@ class ViewClassProfile(request_handler.RequestHandler):
             user_data_coach = models.UserData.get_or_insert_for(coach)
             students_data = user_data_coach.get_students_data()
             
-            study_groups = StudyGroup.gql("WHERE coaches = :1", user_data_coach.key())
+            student_lists = StudentList.gql("WHERE coaches = :1", user_data_coach.key())
             
-            study_groups_list = [{
+            student_lists_list = [{
                 'key': 'allstudents',
                 'name': 'All students',
                 'nstudents': len(students_data),
                 'class_points': self.class_points(students_data)
             }];
-            for group in study_groups:
-                students = [s for s in students_data if group.key() in s.studygroups]
-                study_groups_list.append({
-                    'key': str(group.key()),
-                    'name': group.name,
+            for student_list in student_lists:
+                students = [s for s in students_data if student_list.key() in s.student_lists]
+                student_lists_list.append({
+                    'key': str(student_list.key()),
+                    'name': student_list.name,
                     'nstudents': len(students),
                     'class_points': self.class_points(students)
                 })
             
-            group_id = self.request_string('group_id', 'allstudents')
-            current_group = None
-            for group in study_groups_list:
-                if group['key'] == group_id:
-                    current_group = group
+            list_id = self.request_string('list_id', 'allstudents')
+            current_list = None
+            for student_list in student_lists_list:
+                if student_list['key'] == list_id:
+                    current_list = student_list
             
             dict_students = map(lambda student_data: { 
                 "email": student_data.user.email(),
@@ -63,16 +63,16 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
-            if group_id:
-                initial_graph_url += 'group_id=%s' % group_id
+            if list_id:
+                initial_graph_url += 'list_id=%s' % list_id
             
             template_values = {
                     'coach': coach,
                     'coach_email': coach.email(),
-                    'group_id': group_id,
-                    'group': current_group,
-                    'study_groups': study_groups_list,
-                    'study_groups_json': json.dumps(study_groups_list),
+                    'list_id': list_id,
+                    'list': current_list,
+                    'student_lists': student_lists_list,
+                    'student_lists_json': json.dumps(student_lists_list),
                     'coach_nickname': util.get_nickname_for(coach),
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
@@ -237,12 +237,12 @@ class ClassProfileGraph(ProfileGraph):
             return True
         return False
     
-    def get_study_group(self, user_data_coach):
-        group_id = self.request_string("group_id")
-        if group_id:
+    def get_student_list(self, user_data_coach):
+        list_id = self.request_string("list_id")
+        if list_id:
             try:
-                study_groups = StudyGroup.gql("WHERE coaches = :1", user_data_coach.key())
-                return filter(lambda x: str(x.key()) == group_id, study_groups)[0]
+                student_lists = StudentList.gql("WHERE coaches = :1", user_data_coach.key())
+                return filter(lambda x: str(x.key()) == list_id, student_lists)[0]
             except:
                 return None
         else:
@@ -365,28 +365,28 @@ class ExerciseProgressGraph(ProfileGraph):
 class ClassExercisesOverTimeGraph(ClassProfileGraph):
     GRAPH_TYPE = "classexercisesovertime"
     def graph_html_and_context(self, user_data_coach):
-        group = self.get_study_group(user_data_coach)
-        return templatetags.class_profile_exercises_over_time_graph(user_data_coach, group)
+        student_list = self.get_student_list(user_data_coach)
+        return templatetags.class_profile_exercises_over_time_graph(user_data_coach, student_list)
 
 class ClassProgressReportGraph(ClassProfileGraph):
     GRAPH_TYPE = "classprogressreport"
     def graph_html_and_context(self, user_data_coach):
-        group = self.get_study_group(user_data_coach)
-        return templatetags.class_profile_progress_report_graph(user_data_coach, group)
+        student_list = self.get_student_list(user_data_coach)
+        return templatetags.class_profile_progress_report_graph(user_data_coach, student_list)
 
 class ClassTimeGraph(ClassProfileDateGraph):
     GRAPH_TYPE = "classtime"
     def graph_html_and_context(self, user_data_coach):
-        group = self.get_study_group(user_data_coach)
-        return templatetags.class_profile_time_graph(user_data_coach, self.get_date(), self.tz_offset(), group)
+        student_list = self.get_student_list(user_data_coach)
+        return templatetags.class_profile_time_graph(user_data_coach, self.get_date(), self.tz_offset(), student_list)
 
 class ClassEnergyPointsPerMinuteGraph(ClassProfileGraph):
     GRAPH_TYPE = "classenergypointsperminute"
     def graph_html_and_context(self, user_data_coach):
-        group = self.get_study_group(user_data_coach)
-        return templatetags.class_profile_energy_points_per_minute_graph(user_data_coach, group)
+        student_list = self.get_student_list(user_data_coach)
+        return templatetags.class_profile_energy_points_per_minute_graph(user_data_coach, student_list)
 
     def json_update(self, user_data_coach):
-        group = self.get_study_group(user_data_coach)
-        return templatetags.class_profile_energy_points_per_minute_update(user_data_coach, group)
+        student_list = self.get_student_list(user_data_coach)
+        return templatetags.class_profile_energy_points_per_minute_update(user_data_coach, student_list)
 

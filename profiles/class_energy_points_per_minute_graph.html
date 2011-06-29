@@ -28,10 +28,10 @@
                         setInterval(function() {
                             var params = {coach: email_coach, update: 1};
                             
-                            var group_id = $('#studygroups-box').val();
-                            if (group_id != 'allstudents')
+                            var list_id = $('#studentlists_dropdown ol').data('selected').key;
+                            if (list_id != 'allstudents')
                             {
-                                params['group_id'] = group_id;
+                                params['list_id'] = list_id;
                             }
                             
                             $.get("/profile/graph/classenergypointsperminute", params, function(data) {

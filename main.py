@@ -1459,10 +1459,10 @@ def main():
         ('/requeststudent', coaches.RequestStudent),
         ('/acceptcoach', coaches.AcceptCoach),
 
-        ('/creategroup', coaches.CreateGroup),
-        ('/deletegroup', coaches.DeleteGroup),
-        ('/removestudentfromgroup', coaches.RemoveStudentFromGroup),
-        ('/addstudenttogroup', coaches.AddStudentToGroup),
+        ('/createstudentlist', coaches.CreateStudentList),
+        ('/deletestudentlist', coaches.DeleteStudentList),
+        ('/removestudentfromlist', coaches.RemoveStudentFromList),
+        ('/addstudenttolist', coaches.AddStudentToList),
 
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        

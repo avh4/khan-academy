@@ -58,36 +58,36 @@ var StudentLists = {
 
     //********** data model methods
 
-    isStudentInGroup: function(student_id, group_id) {
+    isStudentInList: function(student_id, list_id) {
         var student = StudentLists.students_by_id[student_id];
-        for (var i in student.study_groups) {
-            if (student.study_groups[i].key == group_id) {
+        for (var i in student.student_lists) {
+            if (student.student_lists[i].key == list_id) {
                 return true;
             }
         }
         return false;
     },
 
-    addGroup: function(group) {
-        StudentLists.study_groups.push(group);
-        StudentLists.study_groups_by_id[group.key] = group;
+    addList: function(student_list) {
+        StudentLists.student_lists.push(student_list);
+        StudentLists.student_lists_by_id[student_list.key] = student_list;
     },
 
-    removeGroup: function(group_id) {
+    removeList: function(list_id) {
         jQuery.each(StudentLists.students, function(i, s) {
-            StudentLists.removeStudentFromGroup(s, group_id);
+            StudentLists.removeStudentFromList(s, list_id);
         });
 
-        var groups = [];
-        for (var i in StudentLists.study_groups) {
-            var group = StudentLists.study_groups[i];
-            if (group.key != group_id) {
-                groups.push(group);
+        var student_lists = [];
+        for (var i in StudentLists.student_lists) {
+            var student_list = StudentLists.student_lists[i];
+            if (student_list.key != list_id) {
+                student_lists.push(student_list);
             }
         }
-        StudentLists.study_groups = groups;
+        StudentLists.student_lists = student_lists;
 
-        StudentLists.generateGroupIndices();
+        StudentLists.generateListIndices();
     },
 
     removeStudent: function(student) {
@@ -98,23 +98,23 @@ var StudentLists = {
         StudentLists.generateStudentIndices();
     },
 
-    removeStudentFromGroup: function(student, group_id) {
-        var groups = [];
-        for (var i in student.study_groups) {
-            var group = student.study_groups[i];
-            if (group.key != group_id) {
-                groups.push(group);
+    removeStudentFromList: function(student, list_id) {
+        var student_lists = [];
+        for (var i in student.student_lists) {
+            var student_list = student.student_lists[i];
+            if (student_list.key != list_id) {
+                student_lists.push(student_list);
             }
         }
-        student.study_groups = groups;
+        student.student_lists = student_lists;
     },
 
-    addStudentToGroup: function(student, group_id) {
-        student.study_groups.push(StudentLists.study_groups_by_id[group_id]);
+    addStudentToList: function(student, list_id) {
+        student.student_lists.push(StudentLists.student_lists_by_id[list_id]);
     },
 
-    generateGroupIndices: function() {
-        StudentLists.study_groups_by_id = Util.toDict(StudentLists.study_groups, 'key');
+    generateListIndices: function() {
+        StudentLists.student_lists_by_id = Util.toDict(StudentLists.student_lists, 'key');
     },
 
     generateStudentIndices: function() {
@@ -125,15 +125,15 @@ var StudentLists = {
 
     // *********** UI methods
 
-    currentGroup: null,
+    currentList: null,
 
     init: function() {
         // indexes
-        StudentLists.generateGroupIndices();
+        StudentLists.generateListIndices();
         StudentLists.generateStudentIndices();
 
         addStudentTextBox.init();
-        addToGroupTextBox.init();
+        addToListTextBox.init();
         editListsMenu.init();
 
         // create lists
@@ -145,12 +145,12 @@ var StudentLists = {
         });
         
         // delete list
-        $('#delete-group').click(StudentLists.deleteGroupClick);
+        $('#delete-list').click(StudentLists.deleteListClick);
         
         // change visible list
         $('.bullet').click(StudentLists.listClick);
         
-        // inline delete student-group
+        // inline delete student-list
         $('.student-row .delete-button').click(StudentLists.deleteStudentClick);
         
         // alerts
@@ -161,26 +161,26 @@ var StudentLists = {
         
         // show initial page
         // todo: remember this with a cookie!
-        $('#group-allstudents a').click();
+        $('#student-list-allstudents a').click();
         
         if(StudentLists.students.length < 2) {
             $('#newlist-button').hide();
         }
     },
 
-    deleteGroupClick: function(event) {
+    deleteListClick: function(event) {
         event.preventDefault();
-        if (StudentLists.currentGroup != 'allstudents' &&
-            StudentLists.currentGroup != 'requests') {
+        if (StudentLists.currentList != 'allstudents' &&
+            StudentLists.currentList != 'requests') {
 
             $.ajax({
                 type: 'POST',
-                url: '/deletegroup',
-                data: 'group_id=' + StudentLists.currentGroup,
+                url: '/deletestudentlist',
+                data: 'list_id=' + StudentLists.currentList,
                 success: function(data, status, jqxhr) {
-                    $('#custom-groups .group-'+StudentLists.currentGroup).remove();
-                    StudentLists.removeGroup(StudentLists.currentGroup);
-                    $('#group-allstudents a').click();
+                    $('#custom-lists .student-list-'+StudentLists.currentList).remove();
+                    StudentLists.removeList(StudentLists.currentList);
+                    $('#student-list-allstudents a').click();
                 }
             });
         }
@@ -192,7 +192,7 @@ var StudentLists = {
         var student_id = rowEl.attr('id').substring('student-'.length);
         var student = StudentLists.students_by_id[student_id];
 
-        if (StudentLists.currentGroup == 'allstudents') {
+        if (StudentLists.currentList == 'allstudents') {
             // this deletes the student-coach relationship: be sure
             var sure = confirm('Are you sure you want to stop coaching this student?');
             if (sure) {
@@ -211,7 +211,7 @@ var StudentLists = {
                 });
             }
         }
-        else if (StudentLists.currentGroup == 'requests') {
+        else if (StudentLists.currentList == 'requests') {
             var email = rowEl.find('.student-name').html();
             $.ajax({
                 type: 'GET',
@@ -235,8 +235,8 @@ var StudentLists = {
             });
         }
         else {
-            var group_id = StudentLists.currentGroup;
-            editListsMenu.removeStudentFromGroupAjax(student, group_id);
+            var list_id = StudentLists.currentList;
+            editListsMenu.removeStudentFromListAjax(student, list_id);
         }
     },
 
@@ -244,11 +244,11 @@ var StudentLists = {
         event.preventDefault();
         var $selectedList = $(event.currentTarget);
 
-        var group_id = Util.parseQueryString($selectedList.attr('href'))['group_id'] || 'allstudents';
-        if(group_id == StudentLists.currentGroup) {
+        var list_id = Util.parseQueryString($selectedList.attr('href'))['list_id'] || 'allstudents';
+        if(list_id == StudentLists.currentList) {
             return;
         }
-        StudentLists.currentGroup = group_id;
+        StudentLists.currentList = list_id;
 
         $('.bullet-active').removeClass('bullet-active');
         $selectedList.addClass('bullet-active');
@@ -257,13 +257,13 @@ var StudentLists = {
     },
 
     redrawListView: function() {
-        // show or hide students depending on group membership
+        // show or hide students depending on list membership
         var nstudents = 0;
         var title;
         var titleHref;
         var countstring = 'student';
 
-        if(StudentLists.currentGroup == 'requests') {
+        if(StudentLists.currentList == 'requests') {
             $('#actual-students').hide();
             $('#requested-students').show();
             nstudents = $('#requested-students .student-row').length;
@@ -276,7 +276,7 @@ var StudentLists = {
 
             title = 'Requests';
             $('.students-header h2 a').removeAttr('href');
-            $('#delete-group').hide();
+            $('#delete-list').hide();
             countstring = 'potential student';
         }
         else {
@@ -286,14 +286,14 @@ var StudentLists = {
             $('#notaccepted-note').hide();
             $('#request-note').hide();
 
-            if(StudentLists.currentGroup=='allstudents') {
+            if(StudentLists.currentList=='allstudents') {
                 var all = $('#actual-students .student-row');
                 all.show();
 
                 nstudents = all.length;
                 title = 'All students';
                 titleHref = '/class_profile';
-                $('#delete-group').hide();
+                $('#delete-list').hide();
                 if(StudentLists.students.length == 0) {
                     $('#empty-class').show();
                 }
@@ -302,7 +302,7 @@ var StudentLists = {
                 $('#actual-students .student-row').each(function() {
                     var el = $(this);
                     var student_id = el.attr('id').substring('student-'.length);
-                    if(StudentLists.isStudentInGroup(student_id, StudentLists.currentGroup)) {
+                    if(StudentLists.isStudentInList(student_id, StudentLists.currentList)) {
                         el.show();
                         nstudents++;
                     }
@@ -312,20 +312,20 @@ var StudentLists = {
                     $('#empty-class').hide();
                 });
 
-                var group = StudentLists.study_groups_by_id[StudentLists.currentGroup];
-                title = group.name;
-                titleHref = '/class_profile?group_id=' + group.key;
-                $('#delete-group').show();
+                var list = StudentLists.student_lists_by_id[StudentLists.currentList];
+                title = list.name;
+                titleHref = '/class_profile?list_id=' + list.key;
+                $('#delete-list').show();
             }
         }
         
-        if (StudentLists.currentGroup == 'requests' || StudentLists.currentGroup == 'allstudents') {
+        if (StudentLists.currentList == 'requests' || StudentLists.currentList == 'allstudents') {
             addStudentTextBox.element.show();
-            addToGroupTextBox.element.hide();
+            addToListTextBox.element.hide();
         }
         else {
             addStudentTextBox.element.hide();
-            addToGroupTextBox.element.show();
+            addToListTextBox.element.show();
         }
 
         var nstudentsStr = nstudents.toString() + ' '
@@ -372,16 +372,16 @@ var addListTextBox = {
         this.element.attr('disabled', 'disabled');
         $.ajax({
             type: 'POST',
-            url: '/creategroup',
-            data: 'group_name=' + listname,
+            url: '/createstudentlist',
+            data: 'list_name=' + listname,
             dataType: 'json',
             success: function(data, status, jqxhr) {
-                var group = data;
-                StudentLists.addGroup(group);
+                var student_list = data;
+                StudentLists.addList(student_list);
 
                 // add a new item to the sidebar
-                var $el = $('<li class="group-'+group.key+'"><a href="students?group_id='+group.key+'" class="bullet">'+group.name+'</a></li>');
-                $('#custom-groups').append($el);
+                var $el = $('<li class="student-list-'+student_list.key+'"><a href="students?list_id='+student_list.key+'" class="bullet">'+student_list.name+'</a></li>');
+                $('#custom-lists').append($el);
                 $el.find('a').click(StudentLists.listClick);
             },
             complete: function(){addListTextBox.hide();}
@@ -431,7 +431,7 @@ var addStudentTextBox = {
                     el.find('.delete-button').click(StudentLists.deleteStudentClick);
                     el.fadeIn();
 
-                    $('#group-requests a').click();
+                    $('#student-list-requests a').click();
                 },
                 error: function(jqxhr) {
                     $('#addstudent-error').slideDown();
@@ -447,17 +447,17 @@ var addStudentTextBox = {
     }
 };
 
-var addToGroupTextBox = {
+var addToListTextBox = {
     element: null,
     
     init: function() {
-        this.element = $('#add-to-group');
+        this.element = $('#add-to-list');
         
         this.blur();
         
         this.element.autocomplete({
-            source: addToGroupTextBox.generateSource(),
-            select: function(event, selected) {addToGroupTextBox.addStudent(event, selected);}
+            source: addToListTextBox.generateSource(),
+            select: function(event, selected) {addToListTextBox.addStudent(event, selected);}
         });
         
         this.element.data("autocomplete").menu.select = function(e) {
@@ -516,8 +516,8 @@ var addToGroupTextBox = {
         }
         
         var student = StudentLists.students_by_email[text];
-        var group_id = StudentLists.currentGroup;
-        editListsMenu.addStudentToGroupAjax(student, group_id);
+        var list_id = StudentLists.currentList;
+        editListsMenu.addStudentToListAjax(student, list_id);
         
         this.element.val('');
     }
@@ -551,60 +551,60 @@ var editListsMenu = {
         $ul.children('.list-option').remove();
         var $newList = $ul.children('li');
         
-        // add a line for each group
-        jQuery.each(StudentLists.study_groups, function(i, group) {
-            var $el = $('<li class="list-option"><label><input type="checkbox">' + group.name + '</label></li>');
+        // add a line for each list
+        jQuery.each(StudentLists.student_lists, function(i, studentList) {
+            var $el = $('<li class="list-option"><label><input type="checkbox">' + studentList.name + '</label></li>');
             var $input = $el.find('input');
             
             // get student
             var student_id = $menu.parents('.student-row').attr('id').substring('student-'.length);
-            if(StudentLists.isStudentInGroup(student_id, group.key)) {
+            if(StudentLists.isStudentInList(student_id, studentList.key)) {
                 $input.attr('checked', true);
             }
             
             $newList.before($el);
             $input.click(function(event){editListsMenu.itemClick(event);})
-                  .data('group', group);
+                  .data('student-list', studentList);
         });
     },
     
     itemClick: function(event) {
         var $input = $(event.currentTarget);
-        var group = $input.data('group');
+        var studentList = $input.data('student-list');
         var student_id = $input.parents('.student-row').attr('id').substring('student-'.length);
         var student = StudentLists.students_by_id[student_id];
         if ($input.attr('checked'))
-            this.addStudentToGroupAjax(student, group.key);
+            this.addStudentToListAjax(student, studentList.key);
         else
-            this.removeStudentFromGroupAjax(student, group.key);
+            this.removeStudentFromListAjax(student, studentList.key);
     },
     
-    addStudentToGroupAjax: function(student, group_id) {
+    addStudentToListAjax: function(student, list_id) {
         $.ajax({
             type: 'POST',
-            url: '/addstudenttogroup',
-            data: 'student_email='+student.email+'&group_id='+group_id,
+            url: '/addstudenttolist',
+            data: 'student_email='+student.email+'&list_id='+list_id,
             success: function() {
-                StudentLists.addStudentToGroup(student, group_id);
+                StudentLists.addStudentToList(student, list_id);
                 
                 // show row on screen if visible
-                if (StudentLists.currentGroup == group_id) {
+                if (StudentLists.currentList == list_id) {
                     $('#student-'+student.key).fadeIn();
                 }
             }
         });
     },
 
-    removeStudentFromGroupAjax: function(student, group_id) {
+    removeStudentFromListAjax: function(student, list_id) {
         $.ajax({
             type: 'POST',
-            url: '/removestudentfromgroup',
-            data: 'student_email='+student.email+'&group_id='+group_id,
+            url: '/removestudentfromlist',
+            data: 'student_email='+student.email+'&list_id='+list_id,
             success: function() {
-                StudentLists.removeStudentFromGroup(student, group_id);
+                StudentLists.removeStudentFromList(student, list_id);
 
                 // hide row from screen if visible
-                if (StudentLists.currentGroup == group_id) {
+                if (StudentLists.currentList == list_id) {
                     $('#student-'+student.key).fadeOut();
                 }
             }

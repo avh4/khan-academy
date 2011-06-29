@@ -17,7 +17,7 @@ import facebook_util
 import util
 import request_handler
 
-from models import UserData, CoachRequest, StudyGroup
+from models import UserData, CoachRequest, StudentList
 from badges import util_badges
 
 from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
@@ -57,30 +57,30 @@ class ViewStudents(request_handler.RequestHandler):
             
             coach_requests = [x.student_requested.email() for x in CoachRequest.get_for_coach(user)]
 
-            study_groups_models = StudyGroup.gql("WHERE coaches = :1", user_data.key())
+            student_lists_models = StudentList.gql("WHERE coaches = :1", user_data.key())
             
-            study_groups_list = [];
-            for group in study_groups_models:
-                study_groups_list.append({
-                    'key': str(group.key()),
-                    'name': group.name,
+            student_lists_list = [];
+            for student_list in student_lists_models:
+                student_lists_list.append({
+                    'key': str(student_list.key()),
+                    'name': student_list.name,
                 })
-            study_groups_dict = dict((g['key'], g) for g in study_groups_list)
+            student_lists_dict = dict((g['key'], g) for g in student_lists_list)
             
             students_data = user_data.get_students_data()
             students = map(lambda s: {
                 'key': str(s.key()),
                 'email': s.user.email(),
                 'nickname': s.nickname,
-                'study_groups': map(lambda id: study_groups_dict[str(id)], s.studygroups),
+                'student_lists': map(lambda id: student_lists_dict[str(id)], s.student_lists),
             }, students_data)
             students.sort(key=lambda s: s['nickname'])
             
             template_values = {
                 "students": students,
                 "students_json": json.dumps(students),
-                "study_groups": study_groups_list,
-                "study_groups_json": json.dumps(study_groups_list),
+                "student_lists": student_lists_list,
+                "student_lists_json": json.dumps(student_lists_list),
                 "invalid_student": invalid_student,
                 "coach_requests": coach_requests,
                 "coach_requests_json": json.dumps(coach_requests),
@@ -236,29 +236,29 @@ class UnregisterStudent(request_handler.RequestHandler):
 
         self.redirect("/students")
 
-class CreateGroup(request_handler.RequestHandler):
+class CreateStudentList(request_handler.RequestHandler):
     def post(self):
         coach_data = get_coach(self)
         
-        group_name = self.request_string('group_name')
-        if not group_name:
-            raise Exception('Invalid group name')
+        list_name = self.request_string('list_name')
+        if not list_name:
+            raise Exception('Invalid list name')
 
-        study_group = StudyGroup(coaches=[coach_data.key()], name=group_name)
-        study_group.put()
+        student_list = StudentList(coaches=[coach_data.key()], name=list_name)
+        student_list.put()
         
-        study_group_json = {
-            'name': study_group.name,
-            'key': str(study_group.key())
+        student_list_json = {
+            'name': student_list.name,
+            'key': str(student_list.key())
         }
         
-        self.render_json(study_group_json)
+        self.render_json(student_list_json)
 
-class DeleteGroup(request_handler.RequestHandler):
+class DeleteStudentList(request_handler.RequestHandler):
     def post(self):
         coach_data = get_coach(self)
-        group = get_group(coach_data, self)
-        group.delete()
+        student_list = get_list(coach_data, self)
+        student_list.delete()
         if not self.is_ajax_request():
             self.redirect_to('/students')
         
@@ -277,33 +277,33 @@ def get_student(coach_data, request_handler):
         raise Exception("Not your student!")
     return student_data
 
-def get_group(coach_data, request_handler):
-    group_id = request_handler.request_string('group_id')
-    group = StudyGroup.get(group_id)
-    if group is None:
-        raise Exception("No group found with group_id='%s'." % group_id)
-    if coach_data.key() not in group.coaches:
-        raise Exception("Not your group!")
-    return group
+def get_list(coach_data, request_handler):
+    list_id = request_handler.request_string('list_id')
+    student_list = StudentList.get(list_id)
+    if student_list is None:
+        raise Exception("No list found with list_id='%s'." % list_id)
+    if coach_data.key() not in student_list.coaches:
+        raise Exception("Not your list!")
+    return student_list
 
-def get_coach_student_and_group(request_handler):
+def get_coach_student_and_student_list(request_handler):
     coach_data = get_coach(request_handler)
-    group = get_group(coach_data, request_handler)
+    student_list = get_list(coach_data, request_handler)
     student_data = get_student(coach_data, request_handler)
-    return (coach_data, student_data, group)
+    return (coach_data, student_data, student_list)
 
-class AddStudentToGroup(request_handler.RequestHandler):
+class AddStudentToList(request_handler.RequestHandler):
     def post(self):
-        coach_data, student_data, group = get_coach_student_and_group(self)
+        coach_data, student_data, student_list = get_coach_student_and_student_list(self)
         
-        student_data.studygroups.append(group.key())
+        student_data.student_lists.append(student_list.key())
         student_data.put()
 
-class RemoveStudentFromGroup(request_handler.RequestHandler):
+class RemoveStudentFromList(request_handler.RequestHandler):
     def post(self):
-        coach_data, student_data, group = get_coach_student_and_group(self)
+        coach_data, student_data, student_list = get_coach_student_and_student_list(self)
         
-        student_data.studygroups.remove(group.key())
+        student_data.student_lists.remove(student_list.key())
         student_data.put()
 
 class ViewIndividualReport(request_handler.RequestHandler):

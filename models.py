@@ -392,33 +392,10 @@ class CoachRequest(db.Model):
     def get_for_coach(coach):
         return CoachRequest.all().filter("coach_requesting = ", coach)
 
-class StudyGroup(db.Model):
+class StudentList(db.Model):
 
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
-
-    @staticmethod
-    def create_group_from_students(coach_email):
-        coach = users.User(coach_email)
-        coach_data = UserData.get_or_insert_for(coach)
-
-        study_group = StudyGroup()
-        study_group.name = "%s's study group" % coach.nickname()
-        study_group.coaches.append(coach_data.key())
-        study_group.put()
-
-        students_data = coach_data.get_students_data()
-        for s in students_data:
-            if not study_group.key() in s.studygroups:
-                s.studygroups.append(study_group.key())
-                s.put()
-
-    @staticmethod
-    def remove_student(student_email, studygroup_key):
-        u = users.User(student_email)
-        ud = UserData.get_or_insert_for(u)
-        ud.studygroups = [g for g in ud.studygroups if str(g) != studygroup_key]
-        ud.put()
 
     def delete(self, *args):
         self.remove_all_students()
@@ -426,12 +403,12 @@ class StudyGroup(db.Model):
 
     def remove_all_students(self):
         for s in self.get_students_data():
-            s.studygroups.remove(self.key())
+            s.student_lists.remove(self.key())
             s.put()
 
     @property
     def students(self):
-        return UserData.gql("WHERE studygroups = :1", self.key())
+        return UserData.gql("WHERE student_lists = :1", self.key())
 
     # these methods have the same interface as the methods on UserData
     def get_students_data(self):
@@ -455,7 +432,7 @@ class UserData(db.Model):
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
-    studygroups = db.ListProperty(db.Key)
+    student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)

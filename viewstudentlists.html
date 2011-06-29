@@ -18,10 +18,10 @@
     text-decoration: none;
     color: inherit;
 }
-.grouplinks {
+.student-list-links {
     margin-bottom: 1.6em;
 }
-.grouplinks li {
+.student-list-links li {
     font-size: 130%;
     margin-bottom: .5em;
 }
@@ -187,7 +187,7 @@ h2 a:hover, .student-name a:hover {
 <script type="text/javascript" charset="utf-8">
 $(function() {
     StudentLists.students= {{students_json}};
-    StudentLists.study_groups= {{study_groups_json}};
+    StudentLists.student_lists= {{student_lists_json}};
     StudentLists.coach_requests = {{coach_requests_json}};
     StudentLists.init();
 });    
@@ -231,13 +231,13 @@ test("focus should return to button after textbox", function() {
 <article id="students">
 
 <div id="sidebar">
-    <ul class="grouplinks">
-        <li id="group-allstudents"><a href="/students" class="bullet bullet-active">All students</a></li>
-        <li id="group-requests"><a href="/students?group_id=requests" class="bullet" title="Students that appear here have not yet responded to your request to coach them">Requests</a></li>
+    <ul class="student-list-links">
+        <li id="student-list-allstudents"><a href="/students" class="bullet bullet-active">All students</a></li>
+        <li id="student-list-requests"><a href="/students?list_id=requests" class="bullet" title="Students that appear here have not yet responded to your request to coach them">Requests</a></li>
     </ul>
-    <ul id="custom-groups" class="grouplinks">
-        {% for group in study_groups %}
-        <li class="group-{{group.key}}"><a href="students?group_id={{group.key}}" class="bullet">{{group.name}}</a></li>
+    <ul id="custom-lists" class="student-list-links">
+        {% for list in student_lists %}
+        <li class="student-list-{{list.key}}"><a href="students?list_id={{list.key}}" class="bullet">{{list.name}}</a></li>
         {% endfor %}
     </ul>
     <input type="textbox" id="newlist-box" />
@@ -249,16 +249,16 @@ test("focus should return to button after textbox", function() {
     <div class="students-header">
         <span class="float-right">
 
-            <a class="delete-button" id="delete-group" href=""><img src="images/circled_cross.png" title="Delete this list (the students will still appear in 'All students')"/></a>
+            <a class="delete-button" id="delete-list" href=""><img src="images/circled_cross.png" title="Delete this list (the students will still appear in 'All students')"/></a>
         </span>
-        <h2><a href="/class_profile?study_group=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
+        <h2><a href="/class_profile?student_list=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
         <span id='nstudents'>n students</span>
     </div>
 
     <div id="textbox-container">
         {# <span class="float-right"><a class="simple-button action-gradient">Bulk add</a></span> #}
         <input type="text" id="request-student" size="80" data-blur-val="Type a student's email address to propose becoming their coach"/>
-        <input type="text" id="add-to-group" size="80" data-blur-val="Type a student's name to add them to this list"/>
+        <input type="text" id="add-to-list" size="80" data-blur-val="Type a student's name to add them to this list"/>
     </div>
     
     <div class="alert error" id="addstudent-error">

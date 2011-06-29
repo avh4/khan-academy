@@ -56,7 +56,7 @@
 </style>
 <script type="text/javascript">
 var ClassProfile = {
-    groups: {{study_groups_json}},
+    student_lists: {{student_lists_json}},
     
     init: function() {
         $('#studentlists_dropdown').css('display', 'inline-block');
@@ -67,7 +67,7 @@ var ClassProfile = {
             // Set the width explicitly before positioning it absolutely to satisfy IE7.
             menu.width(menu.width()).hide().css('position', 'absolute');
             
-            menu.bind("menuselect", this.updateStudyGroup);
+            menu.bind("menuselect", this.updateStudentList);
             
             $(document).bind("click focusin", function(e){
                 if ($(e.target).closest("#studentlists_dropdown").length == 0) {
@@ -87,26 +87,26 @@ var ClassProfile = {
                 e.preventDefault();
             });
             
-            // get initially selected group
-            var group_id = $dropdown.children('li[data-selected=selected]').data('group_id');
-            var group = ClassProfile.getGroupFromId(group_id);
-            $dropdown.data('selected', group);
+            // get initially selected list
+            var list_id = $dropdown.children('li[data-selected=selected]').data('list_id');
+            var student_list = ClassProfile.getStudentListFromId(list_id);
+            $dropdown.data('selected', student_list);
         }
     },
     
-    getGroupFromId: function (group_id) {
-        var group;
-        jQuery.each(this.groups, function(i,g) {
-            if (g.key == group_id) {
-                group = g;
+    getStudentListFromId: function (list_id) {
+        var student_list;
+        jQuery.each(this.student_lists, function(i,l) {
+            if (l.key == list_id) {
+                student_list = l;
                 return false;
             }
         });
-        return group;
+        return student_list;
     },
     
-    // called whenever user selects study group dropdown
-    updateStudyGroup: function(event, ui) {
+    // called whenever user selects student list dropdown
+    updateStudentList: function(event, ui) {
         // change which item has the selected attribute
         // weird stuff happening with .data(), just use attr for now...
         var $dropdown = $('#studentlists_dropdown ol');
@@ -114,19 +114,19 @@ var ClassProfile = {
         $(ui.item).attr('data-selected', 'selected');
         
         // store which item is selected
-        var group = ClassProfile.getGroupFromId(ui.item.data('group_id'));
-        $dropdown.data('selected', group);
+        var student_list = ClassProfile.getStudentListFromId(ui.item.data('list_id'));
+        $dropdown.data('selected', student_list);
         
         // update appearance of dropdown
-        $('#studentlists_dropdown .ui-button-text').html(group.name);
+        $('#studentlists_dropdown .ui-button-text').html(student_list.name);
         $dropdown.hide();
         
         // update rest of page
-        $('#count_students').html(group.nstudents);
-        $('.energy-points-badge').html(group.class_points);
+        $('#count_students').html(student_list.nstudents);
+        $('.energy-points-badge').html(student_list.class_points);
         // url of currently selected graph
         var url = $("#nav-accordion .ui-state-active").attr('href');
-        Profile.loadGraphStudyGroupAware(url);
+        Profile.loadGraphStudentListAware(url);
     }
 };
 
@@ -142,12 +142,12 @@ $(function() {
         <a href="/students">Manage students</a>
         <a href="/class_profile" class="selected">Class Stats For</a>
         <span id="studentlists_dropdown" style="display:none;" class="selected">
-            <a>{{ group.name|escape }}</a>
+            <a>{{ student_list.name|escape }}</a>
             <div id="studentlists_menu">
                 <ol>
-                    {% for group in study_groups %}
-                    <li data-selected="{% ifequal group.key group_id %}selected{% endifequal %}" data-group_id={{group.key}}>
-                        <a href="/class_profile?group_id={{group.key}}">{{group.name|escape}}</a>
+                    {% for list in student_lists %}
+                    <li data-selected="{% ifequal list.key list_id %}selected{% endifequal %}" data-list_id={{list.key}}>
+                        <a href="/class_profile?list_id={{list.key}}">{{list.name|escape}}</a>
                     </li>
                     {% endfor %}
                 </ol>
@@ -163,12 +163,12 @@ $(function() {
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
-            <span id="count_students">{{ study_groups.0.nstudents }}</span><br />
+            <span id="count_students">{{ student_lists.0.nstudents }}</span><br />
             <span class="label">Students</span>
         </span>
     </span>
     <span id="energy-points">
-        <span class="energy-points-badge">{{ study_groups.0.class_points }}</span><br />
+        <span class="energy-points-badge">{{ student_lists.0.class_points }}</span><br />
         <span class="label">Class Energy Points</span>
     </span>
 {% endblock high_level_stats %}
@@ -176,7 +176,7 @@ $(function() {
 {% block graph_accordion %}
     <ul id="nav-accordion">
         <li>
-            {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type group_id %}
+            {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type list_id %}
             <p class="accordion-content">
                 Shows you which exercises your class has worked on and completed.
                 <span class="graph-options">
@@ -187,7 +187,7 @@ $(function() {
             </p>
         </li>
         <li>
-            {% profile_class_graph_link coach "Daily Activity Report" "classtime" selected_graph_type group_id %}
+            {% profile_class_graph_link coach "Daily Activity Report" "classtime" selected_graph_type list_id %}
             <p class="accordion-content">
                 Shows your total class activity on a specific date.
                 {% profile_graph_calendar_picker coach "classtime" %}
@@ -195,7 +195,7 @@ $(function() {
             </p>
         </li>
         <li>
-            {% profile_class_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type group_id %}
+            {% profile_class_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type list_id %}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
                 <span class="instructions">Highlight a <a href="#" class="highlight-section show-students-highlight">specific student</a> or a <a href="#" class="highlight-section show-exercises-highlight">specific exercise</a>.</span><br />
 
@@ -222,7 +222,7 @@ $(function() {
             </div>
         </li>
         <li>
-            {% profile_class_graph_link coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type group_id %}
+            {% profile_class_graph_link coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type list_id %}
             <p class="accordion-content">
                 Shows your total class energy points per minute as a continuously updating rolling average.
             </p>
