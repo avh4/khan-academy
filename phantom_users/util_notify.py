@@ -48,8 +48,8 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     #First Badge
     if numbadge != None and len(numbadge) == 1 and (len(user_badges) > 0):
         notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! You should <span class='notification-bar-login'><a href='#'>login</a></span> to save your progress")
-    #Every 5 badges
-    if numbadge != None and len(numbadge) % 5 == 0 and (len(user_badges) > 0):
+    #Every badge after
+    if numbadge != None and len(numbadge) > 1 and (len(user_badges) > 0):
         notifications.UserLoginNotifier.push_for_user(user,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far. Have you considered <span class='notification-bar-login'><a href='#'>logging in</a></span> so you don't lose your progress?")
     #Every 2.5k points
     if numpoint != None and threshold:

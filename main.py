@@ -639,7 +639,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
             user_exercise.total_done += 1
-
+            util_notify.update(user_data,user_exercise)
+            
             if correct:
 
                 user_exercise.total_correct += 1
@@ -664,7 +665,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-            util_notify.update(user_data,user_exercise)
+           
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
@@ -1346,8 +1347,8 @@ class PostLogin(request_handler.RequestHandler):
         
         # If new user is new, 0 points, migrate data
         if user_data.points == 0:
-            logging.critical("New User")
-            self.redirect("/newaccount")
+            logging.info("New Account: %s", user.email() )
+            self.redirect("/newaccount?continue=%s",cont)
         else:
             self.redirect(cont)
 
@@ -1408,22 +1409,22 @@ class TransferHandler(webapp.RequestHandler):
     #                                             {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html}))
     # 
     # def post(self):
-        logging.critical("Transferring data...")
+        
         #Current user is the non phantom user 
         current_user = util.get_current_user()
         phantom_user = util.get_phantom_user_from_cookies()
         phantom_data = UserData.get_for(phantom_user) 
-        
+        logging.info("Transferring data from Phanntom: %s to NewUser: %s",phantom_user.email() , current_user.email())
         #Clone UserData
         key = "user_email_key_%s" % current_user.email()
         c = cloner.clone_entity(phantom_data, True, key_name=key, user=current_user)
-
+        logging.info("UserData copied for %s", current_user.email())
         #Clone UserExercise
         query = UserExercise.all()
         query.filter('user =', phantom_user)
         for c in query:
             c = cloner.clone_entity(c, True, key_name=c.exercise, user=current_user)
-        key = self.request.get('key')
+        logging.info("UserExercise copied for %s", current_user.email())
         taskqueue.add(url='/transferaccount', name='UserVideo', 
                 params={'current_user': current_user, 'phantom_user': phantom_user, 'data': "UserVideo"})    
         self.redirect('/transferaccount')

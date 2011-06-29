@@ -13,6 +13,7 @@ def clone_problemlog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
+    logging.info("Completed ProblemLog transfer for NewUser:%s", newUser.email())
 
 def clone_videolog(userData, newUser):
     #Clone VideoLog
@@ -22,7 +23,8 @@ def clone_videolog(userData, newUser):
         b = clone_entity(b, True, user=newUser)
     taskqueue.add(url='/transferaccount', name='ProblemLog', 
         queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "ProblemLog"})
-
+    logging.info("Completed VideoLog transfer for NewUser:%s", newUser.email())    
+        
 def clone_uservideo(userData, newUser):
     #Clone UserVideo
     query = models.UserVideo.all()
@@ -32,6 +34,7 @@ def clone_uservideo(userData, newUser):
         b = clone_entity(b, True, key_name=tkey, user=newUser)
     taskqueue.add(url='/transferaccount', name='UserBadge', 
         params={'current_user': newUser, 'phantom_user': userData.user, 'data': "UserBadge"})
+    logging.info("Completed UserVideo transfer for NewUser:%s", newUser.email())
 
 def clone_userbadge(userData, newUser):
     #Clone UserBadge
@@ -43,6 +46,7 @@ def clone_userbadge(userData, newUser):
         b = clone_entity(b, True, key_name=key_name, user=newUser)
     taskqueue.add(url='/transferaccount', name='UserPlaylist', 
         params={'current_user': newUser, 'phantom_user': userData.user, 'data': "UserPlaylist"})
+    logging.info("Completed UserBadge transfer for NewUser:%s", newUser.email())
 
 def clone_userplaylist(userData, newUser):
     #Clone UserPlaylist
@@ -53,6 +57,7 @@ def clone_userplaylist(userData, newUser):
         b = clone_entity(b, True, key_name=key_name, user=newUser)
     taskqueue.add(url='/transferaccount', name='VideoLog', 
         queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "VideoLog"})
+    logging.info("Completed UserPlaylist transfer for NewUser:%s", newUser.email())
         
 def clone_entity(e, store, **extra_args):
     """Clones an entity, adding or overriding constructor attributes.
@@ -79,8 +84,9 @@ class Clone(request_handler.RequestHandler):
         title = "Please wait while we copy your data to your new account."
         message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
         sub_message_html = "This process can take a long time, thank you for your patience."
+        cont = self.request_string('continue', default = "/")
         self.render_template('phantom_users/transfer.html',
-            {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html})
+            {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html, "dest_url":cont})
             
     def post(self):
         datatype = self.request.get('data')
@@ -88,7 +94,7 @@ class Clone(request_handler.RequestHandler):
         current_user = self.request.get('current_user')
         phantom_data = models.UserData.get_for(users.User(phantom_user))
         current_user = users.User(current_user)
-        
+        logging.info("Kicking off Task:%s for NewUser:%s", datatype, current_user.email())
         
         if datatype == "ProblemLog":
             clone_problemlog(phantom_data, current_user)
