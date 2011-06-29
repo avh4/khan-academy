@@ -21,7 +21,7 @@ def clone_videolog(userData, newUser):
     for b in query:
         b = clone_entity(b, True, user=newUser)
     taskqueue.add(url='/transferaccount', name='ProblemLog', 
-        retry_options={task_retry_limit:'3'},params={'current_user': newUser, 'phantom_user': userData.user, 'data': "ProblemLog"})
+        queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "ProblemLog"})
 
 def clone_uservideo(userData, newUser):
     #Clone UserVideo
@@ -52,7 +52,7 @@ def clone_userplaylist(userData, newUser):
         key_name = models.UserPlaylist.get_key_name(b.playlist, newUser)
         b = clone_entity(b, True, key_name=key_name, user=newUser)
     taskqueue.add(url='/transferaccount', name='VideoLog', 
-        retry_options={task_retry_limit:'3'},params={'current_user': newUser, 'phantom_user': userData.user, 'data': "VideoLog"})
+        queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "VideoLog"})
         
 def clone_entity(e, store, **extra_args):
     """Clones an entity, adding or overriding constructor attributes.
