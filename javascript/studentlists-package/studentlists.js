@@ -301,7 +301,7 @@ var addListTextBox = {
         $('#newlist-button').click(function(event) {
             event.stopPropagation();
             event.preventDefault();
-            this.element.show().focus();
+            addListTextBox.element.show().focus();
         });
         
         $('#delete-list').click(this.deleteList);
