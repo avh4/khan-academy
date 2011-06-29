@@ -22,17 +22,18 @@ def class_exercises_over_time_graph_context(user_data):
     user = user_data.user
     end_date = None
 
-    student_emails = user_data.student_emails()
+    students_data = user_data.get_students_data()
+
     dict_student_exercises = {}
     dict_exercises = {}
 
-    for student_email in student_emails:
-        student = users.User(student_email)
-        student_nickname = util.get_nickname_for(student)
-        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": student.email(), "exercises": [] }
+    for user_data_student in students_data:
+        display_student = user_data_student.display_user
+        student_nickname = util.get_nickname_for(display_student)
+        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": display_student.email(), "exercises": [] }
 
         query = models.UserExercise.all()
-        query.filter('user =', student)
+        query.filter('user =', user_data_student.user)
         query.filter('proficient_date >', None)
         query.order('proficient_date')
 

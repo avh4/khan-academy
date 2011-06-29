@@ -32,7 +32,7 @@
             },
             xAxis: {
                 categories: [
-                {% for data in student_data %}
+                {% for data in graph_data %}
                 '{{ data|hash:"name"|escapejs }}<br/>(<em>{{ data|hash:"total_minutes"|escapejs }} min. total</em>)'{% if not forloop.last %},{% endif %}
                 {% endfor %}
                 ],
