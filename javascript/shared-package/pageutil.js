@@ -577,7 +577,7 @@ var Notifications = {
             var progress = 0;
             var width = .3;
             var getGradient = function() {
-                var gradient = "-webkit-gradient(linear, 0% 0%, 100% 0%, color-stop($beginning, #eee), color-stop($middle, #444), color-stop($end, #eee));";
+                var gradient = "-webkit-gradient(linear, 0% 0%, 100% 0%, color-stop($beginning, #eee), color-stop($middle, #fff), color-stop($end, #eee));";
                 return gradient.replace("$beginning", progress).replace("$middle", progress + width / 2).replace("$end", progress + width);
             }
             

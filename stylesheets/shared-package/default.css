@@ -2843,7 +2843,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar-content {
     vertical-align:middle;
-    font-size:150%;
+    font-size:15pt;
     position:relative;
     top:5px;
     color: rgba(0, 0, 0, 0);
@@ -2853,19 +2853,20 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar-content a:link{
     text-decoration:underline; 
-    color:#DD6900;   
+    color:#eee;   
 }
 
 .notification-bar-content a:visited{
     text-decoration:underline;  
-    color:#DD6900;  
+    color:#eee;  
 }
 
 .notification-bar-content a:hover{
     text-decoration:underline;  
     border-bottom:none;  
-    color:#DD6900;
+    color:#eee;
 }
+
 
 .notification-bar-close{
     float:right;
@@ -2876,9 +2877,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar-close a:link{
-    color:white;
+    color:#eee;
 }
 
 .notification-bar-close a:visited{
-    color:white;
+    color:#eee;
 }
