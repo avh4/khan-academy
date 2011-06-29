@@ -74,7 +74,7 @@ class RegisterCoach(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data_coach = self.request_user_data("coach", default="")
+        user_data_coach = self.request_user_data("coach")
         if user_data_coach and user_data_coach.user:
 
             coach = user_data_coach.user

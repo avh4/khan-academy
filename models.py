@@ -459,15 +459,13 @@ class UserData(db.Model):
     def current():
         user = util._get_current_user()
         if user:
-            return UserData.get_or_insert_for(user)
+            return UserData.get_from_user_input(user) or UserData.get_or_insert_for(user)
         return UserData()
 
     @staticmethod
-    def get_from_user_input(email):
-        if not email:
+    def get_from_user_input(user):
+        if not user:
             return None
-
-        user = users.User(email)
 
         query = UserData.all()
         query.filter('current_user =', user)

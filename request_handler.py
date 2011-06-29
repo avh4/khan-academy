@@ -56,7 +56,11 @@ class RequestInputHandler(object):
                 raise # No value available and no default supplied, raise error
 
     def request_user_data(self, key):
-        return UserData.get_from_user_input(self.request_string(key))
+        email = self.request_string(key)
+        if email:
+            user = users.User(email)
+            return UserData.get_from_user_input(user)
+        return None
 
     def request_float(self, key, default = None):
         try:        

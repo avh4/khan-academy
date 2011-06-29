@@ -111,7 +111,7 @@ class ViewProfile(request_handler.RequestHandler):
 
             template_values = {
                 'student': student,
-                'student_nickname': util.get_nickname_for(student),
+                'student_nickname': util.get_nickname_for(user_data_student.display_user),
                 'selected_graph_type': selected_graph_type,
                 'initial_graph_url': initial_graph_url,
                 'tz_offset': tz_offset,
