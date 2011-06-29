@@ -38,7 +38,6 @@ from google.appengine.ext import db
 
 import bulk_update.handler
 import facebook
-import layer_cache
 import request_cache
 from gae_mini_profiler import profiler
 import autocomplete
