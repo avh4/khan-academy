@@ -1342,9 +1342,14 @@ class PostLogin(request_handler.RequestHandler):
         # Immediately after login we make sure this user has a UserData entry
         user = util.get_current_user()
         if user:
-            UserData.get_or_insert_for(user)
-
-        self.redirect(cont)
+            user_data = UserData.get_or_insert_for(user)
+        
+        # If new user is new, 0 points, migrate data
+        if user_data.points == 0:
+            logging.critical("New User")
+            self.redirect("/newaccount")
+        else:
+            self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
     def get(self):
@@ -1403,7 +1408,7 @@ class TransferHandler(webapp.RequestHandler):
     #                                             {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html}))
     # 
     # def post(self):
-        
+        logging.critical("Transferring data...")
         #Current user is the non phantom user 
         current_user = util.get_current_user()
         phantom_user = util.get_phantom_user_from_cookies()
