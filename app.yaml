@@ -103,7 +103,7 @@ handlers:
 - url: /transferaccount
   script: cloner.py
   login: admin
-  
+    
 builtins:
 - appstats: on
 - datastore_admin: on

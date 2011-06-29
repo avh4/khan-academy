@@ -3,24 +3,9 @@ from badges.models_badges import UserBadge
 from badges.badges import Badge
 import logging
 from google.appengine.ext import webapp
+from google.appengine.api import taskqueue
 import request_handler
 from google.appengine.api import users
-
-def clone_userdata(userData, newUser):
-    #Clone UserData
-    key = "user_email_key_%s" % newUser.email()
-    c = clone_entity(userData, True, key_name=key, user=newUser)
-    userData.userdata_copied()
-    userData.stop_migration()
-    
-def clone_userexercise(userData, newUser):
-    #Clone UserExercise
-    query = models.UserExercise.all()
-    query.filter('user =', userData.user)
-    for b in query:
-        b = clone_entity(b, True, key_name=b.exercise, user=newUser)
-    userData.userexercise_copied()
-    userData.stop_migration()
 
 def clone_problemlog(userData, newUser):
     #Clone ProblemLog
@@ -28,8 +13,6 @@ def clone_problemlog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
-    userData.problemlog_copied()
-    userData.stop_migration()
 
 def clone_videolog(userData, newUser):
     #Clone VideoLog
@@ -37,8 +20,8 @@ def clone_videolog(userData, newUser):
     query.filter('user =', userData.user)
     for b in query:
         b = clone_entity(b, True, user=newUser)
-    userData.videolog_copied()
-    userData.stop_migration()
+    taskqueue.add(url='/transferaccount', name='ProblemLog', 
+        queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "ProblemLog"})
 
 def clone_uservideo(userData, newUser):
     #Clone UserVideo
@@ -47,8 +30,8 @@ def clone_uservideo(userData, newUser):
     for b in query:
         tkey = b.get_key_name(b.video,newUser)
         b = clone_entity(b, True, key_name=tkey, user=newUser)
-    userData.uservideo_copied()
-    userData.stop_migration()
+    taskqueue.add(url='/transferaccount', name='UserBadge', 
+        params={'current_user': newUser, 'phantom_user': userData.user, 'data': "UserBadge"})
 
 def clone_userbadge(userData, newUser):
     #Clone UserBadge
@@ -58,10 +41,19 @@ def clone_userbadge(userData, newUser):
         name_with_context = "["+b.target_context_name+"]" or ""
         key_name = newUser.email() + ":" + b.badge_name + name_with_context
         b = clone_entity(b, True, key_name=key_name, user=newUser)
-    userData.userbadge_copied()
-    userData.stop_migration()
-        
+    taskqueue.add(url='/transferaccount', name='UserPlaylist', 
+        params={'current_user': newUser, 'phantom_user': userData.user, 'data': "UserPlaylist"})
 
+def clone_userplaylist(userData, newUser):
+    #Clone UserPlaylist
+    query = models.UserPlaylist.all()
+    query.filter('user =', userData.user)
+    for b in query:
+        key_name = models.UserPlaylist.get_key_name(b.playlist, newUser)
+        b = clone_entity(b, True, key_name=key_name, user=newUser)
+    taskqueue.add(url='/transferaccount', name='VideoLog', 
+        queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "VideoLog"})
+        
 def clone_entity(e, store, **extra_args):
     """Clones an entity, adding or overriding constructor attributes.
     The cloned entity will have exactly the same property values as the original
@@ -82,7 +74,6 @@ def clone_entity(e, store, **extra_args):
         klass(**props).put()
     return klass(**props)
 
-
 class Clone(request_handler.RequestHandler):
     def get(self):
         title = "Please wait while we copy your data to your new account."
@@ -93,26 +84,19 @@ class Clone(request_handler.RequestHandler):
             
     def post(self):
         datatype = self.request.get('data')
-        currentuser = self.request.get('currentuser')
-        userData = models.UserData.get_for(users.User(currentuser))
-        newUser = users.User("derp@bar.com")
-        # logging.critical(datatype)
-        # logging.critical(userData.user)
-        # logging.critical(newUser)
+        phantom_user = self.request.get('phantom_user')
+        current_user = self.request.get('current_user')
+        phantom_data = models.UserData.get_for(users.User(phantom_user))
+        current_user = users.User(current_user)
         
         
-        if datatype == "UserData":
-            clone_userdata(userData, newUser)
-        elif datatype == "UserExercise":
-            clone_userexercise(userData, newUser)
-        elif datatype == "ProblemLog":
-            clone_problemlog(userData, newUser)
+        if datatype == "ProblemLog":
+            clone_problemlog(phantom_data, current_user)
         elif datatype == "VideoLog":
-            clone_videolog(userData, newUser)
+            clone_videolog(phantom_data, current_user)
         elif datatype == "UserVideo":
-            clone_uservideo(userData, newUser)
+            clone_uservideo(phantom_data, current_user)
         elif datatype == "UserBadge":
-            clone_userbadge(userData, newUser)
-        
-        #user = util.get_current_user()
-       
+            clone_userbadge(phantom_data, current_user)
+        elif datatype == "UserPlaylist":
+            clone_userplaylist(phantom_data, current_user)

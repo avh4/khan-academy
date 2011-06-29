@@ -420,13 +420,6 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
-    in_migration = db.BooleanProperty(default=False)
-    userdata_copied = db.BooleanProperty(default=False)
-    userexercise_copied = db.BooleanProperty(default=False)
-    problemlog_copied = db.BooleanProperty(default=False)
-    videolog_copied = db.BooleanProperty(default=False)
-    uservideo_copied = db.BooleanProperty(default=False)
-    userbadge_copied = db.BooleanProperty(default=False)
     
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
@@ -451,44 +444,6 @@ class UserData(db.Model):
             if user_data is not None:
                 return user_data
         return UserData()
-
-
-    def userdata_copied(self):
-        self.userdata_copied = True
-        self.put()
-        logging.critical("UD Copied")
-
-    def userexercise_copied(self):
-        self.userexercise_copied = True
-        self.put()    
-    
-    def problemlog_copied(self):
-        self.problemlog_copied = True
-        self.put()
-
-    def videolog_copied(self):
-        self.videolog_copied = True
-        self.put()
-        
-    def uservideo_copied(self):
-        self.uservideo_copied = True
-        self.put()
-    
-    def userbadge_copied(self):
-        self.userbadge_copied = True
-        self.put()
-    
-    def start_migration(self):
-        self.in_migration = True
-        self.put()
-
-    def stop_migration(self):
-        if (self.userdata_copied and self.userexercise_copied and self.problemlog_copied
-        and self.videolog_copied and self.uservideo_copied and self.userbadge_copied and
-        self.in_migration):
-            self.in_migration = False
-            self.put()
-
         
     @staticmethod    
     def get_for(user):
