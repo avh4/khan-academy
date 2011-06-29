@@ -40,6 +40,11 @@ var StudentLists = {
         student_lists_by_id: null,
         coach_requests: null,
         
+        init: function() {
+            this.generateListIndices();
+            this.generateStudentIndices();
+        },
+        
         isStudentInList: function(student_id, list_id) {
             var student = this.students_by_id[student_id];
             for (var i in student.student_lists) {
@@ -108,21 +113,12 @@ var StudentLists = {
     currentList: null,
 
     init: function() {
-        // indexes
-        StudentLists.Data.generateListIndices();
-        StudentLists.Data.generateStudentIndices();
+        StudentLists.Data.init();
 
         addStudentTextBox.init();
         addToListTextBox.init();
         editListsMenu.init();
-
-        // create lists
         addListTextBox.init();
-        $('#newlist-button').click(function(event) {
-            event.stopPropagation();
-            event.preventDefault();
-            addListTextBox.element.show().focus();
-        });
         
         // change visible list
         $('.bullet').click(StudentLists.listClick);
@@ -301,6 +297,13 @@ var addListTextBox = {
     init: function() {
         this.element = $('#newlist-box');
         Util.bindEventsToObject(this.element, 'keypress keyup focusout', this);
+        
+        $('#newlist-button').click(function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            this.element.show().focus();
+        });
+        
         $('#delete-list').click(this.deleteList);
     },
     
