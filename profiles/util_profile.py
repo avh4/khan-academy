@@ -70,7 +70,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'coach': coach,
                     'coach_email': coach.email(),
                     'list_id': list_id,
-                    'list': current_list,
+                    'student_list': current_list,
                     'student_lists': student_lists_list,
                     'student_lists_json': json.dumps(student_lists_list),
                     'coach_nickname': util.get_nickname_for(coach),
