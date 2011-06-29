@@ -232,12 +232,12 @@ test("focus should return to button after textbox", function() {
 
 <div id="sidebar">
     <ul class="student-list-links">
-        <li id="student-list-allstudents"><a href="/students" class="bullet bullet-active">All students</a></li>
-        <li id="student-list-requests"><a href="/students?list_id=requests" class="bullet" title="Students that appear here have not yet responded to your request to coach them">Requests</a></li>
+        <li id="student-list-allstudents" data-list_id="allstudents"><a href="/students" class="bullet bullet-active">All students</a></li>
+        <li id="student-list-requests" data-list_id="requests"><a href="/students?list_id=requests" class="bullet" title="Students that appear here have not yet responded to your request to coach them">Requests</a></li>
     </ul>
     <ul id="custom-lists" class="student-list-links">
         {% for list in student_lists %}
-        <li class="student-list-{{list.key}}"><a href="students?list_id={{list.key}}" class="bullet">{{list.name}}</a></li>
+        <li data-list_id="{{list.key}}"><a href="students?list_id={{list.key}}" class="bullet">{{list.name}}</a></li>
         {% endfor %}
     </ul>
     <input type="textbox" id="newlist-box" />

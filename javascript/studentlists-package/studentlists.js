@@ -26,31 +26,6 @@ var Util = {
                 });
             })(events[i]);
         }
-    },
-
-    parseQueryString: function(url) {
-        var qs = {};
-        var parts = url.split('?');
-        if(parts.length == 2) {
-            var querystring = parts[1].split('&');
-            for(var i = 0; i<querystring.length; i++) {
-                var kv = querystring[i].split('=');
-                if(kv[0].length > 0) //fix trailing &
-                    qs[kv[0]] = kv[1];
-            }
-        }
-        return qs;
-    },
-
-    toQueryString: function(hash, kvjoin, eljoin) {
-        kvjoin = kvjoin || '=';
-        eljoin = eljoin || '&';
-        var qs = [];
-        for(var key in hash) {
-            if(hash.hasOwnProperty(key))
-                qs.push(key + kvjoin + hash[key]);
-        }
-        return qs.join(eljoin);
     }
 };
 
@@ -178,7 +153,7 @@ var StudentLists = {
                 url: '/deletestudentlist',
                 data: 'list_id=' + StudentLists.currentList,
                 success: function(data, status, jqxhr) {
-                    $('#custom-lists .student-list-'+StudentLists.currentList).remove();
+                    $('#custom-lists li[data-list_id='+StudentLists.currentList+']').remove();
                     StudentLists.removeList(StudentLists.currentList);
                     $('#student-list-allstudents a').click();
                 }
@@ -243,8 +218,8 @@ var StudentLists = {
     listClick: function(event) {
         event.preventDefault();
         var $selectedList = $(event.currentTarget);
-
-        var list_id = Util.parseQueryString($selectedList.attr('href'))['list_id'] || 'allstudents';
+        
+        var list_id = $selectedList.closest('li').data('list_id');
         if(list_id == StudentLists.currentList) {
             return;
         }
@@ -380,7 +355,7 @@ var addListTextBox = {
                 StudentLists.addList(student_list);
 
                 // add a new item to the sidebar
-                var $el = $('<li class="student-list-'+student_list.key+'"><a href="students?list_id='+student_list.key+'" class="bullet">'+student_list.name+'</a></li>');
+                var $el = $('<li data-list_id="'+student_list.key+'"><a href="students?list_id='+student_list.key+'" class="bullet">'+student_list.name+'</a></li>');
                 $('#custom-lists').append($el);
                 $el.find('a').click(StudentLists.listClick);
             },
