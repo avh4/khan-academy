@@ -29,83 +29,88 @@ var Util = {
     }
 };
 
+
 var StudentLists = {
 
-    //********** data model methods
-
-    isStudentInList: function(student_id, list_id) {
-        var student = StudentLists.students_by_id[student_id];
-        for (var i in student.student_lists) {
-            if (student.student_lists[i].key == list_id) {
-                return true;
+    Data: {
+        students: null,
+        students_by_id: null,
+        students_by_email: null,
+        student_lists: null,
+        student_lists_by_id: null,
+        coach_requests: null,
+        
+        isStudentInList: function(student_id, list_id) {
+            var student = this.students_by_id[student_id];
+            for (var i in student.student_lists) {
+                if (student.student_lists[i].key == list_id) {
+                    return true;
+                }
             }
-        }
-        return false;
-    },
+            return false;
+        },
 
-    addList: function(student_list) {
-        StudentLists.student_lists.push(student_list);
-        StudentLists.student_lists_by_id[student_list.key] = student_list;
-    },
+        addList: function(student_list) {
+            this.student_lists.push(student_list);
+            this.student_lists_by_id[student_list.key] = student_list;
+        },
 
-    removeList: function(list_id) {
-        jQuery.each(StudentLists.students, function(i, s) {
-            StudentLists.removeStudentFromList(s, list_id);
-        });
+        removeList: function(list_id) {
+            jQuery.each(this.students, function(i, s) {
+                StudentLists.Data.removeStudentFromList(s, list_id);
+            });
 
-        var student_lists = [];
-        for (var i in StudentLists.student_lists) {
-            var student_list = StudentLists.student_lists[i];
-            if (student_list.key != list_id) {
-                student_lists.push(student_list);
+            var student_lists = [];
+            for (var i in this.student_lists) {
+                var student_list = this.student_lists[i];
+                if (student_list.key != list_id) {
+                    student_lists.push(student_list);
+                }
             }
-        }
-        StudentLists.student_lists = student_lists;
+            this.student_lists = student_lists;
 
-        StudentLists.generateListIndices();
-    },
+            this.generateListIndices();
+        },
 
-    removeStudent: function(student) {
-        var index = StudentLists.students.indexOf(student);
-        if (index != -1)
-            StudentLists.students.splice(index, 1);
+        removeStudent: function(student) {
+            var index = this.students.indexOf(student);
+            if (index != -1)
+                this.students.splice(index, 1);
 
-        StudentLists.generateStudentIndices();
-    },
+            this.generateStudentIndices();
+        },
 
-    removeStudentFromList: function(student, list_id) {
-        var student_lists = [];
-        for (var i in student.student_lists) {
-            var student_list = student.student_lists[i];
-            if (student_list.key != list_id) {
-                student_lists.push(student_list);
+        removeStudentFromList: function(student, list_id) {
+            var student_lists = [];
+            for (var i in student.student_lists) {
+                var student_list = student.student_lists[i];
+                if (student_list.key != list_id) {
+                    student_lists.push(student_list);
+                }
             }
+            student.student_lists = student_lists;
+        },
+
+        addStudentToList: function(student, list_id) {
+            student.student_lists.push(this.student_lists_by_id[list_id]);
+        },
+
+        generateListIndices: function() {
+            this.student_lists_by_id = Util.toDict(StudentLists.Data.student_lists, 'key');
+        },
+
+        generateStudentIndices: function() {
+            this.students_by_id = Util.toDict(StudentLists.Data.students, 'key');
+            this.students_by_email = Util.toDict(StudentLists.Data.students, 'email');
         }
-        student.student_lists = student_lists;
     },
-
-    addStudentToList: function(student, list_id) {
-        student.student_lists.push(StudentLists.student_lists_by_id[list_id]);
-    },
-
-    generateListIndices: function() {
-        StudentLists.student_lists_by_id = Util.toDict(StudentLists.student_lists, 'key');
-    },
-
-    generateStudentIndices: function() {
-        StudentLists.students_by_id = Util.toDict(StudentLists.students, 'key');
-        StudentLists.students_by_email = Util.toDict(StudentLists.students, 'email');
-    },
-
-
-    // *********** UI methods
 
     currentList: null,
 
     init: function() {
         // indexes
-        StudentLists.generateListIndices();
-        StudentLists.generateStudentIndices();
+        StudentLists.Data.generateListIndices();
+        StudentLists.Data.generateStudentIndices();
 
         addStudentTextBox.init();
         addToListTextBox.init();
@@ -118,9 +123,6 @@ var StudentLists = {
             event.preventDefault();
             addListTextBox.element.show().focus();
         });
-        
-        // delete list
-        $('#delete-list').click(StudentLists.deleteListClick);
         
         // change visible list
         $('.bullet').click(StudentLists.listClick);
@@ -138,26 +140,8 @@ var StudentLists = {
         // todo: remember this with a cookie!
         $('#student-list-allstudents a').click();
         
-        if(StudentLists.students.length < 2) {
+        if(StudentLists.Data.students.length < 2) {
             $('#newlist-button').hide();
-        }
-    },
-
-    deleteListClick: function(event) {
-        event.preventDefault();
-        if (StudentLists.currentList != 'allstudents' &&
-            StudentLists.currentList != 'requests') {
-
-            $.ajax({
-                type: 'POST',
-                url: '/deletestudentlist',
-                data: 'list_id=' + StudentLists.currentList,
-                success: function(data, status, jqxhr) {
-                    $('#custom-lists li[data-list_id='+StudentLists.currentList+']').remove();
-                    StudentLists.removeList(StudentLists.currentList);
-                    $('#student-list-allstudents a').click();
-                }
-            });
         }
     },
 
@@ -165,7 +149,7 @@ var StudentLists = {
         event.preventDefault();
         var rowEl = $(event.currentTarget).parents('.student-row');
         var student_id = rowEl.attr('id').substring('student-'.length);
-        var student = StudentLists.students_by_id[student_id];
+        var student = StudentLists.Data.students_by_id[student_id];
 
         if (StudentLists.currentList == 'allstudents') {
             // this deletes the student-coach relationship: be sure
@@ -177,7 +161,7 @@ var StudentLists = {
                     data: 'student_email='+student.email,
                     success: function(event) {
                         // update data model
-                        StudentLists.removeStudent(student);
+                        StudentLists.Data.removeStudent(student);
 
                         // update view
                         $('#student-'+student.key).remove();
@@ -195,13 +179,13 @@ var StudentLists = {
                 success: function(data, status, jqxhr) {
                     // update data model
                     var requests = [];
-                    for (var i in StudentLists.coach_requests) {
-                        var request = StudentLists.coach_requests[i];
+                    for (var i in StudentLists.Data.coach_requests) {
+                        var request = StudentLists.Data.coach_requests[i];
                         if (request != email) {
                             requests.push(request);
                         }
                     }
-                    StudentLists.coach_requests = requests;
+                    StudentLists.Data.coach_requests = requests;
 
                     // update UI
                     rowEl.remove();
@@ -269,7 +253,7 @@ var StudentLists = {
                 title = 'All students';
                 titleHref = '/class_profile';
                 $('#delete-list').hide();
-                if(StudentLists.students.length == 0) {
+                if(StudentLists.Data.students.length == 0) {
                     $('#empty-class').show();
                 }
             }
@@ -277,7 +261,7 @@ var StudentLists = {
                 $('#actual-students .student-row').each(function() {
                     var el = $(this);
                     var student_id = el.attr('id').substring('student-'.length);
-                    if(StudentLists.isStudentInList(student_id, StudentLists.currentList)) {
+                    if(StudentLists.Data.isStudentInList(student_id, StudentLists.currentList)) {
                         el.show();
                         nstudents++;
                     }
@@ -287,7 +271,7 @@ var StudentLists = {
                     $('#empty-class').hide();
                 });
 
-                var list = StudentLists.student_lists_by_id[StudentLists.currentList];
+                var list = StudentLists.Data.student_lists_by_id[StudentLists.currentList];
                 title = list.name;
                 titleHref = '/class_profile?list_id=' + list.key;
                 $('#delete-list').show();
@@ -317,6 +301,7 @@ var addListTextBox = {
     init: function() {
         this.element = $('#newlist-box');
         Util.bindEventsToObject(this.element, 'keypress keyup focusout', this);
+        $('#delete-list').click(this.deleteList);
     },
     
     keypress: function(event) {
@@ -352,7 +337,7 @@ var addListTextBox = {
             dataType: 'json',
             success: function(data, status, jqxhr) {
                 var student_list = data;
-                StudentLists.addList(student_list);
+                StudentLists.Data.addList(student_list);
 
                 // add a new item to the sidebar
                 var $el = $('<li data-list_id="'+student_list.key+'"><a href="students?list_id='+student_list.key+'" class="bullet">'+student_list.name+'</a></li>');
@@ -366,6 +351,24 @@ var addListTextBox = {
     hide: function() {
         this.element.val('').hide().removeAttr('disabled');
         $('#newlist-button').focus();
+    },
+    
+    deleteList: function(event) {
+        event.preventDefault();
+        if (StudentLists.currentList != 'allstudents' &&
+            StudentLists.currentList != 'requests') {
+
+            $.ajax({
+                type: 'POST',
+                url: '/deletestudentlist',
+                data: 'list_id=' + StudentLists.currentList,
+                success: function(data, status, jqxhr) {
+                    $('#custom-lists li[data-list_id='+StudentLists.currentList+']').remove();
+                    StudentLists.Data.removeList(StudentLists.currentList);
+                    $('#student-list-allstudents a').click();
+                }
+            });
+        }
     }
 };
 
@@ -395,7 +398,7 @@ var addStudentTextBox = {
                 data: 'student_email='+email,
                 success: function(data, status, jqxhr) {
                     // data model
-                    StudentLists.coach_requests.push(email);
+                    StudentLists.Data.coach_requests.push(email);
 
                     // UI
                     addStudentTextBox.element.val('');
@@ -447,7 +450,7 @@ var addToListTextBox = {
     
     generateSource: function() {
         var source = [];
-        jQuery.each(StudentLists.students, function(i, student) {
+        jQuery.each(StudentLists.Data.students, function(i, student) {
             source.push({label:student.nickname + ' (' + student.email + ')', value:student.email});
         });
         return source;
@@ -490,7 +493,7 @@ var addToListTextBox = {
             text = this.element.val();
         }
         
-        var student = StudentLists.students_by_email[text];
+        var student = StudentLists.Data.students_by_email[text];
         var list_id = StudentLists.currentList;
         editListsMenu.addStudentToListAjax(student, list_id);
         
@@ -527,13 +530,13 @@ var editListsMenu = {
         var $newList = $ul.children('li');
         
         // add a line for each list
-        jQuery.each(StudentLists.student_lists, function(i, studentList) {
+        jQuery.each(StudentLists.Data.student_lists, function(i, studentList) {
             var $el = $('<li class="list-option"><label><input type="checkbox">' + studentList.name + '</label></li>');
             var $input = $el.find('input');
             
             // get student
             var student_id = $menu.parents('.student-row').attr('id').substring('student-'.length);
-            if(StudentLists.isStudentInList(student_id, studentList.key)) {
+            if(StudentLists.Data.isStudentInList(student_id, studentList.key)) {
                 $input.attr('checked', true);
             }
             
@@ -547,7 +550,7 @@ var editListsMenu = {
         var $input = $(event.currentTarget);
         var studentList = $input.data('student-list');
         var student_id = $input.parents('.student-row').attr('id').substring('student-'.length);
-        var student = StudentLists.students_by_id[student_id];
+        var student = StudentLists.Data.students_by_id[student_id];
         if ($input.attr('checked'))
             this.addStudentToListAjax(student, studentList.key);
         else
@@ -560,7 +563,7 @@ var editListsMenu = {
             url: '/addstudenttolist',
             data: 'student_email='+student.email+'&list_id='+list_id,
             success: function() {
-                StudentLists.addStudentToList(student, list_id);
+                StudentLists.Data.addStudentToList(student, list_id);
                 
                 // show row on screen if visible
                 if (StudentLists.currentList == list_id) {
@@ -576,7 +579,7 @@ var editListsMenu = {
             url: '/removestudentfromlist',
             data: 'student_email='+student.email+'&list_id='+list_id,
             success: function() {
-                StudentLists.removeStudentFromList(student, list_id);
+                StudentLists.Data.removeStudentFromList(student, list_id);
 
                 // hide row from screen if visible
                 if (StudentLists.currentList == list_id) {
