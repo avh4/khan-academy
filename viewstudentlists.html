@@ -136,12 +136,14 @@ h2 a:hover, .student-name a:hover {
     margin-bottom: 10px;
 }
 
-.delete-button {
-    width: 28px;
-    height: 28px;
+.delete-button > img {
+    position: relative;
+    top: 6px;
+    width: 16px;
+    height: 16px;
     opacity:0.2;filter:alpha(opacity=20);
 }
-.delete-button:hover {
+.delete-button > img:hover {
     opacity:0.6;filter:alpha(opacity=60);
 }
 
@@ -216,7 +218,7 @@ $(function() {
     <div class="students-header">
         <span class="float-right">
 
-            <a id="delete-group" href=""><img src="images/round_delete.png" class="delete-button" title="Delete this list (the students will still appear in 'All students')"/></a>
+            <a class="delete-button" id="delete-group" href=""><img src="images/circled_cross.png" title="Delete this list (the students will still appear in 'All students')"/></a>
         </span>
         <h2><a href="/class_profile?study_group=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
         <span id='nstudents'>n students</span>
@@ -254,7 +256,7 @@ $(function() {
                         </li>
                     </ul>
                 </div>
-                <a href="" title="Remove this student from this list"><img src="images/round_delete.png" class="delete-button" /></a>
+                <a class="delete-button" href="" title="Remove this student from this list"><img src="images/circled_cross.png"/></a>
             </span>
             <div>
                 <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname }}</a></span>
@@ -268,7 +270,7 @@ $(function() {
         {% for email in coach_requests %}
         <div class="student-row">
             <span class="float-right">
-                <a href="" title="Cancel the request to coach this student"><img src="images/round_delete.png" class="delete-button" /></a>
+                <a class="delete-button" href="" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
             </span>
             <div><span class="student-name">{{ email }}</span></div>
         </div>
@@ -280,7 +282,7 @@ $(function() {
     <div id="tmpl" style="display:none">
         <div class="student-row">
             <span class="float-right">
-                <a href="" title="Cancel the request to coach this student"><img src="images/round_delete.png" class="delete-button" /></a>
+                <a class="delete-button" href="" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
             </span>
             <div><span class="student-name">email goes here</span></div>
         </div>
