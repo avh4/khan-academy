@@ -218,11 +218,16 @@ test("focus should return to button after textbox", function() {
 });
 </script>
 {% endif %}
-
 {% endblock pagescript %}
-{% block pagetitle %}Students{% endblock pagetitle %}
-{% block pagecontent %}
 
+{% block pagesubmenu %}
+<span class="breadcrumbs_nav">
+    <a href="/students" class="selected">Manage Students</a>
+    <a href="/class_profile">Class Stats</a>
+</span>
+{% endblock pagesubmenu %}
+
+{% block pagecontent %}
 <article id="students">
 
 <div id="sidebar">
