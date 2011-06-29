@@ -314,7 +314,7 @@ var StudentLists = {
 
                 var group = StudentLists.study_groups_by_id[StudentLists.currentGroup];
                 title = group.name;
-                titleHref = '/class_profile?group_id=' + group.key
+                titleHref = '/class_profile?group_id=' + group.key;
                 $('#delete-group').show();
             }
         }
@@ -549,6 +549,7 @@ var editListsMenu = {
             $menu.append($ul);
         }
         $ul.children('.list-option').remove();
+        var $newList = $ul.children('li');
         
         // add a line for each group
         jQuery.each(StudentLists.study_groups, function(i, group) {
@@ -561,7 +562,7 @@ var editListsMenu = {
                 $input.attr('checked', true);
             }
             
-            $ul.prepend($el);
+            $newList.before($el);
             $input.click(function(event){editListsMenu.itemClick(event);})
                   .data('group', group);
         });
