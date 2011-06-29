@@ -41,16 +41,16 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     
     # Every 10 questions
     if numquest != None and numquest % 10 == 0:
-        notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions! <span class='notification-bar-login'><a href='#'>Login</a></span> to save your progress")
+        notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions! To save your progress you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>")
     #Proficiency
     if isProf:
-        notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". <span class='notification-bar-login'><a href='#'>Login</a></span> to save your progress")
+        notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". To save your progress you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>")
     #First Badge
     if numbadge != None and len(numbadge) == 1 and (len(user_badges) > 0):
-        notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! You should <span class='notification-bar-login'><a href='#'>login</a></span> to save your progress")
+        notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! Y To save your progress you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>")
     #Every badge after
     if numbadge != None and len(numbadge) > 1 and (len(user_badges) > 0):
-        notifications.UserLoginNotifier.push_for_user(user,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far. Have you considered <span class='notification-bar-login'><a href='#'>logging in</a></span> so you don't lose your progress?")
+        notifications.UserLoginNotifier.push_for_user(user,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far.  To save your progress you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>")
     #Every 2.5k points
     if numpoint != None and threshold:
         numpoint = 2500*(numpoint/2500)+2500
