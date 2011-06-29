@@ -102,9 +102,7 @@ def exercise_icon(exercise, App):
         s_prefix = "challenge"
 
     src = ""
-    if exercise.phantom:
-        src = "/images/proficient-badge-phantom.png"
-    elif exercise.review:
+    if exercise.review:
         src = "/images/proficient-badge-review.png" # No reviews for summative exercises yet
     elif exercise.suggested:
         src = "/images/%s-suggested.png" % s_prefix
