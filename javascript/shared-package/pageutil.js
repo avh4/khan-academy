@@ -565,7 +565,6 @@ var Notifications = {
         setTimeout(function(){
             jel.css("visibility", "hidden").css("display", "");
             jel.css("top",-1*jel.height());
-            //$(".notification-bar-content").text("You're not logged in.")
             $("body").css("background-position","0px 35px");
             $("body").css("top","35px");
             $("#top-header").css("margin-top","35px");
