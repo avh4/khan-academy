@@ -7,7 +7,7 @@
     min-height: 50px;
 }
 #user-info {
-    margin-top: 15px;
+    margin-top: 23px;
 }
 #studentlists_dropdown {
     text-indent: 0;
@@ -52,6 +52,23 @@
 #studentlists_dropdown a:visited:focus {
     color: #DD6900;
 }
+
+#page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:before { 
+    top: 21px;
+    left: 50px;
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+}
+#page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:after { 
+    top: 22px;
+    left: 50px;
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+}
+
+
 
 </style>
 <script type="text/javascript">
@@ -138,10 +155,10 @@ $(function() {
 
 {% block profile_name %}
 <span id="user-info">
-    <span class="breadcrumbs_nav">
+    <span class="breadcrumbs_nav class-stats-nav">
         <a href="/students">Manage students</a>
         <a href="/class_profile" class="selected">Class Stats For</a>
-        <span id="studentlists_dropdown" style="display:none;" class="selected">
+        <span id="studentlists_dropdown" style="display:none;">
             <a>{{ student_list.name|escape }}</a>
             <div id="studentlists_menu">
                 <ol>
