@@ -3,11 +3,12 @@ from oauth_provider.models import Consumer
 from oauth_provider.consts import ACCEPTED
 
 import request_handler
+import models
 import util
 
 class Register(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if user:
             self.render_template("oauth_provider/register_app.html", {})
         else:
@@ -15,7 +16,7 @@ class Register(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if user:
             name = self.request_string("name", default="").strip()
             description = self.request_string("description", default="").strip()

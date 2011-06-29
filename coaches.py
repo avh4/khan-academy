@@ -25,18 +25,19 @@ from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPer
 
 class ViewCoaches(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
+
         if user:
             invalid_coach = self.request_bool("invalid_coach", default = False)
 
-            user_data = UserData.get_or_insert_for(user)
             coach_requests = CoachRequest.get_for_student(user).fetch(1000)
 
             template_values = {
                         "coaches": user_data.coaches,
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
-                        "student_id": user.email(),
+                        "student_id": user_data.display_user.email(),
                     }
 
             self.render_template('viewcoaches.html', template_values)
@@ -45,12 +46,13 @@ class ViewCoaches(request_handler.RequestHandler):
 
 class ViewStudents(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
+
         if user:
 
             invalid_student = self.request_bool("invalid_student", default = False)
 
-            user_data = UserData.get_or_insert_for(user)
             student_emails = user_data.get_students()
             coach_requests = CoachRequest.get_for_coach(user)
 
@@ -65,13 +67,12 @@ class ViewStudents(request_handler.RequestHandler):
 
 class RegisterCoach(request_handler.RequestHandler):
     def post(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
 
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
             return
-
-        user_data = UserData.get_or_insert_for(user)
 
         coach_email = self.request_string("coach", default="")
         if coach_email:
@@ -91,7 +92,8 @@ class RegisterCoach(request_handler.RequestHandler):
 
 class RequestStudent(request_handler.RequestHandler):
     def post(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
 
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
@@ -111,14 +113,14 @@ class RequestStudent(request_handler.RequestHandler):
 
 class AcceptCoach(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data_student = UserData.current
+        user = user_data_student.user
 
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         accept_coach = self.request_bool("accept", default = False)
-        user_data_student = UserData.get_or_insert_for(user)
 
         coach_email = self.request_string("coach_email")
         if coach_email:
@@ -137,13 +139,13 @@ class AcceptCoach(request_handler.RequestHandler):
 
 class UnregisterCoach(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
 
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data = UserData.get_or_insert_for(user)
         coach_email = self.request.get('coach')
 
         if coach_email:
@@ -159,13 +161,13 @@ class UnregisterCoach(request_handler.RequestHandler):
 
 class UnregisterStudent(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
 
         if user is None:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data = UserData.get_or_insert_for(user)
         student_email = self.request_string("student_email")
 
         if student_email:

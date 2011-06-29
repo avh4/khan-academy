@@ -116,13 +116,11 @@ class KillLiveAssociations(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        if user:
+        user_data = UserData.current
+        if user_data.user:
             exid = self.request.get('exid')
             key = self.request.get('key')
             time_warp = self.request.get('time_warp')
-
-            user_data = UserData.get_or_insert_for(user)
 
             if not exid:
                 exid = 'addition_1'
@@ -174,7 +172,6 @@ class ViewExercise(request_handler.RequestHandler):
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
                 'exercise_states': exercise_states,
-                'cookiename': user.nickname().replace('@', 'at'),
                 'key': user_exercise.key(),
                 'exercise': exercise,
                 'exid': exid,
@@ -301,7 +298,7 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, util.get_current_user())
+        user_video = UserVideo.get_for_video_and_user(video, UserData.current.user)
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points
@@ -334,21 +331,19 @@ class LogVideoProgress(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
-        user_data = None
+        user_data = UserData.current
         video_points_total = 0
         points_total = 0
 
-        if user:
+        if user_data.user:
 
             video = None
             video_key = self.request_string("video_key", default = "")
-            user_data = UserData.get_or_insert_for(user)
 
             if video_key:
                 video = db.get(video_key)
 
-            if video and user_data:
+            if video:
 
                 # Seconds watched is restricted by both the scrubber's position
                 # and the amount of time spent on the video page
@@ -385,15 +380,14 @@ class PrintExercise(request_handler.RequestHandler):
 
     def get(self):
         
-        user = util.get_current_user()
-        if user:
+        user_data = UserData.current
+
+        if user_data.user:
             exid = self.request.get('exid')
             key = self.request.get('key')
             problem_number = int(self.request.get('problem_number') or '0')
             num_problems = int(self.request.get('num_problems'))
             time_warp = self.request.get('time_warp')
-
-            user_data = UserData.get_or_insert_for(user)
 
             query = Exercise.all()
             query.filter('name =', exid)
@@ -422,7 +416,6 @@ class PrintExercise(request_handler.RequestHandler):
                 'proficient': proficient,
                 'endangered': endangered,
                 'reviewing': reviewing,
-                'cookiename': user.nickname().replace('@', 'at'),
                 'key': userExercise.key(),
                 'exercise': exercise,
                 'exid': exid,
@@ -450,8 +443,7 @@ class ReportIssue(request_handler.RequestHandler):
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
         
     def write_response(self, issue_type, extra_template_values):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
+        user_data = UserData.current
 
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
@@ -479,24 +471,16 @@ class ReportIssue(request_handler.RequestHandler):
         self.render_template(page, template_values)
 
 class ProvideFeedback(request_handler.RequestHandler):
-
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-
-        template_values = {
-            'App' : App,
-            'points': user_data.points,
-            }
-
-        self.render_template("provide_feedback.html", template_values)
+        self.render_template("provide_feedback.html", {})
 
 class ViewAllExercises(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        if user:
-            user_data = UserData.get_or_insert_for(user)
+
+        user_data = UserData.current
+
+        if user_data.user:
             
             ex_graph = ExerciseGraph(user_data)
             if user_data.reassess_from_graph(ex_graph):
@@ -570,9 +554,13 @@ class RegisterAnswer(request_handler.RequestHandler):
         self.get()
 
     def get(self):
+
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
-        user = util.get_current_user()
+
+        user_data = UserData.current
+        user = user_data.user
+
         if user:
             key = self.request_string('key')
 
@@ -591,7 +579,10 @@ class RegisterAnswer(request_handler.RequestHandler):
             elapsed_time = int(float(time.time()) - start_time)
 
             user_exercise = db.get(key)
-            user_data = UserData.get_for(user_exercise.user)
+            if not user_exercise.belongs_to(user):
+                self.redirect('/exercises?exid=' + exid)
+                return
+
             exercise = user_exercise.exercise_model
 
             user_exercise.last_done = datetime.datetime.now()
@@ -730,7 +721,9 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # until he clicks the "Next Problem" button, he can avoid resetting his streak
     # by just reloading the page.
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
+
         if user:
             key = self.request.get('key')
 
@@ -743,6 +736,8 @@ class RegisterCorrectness(request_handler.RequestHandler):
 
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
+            if not user_exercise.belongs_to(user):
+                return
 
             user_exercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
@@ -767,10 +762,15 @@ class ResetStreak(request_handler.RequestHandler):
 # clicks on the Hint button. 
 
     def post(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
         if user:
             key = self.request.get('key')
             userExercise = db.get(key)
+
+            if not userExercise.belongs_to(user):
+                return
+
             userExercise.reset_streak()
             userExercise.put()
         else:
@@ -1007,15 +1007,8 @@ class ViewDMCA(request_handler.RequestHandler):
 class ViewStore(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  }, 
-                                                  self.request)
-                                                  
-        self.render_template('store.html', template_values)
+        user_data = UserData.current
+        self.render_template('store.html', {})
         
 class ViewHowToHelp(request_handler.RequestHandler):
     def get(self):
@@ -1025,8 +1018,6 @@ class ViewHowToHelp(request_handler.RequestHandler):
 class ViewSAT(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
         playlist_title = "SAT Preparation"
         query = Playlist.all()
         query.filter('title =', playlist_title)
@@ -1036,29 +1027,22 @@ class ViewSAT(request_handler.RequestHandler):
         query.filter('live_association = ', True) #need to change this to true once I'm done with all of my hacks
         query.order('video_position')
         playlist_videos = query.fetch(500)
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'videos': playlist_videos,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  }, 
-                                                  self.request)
+
+        template_values = {
+                'videos': playlist_videos,
+        }
                                                   
         self.render_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
         problem_solving = VideoPlaylist.get_query_for_playlist_title("GMAT: Problem Solving")
         data_sufficiency = VideoPlaylist.get_query_for_playlist_title("GMAT Data Sufficiency")
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'data_sufficiency': data_sufficiency,
-                                                  'problem_solving': problem_solving,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  }, 
-                                                  self.request)
+        template_values = {
+                            'data_sufficiency': data_sufficiency,
+                            'problem_solving': problem_solving,
+        }
                                                   
         self.render_template('gmat.html', template_values)
                        
@@ -1267,8 +1251,6 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
 class ViewArticle(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
-        user_data = UserData.get_for_current_user()
         video = None
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
@@ -1277,14 +1259,10 @@ class ViewArticle(request_handler.RequestHandler):
         if readable_id == "fortune":
             article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
             
-        
-        
-        template_values = qa.add_template_values({'App': App,
-                                                  'points': user_data.points,
-                                                  'login_url': util.create_login_url(self.request.uri),
-                                                  'article_url': article_url,
-                                                  'issue_labels': ('Component-Videos,Video-%s' % readable_id)}, 
-                                                 self.request)
+        template_values = {
+                'article_url': article_url,
+                'issue_labels': ('Component-Videos,Video-%s' % readable_id),
+        }
 
         self.render_template("article.html", template_values)
             
@@ -1326,9 +1304,7 @@ class PostLogin(request_handler.RequestHandler):
         cont = self.request_string('continue', default = "/")
 
         # Immediately after login we make sure this user has a UserData entry
-        user = util.get_current_user()
-        if user:
-            UserData.get_or_insert_for(user)
+        user_data = UserData.current
 
         self.redirect(cont)
 

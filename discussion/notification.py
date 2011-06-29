@@ -19,7 +19,8 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
+        user_data = models.UserData.current
+        user = user_data.user
 
         if not user:
             self.redirect(util.create_login_url(self.request.uri))
@@ -49,7 +50,6 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
                 dict_answers[video_key] = [answer]
 
         videos = sorted(dict_videos.values(), key=lambda video: video.playlists[0] + video.title)
-        user_data = models.UserData.get_for_current_user()
 
         context = {
                     "App": App,
@@ -128,7 +128,9 @@ def new_answer_for_video_question(video, question, answer):
 
 def clear_question_answers_for_current_user(s_question_id):
 
-    user = util.get_current_user()
+    user_data = models.UserData.current
+    user = user_data.user
+
     if not user:
         return
 
@@ -144,8 +146,6 @@ def clear_question_answers_for_current_user(s_question_id):
     question = models_discussion.Feedback.get_by_id(question_id)
     if not question:
         return;
-
-    user_data = models.UserData.get_or_insert_for(user)
 
     feedback_keys = question.children_keys()
     for key in feedback_keys:

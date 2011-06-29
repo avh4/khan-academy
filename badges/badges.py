@@ -1,6 +1,7 @@
 from google.appengine.api import memcache
 
 import util
+import models
 import models_badges
 import logging
 
@@ -316,7 +317,7 @@ class UserBadgeNotifier:
 
     @staticmethod
     def pop_for_current_user():
-        return UserBadgeNotifier.pop_for_user(util.get_current_user())
+        return UserBadgeNotifier.pop_for_user(models.UserData.current.user)
 
     @staticmethod
     def pop_for_user(user):

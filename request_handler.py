@@ -165,26 +165,18 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def add_global_template_values(self, template_values):
         template_values['App'] = App
         template_values['None'] = None
-        template_values['points'] = None
-        template_values['username'] = ""
-
-        user = util.get_current_user()
-        if user is not None:
-            template_values['username'] = get_nickname_for(user)
 
         if not template_values.has_key('user_data'):
-            user_data = UserData.get_for(user)
+            user_data = UserData.current
             template_values['user_data'] = user_data
 
         user_data = template_values['user_data']
-        template_values['points'] = user_data.points if user_data else 0
 
-        if not template_values.has_key('continue'):
-            template_values['continue'] = self.request.uri
+        template_values['username'] = get_nickname_for(user_data.display_user)
+        template_values['points'] = user_data.points
 
         # Always insert a post-login request before our continue url
-        template_values['continue'] = util.create_post_login_url(template_values['continue'])
-
+        template_values['continue'] = util.create_post_login_url(template_values.get('continue') or self.request.uri)
         template_values['login_url'] = ('%s&direct=1' % util.create_login_url(template_values['continue']))
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 

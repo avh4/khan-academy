@@ -16,7 +16,7 @@ from api.auth.google_util import get_google_user_from_oauth_map
 from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
-def get_current_user():
+def _get_current_user():
     user = None
 
     oauth_map = current_oauth_map()

@@ -238,7 +238,7 @@ def static_url(relative_url):
 
 @register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
 def empty_class_instructions(class_is_empty=True):
-    user = util.get_current_user()
+    user = UserModel.current.user
     coach_email = "Not signed in. Please sign in to see your Coach ID."
     if user:
         coach_email = user.email()

@@ -136,7 +136,7 @@ def get_badge_counts(user_data):
 def get_user_badges(user = None):
 
     if not user:
-        user = util.get_current_user()
+        user = models.UserData.current.user
 
     user_badges = []
     user_badges_dict = {}

@@ -29,14 +29,13 @@ class VotingSortOrder:
 
 class UpdateQASort(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
         sort = self.request_int("sort", default=VotingSortOrder.HighestPointsFirst)
 
         if user:
-            user_data = UserData.get_or_insert_for(user)
-            if user_data:
-                user_data.question_sort_order = sort
-                user_data.put()
+            user_data.question_sort_order = sort
+            user_data.put()
 
         readable_id = self.request_string("readable_id", default="")
         playlist_title = self.request_string("playlist_title", default="")
@@ -49,12 +48,9 @@ class UpdateQASort(request_handler.RequestHandler):
 class VoteEntity(request_handler.RequestHandler):
     def post(self):
         # You have to be logged in to vote
-        user = util.get_current_user()
+        user_data = UserData.current
+        user = user_data.user
         if not user:
-            return
-
-        user_data = UserData.get_or_insert_for(user)
-        if not user_data:
             return
 
         vote_type = self.request_int("vote_type", default=FeedbackVote.ABSTAIN)

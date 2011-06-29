@@ -15,14 +15,14 @@ from badges import util_badges
 class ViewClassProfile(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if user:
             coach = user
 
-            coach_email = self.request_string("coach_email")
-            if users.is_current_user_admin() and coach_email:
+            coach_user = self.request_user("coach_email")
+            if users.is_current_user_admin() and coach_user:
                 # Site administrators can look at any class profile
-                coach = users.User(email=coach_email)
+                coach = coach_user
 
             user_data_coach = models.UserData.get_or_insert_for(coach)
             students_data = user_data_coach.get_students_data()
@@ -83,18 +83,18 @@ class ViewClassProfile(request_handler.RequestHandler):
 class ViewProfile(request_handler.RequestHandler):
 
     def get(self):
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if user:
             student = user
             user_data_student = None
 
-            student_email = self.request_string("student_email")
-            if student_email and student_email != student.email():
-                student_override = users.User(email=student_email)
+            student_override = self.request_user("student_email")
+            if student_override and student_override.email() != student.email():
                 user_data_student = models.UserData.get_or_insert_for(student_override)
-                if (not users.is_current_user_admin()) and user.email() not in user_data_student.coaches and user.email().lower() not in user_data_student.coaches:
+                if (not users.is_current_user_admin()) and (not user_data_student.is_coached_by(user)):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     self.redirect("/profile")
+                    return
                 else:
                     # Allow access to this student's profile
                     student = student_override
@@ -172,15 +172,14 @@ class ProfileGraph(request_handler.RequestHandler):
         student = None
         user_data_student = None
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if user:
             student = user
 
-            student_email = self.request_string("student_email")
-            if student_email and student_email != student.email():
-                student_override = users.User(email=student_email)
+            student_override = self.request_user("student_email")
+            if student_override and student_override.emails() != student.email():
                 user_data_student = models.UserData.get_or_insert_for(student_override)
-                if (not users.is_current_user_admin()) and user.email() not in user_data_student.coaches and user.email().lower() not in user_data_student.coaches:
+                if (not users.is_current_user_admin()) and (not user_data_student.is_coached_by(user)):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     user_data_student = None
                 else:
@@ -212,14 +211,14 @@ class ClassProfileGraph(ProfileGraph):
         coach = None
         user_data_coach = None
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if user:
             coach = user
 
-            coach_email = self.request_string("coach_email")
-            if users.is_current_user_admin() and coach_email:
+            coach_override = self.request_user("coach_email")
+            if users.is_current_user_admin() and coach_override:
                 # Site administrators can look at any class profile
-                coach = users.User(email=coach_email)
+                coach = coach_override
 
             user_data_coach = models.UserData.get_or_insert_for(coach)
 

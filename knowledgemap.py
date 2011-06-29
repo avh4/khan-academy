@@ -7,11 +7,11 @@ from models import UserData
 
 class SaveExpandedAllExercises(request_handler.RequestHandler):
     def post(self):
-        user = util.get_current_user()
-        if user:
+        user_data = UserData.current
+
+        if user_data.user:
             expanded = self.request_bool("expanded")
 
-            user_data = UserData.get_or_insert_for(user)
             user_data.expanded_all_exercises = expanded
             user_data.put() 
 
@@ -21,8 +21,9 @@ class SaveMapCoords(request_handler.RequestHandler):
         return
 
     def post(self):
-        user = util.get_current_user()
-        if user:
+        user_data = UserData.current
+
+        if user_data.user:
             try:
                 lat = self.request_float("lat")
                 lng = self.request_float("lng")
@@ -31,7 +32,6 @@ class SaveMapCoords(request_handler.RequestHandler):
                 # If any of the above values aren't present in request, don't try to save.
                 return
 
-            user_data = UserData.get_or_insert_for(user)
             user_data.map_coords = serializeMapCoords(lat, lng, zoom)
             user_data.put()
  

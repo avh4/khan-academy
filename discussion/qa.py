@@ -108,10 +108,7 @@ class PageQuestions(request_handler.RequestHandler):
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
-        user_data = None
-        user = util.get_current_user()
-        if user:
-            user_data = models.UserData.get_for(user)
+        user_data = models.UserData.current
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
@@ -130,7 +127,7 @@ class AddAnswer(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
 
         if not user:
             self.redirect(util.create_login_url(self.request.uri))
@@ -170,7 +167,7 @@ class Answers(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
         question_key = self.request.get("question_key")
         question = db.get(question_key)
 
@@ -198,7 +195,7 @@ class AddQuestion(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
 
         if not user:
             self.redirect(util.create_login_url(self.request.uri))
@@ -234,7 +231,7 @@ class EditEntity(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if not user:
             return
 
@@ -267,7 +264,7 @@ class EditEntity(request_handler.RequestHandler):
 class VoteEntity(request_handler.RequestHandler):
     def post(self):
         # You have to be logged in to vote
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if not user:
             return
 
@@ -281,7 +278,7 @@ class VoteEntity(request_handler.RequestHandler):
 class FlagEntity(request_handler.RequestHandler):
     def post(self):
         # You have to at least be logged in to flag
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if not user:
             return
 
@@ -332,7 +329,7 @@ class DeleteEntity(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user = models.UserData.current.user
         if not user:
             return
 
@@ -350,7 +347,7 @@ class DeleteEntity(request_handler.RequestHandler):
 def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
 
     limit_per_page = 5
-    user = util.get_current_user()
+    user = user_data.user
 
     if page <= 0:
         page = 1

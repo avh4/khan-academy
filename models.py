@@ -294,6 +294,9 @@ class UserExercise(db.Model):
         self.clear_memcache()
         db.Model.put(self)
 
+    def belongs_to(self, user):
+        return user and self.user.email().lower() == user.email().lower()
+
     def required_streak(self):
         return self.exercise_model.required_streak()
 
@@ -394,7 +397,14 @@ class CoachRequest(db.Model):
 
 class UserData(db.Model):
 
-    user = db.UserProperty()       
+    @property db_user(self):
+        return self.user
+    user = db.UserProperty()
+
+    @property display_user(self):
+        return self.current_user
+    current_user = db.UserProperty()
+
     moderator = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
@@ -429,14 +439,14 @@ class UserData(db.Model):
     @property
     def badge_counts(self):
         return util_badges.get_badge_counts(self)
-    
+
     @staticmethod
-    def get_for_current_user():
-        user = util.get_current_user()
-        if user is not None:
-            user_data = UserData.get_for(user)
-            if user_data is not None:
-                return user_data
+    @request_cache.cache()
+    @property
+    def current():
+        user = util._get_current_user()
+        if user:
+            return UserData.get_or_insert_for(user)
         return UserData()
 
     @staticmethod    
@@ -447,8 +457,9 @@ class UserData(db.Model):
         query = UserData.all()
         query.filter('user =', user)
         query.order('-points') # Temporary workaround for issue 289
+
         return query.get()
-    
+
     @staticmethod    
     def get_or_insert_for(user):
         # Once we have rekeyed legacy entities,
@@ -531,14 +542,14 @@ class UserData(db.Model):
         self.need_to_reassess = False
         return is_changed
     
-    def reassess_if_necessary(self, user=None):
+    def reassess_if_necessary(self):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        ex_graph = ExerciseGraph(self, user)
+        ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
         
-    def is_proficient_at(self, exid, user=None):
-        self.reassess_if_necessary(user)
+    def is_proficient_at(self, exid):
+        self.reassess_if_necessary()
         return (exid in self.all_proficient_exercises)
 
     def is_explicitly_proficient_at(self, exid):
@@ -674,7 +685,7 @@ class Video(Searchable, db.Model):
         return None
 
     def current_user_points(self):
-        user_video = UserVideo.get_for_video_and_user(self, util.get_current_user())
+        user_video = UserVideo.get_for_video_and_user(self, UserData.current.user)
         if user_video:
             return points.VideoPointCalculator(user_video)
         else:
@@ -1115,9 +1126,8 @@ class ExerciseVideo(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data, user=None):
-        if user is None:
-            user = util.get_current_user()
+    def __init__(self, user_data):
+        user = user_data.user
         user_exercises = UserExercise.get_for_user_use_cache(user)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises

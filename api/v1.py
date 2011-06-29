@@ -22,9 +22,10 @@ def api_error_response(e):
 def add_action_results_property(obj, dict_results):
     badges_earned = []
 
-    user = util.get_current_user()
+    user_data = models.UserData.current
+    user = user_data.user
     if user:
-        badge_counts = util_badges.get_badge_counts(models.UserData.get_for(user))
+        badge_counts = util_badges.get_badge_counts(user_data)
 
         user_badges = badges.UserBadgeNotifier.pop_for_user(user)
         badges_dict = util_badges.all_badges_dict()
@@ -237,7 +238,7 @@ def replace_playlist_values(structure, playlist_dict):
 # IFF currently logged in user has permission to view
 def get_visible_user_data_from_request():
 
-    user = util.get_current_user()
+    user = models.UserData.current.user
     if not user:
         return None
 
@@ -256,7 +257,7 @@ def get_visible_user_data_from_request():
 @jsonp
 @jsonify
 def user_data_other():
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user:
         user_data_student = get_visible_user_data_from_request()
@@ -286,7 +287,7 @@ def filter_query_by_request_dates(query, property):
 @jsonp
 @jsonify
 def user_videos_all():
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user:
         user_data_student = get_visible_user_data_from_request()
@@ -308,7 +309,7 @@ def user_videos_all():
 @jsonp
 @jsonify
 def user_videos_specific(youtube_id):
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user and youtube_id:
         user_data_student = get_visible_user_data_from_request()
@@ -325,18 +326,20 @@ def user_videos_specific(youtube_id):
 @jsonp
 @jsonify
 def log_user_video(youtube_id):
-    user = util.get_current_user()
+
+    user_data = models.UserData.current
+    user = user_data.user
+
     points = 0
     video_log = None
 
     if user and youtube_id:
-        user_data= models.UserData.get_for(user)
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
         seconds_watched = int(request.request_float("seconds_watched", default = 0))
         last_second_watched = int(request.request_float("last_second_watched", default = 0))
 
-        if user_data and video:
+        if video:
             user_video, video_log, video_points_total = models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
             if video_log:
@@ -349,7 +352,7 @@ def log_user_video(youtube_id):
 @jsonp
 @jsonify
 def user_exercises_all():
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user:
         user_data_student = get_visible_user_data_from_request()
@@ -365,7 +368,7 @@ def user_exercises_all():
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user and exercise_name:
         user_data_student = get_visible_user_data_from_request()
@@ -381,7 +384,7 @@ def user_exercises_specific(exercise_name):
 @jsonp
 @jsonify
 def user_playlists_all():
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user:
         user_data_student = get_visible_user_data_from_request()
@@ -397,7 +400,7 @@ def user_playlists_all():
 @jsonp
 @jsonify
 def user_playlists_specific(playlist_title):
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user and playlist_title:
         user_data_student = get_visible_user_data_from_request()
@@ -414,7 +417,7 @@ def user_playlists_specific(playlist_title):
 @jsonp
 @jsonify
 def user_problem_logs(exercise_name):
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user and exercise_name:
         user_data_student = get_visible_user_data_from_request()
@@ -442,7 +445,7 @@ def user_problem_logs(exercise_name):
 @jsonp
 @jsonify
 def user_video_logs(youtube_id):
-    user = util.get_current_user()
+    user = models.UserData.current.user
 
     if user and youtube_id:
         user_data_student = get_visible_user_data_from_request()
@@ -472,7 +475,7 @@ def user_video_logs(youtube_id):
 def badges_list():
     badges_dict = util_badges.all_badges_dict()
 
-    user = util.get_current_user()
+    user = models.UserData.current.user
     if user:
 
         user_data_student = get_visible_user_data_from_request()
