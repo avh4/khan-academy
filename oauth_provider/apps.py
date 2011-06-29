@@ -8,7 +8,7 @@ import util
 
 class Register(request_handler.RequestHandler):
     def get(self):
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         if user:
             self.render_template("oauth_provider/register_app.html", {})
         else:
@@ -16,7 +16,7 @@ class Register(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         if user:
             name = self.request_string("name", default="").strip()
             description = self.request_string("description", default="").strip()

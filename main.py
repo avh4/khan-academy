@@ -116,7 +116,7 @@ class KillLiveAssociations(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
 
     def get(self):
-        user_data = UserData.current
+        user_data = UserData.current()
         if user_data.user:
             exid = self.request.get('exid')
             key = self.request.get('key')
@@ -298,7 +298,7 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, UserData.current.user)
+        user_video = UserVideo.get_for_video_and_user(video, UserData.current().user)
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points
@@ -331,7 +331,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
     def get(self):
 
-        user_data = UserData.current
+        user_data = UserData.current()
         video_points_total = 0
         points_total = 0
 
@@ -380,7 +380,7 @@ class PrintExercise(request_handler.RequestHandler):
 
     def get(self):
         
-        user_data = UserData.current
+        user_data = UserData.current()
 
         if user_data.user:
             exid = self.request.get('exid')
@@ -443,7 +443,7 @@ class ReportIssue(request_handler.RequestHandler):
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
         
     def write_response(self, issue_type, extra_template_values):
-        user_data = UserData.current
+        user_data = UserData.current()
 
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
@@ -478,7 +478,7 @@ class ViewAllExercises(request_handler.RequestHandler):
 
     def get(self):
 
-        user_data = UserData.current
+        user_data = UserData.current()
 
         if user_data.user:
             
@@ -558,7 +558,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
 
-        user_data = UserData.current
+        user_data = UserData.current()
         user = user_data.user
 
         if user:
@@ -721,7 +721,7 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # until he clicks the "Next Problem" button, he can avoid resetting his streak
     # by just reloading the page.
     def get(self):
-        user_data = UserData.current
+        user_data = UserData.current()
         user = user_data.user
 
         if user:
@@ -762,7 +762,7 @@ class ResetStreak(request_handler.RequestHandler):
 # clicks on the Hint button. 
 
     def post(self):
-        user_data = UserData.current
+        user_data = UserData.current()
         user = user_data.user
         if user:
             key = self.request.get('key')
@@ -1007,7 +1007,7 @@ class ViewDMCA(request_handler.RequestHandler):
 class ViewStore(request_handler.RequestHandler):
 
     def get(self):
-        user_data = UserData.current
+        user_data = UserData.current()
         self.render_template('store.html', {})
         
 class ViewHowToHelp(request_handler.RequestHandler):
@@ -1304,7 +1304,7 @@ class PostLogin(request_handler.RequestHandler):
         cont = self.request_string('continue', default = "/")
 
         # Immediately after login we make sure this user has a UserData entry
-        user_data = UserData.current
+        user_data = UserData.current()
 
         self.redirect(cont)
 

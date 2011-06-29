@@ -108,7 +108,7 @@ class PageQuestions(request_handler.RequestHandler):
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
-        user_data = models.UserData.current
+        user_data = models.UserData.current()
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
@@ -127,7 +127,7 @@ class AddAnswer(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
 
         if not user:
             self.redirect(util.create_login_url(self.request.uri))
@@ -167,7 +167,7 @@ class Answers(request_handler.RequestHandler):
 
     def get(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         question_key = self.request.get("question_key")
         question = db.get(question_key)
 
@@ -195,7 +195,7 @@ class AddQuestion(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
 
         if not user:
             self.redirect(util.create_login_url(self.request.uri))
@@ -231,7 +231,7 @@ class EditEntity(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         if not user:
             return
 
@@ -264,7 +264,7 @@ class EditEntity(request_handler.RequestHandler):
 class VoteEntity(request_handler.RequestHandler):
     def post(self):
         # You have to be logged in to vote
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         if not user:
             return
 
@@ -278,7 +278,7 @@ class VoteEntity(request_handler.RequestHandler):
 class FlagEntity(request_handler.RequestHandler):
     def post(self):
         # You have to at least be logged in to flag
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         if not user:
             return
 
@@ -329,7 +329,7 @@ class DeleteEntity(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
         if not user:
             return
 

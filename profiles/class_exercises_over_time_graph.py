@@ -22,7 +22,7 @@ def class_exercises_over_time_graph_context(user_data):
     user = user_data.user
     end_date = None
 
-    student_emails = user_data.get_students()
+    student_emails = user_data.student_emails()
     dict_student_exercises = {}
     dict_exercises = {}
 

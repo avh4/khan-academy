@@ -55,6 +55,9 @@ class RequestInputHandler(object):
             else:
                 raise # No value available and no default supplied, raise error
 
+    def request_user_data(self, key):
+        return UserData.get_from_user_input(self.request_string(key))
+
     def request_float(self, key, default = None):
         try:        
             return float(self.request_string(key))
@@ -167,7 +170,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         template_values['None'] = None
 
         if not template_values.has_key('user_data'):
-            user_data = UserData.current
+            user_data = UserData.current()
             template_values['user_data'] = user_data
 
         user_data = template_values['user_data']

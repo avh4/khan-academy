@@ -21,22 +21,22 @@ def _get_current_user():
 
     oauth_map = current_oauth_map()
     if oauth_map:
-        user = get_current_user_from_oauth_map(oauth_map)
+        user = _get_current_user_from_oauth_map(oauth_map)
 
     if not user and allow_cookie_based_auth():
-        user = get_current_user_from_cookies_unsafe()
+        user = _get_current_user_from_cookies_unsafe()
 
     return user
 
-def get_current_user_from_oauth_map(oauth_map):
+def _get_current_user_from_oauth_map(oauth_map):
     user = get_google_user_from_oauth_map(oauth_map)
     if not user:
         user = facebook_util.get_facebook_user_from_oauth_map(oauth_map)
     return user
 
-# get_current_user_from_cookies_unsafe is labeled unsafe because it should
-# never be used in our JSONP-enabled API. All calling code should just use get_current_user.
-def get_current_user_from_cookies_unsafe():
+# _get_current_user_from_cookies_unsafe is labeled unsafe because it should
+# never be used in our JSONP-enabled API. All calling code should just use _get_current_user.
+def _get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()

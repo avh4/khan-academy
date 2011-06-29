@@ -317,7 +317,7 @@ class UserBadgeNotifier:
 
     @staticmethod
     def pop_for_current_user():
-        return UserBadgeNotifier.pop_for_user(models.UserData.current.user)
+        return UserBadgeNotifier.pop_for_user(models.UserData.current().user)
 
     @staticmethod
     def pop_for_user(user):

@@ -371,6 +371,18 @@ class CoachRequest(db.Model):
     coach_requesting = db.UserProperty()
     student_requested = db.UserProperty()
 
+    @property
+    def display_coach_requesting(self):
+        if not hasattr(self, "display_coach_user"):
+            self.display_coach_user = UserData.get_for(self.coach_requesting).display_user
+        return self.display_coach_user
+
+    @property
+    def display_student_requested(self):
+        if not hasattr(self, "display_student_user"):
+            self.display_student_user = UserData.get_for(self.student_requested).display_user
+        return self.display_student_user
+
     @staticmethod
     def key_for(coach, student):
         return "%s_request_for_%s" % (coach.email(), student.email())
@@ -397,11 +409,13 @@ class CoachRequest(db.Model):
 
 class UserData(db.Model):
 
-    @property db_user(self):
+    @property
+    def db_user(self):
         return self.user
     user = db.UserProperty()
 
-    @property display_user(self):
+    @property
+    def display_user(self):
         return self.current_user
     current_user = db.UserProperty()
 
@@ -442,13 +456,25 @@ class UserData(db.Model):
 
     @staticmethod
     @request_cache.cache()
-    @property
     def current():
         user = util._get_current_user()
         if user:
             return UserData.get_or_insert_for(user)
         return UserData()
 
+    @staticmethod
+    def get_from_user_input(email):
+        if not email:
+            return None
+
+        user = users.User(email)
+
+        query = UserData.all()
+        query.filter('current_user =', user)
+        query.order('-points') # Temporary workaround for issue 289
+
+        return query.get()
+        
     @staticmethod    
     def get_for(user):
         if not user:
@@ -471,6 +497,7 @@ class UserData(db.Model):
                 user_data = UserData.get_or_insert(
                     key_name=key,
                     user=user,
+                    current_user=user,
                     moderator=False,
                     last_login=datetime.datetime.now(),
                     proficient_exercises=[],
@@ -586,9 +613,20 @@ class UserData(db.Model):
         	    if student_data.key().id_or_name() not in students_set:
         		    students_data.append(student_data)
         return students_data
-   
-    def get_students(self):
+
+    def student_emails(self):
         return map(lambda student_data: student_data.user.email(), self.get_students_data())
+   
+    def student_display_emails(self):
+        return map(lambda student_data: student_data.display_user.email(), self.get_students_data())
+
+    def coach_display_emails(self):
+        display_emails = []
+        for coach_email in self.coaches:
+            user_data_coach = UserData.get_for(users.User(coach_email))
+            if user_data_coach and user_data_coach.display_user:
+                display_emails.append(user_data_coach.display_user.email())
+        return display_emails
 
     def is_coached_by(self, coach):
         return coach.email() in self.coaches or coach.email().lower() in self.coaches
@@ -685,7 +723,7 @@ class Video(Searchable, db.Model):
         return None
 
     def current_user_points(self):
-        user_video = UserVideo.get_for_video_and_user(self, UserData.current.user)
+        user_video = UserVideo.get_for_video_and_user(self, UserData.current().user)
         if user_video:
             return points.VideoPointCalculator(user_video)
         else:

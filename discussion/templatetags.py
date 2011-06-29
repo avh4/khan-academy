@@ -20,7 +20,7 @@ def video_comments(video, playlist, page=0):
             "video": video,
             "playlist": playlist,
             "page": 0,
-            "user": models.UserData.current.user,
+            "user": models.UserData.current().user,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             }
 
@@ -40,7 +40,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "page": page,
             "qa_expand_id": qa_expand_id,
             "sort_order": sort_order,
-            "user": models.UserData.current.user,
+            "user": models.UserData.current().user,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
@@ -51,7 +51,7 @@ def signature(target=None, verb=None):
                 "target": target, 
                 "verb": verb, 
                 "is_mod": is_current_user_moderator(),
-                "is_author": target and target.author == models.UserData.current.user,
+                "is_author": target and target.author == models.UserData.current().user,
                 "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
             }
 

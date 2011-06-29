@@ -19,7 +19,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
 
     def get(self):
 
-        user_data = models.UserData.current
+        user_data = models.UserData.current()
         user = user_data.user
 
         if not user:
@@ -128,7 +128,7 @@ def new_answer_for_video_question(video, question, answer):
 
 def clear_question_answers_for_current_user(s_question_id):
 
-    user_data = models.UserData.current
+    user_data = models.UserData.current()
     user = user_data.user
 
     if not user:

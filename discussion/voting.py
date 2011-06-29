@@ -29,7 +29,7 @@ class VotingSortOrder:
 
 class UpdateQASort(request_handler.RequestHandler):
     def get(self):
-        user_data = UserData.current
+        user_data = UserData.current()
         user = user_data.user
         sort = self.request_int("sort", default=VotingSortOrder.HighestPointsFirst)
 
@@ -48,7 +48,7 @@ class UpdateQASort(request_handler.RequestHandler):
 class VoteEntity(request_handler.RequestHandler):
     def post(self):
         # You have to be logged in to vote
-        user_data = UserData.current
+        user_data = UserData.current()
         user = user_data.user
         if not user:
             return

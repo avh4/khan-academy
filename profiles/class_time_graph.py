@@ -15,7 +15,7 @@ def class_time_graph_context(user_data, dt_utc, tz_offset):
         return {}
 
     user = user_data.user
-    student_emails = user_data.get_students()
+    student_emails = user_data.student_emails()
 
     classtime_table = None
     classtime_analyzer = classtime.ClassTimeAnalyzer(tz_offset)

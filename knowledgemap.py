@@ -7,7 +7,7 @@ from models import UserData
 
 class SaveExpandedAllExercises(request_handler.RequestHandler):
     def post(self):
-        user_data = UserData.current
+        user_data = UserData.current()
 
         if user_data.user:
             expanded = self.request_bool("expanded")
@@ -21,7 +21,7 @@ class SaveMapCoords(request_handler.RequestHandler):
         return
 
     def post(self):
-        user_data = UserData.current
+        user_data = UserData.current()
 
         if user_data.user:
             try:

@@ -43,7 +43,7 @@ class AddComment(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current.user
+        user = models.UserData.current().user
 
         if not user:
             self.redirect(util.create_login_url(self.request.uri))
@@ -76,7 +76,7 @@ class AddComment(request_handler.RequestHandler):
 
 def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_order=voting.VotingSortOrder.HighestPointsFirst):
 
-    user = models.UserData.current.user
+    user = models.UserData.current().user
 
     if page > 0:
         comments_hidden = False # Never hide questions if specifying specific page
