@@ -572,27 +572,6 @@ var Notifications = {
             jel.css("display", "").css("visibility", "visible");
             jel.animate({top: 0}, 500, function(){jel.show()});
         }, 100);
-
-        setTimeout(function(){
-            var progress = 0;
-            var width = .3;
-            var getGradient = function() {
-                var gradient = "-webkit-gradient(linear, 0% 0%, 100% 0%, color-stop($beginning, #eee), color-stop($middle, #444), color-stop($end, #eee));";
-                return gradient.replace("$beginning", progress).replace("$middle", progress + width / 2).replace("$end", progress + width);
-            }
-            
-            var intervalID = null;
-            progress = -width / 2;
-            intervalID = setInterval(function() {
-              progress += 1 / 120;
-              $('.notification-bar-content').attr('style', 'background-image:' + getGradient());
-              if(progress >= 1) {
-                  clearInterval(intervalID);
-                  intervalID = null;
-              }
-            }, 1 / 60); 
-            
-        }, 500);
     },
 
     hide: function() {
