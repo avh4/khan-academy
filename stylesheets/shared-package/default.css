@@ -2880,3 +2880,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 .notification-bar-close a:visited{
     color:#eee;
 }
+
+.notification-bar-close a:hover{
+    border-bottom: dotted 1px #eee !important;
+}

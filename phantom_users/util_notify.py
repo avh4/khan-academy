@@ -56,8 +56,6 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
         numpoint = 2500*(numpoint/2500)+2500
         notifications.UserLoginNotifier.push_for_user(user,"You've earned over <a href='/profile'>"+str(numpoint)+ " points</a>! If you want to keep them, you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>.")
 
-    #notifications.UserLoginNotifier.push_for_user(user,"You need to login!!!")
-
 
 #Toggle Notify allows the user to close the notification bar (by deleting the memcache) until a new notification occurs. 
 class ToggleNotify(request_handler.RequestHandler):
