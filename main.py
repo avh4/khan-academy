@@ -639,7 +639,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
             user_exercise.total_done += 1
-
+            util_notify.update(user_data,user_exercise)
+            
             if correct:
 
                 user_exercise.total_correct += 1
@@ -664,7 +665,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-            util_notify.update(user_data,user_exercise)
+           
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
