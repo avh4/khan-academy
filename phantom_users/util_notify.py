@@ -39,8 +39,8 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     
     #numprof = proficient_exercises
     
-    # Every 10 questions
-    if numquest != None and numquest % 10 == 0:
+    # Every 10 questions, more than 20 every 5
+    if (numquest != None and numquest % 10 == 0) or (numquest != None and numquest > 20 and numquest % 5 == 0):
         notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions! To save your progress you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>")
     #Proficiency
     if isProf:
