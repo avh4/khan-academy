@@ -2839,6 +2839,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 /*    padding-top:5px;*/
     vertical-align:middle;
     outline:solid 2px #00496E;
+    color: #eee;
 }
 
 .notification-bar-content {
@@ -2846,9 +2847,6 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     font-size:15pt;
     position:relative;
     top:5px;
-    color: rgba(0, 0, 0, 0);
-    -webkit-background-clip:text;
-    background-image:-webkit-gradient(linear, 0% 0%, 100% 0%, color-stop(0, #eee), color-stop(1, #eee));
 }
 
 .notification-bar-content a:link{
@@ -2873,7 +2871,6 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     position:relative;
     top:5px;
     right:20px;
-    color: #eee;
 }
 
 .notification-bar-close a:link{
