@@ -9,14 +9,16 @@ import models
 import classtime
 import util
 
-def class_time_graph_context(user_data, dt_utc, tz_offset):
+def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
 
     if not user_data:
         return {}
-
-    user = user_data.user
-    student_emails = user_data.get_students()
-
+    
+    if student_list:
+        student_emails = student_list.get_students()
+    else:
+        student_emails = user_data.get_students()
+    
     classtime_table = None
     classtime_analyzer = classtime.ClassTimeAnalyzer(tz_offset)
     student_data = []
@@ -43,7 +45,6 @@ def class_time_graph_context(user_data, dt_utc, tz_offset):
 
     return {
             "classtime_table": classtime_table,
-            "coach_email": user.email(),
             "width": (60 * len(student_data)) + 120,
             "student_data": student_data,
             "is_graph_empty": len(classtime_table.rows) <= 0

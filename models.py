@@ -392,6 +392,31 @@ class CoachRequest(db.Model):
     def get_for_coach(coach):
         return CoachRequest.all().filter("coach_requesting = ", coach)
 
+class StudentList(db.Model):
+
+    name = db.StringProperty()
+    coaches = db.ListProperty(db.Key)
+
+    def delete(self, *args):
+        self.remove_all_students()
+        db.Model.delete(self, *args)
+
+    def remove_all_students(self):
+        for s in self.get_students_data():
+            s.student_lists.remove(self.key())
+            s.put()
+
+    @property
+    def students(self):
+        return UserData.gql("WHERE student_lists = :1", self.key())
+
+    # these methods have the same interface as the methods on UserData
+    def get_students_data(self):
+        return [s for s in self.students]
+
+    def get_students(self):
+        return map(lambda student_data: student_data.user.email(), self.get_students_data())
+
 class UserData(db.Model):
 
     user = db.UserProperty()       
@@ -407,6 +432,7 @@ class UserData(db.Model):
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
+    student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)

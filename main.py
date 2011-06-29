@@ -38,7 +38,6 @@ from google.appengine.ext import db
 
 import bulk_update.handler
 import facebook
-import layer_cache
 import request_cache
 from gae_mini_profiler import profiler
 import autocomplete
@@ -1459,6 +1458,11 @@ def main():
         ('/unregisterstudent', coaches.UnregisterStudent),
         ('/requeststudent', coaches.RequestStudent),
         ('/acceptcoach', coaches.AcceptCoach),
+
+        ('/createstudentlist', coaches.CreateStudentList),
+        ('/deletestudentlist', coaches.DeleteStudentList),
+        ('/removestudentfromlist', coaches.RemoveStudentFromList),
+        ('/addstudenttolist', coaches.AddStudentToList),
 
         ('/individualreport', coaches.ViewIndividualReport),
         ('/progresschart', coaches.ViewProgressChart),        

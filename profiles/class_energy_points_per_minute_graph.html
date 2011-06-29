@@ -26,7 +26,15 @@
                     load: function() {
                         var series = this.series[0];
                         setInterval(function() {
-                            $.get("/profile/graph/classenergypointsperminute", {coach: email_coach, update: 1}, function(data) {
+                            var params = {coach: email_coach, update: 1};
+                            
+                            var list_id = $('#studentlists_dropdown ol').data('selected').key;
+                            if (list_id != 'allstudents')
+                            {
+                                params['list_id'] = list_id;
+                            }
+                            
+                            $.get("/profile/graph/classenergypointsperminute", params, function(data) {
 
                                 try { eval("var dict_json = " + data); }
                                 catch(e) { return; }

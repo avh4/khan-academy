@@ -37,20 +37,20 @@ def profile_exercise_progress_graph(user_data_student):
 
 # Class profile graph types
 @register.simple_tag
-def class_profile_exercises_over_time_graph(user_data_coach):
-    return render_graph_html_and_context("class_exercises_over_time_graph.html", class_exercises_over_time_graph.class_exercises_over_time_graph_context(user_data_coach))
+def class_profile_exercises_over_time_graph(user_data_coach, student_list):
+    return render_graph_html_and_context("class_exercises_over_time_graph.html", class_exercises_over_time_graph.class_exercises_over_time_graph_context(user_data_coach, student_list))
 @register.simple_tag
-def class_profile_progress_report_graph(user_data_coach):
-    return render_graph_html_and_context("class_progress_report_graph.html", class_progress_report_graph.class_progress_report_graph_context(user_data_coach))
+def class_profile_progress_report_graph(user_data_coach, student_list):
+    return render_graph_html_and_context("class_progress_report_graph.html", class_progress_report_graph.class_progress_report_graph_context(user_data_coach, student_list))
 @register.simple_tag
-def class_profile_energy_points_per_minute_graph(user_data_coach):
-    return render_graph_html_and_context("class_energy_points_per_minute_graph.html", class_energy_points_per_minute_graph.class_energy_points_per_minute_graph_context(user_data_coach))
+def class_profile_energy_points_per_minute_graph(user_data_coach, student_list):
+    return render_graph_html_and_context("class_energy_points_per_minute_graph.html", class_energy_points_per_minute_graph.class_energy_points_per_minute_graph_context(user_data_coach, student_list))
 @register.simple_tag
-def class_profile_energy_points_per_minute_update(user_data_coach):
-    return class_energy_points_per_minute_graph.class_energy_points_per_minute_update(user_data_coach)
+def class_profile_energy_points_per_minute_update(user_data_coach, student_list):
+    return class_energy_points_per_minute_graph.class_energy_points_per_minute_update(user_data_coach, student_list)
 @register.simple_tag
-def class_profile_time_graph(user_data_coach, dt, tz_offset):
-    return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset))
+def class_profile_time_graph(user_data_coach, dt, tz_offset, student_list):
+    return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset, student_list))
 # End class profile graph types
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
@@ -59,9 +59,9 @@ def profile_graph_link(user, graph_name, graph_type, selected_graph_type):
     return { "user": user, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
-def profile_class_graph_link(coach, graph_name, graph_type, selected_graph_type):
+def profile_class_graph_link(coach, graph_name, graph_type, selected_graph_type, list_id):
     selected = (graph_type == selected_graph_type)
-    return { "user": None, "coach": coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
+    return { "user": None, "coach": coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected, 'list_id': list_id }
 
 @register.inclusion_tag(("../profiles/graph_date_picker.html", "profiles/graph_date_picker.html"))
 def profile_graph_date_picker(user, graph_type):
