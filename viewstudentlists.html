@@ -237,7 +237,7 @@ test("focus should return to button after textbox", function() {
     </ul>
     <ul id="custom-lists" class="student-list-links">
         {% for list in student_lists %}
-        <li data-list_id="{{list.key}}"><a href="students?list_id={{list.key}}" class="bullet">{{list.name}}</a></li>
+        <li data-list_id="{{list.key}}"><a href="students?list_id={{list.key}}" class="bullet">{{list.name|escape}}</a></li>
         {% endfor %}
     </ul>
     <input type="textbox" id="newlist-box" />
@@ -290,7 +290,7 @@ test("focus should return to button after textbox", function() {
                 <a class="delete-button" href="" title="Remove this student from this list"><img src="images/circled_cross.png"/></a>
             </span>
             <div>
-                <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname }}</a></span>
+                <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname|escape }}</a></span>
                 <span class="student-email">{{ student.email|escape }}</span>
             </div>
         </div>
@@ -303,7 +303,7 @@ test("focus should return to button after textbox", function() {
             <span class="float-right">
                 <a class="delete-button" href="" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
             </span>
-            <div><span class="student-name">{{ email }}</span></div>
+            <div><span class="student-name">{{ email|escape }}</span></div>
         </div>
         {% endfor %}
     </div>
