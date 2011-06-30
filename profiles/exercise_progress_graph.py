@@ -8,12 +8,10 @@ def exercise_progress_graph_context(user_data_student):
     if not user_data_student:
         return {}
     
-    user = user_data_student.user
-
     exercise_data = {}
     
     exercises = Exercise.get_all_use_cache()
-    user_exercises = UserExercise.get_for_user_use_cache(user)
+    user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
 
     dict_user_exercises = {}
     for user_exercise in user_exercises:
@@ -27,7 +25,7 @@ def exercise_progress_graph_context(user_data_student):
         ex_link = "/exercises?exid="+exercise.name
         hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % ( exercise_display, "Not Started", 0, 0)
 
-        chart_link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % (user.email(), exercise.name) 
+        chart_link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % (user_data.display_email(), exercise.name) 
                 
         user_exercise = dict_user_exercises[exercise.name] if dict_user_exercises.has_key(exercise.name) else None
 

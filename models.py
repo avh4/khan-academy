@@ -781,7 +781,7 @@ class UserPlaylist(db.Model):
     title = db.StringProperty()
 
     @staticmethod
-    def get_for_user(user_data):
+    def get_for_user_data(user_data):
         query = UserPlaylist.all()
         query.filter('user =', user_data.user)
         return query
@@ -1160,7 +1160,7 @@ class ExerciseVideo(db.Model):
 class ExerciseGraph(object):
 
     def __init__(self, user_data):
-        user_exercises = UserExercise.get_for_user_use_cache(user_data.user)
+        user_exercises = UserExercise.get_for_user_data_use_cache(user_data.user)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
         self.exercise_by_name = {}        
