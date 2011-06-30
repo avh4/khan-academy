@@ -2,7 +2,6 @@ import models
 from badges.models_badges import UserBadge
 from badges.badges import Badge
 import logging
-from google.appengine.ext import webapp
 from google.appengine.api import taskqueue
 import request_handler
 from google.appengine.api import users
