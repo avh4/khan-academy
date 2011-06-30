@@ -1339,16 +1339,18 @@ class PostLogin(request_handler.RequestHandler):
         cont = self.request_string('continue', default = "/")
 
         # Immediately after login we make sure this user has a UserData entry, also delete phantom cookies
-        self.delete_cookie('ureg_id')
         user = util.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
-        
+        else:
+            self.redirect(cont)
+            return
         # If new user is new, 0 points, migrate data
         if user_data.points == 0:
             logging.info("New Account: %s", user.email() )
             self.redirect("/newaccount?continue=%s",cont)
         else:
+            self.delete_cookie('ureg_id')
             self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
