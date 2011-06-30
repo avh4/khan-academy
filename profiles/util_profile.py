@@ -10,7 +10,7 @@ import util
 import models
 import consts
 from badges import util_badges
-from phantom_users.phantom_util import allow_phantoms, disallow_phantoms
+from phantom_users.phantom_util import create_phantom, disallow_phantoms
 
 class ViewClassProfile(request_handler.RequestHandler):
 
@@ -84,9 +84,10 @@ class ViewClassProfile(request_handler.RequestHandler):
 
 class ViewProfile(request_handler.RequestHandler):
 
-    @allow_phantoms
+    @create_phantom
     def get(self):
         user = util.get_current_user()
+        logged_in = not util.is_phantom_user(user)
 
         student = user
         user_data_student = None
@@ -134,6 +135,7 @@ class ViewProfile(request_handler.RequestHandler):
             'student_user_data': user_data_student,
             "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False),
             "view": self.request_string("view", default=""),
+            'logged_in': logged_in,
         }
 
         self.render_template('viewprofile.html', template_values)

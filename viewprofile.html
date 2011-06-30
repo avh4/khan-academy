@@ -3,7 +3,11 @@
 {% block profile_name %}
 <span id="user-info" class="has-details">
     <img src="/images/darth.png" />
-    <span id="name">{{ student_nickname|escape }}{% simple_student_info student_user_data %}</span>
+    {% if logged_in %}
+        <span id="name">{{ student_nickname|escape }}{% simple_student_info student_user_data %}</span>
+    {% else %}
+        <span id="phantom-login"><a href="/login">Login</a></span>
+    {% endif %}
 </span>
 {% endblock profile_name %}
 

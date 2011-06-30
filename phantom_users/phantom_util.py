@@ -44,7 +44,7 @@ def create_phantom_user():
     random_string = hashlib.md5(rs).hexdigest()
     return users.User(PHANTOM_ID_EMAIL_PREFIX+random_string)
 
-def allow_phantoms(method):
+def create_phantom(method):
     '''Decorator used to create phantom users if necessary.
 
     Warning:
@@ -68,7 +68,7 @@ def allow_phantoms(method):
         # Bust the cache so later calls to get_current_user return the phantom user
         request_cache.cache()(util.get_current_user)(bust_cache=True)
 
-        method(self, *args, **kwargs)
+        return method(self, *args, **kwargs)
     return wrapper
 
 def disallow_phantoms(method, redirect_to='/login'):
@@ -81,5 +81,5 @@ def disallow_phantoms(method, redirect_to='/login'):
         if util.is_phantom_user(user):
             self.redirect(redirect_to)
         else:
-            method(self, *args, **kwargs)
+            return method(self, *args, **kwargs)
     return wrapper
