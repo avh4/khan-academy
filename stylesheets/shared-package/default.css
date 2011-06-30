@@ -2318,11 +2318,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     filter:alpha(opacity=50);
 
     display: none;
+    z-index: 100;
 }
 
 #back-to-top a.text {
     display: block;
-    background: white;
+    background: transparent;
     visibility: hidden;
     position: relative;
     top: 10px;
