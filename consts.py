@@ -44,7 +44,7 @@ MAX_WORKING_ON_PROBLEM_SECONDS = 600
 REQUIRED_PROBLEMS_FOR_EXERCISE_STATISTICS = 50
 
 # Number of most recent problems we examine when calculating exercise statistics
-LATEST_PROBLEMS_FOR_EXERCISE_STATISTICS = 10000
+LATEST_PROBLEMS_FOR_EXERCISE_STATISTICS = 5000
 
 # Speediest exercise percentile to use when calculating "fast" problem times
 FASTEST_EXERCISE_PERCENTILE = 0.25

@@ -26,8 +26,12 @@ def route(rule, **options):
 
         func = allow_cross_origin(func)
 
+        rule_desc = rule
+        for key in options:
+            rule_desc += "[%s=%s]" % (key, options[key])
+
         # Fix endpoint names for decorated functions by using the rule for names
-        return api_app.add_url_rule(rule, rule, func, **options)
+        return api_app.add_url_rule(rule, rule_desc, func, **options)
 
     return api_route_wrap
 
