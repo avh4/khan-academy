@@ -106,11 +106,11 @@ def recent_video_activity(video_logs):
 
     return list_video_activity
 
-def recent_activity_for(user, dt_start, dt_end):
+def recent_activity_for(user_data, dt_start, dt_end):
 
-    query_user_badges = models_badges.UserBadge.get_for_user_between_dts(user, dt_start, dt_end)
-    query_problem_logs = models.ProblemLog.get_for_user_between_dts(user, dt_start, dt_end)
-    query_video_logs = models.VideoLog.get_for_user_between_dts(user, dt_start, dt_end)
+    query_user_badges = models_badges.UserBadge.get_for_user_data_between_dts(user_data, dt_start, dt_end)
+    query_problem_logs = models.ProblemLog.get_for_user_data_between_dts(user_data, dt_start, dt_end)
+    query_video_logs = models.VideoLog.get_for_user_data_between_dts(user_data, dt_start, dt_end)
 
     results = util.async_queries([query_user_badges, query_problem_logs, query_video_logs], limit=200)
 
@@ -136,10 +136,10 @@ def collapse_recent_activity(list_recent_activity):
 
     return sorted(filter(lambda activity: activity is not None, list_recent_activity), reverse=True, key=lambda activity: activity.dt)
 
-def recent_activity_context(user):
+def recent_activity_context(user_data):
     list_recent_activity = []
-    if user:
+    if user_data:
         dt_end = datetime.datetime.now()
         dt_start = dt_end - datetime.timedelta(hours = HOURS_RECENT_ACTIVITY)
-        list_recent_activity = recent_activity_for(user, dt_start, dt_end)
-    return { "student": user, "list_recent_activity": list_recent_activity }
+        list_recent_activity = recent_activity_for(user_data, dt_start, dt_end)
+    return { "user_data_student": user_data, "list_recent_activity": list_recent_activity }

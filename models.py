@@ -627,8 +627,8 @@ class UserData(db.Model):
                 display_emails.append(user_data_coach.display_user.email())
         return display_emails
 
-    def is_coached_by(self, coach):
-        return coach.email() in self.coaches or coach.email().lower() in self.coaches
+    def is_coached_by(self, user_data_coach):
+        return user_data_coach.db_email() in self.coaches or user_data_coach.db_email().lower() in self.coaches
 
     def add_points(self, points):
         if self.points == None:

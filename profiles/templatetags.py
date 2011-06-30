@@ -81,8 +81,8 @@ def profile_exercise_progress_block(exercise_data, exercise):
     return context
 
 @register.inclusion_tag(("../profiles/recent_activity.html", "profiles/recent_activity.html"))
-def profile_recent_activity(user):
-    return recent_activity.recent_activity_context(user)
+def profile_recent_activity(user_data):
+    return recent_activity.recent_activity_context(user_data)
 
 @register.inclusion_tag(("../profiles/recent_activity_entry_badge.html", "profiles/recent_activity_entry_badge.html"))
 def profile_recent_activity_entry_badge(student, recent_activity_entry):
