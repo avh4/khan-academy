@@ -397,9 +397,9 @@ class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
 
-    def delete(self, *args):
+    def delete(self, *args, **kwargs):
         self.remove_all_students()
-        db.Model.delete(self, *args)
+        db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
         for s in self.get_students_data():
