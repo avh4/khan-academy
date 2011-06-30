@@ -22,6 +22,7 @@ from badges import util_badges
 
 from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
 from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPerMinuteGraph, ClassTimeGraph
+import profiles.util_profile as util_profile
 
 import simplejson as json
 
@@ -238,7 +239,7 @@ class UnregisterStudent(request_handler.RequestHandler):
 
 class CreateStudentList(request_handler.RequestHandler):
     def post(self):
-        coach_data = get_coach(self)
+        coach_data = util_profile.get_coach(self)
         
         list_name = self.request_string('list_name')
         if not list_name:
@@ -256,52 +257,22 @@ class CreateStudentList(request_handler.RequestHandler):
 
 class DeleteStudentList(request_handler.RequestHandler):
     def post(self):
-        coach_data = get_coach(self)
-        student_list = get_list(coach_data, self)
+        coach_data = util_profile.get_coach(self)
+        student_list = util_profile.get_list(coach_data, self)
         student_list.delete()
         if not self.is_ajax_request():
             self.redirect_to('/students')
-        
-def get_coach(request_handler):
-    coach = util.get_current_user()
-    coach_data = UserData.get_or_insert_for(coach)
-    return coach_data
-
-def get_student(coach_data, request_handler):
-    student_email = request_handler.request_string('student_email')
-    student = users.User(student_email)
-    student_data = UserData.get_for(student)
-    if student_data is None:
-        raise Exception("No student found with email='%s'." % student_email)
-    if coach_data.user.email() not in student_data.coaches:
-        raise Exception("Not your student!")
-    return student_data
-
-def get_list(coach_data, request_handler):
-    list_id = request_handler.request_string('list_id')
-    student_list = StudentList.get(list_id)
-    if student_list is None:
-        raise Exception("No list found with list_id='%s'." % list_id)
-    if coach_data.key() not in student_list.coaches:
-        raise Exception("Not your list!")
-    return student_list
-
-def get_coach_student_and_student_list(request_handler):
-    coach_data = get_coach(request_handler)
-    student_list = get_list(coach_data, request_handler)
-    student_data = get_student(coach_data, request_handler)
-    return (coach_data, student_data, student_list)
 
 class AddStudentToList(request_handler.RequestHandler):
     def post(self):
-        coach_data, student_data, student_list = get_coach_student_and_student_list(self)
+        coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
         
         student_data.student_lists.append(student_list.key())
         student_data.put()
 
 class RemoveStudentFromList(request_handler.RequestHandler):
     def post(self):
-        coach_data, student_data, student_list = get_coach_student_and_student_list(self)
+        coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
         
         student_data.student_lists.remove(student_list.key())
         student_data.put()

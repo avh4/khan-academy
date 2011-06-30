@@ -11,9 +11,39 @@ import util
 import models
 import consts
 from badges import util_badges
-from models import StudentList
+from models import StudentList, UserData
 
 import simplejson as json
+
+def get_coach(request_handler):
+    coach = util.get_current_user()
+    coach_data = UserData.get_or_insert_for(coach)
+    return coach_data
+
+def get_student(coach_data, request_handler):
+    student_email = request_handler.request_string('student_email')
+    student = users.User(student_email)
+    student_data = UserData.get_for(student)
+    if student_data is None:
+        raise Exception("No student found with email='%s'." % student_email)
+    if coach_data.user.email() not in student_data.coaches:
+        raise Exception("Not your student!")
+    return student_data
+
+def get_list(coach_data, request_handler):
+    list_id = request_handler.request_string('list_id')
+    student_list = StudentList.get(list_id)
+    if student_list is None:
+        raise Exception("No list found with list_id='%s'." % list_id)
+    if coach_data.key() not in student_list.coaches:
+        raise Exception("Not your list!")
+    return student_list
+
+def get_coach_student_and_student_list(request_handler):
+    coach_data = get_coach(request_handler)
+    student_list = get_list(coach_data, request_handler)
+    student_data = get_student(coach_data, request_handler)
+    return (coach_data, student_data, student_list)
 
 class ViewClassProfile(request_handler.RequestHandler):
     @staticmethod
@@ -241,12 +271,8 @@ class ClassProfileGraph(ProfileGraph):
     
     def get_student_list(self, user_data_coach):
         list_id = self.request_string("list_id")
-        if list_id:
-            try:
-                student_lists = StudentList.all().filter("coaches = ", user_data_coach.key())
-                return filter(lambda x: str(x.key()) == list_id, student_lists)[0]
-            except:
-                return None
+        if list_id and list_id != 'allstudents':
+            return get_list(user_data_coach, self)
         else:
             return None
 
