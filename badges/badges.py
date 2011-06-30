@@ -3,6 +3,7 @@ from google.appengine.api import memcache
 import util
 import models_badges
 import logging
+import phantom_users.util_notify
 
 # Badges can either be Exercise badges (can earn one for every Exercise),
 # Playlist badges (one for every Playlist),
@@ -285,6 +286,7 @@ class Badge(object):
 
             user_badge.put()
             # call notifications
+        phantom_users.util_notify.update(user_data,None,threshold = False, isProf = False, gotBadge = True)
         UserBadgeNotifier.push_for_user(user, user_badge)
 
     def frequency(self):

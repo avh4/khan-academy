@@ -9,7 +9,7 @@ import request_handler
 from badges import badges
 import logging
 
-def update(user_data,user_exercise,threshold = False, isProf = False):
+def update(user_data,user_exercise,threshold = False, isProf = False, gotBadge = False):
     if user_data == None:
         return False
     user = user_data.user
@@ -26,7 +26,6 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
 
 
     numbadge = user_data.badges
-    user_badges = memcache.get(badges.UserBadgeNotifier.key_for_user(user)) or [] #Only allow badge notifications when earned
     numpoint = user_data.points
 
     # Every 10 questions, more than 20 every 5
@@ -36,10 +35,10 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     if isProf:
         notifications.UserLoginNotifier.push_for_user(user,"You're proficient in "+str(prof)+". To save your progress you'll need to [login]")
     #First Badge
-    if numbadge != None and len(numbadge) == 1 and (len(user_badges) > 0):
+    if numbadge != None and len(numbadge) == 1 and gotBadge:
         notifications.UserLoginNotifier.push_for_user(user,"Congrats on your first <a href='/profile'>badge</a>! To save your progress you'll need to [login]")
     #Every badge after
-    if numbadge != None and len(numbadge) > 1 and (len(user_badges) > 0):
+    if numbadge != None and len(numbadge) > 1 and gotBadge:
         notifications.UserLoginNotifier.push_for_user(user,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far. To save your progress you'll need to [login]")
     #Every 2.5k points
     if numpoint != None and threshold:
