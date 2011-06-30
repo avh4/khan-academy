@@ -57,7 +57,6 @@ var currentexercise = "{{exid|escapejs}}";
 
 {% block pagecontent %}
 <div id="container" class="single-exercise" style="overflow: hidden">
-<div id="back-to-dashboard" class="single-exercise"><a href="/exercisedashboard" id="dashboard-breadcrumb" title="Back to Dashboard">&laquo;Dashboard</a></div> 
 <div class="exercise-badge single-exercise" data-id="{{exercise.name|escape}}">
 
         {% exercise_icon exercise App %}
@@ -87,7 +86,8 @@ var currentexercise = "{{exid|escapejs}}";
         {% exercise_message exercise coaches exercise_states %}
     {% endif %}
     
-<div id="extras" class="single-exercise">
+<div id="extras" class="single-exercise visited-no-recolor">
+    <div id="back-to-dashboard-link" class="single-exercise"><a href="/exercisedashboard" title="Back to Dashboard">&laquo; Back to Dashboard</a></div> 
     <div id="scratch_pad_toggle" style="display: none;">
     	<a id="scratch_pad_show" href="#" style="display: none;">Show scratch pad</a>
     	<a id="scratch_pad_hide" href="#" style="display: none;">Hide scratch pad</a>

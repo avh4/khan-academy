@@ -1,6 +1,6 @@
 <style>
     #library #library-content ol li {
-        width: {{column_width}}px;
+        width: 30%;
         height: {{link_height}}px;   
     }
     #library #library-content ol li a {
@@ -8,7 +8,7 @@
     }
     {% for multiplier in columns %}
     .m{{multiplier}} {
-        margin-left: {{column_width_plus_gutter|multiply:multiplier}}px;
+        margin-left: {{33|multiply:multiplier}}%;
     }
     {% endfor %}
 </style>

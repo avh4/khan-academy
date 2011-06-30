@@ -5,6 +5,7 @@ syntax: glob
 *compressed.js
 *combined.css
 *compressed.css
+*.espressostorage
 hashed-*.css
 hashed-*.js
 *.pem
