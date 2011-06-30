@@ -21,7 +21,6 @@ var Util = {
         for (var i in events) {
             (function(method) {
                 source.bind(events[i], function(event) {
-                    // console.log('firing ' + method + ' on: ', handler);
                     handler[method](event);
                 });
             })(events[i]);
@@ -115,10 +114,10 @@ var StudentLists = {
     init: function() {
         StudentLists.Data.init();
 
-        addStudentTextBox.init();
-        addToListTextBox.init();
-        editListsMenu.init();
-        addListTextBox.init();
+        AddStudentTextBox.init();
+        AddToListTextBox.init();
+        EditListsMenu.init();
+        AddListTextBox.init();
         
         // change visible list
         $('.bullet').click(StudentLists.listClick);
@@ -135,10 +134,6 @@ var StudentLists = {
         // show initial page
         // todo: remember this with a cookie!
         $('#student-list-allstudents a').click();
-        
-        if(StudentLists.Data.students.length < 2) {
-            $('#newlist-button').hide();
-        }
     },
 
     deleteStudentClick: function(event) {
@@ -191,7 +186,7 @@ var StudentLists = {
         }
         else {
             var list_id = StudentLists.currentList;
-            editListsMenu.removeStudentFromListAjax(student, list_id);
+            EditListsMenu.removeStudentFromListAjax(student, list_id);
         }
     },
 
@@ -275,12 +270,12 @@ var StudentLists = {
         }
         
         if (StudentLists.currentList == 'requests' || StudentLists.currentList == 'allstudents') {
-            addStudentTextBox.element.show();
-            addToListTextBox.element.hide();
+            AddStudentTextBox.element.show();
+            AddToListTextBox.element.hide();
         }
         else {
-            addStudentTextBox.element.hide();
-            addToListTextBox.element.show();
+            AddStudentTextBox.element.hide();
+            AddToListTextBox.element.show();
         }
 
         var nstudentsStr = nstudents.toString() + ' '
@@ -291,7 +286,7 @@ var StudentLists = {
     }
 };
 
-var addListTextBox = {
+var AddListTextBox = {
     element: null,
     
     init: function() {
@@ -301,7 +296,7 @@ var addListTextBox = {
         $('#newlist-button').click(function(event) {
             event.stopPropagation();
             event.preventDefault();
-            addListTextBox.element.show().focus();
+            AddListTextBox.element.show().focus();
         });
         
         $('#delete-list').click(this.deleteList);
@@ -347,7 +342,7 @@ var addListTextBox = {
                 $('#custom-lists').append($el);
                 $el.find('a').click(StudentLists.listClick);
             },
-            complete: function(){addListTextBox.hide();}
+            complete: function(){AddListTextBox.hide();}
         });
     },
 
@@ -375,7 +370,7 @@ var addListTextBox = {
     }
 };
 
-var addStudentTextBox = {
+var AddStudentTextBox = {
     element: null,
 
     init: function() {
@@ -394,7 +389,7 @@ var addStudentTextBox = {
 
     keypress: function(event) {
         if (event.which == '13') {
-            var email = addStudentTextBox.element.val();
+            var email = AddStudentTextBox.element.val();
             $.ajax({
                 type: 'POST',
                 url: '/requeststudent',
@@ -404,7 +399,7 @@ var addStudentTextBox = {
                     StudentLists.Data.coach_requests.push(email);
 
                     // UI
-                    addStudentTextBox.element.val('');
+                    AddStudentTextBox.element.val('');
 
                     var el = $('#tmpl .student-row').clone();
                     el.find('.student-name').html(email);
@@ -428,7 +423,7 @@ var addStudentTextBox = {
     }
 };
 
-var addToListTextBox = {
+var AddToListTextBox = {
     element: null,
     
     init: function() {
@@ -437,8 +432,8 @@ var addToListTextBox = {
         this.blur();
         
         this.element.autocomplete({
-            source: addToListTextBox.generateSource(),
-            select: function(event, selected) {addToListTextBox.addStudent(event, selected);}
+            source: AddToListTextBox.generateSource(),
+            select: function(event, selected) {AddToListTextBox.addStudent(event, selected);}
         });
         
         this.element.data("autocomplete").menu.select = function(e) {
@@ -498,16 +493,16 @@ var addToListTextBox = {
         
         var student = StudentLists.Data.students_by_email[text];
         var list_id = StudentLists.currentList;
-        editListsMenu.addStudentToListAjax(student, list_id);
+        EditListsMenu.addStudentToListAjax(student, list_id);
         
         this.element.val('');
     }
 };
 
 
-var editListsMenu = {
+var EditListsMenu = {
     init: function() {
-        $('.lists-css-menu > ul > li').click(function(event){editListsMenu.addChildrenToDropdown(event);});
+        $('.lists-css-menu > ul > li').click(function(event){EditListsMenu.addChildrenToDropdown(event);});
         
         $('.lists-css-menu .list-option-newlist').click(function(event) {
             // if this is called synchronously, the css-menu doesn't disappear.
@@ -544,7 +539,7 @@ var editListsMenu = {
             }
             
             $newList.before($el);
-            $input.click(function(event){editListsMenu.itemClick(event);})
+            $input.click(function(event){EditListsMenu.itemClick(event);})
                   .data('student-list', studentList);
         });
     },

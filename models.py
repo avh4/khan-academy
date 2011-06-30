@@ -408,7 +408,8 @@ class StudentList(db.Model):
 
     @property
     def students(self):
-        return UserData.gql("WHERE student_lists = :1", self.key())
+        # todo: filter
+        return UserData.all().filter("student_lists = ", self.key())
 
     # these methods have the same interface as the methods on UserData
     def get_students_data(self):
