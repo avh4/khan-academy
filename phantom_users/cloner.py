@@ -75,12 +75,21 @@ def clone_entity(e, store, **extra_args):
         klass(**props).put()
     return klass(**props)
 
-class TransferHandler(webapp.RequestHandler):
+class TransferHandler(request_handler.RequestHandler):
     def get(self):       
         #Current user is the non phantom user 
         current_user = util.get_current_user()
         phantom_user = util.get_phantom_user_from_cookies()
+        
+        if phantom_user == None:
+            return
+        
         phantom_data = models.UserData.get_for(phantom_user) 
+        current_data = models.UserData.get_for(current_user)
+        
+        if current_data.points != 0:
+            return
+            
         logging.info("Transferring data from Phanntom: %s to NewUser: %s",phantom_user.email() , current_user.email())
         #Clone UserData
         key = "user_email_key_%s" % current_user.email()
@@ -92,6 +101,7 @@ class TransferHandler(webapp.RequestHandler):
         for c in query:
             c = clone_entity(c, True, key_name=c.exercise, user=current_user)
         logging.info("UserExercise copied for %s", current_user.email())
+        self.delete_cookie('ureg_id')
         taskqueue.add(url='/transferaccount', name='UserVideo', 
                 params={'current_user': current_user, 'phantom_user': phantom_user, 'data': "UserVideo"})    
         self.redirect('/transferaccount')
