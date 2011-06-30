@@ -44,7 +44,7 @@ def create_phantom_user():
     random_string = hashlib.md5(rs).hexdigest()
     return users.User(PHANTOM_ID_EMAIL_PREFIX+random_string)
 
-def allow_phantoms(method):
+def create_phantom(method):
     '''Decorator used to create phantom users if necessary.
 
     Warning:

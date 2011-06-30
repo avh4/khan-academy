@@ -10,7 +10,7 @@ import util
 import models
 import consts
 from badges import util_badges
-from phantom_users.phantom_util import allow_phantoms, disallow_phantoms
+from phantom_users.phantom_util import create_phantom, disallow_phantoms
 
 class ViewClassProfile(request_handler.RequestHandler):
 
@@ -84,7 +84,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
 class ViewProfile(request_handler.RequestHandler):
 
-    @allow_phantoms
+    @create_phantom
     def get(self):
         user = util.get_current_user()
 
