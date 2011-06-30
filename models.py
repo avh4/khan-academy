@@ -396,6 +396,35 @@ class CoachRequest(db.Model):
     @staticmethod
     def get_for_coach(coach):
         return CoachRequest.all().filter("coach_requesting = ", coach)
+        
+        
+class UserMigration(db.Model):
+    previous_user = db.UserProperty()
+    current_user = db.UserProperty()
+
+    @staticmethod
+    def key_for(previous, current):
+        return "%s_migrated_to_%s" % (previous.email(), current.email())
+
+    @staticmethod
+    def get_for(previous, current):
+        return UserMigration.get_by_key_name(UserMigration.key_for(previous, current))
+
+    @staticmethod
+    def get_or_insert_for(previous, current):
+        return UserMigration.get_or_insert(
+                key_name = UserMigration.key_for(previous, current),
+                previous_user = previous,
+                current_user = current,
+                )
+
+    @staticmethod
+    def get_for_previous(previous):
+        return UserMigration.all().filter("previous_user = ", previous)
+
+    @staticmethod
+    def get_for_current(current):
+        return UserMigration.all().filter("current_user = ", current)
 
 class UserData(db.Model):
 
