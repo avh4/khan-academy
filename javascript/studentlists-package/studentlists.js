@@ -270,12 +270,12 @@ var StudentLists = {
         }
         
         if (StudentLists.currentList == 'requests' || StudentLists.currentList == 'allstudents') {
-            AddStudentTextBox.element.show();
-            AddToListTextBox.element.hide();
+            AddStudentTextBox.jElement.show();
+            AddToListTextBox.jElement.hide();
         }
         else {
-            AddStudentTextBox.element.hide();
-            AddToListTextBox.element.show();
+            AddStudentTextBox.jElement.hide();
+            AddToListTextBox.jElement.show();
         }
 
         var nstudentsStr = nstudents.toString() + ' '
@@ -296,7 +296,7 @@ var AddListTextBox = {
         $('#newlist-button').click(function(event) {
             event.stopPropagation();
             event.preventDefault();
-            AddListTextBox.element.show().focus();
+            AddListTextBox.jElement.show().focus();
         });
         
         $('#delete-list').click(this.deleteList);
@@ -389,7 +389,7 @@ var AddStudentTextBox = {
 
     keypress: function(event) {
         if (event.which == '13') {
-            var email = AddStudentTextBox.element.val();
+            var email = AddStudentTextBox.jElement.val();
             $.ajax({
                 type: 'POST',
                 url: '/requeststudent',
@@ -399,7 +399,7 @@ var AddStudentTextBox = {
                     StudentLists.Data.coach_requests.push(email);
 
                     // UI
-                    AddStudentTextBox.element.val('');
+                    AddStudentTextBox.jElement.val('');
 
                     var el = $('#tmpl .student-row').clone();
                     el.find('.student-name').html(email);
