@@ -128,8 +128,8 @@ def user_points(user_data):
     return {"points": points}
 
 @register.inclusion_tag(("possible_points_badge.html", "../possible_points_badge.html"))
-def possible_points_badge(points, possible_points):
-    return {"points": points, "possible_points": possible_points}
+def possible_points_badge(points, possible_points, logged_in=True):
+    return {"points": points, "possible_points": possible_points, "logged_in": logged_in}
 
 @register.inclusion_tag(("simple_student_info.html", "../simple_student_info.html"))
 def simple_student_info(user_data):

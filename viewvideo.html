@@ -99,8 +99,8 @@
 				</span>
 					
          	</div>
-			<span style="float:right;">
-		    	{% possible_points_badge awarded_points video_points_base %}
+			<span style="float:right;" id="points-badge-hover">
+		    	{% possible_points_badge awarded_points video_points_base logged_in %}
 			</span>
          	</nobr>
 		 </span>
@@ -118,7 +118,20 @@
 
 {% block bottompagescript %}
     {% js_package "video" %}
-    <script>$(function(){VideoStats.startLoggingProgress();});</script>
+    {% if not logged_in %}
+    <script>
+      $(function(){VideoStats.startLoggingProgress();});
+      $('#points-badge-hover').CreateBubblePopup({
+          innerHtml: 'You\'re earning points for watching this video. <a href="/login">Sign in</a> to keep them',
+          position: 'bottom',
+          align: 'center',
+          themePath: '/images/jqpopup/',
+          themeName: 'all-black',
+          closingDelay: 120,
+          selectable: true
+      });
+    </script>
+    {% endif %}
     <script type="text/javascript">document.write(unescape('%3Cscript type="text/javascript" src="'+document.location.protocol+'//dnn506yrbagrg.cloudfront.net/pages/scripts/0011/5719.js"%3E%3C%2Fscript%3E'))</script>
 {% endblock bottompagescript %}
 

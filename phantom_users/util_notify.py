@@ -21,7 +21,7 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
     if user_data == None:
         return False
     user = user_data.user
-    if not phantom_util.is_phantom_email(user.email()):
+    if not util.is_phantom_user(user):
         return False
 
     numquest = None
@@ -32,13 +32,11 @@ def update(user_data,user_exercise,threshold = False, isProf = False):
         numquest = user_exercise.total_done
         prof = str(models.Exercise.to_display_name(user_exercise.exercise))
 
-    
+
     numbadge = user_data.badges
     user_badges = memcache.get(badges.UserBadgeNotifier.key_for_user(user)) or [] #Only allow badge notifications when earned
     numpoint = user_data.points
-    
-    #numprof = proficient_exercises
-    
+
     # Every 10 questions, more than 20 every 5
     if (numquest != None and numquest % 10 == 0) or (numquest != None and numquest > 20 and numquest % 5 == 0):
         notifications.UserLoginNotifier.push_for_user(user,"You've answered "+str(numquest)+" questions! To save your progress you'll need to <span class='notification-bar-login'><a href='#'>login</a></span>")
