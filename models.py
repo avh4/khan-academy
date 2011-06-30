@@ -402,13 +402,13 @@ class StudentList(db.Model):
         db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
-        for s in self.get_students_data():
+        students = self.get_students_data()
+        for s in students:
             s.student_lists.remove(self.key())
-            s.put()
+        db.put(students)
 
     @property
     def students(self):
-        # todo: filter
         return UserData.all().filter("student_lists = ", self.key())
 
     # these methods have the same interface as the methods on UserData
