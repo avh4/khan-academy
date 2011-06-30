@@ -522,7 +522,6 @@ class ViewAllExercises(request_handler.RequestHandler):
             exercise.status = ""
             if phantom:
                 exercise.phantom = True
-                exercise.status = "Phantom"
             else:
                 if exercise in suggested_exercises:
                     exercise.suggested = True

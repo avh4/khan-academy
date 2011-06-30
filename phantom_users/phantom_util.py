@@ -31,13 +31,11 @@ def get_phantom_user_from_cookies():
         cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
     except Cookie.CookieError, error:
         logging.critical("Ignoring Cookie Error: '%s'" % error)
+        return None
 
     morsel = cookies.get(PHANTOM_MORSEL_KEY)
-    if morsel:
-        try:
-            return users.User(PHANTOM_ID_EMAIL_PREFIX+morsel.value)
-        except UserNotFoundError:
-            return None
+    if morsel and morsel.value:
+        return users.User(PHANTOM_ID_EMAIL_PREFIX+morsel.value)
     else:
         return None
 
@@ -50,8 +48,7 @@ def allow_phantoms(method):
     '''Decorator used to create phantom users if necessary.
 
     Warning:
-    - Only use on get methods where a phantom user should be allowed to
-    experiment, and would be forced to login otherwise.
+    - Only use on get methods where a phantom user should be created.
     '''
 
     @wraps(method)
