@@ -427,7 +427,7 @@ var AddToListTextBox = {
     },
     
     generateSource: function() {
-        return $.map(StudentLists.Data.students, function(i, student) {
+        return $.map(StudentLists.Data.students, function(student, i) {
             return { label: student.nickname + ' (' + student.email + ')',
                      value: student.email };
         });
