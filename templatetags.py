@@ -214,8 +214,6 @@ def playlist_browser_structure(structure, class_name="", level=0):
             # We have two special case playlist URLs to worry about for now. Should remove later.
             if playlist_title.startswith("SAT"):
                 href = "/sat"
-            elif playlist_title.startswith("GMAT"):
-                href = "/gmat"
 
             if level == 0:
                 s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(name))
