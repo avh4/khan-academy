@@ -26,7 +26,7 @@
 {% block graph_accordion %}
     <ul id="nav-accordion">
         <li>
-            {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type %}
+            {% profile_class_graph_link user_data_coach "Progress Report" "classprogressreport" selected_graph_type %}
             <p class="accordion-content">
                 Shows you which exercises your class has worked on and completed.
                 <span class="graph-options">
@@ -37,15 +37,15 @@
             </p>
         </li>
         <li>
-            {% profile_class_graph_link coach "Daily Activity Report" "classtime" selected_graph_type %}
+            {% profile_class_graph_link user_data_coach"Daily Activity Report" "classtime" selected_graph_type %}
             <p class="accordion-content">
                 Shows your total class activity on a specific date.
-                {% profile_graph_calendar_picker coach "classtime" %}
+                {% profile_graph_calendar_picker user_data_coach "classtime" %}
                 <span class="instructions">Light blue activity shows normal school hours, and dark blue is outside normal hours.</span>
             </p>
         </li>
         <li>
-            {% profile_class_graph_link coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
+            {% profile_class_graph_link user_data_coach "Exercise Progress Over Time" "classexercisesovertime" selected_graph_type %}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
                 <span class="instructions">Highlight a <a href="#" class="highlight-section show-students-highlight">specific student</a> or a <a href="#" class="highlight-section show-exercises-highlight">specific exercise</a>.</span><br />
 
@@ -72,7 +72,7 @@
             </div>
         </li>
         <li>
-            {% profile_class_graph_link coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type %}
+            {% profile_class_graph_link user_data_coach "Class Points per Minute" "classenergypointsperminute" selected_graph_type %}
             <p class="accordion-content">
                 Shows your total class energy points per minute as a continuously updating rolling average.
             </p>

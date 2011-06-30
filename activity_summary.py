@@ -28,7 +28,7 @@ class ActivitySummaryVideoItem:
 class DailyActivitySummary:
 
     def __init__(self):
-        self.user = None
+        self.user_data = None
         self.date = None
         self.hourly_summaries = {}
 
@@ -36,9 +36,9 @@ class DailyActivitySummary:
         return len(self.hourly_summaries) > 0
 
     @staticmethod
-    def build(user, date, problem_logs, video_logs):
+    def build(user_data, date, problem_logs, video_logs):
         summary = DailyActivitySummary()
-        summary.user = user
+        summary.user_data = user_data
 
         # Chop off hours, minutes, and seconds
         summary.date = datetime.datetime(date.year, date.month, date.day)
@@ -110,8 +110,8 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
     if user_data.last_daily_summary:
         dt_start = max(dt_end - datetime.timedelta(days=2), user_data.last_daily_summary)
 
-    query_problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
-    query_video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end)
+    query_problem_logs = models.ProblemLog.get_for_user_data_between_dts(user_data, dt_start, dt_end)
+    query_video_logs = models.VideoLog.get_for_user_data_between_dts(user_data, dt_start, dt_end)
 
     results = util.async_queries([query_problem_logs, query_video_logs])
 
@@ -125,9 +125,9 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
     dt = dt_start
 
     while dt <= dt_end:
-        summary = DailyActivitySummary.build(user_data.user, dt, problem_logs, video_logs)
+        summary = DailyActivitySummary.build(user_data, dt, problem_logs, video_logs)
         if summary.has_activity():
-            log = models.DailyActivityLog.build(user_data.user, dt, summary)
+            log = models.DailyActivityLog.build(user_data, dt, summary)
             daily_activity_logs.append(log)
         dt += datetime.timedelta(days=1)
 
@@ -164,13 +164,13 @@ def daily_activity_summary_map(user_data):
         dt = dt_start
         list_entities_to_put = []
 
-        problem_logs = models.ProblemLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
-        video_logs = models.VideoLog.get_for_user_between_dts(user_data.user, dt_start, dt_end).fetch(100000)
+        problem_logs = models.ProblemLog.get_for_user_data_between_dts(user_data, dt_start, dt_end).fetch(100000)
+        video_logs = models.VideoLog.get_for_user_data_between_dts(user_data, dt_start, dt_end).fetch(100000)
 
         while dt <= dt_end:
-            summary = DailyActivitySummary.build(user_data.user, dt, problem_logs, video_logs)
+            summary = DailyActivitySummary.build(user_data, dt, problem_logs, video_logs)
             if summary.has_activity():
-                log = models.DailyActivityLog.build(user_data.user, dt, summary)
+                log = models.DailyActivityLog.build(user_data, dt, summary)
                 list_entities_to_put.append(log)
 
             dt += datetime.timedelta(days=1)

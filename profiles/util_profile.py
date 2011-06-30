@@ -18,13 +18,11 @@ class ViewClassProfile(request_handler.RequestHandler):
 
         user_data_coach = models.UserData.current()
 
-        if user_data_coach and user_data_coach.user:
-            coach = user_data_coach.user
+        if user_data_coach:
 
             user_data_override = self.request_user_data("coach_email")
             if users.is_current_user_admin() and user_data_override:
                 # Site administrators can look at any class profile
-                coach = user_data_override.user
                 user_data_coach = user_data_override
 
             students_data = user_data_coach.get_students_data()
@@ -34,13 +32,13 @@ class ViewClassProfile(request_handler.RequestHandler):
                 class_points = reduce(lambda a,b: a + b, map(lambda student_data: student_data.points, students_data))
 
             dict_students = map(lambda student_data: { 
-                "email": student_data.display_user.email(),
-                "nickname": util.get_nickname_for(student_data.display_user),
+                "email": student_data.display_email(),
+                "nickname": student_data.nickname(),
             }, students_data)
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, 
-                    urllib.quote(user_data_coach.display_user.email()), 
+                    urllib.quote(user_data_coach.display_email()),
                     urllib.unquote(self.request_string("graph_query_params", default="")))
 
             # Sort students alphabetically and sort into 4 chunked up columns for easy table html
@@ -66,9 +64,9 @@ class ViewClassProfile(request_handler.RequestHandler):
                     list_students_columnized.append(dict_student)
 
             template_values = {
-                    'coach': coach,
-                    'coach_email': user_data_coach.display_user.email(),
-                    'coach_nickname': util.get_nickname_for(user_data_coach.display_user),
+                    'user_data_coach': user_data_coach,
+                    'coach_email': user_data_coach.display_email(),
+                    'coach_nickname': user_data_coach.nickname(),
                     'dict_students': dict_students,
                     'students_per_row': students_per_row,
                     'list_students_columnized': list_students_columnized,

@@ -116,8 +116,11 @@ class KillLiveAssociations(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
 
     def get(self):
+
         user_data = UserData.current()
-        if user_data.user:
+
+        if user_data:
+
             exid = self.request.get('exid')
             key = self.request.get('key')
             time_warp = self.request.get('time_warp')
@@ -168,7 +171,6 @@ class ViewExercise(request_handler.RequestHandler):
             template_values = {
                 'arithmetic_template': 'arithmetic_template.html',
                 'user_data': user_data,
-                'points': user_data.points,
                 'exercise_points': exercise_points,
                 'coaches': user_data.coaches,
                 'exercise_states': exercise_states,
@@ -298,7 +300,7 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user(video, UserData.current().user)
+        user_video = UserVideo.get_for_video_and_user_data(video, UserData.current()
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points
@@ -335,7 +337,7 @@ class LogVideoProgress(request_handler.RequestHandler):
         video_points_total = 0
         points_total = 0
 
-        if user_data.user:
+        if user_data:
 
             video = None
             video_key = self.request_string("video_key", default = "")
@@ -382,7 +384,7 @@ class PrintExercise(request_handler.RequestHandler):
         
         user_data = UserData.current()
 
-        if user_data.user:
+        if user_data:
             exid = self.request.get('exid')
             key = self.request.get('key')
             problem_number = int(self.request.get('problem_number') or '0')
@@ -401,29 +403,27 @@ class PrintExercise(request_handler.RequestHandler):
             if not exid:
                 exid = 'addition_1'
 
-            userExercise = user_data.get_or_insert_exercise(exercise)
+            user_exercise = user_data.get_or_insert_exercise(exercise)
             
             if not problem_number:
-                problem_number = userExercise.total_done+1
+                problem_number = user_exercise.total_done+1
             proficient = False
             endangered = False
             reviewing = False
 
             template_values = {
-                'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
-                'points': user_data.points,
                 'proficient': proficient,
                 'endangered': endangered,
                 'reviewing': reviewing,
-                'key': userExercise.key(),
+                'key': user_exercise.key(),
                 'exercise': exercise,
                 'exid': exid,
                 'expath': exid + '.html',
                 'start_time': time.time(),
                 'exercise_videos': exercise_videos,
                 'extitle': exid.replace('_', ' ').capitalize(),
-                'user_exercise': userExercise,
+                'user_exercise': user_exercise,
                 'time_warp': time_warp,
                 'user_data': user_data,
                 'num_problems': num_problems,
@@ -443,15 +443,11 @@ class ReportIssue(request_handler.RequestHandler):
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
         
     def write_response(self, issue_type, extra_template_values):
-        user_data = UserData.current()
-
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
             user_agent = ''
         user_agent = user_agent.replace(',',';') # Commas delimit labels, so we don't want them
         template_values = {
-            'App' : App,
-            'points': user_data.points,
             'referer': self.request.headers.get('Referer'),
             'user_agent': user_agent,
             }
@@ -477,10 +473,9 @@ class ProvideFeedback(request_handler.RequestHandler):
 class ViewAllExercises(request_handler.RequestHandler):
 
     def get(self):
-
         user_data = UserData.current()
 
-        if user_data.user:
+        if user_data:
             
             ex_graph = ExerciseGraph(user_data)
             if user_data.reassess_from_graph(ex_graph):
@@ -559,9 +554,8 @@ class RegisterAnswer(request_handler.RequestHandler):
         time_warp = self.request_string('time_warp')
 
         user_data = UserData.current()
-        user = user_data.user
 
-        if user:
+        if user_data:
             key = self.request_string('key')
 
             if not exid or not key:
@@ -579,7 +573,7 @@ class RegisterAnswer(request_handler.RequestHandler):
             elapsed_time = int(float(time.time()) - start_time)
 
             user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user):
+            if not user_exercise.belongs_to(user_data):
                 self.redirect('/exercises?exid=' + exid)
                 return
 
@@ -607,7 +601,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
             
-            problem_log.user = user
+            problem_log.user = user_data.user
             problem_log.exercise = exid
             problem_log.correct = correct
             problem_log.time_done = dt_done
@@ -637,11 +631,10 @@ class RegisterAnswer(request_handler.RequestHandler):
                 user_exercise.reset_streak()
 
             util_badges.update_with_user_exercise(
-                user, 
                 user_data, 
                 user_exercise, 
                 include_other_badges = True, 
-                action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
+                action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
 
             user_exercise.clear_memcache()
             db.put([user_data, problem_log, user_exercise])
@@ -722,9 +715,8 @@ class RegisterCorrectness(request_handler.RequestHandler):
     # by just reloading the page.
     def get(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user:
+        if user_data:
             key = self.request.get('key')
 
             if not key:
@@ -736,14 +728,14 @@ class RegisterCorrectness(request_handler.RequestHandler):
 
             hint_used = self.request_bool('hint_used', default=False)
             user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user):
+            if not user_exercise.belongs_to(user_data):
                 return
 
             user_exercise.schedule_review(correct == 1, self.get_time())
             if correct == 0:
                 if user_exercise.streak == 0:
                     # 2+ in a row wrong -> not proficient
-                    user_exercise.set_proficient(False, UserData.get_or_insert_for(user))
+                    user_exercise.set_proficient(False, user_data)
                 user_exercise.reset_streak()
             if hint_used:
                 user_exercise.reset_streak()
@@ -763,16 +755,16 @@ class ResetStreak(request_handler.RequestHandler):
 
     def post(self):
         user_data = UserData.current()
-        user = user_data.user
-        if user:
-            key = self.request.get('key')
-            userExercise = db.get(key)
 
-            if not userExercise.belongs_to(user):
+        if user_data:
+            key = self.request.get('key')
+            user_exercise = db.get(key)
+
+            if not user_exercise.belongs_to(user_data):
                 return
 
-            userExercise.reset_streak()
-            userExercise.put()
+            user_exercise.reset_streak()
+            user_exercise.put()
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -1005,9 +997,7 @@ class ViewDMCA(request_handler.RequestHandler):
         self.render_template('dmca.html', {"selected_nav_link": "dmca"})
 
 class ViewStore(request_handler.RequestHandler):
-
     def get(self):
-        user_data = UserData.current()
         self.render_template('store.html', {})
         
 class ViewHowToHelp(request_handler.RequestHandler):

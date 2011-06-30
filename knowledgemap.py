@@ -9,7 +9,7 @@ class SaveExpandedAllExercises(request_handler.RequestHandler):
     def post(self):
         user_data = UserData.current()
 
-        if user_data.user:
+        if user_data:
             expanded = self.request_bool("expanded")
 
             user_data.expanded_all_exercises = expanded
@@ -23,7 +23,7 @@ class SaveMapCoords(request_handler.RequestHandler):
     def post(self):
         user_data = UserData.current()
 
-        if user_data.user:
+        if user_data:
             try:
                 lat = self.request_float("lat")
                 lng = self.request_float("lng")
