@@ -791,7 +791,7 @@ class UserPlaylist(db.Model):
         return user_data.db_email() + ":" + playlist.youtube_id
 
     @staticmethod
-    def get_for_playlist_and_user(playlist, user_data, insert_if_missing=False):
+    def get_for_playlist_and_user_data(playlist, user_data, insert_if_missing=False):
         if not user_data:
             return None
 
@@ -812,7 +812,7 @@ class UserVideo(db.Model):
         return user_data.db_email() + ":" + video.youtube_id
 
     @staticmethod
-    def get_for_video_and_user(video, user_data, insert_if_missing=False):
+    def get_for_video_and_user_data(video, user_data, insert_if_missing=False):
         if not user_data:
             return None
 
@@ -865,7 +865,7 @@ class VideoLog(db.Model):
     _serialize_blacklist = ["video"]
 
     @staticmethod
-    def get_for_user_between_dts(user_data, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = VideoLog.all()
         query.filter('user =', user_data.user)
 
@@ -876,7 +876,7 @@ class VideoLog(db.Model):
         return query
 
     @staticmethod
-    def get_for_user_and_video(user_data, video):
+    def get_for_user_data_and_video(user_data, video):
         query = VideoLog.all()
 
         query.filter('user =', user_data.user)
@@ -928,7 +928,7 @@ class VideoLog(db.Model):
 
             first_video_playlist = True
             for video_playlist in query:
-                user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user_data, insert_if_missing=True)
+                user_playlist = UserPlaylist.get_for_playlist_and_user_data(video_playlist.playlist, user_data, insert_if_missing=True)
                 user_playlist.title = video_playlist.playlist.title
                 user_playlist.seconds_watched += seconds_watched
                 user_playlist.last_watched = datetime.datetime.now()
