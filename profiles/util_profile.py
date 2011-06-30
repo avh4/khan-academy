@@ -136,9 +136,6 @@ class ViewProfile(request_handler.RequestHandler):
             "view": self.request_string("view", default=""),
         }
 
-
-
-
         self.render_template('viewprofile.html', template_values)
 
 class ProfileGraph(request_handler.RequestHandler):

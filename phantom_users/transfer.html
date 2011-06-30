@@ -2,27 +2,18 @@
 
 {% block pagecontent %}
 
-
-
     <h2>{{ title|escape }}</h2><br/>
-
-	
-	
+		
 	<div style ="margin:auto;width:800px">
 	
-	<!-- copy these lines to your document: -->
-	<div id="treecopyfade_hype_container" style="position:relative;overflow:hidden;width:800px;height:400px;">
-		<script type="text/javascript" src="javascript/treecopy.js"></script>
-		<script>setTimeout('window.location.replace("{{dest_url}}")',5000);</script>
-	</div>
-	<!-- end copy -->
+	    <div id="treecopyfade_hype_container" style="position:relative;overflow:hidden;width:800px;height:400px;">
+		    <script type="text/javascript" src="javascript/treecopy.js"></script>
+		    <script>setTimeout('window.location.replace("{{dest_url}}")',5000);</script>
+	    </div>
 	
 	</div>
-
 
     <h2>{{ message_html }}</h2>
     <p>{{ sub_message_html }}</p>
-
-
 
 {% endblock pagecontent %}
