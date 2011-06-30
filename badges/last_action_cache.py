@@ -19,31 +19,32 @@ import logging
 class LastActionCache:
 
     CACHED_ACTIONS_PER_TYPE = 500
+    VERSION = 2
 
     @staticmethod
-    def key_for_user(user):
-        return "last_action_cache_%s" % user.email()
+    def key_for_email(email):
+        return "last_action_cache_%s_%s" % (LastActionCache.VERSION, email)
 
     @staticmethod
-    def get_for_user(user):
-        action_cache = memcache.get(LastActionCache.key_for_user(user))
+    def get_for_user_data(user_data):
+        action_cache = memcache.get(LastActionCache.key_for_email(user_data.db_email()))
         if action_cache is None:
-            action_cache = LastActionCache(user)
+            action_cache = LastActionCache(user_data)
         return action_cache
 
-    def __init__(self, user):
+    def __init__(self, user_data):
         self.problem_logs = [] # Protobuf version of problem logs for extremely fast (de)serialization
         self.problem_log_models = {} # Deserialized problem log models
 
         self.video_logs = [] # Protobuf version of video logs for extremely fast (de)serialization
         self.video_log_models = {} # Deserialized video log models
 
-        self.user = user
+        self.db_email = user_data.db_email()
 
     # Push a new problem log to the cache and return the LastActionCache
     @staticmethod
-    def get_cache_and_push_problem_log(user, problem_log):
-        action_cache = LastActionCache.get_for_user(user)
+    def get_cache_and_push_problem_log(user_data, problem_log):
+        action_cache = LastActionCache.get_for_user_data(user_data)
         action_cache.push_problem_log(problem_log)
         return action_cache
 
@@ -63,8 +64,8 @@ class LastActionCache:
 
     # Push a new video log to the cache and return the LastActionCache
     @staticmethod
-    def get_cache_and_push_video_log(user, video_log):
-        action_cache = LastActionCache.get_for_user(user)
+    def get_cache_and_push_video_log(user_data, video_log):
+        action_cache = LastActionCache.get_for_user_data(user_data)
         action_cache.push_video_log(video_log)
         return action_cache
 
@@ -93,5 +94,5 @@ class LastActionCache:
         self.problem_log_models = {}
         self.video_log_models = {}
 
-        memcache.set(LastActionCache.key_for_user(self.user), self)
+        memcache.set(LastActionCache.key_for_email(self.db_email), self)
 
