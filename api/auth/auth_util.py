@@ -134,21 +134,9 @@ def get_response(url, params={}):
 
         try:
             result = urlfetch.fetch(url_with_params, deadline=10)
-
-        except urlfetch.DownloadError, e:
-
-            if "timed out" in e.message:
-
-                c_tries_left -= 1
-                logging.debug("Trying to get response for %s again due to timeout." % url)
-
-            else:
-
-                c_tries_left = 0
-                error_msg = "Error in get_response for url %s, urlfetch download error: %s" % (url, e.message)
-
-                logging.debug(error_msg)
-                raise OAuthError(error_msg)
+        except Exception, e:
+            c_tries_left -= 1
+            logging.warning("Trying to get response for %s again (tries left: %s) due to error: %s" % (url, c_tries_left, e.message))
 
     if result:
 
@@ -159,7 +147,7 @@ def get_response(url, params={}):
 
     elif c_tries_left == 0:
 
-        raise OAuthError("Failed to get response for %s due to timeouts." % url)
+        raise OAuthError("Failed to get response for %s due to errors." % url)
 
     return ""
 

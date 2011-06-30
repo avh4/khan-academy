@@ -21,6 +21,7 @@ def facebook_request_token_handler(oauth_map):
     params = {
                 "client_id": App.facebook_app_id,
                 "redirect_uri": get_facebook_token_callback_url(oauth_map),
+                "scope": "offline_access", # Request offline_access so client apps don't have to deal w/ expiration
             }
 
     if oauth_map.is_mobile_view():
@@ -53,7 +54,7 @@ def retrieve_facebook_access_token(oauth_map):
     expires_seconds = 0
     try:
         expires_seconds = int(response_params["expires"][0])
-    except ValueError:
+    except (ValueError, KeyError):
         pass
 
     if expires_seconds:

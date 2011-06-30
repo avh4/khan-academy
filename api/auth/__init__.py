@@ -127,7 +127,7 @@ def access_token():
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
-    
+
     try:
         # Create our access token
         token = oauth_server.fetch_access_token(oauth_request)

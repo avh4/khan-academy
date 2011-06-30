@@ -40,11 +40,14 @@ import bulk_update.handler
 import facebook
 import layer_cache
 import request_cache
+from gae_mini_profiler import profiler
 import autocomplete
 import coaches
 import knowledgemap
 import consts
 import youtube_sync
+import warmup
+import library
 
 from search import Searchable
 import search
@@ -780,84 +783,8 @@ class GenerateLibraryContent(request_handler.RequestHandler):
         self.get()
 
     def get(self):
-        library_content_html(bust_cache=True)
+        library.library_content_html(bust_cache=True)
         self.response.out.write("Library content regenerated")  
-
-@layer_cache.cache_with_key_fxn(
-        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
-        ) 
-def library_content_html(bust_cache = False):
-
-    # No cache found -- regenerate HTML
-    all_playlists = []
-
-    dict_videos = {}
-    dict_videos_counted = {}
-    dict_playlists = {}
-    dict_playlists_by_title = {}
-    dict_video_playlists = {}
-
-    for video in Video.all():
-        dict_videos[video.key()] = video
-
-    for playlist in Playlist.all():
-        dict_playlists[playlist.key()] = playlist
-        if playlist.title in topics_list:
-            dict_playlists_by_title[playlist.title] = playlist
-
-    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
-        playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
-        video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
-
-        if dict_videos.has_key(video_key) and dict_playlists.has_key(playlist_key):
-            video = dict_videos[video_key]
-            playlist = dict_playlists[playlist_key]
-            fast_video_playlist_dict = {"video":video, "playlist":playlist}
-
-            if dict_video_playlists.has_key(playlist_key):
-                dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
-            else:
-                dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
-
-            dict_videos_counted[video_key] = True
-
-    # Update count of all distinct videos associated w/ a live playlist
-    Setting.count_videos(len(dict_videos_counted.keys()))
-
-    for topic in topics_list:
-
-        playlist = dict_playlists_by_title[topic]
-        playlist_key = playlist.key()
-        playlist_videos = dict_video_playlists[playlist_key]
-
-        playlist_data = {
-                 'title': topic,
-                 'topic': topic,
-                 'playlist': playlist,
-                 'videos': playlist_videos,
-                 'next': None
-                 }
-
-        all_playlists.append(playlist_data)
-
-    playlist_data_prev = None
-    for playlist_data in all_playlists:
-        if playlist_data_prev:
-            playlist_data_prev['next'] = playlist_data
-        playlist_data_prev = playlist_data
-
-    # Separating out the columns because the formatting is a little different on each column
-    template_values = {
-        'App' : App,
-        'all_playlists': all_playlists,
-        }
-    path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
-    html = template.render(path, template_values)
-
-    # Set shared date of last generated content
-    Setting.cached_library_content_date(str(datetime.datetime.now()))
-
-    return html
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
@@ -987,7 +914,7 @@ class ViewHomePage(request_handler.RequestHandler):
                 { 
                     "href": "/video/khan-academy-on-pbs-newshour--edited", 
                     "class": "thumb-pbs_thumbnail", 
-                    "desc": "Khan Academy on PBS Newshour",
+                    "desc": "Khan Academy on PBS NewsHour",
                     "youtube_id": "4jXv03sktik",
                     "selected": False,
                 },
@@ -1017,7 +944,7 @@ class ViewHomePage(request_handler.RequestHandler):
                 { 
                     "href": "/video/forbes--names-you-need-to-know---khan-academy", 
                     "class": "thumb-forbes_thumbnail", 
-                    "desc": "Forbes names you need to know",
+                    "desc": "Forbes Names You Need To Know",
                     "youtube_id": "UkfppuS0Plg",
                     "selected": False,
                 },
@@ -1032,7 +959,7 @@ class ViewHomePage(request_handler.RequestHandler):
         movie_youtube_id = selected_thumbnail["youtube_id"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
-        library_content = library_content_html()
+        library_content = library.library_content_html()
         
         template_values = {
                             'video_id': movie_youtube_id,
@@ -1453,7 +1380,7 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
                         
-def real_main():    
+def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1603,30 +1530,14 @@ def real_main():
         ('/.*\.jsp', PermanentRedirectToHome),
         ('/index\.html', PermanentRedirectToHome),
 
+        ('/_ah/warmup.*', warmup.Warmup),
+
         ], debug=True)
 
+    application = profiler.ProfilerWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)
-
-def profile_main():
-    # This is the main function for profiling
-    # We've renamed our original main() above to real_main()
-    import cProfile, pstats
-    prof = cProfile.Profile()
-    prof = prof.runctx("real_main()", globals(), locals())
-    print "<pre>"
-    stats = pstats.Stats(prof)
-    stats.sort_stats("cumulative")  # time or cumulative
-    stats.print_stats(80)  # 80 = how many to print
-    # The rest is optional.
-    # stats.print_callees()
-    stats.print_callers()
-    print "</pre>"
-    
-main = real_main
-# Uncomment the following line to enable profiling 
-# main = profile_main
 
 if __name__ == '__main__':
     main()
