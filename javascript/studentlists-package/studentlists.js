@@ -11,20 +11,8 @@ var Util = {
             dict[key_extractor_fn(item)] = item;
         });
         return dict;
-    },
-    
-    bindEventsToObject: function(source, events, handler) {
-        if (typeof(events) === 'string') {
-            events = events.split(" ");
-        }
-        $.each(events, function(i, method) {
-            source.bind(method, function(event) {
-                handler[method](event);
-            });
-        });
     }
 };
-
 
 var StudentLists = {
 
@@ -99,7 +87,7 @@ var StudentLists = {
         StudentLists.Data.init();
 
         AddStudentTextBox.init();
-        AddToListTextBox.init();
+        AddStudentToListTextBox.init();
         EditListsMenu.init();
         AddListTextBox.init();
         
@@ -251,11 +239,11 @@ var StudentLists = {
         
         if (StudentLists.currentList == 'requests' || StudentLists.currentList == 'allstudents') {
             AddStudentTextBox.jElement.show();
-            AddToListTextBox.jElement.hide();
+            AddStudentToListTextBox.jElement.hide();
         }
         else {
             AddStudentTextBox.jElement.hide();
-            AddToListTextBox.jElement.show();
+            AddStudentToListTextBox.jElement.show();
         }
 
         var nstudentsStr = nstudents.toString() + ' '
@@ -270,8 +258,19 @@ var AddListTextBox = {
     jElement: null,
     
     init: function() {
-        this.jElement = $('#newlist-box');
-        Util.bindEventsToObject(this.jElement, 'keypress keyup focusout', this);
+        this.jElement = $('#newlist-box')
+            .keypress(function(event) {
+                if (event.which == '13') { // enter
+                    event.preventDefault();
+                    AddListTextBox.createList(event);
+                }
+            })
+            .keyup(function(event) {
+                if (event.which == '27') { // escape
+                    AddListTextBox.hide();
+                }
+            })
+            .focusout(this.hide);
         
         $('#newlist-button').click(function(event) {
             event.stopPropagation();
@@ -280,23 +279,6 @@ var AddListTextBox = {
         });
         
         $('#delete-list').click(this.deleteList);
-    },
-    
-    keypress: function(event) {
-        if (event.which == '13') { // enter
-            event.preventDefault();
-            this.createList(event);
-        }
-    },
-    
-    keyup: function(event) {
-        if (event.which == '27') { // escape
-            this.hide();
-        }
-    },
-    
-    focusout: function(event) {
-        this.hide();
     },
 
     createList: function(event) {
@@ -327,7 +309,10 @@ var AddListTextBox = {
     },
 
     hide: function() {
-        this.jElement.val('').hide().removeAttr('disabled');
+        AddListTextBox.jElement
+            .val('')
+            .hide()
+            .removeAttr('disabled');
         $('#newlist-button').focus();
     },
     
@@ -354,67 +339,57 @@ var AddStudentTextBox = {
     jElement: null,
 
     init: function() {
-        this.jElement = $('#request-student');
-        this.blur();
-        Util.bindEventsToObject(this.jElement, 'focus blur keyup keypress', this);
-    },
+        this.jElement = $('#request-student')
+            .keypress(function(event) {
+                if (event.which == '13') {
+                    var email = AddStudentTextBox.jElement.val();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/requeststudent',
+                        data: {'student_email': email},
+                        success: function(data, status, jqxhr) {
+                            // data model
+                            StudentLists.Data.coach_requests.push(email);
 
-    focus: function(event) {
-        this.jElement.val('');
-    },
+                            // UI
+                            AddStudentTextBox.jElement.val('');
 
-    blur: function(event) {
-        this.jElement.val(this.jElement.data('blur-val'));
-    },
+                            var el = $('#tmpl .student-row').clone();
+                            el.find('.student-name').html(email);
+                            el.hide().prependTo('#requested-students');
+                            el.find('.delete-button').click(StudentLists.deleteStudentClick);
+                            el.fadeIn();
 
-    keypress: function(event) {
-        if (event.which == '13') {
-            var email = AddStudentTextBox.jElement.val();
-            $.ajax({
-                type: 'POST',
-                url: '/requeststudent',
-                data: {'student_email': email},
-                success: function(data, status, jqxhr) {
-                    // data model
-                    StudentLists.Data.coach_requests.push(email);
-
-                    // UI
-                    AddStudentTextBox.jElement.val('');
-
-                    var el = $('#tmpl .student-row').clone();
-                    el.find('.student-name').html(email);
-                    el.hide().prependTo('#requested-students');
-                    el.find('.delete-button').click(StudentLists.deleteStudentClick);
-                    el.fadeIn();
-
-                    $('#student-list-requests a').click();
-                },
-                error: function(jqxhr) {
-                    $('#addstudent-error').slideDown();
+                            $('#student-list-requests a').click();
+                        },
+                        error: function(jqxhr) {
+                            $('#addstudent-error').slideDown();
+                        }
+                    });
                 }
-            });
-        }
-    },
-    
-    keyup: function(event) {
-        if (event.which == '27') {
-            this.jElement.blur();
-        }
+            })
+            .placeholder();
     }
 };
 
-var AddToListTextBox = {
+var AddStudentToListTextBox = {
     jElement: null,
     
     init: function() {
-        this.jElement = $('#add-to-list');
-        
-        this.blur();
-        
-        this.jElement.autocomplete({
-            source: AddToListTextBox.generateSource(),
-            select: function(event, selected) {AddToListTextBox.addStudent(event, selected);}
-        });
+        this.jElement = $('#add-to-list')
+            .keypress(function(event) {
+                if (event.which == '13') { // enter
+                    event.preventDefault();
+                    AddStudentToListTextBox.addStudent(event);
+                }
+            })
+            .placeholder()
+            .autocomplete({
+                source: AddStudentToListTextBox.generateSource(),
+                select: function(event, selected) {
+                    AddStudentToListTextBox.addStudent(event, selected);
+                }
+            });
         
         this.jElement.data("autocomplete").menu.select = function(e) {
             // jquery-ui.js's ui.autocomplete widget relies on an implementation of ui.menu
@@ -422,8 +397,6 @@ var AddToListTextBox = {
             // here for this specific autocomplete box, not "select."
             this._trigger("selected", e, { item: this.active });
         };
-        
-        Util.bindEventsToObject(this.jElement, 'focus blur keyup keypress', this);
     },
     
     generateSource: function() {
@@ -436,28 +409,6 @@ var AddToListTextBox = {
     updateSource: function() {
         this.jElement.data('autocomplete').options.source = this.generateSource();
         this.jElement.data('autocomplete')._initSource();
-    },
-    
-    keypress: function(event) {
-        if (event.which == '13') { // enter
-            event.preventDefault();
-            this.addStudent(event);
-        }
-    },
-    
-    keyup: function(event) {
-        if (event.which == '27') {
-            this.jElement.blur();
-        }
-    },
-    
-    focus: function(event) {
-        this.jElement.val('');
-    },
-
-    blur: function(event) {
-        // todo: stop this happening during clicking of an autocomplete item
-        this.jElement.val(this.jElement.data('blur-val'));
     },
     
     addStudent: function(event, selected) {
