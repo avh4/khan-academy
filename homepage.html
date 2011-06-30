@@ -10,22 +10,20 @@
 {% block pagecontent %}
 <div id="homepage">
     <div id="main-video">
-        {% youtube_player_embed video_id 480 380 %}
+        {% youtube_player_embed video_id 480 395 %}
     </div>
-    <div id="homepage-text">
-        <h1 class="main-headline"><a href="/#browse">Watch.</a> <a href="/exercisedashboard">Practice.</a> Learn almost anything&mdash;for free.</h1>
+    <div id="homepage-text" class="visited-no-recolor">
+        <h1 class="section-headline pulls"><a href="/#browse">Watch.</a> <a href="/exercisedashboard">Practice.</a></h1>
+        <h1>Learn almost anything for free.</h1>
         <p>
-            What started out as Sal making a few algebra videos for his cousins has grown 
-            to over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> and <a href="/exercisedashboard">100 self-paced exercises</a> and assessments covering 
-            everything from arithmetic to physics, finance, and history.
+            With a library of over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> covering 
+            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard">125 self-paced exercises</a>,
+            <a href="/about">we're on a mission</a> to help you learn whatever you want, whenever you want, at your own pace.
         </p>
-        <p class="call-to-action-buttons"><a href="/#browse" class="call-to-action simple-button action-gradient">Browse the library</a><span style="padding: 5px 10px;">&mdash; <em>or</em> &mdash;</span><a href="/exercisedashboard" class="call-to-action simple-button action-gradient">Try an exercise</a></p>
-        <h2>Help us change education</h2>
-        <p>
-            <a href="/about/the-team">Our small team</a> is on a mission to deliver a world-class education to anyone anywhere, and you can help.
-            Take a second to <a href="/contribute">get the word out</a>, or read about how <a href="/about/getting-started#teachers">teachers</a>, <a href="/contribute">translators</a>, <a href="/contribute">donors</a>, and <a href="/contribute">everyone else</a> can contribute.
+        <p class="call-to-action-buttons">
+        	<a href="/#browse" class="call-to-action simple-button action-gradient green">Watch a video</a>
+        	<a href="/exercisedashboard" class="call-to-action simple-button action-gradient blue">Practice with an exercise </a>
         </p>
-        <h2 class="featured-videos">Watch a video about the Khan Academy</h2>
     </div>
 
     <div id="thumbnails_container">
@@ -33,12 +31,11 @@
             <tr>
                 <td width="3%">
                     <div class="thumbnails_arrow action-gradient" id="arrow-left">
-                        <div class="arrow-left-shadow"></div>
                         <div class="arrow-left"></div>
                     </div>
                 </td>
                 <td width="94%">
-                    <div id="thumbnails">
+                    <div id="thumbnails" class="visited-no-recolor">
                         {% for thumbnail_link_set in thumbnail_link_sets %}
                             <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}
@@ -55,7 +52,6 @@
                 </td>
                 <td width="3%">
                     <div class="thumbnails_arrow action-gradient" id="arrow-right">
-                        <div class="arrow-right-shadow"></div>
                         <div class="arrow-right"></div>
                     </div>
                 </td>
