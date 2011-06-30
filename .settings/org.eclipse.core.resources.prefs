@@ -1,8 +1,10 @@
-#Wed Sep 29 20:50:01 PDT 2010
+#Thu Jun 30 11:29:43 PDT 2011
 eclipse.preferences.version=1
 encoding//bulk_update/handler.py=utf-8
 encoding//discussion/models_discussion.py=utf-8
 encoding//offline/Khan\ Academy/code/youtube-dl.py=utf-8
+encoding//subtitle-tools/upload_captions.py=utf-8
+encoding//subtitle-tools/upload_unisubs.py=utf-8
 encoding/main.py=utf-8
 encoding/models.py=utf-8
 encoding/qbrary.py=utf-8
