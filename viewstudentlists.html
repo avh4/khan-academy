@@ -268,7 +268,7 @@ a.delete-button[href="#"] {
 
     <div id="requested-students">
         {% for email in coach_requests %}
-        <div class="student-row">
+        <div class="student-row" data-email="{{email}}">
             <span class="float-right">
                 <a class="delete-button" href="#" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
             </span>

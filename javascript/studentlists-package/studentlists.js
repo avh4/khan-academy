@@ -134,7 +134,7 @@ var StudentLists = {
             }
         }
         else if (StudentLists.currentList == 'requests') {
-            var email = jelRow.find('.student-name').html();
+            var email = jelRow.data('email');
             $.ajax({
                 type: 'GET',
                 url: '/acceptcoach',
@@ -249,8 +249,8 @@ var StudentLists = {
         var nstudentsStr = nstudents.toString() + ' '
                                                 + countstring
                                                 + (nstudents==1 ? '' : 's');
-        $('#nstudents').html(nstudentsStr);
-        $('.students-header h2 a').html(title).attr('href', titleHref);
+        $('#nstudents').text(nstudentsStr);
+        $('.students-header h2 a').text(title).attr('href', titleHref);
     }
 };
 
@@ -354,11 +354,12 @@ var AddStudentTextBox = {
                             // UI
                             AddStudentTextBox.jElement.val('');
 
-                            var el = $('#tmpl .student-row').clone();
-                            el.find('.student-name').html(email);
-                            el.hide().prependTo('#requested-students');
-                            el.find('.delete-button').click(StudentLists.deleteStudentClick);
-                            el.fadeIn();
+                            $('#tmpl .student-row').clone()
+                                .data('email', email)
+                                .find('.student-name').text(email).end()
+                                .hide().prependTo('#requested-students')
+                                .find('.delete-button').click(StudentLists.deleteStudentClick).end()
+                                .fadeIn();
 
                             $('#student-list-requests a').click();
                         },
