@@ -76,7 +76,7 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
-from phantom_users.phantom_util import allow_phantoms
+from phantom_users.phantom_util import create_phantom
 from phantom_users.cloner import Clone, TransferHandler
 
 class VideoDataTest(request_handler.RequestHandler):
@@ -119,7 +119,7 @@ class KillLiveAssociations(request_handler.RequestHandler):
 
 class ViewExercise(request_handler.RequestHandler):
 
-    @allow_phantoms
+    @create_phantom
     def get(self):
         user = util.get_current_user()
         
@@ -210,7 +210,7 @@ def get_mangled_playlist_name(playlist_name):
 
 class ViewVideo(request_handler.RequestHandler):
 
-    @allow_phantoms
+    @create_phantom
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -498,7 +498,7 @@ class ProvideFeedback(request_handler.RequestHandler):
 
 class ViewAllExercises(request_handler.RequestHandler):
 
-    @allow_phantoms
+    @create_phantom
     def get(self):
         user = util.get_current_user()
         phantom = util.is_phantom_user(user)
