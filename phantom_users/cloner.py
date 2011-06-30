@@ -91,6 +91,8 @@ class TransferHandler(request_handler.RequestHandler):
             return
             
         logging.info("Transferring data from Phanntom: %s to NewUser: %s",phantom_user.email() , current_user.email())
+        #Create UserMigration Model
+        models.UserMigration.get_or_insert_for(phantom_user,current_user)
         #Clone UserData
         key = "user_email_key_%s" % current_user.email()
         c = clone_entity(phantom_data, True, key_name=key, user=current_user)
