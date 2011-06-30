@@ -33,7 +33,7 @@ class ViewClassProfile(request_handler.RequestHandler):
             user_data_coach = models.UserData.get_or_insert_for(coach)
             students_data = user_data_coach.get_students_data()
             
-            student_lists = StudentList.gql("WHERE coaches = :1", user_data_coach.key())
+            student_lists = StudentList.all().filter("coaches = ", user_data_coach.key())
             
             student_lists_list = [{
                 'key': 'allstudents',
@@ -243,7 +243,7 @@ class ClassProfileGraph(ProfileGraph):
         list_id = self.request_string("list_id")
         if list_id:
             try:
-                student_lists = StudentList.gql("WHERE coaches = :1", user_data_coach.key())
+                student_lists = StudentList.all().filter("coaches = ", user_data_coach.key())
                 return filter(lambda x: str(x.key()) == list_id, student_lists)[0]
             except:
                 return None

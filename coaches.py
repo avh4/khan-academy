@@ -57,7 +57,7 @@ class ViewStudents(request_handler.RequestHandler):
             
             coach_requests = [x.student_requested.email() for x in CoachRequest.get_for_coach(user)]
 
-            student_lists_models = StudentList.gql("WHERE coaches = :1", user_data.key())
+            student_lists_models = StudentList.all().filter("coaches = ", user_data.key())
             
             student_lists_list = [];
             for student_list in student_lists_models:
