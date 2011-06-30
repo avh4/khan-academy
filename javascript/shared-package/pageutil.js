@@ -554,38 +554,42 @@ var Notifications = {
 
     show: function() {
         var jel = $(".notification-bar");
-        $(".notification-bar-login").click(function(){
-            window.location = "/login?"+window.location.href;
-            return false;
-        });
         $(".notification-bar-close").click(function(){
             Notifications.hide();
             return false;
             });
         setTimeout(function(){
-            jel.css("visibility", "hidden").css("display", "");
-            jel.css("top",-1*jel.height());
-            $("body").css("background-position","0px 35px");
-            $("body").css("top","35px");
+            
+            jel
+                .css("visibility", "hidden")
+                .css("display", "")
+                .css("top",-1*jel.height())
+                .css("display", "")
+                .css("visibility", "visible");
+            
+            $("body")
+                .css("background-position","0px 35px")
+                .css("top","35px");
+                
             $("#top-header").css("margin-top","35px");
-            jel.css("display", "").css("visibility", "visible");
-            jel.animate({top: 0}, 500, function(){jel.show()});
+                    
+            jel.animate({top: 0}, 500, function(){jel.show();});
         }, 100);
 
     },
 
     hide: function() {
         var jel = $(".notification-bar");
-        jel.animate({top: -1 * jel.height()}, 500, function(){jel.hide();});
-        $("body").css("background-position","0px 0px");
-        $("body").css("top","0px");
-        $("#top-header").css("margin-top","0px");
+        jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
         
-        var fVisible = $('.notification-bar').is(':visible');
-
-        $.post("/notifierstate", {
-            "hidden": fVisible ? "0" : "1"
-        }); // Fire and forget
+        $("body")
+            .css("background-position","0px 0px")
+            .css("top","0px");
+            
+        $("#top-header")
+            .css("margin-top","0px");
+        
+        $.post("/notifierclose"); 
     },
 
   

@@ -1,8 +1,5 @@
 from google.appengine.api import memcache
-
 import util
-import logging
-
 
 class UserLoginNotifier:
 
@@ -32,9 +29,6 @@ class UserLoginNotifier:
             return []
 
         user_login = memcache.get(UserLoginNotifier.key_for_user(user)) or []
-
-        # if len(user_login) > 0:
-        #     memcache.delete(UserLoginNotifier.key_for_user(user))
-              
+      
         return user_login
 

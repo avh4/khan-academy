@@ -7,7 +7,7 @@ from django import template
 from django.template.defaultfilters import timesince, pluralize
 
 import util
-
+import logging
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
 
@@ -103,6 +103,12 @@ def youtube_timestamp_links(content):
 @register.simple_tag
 def youtube_jump_link(content, seconds):
     return "<span class='youTube' seconds='%s'>%s</span>" % (seconds, content)
+    
+@register.filter
+def phantom_login_link(login_notifications, continue_url):
+    logging.critical(login_notifications)
+    logging.critical(continue_url)
+    return login_notifications.replace("[login]", "<a href='/login?continue="+continue_url+"'>login</a>")
 
 def append_ago(s_time):
     if not s_time:

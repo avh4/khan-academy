@@ -10,7 +10,6 @@ import re
 from pprint import pformat
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
-#import cloner.Clone
 
 from google.appengine.dist import use_library
 use_library('django', '0.96')
@@ -78,7 +77,7 @@ from templatetags import streak_bar, exercise_message, exercise_icon, user_point
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import allow_phantoms
-import cloner
+from phantom_users.cloner import Clone, TransferHandler
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -1399,35 +1398,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
             redirect_target = dict_redirects[relative_path]
 
         self.redirect(redirect_target, True)
-
-class TransferHandler(webapp.RequestHandler):
-    def get(self):
-    #     title = "Please wait while we copy your data to your new account."
-    #     message_html = "We're in the process of copying over all of the progress you've made. Your may access your account once the transfer is complete."
-    #     sub_message_html = "This process can take a long time, thank you for your patience."
-    #     self.response.out.write(template.render('phantom_users/transfer.html',
-    #                                             {'title': title, 'message_html':message_html,"sub_message_html":sub_message_html}))
-    # 
-    # def post(self):
-        
-        #Current user is the non phantom user 
-        current_user = util.get_current_user()
-        phantom_user = util.get_phantom_user_from_cookies()
-        phantom_data = UserData.get_for(phantom_user) 
-        logging.info("Transferring data from Phanntom: %s to NewUser: %s",phantom_user.email() , current_user.email())
-        #Clone UserData
-        key = "user_email_key_%s" % current_user.email()
-        c = cloner.clone_entity(phantom_data, True, key_name=key, user=current_user)
-        logging.info("UserData copied for %s", current_user.email())
-        #Clone UserExercise
-        query = UserExercise.all()
-        query.filter('user =', phantom_user)
-        for c in query:
-            c = cloner.clone_entity(c, True, key_name=c.exercise, user=current_user)
-        logging.info("UserExercise copied for %s", current_user.email())
-        taskqueue.add(url='/transferaccount', name='UserVideo', 
-                params={'current_user': current_user, 'phantom_user': phantom_user, 'data': "UserVideo"})    
-        self.redirect('/transferaccount')
                         
 def main():
     webapp.template.register_template_library('templateext')    
@@ -1570,8 +1540,8 @@ def main():
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
         
-        ('/notifierstate', util_notify.ToggleNotify),
-        ('/transferaccount', cloner.Clone),
+        ('/notifierclose', util_notify.ToggleNotify),
+        ('/transferaccount', Clone),
         ('/newaccount', TransferHandler),
 
         ('/jobs', RedirectToJobvite),

@@ -6,55 +6,51 @@ from google.appengine.ext import webapp
 from google.appengine.api import taskqueue
 import request_handler
 from google.appengine.api import users
+import util
 
 def clone_problemlog(userData, newUser):
-    #Clone ProblemLog
     query = models.ProblemLog.all()
     query.filter('user =', userData.user)
-    for b in query:
-        b = clone_entity(b, True, user=newUser)
+    for problem_logs in query:
+        problem_logs = clone_entity(problem_logs, True, user=newUser)
     logging.info("Completed ProblemLog transfer for NewUser:%s", newUser.email())
 
 def clone_videolog(userData, newUser):
-    #Clone VideoLog
     query = models.VideoLog.all()
     query.filter('user =', userData.user)
-    for b in query:
-        b = clone_entity(b, True, user=newUser)
+    for video_logs in query:
+        video_logs = clone_entity(video_logs, True, user=newUser)
     taskqueue.add(url='/transferaccount', name='ProblemLog', 
         queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "ProblemLog"})
     logging.info("Completed VideoLog transfer for NewUser:%s", newUser.email())    
         
 def clone_uservideo(userData, newUser):
-    #Clone UserVideo
     query = models.UserVideo.all()
     query.filter('user =', userData.user)
-    for b in query:
-        tkey = b.get_key_name(b.video,newUser)
-        b = clone_entity(b, True, key_name=tkey, user=newUser)
+    for user_videos in query:
+        tkey = user_videos.get_key_name(user_videos.video,newUser)
+        user_videos = clone_entity(user_videos, True, key_name=tkey, user=newUser)
     taskqueue.add(url='/transferaccount', name='UserBadge', 
         params={'current_user': newUser, 'phantom_user': userData.user, 'data': "UserBadge"})
     logging.info("Completed UserVideo transfer for NewUser:%s", newUser.email())
 
 def clone_userbadge(userData, newUser):
-    #Clone UserBadge
     query = UserBadge.all()
     query.filter('user =', userData.user)
-    for b in query:
-        name_with_context = "["+b.target_context_name+"]" or ""
-        key_name = newUser.email() + ":" + b.badge_name + name_with_context
-        b = clone_entity(b, True, key_name=key_name, user=newUser)
+    for user_badges in query:
+        name_with_context = "["+user_badges.target_context_name+"]" or ""
+        key_name = newUser.email() + ":" + user_badges.badge_name + name_with_context
+        user_badges = clone_entity(user_badges, True, key_name=key_name, user=newUser)
     taskqueue.add(url='/transferaccount', name='UserPlaylist', 
         params={'current_user': newUser, 'phantom_user': userData.user, 'data': "UserPlaylist"})
     logging.info("Completed UserBadge transfer for NewUser:%s", newUser.email())
 
 def clone_userplaylist(userData, newUser):
-    #Clone UserPlaylist
     query = models.UserPlaylist.all()
     query.filter('user =', userData.user)
-    for b in query:
-        key_name = models.UserPlaylist.get_key_name(b.playlist, newUser)
-        b = clone_entity(b, True, key_name=key_name, user=newUser)
+    for playlists in query:
+        key_name = models.UserPlaylist.get_key_name(playlists.playlist, newUser)
+        playlists = clone_entity(playlists, True, key_name=key_name, user=newUser)
     taskqueue.add(url='/transferaccount', name='VideoLog', 
         queue_name='trythrice',params={'current_user': newUser, 'phantom_user': userData.user, 'data': "VideoLog"})
     logging.info("Completed UserPlaylist transfer for NewUser:%s", newUser.email())
@@ -78,6 +74,28 @@ def clone_entity(e, store, **extra_args):
     if store:
         klass(**props).put()
     return klass(**props)
+
+class TransferHandler(webapp.RequestHandler):
+    def get(self):       
+        #Current user is the non phantom user 
+        current_user = util.get_current_user()
+        phantom_user = util.get_phantom_user_from_cookies()
+        phantom_data = models.UserData.get_for(phantom_user) 
+        logging.info("Transferring data from Phanntom: %s to NewUser: %s",phantom_user.email() , current_user.email())
+        #Clone UserData
+        key = "user_email_key_%s" % current_user.email()
+        c = clone_entity(phantom_data, True, key_name=key, user=current_user)
+        logging.info("UserData copied for %s", current_user.email())
+        #Clone UserExercise
+        query = models.UserExercise.all()
+        query.filter('user =', phantom_user)
+        for c in query:
+            c = clone_entity(c, True, key_name=c.exercise, user=current_user)
+        logging.info("UserExercise copied for %s", current_user.email())
+        taskqueue.add(url='/transferaccount', name='UserVideo', 
+                params={'current_user': current_user, 'phantom_user': phantom_user, 'data': "UserVideo"})    
+        self.redirect('/transferaccount')
+
 
 class Clone(request_handler.RequestHandler):
     def get(self):

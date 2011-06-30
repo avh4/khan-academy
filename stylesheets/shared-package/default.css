@@ -2920,6 +2920,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     vertical-align:middle;
     outline:solid 2px #00496E;
     color: #eee;
+    display:none;
+    position:fixed;
+    z-index:200;
+    left:0px;
+    top:0px;
 }
 
 .notification-bar-content {
