@@ -101,7 +101,7 @@ class TransferHandler(request_handler.RequestHandler):
         for c in query:
             c = clone_entity(c, True, key_name=c.exercise, user=current_user)
         logging.info("UserExercise copied for %s", current_user.email())
-        self.delete_cookie('ureg_id')
+       
         taskqueue.add(url='/transferaccount', name='UserVideo', 
                 params={'current_user': current_user, 'phantom_user': phantom_user, 'data': "UserVideo"})    
         self.redirect('/transferaccount')

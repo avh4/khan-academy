@@ -1338,7 +1338,8 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry
+        # Immediately after login we make sure this user has a UserData entry, also delete phantom cookies
+        self.delete_cookie('ureg_id')
         user = util.get_current_user()
         if user:
             user_data = UserData.get_or_insert_for(user)
