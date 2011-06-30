@@ -19,7 +19,6 @@ def class_exercises_over_time_graph_context(user_data):
     if not user_data:
         return {}
 
-    user = user_data.user
     end_date = None
 
     students_data = user_data.get_students_data()

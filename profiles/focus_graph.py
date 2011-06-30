@@ -9,7 +9,7 @@ import models
 import util
 import activity_summary
 
-def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc):
+def get_playlist_focus_data(daily_activity_logs, dt_start_utc, dt_end_utc):
     total_seconds = 0
     dict_playlist_seconds = {}
 
@@ -67,7 +67,7 @@ def get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
 
     return (total_seconds, dict_playlist_seconds)
 
-def get_exercise_focus_data(user, user_data, daily_activity_logs, dt_start_utc, dt_end_utc):
+def get_exercise_focus_data(user_data, daily_activity_logs, dt_start_utc, dt_end_utc):
 
     total_seconds = 0
     dict_exercise_seconds = {}
@@ -126,17 +126,15 @@ def focus_graph_context(user_data_student, dt_start_utc, dt_end_utc):
     if not user_data_student:
         return {}
 
-    user = user_data_student.user
-
     # We have to expand by 1 day on each side to be sure we grab proper 'day' in client's time zone,
     # then we filter for proper time zone daily boundaries
     dt_start_utc_expanded = dt_start_utc - datetime.timedelta(days=1)
     dt_end_utc_expanded = dt_end_utc + datetime.timedelta(days=1)
-    daily_activity_logs = models.DailyActivityLog.get_for_user_between_dts(user, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
+    daily_activity_logs = models.DailyActivityLog.get_for_user_data_between_dts(user_data, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
     daily_activity_logs = activity_summary.fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data_student, dt_end_utc_expanded)
 
-    playlist_focus_data = get_playlist_focus_data(user, daily_activity_logs, dt_start_utc, dt_end_utc)
-    exercise_focus_data = get_exercise_focus_data(user, user_data_student, daily_activity_logs, dt_start_utc, dt_end_utc)
+    playlist_focus_data = get_playlist_focus_data(daily_activity_logs, dt_start_utc, dt_end_utc)
+    exercise_focus_data = get_exercise_focus_data(user_data_student, daily_activity_logs, dt_start_utc, dt_end_utc)
 
     total_playlist_seconds = playlist_focus_data[0]
     dict_playlist_seconds = playlist_focus_data[1]
@@ -145,7 +143,7 @@ def focus_graph_context(user_data_student, dt_start_utc, dt_end_utc):
     dict_exercise_seconds = exercise_focus_data[1]
 
     return {
-            "student_email": user.email(),
+            "student_email": user_data_student.display_email,
             "total_playlist_seconds": total_playlist_seconds,
             "dict_playlist_seconds": dict_playlist_seconds,
             "total_exercise_seconds": total_exercise_seconds,

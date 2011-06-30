@@ -9,14 +9,13 @@ def get_class_exercises(list_student_data):
 
     class_exercise_dict = {}
 
-    for student_data in list_student_data:
+    for user_data_student in list_student_data:
 
-        student = student_data.user
-        student_email = student.email()
+        student_email = user_data_student.display_email()
 
-        class_exercise_dict[student_email] = {"student_data": student_data}
+        class_exercise_dict[student_email] = {"user_data_student": user_data_student}
 
-        user_exercises = models.UserExercise.get_for_user_use_cache(student)
+        user_exercises = models.UserExercise.get_for_user_data_use_cache(user_data_student)
         for user_exercise in user_exercises:
             if user_exercise.exercise not in class_exercise_dict[student_email]:
                 class_exercise_dict[student_email][user_exercise.exercise] = user_exercise
@@ -28,10 +27,8 @@ def class_progress_report_graph_context(user_data):
     if not user_data:
         return {}
 
-    user = user_data.user
-
     list_student_data = user_data.get_students_data()
-    student_emails = map(lambda student_data: student_data.user.email(), list_student_data)
+    student_emails = map(lambda student_data: student_data.display_email(), list_student_data)
     class_exercises = get_class_exercises(list_student_data)
 
     exercises_all = models.Exercise.get_all_use_cache()
@@ -52,7 +49,7 @@ def class_progress_report_graph_context(user_data):
         if not student_data:
             continue
 
-        name = util.get_nickname_for(student_data.user)
+        name = student_data.nickname
         i = 0
 
         for exercise in exercises_found:
@@ -65,7 +62,7 @@ def class_progress_report_graph_context(user_data):
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
 
-            link = "/profile/graph/exerciseproblems?student_email="+student_email+"&exercise_name="+exercise_name
+            link = "/profile/graph/exerciseproblems?student_email=" + student_data.display_email + "&exercise_name="+exercise_name
 
             status = ""
             hover = ""
@@ -107,5 +104,5 @@ def class_progress_report_graph_context(user_data):
             'student_emails': student_emails,
             'exercise_names': exercises_found_names,
             'exercise_data': exercise_data,
-            'coach_email': user.email(),
+            'coach_email': user_data.display_email(),
         }

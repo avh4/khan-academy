@@ -16,5 +16,4 @@ def class_energy_points_per_minute_update(user_data):
 def class_energy_points_per_minute_graph_context(user_data):
     if not user_data:
         return {}
-    user = user_data.user
-    return { 'user_coach': user, 'coach_email': user.email() }
+    return { 'user_data_coach': user_data }

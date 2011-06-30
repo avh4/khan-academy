@@ -41,8 +41,6 @@ def exercise_problems_graph_context(user_data_student, exid):
     if not user_data_student:
         return {}
 
-    user = user_data_student.user
-
     if not exid:
         exid = "addition_1"
 
@@ -57,12 +55,12 @@ def exercise_problems_graph_context(user_data_student, exid):
     video_list = []
 
     for exercise_video in related_videos:
-        video_logs = models.VideoLog.get_for_user_and_video(user, exercise_video.key_for_video())
+        video_logs = models.VideoLog.get_for_user_data_and_video(user_data_student, exercise_video.key_for_video())
         for video_log in video_logs:
             video_list.append(VideoPoint(video_log))
 
     problem_list = []
-    problem_logs = models.ProblemLog.all().filter('user =', user).filter('exercise =', exid).order("time_done")
+    problem_logs = models.ProblemLog.all().filter('user =', user_data_student.user).filter('exercise =', exid).order("time_done")
     for problem_log in problem_logs:
         problem_list.append(ProblemPoint(problem_log))
 
@@ -110,7 +108,7 @@ def exercise_problems_graph_context(user_data_student, exid):
         'streak': user_exercise.streak,
         'longest_streak': user_exercise.longest_streak,
         'percent_last_ten_correct': percent_last_ten_correct,
-        'student_nickname': util.get_nickname_for(user),
+        'student_nickname': user_data_student.nickname,
         'x_offset': x_offset,
         'x_axis_label': x_axis_label,
     }
