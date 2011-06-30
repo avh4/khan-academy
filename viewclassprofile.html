@@ -168,7 +168,8 @@
 {% empty_class_instructions 1 %}
 {% endblock profile_is_empty %}
 
-{% block bottomscript %}
+{% block bottompagescript %}
+{{ block.super }}
 <script type="text/javascript">
 var ClassProfile = {
     student_lists: {{student_lists_json}},
@@ -249,4 +250,4 @@ $(function() {
     ClassProfile.init();
 })
 </script>
-{% endblock bottomscript %}
+{% endblock bottompagescript %}
