@@ -23,12 +23,12 @@ var StudentLists = {
         student_lists: null,
         student_lists_by_id: null,
         coach_requests: null,
-        
+
         init: function() {
             this.generateListIndices();
             this.generateStudentIndices();
         },
-        
+
         isStudentInList: function(student_id, list_id) {
             var student = this.students_by_id[student_id];
             return $.grep(student.student_lists, function(list, i) {
@@ -90,19 +90,19 @@ var StudentLists = {
         AddStudentToListTextBox.init();
         EditListsMenu.init();
         AddListTextBox.init();
-        
+
         // change visible list
         $('.bullet').click(StudentLists.listClick);
-        
+
         // inline delete student-list
         $('.student-row .delete-button').click(StudentLists.deleteStudentClick);
-        
+
         // alerts
         $('.alert .close-button').click(function(event) {
             event.preventDefault();
             $(event.target).parents('.alert').fadeOut();
         });
-        
+
         // show initial page
         // todo: remember this with a cookie!
         $('#student-list-allstudents a').click();
@@ -141,7 +141,7 @@ var StudentLists = {
                 data: {'accept': 0, 'student_email': email},
                 success: function(data, status, jqxhr) {
                     // update data model
-                    StudentLists.Data.coach_requests = 
+                    StudentLists.Data.coach_requests =
                         $.grep(StudentLists.Data.coach_requests, function(request) {
                             return request != email;
                         });
@@ -161,7 +161,7 @@ var StudentLists = {
     listClick: function(event) {
         event.preventDefault();
         var jelSelectedList = $(event.currentTarget);
-        
+
         var list_id = jelSelectedList.closest('li').data('list_id');
         if(list_id == StudentLists.currentList) {
             return;
@@ -170,7 +170,7 @@ var StudentLists = {
 
         $('.bullet-active').removeClass('bullet-active');
         jelSelectedList.addClass('bullet-active');
-        
+
         StudentLists.redrawListView();
     },
 
@@ -200,7 +200,7 @@ var StudentLists = {
         else {
             $('#requested-students').hide();
             $('#actual-students').show();
-            
+
             $('#notaccepted-note').hide();
             $('#request-note').hide();
 
@@ -236,7 +236,7 @@ var StudentLists = {
                 $('#delete-list').show();
             }
         }
-        
+
         if (StudentLists.currentList == 'requests' || StudentLists.currentList == 'allstudents') {
             AddStudentTextBox.jElement.show();
             AddStudentToListTextBox.jElement.hide();
@@ -256,7 +256,7 @@ var StudentLists = {
 
 var AddListTextBox = {
     jElement: null,
-    
+
     init: function() {
         this.jElement = $('#newlist-box')
             .keypress(function(event) {
@@ -271,24 +271,24 @@ var AddListTextBox = {
                 }
             })
             .focusout(this.hide);
-        
+
         $('#newlist-button').click(function(event) {
             event.stopPropagation();
             event.preventDefault();
             AddListTextBox.jElement.show().focus();
         });
-        
+
         $('#delete-list').click(this.deleteList);
     },
 
     createList: function(event) {
         var listname = this.jElement.val();
-        
+
         if (!listname) {
             this.hide();
             return;
         }
-        
+
         this.jElement.attr('disabled', 'disabled');
         $.ajax({
             type: 'POST',
@@ -315,7 +315,7 @@ var AddListTextBox = {
             .removeAttr('disabled');
         $('#newlist-button').focus();
     },
-    
+
     deleteList: function(event) {
         event.preventDefault();
         if (StudentLists.currentList != 'allstudents' &&
@@ -374,7 +374,7 @@ var AddStudentTextBox = {
 
 var AddStudentToListTextBox = {
     jElement: null,
-    
+
     init: function() {
         this.jElement = $('#add-to-list')
             .keypress(function(event) {
@@ -390,7 +390,7 @@ var AddStudentToListTextBox = {
                     AddStudentToListTextBox.addStudent(event, selected);
                 }
             });
-        
+
         this.jElement.data("autocomplete").menu.select = function(e) {
             // jquery-ui.js's ui.autocomplete widget relies on an implementation of ui.menu
             // that is overridden by our jquery.ui.menu.js.  We need to trigger "selected"
@@ -398,19 +398,19 @@ var AddStudentToListTextBox = {
             this._trigger("selected", e, { item: this.active });
         };
     },
-    
+
     generateSource: function() {
         return $.map(StudentLists.Data.students, function(student, i) {
             return { label: student.nickname + ' (' + student.email + ')',
                      value: student.email };
         });
     },
-    
+
     updateSource: function() {
         this.jElement.data('autocomplete').options.source = this.generateSource();
         this.jElement.data('autocomplete')._initSource();
     },
-    
+
     addStudent: function(event, selected) {
         var text;
         if (selected) {
@@ -420,11 +420,11 @@ var AddStudentToListTextBox = {
         else {
             text = this.jElement.val();
         }
-        
+
         var student = StudentLists.Data.students_by_email[text];
         var list_id = StudentLists.currentList;
         EditListsMenu.addStudentToListAjax(student, list_id);
-        
+
         this.jElement.val('');
     }
 };
@@ -433,7 +433,7 @@ var AddStudentToListTextBox = {
 var EditListsMenu = {
     init: function() {
         $('.lists-css-menu > ul > li').click(function(event){EditListsMenu.addChildrenToDropdown(event);});
-        
+
         $('.lists-css-menu .list-option-newlist').click(function(event) {
             // if this is called synchronously, the css-menu doesn't disappear.
             setTimeout(function() {
@@ -441,7 +441,7 @@ var EditListsMenu = {
             }, 50);
         });
     },
-    
+
     addChildrenToDropdown: function(event) {
         if(event.target != event.currentTarget) {
             // stopPropagation etc don't work on dynamically generated children.
@@ -456,24 +456,24 @@ var EditListsMenu = {
         }
         jelUl.children('.list-option').remove();
         var jelNewList = jelUl.children('li');
-        
+
         // add a line for each list
         $.each(StudentLists.Data.student_lists, function(i, studentList) {
             var jel = $('<li class="list-option"><label><input type="checkbox">' + studentList.name + '</label></li>');
             var jelInput = jel.find('input');
-            
+
             // get student
             var student_id = jelMenu.closest('.student-row').data('student_id');
             if(StudentLists.Data.isStudentInList(student_id, studentList.key)) {
                 jelInput.attr('checked', true);
             }
-            
+
             jelNewList.before(jel);
             jelInput.click(function(event){EditListsMenu.itemClick(event);})
                   .data('student-list', studentList);
         });
     },
-    
+
     itemClick: function(event) {
         var jelInput = $(event.currentTarget);
         var studentList = jelInput.data('student-list');
@@ -484,7 +484,7 @@ var EditListsMenu = {
         else
             this.removeStudentFromListAjax(student, studentList.key);
     },
-    
+
     addStudentToListAjax: function(student, list_id) {
         $.ajax({
             type: 'POST',
@@ -492,7 +492,7 @@ var EditListsMenu = {
             data: {'student_email': student.email, 'list_id': list_id},
             success: function() {
                 StudentLists.Data.addStudentToList(student, list_id);
-                
+
                 // show row on screen if visible
                 if (StudentLists.currentList == list_id) {
                     $('.student-row[data-student_id='+student.key+']').fadeIn();
