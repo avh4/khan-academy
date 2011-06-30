@@ -241,7 +241,7 @@ test("focus should return to button after textbox", function() {
         {% endfor %}
     </ul>
     <input type="textbox" id="newlist-box" />
-    <a id="newlist-button" class="simple-button action-gradient" href="">Create a new list</a>
+    <a id="newlist-button" class="simple-button action-gradient" href="#">Create a new list</a>
 </div>
 
 <div id="students-container">
@@ -249,7 +249,7 @@ test("focus should return to button after textbox", function() {
     <div class="students-header">
         <span class="float-right">
 
-            <a class="delete-button" id="delete-list" href=""><img src="images/circled_cross.png" title="Delete this list (the students will still appear in 'All students')"/></a>
+            <a class="delete-button" id="delete-list" href="#"><img src="images/circled_cross.png" title="Delete this list (the students will still appear in 'All students')"/></a>
         </span>
         <h2><a href="/class_profile?student_list=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
         <span id='nstudents'>n students</span>
@@ -261,7 +261,7 @@ test("focus should return to button after textbox", function() {
     </div>
     
     <div class="alert error" id="addstudent-error">
-        <span class="float-right close-button">(<a href="">close</a>)</span>
+        <span class="float-right close-button">(<a href="#">close</a>)</span>
         No student was found with that ID. The student must log in at least once. Also, check that the student ID is correct. Here are some examples of student IDs:<br>
         <ul>
             <li>student@gmail.com</li>
@@ -269,7 +269,7 @@ test("focus should return to button after textbox", function() {
         </ul>
     </div>
     <div class="alert note" id="notaccepted-note">
-        <span class="float-right close-button">(<a href="">close</a>)</span>
+        <span class="float-right close-button">(<a href="#">close</a>)</span>
         The students below have not yet accepted your request to coach them. To start coaching them, have them click 'add a coach' at the bottom of any screen, then click the 'accept coach' button.
     </div>
 
@@ -286,7 +286,7 @@ test("focus should return to button after textbox", function() {
                         </li>
                     </ul>
                 </div>
-                <a class="delete-button" href="" title="Remove this student from this list"><img src="images/circled_cross.png"/></a>
+                <a class="delete-button" href="#" title="Remove this student from this list"><img src="images/circled_cross.png"/></a>
             </span>
             <div>
                 <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname|escape }}</a></span>
@@ -300,7 +300,7 @@ test("focus should return to button after textbox", function() {
         {% for email in coach_requests %}
         <div class="student-row">
             <span class="float-right">
-                <a class="delete-button" href="" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
+                <a class="delete-button" href="#" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
             </span>
             <div><span class="student-name">{{ email|escape }}</span></div>
         </div>
@@ -312,7 +312,7 @@ test("focus should return to button after textbox", function() {
     <div id="tmpl" style="display:none">
         <div class="student-row">
             <span class="float-right">
-                <a class="delete-button" href="" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
+                <a class="delete-button" href="#" title="Cancel the request to coach this student"><img src="images/circled_cross.png"/></a>
             </span>
             <div><span class="student-name">email goes here</span></div>
         </div>
