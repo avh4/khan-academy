@@ -184,40 +184,6 @@ h2 a:hover, .student-name a:hover {
 }
 
 </style>
-<script type="text/javascript" charset="utf-8">
-$(function() {
-    StudentLists.Data.students = {{students_json}};
-    StudentLists.Data.student_lists = {{student_lists_json}};
-    StudentLists.Data.coach_requests = {{coach_requests_json}};
-    StudentLists.init();
-});    
-</script>
-{% js_package "studentlists" %}
-
-{% if enable_tests %}
-<link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
-<script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
-
-<script type="text/javascript" charset="utf-8">
-$(function() {
-
-test("focus should return to button after textbox", function() {
-    var $newlist = $('#newlist-button');
-    var focusReturned = true;
-    if ($newlist.length != 0) {
-        $newlist.click();
-        // now press escape
-        var e = jQuery.Event('keyup');
-        e.which = '27';
-        $('#newlist-box').trigger(e);
-        focusReturned = (document.activeElement == $newlist.get(0));
-        equals(true, focusReturned);
-    }
-});
-
-});
-</script>
-{% endif %}
 {% endblock pagescript %}
 
 {% block pagesubmenu %}
@@ -331,3 +297,39 @@ test("focus should return to button after textbox", function() {
 </article>
 {% endblock pagecontent %}
 
+{% block bottompagescript %}
+<script type="text/javascript" charset="utf-8">
+$(function() {
+    StudentLists.Data.students = {{students_json}};
+    StudentLists.Data.student_lists = {{student_lists_json}};
+    StudentLists.Data.coach_requests = {{coach_requests_json}};
+    StudentLists.init();
+});    
+</script>
+{% js_package "studentlists" %}
+
+{% if enable_tests %}
+<link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
+<script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+$(function() {
+
+test("focus should return to button after textbox", function() {
+    var $newlist = $('#newlist-button');
+    var focusReturned = true;
+    if ($newlist.length != 0) {
+        $newlist.click();
+        // now press escape
+        var e = jQuery.Event('keyup');
+        e.which = '27';
+        $('#newlist-box').trigger(e);
+        focusReturned = (document.activeElement == $newlist.get(0));
+        equals(true, focusReturned);
+    }
+});
+
+});
+</script>
+{% endif %}
+{% endblock bottompagescript %}
