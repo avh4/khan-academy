@@ -149,7 +149,7 @@ var StudentLists = {
                 $.ajax({
                     type: 'GET',
                     url: '/unregisterstudent',
-                    data: 'student_email='+student.email,
+                    data: {'student_email': student.email},
                     success: function(event) {
                         // update data model
                         StudentLists.Data.removeStudent(student);
@@ -166,7 +166,7 @@ var StudentLists = {
             $.ajax({
                 type: 'GET',
                 url: '/acceptcoach',
-                data: 'accept=0&student_email='+email,
+                data: {'accept': 0, 'student_email': email},
                 success: function(data, status, jqxhr) {
                     // update data model
                     var requests = [];
@@ -331,7 +331,7 @@ var AddListTextBox = {
         $.ajax({
             type: 'POST',
             url: '/createstudentlist',
-            data: 'list_name=' + listname,
+            data: {'list_name': listname},
             dataType: 'json',
             success: function(data, status, jqxhr) {
                 var student_list = data;
@@ -359,7 +359,7 @@ var AddListTextBox = {
             $.ajax({
                 type: 'POST',
                 url: '/deletestudentlist',
-                data: 'list_id=' + StudentLists.currentList,
+                data: {'list_id': StudentLists.currentList},
                 success: function(data, status, jqxhr) {
                     $('#custom-lists li[data-list_id='+StudentLists.currentList+']').remove();
                     StudentLists.Data.removeList(StudentLists.currentList);
@@ -393,7 +393,7 @@ var AddStudentTextBox = {
             $.ajax({
                 type: 'POST',
                 url: '/requeststudent',
-                data: 'student_email='+email,
+                data: {'student_email': email},
                 success: function(data, status, jqxhr) {
                     // data model
                     StudentLists.Data.coach_requests.push(email);
@@ -559,7 +559,7 @@ var EditListsMenu = {
         $.ajax({
             type: 'POST',
             url: '/addstudenttolist',
-            data: 'student_email='+student.email+'&list_id='+list_id,
+            data: {'student_email': student.email, 'list_id': list_id},
             success: function() {
                 StudentLists.Data.addStudentToList(student, list_id);
                 
@@ -575,7 +575,7 @@ var EditListsMenu = {
         $.ajax({
             type: 'POST',
             url: '/removestudentfromlist',
-            data: 'student_email='+student.email+'&list_id='+list_id,
+            data: {'student_email': student.email, 'list_id': list_id},
             success: function() {
                 StudentLists.Data.removeStudentFromList(student, list_id);
 
