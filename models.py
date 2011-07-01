@@ -3,8 +3,10 @@
 import datetime, logging
 import math
 import urllib
+
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.ext import deferred
 from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
@@ -925,7 +927,7 @@ class VideoLog(db.Model):
         # Defer the put of VideoLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(models.commit_video_log, video_log, _queue="video-log-queue")
+        deferred.defer(commit_video_log, video_log, _queue="video-log-queue")
 
         return (user_video, video_log, video_points_total)
 
