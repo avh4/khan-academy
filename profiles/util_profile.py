@@ -91,7 +91,7 @@ class ViewProfile(request_handler.RequestHandler):
         if user_data_student:
 
             user_data_override = self.request_user_data("student_email")
-            if user_data_override and user_data_override.db_email() != user_data_student.db_email():
+            if user_data_override and user_data_override.db_email != user_data_student.db_email:
                 if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     self.redirect("/profile")
@@ -169,7 +169,7 @@ class ProfileGraph(request_handler.RequestHandler):
         if user_data_student:
 
             user_data_override = self.request_user_data("student_email")
-            if user_data_override and user_data_override.db_email() != user_data_student.db_email():
+            if user_data_override and user_data_override.db_email != user_data_student.db_email:
                 if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     user_data_student = None

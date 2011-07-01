@@ -121,7 +121,7 @@ class AcceptCoach(request_handler.RequestHandler):
                     coach_request.delete()
 
                     if accept_coach:
-                        user_data_student.coaches.append(user_data_coach.db_email())
+                        user_data_student.coaches.append(user_data_coach.db_email)
                         user_data_student.put()
 
         self.redirect("/coaches")
@@ -137,8 +137,8 @@ class UnregisterCoach(request_handler.RequestHandler):
         user_data_coach = self.request_user_data("coach")
         if user_data_coach:
             try:
-                user_data.coaches.remove(user_data_coach.db_email())
-                user_data.coaches.remove(user_data_coach.db_email().lower())
+                user_data.coaches.remove(user_data_coach.db_email)
+                user_data.coaches.remove(user_data_coach.db_email.lower())
             except ValueError:
                 pass
 
@@ -158,8 +158,8 @@ class UnregisterStudent(request_handler.RequestHandler):
         if user_data_student:
 
             try:
-                user_data_student.coaches.remove(user_data.db_email())
-                user_data_student.coaches.remove(user_data.db_email().lower())
+                user_data_student.coaches.remove(user_data.db_email)
+                user_data_student.coaches.remove(user_data.db_email.lower())
             except ValueError:
                 pass
 

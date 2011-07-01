@@ -244,7 +244,7 @@ def get_visible_user_data_from_request():
 
     user_data_student = request.request_user_data("email") or user_data
 
-    if user_data_student and (user_data_student.db_email() == user_data.db_email() or user_data_student.is_coached_by(user_data)):
+    if user_data_student and (user_data_student.db_email == user_data.db_email or user_data_student.is_coached_by(user_data)):
         return user_data_student
 
     return None

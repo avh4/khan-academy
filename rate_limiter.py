@@ -25,7 +25,7 @@ class RateLimiter:
         return True
 
     def get_key(self):
-        return "rate_limiter_%s_%s" % (self.__class__.__name__, self.user_data.db_email()) 
+        return "rate_limiter_%s_%s" % (self.__class__.__name__, self.user_data.db_email) 
 
     def add_new(self):
         key = self.get_key()

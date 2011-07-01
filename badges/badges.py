@@ -264,7 +264,7 @@ class Badge(object):
     # Awards badge to user within given context
     def complete_award_to(self, user_data, target_context=None, target_context_name=None):
         name_with_context = self.name_with_target_context(target_context_name)
-        key_name = user_data.db_email() + ":" + name_with_context
+        key_name = user_data.db_email + ":" + name_with_context
 
         if user_data.badges is None:
             user_data.badges = []
@@ -299,7 +299,7 @@ class UserBadgeNotifier:
 
     @staticmethod
     def key_for_user_data(user_data):
-        return "badge_notifications_for_%s" % user_data.db_email()
+        return "badge_notifications_for_%s" % user_data.db_email
 
     @staticmethod
     def push_for_user_data(user_data, user_badge):
@@ -316,7 +316,7 @@ class UserBadgeNotifier:
             memcache.set(UserBadgeNotifier.key_for_user_data(user_data), user_badges)
 
     @staticmethod
-    def pop_for_current_user_data():
+    def pop_for_current_user():
         return UserBadgeNotifier.pop_for_user_data(models.UserData.current())
 
     @staticmethod

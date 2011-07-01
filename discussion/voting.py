@@ -63,7 +63,7 @@ class VoteEntity(request_handler.RequestHandler):
         entity_key = self.request_string("entity_key", default="")
         if entity_key:
             entity = db.get(entity_key)
-            if entity and entity.author.email() == user_data.db_email():
+            if entity and entity.author.email() == user_data.db_email:
                 self.render_json({"error": "You cannot vote for your own posts."})
                 return
 
