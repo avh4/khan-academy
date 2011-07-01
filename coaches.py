@@ -113,11 +113,12 @@ class RegisterCoach(request_handler.RequestHandler):
                     user_data.coaches.append(coach_email)
                     user_data.put()
 
-                self.redirect("/coaches")
+                if not self.is_ajax_request():
+                    self.redirect("/coaches")
                 return
         
         if self.is_ajax_request():
-            raise Exception('todo: write something better')
+            self.response.set_status(400)
         else:
             self.redirect("/coaches?invalid_coach=1")
 
@@ -182,9 +183,7 @@ class AcceptCoach(request_handler.RequestHandler):
                     user_data_student.coaches.append(coach.email())
                     user_data_student.put()
 
-        if self.is_ajax_request():
-            return
-        else:
+        if not self.is_ajax_request():
             self.redirect("/coaches")
 
 class UnregisterCoach(request_handler.RequestHandler):
@@ -205,7 +204,7 @@ class UnregisterCoach(request_handler.RequestHandler):
             except ValueError:
                 pass
 
-            user_data.put()          
+            user_data.put()
 
         self.redirect("/coaches") 
 
