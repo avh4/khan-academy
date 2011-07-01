@@ -175,7 +175,7 @@ class FeedbackVote(db.Model):
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda user_data, video: "voting_dict_for_%s" % video.key())
-    def get_dict_for_user_and_video(user_data, video):
+    def get_dict_for_user_data_and_video(user_data, video):
         query = FeedbackVote.all()
         query.filter("user =", user_data.user)
         query.filter("video =", video)

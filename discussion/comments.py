@@ -43,9 +43,9 @@ class AddComment(request_handler.RequestHandler):
 
     def post(self):
 
-        user = models.UserData.current().user
+        user_data = models.UserData.current()
 
-        if not user:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
@@ -65,7 +65,7 @@ class AddComment(request_handler.RequestHandler):
                 comment_text = comment_text[0:300] # max comment length, also limited by client
 
             comment = models_discussion.Feedback()
-            comment.author = user
+            comment.author = users_data.user
             comment.content = comment_text
             comment.targets = [video.key()]
             comment.types = [models_discussion.FeedbackType.Comment]
@@ -76,7 +76,7 @@ class AddComment(request_handler.RequestHandler):
 
 def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_order=voting.VotingSortOrder.HighestPointsFirst):
 
-    user = models.UserData.current().user
+    user_data = models.UserData.current()
 
     if page > 0:
         comments_hidden = False # Never hide questions if specifying specific page
@@ -92,14 +92,13 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_o
     count_total = len(comments)
     comments = comments[((page - 1) * limit_per_page):(page * limit_per_page)]
 
-    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
     for comment in comments:
         voting.add_vote_expando_properties(comment, dict_votes)
 
     count_page = len(comments)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,
