@@ -5,30 +5,29 @@
 {% css_package "studentlists" %}
 {% endblock pagescript %}
 
-{% block profile_name %}
-<span id="user-info">
-    <span class="breadcrumbs_nav class-stats-nav">
-        <a href="/students">Manage students</a>
-        <a href="/class_profile" class="selected">Class Stats For</a>
-        <span id="studentlists_dropdown" style="display:none;">
-            <a>{{ student_list.name|escape }}</a>
-            <div id="studentlists_menu">
-                <ol>
-                    {% for list in student_lists %}
-                    <li data-selected="{% ifequal list.key list_id %}selected{% endifequal %}" data-list_id={{list.key}}>
-                        <a href="/class_profile?list_id={{list.key}}">{{list.name|escape}}</a>
-                    </li>
-                    {% endfor %}
-                </ol>
-            </div>
-        </span>
+{% block pagesubmenu %}
+<span class="breadcrumbs_nav">
+    <a href="/students">Manage Students</a>
+    <a href="/class_profile" class="selected">Class Stats For</a>
+    <span id="studentlists_dropdown" style="display:none;">
+        <a>{{ student_list.name|escape }}</a>
+        <div id="studentlists_menu">
+            <ol>
+                {% for list in student_lists %}
+                <li data-selected="{% ifequal list.key list_id %}selected{% endifequal %}" data-list_id={{list.key}}>
+                    <a href="/class_profile?list_id={{list.key}}">{{list.name|escape}}</a>
+                </li>
+                {% endfor %}
+            </ol>
+        </div>
     </span>
 </span>
-{% endblock profile_name %}
+{% endblock pagesubmenu %}
 
 {% block statistics_title %}Class Statistics{% endblock statistics_title %}
 
-{% block high_level_stats %}
+{% block graph_accordion %}
+<div id="high-level-class-stats">
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
@@ -40,9 +39,8 @@
         <span class="energy-points-badge">{{ student_lists.0.class_points }}</span><br />
         <span class="label">Class Energy Points</span>
     </span>
-{% endblock high_level_stats %}
+</div>
 
-{% block graph_accordion %}
     <ul id="nav-accordion">
         <li>
             {% profile_class_graph_link coach "Progress Report" "classprogressreport" selected_graph_type list_id %}
