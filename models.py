@@ -3,8 +3,10 @@
 import datetime, logging
 import math
 import urllib
+
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.ext import deferred
 from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
@@ -967,7 +969,12 @@ class VideoLog(db.Model):
             video_log.points_earned = video_points_received
             user_data.add_points(video_points_received)
 
-        db.put([user_video, video_log, user_data])
+        db.put([user_video, user_data])
+
+        # Defer the put of VideoLog for now, as we think it might be causing hot tablets
+        # and want to shift it off to an automatically-retrying task queue.
+        # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
+        deferred.defer(commit_video_log, video_log, _queue="video-log-queue")
 
         return (user_video, video_log, video_points_total)
 
@@ -982,6 +989,10 @@ class VideoLog(db.Model):
 
     def key_for_video(self):
         return VideoLog.video.get_value_for_datastore(self)
+
+# commit_video_log is used by our deferred video log insertion process
+def commit_video_log(video_log):
+    video_log.put()
 
 class DailyActivityLog(db.Model):
     user = db.UserProperty()
@@ -1053,6 +1064,10 @@ class ProblemLog(db.Model):
 
     def minutes_spent(self):
         return util.minutes_between(self.time_started(), self.time_ended())
+
+# commit_problem_log is used by our deferred problem log insertion process
+def commit_problem_log(problem_log):
+    problem_log.put()
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and

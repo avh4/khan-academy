@@ -1,3 +1,4 @@
+total_storage_limit: 200M
 queue:
 - name: activity-log-mapreduce-queue
   rate: 5/s
@@ -24,3 +25,10 @@ queue:
   rate: 5/s
   retry_parameters:
     task_retry_limit: 3
+
+- name: problem-log-queue
+  rate: 30/s
+
+- name: video-log-queue
+  rate: 30/s
+
