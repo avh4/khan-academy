@@ -7,7 +7,6 @@ from notifications import UserLoginNotifier
 import phantom_util
 import request_handler
 from badges import badges
-import logging
 
 def update(user_data,user_exercise,threshold = False, isProf = False, gotBadge = False):
     if user_data == None:
