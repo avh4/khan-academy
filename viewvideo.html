@@ -126,7 +126,8 @@
       // replace it with a nicer link (we don't want to have to pass the url to
       // the templatetag).
       var $points = $('.video-energy-points');
-      $points.data('title', $points.attr('title').replace(/\/login/, '{{ login_url|escape }}'))
+      $points.data('title', $points.attr('title').replace(/Sign in/, 
+                 '<a href="{{ login_url|escape }}">Sign in</a>'))
              .removeAttr('title');
 
       $('#points-badge-hover').qtip({ // Create the tooltip
