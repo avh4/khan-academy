@@ -97,9 +97,9 @@ def related_videos(exercise_videos, show_points=False):
 
 @register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
 def exercise_icon(exercise, App):
-    s_prefix = "proficient-badge"
+    s_prefix = "node"
     if exercise.summative:
-        s_prefix = "challenge"
+        s_prefix = "node-challenge"
 
     src = ""
     if exercise.review:
@@ -148,7 +148,7 @@ def streak_bar(user_exercise):
     if hasattr(user_exercise, "longest_streak"):
         longest_streak = user_exercise.longest_streak
 
-    streak_max_width = 228
+    streak_max_width = 227
 
     streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * streak))
     longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * longest_streak))
@@ -215,8 +215,6 @@ def playlist_browser_structure(structure, class_name="", level=0):
             # We have two special case playlist URLs to worry about for now. Should remove later.
             if playlist_title.startswith("SAT"):
                 href = "/sat"
-            elif playlist_title.startswith("GMAT"):
-                href = "/gmat"
 
             if level == 0:
                 s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(name))

@@ -128,13 +128,6 @@ def access_token():
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
 
-    is_anointed = False
-    try:
-        consumer = oauth_server._get_consumer(oauth_request)
-        is_anointed = consumer and consumer.anointed
-    except:
-        pass
-    
     try:
         # Create our access token
         token = oauth_server.fetch_access_token(oauth_request)
@@ -153,7 +146,7 @@ def access_token():
     except OAuthError, e:
         return oauth_error_response(e)
 
-    return access_token_response(oauth_map, is_anointed=is_anointed)
+    return access_token_response(oauth_map)
 
 # Default callback
 #

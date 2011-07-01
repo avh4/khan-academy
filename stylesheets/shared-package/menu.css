@@ -81,7 +81,7 @@
 
 .css-menu > ul > li:after {
     content: "";
-    width: 12px;
+    width: 13px;
     height: 12px;
     background-image: url(/images/non-repeating-sprites.png);
     background-position: -72px -67px;

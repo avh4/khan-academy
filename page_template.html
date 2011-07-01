@@ -65,8 +65,7 @@
 	<!-- New, faster Google Analytics async tag END -->
 
     </head>
-    <body>
-		
+    <body class="light">
     <div id="page-container">
     <div id="page-container-inner">
         {# Facebook connect root #}
@@ -87,27 +86,40 @@
                                     
                                     {% user_points user_data %}
                                 </span>
-                                <span class="separator">&nbsp;</span>
+                                <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
                                 <a href="{{ login_url|escape }}">Login</a>
                             {% endif %}
-                            <span class="separator">&nbsp;</span>
+                            <span class="separator"></span>
                             <a href="/contribute" id="donate-link">Donate</a>
-                            <span class="separator">&nbsp;</span>
-                            <span id="social-links">
-                                <a class="google-analytics-link-track youtube" onclick="_gaq.push(['_trackEvent', 'Click', 'Youtube-Subscribe-Header']);" href="http://www.youtube.com/khanacademy" title="Youtube"></a>
-                                <a class="google-analytics-link-track twitter" onclick="_gaq.push(['_trackEvent', 'Click', 'Twitter-Follow-Header']);" href="http://twitter.com/khanacademy" title="Twitter"></a>
-                                <a class="google-analytics-link-track facebook" onclick="_gaq.push(['_trackEvent', 'Click', 'Facebook-Join-Header']);" href="http://www.facebook.com/khanacademy" title="Facebook"></a>
-                            </span>
-                            <span class="separator">&nbsp;</span>
+                            <span class="separator"></span>
                             <span id="fb-like-badge">
                                 <fb:like id="page_fb_like" href="http://www.khanacademy.org" layout="button_count" show_faces="false" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
                             </span>
                         </span>
-                    </div>
+                        <div class="clear"></div>
+                        <div id="nav-and-search">
+                            <div id="sitewide-navigation">
+                                <nav>
+                                  <span class="links">
+                                      <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected watch-link"{% else %}class="watch-link"{% endifequal %}>Watch</a>
+                                    <a href="/exercisedashboard" {% ifequal selected_nav_link "practice" %}class="selected practice-link"{% endifequal %}>Practice</a>
+                                    <a href="/class_profile" {% ifequal selected_nav_link "coach" %}class="selected coach-link"{% endifequal %}>Coach</a>
+                                    <a href="/contribute" {% ifequal selected_nav_link "contribute" %}class="selected contribute-link"{% endifequal %}>Contribute</a>
+                                    <a href="/about" {% ifequal selected_nav_link "about" %}class="selected about-link"{% endifequal %}>About</a>
+                                    </span>
+                                </nav>
+                            </div>
+                            <div id="search-box">
+                                <form id="page_search" action="/search">
+                                    <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-all placeholder" /><input type="submit" value=" " id="search-submit" />
+                                </form>
+                            </div>
+                            <div class="clear"></div>
+                        </div>
+                </div>
                     <div id="logo">
-                        <div id="logo-highlight"></div>
                         <a id="logo-image" href="/" title="Take me home!"></a>
                     </div>
                     <div id="stats">
@@ -119,22 +131,8 @@
                     </div>
                     <div class="clear"></div>
                 </div>
-                <div id="search-box">
-                    <form id="page_search" action="/search">
-                        <input id="search-input" type="text" placeholder="Search for a video or playlist" name="page_search_query" value='{{page_search_query|escape}}' class="ui-corner-left placeholder" /><input type="submit" value=" " id="search-submit" />
-                    </form>
-                </div>
-                <div id="sitewide-navigation" class="action-gradient">
-                    <nav>
-                      <span class="links">
-                          <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected watch-link"{% endifequal %}>Watch</a>
-                        <a href="/exercisedashboard" {% ifequal selected_nav_link "practice" %}class="selected practice-link"{% endifequal %}>Practice</a>
-                        <a href="/class_profile" {% ifequal selected_nav_link "coach" %}class="selected coach-link"{% endifequal %}>Coach</a>
-                        <a href="/contribute" {% ifequal selected_nav_link "contribute" %}class="selected contribute-link"{% endifequal %}>Contribute</a>
-                        <a href="/about" {% ifequal selected_nav_link "about" %}class="selected about-link"{% endifequal %}>About</a>
-                        </span>
-                    </nav>
-                </div>
+                
+                
                 <nav id="page_sub_nav">
                     {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
                     {% endblock pagesubmenu %}
