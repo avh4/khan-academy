@@ -214,6 +214,9 @@ var StudentLists = {
                 if(StudentLists.Data.students.length == 0) {
                     $('#empty-class').show();
                 }
+                else {
+                    $('#empty-class').hide();
+                }
             }
             else {
                 $('#actual-students .student-row').each(function() {
