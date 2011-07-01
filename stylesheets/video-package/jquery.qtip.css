@@ -49,6 +49,11 @@
 		overflow: hidden;
 	}
 
+/* blue tooltip links are hard to read. */
+.ui-tooltip-content a{
+    color: #678D00;
+}
+
 	.ui-tooltip-titlebar{
 		position: relative;
 		min-height: 14px;

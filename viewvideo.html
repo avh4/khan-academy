@@ -118,12 +118,21 @@
 
 {% block bottompagescript %}
     {% js_package "video" %}
-    {% if not logged_in %}
     <script>
       $(function(){VideoStats.startLoggingProgress();});
-      $('#points-badge-hover').qtip({
+
+      // We take the message in the title of the energy points box and place it
+      // in a tooltip, and if it's the message with a link to the login we 
+      // replace it with a nicer link (we don't want to have to pass the url to
+      // the templatetag).
+      var $points = $('.video-energy-points');
+      $points.data('title', $points.attr('title').replace(/Sign in/, 
+                 '<a href="{{ login_url|escape }}">Sign in</a>'))
+             .removeAttr('title');
+
+      $('#points-badge-hover').qtip({ // Create the tooltip
           content: {
-              text: 'You\'re earning points for watching this video. <a href="{{ login_url|escape }}">Sign in</a> to keep them',
+              text: $points.data('title'),
           },
           style: {
               classes: 'ui-tooltip-youtube',
@@ -138,7 +147,6 @@
           }
       });
     </script>
-    {% endif %}
     <script type="text/javascript">document.write(unescape('%3Cscript type="text/javascript" src="'+document.location.protocol+'//dnn506yrbagrg.cloudfront.net/pages/scripts/0011/5719.js"%3E%3C%2Fscript%3E'))</script>
 {% endblock bottompagescript %}
 
