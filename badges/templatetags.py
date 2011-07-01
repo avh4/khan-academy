@@ -3,13 +3,18 @@ from google.appengine.ext import webapp
 
 import badges
 import util_badges
+from Notifications import UserNotifier
 
 register = webapp.template.create_template_register()
 
 @register.inclusion_tag(("../badges/notifications.html", "badges/notifications.html"))
 def badge_notifications():
-    user_badges = badges.UserBadgeNotifier.pop_for_current_user()
-
+    user_badges = UserNotifier.pop_for_current_user()
+    
+    if len(user_badges) > 0:
+        user_badges = user_badges[0]
+    
+    
     all_badges_dict = util_badges.all_badges_dict()
     for user_badge in user_badges:
         user_badge.badge = all_badges_dict.get(user_badge.badge_name)
@@ -19,7 +24,7 @@ def badge_notifications():
     user_badges = filter(lambda user_badge: user_badge.badge is not None, user_badges)
 
     if len(user_badges) > 1:
-        user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserBadgeNotifier.NOTIFICATION_LIMIT]
+        user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserNotifier.NOTIFICATION_LIMIT]
 
     return {"user_badges": user_badges}
 

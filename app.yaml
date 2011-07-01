@@ -107,6 +107,7 @@ handlers:
 builtins:
 - appstats: on
 - datastore_admin: on
+- deferred: on
 
 inbound_services:
 - warmup

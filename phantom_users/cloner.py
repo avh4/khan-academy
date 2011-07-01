@@ -79,14 +79,17 @@ class TransferHandler(request_handler.RequestHandler):
         #Current user is the non phantom user 
         current_user = util.get_current_user()
         phantom_user = util.get_phantom_user_from_cookies()
+        cont = self.request_string('continue', default = "/")
         
         if phantom_user == None:
+            self.redirect("/transferaccount?continue=%s" % cont)
             return
         
         phantom_data = models.UserData.get_for(phantom_user) 
         current_data = models.UserData.get_for(current_user)
         
         if current_data.points != 0:
+            self.redirect("/transferaccount?continue=%s" % cont)
             return
             
         logging.info("Transferring data from Phanntom: %s to NewUser: %s",phantom_user.email() , current_user.email())
@@ -105,7 +108,7 @@ class TransferHandler(request_handler.RequestHandler):
         self.delete_cookie('ureg_id')
         taskqueue.add(url='/transferaccount', name='UserVideo', 
                 params={'current_user': current_user, 'phantom_user': phantom_user, 'data': "UserVideo"})    
-        self.redirect('/transferaccount')
+        self.redirect("/transferaccount?continue=%s" % cont)
 
 
 class Clone(request_handler.RequestHandler):

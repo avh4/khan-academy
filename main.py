@@ -35,7 +35,9 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+
 from google.appengine.api import taskqueue
+from google.appengine.ext import deferred
 
 import bulk_update.handler
 import facebook
@@ -63,6 +65,7 @@ import backfill
 import activity_summary
 import exercises
 
+import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
@@ -663,10 +666,17 @@ class RegisterAnswer(request_handler.RequestHandler):
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user, problem_log))
 
-           
 
+            # Manually clear exercise's memcache since we're throwing it in a bulk put
             user_exercise.clear_memcache()
-            db.put([user_data, problem_log, user_exercise])
+
+            # Bulk put
+            db.put([user_data, user_exercise])
+
+            # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
+            # and want to shift it off to an automatically-retrying task queue.
+            # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
+            deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
 
             if not self.is_ajax_request():
                 self.redirect("/exercises?exid=%s" % exid)
@@ -1346,9 +1356,17 @@ class PostLogin(request_handler.RequestHandler):
             self.redirect(cont)
             return
         # If new user is new, 0 points, migrate data
-        if user_data.points == 0:
+        phantom_user = util.get_phantom_user_from_cookies()
+        if phantom_user:
+            phantom_data = UserData.get_or_insert_for(phantom_user)
+        else:
+            self.delete_cookie('ureg_id')
+            self.redirect(cont)
+            return
+            
+        if user_data.points == 0 and phantom_data.points != 0:
             logging.info("New Account: %s", user.email() )
-            self.redirect("/newaccount?continue=%s",cont)
+            self.redirect("/newaccount?continue=%s" % cont)
         else:
             self.delete_cookie('ureg_id')
             self.redirect(cont)
