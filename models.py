@@ -401,7 +401,8 @@ class CoachRequest(db.Model):
 class UserMigration(db.Model):
     previous_user = db.UserProperty()
     current_user = db.UserProperty()
-
+    transfer_date = db.DateTimeProperty(auto_now_add=True)
+     
     @staticmethod
     def key_for(previous, current):
         return "%s_migrated_to_%s" % (previous.email(), current.email())
