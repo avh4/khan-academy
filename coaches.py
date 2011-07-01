@@ -15,7 +15,7 @@ from app import App
 import app
 import facebook_util
 import util
-import request_handler
+from request_handler import RequestHandler
 
 from models import UserData, CoachRequest, StudentList
 from badges import util_badges
@@ -26,7 +26,7 @@ import profiles.util_profile as util_profile
 
 import simplejson as json
 
-class ViewCoaches(request_handler.RequestHandler):
+class ViewCoaches(RequestHandler):
     def get(self):
         user = util.get_current_user()
         if user:
@@ -47,7 +47,7 @@ class ViewCoaches(request_handler.RequestHandler):
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
-class ViewStudents(request_handler.RequestHandler):
+class ViewStudents(RequestHandler):
     def get(self):
         user = util.get_current_user()
         if user:
@@ -92,7 +92,7 @@ class ViewStudents(request_handler.RequestHandler):
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
-class RegisterCoach(request_handler.RequestHandler):
+class RegisterCoach(RequestHandler):
     def post(self):
         user = util.get_current_user()
 
@@ -122,7 +122,7 @@ class RegisterCoach(request_handler.RequestHandler):
         else:
             self.redirect("/coaches?invalid_coach=1")
 
-class RequestStudent(request_handler.RequestHandler):
+class RequestStudent(RequestHandler):
     def post(self):
         user = util.get_current_user()
 
@@ -146,8 +146,8 @@ class RequestStudent(request_handler.RequestHandler):
         else:
             self.redirect("/students?invalid_student=1")
 
-class AcceptCoach(request_handler.RequestHandler):
-    @request_handler.RequestHandler.exceptions_to_http(400)
+class AcceptCoach(RequestHandler):
+    @RequestHandler.exceptions_to_http(400)
     def get(self):
         user = util.get_current_user()
 
@@ -187,7 +187,7 @@ class AcceptCoach(request_handler.RequestHandler):
         if not self.is_ajax_request():
             self.redirect("/coaches")
 
-class UnregisterCoach(request_handler.RequestHandler):
+class UnregisterCoach(RequestHandler):
     def get(self):
         user = util.get_current_user()
 
@@ -209,7 +209,7 @@ class UnregisterCoach(request_handler.RequestHandler):
 
         self.redirect("/coaches") 
 
-class UnregisterStudent(request_handler.RequestHandler):
+class UnregisterStudent(RequestHandler):
     def get(self):
         user = util.get_current_user()
 
@@ -237,8 +237,8 @@ class UnregisterStudent(request_handler.RequestHandler):
 
         self.redirect("/students")
 
-class CreateStudentList(request_handler.RequestHandler):
-    @request_handler.RequestHandler.exceptions_to_http(400)
+class CreateStudentList(RequestHandler):
+    @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data = util_profile.get_coach(self)
         
@@ -256,8 +256,8 @@ class CreateStudentList(request_handler.RequestHandler):
         
         self.render_json(student_list_json)
 
-class DeleteStudentList(request_handler.RequestHandler):
-    @request_handler.RequestHandler.exceptions_to_http(400)
+class DeleteStudentList(RequestHandler):
+    @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data = util_profile.get_coach(self)
         student_list = util_profile.get_list(coach_data, self)
@@ -265,44 +265,44 @@ class DeleteStudentList(request_handler.RequestHandler):
         if not self.is_ajax_request():
             self.redirect_to('/students')
 
-class AddStudentToList(request_handler.RequestHandler):
-    @request_handler.RequestHandler.exceptions_to_http(400)
+class AddStudentToList(RequestHandler):
+    @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
         
         student_data.student_lists.append(student_list.key())
         student_data.put()
 
-class RemoveStudentFromList(request_handler.RequestHandler):
-    @request_handler.RequestHandler.exceptions_to_http(400)
+class RemoveStudentFromList(RequestHandler):
+    @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
         
         student_data.student_lists.remove(student_list.key())
         student_data.put()
 
-class ViewIndividualReport(request_handler.RequestHandler):
+class ViewIndividualReport(RequestHandler):
     def get(self):
         # Individual reports being replaced by user profile
         self.redirect("/profile")
 
-class ViewSharedPoints(request_handler.RequestHandler):
+class ViewSharedPoints(RequestHandler):
     def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassEnergyPointsPerMinuteGraph.GRAPH_TYPE)
         
-class ViewProgressChart(request_handler.RequestHandler):
+class ViewProgressChart(RequestHandler):
     def get(self):    
         self.redirect("/profile?selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
              
-class ViewClassTime(request_handler.RequestHandler):
+class ViewClassTime(RequestHandler):
     def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassTimeGraph.GRAPH_TYPE)
 
-class ViewClassReport(request_handler.RequestHandler):
+class ViewClassReport(RequestHandler):
     def get(self):            
         self.redirect("/class_profile?selected_graph_type=%s" % ClassProgressReportGraph.GRAPH_TYPE)
 
-class ViewCharts(request_handler.RequestHandler):
+class ViewCharts(RequestHandler):
     def get(self):
         self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" % 
                 (ExerciseProblemsGraph.GRAPH_TYPE, self.request_string("student_email"), self.request_string("exercise_name")))
