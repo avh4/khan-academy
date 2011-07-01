@@ -123,7 +123,7 @@
       $(function(){VideoStats.startLoggingProgress();});
       $('#points-badge-hover').qtip({
           content: {
-              text: 'You\'re earning points for watching this video. <a href="/login">Sign in</a> to keep them',
+              text: 'You\'re earning points for watching this video. <a href="{{ login_url|escape }}">Sign in</a> to keep them',
           },
           style: {
               classes: 'ui-tooltip-youtube',
