@@ -4,6 +4,7 @@ import util
 import models_badges
 import logging
 import phantom_users.util_notify
+from Notifications import UserNotifier
 
 # Badges can either be Exercise badges (can earn one for every Exercise),
 # Playlist badges (one for every Playlist),
@@ -287,48 +288,7 @@ class Badge(object):
             user_badge.put()
             # call notifications
         phantom_users.util_notify.update(user_data,None,threshold = False, isProf = False, gotBadge = True)
-        UserBadgeNotifier.push_for_user(user, user_badge)
+        UserNotifier.push_badge_for_user(user, user_badge)
 
     def frequency(self):
         return models_badges.BadgeStat.count_by_badge_name(self.name)
-
-class UserBadgeNotifier:
-
-    # Only show up to 2 badge notifications at a time, rest
-    # will be visible from main badges page.
-    NOTIFICATION_LIMIT = 2
-
-    @staticmethod
-    def key_for_user(user):
-        return "badge_notifications_for_%s" % user.email()
-
-    @staticmethod
-    def push_for_user(user, user_badge):
-        if user is None or user_badge is None:
-            return
-
-        user_badges = memcache.get(UserBadgeNotifier.key_for_user(user))
-
-        if user_badges is None:
-            user_badges = []
-
-        if len(user_badges) < UserBadgeNotifier.NOTIFICATION_LIMIT:
-            user_badges.append(user_badge)
-            memcache.set(UserBadgeNotifier.key_for_user(user), user_badges)
-
-    @staticmethod
-    def pop_for_current_user():
-        return UserBadgeNotifier.pop_for_user(util.get_current_user())
-
-    @staticmethod
-    def pop_for_user(user):
-        if not user:
-            return []
-
-        user_badges = memcache.get(UserBadgeNotifier.key_for_user(user)) or []
-
-        if len(user_badges) > 0:
-            memcache.delete(UserBadgeNotifier.key_for_user(user))
-              
-        return user_badges
-

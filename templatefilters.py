@@ -106,8 +106,6 @@ def youtube_jump_link(content, seconds):
     
 @register.filter
 def phantom_login_link(login_notifications, continue_url):
-    logging.critical(login_notifications)
-    logging.critical(continue_url)
     return login_notifications.replace("[login]", "<a href='/login?continue="+continue_url+"'>login</a>")
 
 def append_ago(s_time):
