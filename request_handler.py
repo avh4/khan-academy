@@ -126,6 +126,18 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
         self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
 
+    @classmethod
+    def exceptions_to_http(klass, status):
+        def decorator(fn):
+            def wrapper(self, *args, **kwargs):
+                try:
+                    fn(self, *args, **kwargs);
+                except Exception, e:
+                    self.response.clear()
+                    self.response.set_status(status)
+            return wrapper
+        return decorator
+
     def user_agent(self):
         return str(self.request.headers['User-Agent'])
 

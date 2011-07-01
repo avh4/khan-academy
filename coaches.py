@@ -146,6 +146,7 @@ class RequestStudent(request_handler.RequestHandler):
         else:
             self.redirect("/students?invalid_student=1")
 
+@request_handler.RequestHandler.exceptions_to_http(400)
 class AcceptCoach(request_handler.RequestHandler):
     def get(self):
         user = util.get_current_user()
@@ -236,6 +237,7 @@ class UnregisterStudent(request_handler.RequestHandler):
 
         self.redirect("/students")
 
+@request_handler.RequestHandler.exceptions_to_http(400)
 class CreateStudentList(request_handler.RequestHandler):
     def post(self):
         coach_data = util_profile.get_coach(self)
@@ -254,6 +256,7 @@ class CreateStudentList(request_handler.RequestHandler):
         
         self.render_json(student_list_json)
 
+@request_handler.RequestHandler.exceptions_to_http(400)
 class DeleteStudentList(request_handler.RequestHandler):
     def post(self):
         coach_data = util_profile.get_coach(self)
@@ -262,6 +265,7 @@ class DeleteStudentList(request_handler.RequestHandler):
         if not self.is_ajax_request():
             self.redirect_to('/students')
 
+@request_handler.RequestHandler.exceptions_to_http(400)
 class AddStudentToList(request_handler.RequestHandler):
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
@@ -269,6 +273,7 @@ class AddStudentToList(request_handler.RequestHandler):
         student_data.student_lists.append(student_list.key())
         student_data.put()
 
+@request_handler.RequestHandler.exceptions_to_http(400)
 class RemoveStudentFromList(request_handler.RequestHandler):
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
