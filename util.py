@@ -16,7 +16,7 @@ from api.auth.google_util import get_google_user_from_oauth_map
 from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
-def _get_current_user():
+def _get_current_user_email():
     user = None
 
     oauth_map = current_oauth_map()
@@ -26,7 +26,10 @@ def _get_current_user():
     if not user and allow_cookie_based_auth():
         user = _get_current_user_from_cookies_unsafe()
 
-    return user
+    if user:
+        return user.email()
+
+    return None
 
 def _get_current_user_from_oauth_map(oauth_map):
     user = get_google_user_from_oauth_map(oauth_map)
@@ -41,9 +44,6 @@ def _get_current_user_from_cookies_unsafe():
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
     return user
-
-def get_nickname_for(user):
-    return nicknames.get_nickname_for(user)
 
 def is_facebook_user(user):
     return user and facebook_util.is_facebook_email(user.email())

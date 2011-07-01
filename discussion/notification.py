@@ -6,7 +6,6 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 from app import App
-from util import get_nickname_for
 import app
 import util
 import util_discussion
@@ -111,7 +110,10 @@ def new_answer_for_video_question(video, question, answer):
     notification.user = question.author
     notification.feedback = answer
 
-    user_data = models.UserData.get_or_insert_for(notification.user)
+    user_data = models.UserData.get_from_db_input(notification.user.email())
+    if not user_data:
+        return
+
     user_data.count_feedback_notification = -1
 
     db.put([notification, user_data])

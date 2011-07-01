@@ -13,7 +13,6 @@ from custom_exceptions import MissingVideoException, MissingExerciseException
 import util
 from app import App
 from render import render_block_to_string
-from nicknames import get_nickname_for
 import cookie_util
 
 class RequestInputHandler(object):
@@ -58,8 +57,7 @@ class RequestInputHandler(object):
     def request_user_data(self, key):
         email = self.request_string(key)
         if email:
-            user = users.User(email)
-            return UserData.get_from_user_input(user)
+            return UserData.get_from_user_input(email)
         return None
 
     def request_float(self, key, default = None):

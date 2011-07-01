@@ -20,6 +20,7 @@ import layer_cache
 import request_cache
 from discussion import models_discussion
 from topics_list import all_topics_list
+import nicknames
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -374,13 +375,13 @@ class CoachRequest(db.Model):
     @property
     def coach_requesting_data(self):
         if not hasattr(self, "coach_user_data"):
-            self.coach_user_data = UserData.get_for(self.coach_requesting)
+            self.coach_user_data = UserData.get_from_db_input(self.coach_requesting.email())
         return self.coach_user_data
 
     @property
     def student_requested_data(self):
         if not hasattr(self, "student_user_data"):
-            self.student_user_data = UserData.get_for(self.student_requested)
+            self.student_user_data = UserData.get_from_db_input(self.student_requested.email())
         return self.student_user_data
 
     @staticmethod
@@ -388,8 +389,8 @@ class CoachRequest(db.Model):
         return "%s_request_for_%s" % (user_data_coach.db_email, user_data_student.db_email)
 
     @staticmethod
-    def get_for(coach, student):
-        return CoachRequest.get_by_key_name(CoachRequest.key_for(coach, student))
+    def get_for(user_data_coach, user_data_student):
+        return CoachRequest.get_by_key_name(CoachRequest.key_for(user_data_coach, user_data_student))
 
     @staticmethod
     def get_or_insert_for(user_data_coach, user_data_student):
@@ -441,7 +442,7 @@ class UserData(db.Model):
 
     @property
     def nickname(self):
-        return util.get_nickname_for(self.current_user)
+        return nicknames.get_nickname_for(self.current_user)
 
     @property
     def display_email(self):
@@ -458,55 +459,58 @@ class UserData(db.Model):
     @staticmethod
     @request_cache.cache()
     def current():
-        user = util._get_current_user()
-        if user:
-            return UserData.get_from_user_input(user) or UserData.get_or_insert_for(user)
+        email = util._get_current_user_email()
+        if email:
+            # Once we have rekeyed legacy entities,
+            # we will be able to simplify this.
+            return  UserData.get_from_user_input(email) or \
+                    UserData.get_from_db_input(email) or \
+                    UserData.insert_for(email)
         return None
 
     @staticmethod
-    def get_from_user_input(user):
-        if not user:
+    def get_from_user_input(email):
+        if not email:
             return None
 
         query = UserData.all()
-        query.filter('current_user =', user)
-        query.order('-points') # Temporary workaround for issue 289
-
-        return query.get()
-        
-    @staticmethod    
-    def get_for(user):
-        if not user:
-            return None
-
-        query = UserData.all()
-        query.filter('user =', user)
+        query.filter('current_user =', users.User(email))
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()
 
     @staticmethod    
-    def get_or_insert_for(user):
-        # Once we have rekeyed legacy entities,
-        # the next block can just be a call to .get_or_insert()
-        user_data = UserData.get_for(user)
-        if user_data is None:
-            if user.email():
-                key = "user_email_key_%s" % user.email()
-                user_data = UserData.get_or_insert(
-                    key_name=key,
-                    user=user,
-                    current_user=user,
-                    moderator=False,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    coaches=[]
-                    )
-        return user_data
+    def get_from_db_input(email):
+        if not email:
+            return None
+
+        query = UserData.all()
+        query.filter('user =', users.User(email))
+        query.order('-points') # Temporary workaround for issue 289
+
+        return query.get()
+
+    @staticmethod
+    def insert_for(email):
+        if not email:
+            return None
+
+        user = users.User(email)
+        key = "user_email_key_%s" % email
+
+        return UserData.get_or_insert(
+            key_name=key,
+            user=user,
+            current_user=user,
+            moderator=False,
+            last_login=datetime.datetime.now(),
+            proficient_exercises=[],
+            suggested_exercises=[],
+            assigned_exercises=[],
+            need_to_reassess=True,
+            points=0,
+            coaches=[]
+            )
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
 
@@ -622,7 +626,7 @@ class UserData(db.Model):
     def coach_display_emails(self):
         display_emails = []
         for coach_email in self.coaches:
-            user_data_coach = UserData.get_for(users.User(coach_email))
+            user_data_coach = UserData.get_from_db_input(coach_email)
             if user_data_coach:
                 display_emails.append(user_data_coach.display_email)
         return display_emails
