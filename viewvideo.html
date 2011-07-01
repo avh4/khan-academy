@@ -121,14 +121,21 @@
     {% if not logged_in %}
     <script>
       $(function(){VideoStats.startLoggingProgress();});
-      $('#points-badge-hover').CreateBubblePopup({
-          innerHtml: 'You\'re earning points for watching this video. <a href="/login">Sign in</a> to keep them',
-          position: 'bottom',
-          align: 'center',
-          themePath: '/images/jqpopup/',
-          themeName: 'all-black',
-          closingDelay: 120,
-          selectable: true
+      $('#points-badge-hover').qtip({
+          content: {
+              text: 'You\'re earning points for watching this video. <a href="{{ login_url|escape }}">Sign in</a> to keep them',
+          },
+          style: {
+              classes: 'ui-tooltip-youtube',
+          },
+          position: {
+              my: 'top center',
+              at: 'bottom center',
+          },
+          hide: {
+              fixed: true,
+              delay: 150,
+          }
       });
     </script>
     {% endif %}

@@ -16,7 +16,7 @@ javascript = {
         "files": [
             "video.js",
             "discussion.js",
-            "jquery.bubblepopup.v2.3.1.min.js",
+            "jquery.qtip.js",
         ]
     },
     "homepage": {
@@ -94,7 +94,7 @@ stylesheets = {
         "files": [
             "video.css",
             "discussion.css",
-            "jquery.bubblepopup.v2.3.1.css",
+            "jquery.qtip.css",
         ]
     },
 }
