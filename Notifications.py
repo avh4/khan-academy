@@ -16,7 +16,7 @@ class UserNotifier:
         if user is None or user_alert is None:
             return
 
-        notifications = memcache.get(UserNotifier.key_for_user(user)) or {"badges":[],"login":[]}
+        notifications = UserNotifier.get_or_create_notifications(user)
         notifications["login"] = [user_alert]
 
         memcache.set(UserNotifier.key_for_user(user), notifications)
@@ -27,7 +27,7 @@ class UserNotifier:
         if user is None or user_badge is None:
             return
 
-        notifications = memcache.get(UserNotifier.key_for_user(user)) or {"badges":[],"login":[]}
+        notifications = UserNotifier.get_or_create_notifications(user)
         
         if notifications["badges"] is None:
             notifications["badges"] = []
@@ -45,7 +45,7 @@ class UserNotifier:
     def pop_for_user(user):
         if not user:
             return []
-        notifications = memcache.get(UserNotifier.key_for_user(user)) or {"badges":[],"login":[]}
+        notifications = UserNotifier.get_or_create_notifications(user)
         user_badges = notifications["badges"] or []
         user_login = notifications["login"] or []
         
@@ -63,6 +63,10 @@ class UserNotifier:
         notifications["login"] = []
         notifications["badges"] = notificationstemp[0]
         memcache.set(UserNotifier.key_for_user(util.get_current_user()), notifications)
+    
+    @staticmethod
+    def get_or_create_notifications(user):
+        return memcache.get(UserNotifier.key_for_user(user)) or {"badges":[],"login":[]}
 
         
         
