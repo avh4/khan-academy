@@ -1348,7 +1348,7 @@ class PostLogin(request_handler.RequestHandler):
         # If new user is new, 0 points, migrate data
         if user_data.points == 0:
             logging.info("New Account: %s", user.email() )
-            self.redirect("/newaccount?continue=%s",cont)
+            self.redirect("/newaccount?continue=%s" % cont)
         else:
             self.delete_cookie('ureg_id')
             self.redirect(cont)
