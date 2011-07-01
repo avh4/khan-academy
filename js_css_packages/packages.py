@@ -70,6 +70,7 @@ javascript = {
         "hashed-filename": "hashed-@studentlists@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "studentlists.js",
+            "classprofile.js",
         ]
     },
 }
@@ -99,6 +100,13 @@ stylesheets = {
         "files": [
             "video.css",
             "discussion.css",
+        ]
+    },
+    "studentlists": {
+        "hashed-filename": "hashed-@studentlists@.css", # @content@ will be replaced with hash by deploy script
+        "files": [
+            "viewstudentlists.css",
+            "viewclassprofile.css",
         ]
     },
 }

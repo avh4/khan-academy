@@ -497,7 +497,7 @@ var EditListsMenu = {
             url: '/addstudenttolist',
             data: {'student_email': student.email, 'list_id': list_id}
         });
-        
+
         StudentLists.Data.addStudentToList(student, list_id);
 
         // show row on screen if visible
@@ -512,7 +512,7 @@ var EditListsMenu = {
             url: '/removestudentfromlist',
             data: {'student_email': student.email, 'list_id': list_id}
         });
-        
+
         StudentLists.Data.removeStudentFromList(student, list_id);
 
         // hide row from screen if visible

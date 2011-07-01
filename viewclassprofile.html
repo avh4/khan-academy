@@ -2,72 +2,7 @@
 {% block meta_page_title %}Class Profile | {% endblock meta_page_title %}
 
 {% block pagescript %}
-<style type="text/css" media="screen">
-#profile-header {
-    min-height: 50px;
-}
-#user-info {
-    margin-top: 23px;
-}
-#studentlists_dropdown {
-    text-indent: 0;
-    margin-left: -15px;
-}
-#studentlists_dropdown .ui-button {
-    display: block;
-}
-#studentlists_dropdown ol {
-    max-height: 20em;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-#studentlists_menu {
-    position: relative;
-}
-#studentlists_menu ol {
-    z-index: 2;
-}
-#studentlists_dropdown li {
-    white-space: nowrap;
-    font-weight: normal;
-}
-#studentlists_dropdown li[data-selected=selected] a {
-    font-weight: bold;
-}
-#studentlists_dropdown .ui-button-text, 
-#studentlists_dropdown .ui-menu-item a {
-    font-weight: normal;
-    line-height: inherit;
-    padding: 0px 25px 0px 1ex;
-}
-#studentlists_dropdown .ui-menu-item a {
-    padding: 1px 25px 1px 10px;
-    margin-right: 0px;
-    margin-left: 0px;
-    text-transform: none;
-}
-#studentlists_dropdown a:link:hover,
-#studentlists_dropdown a:link:focus,
-#studentlists_dropdown a:visited:hover,
-#studentlists_dropdown a:visited:focus {
-    color: #DD6900;
-}
-
-#page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:before { 
-    top: 21px;
-    left: 50px;
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-bottom-width: 5px;
-}
-#page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:after { 
-    top: 22px;
-    left: 50px;
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-bottom-width: 5px;
-}
-</style>
+{% css_package "studentlists" %}
 {% endblock pagescript %}
 
 {% block profile_name %}
@@ -170,83 +105,10 @@
 
 {% block bottompagescript %}
 {{ block.super }}
+{% js_package "studentlists" %}
 <script type="text/javascript">
-var ClassProfile = {
-    student_lists: {{student_lists_json}},
-    
-    init: function() {
-        $('#studentlists_dropdown').css('display', 'inline-block');
-        var $dropdown = $('#studentlists_dropdown ol');
-        if ($dropdown.length > 0) {
-            var menu = $dropdown.menu();
-
-            // Set the width explicitly before positioning it absolutely to satisfy IE7.
-            menu.width(menu.width()).hide().css('position', 'absolute');
-            
-            menu.bind("menuselect", this.updateStudentList);
-            
-            $(document).bind("click focusin", function(e){
-                if ($(e.target).closest("#studentlists_dropdown").length == 0) {
-                    menu.hide();
-                }
-            });
-            
-            var button = $('#studentlists_dropdown > a').button({
-                icons: {
-                    secondary: 'ui-icon-triangle-1-s'
-                }
-            }).show().click(function(e){
-                if (menu.css('display') == 'none')
-                    menu.show().menu("activate", e, $('#studentlists_dropdown li[data-selected=selected]')).focus();
-                else
-                    menu.hide();
-                e.preventDefault();
-            });
-            
-            // get initially selected list
-            var list_id = $dropdown.children('li[data-selected=selected]').data('list_id');
-            var student_list = ClassProfile.getStudentListFromId(list_id);
-            $dropdown.data('selected', student_list);
-        }
-    },
-    
-    getStudentListFromId: function (list_id) {
-        var student_list;
-        jQuery.each(this.student_lists, function(i,l) {
-            if (l.key == list_id) {
-                student_list = l;
-                return false;
-            }
-        });
-        return student_list;
-    },
-    
-    // called whenever user selects student list dropdown
-    updateStudentList: function(event, ui) {
-        // change which item has the selected attribute
-        // weird stuff happening with .data(), just use attr for now...
-        var $dropdown = $('#studentlists_dropdown ol');
-        $dropdown.children('li[data-selected=selected]').removeAttr('data-selected');
-        $(ui.item).attr('data-selected', 'selected');
-        
-        // store which item is selected
-        var student_list = ClassProfile.getStudentListFromId(ui.item.data('list_id'));
-        $dropdown.data('selected', student_list);
-        
-        // update appearance of dropdown
-        $('#studentlists_dropdown .ui-button-text').html(student_list.name);
-        $dropdown.hide();
-        
-        // update rest of page
-        $('#count_students').html(student_list.nstudents);
-        $('.energy-points-badge').html(student_list.class_points);
-        // url of currently selected graph
-        var url = $("#nav-accordion .ui-state-active").attr('href');
-        Profile.loadGraphStudentListAware(url);
-    }
-};
-
 $(function() {
+    ClassProfile.student_lists = {{student_lists_json}};
     ClassProfile.init();
 })
 </script>
