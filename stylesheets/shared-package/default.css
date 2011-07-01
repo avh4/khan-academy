@@ -702,6 +702,7 @@ footer {
     #top-header #top-header-links #fb-like-badge, #sitewide-navigation #fb-like-badge {
         display: inline-block;
         width: 90px;
+        height: 20px;
     }
         #sitewide-navigation #fb-like-badge {
             vertical-align: top;
