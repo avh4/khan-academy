@@ -23,6 +23,7 @@ import recovery_problem_badges
 import unfinished_streak_problem_badges
 import points_badges
 import tenure_badges
+import video_time_badges
 
 import layer_cache
 import request_handler
@@ -100,6 +101,8 @@ def all_badges(bust_cache = False):
         tenure_badges.YearOneBadge(),
         tenure_badges.YearTwoBadge(),
         tenure_badges.YearThreeBadge(),
+
+        video_time_badges.ActOneSceneOneBadge(),
 
     ]
 
