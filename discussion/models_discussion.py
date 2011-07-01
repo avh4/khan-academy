@@ -98,8 +98,8 @@ class Feedback(db.Model):
     def author_nickname(self):
         return get_nickname_for(self.author)
 
-    def add_vote_by(self, vote_type, user):
-        FeedbackVote.add_vote(self, vote_type, user)
+    def add_vote_by(self, vote_type, user_data):
+        FeedbackVote.add_vote(self, vote_type, user_data)
         self.update_votes_and_score()
 
     def update_votes_and_score(self):
@@ -124,12 +124,12 @@ class Feedback(db.Model):
 
         self.inner_score = float(score)
 
-    def add_flag_by(self, flag_type, user):
-        if user.email() in self.flagged_by:
+    def add_flag_by(self, flag_type, user_data):
+        if user_data.db_email() in self.flagged_by:
             return False
 
         self.flags.append(flag_type)
-        self.flagged_by.append(user.email())
+        self.flagged_by.append(user_data.db_email())
         self.recalculate_flagged()
         return True
 
@@ -157,15 +157,15 @@ class FeedbackVote(db.Model):
     vote_type = db.IntegerProperty(default=0)
 
     @staticmethod
-    def add_vote(feedback, vote_type, user):
+    def add_vote(feedback, vote_type, user_data):
         if not feedback:
             return
 
         vote = FeedbackVote.get_or_insert(
-                key_name = "vote_by_%s" % user.email(),
+                key_name = "vote_by_%s" % user_data.db_email(),
                 parent = feedback,
                 video = feedback.first_target_key(),
-                user = user,
+                user = user_data.user,
                 vote_type = vote_type)
 
         if vote and vote.vote_type != vote_type:
@@ -174,10 +174,10 @@ class FeedbackVote(db.Model):
             vote.put()
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user, video: "voting_dict_for_%s" % video.key())
-    def get_dict_for_user_and_video(user, video):
+    @request_cache.cache_with_key_fxn(lambda user_data, video: "voting_dict_for_%s" % video.key())
+    def get_dict_for_user_and_video(user_data, video):
         query = FeedbackVote.all()
-        query.filter("user =", user)
+        query.filter("user =", user_data.user)
         query.filter("video =", video)
         votes = query.fetch(1000)
 

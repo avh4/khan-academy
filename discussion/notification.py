@@ -20,13 +20,12 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
     def get(self):
 
         user_data = models.UserData.current()
-        user = user_data.user
 
-        if not user:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        answers = feedback_answers_for_user(user)
+        answers = feedback_answers_for_user_data(user_data)
 
         dict_videos = {}
         dict_answers = {}
@@ -35,7 +34,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
 
             video = answer.first_target()
 
-            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
             voting.add_vote_expando_properties(answer, dict_votes)
 
             if video == None or type(video).__name__ != "Video":
@@ -52,12 +51,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
         videos = sorted(dict_videos.values(), key=lambda video: video.playlists[0] + video.title)
 
         context = {
-                    "App": App,
-                    "points": user_data.points,
-                    "username": get_nickname_for(user),
-                    "email": user.email(),
-                    "login_url": util.create_login_url(self.request.uri),
-                    "logout_url": users.create_logout_url(self.request.uri),
+                    "email": user_data.display_email(),
                     "videos": videos,
                     "dict_answers": dict_answers
                   }
@@ -68,14 +62,10 @@ class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
 
     def get(self):
 
-        user = None
-        try:
-            user = users.User(self.request.get("email"))
-        except:
-            user = None
+        user_data = self.request_user_data("email")
 
         max_entries = 100
-        answers = feedback_answers_for_user(user)
+        answers = feedback_answers_for_user_data(user_data)
         answers = sorted(answers, key=lambda answer: answer.date)
 
         context = {
@@ -86,8 +76,8 @@ class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
         self.response.headers['Content-Type'] = 'text/xml'
         self.render_template('discussion/video_feedback_notification_feed.xml', context)
 
-def feedback_answers_for_user(user):
-    notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1", user)
+def feedback_answers_for_user_data(user_data):
+    notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1", user_data.user)
 
     feedbacks = []
 
@@ -129,9 +119,8 @@ def new_answer_for_video_question(video, question, answer):
 def clear_question_answers_for_current_user(s_question_id):
 
     user_data = models.UserData.current()
-    user = user_data.user
 
-    if not user:
+    if not user_data:
         return
 
     question_id = -1
@@ -149,7 +138,7 @@ def clear_question_answers_for_current_user(s_question_id):
 
     feedback_keys = question.children_keys()
     for key in feedback_keys:
-        notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1 AND feedback = :2", user, key)
+        notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1 AND feedback = :2", user_data.user, key)
         if notifications.count():
             db.delete(notifications)
 
