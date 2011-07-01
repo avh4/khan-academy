@@ -33,7 +33,7 @@ def class_time_graph_context(user_data, dt_utc, tz_offset):
 
         total_student_minutes = 0
         if classtime_table is not None:
-            total_student_minutes = classtime_table.get_student_total(user_data_student.display_email())
+            total_student_minutes = classtime_table.get_student_total(user_data_student.display_email)
 
         graph_data.append({
             "name": short_name,
@@ -42,7 +42,7 @@ def class_time_graph_context(user_data, dt_utc, tz_offset):
 
     return {
             "classtime_table": classtime_table,
-            "coach_email": user_data.display_email(),
+            "coach_email": user_data.display_email,
             "width": (60 * len(graph_data)) + 120,
             "graph_data": graph_data,
             "is_graph_empty": len(classtime_table.rows) <= 0

@@ -32,13 +32,13 @@ class ViewClassProfile(request_handler.RequestHandler):
                 class_points = reduce(lambda a,b: a + b, map(lambda student_data: student_data.points, students_data))
 
             dict_students = map(lambda student_data: { 
-                "email": student_data.display_email(),
+                "email": student_data.display_email,
                 "nickname": student_data.nickname(),
             }, students_data)
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, 
-                    urllib.quote(user_data_coach.display_email()),
+                    urllib.quote(user_data_coach.display_email),
                     urllib.unquote(self.request_string("graph_query_params", default="")))
 
             # Sort students alphabetically and sort into 4 chunked up columns for easy table html
@@ -65,7 +65,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             template_values = {
                     'user_data_coach': user_data_coach,
-                    'coach_email': user_data_coach.display_email(),
+                    'coach_email': user_data_coach.display_email,
                     'coach_nickname': user_data_coach.nickname(),
                     'dict_students': dict_students,
                     'students_per_row': students_per_row,
@@ -103,7 +103,7 @@ class ViewProfile(request_handler.RequestHandler):
             user_badges = util_badges.get_user_badges(user_data_student)
 
             selected_graph_type = self.request_string("selected_graph_type") or ActivityGraph.GRAPH_TYPE
-            initial_graph_url = "/profile/graph/%s?student_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_student.display_email()), urllib.unquote(self.request_string("graph_query_params", default="")))
+            initial_graph_url = "/profile/graph/%s?student_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_student.display_email), urllib.unquote(self.request_string("graph_query_params", default="")))
             tz_offset = self.request_int("tz_offset", default=0)
 
             template_values = {
@@ -183,7 +183,7 @@ class ProfileGraph(request_handler.RequestHandler):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
             self.redirect("/profile?selected_graph_type=%s&student_email=%s&graph_query_params=%s" % 
-                    (self.GRAPH_TYPE, urllib.quote(user_data_student.display_email()), urllib.quote(urllib.quote(self.request.query_string))))
+                    (self.GRAPH_TYPE, urllib.quote(user_data_student.display_email), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
 

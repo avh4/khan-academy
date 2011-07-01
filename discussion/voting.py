@@ -79,7 +79,7 @@ class VoteEntity(request_handler.RequestHandler):
         # the taskqueue will just retry w/ exponential backoff.
         taskqueue.add(url='/admin/discussion/finishvoteentity', queue_name='voting-queue', 
                 params={
-                    "email": user_data.display_email(),
+                    "email": user_data.display_email,
                     "vote_type": self.request_int("vote_type", default=FeedbackVote.ABSTAIN),
                     "entity_key": entity_key
                 }

@@ -25,7 +25,7 @@ def exercise_progress_graph_context(user_data_student):
         ex_link = "/exercises?exid="+exercise.name
         hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % ( exercise_display, "Not Started", 0, 0)
 
-        chart_link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % (user_data.display_email(), exercise.name) 
+        chart_link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % (user_data.display_email, exercise.name) 
                 
         user_exercise = dict_user_exercises[exercise.name] if dict_user_exercises.has_key(exercise.name) else None
 

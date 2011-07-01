@@ -11,7 +11,7 @@ def get_class_exercises(list_student_data):
 
     for user_data_student in list_student_data:
 
-        student_email = user_data_student.display_email()
+        student_email = user_data_student.display_email
 
         class_exercise_dict[student_email] = {"user_data_student": user_data_student}
 
@@ -28,7 +28,7 @@ def class_progress_report_graph_context(user_data):
         return {}
 
     list_student_data = user_data.get_students_data()
-    student_emails = map(lambda student_data: student_data.display_email(), list_student_data)
+    student_emails = map(lambda student_data: student_data.display_email, list_student_data)
     class_exercises = get_class_exercises(list_student_data)
 
     exercises_all = models.Exercise.get_all_use_cache()
@@ -104,5 +104,5 @@ def class_progress_report_graph_context(user_data):
             'student_emails': student_emails,
             'exercise_names': exercises_found_names,
             'exercise_data': exercise_data,
-            'coach_email': user_data.display_email(),
+            'coach_email': user_data.display_email,
         }
