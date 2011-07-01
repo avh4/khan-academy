@@ -288,7 +288,7 @@ class UserExercise(db.Model):
         return user_exercises
 
     def clear_memcache(self):
-        memcache.delete(UserExercise.get_key_for_user(self.user.email()), namespace=App.version)
+        memcache.delete(UserExercise.get_key_for_email(self.user.email()), namespace=App.version)
     
     def put(self):
         self.clear_memcache()
@@ -1160,7 +1160,7 @@ class ExerciseVideo(db.Model):
 class ExerciseGraph(object):
 
     def __init__(self, user_data):
-        user_exercises = UserExercise.get_for_user_data_use_cache(user_data.user)
+        user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
         self.exercise_by_name = {}        

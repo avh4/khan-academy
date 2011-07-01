@@ -33,7 +33,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             dict_students = map(lambda student_data: { 
                 "email": student_data.display_email,
-                "nickname": student_data.nickname(),
+                "nickname": student_data.nickname,
             }, students_data)
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
@@ -66,7 +66,7 @@ class ViewClassProfile(request_handler.RequestHandler):
             template_values = {
                     'user_data_coach': user_data_coach,
                     'coach_email': user_data_coach.display_email,
-                    'coach_nickname': user_data_coach.nickname(),
+                    'coach_nickname': user_data_coach.nickname,
                     'dict_students': dict_students,
                     'students_per_row': students_per_row,
                     'list_students_columnized': list_students_columnized,

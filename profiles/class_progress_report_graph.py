@@ -1,5 +1,6 @@
-from google.appengine.api import users
+import logging
 
+from google.appengine.api import users
 from django.template.defaultfilters import escape
 
 import models
@@ -28,7 +29,7 @@ def class_progress_report_graph_context(user_data):
         return {}
 
     list_student_data = user_data.get_students_data()
-    student_emails = map(lambda student_data: student_data.display_email, list_student_data)
+    student_emails = map(lambda user_data_student: user_data_student.display_email, list_student_data)
     class_exercises = get_class_exercises(list_student_data)
 
     exercises_all = models.Exercise.get_all_use_cache()
@@ -43,13 +44,13 @@ def class_progress_report_graph_context(user_data):
     exercises_found_names = map(lambda exercise: exercise.name, exercises_found)
     exercise_data = {}
 
-    for student_email in student_emails:   
+    for student_email in student_emails:
 
-        student_data = class_exercises[student_email]["student_data"]
-        if not student_data:
+        user_data_student = class_exercises[student_email]["user_data_student"]
+        if not user_data_student:
             continue
 
-        name = student_data.nickname
+        name = user_data_student.nickname
         i = 0
 
         for exercise in exercises_found:
@@ -62,17 +63,17 @@ def class_progress_report_graph_context(user_data):
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
 
-            link = "/profile/graph/exerciseproblems?student_email=" + student_data.display_email + "&exercise_name="+exercise_name
+            link = "/profile/graph/exerciseproblems?student_email=" + user_data_student.display_email + "&exercise_name="+exercise_name
 
             status = ""
             hover = ""
             color = "transparent"
 
-            if student_data.is_proficient_at(exercise_name):
+            if user_data_student.is_proficient_at(exercise_name):
                 status = "Proficient"
                 color = "proficient"
 
-                if not student_data.is_explicitly_proficient_at(exercise_name):
+                if not user_data_student.is_explicitly_proficient_at(exercise_name):
                     status = "Proficient (due to proficiency in a more advanced module)"
 
             elif user_exercise.exercise is not None and models.UserExercise.is_struggling_with(user_exercise, exercise):
