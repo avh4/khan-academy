@@ -27,9 +27,8 @@ def class_exercises_over_time_graph_context(user_data):
     dict_exercises = {}
 
     for user_data_student in students_data:
-        display_student = user_data_student.display_user
-        student_nickname = util.get_nickname_for(display_student)
-        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": display_student.email(), "exercises": [] }
+        student_nickname = user_data_student.nickname
+        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": user_data_student.display_email, "exercises": [] }
 
         query = models.UserExercise.all()
         query.filter('user =', user_data_student.user)

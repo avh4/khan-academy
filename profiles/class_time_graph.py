@@ -27,7 +27,7 @@ def class_time_graph_context(user_data, dt_utc, tz_offset):
 
     for user_data_student in students_data:
 
-        short_name = util.get_nickname_for(user_data_student.display_user)
+        short_name = user_data_student.nickname
         if len(short_name) > 18:
             short_name = short_name[0:18] + "..."
 

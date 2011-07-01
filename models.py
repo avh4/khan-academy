@@ -617,14 +617,14 @@ class UserData(db.Model):
         return map(lambda student_data: student_data.user.email(), self.get_students_data())
    
     def student_display_emails(self):
-        return map(lambda student_data: student_data.display_user.email(), self.get_students_data())
+        return map(lambda student_data: student_data.display_email, self.get_students_data())
 
     def coach_display_emails(self):
         display_emails = []
         for coach_email in self.coaches:
             user_data_coach = UserData.get_for(users.User(coach_email))
-            if user_data_coach and user_data_coach.display_user:
-                display_emails.append(user_data_coach.display_user.email())
+            if user_data_coach:
+                display_emails.append(user_data_coach.display_email)
         return display_emails
 
     def is_coached_by(self, user_data_coach):
