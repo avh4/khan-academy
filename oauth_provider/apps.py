@@ -1,5 +1,5 @@
 
-from oauth_provider.models import Consumer
+from oauth_provider.models_oauth import Consumer
 from oauth_provider.consts import ACCEPTED
 
 import request_handler
