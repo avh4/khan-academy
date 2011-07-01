@@ -300,7 +300,7 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user_data(video, UserData.current()
+        user_video = UserVideo.get_for_video_and_user_data(video, UserData.current())
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points
