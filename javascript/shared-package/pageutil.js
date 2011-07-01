@@ -359,10 +359,29 @@ var VideoStats = {
 
         if (dict_json.video_points && dict_json.user_points_html)
         {
+            // Update the energy points box with the new data.
             var jelPoints = $(".video-energy-points");
-            jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
+            jelPoints.data("title", jelPoints.data("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
             $("#user-points-container").html(dict_json.user_points_html);
+
+            // Replace the old tooltip with an updated one.
+            $('#points-badge-hover').qtip({
+                content: {
+                    text: jelPoints.data('title'),
+                },
+                style: {
+                    classes: 'ui-tooltip-youtube',
+                },
+                position: {
+                    my: 'top center',
+                    at: 'bottom center',
+                },
+                hide: {
+                    fixed: true,
+                    delay: 150,
+                }
+            });
         }
     },
 

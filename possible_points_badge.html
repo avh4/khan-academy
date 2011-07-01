@@ -1,1 +1,1 @@
-<div class="video-energy-points"{% if logged_in %} title="{{ points }} Energy Points earned for watching this video"{% endif %}><span class="video-energy-points-current">{{ points }}</span> of {{ possible_points }}</div>
+<div class="video-energy-points"{% if logged_in %} title="{{ points }} Energy Points earned for watching this video"{% else %} title="You're earning points for watching this video. <a href='/login'>Sign in</a> to keep them"{% endif %}><span class="video-energy-points-current">{{ points }}</span> of {{ possible_points }}</div>
