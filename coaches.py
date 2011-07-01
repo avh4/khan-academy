@@ -30,7 +30,7 @@ class ViewCoaches(request_handler.RequestHandler):
         if user_data:
             invalid_coach = self.request_bool("invalid_coach", default = False)
 
-            coach_requests = CoachRequest.get_for_student_data(user_data).fetch(1000)
+            coach_requests = CoachRequest.get_for_student(user_data).fetch(1000)
             
             template_values = {
                         "coach_emails": user_data.coach_display_emails(),
@@ -52,7 +52,7 @@ class ViewStudents(request_handler.RequestHandler):
             invalid_student = self.request_bool("invalid_student", default = False)
 
             student_emails = user_data.student_display_emails()
-            coach_requests = CoachRequest.get_for_coach_data(user_data)
+            coach_requests = CoachRequest.get_for_coach(user_data)
 
             template_values = {
                         "student_emails": student_emails,
@@ -112,11 +112,12 @@ class AcceptCoach(request_handler.RequestHandler):
 
         accept_coach = self.request_bool("accept", default = False)
 
-        user_data_coach = self.request_user_data("coach")
+        user_data_coach = self.request_user_data("coach_email")
         if user_data_coach:
 
             if not user_data_student.is_coached_by(user_data_coach):
                 coach_request = CoachRequest.get_for(user_data_coach, user_data_student)
+
                 if coach_request:
                     coach_request.delete()
 
