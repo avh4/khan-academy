@@ -206,11 +206,11 @@ class ClassProfileGraph(ProfileGraph):
 
         return user_data_coach
 
-    def redirect_if_not_ajax(self, coach):
+    def redirect_if_not_ajax(self, user_data_coach):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
             self.redirect("/class_profile?selected_graph_type=%s&coach_email=%s&graph_query_params=%s" % 
-                    (self.GRAPH_TYPE, urllib.quote(coach.email()), urllib.quote(urllib.quote(self.request.query_string))))
+                    (self.GRAPH_TYPE, urllib.quote(user_data_coach.display_email), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
 

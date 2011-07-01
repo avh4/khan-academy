@@ -278,7 +278,7 @@ class UserExercise(db.Model):
         return query.fetch(1000)
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user_data: "request_cache_user_exercise_%s" % user_data.user.email())
+    @request_cache.cache_with_key_fxn(lambda user_data: "request_cache_user_exercise_%s" % user_data.db_email)
     def get_for_user_data_use_cache(user_data):
         user_exercises_key = UserExercise.get_key_for_email(user_data.db_email)
         user_exercises = memcache.get(user_exercises_key, namespace=App.version)
@@ -295,7 +295,7 @@ class UserExercise(db.Model):
         db.Model.put(self)
 
     def belongs_to(self, user_data):
-        return user_data and self.user.email().lower() == user_data.user.email().lower()
+        return user_data and self.user.email().lower() == user_data.db_email.lower()
 
     def required_streak(self):
         return self.exercise_model.required_streak()
@@ -600,7 +600,7 @@ class UserData(db.Model):
         return (exid in self.suggested_exercises)
 
     def get_students_data(self):
-        coach_email = self.user.email()   
+        coach_email = self.db_email   
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
         students_data = []
         for student_data in query:
@@ -614,7 +614,7 @@ class UserData(db.Model):
         return students_data
 
     def student_emails(self):
-        return map(lambda student_data: student_data.user.email(), self.get_students_data())
+        return map(lambda student_data: student_data.db_email, self.get_students_data())
    
     def student_display_emails(self):
         return map(lambda student_data: student_data.display_email, self.get_students_data())

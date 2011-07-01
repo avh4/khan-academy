@@ -75,7 +75,7 @@ class RegisterCoach(request_handler.RequestHandler):
         if user_data_coach:
 
             if not user_data.is_coached_by(user_data_coach):
-                user_data.coaches.append(coach.email())
+                user_data.coaches.append(user_data_coach.db_email)
                 user_data.put()
 
             self.redirect("/coaches")

@@ -92,4 +92,4 @@ def profile_recent_activity_entry_exercise(user_data_student, recent_activity_en
     return { "recent_activity": recent_activity_entry, "student_email": user_data_student.display_email }
 @register.inclusion_tag(("../profiles/recent_activity_entry_video.html", "profiles/recent_activity_entry_video.html"))
 def profile_recent_activity_entry_video(user_data_student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email() }
+    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.display_email }
