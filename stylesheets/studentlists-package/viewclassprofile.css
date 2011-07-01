@@ -49,14 +49,14 @@
 }
 
 #page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:before {
-    top: 21px;
+    top: 23px;
     left: 50px;
     border-left-width: 5px;
     border-right-width: 5px;
     border-bottom-width: 5px;
 }
 #page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:after {
-    top: 22px;
+    top: 24px;
     left: 50px;
     border-left-width: 5px;
     border-right-width: 5px;
