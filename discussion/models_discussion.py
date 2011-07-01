@@ -158,7 +158,7 @@ class FeedbackVote(db.Model):
 
     @staticmethod
     def add_vote(feedback, vote_type, user_data):
-        if not feedback:
+        if not feedback or not user_data:
             return
 
         vote = FeedbackVote.get_or_insert(
@@ -176,6 +176,10 @@ class FeedbackVote(db.Model):
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda user_data, video: "voting_dict_for_%s" % video.key())
     def get_dict_for_user_data_and_video(user_data, video):
+
+        if not user_data:
+            return {}
+
         query = FeedbackVote.all()
         query.filter("user =", user_data.user)
         query.filter("video =", video)
