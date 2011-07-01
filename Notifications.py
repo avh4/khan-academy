@@ -45,7 +45,6 @@ class UserNotifier:
     def pop_for_user(user):
         if not user:
             return []
-        logging.critical("Memcache called")
         notifications = memcache.get(UserNotifier.key_for_user(user)) or {"badges":[],"login":[]}
         user_badges = notifications["badges"] or []
         user_login = notifications["login"] or []
@@ -64,6 +63,6 @@ class UserNotifier:
         notifications["login"] = []
         notifications["badges"] = notificationstemp[0]
         memcache.set(UserNotifier.key_for_user(util.get_current_user()), notifications)
-        logging.critical("Memcache called")
+
         
         
