@@ -384,28 +384,28 @@ class CoachRequest(db.Model):
         return self.student_user_data
 
     @staticmethod
-    def key_for(coach, student):
-        return "%s_request_for_%s" % (coach.email(), student.email())
+    def key_for(user_data_coach, user_data_student):
+        return "%s_request_for_%s" % (user_data_coach.db_email(), user_data_student.db_email())
 
     @staticmethod
     def get_for(coach, student):
         return CoachRequest.get_by_key_name(CoachRequest.key_for(coach, student))
 
     @staticmethod
-    def get_or_insert_for(coach, student):
+    def get_or_insert_for(user_data_coach, user_data_student):
         return CoachRequest.get_or_insert(
-                key_name = CoachRequest.key_for(coach, student),
-                coach_requesting = coach,
-                student_requested = student,
+                key_name = CoachRequest.key_for(user_data_coach, user_data_student),
+                coach_requesting = user_data_coach.user,
+                student_requested = user_data_student.user,
                 )
 
     @staticmethod
-    def get_for_student(student):
-        return CoachRequest.all().filter("student_requested = ", student)
+    def get_for_student(user_data_student):
+        return CoachRequest.all().filter("student_requested = ", user_data_student.user)
 
     @staticmethod
-    def get_for_coach(coach):
-        return CoachRequest.all().filter("coach_requesting = ", coach)
+    def get_for_coach(user_data_coach):
+        return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
 
 class UserData(db.Model):
 

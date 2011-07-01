@@ -65,7 +65,7 @@
             {% else %}
             <tr class="odd_row">
             {% endif %}
-                <td>{{ coach_request.display_student_requested.email|escape }}</td>
+                <td>{{ coach_request.student_requested_data.display_email|escape }}</td>
                 <td><em>Request pending</em></td>
             </tr>
     {% endfor %}

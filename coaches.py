@@ -26,18 +26,17 @@ from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPer
 class ViewCoaches(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user:
+        if user_data:
             invalid_coach = self.request_bool("invalid_coach", default = False)
 
-            coach_requests = CoachRequest.get_for_student(user).fetch(1000)
+            coach_requests = CoachRequest.get_for_student_data(user_data).fetch(1000)
             
             template_values = {
                         "coach_emails": user_data.coach_display_emails(),
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
-                        "student_id": user_data.display_user.email(),
+                        "student_id": user_data.display_email,
                     }
 
             self.render_template('viewcoaches.html', template_values)
@@ -47,14 +46,13 @@ class ViewCoaches(request_handler.RequestHandler):
 class ViewStudents(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user:
+        if user_data:
 
             invalid_student = self.request_bool("invalid_student", default = False)
 
             student_emails = user_data.student_display_emails()
-            coach_requests = CoachRequest.get_for_coach(user)
+            coach_requests = CoachRequest.get_for_coach_data(user_data)
 
             template_values = {
                         "student_emails": student_emails,
@@ -68,18 +66,15 @@ class ViewStudents(request_handler.RequestHandler):
 class RegisterCoach(request_handler.RequestHandler):
     def post(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         user_data_coach = self.request_user_data("coach")
-        if user_data_coach and user_data_coach.user:
+        if user_data_coach:
 
-            coach = user_data_coach.user
-
-            if not user_data.is_coached_by(coach):
+            if not user_data.is_coached_by(user_data_coach):
                 user_data.coaches.append(coach.email())
                 user_data.put()
 
@@ -91,19 +86,16 @@ class RegisterCoach(request_handler.RequestHandler):
 class RequestStudent(request_handler.RequestHandler):
     def post(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         user_data_student = self.request_user_data("student_email")
-        if user_data_student and user_data_student.user:
+        if user_data_student:
 
-            student = user_data_student.user
-
-            if not user_data_student.is_coached_by(user):
-                coach_request = CoachRequest.get_or_insert_for(user, student)
+            if not user_data_student.is_coached_by(user_data):
+                coach_request = CoachRequest.get_or_insert_for(user_data, user_data_student)
                 if coach_request:
                     self.redirect("/students")
                     return
@@ -113,26 +105,23 @@ class RequestStudent(request_handler.RequestHandler):
 class AcceptCoach(request_handler.RequestHandler):
     def get(self):
         user_data_student = UserData.current()
-        user = user_data_student.user
 
-        if user is None:
+        if not user_data_student:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         accept_coach = self.request_bool("accept", default = False)
 
         user_data_coach = self.request_user_data("coach")
-        if user_data_coach and user_data_coach.user:
+        if user_data_coach:
 
-            coach = user_data_coach.user
-
-            if not user_data_student.is_coached_by(coach):
-                coach_request = CoachRequest.get_for(coach, user)
+            if not user_data_student.is_coached_by(user_data_coach):
+                coach_request = CoachRequest.get_for(user_data_coach, user_data_student)
                 if coach_request:
                     coach_request.delete()
 
                     if accept_coach:
-                        user_data_student.coaches.append(coach.email())
+                        user_data_student.coaches.append(user_data_coach.db_email())
                         user_data_student.put()
 
         self.redirect("/coaches")
@@ -140,17 +129,16 @@ class AcceptCoach(request_handler.RequestHandler):
 class UnregisterCoach(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         user_data_coach = self.request_user_data("coach")
-        if user_data_coach and user_data_coach.user:
+        if user_data_coach:
             try:
-                user_data.coaches.remove(user_data_coach.user.email())
-                user_data.coaches.remove(user_data_coach.user.email().lower())
+                user_data.coaches.remove(user_data_coach.db_email())
+                user_data.coaches.remove(user_data_coach.db_email().lower())
             except ValueError:
                 pass
 
@@ -161,18 +149,17 @@ class UnregisterCoach(request_handler.RequestHandler):
 class UnregisterStudent(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
-        user = user_data.user
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
         user_data_student = self.request_user_data("student_email")
-        if user_data_student and user_data_student.user:
+        if user_data_student:
 
             try:
-                user_data_student.coaches.remove(user.email())
-                user_data_student.coaches.remove(user.email().lower())
+                user_data_student.coaches.remove(user_data.db_email())
+                user_data_student.coaches.remove(user_data.db_email().lower())
             except ValueError:
                 pass
 

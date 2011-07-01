@@ -73,9 +73,9 @@ Make sure you're entering your full coach's full id, which is <em>case sensitive
             {% else %}
             <tr class="odd_row">
             {% endif %}
-                <td>{{ coach_request.display_coach_requesting.email|escape }}</td>
-                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.display_coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
-                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.display_coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
+                <td>{{ coach_request.coach_requesting_data.display_email|escape }}</td>
+                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting_data.display_email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
+                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting_data.display_email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
             </tr>
     {% endfor %}
     </table>
