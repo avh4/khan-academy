@@ -99,7 +99,7 @@ class ViewProfile(request_handler.RequestHandler):
                     # Allow access to this student's profile
                     user_data_student = user_data_override
 
-            user_badges = util_badges.get_user_badges(student)
+            user_badges = util_badges.get_user_badges(user_data_student)
 
             selected_graph_type = self.request_string("selected_graph_type") or ActivityGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?student_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_student.display_email()), urllib.unquote(self.request_string("graph_query_params", default="")))
