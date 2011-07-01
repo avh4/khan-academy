@@ -85,8 +85,7 @@ class ViewStudents(RequestHandler):
                 "invalid_student": invalid_student,
                 "coach_requests": coach_requests,
                 "coach_requests_json": json.dumps(coach_requests),
-                'selected_nav_link': 'coach',
-                'enable_tests': self.request_bool('enable_tests', default = False)
+                'selected_nav_link': 'coach'
             }
             self.render_template('viewstudentlists.html', template_values)
         else:
