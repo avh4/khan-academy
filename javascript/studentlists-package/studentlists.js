@@ -121,36 +121,35 @@ var StudentLists = {
                 $.ajax({
                     type: 'GET',
                     url: '/unregisterstudent',
-                    data: {'student_email': student.email},
-                    success: function(event) {
-                        // update data model
-                        StudentLists.Data.removeStudent(student);
-
-                        // update view
-                        $('#student-'+student.key).remove();
-                        StudentLists.redrawListView();
-                    }
+                    data: {'student_email': student.email}
                 });
+
+                // update data model
+                StudentLists.Data.removeStudent(student);
+
+                // update view
+                $('#student-'+student.key).remove();
+                StudentLists.redrawListView();
             }
         }
         else if (StudentLists.currentList == 'requests') {
             var email = jelRow.data('email');
+
             $.ajax({
                 type: 'GET',
                 url: '/acceptcoach',
-                data: {'accept': 0, 'student_email': email},
-                success: function(data, status, jqxhr) {
-                    // update data model
-                    StudentLists.Data.coach_requests =
-                        $.grep(StudentLists.Data.coach_requests, function(request) {
-                            return request != email;
-                        });
-
-                    // update UI
-                    jelRow.remove();
-                    StudentLists.redrawListView();
-                }
+                data: {'accept': 0, 'student_email': email}
             });
+
+            // update data model
+            StudentLists.Data.coach_requests =
+                $.grep(StudentLists.Data.coach_requests, function(request) {
+                    return request != email;
+                });
+
+            // update UI
+            jelRow.remove();
+            StudentLists.redrawListView();
         }
         else {
             var list_id = StudentLists.currentList;
@@ -290,6 +289,7 @@ var AddListTextBox = {
         }
 
         this.jElement.attr('disabled', 'disabled');
+        Throbber.show(this.jElement);
         $.ajax({
             type: 'POST',
             url: '/createstudentlist',
@@ -304,7 +304,10 @@ var AddListTextBox = {
                 $('#custom-lists').append(jel);
                 jel.find('a').click(StudentLists.listClick);
             },
-            complete: function(){AddListTextBox.hide();}
+            complete: function(){
+                Throbber.hide();
+                AddListTextBox.hide();
+            }
         });
     },
 
@@ -320,17 +323,15 @@ var AddListTextBox = {
         event.preventDefault();
         if (StudentLists.currentList != 'allstudents' &&
             StudentLists.currentList != 'requests') {
+                $.ajax({
+                    type: 'POST',
+                    url: '/deletestudentlist',
+                    data: {'list_id': StudentLists.currentList}
+                });
 
-            $.ajax({
-                type: 'POST',
-                url: '/deletestudentlist',
-                data: {'list_id': StudentLists.currentList},
-                success: function(data, status, jqxhr) {
-                    $('#custom-lists li[data-list_id='+StudentLists.currentList+']').remove();
-                    StudentLists.Data.removeList(StudentLists.currentList);
-                    $('#student-list-allstudents a').click();
-                }
-            });
+                $('#custom-lists li[data-list_id='+StudentLists.currentList+']').remove();
+                StudentLists.Data.removeList(StudentLists.currentList);
+                $('#student-list-allstudents a').click();
         }
     }
 };
@@ -343,6 +344,7 @@ var AddStudentTextBox = {
             .keypress(function(event) {
                 if (event.which == '13') {
                     var email = AddStudentTextBox.jElement.val();
+                    Throbber.show(AddStudentTextBox.jElement);
                     $.ajax({
                         type: 'POST',
                         url: '/requeststudent',
@@ -365,6 +367,9 @@ var AddStudentTextBox = {
                         },
                         error: function(jqxhr) {
                             $('#addstudent-error').slideDown();
+                        },
+                        complete: function() {
+                            Throbber.hide();
                         }
                     });
                 }
@@ -490,31 +495,29 @@ var EditListsMenu = {
         $.ajax({
             type: 'POST',
             url: '/addstudenttolist',
-            data: {'student_email': student.email, 'list_id': list_id},
-            success: function() {
-                StudentLists.Data.addStudentToList(student, list_id);
-
-                // show row on screen if visible
-                if (StudentLists.currentList == list_id) {
-                    $('.student-row[data-student_id='+student.key+']').fadeIn();
-                }
-            }
+            data: {'student_email': student.email, 'list_id': list_id}
         });
+        
+        StudentLists.Data.addStudentToList(student, list_id);
+
+        // show row on screen if visible
+        if (StudentLists.currentList == list_id) {
+            $('.student-row[data-student_id='+student.key+']').fadeIn();
+        }
     },
 
     removeStudentFromListAjax: function(student, list_id) {
         $.ajax({
             type: 'POST',
             url: '/removestudentfromlist',
-            data: {'student_email': student.email, 'list_id': list_id},
-            success: function() {
-                StudentLists.Data.removeStudentFromList(student, list_id);
-
-                // hide row from screen if visible
-                if (StudentLists.currentList == list_id) {
-                    $('.student-row[data-student_id='+student.key+']').fadeOut();
-                }
-            }
+            data: {'student_email': student.email, 'list_id': list_id}
         });
+        
+        StudentLists.Data.removeStudentFromList(student, list_id);
+
+        // hide row from screen if visible
+        if (StudentLists.currentList == list_id) {
+            $('.student-row[data-student_id='+student.key+']').fadeOut();
+        }
     }
 };
