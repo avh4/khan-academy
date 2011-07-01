@@ -481,6 +481,15 @@ var EditListsMenu = {
             jelInput.click(function(event){EditListsMenu.itemClick(event);})
                   .data('student-list', studentList);
         });
+
+        // css menus will overlap the footer if they are at the bottom of page
+        // fix by increasing the size of the .push element. Overshoot so we have
+        // a bit more room to grow if they add more lists.
+        var height = jelUl.height();
+        if (height > $('.push').height()) {
+            var overshoot = 30;
+            $('.push').css('height', height + overshoot + 'px');
+        }
     },
 
     itemClick: function(event) {
