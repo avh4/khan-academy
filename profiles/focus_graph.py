@@ -130,7 +130,7 @@ def focus_graph_context(user_data_student, dt_start_utc, dt_end_utc):
     # then we filter for proper time zone daily boundaries
     dt_start_utc_expanded = dt_start_utc - datetime.timedelta(days=1)
     dt_end_utc_expanded = dt_end_utc + datetime.timedelta(days=1)
-    daily_activity_logs = models.DailyActivityLog.get_for_user_data_between_dts(user_data, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
+    daily_activity_logs = models.DailyActivityLog.get_for_user_data_between_dts(user_data_student, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
     daily_activity_logs = activity_summary.fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data_student, dt_end_utc_expanded)
 
     playlist_focus_data = get_playlist_focus_data(daily_activity_logs, dt_start_utc, dt_end_utc)
