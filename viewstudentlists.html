@@ -34,7 +34,7 @@
 
             <a class="delete-button" id="delete-list" href="#"><img src="images/circled_cross.png" title="Delete this list (the students will still appear in 'All students')"/></a>
         </span>
-        <h2><a href="/class_profile?student_list=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
+        <h2 class="visited-no-recolor"><a href="/class_profile?student_list=allstudents" title="View the class statistics page for this set of students">All students</a></h2>
         <span id='nstudents'>0 students</span>
     </div>
 
@@ -72,7 +72,7 @@
                 <a class="delete-button" href="#" title="Remove this student from this list"><img src="images/circled_cross.png"/></a>
             </span>
             <div>
-                <span class="student-name"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname|escape }}</a></span>
+                <span class="student-name visited-no-recolor"><a href="/profile?student_email={{ student.email|escape }}" title="View this student's profile page">{{ student.nickname|escape }}</a></span>
                 <span class="student-email">{{ student.email|escape }}</span>
             </div>
         </div>

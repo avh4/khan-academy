@@ -48,16 +48,8 @@
     margin-bottom: 0;
     border-bottom: 1pt solid #aaaaaa;
 }
-h2 {
+.students-header h2 {
     display: inline;
-}
-h2 a:link, h2 a:visited, .student-name a:link, .student-name a:visited {
-    color: #000 ! important;
-    text-decoration: none;
-}
-h2 a:hover, .student-name a:hover {
-    color: #000;
-    text-decoration: underline;
 }
 #nstudents {
     margin-left: .5em;
