@@ -28,7 +28,7 @@
 .bullet:hover {
     background: url('/images/list-item-green.png');
     background-repeat: no-repeat;
-    background-position-y: 5px;
+    background-position-y: 7px;
 }
 .bullet-active {
     background: url('/images/list-item-black.png');
@@ -80,7 +80,7 @@
 }
 
 .lists-css-menu {
-    margin-right: 2em;
+    margin-right: 6em;
     position: relative;
     top: 4px;
 }
@@ -141,6 +141,7 @@ a.delete-button[href="#"] {
 
 .student-email {
     margin-left: .5em;
+    color: #777;
 }
 
 #requested-students {
