@@ -1348,7 +1348,7 @@ class PostLogin(request_handler.RequestHandler):
         # If new user is new, 0 points, migrate data
         phantom_user = util.get_phantom_user_from_cookies()
         if phantom_user:
-            phantom_data = UserData.get_for(phantom_user)
+            phantom_data = UserData.get_or_insert_for(phantom_user)
         else:
             self.delete_cookie('ureg_id')
             self.redirect(cont)
