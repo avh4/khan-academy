@@ -76,10 +76,10 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; }
     min-width: 1000px;
     max-width: 1200px;
     position: relative;
-    background: transparent url(/images/content-border.png) no-repeat 0 85px;
+    background: transparent url(/images/content-border.1.png) no-repeat 0 85px;
 }
 #page-container-inner {
-    background: transparent url(/images/content-border.png) no-repeat right 85px;
+    background: transparent url(/images/content-border.1.png) no-repeat right 85px;
 }
 
 /* Basic typography for the entire site */
