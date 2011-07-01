@@ -63,31 +63,22 @@
     border-bottom-width: 5px;
 }
 
-#high-level-class-stats {
+#high-level-class-stats img {
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+    position: relative;
+    top: -4px;
+}
+
+#high-level-class-stats > span {
+    display: inline-block;
+    margin-left: 10px;
+}
+#high-level-class-stats .count {
     display: inline-block;
 }
-{
-    position: relative;
-    display: block;
-}    
-    #high-level-class-stats img {
-        width: 50px;
-        height: 50px;
-        vertical-align: middle;
-        position: relative;
-        top: -4px;
-    }
 
-    #high-level-class-stats > span {
-        display: inline-block;
-    }
-    #high-level-class-stats .count {
-        display: inline-block;
-    }
-#high-level-class-stats #students-coached
-{
-    margin-right: 10px;
-}
     #high-level-class-stats span > span.count {
         font-size: 16px;
         font-weight: bold;
