@@ -76,10 +76,10 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; }
     min-width: 1000px;
     max-width: 1200px;
     position: relative;
-    background: transparent url(/images/content-border.png) no-repeat 0 85px;
+    background: transparent url(/images/content-border.1.png) no-repeat 0 85px;
 }
 #page-container-inner {
-    background: transparent url(/images/content-border.png) no-repeat right 85px;
+    background: transparent url(/images/content-border.1.png) no-repeat right 85px;
 }
 
 /* Basic typography for the entire site */
@@ -702,6 +702,7 @@ footer {
     #top-header #top-header-links #fb-like-badge, #sitewide-navigation #fb-like-badge {
         display: inline-block;
         width: 90px;
+        height: 20px;
     }
         #sitewide-navigation #fb-like-badge {
             vertical-align: top;
