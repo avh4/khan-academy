@@ -609,7 +609,7 @@ var Notifications = {
             .css("margin-top","0px");
         
         $.post("/notifierclose"); 
-    },
+    }
 
   
 }
