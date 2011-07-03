@@ -55,7 +55,7 @@ class ViewStudents(RequestHandler):
 
             invalid_student = self.request_bool("invalid_student", default = False)
             
-            coach_requests = [x.student_requested.email() for x in CoachRequest.get_for_coach(user_data)]
+            coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
 
             student_lists_models = StudentList.all().filter("coaches = ", user_data.key())
             
@@ -75,7 +75,7 @@ class ViewStudents(RequestHandler):
                 'student_lists': map(lambda id: student_lists_dict[str(id)], s.student_lists),
             }, students_data)
             students.sort(key=lambda s: s['nickname'])
-            
+
             template_values = {
                 "students": students,
                 "students_json": json.dumps(students),

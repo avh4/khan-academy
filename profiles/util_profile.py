@@ -84,13 +84,13 @@ class ViewClassProfile(request_handler.RequestHandler):
             }, students_data)
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
-            initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
+            initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_coach.email), urllib.unquote(self.request_string("graph_query_params", default="")))
             if list_id:
                 initial_graph_url += 'list_id=%s' % list_id
             
             template_values = {
                     'user_data_coach': user_data_coach,
-                    'coach_email': user_data_coach.email(),
+                    'coach_email': user_data_coach.email,
                     'list_id': list_id,
                     'student_list': current_list,
                     'student_lists': student_lists_list,
