@@ -39,6 +39,7 @@ class FeedbackFlag:
 
 class Feedback(db.Model):
     author = db.UserProperty()
+    author_nickname = db.StringProperty()
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
@@ -62,6 +63,13 @@ class Feedback(db.Model):
     def put(self):
         memcache.delete(Feedback.memcache_key_for_video(self.first_target()), namespace=App.version)
         db.Model.put(self)
+
+    def set_author(self, user_data):
+        self.author = user_data.user
+        self.author_nickname = user_data.nickname
+
+    def authored_by(self, user_data):
+        return user_data and self.author == user_data.user
 
     def sum_votes_incremented(self):
         # Always add an extra vote when displaying vote counts to convey the author's implicit "vote"
@@ -94,9 +102,6 @@ class Feedback(db.Model):
         if target_key:
             return db.get(target_key)
         return None
-
-    def author_nickname(self):
-        return get_nickname_for(self.author)
 
     def add_vote_by(self, vote_type, user_data):
         FeedbackVote.add_vote(self, vote_type, user_data)

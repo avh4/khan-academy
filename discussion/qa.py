@@ -147,7 +147,7 @@ class AddAnswer(request_handler.RequestHandler):
         if answer_text and video and question:
 
             answer = models_discussion.Feedback()
-            answer.author = user_data.user
+            answer.set_author(user_data)
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
             answer.types = [models_discussion.FeedbackType.Answer]
@@ -216,7 +216,7 @@ class AddQuestion(request_handler.RequestHandler):
                 question_text = question_text[0:500] # max question length, also limited by client
 
             question = models_discussion.Feedback()
-            question.author = user_data.user
+            question.set_author(user_data)
             question.content = question_text
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
@@ -241,7 +241,7 @@ class EditEntity(request_handler.RequestHandler):
         if key and text:
             feedback = db.get(key)
             if feedback:
-                if feedback.author == user_data.user or util_discussion.is_current_user_moderator():
+                if feedback.authored_by(user_data) or util_discussion.is_current_user_moderator():
 
                     feedback.content = text
                     feedback.put()
@@ -337,7 +337,7 @@ class DeleteEntity(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 # Must be a moderator or author of entity to delete
-                if entity.author == user_data.user or util_discussion.is_current_user_moderator():
+                if entity.authored_by(user_data) or util_discussion.is_current_user_moderator():
                     entity.deleted = True
                     entity.put()
 

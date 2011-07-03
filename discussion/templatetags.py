@@ -50,7 +50,7 @@ def signature(target=None, verb=None):
                 "target": target, 
                 "verb": verb, 
                 "is_mod": is_current_user_moderator(),
-                "is_author": target and models.UserData.current() and target.author == models.UserData.current().user,
+                "is_author": target and target.authored_by(models.UserData.current()),
                 "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
             }
 

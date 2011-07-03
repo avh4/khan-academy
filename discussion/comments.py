@@ -65,7 +65,7 @@ class AddComment(request_handler.RequestHandler):
                 comment_text = comment_text[0:300] # max comment length, also limited by client
 
             comment = models_discussion.Feedback()
-            comment.author = user_data.user
+            comment.set_author(user_data)
             comment.content = comment_text
             comment.targets = [video.key()]
             comment.types = [models_discussion.FeedbackType.Comment]
