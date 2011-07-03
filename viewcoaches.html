@@ -35,9 +35,9 @@
             {% else %}
             <tr class="odd_row">
             {% endif %}
-                <td>{{ coach_request.coach_requesting.email|escape }}</td>
-                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
-                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
+                <td>{{ coach_request.coach_requesting_data.email|escape }}</td>
+                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting_data.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
+                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting_data.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
             </tr>
     {% endfor %}
     </table>

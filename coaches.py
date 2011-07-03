@@ -28,18 +28,18 @@ import simplejson as json
 
 class ViewCoaches(RequestHandler):
     def get(self):
-        user = util.get_current_user()
-        if user:
+        user_data = UserData.current()
+
+        if user_data:
             invalid_coach = self.request_bool("invalid_coach", default = False)
 
-            user_data = UserData.get_or_insert_for(user)
-            coach_requests = CoachRequest.get_for_student(user).fetch(1000)
+            coach_requests = CoachRequest.get_for_student(user_data).fetch(1000)
 
             template_values = {
                         "coaches": user_data.coaches,
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
-                        "student_id": user.email(),
+                        "student_id": user_data.email,
                         'selected_nav_link': 'coach'
                     }
 
@@ -49,14 +49,13 @@ class ViewCoaches(RequestHandler):
 
 class ViewStudents(RequestHandler):
     def get(self):
-        user = util.get_current_user()
-        if user:
+        user_data = UserData.current()
+
+        if user_data:
 
             invalid_student = self.request_bool("invalid_student", default = False)
-
-            user_data = UserData.get_or_insert_for(user)
             
-            coach_requests = [x.student_requested.email() for x in CoachRequest.get_for_coach(user)]
+            coach_requests = [x.student_requested.email() for x in CoachRequest.get_for_coach(user_data)]
 
             student_lists_models = StudentList.all().filter("coaches = ", user_data.key())
             
@@ -71,7 +70,7 @@ class ViewStudents(RequestHandler):
             students_data = user_data.get_students_data()
             students = map(lambda s: {
                 'key': str(s.key()),
-                'email': s.user.email(),
+                'email': s.email,
                 'nickname': s.nickname,
                 'student_lists': map(lambda id: student_lists_dict[str(id)], s.student_lists),
             }, students_data)
@@ -93,28 +92,21 @@ class ViewStudents(RequestHandler):
 
 class RegisterCoach(RequestHandler):
     def post(self):
-        user = util.get_current_user()
+        user_data = UserData.current()
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data = UserData.get_or_insert_for(user)
+        user_data_coach = self.request_user_data("coach")
+        if user_data_coach:
+            if not user_data.is_coached_by(user_data_coach):
+                user_data.coaches.append(user_data_coach.key_email)
+                user_data.put()
 
-        coach_email = self.request_string("coach", default="")
-        if coach_email:
-            coach_user = users.User(coach_email)
-            coach_user_data = UserData.get_for(coach_user)
-
-            if coach_user_data:
-
-                if coach_email not in user_data.coaches and coach_email.lower() not in user_data.coaches:
-                    user_data.coaches.append(coach_email)
-                    user_data.put()
-
-                if not self.is_ajax_request():
-                    self.redirect("/coaches")
-                return
+            if not self.is_ajax_request():
+                self.redirect("/coaches")
+            return
         
         if self.is_ajax_request():
             self.response.set_status(400)
@@ -123,18 +115,16 @@ class RegisterCoach(RequestHandler):
 
 class RequestStudent(RequestHandler):
     def post(self):
-        user = util.get_current_user()
+        user_data = UserData.current()
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        student_email = self.request_string("student_email")
-        if student_email:
-            student = users.User(student_email)
-            user_data_student = UserData.get_for(student)
-            if user_data_student and not user_data_student.is_coached_by(user):
-                coach_request = CoachRequest.get_or_insert_for(user, student)
+        user_data_student = self.request_user_data("student_email")
+        if user_data_student:
+            if not user_data_student.is_coached_by(user_data):
+                coach_request = CoachRequest.get_or_insert_for(user_data, user_data_student)
                 if coach_request:
                     if not self.is_ajax_request():
                         self.redirect("/students")
@@ -148,39 +138,31 @@ class RequestStudent(RequestHandler):
 class AcceptCoach(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current()
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data = UserData.get_or_insert_for(user)
-
         accept_coach = self.request_bool("accept", default = False)
-        coach_email = self.request_string("coach_email")
-        student_email = self.request_string('student_email')
+        user_data_coach = self.request_user_data("coach_email")
+        user_data_student = self.request_user_data('student_email')
 
-        if bool(coach_email) == bool(student_email):
+        if bool(user_data_coach) == bool(user_data_student):
             raise Exception('must provide coach_email xor student_email')
 
-        if coach_email:
-            student = user
+        if user_data_coach:
             user_data_student = user_data
-            coach = users.User(coach_email)
-            user_data_coach = UserData.get_for(coach)
-        elif student_email:
-            student = users.User(student_email)
-            user_data_student = UserData.get_for(student)
-            coach = user
+        elif user_data_student:
             user_data_coach = user_data
         
-        if user_data_coach and not user_data_student.is_coached_by(coach):
-            coach_request = CoachRequest.get_for(coach, student)
+        if user_data_coach and not user_data_student.is_coached_by(user_data_coach):
+            coach_request = CoachRequest.get_for(user_data_coach, user_data_student)
             if coach_request:
                 coach_request.delete()
 
-                if user==student and accept_coach:
-                    user_data_student.coaches.append(coach.email())
+                if user_data.key_email == user_data_student.key_email and accept_coach:
+                    user_data_student.coaches.append(user_data_coach.key_email)
                     user_data_student.put()
 
         if not self.is_ajax_request():
@@ -188,19 +170,18 @@ class AcceptCoach(RequestHandler):
 
 class UnregisterCoach(RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current()
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data = UserData.get_or_insert_for(user)
-        coach_email = self.request.get('coach')
+        user_data_coach = self.request_user_data("coach")
 
-        if coach_email:
+        if user_data_coach:
             try:
-                user_data.coaches.remove(coach_email)
-                user_data.coaches.remove(coach_email.lower())
+                user_data.coaches.remove(user_data_coach.key_email)
+                user_data.coaches.remove(user_data_coach.key_email.lower())
             except ValueError:
                 pass
 
@@ -210,36 +191,33 @@ class UnregisterCoach(RequestHandler):
 
 class UnregisterStudent(RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current()
 
-        if user is None:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data = UserData.get_or_insert_for(user)
-        student_email = self.request_string("student_email")
+        user_data_student = self.request_user_data("student_email")
 
-        if student_email:
+        if user_data_student:
 
-            student = users.User(student_email)
-            user_data_student = UserData.get_for(student)
+            try:
+                user_data_student.coaches.remove(user_data.key_email)
+                user_data_student.coaches.remove(user_data.key_email.lower())
+            except ValueError:
+                pass
 
-            if user_data_student:
-
-                try:
-                    user_data_student.coaches.remove(user.email())
-                    user_data_student.coaches.remove(user.email().lower())
-                except ValueError:
-                    pass
-
-                user_data_student.put()
+            user_data_student.put()
 
         self.redirect("/students")
 
 class CreateStudentList(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
     def post(self):
-        coach_data = util_profile.get_coach(self)
+        coach_data = UserData.current()
+
+        if not coach_data:
+            return
         
         list_name = self.request_string('list_name')
         if not list_name:
@@ -258,7 +236,11 @@ class CreateStudentList(RequestHandler):
 class DeleteStudentList(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
     def post(self):
-        coach_data = util_profile.get_coach(self)
+        coach_data = UserData.current()
+
+        if not coach_data:
+            return
+
         student_list = util_profile.get_list(coach_data, self)
         student_list.delete()
         if not self.is_ajax_request():

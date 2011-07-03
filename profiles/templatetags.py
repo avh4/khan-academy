@@ -59,9 +59,9 @@ def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
     return { "user_data_student": user_data, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
-def profile_class_graph_link(coach, graph_name, graph_type, selected_graph_type, list_id):
+def profile_class_graph_link(user_data_coach, graph_name, graph_type, selected_graph_type, list_id):
     selected = (graph_type == selected_graph_type)
-    return { "user": None, "coach": coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected, 'list_id': list_id }
+    return { "user": None, "user_data_coach": user_data_coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected, 'list_id': list_id }
 
 @register.inclusion_tag(("../profiles/graph_date_picker.html", "profiles/graph_date_picker.html"))
 def profile_graph_date_picker(user_data, graph_type):

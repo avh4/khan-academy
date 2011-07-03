@@ -435,9 +435,6 @@ class StudentList(db.Model):
     def get_students_data(self):
         return [s for s in self.students]
 
-    def get_students(self):
-        return map(lambda student_data: student_data.user.email(), self.get_students_data())
-
 class UserData(db.Model):
 
     user = db.UserProperty()

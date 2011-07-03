@@ -12,21 +12,13 @@ import models
 import consts
 from badges import util_badges
 from models import StudentList, UserData
-
 import simplejson as json
 
-def get_coach(request_handler):
-    coach = util.get_current_user()
-    coach_data = UserData.get_or_insert_for(coach)
-    return coach_data
-
 def get_student(coach_data, request_handler):
-    student_email = request_handler.request_string('student_email')
-    student = users.User(student_email)
-    student_data = UserData.get_for(student)
+    student_data = request_handler.request_user_data('student_email')
     if student_data is None:
-        raise Exception("No student found with email='%s'." % student_email)
-    if coach_data.user.email() not in student_data.coaches:
+        raise Exception("No student found with email='%s'." % request_handler.request_string('student_email'))
+    if not student_data.is_coached_by(coach_data):
         raise Exception("Not your student!")
     return student_data
 
@@ -40,7 +32,7 @@ def get_list(coach_data, request_handler):
     return student_list
 
 def get_coach_student_and_student_list(request_handler):
-    coach_data = get_coach(request_handler)
+    coach_data = models.UserData.current()
     student_list = get_list(coach_data, request_handler)
     student_data = get_student(coach_data, request_handler)
     return (coach_data, student_data, student_list)
@@ -92,18 +84,18 @@ class ViewClassProfile(request_handler.RequestHandler):
             }, students_data)
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
-            initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
+            initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_coach.email()), urllib.unquote(self.request_string("graph_query_params", default="")))
             if list_id:
                 initial_graph_url += 'list_id=%s' % list_id
             
             template_values = {
-                    'coach': coach,
-                    'coach_email': coach.email(),
+                    'user_data_coach': user_data_coach,
+                    'coach_email': user_data_coach.email(),
                     'list_id': list_id,
                     'student_list': current_list,
                     'student_lists': student_lists_list,
                     'student_lists_json': json.dumps(student_lists_list),
-                    'coach_nickname': util.get_nickname_for(coach),
+                    'coach_nickname': user_data_coach.nickname,
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),

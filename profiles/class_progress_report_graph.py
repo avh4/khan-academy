@@ -28,10 +28,12 @@ def class_progress_report_graph_context(user_data, student_list):
     if not user_data:
         return {}
         
+    list_student_data = None
     if student_list:
-        user_data = student_list
+        list_student_data = student_list.get_students_data()
+    else:
+        list_student_data = user_data.get_students_data()
 
-    list_student_data = user_data.get_students_data()
     student_emails = map(lambda user_data_student: user_data_student.email, list_student_data)
     class_exercises = get_class_exercises(list_student_data)
 
