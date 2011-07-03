@@ -54,9 +54,9 @@ def class_profile_time_graph(user_data_coach, dt, tz_offset, student_list):
 # End class profile graph types
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
-def profile_graph_link(user, graph_name, graph_type, selected_graph_type):
+def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
     selected = (graph_type == selected_graph_type)
-    return { "user": user, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
+    return { "user_data_student": user_data, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
 
 @register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
 def profile_class_graph_link(coach, graph_name, graph_type, selected_graph_type, list_id):
@@ -64,12 +64,12 @@ def profile_class_graph_link(coach, graph_name, graph_type, selected_graph_type,
     return { "user": None, "coach": coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected, 'list_id': list_id }
 
 @register.inclusion_tag(("../profiles/graph_date_picker.html", "profiles/graph_date_picker.html"))
-def profile_graph_date_picker(user, graph_type):
-    return { "user": user, "graph_type": graph_type }
+def profile_graph_date_picker(user_data, graph_type):
+    return { "user_data": user_data, "graph_type": graph_type }
 
 @register.inclusion_tag(("../profiles/graph_calendar_picker.html", "profiles/graph_calendar_picker.html"))
-def profile_graph_calendar_picker(user, graph_type):
-    return { "user": user, "graph_type": graph_type }
+def profile_graph_calendar_picker(user_data, graph_type):
+    return { "user_data": user_data, "graph_type": graph_type }
 
 @register.inclusion_tag(("../profiles/exercise_progress_block.html", "profiles/exercise_progress_block.html"))
 def profile_exercise_progress_block(exercise_data, exercise):
@@ -81,15 +81,15 @@ def profile_exercise_progress_block(exercise_data, exercise):
     return context
 
 @register.inclusion_tag(("../profiles/recent_activity.html", "profiles/recent_activity.html"))
-def profile_recent_activity(user):
-    return recent_activity.recent_activity_context(user)
+def profile_recent_activity(user_data):
+    return recent_activity.recent_activity_context(user_data)
 
 @register.inclusion_tag(("../profiles/recent_activity_entry_badge.html", "profiles/recent_activity_entry_badge.html"))
-def profile_recent_activity_entry_badge(student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": student.email() }
+def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry):
+    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email }
 @register.inclusion_tag(("../profiles/recent_activity_entry_exercise.html", "profiles/recent_activity_entry_exercise.html"))
-def profile_recent_activity_entry_exercise(student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": student.email() }
+def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry):
+    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email }
 @register.inclusion_tag(("../profiles/recent_activity_entry_video.html", "profiles/recent_activity_entry_video.html"))
-def profile_recent_activity_entry_video(student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": student.email() }
+def profile_recent_activity_entry_video(user_data_student, recent_activity_entry):
+    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email }

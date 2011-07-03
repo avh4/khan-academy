@@ -15,7 +15,7 @@ class ExerciseCompletionBadge(Badge):
         user = user_data.user
 
         for exercise_name in self.exercise_names_required:
-            if not user_data.is_proficient_at(exercise_name, user):
+            if not user_data.is_proficient_at(exercise_name):
                 return False
 
         return True

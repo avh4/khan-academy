@@ -72,7 +72,7 @@ def add_bucket_html_summary(dict_bucket, key, limit):
                 c += 1
             dict_bucket[bucket]["html_summary"] = "<br/>".join(list_entries)
 
-def get_exercise_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
+def get_exercise_activity_data(user_data, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
 
@@ -110,7 +110,7 @@ def get_exercise_activity_data(user, bucket_list, bucket_type, daily_activity_lo
 
     return dict_bucket
 
-def get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
+def get_playlist_activity_data(user_data, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
 
@@ -147,10 +147,10 @@ def get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_lo
 
     return dict_bucket
 
-def get_badge_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
+def get_badge_activity_data(user_data, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
-    user_badges = models_badges.UserBadge.get_for_user_between_dts(user, dt_start_utc, dt_end_utc).fetch(1000)
+    user_badges = models_badges.UserBadge.get_for_user_data_between_dts(user_data, dt_start_utc, dt_end_utc).fetch(1000)
     badges_dict = util_badges.all_badges_dict()
 
     for user_badge in user_badges:
@@ -177,10 +177,10 @@ def get_badge_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end
 
     return dict_bucket
 
-def get_proficiency_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
+def get_proficiency_activity_data(user_data, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
-    user_exercises = models.UserExercise.get_for_user_use_cache(user)
+    user_exercises = models.UserExercise.get_for_user_data_use_cache(user_data)
 
     for user_exercise in user_exercises:
 
@@ -234,22 +234,20 @@ def activity_graph_context(user_data_student, dt_start_utc, dt_end_utc, tz_offse
     if not user_data_student:
         return {}
 
-    user = user_data_student.user
-
     # We have to expand by 1 day on each side to be sure we grab proper 'day' in client's time zone,
     # then we filter for proper time zone daily boundaries
     dt_start_utc_expanded = dt_start_utc - datetime.timedelta(days=1)
     dt_end_utc_expanded = dt_end_utc + datetime.timedelta(days=1)
-    daily_activity_logs = models.DailyActivityLog.get_for_user_between_dts(user, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
+    daily_activity_logs = models.DailyActivityLog.get_for_user_data_between_dts(user_data_student, dt_start_utc_expanded, dt_end_utc_expanded).fetch(1000)
     daily_activity_logs = activity_summary.fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data_student, dt_end_utc_expanded)
 
     bucket_type = get_bucket_type(dt_start_utc, dt_end_utc)
     bucket_list = get_bucket_list(dt_start_utc, dt_end_utc, tz_offset, bucket_type)
 
-    dict_playlist_buckets = get_playlist_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
-    dict_exercise_buckets = get_exercise_activity_data(user, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
-    dict_badge_buckets = get_badge_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
-    dict_proficiency_buckets = get_proficiency_activity_data(user, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
+    dict_playlist_buckets = get_playlist_activity_data(user_data_student, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
+    dict_exercise_buckets = get_exercise_activity_data(user_data_student, bucket_list, bucket_type, daily_activity_logs, dt_start_utc, dt_end_utc, tz_offset)
+    dict_badge_buckets = get_badge_activity_data(user_data_student, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
+    dict_proficiency_buckets = get_proficiency_activity_data(user_data_student, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset)
     dict_points_buckets = get_points_activity_data(bucket_list, dict_playlist_buckets, dict_exercise_buckets, dict_badge_buckets)
 
     map_scatter_y_values(dict_badge_buckets, dict_playlist_buckets, dict_exercise_buckets)
@@ -276,7 +274,7 @@ def activity_graph_context(user_data_student, dt_start_utc, dt_end_utc, tz_offse
             "dict_badge_buckets": dict_badge_buckets,
             "dict_proficiency_buckets": dict_proficiency_buckets,
             "dict_points_buckets": dict_points_buckets,
-            "student_email": user.email(),
+            "student_email": user_data_student.email,
             "tz_offset": tz_offset,
             "graph_title": graph_title,
             }

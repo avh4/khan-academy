@@ -7,7 +7,7 @@ OAUTH_BLACKLISTED_HOSTNAMES = getattr(config,'OAUTH_BLACKLISTED_HOSTNAMES',[])
 
 import oauth
 
-from models import Nonce, Token, Consumer, Resource, generate_random 
+from models_oauth import Nonce, Token, Consumer, Resource, generate_random 
 from consts import VERIFIER_SIZE, MAX_URL_LENGTH, OUT_OF_BAND
 
 logger = logging.getLogger()
