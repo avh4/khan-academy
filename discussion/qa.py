@@ -39,8 +39,8 @@ class ModeratorList(request_handler.RequestHandler):
 
         user_data = self.request_user_data("user")
 
-        if user_data is not None:
-            user_data.moderator = (self.request_bool("mod") == "1")
+        if user_data:
+            user_data.moderator = self.request_bool("mod")
             db.put(user_data)
 
         self.redirect("/discussion/moderatorlist")
