@@ -1,3 +1,5 @@
+import logging
+
 from google.appengine.api import users
 
 import models
@@ -36,7 +38,8 @@ def class_exercises_over_time_graph_context(user_data):
         query.order('proficient_date')
 
         for user_exercise in query:
-            days_until_proficient = (user_exercise.proficient_date - user_data.joined).days
+            joined = min(user_data.joined, user_exercise.proficient_date)
+            days_until_proficient = (user_exercise.proficient_date - joined).days
             proficient_date = user_exercise.proficient_date.strftime('%m/%d/%Y')
             data = ExerciseData(student_nickname, user_exercise.exercise, user_exercise.exercise, days_until_proficient, proficient_date)
             dict_student_exercises[student_nickname]["exercises"].append(data)
