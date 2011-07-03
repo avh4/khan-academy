@@ -72,7 +72,7 @@ class ViewStudents(RequestHandler):
                 'key': str(s.key()),
                 'email': s.email,
                 'nickname': s.nickname,
-                'student_lists': map(lambda id: student_lists_dict[str(id)], s.student_lists),
+                'student_lists': map(lambda id: student_lists_dict.get(str(id)), s.student_lists),
             }, students_data)
             students.sort(key=lambda s: s['nickname'])
 
