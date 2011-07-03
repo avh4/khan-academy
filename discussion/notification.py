@@ -50,7 +50,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
         videos = sorted(dict_videos.values(), key=lambda video: video.playlists[0] + video.title)
 
         context = {
-                    "email": user_data.display_email,
+                    "email": user_data.email,
                     "videos": videos,
                     "dict_answers": dict_answers
                   }

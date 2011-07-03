@@ -27,6 +27,6 @@ def exercises_over_time_graph_context(user_data):
         end_date = ue.proficient_date
 
     return {
-        'student_email': user_data.display_email,
+        'student_email': user_data.email,
         'user_exercises': user_exercises,
         }

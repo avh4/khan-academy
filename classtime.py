@@ -95,9 +95,9 @@ class ClassTimeTable:
         self.dt_end_ctz = dt_end_ctz
 
     def update_student_total(self, chunk):
-        if not self.student_totals.has_key(chunk.user_data_student.display_email):
-            self.student_totals[chunk.user_data_student.display_email] = 0
-        self.student_totals[chunk.user_data_student.display_email] += chunk.minutes_spent()
+        if not self.student_totals.has_key(chunk.user_data_student.email):
+            self.student_totals[chunk.user_data_student.email] = 0
+        self.student_totals[chunk.user_data_student.email] += chunk.minutes_spent()
 
     def get_student_total(self, student_email):
         if self.student_totals.has_key(student_email):

@@ -63,7 +63,7 @@ class VoteEntity(request_handler.RequestHandler):
         entity_key = self.request_string("entity_key", default="")
         if entity_key:
             entity = db.get(entity_key)
-            if entity and entity.author.email() == user_data.db_email:
+            if entity and entity.author.email() == user_data.key_email:
                 self.render_json({"error": "You cannot vote for your own posts."})
                 return
 
@@ -79,7 +79,7 @@ class VoteEntity(request_handler.RequestHandler):
         # the taskqueue will just retry w/ exponential backoff.
         taskqueue.add(url='/admin/discussion/finishvoteentity', queue_name='voting-queue', 
                 params={
-                    "email": user_data.display_email,
+                    "email": user_data.email,
                     "vote_type": self.request_int("vote_type", default=FeedbackVote.ABSTAIN),
                     "entity_key": entity_key
                 }

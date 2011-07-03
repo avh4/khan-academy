@@ -27,7 +27,7 @@ class LastActionCache:
 
     @staticmethod
     def get_for_user_data(user_data):
-        action_cache = memcache.get(LastActionCache.key_for_email(user_data.db_email))
+        action_cache = memcache.get(LastActionCache.key_for_email(user_data.key_email))
         if action_cache is None:
             action_cache = LastActionCache(user_data)
         return action_cache
@@ -39,7 +39,7 @@ class LastActionCache:
         self.video_logs = [] # Protobuf version of video logs for extremely fast (de)serialization
         self.video_log_models = {} # Deserialized video log models
 
-        self.db_email = user_data.db_email
+        self.key_email = user_data.key_email
 
     # Push a new problem log to the cache and return the LastActionCache
     @staticmethod
@@ -94,5 +94,5 @@ class LastActionCache:
         self.problem_log_models = {}
         self.video_log_models = {}
 
-        memcache.set(LastActionCache.key_for_email(self.db_email), self)
+        memcache.set(LastActionCache.key_for_email(self.key_email), self)
 

@@ -240,7 +240,7 @@ def empty_class_instructions(class_is_empty=True):
     user_data = UserData.current()
     coach_email = "Not signed in. Please sign in to see your Coach ID."
     if user_data:
-        coach_email = user_data.display_email
+        coach_email = user_data.email
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 

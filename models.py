@@ -283,9 +283,9 @@ class UserExercise(db.Model):
         return query.fetch(1000)
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user_data: "request_cache_user_exercise_%s" % user_data.db_email)
+    @request_cache.cache_with_key_fxn(lambda user_data: "request_cache_user_exercise_%s" % user_data.key_email)
     def get_for_user_data_use_cache(user_data):
-        user_exercises_key = UserExercise.get_key_for_email(user_data.db_email)
+        user_exercises_key = UserExercise.get_key_for_email(user_data.key_email)
         user_exercises = memcache.get(user_exercises_key, namespace=App.version)
         if user_exercises is None:
             user_exercises = UserExercise.get_for_user_data(user_data)
@@ -300,7 +300,7 @@ class UserExercise(db.Model):
         db.Model.put(self)
 
     def belongs_to(self, user_data):
-        return user_data and self.user.email().lower() == user_data.db_email.lower()
+        return user_data and self.user.email().lower() == user_data.key_email.lower()
 
     def required_streak(self):
         return self.exercise_model.required_streak()
@@ -390,7 +390,7 @@ class CoachRequest(db.Model):
 
     @staticmethod
     def key_for(user_data_coach, user_data_student):
-        return "%s_request_for_%s" % (user_data_coach.db_email, user_data_student.db_email)
+        return "%s_request_for_%s" % (user_data_coach.key_email, user_data_student.key_email)
 
     @staticmethod
     def get_for(user_data_coach, user_data_student):
@@ -441,7 +441,7 @@ class UserData(db.Model):
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
-            "last_login"
+            "last_login", "user", "current_user"
     ]
 
     @property
@@ -449,11 +449,11 @@ class UserData(db.Model):
         return nicknames.get_nickname_for(self.current_user)
 
     @property
-    def display_email(self):
+    def email(self):
         return self.current_user.email()
 
     @property
-    def db_email(self):
+    def key_email(self):
         return self.user.email()
 
     @property
@@ -608,7 +608,7 @@ class UserData(db.Model):
         return (exid in self.suggested_exercises)
 
     def get_students_data(self):
-        coach_email = self.db_email   
+        coach_email = self.key_email   
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
         students_data = []
         for student_data in query:
@@ -622,21 +622,21 @@ class UserData(db.Model):
         return students_data
 
     def student_emails(self):
-        return map(lambda student_data: student_data.db_email, self.get_students_data())
+        return map(lambda student_data: student_data.key_email, self.get_students_data())
    
     def student_display_emails(self):
-        return map(lambda student_data: student_data.display_email, self.get_students_data())
+        return map(lambda student_data: student_data.email, self.get_students_data())
 
     def coach_display_emails(self):
         display_emails = []
         for coach_email in self.coaches:
             user_data_coach = UserData.get_from_db_input(coach_email)
             if user_data_coach:
-                display_emails.append(user_data_coach.display_email)
+                display_emails.append(user_data_coach.email)
         return display_emails
 
     def is_coached_by(self, user_data_coach):
-        return user_data_coach.db_email in self.coaches or user_data_coach.db_email.lower() in self.coaches
+        return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
     def add_points(self, points):
         if self.points == None:
@@ -796,7 +796,7 @@ class UserPlaylist(db.Model):
 
     @staticmethod
     def get_key_name(playlist, user_data):
-        return user_data.db_email + ":" + playlist.youtube_id
+        return user_data.key_email + ":" + playlist.youtube_id
 
     @staticmethod
     def get_for_playlist_and_user_data(playlist, user_data, insert_if_missing=False):
@@ -817,7 +817,7 @@ class UserVideo(db.Model):
 
     @staticmethod
     def get_key_name(video, user_data):
-        return user_data.db_email + ":" + video.youtube_id
+        return user_data.key_email + ":" + video.youtube_id
 
     @staticmethod
     def get_for_video_and_user_data(video, user_data, insert_if_missing=False):
@@ -1004,7 +1004,7 @@ class DailyActivityLog(db.Model):
 
     @staticmethod
     def get_key_name(user_data, date):
-        return "%s:%s" % (user_data.db_email, date.strftime("%Y-%m-%d-%H"))
+        return "%s:%s" % (user_data.key_email, date.strftime("%Y-%m-%d-%H"))
 
     @staticmethod
     def build(user_data, date, activity_summary):

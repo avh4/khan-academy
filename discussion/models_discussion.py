@@ -125,11 +125,11 @@ class Feedback(db.Model):
         self.inner_score = float(score)
 
     def add_flag_by(self, flag_type, user_data):
-        if user_data.db_email in self.flagged_by:
+        if user_data.key_email in self.flagged_by:
             return False
 
         self.flags.append(flag_type)
-        self.flagged_by.append(user_data.db_email)
+        self.flagged_by.append(user_data.key_email)
         self.recalculate_flagged()
         return True
 
@@ -162,7 +162,7 @@ class FeedbackVote(db.Model):
             return
 
         vote = FeedbackVote.get_or_insert(
-                key_name = "vote_by_%s" % user_data.db_email,
+                key_name = "vote_by_%s" % user_data.key_email,
                 parent = feedback,
                 video = feedback.first_target_key(),
                 user = user_data.user,
