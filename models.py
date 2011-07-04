@@ -645,20 +645,6 @@ class UserData(db.Model):
         		    students_data.append(student_data)
         return students_data
 
-    def student_emails(self):
-        return map(lambda student_data: student_data.key_email, self.get_students_data())
-   
-    def student_display_emails(self):
-        return map(lambda student_data: student_data.email, self.get_students_data())
-
-    def coach_display_emails(self):
-        display_emails = []
-        for coach_email in self.coaches:
-            user_data_coach = UserData.get_from_db_input(coach_email)
-            if user_data_coach:
-                display_emails.append(user_data_coach.email)
-        return display_emails
-
     def is_coached_by(self, user_data_coach):
         return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
