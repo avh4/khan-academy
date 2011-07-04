@@ -110,7 +110,7 @@ def new_answer_for_video_question(video, question, answer):
     notification.user = question.author
     notification.feedback = answer
 
-    user_data = models.UserData.get_from_db_input(notification.user.email())
+    user_data = models.UserData.get_from_db_key_email(notification.user.email())
     if not user_data:
         return
 

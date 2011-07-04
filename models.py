@@ -379,13 +379,13 @@ class CoachRequest(db.Model):
     @property
     def coach_requesting_data(self):
         if not hasattr(self, "coach_user_data"):
-            self.coach_user_data = UserData.get_from_db_input(self.coach_requesting.email())
+            self.coach_user_data = UserData.get_from_db_key_email(self.coach_requesting.email())
         return self.coach_user_data
 
     @property
     def student_requested_data(self):
         if not hasattr(self, "student_user_data"):
-            self.student_user_data = UserData.get_from_db_input(self.student_requested.email())
+            self.student_user_data = UserData.get_from_db_key_email(self.student_requested.email())
         return self.student_user_data
 
     @staticmethod
@@ -491,13 +491,13 @@ class UserData(db.Model):
         if email:
             # Once we have rekeyed legacy entities,
             # we will be able to simplify this.
-            return  UserData.get_from_user_input(email) or \
-                    UserData.get_from_db_input(email) or \
+            return  UserData.get_from_user_input_email(email) or \
+                    UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(email)
         return None
 
     @staticmethod
-    def get_from_user_input(email):
+    def get_from_user_input_email(email):
         if not email:
             return None
 
@@ -508,7 +508,7 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod    
-    def get_from_db_input(email):
+    def get_from_db_key_email(email):
         if not email:
             return None
 
