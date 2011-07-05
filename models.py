@@ -41,16 +41,23 @@ class Setting(db.Model):
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
-            memcache.delete("setting_key_%s" % key, namespace=App.version)
+
+            Setting.get_settings_dict(bust_cache=True)
+
             return setting.value
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(lambda key: "setting_key_%s" % key, layer=layer_cache.Layers.Memcache)
     def cache_get_by_key_name(key):
-        setting = Setting.get_by_key_name(key)
+        setting = Setting.get_settings_dict().get(key)
         if setting is not None:
             return setting.value
         return None
+
+    @staticmethod
+    @request_cache.cache()
+    @layer_cache.cache(layer=layer_cache.Layers.Memcache)
+    def get_settings_dict(bust_cache = False):
+        return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
 
     @staticmethod
     def cached_library_content_date(val = None):
