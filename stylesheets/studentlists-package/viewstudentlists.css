@@ -171,3 +171,6 @@ a.delete-button[href="#"] {
     margin: .3em;
     margin-left: .8em;
 }
+
+#page_sub_nav .breadcrumbs_nav a#manage-students.selected:before {left: 58px;}
+#page_sub_nav .breadcrumbs_nav a#manage-students.selected:after {left: 59px;}

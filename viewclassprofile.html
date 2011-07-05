@@ -7,8 +7,8 @@
 
 {% block pagesubmenu %}
 <span class="breadcrumbs_nav">
-    <a href="/students">Manage Students</a>
-    <a href="/class_profile" class="selected">Class Stats For</a>
+    <a href="/students" id="manage-students">Manage Students</a>
+    <a href="/class_profile" id="class-stats" class="selected">Class Stats For</a>
     <span id="studentlists_dropdown" style="display:none;">
         <a>{{ student_list.name|escape }}</a>
         <div id="studentlists_menu">
