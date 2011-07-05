@@ -481,10 +481,8 @@ class StudentList(db.Model):
 
 
 class UserData(db.Model):
-
     user = db.UserProperty()
     current_user = db.UserProperty()
-
     moderator = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
@@ -541,6 +539,10 @@ class UserData(db.Model):
                     UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(email)
         return None
+
+    @property
+    def is_phantom(self):
+        return util.is_phantom_user(self.user)
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)
@@ -697,12 +699,6 @@ class UserData(db.Model):
     def is_coached_by(self, user_data_coach):
         return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
-    
-    
-    
-
-    
-    
     def add_points(self, points):
         if self.points == None:
             self.points = 0
@@ -1332,7 +1328,7 @@ class ExerciseGraph(object):
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
 
-        phantom = util.is_phantom_user(user)
+        phantom = user_data.is_phantom
         for ex in exercises:
             ex.phantom = phantom
                 

@@ -6,7 +6,6 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 
 from app import App
-from nicknames import get_nickname_for
 import request_cache
 
 class FeedbackType:
