@@ -4,6 +4,8 @@ import datetime, logging
 import math
 import urllib
 
+import config_django
+
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred

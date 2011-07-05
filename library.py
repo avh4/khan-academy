@@ -51,20 +51,20 @@ def library_content_html(bust_cache = False):
     Setting.count_videos(len(dict_videos_counted.keys()))
 
     for topic in topics_list:
+        if topic in dict_playlists_by_title:
+            playlist = dict_playlists_by_title[topic]
+            playlist_key = playlist.key()
+            playlist_videos = dict_video_playlists[playlist_key]
 
-        playlist = dict_playlists_by_title[topic]
-        playlist_key = playlist.key()
-        playlist_videos = dict_video_playlists[playlist_key]
+            playlist_data = {
+                     'title': topic,
+                     'topic': topic,
+                     'playlist': playlist,
+                     'videos': playlist_videos,
+                     'next': None
+                     }
 
-        playlist_data = {
-                 'title': topic,
-                 'topic': topic,
-                 'playlist': playlist,
-                 'videos': playlist_videos,
-                 'next': None
-                 }
-
-        all_playlists.append(playlist_data)
+            all_playlists.append(playlist_data)
 
     playlist_data_prev = None
     for playlist_data in all_playlists:
