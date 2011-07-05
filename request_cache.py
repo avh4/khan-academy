@@ -26,7 +26,9 @@ def cache():
     def decorator(target):
         key = "__request_cache_%s.%s__" % (target.__module__, target.__name__)
         def wrapper(*args, **kwargs):
-            return request_cache_check_set_return(target, lambda *a, **kw: key, *args, **kwargs)
+
+            return request_cache_check_set_return(target, lambda *args, **kwargs: key, *args, **kwargs)
+
         return wrapper
     return decorator
 

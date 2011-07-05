@@ -3,6 +3,7 @@ from google.appengine.api import users
 # If using the default should_profile implementation, the profiler
 # will only be enabled for requests made by the following GAE users.
 enabled_profiler_emails = [
+    "test@example.com",
     "kamens@gmail.com",
     "jasonrosoff@gmail.com",
     "joelburget@gmail.com",

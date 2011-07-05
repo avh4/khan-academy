@@ -68,17 +68,17 @@ class UserBadge(db.Model):
     points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
-    def get_for(user):
+    def get_for(user_data):
         query = UserBadge.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
         query.order('badge_name')
         query.order('-date')
         return query.fetch(1000)
 
     @staticmethod
-    def get_for_user_between_dts(user, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = UserBadge.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
         query.filter('date >=', dt_a)
         query.filter('date <=', dt_b)
         query.order('date')

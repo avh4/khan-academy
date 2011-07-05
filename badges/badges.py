@@ -1,6 +1,7 @@
 from google.appengine.api import memcache
 
 import util
+import models
 import models_badges
 import logging
 import phantom_users.util_notify
@@ -259,13 +260,13 @@ class Badge(object):
     #
     # Overridden by individual badge implementations which each grab various parameters from args and kwargs
     # It's ok for award_to to talk to the datastore, because it is run relatively infrequently.
-    def award_to(self, user, user_data, *args, **kwargs):
-        self.complete_award_to(user, user_data)
+    def award_to(self, user_data, *args, **kwargs):
+        self.complete_award_to(user_data)
 
     # Awards badge to user within given context
-    def complete_award_to(self, user, user_data, target_context=None, target_context_name=None):
+    def complete_award_to(self, user_data, target_context=None, target_context_name=None):
         name_with_context = self.name_with_target_context(target_context_name)
-        key_name = user.email() + ":" + name_with_context
+        key_name = user_data.key_email + ":" + name_with_context
 
         if user_data.badges is None:
             user_data.badges = []
@@ -279,16 +280,19 @@ class Badge(object):
 
             user_badge = models_badges.UserBadge(
                     key_name = key_name,
-                    user = user,
+                    user = user_data.user,
                     badge_name = self.name,
                     target_context = target_context,
                     target_context_name = target_context_name,
                     points_earned = self.points)
 
             user_badge.put()
-            # call notifications
+
+        # call notifications
         phantom_users.util_notify.update(user_data,None,threshold = False, isProf = False, gotBadge = True)
-        UserNotifier.push_badge_for_user(user, user_badge)
+        UserNotifier.push_badge_for_user(user_data, user_badge)
+
 
     def frequency(self):
         return models_badges.BadgeStat.count_by_badge_name(self.name)
+   

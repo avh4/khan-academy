@@ -23,7 +23,7 @@ class ClassTimeAnalyzer:
     def dt_to_ctz(self, dt):
         return dt + self.timezone_adjustment
 
-    def get_classtime_table(self, student_emails, dt_start_utc):
+    def get_classtime_table(self, students_data, dt_start_utc):
 
         dt_start_ctz = self.dt_to_ctz(dt_start_utc)
         dt_end_ctz = dt_start_ctz + datetime.timedelta(days = 1)
@@ -34,11 +34,10 @@ class ClassTimeAnalyzer:
 
         # Asynchronously grab all student data at once
         async_queries = []
-        for student_email in student_emails:
-            student = users.User(email=student_email)
+        for user_data_student in students_data:
 
-            query_problem_logs = ProblemLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
-            query_video_logs = VideoLog.get_for_user_between_dts(student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
+            query_problem_logs = ProblemLog.get_for_user_data_between_dts(user_data_student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
+            query_video_logs = VideoLog.get_for_user_data_between_dts(user_data_student, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
 
             async_queries.append(query_problem_logs)
             async_queries.append(query_video_logs)
@@ -46,8 +45,7 @@ class ClassTimeAnalyzer:
         # Wait for all queries to finish
         results = util.async_queries(async_queries, limit=10000)
 
-        for i, student_email in enumerate(student_emails):
-            student = users.User(email=student_email)
+        for i, user_data_student in enumerate(students_data):
 
             problem_logs = results[i * 2].get_result()
             video_logs = results[i * 2 + 1].get_result()
@@ -72,7 +70,7 @@ class ClassTimeAnalyzer:
 
                 if chunk_current is None:
                     chunk_current = ClassTimeChunk()
-                    chunk_current.student = student
+                    chunk_current.user_data_student = user_data_student
                     chunk_current.start = self.dt_to_ctz(activity.time_started())
                     chunk_current.end = self.dt_to_ctz(activity.time_ended())
 
@@ -97,9 +95,9 @@ class ClassTimeTable:
         self.dt_end_ctz = dt_end_ctz
 
     def update_student_total(self, chunk):
-        if not self.student_totals.has_key(chunk.student.email()):
-            self.student_totals[chunk.student.email()] = 0
-        self.student_totals[chunk.student.email()] += chunk.minutes_spent()
+        if not self.student_totals.has_key(chunk.user_data_student.email):
+            self.student_totals[chunk.user_data_student.email] = 0
+        self.student_totals[chunk.user_data_student.email] += chunk.minutes_spent()
 
     def get_student_total(self, student_email):
         if self.student_totals.has_key(student_email):
@@ -156,7 +154,7 @@ class ClassTimeChunk:
     SCHOOLDAY_END_HOURS = 15 # 3pm
 
     def __init__(self):
-        self.student = None
+        self.user_data_student = None
         self.start = None
         self.end = None
         self.activities = []

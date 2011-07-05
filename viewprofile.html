@@ -3,11 +3,13 @@
 {% block profile_name %}
 <span id="user-info" class="has-details">
     <img src="/images/darth.png" />
+
     {% if logged_in %}
-        <span id="name">{{ student_nickname|escape }}{% simple_student_info student_user_data %}</span>
+        <span id="name">{{ student_nickname|escape }}{% simple_student_info user_data_student %}</span>
     {% else %}
         <span id="phantom-login"><a href="{{ login_url|escape }}">Login to save your progress</a></span>
     {% endif %}
+
 </span>
 {% endblock profile_name %}
 
@@ -35,21 +37,21 @@
 {% block graph_accordion %}
     <ul id="nav-accordion">
         <li>
-            {% profile_graph_link student "Activity" "activity" selected_graph_type %}
+            {% profile_graph_link user_data_student "Activity" "activity" selected_graph_type %}
             <p class="accordion-content">
                 Shows how much work you're doing each day.
-                {% profile_graph_date_picker student "activity" %}
+                {% profile_graph_date_picker user_data_student "activity" %}
             </p>
         </li>
         <li>
-            {% profile_graph_link student "Focus" "focus" selected_graph_type %}
+            {% profile_graph_link user_data_student "Focus" "focus" selected_graph_type %}
             <p class="accordion-content">
                 Shows how well you've focused on exercises and video playlists.
-                {% profile_graph_date_picker student "focus" %}
+                {% profile_graph_date_picker user_data_student "focus" %}
             </p>
         </li>
         <li>
-            {% profile_graph_link student "Exercise Progress" "exerciseprogress" selected_graph_type %}
+            {% profile_graph_link user_data_student "Exercise Progress" "exerciseprogress" selected_graph_type %}
             <p class="accordion-content">
                 Shows you which exercises you've worked on and completed.
                 <span class="graph-options">
@@ -60,7 +62,7 @@
             </p>
         </li>
         <li>
-            {% profile_graph_link student "Exercise Progress Over Time" "exercisesovertime" selected_graph_type %}
+            {% profile_graph_link user_data_student "Exercise Progress Over Time" "exercisesovertime" selected_graph_type %}
             <p class="accordion-content">Shows how many exercises you've completed over time. </p>
         </li>
     </ul>
@@ -132,6 +134,6 @@
             </div>
         </div>
     </div>
-    {% profile_recent_activity student %}
+    {% profile_recent_activity user_data_student %}
 {% endblock profile_extended_sections %}
 

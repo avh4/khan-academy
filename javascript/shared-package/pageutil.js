@@ -766,3 +766,28 @@ var FacebookHook = {
     }
 }
 FacebookHook.init();
+
+var Throbber = {
+    jElement: null,
+
+    show: function(jTarget, fOnLeft) {
+        if (!Throbber.jElement)
+        {
+            Throbber.jElement = $("<img style='display:none;' src='/images/throbber.gif' class='throbber'/>");
+            $(document.body).append(Throbber.jElement);
+        }
+
+        if (!jTarget.length) return;
+
+        var offset = jTarget.offset();
+
+        var top = offset.top + (jTarget.height() / 2) - 8;
+        var left = fOnLeft ? (offset.left - 16 - 4) : (offset.left + jTarget.width() + 4);
+
+        Throbber.jElement.css("top", top).css("left", left).css("display", "");
+    },
+
+    hide: function() {
+        if (Throbber.jElement) Throbber.jElement.css("display", "none");
+    }
+};

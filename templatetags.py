@@ -8,6 +8,7 @@ from django.template.defaultfilters import escape, slugify
 
 from app import App
 from templatefilters import seconds_to_time_string
+from models import UserData
 import consts
 import util
 import topics_list
@@ -136,8 +137,6 @@ def simple_student_info(user_data):
     coach_count = len(user_data.coaches)
 
     return { 
-            "first_coach": user_data.coaches[0] if coach_count >= 1 else None,
-            "additional_coaches": coach_count - 1 if coach_count > 1 else None,
             "member_for": seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
            }
 
@@ -242,10 +241,10 @@ def static_url(relative_url):
 
 @register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
 def empty_class_instructions(class_is_empty=True):
-    user = util.get_current_user()
+    user_data = UserData.current()
     coach_email = "Not signed in. Please sign in to see your Coach ID."
-    if user:
-        coach_email = user.email()
+    if user_data:
+        coach_email = user_data.email
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 

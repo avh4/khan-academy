@@ -3,6 +3,7 @@ import re
 from google.appengine.ext import webapp
 from django import template
 
+import models
 import models_discussion
 from comments import video_comments_context
 from qa import video_qa_context
@@ -15,13 +16,13 @@ register = webapp.template.create_template_register()
 
 @register.inclusion_tag("discussion/video_comments.html")
 def video_comments(video, playlist, page=0):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
     return {
             "video": video,
             "playlist": playlist,
             "page": 0,
-            "user": user,
-            "logged_in": user and not util.is_phantom_user(user),
+            "logged_in": user_data and not user_data.is_phantom,
+            "user_data": user_data,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             }
 
@@ -43,8 +44,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "page": page,
             "qa_expand_id": qa_expand_id,
             "sort_order": sort_order,
-            "user": user,
-            "logged_in": user and not util.is_phantom_user(user),
+            "logged_in": user_data and not user_data.is_phantom,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
@@ -55,7 +55,7 @@ def signature(target=None, verb=None):
                 "target": target, 
                 "verb": verb, 
                 "is_mod": is_current_user_moderator(),
-                "is_author": target and target.author == util.get_current_user(),
+                "is_author": target and target.authored_by(models.UserData.current()),
                 "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
             }
 

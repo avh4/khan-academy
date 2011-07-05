@@ -14,6 +14,7 @@ from app import App
 import layer_cache
 import request_cache
 import util
+import models
 from cookie_util import set_request_cookie
 
 PHANTOM_ID_EMAIL_PREFIX = "http://nouserid.khanacademy.org/"
@@ -76,9 +77,9 @@ def disallow_phantoms(method, redirect_to='/login'):
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        user = util.get_current_user()
+        user_data = models.UserData.current()
 
-        if util.is_phantom_user(user):
+        if user_data and user_data.is_phantom:
             self.redirect(redirect_to)
         else:
             return method(self, *args, **kwargs)

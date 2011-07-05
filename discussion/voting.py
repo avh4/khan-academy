@@ -29,14 +29,12 @@ class VotingSortOrder:
 
 class UpdateQASort(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
+        user_data = UserData.current()
         sort = self.request_int("sort", default=VotingSortOrder.HighestPointsFirst)
 
-        if user:
-            user_data = UserData.get_or_insert_for(user)
-            if user_data:
-                user_data.question_sort_order = sort
-                user_data.put()
+        if user_data:
+            user_data.question_sort_order = sort
+            user_data.put()
 
         readable_id = self.request_string("readable_id", default="")
         playlist_title = self.request_string("playlist_title", default="")
@@ -49,11 +47,7 @@ class UpdateQASort(request_handler.RequestHandler):
 class VoteEntity(request_handler.RequestHandler):
     def post(self):
         # You have to be logged in to vote
-        user = util.get_current_user()
-        if not user:
-            return
-
-        user_data = UserData.get_or_insert_for(user)
+        user_data = UserData.current()
         if not user_data:
             return
 
@@ -69,7 +63,7 @@ class VoteEntity(request_handler.RequestHandler):
         entity_key = self.request_string("entity_key", default="")
         if entity_key:
             entity = db.get(entity_key)
-            if entity and entity.author.email() == user.email():
+            if entity and entity.authored_by(user_data):
                 self.render_json({"error": "You cannot vote for your own posts."})
                 return
 
@@ -85,7 +79,7 @@ class VoteEntity(request_handler.RequestHandler):
         # the taskqueue will just retry w/ exponential backoff.
         taskqueue.add(url='/admin/discussion/finishvoteentity', queue_name='voting-queue', 
                 params={
-                    "email": user.email(),
+                    "email": user_data.email,
                     "vote_type": self.request_int("vote_type", default=FeedbackVote.ABSTAIN),
                     "entity_key": entity_key
                 }
@@ -94,18 +88,15 @@ class VoteEntity(request_handler.RequestHandler):
 class FinishVoteEntity(request_handler.RequestHandler):
     def post(self):
 
-        email = self.request_string("email", default="")
-        if not email:
-            return
+        user_data = self.request_user_data("email")
 
-        user = users.User(email)
         vote_type = self.request_int("vote_type", default=FeedbackVote.ABSTAIN)
 
         key = self.request_string("entity_key", default="")
         if key:
             entity = db.get(key)
             if entity:
-                entity.add_vote_by(vote_type, user)
+                entity.add_vote_by(vote_type, user_data)
 
 class StartNewVoteMapReduce(request_handler.RequestHandler):
 

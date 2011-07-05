@@ -10,8 +10,8 @@ from badges import badges
 def update(user_data,user_exercise,threshold = False, isProf = False, gotBadge = False):
     if user_data == None:
         return False
-    user = user_data.user
-    if not util.is_phantom_user(user):
+        
+    if not user_data.is_phantom:
         return False
 
     numquest = None

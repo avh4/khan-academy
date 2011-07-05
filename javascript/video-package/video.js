@@ -71,7 +71,7 @@ var Video = {
         $('.mirosubs-videoTab').hide();
         $('.subtitles-warning').hide();
         $('.youtube-video').css('marginBottom', '0px');
-        Discussion.hideThrobber();
+        Throbber.hide();
     },
 
     showSubtitles: function() {
@@ -84,7 +84,7 @@ var Video = {
         if ($('.mirosubs-videoTab').length == 0)
         {
             setTimeout(function() {
-                Discussion.showThrobber($(".subtitles-warning"), true);
+                Throbber.show($(".subtitles-warning"), true);
             }, 1);
 
             $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', function() { 

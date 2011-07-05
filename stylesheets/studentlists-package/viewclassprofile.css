@@ -1,0 +1,112 @@
+#profile-header {
+    min-height: 50px;
+}
+#user-info {
+    margin-top: 23px;
+}
+#studentlists_dropdown {
+    text-indent: 0;
+    margin-left: -15px;
+}
+#studentlists_dropdown .ui-button {
+    display: block;
+}
+#studentlists_dropdown ol {
+    max-height: 20em;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#studentlists_menu {
+    position: relative;
+}
+#studentlists_menu ol {
+    z-index: 2;
+}
+#studentlists_dropdown li {
+    white-space: nowrap;
+    font-weight: normal;
+}
+#studentlists_dropdown li[data-selected=selected] a {
+    font-weight: bold;
+}
+#studentlists_dropdown .ui-button-text,
+#studentlists_dropdown .ui-menu-item a {
+    font-weight: normal;
+    line-height: inherit;
+    padding: 0px 25px 0px 1ex;
+}
+#studentlists_dropdown .ui-menu-item a {
+    padding: 1px 25px 1px 10px;
+    margin-right: 0px;
+    margin-left: 0px;
+    text-transform: none;
+}
+#studentlists_dropdown a:link:hover,
+#studentlists_dropdown a:link:focus,
+#studentlists_dropdown a:visited:hover,
+#studentlists_dropdown a:visited:focus {
+    color: #DD6900;
+}
+
+#page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:before {
+    top: 23px;
+    left: 50px;
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+}
+#page_sub_nav .breadcrumbs_nav.class-stats-nav a.selected:after {
+    top: 24px;
+    left: 50px;
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 5px;
+}
+
+#high-level-class-stats img {
+    width: 50px;
+    height: 50px;
+    vertical-align: middle;
+    position: relative;
+    top: -4px;
+}
+
+#high-level-class-stats > span {
+    display: inline-block;
+    margin-left: 10px;
+}
+#high-level-class-stats .count {
+    display: inline-block;
+}
+
+    #high-level-class-stats span > span.count {
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 18px;
+        position: relative;
+        top: 10px;
+    }
+    #high-level-class-stats span > span.label {
+        font-size: 11px;
+        font-style: italic;
+        color: #666;
+        font-weight: normal;
+    }
+#high-level-class-stats #energy-points {
+    height: 51px;
+    position: relative;
+    top: 12px;
+}
+    #high-level-class-stats #energy-points .energy-points-badge {
+        display: inline-block;
+        float:none;
+        font-size: 16px;
+        min-width: 90px;
+        padding: 2px 5px 4px;
+    }
+    #high-level-class-stats #energy-points .label {
+        display: inline-block;
+        min-width: 90px;
+        position: relative;
+        top: -1px;
+    }
