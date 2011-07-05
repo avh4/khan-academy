@@ -619,12 +619,8 @@ var Notifications = {
             .css("margin-top","0px");
         
         $.post("/notifierclose"); 
-    },
-
-  
+    }
 }
-
-
 
 var Timezone = {
     tz_offset: null,
