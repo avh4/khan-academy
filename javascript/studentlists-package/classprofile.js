@@ -63,8 +63,8 @@ var ClassProfile = {
         $dropdown.hide();
 
         // update rest of page
-        $('#count_students').html(student_list.nstudents);
-        $('.energy-points-badge').html(student_list.class_points);
+        $('#count_students').html(addCommas(student_list.nstudents));
+        $('.energy-points-badge').html(addCommas(student_list.class_points));
         // url of currently selected graph
         var url = $("#nav-accordion .ui-state-active").attr('href');
         Profile.loadGraphStudentListAware(url);
