@@ -290,7 +290,7 @@ class Badge(object):
 
         # call notifications
         phantom_users.util_notify.update(user_data,None,threshold = False, isProf = False, gotBadge = True)
-        UserNotifier.push_badge_for_user(user_data, user_badge)
+        UserNotifier.push_badge_for_user_data(user_data, user_badge)
 
 
     def frequency(self):

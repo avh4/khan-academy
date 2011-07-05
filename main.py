@@ -64,7 +64,7 @@ from templatetags import streak_bar, exercise_message, exercise_icon, user_point
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom
-from phantom_users.cloner import Clone, TransferHandler
+from phantom_users.cloner import Clone#, TransferHandler
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -883,6 +883,7 @@ class MobileSite(request_handler.RequestHandler):
 
 class ViewHomePage(request_handler.RequestHandler):
 
+    @create_phantom
     def get(self):
 
         thumbnail_link_sets = [
@@ -1518,7 +1519,7 @@ def main():
         
         ('/notifierclose', util_notify.ToggleNotify),
         ('/transferaccount', Clone),
-        ('/newaccount', TransferHandler),
+        #('/newaccount', TransferHandler),
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),

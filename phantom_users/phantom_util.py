@@ -51,13 +51,15 @@ def create_phantom(method):
     - Only use on get methods where a phantom user should be created.
     '''
 
+    import models
+
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        user_data = UserData.current()
+        user_data = models.UserData.current()
 
         if not user_data:
             user = create_phantom_user()
-            user_data = UserData.insert_for(user.email())
+            user_data = models.UserData.insert_for(user.email())
         
             # we set a 20 digit random string as the cookie, not the entire fake email
             cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
@@ -76,6 +78,7 @@ def disallow_phantoms(method, redirect_to='/login'):
     '''Decorator used to redirect phantom users.'''
 
     import models
+
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         user_data = models.UserData.current()

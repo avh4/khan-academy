@@ -9,7 +9,7 @@ register = webapp.template.create_template_register()
 
 @register.inclusion_tag(("../badges/notifications.html", "badges/notifications.html"))
 def badge_notifications():
-    user_badges = UserNotifier.pop_for_current_user()
+    user_badges = UserNotifier.pop_for_current_user_data()
     
     if len(user_badges) > 0:
         user_badges = user_badges[0]
