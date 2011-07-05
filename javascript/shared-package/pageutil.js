@@ -350,6 +350,31 @@ var VideoStats = {
         this.dtSinceSave = new Date();
     },
 
+    /* Use qtip2 (http://craigsworks.com/projects/qtip2/) to create a tooltip
+     * that looks like the ones on youtube.
+     *
+     * Example: 
+     * VideoStats.tooltip('#points-badge-hover', '0 of 500 points');
+     */
+    tooltip: function(selector, content) {
+        $(selector).qtip({
+            content: {
+                text: content
+            },
+            style: {
+                classes: 'ui-tooltip-youtube'
+            },
+            position: {
+                my: 'top center',
+                at: 'bottom center'
+            },
+            hide: {
+                fixed: true,
+                delay: 150
+            }
+        });
+    },
+
     finishSave: function(data, percent) {
         VideoStats.fSaving = false;
         VideoStats.dPercentLastSaved = percent;
@@ -366,22 +391,7 @@ var VideoStats = {
             $("#user-points-container").html(dict_json.user_points_html);
 
             // Replace the old tooltip with an updated one.
-            $('#points-badge-hover').qtip({
-                content: {
-                    text: jelPoints.data('title')
-                },
-                style: {
-                    classes: 'ui-tooltip-youtube'
-                },
-                position: {
-                    my: 'top center',
-                    at: 'bottom center'
-                },
-                hide: {
-                    fixed: true,
-                    delay: 150
-                }
-            });
+            VideoStats.tooltip('#points-badge-hover', jelPoints.data('title'));
         }
     },
 
