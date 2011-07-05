@@ -64,7 +64,7 @@ from templatetags import streak_bar, exercise_message, exercise_icon, user_point
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom
-from phantom_users.cloner import Clone#, TransferHandler
+from phantom_users.cloner import Clone
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -1301,26 +1301,30 @@ class PostLogin(request_handler.RequestHandler):
 
         # Immediately after login we make sure this user has a UserData entry, 
         # also delete phantom cookies
-        user_data = UserData.current()
-        if not user_data:
-            self.redirect(cont)
-            return
+        
 
         # If new user is new, 0 points, migrate data
-        # phantom_user = util.get_phantom_user_from_cookies()
-        # if phantom_user:
-        #     phantom_data = UserData.get_or_insert_for(phantom_user)
-        # else:
-        #     self.delete_cookie('ureg_id')
-        #     self.redirect(cont)
-        #     return
-        #     
-        # if user_data.points == 0 and phantom_data.points != 0:
-        #     logging.info("New Account: %s", user.email() )
-        #     self.redirect("/newaccount?continue=%s" % cont)
-        # else:
-        #     self.delete_cookie('ureg_id')
-        #     self.redirect(cont)
+        phantom_user = util.get_phantom_user_from_cookies()
+        user_data = UserData.current()
+        if phantom_user:
+            email = phantom_user.email()
+            phantom_data = UserData.get_from_user_input_email(email) or \
+                    UserData.get_from_db_key_email(email) or \
+                    UserData.insert_for(email)
+        else:
+            self.delete_cookie('ureg_id')
+            self.redirect(cont)
+            return
+             
+        if user_data.points == 0 and phantom_data.points != 0:
+            logging.info("New Account: %s", (user_data.current()).email() )
+            phantom_data.current_user = user_data.current_user
+            phantom_data.put()
+            self.delete_cookie('ureg_id')
+            self.redirect("/newaccount?continue=%s" % cont)
+        else:
+            self.delete_cookie('ureg_id')
+            self.redirect(cont)
 
 
 class Logout(request_handler.RequestHandler):
@@ -1518,8 +1522,7 @@ def main():
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
         
         ('/notifierclose', util_notify.ToggleNotify),
-        ('/transferaccount', Clone),
-        #('/newaccount', TransferHandler),
+        ('/newaccount', Clone),
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
