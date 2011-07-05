@@ -91,7 +91,6 @@
 .unit-rating li.streak-icon, 
 .unit-rating li.current-label,
 .unit-rating li.level-label {
-    text-shadow: #000 -1px -1px 0;
     color: white;
     font-weight: bold;
     font-size: 14px;

@@ -130,22 +130,7 @@
                  '<a href="{{ login_url|escape }}">Sign in</a>'))
              .removeAttr('title');
 
-      $('#points-badge-hover').qtip({ // Create the tooltip
-          content: {
-              text: $points.data('title'),
-          },
-          style: {
-              classes: 'ui-tooltip-youtube',
-          },
-          position: {
-              my: 'top center',
-              at: 'bottom center',
-          },
-          hide: {
-              fixed: true,
-              delay: 150,
-          }
-      });
+      VideoStats.tooltip('#points-badge-hover', $points.data('title'));
     </script>
     <script type="text/javascript">document.write(unescape('%3Cscript type="text/javascript" src="'+document.location.protocol+'//dnn506yrbagrg.cloudfront.net/pages/scripts/0011/5719.js"%3E%3C%2Fscript%3E'))</script>
 {% endblock bottompagescript %}
