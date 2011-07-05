@@ -36,7 +36,7 @@ class ViewCoaches(RequestHandler):
             coach_requests = CoachRequest.get_for_student(user_data).fetch(1000)
 
             template_values = {
-                        "coaches": user_data.coaches,
+                        "coach_emails": user_data.coach_emails(),
                         "invalid_coach": invalid_coach,
                         "coach_requests": coach_requests,
                         "student_id": user_data.email,

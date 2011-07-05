@@ -653,6 +653,14 @@ class UserData(db.Model):
         		    students_data.append(student_data)
         return students_data
 
+    def coach_emails(self):
+        emails = []
+        for key_email in self.coaches:
+            user_data_coach = UserData.get_from_db_key_email(key_email)
+            if user_data_coach:
+                emails.append(user_data_coach.email)
+        return emails
+
     def is_coached_by(self, user_data_coach):
         return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
