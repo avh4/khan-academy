@@ -287,7 +287,7 @@ class UserExercise(db.Model):
     def get_for_user_data(user_data):
         query = UserExercise.all()
         query.filter('user =', user_data.user)
-        return query.fetch(1000)
+        return query
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda user_data: "request_cache_user_exercise_%s" % user_data.key_email)
@@ -295,7 +295,7 @@ class UserExercise(db.Model):
         user_exercises_key = UserExercise.get_key_for_email(user_data.key_email)
         user_exercises = memcache.get(user_exercises_key, namespace=App.version)
         if user_exercises is None:
-            user_exercises = UserExercise.get_for_user_data(user_data)
+            user_exercises = UserExercise.get_for_user_data(user_data).fetch(1000)
             memcache.set(user_exercises_key, user_exercises, namespace=App.version)
         return user_exercises
 

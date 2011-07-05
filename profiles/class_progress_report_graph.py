@@ -9,17 +9,20 @@ import util
 def get_class_exercises(list_student_data):
 
     class_exercise_dict = {}
+    async_queries = []
 
     for user_data_student in list_student_data:
+        class_exercise_dict[user_data_student.email] = {"user_data_student": user_data_student}
+        async_queries.append(models.UserExercise.get_for_user_data(user_data_student))
 
-        student_email = user_data_student.email
+    results = util.async_queries(async_queries)
 
-        class_exercise_dict[student_email] = {"user_data_student": user_data_student}
+    for i, user_data_student in enumerate(list_student_data):
 
-        user_exercises = models.UserExercise.get_for_user_data_use_cache(user_data_student)
+        user_exercises = results[i].get_result()
         for user_exercise in user_exercises:
-            if user_exercise.exercise not in class_exercise_dict[student_email]:
-                class_exercise_dict[student_email][user_exercise.exercise] = user_exercise
+            if user_exercise.exercise not in class_exercise_dict[user_data_student.email]:
+                class_exercise_dict[user_data_student.email][user_exercise.exercise] = user_exercise
 
     return class_exercise_dict
 
