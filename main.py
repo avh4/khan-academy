@@ -1301,8 +1301,6 @@ class PostLogin(request_handler.RequestHandler):
 
         # Immediately after login we make sure this user has a UserData entry, 
         # also delete phantom cookies
-        
-
         # If new user is new, 0 points, migrate data
         phantom_user = util.get_phantom_user_from_cookies()
         user_data = UserData.current()
@@ -1317,15 +1315,21 @@ class PostLogin(request_handler.RequestHandler):
             return
              
         if user_data.points == 0 and phantom_data.points != 0:
-            logging.info("New Account: %s", (user_data.current()).email() )
+            logging.critical("New Email: %s" % user_data.email)
+            logging.critical("Phantom EMail: %s" % phantom_data.email)
+            logging.info("New Account: %s", user_data.email )
+            logging.critical("Phantom User: %s" % phantom_data.current_user)
+            logging.critical("New Account: %s", user_data.current_user )
             phantom_data.current_user = user_data.current_user
+            logging.critical("Test1: %s", phantom_data.current_user )
             phantom_data.put()
+            user_data.delete()
+            logging.critical("Test2: %s", phantom_data.current_user )
             self.delete_cookie('ureg_id')
             self.redirect("/newaccount?continue=%s" % cont)
         else:
             self.delete_cookie('ureg_id')
             self.redirect(cont)
-
 
 class Logout(request_handler.RequestHandler):
     def get(self):
