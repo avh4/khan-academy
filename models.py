@@ -622,7 +622,7 @@ class UserData(db.Model):
         
     def get_exercise_states(self, exercise, user_exercise, current_time):
         phantom = exercise.phantom = util.is_phantom_user(self.user)
-        proficient = exercise.proficient = self.is_proficient_at(exercise.name, self.user)
+        proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
         struggling = UserExercise.is_struggling_with(user_exercise, exercise)

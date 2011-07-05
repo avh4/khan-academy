@@ -163,7 +163,7 @@ class ViewExercise(request_handler.RequestHandler):
             'exercise_points': exercise_points,
             'coaches': user_data.coaches,
             'exercise_states': exercise_states,
-            'cookiename': user.nickname().replace('@', 'at'),
+            'cookiename': user_data.nickname.replace('@', 'at'),
             'key': user_exercise.key(),
             'exercise': exercise,
             'exid': exid,

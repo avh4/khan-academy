@@ -35,8 +35,6 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
     if sort_override >= 0:
         sort_order = sort_override
 
-    user = util.get_current_user()
-
     return {
             "user_data": user_data,
             "video": video,
