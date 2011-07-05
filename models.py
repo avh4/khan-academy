@@ -504,6 +504,7 @@ class UserData(db.Model):
         return None
 
     @staticmethod
+    @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)
     def get_from_user_input_email(email):
         if not email:
             return None
