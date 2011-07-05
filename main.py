@@ -105,7 +105,6 @@ class KillLiveAssociations(request_handler.RequestHandler):
         db.put(all_video_playlists)
 
 class ViewExercise(request_handler.RequestHandler):
-
     @create_phantom
     def get(self):
         user_data = UserData.current()
@@ -120,7 +119,7 @@ class ViewExercise(request_handler.RequestHandler):
 
         if not exercise: 
             raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
-
+        
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
@@ -1298,7 +1297,6 @@ class MobileOAuthLogin(request_handler.RequestHandler):
 class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
-
         # Immediately after login we make sure this user has a UserData entry, 
         # also delete phantom cookies
         # If new user is new, 0 points, migrate data
@@ -1315,16 +1313,10 @@ class PostLogin(request_handler.RequestHandler):
             return
              
         if user_data.points == 0 and phantom_data.points != 0:
-            logging.critical("New Email: %s" % user_data.email)
-            logging.critical("Phantom EMail: %s" % phantom_data.email)
             logging.info("New Account: %s", user_data.email )
-            logging.critical("Phantom User: %s" % phantom_data.current_user)
-            logging.critical("New Account: %s", user_data.current_user )
             phantom_data.current_user = user_data.current_user
-            logging.critical("Test1: %s", phantom_data.current_user )
             phantom_data.put()
             user_data.delete()
-            logging.critical("Test2: %s", phantom_data.current_user )
             self.delete_cookie('ureg_id')
             self.redirect("/newaccount?continue=%s" % cont)
         else:
