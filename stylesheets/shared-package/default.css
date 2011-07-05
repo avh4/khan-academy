@@ -2954,7 +2954,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar-close{
     float:right;
-    position:relative;
+    position:absolute;
     top:5px;
     right:20px;
 }
