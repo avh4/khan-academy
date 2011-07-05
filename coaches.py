@@ -125,7 +125,6 @@ class RequestStudent(RequestHandler):
     def post(self):
         user_data = UserData.current()
 
-
         if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
@@ -148,7 +147,6 @@ class RequestStudent(RequestHandler):
 class AcceptCoach(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
     @disallow_phantoms
-
     def get(self):
         user_data = UserData.current()
 
@@ -177,7 +175,6 @@ class AcceptCoach(RequestHandler):
                     user_data_student.coaches.append(user_data_coach.key_email)
                     user_data_student.put()
 
-
         if not self.is_ajax_request():
             self.redirect("/coaches")
 
@@ -203,10 +200,8 @@ class UnregisterCoach(RequestHandler):
 
         self.redirect("/coaches") 
 
-
 class UnregisterStudent(RequestHandler):
     @disallow_phantoms
-
     def get(self):
         user_data = UserData.current()
 
@@ -304,4 +299,3 @@ class ViewCharts(RequestHandler):
     def get(self):
         self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" % 
                 (ExerciseProblemsGraph.GRAPH_TYPE, self.request_string("student_email"), self.request_string("exercise_name")))
-

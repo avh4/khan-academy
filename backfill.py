@@ -45,6 +45,3 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
                 queue_name = "backfill-mapreduce-queue",
                 )
         self.response.out.write("OK: " + str(mapreduce_id))
-
-
-

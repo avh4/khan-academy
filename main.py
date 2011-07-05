@@ -182,7 +182,6 @@ class ViewExercise(request_handler.RequestHandler):
             }
         template_file = exercise_non_summative.name + '.html'
         self.render_template(template_file, template_values)
-
             
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -194,7 +193,6 @@ def get_mangled_playlist_name(playlist_name):
     return playlist_name
 
 class ViewVideo(request_handler.RequestHandler):
-
     @create_phantom
     def get(self):
 
@@ -465,13 +463,11 @@ class ViewAllExercises(request_handler.RequestHandler):
 
     @create_phantom
     def get(self):
-
         user_data = UserData.current()
         
         ex_graph = ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
-
 
         recent_exercises = ex_graph.get_recent_exercises()
         review_exercises = ex_graph.get_review_exercises(self.get_time())
@@ -543,7 +539,6 @@ class RegisterAnswer(request_handler.RequestHandler):
         self.get()
 
     def get(self):
-
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
 

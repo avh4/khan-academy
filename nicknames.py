@@ -14,4 +14,3 @@ def get_nickname_for(user):
         nickname = nickname[0].upper() + nickname[1:]
 
     return nickname
-

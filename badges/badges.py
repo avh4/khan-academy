@@ -292,7 +292,5 @@ class Badge(object):
         phantom_users.util_notify.update(user_data,None,threshold = False, isProf = False, gotBadge = True)
         UserNotifier.push_badge_for_user_data(user_data, user_badge)
 
-
     def frequency(self):
         return models_badges.BadgeStat.count_by_badge_name(self.name)
-   

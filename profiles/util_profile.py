@@ -37,7 +37,6 @@ def get_coach_student_and_student_list(request_handler):
     student_data = get_student(coach_data, request_handler)
     return (coach_data, student_data, student_list)
 
-
 class ViewClassProfile(request_handler.RequestHandler):
     @staticmethod
     def class_points(students):
@@ -115,8 +114,6 @@ class ViewProfile(request_handler.RequestHandler):
     def get(self):
         user_data_student = models.UserData.current()
 
-
-
         user_data_override = self.request_user_data("student_email")
         if user_data_override and user_data_override.key_email != user_data_student.key_email:
             if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
@@ -130,7 +127,6 @@ class ViewProfile(request_handler.RequestHandler):
         selected_graph_type = self.request_string("selected_graph_type") or ActivityGraph.GRAPH_TYPE
         initial_graph_url = "/profile/graph/%s?student_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_student.email), urllib.unquote(self.request_string("graph_query_params", default="")))
         tz_offset = self.request_int("tz_offset", default=0)
-
 
         template_values = {
             'student_nickname': user_data_student.nickname,
@@ -189,7 +185,6 @@ class ProfileGraph(request_handler.RequestHandler):
 
     def get_profile_target_user_data(self):
         user_data_student = models.UserData.current()
-
 
         if user_data_student:
             user_data_override = self.request_user_data("student_email")

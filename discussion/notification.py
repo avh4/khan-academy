@@ -146,5 +146,3 @@ def clear_question_answers_for_current_user(s_question_id):
 
     user_data.count_feedback_notification = -1
     user_data.put()
-
-

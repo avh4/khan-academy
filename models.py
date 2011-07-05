@@ -424,7 +424,6 @@ class CoachRequest(db.Model):
     def get_for_coach(user_data_coach):
         return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
         
-        
 class UserMigration(db.Model):
     previous_user = db.UserProperty()
     current_user = db.UserProperty()
@@ -433,8 +432,6 @@ class UserMigration(db.Model):
     @staticmethod
     def key_for(previous, current):
         return "%s_migrated_to_%s" % (previous.email(), current.email())
-
-
 
     @staticmethod
     def get_for(previous, current):
@@ -457,7 +454,6 @@ class UserMigration(db.Model):
         return UserMigration.all().filter("current_user = ", current)
 
 class StudentList(db.Model):
-
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
 
