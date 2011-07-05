@@ -89,14 +89,14 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
             var jelMenu = $(autocompleteWidget.data("autocomplete").menu.element);
             var jelInput = $(this);
 
-            var pxRightMenu = jelMenu.offset().left + jelMenu.outerWidth();
-            var pxRightInput = jelInput.offset().left + jelInput.outerWidth();
+            var pxRightMenu = jelMenu.offset().right + jelMenu.outerWidth();
+            var pxRightInput = jelInput.offset().right + jelInput.outerWidth();
 
             if (pxRightMenu > pxRightInput)
             {
                 // Keep right side of search input and autocomplete menu aligned
                 jelMenu.offset({
-                                    left: pxRightInput - jelMenu.outerWidth(), 
+                                    right: pxRightInput - jelMenu.outerWidth(), 
                                     top: jelMenu.offset().top
                                 });
             }

@@ -590,7 +590,7 @@ footer {
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-bottom: 6px solid #C6D1AD;
-        left: 21px;
+        left: 27px;
         position: absolute;
         top: 22px;
     }
@@ -602,10 +602,10 @@ footer {
         #sitewide-navigation a.coach-link.selected:before {left: 23px;}
         #sitewide-navigation a.contribute-link.selected:before {left: 40px;}
         #sitewide-navigation a.about-link.selected:before {left: 23px;}
-        #page_sub_nav .breadcrumbs_nav a#faq.selected:before {left: 6px;}
-        #page_sub_nav .breadcrumbs_nav a#getting-started.selected:before {left: 50px;}
-        #page_sub_nav .breadcrumbs_nav a#blog.selected:before {left: 11px;}
-        #page_sub_nav .breadcrumbs_nav a#the-team.selected:before {left: 25px;}
+        #page_sub_nav .breadcrumbs_nav a#faq.selected:before {left: 9px;}
+        #page_sub_nav .breadcrumbs_nav a#getting-started.selected:before {left: 54px;}
+        #page_sub_nav .breadcrumbs_nav a#blog.selected:before {left: 14px;}
+        #page_sub_nav .breadcrumbs_nav a#the-team.selected:before {left: 31px;}
         #page_sub_nav .breadcrumbs_nav.video-nav span.selected:before { 
             top: 24px;
             left: 20px;
@@ -625,7 +625,7 @@ footer {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-bottom: 5px solid #fff;
-    left: 22px;
+    left: 28px;
     position: absolute;
     top: 23px;
 }
@@ -637,10 +637,10 @@ footer {
     #sitewide-navigation a.coach-link.selected:after {left: 24px;}
     #sitewide-navigation a.contribute-link.selected:after {left: 41px;}
     #sitewide-navigation a.about-link.selected:after {left: 24px;}
-    #page_sub_nav .breadcrumbs_nav a#faq.selected:after {left: 7px;}
-    #page_sub_nav .breadcrumbs_nav a#getting-started.selected:after {left: 51px;}
-    #page_sub_nav .breadcrumbs_nav a#blog.selected:after {left: 12px;}
-    #page_sub_nav .breadcrumbs_nav a#the-team.selected:after {left: 26px;}
+    #page_sub_nav .breadcrumbs_nav a#faq.selected:after {left: 10px;}
+    #page_sub_nav .breadcrumbs_nav a#getting-started.selected:after {left: 55px;}
+    #page_sub_nav .breadcrumbs_nav a#blog.selected:after {left: 15px;}
+    #page_sub_nav .breadcrumbs_nav a#the-team.selected:after {left: 32px;}
     #page_sub_nav .breadcrumbs_nav.video-nav span.selected:after { 
         top: 25px;
         left: 20px;
@@ -1387,7 +1387,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     width: 320px;
     height: 79px;
     cursor: pointer;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
