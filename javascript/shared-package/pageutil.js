@@ -368,18 +368,18 @@ var VideoStats = {
             // Replace the old tooltip with an updated one.
             $('#points-badge-hover').qtip({
                 content: {
-                    text: jelPoints.data('title'),
+                    text: jelPoints.data('title')
                 },
                 style: {
-                    classes: 'ui-tooltip-youtube',
+                    classes: 'ui-tooltip-youtube'
                 },
                 position: {
                     my: 'top center',
-                    at: 'bottom center',
+                    at: 'bottom center'
                 },
                 hide: {
                     fixed: true,
-                    delay: 150,
+                    delay: 150
                 }
             });
         }
