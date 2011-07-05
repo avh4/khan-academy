@@ -1,22 +1,22 @@
 
-from oauth_provider.models import Consumer
+from oauth_provider.models_oauth import Consumer
 from oauth_provider.consts import ACCEPTED
 
 import request_handler
+import models
 import util
 
 class Register(request_handler.RequestHandler):
     def get(self):
-        user = util.get_current_user()
-        if user:
+        if models.UserData.current():
             self.render_template("oauth_provider/register_app.html", {})
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
     def post(self):
 
-        user = util.get_current_user()
-        if user:
+        user_data = models.UserData.current()
+        if user_data:
             name = self.request_string("name", default="").strip()
             description = self.request_string("description", default="").strip()
             website = self.request_string("website", default="").strip()
@@ -60,7 +60,7 @@ class Register(request_handler.RequestHandler):
                         name = name,
                         description = description,
                         website = website,
-                        user = user,
+                        user = user_data.user,
                         status = ACCEPTED,
                         phone = phone,
                         company = company,

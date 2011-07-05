@@ -37,11 +37,10 @@ class ModeratorList(request_handler.RequestHandler):
         if not users.is_current_user_admin():
             return
 
-        user = users.User(self.request.get("user"))
-        user_data = models.UserData.get_for(user)
+        user_data = self.request_user_data("user")
 
-        if user_data is not None:
-            user_data.moderator = (self.request.get("mod") == "1")
+        if user_data:
+            user_data.moderator = self.request_bool("mod")
             db.put(user_data)
 
         self.redirect("/discussion/moderatorlist")
@@ -108,10 +107,7 @@ class PageQuestions(request_handler.RequestHandler):
         video = db.get(video_key)
         playlist = db.get(playlist_key)
 
-        user_data = None
-        user = util.get_current_user()
-        if user:
-            user_data = models.UserData.get_for(user)
+        user_data = models.UserData.current()
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
@@ -130,9 +126,9 @@ class AddAnswer(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user_data = models.UserData.current()
 
-        if not user:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
@@ -151,7 +147,7 @@ class AddAnswer(request_handler.RequestHandler):
         if answer_text and video and question:
 
             answer = models_discussion.Feedback()
-            answer.author = user
+            answer.set_author(user_data)
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
             answer.types = [models_discussion.FeedbackType.Answer]
@@ -170,13 +166,13 @@ class Answers(request_handler.RequestHandler):
 
     def get(self):
 
-        user = util.get_current_user()
+        user_data = models.UserData.current()
         question_key = self.request.get("question_key")
         question = db.get(question_key)
 
         if question:
             video = question.first_target()
-            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+            dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
 
             answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
             answers = voting.VotingSortOrder.sort(answers)
@@ -198,9 +194,9 @@ class AddQuestion(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
+        user_data = models.UserData.current()
 
-        if not user:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
@@ -220,7 +216,7 @@ class AddQuestion(request_handler.RequestHandler):
                 question_text = question_text[0:500] # max question length, also limited by client
 
             question = models_discussion.Feedback()
-            question.author = user
+            question.set_author(user_data)
             question.content = question_text
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
@@ -234,8 +230,8 @@ class EditEntity(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
-        if not user:
+        user_data = models.UserData.current()
+        if not user_data:
             return
 
         key = self.request.get("entity_key")
@@ -245,7 +241,7 @@ class EditEntity(request_handler.RequestHandler):
         if key and text:
             feedback = db.get(key)
             if feedback:
-                if feedback.author == user or util_discussion.is_current_user_moderator():
+                if feedback.authored_by(user_data) or util_discussion.is_current_user_moderator():
 
                     feedback.content = text
                     feedback.put()
@@ -267,29 +263,29 @@ class EditEntity(request_handler.RequestHandler):
 class VoteEntity(request_handler.RequestHandler):
     def post(self):
         # You have to be logged in to vote
-        user = util.get_current_user()
-        if not user:
+        user_data = models.UserData.current()
+        if not user_data:
             return
 
         key = self.request_string("entity_key", default="")
         flag = self.request_string("flag", default="")
         if key and models_discussion.FeedbackFlag.is_valid(flag):
             entity = db.get(key)
-            if entity and entity.add_flag_by(flag, user):
+            if entity and entity.add_flag_by(flag, user_data):
                 entity.put()
 
 class FlagEntity(request_handler.RequestHandler):
     def post(self):
         # You have to at least be logged in to flag
-        user = util.get_current_user()
-        if not user:
+        user_data = models.UserData.current()
+        if not user_data:
             return
 
         key = self.request_string("entity_key", default="")
         flag = self.request_string("flag", default="")
         if key and models_discussion.FeedbackFlag.is_valid(flag):
             entity = db.get(key)
-            if entity and entity.add_flag_by(flag, user):
+            if entity and entity.add_flag_by(flag, user_data):
                 entity.put()
 
 class ClearFlags(request_handler.RequestHandler):
@@ -332,8 +328,8 @@ class DeleteEntity(request_handler.RequestHandler):
 
     def post(self):
 
-        user = util.get_current_user()
-        if not user:
+        user_data = models.UserData.current()
+        if not user_data:
             return
 
         key = self.request.get("entity_key")
@@ -341,7 +337,7 @@ class DeleteEntity(request_handler.RequestHandler):
             entity = db.get(key)
             if entity:
                 # Must be a moderator or author of entity to delete
-                if entity.author == user or util_discussion.is_current_user_moderator():
+                if entity.authored_by(user_data) or util_discussion.is_current_user_moderator():
                     entity.deleted = True
                     entity.put()
 
@@ -350,7 +346,6 @@ class DeleteEntity(request_handler.RequestHandler):
 def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
 
     limit_per_page = 5
-    user = util.get_current_user()
 
     if page <= 0:
         page = 1
@@ -380,7 +375,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     answers.reverse() # Answers are initially in date descending -- we want ascending before the points sort
     answers = voting.VotingSortOrder.sort(answers)
 
-    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
 
     count_total = len(questions)
     questions = questions[((page - 1) * limit_per_page):(page * limit_per_page)]
@@ -403,7 +398,6 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     count_page = len(questions)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,

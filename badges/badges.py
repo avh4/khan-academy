@@ -1,6 +1,7 @@
 from google.appengine.api import memcache
 
 import util
+import models
 import models_badges
 import logging
 
@@ -257,13 +258,13 @@ class Badge(object):
     #
     # Overridden by individual badge implementations which each grab various parameters from args and kwargs
     # It's ok for award_to to talk to the datastore, because it is run relatively infrequently.
-    def award_to(self, user, user_data, *args, **kwargs):
-        self.complete_award_to(user, user_data)
+    def award_to(self, user_data, *args, **kwargs):
+        self.complete_award_to(user_data)
 
     # Awards badge to user within given context
-    def complete_award_to(self, user, user_data, target_context=None, target_context_name=None):
+    def complete_award_to(self, user_data, target_context=None, target_context_name=None):
         name_with_context = self.name_with_target_context(target_context_name)
-        key_name = user.email() + ":" + name_with_context
+        key_name = user_data.key_email + ":" + name_with_context
 
         if user_data.badges is None:
             user_data.badges = []
@@ -277,7 +278,7 @@ class Badge(object):
 
             user_badge = models_badges.UserBadge(
                     key_name = key_name,
-                    user = user,
+                    user = user_data.user,
                     badge_name = self.name,
                     target_context = target_context,
                     target_context_name = target_context_name,
@@ -285,7 +286,7 @@ class Badge(object):
 
             user_badge.put()
 
-        UserBadgeNotifier.push_for_user(user, user_badge)
+        UserBadgeNotifier.push_for_user_data(user_data, user_badge)
 
     def frequency(self):
         return models_badges.BadgeStat.count_by_badge_name(self.name)
@@ -297,36 +298,36 @@ class UserBadgeNotifier:
     NOTIFICATION_LIMIT = 2
 
     @staticmethod
-    def key_for_user(user):
-        return "badge_notifications_for_%s" % user.email()
+    def key_for_user_data(user_data):
+        return "badge_notifications_for_%s" % user_data.key_email
 
     @staticmethod
-    def push_for_user(user, user_badge):
-        if user is None or user_badge is None:
+    def push_for_user_data(user_data, user_badge):
+        if user_data is None or user_badge is None:
             return
 
-        user_badges = memcache.get(UserBadgeNotifier.key_for_user(user))
+        user_badges = memcache.get(UserBadgeNotifier.key_for_user_data(user_data))
 
         if user_badges is None:
             user_badges = []
 
         if len(user_badges) < UserBadgeNotifier.NOTIFICATION_LIMIT:
             user_badges.append(user_badge)
-            memcache.set(UserBadgeNotifier.key_for_user(user), user_badges)
+            memcache.set(UserBadgeNotifier.key_for_user_data(user_data), user_badges)
 
     @staticmethod
     def pop_for_current_user():
-        return UserBadgeNotifier.pop_for_user(util.get_current_user())
+        return UserBadgeNotifier.pop_for_user_data(models.UserData.current())
 
     @staticmethod
-    def pop_for_user(user):
-        if not user:
+    def pop_for_user_data(user_data):
+        if not user_data:
             return []
 
-        user_badges = memcache.get(UserBadgeNotifier.key_for_user(user)) or []
+        user_badges = memcache.get(UserBadgeNotifier.key_for_user_data(user_data)) or []
 
         if len(user_badges) > 0:
-                                  memcache.delete(UserBadgeNotifier.key_for_user(user))
+                                  memcache.delete(UserBadgeNotifier.key_for_user_data(user_data))
               
         return user_badges
 

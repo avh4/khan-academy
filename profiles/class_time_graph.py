@@ -13,40 +13,38 @@ def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
 
     if not user_data:
         return {}
-    
-    if student_list:
-        student_emails = student_list.get_students()
-    else:
-        student_emails = user_data.get_students()
-    
+
+    students_data = user_data.get_students_data()
+
     classtime_table = None
     classtime_analyzer = classtime.ClassTimeAnalyzer(tz_offset)
-    student_data = []
+    graph_data = []
 
     if classtime_analyzer.timezone_offset != -1:
         # If no timezone offset is specified, don't bother grabbing all the data
         # because we'll be redirecting back to here w/ timezone information.
-        classtime_table = classtime_analyzer.get_classtime_table(student_emails, dt_utc)
+        classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
 
-    for student_email in student_emails:
+    for user_data_student in students_data:
 
-        short_name = util.get_nickname_for(users.User(email=student_email))
+        short_name = user_data_student.nickname
         if len(short_name) > 18:
             short_name = short_name[0:18] + "..."
 
         total_student_minutes = 0
         if classtime_table is not None:
-            total_student_minutes = classtime_table.get_student_total(student_email)
+            total_student_minutes = classtime_table.get_student_total(user_data_student.email)
 
-        student_data.append({
+        graph_data.append({
             "name": short_name,
             "total_minutes": "~%.0f" % total_student_minutes
             })
 
     return {
             "classtime_table": classtime_table,
-            "width": (60 * len(student_data)) + 120,
-            "student_data": student_data,
+            "coach_email": user_data.email,
+            "width": (60 * len(graph_data)) + 120,
+            "graph_data": graph_data,
             "is_graph_empty": len(classtime_table.rows) <= 0
         }
 

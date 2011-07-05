@@ -7,8 +7,8 @@
     var pointsLast = -1;
     var email_coach = null;
 
-    {% if user_coach %}
-        email_coach = '{{ coach_email|escapejs }}';
+    {% if user_data_coach %}
+        email_coach = '{{ user_data_coach.email|escapejs }}';
     {% endif %}
 
     var now = (new Date()).getTime();

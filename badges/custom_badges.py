@@ -105,11 +105,10 @@ class AwardCustomBadge(request_handler.RequestHandler):
             emails = map(lambda email: email.strip(), emails)
 
             for email in emails:
-                user = users.User(email)
-                user_data = UserData.get_for(user)
+                user_data = UserData.get_from_user_input_email(email)
                 if user_data:
                     if not custom_badge_awarded.is_already_owned_by(user_data):
-                        custom_badge_awarded.award_to(user, user_data)
+                        custom_badge_awarded.award_to(user_data)
                         user_data.put()
                         emails_awarded.append(email)
         

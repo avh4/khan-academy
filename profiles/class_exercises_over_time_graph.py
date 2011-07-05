@@ -1,3 +1,5 @@
+import logging
+
 from google.appengine.api import users
 
 import models
@@ -18,31 +20,29 @@ def class_exercises_over_time_graph_context(user_data, student_list):
 
     if not user_data:
         return {}
-    
-    # todo: change this to something sane
-    start_date = user_data.joined
+
     end_date = None
 
     if student_list:
-        student_emails = student_list.get_students()
+        students_data = student_list.get_students_data()
     else:
-        student_emails = user_data.get_students()
-        
+        students_data = user_data.get_students_data()
+
     dict_student_exercises = {}
     dict_exercises = {}
 
-    for student_email in student_emails:
-        student = users.User(student_email)
-        student_nickname = util.get_nickname_for(student)
-        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": student.email(), "exercises": [] }
+    for user_data_student in students_data:
+        student_nickname = user_data_student.nickname
+        dict_student_exercises[student_nickname] = { "nickname": student_nickname, "email": user_data_student.email, "exercises": [] }
 
         query = models.UserExercise.all()
-        query.filter('user =', student)
+        query.filter('user =', user_data_student.user)
         query.filter('proficient_date >', None)
         query.order('proficient_date')
         
         for user_exercise in query:
-            days_until_proficient = (user_exercise.proficient_date - start_date).days
+            joined = min(user_data.joined, user_exercise.proficient_date)
+            days_until_proficient = (user_exercise.proficient_date - joined).days
             proficient_date = user_exercise.proficient_date.strftime('%m/%d/%Y')
             data = ExerciseData(student_nickname, user_exercise.exercise, user_exercise.exercise, days_until_proficient, proficient_date)
             dict_student_exercises[student_nickname]["exercises"].append(data)
