@@ -110,7 +110,7 @@
     <div class="clear"></div>
     <div class="team-card">
         <div class="card-photo vertical-shadow">
-            <img src="/images/headshots/jason.jpg" />
+            <img src="/images/headshots/jason.jpg" id="jason" />
         </div>
         <div class="card-info">
             <h2 class="pulls">Jason</h2>
@@ -213,3 +213,15 @@
     <p>&nbsp;</p>
 </div>
 {% endblock aboutcontent %}
+
+{% block bottompagescript %}
+{{ block.super }}
+<script type="text/javascript" charset="utf-8">
+$(function(){
+    $('#jason').hover(
+        function(){$('#jason').attr('src', '/images/headshots/jason-rawr.jpg');},
+        function(){$('#jason').attr('src', '/images/headshots/jason.jpg');}
+    );
+});
+</script>
+{% endblock bottompagescript %}
