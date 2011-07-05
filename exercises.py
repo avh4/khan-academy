@@ -15,7 +15,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
             return
 
-        user = UserData.current().user
+        user = models.UserData.current().user
         query = models.Exercise.all().order('name')
         exercises = query.fetch(1000)
 
@@ -63,7 +63,7 @@ class UpdateExercise(request_handler.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
             return
 
-        user = UserData.current().user
+        user = models.UserData.current().user
 
         exercise_name = self.request.get('name')
         if not exercise_name:
