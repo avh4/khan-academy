@@ -14,7 +14,6 @@ from app import App
 import layer_cache
 import request_cache
 import util
-import models
 from cookie_util import set_request_cookie
 
 PHANTOM_ID_EMAIL_PREFIX = "http://nouserid.khanacademy.org/"
@@ -54,20 +53,21 @@ def create_phantom(method):
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        user = util.get_current_user()
+        user_data = UserData.current()
 
-        if not user:
+        if not user_data:
             user = create_phantom_user()
+            user_data = UserData.insert_for(user.email())
         
             # we set a 20 digit random string as the cookie, not the entire fake email
-            cookie = user.email().split(PHANTOM_ID_EMAIL_PREFIX)[1]
+            cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
             # set the cookie on the user's computer
             self.set_cookie(PHANTOM_MORSEL_KEY, cookie)
             # make it appear like the cookie was already set
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))
 
         # Bust the cache so later calls to get_current_user return the phantom user
-        request_cache.cache()(util.get_current_user)(bust_cache=True)
+        request_cache.cache()(util._get_current_user_email)(bust_cache=True)
 
         return method(self, *args, **kwargs)
     return wrapper
@@ -75,6 +75,7 @@ def create_phantom(method):
 def disallow_phantoms(method, redirect_to='/login'):
     '''Decorator used to redirect phantom users.'''
 
+    import models
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         user_data = models.UserData.current()

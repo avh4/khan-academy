@@ -1298,26 +1298,28 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry, also delete phantom cookies
+        # Immediately after login we make sure this user has a UserData entry, 
+        # also delete phantom cookies
         user_data = UserData.current()
         if not user_data:
             self.redirect(cont)
             return
+
         # If new user is new, 0 points, migrate data
-        phantom_user = util.get_phantom_user_from_cookies()
-        if phantom_user:
-            phantom_data = UserData.get_or_insert_for(phantom_user)
-        else:
-            self.delete_cookie('ureg_id')
-            self.redirect(cont)
-            return
-            
-        if user_data.points == 0 and phantom_data.points != 0:
-            logging.info("New Account: %s", user.email() )
-            self.redirect("/newaccount?continue=%s" % cont)
-        else:
-            self.delete_cookie('ureg_id')
-            self.redirect(cont)
+        # phantom_user = util.get_phantom_user_from_cookies()
+        # if phantom_user:
+        #     phantom_data = UserData.get_or_insert_for(phantom_user)
+        # else:
+        #     self.delete_cookie('ureg_id')
+        #     self.redirect(cont)
+        #     return
+        #     
+        # if user_data.points == 0 and phantom_data.points != 0:
+        #     logging.info("New Account: %s", user.email() )
+        #     self.redirect("/newaccount?continue=%s" % cont)
+        # else:
+        #     self.delete_cookie('ureg_id')
+        #     self.redirect(cont)
 
 
 class Logout(request_handler.RequestHandler):
