@@ -1296,25 +1296,18 @@ class PostLogin(request_handler.RequestHandler):
         # If new user is new, 0 points, migrate data
         phantom_user = _get_phantom_user_from_cookies()
         user_data = UserData.current()
-        if phantom_user:
+        if user_data and phantom_user:
             email = phantom_user.email()
-            phantom_data = UserData.get_from_user_input_email(email) or \
-                    UserData.get_from_db_key_email(email) or \
-                    UserData.insert_for(email)
-        else:
-            self.delete_cookie('ureg_id')
-            self.redirect(cont)
-            return
-             
-        if user_data.points == 0 and phantom_data.points != 0:
-            logging.info("New Account: %s", (user_data.current()).email)
-            phantom_data.current_user = user_data.current_user
-            phantom_data.put()
-            self.delete_cookie('ureg_id')
-            self.redirect("/newaccount?continue=%s" % cont)
-        else:
-            self.delete_cookie('ureg_id')
-            self.redirect(cont)
+            phantom_data = UserData.get_from_db_key_email(email) 
+       
+            if user_data.points == 0 and phantom_data != None and phantom_data.points != 0:
+                logging.info("New Account: %s", user_data.current().email)
+                phantom_data.current_user = user_data.current_user
+                phantom_data.put()
+                cont = "/newaccount?continue=%s" % cont
+      
+        self.delete_cookie('ureg_id')
+        self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
     def get(self):
