@@ -7,8 +7,8 @@
 
 {% block pagesubmenu %}
 <span class="breadcrumbs_nav">
-    <a href="/students">Manage Students</a>
-    <a href="/class_profile" class="selected">Class Stats For</a>
+    <a href="/students" id="manage-students">Manage Students</a>
+    <a href="/class_profile" id="class-stats" class="selected">Class Stats For</a>
     <span id="studentlists_dropdown" style="display:none;">
         <a>{{ student_list.name|escape }}</a>
         <div id="studentlists_menu">
@@ -31,12 +31,12 @@
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
-            <span id="count_students">{{ student_lists.0.nstudents }}</span><br />
+            <span id="count_students">{{ student_lists.0.nstudents|thousands_separated }}</span><br />
             <span class="label">Students</span>
         </span>
     </span>
     <span id="energy-points">
-        <span class="energy-points-badge">{{ student_lists.0.class_points }}</span><br />
+        <span class="energy-points-badge">{{ student_lists.0.class_points|thousands_separated }}</span><br />
         <span class="label">Class Energy Points</span>
     </span>
 </div>

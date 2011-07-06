@@ -100,6 +100,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),
                     'is_profile_empty': len(dict_students) <= 0,
+                    'dict_students': dict_students,
                     'selected_nav_link': 'coach',
                     "view": self.request_string("view", default=""),
                     }

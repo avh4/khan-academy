@@ -370,7 +370,7 @@ footer {
         padding-bottom: 8px;
     }
     footer.short span.sep {
-        padding-right: 10px;
+        padding: 0 5px;
     }
     footer a {
         color: white;
@@ -388,7 +388,7 @@ footer {
     footer #copyright {
         float: right;
         text-align: right;
-        padding: 10px 10px 0 0;
+        padding: 8px 10px 0 0;
     }
     footer #creative-commons-link {
         background-image: url(/images/non-repeating-sprites.1.png);
@@ -396,7 +396,7 @@ footer {
         display: inline-block;
         height: 15px;
         position: relative;
-        top: 3px;
+        top: 4px;
         width: 64px;
     }
     footer #copyright img {
@@ -2199,6 +2199,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         #the-team .team-card .card-photo img {
             height: 267px;
+            display: block;
         }
     #the-team .team-card .card-info {
         margin-left: 230px;

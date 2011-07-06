@@ -28,13 +28,14 @@
 .bullet:hover {
     background: url('/images/list-item-green.png');
     background-repeat: no-repeat;
-    background-position-y: 7px;
+    background-position: 0 7px;
 }
 .bullet-active {
     background: url('/images/list-item-black.png');
     background-repeat: no-repeat;
-    background-position-y: 5px;
+    background-position: 0 7px;
 }
+
 #sidebar .simple-button {
     margin-left: 15px;
 }
@@ -171,3 +172,6 @@ a.delete-button[href="#"] {
     margin: .3em;
     margin-left: .8em;
 }
+
+#page_sub_nav .breadcrumbs_nav a#manage-students.selected:before {left: 58px;}
+#page_sub_nav .breadcrumbs_nav a#manage-students.selected:after {left: 59px;}

@@ -76,9 +76,12 @@ class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
         self.render_template('discussion/video_feedback_notification_feed.xml', context)
 
 def feedback_answers_for_user_data(user_data):
-    notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1", user_data.user)
-
     feedbacks = []
+
+    if not user_data:
+        return feedbacks
+
+    notifications = models_discussion.FeedbackNotification.gql("WHERE user = :1", user_data.user)
 
     for notification in notifications:
 
