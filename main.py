@@ -63,7 +63,7 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
-from phantom_users.phantom_util import create_phantom
+from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
 from phantom_users.cloner import Clone
 
 class VideoDataTest(request_handler.RequestHandler):
@@ -105,7 +105,6 @@ class KillLiveAssociations(request_handler.RequestHandler):
         db.put(all_video_playlists)
 
 class ViewExercise(request_handler.RequestHandler):
-
     @create_phantom
     def get(self):
         user_data = UserData.current()
@@ -460,7 +459,6 @@ class ProvideFeedback(request_handler.RequestHandler):
         self.render_template("provide_feedback.html", {})
 
 class ViewAllExercises(request_handler.RequestHandler):
-
     @create_phantom
     def get(self):
         user_data = UserData.current()
@@ -877,10 +875,8 @@ class MobileSite(request_handler.RequestHandler):
         self.redirect("/")
 
 class ViewHomePage(request_handler.RequestHandler):
-
     @create_phantom
     def get(self):
-
         thumbnail_link_sets = [
             [
                 { 
@@ -1296,10 +1292,9 @@ class PostLogin(request_handler.RequestHandler):
 
         # Immediately after login we make sure this user has a UserData entry, 
         # also delete phantom cookies
-        
 
         # If new user is new, 0 points, migrate data
-        phantom_user = util.get_phantom_user_from_cookies()
+        phantom_user = _get_phantom_user_from_cookies()
         user_data = UserData.current()
         if phantom_user:
             email = phantom_user.email()
@@ -1320,7 +1315,6 @@ class PostLogin(request_handler.RequestHandler):
         else:
             self.delete_cookie('ureg_id')
             self.redirect(cont)
-
 
 class Logout(request_handler.RequestHandler):
     def get(self):

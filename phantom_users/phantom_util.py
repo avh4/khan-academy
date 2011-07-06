@@ -22,10 +22,7 @@ PHANTOM_MORSEL_KEY = 'ureg_id'
 def is_phantom_email(email):
     return email.startswith(PHANTOM_ID_EMAIL_PREFIX)
 
-def get_phantom_nickname_key(user):
-    return "phantom_nickname_%s" % user.email()
-
-def get_phantom_user_from_cookies():
+def _get_phantom_user_from_cookies():
     cookies = None
     try:
         cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
@@ -39,7 +36,7 @@ def get_phantom_user_from_cookies():
     else:
         return None
 
-def create_phantom_user():
+def _create_phantom_user():
     rs = os.urandom(20)
     random_string = hashlib.md5(rs).hexdigest()
     return users.User(PHANTOM_ID_EMAIL_PREFIX+random_string)
@@ -58,7 +55,7 @@ def create_phantom(method):
         user_data = models.UserData.current()
 
         if not user_data:
-            user = create_phantom_user()
+            user = _create_phantom_user()
             user_data = models.UserData.insert_for(user.email())
         
             # we set just a 20 digit random string as the cookie, 

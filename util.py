@@ -10,7 +10,7 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
-from phantom_users.phantom_util import get_phantom_user_from_cookies, \
+from phantom_users.phantom_util import _get_phantom_user_from_cookies, \
     is_phantom_email
 
 from api.auth.google_util import get_google_user_from_oauth_map
@@ -45,7 +45,7 @@ def _get_current_user_from_cookies_unsafe():
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
     if not user:
-        user = get_phantom_user_from_cookies()
+        user = _get_phantom_user_from_cookies()
     return user
 
 def is_facebook_user(user):

@@ -44,7 +44,6 @@ class ViewClassProfile(request_handler.RequestHandler):
 
     @disallow_phantoms
     def get(self):
-
         user_data_coach = models.UserData.current()
 
         if user_data_coach:
@@ -381,4 +380,3 @@ class ClassEnergyPointsPerMinuteGraph(ClassProfileGraph):
     def json_update(self, user_data_coach):
         student_list = self.get_student_list(user_data_coach)
         return templatetags.class_profile_energy_points_per_minute_update(user_data_coach, student_list)
-
