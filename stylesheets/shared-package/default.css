@@ -133,7 +133,7 @@ hr {
     position: relative;
     *position: static;
     margin: 0;
-    text-decoration: none;
+    text-decoration: none !important;
     
     border-radius: 5px;
     -moz-border-radius: 5px;
@@ -2916,12 +2916,13 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar {
-    background-color: #069;
+    background: #069 url(/images/candy-stripe.png) repeat-x;
     width:100%;
     height:35px;
     text-align:center;
     vertical-align:middle;
-    outline:solid 2px #00496E;
+    border-bottom: 1px solid #738c99;
+    outline:solid 1px #00496E;
     color: #eee;
     display:none;
     position:fixed;
@@ -2932,7 +2933,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar-content {
     vertical-align:middle;
-    font-size:15pt;
+    font-size:18px;
     position:relative;
     top:5px;
 }
@@ -2941,7 +2942,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     text-decoration:underline; 
     color:#eee;   
 }
-
+.notification-bar-content .simple-button {
+	padding: 1px 8px 3px;
+	font-size: 16px;
+	top: -1px;
+}
 .notification-bar-content a:visited{
     text-decoration:underline;  
     color:#eee;  
