@@ -26,7 +26,10 @@ def update(user_data, user_exercise, threshold=False, isProf=False, gotBadge=Fal
     numbadge = user_data.badges
     numpoint = user_data.points
 
-    # Every 10 questions, more than 20 every 5
+    # First question
+    if (numquest == 1):
+        UserNotifier.push_login_for_user_data(user_data,"You've answered your first question! To save your progress you'll need to [login]")  
+    # Every 10 questions, more than 20 every 5  
     if (numquest != None and numquest % 10 == 0) or \
        (numquest != None and numquest > 20 and numquest % 5 == 0):
         UserNotifier.push_login_for_user_data(user_data,"You've answered "+str(numquest)+" questions! To save your progress you'll need to [login]")
