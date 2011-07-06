@@ -22,7 +22,6 @@ import voting
 from phantom_users.phantom_util import disallow_phantoms
 
 class ModeratorList(request_handler.RequestHandler):
-
     def get(self):
 
         # Must be an admin to change moderators
@@ -47,7 +46,6 @@ class ModeratorList(request_handler.RequestHandler):
         self.redirect("/discussion/moderatorlist")
 
 class FlaggedFeedback(request_handler.RequestHandler):
-
     def get(self):
 
         if not util_discussion.is_current_user_moderator():
@@ -87,12 +85,10 @@ class StartNewFlagUpdateMapReduce(request_handler.RequestHandler):
         self.response.out.write("OK: " + str(mapreduce_id))
 
 class ExpandQuestion(request_handler.RequestHandler):
-
     def post(self):
         notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
 
 class PageQuestions(request_handler.RequestHandler):
-
     def get(self):
 
         page = 0
@@ -124,7 +120,6 @@ class PageQuestions(request_handler.RequestHandler):
         return
 
 class AddAnswer(request_handler.RequestHandler):
-
     @disallow_phantoms
     def post(self):
 
@@ -165,9 +160,7 @@ class AddAnswer(request_handler.RequestHandler):
         self.redirect("/discussion/answers?question_key=%s" % question_key)
 
 class Answers(request_handler.RequestHandler):
-
     def get(self):
-
         user_data = models.UserData.current()
         question_key = self.request.get("question_key")
         question = db.get(question_key)
@@ -193,7 +186,6 @@ class Answers(request_handler.RequestHandler):
         return
 
 class AddQuestion(request_handler.RequestHandler):
-
     @disallow_phantoms
     def post(self):
 
@@ -230,10 +222,8 @@ class AddQuestion(request_handler.RequestHandler):
                 (video_key, playlist_key, question_key))
 
 class EditEntity(request_handler.RequestHandler):
-
     @disallow_phantoms
     def post(self):
-
         user_data = models.UserData.current()
         if not user_data:
             return
@@ -309,9 +299,7 @@ class ClearFlags(request_handler.RequestHandler):
         self.redirect("/discussion/flaggedfeedback")
 
 class ChangeEntityType(request_handler.RequestHandler):
-
     def post(self):
-
         # Must be a moderator to change types of anything
         if not util_discussion.is_current_user_moderator():
             return
@@ -331,10 +319,8 @@ class ChangeEntityType(request_handler.RequestHandler):
         self.redirect("/discussion/flaggedfeedback")
 
 class DeleteEntity(request_handler.RequestHandler):
-
     @disallow_phantoms
     def post(self):
-
         user_data = models.UserData.current()
         if not user_data:
             return
@@ -351,7 +337,6 @@ class DeleteEntity(request_handler.RequestHandler):
         self.redirect("/discussion/flaggedfeedback")
 
 def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
-
     limit_per_page = 5
 
     if page <= 0:

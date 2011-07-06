@@ -17,9 +17,7 @@ import voting
 from phantom_users.phantom_util import disallow_phantoms
 
 class PageComments(request_handler.RequestHandler):
-
     def get(self):
-
         page = 0
         try:
             page = int(self.request.get("page"))
@@ -41,10 +39,8 @@ class PageComments(request_handler.RequestHandler):
             self.response.out.write(json)
 
 class AddComment(request_handler.RequestHandler):
-
     @disallow_phantoms
     def post(self):
-
         user_data = models.UserData.current()
 
         if not user_data:

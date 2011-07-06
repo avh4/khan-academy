@@ -541,7 +541,7 @@ class UserData(db.Model):
 
     @property
     def is_phantom(self):
-        return util.is_phantom_user(self.current_user)
+        return util._is_phantom_user(self.current_user)
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)
@@ -620,7 +620,7 @@ class UserData(db.Model):
         return userExercise
         
     def get_exercise_states(self, exercise, user_exercise, current_time):
-        phantom = exercise.phantom = util.is_phantom_user(self.user)
+        phantom = exercise.phantom = util._is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
