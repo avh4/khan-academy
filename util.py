@@ -48,10 +48,7 @@ def _get_current_user_from_cookies_unsafe():
         user = _get_phantom_user_from_cookies()
     return user
 
-def is_facebook_user(user):
-    return user and facebook_util.is_facebook_email(user.email())
-
-def is_phantom_user(user):
+def _is_phantom_user(user):
     return user and is_phantom_email(user.email())
 
 def create_login_url(dest_url):

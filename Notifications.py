@@ -11,7 +11,7 @@ class UserNotifier:
     
     @staticmethod
     def key_for_user_data(user_data):
-        return "notifications_for_%s" % user_data.email
+        return "notifications_for_%s" % user_data.key_email
 
     @staticmethod
     def push_login_for_user_data(user_data, user_alert):
@@ -22,7 +22,6 @@ class UserNotifier:
         notifications["login"] = [user_alert]
 
         memcache.set(UserNotifier.key_for_user_data(user_data), notifications)
-    
     
     @staticmethod
     def push_badge_for_user_data(user_data, user_badge):

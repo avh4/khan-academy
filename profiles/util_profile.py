@@ -108,7 +108,6 @@ class ViewClassProfile(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
 
 class ViewProfile(request_handler.RequestHandler):
-
     @create_phantom
     def get(self):
         user_data_student = models.UserData.current()
@@ -153,7 +152,6 @@ class ViewProfile(request_handler.RequestHandler):
         self.render_template('viewprofile.html', template_values)
 
 class ProfileGraph(request_handler.RequestHandler):
-
     def get(self):
         html = ""
         json_update = ""
@@ -212,7 +210,6 @@ class ProfileGraph(request_handler.RequestHandler):
         return ""
 
 class ClassProfileGraph(ProfileGraph):
-
     def get_profile_target_user_data(self):
         user_data_coach = models.UserData.current()
 
