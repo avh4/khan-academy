@@ -388,7 +388,7 @@ footer {
     footer #copyright {
         float: right;
         text-align: right;
-        padding: 10px 10px 0 0;
+        padding: 8px 10px 0 0;
     }
     footer #creative-commons-link {
         background-image: url(/images/non-repeating-sprites.1.png);
@@ -396,7 +396,7 @@ footer {
         display: inline-block;
         height: 15px;
         position: relative;
-        top: 3px;
+        top: 4px;
         width: 64px;
     }
     footer #copyright img {
