@@ -526,11 +526,14 @@ class UserData(db.Model):
 
     @staticmethod
     @request_cache.cache()
-    def current():
+    def current(bust_cache=True):
+        if bust_cache:
+            util._get_current_user_email(bust_cache=True)
         email = util._get_current_user_email()
         if email:
             # Once we have rekeyed legacy entities,
             # we will be able to simplify this.
+
             return  UserData.get_from_user_input_email(email) or \
                     UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(email)
@@ -538,7 +541,7 @@ class UserData(db.Model):
 
     @property
     def is_phantom(self):
-        return util.is_phantom_user(self.user)
+        return util.is_phantom_user(self.current_user)
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)

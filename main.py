@@ -1312,7 +1312,7 @@ class PostLogin(request_handler.RequestHandler):
             return
              
         if user_data.points == 0 and phantom_data.points != 0:
-            logging.info("New Account: %s", (user_data.current()).email() )
+            logging.info("New Account: %s", (user_data.current()).email)
             phantom_data.current_user = user_data.current_user
             phantom_data.put()
             self.delete_cookie('ureg_id')
