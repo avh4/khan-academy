@@ -99,10 +99,6 @@ handlers:
 
 - url: .*
   script: main.py
- 
-- url: /transferaccount
-  script: cloner.py
-  login: admin
     
 builtins:
 - appstats: on
