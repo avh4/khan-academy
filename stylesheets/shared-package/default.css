@@ -2199,6 +2199,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         #the-team .team-card .card-photo img {
             height: 267px;
+            display: block;
         }
     #the-team .team-card .card-info {
         margin-left: 230px;
