@@ -2965,6 +2965,13 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     right:20px;
 }
 
+.notification-bar-flair{
+/*    float:left;*/
+    position:absolute;
+    top:5px;
+    left:20px;
+}
+
 .notification-bar-close a:link{
     color:#eee;
 }
@@ -2975,6 +2982,41 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar-close a:hover{
     border-bottom: dotted 1px #eee !important;
+}
+
+.notification-bar .energy-points-badge {
+    float: none;
+}
+
+.notification-bar .achievement-badge-counts{
+    color:#eee; 
+    font-size:18px;
+}
+
+.notification-bar-flair a:link{
+    color:#eee; 
+}
+
+.notification-bar-flair a:visited{
+    color:#eee; 
+}
+
+.notification-bar-flair a:hover{
+    color:#eee; 
+}
+
+.notification-bar-flair a:active{
+    color:#eee; 
+}
+
+.notification-bar-flair .user-points-container{
+    font-size:18px;
+    font-style:none;
+    font-weight:none;
+}
+
+.notification-bar-flair .energy-points-badge{
+    margin-left:5px;
 }
 
 @media screen and (min-width: 1200px) {
