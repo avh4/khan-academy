@@ -3,6 +3,7 @@
 import datetime, logging
 import math
 import urllib
+import random
 
 import config_django
 
@@ -424,35 +425,6 @@ class CoachRequest(db.Model):
     def get_for_coach(user_data_coach):
         return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
         
-class UserMigration(db.Model):
-    previous_user = db.UserProperty()
-    current_user = db.UserProperty()
-    transfer_date = db.DateTimeProperty(auto_now_add=True)
-     
-    @staticmethod
-    def key_for(previous, current):
-        return "%s_migrated_to_%s" % (previous.email(), current.email())
-
-    @staticmethod
-    def get_for(previous, current):
-        return UserMigration.get_by_key_name(UserMigration.key_for(previous, current))
-
-    @staticmethod
-    def get_or_insert_for(previous, current):
-        return UserMigration.get_or_insert(
-                key_name = UserMigration.key_for(previous, current),
-                previous_user = previous,
-                current_user = current,
-                )
-                
-    @staticmethod
-    def get_for_previous(previous):
-        return UserMigration.all().filter("previous_user = ", previous)
-        
-    @staticmethod
-    def get_for_current(current):
-        return UserMigration.all().filter("current_user = ", current)
-
 class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
@@ -725,7 +697,75 @@ class UserData(db.Model):
             self.count_feedback_notification = models_discussion.FeedbackNotification.gql("WHERE user = :1", self.user).count()
             self.put()
         return self.count_feedback_notification
-    
+
+class PhantomCounterConfig(db.Model):
+    num_shards = db.IntegerProperty(required=True, default=20)
+
+class PhantomCounter(db.Model):
+    name = db.StringProperty(required=True)
+    count = db.IntegerProperty(required=True, default=0)
+
+    @staticmethod
+    def get_count():
+        '''Get the number of phantom users'''
+        total = 0
+        for counter in PhantomCounter.all():
+            total += counter.count
+        return total
+
+    def _transaction(n):
+        config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
+        index = random.randint(0, config.num_shards - 1)
+        shard_name = "shard" + str(index)
+        counter = PhantomCounter.get_by_key_name(shard_name)
+        if counter is None:
+            counter = PhantomCounter(key_name=shard_name)
+        counter.count += n
+        counter.put()
+
+    @staticmethod 
+    def increment():
+        '''Increment the count of phantom users'''
+        db.run_in_transaction(_transaction, 1)
+
+    @staticmethod
+    def decrement():
+        '''Decrement the count of phantom users'''
+        db.run_in_transaction(_transaction, -1)
+
+    @staticmethod
+    def increase_shards(num):
+        '''Increase the number of shards to num'''
+        config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
+        def transaction():
+            if config.num_shards < num:
+                config.num_shards = num
+            config.put()
+        db.run_in_transaction(transaction)
+
+    @staticmethod
+    def decrease_shards(num):
+        '''Decrease the number of shards to num'''
+        config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
+        def transaction():
+            if config.num_shards > num:
+                for i in range(num, config.num_shards):
+                    old_shard_name = "shard" + str(i)
+                    old_counter = PhantomCounter.get_by_key_name(old_shard_name)
+
+                    new_index = random.randint(0, num-1)
+                    new_shard_name = "shard" + str(new_index)
+                    new_counter = PhantomCounter.get_by_key_name(new_shard_name)
+
+                    if new_counter is None:
+                        new_counter = PhantomCounter(key_name=shard_name)
+                    new_counter.count += old_counter.count
+                    old_counter.delete()
+
+                config.num_shards = num
+
+        db.run_in_transaction(transaction)
+
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()
     url = db.StringProperty()

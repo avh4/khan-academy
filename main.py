@@ -1297,15 +1297,18 @@ class PostLogin(request_handler.RequestHandler):
         phantom_user = _get_phantom_user_from_cookies()
         user_data = UserData.current()
         if user_data and phantom_user:
+            # record that we now have one less phantom
+            PhantomCounter.decrement()
+
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
-       
+
             if user_data.points == 0 and phantom_data != None and phantom_data.points != 0:
                 logging.info("New Account: %s", user_data.current().email)
                 phantom_data.current_user = user_data.current_user
                 phantom_data.put()
                 cont = "/newaccount?continue=%s" % cont
-      
+
         self.delete_cookie('ureg_id')
         self.redirect(cont)
 
