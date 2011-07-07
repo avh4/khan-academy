@@ -1833,7 +1833,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         #user-info .energy-points-badge,
         #profile-header #high-level-stats .energy-points-badge,
         .energy-points-badge {
-            background: #0075b1;
+            background: #005987;
             float: right;
             line-height: 18px;
             text-align: center;
@@ -2972,15 +2972,12 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     left:20px;
 }
 
-.notification-bar-close a:link{
-    color:#eee;
-}
-
-.notification-bar-close a:visited{
-    color:#eee;
-}
-
+.notification-bar-close a:link,
+.notification-bar-close a:visited,
 .notification-bar-close a:hover{
+    color:#eee;
+}
+.notification-bar-close a:hover {
     border-bottom: dotted 1px #eee !important;
 }
 
@@ -2993,19 +2990,10 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     font-size:18px;
 }
 
-.notification-bar-flair a:link{
-    color:#eee; 
-}
-
-.notification-bar-flair a:visited{
-    color:#eee; 
-}
-
-.notification-bar-flair a:hover{
-    color:#eee; 
-}
-
-.notification-bar-flair a:active{
+.notification-bar-flair a:link,
+.notification-bar-flair a:visited,
+.notification-bar-flair a:hover,
+.notification-bar-flair a:active {
     color:#eee; 
 }
 
@@ -3017,6 +3005,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar-flair .energy-points-badge{
     margin-left:5px;
+    border: 1px solid #738C99;
 }
 
 @media screen and (min-width: 1200px) {
