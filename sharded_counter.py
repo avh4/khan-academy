@@ -17,7 +17,6 @@
 #
 
 import random
-import logging
 
 from google.appengine.ext import db
 
@@ -33,7 +32,6 @@ class ShardedCounter(db.Model):
     def get_count(name):
         '''Get the count'''
         total = 0
-        logging.critical(total)
         for counter in ShardedCounter.all().filter('name = ', name):
             total += counter.count
         return total
