@@ -698,112 +698,77 @@ class UserData(db.Model):
             self.put()
         return self.count_feedback_notification
 
-class PhantomLog(db.Model):
-    phantom_users = db.IntegerProperty(required=True, default=0)
-    total_users = db.IntegerProperty(required=True, default=0)
+class UserLog(db.Model):
+    registered_users = db.IntegerProperty(required=True, default=0)
     time = db.DateTimeProperty(auto_now_add=True)
 
     @staticmethod
-    def _add_entry(phantoms_users, total_users, time=None):
-        log = PhantomLog()
+    def _add_entry(registered_users, time=None):
+        log = UserLog()
         if time: # time defaults to now
             log.time = time
-        log.phantoms_users = phantoms_users
-        log.total_users = total_users
+        log.registered_users = registered_users
 
         log.put()
 
     @staticmethod
     def add_current_state():
-        PhantomLog._add_entry(PhantomCounter.get_phantom_count(),
-                              PhantomCounter.get_total_count())
+        UserLog._add_entry(UserCounter.get_registered_count())
 
-    @staticmethod
-    def get_for_user_data_between_dts(dt_a, dt_b):
-        query = PhantomLog.all()
-
-        query.filter('time >=', dt_a)
-        query.filter('time <', dt_b)
-        query.order('time')
-
-        return query
-
-class PhantomCounterConfig(db.Model):
+class UserCounterConfig(db.Model):
     num_shards = db.IntegerProperty(required=True, default=20)
 
-class PhantomCounter(db.Model):
+class UserCounter(db.Model):
     name = db.StringProperty(required=True)
-    phantom_count = db.IntegerProperty(required=True, default=0)
-    total_count = db.IntegerProperty(required=True, default=0)
+    registered_count = db.IntegerProperty(required=True, default=0)
 
     @staticmethod
-    def get_phantom_count():
-        '''Get the number of phantom users'''
+    def get_registered_count():
+        '''Get the number of registered users'''
         total = 0
-        for counter in PhantomCounter.all():
-            total += counter.phantom_count
+        for counter in UserCounter.all():
+            total += counter.registered_count
         return total
 
     @staticmethod
-    def get_total_count():
-        '''Get the number of phantom users'''
-        total = 0
-        for counter in PhantomCounter.all():
-            total += counter.total_count
-        return total
+    def add_to_counter(n):
+        '''Add n to the counter (n < 0 is valid)'''
 
-    def _transaction(n, m):
-        config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
-        index = random.randint(0, config.num_shards - 1)
-        shard_name = "shard" + str(index)
-        counter = PhantomCounter.get_by_key_name(shard_name)
-        if counter is None:
-            counter = PhantomCounter(key_name=shard_name)
-        counter.phantom_count += n
-        counter.total_count += m
-        counter.put()
+        config = UserCounterConfig.get_or_insert('user_counter_config')
+        def transaction(n):
+            index = random.randint(0, config.num_shards - 1)
+            shard_name = "shard" + str(index)
+            counter = UserCounter.get_by_key_name(shard_name)
+            if counter is None:
+                counter = UserCounter(key_name=shard_name, name=shard_name)
+            counter.registered_count += n
+            counter.put()
 
-    @staticmethod 
-    def new_phantom_created():
-        '''Change the count by adding one phantom and one total user'''
-        db.run_in_transaction(_transaction, 1, 1)
+        db.run_in_transaction(transaction, n)
 
     @staticmethod
-    def account_transfer():
-        '''Change the count by keeping the total users but removing one phantom'''
-        db.run_in_transaction(_transaction, -1, 0)
-
-    @staticmethod
-    def increase_shards(num):
-        '''Increase the number of shards to num'''
-        config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
-        def transaction():
-            if config.num_shards < num:
-                config.num_shards = num
-            config.put()
-        db.run_in_transaction(transaction)
-
-    @staticmethod
-    def decrease_shards(num):
-        '''Decrease the number of shards to num'''
-        config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
+    def change_number_of_shards(num):
+        '''Change the number of shards to num'''
+        config = UserCounterConfig.get_or_insert('user_counter_config')
         def transaction():
             if config.num_shards > num:
                 for i in range(num, config.num_shards):
                     old_shard_name = "shard" + str(i)
-                    old_counter = PhantomCounter.get_by_key_name(old_shard_name)
+                    old_counter = UserCounter.get_by_key_name(old_shard_name)
 
                     new_index = random.randint(0, num-1)
                     new_shard_name = "shard" + str(new_index)
-                    new_counter = PhantomCounter.get_by_key_name(new_shard_name)
+                    new_counter = UserCounter.get_by_key_name(new_shard_name)
 
                     if new_counter is None:
-                        new_counter = PhantomCounter(key_name=shard_name)
-                    new_counter.phantom_count += old_counter.phantom_count
-                    new_counter.total_count += old_counter.total_count
+                        new_counter = UserCounter(key_name=shard_name)
+                    new_counter.registered_count += old_counter.registered_count
                     old_counter.delete()
 
-                config.num_shards = num
+            # if num > num_shards, we don't have to do data transfer, just set
+            # the number of shards
+
+            config.num_shards = num
 
         db.run_in_transaction(transaction)
 

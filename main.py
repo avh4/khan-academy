@@ -1304,7 +1304,7 @@ class PostLogin(request_handler.RequestHandler):
         user_data = UserData.current()
         if user_data and phantom_user:
             # record that we now have one less phantom
-            PhantomCounter.decrement()
+            models.UserCounter.add_to_counter(1)
 
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
@@ -1366,14 +1366,13 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
 
-class PhantomStatistics(request_handler.RequestHandler):
+class UserStatistics(request_handler.RequestHandler):
     def get(self):
         self.put()
 
     def put(self):
-        models.PhantomLog.add_current_state()
-
-        self.response.out.write("Phantom user statistics recorded.")
+        models.UserLog.add_current_state()
+        self.response.out.write("Registered user statistics recorded.")
                         
 def main():
     webapp.template.register_template_library('templateext')    
@@ -1446,7 +1445,7 @@ def main():
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
-        ('/admin/phantomstatistics', PhantomStatistics),
+        ('/admin/userstatistics', UserStatistics),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
