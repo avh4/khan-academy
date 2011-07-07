@@ -547,19 +547,26 @@ class UserData(db.Model):
         user = users.User(email)
         key = "user_email_key_%s" % email
 
-        return UserData.get_or_insert(
-            key_name=key,
-            user=user,
-            current_user=user,
-            moderator=False,
-            last_login=datetime.datetime.now(),
-            proficient_exercises=[],
-            suggested_exercises=[],
-            assigned_exercises=[],
-            need_to_reassess=True,
-            points=0,
-            coaches=[]
-            )
+        ud = UserData.get_by_key_name(key)
+        if ud:
+            return ud
+        else:
+            # record that we now have one more registered user
+            UserCounter.add_to_counter(1)
+
+            return UserData.get_or_insert(
+                key_name=key,
+                user=user,
+                current_user=user,
+                moderator=False,
+                last_login=datetime.datetime.now(),
+                proficient_exercises=[],
+                suggested_exercises=[],
+                assigned_exercises=[],
+                need_to_reassess=True,
+                points=0,
+                coaches=[]
+                )
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
 
