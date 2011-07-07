@@ -156,6 +156,14 @@ def playlists_library():
 def playlists_library_list():
     return fully_populated_playlists()
 
+# We expose the following "fresh" route but don't publish the URL for internal services
+# that don't want to deal w/ cached values.
+@route("/api/v1/playlists/library/list/fresh", methods=["GET"])
+@jsonp
+@jsonify
+def playlists_library_list_fresh():
+    return fully_populated_playlists()
+
 @route("/api/v1/exercises", methods=["GET"])
 @jsonp
 @jsonify
