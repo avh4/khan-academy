@@ -8,20 +8,19 @@ var GaeMiniProfiler = {
             if (xhr) {
                 var requestId = xhr.getResponseHeader('X-MiniProfiler-Id');
                 if (requestId) {
-                    GaeMiniProfiler.fetch([requestId]);
+                    var queryString = xhr.getResponseHeader('X-MiniProfiler-QS');
+                    GaeMiniProfiler.fetch(requestId, queryString);
                 }
             }
         });
 
-        GaeMiniProfiler.fetch(GaeMiniProfiler.appendRedirectIds(requestId), fShowImmediately);
+        GaeMiniProfiler.fetch(requestId, window.location.search, fShowImmediately);
     },
 
-    appendRedirectIds: function(requestId) {
-        var query = window.location.search;
-
-        if (query) {
+    appendRedirectIds: function(requestId, queryString) {
+        if (queryString) {
             var re = /mp-r-id=([^&]+)/;
-            var matches = re.exec(query);
+            var matches = re.exec(queryString);
             if (matches && matches.length) {
                 var sRedirectIds = matches[1];
                 var list = sRedirectIds.split(",");
@@ -33,7 +32,9 @@ var GaeMiniProfiler = {
         return [requestId];
     },
 
-    fetch: function(requestIds, fShowImmediately) {
+    fetch: function(requestId, queryString, fShowImmediately) {
+        var requestIds = this.appendRedirectIds(requestId, queryString);
+
         $.get(
                 "/gae_mini_profiler/request",
                 { "request_ids": requestIds.join(",") },

@@ -296,10 +296,13 @@ class ProfilerWSGIMiddleware(object):
                 if status.startswith("302 "):
                     # Temporary redirect. Add request identifier to redirect location
                     # so next rendered page can show this request's profile.
-                    headers = ProfilerWSGIMiddleware.headers_with_modified_redirect(headers)
+                    headers = ProfilerWSGIMiddleware.headers_with_modified_redirect(environ, headers)
                     self.temporary_redirect = True
 
+                # Append headers used when displaying profiler results from ajax requests
                 headers.append(("X-MiniProfiler-Id", request_id))
+                headers.append(("X-MiniProfiler-QS", environ.get("QUERY_STRING")))
+
                 return start_response(status, headers, exc_info)
 
             # Configure AppStats output, keeping a high level of request
@@ -350,22 +353,28 @@ class ProfilerWSGIMiddleware(object):
             for value in result:
                 yield value
 
-
     @staticmethod
-    def headers_with_modified_redirect(headers):
+    def headers_with_modified_redirect(environ, headers):
         headers_modified = []
 
         for header in headers:
             if header[0] == "Location":
-                location = header[1]
+                reg = re.compile("mp-r-id=([^&]+)")
+
+                # Keep any chain of redirects around
+                request_id_chain = request_id
+                match = reg.search(environ.get("QUERY_STRING"))
+                if match:
+                    request_id_chain = ",".join([match.groups()[0], request_id])
 
                 # Remove any pre-existing miniprofiler redirect id
-                location = re.sub("mp-r-id=[^&]+", "", location)
-
-                location += ("&" if "?" in location else "?")
+                location = header[1]
+                location = reg.sub("", location)
 
                 # Add current request id as miniprofiler redirect id
-                location += "mp-r-id=%s" % request_id
+                location += ("&" if "?" in location else "?")
+                location = location.replace("&&", "&")
+                location += "mp-r-id=%s" % request_id_chain
 
                 headers_modified.append((header[0], location))
             else:
