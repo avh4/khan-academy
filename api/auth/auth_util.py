@@ -129,7 +129,7 @@ def get_response(url, params={}):
 
     # Be extra forgiving w/ timeouts during API auth consumer calls
     # in case Facebook or Google is slow.
-    c_tries_left = 3
+    c_tries_left = 5
     while not result and c_tries_left > 0:
 
         try:
