@@ -3012,6 +3012,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     top: 2px;
     background:none;
 }
+
+.notification-bar .notify-badge img{
+    position:relative !important;
+    top:2px !important;
+}
 @media screen and (min-width: 1200px) {
     .dark #homepage, .dark #contribute, .dark #container, .dark #page_sub_nav, .dark #container .exercise-badge.single-exercise {
         -moz-border-radius-topleft: 4px;
