@@ -27,6 +27,7 @@ from discussion import models_discussion
 from topics_list import all_topics_list
 from phantom_users import util_notify
 import nicknames
+from sharded_counter import ShardedCounter
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -704,73 +705,31 @@ class UserLog(db.Model):
 
     @staticmethod
     def _add_entry(registered_users, time=None):
-        log = UserLog()
+        log = UserLog(registered_users=registered_users)
         if time: # time defaults to now
             log.time = time
-        log.registered_users = registered_users
 
         log.put()
 
     @staticmethod
     def add_current_state():
-        UserLog._add_entry(UserCounter.get_registered_count())
+        UserLog._add_entry(UserCounter.get_count())
 
-class UserCounterConfig(db.Model):
-    num_shards = db.IntegerProperty(required=True, default=20)
-
-class UserCounter(db.Model):
-    name = db.StringProperty(required=True)
-    registered_count = db.IntegerProperty(required=True, default=0)
-
+class UserCounter:
     @staticmethod
-    def get_registered_count():
+    def get_count():
         '''Get the number of registered users'''
-        total = 0
-        for counter in UserCounter.all():
-            total += counter.registered_count
-        return total
+        return ShardedCounter.get_count('user_counter')
 
     @staticmethod
     def add_to_counter(n):
         '''Add n to the counter (n < 0 is valid)'''
-
-        config = UserCounterConfig.get_or_insert('user_counter_config')
-        def transaction(n):
-            index = random.randint(0, config.num_shards - 1)
-            shard_name = "shard" + str(index)
-            counter = UserCounter.get_by_key_name(shard_name)
-            if counter is None:
-                counter = UserCounter(key_name=shard_name, name=shard_name)
-            counter.registered_count += n
-            counter.put()
-
-        db.run_in_transaction(transaction, n)
+        ShardedCounter.add_to_counter('user_counter', n)
 
     @staticmethod
     def change_number_of_shards(num):
         '''Change the number of shards to num'''
-        config = UserCounterConfig.get_or_insert('user_counter_config')
-        def transaction():
-            if config.num_shards > num:
-                for i in range(num, config.num_shards):
-                    old_shard_name = "shard" + str(i)
-                    old_counter = UserCounter.get_by_key_name(old_shard_name)
-
-                    new_index = random.randint(0, num-1)
-                    new_shard_name = "shard" + str(new_index)
-                    new_counter = UserCounter.get_by_key_name(new_shard_name)
-
-                    if new_counter is None:
-                        new_counter = UserCounter(key_name=shard_name)
-                    new_counter.registered_count += old_counter.registered_count
-                    old_counter.delete()
-
-            # if num > num_shards, we don't have to do data transfer, just set
-            # the number of shards
-
-            config.num_shards = num
-
-        db.run_in_transaction(transaction)
+        ShardedCounter.change_number_of_shards('user_counter', num)
 
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()

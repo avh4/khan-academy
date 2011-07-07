@@ -1362,9 +1362,9 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
 class UserStatistics(request_handler.RequestHandler):
     def get(self):
-        self.put()
+        return self.post()
 
-    def put(self):
+    def post(self):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
                         
