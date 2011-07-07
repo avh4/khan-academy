@@ -716,6 +716,7 @@ class UserLog(db.Model):
         UserLog._add_entry(UserCounter.get_count())
 
 class UserCounter:
+    '''Keeps a global count of registered users, used to create `UserLog`s.'''
     @staticmethod
     def get_count():
         '''Get the number of registered users'''

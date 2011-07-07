@@ -21,10 +21,16 @@ import random
 from google.appengine.ext import db
 
 class ShardedCounterConfig(db.Model):
+    '''Holds the configuration for a class of `ShardedCounter`s.'''
     name = db.StringProperty(required=True)
     num_shards = db.IntegerProperty(required=True, default=20)
 
 class ShardedCounter(db.Model):
+    '''`ShardedCounter`s work together to hold a global count.
+    This model is intended to be written often and read rarely (once a day). If
+    you need a global that will be read often consider writing a similar model
+    using memcache.
+    '''
     name = db.StringProperty(required=True)
     count = db.IntegerProperty(required=True, default=0)
 
