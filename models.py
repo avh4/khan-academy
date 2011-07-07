@@ -718,7 +718,7 @@ class Video(Searchable, db.Model):
     def download_urls(self):
         if self.download_available:
 
-            download_url_base = "http://www.archive.org/download/KA-youtube-converted"
+            download_url_base = "http://www.archive.org/download/KA-converted-%s" % self.youtube_id
 
             return {
                     "mp4": "%s/%s.mp4" % (download_url_base, self.youtube_id),
