@@ -485,18 +485,18 @@ class ViewAllExercises(request_handler.RequestHandler):
             exercise.proficient = False
             exercise.review = False
             exercise.status = ""
-            if user_data.is_phantom:
-                exercise.phantom = True
-            else:
-                if exercise in suggested_exercises:
-                    exercise.suggested = True
-                    exercise.status = "Suggested"
-                if exercise in proficient_exercises:
-                    exercise.proficient = True
-                    exercise.status = "Proficient"
-                if exercise in review_exercises:
-                    exercise.review = True
-                    exercise.status = "Review"
+            # if user_data.is_phantom:
+            #     exercise.phantom = True
+            # else:
+            if exercise in suggested_exercises:
+                exercise.suggested = True
+                exercise.status = "Suggested"
+            if exercise in proficient_exercises:
+                exercise.proficient = True
+                exercise.status = "Proficient"
+            if exercise in review_exercises:
+                exercise.review = True
+                exercise.status = "Review"
 
         template_values = {
             'exercises': ex_graph.exercises,
