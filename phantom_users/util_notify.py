@@ -9,7 +9,7 @@ from badges import badges
 def welcome(user_data):
     if user_data == None:
         return False
-    UserNotifier.push_login_for_user_data(user_data,"Welcome to Khan Academy! Currently you're not logged in. If you want to save your progress you should [login]")
+    UserNotifier.push_login_for_user_data(user_data,"Welcome to Khan Academy! To get the best experience you should [login]")
     
 def update(user_data, user_exercise, threshold=False, isProf=False, gotBadge=False):
     if user_data == None:

@@ -7,7 +7,7 @@
     {% if logged_in %}
         <span id="name">{{ student_nickname|escape }}{% simple_student_info user_data_student %}</span>
     {% else %}
-        <span id="phantom-login"><a href="{{ login_url|escape }}">Login to save your progress</a></span>
+        <span id="phantom-login"><a href="{{ login_url|escape }}">Log in to save your progress</a></span>
     {% endif %}
 
 </span>
