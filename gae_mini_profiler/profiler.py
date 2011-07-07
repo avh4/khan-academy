@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import pickle
+import re
 import simplejson
 import StringIO
 import sys
@@ -38,15 +39,27 @@ class RequestStatsHandler(RequestHandler):
 
         self.response.headers["Content-Type"] = "application/json"
 
-        request_stats = RequestStats.get(self.request.get("request_id"))
-        if not request_stats:
-            return
+        list_request_ids = []
 
-        dict_request_stats = {}
-        for property in RequestStats.serialized_properties:
-            dict_request_stats[property] = request_stats.__getattribute__(property)
+        request_ids = self.request.get("request_ids")
+        if request_ids:
+            list_request_ids = request_ids.split(",")
 
-        self.response.out.write(simplejson.dumps(dict_request_stats))
+        list_request_stats = []
+
+        for request_id in list_request_ids:
+
+            request_stats = RequestStats.get(request_id)
+
+            if request_stats:
+
+                dict_request_stats = {}
+                for property in RequestStats.serialized_properties:
+                    dict_request_stats[property] = request_stats.__getattribute__(property)
+
+                list_request_stats.append(dict_request_stats)
+
+        self.response.out.write(simplejson.dumps(list_request_stats))
 
 class RequestStats(object):
 
@@ -263,11 +276,17 @@ class ProfilerWSGIMiddleware(object):
             # Set a random ID for this request so we can look up stats later
             import base64
             import os
-            request_id = base64.urlsafe_b64encode(os.urandom(15))
+            request_id = base64.urlsafe_b64encode(os.urandom(5))
 
             # Send request id in headers so jQuery ajax calls can pick
             # up profiles.
             def profiled_start_response(status, headers, exc_info = None):
+
+                if status.startswith("302 "):
+                    # Temporary redirect. Add request identifier to redirect location
+                    # so next rendered page can show this request's profile.
+                    headers = ProfilerWSGIMiddleware.headers_with_modified_redirect(headers)
+
                 headers.append(("X-MiniProfiler-Id", request_id))
                 return start_response(status, headers, exc_info)
 
@@ -318,3 +337,26 @@ class ProfilerWSGIMiddleware(object):
             result = self.app(environ, start_response)
             for value in result:
                 yield value
+
+
+    @staticmethod
+    def headers_with_modified_redirect(headers):
+        headers_modified = []
+
+        for header in headers:
+            if header[0] == "Location":
+                location = header[1]
+
+                # Remove any pre-existing miniprofiler redirect id
+                location = re.sub("mp-r-id=[^&]+", "", location)
+
+                location += ("&" if "?" in location else "?")
+
+                # Add current request id as miniprofiler redirect id
+                location += "mp-r-id=%s" % request_id
+
+                headers_modified.append((header[0], location))
+            else:
+                headers_modified.append(header)
+
+        return headers_modified
