@@ -51,7 +51,7 @@ class RequestStatsHandler(RequestHandler):
 
             request_stats = RequestStats.get(request_id)
 
-            if request_stats:
+            if request_stats and not request_stats.disabled:
 
                 dict_request_stats = {}
                 for property in RequestStats.serialized_properties:
@@ -59,11 +59,17 @@ class RequestStatsHandler(RequestHandler):
 
                 list_request_stats.append(dict_request_stats)
 
+                # Don't show temporary redirect profiles more than once automatically, as they are
+                # tied to URL params and may be copied around easily.
+                if request_stats.temporary_redirect:
+                    request_stats.disabled = True
+                    request_stats.store()
+
         self.response.out.write(simplejson.dumps(list_request_stats))
 
 class RequestStats(object):
 
-    serialized_properties = ["request_id", "url", "url_short", "s_dt", "profiler_results", "appstats_results"]
+    serialized_properties = ["request_id", "url", "url_short", "s_dt", "profiler_results", "appstats_results", "temporary_redirect"]
 
     def __init__(self, request_id, environ, middleware):
         self.request_id = request_id
@@ -80,6 +86,9 @@ class RequestStats(object):
 
         self.profiler_results = RequestStats.calc_profiler_results(middleware)
         self.appstats_results = RequestStats.calc_appstats_results(middleware)
+
+        self.temporary_redirect = middleware.temporary_redirect
+        self.disabled = False
 
     def store(self):
         # Store compressed results so we stay under the memcache 1MB limit
@@ -260,6 +269,7 @@ class ProfilerWSGIMiddleware(object):
         self.app_clean = app
         self.prof = None
         self.recorder = None
+        self.temporary_redirect = False
 
     def __call__(self, environ, start_response):
 
@@ -270,6 +280,7 @@ class ProfilerWSGIMiddleware(object):
         self.app = self.app_clean
         self.prof = None
         self.recorder = None
+        self.temporary_redirect = False
 
         if config.should_profile(environ):
 
@@ -286,6 +297,7 @@ class ProfilerWSGIMiddleware(object):
                     # Temporary redirect. Add request identifier to redirect location
                     # so next rendered page can show this request's profile.
                     headers = ProfilerWSGIMiddleware.headers_with_modified_redirect(headers)
+                    self.temporary_redirect = True
 
                 headers.append(("X-MiniProfiler-Id", request_id))
                 return start_response(status, headers, exc_info)
