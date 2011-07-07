@@ -1303,9 +1303,6 @@ class PostLogin(request_handler.RequestHandler):
         phantom_user = _get_phantom_user_from_cookies()
         user_data = UserData.current()
         if user_data and phantom_user:
-            # record that we now have one less phantom
-            models.UserCounter.add_to_counter(1)
-
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
 
@@ -1369,9 +1366,9 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
 class UserStatistics(request_handler.RequestHandler):
     def get(self):
-        self.put()
+        return self.post()
 
-    def put(self):
+    def post(self):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
                         
