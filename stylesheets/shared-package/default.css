@@ -2985,7 +2985,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     float: none;
 }
 
-.notification-bar .achievement-badge-counts{
+.notification-bar .notify-badge{
     color:#eee; 
 }
 
@@ -3006,8 +3006,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     border: 1px solid #738C99;
 }
 
-.notification-bar-flair .achievement-badge-counts {
+.notification-bar-flair .notify-badge {
 	position: static;
+    text-decoration: none;
+    top: 2px;
+    background:none;
 }
 @media screen and (min-width: 1200px) {
     .dark #homepage, .dark #contribute, .dark #container, .dark #page_sub_nav, .dark #container .exercise-badge.single-exercise {
