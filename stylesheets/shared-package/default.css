@@ -2929,11 +2929,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     z-index:200;
     left:0px;
     top:0px;
+    font-size: 15px;
 }
 
 .notification-bar-content {
     vertical-align:middle;
-    font-size:18px;
     position:relative;
     top:5px;
 }
@@ -2943,7 +2943,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     color:#eee;   
 }
 .notification-bar-content .simple-button {
-	padding: 1px 8px 3px;
+	padding: 2px 10px 4px;
 	font-size: 16px;
 	top: -1px;
 }
@@ -2968,7 +2968,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 .notification-bar-flair{
 /*    float:left;*/
     position:absolute;
-    top:5px;
+    top:7px;
     left:20px;
 }
 
@@ -2987,7 +2987,6 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .notification-bar .achievement-badge-counts{
     color:#eee; 
-    font-size:18px;
 }
 
 .notification-bar-flair a:link,
@@ -2998,7 +2997,6 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar-flair .user-points-container{
-    font-size:18px;
     font-style:none;
     font-weight:none;
 }
@@ -3008,6 +3006,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     border: 1px solid #738C99;
 }
 
+.notification-bar-flair .achievement-badge-counts {
+	position: static;
+}
 @media screen and (min-width: 1200px) {
     .dark #homepage, .dark #contribute, .dark #container, .dark #page_sub_nav, .dark #container .exercise-badge.single-exercise {
         -moz-border-radius-topleft: 4px;
