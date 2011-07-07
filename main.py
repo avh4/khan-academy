@@ -1316,6 +1316,7 @@ class PostLogin(request_handler.RequestHandler):
                 cont = "/newaccount?continue=%s" % cont
 
         self.delete_cookie('ureg_id')
+        self.delete_cookie('knowledge_map_notification')
         self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
