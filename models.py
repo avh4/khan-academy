@@ -698,40 +698,80 @@ class UserData(db.Model):
             self.put()
         return self.count_feedback_notification
 
+class PhantomLog(db.Model):
+    phantom_users = db.IntegerProperty(required=True, default=0)
+    total_users = db.IntegerProperty(required=True, default=0)
+    time = db.DateTimeProperty(auto_now_add=True)
+
+    @staticmethod
+    def _add_entry(phantoms_users, total_users, time=None):
+        log = PhantomLog()
+        if time: # time defaults to now
+            log.time = time
+        log.phantoms_users = phantoms_users
+        log.total_users = total_users
+
+        log.put()
+
+    @staticmethod
+    def add_current_state():
+        PhantomLog._add_entry(PhantomCounter.get_phantom_count(),
+                              PhantomCounter.get_total_count())
+
+    @staticmethod
+    def get_for_user_data_between_dts(dt_a, dt_b):
+        query = PhantomLog.all()
+
+        query.filter('time >=', dt_a)
+        query.filter('time <', dt_b)
+        query.order('time')
+
+        return query
+
 class PhantomCounterConfig(db.Model):
     num_shards = db.IntegerProperty(required=True, default=20)
 
 class PhantomCounter(db.Model):
     name = db.StringProperty(required=True)
-    count = db.IntegerProperty(required=True, default=0)
+    phantom_count = db.IntegerProperty(required=True, default=0)
+    total_count = db.IntegerProperty(required=True, default=0)
 
     @staticmethod
-    def get_count():
+    def get_phantom_count():
         '''Get the number of phantom users'''
         total = 0
         for counter in PhantomCounter.all():
-            total += counter.count
+            total += counter.phantom_count
         return total
 
-    def _transaction(n):
+    @staticmethod
+    def get_total_count():
+        '''Get the number of phantom users'''
+        total = 0
+        for counter in PhantomCounter.all():
+            total += counter.total_count
+        return total
+
+    def _transaction(n, m):
         config = PhantomCounterConfig.get_or_insert('phantom_counter_config')
         index = random.randint(0, config.num_shards - 1)
         shard_name = "shard" + str(index)
         counter = PhantomCounter.get_by_key_name(shard_name)
         if counter is None:
             counter = PhantomCounter(key_name=shard_name)
-        counter.count += n
+        counter.phantom_count += n
+        counter.total_count += m
         counter.put()
 
     @staticmethod 
-    def increment():
-        '''Increment the count of phantom users'''
-        db.run_in_transaction(_transaction, 1)
+    def new_phantom_created():
+        '''Change the count by adding one phantom and one total user'''
+        db.run_in_transaction(_transaction, 1, 1)
 
     @staticmethod
-    def decrement():
-        '''Decrement the count of phantom users'''
-        db.run_in_transaction(_transaction, -1)
+    def account_transfer():
+        '''Change the count by keeping the total users but removing one phantom'''
+        db.run_in_transaction(_transaction, -1, 0)
 
     @staticmethod
     def increase_shards(num):
@@ -759,7 +799,8 @@ class PhantomCounter(db.Model):
 
                     if new_counter is None:
                         new_counter = PhantomCounter(key_name=shard_name)
-                    new_counter.count += old_counter.count
+                    new_counter.phantom_count += old_counter.phantom_count
+                    new_counter.total_count += old_counter.total_count
                     old_counter.delete()
 
                 config.num_shards = num

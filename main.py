@@ -1359,6 +1359,15 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
             redirect_target = dict_redirects[relative_path]
 
         self.redirect(redirect_target, True)
+
+class PhantomStatistics(request_handler.RequestHandler):
+    def get(self):
+        self.put()
+
+    def put(self):
+        models.PhantomLog.add_current_state()
+
+        self.response.out.write("Phantom user statistics recorded.")
                         
 def main():
     webapp.template.register_template_library('templateext')    
@@ -1431,6 +1440,7 @@ def main():
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
+        ('/admin/phantomstatistics', PhantomStatistics),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
