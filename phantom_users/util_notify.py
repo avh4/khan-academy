@@ -1,5 +1,4 @@
 from google.appengine.api import memcache
-
 import util
 import models
 from Notifications import UserNotifier
@@ -7,6 +6,11 @@ import phantom_util
 import request_handler
 from badges import badges
 
+def welcome(user_data):
+    if user_data == None:
+        return False
+    UserNotifier.push_login_for_user_data(user_data,"Welcome to Khan Academy! Currently you're not logged in. If you want to save your progress you should [login]")
+    
 def update(user_data, user_exercise, threshold=False, isProf=False, gotBadge=False):
     if user_data == None:
         return False

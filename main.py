@@ -463,6 +463,12 @@ class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
         
+        if user_data.is_phantom:
+            notified = self.get_cookie_value("knowledge_map_notification")
+            if notified != '1':
+                self.set_cookie("knowledge_map_notification",1)
+                util_notify.welcome(user_data)
+        
         ex_graph = ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
