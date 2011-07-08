@@ -1,6 +1,6 @@
 # import the webapp module
 from google.appengine.ext import webapp
-from Notifications import UserNotifier
+from notifications import UserNotifier
 from .badges import badges, util_badges
 
 register = webapp.template.create_template_register()

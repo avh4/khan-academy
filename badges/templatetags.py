@@ -3,7 +3,7 @@ from google.appengine.ext import webapp
 
 import badges
 import util_badges
-from Notifications import UserNotifier
+from notifications import UserNotifier
 
 register = webapp.template.create_template_register()
 

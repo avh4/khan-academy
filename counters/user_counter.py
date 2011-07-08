@@ -1,20 +1,15 @@
-from google.appengine.ext import db
+import sharded_counter
 
-from sharded_counter import ShardedCounter
+# Keep a global count of registered users, used to create `UserLog`s.
 
-class UserCounter(db.Model):
-    '''Keeps a global count of registered users, used to create `UserLog`s.'''
-    @staticmethod
-    def get_count():
-        '''Get the number of registered users'''
-        return ShardedCounter.get_count('user_counter')
+def get_count():
+    '''Get the number of registered users'''
+    return sharded_counter.get_count('user_counter')
 
-    @staticmethod
-    def add_to_counter(n):
-        '''Add n to the counter (n < 0 is valid)'''
-        ShardedCounter.add_to_counter('user_counter', n)
+def add_to_counter(n):
+    '''Add n to the counter (n < 0 is valid)'''
+    sharded_counter.add_to_counter('user_counter', n)
 
-    @staticmethod
-    def change_number_of_shards(num):
-        '''Change the number of shards to num'''
-        ShardedCounter.change_number_of_shards('user_counter', num)
+def change_number_of_shards(num):
+    '''Change the number of shards to num'''
+    sharded_counter.change_number_of_shards('user_counter', num)

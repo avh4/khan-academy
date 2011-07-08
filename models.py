@@ -27,7 +27,7 @@ from discussion import models_discussion
 from topics_list import all_topics_list
 from phantom_users import util_notify
 import nicknames
-from counters.user_counter import UserCounter
+from counters import user_counter
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -547,26 +547,28 @@ class UserData(db.Model):
         user = users.User(email)
         key = "user_email_key_%s" % email
 
-        ud = UserData.get_by_key_name(key)
-        if ud:
-            return ud
-        else:
-            # record that we now have one more registered user
-            UserCounter.add_to_counter(1)
+        user_data = UserData.get_or_insert(
+            key_name=key,
+            user=user,
+            current_user=user,
+            moderator=False,
+            last_login=datetime.datetime.now(),
+            proficient_exercises=[],
+            suggested_exercises=[],
+            assigned_exercises=[],
+            need_to_reassess=True,
+            points=0,
+            coaches=[]
+            )
 
-            return UserData.get_or_insert(
-                key_name=key,
-                user=user,
-                current_user=user,
-                moderator=False,
-                last_login=datetime.datetime.now(),
-                proficient_exercises=[],
-                suggested_exercises=[],
-                assigned_exercises=[],
-                need_to_reassess=True,
-                points=0,
-                coaches=[]
-                )
+        if not user_data.is_phantom:
+          # Record that we now have one more registered user
+          if (datetime.datetime.now() - user_data.joined).seconds < 60:
+            # Extra safety check against user_data.joined in case some subtle bug results in
+            # lots of calls to insert_for for UserData objects with existing key_names.
+            user_counter.add_to_counter(1)
+
+        return user_data
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
 
@@ -720,7 +722,7 @@ class UserLog(db.Model):
 
     @staticmethod
     def add_current_state():
-        UserLog._add_entry(UserCounter.get_count())
+        UserLog._add_entry(user_counter.get_count())
 
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()

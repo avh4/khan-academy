@@ -39,53 +39,50 @@ class ShardedCounter(db.Model):
     name = db.StringProperty(required=True)
     count = db.IntegerProperty(required=True, default=0)
 
-    @staticmethod
-    def get_count(name):
-        '''Get the count'''
-        total = 0
-        for counter in ShardedCounter.all().filter('name = ', name):
-            total += counter.count
-        return total
+def get_count(name):
+    '''Get the count'''
+    total = 0
+    for counter in ShardedCounter.all().filter('name = ', name):
+        total += counter.count
+    return total
 
-    @staticmethod
-    def add_to_counter(name, n):
-        '''Add n to the counter (n < 0 is valid)'''
-        config = ShardedCounterConfig.get_or_insert(name, name=name)
-        def transaction():
-            index = random.randint(0, config.num_shards - 1)
-            shard_name = name + str(index)
-            counter = ShardedCounter.get_by_key_name(shard_name)
-            if counter is None:
-                counter = ShardedCounter(key_name=shard_name, name=name)
-            counter.count += n
-            counter.put()
+def add_to_counter(name, n):
+    '''Add n to the counter (n < 0 is valid)'''
+    config = ShardedCounterConfig.get_or_insert(name, name=name)
+    def transaction():
+        index = random.randint(0, config.num_shards - 1)
+        shard_name = name + str(index)
+        counter = ShardedCounter.get_by_key_name(shard_name)
+        if counter is None:
+            counter = ShardedCounter(key_name=shard_name, name=name)
+        counter.count += n
+        counter.put()
 
-        db.run_in_transaction(transaction)
+    db.run_in_transaction(transaction)
 
-    @staticmethod
-    def change_number_of_shards(name, num):
-        '''Change the number of shards to num'''
-        config = ShardedCounterConfig.get_or_insert(name, name=name)
-        def transaction():
-            if config.num_shards > num:
-                for i in range(num, config.num_shards):
-                    del_shard_name = name + str(i)
-                    del_counter = ShardedCounter.get_by_key_name(del_shard_name)
+def change_number_of_shards(name, num):
+    '''Change the number of shards to num'''
+    config = ShardedCounterConfig.get_or_insert(name, name=name)
+    def transaction():
+        if config.num_shards > num:
+            for i in range(num, config.num_shards):
+                del_shard_name = name + str(i)
+                del_counter = ShardedCounter.get_by_key_name(del_shard_name)
 
-                    keep_index = random.randint(0, num-1)
-                    keep_shard_name = name + str(keep_index)
-                    keep_counter = ShardedCounter.get_by_key_name(keep_shard_name)
+                keep_index = random.randint(0, num-1)
+                keep_shard_name = name + str(keep_index)
+                keep_counter = ShardedCounter.get_by_key_name(keep_shard_name)
 
-                    if keep_counter is None:
-                        keep_counter = ShardedCounter(key_name=shard_name, name=name)
-                    keep_counter.count += del_counter.count
+                if keep_counter is None:
+                    keep_counter = ShardedCounter(key_name=shard_name, name=name)
+                keep_counter.count += del_counter.count
 
-                    keep_counter.put()
-                    del_counter.delete()
+                keep_counter.put()
+                del_counter.delete()
 
-            # if num > num_shards, we don't have to do data transfer
+        # if num > num_shards, we don't have to do data transfer
 
-            config.num_shards = num
-            config.put()
+        config.num_shards = num
+        config.put()
 
-        db.run_in_transaction(transaction)
+    db.run_in_transaction(transaction)

@@ -5,7 +5,7 @@ import models
 import models_badges
 import logging
 import phantom_users.util_notify
-from Notifications import UserNotifier
+from notifications import UserNotifier
 
 # Badges can either be Exercise badges (can earn one for every Exercise),
 # Playlist badges (one for every Playlist),

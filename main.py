@@ -65,7 +65,8 @@ from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
 from phantom_users.cloner import Clone
-from counters.user_counter import UserCounter
+from counters import user_counter
+from notifications import UserNotifier
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -463,13 +464,6 @@ class ViewAllExercises(request_handler.RequestHandler):
     @create_phantom
     def get(self):
         user_data = UserData.current()
-        
-        # Notification for first seeing the Knowledge Map. Disabled for now
-        # if user_data.is_phantom:
-        #     notified = self.get_cookie_value("knowledge_map_notification")
-        #     if notified != '1':
-        #         self.set_cookie("knowledge_map_notification",1)
-        #         util_notify.welcome(user_data)
         
         ex_graph = ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
@@ -1304,12 +1298,12 @@ class PostLogin(request_handler.RequestHandler):
         # If new user is new, 0 points, migrate data
         phantom_user = _get_phantom_user_from_cookies()
         user_data = UserData.current()
+
         if user_data and phantom_user:
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
 
             if user_data.points == 0 and phantom_data != None and phantom_data.points != 0:
-                from Notifications import UserNotifier
                 UserNotifier.clear_all(phantom_data)
                 logging.info("New Account: %s", user_data.current().email)
                 phantom_data.current_user = user_data.current_user
@@ -1317,7 +1311,6 @@ class PostLogin(request_handler.RequestHandler):
                 cont = "/newaccount?continue=%s" % cont
 
         self.delete_cookie('ureg_id')
-        self.delete_cookie('knowledge_map_notification')
         self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
@@ -1398,9 +1391,9 @@ class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
         query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
         for udata in query:
             if udata.user and not udata.is_phantom:
-                models.UserCounter.add_to_counter(1)
+                user_counter.add_to_counter(1)
 
-        models.UserLog._add_entry(models.UserCounter.get_count(), end_time)
+        models.UserLog._add_entry(user_counter.get_count(), end_time)
         logging.info("Completed step %s of recording registered users: start_date: %s, end_date: %s" % (step, start_time, end_time))
 
         taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})

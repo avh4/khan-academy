@@ -1,7 +1,7 @@
 from google.appengine.api import memcache
 import util
 import models
-from Notifications import UserNotifier
+from notifications import UserNotifier
 import phantom_util
 import request_handler
 from badges import badges
