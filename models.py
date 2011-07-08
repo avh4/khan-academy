@@ -562,11 +562,12 @@ class UserData(db.Model):
             )
 
         if not user_data.is_phantom:
-          # Record that we now have one more registered user
-          if (datetime.datetime.now() - user_data.joined).seconds < 60:
-            # Extra safety check against user_data.joined in case some subtle bug results in
-            # lots of calls to insert_for for UserData objects with existing key_names.
-            user_counter.add_to_counter(1)
+            # Record that we now have one more registered user
+            if (datetime.datetime.now() - user_data.joined).seconds < 60:
+                # Extra safety check against user_data.joined in case some
+                # subtle bug results in lots of calls to insert_for for
+                # UserData objects with existing key_names.
+                user_counter.add_to_counter(1)
 
         return user_data
 
