@@ -593,11 +593,14 @@ var Notifications = {
                 .css("visibility", "hidden")
                 .css("display", "")
                 .css("top",-1*jel.height())
-                .css("display", "")
                 .css("visibility", "visible");
-                    
-            jel.animate({top: 0}, 500);
-            $("#top-header").animate({'margin-top': 35},500);
+
+            // Queue:false to make sure all of these run at the same time
+            var animationOptions = {duration: 350, queue: false};
+            
+            $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
+            $("#top-header").animate({ marginTop: 35 }, animationOptions);
+            jel.show().animate({ top: 0 }, animationOptions);
 
         }, 100);
 
@@ -605,10 +608,19 @@ var Notifications = {
 
     hide: function() {
         var jel = $(".notification-bar");
-        jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
+
+        // Queue:false to make sure all of these run at the same time
+        var animationOptions = {duration: 350, queue: false};
         
-        $("#top-header").animate({'margin-top': 0},500);
-        
+        $("body").animate({ backgroundPosition: "0px 0px", top: 0 }, animationOptions);
+        $("#top-header").animate({ marginTop: 0 }, animationOptions);
+        jel.animate(
+                { top: -1 * jel.height() }, 
+                $.extend(animationOptions, 
+                    { complete: function(){ jel.remove(); } }
+                )
+        );
+
         $.post("/notifierclose"); 
     }
 
