@@ -595,14 +595,9 @@ var Notifications = {
                 .css("top",-1*jel.height())
                 .css("display", "")
                 .css("visibility", "visible");
-            
-            $("body")
-                .css("background-position","0px 35px")
-                .css("top","35px");
-                
-            $("#top-header").css("margin-top","35px");
                     
             jel.animate({top: 0}, 500);
+            $("#top-header").animate({'margin-top': 35},500);
 
         }, 100);
 
