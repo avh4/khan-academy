@@ -1381,11 +1381,12 @@ class GoBackInTimeAndRecordRegisteredUsersStepLog(db.Model):
 class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
     def get(self):
       if self.request_bool("start", default=False):
-          self.task_step(0)
           self.response.out.write("Sync started")
+          taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': 0})
+          self.redirect('/admin/gobackintimeandrecordregisteredusers')
       else:
           latest_logs_query = GoBackInTimeAndRecordRegisteredUsersStepLog.all()
-          latest_logs_query.order("-dt")
+          latest_logs_query.order("-start_date")
           latest_logs = latest_logs_query.fetch(10)
 
           self.response.out.write("Latest sync logs:<br/><br/>")
@@ -1398,7 +1399,10 @@ class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
         start_time = datetime.datetime(2009, 1, 1) + step*delta
         end_time = datetime.datetime(2009, 1, 1) + (step + 1)*delta
 
-        if start_time > datetime.now():
+        if start_time > datetime.datetime.now():
+            logs_query = GoBackInTimeAndRecordRegisteredUsersStepLog.all()
+            db.delete(logs_query.fetch(1000))
+            models.UserLog.add_current_state()
             return
 
         # delete empty UserData
@@ -1409,9 +1413,11 @@ class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
             results = fetch(1000)
 
         # count registered users
-        query1 = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
-        num = query.count()
-        UserCounter.add_to_counter(num)
+        query2 = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
+        # TODO count only non-phantoms
+        num = query2.count()
+        models.UserCounter.add_to_counter(num)
+        models.UserLog._add_entry(models.UserCounter.get_count(), end_time)
 
         log = GoBackInTimeAndRecordRegisteredUsersStepLog()
         log.step = step
