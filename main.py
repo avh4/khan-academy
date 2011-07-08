@@ -1302,11 +1302,13 @@ class PostLogin(request_handler.RequestHandler):
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
 
-            if user_data.points == 0 and phantom_data != None and phantom_data.points != 0:
+            if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
                 UserNotifier.clear_all(phantom_data)
                 logging.info("New Account: %s", user_data.current().email)
                 phantom_data.current_user = user_data.current_user
                 if phantom_data.put():
+                    # Phantom user was just transitioned to real user
+                    user_counter.add(1)
                     user_data.delete()
                 cont = "/newaccount?continue=%s" % cont
 

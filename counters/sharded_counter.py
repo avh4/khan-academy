@@ -17,6 +17,7 @@
 #
 
 import random
+import logging
 
 from google.appengine.ext import db
 
@@ -41,10 +42,15 @@ class ShardedCounter(db.Model):
 
 def get_count(name):
     '''Get the count'''
-    total = 0
-    for counter in ShardedCounter.all().filter('name = ', name):
-        total += counter.count
-    return total
+    try:
+        total = 0
+        for counter in ShardedCounter.all().filter('name = ', name):
+            total += counter.count
+        return total
+
+    except Exception, e:
+        logging.error("Error in get_count: %s" % e)
+        return 0
 
 def add(name, n):
     '''Add n to the counter (n < 0 is valid)'''
@@ -61,8 +67,8 @@ def add(name, n):
 
         db.run_in_transaction(transaction)
 
-    except:
-        pass
+    except Exception, e:
+        logging.error("Error in add: %s" % e)
 
 def change_number_of_shards(name, num):
     '''Change the number of shards to num'''
@@ -92,5 +98,5 @@ def change_number_of_shards(name, num):
 
         db.run_in_transaction(transaction)
 
-    except:
-        pass
+    except Exception, e:
+        logging.error("Error in change_number_of_shards: %s" % e)

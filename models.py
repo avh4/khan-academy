@@ -572,8 +572,12 @@ class UserData(db.Model):
         return user_data
 
     def delete(self):
+        logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
+
+        if not self.is_phantom:
+            user_counter.add(-1)
+
         db.delete(self)
-        user_counter.add(-1)
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
 
