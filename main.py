@@ -877,7 +877,6 @@ class MobileSite(request_handler.RequestHandler):
         self.redirect("/")
 
 class ViewHomePage(request_handler.RequestHandler):
-    @create_phantom
     def get(self):
         thumbnail_link_sets = [
             [
