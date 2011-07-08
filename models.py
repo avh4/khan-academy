@@ -747,7 +747,7 @@ class Video(Searchable, db.Model):
 
     # Last download version in which video download was prepped.
     download_version = db.IntegerProperty(default = 0)
-    CURRENT_DOWNLOAD_VERSION = 1
+    CURRENT_DOWNLOAD_VERSION = 2
 
     _serialize_blacklist = ["download_version", "CURRENT_DOWNLOAD_VERSION"]
 
