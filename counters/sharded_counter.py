@@ -46,7 +46,7 @@ def get_count(name):
         total += counter.count
     return total
 
-def add_to_counter(name, n):
+def add(name, n):
     '''Add n to the counter (n < 0 is valid)'''
     config = ShardedCounterConfig.get_or_insert(name, name=name)
     def transaction():

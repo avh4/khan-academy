@@ -1390,7 +1390,7 @@ class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
         query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
         for udata in query:
             if udata.user and not udata.is_phantom:
-                user_counter.add_to_counter(1)
+                user_counter.add(1)
 
         models.UserLog._add_entry(user_counter.get_count(), end_time)
         logging.info("Completed step %s of recording registered users: start_date: %s, end_date: %s" % (step, start_time, end_time))

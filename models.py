@@ -567,7 +567,7 @@ class UserData(db.Model):
                 # Extra safety check against user_data.joined in case some
                 # subtle bug results in lots of calls to insert_for for
                 # UserData objects with existing key_names.
-                user_counter.add_to_counter(1)
+                user_counter.add(1)
 
         return user_data
 
