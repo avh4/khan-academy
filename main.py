@@ -1306,7 +1306,8 @@ class PostLogin(request_handler.RequestHandler):
                 UserNotifier.clear_all(phantom_data)
                 logging.info("New Account: %s", user_data.current().email)
                 phantom_data.current_user = user_data.current_user
-                phantom_data.put()
+                if phantom_data.put():
+                    user_data.delete()
                 cont = "/newaccount?continue=%s" % cont
 
         self.delete_cookie('ureg_id')
