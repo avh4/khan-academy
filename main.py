@@ -65,6 +65,7 @@ from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
 from phantom_users.cloner import Clone
+from counters.user_counter import UserCounter
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -1373,11 +1374,6 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-class GoBackInTimeAndRecordRegisteredUsersStepLog(db.Model):
-    step = db.IntegerProperty()
-    start_date = db.DateTimeProperty()
-    end_date = db.DateTimeProperty()
-
 class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
     def get(self):
       if self.request_bool("start", default=False):
@@ -1385,45 +1381,25 @@ class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
           taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': 0})
           self.redirect('/admin/gobackintimeandrecordregisteredusers')
       else:
-          latest_logs_query = GoBackInTimeAndRecordRegisteredUsersStepLog.all()
-          latest_logs_query.order("-start_date")
-          latest_logs = latest_logs_query.fetch(10)
-
-          self.response.out.write("Latest sync logs:<br/><br/>")
-          for sync_log in latest_logs:
-              self.response.out.write("Step: %s, Start Date: %s, End Date: %s<br/>" % (sync_log.step, sync_log.start_date, sync_log.end_date))
+          self.redirect('/')
 
     def post(self):
         step = self.request_int("step", default=0)
-        delta = datetime.timedelta(days=25)
-        start_time = datetime.datetime(2009, 1, 1) + step*delta
-        end_time = datetime.datetime(2009, 1, 1) + (step + 1)*delta
+        delta = datetime.timedelta(days=1)
+        start_time = datetime.datetime(2010, 1, 1) + step*delta
+        end_time = datetime.datetime(2010, 1, 1) + (step + 1)*delta
 
         if start_time > datetime.datetime.now():
-            logs_query = GoBackInTimeAndRecordRegisteredUsersStepLog.all()
-            db.delete(logs_query.fetch(1000))
-            models.UserLog.add_current_state()
             return
 
-        # delete empty UserData
-        query1 = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2 AND User = :3", start_time, end_time, None)
-        results = query1.fetch(1000)
-        while results:
-            db.delete(results)
-            results = fetch(1000)
-
         # count registered users
-        query2 = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
-        # TODO count only non-phantoms
-        num = query2.count()
-        models.UserCounter.add_to_counter(num)
-        models.UserLog._add_entry(models.UserCounter.get_count(), end_time)
+        query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
+        for udata in query:
+            if udata.user and not udata.is_phantom:
+                models.UserCounter.add_to_counter(1)
 
-        log = GoBackInTimeAndRecordRegisteredUsersStepLog()
-        log.step = step
-        log.start_date = start_time
-        log.end_date = end_time
-        log.put()
+        models.UserLog._add_entry(models.UserCounter.get_count(), end_time)
+        logging.info("Completed step %s of recording registered users" % step)
 
         taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})
                         

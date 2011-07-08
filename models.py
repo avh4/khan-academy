@@ -27,7 +27,7 @@ from discussion import models_discussion
 from topics_list import all_topics_list
 from phantom_users import util_notify
 import nicknames
-from sharded_counter import ShardedCounter
+from counters.user_counter import UserCounter
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -721,23 +721,6 @@ class UserLog(db.Model):
     @staticmethod
     def add_current_state():
         UserLog._add_entry(UserCounter.get_count())
-
-class UserCounter:
-    '''Keeps a global count of registered users, used to create `UserLog`s.'''
-    @staticmethod
-    def get_count():
-        '''Get the number of registered users'''
-        return ShardedCounter.get_count('user_counter')
-
-    @staticmethod
-    def add_to_counter(n):
-        '''Add n to the counter (n < 0 is valid)'''
-        ShardedCounter.add_to_counter('user_counter', n)
-
-    @staticmethod
-    def change_number_of_shards(num):
-        '''Change the number of shards to num'''
-        ShardedCounter.change_number_of_shards('user_counter', num)
 
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()

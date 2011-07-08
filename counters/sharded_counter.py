@@ -20,6 +20,11 @@ import random
 
 from google.appengine.ext import db
 
+#
+# Sharded counters are useful for keeping a global count. See user_counter.py
+# for an example of their use.
+#
+
 class ShardedCounterConfig(db.Model):
     '''Holds the configuration for a class of `ShardedCounter`s.'''
     name = db.StringProperty(required=True)
@@ -46,7 +51,7 @@ class ShardedCounter(db.Model):
     def add_to_counter(name, n):
         '''Add n to the counter (n < 0 is valid)'''
         config = ShardedCounterConfig.get_or_insert(name, name=name)
-        def transaction(n):
+        def transaction():
             index = random.randint(0, config.num_shards - 1)
             shard_name = name + str(index)
             counter = ShardedCounter.get_by_key_name(shard_name)
@@ -55,7 +60,7 @@ class ShardedCounter(db.Model):
             counter.count += n
             counter.put()
 
-        db.run_in_transaction(transaction, n)
+        db.run_in_transaction(transaction)
 
     @staticmethod
     def change_number_of_shards(name, num):
@@ -64,20 +69,23 @@ class ShardedCounter(db.Model):
         def transaction():
             if config.num_shards > num:
                 for i in range(num, config.num_shards):
-                    old_shard_name = name + str(i)
-                    old_counter = ShardedCounter.get_by_key_name(old_shard_name)
+                    del_shard_name = name + str(i)
+                    del_counter = ShardedCounter.get_by_key_name(del_shard_name)
 
-                    new_index = random.randint(0, num-1)
-                    new_shard_name = name + str(new_index)
-                    new_counter = ShardedCounter.get_by_key_name(new_shard_name)
+                    keep_index = random.randint(0, num-1)
+                    keep_shard_name = name + str(keep_index)
+                    keep_counter = ShardedCounter.get_by_key_name(keep_shard_name)
 
-                    if new_counter is None:
-                        new_counter = ShardedCounter(key_name=shard_name, name=name)
-                    new_counter.count += old_counter.count
-                    old_counter.delete()
+                    if keep_counter is None:
+                        keep_counter = ShardedCounter(key_name=shard_name, name=name)
+                    keep_counter.count += del_counter.count
+
+                    keep_counter.put()
+                    del_counter.delete()
 
             # if num > num_shards, we don't have to do data transfer
 
             config.num_shards = num
+            config.put()
 
         db.run_in_transaction(transaction)
