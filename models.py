@@ -571,6 +571,10 @@ class UserData(db.Model):
 
         return user_data
 
+    def delete(self):
+        db.delete(self)
+        user_counter.add(-1)
+
     def get_or_insert_exercise(self, exercise, allow_insert = True):
 
         exid = exercise.name
