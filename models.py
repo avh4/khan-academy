@@ -742,10 +742,11 @@ class Video(Searchable, db.Model):
     # this date may be much later than the actual YouTube upload date.
     date_added = db.DateTimeProperty(auto_now_add=True)
 
-    # True if video download has been prepped.
-    download_available = db.BooleanProperty(default=False)
+    # Last download version in which video download was prepped.
+    download_version = db.IntegerProperty(default = 0)
+    CURRENT_DOWNLOAD_VERSION = 1
 
-    _serialize_blacklist = ["download_available"]
+    _serialize_blacklist = ["download_version", "CURRENT_DOWNLOAD_VERSION"]
 
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
@@ -757,9 +758,8 @@ class Video(Searchable, db.Model):
 
     @property
     def download_urls(self):
-        if self.download_available:
-
-            download_url_base = "http://www.archive.org/download/KA-youtube-converted"
+        if self.download_version == Video.CURRENT_DOWNLOAD_VERSION:
+            download_url_base = "http://www.archive.org/download/KA-converted-%s" % self.youtube_id
 
             return {
                     "mp4": "%s/%s.mp4" % (download_url_base, self.youtube_id),

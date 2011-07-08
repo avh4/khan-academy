@@ -199,7 +199,7 @@ def video(video_id):
 def video_download_available(video_id):
     video = models.Video.all().filter("youtube_id =", video_id).get()
     if video:
-        video.download_available = request.request_bool("available", default=False)
+        video.download_version = models.Video.CURRENT_DOWNLOAD_VERSION if request.request_bool("available", default=False) else 0
         video.put()
     return video
 
