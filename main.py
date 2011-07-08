@@ -1317,6 +1317,7 @@ class PostLogin(request_handler.RequestHandler):
 
 class Logout(request_handler.RequestHandler):
     def get(self):
+        self.delete_cookie('ureg_id')
         self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):
