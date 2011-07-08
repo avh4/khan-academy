@@ -1,6 +1,6 @@
 from sharded_counter import ShardedCounter
 
-class UserCounter:
+class UserCounter(db.Model):
     '''Keeps a global count of registered users, used to create `UserLog`s.'''
     @staticmethod
     def get_count():
@@ -16,4 +16,3 @@ class UserCounter:
     def change_number_of_shards(num):
         '''Change the number of shards to num'''
         ShardedCounter.change_number_of_shards('user_counter', num)
-
