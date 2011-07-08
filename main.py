@@ -1309,6 +1309,8 @@ class PostLogin(request_handler.RequestHandler):
             phantom_data = UserData.get_from_db_key_email(email) 
 
             if user_data.points == 0 and phantom_data != None and phantom_data.points != 0:
+                from Notifications import UserNotifier
+                UserNotifier.clear_all(phantom_data)
                 logging.info("New Account: %s", user_data.current().email)
                 phantom_data.current_user = user_data.current_user
                 phantom_data.put()
