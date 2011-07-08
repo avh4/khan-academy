@@ -10,7 +10,6 @@ from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
-import util
 from app import App
 from render import render_block_to_string
 import cookie_util
@@ -238,3 +237,4 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             self.response.out.write(json)
 
 from models import UserData
+import util

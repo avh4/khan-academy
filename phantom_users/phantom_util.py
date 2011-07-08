@@ -14,6 +14,7 @@ from app import App
 import layer_cache
 import request_cache
 import util
+import models
 from cookie_util import set_request_cookie
 
 PHANTOM_ID_EMAIL_PREFIX = "http://nouserid.khanacademy.org/"
@@ -48,8 +49,6 @@ def create_phantom(method):
     - Only use on get methods where a phantom user should be created.
     '''
 
-    import models
-
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         user_data = models.UserData.current()
@@ -75,8 +74,6 @@ def create_phantom(method):
 
 def disallow_phantoms(method, redirect_to='/login'):
     '''Decorator used to redirect phantom users.'''
-
-    import models
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):

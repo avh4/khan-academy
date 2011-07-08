@@ -1,6 +1,7 @@
 from google.appengine.api import memcache
 import util
 import request_cache
+import models
 
 class UserNotifier:
     # Only show up to 2 badge notifications at a time, rest
@@ -73,5 +74,3 @@ class UserNotifier:
     def get_or_create_notifications(user_data):
         return memcache.get(UserNotifier.key_for_user_data(user_data)) or \
             {"badges":[],"login":[]}
-
-import models
