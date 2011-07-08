@@ -27,3 +27,5 @@ queue:
 - name: video-log-queue
   rate: 30/s
 
+- name: gobackintimeandrecordregisteredusers-queue
+  rate: 5/s

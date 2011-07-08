@@ -1372,6 +1372,54 @@ class UserStatistics(request_handler.RequestHandler):
     def post(self):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
+
+class GoBackInTimeAndRecordRegisteredUsersStepLog(db.Model):
+    step = db.IntegerProperty()
+    start_date = db.DateTimeProperty()
+    end_date = db.DateTimeProperty()
+
+class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
+    def get(self):
+      if self.request_bool("start", default=False):
+          self.task_step(0)
+          self.response.out.write("Sync started")
+      else:
+          latest_logs_query = GoBackInTimeAndRecordRegisteredUsersStepLog.all()
+          latest_logs_query.order("-dt")
+          latest_logs = latest_logs_query.fetch(10)
+
+          self.response.out.write("Latest sync logs:<br/><br/>")
+          for sync_log in latest_logs:
+              self.response.out.write("Step: %s, Start Date: %s, End Date: %s<br/>" % (sync_log.step, sync_log.start_date, sync_log.end_date))
+
+    def post(self):
+        step = self.request_int("step", default=0)
+        delta = datetime.timedelta(days=25)
+        start_time = datetime.datetime(2009, 1, 1) + step*delta
+        end_time = datetime.datetime(2009, 1, 1) + (step + 1)*delta
+
+        if start_time > datetime.now():
+            return
+
+        # delete empty UserData
+        query1 = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2 AND User = :3", start_time, end_time, None)
+        results = query1.fetch(1000)
+        while results:
+            db.delete(results)
+            results = fetch(1000)
+
+        # count registered users
+        query1 = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
+        num = query.count()
+        UserCounter.add_to_counter(num)
+
+        log = GoBackInTimeAndRecordRegisteredUsersStepLog()
+        log.step = step
+        log.start_date = start_time
+        log.end_date = end_time
+        log.put()
+
+        taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})
                         
 def main():
     webapp.template.register_template_library('templateext')    
@@ -1445,6 +1493,7 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
+        ('/admin/gobackintimeandrecordregisteredusers', GoBackInTimeAndRecordRegisteredUsers),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
