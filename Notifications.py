@@ -66,6 +66,14 @@ class UserNotifier:
         memcache.set(UserNotifier.key_for_user_data(models.UserData.current()), notifications)
     
     @staticmethod
+    def clear_all(user_data):
+        import models
+        notifications = {"badges":[],"login":[]}
+        notifications["login"] = []
+        notifications["badges"] = []
+        memcache.set(UserNotifier.key_for_user_data(user_data), notifications)
+    
+    @staticmethod
     def get_or_create_notifications(user_data):
         return memcache.get(UserNotifier.key_for_user_data(user_data)) or \
             {"badges":[],"login":[]}
