@@ -6,9 +6,9 @@ def get_count():
     '''Get the number of registered users'''
     return sharded_counter.get_count('user_counter')
 
-def add_to_counter(n):
+def add(n):
     '''Add n to the counter (n < 0 is valid)'''
-    sharded_counter.add_to_counter('user_counter', n)
+    sharded_counter.add('user_counter', n)
 
 def change_number_of_shards(num):
     '''Change the number of shards to num'''
