@@ -607,12 +607,7 @@ var Notifications = {
         var jel = $(".notification-bar");
         jel.animate({top: -1 * jel.height()}, 500, function(){jel.remove();});
         
-        $("body")
-            .css("background-position","0px 0px")
-            .css("top","0px");
-            
-        $("#top-header")
-            .css("margin-top","0px");
+        $("#top-header").animate({'margin-top': 0},500);
         
         $.post("/notifierclose"); 
     }
