@@ -1,3 +1,5 @@
+from google.appengine.ext import db
+
 from sharded_counter import ShardedCounter
 
 class UserCounter(db.Model):

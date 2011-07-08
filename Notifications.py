@@ -2,7 +2,6 @@ from google.appengine.api import memcache
 import util
 import request_cache
 import logging
-import models
 
 class UserNotifier:
     # Only show up to 2 badge notifications at a time, rest
@@ -40,6 +39,7 @@ class UserNotifier:
     @staticmethod
     @request_cache.cache()
     def pop_for_current_user_data():
+        import models
         return UserNotifier.pop_for_user_data(models.UserData.current())
 
     @staticmethod
@@ -58,6 +58,7 @@ class UserNotifier:
         
     @staticmethod
     def clear_login():
+        import models
         notificationstemp = UserNotifier.pop_for_current_user_data()
         notifications = {"badges":[],"login":[]}
         notifications["login"] = []
