@@ -2924,11 +2924,10 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     border-bottom: 1px solid #738c99;
     outline:solid 1px #00496E;
     color: #eee;
-    display:none;
     position:fixed;
     z-index:200;
     left:0px;
-    top:0px;
+    top:-35px;
     font-size: 15px;
 }
 

@@ -602,7 +602,8 @@ var Notifications = {
                 
             $("#top-header").css("margin-top","35px");
                     
-            jel.animate({top: 0}, 500, function(){jel.show();});
+            jel.animate({top: 0}, 500);
+
         }, 100);
 
     },
