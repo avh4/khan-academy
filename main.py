@@ -1384,18 +1384,29 @@ class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
     def post(self):
         step = self.request_int("step", default=0)
         delta = datetime.timedelta(days=1)
-        start_time = datetime.datetime(2010, 1, 1) + step*delta
-        end_time = datetime.datetime(2010, 1, 1) + (step + 1)*delta
+        start_time = datetime.datetime(2011, 3, 12) + step*delta
+        end_time = datetime.datetime(2011, 3, 12) + (step + 1)*delta
 
         if start_time > datetime.datetime.now():
             return
 
         # count registered users
         c = 0
-        query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
-        for udata in query:
-            if udata.user and not udata.is_phantom:
-                c += 1
+        possible_results = True
+        cursor = None
+
+        while possible_results:
+            query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
+            if cursor:
+                query.with_cursor(cursor)
+
+            possible_results = False
+            for udata in query.fetch(250):
+                possible_results = True
+                if udata.user and not udata.is_phantom:
+                    c += 1
+
+            cursor = query.cursor()
 
         user_counter.add(c)
         models.UserLog._add_entry(user_counter.get_count(), end_time)
