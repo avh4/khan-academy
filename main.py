@@ -1371,35 +1371,6 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
-    def get(self):
-      if self.request_bool("start", default=False):
-          self.response.out.write("Sync started")
-          taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': 0})
-          self.redirect('/admin/gobackintimeandrecordregisteredusers')
-      else:
-          self.redirect('/')
-
-    def post(self):
-        step = self.request_int("step", default=0)
-        delta = datetime.timedelta(days=1)
-        start_time = datetime.datetime(2010, 1, 1) + step*delta
-        end_time = datetime.datetime(2010, 1, 1) + (step + 1)*delta
-
-        if start_time > datetime.datetime.now():
-            return
-
-        # count registered users
-        query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
-        for udata in query:
-            if udata.user and not udata.is_phantom:
-                user_counter.add(1)
-
-        models.UserLog._add_entry(user_counter.get_count(), end_time)
-        logging.info("Completed step %s of recording registered users: start_date: %s, end_date: %s" % (step, start_time, end_time))
-
-        taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})
-                        
 def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
@@ -1472,7 +1443,6 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
-        ('/admin/gobackintimeandrecordregisteredusers', GoBackInTimeAndRecordRegisteredUsers),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
