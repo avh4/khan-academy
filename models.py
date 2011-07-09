@@ -10,6 +10,10 @@ import config_django
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
+
+# Do not remove this webapp.template import, as suggested
+# by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
+from google.appengine.ext.webapp import template
 from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
