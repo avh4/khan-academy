@@ -29,7 +29,6 @@ import layer_cache
 import request_cache
 from discussion import models_discussion
 from topics_list import all_topics_list
-from phantom_users import util_notify
 import nicknames
 from counters import user_counter
 
@@ -1438,3 +1437,4 @@ class ExerciseGraph(object):
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
 
 from badges import util_badges, last_action_cache
+from phantom_users import util_notify
