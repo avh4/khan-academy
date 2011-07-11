@@ -1372,9 +1372,6 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-
-
-
 def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
