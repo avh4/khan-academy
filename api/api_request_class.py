@@ -1,3 +1,4 @@
+import logging
 
 from flask import Request
 
@@ -11,7 +12,7 @@ class ApiRequest(Request, RequestInputHandler):
     
     # Make arguments behave like webapp.arguments
     def arguments(self):
-        return self.values
+        return [val for val in self.values]
 
     # Make get behave like webapp.get
     def get(self, key, default_value=None):

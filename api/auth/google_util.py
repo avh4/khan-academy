@@ -32,14 +32,8 @@ def get_google_user_from_oauth_map(oauth_map):
 
 @layer_cache.cache_with_key_fxn(lambda oauth_map: "google_email_from_oauth_token_%s" % oauth_map.google_access_token, layer=layer_cache.Layers.Memcache)
 def get_google_email_from_oauth_map(oauth_map):
-    email = ""
-    try:
-        google_client = GoogleOAuthClient()
-        email = google_client.access_user_email(oauth_map)
-    except Exception, e:
-        raise OAuthError(e.message)
-
-    return email
+    google_client = GoogleOAuthClient()
+    return google_client.access_user_email(oauth_map)
 
 def google_request_token_handler(oauth_map):
     # Start Google request token process

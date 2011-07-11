@@ -6,7 +6,6 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 
 from app import App
-from nicknames import get_nickname_for
 import request_cache
 
 class FeedbackType:
@@ -39,6 +38,7 @@ class FeedbackFlag:
 
 class Feedback(db.Model):
     author = db.UserProperty()
+    author_nickname = db.StringProperty()
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
@@ -62,6 +62,13 @@ class Feedback(db.Model):
     def put(self):
         memcache.delete(Feedback.memcache_key_for_video(self.first_target()), namespace=App.version)
         db.Model.put(self)
+
+    def set_author(self, user_data):
+        self.author = user_data.user
+        self.author_nickname = user_data.nickname
+
+    def authored_by(self, user_data):
+        return user_data and self.author == user_data.user
 
     def sum_votes_incremented(self):
         # Always add an extra vote when displaying vote counts to convey the author's implicit "vote"
@@ -95,11 +102,8 @@ class Feedback(db.Model):
             return db.get(target_key)
         return None
 
-    def author_nickname(self):
-        return get_nickname_for(self.author)
-
-    def add_vote_by(self, vote_type, user):
-        FeedbackVote.add_vote(self, vote_type, user)
+    def add_vote_by(self, vote_type, user_data):
+        FeedbackVote.add_vote(self, vote_type, user_data)
         self.update_votes_and_score()
 
     def update_votes_and_score(self):
@@ -124,12 +128,12 @@ class Feedback(db.Model):
 
         self.inner_score = float(score)
 
-    def add_flag_by(self, flag_type, user):
-        if user.email() in self.flagged_by:
+    def add_flag_by(self, flag_type, user_data):
+        if user_data.key_email in self.flagged_by:
             return False
 
         self.flags.append(flag_type)
-        self.flagged_by.append(user.email())
+        self.flagged_by.append(user_data.key_email)
         self.recalculate_flagged()
         return True
 
@@ -157,15 +161,15 @@ class FeedbackVote(db.Model):
     vote_type = db.IntegerProperty(default=0)
 
     @staticmethod
-    def add_vote(feedback, vote_type, user):
-        if not feedback:
+    def add_vote(feedback, vote_type, user_data):
+        if not feedback or not user_data:
             return
 
         vote = FeedbackVote.get_or_insert(
-                key_name = "vote_by_%s" % user.email(),
+                key_name = "vote_by_%s" % user_data.key_email,
                 parent = feedback,
                 video = feedback.first_target_key(),
-                user = user,
+                user = user_data.user,
                 vote_type = vote_type)
 
         if vote and vote.vote_type != vote_type:
@@ -174,10 +178,14 @@ class FeedbackVote(db.Model):
             vote.put()
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user, video: "voting_dict_for_%s" % video.key())
-    def get_dict_for_user_and_video(user, video):
+    @request_cache.cache_with_key_fxn(lambda user_data, video: "voting_dict_for_%s" % video.key())
+    def get_dict_for_user_data_and_video(user_data, video):
+
+        if not user_data:
+            return {}
+
         query = FeedbackVote.all()
-        query.filter("user =", user)
+        query.filter("user =", user_data.user)
         query.filter("video =", video)
         votes = query.fetch(1000)
 

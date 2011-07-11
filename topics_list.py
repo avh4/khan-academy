@@ -130,6 +130,10 @@ PLAYLIST_STRUCTURE = [
                 "name": "Cosmology and Astronomy",
                 "playlist": "Cosmology and Astronomy"
             },
+            {
+                "name": "Computer Science",
+                "playlist": "Computer Science"
+            }
         ],
     },
     {
@@ -205,6 +209,23 @@ PLAYLIST_STRUCTURE = [
             {
                 "name": "CAHSEE",
                 "playlist": "CAHSEE Example Problems"
+            },
+            {
+                "name": "California Standards Test",
+                "items": [
+                    {
+                        "name": "Algebra I",
+                        "playlist": "California Standards Test: Algebra I"
+                    },
+                    {
+                        "name": "Geometry",
+                        "playlist": "California Standards Test: Geometry"
+                    },
+                ]
+            },
+            {
+                "name": "Competition Math",
+                "playlist": "Competition Math"
             },
             {
                 "name": "IIT JEE",
@@ -292,8 +313,7 @@ DVD_list = DVDs_dict.get(None) #'Math'
 def sorted_playlist_titles():
     playlist_titles = []
     append_playlist_titles(playlist_titles, PLAYLIST_STRUCTURE)
-    playlist_titles.sort()
-    return playlist_titles
+    return sorted(set(playlist_titles))
 
 def append_playlist_titles(playlist_titles, obj):
     type_obj = type(obj)

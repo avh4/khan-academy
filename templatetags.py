@@ -8,9 +8,11 @@ from django.template.defaultfilters import escape, slugify
 
 from app import App
 from templatefilters import seconds_to_time_string
+from models import UserData
 import consts
 import util
 import topics_list
+from inspect import getmembers
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -96,17 +98,19 @@ def related_videos(exercise_videos, show_points=False):
 
 @register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
 def exercise_icon(exercise, App):
-    s_prefix = "proficient-badge"
+    s_prefix = "node"
     if exercise.summative:
-        s_prefix = "challenge"
+        s_prefix = "node-challenge"
 
     src = ""
     if exercise.review:
-        src = "/images/proficient-badge-review.png" # No reviews for summative exercises yet
+        src = "/images/node-review.png" # No reviews for summative exercises yet
     elif exercise.suggested:
         src = "/images/%s-suggested.png" % s_prefix
     elif exercise.proficient:
         src = "/images/%s-complete.png" % s_prefix
+    # elif exercise.phantom:
+    #     src = "/images/node-not-started.png"
     else:
         src = "/images/%s-not-started.png" % s_prefix
 
@@ -125,29 +129,30 @@ def user_points(user_data):
     return {"points": points}
 
 @register.inclusion_tag(("possible_points_badge.html", "../possible_points_badge.html"))
-def possible_points_badge(points, possible_points):
-    return {"points": points, "possible_points": possible_points}
+def possible_points_badge(points, possible_points, logged_in=True):
+    return {"points": points, "possible_points": possible_points, "logged_in": logged_in}
 
 @register.inclusion_tag(("simple_student_info.html", "../simple_student_info.html"))
 def simple_student_info(user_data):
     coach_count = len(user_data.coaches)
 
     return { 
-            "first_coach": user_data.coaches[0] if coach_count >= 1 else None,
-            "additional_coaches": coach_count - 1 if coach_count > 1 else None,
             "member_for": seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
            }
 
 @register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))
 def streak_bar(user_exercise):
-
     streak = user_exercise.streak
     longest_streak = 0
 
     if hasattr(user_exercise, "longest_streak"):
         longest_streak = user_exercise.longest_streak
 
-    streak_max_width = 228
+    if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
+        streak = 0
+        longest_streak = 0
+
+    streak_max_width = 227
 
     streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * streak))
     longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * longest_streak))
@@ -214,8 +219,6 @@ def playlist_browser_structure(structure, class_name="", level=0):
             # We have two special case playlist URLs to worry about for now. Should remove later.
             if playlist_title.startswith("SAT"):
                 href = "/sat"
-            elif playlist_title.startswith("GMAT"):
-                href = "/gmat"
 
             if level == 0:
                 s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(name))
@@ -238,10 +241,10 @@ def static_url(relative_url):
 
 @register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
 def empty_class_instructions(class_is_empty=True):
-    user = util.get_current_user()
+    user_data = UserData.current()
     coach_email = "Not signed in. Please sign in to see your Coach ID."
-    if user:
-        coach_email = user.email()
+    if user_data:
+        coach_email = user_data.email
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
@@ -250,6 +253,7 @@ register.tag(highlight)
 webapp.template.register_template_library('templatetags')    
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
+webapp.template.register_template_library('phantom_users.templatetags')
 webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
 webapp.template.register_template_library('js_css_packages.templatetags')

@@ -3,8 +3,18 @@
 import datetime, logging
 import math
 import urllib
+import random
+
+import config_django
+
 from google.appengine.api import users
 from google.appengine.api import memcache
+from google.appengine.ext import deferred
+
+# Do not remove this webapp.template import, as suggested
+# by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
+from google.appengine.ext.webapp import template
+from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
@@ -19,10 +29,13 @@ import layer_cache
 import request_cache
 from discussion import models_discussion
 from topics_list import all_topics_list
+import nicknames
+from counters import user_counter
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
 # across all GAE instances.
+
 class Setting(db.Model):
 
     value = db.StringProperty()
@@ -35,16 +48,23 @@ class Setting(db.Model):
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
-            memcache.delete("setting_key_%s" % key, namespace=App.version)
+
+            Setting.get_settings_dict(bust_cache=True)
+
             return setting.value
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(lambda key: "setting_key_%s" % key, layer=layer_cache.Layers.Memcache)
     def cache_get_by_key_name(key):
-        setting = Setting.get_by_key_name(key)
+        setting = Setting.get_settings_dict().get(key)
         if setting is not None:
             return setting.value
         return None
+
+    @staticmethod
+    @request_cache.cache()
+    @layer_cache.cache(layer=layer_cache.Layers.Memcache)
+    def get_settings_dict(bust_cache = False):
+        return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
 
     @staticmethod
     def cached_library_content_date(val = None):
@@ -114,6 +134,7 @@ class Exercise(db.Model):
             return name.replace('_', ' ').capitalize()
         return ""
 
+    @property
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
@@ -127,7 +148,7 @@ class Exercise(db.Model):
     def short_name(self):
         if self.short_display_name:
             return self.short_display_name[:11]
-        return self.display_name()[:11]
+        return self.display_name[:11]
 
     def is_visible_to_current_user(self):
         return self.live or users.is_current_user_admin()
@@ -254,6 +275,7 @@ class UserExercise(db.Model):
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
+    total_correct = db.IntegerProperty(default = 0)
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
     review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
     proficient_date = db.DateTimeProperty()
@@ -265,31 +287,34 @@ class UserExercise(db.Model):
     _serialize_blacklist = ["review_interval_secs", "exercise_model"]
 
     @staticmethod
-    def get_key_for_user(user):
-        return UserExercise._USER_EXERCISE_KEY_FORMAT % user.email()
+    def get_key_for_email(email):
+        return UserExercise._USER_EXERCISE_KEY_FORMAT % email
 
     @staticmethod
-    def get_for_user(user):
+    def get_for_user_data(user_data):
         query = UserExercise.all()
-        query.filter('user =', user)
-        return query.fetch(1000)
+        query.filter('user =', user_data.user)
+        return query
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user: "request_cache_user_exercise_%s" % user.email())
-    def get_for_user_use_cache(user):
-        user_exercises_key = UserExercise.get_key_for_user(user)
+    @request_cache.cache_with_key_fxn(lambda user_data: "request_cache_user_exercise_%s" % user_data.key_email)
+    def get_for_user_data_use_cache(user_data):
+        user_exercises_key = UserExercise.get_key_for_email(user_data.key_email)
         user_exercises = memcache.get(user_exercises_key, namespace=App.version)
         if user_exercises is None:
-            user_exercises = UserExercise.get_for_user(user)
+            user_exercises = UserExercise.get_for_user_data(user_data).fetch(1000)
             memcache.set(user_exercises_key, user_exercises, namespace=App.version)
         return user_exercises
 
     def clear_memcache(self):
-        memcache.delete(UserExercise.get_key_for_user(self.user), namespace=App.version)
+        memcache.delete(UserExercise.get_key_for_email(self.user.email()), namespace=App.version)
     
     def put(self):
         self.clear_memcache()
         db.Model.put(self)
+
+    def belongs_to(self, user_data):
+        return user_data and self.user.email().lower() == user_data.key_email.lower()
 
     def required_streak(self):
         return self.exercise_model.required_streak()
@@ -344,7 +369,7 @@ class UserExercise(db.Model):
         else:
             self.last_review = datetime.datetime.min
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
-        
+
     def set_proficient(self, proficient, user_data):
         if not proficient and self.longest_streak < self.required_streak():
             # Not proficient and never has been so nothing to do
@@ -352,46 +377,84 @@ class UserExercise(db.Model):
 
         if proficient:
             if self.exercise not in user_data.proficient_exercises:
-                    user_data.proficient_exercises.append(self.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
+                user_data.proficient_exercises.append(self.exercise)
+                user_data.need_to_reassess = True
+                user_data.put()
+                util_notify.update(user_data, self, False, True)
+
         else:
             if self.exercise in user_data.proficient_exercises:
-                    user_data.proficient_exercises.remove(self.exercise)
-                    user_data.need_to_reassess = True
-                    user_data.put()
+                user_data.proficient_exercises.remove(self.exercise)
+                user_data.need_to_reassess = True
+                user_data.put()
+                    
 
 class CoachRequest(db.Model):
     coach_requesting = db.UserProperty()
     student_requested = db.UserProperty()
 
-    @staticmethod
-    def key_for(coach, student):
-        return "%s_request_for_%s" % (coach.email(), student.email())
+    @property
+    def coach_requesting_data(self):
+        if not hasattr(self, "coach_user_data"):
+            self.coach_user_data = UserData.get_from_db_key_email(self.coach_requesting.email())
+        return self.coach_user_data
+
+    @property
+    def student_requested_data(self):
+        if not hasattr(self, "student_user_data"):
+            self.student_user_data = UserData.get_from_db_key_email(self.student_requested.email())
+        return self.student_user_data
 
     @staticmethod
-    def get_for(coach, student):
-        return CoachRequest.get_by_key_name(CoachRequest.key_for(coach, student))
+    def key_for(user_data_coach, user_data_student):
+        return "%s_request_for_%s" % (user_data_coach.key_email, user_data_student.key_email)
 
     @staticmethod
-    def get_or_insert_for(coach, student):
+    def get_for(user_data_coach, user_data_student):
+        return CoachRequest.get_by_key_name(CoachRequest.key_for(user_data_coach, user_data_student))
+
+    @staticmethod
+    def get_or_insert_for(user_data_coach, user_data_student):
         return CoachRequest.get_or_insert(
-                key_name = CoachRequest.key_for(coach, student),
-                coach_requesting = coach,
-                student_requested = student,
+                key_name = CoachRequest.key_for(user_data_coach, user_data_student),
+                coach_requesting = user_data_coach.user,
+                student_requested = user_data_student.user,
                 )
 
     @staticmethod
-    def get_for_student(student):
-        return CoachRequest.all().filter("student_requested = ", student)
+    def get_for_student(user_data_student):
+        return CoachRequest.all().filter("student_requested = ", user_data_student.user)
 
     @staticmethod
-    def get_for_coach(coach):
-        return CoachRequest.all().filter("coach_requesting = ", coach)
+    def get_for_coach(user_data_coach):
+        return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
+        
+class StudentList(db.Model):
+    name = db.StringProperty()
+    coaches = db.ListProperty(db.Key)
+
+    def delete(self, *args, **kwargs):
+        self.remove_all_students()
+        db.Model.delete(self, *args, **kwargs)
+
+    def remove_all_students(self):
+        students = self.get_students_data()
+        for s in students:
+            s.student_lists.remove(self.key())
+        db.put(students)
+
+    @property
+    def students(self):
+        return UserData.all().filter("student_lists = ", self.key())
+
+    # these methods have the same interface as the methods on UserData
+    def get_students_data(self):
+        return [s for s in self.students]
+
 
 class UserData(db.Model):
-
-    user = db.UserProperty()       
+    user = db.UserProperty()
+    current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
@@ -404,61 +467,120 @@ class UserData(db.Model):
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
+    student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
+    hide_notifications = db.BooleanProperty(default=True)
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
-
+    
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
-            "last_login"
+            "last_login", "user", "current_user"
     ]
-    
-    @staticmethod
-    def get_for_current_user():
-        user = util.get_current_user()
-        if user is not None:
-            user_data = UserData.get_for(user)
-            if user_data is not None:
-                return user_data
-        return UserData()
 
-    @staticmethod    
-    def get_for(user):
-        if not user:
+    @property
+    def nickname(self):
+        return nicknames.get_nickname_for(self.current_user)
+
+    @property
+    def email(self):
+        return self.current_user.email()
+
+    @property
+    def key_email(self):
+        return self.user.email()
+
+    @property
+    def badge_counts(self):
+        return util_badges.get_badge_counts(self)
+
+    @staticmethod
+    @request_cache.cache()
+    def current(bust_cache=True):
+        if bust_cache:
+            util._get_current_user_email(bust_cache=True)
+        email = util._get_current_user_email()
+        if email:
+            # Once we have rekeyed legacy entities,
+            # we will be able to simplify this.
+
+            return  UserData.get_from_user_input_email(email) or \
+                    UserData.get_from_db_key_email(email) or \
+                    UserData.insert_for(email)
+        return None
+
+    @property
+    def is_phantom(self):
+        return util._is_phantom_user(self.current_user)
+
+    @staticmethod
+    @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)
+    def get_from_user_input_email(email):
+        if not email:
             return None
 
         query = UserData.all()
-        query.filter('user =', user)
+        query.filter('current_user =', users.User(email))
         query.order('-points') # Temporary workaround for issue 289
+
         return query.get()
-    
+
     @staticmethod    
-    def get_or_insert_for(user):
-        # Once we have rekeyed legacy entities,
-        # the next block can just be a call to .get_or_insert()
-        user_data = UserData.get_for(user)
-        if user_data is None:
-            if user.email():
-                key = "user_email_key_%s" % user.email()
-                user_data = UserData.get_or_insert(
-                    key_name=key,
-                    user=user,
-                    moderator=False,
-                    last_login=datetime.datetime.now(),
-                    proficient_exercises=[],
-                    suggested_exercises=[],
-                    assigned_exercises=[],
-                    need_to_reassess=True,
-                    points=0,
-                    coaches=[]
-                    )
+    def get_from_db_key_email(email):
+        if not email:
+            return None
+
+        query = UserData.all()
+        query.filter('user =', users.User(email))
+        query.order('-points') # Temporary workaround for issue 289
+
+        return query.get()
+
+    @staticmethod
+    def insert_for(email):
+        if not email:
+            return None
+
+        user = users.User(email)
+        key = "user_email_key_%s" % email
+
+        user_data = UserData.get_or_insert(
+            key_name=key,
+            user=user,
+            current_user=user,
+            moderator=False,
+            last_login=datetime.datetime.now(),
+            proficient_exercises=[],
+            suggested_exercises=[],
+            assigned_exercises=[],
+            need_to_reassess=True,
+            points=0,
+            coaches=[]
+            )
+
+        if not user_data.is_phantom:
+            # Record that we now have one more registered user
+            if (datetime.datetime.now() - user_data.joined).seconds < 60:
+                # Extra safety check against user_data.joined in case some
+                # subtle bug results in lots of calls to insert_for for
+                # UserData objects with existing key_names.
+                user_counter.add(1)
+
         return user_data
+
+    def delete(self):
+        logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
+
+        if not self.is_phantom:
+            user_counter.add(-1)
+
+        db.delete(self)
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
 
@@ -497,6 +619,7 @@ class UserData(db.Model):
         return userExercise
         
     def get_exercise_states(self, exercise, user_exercise, current_time):
+        phantom = exercise.phantom = util._is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
@@ -504,6 +627,7 @@ class UserData(db.Model):
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
         
         return {
+            'phantom': phantom,
             'proficient': proficient,
             'suggested': suggested,
             'reviewing': reviewing,
@@ -525,14 +649,14 @@ class UserData(db.Model):
         self.need_to_reassess = False
         return is_changed
     
-    def reassess_if_necessary(self, user=None):
+    def reassess_if_necessary(self):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        ex_graph = ExerciseGraph(self, user)
+        ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
         
-    def is_proficient_at(self, exid, user=None):
-        self.reassess_if_necessary(user)
+    def is_proficient_at(self, exid):
+        self.reassess_if_necessary()
         return (exid in self.all_proficient_exercises)
 
     def is_explicitly_proficient_at(self, exid):
@@ -557,7 +681,7 @@ class UserData(db.Model):
         return (exid in self.suggested_exercises)
 
     def get_students_data(self):
-        coach_email = self.user.email()   
+        coach_email = self.key_email   
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
         students_data = []
         for student_data in query:
@@ -569,21 +693,29 @@ class UserData(db.Model):
         	    if student_data.key().id_or_name() not in students_set:
         		    students_data.append(student_data)
         return students_data
-   
-    def get_students(self):
-        return map(lambda student_data: student_data.user.email(), self.get_students_data())
 
-    def is_coached_by(self, coach):
-        return coach.email() in self.coaches or coach.email().lower() in self.coaches
+    def coach_emails(self):
+        emails = []
+        for key_email in self.coaches:
+            user_data_coach = UserData.get_from_db_key_email(key_email)
+            if user_data_coach:
+                emails.append(user_data_coach.email)
+        return emails
+
+    def is_coached_by(self, user_data_coach):
+        return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
     def add_points(self, points):
         if self.points == None:
             self.points = 0
+        if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
+            util_notify.update(self,None,True)
         self.points += points
+        
 
     def get_videos_completed(self):
         if self.videos_completed < 0:
-            self.videos_completed = UserVideo.count_completed_for_user(self.user)
+            self.videos_completed = UserVideo.count_completed_for_user_data(self)
             self.put()
         return self.videos_completed
 
@@ -592,7 +724,23 @@ class UserData(db.Model):
             self.count_feedback_notification = models_discussion.FeedbackNotification.gql("WHERE user = :1", self.user).count()
             self.put()
         return self.count_feedback_notification
-    
+
+class UserLog(db.Model):
+    registered_users = db.IntegerProperty(required=True, default=0)
+    time = db.DateTimeProperty(auto_now_add=True)
+
+    @staticmethod
+    def _add_entry(registered_users, time=None):
+        log = UserLog(registered_users=registered_users)
+        if time: # time defaults to now
+            log.time = time
+
+        log.put()
+
+    @staticmethod
+    def add_current_state():
+        UserLog._add_entry(user_counter.get_count())
+
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()
     url = db.StringProperty()
@@ -613,6 +761,12 @@ class Video(Searchable, db.Model):
     # this date may be much later than the actual YouTube upload date.
     date_added = db.DateTimeProperty(auto_now_add=True)
 
+    # Last download version in which video download was prepped.
+    download_version = db.IntegerProperty(default = 0)
+    CURRENT_DOWNLOAD_VERSION = 2
+
+    _serialize_blacklist = ["download_version", "CURRENT_DOWNLOAD_VERSION"]
+
     INDEX_ONLY = ['title', 'keywords', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
@@ -620,6 +774,18 @@ class Video(Searchable, db.Model):
     @property
     def ka_url(self):
         return "http://www.khanacademy.org/video/%s" % self.readable_id
+
+    @property
+    def download_urls(self):
+        if self.download_version == Video.CURRENT_DOWNLOAD_VERSION:
+            download_url_base = "http://www.archive.org/download/KA-converted-%s" % self.youtube_id
+
+            return {
+                    "mp4": "%s/%s.mp4" % (download_url_base, self.youtube_id),
+                    "png": "%s/%s.png" % (download_url_base, self.youtube_id),
+                    }
+
+        return None
     
     @staticmethod
     def get_for_readable_id(readable_id):
@@ -650,7 +816,7 @@ class Video(Searchable, db.Model):
         return None
 
     def current_user_points(self):
-        user_video = UserVideo.get_for_video_and_user(self, util.get_current_user())
+        user_video = UserVideo.get_for_video_and_user_data(self, UserData.current())
         if user_video:
             return points.VideoPointCalculator(user_video)
         else:
@@ -691,7 +857,7 @@ class Playlist(Searchable, db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(self.title))
+        return "http://www.khanacademy.org/#%s" % urllib.quote(slugify(self.title))
 
     @staticmethod
     def get_for_all_topics():
@@ -709,27 +875,26 @@ class UserPlaylist(db.Model):
     title = db.StringProperty()
 
     @staticmethod
-    def get_for_user(user):
+    def get_for_user_data(user_data):
         query = UserPlaylist.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
         return query
 
     @staticmethod
-    def get_key_name(playlist, user):
-        return user.email() + ":" + playlist.youtube_id
+    def get_key_name(playlist, user_data):
+        return user_data.key_email + ":" + playlist.youtube_id
 
     @staticmethod
-    def get_for_playlist_and_user(playlist, user, insert_if_missing=False):
-
-        if not user:
+    def get_for_playlist_and_user_data(playlist, user_data, insert_if_missing=False):
+        if not user_data:
             return None
 
-        key = UserPlaylist.get_key_name(playlist, user)
+        key = UserPlaylist.get_key_name(playlist, user_data)
 
         if insert_if_missing:
             return UserPlaylist.get_or_insert(
                         key_name = key,
-                        user = user,
+                        user = user_data.user,
                         playlist = playlist)
         else:
             return UserPlaylist.get_by_key_name(key)
@@ -737,30 +902,28 @@ class UserPlaylist(db.Model):
 class UserVideo(db.Model):
 
     @staticmethod
-    def get_key_name(video, user):
-        return user.email() + ":" + video.youtube_id
+    def get_key_name(video, user_data):
+        return user_data.key_email + ":" + video.youtube_id
 
     @staticmethod
-    def get_for_video_and_user(video, user, insert_if_missing=False):
-
-        if not user:
+    def get_for_video_and_user_data(video, user_data, insert_if_missing=False):
+        if not user_data:
             return None
-
-        key = UserVideo.get_key_name(video, user)
+        key = UserVideo.get_key_name(video, user_data)
 
         if insert_if_missing:
             return UserVideo.get_or_insert(
                         key_name = key,
-                        user = user,
+                        user = user_data.user,
                         video = video,
                         duration = video.duration)
         else:
             return UserVideo.get_by_key_name(key)
 
     @staticmethod
-    def count_completed_for_user(user):
+    def count_completed_for_user_data(user_data):
         query = UserVideo.all()
-        query.filter("user = ", user)
+        query.filter("user = ", user_data.user)
         query.filter("completed = ", True)
         return query.count(limit=10000)
 
@@ -795,9 +958,9 @@ class VideoLog(db.Model):
     _serialize_blacklist = ["video"]
 
     @staticmethod
-    def get_for_user_between_dts(user, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = VideoLog.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
 
         query.filter('time_watched >=', dt_a)
         query.filter('time_watched <=', dt_b)
@@ -806,10 +969,10 @@ class VideoLog(db.Model):
         return query
 
     @staticmethod
-    def get_for_user_and_video(user, video):
+    def get_for_user_data_and_video(user_data, video):
         query = VideoLog.all()
 
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
         query.filter('video =', video)
 
         query.order('time_watched')
@@ -819,15 +982,14 @@ class VideoLog(db.Model):
     @staticmethod
     def add_entry(user_data, video, seconds_watched, last_second_watched):
 
-        user = user_data.user
-        user_video = UserVideo.get_for_video_and_user(video, user, insert_if_missing=True)
+        user_video = UserVideo.get_for_video_and_user_data(video, user_data, insert_if_missing=True)
 
         # Cap seconds_watched at duration of video
         seconds_watched = max(0, min(seconds_watched, video.duration))
 
         video_points_previous = points.VideoPointCalculator(user_video)
 
-        action_cache=last_action_cache.LastActionCache.get_for_user(user)
+        action_cache=last_action_cache.LastActionCache.get_for_user_data(user_data)
 
         last_video_log = action_cache.get_last_video_log()
 
@@ -837,10 +999,10 @@ class VideoLog(db.Model):
         if last_video_log and last_video_log.key_for_video() != video.key():
             dt_now = datetime.datetime.now()
             if last_video_log.time_watched > (dt_now - datetime.timedelta(seconds=seconds_watched)):
-                return
+                return (None, None, 0)
 
         video_log = VideoLog()
-        video_log.user = user
+        video_log.user = user_data.user
         video_log.video = video
         video_log.video_title = video.title
         video_log.seconds_watched = seconds_watched
@@ -859,7 +1021,7 @@ class VideoLog(db.Model):
 
             first_video_playlist = True
             for video_playlist in query:
-                user_playlist = UserPlaylist.get_for_playlist_and_user(video_playlist.playlist, user, insert_if_missing=True)
+                user_playlist = UserPlaylist.get_for_playlist_and_user_data(video_playlist.playlist, user_data, insert_if_missing=True)
                 user_playlist.title = video_playlist.playlist.title
                 user_playlist.seconds_watched += seconds_watched
                 user_playlist.last_watched = datetime.datetime.now()
@@ -871,7 +1033,6 @@ class VideoLog(db.Model):
                     action_cache.push_video_log(video_log)
 
                 util_badges.update_with_user_playlist(
-                        user, 
                         user_data, 
                         user_playlist,
                         include_other_badges = first_video_playlist,
@@ -896,9 +1057,14 @@ class VideoLog(db.Model):
             video_log.points_earned = video_points_received
             user_data.add_points(video_points_received)
 
-        db.put([user_video, video_log, user_data])
+        db.put([user_video, user_data])
 
-        return video_points_total
+        # Defer the put of VideoLog for now, as we think it might be causing hot tablets
+        # and want to shift it off to an automatically-retrying task queue.
+        # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
+        deferred.defer(commit_video_log, video_log, _queue="video-log-queue")
+
+        return (user_video, video_log, video_points_total)
 
     def time_started(self):
         return self.time_watched - datetime.timedelta(seconds = self.seconds_watched)
@@ -912,27 +1078,31 @@ class VideoLog(db.Model):
     def key_for_video(self):
         return VideoLog.video.get_value_for_datastore(self)
 
+# commit_video_log is used by our deferred video log insertion process
+def commit_video_log(video_log):
+    video_log.put()
+
 class DailyActivityLog(db.Model):
     user = db.UserProperty()
     date = db.DateTimeProperty()
     activity_summary = object_property.ObjectProperty()
 
     @staticmethod
-    def get_key_name(user, date):
-        return "%s:%s" % (user.email(), date.strftime("%Y-%m-%d-%H"))
+    def get_key_name(user_data, date):
+        return "%s:%s" % (user_data.key_email, date.strftime("%Y-%m-%d-%H"))
 
     @staticmethod
-    def build(user, date, activity_summary):
-        log = DailyActivityLog(key_name=DailyActivityLog.get_key_name(user, date))
-        log.user = user
+    def build(user_data, date, activity_summary):
+        log = DailyActivityLog(key_name=DailyActivityLog.get_key_name(user_data, date))
+        log.user = user_data.user
         log.date = date
         log.activity_summary = activity_summary
         return log
 
     @staticmethod
-    def get_for_user_between_dts(user, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = DailyActivityLog.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
 
         query.filter('date >=', dt_a)
         query.filter('date <', dt_b)
@@ -953,10 +1123,14 @@ class ProblemLog(db.Model):
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
 
+    @property
+    def ka_url(self):
+        return "http://www.khanacademy.org/exercises?exid=%s&problem_number=%s" % (self.exercise, self.problem_number)
+
     @staticmethod
-    def get_for_user_between_dts(user, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = ProblemLog.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
 
         query.filter('time_done >=', dt_a)
         query.filter('time_done <', dt_b)
@@ -978,6 +1152,10 @@ class ProblemLog(db.Model):
 
     def minutes_spent(self):
         return util.minutes_between(self.time_started(), self.time_ended())
+
+# commit_problem_log is used by our deferred problem log insertion process
+def commit_problem_log(problem_log):
+    problem_log.put()
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and
@@ -1087,10 +1265,8 @@ class ExerciseVideo(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data, user=None):
-        if user is None:
-            user = util.get_current_user()
-        user_exercises = UserExercise.get_for_user_use_cache(user)
+    def __init__(self, user_data):
+        user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
         self.exercise_by_name = {}        
@@ -1103,6 +1279,7 @@ class ExerciseGraph(object):
             ex.is_ancestor_review_candidate = None  # Not set initially
             ex.proficient = None # Not set initially
             ex.suggested = None # Not set initially
+            ex.phantom = False
             ex.assigned = False
             ex.streak = 0
             ex.longest_streak = 0
@@ -1172,6 +1349,11 @@ class ExerciseGraph(object):
         for ex in exercises:
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
+
+        phantom = user_data.is_phantom
+        for ex in exercises:
+            ex.phantom = phantom
+                
 
     def get_review_exercises(self, now):
 
@@ -1260,3 +1442,4 @@ class ExerciseGraph(object):
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
 
 from badges import util_badges, last_action_cache
+from phantom_users import util_notify

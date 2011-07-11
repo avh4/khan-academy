@@ -8,9 +8,10 @@ from flask import current_app
 
 from api import route
 from api.auth.models import OAuthMap
-from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response
+from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response, custom_scheme_redirect, set_current_oauth_map_in_session
 from api.auth.google_util import google_request_token_handler
 from api.auth.facebook_util import facebook_request_token_handler
+from api.auth.decorators import oauth_required
 
 from oauth_provider.oauth import OAuthError
 from oauth_provider.utils import initialize_server_request
@@ -39,6 +40,9 @@ def request_token():
     except OAuthError, e:
         return oauth_error_response(e)
 
+    if OAuthMap.get_from_request_token(token.key_):
+        return oauth_error_response(OAuthError("OAuth parameters already used."))
+
     # Start a new OAuth mapping
     oauth_map = OAuthMap()
     oauth_map.request_token_secret = token.secret
@@ -50,7 +54,13 @@ def request_token():
 
     oauth_map.put()
 
-    return redirect("/login/mobileoauth?oauth_map_id=%s" % oauth_map.key().id())
+    chooser_url = "/login/mobileoauth?oauth_map_id=%s&view=%s" % (oauth_map.key().id(), oauth_map.view)
+
+    oauth_consumer = oauth_server._get_consumer(oauth_request)
+    if oauth_consumer and oauth_consumer.anointed:
+        chooser_url += "&an=1"
+
+    return redirect(chooser_url)
 
 @route("/api/auth/request_token_callback/<provider>/<oauth_map_id>", methods=["GET"])
 def request_token_callback(provider, oauth_map_id):
@@ -100,7 +110,7 @@ def authorize_token():
         oauth_map.verifier = token.verifier
         oauth_map.put()
 
-        return redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
+        return custom_scheme_redirect(oauth_map.callback_url_with_request_token_params(include_verifier=True))
 
     except OAuthError, e:
         return oauth_error_response(e)
@@ -117,7 +127,7 @@ def access_token():
 
     if oauth_server is None:
         return oauth_error_response(OAuthError('Invalid request parameters.'))
-    
+
     try:
         # Create our access token
         token = oauth_server.fetch_access_token(oauth_request)
@@ -125,7 +135,7 @@ def access_token():
             return oauth_error_response(OAuthError("Cannot find corresponding access token."))
 
         # Grab the mapping of access tokens to our identity providers 
-        oauth_map = OAuthMap.get_from_request_token(request.values.get("oauth_token"))
+        oauth_map = OAuthMap.get_from_request_token(oauth_request.get_parameter("oauth_token"))
         if not oauth_map:
             return oauth_error_response(OAuthError("Cannot find oauth mapping for request token."))
 
@@ -146,3 +156,9 @@ def access_token():
 def default_callback():
     return "OK"
 
+# Use OAuth token to login via session cookie
+@route("/api/auth/token_to_session", methods=["GET"])
+@oauth_required(require_anointed_consumer=True)
+def token_to_session():
+    set_current_oauth_map_in_session()
+    return redirect(request.request_string("continue", default="/"))

@@ -70,7 +70,7 @@
 .unit-rating a.r10-unit:hover{width: 200px;}
 
 .unit-rating li.current-rating {
-	background-image: url(/images/non-repeating-sprites.png);
+	background-image: url(/images/non-repeating-sprites.1.png);
     background-position: -10px -780px;
 	height: 30px;
 	z-index: 1;
@@ -91,7 +91,6 @@
 .unit-rating li.streak-icon, 
 .unit-rating li.current-label,
 .unit-rating li.level-label {
-    text-shadow: #000 -1px -1px 0;
     color: white;
     font-weight: bold;
     font-size: 14px;
@@ -116,7 +115,7 @@
     }
 
 .unit-rating li.streak-icon {
-	background-image: url(/images/non-repeating-sprites.png);
+	background-image: url(/images/non-repeating-sprites.1.png);
     background-position: -10px -820px;
     z-index: 2;
     }

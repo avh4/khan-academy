@@ -89,14 +89,14 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
             var jelMenu = $(autocompleteWidget.data("autocomplete").menu.element);
             var jelInput = $(this);
 
-            var pxRightMenu = jelMenu.offset().left + jelMenu.outerWidth();
-            var pxRightInput = jelInput.offset().left + jelInput.outerWidth();
+            var pxRightMenu = jelMenu.offset().right + jelMenu.outerWidth();
+            var pxRightInput = jelInput.offset().right + jelInput.outerWidth();
 
             if (pxRightMenu > pxRightInput)
             {
                 // Keep right side of search input and autocomplete menu aligned
                 jelMenu.offset({
-                                    left: pxRightInput - jelMenu.outerWidth(), 
+                                    right: pxRightInput - jelMenu.outerWidth(), 
                                     top: jelMenu.offset().top
                                 });
             }
@@ -205,9 +205,6 @@ var VideoControls = {
     initThumbnails: function() {
 
         var jelThumbnails = $("#thumbnails");
-        
-        this.thumbnailResize(jelThumbnails);
-        $(window).resize(function(){ VideoControls.thumbnailResize(jelThumbnails); });
 
         jelThumbnails.cycle({ 
             fx:     'scrollHorz', 
@@ -220,15 +217,12 @@ var VideoControls = {
             next: '#arrow-right'
         });
 
+        // We want #thumbnails to be full width even though the cycle plugin doesn't
+        jelThumbnails.css({ width: "" });
+
         $(".thumbnail_link", jelThumbnails).click(VideoControls.thumbnailClick);
     },
 
-    thumbnailResize: function(jelThumbnails) {
-        var width = jelThumbnails.parent().width();
-        jelThumbnails.width(width);
-        $("table", jelThumbnails).width(width);
-    },
-    
     thumbnailClick: function() {
         var jelParent = $(this).parents("td").first();
         var youtubeId = jelParent.attr("data-youtube-id");
@@ -268,7 +262,7 @@ var VideoStats = {
     getPercentWatched: function() {
         if (!this.player) return 0;
 
-        var duration = this.player.getDuration() || 0
+        var duration = this.player.getDuration() || 0;
         if (duration <= 0) return 0;
 
         return this.getSecondsWatched() / duration;
@@ -294,7 +288,7 @@ var VideoStats = {
         {
             // Every 10 seconds check to see if we've crossed over our percent
             // granularity logging boundary
-            setInterval(function(){VideoStats.saveIfChanged();}, 10000);
+            setInterval(function(){VideoStats.playerStateChange(-2);}, 10000);
             this.fIntervalStarted = true;
         }
     },
@@ -311,21 +305,23 @@ var VideoStats = {
     },
 
     playerStateChange: function(state) {
-        // YouTube's "ended" state
-        if (state == 0)
-        {
-            this.saveIfChanged();
-        }
-    },
-
-    saveIfChanged: function() {
-        var percent = this.getPercentWatched();
-        if (percent > this.dPercentLastSaved && 
-                (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
-        {
-            // Either video was finished or another 10% has been watched
+        if (state == -2) { // playing normally
+            var percent = this.getPercentWatched();
+            if (percent > (this.dPercentLastSaved + this.dPercentGranularity))
+            {
+                // Another 10% has been watched
+                this.save();
+            }
+        } else if (state == 0) { // ended
             this.save();
+        } else if (state == 2) { // paused
+            if (this.getSecondsWatchedRestrictedByPageTime() > 1) {
+              this.save();
+            }
+        } else if (state == 1) { // play
+            this.dtSinceSave = new Date();
         }
+        // If state is buffering, unstarted, or cued, don't do anything
     },
 
     save: function() {
@@ -354,6 +350,31 @@ var VideoStats = {
         this.dtSinceSave = new Date();
     },
 
+    /* Use qtip2 (http://craigsworks.com/projects/qtip2/) to create a tooltip
+     * that looks like the ones on youtube.
+     *
+     * Example: 
+     * VideoStats.tooltip('#points-badge-hover', '0 of 500 points');
+     */
+    tooltip: function(selector, content) {
+        $(selector).qtip({
+            content: {
+                text: content
+            },
+            style: {
+                classes: 'ui-tooltip-youtube'
+            },
+            position: {
+                my: 'top center',
+                at: 'bottom center'
+            },
+            hide: {
+                fixed: true,
+                delay: 150
+            }
+        });
+    },
+
     finishSave: function(data, percent) {
         VideoStats.fSaving = false;
         VideoStats.dPercentLastSaved = percent;
@@ -363,10 +384,14 @@ var VideoStats = {
 
         if (dict_json.video_points && dict_json.user_points_html)
         {
+            // Update the energy points box with the new data.
             var jelPoints = $(".video-energy-points");
-            jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
+            jelPoints.data("title", jelPoints.data("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
             $("#user-points-container").html(dict_json.user_points_html);
+
+            // Replace the old tooltip with an updated one.
+            VideoStats.tooltip('#points-badge-hover', jelPoints.data('title'));
         }
     },
 
@@ -553,6 +578,54 @@ var Badges = {
     }
 }
 
+
+var Notifications = {
+
+    show: function() {
+        var jel = $(".notification-bar");
+        $(".notification-bar-close").click(function(){
+            Notifications.hide();
+            return false;
+            });
+        setTimeout(function(){
+            
+            jel
+                .css("visibility", "hidden")
+                .css("display", "")
+                .css("top",-1*jel.height())
+                .css("visibility", "visible");
+
+            // Queue:false to make sure all of these run at the same time
+            var animationOptions = {duration: 350, queue: false};
+            
+            $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
+            $("#top-header").animate({ marginTop: 35 }, animationOptions);
+            jel.show().animate({ top: 0 }, animationOptions);
+
+        }, 100);
+
+    },
+
+    hide: function() {
+        var jel = $(".notification-bar");
+
+        // Queue:false to make sure all of these run at the same time
+        var animationOptions = {duration: 350, queue: false};
+        
+        $("body").animate({ backgroundPosition: "0px 0px", top: 0 }, animationOptions);
+        $("#top-header").animate({ marginTop: 0 }, animationOptions);
+        jel.animate(
+                { top: -1 * jel.height() }, 
+                $.extend(animationOptions, 
+                    { complete: function(){ jel.remove(); } }
+                )
+        );
+
+        $.post("/notifierclose"); 
+    }
+
+}
+
 var Timezone = {
     tz_offset: null,
 
@@ -696,3 +769,28 @@ var FacebookHook = {
     }
 }
 FacebookHook.init();
+
+var Throbber = {
+    jElement: null,
+
+    show: function(jTarget, fOnLeft) {
+        if (!Throbber.jElement)
+        {
+            Throbber.jElement = $("<img style='display:none;' src='/images/throbber.gif' class='throbber'/>");
+            $(document.body).append(Throbber.jElement);
+        }
+
+        if (!jTarget.length) return;
+
+        var offset = jTarget.offset();
+
+        var top = offset.top + (jTarget.height() / 2) - 8;
+        var left = fOnLeft ? (offset.left - 16 - 4) : (offset.left + jTarget.width() + 4);
+
+        Throbber.jElement.css("top", top).css("left", left).css("display", "");
+    },
+
+    hide: function() {
+        if (Throbber.jElement) Throbber.jElement.css("display", "none");
+    }
+};

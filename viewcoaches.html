@@ -23,7 +23,27 @@
 {% block pagecontent %}
 
 <article id="coaches">
-<h2>Add a coach</h2>
+{% if coach_requests %}
+    <h2>New coaches are waiting</h2>
+
+    <p>These coaches have requested you as their student. <strong>If you accept them as your coach, they will have access to your Khan Academy data</strong>.</p>
+
+    <table>
+    {% for coach_request in coach_requests %}
+            {% if forloop.counter|divisibleby:2 %}
+            <tr class="even_row">
+            {% else %}
+            <tr class="odd_row">
+            {% endif %}
+                <td>{{ coach_request.coach_requesting_data.email|escape }}</td>
+                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting_data.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
+                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting_data.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
+            </tr>
+    {% endfor %}
+    </table>
+{% endif %}
+
+<h2 {% if coach_requests %}class="section-headline"{% endif %}>Add a coach</h2>
 <p>
     Your coach will give you their coach id. Enter it here to give them access to your Khan Academy data.
 </p>
@@ -42,44 +62,24 @@ Make sure you're entering your full coach's full id, which is <em>case sensitive
 </p>
 {% endif %}
 
-{% if coaches %}
+{% if coach_emails %}
 
-    <br/><br/>
-    <h2>Your coaches</h2>
+    <h2 class="section-headline">Your coaches</h2>
 
     <table>
-    {% for coach in coaches %}
+    {% for coach_email in coach_emails %}
             {% if forloop.counter|divisibleby:2 %}
             <tr class="even_row">
             {% else %}
             <tr class="odd_row">
             {% endif %}
-                <td>{{ coach|escape }}</td>
-                <td><a href="/unregistercoach?coach={{ coach|urlencode|escape }}" class="simple-button action-gradient">Remove coach</a></td>
+                <td>{{ coach_email|escape }}</td>
+                <td><a href="/unregistercoach?coach={{ coach_email|urlencode|escape }}" class="simple-button action-gradient">Remove coach</a></td>
             </tr>
     {% endfor %}
     </table>
 {% endif %}
 
-{% if coach_requests %}
-    <h2 class="section-headline">New coaches are waiting</h2>
-
-    <p>These coaches have requested you as their student. <strong>If you accept them as your coach, they will have access to your Khan Academy data</strong>.</p>
-
-    <table>
-    {% for coach_request in coach_requests %}
-            {% if forloop.counter|divisibleby:2 %}
-            <tr class="even_row">
-            {% else %}
-            <tr class="odd_row">
-            {% endif %}
-                <td>{{ coach_request.coach_requesting.email|escape }}</td>
-                <td><a href="/acceptcoach?accept=1&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Accept coach</a></td>
-                <td><a href="/acceptcoach?accept=0&coach_email={{ coach_request.coach_requesting.email|urlencode|escape }}" class="simple-button action-gradient">Deny coach</a></td>
-            </tr>
-    {% endfor %}
-    </table>
-{% endif %}
 <h2 class="section-headline">Your Student ID</h2>
 <p>If your coach asks for your student id, it is: {{student_id|escape}}</p>
 </article>

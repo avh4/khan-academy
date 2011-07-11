@@ -1,0 +1,7 @@
+<span id="badge-count-container" class="badge_count_container">
+{% block badge_count_block %}
+{% if sum %}
+<a title="{{ sum }} badges" class="notify-badge" href="/profile#achievements">{% if bronze %}<img src="{% static_url "/images/badges/meteorite-medium.png" %}" width="15" height="15"/> {{bronze}}{% endif %}{% if silver %} <img src="{% static_url "/images/badges/moon-medium.png" %}" width="15" height="15"/> {{ silver }}{% endif %}{% if gold %} <img src="{% static_url "/images/badges/earth-medium.png" %}" width="15" height="15"/> {{ gold }}{% endif %}{% if platinum %} <img src="{% static_url "/images/badges/sun-medium.png" %}" width="15" height="15"/> {{ platinum }}{% endif %}{% if diamond %} <img src="{% static_url "/images/badges/eclipse-medium.png" %}" width="15" height="15"/> {{ diamond }}{% endif %}{% if master %} <img src="{% static_url "/images/badges/master-challenge-blue-medium.png" %}" width="12" height="12" /> {{ master }}{% endif %}</a>
+{% endif %}
+{% endblock %}
+</span>

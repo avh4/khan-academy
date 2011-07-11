@@ -191,7 +191,18 @@ indexes:
 
 - kind: UserData
   properties:
+  - name: User
+  - name: joined
+
+- kind: UserData
+  properties:
   - name: __key__
+    direction: desc
+
+- kind: UserData
+  properties:
+  - name: current_user
+  - name: points
     direction: desc
 
 - kind: UserData
@@ -224,6 +235,11 @@ indexes:
   properties:
   - name: __key__
     direction: desc
+
+- kind: UserVideo
+  properties:
+  - name: user
+  - name: last_watched
 
 - kind: Video
   properties:

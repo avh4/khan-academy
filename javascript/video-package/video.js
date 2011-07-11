@@ -46,14 +46,24 @@ var Video = {
         $('.subtitles-link').click(function() { Video.toggleSubtitles(); return false; });
         if (readCookie(this.SHOW_SUBTITLES_COOKIE))
             this.showSubtitles();
-    },
 
+	
+		$('.sharepop').hide();
+		
+		$('.share-link').click(function() {
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+			return false;
+		});
+	
+    },
+	
     toggleSubtitles: function() {
         if ($('.subtitles-warning').is(":visible"))
             this.hideSubtitles();
         else
             this.showSubtitles();
     },
+	
 
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);
@@ -61,7 +71,7 @@ var Video = {
         $('.mirosubs-videoTab').hide();
         $('.subtitles-warning').hide();
         $('.youtube-video').css('marginBottom', '0px');
-        Discussion.hideThrobber();
+        Throbber.hide();
     },
 
     showSubtitles: function() {
@@ -74,7 +84,7 @@ var Video = {
         if ($('.mirosubs-videoTab').length == 0)
         {
             setTimeout(function() {
-                Discussion.showThrobber($(".subtitles-warning"), true);
+                Throbber.show($(".subtitles-warning"), true);
             }, 1);
 
             $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', function() { 

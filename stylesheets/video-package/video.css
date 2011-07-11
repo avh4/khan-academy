@@ -13,6 +13,9 @@
 }
 #video_menu ol {
     z-index: 2;
+    position: absolute;
+    right: 3px;
+    top: 5px;
 }
 #video_dropdown ol {
     max-height: 20em;
@@ -24,6 +27,7 @@
 #video_dropdown li {
     white-space: nowrap;
     font-weight: normal;
+    padding: 3px 0;
 }
 #video_dropdown li[data-selected=selected] a {
     font-weight: bold;
@@ -57,10 +61,8 @@
     float: left;
     margin-right: 1em;
     text-align: left;
-    background: url(/images/list-item-black-left.png) no-repeat 0 4px;
-    padding-top: 1px;
+    background: url(/images/list-item-black-left.png) no-repeat 0 6px;
     padding-left: 10px;
-    height: 20px;
 }
 #playlists {
     display: block;
@@ -71,10 +73,8 @@
     float: right;
     margin-left: 1em;
     text-align: right;
-    background: url(/images/list-item-black.png) no-repeat 100% 4px;
-    padding-top: 1px;
+    background: url(/images/list-item-black.png) no-repeat 100% 6px;
     padding-right: 10px;
-    height: 20px;
 }
 
 #youtube_blocked {
@@ -96,9 +96,6 @@
         white-space: nowrap;
         text-overflow: ellipsis;
     }
-    .video #description h3 span.title {
-        color: #e45c02;
-    }
     .video #description h3 span.long-description {
         color: #555;
         font-weight: normal;
@@ -115,7 +112,7 @@
 }
 #page_sub_nav .breadcrumbs_nav #video_dropdown {
     position: relative;
-    top: -1px;    
+    top: -1px;
 }
 .youtube-video {
     position: relative;
@@ -131,7 +128,39 @@
 }
 .extra-link-bar .more-content {
     display: none;
+	
 }
 .extra-link-bar a {
     color: #069;
+    margin-left: 5px;
 }
+.simple-button.with-icon.download-icon img { top: 5px; }
+
+.extra-link-bar .sharepop {
+	position:absolute;
+	float:right;
+	margin-top:10px;
+	width:60px;
+	height:35px;
+	left:auto;
+	right:10px;
+	top:5px;
+	padding:0px;
+	z-index:30;
+	
+	}
+.extra-link-bar .triangle-isosceles.top{
+	width:60px;
+	height:25px;
+	position:absolute;
+	padding-left:0px;
+	}
+
+.twitterShare {background: url(/images/twitter.png);background-repeat:no-repeat; float:right;height:24px; padding:0px;width:24px;display:block;text-decoration: none;}
+.facebookShare {background: url(/images/facebook.png);background-repeat:no-repeat; float:left;height:24px; padding:0px;width:24px;display:block;text-decoration: none;}
+.extra-link-bar {
+	float:right; 
+	position:relative;
+	top: 1px;
+}
+.video_extra_links {float:right;}

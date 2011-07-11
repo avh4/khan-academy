@@ -23,6 +23,7 @@ import recovery_problem_badges
 import unfinished_streak_problem_badges
 import points_badges
 import tenure_badges
+import video_time_badges
 
 import layer_cache
 import request_handler
@@ -101,6 +102,8 @@ def all_badges(bust_cache = False):
         tenure_badges.YearTwoBadge(),
         tenure_badges.YearThreeBadge(),
 
+        video_time_badges.ActOneSceneOneBadge(),
+
     ]
 
     list_badges.extend(custom_badges.CustomBadge.all())
@@ -119,6 +122,10 @@ def badges_with_context_type(badge_context_type):
 def get_badge_counts(user_data):
 
     count_dict = badges.BadgeCategory.empty_count_dict()
+
+    if not user_data:
+        return count_dict
+
     badges_dict = all_badges_dict()
 
     for badge_name_with_context in user_data.badges:
@@ -129,16 +136,16 @@ def get_badge_counts(user_data):
 
     return count_dict
 
-def get_user_badges(user = None):
+def get_user_badges(user_data = None):
 
-    if not user:
-        user = util.get_current_user()
+    if not user_data:
+        user_data = models.UserData.current()
 
     user_badges = []
     user_badges_dict = {}
 
-    if user:
-        user_badges = models_badges.UserBadge.get_for(user)
+    if user_data:
+        user_badges = models_badges.UserBadge.get_for(user_data)
         badges_dict = all_badges_dict()
         user_badge_last = None
         for user_badge in user_badges:
@@ -256,74 +263,80 @@ class StartNewBadgeMapReduce(request_handler.RequestHandler):
 # badge_update_map is called by a background MapReduce task.
 # Each call updates the badges for a single user.
 def badge_update_map(user_data):
-    user = user_data.user
 
-    if user is None:
+    if not user_data:
         return
 
-    action_cache = last_action_cache.LastActionCache.get_for_user(user)
+    if not user_data.user:
+        return
+
+    if not user_data.current_user:
+        logging.error("UserData with user and no current_user: %s" % user_data.user)
+        return
+
+    action_cache = last_action_cache.LastActionCache.get_for_user_data(user_data)
 
     # Update all no-context badges
-    awarded = update_with_no_context(user, user_data, action_cache=action_cache)
+    awarded = update_with_no_context(user_data, action_cache=action_cache)
 
     # Update all exercise-context badges
-    for user_exercise in models.UserExercise.get_for_user(user):
-        awarded = update_with_user_exercise(user, user_data, user_exercise, action_cache=action_cache) or awarded
+    for user_exercise in models.UserExercise.get_for_user_data(user_data):
+        awarded = update_with_user_exercise(user_data, user_exercise, action_cache=action_cache) or awarded
 
     # Update all playlist-context badges
-    for user_playlist in models.UserPlaylist.get_for_user(user):
-        awarded = update_with_user_playlist(user, user_data, user_playlist, action_cache=action_cache) or awarded
+    for user_playlist in models.UserPlaylist.get_for_user_data(user_data):
+        awarded = update_with_user_playlist(user_data, user_playlist, action_cache=action_cache) or awarded
 
     if awarded:
         yield op.db.Put(user_data)
 
 # Award this user any earned no-context badges.
-def update_with_no_context(user, user_data, action_cache = None):
+def update_with_no_context(user_data, action_cache = None):
     possible_badges = badges_with_context_type(badges.BadgeContextType.NONE)
-    action_cache = action_cache or last_action_cache.LastActionCache.get_for_user(user)
+    action_cache = action_cache or last_action_cache.LastActionCache.get_for_user_data(user_data)
 
     awarded = False
     for badge in possible_badges:
         if not badge.is_already_owned_by(user_data=user_data):
             if badge.is_satisfied_by(user_data=user_data, action_cache=action_cache):
-                badge.award_to(user=user, user_data=user_data)
+                badge.award_to(user_data=user_data)
                 awarded = True
 
     return awarded
 
 # Award this user any earned Exercise-context badges for the provided UserExercise.
-def update_with_user_exercise(user, user_data, user_exercise, include_other_badges = False, action_cache = None):
+def update_with_user_exercise(user_data, user_exercise, include_other_badges = False, action_cache = None):
     possible_badges = badges_with_context_type(badges.BadgeContextType.EXERCISE)
-    action_cache = action_cache or last_action_cache.LastActionCache.get_for_user(user)
+    action_cache = action_cache or last_action_cache.LastActionCache.get_for_user_data(user_data)
 
     awarded = False
     for badge in possible_badges:
         # Pass in pre-retrieved user_exercise data so each badge check doesn't have to talk to the datastore
         if not badge.is_already_owned_by(user_data=user_data, user_exercise=user_exercise):
             if badge.is_satisfied_by(user_data=user_data, user_exercise=user_exercise, action_cache=action_cache):
-                badge.award_to(user=user, user_data=user_data, user_exercise=user_exercise)
+                badge.award_to(user_data=user_data, user_exercise=user_exercise)
                 awarded = True
 
     if include_other_badges:
-        awarded = update_with_no_context(user, user_data, action_cache=action_cache) or awarded
+        awarded = update_with_no_context(user_data, action_cache=action_cache) or awarded
 
     return awarded
 
 # Award this user any earned Playlist-context badges for the provided UserPlaylist.
-def update_with_user_playlist(user, user_data, user_playlist, include_other_badges = False, action_cache = None):
+def update_with_user_playlist(user_data, user_playlist, include_other_badges = False, action_cache = None):
     possible_badges = badges_with_context_type(badges.BadgeContextType.PLAYLIST)
-    action_cache = action_cache or last_action_cache.LastActionCache.get_for_user(user)
+    action_cache = action_cache or last_action_cache.LastActionCache.get_for_user_data(user_data)
     
     awarded = False
     for badge in possible_badges:
         # Pass in pre-retrieved user_playlist data so each badge check doesn't have to talk to the datastore
         if not badge.is_already_owned_by(user_data=user_data, user_playlist=user_playlist):
             if badge.is_satisfied_by(user_data=user_data, user_playlist=user_playlist, action_cache=action_cache):
-                badge.award_to(user=user, user_data=user_data, user_playlist=user_playlist)
+                badge.award_to(user_data=user_data, user_playlist=user_playlist)
                 awarded = True
 
     if include_other_badges:
-        awarded = update_with_no_context(user, user_data, action_cache=action_cache) or awarded
+        awarded = update_with_no_context(user_data, action_cache=action_cache) or awarded
 
     return awarded
 

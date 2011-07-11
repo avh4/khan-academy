@@ -1,7 +1,6 @@
 import os
 import logging
 import datetime
-import Cookie
 import urllib
 
 from django.utils import simplejson
@@ -11,10 +10,9 @@ from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
-import util
 from app import App
 from render import render_block_to_string
-from nicknames import get_nickname_for
+import cookie_util
 
 class RequestInputHandler(object):
 
@@ -40,8 +38,26 @@ class RequestInputHandler(object):
                 raise # No value available and no default supplied, raise error
 
     def request_date_iso(self, key, default = None):
-        # Try to parse date in ISO 8601 format
-        return self.request_date(key, "%Y-%m-%dT%H:%M:%S", default)
+        s_date = self.request_string(key)
+
+        # Pull out milliseconds b/c Python 2.5 doesn't play nicely w/ milliseconds in date format strings
+        if "." in s_date:
+            s_date = s_date[:s_date.find(".")]
+
+        # Try to parse date in our approved ISO 8601 format
+        try:
+            return datetime.datetime.strptime(s_date, "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            if default is not None:
+                return default
+            else:
+                raise # No value available and no default supplied, raise error
+
+    def request_user_data(self, key):
+        email = self.request_string(key)
+        if email:
+            return UserData.get_from_user_input_email(email)
+        return None
 
     def request_float(self, key, default = None):
         try:        
@@ -114,6 +130,18 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
         self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
 
+    @classmethod
+    def exceptions_to_http(klass, status):
+        def decorator(fn):
+            def wrapper(self, *args, **kwargs):
+                try:
+                    fn(self, *args, **kwargs);
+                except Exception, e:
+                    self.response.clear()
+                    self.response.set_status(status)
+            return wrapper
+        return decorator
+
     def user_agent(self):
         return str(self.request.headers['User-Agent'])
 
@@ -136,43 +164,15 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def set_mobile_full_site_cookie(self, is_mobile):
         self.set_cookie("mobile_full_site", "1" if is_mobile else "0")
 
-    def get_cookie_value(self, key):
-        cookies = None
-        try:
-            cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
-        except Cookie.CookieError, error:
-            logging.debug("Ignoring Cookie Error, skipping get cookie: '%s'" % error)
-
-        if not cookies:
-            return None
-
-        cookie = cookies.get(key)
-
-        if not cookie:
-            return None
-
-        return cookie.value
+    @staticmethod
+    def get_cookie_value(key):
+        return cookie_util.get_cookie_value(key)
 
     # Cookie handling from http://appengine-cookbook.appspot.com/recipe/a-simple-cookie-class/
     def set_cookie(self, key, value='', max_age=None,
                    path='/', domain=None, secure=None, httponly=False,
                    version=None, comment=None):
-        cookies = Cookie.BaseCookie()
-        cookies[key] = value
-        for var_name, var_value in [
-            ('max-age', max_age),
-            ('path', path),
-            ('domain', domain),
-            ('secure', secure),
-            ('HttpOnly', httponly),
-            ('version', version),
-            ('comment', comment),
-            ]:
-            if var_value is not None and var_value is not False:
-                cookies[key][var_name] = str(var_value)
-            if max_age is not None:
-                cookies[key]['expires'] = max_age
-        header_value = cookies[key].output(header='').lstrip()
+        header_value = cookie_util.set_cookie_value(key, value, max_age, path, domain, secure, httponly, version, comment)
         self.response.headers._headers.append(('Set-Cookie', header_value))
 
     def delete_cookie(self, key, path='/', domain=None):
@@ -181,26 +181,19 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def add_global_template_values(self, template_values):
         template_values['App'] = App
         template_values['None'] = None
-        template_values['points'] = None
-        template_values['username'] = ""
-
-        user = util.get_current_user()
-        if user is not None:
-            template_values['username'] = get_nickname_for(user)
 
         if not template_values.has_key('user_data'):
-            user_data = UserData.get_for(user)
+            user_data = UserData.current()
             template_values['user_data'] = user_data
 
         user_data = template_values['user_data']
-        template_values['points'] = user_data.points if user_data else 0
 
-        if not template_values.has_key('continue'):
-            template_values['continue'] = self.request.uri
+        template_values['username'] = user_data.nickname if user_data else ""
+        template_values['points'] = user_data.points if user_data else 0
+        template_values['logged_in'] = not user_data.is_phantom if user_data else False
 
         # Always insert a post-login request before our continue url
-        template_values['continue'] = util.create_post_login_url(template_values['continue'])
-
+        template_values['continue'] = util.create_post_login_url(template_values.get('continue') or self.request.uri)
         template_values['login_url'] = ('%s&direct=1' % util.create_login_url(template_values['continue']))
         template_values['logout_url'] = util.create_logout_url(self.request.uri)
 
@@ -244,3 +237,4 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             self.response.out.write(json)
 
 from models import UserData
+import util

@@ -4,17 +4,45 @@ import logging
 
 from google.appengine.api import users
 
-from flask import request
+from flask import request, current_app
 
 import models
 import layer_cache
 import topics_list
+from badges import badges, util_badges, models_badges
+import util
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
-from api.auth.decorators import oauth_required
+from api.auth.decorators import oauth_required, oauth_optional
 
-import util
+def api_error_response(e):
+    return current_app.response_class("API error. %s" % e.message, status=500)
+
+def add_action_results_property(obj, dict_results):
+    badges_earned = []
+
+    user_data = models.UserData.current()
+    if user_data:
+
+        badge_counts = util_badges.get_badge_counts(user_data)
+
+        user_badges = badges.UserBadgeNotifier.pop_for_user_data(user_data)
+        badges_dict = util_badges.all_badges_dict()
+
+        for user_badge in user_badges:
+            badge = badges_dict.get(user_badge.badge_name)
+
+            if badge:
+                if not hasattr(badge, "user_badges"):
+                    badge.user_badges = []
+                badge.user_badges.append(user_badge)
+                badge.is_owned = True
+                badges_earned.append(badge)
+
+    dict_results["badges_earned"] = badges_earned
+
+    obj.action_results = dict_results
 
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
@@ -118,7 +146,6 @@ def playlists_library():
     return playlist_structure
 
 @route("/api/v1/playlists/library/list", methods=["GET"])
-@etag(lambda: models.Setting.cached_library_content_date())
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(
@@ -127,6 +154,14 @@ def playlists_library():
 @compress
 @jsonify
 def playlists_library_list():
+    return fully_populated_playlists()
+
+# We expose the following "fresh" route but don't publish the URL for internal services
+# that don't want to deal w/ cached values.
+@route("/api/v1/playlists/library/list/fresh", methods=["GET"])
+@jsonp
+@jsonify
+def playlists_library_list_fresh():
     return fully_populated_playlists()
 
 @route("/api/v1/exercises", methods=["GET"])
@@ -150,6 +185,23 @@ def exercise_videos(exercise_name):
         exercise_videos = exercise.related_videos()
         return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
+
+@route("/api/v1/videos/<video_id>", methods=["GET"])
+@jsonp
+@jsonify
+def video(video_id):
+    return models.Video.all().filter("youtube_id =", video_id).get()
+
+@route("/api/v1/videos/<video_id>/download_available", methods=["POST"])
+@oauth_required(require_anointed_consumer=True)
+@jsonp
+@jsonify
+def video_download_available(video_id):
+    video = models.Video.all().filter("youtube_id =", video_id).get()
+    if video:
+        video.download_version = models.Video.CURRENT_DOWNLOAD_VERSION if request.request_bool("available", default=False) else 0
+        video.put()
+    return video
 
 @route("/api/v1/videos/<video_id>/exercises", methods=["GET"])
 @jsonp
@@ -194,14 +246,13 @@ def replace_playlist_values(structure, playlist_dict):
 # IFF currently logged in user has permission to view
 def get_visible_user_data_from_request():
 
-    user = util.get_current_user()
+    user_data = models.UserData.current()
+    if not user_data:
+        return None
 
-    email_student = request.request_string("email")
-    user_student = users.User(email_student) if email_student else user
+    user_data_student = request.request_user_data("email") or user_data
 
-    user_data_student = models.UserData.get_for(user_student)
-
-    if user_data_student and (user_student.email() == user.email() or user_data_student.is_coached_by(user)):
+    if user_data_student and (user_data_student.key_email == user_data.key_email or user_data_student.is_coached_by(user_data)):
         return user_data_student
 
     return None
@@ -211,28 +262,50 @@ def get_visible_user_data_from_request():
 @jsonp
 @jsonify
 def user_data_other():
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user:
+    if user_data:
         user_data_student = get_visible_user_data_from_request()
         if user_data_student:
             return user_data_student
 
     return None
 
+def filter_query_by_request_dates(query, property):
+
+    if request.request_string("dt_start"):
+        try:
+            dt_start = request.request_date_iso("dt_start")
+            query.filter("%s >=" % property, dt_start)
+        except ValueError:
+            raise ValueError("Invalid date format sent to dt_start, use ISO 8601.")
+
+    if request.request_string("dt_end"):
+        try:
+            dt_end = request.request_date_iso("dt_end")
+            query.filter("%s <=" % property, dt_end)
+        except ValueError:
+            raise ValueError("Invalid date format sent to dt_end, use ISO 8601.")
+
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()
 @jsonp
 @jsonify
 def user_videos_all():
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user:
+    if user_data:
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
-            user_videos = models.UserVideo.all().filter("user =", user_data_student.user)
-            return user_videos.fetch(10000)
+            user_videos_query = models.UserVideo.all().filter("user =", user_data_student.user)
+
+            try:
+                filter_query_by_request_dates(user_videos_query, "last_watched")
+            except ValueError, e:
+                return api_error_response(e)
+
+            return user_videos_query.fetch(10000)
 
     return None
 
@@ -241,9 +314,9 @@ def user_videos_all():
 @jsonp
 @jsonify
 def user_videos_specific(youtube_id):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user and youtube_id:
+    if user_data and youtube_id:
         user_data_student = get_visible_user_data_from_request()
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
@@ -258,28 +331,33 @@ def user_videos_specific(youtube_id):
 @jsonp
 @jsonify
 def log_user_video(youtube_id):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user and youtube_id:
-        user_data= models.UserData.get_for(user)
+    points = 0
+    video_log = None
+
+    if user_data and youtube_id:
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
         seconds_watched = int(request.request_float("seconds_watched", default = 0))
         last_second_watched = int(request.request_float("last_second_watched", default = 0))
 
-        if user_data and video:
-            return models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
+        if video:
+            user_video, video_log, video_points_total = models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-    return 0
+            if video_log:
+                add_action_results_property(video_log, {"user_video": user_video, "user_data": user_data})
+
+    return video_log
 
 @route("/api/v1/user/exercises", methods=["GET"])
 @oauth_required()
 @jsonp
 @jsonify
 def user_exercises_all():
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user:
+    if user_data:
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
@@ -293,9 +371,9 @@ def user_exercises_all():
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user and exercise_name:
+    if user_data and exercise_name:
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
@@ -309,9 +387,9 @@ def user_exercises_specific(exercise_name):
 @jsonp
 @jsonify
 def user_playlists_all():
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user:
+    if user_data:
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
@@ -325,9 +403,9 @@ def user_playlists_all():
 @jsonp
 @jsonify
 def user_playlists_specific(playlist_title):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user and playlist_title:
+    if user_data and playlist_title:
         user_data_student = get_visible_user_data_from_request()
         playlist = models.Playlist.all().filter("title =", playlist_title).get()
 
@@ -342,25 +420,22 @@ def user_playlists_specific(playlist_title):
 @jsonp
 @jsonify
 def user_problem_logs(exercise_name):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user and exercise_name:
+    if user_data and exercise_name:
         user_data_student = get_visible_user_data_from_request()
         exercise = models.Exercise.get_by_name(exercise_name)
 
         if user_data_student and exercise:
 
             problem_log_query = models.ProblemLog.all()
-            problem_log_query.filter("user =", user)
+            problem_log_query.filter("user =", user_data_student.user)
             problem_log_query.filter("exercise =", exercise.name)
 
-            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
-            if dt_start != datetime.datetime.min:
-                problem_log_query.filter("time_done >=", dt_start)
-
-            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
-            if dt_end != datetime.datetime.min:
-                problem_log_query.filter("time_done <", dt_end)
+            try:
+                filter_query_by_request_dates(problem_log_query, "time_done")
+            except ValueError, e:
+                return api_error_response(e)
 
             problem_log_query.order("time_done")
 
@@ -373,28 +448,64 @@ def user_problem_logs(exercise_name):
 @jsonp
 @jsonify
 def user_video_logs(youtube_id):
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
-    if user and youtube_id:
+    if user_data and youtube_id:
         user_data_student = get_visible_user_data_from_request()
         video = models.Video.all().filter("youtube_id =", youtube_id).get()
 
         if user_data_student and video:
 
             video_log_query = models.VideoLog.all()
-            video_log_query.filter("user =", user)
+            video_log_query.filter("user =", user_data_student.user)
             video_log_query.filter("video =", video)
 
-            dt_start = request.request_date_iso("dt_start", default=datetime.datetime.min)
-            if dt_start != datetime.datetime.min:
-                video_log_query.filter("time_watched >=", dt_start)
-
-            dt_end = request.request_date_iso("dt_end", default=datetime.datetime.min)
-            if dt_end != datetime.datetime.min:
-                video_log_query.filter("time_watched <", dt_end)
+            try:
+                filter_query_by_request_dates(video_log_query, "time_watched")
+            except ValueError, e:
+                return api_error_response(e)
 
             video_log_query.order("time_watched")
 
             return video_log_query.fetch(500)
 
     return None
+
+@route("/api/v1/badges", methods=["GET"])
+@oauth_optional()
+@jsonp
+@jsonify
+def badges_list():
+    badges_dict = util_badges.all_badges_dict()
+
+    user_data = models.UserData.current()
+    if user_data:
+
+        user_data_student = get_visible_user_data_from_request()
+        if user_data_student:
+
+            user_badges = models_badges.UserBadge.get_for(user_data_student)
+
+            for user_badge in user_badges:
+
+                badge = badges_dict.get(user_badge.badge_name)
+
+                if badge:
+                    if not hasattr(badge, "user_badges"):
+                        badge.user_badges = []
+                    badge.user_badges.append(user_badge)
+                    badge.is_owned = True
+
+    return sorted(filter(lambda badge: not badge.is_hidden(), badges_dict.values()), key=lambda badge: badge.name)
+
+@route("/api/v1/badges/categories", methods=["GET"])
+@jsonp
+@jsonify
+def badge_categories():
+    return badges.BadgeCategory.all()
+
+@route("/api/v1/badges/categories/<category>", methods=["GET"])
+@jsonp
+@jsonify
+def badge_category(category):
+    return filter(lambda badge_category: str(badge_category.category) == category, badges.BadgeCategory.all())

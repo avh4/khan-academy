@@ -15,10 +15,10 @@ class ExerciseBadge(Badge):
 
         return self.name_with_target_context(models.Exercise.to_display_name(user_exercise.exercise)) in user_data.badges
 
-    def award_to(self, user, user_data, *args, **kwargs):
+    def award_to(self, user_data, *args, **kwargs):
         user_exercise = kwargs.get("user_exercise", None)
         if user_exercise is None:
             return False
 
-        self.complete_award_to(user, user_data, user_exercise.exercise_model, models.Exercise.to_display_name(user_exercise.exercise))
+        self.complete_award_to(user_data, user_exercise.exercise_model, models.Exercise.to_display_name(user_exercise.exercise))
 

@@ -6,7 +6,27 @@ var Profile = {
     fLoadedGraph: false,
 
     init: function() {
+		
+		$('.recent-share').hide();
+		$('.sharepop').hide();
+			
+		$(".achievement,.exercise,.video").hover(
+			function () {
+			    $(this).find(".recent-share").show();
+				},
+			function () {
+			    $(this).find(".recent-share").hide();
+				$(this).find(".sharepop").hide();
+			  });
 
+		$('.recent-share').click(function() {
+		if ( $.browser.msie && (parseInt($.browser.version, 10) < 8) )
+			$(this).next(".sharepop").toggle();
+		else			
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+		return false;
+				});
+		
         if ($.address)
             $.address.externalChange(function(){ Profile.historyChange(); });
 
@@ -49,7 +69,8 @@ var Profile = {
             }
         }, 1000);
     },
-
+	
+	
     highlightPoints: function(chart, fxnHighlight) {
 
         if (!chart) return;
@@ -176,10 +197,27 @@ var Profile = {
         $(".graph-sub-link").removeClass("graph-sub-link-selected");
         $(".graph-sub-link[href*='" + this.baseGraphHref(href) + "'][href*='" + sDtStart + "']").addClass("graph-sub-link-selected");
     },
-
+    
+    // called whenever user clicks graph type accordion
     loadGraphFromLink: function(el) {
         if (!el) return;
-        this.loadGraph(el.href);
+        Profile.loadGraphStudentListAware(el.href);
+    },
+    
+    loadGraphStudentListAware: function(url) {
+        var $dropdown = $('#studentlists_dropdown ol');
+        if ($dropdown.length == 1) {
+            var list_id = $dropdown.data('selected').key;
+            var qs = this.parseQueryString(url);
+            if (list_id != 'allstudents')
+                qs['list_id'] = list_id;
+            else
+                delete qs['list_id'];
+        
+            url = this.baseGraphHref(url) + '?' + this.reconstructQueryString(qs);
+        }
+        
+        this.loadGraph(url);
     },
 
     loadGraph: function(href, fNoHistoryEntry) {
@@ -243,6 +281,31 @@ var Profile = {
             $("#graph-progress-bar").progressbar({value: 100}).slideDown("fast");
         else
             $("#graph-progress-bar").slideUp("fast");
+    },
+    
+    parseQueryString: function(url) {
+        var qs = {};
+        var parts = url.split('?');
+        if(parts.length == 2) {
+            var querystring = parts[1].split('&');
+            for(var i = 0; i<querystring.length; i++) {
+                var kv = querystring[i].split('=');
+                if(kv[0].length > 0) //fix trailing &
+                    qs[kv[0]] = kv[1];
+            }
+        }
+        return qs;
+    },
+    
+    reconstructQueryString: function(hash, kvjoin, eljoin) {
+        kvjoin = kvjoin || '=';
+        eljoin = eljoin || '&';
+        qs = [];
+        for(var key in hash) {
+            if(hash.hasOwnProperty(key))
+                qs.push(key + kvjoin + hash[key]);
+        }
+        return qs.join(eljoin);
     }
 };
 

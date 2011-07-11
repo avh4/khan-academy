@@ -4,6 +4,10 @@
 <style>
     /* Temporary styles to fit new dashboard into old template, will be removed when new template is dropped in. */
     #page_sub_nav {display: none;}
+
+    #container.unregistered .energy-points-badge {
+        visibility: hidden;
+    }
 </style>
 <script type="text/javascript">
   	function submitForm(value)
@@ -30,13 +34,12 @@
 	}
 	
     $(function(){Drawer.init();});
-
 </script>
 {% endblock pagescript %}
 {% block pagetitle %}Exercise Dashboard{% endblock pagetitle %}
 {% block pagecontent %}
 <div id="background">
-<div id="container" class="dashboard">
+  <div id="container" class="dashboard{% if not logged_in %} unregistered{% endif %}">
     <div id="dashboard-header">
         <div id="dashboard-nav">
             <span class="selected"><a href="#">Knowledge Map{% if App.offline_mode %} (<em>not supported in offline mode</em>){% endif %}</a></span> |

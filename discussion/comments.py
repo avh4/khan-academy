@@ -7,17 +7,17 @@ from google.appengine.ext.webapp import template
 
 from django.utils import simplejson
 
+import models
 import models_discussion
 import util_discussion
 import app
 import util
 import request_handler
 import voting
+from phantom_users.phantom_util import disallow_phantoms
 
 class PageComments(request_handler.RequestHandler):
-
     def get(self):
-
         page = 0
         try:
             page = int(self.request.get("page"))
@@ -39,12 +39,11 @@ class PageComments(request_handler.RequestHandler):
             self.response.out.write(json)
 
 class AddComment(request_handler.RequestHandler):
-
+    @disallow_phantoms
     def post(self):
+        user_data = models.UserData.current()
 
-        user = util.get_current_user()
-
-        if not user:
+        if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
 
@@ -64,7 +63,7 @@ class AddComment(request_handler.RequestHandler):
                 comment_text = comment_text[0:300] # max comment length, also limited by client
 
             comment = models_discussion.Feedback()
-            comment.author = user
+            comment.set_author(user_data)
             comment.content = comment_text
             comment.targets = [video.key()]
             comment.types = [models_discussion.FeedbackType.Comment]
@@ -75,7 +74,7 @@ class AddComment(request_handler.RequestHandler):
 
 def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_order=voting.VotingSortOrder.HighestPointsFirst):
 
-    user = util.get_current_user()
+    user_data = models.UserData.current()
 
     if page > 0:
         comments_hidden = False # Never hide questions if specifying specific page
@@ -91,14 +90,13 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_o
     count_total = len(comments)
     comments = comments[((page - 1) * limit_per_page):(page * limit_per_page)]
 
-    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_and_video(user, video)
+    dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
     for comment in comments:
         voting.add_vote_expando_properties(comment, dict_votes)
 
     count_page = len(comments)
     pages_total = max(1, ((count_total - 1) / limit_per_page) + 1)
     return {
-            "user": user,
             "is_mod": util_discussion.is_current_user_moderator(),
             "video": video,
             "playlist": playlist,

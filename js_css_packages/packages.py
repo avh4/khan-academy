@@ -8,6 +8,7 @@ javascript = {
             "jquery.watermark.js",
             "jquery.placeholder.js",
             "pageutil.js",
+			"social.js",
         ]
     },
     "video": {
@@ -15,6 +16,7 @@ javascript = {
         "files": [
             "video.js",
             "discussion.js",
+            "jquery.qtip.js",
         ]
     },
     "homepage": {
@@ -65,6 +67,13 @@ javascript = {
             "iscroll-lite.min.js",
         ]
     },
+    "studentlists": {
+        "hashed-filename": "hashed-@studentlists@.js", # @content@ will be replaced with hash by deploy script
+        "files": [
+            "studentlists.js",
+            "classprofile.js",
+        ]
+    },
 }
 
 stylesheets = {
@@ -76,6 +85,7 @@ stylesheets = {
             "stylesheet.css",
             "menu.css",
             "profile.css",
+            "museo-sans.css",
             "jquery-ui-1.8.4.custom.css",
         ]
     },
@@ -91,6 +101,14 @@ stylesheets = {
         "files": [
             "video.css",
             "discussion.css",
+            "jquery.qtip.css",
+        ]
+    },
+    "studentlists": {
+        "hashed-filename": "hashed-@studentlists@.css", # @content@ will be replaced with hash by deploy script
+        "files": [
+            "viewstudentlists.css",
+            "viewclassprofile.css",
         ]
     },
 }

@@ -35,11 +35,15 @@ class CustomBadgeType(db.Model):
     full_description = db.TextProperty()
     points = db.IntegerProperty(default = 0)
     category = db.IntegerProperty(default = 0)
+    icon_src = db.StringProperty(default = "")
 
     @staticmethod
-    def insert(name, description, full_description, points, badge_category):
+    def insert(name, description, full_description, points, badge_category, icon_src = ""):
 
         if not name or not description or not full_description or points < 0 or badge_category < 0:
+            return None
+
+        if icon_src and not icon_src.startswith("/"):
             return None
 
         custom_badge_type = CustomBadgeType.get_by_key_name(key_names = name)
@@ -50,6 +54,7 @@ class CustomBadgeType(db.Model):
                     full_description = full_description,
                     points = points,
                     category = badge_category,
+                    icon_src = icon_src
                     )
 
         return None
@@ -63,17 +68,17 @@ class UserBadge(db.Model):
     points_earned = db.IntegerProperty(default = 0)
 
     @staticmethod
-    def get_for(user):
+    def get_for(user_data):
         query = UserBadge.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
         query.order('badge_name')
         query.order('-date')
         return query.fetch(1000)
 
     @staticmethod
-    def get_for_user_between_dts(user, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = UserBadge.all()
-        query.filter('user =', user)
+        query.filter('user =', user_data.user)
         query.filter('date >=', dt_a)
         query.filter('date <=', dt_b)
         query.order('date')

@@ -5,27 +5,6 @@ var Discussion = {
         VideoControls.initJumpLinks();
     },
 
-    showThrobber: function(jTarget, fOnLeft) {
-        if (!Discussion.jThrobber)
-        {
-            Discussion.jThrobber = $("<img style='display:none;' src='/images/throbber.gif' class='throbber'/>");
-            $(document.body).append(Discussion.jThrobber);
-        }
-
-        if (!jTarget.length) return;
-
-        var offset = jTarget.offset();
-
-        var top = offset.top + (jTarget.height() / 2) - 8;
-        var left = fOnLeft ? (offset.left - 16 - 4) : (offset.left + jTarget.width() + 4);
-
-        Discussion.jThrobber.css("top", top).css("left", left).css("display", "");
-    },
-
-    hideThrobber: function() {
-        if (Discussion.jThrobber) Discussion.jThrobber.css("display", "none");
-    },
-
     updateRemaining: function(max, textSelector, charsSelector, charCountSelector, parent) {
         setTimeout(function(){
             var c = 0;
@@ -219,7 +198,7 @@ var Moderation = {
         if (!parent.length) return;
 
         parent.text(sMsg);
-        Discussion.hideThrobber();
+        Throbber.hide();
     }
 
 };
@@ -290,7 +269,7 @@ var QA = {
                 function(data) {fxnCallback(data, jText[0]);});
 
         QA.disable();
-        Discussion.showThrobber($("." + type + "_cancel", parent));
+        Throbber.show($("." + type + "_cancel", parent));
     },
 
     finishSubmitQuestion: function(data, el) {
@@ -310,7 +289,7 @@ var QA = {
         setTimeout(function(){QA.cancel.apply(el)}, 1);
         $(".answers_container", parent).html(dict_json.html);
         VideoControls.initJumpLinks();
-        Discussion.hideThrobber();
+        Throbber.hide();
         QA.enable();
     },
 
@@ -331,7 +310,7 @@ var QA = {
                 }, 
                 function(data) { QA.finishLoadPage(data, fInitialLoad); });
 
-        if (!fInitialLoad) Discussion.showThrobber($(".questions_page_controls span"));
+        if (!fInitialLoad) Throbber.show($(".questions_page_controls span"));
     },
 
     finishLoadPage: function(data, fInitialLoad) {
@@ -341,7 +320,7 @@ var QA = {
         $(".questions_container").html(dict_json.html);
         QA.page = dict_json.page;
         QA.initPagesAndQuestions();
-        if (!fInitialLoad) Discussion.hideThrobber();
+        if (!fInitialLoad) Throbber.hide();
         VideoControls.initJumpLinks();
 
         var hash = "qa";
@@ -605,7 +584,7 @@ var Comments = {
                 }, 
                 function(data) { Comments.finishLoadPage(data, fInitialLoad); });
 
-        if (!fInitialLoad) Discussion.showThrobber($(".comments_page_controls span"));
+        if (!fInitialLoad) Throbber.show($(".comments_page_controls span"));
     },
 
     finishLoadPage: function(data, fInitialLoad) {
@@ -615,7 +594,7 @@ var Comments = {
         $(".comments_container").html(dict_json.html);
         Comments.page = dict_json.page;
         Comments.initPages();
-        if (!fInitialLoad) Discussion.hideThrobber();
+        if (!fInitialLoad) Throbber.hide();
         VideoControls.initJumpLinks();
 
         if (!fInitialLoad)
@@ -653,7 +632,7 @@ var Comments = {
                 Comments.finishSubmit);
 
         Comments.disable();
-        Discussion.showThrobber($(".comment_cancel"));
+        Throbber.show($(".comment_cancel"));
     },
 
     finishSubmit: function(data) {

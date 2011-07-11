@@ -44,7 +44,7 @@ MAX_WORKING_ON_PROBLEM_SECONDS = 600
 REQUIRED_PROBLEMS_FOR_EXERCISE_STATISTICS = 50
 
 # Number of most recent problems we examine when calculating exercise statistics
-LATEST_PROBLEMS_FOR_EXERCISE_STATISTICS = 10000
+LATEST_PROBLEMS_FOR_EXERCISE_STATISTICS = 5000
 
 # Speediest exercise percentile to use when calculating "fast" problem times
 FASTEST_EXERCISE_PERCENTILE = 0.25
@@ -68,4 +68,4 @@ MIN_REVIEW_INTERVAL_DAYS = 1
 MAX_GRAPH_DAY_RANGE = 30
 
 # Approximate Video Count to display on content pages
-APPROX_VID_COUNT = 2100
+APPROX_VID_COUNT = 2400

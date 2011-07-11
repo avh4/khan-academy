@@ -3,8 +3,6 @@ import logging
 
 from google.appengine.ext import db
 
-from api.auth.auth_util import append_url_params
-
 # OAuthMap creates a mapping between our OAuth credentials and our identity providers'.
 class OAuthMap(db.Model):
 
@@ -55,7 +53,7 @@ class OAuthMap(db.Model):
         }
         
         if include_verifier and self.verifier:
-            params_callback["verifier"] = self.verifier
+            params_callback["oauth_verifier"] = self.verifier
 
         return append_url_params(self.callback_url, params_callback)
 
@@ -94,5 +92,6 @@ class OAuthMap(db.Model):
             return None
         return OAuthMap.if_not_expired(OAuthMap.all().filter("access_token =", access_token).get())
 
+from api.auth.auth_util import append_url_params
 from api.auth.google_util import get_google_user_from_oauth_map
 from ..facebook_util import get_facebook_user_from_oauth_map

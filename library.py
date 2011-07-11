@@ -1,0 +1,88 @@
+import datetime
+import os
+import logging
+
+from google.appengine.ext.webapp import template
+
+from app import App
+import layer_cache
+from models import Video, Playlist, VideoPlaylist, Setting
+from topics_list import topics_list
+
+@layer_cache.cache_with_key_fxn(
+        lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
+        ) 
+def library_content_html(bust_cache = False):
+
+    # No cache found -- regenerate HTML
+    all_playlists = []
+
+    dict_videos = {}
+    dict_videos_counted = {}
+    dict_playlists = {}
+    dict_playlists_by_title = {}
+    dict_video_playlists = {}
+
+    for video in Video.all():
+        dict_videos[video.key()] = video
+
+    for playlist in Playlist.all():
+        dict_playlists[playlist.key()] = playlist
+        if playlist.title in topics_list:
+            dict_playlists_by_title[playlist.title] = playlist
+
+    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
+        playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
+        video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
+
+        if dict_videos.has_key(video_key) and dict_playlists.has_key(playlist_key):
+            video = dict_videos[video_key]
+            playlist = dict_playlists[playlist_key]
+            fast_video_playlist_dict = {"video":video, "playlist":playlist}
+
+            if dict_video_playlists.has_key(playlist_key):
+                dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
+            else:
+                dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
+
+            dict_videos_counted[video_key] = True
+
+    # Update count of all distinct videos associated w/ a live playlist
+    Setting.count_videos(len(dict_videos_counted.keys()))
+
+    for topic in topics_list:
+        if topic in dict_playlists_by_title:
+            playlist = dict_playlists_by_title[topic]
+            playlist_key = playlist.key()
+            playlist_videos = dict_video_playlists[playlist_key]
+
+            playlist_data = {
+                     'title': topic,
+                     'topic': topic,
+                     'playlist': playlist,
+                     'videos': playlist_videos,
+                     'next': None
+                     }
+
+            all_playlists.append(playlist_data)
+
+    playlist_data_prev = None
+    for playlist_data in all_playlists:
+        if playlist_data_prev:
+            playlist_data_prev['next'] = playlist_data
+        playlist_data_prev = playlist_data
+
+    # Separating out the columns because the formatting is a little different on each column
+    template_values = {
+        'App' : App,
+        'all_playlists': all_playlists,
+        }
+    path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
+    html = template.render(path, template_values)
+
+    # Set shared date of last generated content
+    Setting.cached_library_content_date(str(datetime.datetime.now()))
+
+    return html
+
+
