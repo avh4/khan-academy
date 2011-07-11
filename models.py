@@ -201,8 +201,11 @@ class Exercise(db.Model):
     @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def related_videos_fetch(self):
         exercise_videos = self.related_videos().fetch(10)
+        exercise_order = {}
         for exercise_video in exercise_videos:
             exercise_video.video # Pre-cache video entity
+            exercise_order[exercise_video.video.title] = VideoPlaylist.all().filter('video =',exercise_video.video).get().video_position
+        exercise_videos.sort(key=lambda vid: exercise_order[(vid.video.title)])
         return exercise_videos
 
     @classmethod

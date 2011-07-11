@@ -95,7 +95,6 @@ def related_videos_with_points(exercise_videos):
 
 @register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos(exercise_videos, show_points=False):
-    exercise_videos.sort(key=lambda vid: models.VideoPlaylist.all().filter('video =',vid.video).get().video_position)
     return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE, "show_points": show_points}
 
 @register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
