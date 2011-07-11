@@ -1,6 +1,7 @@
 import urllib
 
 from google.appengine.api import oauth as google_oauth
+from google.appengine.api.oauth.oauth_api import InvalidOAuthTokenError
 from google.appengine.api import users
 
 from flask import request, redirect
@@ -18,9 +19,17 @@ from api.auth.models import OAuthMap
 # return the authorized user's email.
 @route("/api/auth/current_google_oauth_email")
 def current_google_oauth_email():
-    user = google_oauth.get_current_user()
+    user = None
+
+    try:
+        user = google_oauth.get_current_user()
+    except InvalidOAuthTokenError:
+        # Ignore invalid auth tokens, user is not logged in
+        pass
+
     if user:
         return user.email()
+
     return ""
 
 def get_google_user_from_oauth_map(oauth_map):
