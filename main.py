@@ -776,7 +776,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
 
     def get(self):
         library.library_content_html(bust_cache=True)
-        self.response.out.write("Library content regenerated")  
+        self.redirect("/")
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
