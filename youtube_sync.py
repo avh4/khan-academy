@@ -124,7 +124,7 @@ class YouTubeSync(request_handler.RequestHandler):
 
                 for video in video_feed.entry:
 
-                    video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0].decode('windows-1252')
+                    video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0].decode('utf-8')
 
                     video_data = None
                     if video_youtube_id_dict.has_key(video_id):
@@ -132,24 +132,24 @@ class YouTubeSync(request_handler.RequestHandler):
                     
                     if not video_data:
                         video_data = Video(youtube_id=video_id)
-                        self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('windows-1252') + '</strong>')
+                        self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('utf-8') + '</strong>')
                         video_data.playlists = []
 
-                    video_data.title = video.media.title.text.decode('windows-1252')
-                    video_data.url = video.media.player.url.decode('windows-1252')
+                    video_data.title = video.media.title.text.decode('utf-8')
+                    video_data.url = video.media.player.url.decode('utf-8')
                     video_data.duration = int(video.media.duration.seconds)
 
                     if video.statistics:
                         video_data.views = int(video.statistics.view_count)
 
                     if video.media.description.text is not None:
-                        video_data.description = video.media.description.text.decode('windows-1252')
+                        video_data.description = video.media.description.text.decode('utf-8')
                     else:
                         video_data.decription = ' '
 
                     if playlist.title.text not in video_data.playlists:
-                        video_data.playlists.append(playlist.title.text.decode('windows-1252'))
-                    video_data.keywords = video.media.keywords.text.decode('windows-1252')
+                        video_data.playlists.append(playlist.title.text.decode('utf-8'))
+                    video_data.keywords = video.media.keywords.text.decode('utf-8')
                     video_data.position = video.position
                     video_data_list.append(video_data)
                 db.put(video_data_list)

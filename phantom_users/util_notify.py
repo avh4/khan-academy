@@ -4,7 +4,6 @@ import models
 from notifications import UserNotifier
 import phantom_util
 import request_handler
-from badges import badges
 
 def welcome(user_data):
     if user_data == None:
@@ -56,3 +55,4 @@ def update(user_data, user_exercise, threshold=False, isProf=False, gotBadge=Fal
 class ToggleNotify(request_handler.RequestHandler):
     def post(self):
         UserNotifier.clear_login()
+

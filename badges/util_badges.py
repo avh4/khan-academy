@@ -264,7 +264,14 @@ class StartNewBadgeMapReduce(request_handler.RequestHandler):
 # Each call updates the badges for a single user.
 def badge_update_map(user_data):
 
-    if user_data is None:
+    if not user_data:
+        return
+
+    if not user_data.user:
+        return
+
+    if not user_data.current_user:
+        logging.error("UserData with user and no current_user: %s" % user_data.user)
         return
 
     action_cache = last_action_cache.LastActionCache.get_for_user_data(user_data)

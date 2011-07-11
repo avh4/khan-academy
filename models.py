@@ -10,6 +10,10 @@ import config_django
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
+
+# Do not remove this webapp.template import, as suggested
+# by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
+from google.appengine.ext.webapp import template
 from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
@@ -25,7 +29,6 @@ import layer_cache
 import request_cache
 from discussion import models_discussion
 from topics_list import all_topics_list
-from phantom_users import util_notify
 import nicknames
 from counters import user_counter
 
@@ -1434,3 +1437,4 @@ class ExerciseGraph(object):
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
 
 from badges import util_badges, last_action_cache
+from phantom_users import util_notify
