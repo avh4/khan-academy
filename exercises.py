@@ -1,4 +1,4 @@
-import os
+import os, logging
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -132,12 +132,13 @@ class UpdateExercise(request_handler.RequestHandler):
             existing_video_keys.append(exercise_video.video.key())
             if not exercise_video.video.key() in video_keys:
                 exercise_video.delete()
-
+            
         for video_key in video_keys:
             if not video_key in existing_video_keys:
                 exercise_video = models.ExerciseVideo()
                 exercise_video.exercise = exercise
                 exercise_video.video = db.Key(video_key)
+                exercise_video.exercise_order = models.VideoPlaylist.all().filter('video =',exercise_video.video).get().video_position
                 exercise_video.put()
 
         exercise.put()
