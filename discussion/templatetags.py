@@ -16,11 +16,13 @@ register = webapp.template.create_template_register()
 
 @register.inclusion_tag("discussion/video_comments.html")
 def video_comments(video, playlist, page=0):
+    user_data = models.UserData.current()
     return {
             "video": video,
             "playlist": playlist,
             "page": 0,
-            "user_data": models.UserData.current(),
+            "logged_in": user_data and not user_data.is_phantom,
+            "user_data": user_data,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             }
 
@@ -40,6 +42,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "page": page,
             "qa_expand_id": qa_expand_id,
             "sort_order": sort_order,
+            "logged_in": user_data and not user_data.is_phantom,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }

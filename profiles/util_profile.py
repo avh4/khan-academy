@@ -1,5 +1,4 @@
 import datetime
-import logging
 import urllib
 
 from django.utils import simplejson
@@ -11,6 +10,7 @@ import util
 import models
 import consts
 from badges import util_badges
+from phantom_users.phantom_util import create_phantom, disallow_phantoms
 from models import StudentList, UserData
 import simplejson as json
 
@@ -42,8 +42,8 @@ class ViewClassProfile(request_handler.RequestHandler):
     def class_points(students):
         return reduce(lambda a,b: a + b, map(lambda s: s.points, students), 0)
 
+    @disallow_phantoms
     def get(self):
-
         user_data_coach = models.UserData.current()
 
         if user_data_coach:
@@ -109,57 +109,50 @@ class ViewClassProfile(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
 
 class ViewProfile(request_handler.RequestHandler):
-
+    @create_phantom
     def get(self):
         user_data_student = models.UserData.current()
 
-        if user_data_student:
+        user_data_override = self.request_user_data("student_email")
+        if user_data_override and user_data_override.key_email != user_data_student.key_email:
+            if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
+                # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
+                self.redirect("/profile")
+                return
+            else:
+                # Allow access to this student's profile
+                user_data_student = user_data_override
+        user_badges = util_badges.get_user_badges(user_data_student)
+        selected_graph_type = self.request_string("selected_graph_type") or ActivityGraph.GRAPH_TYPE
+        initial_graph_url = "/profile/graph/%s?student_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_student.email), urllib.unquote(self.request_string("graph_query_params", default="")))
+        tz_offset = self.request_int("tz_offset", default=0)
 
-            user_data_override = self.request_user_data("student_email")
-            if user_data_override and user_data_override.key_email != user_data_student.key_email:
-                if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
-                    # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
-                    self.redirect("/profile")
-                    return
-                else:
-                    # Allow access to this student's profile
-                    user_data_student = user_data_override
+        template_values = {
+            'student_nickname': user_data_student.nickname,
+            'selected_graph_type': selected_graph_type,
+            'initial_graph_url': initial_graph_url,
+            'tz_offset': tz_offset,
+            'student_points': user_data_student.points,
+            'count_videos': models.Setting.count_videos(),
+            'count_videos_completed': user_data_student.get_videos_completed(),
+            'count_exercises': models.Exercise.get_count(),
+            'count_exercises_proficient': len(user_data_student.all_proficient_exercises),
+            'badge_collections': user_badges['badge_collections'],
+            'user_badges_bronze': user_badges['bronze_badges'],
+            'user_badges_silver': user_badges['silver_badges'],
+            'user_badges_gold': user_badges['gold_badges'],
+            'user_badges_platinum': user_badges['platinum_badges'],
+            'user_badges_diamond': user_badges['diamond_badges'],
+            'user_badges_master': user_badges['user_badges_master'],
+            'user_badges': [user_badges['bronze_badges'], user_badges['silver_badges'], user_badges['gold_badges'], user_badges['platinum_badges'], user_badges['diamond_badges'],user_badges['user_badges_master']],
+            'user_data_student': user_data_student,
+            "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False),
+            "view": self.request_string("view", default=""),
+        }
 
-            user_badges = util_badges.get_user_badges(user_data_student)
-
-            selected_graph_type = self.request_string("selected_graph_type") or ActivityGraph.GRAPH_TYPE
-            initial_graph_url = "/profile/graph/%s?student_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_student.email), urllib.unquote(self.request_string("graph_query_params", default="")))
-            tz_offset = self.request_int("tz_offset", default=0)
-
-            template_values = {
-                'student_nickname': user_data_student.nickname,
-                'selected_graph_type': selected_graph_type,
-                'initial_graph_url': initial_graph_url,
-                'tz_offset': tz_offset,
-                'student_points': user_data_student.points,
-                'count_videos': models.Setting.count_videos(),
-                'count_videos_completed': user_data_student.get_videos_completed(),
-                'count_exercises': models.Exercise.get_count(),
-                'count_exercises_proficient': len(user_data_student.all_proficient_exercises),
-                'badge_collections': user_badges['badge_collections'],
-                'user_badges_bronze': user_badges['bronze_badges'],
-                'user_badges_silver': user_badges['silver_badges'],
-                'user_badges_gold': user_badges['gold_badges'],
-                'user_badges_platinum': user_badges['platinum_badges'],
-                'user_badges_diamond': user_badges['diamond_badges'],
-                'user_badges_master': user_badges['user_badges_master'],
-                'user_badges': [user_badges['bronze_badges'], user_badges['silver_badges'], user_badges['gold_badges'], user_badges['platinum_badges'], user_badges['diamond_badges'],user_badges['user_badges_master']],
-                'user_data_student': user_data_student,
-                "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False),
-                "view": self.request_string("view", default=""),
-            }
-
-            self.render_template('viewprofile.html', template_values)
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
+        self.render_template('viewprofile.html', template_values)
 
 class ProfileGraph(request_handler.RequestHandler):
-
     def get(self):
         html = ""
         json_update = ""
@@ -192,7 +185,6 @@ class ProfileGraph(request_handler.RequestHandler):
         user_data_student = models.UserData.current()
 
         if user_data_student:
-
             user_data_override = self.request_user_data("student_email")
             if user_data_override and user_data_override.key_email != user_data_student.key_email:
                 if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
@@ -219,7 +211,6 @@ class ProfileGraph(request_handler.RequestHandler):
         return ""
 
 class ClassProfileGraph(ProfileGraph):
-
     def get_profile_target_user_data(self):
         user_data_coach = models.UserData.current()
 
@@ -387,4 +378,3 @@ class ClassEnergyPointsPerMinuteGraph(ClassProfileGraph):
     def json_update(self, user_data_coach):
         student_list = self.get_student_list(user_data_coach)
         return templatetags.class_profile_energy_points_per_minute_update(user_data_coach, student_list)
-

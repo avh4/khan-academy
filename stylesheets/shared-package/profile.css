@@ -28,6 +28,14 @@
 #page_sub_nav #profile-header #user-info #name {
     font-size: 20px;
 }
+#page_sub_nav #profile-header #user-info #phantom-login {
+    position: relative;
+    top: 7px;
+}
+#page_sub_nav #profile-header #user-info #phantom-login a {
+    color: #005987;
+    font-size: 20px;
+}
 #page_sub_nav #profile-header #user-info img {
     width: 0px;
     visibility: hidden;

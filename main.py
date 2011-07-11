@@ -20,6 +20,8 @@ from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
+
+from google.appengine.api import taskqueue
 from google.appengine.ext import deferred
 
 import bulk_update.handler
@@ -51,6 +53,7 @@ import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
+from phantom_users import util_notify
 from badges import util_badges, last_action_cache, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
@@ -60,6 +63,10 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
+from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
+from phantom_users.cloner import Clone
+from counters import user_counter
+from notifications import UserNotifier
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -100,86 +107,82 @@ class KillLiveAssociations(request_handler.RequestHandler):
         db.put(all_video_playlists)
 
 class ViewExercise(request_handler.RequestHandler):
-
+    @create_phantom
     def get(self):
-
         user_data = UserData.current()
+        exid = self.request.get('exid')
+        key = self.request.get('key')
+        time_warp = self.request.get('time_warp')
 
-        if user_data:
+        if not exid:
+            exid = 'addition_1'
 
-            exid = self.request.get('exid')
-            key = self.request.get('key')
-            time_warp = self.request.get('time_warp')
+        exercise = Exercise.get_by_name(exid)
 
-            if not exid:
-                exid = 'addition_1'
+        if not exercise: 
+            raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
 
-            exercise = Exercise.get_by_name(exid)
+        user_exercise = user_data.get_or_insert_exercise(exercise)
 
-            if not exercise: 
-                raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
+        problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
-            user_exercise = user_data.get_or_insert_exercise(exercise)
+        # When viewing a problem out-of-order, show read-only view
+        read_only = problem_number != (user_exercise.total_done + 1)
 
-            problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
+        exercise_non_summative = exercise.non_summative_exercise(problem_number)
 
-            # When viewing a problem out-of-order, show read-only view
-            read_only = problem_number != (user_exercise.total_done + 1)
+        # If read-only and an explicit exid is provided for non-summative content, use
+        # overriding exercise
+        if read_only:
+            exid_non_summative = self.request_string('exid_non_summative', default=None)
+            if exid_non_summative:
+                exercise_non_summative = Exercise.get_by_name(exid_non_summative)
+                
+        exercise_videos = exercise_non_summative.related_videos_fetch()
 
-            exercise_non_summative = exercise.non_summative_exercise(problem_number)
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-            # If read-only and an explicit exid is provided for non-summative content, use
-            # overriding exercise
-            if read_only:
-                exid_non_summative = self.request_string('exid_non_summative', default=None)
-                if exid_non_summative:
-                    exercise_non_summative = Exercise.get_by_name(exid_non_summative)
-                    
-            exercise_videos = exercise_non_summative.related_videos_fetch()
+        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+               
+        # Note: if they just need a single problem for review they can just print this page.
+        num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
+        
+        # If the user is proficient, assume they want to print a bunch of practice problems.
+        if exercise_states['proficient']:
+            num_problems_to_print = exercise.required_streak()
 
-            exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
+        if exercise.summative:
+            # Make sure UserExercise has proper summative value even before it's been set.
+            user_exercise.summative = True
+            # We can't currently print summative exercises.
+            num_problems_to_print = 0
 
-            exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-                   
-            # Note: if they just need a single problem for review they can just print this page.
-            num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
-            
-            # If the user is proficient, assume they want to print a bunch of practice problems.
-            if exercise_states['proficient']:
-                num_problems_to_print = exercise.required_streak()
-
-            if exercise.summative:
-                # Make sure UserExercise has proper summative value even before it's been set.
-                user_exercise.summative = True
-                # We can't currently print summative exercises.
-                num_problems_to_print = 0
-
-            template_values = {
-                'arithmetic_template': 'arithmetic_template.html',
-                'user_data': user_data,
-                'exercise_points': exercise_points,
-                'coaches': user_data.coaches,
-                'exercise_states': exercise_states,
-                'key': user_exercise.key(),
-                'exercise': exercise,
-                'exid': exid,
-                'start_time': time.time(),
-                'exercise_videos': exercise_videos,
-                'exercise_non_summative': exercise_non_summative,
-                'extitle': exid.replace('_', ' ').capitalize(),
-                'user_exercise': user_exercise,
-                'streak': user_exercise.streak,
-                'time_warp': time_warp,
-                'problem_number': problem_number,
-                'read_only': read_only,
-                'selected_nav_link': 'practice',
-                'num_problems_to_print': num_problems_to_print,
-                'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
-                }
-            template_file = exercise_non_summative.name + '.html'
-            self.render_template(template_file, template_values)
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
+        template_values = {
+            'arithmetic_template': 'arithmetic_template.html',
+            'user_data': user_data,
+            'points': user_data.points,
+            'exercise_points': exercise_points,
+            'coaches': user_data.coaches,
+            'exercise_states': exercise_states,
+            'cookiename': user_data.nickname.replace('@', 'at'),
+            'key': user_exercise.key(),
+            'exercise': exercise,
+            'exid': exid,
+            'start_time': time.time(),
+            'exercise_videos': exercise_videos,
+            'exercise_non_summative': exercise_non_summative,
+            'extitle': exid.replace('_', ' ').capitalize(),
+            'user_exercise': user_exercise,
+            'streak': user_exercise.streak,
+            'time_warp': time_warp,
+            'problem_number': problem_number,
+            'read_only': read_only,
+            'selected_nav_link': 'practice',
+            'num_problems_to_print': num_problems_to_print,
+            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
+            }
+        template_file = exercise_non_summative.name + '.html'
+        self.render_template(template_file, template_values)
             
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -191,7 +194,7 @@ def get_mangled_playlist_name(playlist_name):
     return playlist_name
 
 class ViewVideo(request_handler.RequestHandler):
-
+    @create_phantom
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -286,7 +289,8 @@ class ViewVideo(request_handler.RequestHandler):
         if video.description == video.title:
             video.description = None
 
-        user_video = UserVideo.get_for_video_and_user_data(video, UserData.current())
+        user_video = UserVideo.get_for_video_and_user_data(video, UserData.current(), insert_if_missing=True)
+
         awarded_points = 0
         if user_video:
             awarded_points = user_video.points
@@ -457,50 +461,50 @@ class ProvideFeedback(request_handler.RequestHandler):
         self.render_template("provide_feedback.html", {})
 
 class ViewAllExercises(request_handler.RequestHandler):
-
+    @create_phantom
     def get(self):
         user_data = UserData.current()
+        
+        ex_graph = ExerciseGraph(user_data)
+        if user_data.reassess_from_graph(ex_graph):
+            user_data.put()
 
-        if user_data:
-            
-            ex_graph = ExerciseGraph(user_data)
-            if user_data.reassess_from_graph(ex_graph):
-                user_data.put()
+        recent_exercises = ex_graph.get_recent_exercises()
+        review_exercises = ex_graph.get_review_exercises(self.get_time())
+        suggested_exercises = ex_graph.get_suggested_exercises()
+        proficient_exercises = ex_graph.get_proficient_exercises()
 
-            recent_exercises = ex_graph.get_recent_exercises()
-            review_exercises = ex_graph.get_review_exercises(self.get_time())
-            suggested_exercises = ex_graph.get_suggested_exercises()
-            proficient_exercises = ex_graph.get_proficient_exercises()
+        for exercise in ex_graph.exercises:
+            exercise.phantom = False
+            exercise.suggested = False
+            exercise.proficient = False
+            exercise.review = False
+            exercise.status = ""
+            # if user_data.is_phantom:
+            #     exercise.phantom = True
+            # else:
+            if exercise in suggested_exercises:
+                exercise.suggested = True
+                exercise.status = "Suggested"
+            if exercise in proficient_exercises:
+                exercise.proficient = True
+                exercise.status = "Proficient"
+            if exercise in review_exercises:
+                exercise.review = True
+                exercise.status = "Review"
 
-            for exercise in ex_graph.exercises:
-                exercise.suggested = False
-                exercise.proficient = False
-                exercise.review = False
-                exercise.status = ""
-                if exercise in suggested_exercises:
-                    exercise.suggested = True
-                    exercise.status = "Suggested"
-                if exercise in proficient_exercises:
-                    exercise.proficient = True
-                    exercise.status = "Proficient"
-                if exercise in review_exercises:
-                    exercise.review = True
-                    exercise.status = "Review"
+        template_values = {
+            'exercises': ex_graph.exercises,
+            'recent_exercises': recent_exercises,
+            'review_exercises': review_exercises,
+            'suggested_exercises': suggested_exercises,
+            'user_data': user_data,
+            'expanded_all_exercises': user_data.expanded_all_exercises,
+            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
+            'selected_nav_link': 'practice',
+            }
 
-            template_values = {
-                'exercises': ex_graph.exercises,
-                'recent_exercises': recent_exercises,
-                'review_exercises': review_exercises,
-                'suggested_exercises': suggested_exercises,
-                'user_data': user_data,
-                'expanded_all_exercises': user_data.expanded_all_exercises,
-                'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
-                'selected_nav_link': 'practice',
-                }
-
-            self.render_template('viewexercises.html', template_values)
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
+        self.render_template('viewexercises.html', template_values)
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -535,7 +539,6 @@ class RegisterAnswer(request_handler.RequestHandler):
         self.get()
 
     def get(self):
-
         exid = self.request_string('exid')
         time_warp = self.request_string('time_warp')
 
@@ -599,7 +602,8 @@ class RegisterAnswer(request_handler.RequestHandler):
                 problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
             user_exercise.total_done += 1
-
+            util_notify.update(user_data,user_exercise)
+            
             if correct:
 
                 user_exercise.total_correct += 1
@@ -612,6 +616,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                     user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
                     problem_log.earned_proficiency = True
+                    
             else:
                 # Just in case RegisterCorrectness didn't get called.
                 user_exercise.reset_streak()
@@ -621,6 +626,7 @@ class RegisterAnswer(request_handler.RequestHandler):
                 user_exercise, 
                 include_other_badges = True, 
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
+
 
             # Manually clear exercise's memcache since we're throwing it in a bulk put
             user_exercise.clear_memcache()
@@ -871,9 +877,7 @@ class MobileSite(request_handler.RequestHandler):
         self.redirect("/")
 
 class ViewHomePage(request_handler.RequestHandler):
-
     def get(self):
-
         thumbnail_link_sets = [
             [
                 { 
@@ -1287,13 +1291,33 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry
+        # Immediately after login we make sure this user has a UserData entry, 
+        # also delete phantom cookies
+
+        # If new user is new, 0 points, migrate data
+        phantom_user = _get_phantom_user_from_cookies()
         user_data = UserData.current()
 
+        if user_data and phantom_user:
+            email = phantom_user.email()
+            phantom_data = UserData.get_from_db_key_email(email) 
+
+            if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
+                UserNotifier.clear_all(phantom_data)
+                logging.info("New Account: %s", user_data.current().email)
+                phantom_data.current_user = user_data.current_user
+                if phantom_data.put():
+                    # Phantom user was just transitioned to real user
+                    user_counter.add(1)
+                    user_data.delete()
+                cont = "/newaccount?continue=%s" % cont
+
+        self.delete_cookie('ureg_id')
         self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
     def get(self):
+        self.delete_cookie('ureg_id')
         self.redirect(users.create_logout_url(self.request_string("continue", default="/")))
 
 class Search(request_handler.RequestHandler):
@@ -1339,6 +1363,57 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
             redirect_target = dict_redirects[relative_path]
 
         self.redirect(redirect_target, True)
+
+class UserStatistics(request_handler.RequestHandler):
+    def get(self):
+        return self.post()
+
+    def post(self):
+        models.UserLog.add_current_state()
+        self.response.out.write("Registered user statistics recorded.")
+
+class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
+    def get(self):
+      if self.request_bool("start", default=False):
+          self.response.out.write("Sync started")
+          taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': 0})
+          self.redirect('/admin/gobackintimeandrecordregisteredusers')
+      else:
+          self.redirect('/')
+
+    def post(self):
+        step = self.request_int("step", default=0)
+        delta = datetime.timedelta(days=1)
+        start_time = datetime.datetime(2011, 3, 12) + step*delta
+        end_time = datetime.datetime(2011, 3, 12) + (step + 1)*delta
+
+        if start_time > datetime.datetime.now():
+            return
+
+        # count registered users
+        c = 0
+        possible_results = True
+        cursor = None
+
+        while possible_results:
+            query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
+            if cursor:
+                query.with_cursor(cursor)
+
+            possible_results = False
+            for udata in query.fetch(250):
+                possible_results = True
+                if udata.user and not udata.is_phantom:
+                    c += 1
+
+            cursor = query.cursor()
+
+        user_counter.add(c)
+        models.UserLog._add_entry(user_counter.get_count(), end_time)
+
+        logging.info("Completed step %s of recording registered users: start_date: %s, end_date: %s" % (step, start_time, end_time))
+
+        taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})
                         
 def main():
     webapp.template.register_template_library('templateext')    
@@ -1411,6 +1486,8 @@ def main():
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
+        ('/admin/userstatistics', UserStatistics),
+        ('/admin/gobackintimeandrecordregisteredusers', GoBackInTimeAndRecordRegisteredUsers),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
@@ -1485,6 +1562,9 @@ def main():
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
+        
+        ('/notifierclose', util_notify.ToggleNotify),
+        ('/newaccount', Clone),
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),

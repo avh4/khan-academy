@@ -55,6 +55,7 @@
 	  _gaq.push(['_setAccount', 'UA-6742635-1']);
 	  _gaq.push(['_setDomainName', '.khanacademy.org']);
 	  _gaq.push(['_trackPageview']);
+	  _gaq.push(['_trackPageLoadTime']);
 
 	  // For OER Analytics
 	  _gaq.push(['ht._setAccount', 'UA-5033010-1']);
@@ -65,7 +66,9 @@
 	<!-- New, faster Google Analytics async tag END -->
 
     </head>
+
     <body class="light">
+	{% login_notifications continue user_data %}
     <div id="page-container">
     <div id="page-container-inner">
         {# Facebook connect root #}
@@ -78,7 +81,7 @@
                 <div id="top-header">
                     <div id="top-header-links">
                         <span class="page_links" id="page_auth">
-                            {% if username %}
+                            {% if logged_in %}
                                 <span id="user-info">
                                     {% username_and_notification username user_data %}
 
@@ -89,7 +92,8 @@
                                 <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                                <a href="{{ login_url|escape }}">Login</a>
+                            	<span class="achievement-badge-counts" style="left:-60px;"></span> <!--Fix for unregistered users-->
+								<a href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator"></span>
                             <a href="/contribute" id="donate-link">Donate</a>
@@ -145,9 +149,9 @@
             {% endblock pagecontent %}
             <div style="padding: 10px;">&nbsp;</div>
 
-            {% if username %}
-                {% badge_notifications %}
-            {% endif %}
+            
+            {% badge_notifications %}
+            
     </div>
     </div>
     <div class="push"></div>

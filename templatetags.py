@@ -13,6 +13,8 @@ import consts
 import util
 import topics_list
 import models
+from inspect import getmembers
+
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
 
@@ -109,6 +111,8 @@ def exercise_icon(exercise, App):
         src = "/images/%s-suggested.png" % s_prefix
     elif exercise.proficient:
         src = "/images/%s-complete.png" % s_prefix
+    # elif exercise.phantom:
+    #     src = "/images/node-not-started.png"
     else:
         src = "/images/%s-not-started.png" % s_prefix
 
@@ -127,8 +131,8 @@ def user_points(user_data):
     return {"points": points}
 
 @register.inclusion_tag(("possible_points_badge.html", "../possible_points_badge.html"))
-def possible_points_badge(points, possible_points):
-    return {"points": points, "possible_points": possible_points}
+def possible_points_badge(points, possible_points, logged_in=True):
+    return {"points": points, "possible_points": possible_points, "logged_in": logged_in}
 
 @register.inclusion_tag(("simple_student_info.html", "../simple_student_info.html"))
 def simple_student_info(user_data):
@@ -140,12 +144,15 @@ def simple_student_info(user_data):
 
 @register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))
 def streak_bar(user_exercise):
-
     streak = user_exercise.streak
     longest_streak = 0
 
     if hasattr(user_exercise, "longest_streak"):
         longest_streak = user_exercise.longest_streak
+
+    if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
+        streak = 0
+        longest_streak = 0
 
     streak_max_width = 227
 
@@ -248,6 +255,7 @@ register.tag(highlight)
 webapp.template.register_template_library('templatetags')    
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
+webapp.template.register_template_library('phantom_users.templatetags')
 webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
 webapp.template.register_template_library('js_css_packages.templatetags')

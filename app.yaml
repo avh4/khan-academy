@@ -99,7 +99,7 @@ handlers:
 
 - url: .*
   script: main.py
-  
+    
 builtins:
 - appstats: on
 - datastore_admin: on

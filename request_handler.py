@@ -10,7 +10,6 @@ from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
-import util
 from app import App
 from render import render_block_to_string
 import cookie_util
@@ -191,6 +190,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
         template_values['username'] = user_data.nickname if user_data else ""
         template_values['points'] = user_data.points if user_data else 0
+        template_values['logged_in'] = not user_data.is_phantom if user_data else False
 
         # Always insert a post-login request before our continue url
         template_values['continue'] = util.create_post_login_url(template_values.get('continue') or self.request.uri)
@@ -237,3 +237,4 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             self.response.out.write(json)
 
 from models import UserData
+import util

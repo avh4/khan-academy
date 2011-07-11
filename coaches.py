@@ -22,11 +22,14 @@ from badges import util_badges
 
 from profiles.util_profile import ExercisesOverTimeGraph, ExerciseProblemsGraph
 from profiles.util_profile import ClassProgressReportGraph, ClassEnergyPointsPerMinuteGraph, ClassTimeGraph
-import profiles.util_profile as util_profile
 
+from phantom_users.phantom_util import disallow_phantoms
+import profiles.util_profile as util_profile
 import simplejson as json
 
+
 class ViewCoaches(RequestHandler):
+    @disallow_phantoms
     def get(self):
         user_data = UserData.current()
 
@@ -47,7 +50,9 @@ class ViewCoaches(RequestHandler):
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
+
 class ViewStudents(RequestHandler):
+    @disallow_phantoms
     def get(self):
         user_data = UserData.current()
 
@@ -90,7 +95,9 @@ class ViewStudents(RequestHandler):
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
+
 class RegisterCoach(RequestHandler):
+    @disallow_phantoms
     def post(self):
         user_data = UserData.current()
 
@@ -114,6 +121,7 @@ class RegisterCoach(RequestHandler):
             self.redirect("/coaches?invalid_coach=1")
 
 class RequestStudent(RequestHandler):
+    @disallow_phantoms
     def post(self):
         user_data = UserData.current()
 
@@ -135,8 +143,10 @@ class RequestStudent(RequestHandler):
         else:
             self.redirect("/students?invalid_student=1")
 
+
 class AcceptCoach(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
+    @disallow_phantoms
     def get(self):
         user_data = UserData.current()
 
@@ -169,6 +179,7 @@ class AcceptCoach(RequestHandler):
             self.redirect("/coaches")
 
 class UnregisterCoach(RequestHandler):
+    @disallow_phantoms
     def get(self):
         user_data = UserData.current()
 
@@ -190,6 +201,7 @@ class UnregisterCoach(RequestHandler):
         self.redirect("/coaches") 
 
 class UnregisterStudent(RequestHandler):
+    @disallow_phantoms
     def get(self):
         user_data = UserData.current()
 
@@ -287,4 +299,3 @@ class ViewCharts(RequestHandler):
     def get(self):
         self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" % 
                 (ExerciseProblemsGraph.GRAPH_TYPE, self.request_string("student_email"), self.request_string("exercise_name")))
-

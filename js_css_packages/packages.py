@@ -16,6 +16,7 @@ javascript = {
         "files": [
             "video.js",
             "discussion.js",
+            "jquery.qtip.js",
         ]
     },
     "homepage": {
@@ -100,6 +101,7 @@ stylesheets = {
         "files": [
             "video.css",
             "discussion.css",
+            "jquery.qtip.css",
         ]
     },
     "studentlists": {

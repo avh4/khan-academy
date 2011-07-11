@@ -1,7 +1,6 @@
 import os
 import datetime
 import urllib
-import logging
 import request_cache
 
 from google.appengine.api import users
@@ -11,12 +10,14 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
+from phantom_users.phantom_util import _get_phantom_user_from_cookies, \
+    is_phantom_email
 
 from api.auth.google_util import get_google_user_from_oauth_map
 from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
-def _get_current_user_email():
+def _get_current_user_email(bust_cache=False):
     user = None
 
     oauth_map = current_oauth_map()
@@ -43,10 +44,12 @@ def _get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
+    if not user:
+        user = _get_phantom_user_from_cookies()
     return user
 
-def is_facebook_user(user):
-    return user and facebook_util.is_facebook_email(user.email())
+def _is_phantom_user(user):
+    return user and is_phantom_email(user.email())
 
 def create_login_url(dest_url):
     return "/login?continue=%s" % urllib.quote(dest_url)

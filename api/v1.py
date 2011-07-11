@@ -331,7 +331,6 @@ def user_videos_specific(youtube_id):
 @jsonp
 @jsonify
 def log_user_video(youtube_id):
-
     user_data = models.UserData.current()
 
     points = 0

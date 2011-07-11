@@ -191,6 +191,11 @@ indexes:
 
 - kind: UserData
   properties:
+  - name: User
+  - name: joined
+
+- kind: UserData
+  properties:
   - name: __key__
     direction: desc
 

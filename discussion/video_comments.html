@@ -4,7 +4,9 @@
 
     <div class="comments_container"><em>Loading...</em> <img class="icon" src="{% static_url "/images/throbber.gif" %}"/></div>
     
-    {% if user_data %}
+
+    {% if logged_in %}
+
     <a href="#" class="control comment_add"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Add a comment</a>
     {% else %}
     <a href="{{login_url}}" class="control"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Log in to add a comment</a>

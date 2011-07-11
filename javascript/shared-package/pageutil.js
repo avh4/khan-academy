@@ -350,6 +350,31 @@ var VideoStats = {
         this.dtSinceSave = new Date();
     },
 
+    /* Use qtip2 (http://craigsworks.com/projects/qtip2/) to create a tooltip
+     * that looks like the ones on youtube.
+     *
+     * Example: 
+     * VideoStats.tooltip('#points-badge-hover', '0 of 500 points');
+     */
+    tooltip: function(selector, content) {
+        $(selector).qtip({
+            content: {
+                text: content
+            },
+            style: {
+                classes: 'ui-tooltip-youtube'
+            },
+            position: {
+                my: 'top center',
+                at: 'bottom center'
+            },
+            hide: {
+                fixed: true,
+                delay: 150
+            }
+        });
+    },
+
     finishSave: function(data, percent) {
         VideoStats.fSaving = false;
         VideoStats.dPercentLastSaved = percent;
@@ -359,10 +384,14 @@ var VideoStats = {
 
         if (dict_json.video_points && dict_json.user_points_html)
         {
+            // Update the energy points box with the new data.
             var jelPoints = $(".video-energy-points");
-            jelPoints.attr("title", jelPoints.attr("title").replace(/^\d+/, dict_json.video_points));
+            jelPoints.data("title", jelPoints.data("title").replace(/^\d+/, dict_json.video_points));
             $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
             $("#user-points-container").html(dict_json.user_points_html);
+
+            // Replace the old tooltip with an updated one.
+            VideoStats.tooltip('#points-badge-hover', jelPoints.data('title'));
         }
     },
 
@@ -547,6 +576,54 @@ var Badges = {
             jelBadge.nextAll(".achievement-badge").first().css("clear", "both");
         }
     }
+}
+
+
+var Notifications = {
+
+    show: function() {
+        var jel = $(".notification-bar");
+        $(".notification-bar-close").click(function(){
+            Notifications.hide();
+            return false;
+            });
+        setTimeout(function(){
+            
+            jel
+                .css("visibility", "hidden")
+                .css("display", "")
+                .css("top",-1*jel.height())
+                .css("visibility", "visible");
+
+            // Queue:false to make sure all of these run at the same time
+            var animationOptions = {duration: 350, queue: false};
+            
+            $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
+            $("#top-header").animate({ marginTop: 35 }, animationOptions);
+            jel.show().animate({ top: 0 }, animationOptions);
+
+        }, 100);
+
+    },
+
+    hide: function() {
+        var jel = $(".notification-bar");
+
+        // Queue:false to make sure all of these run at the same time
+        var animationOptions = {duration: 350, queue: false};
+        
+        $("body").animate({ backgroundPosition: "0px 0px", top: 0 }, animationOptions);
+        $("#top-header").animate({ marginTop: 0 }, animationOptions);
+        jel.animate(
+                { top: -1 * jel.height() }, 
+                $.extend(animationOptions, 
+                    { complete: function(){ jel.remove(); } }
+                )
+        );
+
+        $.post("/notifierclose"); 
+    }
+
 }
 
 var Timezone = {

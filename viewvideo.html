@@ -91,7 +91,7 @@
                          Share
                  </a>
 
-                 <span class="sharepop">
+                 <span class="sharepop" style="display: none;">
 					<span class="triangle-isosceles top">
 						<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookVideo('{{video.title|escape}}','{{video.description}}','/video?v={{video.youtube_id}}');"></a>
 						<a class="twitterShare" href="http://twitter.com/share?text=just%20learned%20about%20{{video.title|escape}}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy"> </a>
@@ -99,9 +99,8 @@
 				</span>
 					
          	</div>
-			<span style="float:right;">{% if username %}
-		    	{% possible_points_badge awarded_points video_points_base %}
-		    {% endif %}
+			<span style="float:right;" id="points-badge-hover">
+		    	{% possible_points_badge awarded_points video_points_base logged_in %}
 			</span>
          	</nobr>
 		 </span>
@@ -119,9 +118,20 @@
 
 {% block bottompagescript %}
     {% js_package "video" %}
-    {% if username %}
-        <script>$(function(){VideoStats.startLoggingProgress();});</script>
-    {% endif %}
+    <script>
+      $(function(){VideoStats.startLoggingProgress();});
+
+      // We take the message in the title of the energy points box and place it
+      // in a tooltip, and if it's the message with a link to the login we 
+      // replace it with a nicer link (we don't want to have to pass the url to
+      // the templatetag).
+      var $points = $('.video-energy-points');
+      $points.data('title', $points.attr('title').replace(/Sign in/, 
+                 '<a href="{{ login_url|escape }}">Sign in</a>'))
+             .removeAttr('title');
+
+      VideoStats.tooltip('#points-badge-hover', $points.data('title'));
+    </script>
     <script type="text/javascript">document.write(unescape('%3Cscript type="text/javascript" src="'+document.location.protocol+'//dnn506yrbagrg.cloudfront.net/pages/scripts/0011/5719.js"%3E%3C%2Fscript%3E'))</script>
 {% endblock bottompagescript %}
 
