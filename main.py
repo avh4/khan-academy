@@ -1441,7 +1441,7 @@ def main():
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
-        ('/admin/youtubesync', youtube_sync.YouTubeSync),
+        ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
 

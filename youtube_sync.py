@@ -74,7 +74,7 @@ class YouTubeSync(request_handler.RequestHandler):
             self.task_step(step + 1)
 
     def task_step(self, step):
-        taskqueue.add(url='/admin/youtubesync', queue_name='youtube-sync-queue', params={'step': step})
+        taskqueue.add(url='/admin/youtubesync/%s' % step, queue_name='youtube-sync-queue', params={'step': step})
 
     def startYouTubeSync(self):
         Setting.last_youtube_sync_generation_start(int(Setting.last_youtube_sync_generation_start()) + 1)
