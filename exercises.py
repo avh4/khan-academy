@@ -143,26 +143,28 @@ class UpdateExercise(request_handler.RequestHandler):
 
         exercise.put()
         
-        #####
+        #Start ordering
         ExerciseVideos = models.ExerciseVideo.all().filter('exercise =', exercise.key()).fetch(1000)
         playlists = []
         for exvid in ExerciseVideos:
             playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exvid.video))
         
-        playlists = list(itertools.chain(*playlists))
-        titles = map(lambda pl: pl.title, playlists)
-        templ = []
-        for p in playlists:
-            templ.append([p, titles.count(p.title)])
-        templ.sort(key = lambda p: p[1])
-        playlists = list(set(playlists))
-        templ.reverse()
-        playlists = []
-        for p in templ:
-            playlists.append(p[0])
-        fullorder = {}
-        finallist = []
         if playlists:
+            
+            playlists = list(itertools.chain(*playlists))
+            titles = map(lambda pl: pl.title, playlists)
+            templ = []
+            for p in playlists:
+                templ.append([p, titles.count(p.title)])
+            templ.sort(key = lambda p: p[1])
+            playlists = list(set(playlists))
+            templ.reverse()
+            playlists = []
+            for p in templ:
+                playlists.append(p[0])
+            fullorder = {}
+            finallist = []
+            
             for p in playlists:
                 fullorder[p.title]=[]
                 for exvid in ExerciseVideos:
@@ -174,12 +176,12 @@ class UpdateExercise(request_handler.RequestHandler):
                     fullorder[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
                     finallist.append(fullorder[p.title])
         
-            finallist = list(itertools.chain(*finallist))
-            for e in finallist:
-                e.exercise_order = finallist.index(e)
-                e.put()
-        
-        #####
+            if finallist:
+                finallist = list(itertools.chain(*finallist))
+                for e in finallist:
+                    e.exercise_order = finallist.index(e)
+                    e.put()
+
 
         self.redirect('/editexercise?saved=1&name=' + exercise_name)
 
