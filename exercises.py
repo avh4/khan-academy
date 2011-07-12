@@ -150,9 +150,16 @@ class UpdateExercise(request_handler.RequestHandler):
             playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exvid.video))
         
         playlists = list(itertools.chain(*playlists))
-        playlists.sort(key = lambda p: playlists.count(p.title))
+        titles = map(lambda pl: pl.title, playlists)
+        templ = []
+        for p in playlists:
+            templ.append([p, titles.count(p.title)])
+        templ.sort(key = lambda p: p[1])
         playlists = list(set(playlists))
-        playlists.reverse()
+        templ.reverse()
+        playlists = []
+        for p in templ:
+            playlists.append(p[0])
         fullorder = {}
         finallist = []
         if playlists:
@@ -161,7 +168,6 @@ class UpdateExercise(request_handler.RequestHandler):
                 for exvid in ExerciseVideos:
                     if p.title  in map(lambda pl: pl.title, models.VideoPlaylist.get_cached_playlists_for_video(exvid.video)):
                         fullorder[p.title].append(exvid)
-                        logging.critical(fullorder[p.title])
                         ExerciseVideos.remove(exvid)
 
                 if fullorder[p.title]:
