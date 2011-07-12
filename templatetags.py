@@ -248,6 +248,10 @@ def empty_class_instructions(class_is_empty=True):
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
+@register.inclusion_tag(("crazyegg_tracker.html", "../crazyegg_tracker.html"))
+def crazyegg_tracker(enabled=True):
+	return { 'enabled': enabled }
+
 register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')    
