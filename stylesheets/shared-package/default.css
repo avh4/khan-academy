@@ -1809,7 +1809,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             display: block;
             float: left;
             margin: 4px 0 0 2px;
-            width: 75%;
+            width: 70%;
             overflow: hidden;
             text-overflow: ellipsis;
         }

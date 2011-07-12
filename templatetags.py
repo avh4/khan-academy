@@ -36,7 +36,7 @@ class HighlightNode(template.Node):
         try:
             phrases = template.resolve_variable(self.phrases_to_highlight, context)
             text = template.resolve_variable(self.text, context)
-        except VariableDoesNotExist:
+        except template.VariableDoesNotExist:
             pass
         phrases = [(re.escape(p)+r'\w*') for p in phrases]
         regex = re.compile("(%s)" % "|".join(phrases), re.IGNORECASE)
@@ -248,6 +248,10 @@ def empty_class_instructions(class_is_empty=True):
         coach_email = user_data.email
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
+
+@register.inclusion_tag(("crazyegg_tracker.html", "../crazyegg_tracker.html"))
+def crazyegg_tracker(enabled=True):
+	return { 'enabled': enabled }
 
 register.tag(highlight)
 

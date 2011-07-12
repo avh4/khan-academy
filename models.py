@@ -947,6 +947,7 @@ class VideoLog(db.Model):
     video_title = db.StringProperty()
     time_watched = db.DateTimeProperty(auto_now_add = True)
     seconds_watched = db.IntegerProperty(default = 0)
+    last_second_watched = db.IntegerProperty()
     points_earned = db.IntegerProperty(default = 0)
     playlist_titles = db.StringListProperty()
 
@@ -1001,6 +1002,7 @@ class VideoLog(db.Model):
         video_log.video = video
         video_log.video_title = video.title
         video_log.seconds_watched = seconds_watched
+        video_log.last_second_watched = last_second_watched
 
         if last_second_watched > user_video.last_second_watched:
             user_video.last_second_watched = last_second_watched
