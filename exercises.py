@@ -146,40 +146,39 @@ class UpdateExercise(request_handler.RequestHandler):
         #Start ordering
         ExerciseVideos = models.ExerciseVideo.all().filter('exercise =', exercise.key()).fetch(1000)
         playlists = []
-        for exvid in ExerciseVideos:
-            playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exvid.video))
+        for exercise_video in ExerciseVideos:
+            playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video))
         
         if playlists:
             
             playlists = list(itertools.chain(*playlists))
             titles = map(lambda pl: pl.title, playlists)
-            templ = []
+            playlist_sorted = []
             for p in playlists:
-                templ.append([p, titles.count(p.title)])
-            templ.sort(key = lambda p: p[1])
-            playlists = list(set(playlists))
-            templ.reverse()
+                playlist_sorted.append([p, titles.count(p.title)])
+            playlist_sorted.sort(key = lambda p: p[1])
+            playlist_sorted.reverse()
             playlists = []
-            for p in templ:
+            for p in playlist_sorted:
                 playlists.append(p[0])
-            fullorder = {}
-            finallist = []
+            playlist_dict = {}
+            exercise_list = []
             
             for p in playlists:
-                fullorder[p.title]=[]
-                for exvid in ExerciseVideos:
-                    if p.title  in map(lambda pl: pl.title, models.VideoPlaylist.get_cached_playlists_for_video(exvid.video)):
-                        fullorder[p.title].append(exvid)
-                        ExerciseVideos.remove(exvid)
+                playlist_dict[p.title]=[]
+                for exercise_video in ExerciseVideos:
+                    if p.title  in map(lambda pl: pl.title, models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video)):
+                        playlist_dict[p.title].append(exercise_video)
+                        ExerciseVideos.remove(exercise_video)
 
-                if fullorder[p.title]:
-                    fullorder[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
-                    finallist.append(fullorder[p.title])
+                if playlist_dict[p.title]:
+                    playlist_dict[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
+                    exercise_list.append(playlist_dict[p.title])
         
-            if finallist:
-                finallist = list(itertools.chain(*finallist))
-                for e in finallist:
-                    e.exercise_order = finallist.index(e)
+            if exercise_list:
+                exercise_list = list(itertools.chain(*exercise_list))
+                for e in exercise_list:
+                    e.exercise_order = exercise_list.index(e)
                     e.put()
 
 
