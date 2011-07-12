@@ -8,6 +8,7 @@ import urllib
 import logging
 import re
 from pprint import pformat
+from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
@@ -860,6 +861,13 @@ class Crash(request_handler.RequestHandler):
             # Even Watson isn't perfect
             raise Exception("What is Toronto?")
 
+class ReadOnlyDowntime(request_handler.RequestHandler):
+    def get(self):
+        raise CapabilityDisabledError("App Engine maintenance period")
+
+    def post(self):
+        return self.get()
+
 class SendToLog(request_handler.RequestHandler):
     def post(self):
         message = self.request_string("message", default="")
@@ -1373,6 +1381,7 @@ class UserStatistics(request_handler.RequestHandler):
         self.response.out.write("Registered user statistics recorded.")
 
 def main():
+
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1534,6 +1543,9 @@ def main():
         ('/_ah/warmup.*', warmup.Warmup),
 
         ], debug=True)
+
+    if not capabilities.CapabilitySet('datastore_v3', capabilities=['write']).is_enabled():
+        application = webapp.WSGIApplication([('.*', ReadOnlyDowntime)])
 
     application = profiler.ProfilerWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
