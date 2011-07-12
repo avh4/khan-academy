@@ -35,7 +35,7 @@ class HighlightNode(template.Node):
         try:
             phrases = template.resolve_variable(self.phrases_to_highlight, context)
             text = template.resolve_variable(self.text, context)
-        except VariableDoesNotExist:
+        except template.VariableDoesNotExist:
             pass
         phrases = [(re.escape(p)+r'\w*') for p in phrases]
         regex = re.compile("(%s)" % "|".join(phrases), re.IGNORECASE)
