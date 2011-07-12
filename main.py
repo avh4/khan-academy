@@ -776,7 +776,7 @@ class GenerateLibraryContent(request_handler.RequestHandler):
 
     def get(self):
         library.library_content_html(bust_cache=True)
-        self.response.out.write("Library content regenerated")  
+        self.redirect("/")
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
@@ -1372,49 +1372,6 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
-    def get(self):
-      if self.request_bool("start", default=False):
-          self.response.out.write("Sync started")
-          taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': 0})
-          self.redirect('/admin/gobackintimeandrecordregisteredusers')
-      else:
-          self.redirect('/')
-
-    def post(self):
-        step = self.request_int("step", default=0)
-        delta = datetime.timedelta(days=1)
-        start_time = datetime.datetime(2011, 3, 12) + step*delta
-        end_time = datetime.datetime(2011, 3, 12) + (step + 1)*delta
-
-        if start_time > datetime.datetime.now():
-            return
-
-        # count registered users
-        c = 0
-        possible_results = True
-        cursor = None
-
-        while possible_results:
-            query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
-            if cursor:
-                query.with_cursor(cursor)
-
-            possible_results = False
-            for udata in query.fetch(250):
-                possible_results = True
-                if udata.user and not udata.is_phantom:
-                    c += 1
-
-            cursor = query.cursor()
-
-        user_counter.add(c)
-        models.UserLog._add_entry(user_counter.get_count(), end_time)
-
-        logging.info("Completed step %s of recording registered users: start_date: %s, end_date: %s" % (step, start_time, end_time))
-
-        taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})
-                        
 def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
@@ -1487,7 +1444,6 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
-        ('/admin/gobackintimeandrecordregisteredusers', GoBackInTimeAndRecordRegisteredUsers),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
