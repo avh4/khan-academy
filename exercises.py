@@ -1,4 +1,4 @@
-import os
+import os, logging
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -158,18 +158,19 @@ class UpdateExercise(request_handler.RequestHandler):
                 playlist_sorted.append([p, titles.count(p.title)])
             playlist_sorted.sort(key = lambda p: p[1])
             playlist_sorted.reverse()
+                
             playlists = []
             for p in playlist_sorted:
                 playlists.append(p[0])
             playlist_dict = {}
             exercise_list = []
-            
+            playlists = list(set(playlists))
             for p in playlists:
                 playlist_dict[p.title]=[]
                 for exercise_video in ExerciseVideos:
                     if p.title  in map(lambda pl: pl.title, models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video)):
                         playlist_dict[p.title].append(exercise_video)
-                        ExerciseVideos.remove(exercise_video)
+                        # ExerciseVideos.remove(exercise_video)
 
                 if playlist_dict[p.title]:
                     playlist_dict[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
