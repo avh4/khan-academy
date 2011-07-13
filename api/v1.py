@@ -11,6 +11,7 @@ import layer_cache
 import topics_list
 from badges import badges, util_badges, models_badges
 import util
+import notifications
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
@@ -27,7 +28,7 @@ def add_action_results_property(obj, dict_results):
 
         badge_counts = util_badges.get_badge_counts(user_data)
 
-        user_badges = badges.UserBadgeNotifier.pop_for_user_data(user_data)
+        user_badges = notifications.UserNotifier.pop_for_user_data(user_data)["badges"]
         badges_dict = util_badges.all_badges_dict()
 
         for user_badge in user_badges:

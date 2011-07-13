@@ -10,7 +10,7 @@ class UserNotifier:
     
     @staticmethod
     def key_for_user_data(user_data):
-        return "notifications_for_%s" % user_data.key_email
+        return "notifications_dict_for_%s" % user_data.key_email
 
     @staticmethod
     def push_login_for_user_data(user_data, user_alert):
@@ -44,33 +44,32 @@ class UserNotifier:
     @staticmethod
     def pop_for_user_data(user_data):
         if not user_data:
-            return []
+            return UserNotifier.empty_notifications()
+
         notifications = UserNotifier.get_or_create_notifications(user_data)
+
         user_badges = notifications["badges"] or []
-        user_login = notifications["login"] or []
-        
         if len(user_badges) > 0:
             notifications["badges"] = []
             memcache.set(UserNotifier.key_for_user_data(user_data), notifications)
+            notifications["badges"] = user_badges
 
-        return user_badges,user_login
+        return notifications
+
+    @staticmethod
+    def empty_notifications():
+        return { "badges": [], "login": [] }
         
     @staticmethod
     def clear_login():
-        notificationstemp = UserNotifier.pop_for_current_user_data()
-        notifications = {"badges":[],"login":[]}
-        notifications["login"] = []
-        notifications["badges"] = notificationstemp[0]
+        notifications = UserNotifier.empty_notifications()
+        notifications["badges"] = UserNotifier.pop_for_current_user_data()["badges"]
         memcache.set(UserNotifier.key_for_user_data(models.UserData.current()), notifications)
     
     @staticmethod
     def clear_all(user_data):
-        notifications = {"badges":[],"login":[]}
-        notifications["login"] = []
-        notifications["badges"] = []
-        memcache.set(UserNotifier.key_for_user_data(user_data), notifications)
+        memcache.set(UserNotifier.key_for_user_data(user_data), UserNotifier.empty_notifications())
     
     @staticmethod
     def get_or_create_notifications(user_data):
-        return memcache.get(UserNotifier.key_for_user_data(user_data)) or \
-            {"badges":[],"login":[]}
+        return memcache.get(UserNotifier.key_for_user_data(user_data)) or UserNotifier.empty_notifications()
