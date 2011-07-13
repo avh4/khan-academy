@@ -773,11 +773,13 @@ class GenerateLibraryContent(request_handler.RequestHandler):
 
     def post(self):
         # We support posts so we can fire task queues at this handler
-        self.get()
+        self.get(from_task_queue = True)
 
-    def get(self):
+    def get(self, from_task_queue = False):
         library.library_content_html(bust_cache=True)
-        self.redirect("/")
+
+        if not from_task_queue:
+            self.redirect("/")
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
