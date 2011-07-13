@@ -1312,15 +1312,20 @@ class PostLogin(request_handler.RequestHandler):
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
 
+            # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
-                UserNotifier.clear_all(phantom_data)
-                logging.info("New Account: %s", user_data.current().email)
-                phantom_data.current_user = user_data.current_user
-                if phantom_data.put():
-                    # Phantom user was just transitioned to real user
-                    user_counter.add(1)
-                    user_data.delete()
-                cont = "/newaccount?continue=%s" % cont
+
+                # Make sure user has no students
+                if not user_data.has_students():
+
+                    UserNotifier.clear_all(phantom_data)
+                    logging.info("New Account: %s", user_data.current().email)
+                    phantom_data.current_user = user_data.current_user
+                    if phantom_data.put():
+                        # Phantom user was just transitioned to real user
+                        user_counter.add(1)
+                        user_data.delete()
+                    cont = "/newaccount?continue=%s" % cont
 
         self.delete_cookie('ureg_id')
         self.redirect(cont)

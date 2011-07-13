@@ -689,6 +689,9 @@ class UserData(db.Model):
         		    students_data.append(student_data)
         return students_data
 
+    def has_students(self):
+        return len(self.get_students_data()) > 0
+
     def coach_emails(self):
         emails = []
         for key_email in self.coaches:
