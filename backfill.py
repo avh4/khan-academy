@@ -12,6 +12,7 @@ from facebook_util import is_facebook_email
     
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
+        pass
         # Admin-only restriction is handled by /admin/* URL pattern
         # so this can be called by a cron job.
 

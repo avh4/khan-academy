@@ -1552,6 +1552,7 @@ def main():
         ], debug=True)
 
     if not capabilities.CapabilitySet('datastore_v3', capabilities=['write']).is_enabled():
+        logging.info("Shortcircuiting request due to disabled datastore write.")
         application = webapp.WSGIApplication([('.*', ReadOnlyDowntime)])
 
     application = profiler.ProfilerWSGIMiddleware(application)
