@@ -195,7 +195,7 @@ class Exercise(db.Model):
     def related_videos(self):
         exercise_videos = None
         query = ExerciseVideo.all()
-        query.filter('exercise =', self.key())
+        query.filter('exercise =', self.key()).order('exercise_order')
         return query
 
     @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
@@ -1243,7 +1243,8 @@ class ExerciseVideo(db.Model):
 
     video = db.ReferenceProperty(Video)
     exercise = db.ReferenceProperty(Exercise)
-
+    exercise_order = db.IntegerProperty()
+    
     def key_for_video(self):
         return ExerciseVideo.video.get_value_for_datastore(self)
 

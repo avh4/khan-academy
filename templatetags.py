@@ -12,6 +12,7 @@ from models import UserData
 import consts
 import util
 import topics_list
+import models
 from inspect import getmembers
 
 # get registry, we need it to register our filter later.

@@ -7,7 +7,7 @@ from app import App
 import models
 import request_handler
 import util
-
+import itertools
 class ExerciseAdmin(request_handler.RequestHandler):
 
     def get(self):
@@ -132,15 +132,55 @@ class UpdateExercise(request_handler.RequestHandler):
             existing_video_keys.append(exercise_video.video.key())
             if not exercise_video.video.key() in video_keys:
                 exercise_video.delete()
-
+        
         for video_key in video_keys:
             if not video_key in existing_video_keys:
                 exercise_video = models.ExerciseVideo()
                 exercise_video.exercise = exercise
                 exercise_video.video = db.Key(video_key)
+                exercise_video.exercise_order = models.VideoPlaylist.all().filter('video =',exercise_video.video).get().video_position
                 exercise_video.put()
 
         exercise.put()
+        
+        #Start ordering
+        ExerciseVideos = models.ExerciseVideo.all().filter('exercise =', exercise.key()).fetch(1000)
+        playlists = []
+        for exercise_video in ExerciseVideos:
+            playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video))
+        
+        if playlists:
+            
+            playlists = list(itertools.chain(*playlists))
+            titles = map(lambda pl: pl.title, playlists)
+            playlist_sorted = []
+            for p in playlists:
+                playlist_sorted.append([p, titles.count(p.title)])
+            playlist_sorted.sort(key = lambda p: p[1])
+            playlist_sorted.reverse()
+            playlists = []
+            for p in playlist_sorted:
+                playlists.append(p[0])
+            playlist_dict = {}
+            exercise_list = []
+            
+            for p in playlists:
+                playlist_dict[p.title]=[]
+                for exercise_video in ExerciseVideos:
+                    if p.title  in map(lambda pl: pl.title, models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video)):
+                        playlist_dict[p.title].append(exercise_video)
+                        ExerciseVideos.remove(exercise_video)
+
+                if playlist_dict[p.title]:
+                    playlist_dict[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
+                    exercise_list.append(playlist_dict[p.title])
+        
+            if exercise_list:
+                exercise_list = list(itertools.chain(*exercise_list))
+                for e in exercise_list:
+                    e.exercise_order = exercise_list.index(e)
+                    e.put()
+
 
         self.redirect('/editexercise?saved=1&name=' + exercise_name)
 
