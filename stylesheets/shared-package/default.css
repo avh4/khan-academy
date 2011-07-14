@@ -1242,7 +1242,7 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.vl {
 				font-weight: normal;	
-				background-image: url(/images/non-repeating-sprites.1.png);
+				/*background-image: url(/images/non-repeating-sprites.1.png);*/
                 background-position: -56px -36px;
 				padding: 0 2px 0 13px;
 				line-height: 18px;

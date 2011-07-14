@@ -451,6 +451,42 @@ class StudentList(db.Model):
     def get_students_data(self):
         return [s for s in self.students]
 
+class UserVideoCss(db.Model):
+    user = db.UserProperty()
+    video_css = db.TextProperty()
+
+    STARTED_CSS = '{background-image:url(/images/vid-progress-started.png)}'
+    COMPLETE_CSS = '{background-image:url(/images/vid-progress-complete.png)}'
+
+    @staticmethod
+    def get_for_user_data(user_data):
+        return UserVideoCss.get_by_key_name(UserVideoCss.key_for(user_data))
+
+    @staticmethod
+    def key_for(user_data):
+        return 'user_video_css_%s' % user_data.key_email
+
+    @staticmethod
+    def started(user_data, video):
+        uvc = UserVideoCss.get_for_user_data(user_data)
+        if not str(video.key().id() in uvc.video_css:
+            #If the video is already in the css, we don't do anything
+            if uvc.video_css.find(STARTED_CSS):
+                # The user already has rules for started videos
+                uvc.video_css.replace(STARTED_CSS, 
+                                      ',#v'+video.key().id()+STARTED_CSS)
+            else:
+                uvc.video_css = '#v'+video.key().id()+STARTED_CSS + uvc.video_css
+
+    @staticmethod
+    def completed(user_data, video):
+        uvc = UserVideoCss.get_for_user_data(user_data)
+        if uvc.video_css.find(COMPLETE_CSS):
+            # The user already has rules for complete videos
+            uvc.video_css.replace(COMPLETE_CSS,
+                                  ',#v'+video.key().id()+STARTED_CSS)
+        else:
+            uvc.video_css = uvc.video_css + '#v'+video.key().id()+COMPLETE_CSS
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -1008,6 +1044,9 @@ class VideoLog(db.Model):
             user_video.last_second_watched = last_second_watched
 
         if seconds_watched > 0:
+            if user_video.seconds_watched == 0:
+                UserVideoCss.started(user_data, user_video.video)
+
             user_video.seconds_watched += seconds_watched
             user_data.total_seconds_watched += seconds_watched
 
@@ -1049,6 +1088,8 @@ class VideoLog(db.Model):
             # Just finished this video for the first time
             user_video.completed = True
             user_data.videos_completed = -1
+
+            UserVideoCss.completed(user_data, user_video.video)
 
         if video_points_received > 0:
             video_log.points_earned = video_points_received

@@ -97,6 +97,10 @@ handlers:
 - url: /gae_mini_profiler/.*
   script: gae_mini_profiler/main.py
 
+- url: /backends/*
+  script: videoprogress.py
+  login: admin
+
 - url: .*
   script: main.py
     

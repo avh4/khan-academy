@@ -950,7 +950,7 @@ class ViewHomePage(request_handler.RequestHandler):
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
-        
+
         template_values = {
                             'video_id': movie_youtube_id,
                             'thumbnail_link_sets': thumbnail_link_sets,
@@ -1372,6 +1372,14 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+class ServeUserVideoCss(request_handler.RequestHandler):
+    def get(self):
+        user_data = UserData.current()
+        css = models.UserVideoCss.get_for_user_data(user_data)
+        self.response.headers['Content-Type'] = 'text/css'
+        if css:
+            self.response.out.write(css)
+
 def main():
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
@@ -1526,6 +1534,8 @@ def main():
         ('/jobs/.*', RedirectToJobvite),
 
         ('/sendtolog', SendToLog),
+
+        ('/user_video_css', ServeUserVideoCss),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
