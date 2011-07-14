@@ -106,6 +106,8 @@ def remove_urls(path, path_combined, suffix):
     path_without_urls = os.path.join(path, URI_FILENAME + suffix)
     print "Replacing urls from %s to get %s" % (path_combined, path_without_urls)
 
+    new_file = open(path_without_urls, 'w')
+
     r = re.compile('replace-with-data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
     with open(path_combined) as f:
         for line in f:
@@ -114,6 +116,9 @@ def remove_urls(path, path_combined, suffix):
                     urlpath = '/images/'+i.group(1)+'.'+i.group(2)
                     print "urlpath: %s" % urlpath
                     re.sub(urlpath, remove_images_from_line, line, 1)
+            new_file.write(line)
+
+    new_file.close()
 
     if not os.path.exists(path_without_urls):
           raise Exception("Unable to remove images: %s" % path_combined)
