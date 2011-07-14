@@ -154,9 +154,10 @@ def streak_bar(user_exercise):
         longest_streak = 0
 
     streak_max_width = 227
+    required_streak = user_exercise.required_streak
 
-    streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * streak))
-    longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * longest_streak))
+    streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * streak))
+    longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * longest_streak))
     streak_icon_width = min(streak_max_width - 2, max(43, streak_width)) # 43 is width of streak icon
 
     width_required_for_label = 20
@@ -165,7 +166,7 @@ def streak_bar(user_exercise):
 
     levels = []
     if user_exercise.summative:
-        c_levels = user_exercise.required_streak() / consts.REQUIRED_STREAK
+        c_levels = required_streak / consts.REQUIRED_STREAK
         level_offset = streak_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)

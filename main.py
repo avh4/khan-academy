@@ -125,6 +125,9 @@ class ViewExercise(request_handler.RequestHandler):
 
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
+        # Cache this so we don't have to worry about future lookups
+        user_exercise.exercise_model = exercise
+
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
         # When viewing a problem out-of-order, show read-only view
@@ -143,14 +146,14 @@ class ViewExercise(request_handler.RequestHandler):
 
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                
         # Note: if they just need a single problem for review they can just print this page.
-        num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
+        num_problems_to_print = max(2, exercise.required_streak - user_exercise.streak)
         
         # If the user is proficient, assume they want to print a bunch of practice problems.
         if exercise_states['proficient']:
-            num_problems_to_print = exercise.required_streak()
+            num_problems_to_print = exercise.required_streak
 
         if exercise.summative:
             # Make sure UserExercise has proper summative value even before it's been set.
@@ -587,7 +590,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             if correct:
                 suggested = user_data.is_suggested(exid)
-                points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
             
@@ -612,7 +615,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
                 if user_exercise.streak > user_exercise.longest_streak:
                     user_exercise.longest_streak = user_exercise.streak
-                if user_exercise.streak >= exercise.required_streak() and not proficient:
+                if user_exercise.streak >= exercise.required_streak and not proficient:
                     user_exercise.set_proficient(True, user_data)
                     user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
@@ -655,7 +658,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         
     def send_json(self, user_data, user_exercise, exercise, key, time_warp):
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
         
         streak_bar_context = streak_bar(user_exercise)
         streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)

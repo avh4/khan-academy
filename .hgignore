@@ -16,3 +16,5 @@ sample_data/bulkloader-*
 index.yaml
 offline/*
 *.orig
+.*.swp
+.*.un~

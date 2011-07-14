@@ -138,6 +138,13 @@ class Exercise(db.Model):
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
+    @property
+    def required_streak(self):
+        if self.summative:
+            return consts.REQUIRED_STREAK * len(self.prerequisites)
+        else:
+            return consts.REQUIRED_STREAK
+
     @staticmethod
     def to_short_name(name):
         exercise = Exercise.get_by_name(name)
@@ -153,14 +160,8 @@ class Exercise(db.Model):
     def is_visible_to_current_user(self):
         return self.live or users.is_current_user_admin()
 
-    def required_streak(self):
-        if self.summative:
-            return consts.REQUIRED_STREAK * len(self.prerequisites)
-        else:
-            return consts.REQUIRED_STREAK
-
     def struggling_threshold(self):
-        return 3 * self.required_streak()
+        return 3 * self.required_streak
 
     def summative_children(self):
         if not self.summative:
@@ -284,7 +285,14 @@ class UserExercise(db.Model):
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
-    _serialize_blacklist = ["review_interval_secs", "exercise_model"]
+    _serialize_blacklist = ["review_interval_secs"]
+
+    @property
+    def required_streak(self):
+        if self.summative:
+            return self.exercise_model.required_streak
+        else:
+            return consts.REQUIRED_STREAK
 
     @staticmethod
     def get_key_for_email(email):
@@ -316,8 +324,8 @@ class UserExercise(db.Model):
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
 
-    def required_streak(self):
-        return self.exercise_model.required_streak()
+    def next_points(self):
+        return points.ExercisePointCalculator(self, ex.suggested, ex.proficient)            
 
     def reset_streak(self):
         if self.exercise_model.summative:
@@ -331,7 +339,7 @@ class UserExercise(db.Model):
 
     @staticmethod
     def is_struggling_with(user_exercise, exercise):
-        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak() and user_exercise.total_done > exercise.struggling_threshold() 
+        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak and user_exercise.total_done > exercise.struggling_threshold() 
 
     def is_struggling(self):
         return UserExercise.is_struggling_with(self, self.exercise_model)
@@ -348,7 +356,7 @@ class UserExercise(db.Model):
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
         # If the user is not now and never has been proficient, don't schedule a review
-        if (self.streak + correct) < self.required_streak() and self.longest_streak < self.required_streak():
+        if (self.streak + correct) < self.required_streak and self.longest_streak < self.required_streak:
             return
 
         # If the user is hitting a new streak either for the first time or after having lost
@@ -371,7 +379,7 @@ class UserExercise(db.Model):
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
 
     def set_proficient(self, proficient, user_data):
-        if not proficient and self.longest_streak < self.required_streak():
+        if not proficient and self.longest_streak < self.required_streak:
             # Not proficient and never has been so nothing to do
             return
 
@@ -619,7 +627,7 @@ class UserData(db.Model):
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
         struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
         
         return {
             'phantom': phantom,
@@ -1349,7 +1357,7 @@ class ExerciseGraph(object):
             
         for ex in exercises:
             compute_suggested(ex)
-            ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
+            ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)            
 
         phantom = user_data.is_phantom
         for ex in exercises:
