@@ -73,10 +73,17 @@ def requested_oauth_callback():
     return request.values.get("oauth_callback") or ("%sapi/auth/default_callback" % request.host_url)
 
 def allow_cookie_based_auth():
+
     # Don't allow cookie-based authentication for API calls which
-    # may return JSONP
+    # may return JSONP, unless they are POSTs
+
     path = os.environ.get("PATH_INFO")
-    return not path or not path.lower().startswith("/api/")
+
+    if path and path.lower().startswith("/api/"):
+        if "POST" != os.environ.get("REQUEST_METHOD"):
+            return False
+
+    return True
 
 def current_oauth_map():
     oauth_map = None

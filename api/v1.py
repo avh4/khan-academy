@@ -460,6 +460,65 @@ def user_problem_logs(exercise_name):
 
     return None
 
+@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/answer", methods=["GET"])
+@oauth_optional()
+@jsonp
+@jsonify
+def answer_problem(exercise_name, problem_number):
+    user_data = models.UserData.current()
+
+    if user_data and exercise_name and problem_number:
+        user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
+
+        if user_exercise:
+            correct = request.request_bool("correct", default=False)
+
+            user_exercise.schedule_review(correct, self.get_time())
+
+            if not correct:
+                if user_exercise.streak == 0:
+                    # 2+ in a row wrong -> not proficient
+                    user_exercise.set_proficient(False, user_data)
+                user_exercise.reset_streak()
+            user_exercise.put()
+
+            return user_exercise
+
+    return None
+
+@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["GET"])
+@oauth_optional()
+@jsonp
+@jsonify
+def complete_problem(exercise_name, problem_number):
+    user_data = models.UserData.current()
+
+    if user_data and exercise_name and problem_number:
+        user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
+
+        if user_exercise:
+            pass
+
+    return None
+
+@route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["GET"])
+@oauth_optional()
+@jsonp
+@jsonify
+def reset_streak(exercise_name):
+    user_data = models.UserData.current()
+
+    if user_data and exercise_name:
+        user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
+
+        if user_exercise:
+            user_exercise.reset_streak()
+            user_exercise.put()
+
+            return user_exercise
+
+    return None
+
 @route("/api/v1/user/videos/<youtube_id>/log", methods=["GET"])
 @oauth_required()
 @jsonp
