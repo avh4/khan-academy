@@ -368,16 +368,16 @@ def user_exercises_all():
             exercises_dict = dict((exercise.name, exercise) for exercise in exercises)
             user_exercises_dict = dict((user_exercise.exercise, user_exercise) for user_exercise in user_exercises)
 
-            for exercise_name in user_exercises_dict:
-                user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
-
             for exercise_name in exercises_dict:
                 if not exercise_name in user_exercises_dict:
                     user_exercise = models.UserExercise()
                     user_exercise.exercise = exercise_name
-                    user_exercise.exercise_model = exercises_dict[exercise_name]
                     user_exercise.user = user_data_student.user
                     user_exercises_dict[exercise_name] = user_exercise
+
+            for exercise_name in user_exercises_dict:
+                user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
+                user_exercises_dict[exercise_name]._user_data = user_data_student
 
             return user_exercises_dict.values()
 

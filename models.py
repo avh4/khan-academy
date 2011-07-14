@@ -294,6 +294,23 @@ class UserExercise(db.Model):
         else:
             return consts.REQUIRED_STREAK
 
+    @property
+    def next_points(self):
+        user_data = None
+
+        if hasattr(self, "_user_data"):
+            user_data = self._user_data
+        else:
+            user_data = UserData.get_from_db_key_email(self.user.email())
+
+        suggested = proficient = False
+
+        if user_data:
+            suggested = user_data.is_suggested(self.exercise)
+            proficient = user_data.is_proficient_at(self.exercise)
+
+        return points.ExercisePointCalculator(self, suggested, proficient)
+
     @staticmethod
     def get_key_for_email(email):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % email
@@ -323,9 +340,6 @@ class UserExercise(db.Model):
 
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
-
-    def next_points(self):
-        return points.ExercisePointCalculator(self, ex.suggested, ex.proficient)            
 
     def reset_streak(self):
         if self.exercise_model.summative:
