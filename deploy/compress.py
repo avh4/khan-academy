@@ -107,7 +107,7 @@ def remove_urls(path, path_combined, suffix):
     print "Replacing urls from %s to get %s" % (path_combined, path_without_urls)
 
     r = re.compile('replace-with-data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
-    with open(path_combined) as f
+    with open(path_combined) as f:
         for line in f:
             if r.search(line):
                 for i in r.finditer(line):
