@@ -1375,7 +1375,7 @@ class UserStatistics(request_handler.RequestHandler):
 class ServeUserVideoCss(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
-        css = models.UserVideoCss.get_for_user_data(user_data)
+        css = models.UserVideoCss.get_for_user_data(user_data).video_css
         self.response.headers['Content-Type'] = 'text/css'
         if css:
             self.response.out.write(css)

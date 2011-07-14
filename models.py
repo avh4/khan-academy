@@ -451,12 +451,12 @@ class StudentList(db.Model):
     def get_students_data(self):
         return [s for s in self.students]
 
+STARTED_CSS = '{background-image:url(/images/vid-progress-started.png)}'
+COMPLETE_CSS = '{background-image:url(/images/vid-progress-complete.png)}'
+
 class UserVideoCss(db.Model):
     user = db.UserProperty()
     video_css = db.TextProperty()
-
-    STARTED_CSS = '{background-image:url(/images/vid-progress-started.png)}'
-    COMPLETE_CSS = '{background-image:url(/images/vid-progress-complete.png)}'
 
     @staticmethod
     def get_for_user_data(user_data):
@@ -469,14 +469,14 @@ class UserVideoCss(db.Model):
     @staticmethod
     def started(user_data, video):
         uvc = UserVideoCss.get_for_user_data(user_data)
-        if not str(video.key().id() in uvc.video_css:
+        if not str(video.key().id()) in uvc.video_css:
             #If the video is already in the css, we don't do anything
             if uvc.video_css.find(STARTED_CSS):
                 # The user already has rules for started videos
                 uvc.video_css.replace(STARTED_CSS, 
-                                      ',#v'+video.key().id()+STARTED_CSS)
+                                      ',#v'+str(video.key().id())+STARTED_CSS)
             else:
-                uvc.video_css = '#v'+video.key().id()+STARTED_CSS + uvc.video_css
+                uvc.video_css = '#v'+str(video.key().id())+STARTED_CSS + uvc.video_css
 
     @staticmethod
     def completed(user_data, video):
@@ -484,9 +484,9 @@ class UserVideoCss(db.Model):
         if uvc.video_css.find(COMPLETE_CSS):
             # The user already has rules for complete videos
             uvc.video_css.replace(COMPLETE_CSS,
-                                  ',#v'+video.key().id()+STARTED_CSS)
+                                  ',#v'+str(video.key().id())+STARTED_CSS)
         else:
-            uvc.video_css = uvc.video_css + '#v'+video.key().id()+COMPLETE_CSS
+            uvc.video_css = uvc.video_css + '#v'+str(video.key().id())+COMPLETE_CSS
 
 class UserData(db.Model):
     user = db.UserProperty()
