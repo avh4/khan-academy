@@ -1087,7 +1087,7 @@ article.video ol {
     display: inline;
     background: #eee;
     background-break: continuous; /* CSS3 */
-    background-image: url(/images/798white_798grey.png);
+    background-image: url(/images/798white_798grey.png); /* replace-with-data-uri(/images/798white_798grey.png) */
 }
 
 article.video p#keywords {
@@ -3028,4 +3028,16 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     .dark #page-container, .dark #page-container-inner {
         background-position-y: 107px; 
     }
+}
+
+.images-email {
+  background-image: url(/images/email.png); /* replace-with-data-uri(/images/email.png) */
+  width: 16px;
+  height: 11px;
+}
+
+.images-email-gray {
+  background-image: url(/images/email.png); /* replace-with-data-uri(/images/email.png) */
+  width: 16px;
+  height: 11px;
 }

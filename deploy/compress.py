@@ -1,14 +1,18 @@
+from __future__ import with_statement
 import os
 import shutil
 import subprocess
 import sys
 import md5
 import re
+import StringIO
+import base64
 
 sys.path.append(os.path.abspath("."))
 from js_css_packages import packages
 
 COMBINED_FILENAME = "combined"
+URI_FILENAME = "uri"
 COMPRESSED_FILENAME = "compressed"
 PACKAGE_SUFFIX = "-package"
 HASHED_FILENAME_PREFIX = "hashed-"
@@ -49,6 +53,7 @@ def compress_package(name, path, files, suffix):
     remove_working_files(path, suffix)
 
     path_combined = combine_package(path, files, suffix)
+    path_with_uris = remove_urls(path, path_combined, suffix)
     path_compressed = minify_package(path, path_combined, suffix)
     path_hashed = hash_package(name, path, path_compressed, suffix)
 
@@ -78,6 +83,42 @@ def minify_package(path, path_combined, suffix):
         raise Exception("Unable to YUICompress: %s" % path_combined)
 
     return path_compressed
+
+def remove_images_from_line(filename):
+    filename = filename.group(0) # open image
+    filename = os.path.join('..', filename[1:])
+    print "filename: %s" % filename
+    if os.path.isfile(filename):
+        with open(filename) as img:
+            f = StringIO.StringIO()
+            f.write(img.read())
+            data = 'data:image/png;base64,'+base64.b64encode(f.getvalue())
+            print data
+            return data
+            #return 'data:image/png;base64,'+base64.b64encode(f.getvalue())
+
+    return filename
+
+def remove_urls(path, path_combined, suffix):
+    if suffix != '.css':
+        return path_combined
+
+    path_without_urls = os.path.join(path, URI_FILENAME + suffix)
+    print "Replacing urls from %s to get %s" % (path_combined, path_without_urls)
+
+    r = re.compile('replace-with-data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
+    with open(path_combined) as f
+        for line in f:
+            if r.search(line):
+                for i in r.finditer(line):
+                    urlpath = '/images/'+i.group(1)+'.'+i.group(2)
+                    print "urlpath: %s" % urlpath
+                    re.sub(urlpath, remove_images_from_line, line, 1)
+
+    if not os.path.exists(path_without_urls):
+          raise Exception("Unable to remove images: %s" % path_combined)
+
+    return path_without_urls
 
 def hash_package(name, path, path_compressed, suffix):
     f = open(path_compressed, "r")
