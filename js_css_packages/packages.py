@@ -77,6 +77,9 @@ javascript = {
 }
 
 stylesheets = {
+    "shared-ie": {
+        "hashed-filename": "hashed-@shared-ie@.css", # @content@ will be replaced with hash by deploy script
+    },
     "shared": {
         "hashed-filename": "hashed-@shared@.css", # @content@ will be replaced with hash by deploy script
         "files": [
@@ -96,6 +99,9 @@ stylesheets = {
             "mobile.css",
         ]
     },
+    "video-ie": {
+        "hashed-filename": "hashed-@video-ie@.css", # @content@ will be replaced with hash by deploy script
+    },
     "video": {
         "hashed-filename": "hashed-@video@.css", # @content@ will be replaced with hash by deploy script
         "files": [
@@ -103,6 +109,9 @@ stylesheets = {
             "discussion.css",
             "jquery.qtip.css",
         ]
+    },
+    "studentlists-ie": {
+        "hashed-filename": "hashed-@studentlists-ie@.css", # @content@ will be replaced with hash by deploy script
     },
     "studentlists": {
         "hashed-filename": "hashed-@studentlists@.css", # @content@ will be replaced with hash by deploy script

@@ -44,8 +44,8 @@ class App(object):
     flask_secret_key = secrets.flask_secret_key
     
     is_dev_server = False
-    if os.environ["SERVER_SOFTWARE"].startswith('Development'):
-        is_dev_server = True
+    # if os.environ["SERVER_SOFTWARE"].startswith('Development'):
+    #     is_dev_server = True
     accepts_openid = False
     if not users.create_login_url('/').startswith('https://www.google.com/accounts/ServiceLogin'):
         accepts_openid = True

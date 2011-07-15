@@ -53,7 +53,12 @@ def compress_package(name, path, files, suffix):
     remove_working_files(path, suffix)
 
     path_combined = combine_package(path, files, suffix)
-    path_with_uris = remove_urls(path, path_combined, suffix)
+
+    # don't use data-uri's for IE < 8 or mobile browsers
+    if 'ie' in path or 'mobile' in path:
+        path_with_uris = path_combined
+    else:
+        path_with_uris = remove_urls(path, path_combined, suffix)
     path_compressed = minify_package(path, path_combined, suffix)
     path_hashed = hash_package(name, path, path_compressed, suffix)
 
@@ -68,6 +73,7 @@ def remove_working_files(path, suffix):
     for filename in filenames:
         if filename.endswith(COMBINED_FILENAME + suffix) \
                 or filename.endswith(COMPRESSED_FILENAME + suffix) \
+                or filename.endswith(URI_FILENAME + suffix) \
                 or filename.startswith(HASHED_FILENAME_PREFIX):
             os.remove(os.path.join(path, filename))
 
@@ -86,21 +92,18 @@ def minify_package(path, path_combined, suffix):
 
 def remove_images_from_line(filename):
     filename = filename.group(0) # open image
-    filename = os.path.join('..', filename[1:])
+    filename = os.path.join('.', filename[1:])
     print "filename: %s" % filename
     if os.path.isfile(filename):
         with open(filename) as img:
             f = StringIO.StringIO()
             f.write(img.read())
-            data = 'data:image/png;base64,'+base64.b64encode(f.getvalue())
-            print data
-            return data
-            #return 'data:image/png;base64,'+base64.b64encode(f.getvalue())
+            return 'data:image/png;base64,'+base64.b64encode(f.getvalue())
 
     return filename
 
 def remove_urls(path, path_combined, suffix):
-    if suffix != '.css':
+    if suffix != '.css': # don't touch js
         return path_combined
 
     path_without_urls = os.path.join(path, URI_FILENAME + suffix)
@@ -115,7 +118,7 @@ def remove_urls(path, path_combined, suffix):
                 for i in r.finditer(line):
                     urlpath = '/images/'+i.group(1)+'.'+i.group(2)
                     print "urlpath: %s" % urlpath
-                    re.sub(urlpath, remove_images_from_line, line, 1)
+                    line = re.sub(urlpath, remove_images_from_line, line, 1)
             new_file.write(line)
 
     new_file.close()
