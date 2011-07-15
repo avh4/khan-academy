@@ -605,6 +605,8 @@ class UserData(db.Model):
         db.delete(self)
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
+        if not exercise:
+            return None
 
         exid = exercise.name
         userExercise = UserExercise.get_by_key_name(exid, parent=self)

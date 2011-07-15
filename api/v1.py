@@ -17,9 +17,7 @@ import notifications
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
-
-def api_error_response(e):
-    return current_app.response_class("API error. %s" % e.message, status=500)
+from api.auth.auth_util import unauthorized_response, api_error_response
 
 def add_action_results_property(obj, dict_results):
     badges_earned = []
@@ -467,12 +465,14 @@ def user_problem_logs(exercise_name):
 @jsonify
 def answer_problem_number(exercise_name, problem_number):
     user_data = models.UserData.current()
-    user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
 
-    if user_data and user_exercise:
-        return answer_problem(user_data, user_exercise, request.request_bool("correct", default=False))
+    if user_data:
+        user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
 
-    return None
+        if user_exercise:
+            return answer_problem(user_data, user_exercise, request.request_bool("correct", default=False))
+
+    return unauthorized_response()
 
 @route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["POST"])
 @oauth_optional()
@@ -480,19 +480,21 @@ def answer_problem_number(exercise_name, problem_number):
 @jsonify
 def complete_problem_number(exercise_name, problem_number):
     user_data = models.UserData.current()
-    user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
 
-    if user_data and user_exercise and problem_number:
-        return complete_problem(
-                user_data, 
-                user_exercise, 
-                problem_number, 
-                request.request_bool("correct", default=False), 
-                request.request_bool("hint_used", default=False), 
-                int(request.request_float("time_taken"))
-                )
+    if user_data:
+        user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
 
-    return None
+        if user_exercise and problem_number:
+            return complete_problem(
+                    user_data, 
+                    user_exercise, 
+                    problem_number, 
+                    request.request_bool("correct", default=False), 
+                    request.request_bool("hint_used", default=False), 
+                    int(request.request_float("time_taken"))
+                    )
+
+    return unauthorized_response()
 
 @route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["POST"])
 @oauth_optional()
@@ -502,10 +504,10 @@ def reset_problem_streak(exercise_name):
     user_data = models.UserData.current()
 
     if user_data and exercise_name:
-        user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
+        user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
         return reset_streak(user_data, user_exercise)
 
-    return None
+    return unauthorized_response()
 
 @route("/api/v1/user/videos/<youtube_id>/log", methods=["GET"])
 @oauth_required()
