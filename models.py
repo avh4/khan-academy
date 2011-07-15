@@ -41,21 +41,21 @@ class Setting(db.Model):
     value = db.StringProperty()
 
     @staticmethod
-    def get_or_set_with_key(key, val = None):
+    def _get_or_set_with_key(key, val = None):
         if val is None:
-            return Setting.cache_get_by_key_name(key)
+            return Setting._cache_get_by_key_name(key)
         else:
             setting = Setting.get_or_insert(key)
             setting.value = str(val)
             setting.put()
 
-            Setting.get_settings_dict(bust_cache=True)
+            Setting._get_settings_dict(bust_cache=True)
 
             return setting.value
 
     @staticmethod
-    def cache_get_by_key_name(key):
-        setting = Setting.get_settings_dict().get(key)
+    def _cache_get_by_key_name(key):
+        setting = Setting._get_settings_dict().get(key)
         if setting is not None:
             return setting.value
         return None
@@ -63,24 +63,24 @@ class Setting(db.Model):
     @staticmethod
     @request_cache.cache()
     @layer_cache.cache(layer=layer_cache.Layers.Memcache)
-    def get_settings_dict(bust_cache = False):
+    def _get_settings_dict(bust_cache = False):
         return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
 
     @staticmethod
     def cached_library_content_date(val = None):
-        return Setting.get_or_set_with_key("cached_library_content_date", val)
+        return Setting._get_or_set_with_key("cached_library_content_date", val)
 
     @staticmethod
     def cached_exercises_date(val = None):
-        return Setting.get_or_set_with_key("cached_exercises_date", val)
+        return Setting._get_or_set_with_key("cached_exercises_date", val)
 
     @staticmethod
     def count_videos(val = None):
-        return Setting.get_or_set_with_key("count_videos", val) or 0
+        return Setting._get_or_set_with_key("count_videos", val) or 0
 
     @staticmethod
     def last_youtube_sync_generation_start(val = None):
-        return Setting.get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
+        return Setting._get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
 
 class Exercise(db.Model):
 
