@@ -461,7 +461,7 @@ def user_problem_logs(exercise_name):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/answer", methods=["POST"])
+@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/answer", methods=["GET"])
 @oauth_optional()
 @jsonp
 @jsonify
@@ -474,23 +474,31 @@ def answer_problem_number(exercise_name, problem_number):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["POST"])
+@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["GET"])
 @oauth_optional()
 @jsonp
 @jsonify
-def complete_problem(exercise_name, problem_number):
+def complete_problem_number(exercise_name, problem_number):
     user_data = models.UserData.current()
+    user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
 
-    if user_data and exercise_name and problem_number:
-        return complete_problem(user_data, exercise_name, problem_number, request.request_float("time_taken"))
+    if user_data and user_exercise and problem_number:
+        return complete_problem(
+                user_data, 
+                user_exercise, 
+                problem_number, 
+                request.request_bool("correct", default=False), 
+                request.request_bool("hint_used", default=False), 
+                int(request.request_float("time_taken"))
+                )
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["POST"])
+@route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["GET"])
 @oauth_optional()
 @jsonp
 @jsonify
-def reset_streak(exercise_name):
+def reset_problem_streak(exercise_name):
     user_data = models.UserData.current()
 
     if user_data and exercise_name:

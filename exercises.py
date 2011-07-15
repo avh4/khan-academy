@@ -53,8 +53,7 @@ def complete_problem(user_data, user_exercise, problem_number, correct, hint_use
         # display the next problem.
         if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
             # Only admins can answer problems out of order.
-            self.redirect('/exercises?exid=' + user_exercise.exercise)
-            return
+            return None
 
         problem_log = models.ProblemLog()
         proficient = user_data.is_proficient_at(user_exercise.exercise)
@@ -112,6 +111,8 @@ def complete_problem(user_data, user_exercise, problem_number, correct, hint_use
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
         deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
+
+        return user_exercise
 
 class ExerciseAdmin(request_handler.RequestHandler):
 
