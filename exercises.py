@@ -2,12 +2,117 @@ import os, logging
 
 from google.appengine.ext import db
 from google.appengine.api import users
+from google.appengine.ext import deferred
 
 from app import App
+import datetime
 import models
 import request_handler
 import util
+import points
 import itertools
+from badges import util_badges, last_action_cache, custom_badges
+from phantom_users import util_notify
+
+def reset_streak(user_data, user_exercise):
+    if user_exercise and user_exercise.belongs_to(user_data):
+        user_exercise.reset_streak()
+        user_exercise.put()
+
+        return user_exercise
+
+def answer_problem(user_data, user_exercise, correct):
+    if user_exercise and user_exercise.belongs_to(user_data):
+        user_exercise.schedule_review(correct)
+
+        if not correct:
+            if user_exercise.streak == 0:
+                # 2+ in a row wrong -> not proficient
+                user_exercise.set_proficient(False, user_data)
+            user_exercise.reset_streak()
+        user_exercise.put()
+
+        return user_exercise
+
+    return None
+
+def complete_problem(user_data, user_exercise, problem_number, correct, hint_used, time_taken):
+
+    if user_exercise and user_exercise.belongs_to(user_data):
+
+        dt_done = datetime.datetime.now()
+        exercise = user_exercise.exercise_model
+
+        user_exercise.last_done = datetime.datetime.now()
+        user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
+        user_exercise.summative = exercise.summative
+
+        user_data.last_activity = user_exercise.last_done
+        
+        # If a non-admin tries to answer a problem out-of-order, just ignore it and
+        # display the next problem.
+        if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
+            # Only admins can answer problems out of order.
+            self.redirect('/exercises?exid=' + user_exercise.exercise)
+            return
+
+        problem_log = models.ProblemLog()
+        proficient = user_data.is_proficient_at(user_exercise.exercise)
+
+        if correct:
+            suggested = user_data.is_suggested(user_exercise.exercise)
+            points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
+            problem_log.points_earned = points_possible
+            user_data.add_points(points_possible)
+        
+        problem_log.user = user_data.user
+        problem_log.exercise = user_exercise.exercise
+        problem_log.correct = correct
+        problem_log.time_done = dt_done
+        problem_log.time_taken = time_taken
+        problem_log.problem_number = problem_number
+        problem_log.hint_used = hint_used
+
+        if exercise.summative:
+            problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
+
+        user_exercise.total_done += 1
+        util_notify.update(user_data,user_exercise)
+        
+        if correct:
+
+            user_exercise.total_correct += 1
+            user_exercise.streak += 1
+
+            if user_exercise.streak > user_exercise.longest_streak:
+                user_exercise.longest_streak = user_exercise.streak
+            if user_exercise.streak >= exercise.required_streak and not proficient:
+                user_exercise.set_proficient(True, user_data)
+                user_exercise.proficient_date = datetime.datetime.now()                    
+                user_data.reassess_if_necessary()
+                problem_log.earned_proficiency = True
+                
+        else:
+            # Just in case RegisterCorrectness didn't get called.
+            user_exercise.reset_streak()
+
+        util_badges.update_with_user_exercise(
+            user_data, 
+            user_exercise, 
+            include_other_badges = True, 
+            action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
+
+        # Manually clear exercise's memcache since we're throwing it in a bulk put
+        user_exercise.clear_memcache()
+
+        # Bulk put
+        db.put([user_data, user_exercise])
+
+        # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
+        # and want to shift it off to an automatically-retrying task queue.
+        # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
+        deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
+
 class ExerciseAdmin(request_handler.RequestHandler):
 
     def get(self):

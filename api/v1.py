@@ -10,6 +10,7 @@ import models
 import layer_cache
 import topics_list
 from badges import badges, util_badges, models_badges
+from exercises import answer_problem, complete_problem, reset_streak
 import util
 import notifications
 
@@ -464,25 +465,12 @@ def user_problem_logs(exercise_name):
 @oauth_optional()
 @jsonp
 @jsonify
-def answer_problem(exercise_name, problem_number):
+def answer_problem_number(exercise_name, problem_number):
     user_data = models.UserData.current()
+    user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
 
-    if user_data and exercise_name and problem_number:
-        user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
-
-        if user_exercise:
-            correct = request.request_bool("correct", default=False)
-
-            user_exercise.schedule_review(correct, self.get_time())
-
-            if not correct:
-                if user_exercise.streak == 0:
-                    # 2+ in a row wrong -> not proficient
-                    user_exercise.set_proficient(False, user_data)
-                user_exercise.reset_streak()
-            user_exercise.put()
-
-            return user_exercise
+    if user_data and user_exercise:
+        return answer_problem(user_data, user_exercise, request.request_bool("correct", default=False))
 
     return None
 
@@ -494,10 +482,7 @@ def complete_problem(exercise_name, problem_number):
     user_data = models.UserData.current()
 
     if user_data and exercise_name and problem_number:
-        user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
-
-        if user_exercise:
-            pass
+        return complete_problem(user_data, exercise_name, problem_number, request.request_float("time_taken"))
 
     return None
 
@@ -510,12 +495,7 @@ def reset_streak(exercise_name):
 
     if user_data and exercise_name:
         user_exercise = models.UserExercise.all().filter("user =", user_data.user).filter("exercise =", exercise_name).get()
-
-        if user_exercise:
-            user_exercise.reset_streak()
-            user_exercise.put()
-
-            return user_exercise
+        return reset_streak(user_data, user_exercise)
 
     return None
 
