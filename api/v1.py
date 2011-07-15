@@ -17,7 +17,8 @@ import notifications
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
-from api.auth.auth_util import unauthorized_response, api_error_response
+from api.auth.auth_util import unauthorized_response
+from api.api_util import api_error_response
 
 def add_action_results_property(obj, dict_results):
     badges_earned = []
@@ -491,7 +492,7 @@ def complete_problem_number(exercise_name, problem_number):
                     problem_number, 
                     request.request_bool("correct", default=False), 
                     request.request_bool("hint_used", default=False), 
-                    int(request.request_float("time_taken"))
+                    int(request.request_float("time_taken", default=0.0))
                     )
 
     return unauthorized_response()

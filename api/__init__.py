@@ -25,6 +25,7 @@ def route(rule, **options):
     def api_route_wrap(func):
 
         func = allow_cross_origin(func)
+        func = format_api_errors(func)
 
         rule_desc = rule
         for key in options:
@@ -47,3 +48,15 @@ def allow_cross_origin(func):
         return result
 
     return cross_origin_allowed
+
+def format_api_errors(func):
+    @wraps(func)
+    def api_errors_formatted(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception, e:
+            # If any exception makes it all the way up to the top of an API request,
+            # send possibly helpful message down for consumer
+            return current_app.response_class("API error. %s" % e.message, status=500)
+
+    return api_errors_formatted

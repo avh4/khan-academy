@@ -21,9 +21,6 @@ def oauth_error_response(e):
 def unauthorized_response():
     return current_app.response_class("Unauthorized", status=401)
 
-def api_error_response(e):
-    return current_app.response_class("API error. %s" % e.message, status=500)
-
 def access_token_response(oauth_map):
     if not oauth_map:
         raise OAuthError("Missing oauth_map while returning access_token_response")

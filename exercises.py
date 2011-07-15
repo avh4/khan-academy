@@ -53,7 +53,7 @@ def complete_problem(user_data, user_exercise, problem_number, correct, hint_use
         # display the next problem.
         if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
             # Only admins can answer problems out of order.
-            return None
+            raise Exception("Problem number out of order")
 
         problem_log = models.ProblemLog()
         proficient = user_data.is_proficient_at(user_exercise.exercise)
