@@ -41,7 +41,8 @@ def allow_cross_origin(func):
         result = func(*args, **kwargs)
 
         if isinstance(result, current_app.response_class):
-            result.headers["Access-Control-Allow-Origin"] = "*"
+            result.headers["Access-Control-Allow-Origin"] = os.environ.get("HTTP_ORIGIN") or "*"
+            result.headers["Access-Control-Allow-Credentials"] = "true"
 
         return result
 
