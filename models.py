@@ -41,16 +41,18 @@ class Setting(db.Model):
     value = db.StringProperty()
 
     @staticmethod
+    def entity_group_key():
+        return db.Key.from_path('Settings', 'default_settings')
+
+    @staticmethod
     def _get_or_set_with_key(key, val = None):
         if val is None:
             return Setting._cache_get_by_key_name(key)
         else:
-            setting = Setting.get_or_insert(key)
-            setting.value = str(val)
-            setting.put()
-
-            Setting._get_settings_dict(bust_cache=True)
-
+            setting = Setting.get_or_insert(parent=entity_group_key(),
+                                            key_name=key,
+                                            value=str(val))
+            Setting._get_settings_dict(just_bust=True)
             return setting.value
 
     @staticmethod
@@ -64,7 +66,8 @@ class Setting(db.Model):
     @request_cache.cache()
     @layer_cache.cache(layer=layer_cache.Layers.Memcache)
     def _get_settings_dict(bust_cache = False):
-        return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
+        query = Setting.all().ancestor(Setting.entity_group_key())
+        return dict((setting.key().name(), setting) for setting in query.fetch(20))
 
     @staticmethod
     def cached_library_content_date(val = None):
