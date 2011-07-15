@@ -461,7 +461,7 @@ def user_problem_logs(exercise_name):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/answer", methods=["GET"])
+@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/answer", methods=["POST"])
 @oauth_optional()
 @jsonp
 @jsonify
@@ -474,7 +474,7 @@ def answer_problem_number(exercise_name, problem_number):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["GET"])
+@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["POST"])
 @oauth_optional()
 @jsonp
 @jsonify
@@ -494,7 +494,7 @@ def complete_problem_number(exercise_name, problem_number):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["GET"])
+@route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["POST"])
 @oauth_optional()
 @jsonp
 @jsonify
