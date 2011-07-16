@@ -114,23 +114,8 @@ def layer_cache_check_set_return(
 
     if persist_across_app_versions:
         namespace = None
-
-    just_bust = kwargs.get("just_bust", False)
-    if just_bust:
-        # just invalidate the item in cache and return
-        if layer & Layers.InAppMemory:
-            cachepy.delete(key)
-
-        if layer & Layers.Memcache:
-            if not memcache.delete(key, namespace=namespace):
-                logging.error("Memcache delete failed for %s" % key)
-
-        if layer & Layers.Datastore:
-            KeyValueCache.delete(key, namespace=namespace)
-
-        return None
-
     bust_cache = kwargs.get("bust_cache", False)
+
     if not bust_cache:
 
         if layer & Layers.InAppMemory:

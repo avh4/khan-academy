@@ -49,10 +49,20 @@ class Setting(db.Model):
         if val is None:
             return Setting._cache_get_by_key_name(key)
         else:
-            setting = Setting.get_or_insert(parent=entity_group_key(),
-                                            key_name=key,
-                                            value=str(val))
-            Setting._get_settings_dict(just_bust=True)
+            strval = str(val)
+
+            def txn():
+                entity = Setting.get_by_key_name(key, parent=Setting.entity_group_key())
+                if entity is None:
+                    entity = Setting(parent=Setting.entity_group_key(),
+                                     key_name=key, value=strval)
+                else:
+                    entity.value = strval
+                entity.put()
+                return entity
+            setting = db.run_in_transaction(txn)
+
+            Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
     @staticmethod
