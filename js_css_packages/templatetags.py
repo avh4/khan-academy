@@ -24,8 +24,7 @@ def css_package(package_name):
     package = packages.stylesheets[package_name]
     src_dir = "/stylesheets/%s-package" % package_name
 
-    ie_package = packages.stylesheets[package_name]
-    ie_src_dir = "/stylesheets/%s-package" % package_name+'-ie'
+    ie_package = packages.stylesheets[package_name+'-ie']
 
     list_css = []
     list_css.append("<!--[if (!IE)|(gte IE 8)]><!-->")
@@ -44,10 +43,10 @@ def css_package(package_name):
     if App.is_dev_server:
         for filename in ie_package["files"]:
             list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
-                % (ie_src_dir, filename))
+                % (src_dir, filename))
     else:
         list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
-            % (util.static_url(ie_src_dir), ie_package["hashed-filename"]))
+            % (util.static_url(src_dir), ie_package["hashed-filename"]))
 
     list_css.append("<![endif]-->")
     return "".join(list_css)

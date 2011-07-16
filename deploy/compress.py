@@ -42,6 +42,11 @@ def compress_all_packages(path, dict_packages, suffix):
         package = dict_packages[package_name]
 
         dir_name = "%s-package" % package_name
+
+        # use the same directory for ie and non-ie css
+        if '-ie' in dir_name and suffix == '.css':
+            dir_name = re.sub('-ie', '', dir_name)
+
         package_path = os.path.join(path, dir_name)
 
         compress_package(package_name, package_path, package["files"], suffix)
@@ -49,17 +54,17 @@ def compress_all_packages(path, dict_packages, suffix):
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
-
     remove_working_files(path, suffix)
 
     path_combined = combine_package(path, files, suffix)
 
     # don't use data-uri's for IE < 8 or mobile browsers
-    if 'ie' in path or 'mobile' in path:
+    if suffix != '.css' or '-ie' in name or 'mobile' in name:
         path_with_uris = path_combined
     else:
         path_with_uris = remove_urls(path, path_combined, suffix)
-    path_compressed = minify_package(path, path_combined, suffix)
+
+    path_compressed = minify_package(path, path_with_uris, suffix)
     path_hashed = hash_package(name, path, path_compressed, suffix)
 
     if not os.path.exists(path_hashed):
@@ -93,7 +98,7 @@ def minify_package(path, path_combined, suffix):
 def remove_images_from_line(filename):
     filename = filename.group(0) # open image
     filename = os.path.join('.', filename[1:])
-    print "filename: %s" % filename
+    print "Removing images from %s" % filename
     if os.path.isfile(filename):
         with open(filename) as img:
             f = StringIO.StringIO()
@@ -117,7 +122,6 @@ def remove_urls(path, path_combined, suffix):
             if r.search(line):
                 for i in r.finditer(line):
                     urlpath = '/images/'+i.group(1)+'.'+i.group(2)
-                    print "urlpath: %s" % urlpath
                     line = re.sub(urlpath, remove_images_from_line, line, 1)
             new_file.write(line)
 
@@ -134,7 +138,10 @@ def hash_package(name, path, path_compressed, suffix):
     f.close()
 
     hash_sig = md5.new(content).hexdigest()
-    path_hashed = os.path.join(path, "hashed-%s%s" % (hash_sig, suffix))
+    if '-ie' in name:
+        path_hashed = os.path.join(path, "hashed-ie-%s%s" % (hash_sig, suffix))
+    else:
+        path_hashed = os.path.join(path, "hashed-%s%s" % (hash_sig, suffix))
     
     print "Copying %s into %s" % (path_compressed, path_hashed)
     shutil.copyfile(path_compressed, path_hashed)
