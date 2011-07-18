@@ -49,7 +49,7 @@ class Setting(db.Model):
         if val is None:
             return Setting._cache_get_by_key_name(key)
         else:
-            setting = Setting(key, parent=Setting.entity_group_key(), value=val)
+            setting = Setting(Setting.entity_group_key(), key, value=val)
             setting.put()
             Setting._get_settings_dict(bust_cache=True)
             return setting.value
