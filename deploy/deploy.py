@@ -1,10 +1,7 @@
-from __future__ import with_statement
 import re
 import subprocess
 import os
 import optparse
-import StringIO
-import base64
 
 import compress
 
@@ -41,49 +38,6 @@ def hg_pull_up():
             version = match.groups()[0]
 
     return version
-
-# def replace_data_uri():
-#     print "Replacing images with data-uris"
-#     path = os.path.join(os.path.dirname(__file__), "..")
-#     replace_data_uri_in_path(path)
-# 
-# def compile_file(filename):
-#     filename = os.path.join('..', filename)
-#     print "filename: %s" % filename
-#     if os.path.isfile(filename):
-#         with open(filename) as img:
-#             f = StringIO.StringIO()
-#             f.write(img.read())
-#             return 'data:image/png;base64,'+base64.b64encode(f.getvalue())
-# 
-#     return filename
-# 
-# def replace_data_uri_in_path(path):
-#     # only go through css, html, and js. We're assuming we don't need to
-#     # replace any filenames in python.
-#     if not os.path.exists(path):
-#         raise Exception("Path does not exist: %s" % path)
-# 
-#     # Essentially grep for 'data-uri' in each file in the
-#     # directory (and its children), taken from a stack overflow answer:
-#     # http://stackoverflow.com/questions/1863236/grep-r-in-python/1863274#1863274
-#     r = re.compile('data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
-#         
-#     for parent, dnames, fnames in os.walk(dir):
-#         for fname in fnames:
-#             filename = os.path.join(parent, fname)
-#             extension = os.path.splitext(filename)[1]
-#             if os.path.isfile(filename) and extension in ['css']: #'html'
-#                 with open(filename) as f:
-#                     for line in f:
-#                         if r.search(line):
-#                             for i in r.finditer(line):
-#                                 #r = re.compile('/images/(\S+)\.(png|gif|GIF|jpg)')
-#                                 #r.sub(replace, line)
-#                                 filename = '/images/'+i.group(1)+'.'+i.group(2)
-#                                 print "filename: %s" % filename
-#                                 # re.sub(filename, compile_file, line)
-#                                 print compile_file(filename)
 
 def compress_js():
     print "Compressing javascript"
@@ -139,7 +93,6 @@ def main():
 
     print "Deploying version " + str(version)
     compress.revert_js_css_hashes()
-    #replace_data_uri()
     compress_js()
     compress_css()
 
