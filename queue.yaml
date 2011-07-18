@@ -26,6 +26,3 @@ queue:
 
 - name: video-log-queue
   rate: 30/s
-
-- name: backfillvideoprogress-queue
-  rate: 30/s

@@ -467,7 +467,7 @@ class UserVideoCss(db.Model):
         return 'user_video_css_%s' % user_data.key_email
 
     @staticmethod
-    def started(user_data, video):
+    def set_started(user_data, video):
         uvc = UserVideoCss.get_for_user_data(user_data)
         if not str(video.key().id()) in uvc.video_css:
             #If the video is already in the css, we don't do anything
@@ -479,7 +479,7 @@ class UserVideoCss(db.Model):
                 uvc.video_css = '#v'+str(video.key().id())+STARTED_CSS + uvc.video_css
 
     @staticmethod
-    def completed(user_data, video):
+    def set_completed(user_data, video):
         uvc = UserVideoCss.get_for_user_data(user_data)
         if uvc.video_css.find(COMPLETE_CSS):
             # The user already has rules for complete videos
@@ -1045,7 +1045,7 @@ class VideoLog(db.Model):
 
         if seconds_watched > 0:
             if user_video.seconds_watched == 0:
-                UserVideoCss.started(user_data, user_video.video)
+                UserVideoCss.set_started(user_data, user_video.video)
 
             user_video.seconds_watched += seconds_watched
             user_data.total_seconds_watched += seconds_watched
@@ -1089,7 +1089,7 @@ class VideoLog(db.Model):
             user_video.completed = True
             user_data.videos_completed = -1
 
-            UserVideoCss.completed(user_data, user_video.video)
+            UserVideoCss.set_completed(user_data, user_video.video)
 
         if video_points_received > 0:
             video_log.points_earned = video_points_received
