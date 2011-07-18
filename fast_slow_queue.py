@@ -16,7 +16,7 @@ from google.appengine.ext import deferred
 # a possibly instance-starting entry point. See above Stack Oveflow question.
 import config_django
 
-FAST_QUEUE_NAME = "fast-background-queue"
+QUEUE_NAME = "fast-background-queue"
 SLOW_QUEUE_NAME = "slow-background-queue"
 
 func_cache = {}

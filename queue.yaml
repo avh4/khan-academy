@@ -1,8 +1,5 @@
 total_storage_limit: 200M
 queue:
-- name: badge-mapreduce-queue
-  rate: 5/s
-
 - name: badge-statistics-queue
   rate: 5/s
 

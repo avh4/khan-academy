@@ -213,7 +213,7 @@ class StartNewDailyActivityLogMapReduce(request_handler.RequestHandler):
                 reader_parameters = {"entity_kind": "models.UserData"},
                 mapreduce_parameters = {"processing_rate": 250},
                 shard_count = 64,
-                queue_name = fast_slow_queue.FAST_QUEUE_NAME,)
+                queue_name = fast_slow_queue.QUEUE_NAME,)
         self.response.out.write("OK: " + str(mapreduce_id))
 
 

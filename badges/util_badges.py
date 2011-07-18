@@ -24,6 +24,7 @@ import unfinished_streak_problem_badges
 import points_badges
 import tenure_badges
 import video_time_badges
+import fast_slow_queue
 
 import layer_cache
 import request_handler
@@ -255,40 +256,47 @@ class StartNewBadgeMapReduce(request_handler.RequestHandler):
                 handler_spec = "badges.util_badges.badge_update_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
                 reader_parameters = {"entity_kind": "models.UserData"},
-                queue_name = "badge-mapreduce-queue",
+                mapreduce_parameters = {"processing_rate": 250},
+                shard_count = 64,
+                queue_name = fast_slow_queue.QUEUE_NAME,
                 )
 
         self.response.out.write("OK: " + str(mapreduce_id))
 
-# badge_update_map is called by a background MapReduce task.
-# Each call updates the badges for a single user.
-def badge_update_map(user_data):
-
+def is_badge_review_waiting(user_data):
     if not user_data:
-        return
+        return False
 
     if not user_data.user:
-        return
+        return False
 
     if not user_data.current_user:
         logging.error("UserData with user and no current_user: %s" % user_data.user)
-        return
+        return False
 
+    if not user_data.last_activity or (user_data.last_badge_review and user_data.last_activity <= user_data.last_badge_review):
+        # No activity since last badge review, skip
+        return False
+
+    return True
+
+@fast_slow_queue.handler(is_badge_review_waiting)
+def badge_update_map(user_data):
     action_cache = last_action_cache.LastActionCache.get_for_user_data(user_data)
 
     # Update all no-context badges
-    awarded = update_with_no_context(user_data, action_cache=action_cache)
+    update_with_no_context(user_data, action_cache=action_cache)
 
     # Update all exercise-context badges
     for user_exercise in models.UserExercise.get_for_user_data(user_data):
-        awarded = update_with_user_exercise(user_data, user_exercise, action_cache=action_cache) or awarded
+        update_with_user_exercise(user_data, user_exercise, action_cache=action_cache)
 
     # Update all playlist-context badges
     for user_playlist in models.UserPlaylist.get_for_user_data(user_data):
-        awarded = update_with_user_playlist(user_data, user_playlist, action_cache=action_cache) or awarded
+        update_with_user_playlist(user_data, user_playlist, action_cache=action_cache)
 
-    if awarded:
-        yield op.db.Put(user_data)
+    user_data.last_badge_review = datetime.datetime.now()
+    user_data.put()
 
 # Award this user any earned no-context badges.
 def update_with_no_context(user_data, action_cache = None):
