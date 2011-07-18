@@ -468,8 +468,8 @@ var Drawer = {
                         function(){KnowledgeMap.onBadgeMouseout.apply(this);}
                 );
                 $(".exercise-edit").hover(
-                        function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
-                        function(){KnowledgeMap.onBadgeMouseout.apply(this);}
+                        function(){KnowledgeMapAdmin.onBadgeMouseover.apply(this);}, 
+                        function(){KnowledgeMapAdmin.onBadgeMouseout.apply(this);}
                 );
             }
         }
