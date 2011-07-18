@@ -279,7 +279,7 @@ class ViewVideo(request_handler.RequestHandler):
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
-            video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+            video_path = video.download_video_url()
 
         exercise = None
         exercise_video = video.get_related_exercise()
