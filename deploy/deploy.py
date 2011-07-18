@@ -64,10 +64,10 @@ def hg_pull_up():
 #     if not os.path.exists(path):
 #         raise Exception("Path does not exist: %s" % path)
 # 
-#     # Essentially grep for 'replace-with-data-uri' in each file in the
+#     # Essentially grep for 'data-uri' in each file in the
 #     # directory (and its children), taken from a stack overflow answer:
 #     # http://stackoverflow.com/questions/1863236/grep-r-in-python/1863274#1863274
-#     r = re.compile('replace-with-data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
+#     r = re.compile('data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
 #         
 #     for parent, dnames, fnames in os.walk(dir):
 #         for fname in fnames:
