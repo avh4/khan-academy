@@ -74,7 +74,7 @@
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
         
         {% for exercise in exercises %}
-        <a href="/editexercise?name={{ exercise.name|escape }}">
+     
                 <div class="exercise-edit" data-id="{{exercise.name}}">
                 <a href="/editexercise?name={{ exercise.name|escape }}" 
                     {% if exercise.live %}
@@ -84,7 +84,7 @@
                     {% endif %}
                     title="{{ exercise.display_name|escape }}"><nobr>{{ exercise.display_name|truncatewords:4|escape }}</nobr></a>
                     </div>
-                    </a>
+              
             <br />
         {% endfor %}
     </div></div>

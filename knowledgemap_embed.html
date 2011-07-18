@@ -2,11 +2,9 @@
 {% js_package "maps" %}
 
 <script>
-{% if admin %}
-$(function(){KnowledgeMapAdmin.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_coords.2 }});});
-{%else%}
-$(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_coords.2 }});});
-{%endif%}
+
+$(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_coords.2 }}, {{admin}});});
+
 </script>
 
 <article id="knowledge_map">

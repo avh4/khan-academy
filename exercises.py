@@ -8,6 +8,36 @@ import models
 import request_handler
 import util
 import itertools
+
+class MoveMapNode(request_handler.RequestHandler):
+    def post(self):
+        self.get()
+    def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+        
+        node = self.request_string('exercise')
+        logging.critical(node)
+        direction = self.request_string('direction')
+        move_children = self.request_string('movechildren', default = True)
+    
+        exercise = models.Exercise.get_by_name(node)
+    
+        if direction=="up":
+            exercise.h_position -= 1
+            exercise.put()
+        elif direction=="down":
+            exercise.h_position += 1
+            exercise.put()
+        elif direction=="left":
+            exercise.v_position -= 1
+            exercise.put()
+        elif direction=="right":
+            exercise.v_position += 1
+            exercise.put()
+            
+            
 class ExerciseAdmin(request_handler.RequestHandler):
 
     def get(self):
@@ -44,7 +74,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
                 exercise.proficient = True
                 exercise.status = "Proficient"
            
-        template_values = {'App' : App,'admin': True,  'exercises': ex_graph.exercises, 'map_coords': (0,0,0)}
+        template_values = {'App' : App,'admin': "true",  'exercises': ex_graph.exercises, 'map_coords': (0,0,0)}
 
         self.render_template('exerciseadmin.html', template_values)
 

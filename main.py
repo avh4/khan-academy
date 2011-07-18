@@ -1390,29 +1390,7 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-class MoveMapNode(request_handler.RequestHandler):
-    def post(self):
-        self.get()
-    def get(self):
-        node = self.request_string('exercise')
-        logging.critical(node)
-        direction = self.request_string('direction')
-        move_children = self.request_string('movechildren', default = True)
-    
-        exercise = models.Exercise.get_by_name(node)
-    
-        if direction=="up":
-            exercise.h_position -= 1
-            exercise.put()
-        elif direction=="down":
-            exercise.h_position += 1
-            exercise.put()
-        elif direction=="left":
-            exercise.v_position -= 1
-            exercise.put()
-        elif direction=="right":
-            exercise.v_position += 1
-            exercise.put()
+
         
 def main():
 
@@ -1487,7 +1465,7 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
-        ('/admin/movemapnode', MoveMapNode),
+        ('/admin/movemapnode', exercises.MoveMapNode),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 

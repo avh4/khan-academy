@@ -54,10 +54,10 @@ var KnowledgeMap = {
                 isPng: false
     },
 
-    init: function(latInit, lngInit, zoomInit) {
+    init: function(latInit, lngInit, zoomInit, admin) {
 
         this.discoverGraph();
-
+        this.admin = admin;
         this.map = new google.maps.Map(document.getElementById("map-canvas"), {
             mapTypeControl: false,
             streetViewControl: false,
@@ -325,7 +325,59 @@ var KnowledgeMap = {
             return;
 
         // Go to exercise
+        if (KnowledgeMap.admin)
+        {
+            
+            //Unbind other keydowns to prevent a spawn of hell
+            $(document).unbind('keydown');
+
+            // If keydown is an arrow key
+            $(document).keydown(function(e){
+                if (e.keyCode == 37) { 
+                    $.post("/admin/movemapnode", { exercise: node.id, direction: "left" } );
+                    node.v_position = parseInt(node.v_position)-(1); 
+                }
+                if (e.keyCode == 38) { 
+                    $.post("/admin/movemapnode", { exercise: node.id, direction: "up" } );
+                    node.h_position = parseInt(node.h_position)-(1); 
+                }
+                if (e.keyCode == 39) { 
+                    $.post("/admin/movemapnode", { exercise: node.id, direction: "right" } );
+                    node.v_position = parseInt(node.v_position)+(1); 
+                }
+                if (e.keyCode == 40) { 
+                    $.post("/admin/movemapnode", { exercise: node.id, direction: "down" } );
+                    node.h_position = parseInt(node.h_position)+(1); 
+                }
+
+                if ( 37 <= e.keyCode && e.keyCode <= 40 ) {
+                    var zoom =KnowledgeMap.map.getZoom();
+                    KnowledgeMap.markers = [];
+
+                    for (var key in KnowledgeMap.dictEdges)
+                        {
+                            var rgTargets = KnowledgeMap.dictEdges[key];
+                            for (var ix = 0; ix < rgTargets.length; ix++)
+                            {
+                                rgTargets[ix].line.setMap(null);
+                            }
+                        }
+                    KnowledgeMap.dictNodes[node.id] = node;
+                    KnowledgeMap.overlay.setMap(null);
+                    KnowledgeMap.layoutGraph();
+                    KnowledgeMap.drawOverlay();
+                    return false;
+               }
+            });
+            
+        }
+        else
         window.location = node.url;
+        
+        
+        
+        
+        
     },
 
     onNodeMouseover: function(el, node) {
@@ -334,8 +386,15 @@ var KnowledgeMap = {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
+        if (admin)  
+        {
+            $(".exercise-edit[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").addClass("exercise-edit-hover");
+            this.highlightNode(node, true);
+        }
+        else {
         $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").addClass("exercise-badge-hover");
         this.highlightNode(node, true);
+        }
     },
 
     onNodeMouseout: function(el, node) {
@@ -343,9 +402,15 @@ var KnowledgeMap = {
             return;
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
-
+        
+        if (admin){
+            $(".exercise-edit[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").removeClass("exercise-edit-hover");
+            this.highlightNode(node, false);
+        }
+        else{
         $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").removeClass("exercise-badge-hover");
         this.highlightNode(node, false);
+    }
     },
 
     onBadgeMouseover: function() {
