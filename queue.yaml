@@ -1,11 +1,5 @@
 total_storage_limit: 200M
 queue:
-- name: activity-log-mapreduce-queue
-  rate: 5/s
-
-- name: badge-mapreduce-queue
-  rate: 5/s
-
 - name: badge-statistics-queue
   rate: 5/s
 
@@ -26,3 +20,9 @@ queue:
 
 - name: video-log-queue
   rate: 30/s
+
+- name: fast-background-queue
+  rate: 10/s
+
+- name: slow-background-queue
+  rate: 5/s
