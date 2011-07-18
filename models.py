@@ -457,6 +457,7 @@ COMPLETE_CSS = '{background-image:url(/images/vid-progress-complete.png)}'
 class UserVideoCss(db.Model):
     user = db.UserProperty()
     video_css = db.TextProperty()
+    last_modified = db.DateTimeProperty(required=True, auto_now=True)
 
     @staticmethod
     def get_for_user_data(user_data):
