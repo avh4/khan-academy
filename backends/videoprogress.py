@@ -9,10 +9,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 
 from models import UserData, UserVideo
 
-def _get_taskqueue_target():
-    #return '%d.%s' % (backends.get_instance(), backends.get_backend())
-    return '%s.%d' % (backends.get_backend(), backends.get_instance())
-
 class StartBackfill(webapp.RequestHandler):
     def get(self):
         self.post()

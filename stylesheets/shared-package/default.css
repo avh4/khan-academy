@@ -1244,7 +1244,7 @@ a:link.google-analytics-link-track
 				font-weight: normal;	
 				/*background-image: url(/images/non-repeating-sprites.1.png);*/
                 background-position: -56px -36px;
-				padding: 0 2px 0 13px;
+				padding: 0 2px 0 2px;
 				line-height: 18px;
 			}
 			#library #library-content #library-content-main a.vl:hover {
@@ -3028,4 +3028,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     .dark #page-container, .dark #page-container-inner {
         background-position-y: 107px; 
     }
+}
+
+.vid-progress {
+  padding: 0 8px;
+  background-repeat: no-repeat;
 }
