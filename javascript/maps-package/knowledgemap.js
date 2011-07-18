@@ -324,7 +324,7 @@ var KnowledgeMap = {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
-        // Go to exercise
+       
         if (KnowledgeMap.admin)
         {
             
@@ -334,27 +334,29 @@ var KnowledgeMap = {
             // If keydown is an arrow key
             $(document).keydown(function(e){
                 if (e.keyCode == 37) { 
-                    $.post("/admin/movemapnode", { exercise: node.id, direction: "left" } );
+                    dir = "left";
                     node.v_position = parseInt(node.v_position)-(1); 
                 }
                 if (e.keyCode == 38) { 
-                    $.post("/admin/movemapnode", { exercise: node.id, direction: "up" } );
+                    dir = "up";
                     node.h_position = parseInt(node.h_position)-(1); 
                 }
                 if (e.keyCode == 39) { 
-                    $.post("/admin/movemapnode", { exercise: node.id, direction: "right" } );
+                    dir = "right";
                     node.v_position = parseInt(node.v_position)+(1); 
                 }
                 if (e.keyCode == 40) { 
-                    $.post("/admin/movemapnode", { exercise: node.id, direction: "down" } );
+                    dir = "down";
                     node.h_position = parseInt(node.h_position)+(1); 
                 }
 
                 if ( 37 <= e.keyCode && e.keyCode <= 40 ) {
+                    $.post("/admin/movemapnode", { exercise: node.id, direction: dir } );
+                    
                     var zoom =KnowledgeMap.map.getZoom();
                     KnowledgeMap.markers = [];
 
-                    for (var key in KnowledgeMap.dictEdges)
+                    for (var key in KnowledgeMap.dictEdges) // this loop lets us update the edges wand will remove the old edges
                         {
                             var rgTargets = KnowledgeMap.dictEdges[key];
                             for (var ix = 0; ix < rgTargets.length; ix++)
@@ -372,6 +374,7 @@ var KnowledgeMap = {
             
         }
         else
+         // Go to exercise
         window.location = node.url;
         
         
@@ -385,16 +388,10 @@ var KnowledgeMap = {
             return;
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
-
-        if (admin)  
-        {
-            $(".exercise-edit[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").addClass("exercise-edit-hover");
-            this.highlightNode(node, true);
-        }
-        else {
+      
         $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").addClass("exercise-badge-hover");
         this.highlightNode(node, true);
-        }
+        
     },
 
     onNodeMouseout: function(el, node) {
@@ -402,15 +399,10 @@ var KnowledgeMap = {
             return;
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
-        
-        if (admin){
-            $(".exercise-edit[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").removeClass("exercise-edit-hover");
-            this.highlightNode(node, false);
-        }
-        else{
+    
         $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").removeClass("exercise-badge-hover");
         this.highlightNode(node, false);
-    }
+    
     },
 
     onBadgeMouseover: function() {

@@ -14,6 +14,7 @@ import util
 import topics_list
 import models
 from inspect import getmembers
+import simplejson as json
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -86,8 +87,8 @@ def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     return {"video_path": video_path, "width": width, "height": height}
 
 @register.inclusion_tag(("knowledgemap_embed.html", "../knowledgemap_embed.html"))
-def knowledgemap_embed(exercises, map_coords, admin="false"):
-    return {"App": App,  "exercises": exercises, "map_coords": map_coords, 'admin':admin}
+def knowledgemap_embed(exercises, map_coords, admin=False):
+    return {"App": App,  "exercises": exercises, "map_coords": map_coords, 'admin':json.dumps(admin)}
 
 @register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos_with_points(exercise_videos):

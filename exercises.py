@@ -1,4 +1,4 @@
-import os, logging
+import os
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -18,9 +18,7 @@ class MoveMapNode(request_handler.RequestHandler):
             return
         
         node = self.request_string('exercise')
-        logging.critical(node)
         direction = self.request_string('direction')
-        move_children = self.request_string('movechildren', default = True)
     
         exercise = models.Exercise.get_by_name(node)
     
@@ -54,7 +52,6 @@ class ExerciseAdmin(request_handler.RequestHandler):
             user_data.put()
 
         recent_exercises = ex_graph.get_recent_exercises()
-        # review_exercises = ex_graph.get_review_exercises(self.get_time())
         suggested_exercises = ex_graph.get_suggested_exercises()
         proficient_exercises = ex_graph.get_proficient_exercises()
 
@@ -74,7 +71,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
                 exercise.proficient = True
                 exercise.status = "Proficient"
            
-        template_values = {'App' : App,'admin': "true",  'exercises': ex_graph.exercises, 'map_coords': (0,0,0)}
+        template_values = {'App' : App,'admin': True,  'exercises': ex_graph.exercises, 'map_coords': (0,0,0)}
 
         self.render_template('exerciseadmin.html', template_values)
 
