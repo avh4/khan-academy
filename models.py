@@ -807,6 +807,12 @@ class Video(Searchable, db.Model):
                     }
 
         return None
+
+    def download_video_url(self):
+        download_urls = self.download_urls
+        if download_urls:
+            return download_urls.get("mp4")
+        return None
     
     @staticmethod
     def get_for_readable_id(readable_id):
