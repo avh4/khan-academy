@@ -496,7 +496,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             if exercise in review_exercises:
                 exercise.review = True
                 exercise.status = "Review"
-
+   
         template_values = {
             'exercises': ex_graph.exercises,
             'recent_exercises': recent_exercises,
@@ -507,7 +507,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
             'selected_nav_link': 'practice',
             }
-
+            
         self.render_template('viewexercises.html', template_values)
 
     def get_time(self):
@@ -1390,6 +1390,30 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+class MoveMapNode(request_handler.RequestHandler):
+    def post(self):
+        self.get()
+    def get(self):
+        node = self.request_string('exercise')
+        logging.critical(node)
+        direction = self.request_string('direction')
+        move_children = self.request_string('movechildren', default = True)
+    
+        exercise = models.Exercise.get_by_name(node)
+    
+        if direction=="up":
+            exercise.h_position -= 1
+            exercise.put()
+        elif direction=="down":
+            exercise.h_position += 1
+            exercise.put()
+        elif direction=="left":
+            exercise.v_position -= 1
+            exercise.put()
+        elif direction=="right":
+            exercise.v_position += 1
+            exercise.put()
+        
 def main():
 
     webapp.template.register_template_library('templateext')    
@@ -1463,6 +1487,7 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
+        ('/admin/movemapnode', MoveMapNode),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 

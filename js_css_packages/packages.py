@@ -57,6 +57,7 @@ javascript = {
         "files": [
             "fastmarkeroverlay.js",
             "knowledgemap.js",
+            "knowledgemapadmin.js",
         ]
     },
     "mobile": {
