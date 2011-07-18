@@ -86,8 +86,8 @@ def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     return {"video_path": video_path, "width": width, "height": height}
 
 @register.inclusion_tag(("knowledgemap_embed.html", "../knowledgemap_embed.html"))
-def knowledgemap_embed(exercises, map_coords):
-    return {"App": App, "exercises": exercises, "map_coords": map_coords}
+def knowledgemap_embed(exercises, map_coords, admin="false"):
+    return {"App": App,  "exercises": exercises, "map_coords": map_coords, 'admin':admin}
 
 @register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos_with_points(exercise_videos):

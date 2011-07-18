@@ -2,7 +2,9 @@
 {% js_package "maps" %}
 
 <script>
-$(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_coords.2 }});});
+
+$(function(){KnowledgeMap.init({{ map_coords.0 }}, {{ map_coords.1 }}, {{ map_coords.2 }}, {{admin}});});
+
 </script>
 
 <article id="knowledge_map">

@@ -496,7 +496,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             if exercise in review_exercises:
                 exercise.review = True
                 exercise.status = "Review"
-
+   
         template_values = {
             'exercises': ex_graph.exercises,
             'recent_exercises': recent_exercises,
@@ -507,7 +507,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
             'selected_nav_link': 'practice',
             }
-
+            
         self.render_template('viewexercises.html', template_values)
 
     def get_time(self):
@@ -1390,6 +1390,8 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+
+        
 def main():
 
     webapp.template.register_template_library('templateext')    
@@ -1463,6 +1465,7 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
+        ('/admin/movemapnode', exercises.MoveMapNode),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 
@@ -1553,10 +1556,6 @@ def main():
         ('/_ah/warmup.*', warmup.Warmup),
 
         ], debug=True)
-
-    if not capabilities.CapabilitySet('datastore_v3', capabilities=['write']).is_enabled():
-        logging.info("Shortcircuiting request due to disabled datastore write.")
-        application = webapp.WSGIApplication([('.*', ReadOnlyDowntime)])
 
     application = profiler.ProfilerWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)

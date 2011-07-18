@@ -8,18 +8,73 @@ import models
 import request_handler
 import util
 import itertools
+
+class MoveMapNode(request_handler.RequestHandler):
+    def post(self):
+        self.get()
+    def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+        
+        node = self.request_string('exercise')
+        logging.critical(node)
+        direction = self.request_string('direction')
+        move_children = self.request_string('movechildren', default = True)
+    
+        exercise = models.Exercise.get_by_name(node)
+    
+        if direction=="up":
+            exercise.h_position -= 1
+            exercise.put()
+        elif direction=="down":
+            exercise.h_position += 1
+            exercise.put()
+        elif direction=="left":
+            exercise.v_position -= 1
+            exercise.put()
+        elif direction=="right":
+            exercise.v_position += 1
+            exercise.put()
+            
+            
 class ExerciseAdmin(request_handler.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
-
+        
+        user_data = models.UserData.current()
         user = models.UserData.current().user
-        query = models.Exercise.all().order('name')
-        exercises = query.fetch(1000)
 
-        template_values = {'App' : App, 'exercises': exercises}
+        
+        ex_graph = models.ExerciseGraph(user_data)
+        if user_data.reassess_from_graph(ex_graph):
+            user_data.put()
+
+        recent_exercises = ex_graph.get_recent_exercises()
+        # review_exercises = ex_graph.get_review_exercises(self.get_time())
+        suggested_exercises = ex_graph.get_suggested_exercises()
+        proficient_exercises = ex_graph.get_proficient_exercises()
+
+        for exercise in ex_graph.exercises:
+            exercise.phantom = False
+            exercise.suggested = False
+            exercise.proficient = False
+            exercise.review = False
+            exercise.status = ""
+            # if user_data.is_phantom:
+            #     exercise.phantom = True
+            # else:
+            if exercise in suggested_exercises:
+                exercise.suggested = True
+                exercise.status = "Suggested"
+            if exercise in proficient_exercises:
+                exercise.proficient = True
+                exercise.status = "Proficient"
+           
+        template_values = {'App' : App,'admin': "true",  'exercises': ex_graph.exercises, 'map_coords': (0,0,0)}
 
         self.render_template('exerciseadmin.html', template_values)
 

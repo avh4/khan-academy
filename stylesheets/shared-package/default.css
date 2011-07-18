@@ -3016,6 +3016,30 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     position:relative !important;
     top:2px !important;
 }
+
+.exercise-edit {
+    background: #f3f3f3;
+    padding-top:3px;
+    padding-left:5px;
+    margin-left: 1px;
+    position: relative;
+    width: 320px;
+    height: 23px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+    .drawer-hoverable .exercise-edit:hover, .drawer-hoverable .exercise-edit-hover {
+        background: #FCF9CF;
+        -webkit-box-shadow: 0 0 3px #666;
+        -moz-box-shadow: 0 0 3px #666;
+        box-shadow: 0 0 3px #666;
+        border: 1px solid #aaa;
+    }
+
 @media screen and (min-width: 1200px) {
     .dark #homepage, .dark #contribute, .dark #container, .dark #page_sub_nav, .dark #container .exercise-badge.single-exercise {
         -moz-border-radius-topleft: 4px;
