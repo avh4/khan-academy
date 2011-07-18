@@ -64,6 +64,11 @@ indexes:
   - name: __key__
     direction: desc
 
+- kind: ExerciseVideo
+  properties:
+  - name: exercise
+  - name: exercise_order
+
 - kind: Feedback
   properties:
   - name: deleted

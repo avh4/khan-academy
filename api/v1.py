@@ -11,6 +11,7 @@ import layer_cache
 import topics_list
 from badges import badges, util_badges, models_badges
 import util
+import notifications
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
@@ -27,7 +28,7 @@ def add_action_results_property(obj, dict_results):
 
         badge_counts = util_badges.get_badge_counts(user_data)
 
-        user_badges = badges.UserBadgeNotifier.pop_for_user_data(user_data)
+        user_badges = notifications.UserNotifier.pop_for_user_data(user_data)["badges"]
         badges_dict = util_badges.all_badges_dict()
 
         for user_badge in user_badges:
@@ -361,8 +362,24 @@ def user_exercises_all():
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
-            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user)
-            return user_exercises.fetch(10000)
+            exercises = models.Exercise.get_all_use_cache()
+            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
+
+            exercises_dict = dict((exercise.name, exercise) for exercise in exercises)
+            user_exercises_dict = dict((user_exercise.exercise, user_exercise) for user_exercise in user_exercises)
+
+            for exercise_name in exercises_dict:
+                if not exercise_name in user_exercises_dict:
+                    user_exercise = models.UserExercise()
+                    user_exercise.exercise = exercise_name
+                    user_exercise.user = user_data_student.user
+                    user_exercises_dict[exercise_name] = user_exercise
+
+            for exercise_name in user_exercises_dict:
+                user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
+                user_exercises_dict[exercise_name]._user_data = user_data_student
+
+            return user_exercises_dict.values()
 
     return None
 
