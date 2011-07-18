@@ -96,8 +96,8 @@ def minify_package(path, path_combined, suffix):
     return path_compressed
 
 def remove_images_from_line(filename):
-    filename = filename.group(0) # open image
-    filename = os.path.join('.', filename[1:])
+    filename = filename.group(0)
+    filename = os.path.join(os.path.dirname(__file__), '..', filename[1:])
     print "Removing images from %s" % filename
     if os.path.isfile(filename):
         with open(filename) as img:
@@ -121,6 +121,10 @@ def remove_urls(path, path_combined, suffix):
         for line in f:
             if r.search(line):
                 for i in r.finditer(line):
+                    # /images/dark-page-bg.png
+                    #         <----------> <->
+                    #             |         |
+                    #         i.group(1) i.group(2)
                     urlpath = '/images/'+i.group(1)+'.'+i.group(2)
                     line = re.sub(urlpath, remove_images_from_line, line, 1)
             new_file.write(line)
