@@ -35,7 +35,7 @@ def get_facebook_nickname(user):
     try:
         profile = graph.get_object(id)
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
-        return unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
+        return unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
     except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError):
         # In the event of an FB error, don't cache the result.
         return layer_cache.UncachedResult(email)
