@@ -2,13 +2,14 @@ import datetime
 import logging
 
 from mapreduce import control
-from mapreduce import operation as op
+from google.appengine.ext import db
 
 import util
 import request_handler
 import models
 import consts
 import points
+import fast_slow_queue
 
 class ActivitySummaryExerciseItem:
     def __init__(self):
@@ -133,7 +134,10 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
 
     return daily_activity_logs
 
-def daily_activity_summary_map(user_data):
+def next_daily_activity_dates(user_data):
+
+    if not user_data:
+        return (None, None)
 
     # Start summarizing after the last summary
     dt_start = user_data.last_daily_summary or datetime.datetime.min
@@ -161,25 +165,41 @@ def daily_activity_summary_map(user_data):
         # Only iterate over 10 days per mapreduce
         dt_end = min(dt_end, dt_start + datetime.timedelta(days=10))
 
-        dt = dt_start
-        list_entities_to_put = []
+        return (dt_start, dt_end)
 
-        problem_logs = models.ProblemLog.get_for_user_data_between_dts(user_data, dt_start, dt_end).fetch(100000)
-        video_logs = models.VideoLog.get_for_user_data_between_dts(user_data, dt_start, dt_end).fetch(100000)
+    return (None, None)
 
-        while dt <= dt_end:
-            summary = DailyActivitySummary.build(user_data, dt, problem_logs, video_logs)
-            if summary.has_activity():
-                log = models.DailyActivityLog.build(user_data, dt, summary)
-                list_entities_to_put.append(log)
+def is_daily_activity_waiting(user_data):
+    dt_start, dt_end = next_daily_activity_dates(user_data)
+    return dt_start and dt_end
 
-            dt += datetime.timedelta(days=1)
+@fast_slow_queue.handler(is_daily_activity_waiting)
+def daily_activity_summary_map(user_data):
 
-        user_data.last_daily_summary = dt_end
+    dt_start, dt_end = next_daily_activity_dates(user_data)
 
-        for entity in list_entities_to_put:
-            yield op.db.Put(entity)
-        yield op.db.Put(user_data)
+    if not dt_start or not dt_end:
+        return
+
+    dt = dt_start
+    list_entities_to_put = []
+
+    problem_logs = models.ProblemLog.get_for_user_data_between_dts(user_data, dt_start, dt_end).fetch(100000)
+    video_logs = models.VideoLog.get_for_user_data_between_dts(user_data, dt_start, dt_end).fetch(100000)
+
+    while dt <= dt_end:
+        summary = DailyActivitySummary.build(user_data, dt, problem_logs, video_logs)
+        if summary.has_activity():
+            log = models.DailyActivityLog.build(user_data, dt, summary)
+            list_entities_to_put.append(log)
+
+        dt += datetime.timedelta(days=1)
+
+    user_data.last_daily_summary = dt_end
+
+    list_entities_to_put.append(user_data)
+
+    db.put(list_entities_to_put)
 
 class StartNewDailyActivityLogMapReduce(request_handler.RequestHandler):
     def get(self):
@@ -193,7 +213,7 @@ class StartNewDailyActivityLogMapReduce(request_handler.RequestHandler):
                 reader_parameters = {"entity_kind": "models.UserData"},
                 mapreduce_parameters = {"processing_rate": 250},
                 shard_count = 64,
-                queue_name = "activity-log-mapreduce-queue",)
+                queue_name = fast_slow_queue.FAST_QUEUE_NAME,)
         self.response.out.write("OK: " + str(mapreduce_id))
 
 
