@@ -251,7 +251,7 @@ class EditEntity(request_handler.RequestHandler):
 
                     elif feedback.is_type(models_discussion.FeedbackType.Answer):
 
-                        question = feedback.parent()
+                        question = feedback.question()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
 
 class VoteEntity(request_handler.RequestHandler):
@@ -381,7 +381,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     # Just grab all answers for this video and cache in page's questions
     for answer in answers:
         # Grab the key only for each answer, don't run a full gql query on the ReferenceProperty
-        question_key = answer.parent_key()
+        question_key = answer.question_key()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
             voting.add_vote_expando_properties(answer, dict_votes)

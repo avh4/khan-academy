@@ -42,7 +42,8 @@ class Feedback(db.Model):
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
-    targets = db.ListProperty(db.Key)
+    targets = db.ListProperty(db.Key) # first element is video key.
+                                      # optional second element is question key.
     types = db.StringListProperty()
     is_flagged = db.BooleanProperty(default=False)
     is_hidden_by_flags = db.BooleanProperty(default=False)
@@ -78,19 +79,20 @@ class Feedback(db.Model):
     def is_type(self, type):
         return type in self.types
 
-    def parent_key(self):
+    def question_key(self):
         if self.targets:
-            return self.targets[-1]
+            return self.targets[-1] # last target is always the question
         return None
 
-    def parent(self):
-        return db.get(self.parent_key())
+    def question(self):
+        return db.get(self.question_key())
 
     def children_keys(self):
         keys = db.Query(Feedback, keys_only=True)
         keys.filter("targets = ", self.key())
         return keys
 
+    # first_target is always the video key
     def first_target_key(self):
         if self.targets:
             return self.targets[0]
@@ -112,7 +114,7 @@ class Feedback(db.Model):
         self.put()
 
         if self.is_type(FeedbackType.Answer):
-            question = self.parent()
+            question = self.question()
             question.recalculate_score()
             question.put()
 
