@@ -258,6 +258,8 @@ def user_video_css(user_data):
     if user_data:
         uvc = UserVideoCss.get_for_user_data(user_data)
         return '<link rel=\'stylesheet\' type=\'text/css\' href=\'/user_video_css?version='+str(uvc.version)+'\'></link>'
+    else:
+        return ''
 
 register.tag(highlight)
 
