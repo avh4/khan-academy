@@ -8,7 +8,11 @@ import urllib
 import logging
 import re
 from pprint import pformat
+<<<<<<< local
 from email.utils import formatdate, parsedate
+=======
+from google.appengine.api import capabilities
+>>>>>>> other
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
@@ -125,6 +129,9 @@ class ViewExercise(request_handler.RequestHandler):
 
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
+        # Cache this so we don't have to worry about future lookups
+        user_exercise.exercise_model = exercise
+
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
         # When viewing a problem out-of-order, show read-only view
@@ -143,14 +150,14 @@ class ViewExercise(request_handler.RequestHandler):
 
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                
         # Note: if they just need a single problem for review they can just print this page.
-        num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
+        num_problems_to_print = max(2, exercise.required_streak - user_exercise.streak)
         
         # If the user is proficient, assume they want to print a bunch of practice problems.
         if exercise_states['proficient']:
-            num_problems_to_print = exercise.required_streak()
+            num_problems_to_print = exercise.required_streak
 
         if exercise.summative:
             # Make sure UserExercise has proper summative value even before it's been set.
@@ -280,7 +287,7 @@ class ViewVideo(request_handler.RequestHandler):
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
-            video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+            video_path = video.download_video_url()
 
         exercise = None
         exercise_video = video.get_related_exercise()
@@ -493,7 +500,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             if exercise in review_exercises:
                 exercise.review = True
                 exercise.status = "Review"
-
+   
         template_values = {
             'exercises': ex_graph.exercises,
             'recent_exercises': recent_exercises,
@@ -504,7 +511,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
             'selected_nav_link': 'practice',
             }
-
+            
         self.render_template('viewexercises.html', template_values)
 
     def get_time(self):
@@ -587,7 +594,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             if correct:
                 suggested = user_data.is_suggested(exid)
-                points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
             
@@ -612,7 +619,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
                 if user_exercise.streak > user_exercise.longest_streak:
                     user_exercise.longest_streak = user_exercise.streak
-                if user_exercise.streak >= exercise.required_streak() and not proficient:
+                if user_exercise.streak >= exercise.required_streak and not proficient:
                     user_exercise.set_proficient(True, user_data)
                     user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
@@ -655,7 +662,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         
     def send_json(self, user_data, user_exercise, exercise, key, time_warp):
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
         
         streak_bar_context = streak_bar(user_exercise)
         streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)
@@ -773,11 +780,13 @@ class GenerateLibraryContent(request_handler.RequestHandler):
 
     def post(self):
         # We support posts so we can fire task queues at this handler
-        self.get()
+        self.get(from_task_queue = True)
 
-    def get(self):
+    def get(self, from_task_queue = False):
         library.library_content_html(bust_cache=True)
-        self.response.out.write("Library content regenerated")  
+
+        if not from_task_queue:
+            self.redirect("/")
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
@@ -860,6 +869,13 @@ class Crash(request_handler.RequestHandler):
         else:
             # Even Watson isn't perfect
             raise Exception("What is Toronto?")
+
+class ReadOnlyDowntime(request_handler.RequestHandler):
+    def get(self):
+        raise CapabilityDisabledError("App Engine maintenance period")
+
+    def post(self):
+        return self.get()
 
 class SendToLog(request_handler.RequestHandler):
     def post(self):
@@ -1303,15 +1319,20 @@ class PostLogin(request_handler.RequestHandler):
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
 
+            # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
-                UserNotifier.clear_all(phantom_data)
-                logging.info("New Account: %s", user_data.current().email)
-                phantom_data.current_user = user_data.current_user
-                if phantom_data.put():
-                    # Phantom user was just transitioned to real user
-                    user_counter.add(1)
-                    user_data.delete()
-                cont = "/newaccount?continue=%s" % cont
+
+                # Make sure user has no students
+                if not user_data.has_students():
+
+                    UserNotifier.clear_all(phantom_data)
+                    logging.info("New Account: %s", user_data.current().email)
+                    phantom_data.current_user = user_data.current_user
+                    if phantom_data.put():
+                        # Phantom user was just transitioned to real user
+                        user_counter.add(1)
+                        user_data.delete()
+                    cont = "/newaccount?continue=%s" % cont
 
         self.delete_cookie('ureg_id')
         self.redirect(cont)
@@ -1373,19 +1394,27 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+<<<<<<< local
 class ServeUserVideoCss(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
         if user_data == None:
             return
+=======
+>>>>>>> other
 
+<<<<<<< local
         user_video_css = models.UserVideoCss.get_for_user_data(user_data)
         self.response.headers['Content-Type'] = 'text/css'
         self.response.headers['Expires'] = ' Thu, 15 Apr 2020 20:00:00 GMT'
         self.response.headers['Cache-Control'] = 'public,max-age=1000000'
         self.response.out.write(user_video_css.video_css)
 
+=======
+        
+>>>>>>> other
 def main():
+
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1457,6 +1486,7 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
+        ('/admin/movemapnode', exercises.MoveMapNode),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 

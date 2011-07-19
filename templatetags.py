@@ -12,7 +12,9 @@ from models import UserData, UserVideoCss
 import consts
 import util
 import topics_list
+import models
 from inspect import getmembers
+import simplejson as json
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -35,7 +37,7 @@ class HighlightNode(template.Node):
         try:
             phrases = template.resolve_variable(self.phrases_to_highlight, context)
             text = template.resolve_variable(self.text, context)
-        except VariableDoesNotExist:
+        except template.VariableDoesNotExist:
             pass
         phrases = [(re.escape(p)+r'\w*') for p in phrases]
         regex = re.compile("(%s)" % "|".join(phrases), re.IGNORECASE)
@@ -85,8 +87,8 @@ def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     return {"video_path": video_path, "width": width, "height": height}
 
 @register.inclusion_tag(("knowledgemap_embed.html", "../knowledgemap_embed.html"))
-def knowledgemap_embed(exercises, map_coords):
-    return {"App": App, "exercises": exercises, "map_coords": map_coords}
+def knowledgemap_embed(exercises, map_coords, admin=False):
+    return {"App": App,  "exercises": exercises, "map_coords": map_coords, 'admin':json.dumps(admin)}
 
 @register.inclusion_tag(("related_videos.html", "../related_videos.html"))
 def related_videos_with_points(exercise_videos):
@@ -153,9 +155,10 @@ def streak_bar(user_exercise):
         longest_streak = 0
 
     streak_max_width = 227
+    required_streak = user_exercise.required_streak
 
-    streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * streak))
-    longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(user_exercise.required_streak())) * longest_streak))
+    streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * streak))
+    longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * longest_streak))
     streak_icon_width = min(streak_max_width - 2, max(43, streak_width)) # 43 is width of streak icon
 
     width_required_for_label = 20
@@ -164,7 +167,7 @@ def streak_bar(user_exercise):
 
     levels = []
     if user_exercise.summative:
-        c_levels = user_exercise.required_streak() / consts.REQUIRED_STREAK
+        c_levels = required_streak / consts.REQUIRED_STREAK
         level_offset = streak_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
@@ -248,11 +251,18 @@ def empty_class_instructions(class_is_empty=True):
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
+<<<<<<< local
 @register.simple_tag
 def video_name_and_progress(video):
     # The &nbsp; is so the image will be shown
     return '<span class=\'vid-progress v' + str(video.key().id()) + ' \'>&nbsp;</span>' + video.title
+=======
+@register.inclusion_tag(("crazyegg_tracker.html", "../crazyegg_tracker.html"))
+def crazyegg_tracker(enabled=True):
+	return { 'enabled': enabled }
+>>>>>>> other
 
+<<<<<<< local
 @register.simple_tag
 def user_video_css(user_data):
     if user_data:
@@ -261,6 +271,8 @@ def user_video_css(user_data):
     else:
         return ''
 
+=======
+>>>>>>> other
 register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')    
