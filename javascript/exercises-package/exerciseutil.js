@@ -120,9 +120,12 @@ var Exercise = {
     
     submitForm: function() {
         if (this.fSupportsAjax) {
-            var data = {};
-            $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used", "time_warp"], function() {
-              data[this] = $("#" + this).val();
+            var data = {
+                "attempt_number": Exercise.tries + 1
+            };
+
+            $.each(["exid", "key", "correct", "problem_number", "start_time", "hint_used"], function() {
+                data[this] = $("#" + this).val();
             });
             
             Exercise.disable();
@@ -893,7 +896,7 @@ function reset_streak() {
         fade_streaks();
         $.ajax({
             type: "POST",
-            url: "/resetstreak",
+            url: "/api/v1/user/exercises/" + $("#exid").val() + "/reset_streak",
             data: {	key: $("#key").val() },
             data_type: 'json'
         }); 

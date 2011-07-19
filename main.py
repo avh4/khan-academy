@@ -542,40 +542,7 @@ class RegisterAnswer(request_handler.RequestHandler):
         self.get()
 
     def get(self):
-        exid = self.request_string('exid')
-        time_warp = self.request_string('time_warp')
-
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request_string('key')
-
-            if not exid or not key:
-                logging.warning("Missing exid or key data in RegisterAnswer")
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            correct = self.request_bool('correct')
-            problem_number = self.request_int('problem_number')
-            start_time = self.request_float('start_time')
-            hint_used = self.request_bool('hint_used', default=False)
-            elapsed_time = int(float(time.time()) - start_time)
-
-            user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user_data):
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            exercises.complete_problem(user_data, user_exercise, problem_number, correct, hint_used, elapsed_time)
-
-            if not self.is_ajax_request():
-                self.redirect("/exercises?exid=%s" % exid)
-            else:
-                self.send_json(user_data, user_exercise, user_exercise.exercise_model, key, time_warp)
-            
-        else:
-            # Redirect to display the problem again which requires authentication
-            self.redirect('/exercises?exid=' + exid)
+        self.redirect('/exercises?exid=' + self.request_string("exid"))
 
     def get_time(self):
         time_warp = int(self.request.get('time_warp') or '0')
@@ -628,61 +595,6 @@ class RegisterAnswer(request_handler.RequestHandler):
             #
         json = simplejson.dumps(updated_values)
         self.response.out.write(json)
-
-class RegisterCorrectness(request_handler.RequestHandler):
-
-    # RegisterCorrectness uses a GET request to solve the IE-behind-firewall
-    # issue with occasionally stripped POST data.
-    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
-    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
-    def post(self):
-        self.get()
-
-    # A GET request is made via AJAX when the user clicks "Check Answer".
-    # This allows us to reset the user's streak if the answer was wrong.  If we wait
-    # until he clicks the "Next Problem" button, he can avoid resetting his streak
-    # by just reloading the page.
-    def get(self):
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request.get('key')
-
-            if not key:
-                logging.warning("Missing key data in RegisterCorrectness")
-                self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
-                return
-
-            user_exercise = db.get(key)
-            exercises.answer_problem(user_data, user_exercise, self.request_bool("correct", default=False))
-
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-
-class ResetStreak(request_handler.RequestHandler):
-
-# This resets the user's streak through an AJAX post request when the user
-# clicks on the Hint button. 
-
-    def post(self):
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request.get('key')
-            user_exercise = db.get(key)
-
-            if not user_exercise.belongs_to(user_data):
-                return
-
-            user_exercise.reset_streak()
-            user_exercise.put()
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
@@ -1337,8 +1249,6 @@ def main():
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
         ('/registeranswer', RegisterAnswer),
-        ('/registercorrectness', RegisterCorrectness),
-        ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo), # Backwards URL compatibility

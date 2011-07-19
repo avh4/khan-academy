@@ -10,7 +10,7 @@ import models
 import layer_cache
 import topics_list
 from badges import badges, util_badges, models_badges
-from exercises import answer_problem, complete_problem, reset_streak
+from exercises import attempt_problem, reset_streak
 import util
 import notifications
 
@@ -460,39 +460,28 @@ def user_problem_logs(exercise_name):
 
     return None
 
-@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/answer", methods=["POST"])
+@route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/attempt", methods=["POST"])
 @oauth_optional()
 @jsonp
 @jsonify
-def answer_problem_number(exercise_name, problem_number):
-    user_data = models.UserData.current()
-
-    if user_data:
-        user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
-
-        if user_exercise:
-            return answer_problem(user_data, user_exercise, request.request_bool("correct", default=False))
-
-    return unauthorized_response()
-
-@route("/api/v1/user/exercises/<exercise_name>/problem/<int:problem_number>/complete", methods=["POST"])
-@oauth_optional()
-@jsonp
-@jsonify
-def complete_problem_number(exercise_name, problem_number):
+def attempt_problem_number(exercise_name, problem_number):
     user_data = models.UserData.current()
 
     if user_data:
         user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
 
         if user_exercise and problem_number:
-            return complete_problem(
+            return attempt_problem(
                     user_data, 
                     user_exercise, 
                     problem_number, 
-                    request.request_bool("correct", default=False), 
-                    request.request_bool("hint_used", default=False), 
-                    int(request.request_float("time_taken", default=0.0))
+                    request.request_int("attempt_number"),
+                    request.request_string("attempt_content"),
+                    request.request_string("sha1"),
+                    request.request_string("seed"),
+                    request.request_bool("complete"),
+                    request.request_bool("hint_used"),
+                    int(request.request_float("time_taken"))
                     )
 
     return unauthorized_response()

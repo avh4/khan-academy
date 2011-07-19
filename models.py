@@ -399,9 +399,12 @@ class UserExercise(db.Model):
 
         if proficient:
             if self.exercise not in user_data.proficient_exercises:
+                self.proficient_date = datetime.datetime.now()
+
                 user_data.proficient_exercises.append(self.exercise)
                 user_data.need_to_reassess = True
                 user_data.put()
+
                 util_notify.update(user_data, self, False, True)
 
         else:
@@ -409,7 +412,6 @@ class UserExercise(db.Model):
                 user_data.proficient_exercises.remove(self.exercise)
                 user_data.need_to_reassess = True
                 user_data.put()
-                    
 
 class CoachRequest(db.Model):
     coach_requesting = db.UserProperty()
@@ -1138,14 +1140,19 @@ class ProblemLog(db.Model):
 
     user = db.UserProperty()
     exercise = db.StringProperty()
-    correct = db.BooleanProperty()
-    time_done = db.DateTimeProperty()
-    time_taken = db.IntegerProperty()
+    correct = db.BooleanProperty(default = False)
+    time_done = db.DateTimeProperty(auto_now_add=True)
+    time_taken = db.IntegerProperty(default = 0)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
+    sha1 = db.StringProperty()
+    seed = db.StringProperty()
+    count_attempts = db.IntegerProperty(default = 0)
+    time_taken_attempts = db.ListProperty(int)
+    attempts = db.StringListProperty()
 
     @property
     def ka_url(self):
@@ -1178,8 +1185,60 @@ class ProblemLog(db.Model):
         return util.minutes_between(self.time_started(), self.time_ended())
 
 # commit_problem_log is used by our deferred problem log insertion process
-def commit_problem_log(problem_log):
-    problem_log.put()
+def commit_problem_log(problem_log_source):
+    if not problem_log_source or not problem_log_source.key().name:
+        return
+
+    # Committing transaction combines existing problem log with any followup attempts
+    def txn():
+        problem_log = ProblemLog.get_by_key_name(problem_log_source.key().name())
+        
+        if not problem_log:
+            problem_log = ProblemLog(
+                key_name = problem_log_source.key().name(),
+                user = problem_log_source.user,
+                exercise = problem_log_source.exercise,
+                problem_number = problem_log_source.problem_number,
+                time_done = problem_log_source.time_done,
+                sha1 = problem_log_source.sha1,
+                seed = problem_log_source.seed,
+                exercise_non_summative = problem_log_source.exercise_non_summative,
+        )
+
+        next_attempt = problem_log.count_attempts + 1
+        if next_attempt < problem_log_source.count_attempts:
+            # Problem logs must be committed in order of their attempts.
+            raise Exception("Problem log committed out of order by taskqueue (%s vs %s), raising exception for retry later." % 
+                    (problem_log.count_attempts, problem_log_source.count_attempts))
+        elif next_attempt > problem_log_source.count_attempts:
+            # Trying to re-put an attempt that was already logged. Ignore this dupe taskqueue attempt.
+            return
+
+        # Bump up attempt count
+        problem_log.count_attempts = problem_log_source.count_attempts
+
+        # Hint used cannot be changed from True to False
+        problem_log.hint_used = problem_log.hint_used or problem_log_source.hint_used
+
+        # Correct cannot be changed from False to True after first attempt
+        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hint_used
+
+        # Add time_taken for this individual attempt
+        problem_log.time_taken += problem_log_source.time_taken
+        problem_log.time_taken_attempts.append(problem_log_source.time_taken)
+
+        # Add actual attempt content
+        problem_log.attempts.append(problem_log_source.attempts[0])
+
+        # Points should only be earned once per problem, regardless of attempt count
+        problem_log.points_earned = max(problem_log.points_earned, problem_log_source.points_earned)
+
+        # Proficiency earned should never change per problem
+        problem_log.earned_proficiency = problem_log.earned_proficiency or problem_log_source.earned_proficiency
+
+        problem_log.put()
+
+    db.run_in_transaction(txn)
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and

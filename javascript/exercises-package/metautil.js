@@ -174,32 +174,38 @@ function arraySum(a)
 	return array_sum(a);
 }
 
-var correctnessRegistered = false;
 function handleCorrectness(isCorrect)
 {
-	if (!correctnessRegistered) 
-	{
-		// Attempt to register the correctness of the answer with the server, before telling the user 
-		// whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
-		// avoid blowing a streak when he gets a wrong answer.  If the attempt to register the correctness fails,
-		// we don't worry about it because they might just be having connectivity problems or need to log in again.
-		// That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
-		// but it takes longer and is more noticeable.
-        
-        var data = {
-				key: $("#key").val(),
-				time_warp: $("#time_warp").val(),
-				correct: ((isCorrect && Exercise.tries==0 && Exercise.steps_given==0) ? 1 : 0),
-                hint_used: ($("#hint_used").val() == 1 ? 1 : 0)
-		};
+    // Attempt to register the correctness of the answer with the server, before telling the user 
+    // whether it is correct.  This prevents the user from just reloading the page to quickly and quietly 
+    // avoid blowing a streak when he gets a wrong answer.  If the attempt to register the correctness fails,
+    // we don't worry about it because they might just be having connectivity problems or need to log in again.
+    // That means it is still possible for a user to cheat (e.g. by logging out before clicking "Check Answer")
+    // but it takes longer and is more noticeable.
+    //
 
-		$.get("/registercorrectness", data);
+    var data = {
+        "complete": isCorrect ? "1" : "0",
+        "sha1": "sha1monkeys",
+        "seed": "seedmonkeys",
+        "time_taken": 5,
+        "attempt_number": Exercise.tries + 1
+    };
 
-		correctnessRegistered = true;		
-	}	
-	if (isCorrect)
+    $.each(["exid", "problem_number", "hint_used"], function() {
+        data[this] = $("#" + this).val();
+    });
+
+    $.ajax({
+        type: "POST",
+        url: "/api/v1/user/exercises/" + data["exid"] + "/problems/" + data["problem_number"] + "/attempt",
+        data: data
+    });
+
+    Exercise.tries++;
+
+    if (isCorrect)
 	{
-		
 		if (Exercise.tries==0 && Exercise.steps_given==0)
 		{
 			document.getElementById("correct").value="1"
@@ -207,10 +213,6 @@ function handleCorrectness(isCorrect)
 
         $("#hint_used").val(Exercise.steps_given == 0 ? "0" : "1");
 		eraseCookie(notDoneCookie);
-	}
-	else
-	{
-		Exercise.tries++;
 	}
 	showFeedback(isCorrect);
 }

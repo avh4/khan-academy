@@ -21,85 +21,96 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-def answer_problem(user_data, user_exercise, correct):
-    if user_exercise and user_exercise.belongs_to(user_data):
-        user_exercise.schedule_review(correct)
-
-        if not correct:
-            if user_exercise.streak == 0:
-                # 2+ in a row wrong -> not proficient
-                user_exercise.set_proficient(False, user_data)
-            user_exercise.reset_streak()
-        user_exercise.put()
-
-        return user_exercise
-
-    return None
-
-def complete_problem(user_data, user_exercise, problem_number, correct, hint_used, time_taken):
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken):
 
     if user_exercise and user_exercise.belongs_to(user_data):
 
-        dt_done = datetime.datetime.now()
+        dt_now = datetime.datetime.now()
         exercise = user_exercise.exercise_model
 
-        user_exercise.last_done = datetime.datetime.now()
+        user_exercise.last_done = dt_now
         user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
         user_exercise.summative = exercise.summative
 
         user_data.last_activity = user_exercise.last_done
         
-        # If a non-admin tries to answer a problem out-of-order, just ignore it and
-        # display the next problem.
+        # If a non-admin tries to answer a problem out-of-order, just ignore it
         if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
             # Only admins can answer problems out of order.
             raise Exception("Problem number out of order")
 
-        problem_log = models.ProblemLog()
-        proficient = user_data.is_proficient_at(user_exercise.exercise)
+        if len(sha1) <= 0:
+            raise Exception("Missing sha1 hash of problem content.")
 
-        if correct:
-            suggested = user_data.is_suggested(user_exercise.exercise)
-            points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
-            problem_log.points_earned = points_possible
-            user_data.add_points(points_possible)
-        
-        problem_log.user = user_data.user
-        problem_log.exercise = user_exercise.exercise
-        problem_log.correct = correct
-        problem_log.time_done = dt_done
-        problem_log.time_taken = time_taken
-        problem_log.problem_number = problem_number
-        problem_log.hint_used = hint_used
+        if len(seed) <= 0:
+            raise Exception("Missing seed for problem content.")
+
+        if len(attempt_content) > 500:
+            raise Exception("Attempt content exceeded maximum length.")
+
+        # Build up problem log for deferred put
+        problem_log = models.ProblemLog(
+                key_name = "problemlog_%s_%s_%s" % (user_data.key_email, user_exercise.exercise, problem_number),
+                user = user_data.user,
+                exercise = user_exercise.exercise,
+                problem_number = problem_number,
+                time_taken = time_taken,
+                time_done = dt_now,
+                hint_used = hint_used,
+                correct = completed and (attempt_number == 1),
+                sha1 = sha1,
+                seed = seed,
+                count_attempts = attempt_number,
+                attempts = [attempt_content],
+        )
 
         if exercise.summative:
             problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
 
-        user_exercise.total_done += 1
-        util_notify.update(user_data,user_exercise)
-        
-        if correct:
+        # If this is the first attempt, update review schedule appropriately
+        if attempt_number == 1:
+            user_exercise.schedule_review(completed)
 
-            user_exercise.total_correct += 1
-            user_exercise.streak += 1
+        if completed:
 
-            if user_exercise.streak > user_exercise.longest_streak:
-                user_exercise.longest_streak = user_exercise.streak
-            if user_exercise.streak >= exercise.required_streak and not proficient:
-                user_exercise.set_proficient(True, user_data)
-                user_exercise.proficient_date = datetime.datetime.now()                    
-                user_data.reassess_if_necessary()
-                problem_log.earned_proficiency = True
-                
+            user_exercise.total_done += 1
+
+            proficient = user_data.is_proficient_at(user_exercise.exercise)
+
+            if problem_log.correct:
+
+                suggested = user_data.is_suggested(user_exercise.exercise)
+                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
+
+                problem_log.points_earned = points_possible
+                user_data.add_points(points_possible)
+
+                user_exercise.total_correct += 1
+                user_exercise.streak += 1
+                user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
+
+                if user_exercise.streak >= exercise.required_streak and not proficient:
+                    user_exercise.set_proficient(True, user_data)
+                    user_data.reassess_if_necessary()
+
+                    problem_log.earned_proficiency = True
+                    
+            util_badges.update_with_user_exercise(
+                user_data, 
+                user_exercise, 
+                include_other_badges = True, 
+                action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
+
+            # Update phantom user notifications
+            util_notify.update(user_data, user_exercise)
+
         else:
-            # Just in case RegisterCorrectness didn't get called.
-            user_exercise.reset_streak()
 
-        util_badges.update_with_user_exercise(
-            user_data, 
-            user_exercise, 
-            include_other_badges = True, 
-            action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
+            if user_exercise.streak == 0:
+                # 2+ in a row wrong -> not proficient
+                user_exercise.set_proficient(False, user_data)
+
+            user_exercise.reset_streak()
 
         # Manually clear exercise's memcache since we're throwing it in a bulk put
         user_exercise.clear_memcache()
