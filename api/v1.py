@@ -10,8 +10,9 @@ import models
 import layer_cache
 import topics_list
 import templatetags # Must be imported to register template tags
-from badges.templatetags import badge_notifications_html
 from badges import badges, util_badges, models_badges
+from badges.templatetags import badge_notifications_html
+from phantom_users.templatetags import login_notifications_html
 from exercises import attempt_problem, reset_streak
 import util
 import notifications
@@ -23,25 +24,34 @@ from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
 def add_action_results_property(obj, dict_results):
+
     badges_earned = []
-
     user_data = models.UserData.current()
+
     if user_data:
+        user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
 
-        badge_counts = util_badges.get_badge_counts(user_data)
+        # Add any new badge notifications
+        user_badges = user_notifications_dict["badges"]
+        if len(user_badges) > 0:
+            badges_dict = util_badges.all_badges_dict()
 
-        user_badges = notifications.UserNotifier.pop_for_user_data(user_data)["badges"]
-        badges_dict = util_badges.all_badges_dict()
+            for user_badge in user_badges:
+                badge = badges_dict.get(user_badge.badge_name)
 
-        for user_badge in user_badges:
-            badge = badges_dict.get(user_badge.badge_name)
+                if badge:
 
-            if badge:
-                if not hasattr(badge, "user_badges"):
-                    badge.user_badges = []
-                badge.user_badges.append(user_badge)
-                badge.is_owned = True
-                badges_earned.append(badge)
+                    if not hasattr(badge, "user_badges"):
+                        badge.user_badges = []
+
+                    badge.user_badges.append(user_badge)
+                    badge.is_owned = True
+                    badges_earned.append(badge)
+
+        # Add any new login notifications for phantom users
+        login_notifications = user_notifications_dict["login"]
+        if len(login_notifications) > 0:
+            dict_results["login_notifications_html"] = login_notifications_html(login_notifications, user_data)
 
     dict_results["badges_earned"] = badges_earned
 

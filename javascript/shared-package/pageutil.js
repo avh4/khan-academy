@@ -538,9 +538,11 @@ var Drawer = {
     }
 }
 
-var Badges = {
+var APIActionResults = {
 
     init: function() {
+        this.hooks = [];
+
         $(document).ajaxComplete(function (e, xhr, settings) {
 
             if (xhr && 
@@ -550,17 +552,25 @@ var Badges = {
                 try { eval("var result = " + xhr.responseText); }
                 catch(e) { return; }
 
-                if (result && 
-                    result.action_results && 
-                    result.action_results.badges_earned_html) {
-
-                    // Show any badges that were awarded w/ this ajax request
-                    Badges.show(result.action_results.badges_earned_html);
-
+                if (result && result.action_results) {
+                    $(APIActionResults.hooks).each(function(ix, el) {
+                        if (result.action_results[el.prop]) {
+                            el.fxn(result.action_results[el.prop]);
+                        }
+                    });
                 }
             }
         });
     },
+
+    register: function(prop, fxn) {
+        this.hooks[this.hooks.length] = {prop: prop, fxn: fxn};
+    }
+};
+
+$(function(){ APIActionResults.init(); });
+
+var Badges = {
 
     show: function(sBadgeContainerHtml) {
         var jel = $(".badge-award-container");
@@ -581,11 +591,12 @@ var Badges = {
             return false;
         });
 
+        var jelTarget = $(".badge-target");
+        var top = jelTarget.offset().top + jelTarget.height() + 5;
+
         setTimeout(function(){
-            var jelTarget = $(".badge-target");
             jel.css("visibility", "hidden").css("display", "");
             jel.css("left", jelTarget.offset().left + jelTarget.width() - jel.width()).css("top", -1 * jel.height());
-            var top = jelTarget.offset().top + jelTarget.height() + 5;
             var topBounce = top + 10;
             jel.css("display", "").css("visibility", "visible");
             jel.animate({top: topBounce}, 300, function(){jel.animate({top: top}, 100);});
@@ -612,34 +623,44 @@ var Badges = {
         }
     }
 }
-$(function(){Badges.init();});
 
+// Show any badges that were awarded w/ any API ajax request
+$(function(){ APIActionResults.register("badges_earned_html", Badges.show); });
 
 var Notifications = {
 
-    show: function() {
+    show: function(sNotificationContainerHtml) {
         var jel = $(".notification-bar");
+
+        if (sNotificationContainerHtml)
+        {
+            var jelNew = $(sNotificationContainerHtml);
+            jel.empty().append(jelNew.children());
+        }
+
         $(".notification-bar-close").click(function(){
             Notifications.hide();
             return false;
-            });
-        setTimeout(function(){
-            
-            jel
-                .css("visibility", "hidden")
-                .css("display", "")
-                .css("top",-1*jel.height())
-                .css("visibility", "visible");
+        });
 
-            // Queue:false to make sure all of these run at the same time
-            var animationOptions = {duration: 350, queue: false};
-            
-            $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
-            $("#top-header").animate({ marginTop: 35 }, animationOptions);
-            jel.show().animate({ top: 0 }, animationOptions);
+        if (!jel.is(":visible")) {
+            setTimeout(function(){
+                
+                jel
+                    .css("visibility", "hidden")
+                    .css("display", "")
+                    .css("top",-1*jel.height())
+                    .css("visibility", "visible");
 
-        }, 100);
+                // Queue:false to make sure all of these run at the same time
+                var animationOptions = {duration: 350, queue: false};
+                
+                $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
+                $("#top-header").animate({ marginTop: 35 }, animationOptions);
+                jel.show().animate({ top: 0 }, animationOptions);
 
+            }, 100);
+        }
     },
 
     hide: function() {
@@ -659,8 +680,10 @@ var Notifications = {
 
         $.post("/notifierclose"); 
     }
-
 }
+
+// Show any login notifications that pop up w/ any API ajax request
+$(function(){ APIActionResults.register("login_notifications_html", Notifications.show); });
 
 var Timezone = {
     tz_offset: null,

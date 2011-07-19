@@ -1,10 +1,10 @@
-{% if login_notifications %}
-<div class="notification-bar">
+<div class="notification-bar" style="display:none;">
+{% if login_notification %}
 	<span class="notification-bar-flair">
         {% badge_info user_data %}  {% point_info user_data %}
     </span>
-	<span class="notification-bar-content">{{ login_notifications|phantom_login_link:continue }}</span>
+	<span class="notification-bar-content">{{ login_notification|phantom_login_link:continue }}</span>
 	<span class="notification-bar-close">(<a href="#" onclick="Notifications.hide();return false;">close</a>)</span>
-</div>
-    <script>$(Notifications.show);</script>
+<script>$(function(){ Notifications.show(); });</script>
 {% endif %}
+</div>
