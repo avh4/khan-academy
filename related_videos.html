@@ -4,7 +4,7 @@
     <ul id="related-video-list">
     {% for exercise_video in exercise_videos %}
         <li {% if forloop.counter|greater_than:3 %}style="display:none;"{% endif %}>
-        <a href="/video?v={{exercise_video.video.youtube_id}}" title="{{exercise_video.video.title|escape}}"><span class="video-title">{% video_progress_icon exercise_video.video %}{{exercise_video.video.title|escape}}</span></a>{% if show_points %}{% possible_points_badge exercise_video.video.current_user_points video_points_base %}<div class="clear"></div>{% endif %}{% if not forloop.last %}<span class="separator">,</span>{% endif %}
+        <a href="/video?v={{exercise_video.video.youtube_id}}" title="{{exercise_video.video.title|escape}}"><span class="video-title">{% video_name_and_progress exercise_video.video %}</span></a>{% if show_points %}{% possible_points_badge exercise_video.video.current_user_points video_points_base %}<div class="clear"></div>{% endif %}{% if not forloop.last %}<span class="separator">,</span>{% endif %}
         </li>
 
         {% if not forloop.last %}

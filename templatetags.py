@@ -249,9 +249,9 @@ def empty_class_instructions(class_is_empty=True):
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
 @register.simple_tag
-def video_progress_icon(video):
+def video_name_and_progress(video):
   # The &nbsp; is so the image will be shown
-  return '<span class=\'vid-progress\' id=\'v' + str(video.key().id()) + '\'>&nbsp;</span>'
+  return '<span class=\'vid-progress v' + str(video.key().id()) + ' \'>&nbsp;</span>' + video.title
 
 register.tag(highlight)
 

@@ -4,6 +4,7 @@ import datetime, logging
 import math
 import urllib
 import random
+import pickle
 
 import config_django
 
@@ -457,37 +458,68 @@ COMPLETE_CSS = '{background-image:url(/images/vid-progress-complete.png)}'
 class UserVideoCss(db.Model):
     user = db.UserProperty()
     video_css = db.TextProperty()
+    pickled_dict = db.BlobProperty()
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
 
     @staticmethod
     def get_for_user_data(user_data):
-        return UserVideoCss.get_by_key_name(UserVideoCss.key_for(user_data))
+        p = pickle.dumps({'started': set([]), 'completed': set([])})
+        return UserVideoCss.get_or_insert(UserVideoCss._key_for(user_data),
+                                          user=user_data.user,
+                                          video_css='',
+                                          pickled_dict=p
+                                          )
 
     @staticmethod
-    def key_for(user_data):
+    def _key_for(user_data):
         return 'user_video_css_%s' % user_data.key_email
 
     @staticmethod
     def set_started(user_data, video):
         uvc = UserVideoCss.get_for_user_data(user_data)
-        if not str(video.key().id()) in uvc.video_css:
-            #If the video is already in the css, we don't do anything
-            if uvc.video_css.find(STARTED_CSS):
-                # The user already has rules for started videos
-                uvc.video_css.replace(STARTED_CSS, 
-                                      ',#v'+str(video.key().id())+STARTED_CSS)
-            else:
-                uvc.video_css = '#v'+str(video.key().id())+STARTED_CSS + uvc.video_css
+        css = pickle.loads(uvc.pickled_dict)
+
+        id = '.v'+str(video.key().id())
+        css['started'].add(id)
+        css['completed'].discard(id)
+
+        uvc.pickled_dict = pickle.dumps(css)
+        uvc.load_pickled()
+        uvc.put()
 
     @staticmethod
     def set_completed(user_data, video):
         uvc = UserVideoCss.get_for_user_data(user_data)
-        if uvc.video_css.find(COMPLETE_CSS):
-            # The user already has rules for complete videos
-            uvc.video_css.replace(COMPLETE_CSS,
-                                  ',#v'+str(video.key().id())+STARTED_CSS)
-        else:
-            uvc.video_css = uvc.video_css + '#v'+str(video.key().id())+COMPLETE_CSS
+        css = pickle.loads(uvc.pickled_dict)
+
+        id = '.v'+str(video.key().id())
+        css['started'].discard(id)
+        css['completed'].add(id)
+
+        uvc.pickled_dict = pickle.dumps(css)
+        uvc.load_pickled()
+        uvc.put()
+
+    def load_pickled(self):
+        def chunker(seq, size):
+            return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
+
+        css_list = []
+        query_results = True
+        cursor = None
+
+        unpickled = pickle.loads(self.pickled_dict)
+
+        for id in chunker(list(unpickled['started']), 20):
+            css_list.append(','.join(id))
+            css_list.append(STARTED_CSS)
+
+        for id in chunker(list(unpickled['completed']), 20):
+            css_list.append(','.join(id))
+            css_list.append(STARTED_CSS)
+
+        self.video_css = ''.join(css_list)
+        self.put()
 
 class UserData(db.Model):
     user = db.UserProperty()
