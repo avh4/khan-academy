@@ -254,21 +254,6 @@ class EditEntity(request_handler.RequestHandler):
                         question = feedback.question()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
 
-class VoteEntity(request_handler.RequestHandler):
-    @disallow_phantoms
-    def post(self):
-        # You have to be logged in to vote
-        user_data = models.UserData.current()
-        if not user_data:
-            return
-
-        key = self.request_string("entity_key", default="")
-        flag = self.request_string("flag", default="")
-        if key and models_discussion.FeedbackFlag.is_valid(flag):
-            entity = db.get(key)
-            if entity and entity.add_flag_by(flag, user_data):
-                entity.put()
-
 class FlagEntity(request_handler.RequestHandler):
     @disallow_phantoms
     def post(self):
