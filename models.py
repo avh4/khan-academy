@@ -497,31 +497,11 @@ class UserVideoCss(db.Model):
 
     @staticmethod
     def set_started(user_data, video):
-        uvc = UserVideoCss.get_for_user_data(user_data)
-        css = pickle.loads(uvc.pickled_dict)
-
-        id = '.v'+str(video.key().id())
-        css['completed'].discard(id)
-        css['started'].add(id)
-
-        uvc.pickled_dict = pickle.dumps(css)
-        uvc.load_pickled()
-        uvc.version += 1
-        uvc.put()
+      deferred.defer(set_started_deferred, user_data.key(), video.key())
 
     @staticmethod
     def set_completed(user_data, video):
-        uvc = UserVideoCss.get_for_user_data(user_data)
-        css = pickle.loads(uvc.pickled_dict)
-
-        id = '.v'+str(video.key().id())
-        css['started'].discard(id)
-        css['completed'].add(id)
-
-        uvc.pickled_dict = pickle.dumps(css)
-        uvc.load_pickled()
-        uvc.version += 1
-        uvc.put()
+      deferred.defer(set_completed_deferred, user_data.key(), video.key())
 
     def load_pickled(self):
         def chunker(seq, size):
@@ -546,6 +526,36 @@ class UserVideoCss(db.Model):
             css_list.append(complete_css)
 
         self.video_css = ''.join(css_list)
+
+def set_started_deferred(user_data_key, video_key):
+    user_data = UserData.get(user_data_key)
+    video = Video.get(video_key)
+    uvc = UserVideoCss.get_for_user_data(user_data)
+    css = pickle.loads(uvc.pickled_dict)
+
+    id = '.v'+str(video.key().id())
+    css['completed'].discard(id)
+    css['started'].add(id)
+
+    uvc.pickled_dict = pickle.dumps(css)
+    uvc.load_pickled()
+    uvc.version += 1
+    uvc.put()
+
+def set_completed_deferred(user_data_key, video_key):
+    user_data = UserData.get(user_data_key)
+    video = Video.get(video_key)
+    uvc = UserVideoCss.get_for_user_data(user_data)
+    css = pickle.loads(uvc.pickled_dict)
+
+    id = '.v'+str(video.key().id())
+    css['started'].discard(id)
+    css['completed'].add(id)
+
+    uvc.pickled_dict = pickle.dumps(css)
+    uvc.load_pickled()
+    uvc.version += 1
+    uvc.put()
 
 class UserData(db.Model):
     user = db.UserProperty()

@@ -2,6 +2,8 @@ import re
 import logging
 import cgi
 import math
+from hashlib import sha1
+
 from google.appengine.ext import webapp
 from django import template
 from django.template.defaultfilters import escape, slugify
@@ -263,8 +265,12 @@ def crazyegg_tracker(enabled=True):
 @register.simple_tag
 def user_video_css(user_data):
     if user_data:
+        m = sha1()
+        m.update(user_data.key_email)
+        hash = m.hexdigest()
         uvc = UserVideoCss.get_for_user_data(user_data)
-        return '<link rel=\'stylesheet\' type=\'text/css\' href=\'/user_video_css?version='+str(uvc.version)+'\'></link>'
+
+        return '<link rel=\'stylesheet\' type=\'text/css\' href=\'/user_video_css?version='+str(uvc.version)+'&id='+hash+'\'></link>'
     else:
         return ''
 
