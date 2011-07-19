@@ -8,11 +8,8 @@ import urllib
 import logging
 import re
 from pprint import pformat
-<<<<<<< local
 from email.utils import formatdate, parsedate
-=======
 from google.appengine.api import capabilities
->>>>>>> other
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
@@ -1394,25 +1391,18 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-<<<<<<< local
 class ServeUserVideoCss(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
         if user_data == None:
             return
-=======
->>>>>>> other
 
-<<<<<<< local
         user_video_css = models.UserVideoCss.get_for_user_data(user_data)
         self.response.headers['Content-Type'] = 'text/css'
         self.response.headers['Expires'] = ' Thu, 15 Apr 2020 20:00:00 GMT'
         self.response.headers['Cache-Control'] = 'public,max-age=1000000'
         self.response.out.write(user_video_css.video_css)
 
-=======
-        
->>>>>>> other
 def main():
 
     webapp.template.register_template_library('templateext')    

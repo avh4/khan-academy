@@ -251,18 +251,15 @@ def empty_class_instructions(class_is_empty=True):
             
     return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
 
-<<<<<<< local
 @register.simple_tag
 def video_name_and_progress(video):
     # The &nbsp; is so the image will be shown
     return '<span class=\'vid-progress v' + str(video.key().id()) + ' \'>&nbsp;</span>' + video.title
-=======
+
 @register.inclusion_tag(("crazyegg_tracker.html", "../crazyegg_tracker.html"))
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
->>>>>>> other
 
-<<<<<<< local
 @register.simple_tag
 def user_video_css(user_data):
     if user_data:
@@ -271,8 +268,6 @@ def user_video_css(user_data):
     else:
         return ''
 
-=======
->>>>>>> other
 register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')    

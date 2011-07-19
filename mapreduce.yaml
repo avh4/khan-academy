@@ -1,8 +1,8 @@
 mapreduce:
-- name: UpdateUserBadges
+- name: Backfill UserVideoCss
   mapper:
     input_reader: mapreduce.input_readers.DatastoreInputReader
-    handler: badges.util_badges.update_for_mapper
+    handler:  backfill_uservideocss.backfill_user_data
     params:
-      - name: entity_kind
-        default: models.UserData
+    - name: entity_kind
+      default: models.UserData

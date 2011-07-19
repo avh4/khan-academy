@@ -474,9 +474,6 @@ class StudentList(db.Model):
     def get_students_data(self):
         return [s for s in self.students]
 
-STARTED_CSS = '{background-image:url(/images/vid-progress-started.png)}'
-COMPLETE_CSS = '{background-image:url(/images/vid-progress-complete.png)}'
-
 class UserVideoCss(db.Model):
     user = db.UserProperty()
     video_css = db.TextProperty()
@@ -504,8 +501,8 @@ class UserVideoCss(db.Model):
         css = pickle.loads(uvc.pickled_dict)
 
         id = '.v'+str(video.key().id())
-        css['started'].add(id)
         css['completed'].discard(id)
+        css['started'].add(id)
 
         uvc.pickled_dict = pickle.dumps(css)
         uvc.load_pickled()
@@ -530,19 +527,23 @@ class UserVideoCss(db.Model):
         def chunker(seq, size):
             return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
+        max_selectors = 20
         css_list = []
         query_results = True
         cursor = None
 
         unpickled = pickle.loads(self.pickled_dict)
 
-        for id in chunker(list(unpickled['started']), 20):
-            css_list.append(','.join(id))
-            css_list.append(STARTED_CSS)
+        started_css = '{background-image:url(/images/vid-progress-started.png)}'
+        complete_css = '{background-image:url(/images/vid-progress-complete.png)}'
 
-        for id in chunker(list(unpickled['completed']), 20):
+        for id in chunker(list(unpickled['started']), max_selectors):
             css_list.append(','.join(id))
-            css_list.append(STARTED_CSS)
+            css_list.append(started_css)
+
+        for id in chunker(list(unpickled['completed']), max_selectors):
+            css_list.append(','.join(id))
+            css_list.append(complete_css)
 
         self.video_css = ''.join(css_list)
 
