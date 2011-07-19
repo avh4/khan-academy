@@ -87,7 +87,7 @@
                 {% endifequal %}
                 </nobr>
             </td>
-            <td class="center"><a href="/video/{{feedback.first_target.readable_id|escape}}">{{ feedback.first_target.title|escape }}</a></td>
+            <td class="center"><a href="/video/{{feedback.video.readable_id|escape}}">{{ feedback.video.title|escape }}</a></td>
             <td>{{ feedback.content|escape|linebreaksbr }}</td>
             <td>{% for flag in feedback.flags %}{{ flag|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
             <td>{% for email in feedback.flagged_by %}{{ email|escape }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>

@@ -61,7 +61,7 @@ class Feedback(db.Model):
         self.children_cache = [] # For caching each question's answers during render
 
     def put(self):
-        memcache.delete(Feedback.memcache_key_for_video(self.first_target()), namespace=App.version)
+        memcache.delete(Feedback.memcache_key_for_video(self.video()), namespace=App.version)
         db.Model.put(self)
 
     def set_author(self, user_data):
@@ -92,16 +92,15 @@ class Feedback(db.Model):
         keys.filter("targets = ", self.key())
         return keys
 
-    # first_target is always the video key
-    def first_target_key(self):
+    def video_key(self):
         if self.targets:
             return self.targets[0]
         return None
 
-    def first_target(self):
-        target_key = self.first_target_key()
-        if target_key:
-            return db.get(target_key)
+    def video(self):
+        video_key = self.video_key()
+        if video_key:
+            return db.get(video_key)
         return None
 
     def add_vote_by(self, vote_type, user_data):
@@ -170,7 +169,7 @@ class FeedbackVote(db.Model):
         vote = FeedbackVote.get_or_insert(
                 key_name = "vote_by_%s" % user_data.key_email,
                 parent = feedback,
-                video = feedback.first_target_key(),
+                video = feedback.video_key(),
                 user = user_data.user,
                 vote_type = vote_type)
 

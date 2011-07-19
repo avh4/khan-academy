@@ -1057,7 +1057,7 @@ class RetargetFeedback(bulk_update.handler.UpdateKind):
         return False
     
     def update(self, feedback):
-        orig_video = feedback.first_target()
+        orig_video = feedback.video()
 
         if orig_video == None or type(orig_video).__name__ != "Video":
             return False

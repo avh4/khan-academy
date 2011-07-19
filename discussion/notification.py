@@ -31,7 +31,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
 
         for answer in answers:
 
-            video = answer.first_target()
+            video = answer.video()
 
             dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
             voting.add_vote_expando_properties(answer, dict_votes)

@@ -166,7 +166,7 @@ class Answers(request_handler.RequestHandler):
         question = db.get(question_key)
 
         if question:
-            video = question.first_target()
+            video = question.video()
             dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
 
             answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
@@ -245,7 +245,7 @@ class EditEntity(request_handler.RequestHandler):
                     if feedback.is_type(models_discussion.FeedbackType.Question):
 
                         page = self.request.get("page")
-                        video = feedback.first_target()
+                        video = feedback.video()
                         self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=%s&qa_expand_id=%s" % 
                                         (video.key(), playlist_key, page, feedback.key().id()))
 
