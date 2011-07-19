@@ -82,7 +82,7 @@
                     <div id="top-header-links">
                         <span class="page_links" id="page_auth">
                             {% if logged_in %}
-                                <span id="user-info">
+                                <span id="user-info" class="badge-target">
                                     {% username_and_notification username user_data %}
 
                                     {% badge_counts user_data %}
@@ -92,8 +92,7 @@
                                 <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                            	<span class="achievement-badge-counts" style="left:-60px;"></span> <!--Fix for unregistered users-->
-								<a href="{{ login_url|escape }}">Login</a>
+								<a class="badge-target" href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator"></span>
                             <a href="/contribute" id="donate-link">Donate</a>

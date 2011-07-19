@@ -540,20 +540,55 @@ var Drawer = {
 
 var Badges = {
 
-    show: function() {
+    init: function() {
+        $(document).ajaxComplete(function (e, xhr, settings) {
+
+            if (xhr && 
+                xhr.getResponseHeader('X-KA-API-Response') && 
+                xhr.responseText) {
+
+                try { eval("var result = " + xhr.responseText); }
+                catch(e) { return; }
+
+                if (result && 
+                    result.action_results && 
+                    result.action_results.badges_earned_html) {
+
+                    // Show any badges that were awarded w/ this ajax request
+                    Badges.show(result.action_results.badges_earned_html);
+
+                }
+            }
+        });
+    },
+
+    show: function(sBadgeContainerHtml) {
         var jel = $(".badge-award-container");
+
+        if (sBadgeContainerHtml)
+        {
+            jel.remove();
+            $("body").append(sBadgeContainerHtml);
+            jel = $(".badge-award-container");
+
+            if (jel.length) Social.init(jel);
+        }
+
+        if (!jel.length) return;
+
         $(".achievement-badge", jel).click(function(){
             window.location = "/badges/view";
             return false;
         });
+
         setTimeout(function(){
-            var jelTarget = $(".achievement-badge-counts");
+            var jelTarget = $(".badge-target");
             jel.css("visibility", "hidden").css("display", "");
             jel.css("left", jelTarget.offset().left + jelTarget.width() - jel.width()).css("top", -1 * jel.height());
             var top = jelTarget.offset().top + jelTarget.height() + 5;
             var topBounce = top + 10;
             jel.css("display", "").css("visibility", "visible");
-            jel.animate({top: topBounce}, 500, function(){jel.animate({top: top}, 100);});
+            jel.animate({top: topBounce}, 300, function(){jel.animate({top: top}, 100);});
         }, 100);
     },
 
@@ -577,6 +612,7 @@ var Badges = {
         }
     }
 }
+$(function(){Badges.init();});
 
 
 var Notifications = {

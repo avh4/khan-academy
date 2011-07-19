@@ -9,6 +9,8 @@ from flask import request, current_app
 import models
 import layer_cache
 import topics_list
+import templatetags # Must be imported to register template tags
+from badges.templatetags import badge_notifications_html
 from badges import badges, util_badges, models_badges
 from exercises import attempt_problem, reset_streak
 import util
@@ -42,6 +44,9 @@ def add_action_results_property(obj, dict_results):
                 badges_earned.append(badge)
 
     dict_results["badges_earned"] = badges_earned
+
+    if len(badges_earned) > 0:
+        dict_results["badges_earned_html"] = badge_notifications_html(user_badges)
 
     obj.action_results = dict_results
 
@@ -471,7 +476,7 @@ def attempt_problem_number(exercise_name, problem_number):
         user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
 
         if user_exercise and problem_number:
-            return attempt_problem(
+            user_exercise = attempt_problem(
                     user_data, 
                     user_exercise, 
                     problem_number, 
@@ -483,6 +488,10 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_bool("hint_used"),
                     int(request.request_float("time_taken"))
                     )
+
+            add_action_results_property(user_exercise, {"user_data": user_data})
+
+            return user_exercise
 
     return unauthorized_response()
 

@@ -24,8 +24,9 @@ api_app.secret_key = App.flask_secret_key
 def route(rule, **options):
     def api_route_wrap(func):
 
-        func = allow_cross_origin(func)
         func = format_api_errors(func)
+        func = allow_cross_origin(func)
+        func = add_api_header(func)
 
         rule_desc = rule
         for key in options:
@@ -35,6 +36,18 @@ def route(rule, **options):
         return api_app.add_url_rule(rule, rule_desc, func, **options)
 
     return api_route_wrap
+
+def add_api_header(func):
+    @wraps(func)
+    def api_header_added(*args, **kwargs):
+        result = func(*args, **kwargs)
+
+        if isinstance(result, current_app.response_class):
+            result.headers["X-KA-API-Response"] = "true"
+
+        return result
+
+    return api_header_added
 
 def allow_cross_origin(func):
     @wraps(func)
