@@ -460,6 +460,7 @@ class UserVideoCss(db.Model):
     video_css = db.TextProperty()
     pickled_dict = db.BlobProperty()
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
+    version = db.IntegerProperty(default=0)
 
     @staticmethod
     def get_for_user_data(user_data):
@@ -467,7 +468,8 @@ class UserVideoCss(db.Model):
         return UserVideoCss.get_or_insert(UserVideoCss._key_for(user_data),
                                           user=user_data.user,
                                           video_css='',
-                                          pickled_dict=p
+                                          pickled_dict=p,
+                                          version=0
                                           )
 
     @staticmethod
@@ -485,6 +487,7 @@ class UserVideoCss(db.Model):
 
         uvc.pickled_dict = pickle.dumps(css)
         uvc.load_pickled()
+        uvc.version += 1
         uvc.put()
 
     @staticmethod
@@ -498,6 +501,7 @@ class UserVideoCss(db.Model):
 
         uvc.pickled_dict = pickle.dumps(css)
         uvc.load_pickled()
+        uvc.version += 1
         uvc.put()
 
     def load_pickled(self):
@@ -519,7 +523,6 @@ class UserVideoCss(db.Model):
             css_list.append(STARTED_CSS)
 
         self.video_css = ''.join(css_list)
-        self.put()
 
 class UserData(db.Model):
     user = db.UserProperty()

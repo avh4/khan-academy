@@ -45,7 +45,7 @@
             {% js_package "shared" %}
         {% endif %}
 		
-        <link rel='stylesheet' type='text/css' href='/user_video_css'></link>
+        {% user_video_css user_data %}
 
         {% block pagescript %}
         {% endblock pagescript %}

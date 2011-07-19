@@ -1379,34 +1379,11 @@ class ServeUserVideoCss(request_handler.RequestHandler):
         if user_data == None:
             return
 
-        # TODO get_or_insert
         user_video_css = models.UserVideoCss.get_for_user_data(user_data)
-
-        if 'If-Modified-Since' in self.request.headers:
-            last_seen = datetime.datetime(
-                *parsedate(self.request.headers['If-Modified-Since'])[:6]
-                )
-            last_modified = user_video_css.last_modified.replace(microsecond=0)
-
-            # css hasn't been updated
-            if last_seen < last_modified:
-                self.response.headers['Content-Type'] = 'text/css'
-                self.response.headers['Last-Modified'] = formatdate(
-                    timeval=time.mktime(last_modified.timetuple()),
-                    localtime=False,
-                    usegmt=True
-                    )
-                self.response.set_status(304)
-                return
-
-        if user_video_css:
-            self.response.headers['Content-Type'] = 'text/css'
-            self.response.headers['Last-Modified'] = formatdate(
-                timeval=time.mktime(datetime.datetime.now().timetuple()),
-                localtime=False,
-                usegmt=True
-                )
-            self.response.out.write(user_video_css.video_css)
+        self.response.headers['Content-Type'] = 'text/css'
+        self.response.headers['Expires'] = ' Thu, 15 Apr 2020 20:00:00 GMT'
+        self.response.headers['Cache-Control'] = 'public,max-age=1000000'
+        self.response.out.write(user_video_css.video_css)
 
 def main():
     webapp.template.register_template_library('templateext')    

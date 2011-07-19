@@ -8,7 +8,7 @@ from django.template.defaultfilters import escape, slugify
 
 from app import App
 from templatefilters import seconds_to_time_string
-from models import UserData
+from models import UserData, UserVideoCss
 import consts
 import util
 import topics_list
@@ -250,8 +250,14 @@ def empty_class_instructions(class_is_empty=True):
 
 @register.simple_tag
 def video_name_and_progress(video):
-  # The &nbsp; is so the image will be shown
-  return '<span class=\'vid-progress v' + str(video.key().id()) + ' \'>&nbsp;</span>' + video.title
+    # The &nbsp; is so the image will be shown
+    return '<span class=\'vid-progress v' + str(video.key().id()) + ' \'>&nbsp;</span>' + video.title
+
+@register.simple_tag
+def user_video_css(user_data):
+    if user_data:
+        uvc = UserVideoCss.get_for_user_data(user_data)
+        return '<link rel=\'stylesheet\' type=\'text/css\' href=\'/user_video_css?version='+str(uvc.version)+'\'></link>'
 
 register.tag(highlight)
 

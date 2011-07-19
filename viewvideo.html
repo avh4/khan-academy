@@ -2,7 +2,7 @@
 
 {% block pagecss %}
     {% css_package "video" %}
-    <link rel='stylesheet' type='text/css' href='/user_video_css'></link>
+    {% user_video_css user_data %}
 {% endblock pagecss %}
 {% block pagesubmenu %}
 <span class="breadcrumbs_nav video-nav">
