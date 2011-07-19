@@ -1399,7 +1399,6 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         user_video_css = models.UserVideoCss.get_for_user_data(user_data)
         self.response.headers['Content-Type'] = 'text/css'
-        self.response.headers['Expires'] = ' Thu, 15 Apr 2020 20:00:00 GMT'
         self.response.headers['Cache-Control'] = 'public,max-age=1000000'
         self.response.out.write(user_video_css.video_css)
 
