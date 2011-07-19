@@ -39,6 +39,21 @@ def hg_pull_up():
 
     return version
 
+def check_secrets():
+    content = ""
+
+    try:
+        f = open("secrets.py", "r")
+        content = f.read()
+        f.close()
+    except:
+        return False
+
+    # Try to find the beginning of our production facebook app secret
+    # to verify deploy is being sent from correct directory.
+    regex = re.compile("^facebook_app_secret = '050c.+'$", re.MULTILINE)
+    return regex.search(content)
+
 def compress_js():
     print "Compressing javascript"
     path = os.path.join(os.path.dirname(__file__), "..", "javascript")
@@ -69,6 +84,10 @@ def main():
         action="store_true", dest="noup",
         help="Don't hg pull/up before deploy", default="")
 
+    parser.add_option('-s', '--no-secrets',
+        action="store_true", dest="nosecrets",
+        help="Don't check for production secrets.py file before deploying", default="")
+
     parser.add_option('-d', '--dryrun',
         action="store_true", dest="dryrun",
         help="Dry run without the final deploy-to-App-Engine step", default=False)
@@ -86,6 +105,11 @@ def main():
         version = hg_pull_up()
         if version <= 0:
             print "Could not find version after 'hg pull', 'hg up', 'hg tip'."
+            return
+
+    if not options.nosecrets:
+        if not check_secrets():
+            print "Stopping deploy. It doesn't look like you're deploying from a directory with the appropriate secrets.py."
             return
 
     if len(options.version) > 0:
