@@ -1,5 +1,0 @@
-backends:
-- name: backfillvideoprogress
-  class: B2
-  instances: 1
-  start: backends/videoprogress.py
