@@ -497,35 +497,32 @@ class UserVideoCss(db.Model):
 
     @staticmethod
     def set_started(user_data, video):
-      deferred.defer(set_started_deferred, user_data.key(), video.key())
+        deferred.defer(set_started_deferred, user_data.key(), video.key())
 
     @staticmethod
     def set_completed(user_data, video):
-      deferred.defer(set_completed_deferred, user_data.key(), video.key())
+        deferred.defer(set_completed_deferred, user_data.key(), video.key())
 
     def load_pickled(self):
-        def chunker(seq, size):
-            return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
-
         max_selectors = 20
         css_list = []
-        query_results = True
-        cursor = None
-
-        unpickled = pickle.loads(self.pickled_dict)
+        css = pickle.loads(self.pickled_dict)
 
         started_css = '{background-image:url(/images/vid-progress-started.png)}'
         complete_css = '{background-image:url(/images/vid-progress-complete.png)}'
 
-        for id in chunker(list(unpickled['started']), max_selectors):
+        for id in _chunker(list(css['started']), max_selectors):
             css_list.append(','.join(id))
             css_list.append(started_css)
 
-        for id in chunker(list(unpickled['completed']), max_selectors):
+        for id in _chunker(list(css['completed']), max_selectors):
             css_list.append(','.join(id))
             css_list.append(complete_css)
 
         self.video_css = ''.join(css_list)
+
+def _chunker(seq, size):
+    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 def set_started_deferred(user_data_key, video_key):
     user_data = UserData.get(user_data_key)
@@ -533,7 +530,7 @@ def set_started_deferred(user_data_key, video_key):
     uvc = UserVideoCss.get_for_user_data(user_data)
     css = pickle.loads(uvc.pickled_dict)
 
-    id = '.v'+str(video.key().id())
+    id = '.v%d' % video.key().id()
     css['completed'].discard(id)
     css['started'].add(id)
 
@@ -548,7 +545,7 @@ def set_completed_deferred(user_data_key, video_key):
     uvc = UserVideoCss.get_for_user_data(user_data)
     css = pickle.loads(uvc.pickled_dict)
 
-    id = '.v'+str(video.key().id())
+    id = '.v%d' % video.key().id()
     css['started'].discard(id)
     css['completed'].add(id)
 
