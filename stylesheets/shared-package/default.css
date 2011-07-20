@@ -3053,3 +3053,14 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
         background-position-y: 107px; 
     }
 }
+
+#devpanel td{
+    border:black 2px solid;
+    padding:3px;
+    
+}
+
+#devpanel {
+   margin: 0 auto;
+    
+}

@@ -1,0 +1,56 @@
+{% extends "page_template.html" %}
+{% block pagesubmenu %}
+    <span class="breadcrumbs_nav">
+        <a href="/admin94040">Dev Panel</a>
+        {{ main_exercise.display_name|escape }}
+        {% if saved %}
+            <span style="color:green;" id="saved">...Saved!</span>
+            <script>$(function(){setTimeout(function(){$("#saved").fadeOut("slow");}, 2000);});</script>
+        {% endif %}
+    </span>
+{% endblock pagesubmenu %}
+
+{% block pagecontent %}
+
+    <style>
+        .exercise-properties td { padding-right: 9px; }
+        #footer { z-index:0 ; }
+    </style>
+
+    <div id="devpanel" style="padding: 9px 23px;">
+        <div>
+            <form type="GET" action="">
+            Current Email:<input type="text" name="curremail" />
+            New Email:<input type="text" name="newemail" />    
+            <input type="submit" value="Submit" />
+            </form>
+            <table>
+                
+                <tr>
+                    <td style="border:none;"></td>
+                    <td style="border:none;">Current User</td>
+                    <td style="border:none;">New User</td>
+                </tr>
+                
+                
+                <tr>
+                    <td style="border:none;"></td>
+                    {% if currdata %}<td>{{currdata.current_user}}</td>{% else %}<td>No User!</td>{% endif %}
+                    {% if newdata %}<td>{{newdata.current_user}}</td>{% else %}<td>No User!</td>{% endif %}
+                </tr>
+                
+                {% for prop in properties %}
+                <tr>
+                    <td>{{prop}}</td>
+                    <td>{% if currdata %}{{currdata|mygetattr:prop}}{% endif %}</td>
+                    <td>{% if newdata %}{{newdata|mygetattr:prop}}{% endif %}</td>
+                  
+                </tr>
+                {% endfor %}
+                    
+                
+            </table>
+        </div>
+    </div>
+
+{% endblock pagecontent %}

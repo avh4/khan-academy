@@ -134,6 +134,11 @@ def column_height(list_item_index, column_breakpoints):
         height = list_item_index - column_breakpoints[column_breakpoints.index(list_item_index) - 1]
     return height
 
+
+@register.filter  #use to get model property value 
+def mygetattr(obj, name): 
+    return getattr(obj, name)
+    
 register.filter(smart_truncate)
 register.filter(mod)
 register.filter(multiply)
