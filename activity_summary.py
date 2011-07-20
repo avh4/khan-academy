@@ -136,7 +136,7 @@ def fill_realtime_recent_daily_activity_summaries(daily_activity_logs, user_data
 
 def next_daily_activity_dates(user_data):
 
-    if not user_data:
+    if not user_data or not user_data.points:
         return (None, None)
 
     # Start summarizing after the last summary

@@ -274,6 +274,11 @@ def is_badge_review_waiting(user_data):
         logging.error("UserData with user and no current_user: %s" % user_data.user)
         return False
 
+    if user_data.is_phantom:
+        # Don't bother doing overnight badge reviews for phantom users -- we're not that worried about it,
+        # and it reduces task queue stress.
+        return False
+
     if not user_data.last_activity or (user_data.last_badge_review and user_data.last_activity <= user_data.last_badge_review):
         # No activity since last badge review, skip
         return False
