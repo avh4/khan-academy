@@ -77,6 +77,8 @@ def requested_oauth_callback():
 
 def allow_cookie_based_auth():
 
+    return True
+
     # Don't allow cookie-based authentication for API calls which
     # may return JSONP, unless they are POSTs
 
