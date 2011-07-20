@@ -27,7 +27,11 @@ def get_feedback_for_video(video):
 
 @request_cache.cache_with_key_fxn(lambda v, ud: str(v)+str(ud))
 def get_feedback_for_video_by_user(video_key, user_data_key):
-    return feedback_query(video_key).ancestor(user_data_key).fetch(20)
+    query = models_discussion.Feedback.all()
+    query.ancestor(user_data_key)
+    query.filter("targets =", video_key)
+    query.order('-date')
+    return feedback_query(video_key).fetch(20)
 
 def get_feedback_by_type_for_video(video, feedback_type, user_data=None):
     feedback = [f for f in get_feedback_for_video(video) if feedback_type in f.types]
@@ -39,4 +43,9 @@ def get_feedback_by_type_for_video(video, feedback_type, user_data=None):
     user_feedback_dict = dict([(f.key(), f) for f in user_feedback if feedback_type in f.types])
 
     feedback_dict.update(user_feedback_dict)
-    return sorted(feedback_dict.values(), key=lambda s: s.date, reverse=True)
+    # It's possible that an entity was deleted or flagged by the user.
+    # They'll still be in the main query, but remove the ones by the user here.
+    feedback = feedback_dict.values()
+    feedback = filter(lambda f: not (f.deleted or f.is_hidden_by_flags), feedback)
+
+    return sorted(feedback, key=lambda s: s.date, reverse=True)
