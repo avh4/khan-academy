@@ -38,8 +38,22 @@ $(function(){ APIActionResults.register("login_notifications_html", Notification
 
 // Update user info after appropriate API ajax requests
 $(function(){ APIActionResults.register("user_info_html", 
-        function(user_info_html) {
-            $("#user-info").html(user_info_html);
+        function(sUserInfoHtml) {
+            $("#user-info").html(sUserInfoHtml);
+        }
+    );
+});
+
+// Update exercise message after appropriate API ajax requests
+$(function(){ APIActionResults.register("exercise_message_html", 
+        function(sExerciseMessageHtml) {
+            var jelNew = $(sExerciseMessageHtml);
+            if (jelNew.children().length) {
+                var jel = $("#exercise-message-container");
+                jel.empty().append(jelNew.children());
+
+                setTimeout(function(){ jel.slideDown(); }, 50);
+            }
         }
     );
 });

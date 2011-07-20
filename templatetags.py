@@ -125,9 +125,10 @@ def exercise_icon(exercise, App):
 
     return {"src": src, "version": App.version }
 
-@register.inclusion_tag("exercise_message.html")
+@register.simple_tag
 def exercise_message(exercise, coaches, exercise_states):
-    return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
+    path = os.path.join(os.path.dirname(__file__), "exercise_message.html")
+    return webapp_template.render(path, dict({"exercise": exercise, "coaches": coaches}, **exercise_states))
 
 @register.inclusion_tag(("user_points.html", "../user_points.html"))
 def user_points(user_data):

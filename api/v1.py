@@ -485,9 +485,11 @@ def attempt_problem_number(exercise_name, problem_number):
     user_data = models.UserData.current()
 
     if user_data:
-        user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
+        exercise = models.Exercise.get_by_name(exercise_name)
+        user_exercise = user_data.get_or_insert_exercise(exercise)
 
         if user_exercise and problem_number:
+
             user_exercise = attempt_problem(
                     user_data, 
                     user_exercise, 
@@ -501,7 +503,12 @@ def attempt_problem_number(exercise_name, problem_number):
                     int(request.request_float("time_taken"))
                     )
 
-            add_action_results(user_exercise, {})
+            exercise_states = user_data.get_exercise_states(exercise, user_exercise)
+
+            add_action_results(user_exercise, {
+                "exercise_states": exercise_states,
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, exercise_states),
+            })
 
             return user_exercise
 

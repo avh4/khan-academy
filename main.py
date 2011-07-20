@@ -544,58 +544,6 @@ class RegisterAnswer(request_handler.RequestHandler):
     def get(self):
         self.redirect('/exercises?exid=' + self.request_string("exid"))
 
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-        
-    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-        
-        streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)
-        
-        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-        exercise_message_html = self.render_template_block_to_string("exercise_message.html", "exercise_message_block", exercise_message_context)
-        
-        exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = self.render_template_block_to_string("exercise_icon.html", "exercise_icon_block", exercise_icon_context)
-        
-        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
-        badge_count_context = badge_counts(user_data)
-        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
-        
-        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
-        badge_notification_context = badge_notifications()
-        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
-        
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
-        
-        updated_values = {
-            'exercise_states': exercise_states,
-            'exercise_points':  exercise_points,
-            'key': key,
-            'start_time': time.time(),
-            'streak': user_exercise.streak,
-            'time_warp': time_warp,
-            'problem_number': user_exercise.total_done + 1,
-            'streak_bar_html': streak_bar_html,
-            'exercise_message_html': exercise_message_html,
-            'exercise_icon_html': exercise_icon_html,
-            'badge_count_html': badge_count_html,
-            'badge_notification_html': badge_notification_html,
-            'user_points_html': user_points_html
-            }
-            
-            #
-            #    'exercise_non_summative': exercise_non_summative,
-            #    'read_only': read_only,
-            #    'num_problems_to_print': num_problems_to_print,
-            #
-        json = simplejson.dumps(updated_values)
-        self.response.out.write(json)
-
 class GenerateLibraryContent(request_handler.RequestHandler):
 
     def post(self):

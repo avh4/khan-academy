@@ -639,7 +639,7 @@ class UserData(db.Model):
 
         return userExercise
         
-    def get_exercise_states(self, exercise, user_exercise, current_time):
+    def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
         phantom = exercise.phantom = util._is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
