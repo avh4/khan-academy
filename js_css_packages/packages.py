@@ -29,22 +29,6 @@ javascript = {
             "homepage.js",
         ]
     },
-    "exercises": {
-        "hashed-filename": "hashed-@exercises@.js", # @content@ will be replaced with hash by deploy script
-        "files": [
-            "ASCIIMathML.js",
-            "raphael.js",
-            "ASCIIsvg-wrapper.js",
-            "fontdetect.js",
-            "seedrandom.js",
-            "metautil.js",
-            "exerciseutil.js",
-            "graphutil.js",
-            "g.raphael-min.js",
-            "g.pie-min.js",
-            "g.line-min.js",
-        ]
-    },
     "profile": {
         "hashed-filename": "hashed-@profile@.js", # @content@ will be replaced with hash by deploy script
         "files": [
