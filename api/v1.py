@@ -401,7 +401,7 @@ def user_exercises_all():
     return None
 
 @route("/api/v1/user/exercises/<exercise_name>", methods=["GET"])
-@oauth_required()
+@oauth_required
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
@@ -409,9 +409,16 @@ def user_exercises_specific(exercise_name):
 
     if user_data and exercise_name:
         user_data_student = get_visible_user_data_from_request()
+        exercise = models.Exercise.get_by_name(exercise_name)
 
-        if user_data_student:
+        if user_data_student and exercise:
             user_exercise = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name).get()
+
+            if not user_exercise:
+                user_exercise = models.UserExercise()
+                user_exercise.exercise_model = exercise
+                user_exercise.exercise = exercise_name
+                user_exercise.user = user_data_student.user
 
             # Cheat and send back related videos when grabbing a single UserExercise for ease of exercise integration
             user_exercise.exercise_model.related_videos = user_exercise.exercise_model.related_videos_fetch()
