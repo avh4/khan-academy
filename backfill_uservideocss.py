@@ -7,7 +7,7 @@ from mapreduce import operation as op
 from models import UserData, UserVideo, UserVideoCss
 
 def backfill_user_data(user_data):
-    BATCH_SIZE = 1000
+    batch_size = 1000
     query_results = True
     cursor = None
 
@@ -22,7 +22,7 @@ def backfill_user_data(user_data):
             user_video_query.with_cursor(cursor)
 
         query_results = False
-        for user_video in user_video_query.fetch(BATCH_SIZE):
+        for user_video in user_video_query.fetch(batch_size):
             query_results = True
             css_dict['completed'].add('.v'+str(user_video.video.key().id()))
         cursor = user_video_query.cursor()
@@ -31,12 +31,13 @@ def backfill_user_data(user_data):
         
     # Set css for started videos
     while query_results:
-        user_video_query = UserVideo.gql("WHERE user = :1 AND completed = False", user_data.user)
+        user_video_query = UserVideo.gql("WHERE user = :1 AND completed = False", 
+                                         user_data.user)
         if cursor:
             user_video_query.with_cursor(cursor)
 
         query_results = False
-        for user_video in user_video_query.fetch(BATCH_SIZE):
+        for user_video in user_video_query.fetch(batch_size):
             query_results = True
             css_dict['started'].add('.v'+str(user_video.video.key().id()))
         cursor = user_video_query.cursor()
