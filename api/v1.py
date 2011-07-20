@@ -23,12 +23,15 @@ from api.auth.decorators import oauth_required, oauth_optional
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
-def add_action_results_property(obj, dict_results):
+def add_action_results(obj, dict_results):
 
     badges_earned = []
     user_data = models.UserData.current()
 
     if user_data:
+        dict_results["user_data"] = user_data
+        dict_results["user_info_html"] = templatetags.user_info(user_data.nickname, user_data)
+
         user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
 
         # Add any new badge notifications
@@ -48,15 +51,14 @@ def add_action_results_property(obj, dict_results):
                     badge.is_owned = True
                     badges_earned.append(badge)
 
+        if len(badges_earned) > 0:
+            dict_results["badges_earned"] = badges_earned
+            dict_results["badges_earned_html"] = badge_notifications_html(user_badges)
+
         # Add any new login notifications for phantom users
         login_notifications = user_notifications_dict["login"]
         if len(login_notifications) > 0:
             dict_results["login_notifications_html"] = login_notifications_html(login_notifications, user_data)
-
-    dict_results["badges_earned"] = badges_earned
-
-    if len(badges_earned) > 0:
-        dict_results["badges_earned_html"] = badge_notifications_html(user_badges)
 
     obj.action_results = dict_results
 
@@ -362,7 +364,7 @@ def log_user_video(youtube_id):
             user_video, video_log, video_points_total = models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
             if video_log:
-                add_action_results_property(video_log, {"user_video": user_video, "user_data": user_data})
+                add_action_results(video_log, {"user_video": user_video})
 
     return video_log
 
@@ -499,7 +501,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     int(request.request_float("time_taken"))
                     )
 
-            add_action_results_property(user_exercise, {"user_data": user_data})
+            add_action_results(user_exercise, {})
 
             return user_exercise
 

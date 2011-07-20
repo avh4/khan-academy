@@ -2,7 +2,10 @@ import re
 import logging
 import cgi
 import math
+import os
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template as webapp_template
+
 from django import template
 from django.template.defaultfilters import escape, slugify
 
@@ -43,6 +46,11 @@ class HighlightNode(template.Node):
         text = cgi.escape(text)
         text = re.sub(regex, r'<span class="highlight">\1</span>', text)
         return text
+
+@register.simple_tag
+def user_info(username, user_data):
+    path = os.path.join(os.path.dirname(__file__), "user_info.html")
+    return webapp_template.render(path, {"username": username, "user_data": user_data})
 
 @register.inclusion_tag("column_major_order_styles.html")
 def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):

@@ -8,6 +8,7 @@ javascript = {
             "jquery.watermark.js",
             "jquery.placeholder.js",
             "pageutil.js",
+            "api.js",
 			"social.js",
         ]
     },

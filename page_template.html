@@ -83,11 +83,7 @@
                         <span class="page_links" id="page_auth">
                             {% if logged_in %}
                                 <span id="user-info" class="badge-target">
-                                    {% username_and_notification username user_data %}
-
-                                    {% badge_counts user_data %}
-                                    
-                                    {% user_points user_data %}
+                                    {% user_info username user_data %}
                                 </span>
                                 <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>

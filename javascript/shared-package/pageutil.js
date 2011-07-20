@@ -538,38 +538,6 @@ var Drawer = {
     }
 }
 
-var APIActionResults = {
-
-    init: function() {
-        this.hooks = [];
-
-        $(document).ajaxComplete(function (e, xhr, settings) {
-
-            if (xhr && 
-                xhr.getResponseHeader('X-KA-API-Response') && 
-                xhr.responseText) {
-
-                try { eval("var result = " + xhr.responseText); }
-                catch(e) { return; }
-
-                if (result && result.action_results) {
-                    $(APIActionResults.hooks).each(function(ix, el) {
-                        if (result.action_results[el.prop]) {
-                            el.fxn(result.action_results[el.prop]);
-                        }
-                    });
-                }
-            }
-        });
-    },
-
-    register: function(prop, fxn) {
-        this.hooks[this.hooks.length] = {prop: prop, fxn: fxn};
-    }
-};
-
-$(function(){ APIActionResults.init(); });
-
 var Badges = {
 
     show: function(sBadgeContainerHtml) {
@@ -623,9 +591,6 @@ var Badges = {
         }
     }
 }
-
-// Show any badges that were awarded w/ any API ajax request
-$(function(){ APIActionResults.register("badges_earned_html", Badges.show); });
 
 var Notifications = {
 
@@ -681,9 +646,6 @@ var Notifications = {
         $.post("/notifierclose"); 
     }
 }
-
-// Show any login notifications that pop up w/ any API ajax request
-$(function(){ APIActionResults.register("login_notifications_html", Notifications.show); });
 
 var Timezone = {
     tz_offset: null,
