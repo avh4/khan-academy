@@ -143,7 +143,7 @@ class AddAnswer(request_handler.RequestHandler):
 
         if answer_text and video and question:
 
-            answer = models_discussion.Feedback()
+            answer = models_discussion.Feedback(parent=user_data)
             answer.set_author(user_data)
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
@@ -210,7 +210,7 @@ class AddQuestion(request_handler.RequestHandler):
             if len(question_text) > 500:
                 question_text = question_text[0:500] # max question length, also limited by client
 
-            question = models_discussion.Feedback()
+            question = models_discussion.Feedback(parent=user_data)
             question.set_author(user_data)
             question.content = question_text
             question.targets = [video.key()]
@@ -333,7 +333,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     if sort_override >= 0:
         sort_order = sort_override
 
-    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
+    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question, user_data)
     questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
 
     if qa_expand_id:
@@ -348,7 +348,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
                 count_preceding += 1
             page = 1 + (count_preceding / limit_per_page)
 
-    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer, user_data)
     answers.reverse() # Answers are initially in date descending -- we want ascending before the points sort
     answers = voting.VotingSortOrder.sort(answers)
 
