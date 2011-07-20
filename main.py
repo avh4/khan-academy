@@ -67,6 +67,7 @@ from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_co
 from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
+from api.auth.xsrf import ensure_xsrf_cookie
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -107,6 +108,7 @@ class KillLiveAssociations(request_handler.RequestHandler):
         db.put(all_video_playlists)
 
 class ViewExercise(request_handler.RequestHandler):
+    @ensure_xsrf_cookie
     @create_phantom
     def get(self):
         user_data = UserData.current()

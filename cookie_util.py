@@ -30,7 +30,7 @@ def set_cookie_value(key, value='', max_age=None,
         ('path', path),
         ('domain', domain),
         ('secure', secure),
-        ('HttpOnly', httponly),
+        #('HttpOnly', httponly), Python 2.6 is required for httponly cookies
         ('version', version),
         ('comment', comment),
         ]:
@@ -38,7 +38,14 @@ def set_cookie_value(key, value='', max_age=None,
             cookies[key][var_name] = str(var_value)
         if max_age is not None:
             cookies[key]['expires'] = max_age
-    return cookies[key].output(header='').lstrip()
+
+    cookies_header = cookies[key].output(header='').lstrip()
+
+    if httponly:
+        # We have to manually add this part of the header until GAE uses Python 2.6.
+        cookies_header += "; HttpOnly"
+
+    return cookies_header
 
 def set_request_cookie(key, value):
     ''' Set a cookie for the remainder of the request

@@ -54,6 +54,7 @@ def allow_cross_origin(func):
     def cross_origin_allowed(*args, **kwargs):
         result = func(*args, **kwargs)
 
+        # Let our mobile apps make API calls from their local files, and rely on oauth for security
         if isinstance(result, current_app.response_class):
             result.headers["Access-Control-Allow-Origin"] = os.environ.get("HTTP_ORIGIN") or "*"
             result.headers["Access-Control-Allow-Credentials"] = "true"

@@ -401,7 +401,7 @@ def user_exercises_all():
     return None
 
 @route("/api/v1/user/exercises/<exercise_name>", methods=["GET"])
-@oauth_optional
+@oauth_optional()
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
