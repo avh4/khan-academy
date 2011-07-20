@@ -1468,7 +1468,7 @@ def main():
         ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
         
-        ('/admin/emailchange', devpanel.Email),
+        ('/devadmin/emailchange', devpanel.Email),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 

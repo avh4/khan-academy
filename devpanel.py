@@ -2,7 +2,7 @@ import os, logging
 
 from google.appengine.ext import db
 from google.appengine.api import users
-
+import util
 from app import App
 import models
 from models import UserData
@@ -14,7 +14,7 @@ import itertools
 class Email(request_handler.RequestHandler):
 
     def get(self):
-        if not users.is_current_user_admin():
+        if not users.is_current_user_admin() and not UserData.current().developer:
             self.redirect(users.create_login_url(self.request.uri))
             return
             
@@ -22,13 +22,9 @@ class Email(request_handler.RequestHandler):
         new_email = self.request.get('newemail') #email the user wants to change to
         swap = self.request.get('swap') #Are we changing emails?
         
-            
-        
-        query = UserData.all()
-        currdata = query.filter('current_user =', users.User(current_email)).get()
-        
-        query = UserData.all()
-        newdata = query.filter('current_user =', users.User(new_email)).get()
+
+        currdata = UserData.get_from_user_input_email(current_email)
+        newdata = UserData.get_from_user_input_email(new_email)
         
         if swap:
             currdata.current_user = users.User(new_email)
