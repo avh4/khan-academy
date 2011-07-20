@@ -3061,6 +3061,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 #devpanel {
-   margin: 0 auto;
+   margin: 0px auto;
+   width:500px;
     
 }

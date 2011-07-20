@@ -478,6 +478,7 @@ class UserData(db.Model):
     user = db.UserProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
+    developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
     proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient

@@ -35,21 +35,29 @@
                 
                 <tr>
                     <td style="border:none;"></td>
-                    {% if currdata %}<td>{{currdata.current_user}}</td>{% else %}<td>No User!</td>{% endif %}
-                    {% if newdata %}<td>{{newdata.current_user}}</td>{% else %}<td>No User!</td>{% endif %}
+                    <td>{{curremail}}</td>
+                    <td>{{newemail}}</td>
                 </tr>
                 
                 {% for prop in properties %}
                 <tr>
                     <td>{{prop}}</td>
-                    <td>{% if currdata %}{{currdata|mygetattr:prop}}{% endif %}</td>
-                    <td>{% if newdata %}{{newdata|mygetattr:prop}}{% endif %}</td>
+                    <td>{% if currdata %}{{currdata|mygetattr:prop}}{% else %}No User!{% endif %}</td>
+                    <td>{% if newdata %}{{newdata|mygetattr:prop}}{% else %}No User!{% endif %}</td>
                   
                 </tr>
                 {% endfor %}
                     
                 
             </table>
+            <form type="GET" action="">
+            <input style="margin-top:30px;"type="submit" value="Change {{curremail}} to {{newemail}}"/>
+            <input type="hidden" name="swap" value="swap" />
+            <input type="hidden" name="curremail" value="{{curremail}}" />
+            <input type="hidden" name="newemail" value="{{newemail}}" />
+            
+            </form>
+            
         </div>
     </div>
 

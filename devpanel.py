@@ -20,15 +20,22 @@ class Email(request_handler.RequestHandler):
             
         current_email = self.request.get('curremail') #email that is currently used 
         new_email = self.request.get('newemail') #email the user wants to change to
+        swap = self.request.get('swap') #Are we changing emails?
+        
+            
         
         query = UserData.all()
         currdata = query.filter('current_user =', users.User(current_email)).get()
         
         query = UserData.all()
         newdata = query.filter('current_user =', users.User(new_email)).get()
-
-                   
-        template_values = {'App' : App,  'currdata': currdata, 'newdata': newdata, "properties": UserData.properties()}
+        
+        if swap:
+            currdata.current_user = users.User(new_email)
+            currdata.put()
+            # newdata.delete()
+        
+        template_values = {'App' : App, 'curremail': current_email, 'newemail':  new_email, 'currdata': currdata, 'newdata': newdata, "properties": UserData.properties()}
 
         self.render_template('devemailpanel.html', template_values)
 
