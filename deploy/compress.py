@@ -7,6 +7,7 @@ import md5
 import re
 import StringIO
 import base64
+from string import lower
 
 sys.path.append(os.path.abspath("."))
 from js_css_packages import packages
@@ -97,13 +98,19 @@ def minify_package(path, path_combined, suffix):
 
 def remove_images_from_line(filename):
     filename = filename.group(0)
+
+    ext = os.path.splitext(filename)[1][1:].lower()
+    if ext == 'jpg':
+        ext = 'jpeg'
+
     filename = os.path.join(os.path.dirname(__file__), '..', filename[1:])
+
     print "Removing images from %s" % filename
     if os.path.isfile(filename):
         with open(filename) as img:
             f = StringIO.StringIO()
             f.write(img.read())
-            return 'data:image/png;base64,'+base64.b64encode(f.getvalue())
+            return 'data:image/%s;base64,%s'% (ext, base64.b64encode(f.getvalue()))
 
     return filename
 

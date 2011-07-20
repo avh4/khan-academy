@@ -77,18 +77,6 @@ javascript = {
 }
 
 stylesheets = {
-    "shared-ie": {
-        "hashed-filename": "hashed-@shared-ie@.css", # @content@ will be replaced with hash by deploy script
-        "files": [
-            "default.css",
-            "rating.css",
-            "stylesheet.css",
-            "menu.css",
-            "profile.css",
-            "museo-sans.css",
-            "jquery-ui-1.8.4.custom.css",
-        ]
-    },
     "shared": {
         "hashed-filename": "hashed-@shared@.css", # @content@ will be replaced with hash by deploy script
         "files": [
@@ -108,27 +96,12 @@ stylesheets = {
             "mobile.css",
         ]
     },
-    "video-ie": {
-        "hashed-filename": "hashed-@video-ie@.css", # @content@ will be replaced with hash by deploy script
-        "files": [
-            "video.css",
-            "discussion.css",
-            "jquery.qtip.css",
-        ]
-    },
     "video": {
         "hashed-filename": "hashed-@video@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "video.css",
             "discussion.css",
             "jquery.qtip.css",
-        ]
-    },
-    "studentlists-ie": {
-        "hashed-filename": "hashed-@studentlists-ie@.css", # @content@ will be replaced with hash by deploy script
-        "files": [
-            "viewstudentlists.css",
-            "viewclassprofile.css",
         ]
     },
     "studentlists": {
