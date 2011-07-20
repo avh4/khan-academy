@@ -32,9 +32,6 @@ def get_xsrf_cookie_value():
 
 def validate_xsrf_value():
     header_value = os.environ.get(XSRF_HEADER_KEY)
-    logging.critical(os.environ)
-    logging.critical(header_value)
-    logging.critical(get_xsrf_cookie_value())
     return header_value and header_value == get_xsrf_cookie_value()
 
 def render_xsrf_js():
