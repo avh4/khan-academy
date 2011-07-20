@@ -3,9 +3,10 @@ import logging
 import cgi
 import math
 import os
+from inspect import getmembers
+
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template as webapp_template
-
 from django import template
 from django.template.defaultfilters import escape, slugify
 
@@ -16,7 +17,7 @@ import consts
 import util
 import topics_list
 import models
-from inspect import getmembers
+from api.auth import xsrf
 
 # get registry, we need it to register our filter later.
 register = webapp.template.create_template_register()
@@ -263,9 +264,13 @@ def empty_class_instructions(class_is_empty=True):
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
 
+@register.simple_tag
+def xsrf_value():
+    return xsrf.render_xsrf_js()
+
 register.tag(highlight)
 
-webapp.template.register_template_library('templatetags')    
+webapp.template.register_template_library('templatetags')
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
 webapp.template.register_template_library('phantom_users.templatetags')

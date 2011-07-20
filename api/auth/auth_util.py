@@ -12,6 +12,7 @@ from flask.session import Session
 
 from app import App
 from api.auth.models import OAuthMap
+from api.auth.xsrf import validate_xsrf_value
 from oauth_provider.oauth import build_authenticate_header, OAuthError
 import cookie_util
 
@@ -77,16 +78,12 @@ def requested_oauth_callback():
 
 def allow_cookie_based_auth():
 
-    return True
-
     # Don't allow cookie-based authentication for API calls which
-    # may return JSONP, unless they are POSTs
-
+    # may return JSONP, unless they include a valid XSRF token.
     path = os.environ.get("PATH_INFO")
 
     if path and path.lower().startswith("/api/"):
-        if "POST" != os.environ.get("REQUEST_METHOD"):
-            return False
+        return validate_xsrf_value()
 
     return True
 
