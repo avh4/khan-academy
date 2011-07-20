@@ -41,6 +41,8 @@ def handler(func_peek):
                 kwargs["_func_key"] = func_key
                 deferred.defer(guarantee_slow, *args, **kwargs)
 
+                logging.debug("fast_slow_queue deferred execution of %s" % func_key)
+
         return wrapped
 
     return queue_decorator

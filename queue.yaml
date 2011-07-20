@@ -1,4 +1,4 @@
-total_storage_limit: 500M
+total_storage_limit: 999M
 queue:
 - name: badge-statistics-queue
   rate: 5/s
@@ -25,4 +25,4 @@ queue:
   rate: 10/s
 
 - name: slow-background-queue
-  rate: 5/s
+  rate: 10/s
