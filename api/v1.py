@@ -411,8 +411,11 @@ def user_exercises_specific(exercise_name):
         user_data_student = get_visible_user_data_from_request()
 
         if user_data_student:
-            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name)
-            return user_exercises.get()
+            user_exercise = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name).get()
+
+            # Cheat and send back related videos when grabbing a single UserExercise for ease of exercise integration
+            user_exercise.exercise_model.related_videos = user_exercise.exercise_model.related_videos_fetch()
+            return user_exercise
 
     return None
 
