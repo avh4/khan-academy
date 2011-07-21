@@ -581,22 +581,34 @@ Khan.loadScripts( [ { src: "https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/j
 				if ( jQuery("#answera_area").length === 0 ) {
 					// Pull from the cache if it's already there
 					var tmpl = window.localStorage && window.localStorage.khanTmpl;
+					var tmplExercise = window.localStorage && window.localStorage.khanTmplExercise;
 					
-					if ( tmpl ) {
-						handleInject( tmpl );
+					if ( tmpl && tmplExercise ) {
+						handleInject( tmpl, tmplExercise );
 					
 					// Otherwise load it dynamically
 					} else {
 						jQuery.ajax( {
-							url: "khan-exercise.html",
+							url: "khan-site.html",
 							dataType: "html",
 							success: function( html ) {
-								if ( window.localStorage ) {
-									// Disabled for now
-									// window.localStorage.khanTmpl = html;
-								}
-					
-								handleInject( html );
+
+                                jQuery.ajax( {
+                                    url: "khan-exercise.html",
+                                    dataType: "text",
+                                    success: function( htmlExercise ) {
+
+                                        if ( window.localStorage ) {
+                                            // Disabled for now
+                                            // window.localStorage.khanTmpl = html;
+                                            // window.localStorage.khanTmplExercise = htmlExercise;
+                                        }
+                            
+                                        handleInject( html, htmlExercise );
+
+                                    }
+                                });
+
 							}
 						});
 					}
@@ -604,8 +616,8 @@ Khan.loadScripts( [ { src: "https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/j
 			});
 		});
 		
-		function handleInject( html ) {
-			injectSite( html );
+		function handleInject( html, htmlExercise ) {
+			injectSite( html, htmlExercise );
 			
 			// Prepare the "random" problems
 			if ( !testMode || !Khan.query.problem ) {
@@ -1018,8 +1030,9 @@ function makeProblem( id, seed ) {
 	jQuery(Khan).trigger( "newProblem" );
 }
 
-function injectSite( html ) {
+function injectSite( html, htmlExercise ) {
 	jQuery("body").prepend( html );
+    jQuery("#container").html( htmlExercise );
 	
 	jQuery(".exercise-title").text( document.title );
 

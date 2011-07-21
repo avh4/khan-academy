@@ -132,11 +132,13 @@ class ViewExercise(request_handler.RequestHandler):
         exercise_states = user_data.get_exercise_states(exercise, user_exercise)
 
         exercise_body_html, exercise_inline_script, data_require, sha1 = exercises.exercise_contents(exercise)
+        exercise_template_html = exercises.exercise_template()
 
         template_values = {
             'exercise': exercise,
             'user_exercise': user_exercise,
             'exercise_body_html': exercise_body_html,
+            'exercise_template_html': exercise_template_html,
             'exercise_inline_script': exercise_inline_script,
             'data_require': data_require,
             'read_only': read_only,

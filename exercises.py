@@ -19,6 +19,24 @@ from badges import util_badges, last_action_cache, custom_badges
 from phantom_users import util_notify
 from custom_exceptions import MissingExerciseException
 
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
+def exercise_template():
+    path = os.path.join(os.path.dirname(__file__), "khan-exercises/exercises/khan-exercise.html")
+
+    contents = ""
+    f = open(path)
+
+    if f:
+        try:
+            contents = f.read()
+        finally:
+            f.close()
+
+    if not len(contents):
+        raise MissingExerciseException("Missing exercise template")
+
+    return contents
+
 @layer_cache.cache_with_key_fxn(lambda exercise: "exercise_html_%s" % exercise.name, layer=layer_cache.Layers.InAppMemory)
 def exercise_contents(exercise):
     path = os.path.join(os.path.dirname(__file__), "khan-exercises/exercises/%s.html" % exercise.name)
@@ -33,7 +51,7 @@ def exercise_contents(exercise):
             f.close()
 
     if not len(contents):
-        raise MissingExerciseException("Missing exercise template for exid '%s'" % exercise.name)
+        raise MissingExerciseException("Missing exercise content for exid '%s'" % exercise.name)
 
     re_data_require = re.compile("^<html.*(data-require=\".*\").*>", re.MULTILINE)
     match_data_require = re_data_require.search(contents)
@@ -50,7 +68,7 @@ def exercise_contents(exercise):
     sha1 = hashlib.sha1(contents).hexdigest()
 
     if not len(body_contents):
-        raise MissingExerciseException("Missing exercise body in template for exid '%s'" % exercise.name)
+        raise MissingExerciseException("Missing exercise body in content for exid '%s'" % exercise.name)
 
     return (body_contents, script_contents, data_require, sha1)
 
