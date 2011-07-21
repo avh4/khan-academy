@@ -8,6 +8,7 @@ import re
 import StringIO
 import base64
 import copy
+import fileinput
 from string import lower
 
 sys.path.append(os.path.abspath("."))
@@ -63,9 +64,31 @@ def compress_all_packages(path, dict_packages, suffix):
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
-    remove_working_files(path, suffix)
 
+    remove_combined_files(path, suffix)
     path_combined = combine_package(path, files, suffix)
+
+    for line in fileinput.input(PATH_PACKAGES_HASH, inplace=1):
+        if line.find(name):
+            # example line:
+            # shared 47295efbe8dda8c333aa983a5eb0d646
+            # <----> <------------------------------>
+            #    |                  |
+            #   [0]                [1]
+            new_hash = line.split()[1]
+
+            with open(path_combined, "r") as combined:
+                content = combined.read()
+                old_hash = md5.new(content).hexdigest()
+
+                if new_hash == old_hash:
+                    return
+                else:
+                    # This does not print to the console, it replaces the old
+                    # hash with the new one *in the file*.
+                    print '%s%s %s' % (name, suffix, new_hash)
+
+    remove_working_files(path, suffix)
 
     # Create an IE package and a data-uri one. Skip this step for mobile css
     # and js.
@@ -85,14 +108,20 @@ def compress_package(name, path, files, suffix):
     if not os.path.exists(path_hashed):
         raise Exception("Did not successfully compress and hash: %s" % path)
 
-# Remove previous combined.js\.css and compress.js\.css files
+# Remove previous hashed-*.js\.css, uri.css, and compress.js\.css files
 def remove_working_files(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
-        if filename.endswith(COMBINED_FILENAME + suffix) \
-                or filename.endswith(COMPRESSED_FILENAME + suffix) \
+        if filename.endswith(COMPRESSED_FILENAME + suffix) \
                 or filename.endswith(URI_FILENAME + suffix) \
                 or filename.startswith(HASHED_FILENAME_PREFIX):
+            os.remove(os.path.join(path, filename))
+
+# Remove previous combined.js\.css 
+def remove_combined_files(path, suffix):
+    filenames = os.listdir(path)
+    for filename in filenames:
+        if filename.endswith(COMBINED_FILENAME + suffix):
             os.remove(os.path.join(path, filename))
 
 # Use YUICompressor to minify the combined file
@@ -177,9 +206,12 @@ def insert_hash_sig(name, hash_sig, suffix):
     print "Inserting %s sig (%s) into %s\n" % (name, hash_sig, PATH_PACKAGES)
 
     current_dict = packages_stylesheets if suffix.endswith('.css') else packages_javascript
+    if suffix == '-ie.css':
+        name = name+'-ie'
+
     if name not in current_dict:
         current_dict[name] = {}
-    current_dict[name]["hashed-filename"] = "hashed-%s.css" % hash_sig
+    current_dict[name]["hashed-filename"] = "hashed-%s%s" % (hash_sig, suffix)
 
 # Combine all files into a single combined.js\.css
 def combine_package(path, files, suffix):
