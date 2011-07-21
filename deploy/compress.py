@@ -20,6 +20,7 @@ PACKAGE_SUFFIX = "-package"
 HASHED_FILENAME_PREFIX = "hashed-"
 PATH_PACKAGES = "js_css_packages/packages.py"
 PATH_PACKAGES_TEMP = "js_css_packages/packages.compresstemp.py"
+PATH_PACKAGES_HASH = "js_css_packages/packages_hash"
 
 packages_stylesheets = copy.deepcopy(packages.stylesheets)
 packages_javascript = copy.deepcopy(packages.javascript)
@@ -47,11 +48,6 @@ def compress_all_packages(path, dict_packages, suffix):
         package = dict_packages[package_name]
 
         dir_name = "%s-package" % package_name
-
-        # use the same directory for ie and non-ie css
-        if '-ie' in dir_name and suffix == '.css':
-            dir_name = re.sub('-ie', '', dir_name)
-
         package_path = os.path.join(path, dir_name)
 
         compress_package(package_name, package_path, package["files"], suffix)
@@ -180,11 +176,10 @@ def hash_package(name, path, path_compressed, suffix):
 def insert_hash_sig(name, hash_sig, suffix):
     print "Inserting %s sig (%s) into %s\n" % (name, hash_sig, PATH_PACKAGES)
 
-    current_dict = packages_stylesheets if suffix == '.css' else packages_javascript
+    current_dict = packages_stylesheets if suffix.endswith('.css') else packages_javascript
     if name not in current_dict:
-        current_dict[name] = {"hashed-filename": "hashed-%s.css" % hash_sig}
-    else:
-        current_dict[name]["hashed-filename"] = "hashed-%s.css" % hash_sig
+        current_dict[name] = {}
+    current_dict[name]["hashed-filename"] = "hashed-%s.css" % hash_sig
 
 # Combine all files into a single combined.js\.css
 def combine_package(path, files, suffix):
