@@ -42,7 +42,8 @@ class Feedback(db.Model):
     content = db.TextProperty()
     date = db.DateTimeProperty(auto_now_add=True)
     deleted = db.BooleanProperty(default=False)
-    targets = db.ListProperty(db.Key)
+    targets = db.ListProperty(db.Key) # first element is video key.
+                                      # optional second element is question key.
     types = db.StringListProperty()
     is_flagged = db.BooleanProperty(default=False)
     is_hidden_by_flags = db.BooleanProperty(default=False)
@@ -60,7 +61,7 @@ class Feedback(db.Model):
         self.children_cache = [] # For caching each question's answers during render
 
     def put(self):
-        memcache.delete(Feedback.memcache_key_for_video(self.first_target()), namespace=App.version)
+        memcache.delete(Feedback.memcache_key_for_video(self.video()), namespace=App.version)
         db.Model.put(self)
 
     def set_author(self, user_data):
@@ -78,28 +79,28 @@ class Feedback(db.Model):
     def is_type(self, type):
         return type in self.types
 
-    def parent_key(self):
+    def question_key(self):
         if self.targets:
-            return self.targets[-1]
+            return self.targets[-1] # last target is always the question
         return None
 
-    def parent(self):
-        return db.get(self.parent_key())
+    def question(self):
+        return db.get(self.question_key())
 
     def children_keys(self):
         keys = db.Query(Feedback, keys_only=True)
         keys.filter("targets = ", self.key())
         return keys
 
-    def first_target_key(self):
+    def video_key(self):
         if self.targets:
             return self.targets[0]
         return None
 
-    def first_target(self):
-        target_key = self.first_target_key()
-        if target_key:
-            return db.get(target_key)
+    def video(self):
+        video_key = self.video_key()
+        if video_key:
+            return db.get(video_key)
         return None
 
     def add_vote_by(self, vote_type, user_data):
@@ -112,7 +113,7 @@ class Feedback(db.Model):
         self.put()
 
         if self.is_type(FeedbackType.Answer):
-            question = self.parent()
+            question = self.question()
             question.recalculate_score()
             question.put()
 
@@ -168,7 +169,7 @@ class FeedbackVote(db.Model):
         vote = FeedbackVote.get_or_insert(
                 key_name = "vote_by_%s" % user_data.key_email,
                 parent = feedback,
-                video = feedback.first_target_key(),
+                video = feedback.video_key(),
                 user = user_data.user,
                 vote_type = vote_type)
 

@@ -62,7 +62,7 @@ class AddComment(request_handler.RequestHandler):
             if len(comment_text) > 300:
                 comment_text = comment_text[0:300] # max comment length, also limited by client
 
-            comment = models_discussion.Feedback()
+            comment = models_discussion.Feedback(parent=user_data)
             comment.set_author(user_data)
             comment.content = comment_text
             comment.targets = [video.key()]
@@ -84,7 +84,7 @@ def video_comments_context(video, playlist, page=0, comments_hidden=True, sort_o
     limit_per_page = 10
     limit_initially_visible = 2 if comments_hidden else limit_per_page
 
-    comments = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Comment)
+    comments = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Comment, user_data)
     comments = voting.VotingSortOrder.sort(comments, sort_order=sort_order)
 
     count_total = len(comments)
