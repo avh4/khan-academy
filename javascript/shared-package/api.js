@@ -41,7 +41,7 @@ var APIActionResults = {
     }
 };
 
-$(function(){ APIActionResults.init(); });
+APIActionResults.init();
 
 // Show any badges that were awarded w/ any API ajax request
 $(function(){ APIActionResults.register("badges_earned_html", Badges.show); });

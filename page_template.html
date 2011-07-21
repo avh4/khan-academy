@@ -44,6 +44,8 @@
             {% block pagecss %}{% endblock pagecss %}
             {% js_package "shared" %}
         {% endif %}
+
+        {% xsrf_value %}
 		
         {% block pagescript %}
         {% endblock pagescript %}
@@ -185,7 +187,6 @@
 	</script>
 
     {% profiler_includes %}
-    {% xsrf_value %}
 
     </body>
 </html>
