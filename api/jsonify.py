@@ -75,6 +75,6 @@ def jsonify(data, **kwargs):
     entity is passed in it will be encoded as a dict.
     """
     return simplejson.dumps(data, skipkeys=True, sort_keys=True, 
-            ensure_ascii=False, indent=None if request.is_xhr else 4, 
+            ensure_ascii=False, indent=4,
             cls=JSONModelEncoder)
 

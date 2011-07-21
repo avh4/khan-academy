@@ -30,7 +30,7 @@ var primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 	server = standalone ? "http://localhost:8080" : "",
 	
 	// The name of the exercise
-	exerciseName = "subtraction_1",//(/([^\/.]+)(?:\.html)?$/.exec( window.location.pathname ) || [])[1],
+	exerciseName = userExercise ? userExercise.exercise : ((/([^\/.]+)(?:\.html)?$/.exec( window.location.pathname ) || [])[1]),
 
 	// Bin users into a certain number of realms so that
 	// there is some level of reproducability in their questions
@@ -342,7 +342,7 @@ Khan.loadScripts( scripts, function() {
 					
 					// A hash representing the exercise
 					// TODO: Populate this from somewhere
-					sha1: exerciseName,
+					sha1: userExercise ? userExercise.exercise_model.sha1 : exerciseName,
 					
 					// The seed that was used for generating the problem
 					seed: problemSeed
@@ -1051,7 +1051,7 @@ function injectSite( html, htmlExercise ) {
 
 function prepareSite() {
 	
-	jQuery(".exercise-title").text( document.title );
+	jQuery(".exercise-title").text( userExercise ? userExercise.exercise_model.display_name : document.title );
 
 	// Hide exercies summaries for now
 	// Will figure out something more elegant to do with them once the new

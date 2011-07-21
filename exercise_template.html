@@ -1,13 +1,20 @@
 {% extends "page_template.html" %}
 
-{% block pagetitle %}{{ exercise_name|escape }}{% endblock pagetitle %}
+{% block meta_page_title %}{{ exercise.display_name|escape }} | {% endblock meta_page_title %}
 
 {% block pagescript %}
-    <style>#page_sub_nav {display: none;}</style>
-    <script src="/khan-exercises/khan-exercise.js"></script>
-    <script>
-        {{ exercise_inline_script }}
-    </script>
+<style>#page_sub_nav {display: none;}</style>
+
+<script>
+    var userExercise = {{ user_exercise_json }};
+</script>
+
+<script src="/khan-exercises/khan-exercise.js"></script>
+
+<script>
+    {{ exercise_inline_script }}
+</script>
+
 {% endblock pagescript %}
 
 {% block pagecontent %}

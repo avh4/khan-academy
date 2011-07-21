@@ -67,6 +67,7 @@ from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_co
 from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
+from api import jsonify
 from api.auth.xsrf import ensure_xsrf_cookie
 
 class VideoDataTest(request_handler.RequestHandler):
@@ -134,9 +135,13 @@ class ViewExercise(request_handler.RequestHandler):
         exercise_body_html, exercise_inline_script, data_require, sha1 = exercises.exercise_contents(exercise)
         exercise_template_html = exercises.exercise_template()
 
+        # Set extra properties so they're accessible by the exercise framework
+        user_exercise.exercise_model.sha1 = sha1
+        user_exercise_json = jsonify.jsonify(user_exercise)
+
         template_values = {
             'exercise': exercise,
-            'user_exercise': user_exercise,
+            'user_exercise_json': user_exercise_json,
             'exercise_body_html': exercise_body_html,
             'exercise_template_html': exercise_template_html,
             'exercise_inline_script': exercise_inline_script,
