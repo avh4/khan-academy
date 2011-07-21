@@ -13,7 +13,7 @@ import itertools
             
 class Email(request_handler.RequestHandler):
 
-    def get(self):
+    def get(self): #devs or admins may change emails
         if not UserData.current() or (not users.is_current_user_admin() and not UserData.current().developer):
             self.redirect(users.create_login_url(self.request.uri))
             return
@@ -26,10 +26,10 @@ class Email(request_handler.RequestHandler):
         currdata = UserData.get_from_user_input_email(current_email)
         newdata = UserData.get_from_user_input_email(new_email)
         
-        if swap and currdata:
+        if swap and currdata: #are we swapping? make sure account exists
             currdata.current_user = users.User(new_email)
             currdata.put()
-            if newdata:
+            if newdata: #delete old account 
                 newdata.delete()
 
         template_values = {'App' : App, 'curremail': current_email, 'newemail':  new_email, 'currdata': currdata, 'newdata': newdata, "properties": UserData.properties()}
@@ -40,7 +40,7 @@ class Email(request_handler.RequestHandler):
 class Manage(request_handler.RequestHandler):
 
     def get(self):
-        if not users.is_current_user_admin():
+        if not users.is_current_user_admin(): #Only admins may add devs, devs cannot add devs.
             self.redirect(users.create_login_url(self.request.uri))
             return
         errormessage = ""
