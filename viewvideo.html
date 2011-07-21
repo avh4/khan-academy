@@ -81,10 +81,12 @@
                        	Subtitles
                 </a>
 
+                {% if video_path %}
                 <a href="{{video_path}}" title="Download this lesson" style="z-index:101;" class="simple-button action-gradient with-icon download-icon download-link">
                 <img src="/images/download-icon-small.png" />
                          Download
-                 </a>
+                </a>
+                {% endif %}
                   
                  <a href="#" style="z-index:101;" class="simple-button action-gradient with-icon download-icon share-link">
                  <img src="/images/share-icon-small.png" />
@@ -132,7 +134,7 @@
 
       VideoStats.tooltip('#points-badge-hover', $points.data('title'));
     </script>
-    <script type="text/javascript">document.write(unescape('%3Cscript type="text/javascript" src="'+document.location.protocol+'//dnn506yrbagrg.cloudfront.net/pages/scripts/0011/5719.js"%3E%3C%2Fscript%3E'))</script>
+    {% crazyegg_tracker 0 %}
 {% endblock bottompagescript %}
 
 {% block pagefooter %}
