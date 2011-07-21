@@ -14,7 +14,7 @@ import itertools
 class Email(request_handler.RequestHandler):
 
     def get(self):
-        if not users.is_current_user_admin() and not UserData.current().developer:
+        if not UserData.current() or (not users.is_current_user_admin() and not UserData.current().developer):
             self.redirect(users.create_login_url(self.request.uri))
             return
             
@@ -26,11 +26,12 @@ class Email(request_handler.RequestHandler):
         currdata = UserData.get_from_user_input_email(current_email)
         newdata = UserData.get_from_user_input_email(new_email)
         
-        if swap:
+        if swap and currdata:
             currdata.current_user = users.User(new_email)
             currdata.put()
-            # newdata.delete()
-        
+            if newdata:
+                newdata.delete()
+
         template_values = {'App' : App, 'curremail': current_email, 'newemail':  new_email, 'currdata': currdata, 'newdata': newdata, "properties": UserData.properties()}
 
         self.render_template('devemailpanel.html', template_values)
@@ -42,23 +43,35 @@ class Manage(request_handler.RequestHandler):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
-   
+        errormessage = ""
         add_dev = self.request.get('adddev', None) #email that is currently used 
         remove_dev = self.request.get('removedev', None) #email the user wants to change to     
-    
-        if add_dev:
+        if add_dev and not UserData.get_from_user_input_email(add_dev):
+            errormessage = "You can't add a user that doesn't exist!"
+        
+        if remove_dev and not UserData.get_from_user_input_email(remove_dev):
+            errormessage = "You can't remove a user that doesn't exist!"
+            
+        
+        if add_dev and errormessage == "":
             dev = UserData.get_from_user_input_email(add_dev)
-            dev.developer = True
-            dev.put()
+            if dev.developer == True:
+                errormessage = "%s is already flagged as a developer!" % add_dev
+            else:
+                dev.developer = True
+                dev.put()
     
-        if remove_dev:
+        if remove_dev and errormessage == "":
             dev = UserData.get_from_user_input_email(remove_dev)
-            dev.developer = False
-            dev.put()
+            if dev.developer == True:
+                errormessage = "%s is not a developer to begin with" % remove_dev
+            else:
+                dev.developer = False
+                dev.put()
    
         developers = UserData.all()
         developers.filter('developer = ', True).fetch(1000)
-        template_values = {'App' : App,  "developers": developers}
+        template_values = {'App' : App,  "developers": developers, "errormessage":errormessage}
 
         self.render_template('managedevs.html', template_values) 
         

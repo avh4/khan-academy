@@ -20,14 +20,22 @@
     <div id="devpanel" style="padding: 9px 23px;">
         <div>
             <form type="GET" action="">
-            Add Dev:<input type="text" name="adddev" />
-            Remove Dev:<input type="text" name="removedev" />    
-            <input type="submit" value="Submit" />
+            Add Dev:<input type="text" name="adddev" />   
+            <input type="submit" value="Add as developer" />
+            
             </form>
+            <br />
+            <form type="GET" action="">
+            Remove Dev:<input type="text" name="removedev" />   
+            <input type="submit" value="Remove from developers" />
+            </form>
+            
+            <br />
+            <span style="color:red;">{{errormessage}}</span>
             <table>
                 
                 <tr>
-                    <td style="border:none;">Current Devs</td>
+                    <td style="border:none;">Current Devs:</td>
                 </tr>
                 
                 {% for dev in developers %}

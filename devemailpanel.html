@@ -50,7 +50,7 @@
                     
                 
             </table>
-            <form type="GET" action="">
+            <form id="changeemail" type="GET" onsubmit="return confirm('WARNING: Are you sure you want to change {{curremail}} to {{newemail}}? The user will be unable to login using {{curremail}} and if an account exists for {{newemail}} it will be deleted.')">
             <input style="margin-top:30px;"type="submit" value="Change {{curremail}} to {{newemail}}"/>
             <input type="hidden" name="swap" value="swap" />
             <input type="hidden" name="curremail" value="{{curremail}}" />
