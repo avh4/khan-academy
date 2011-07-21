@@ -1,4 +1,7 @@
-import os, logging
+import re
+import os
+import logging
+import itertools
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -10,9 +13,43 @@ import models
 import request_handler
 import util
 import points
-import itertools
+import layer_cache
 from badges import util_badges, last_action_cache, custom_badges
 from phantom_users import util_notify
+from custom_exceptions import MissingExerciseException
+
+@layer_cache.cache_with_key_fxn(lambda exercise: "exercise_html_%s" % exercise.name, layer=layer_cache.Layers.InAppMemory)
+def exercise_contents(exercise):
+    path = os.path.join(os.path.dirname(__file__), "khan-exercises/exercises/%s.html" % exercise.name)
+
+    contents = ""
+    f = open(path)
+
+    if f:
+        try:
+            contents = f.read()
+        finally:
+            f.close()
+
+    if not len(contents):
+        raise MissingExerciseException("Missing exercise template for exid '%s'" % exercise.name)
+
+    re_data_require = re.compile("^<html.*(data-require=\".*\").*>", re.MULTILINE)
+    match_data_require = re_data_require.search(contents)
+    data_require = match_data_require.groups()[0] if match_data_require else ""
+
+    re_body_contents = re.compile("<body>(.*)</body>", re.DOTALL)
+    match_body_contents = re_body_contents.search(contents)
+    body_contents = match_body_contents.groups()[0]
+
+    re_script_contents = re.compile("<script>(.*?)</script>", re.DOTALL)
+    list_script_contents = re_script_contents.findall(contents)
+    script_contents = ";".join(list_script_contents)
+
+    if not len(body_contents):
+        raise MissingExerciseException("Missing exercise body in template for exid '%s'" % exercise.name)
+
+    return (body_contents, script_contents, data_require)
 
 def reset_streak(user_data, user_exercise):
     if user_exercise and user_exercise.belongs_to(user_data):

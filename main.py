@@ -112,13 +112,8 @@ class ViewExercise(request_handler.RequestHandler):
     @create_phantom
     def get(self):
         user_data = UserData.current()
-        exid = self.request.get('exid')
-        key = self.request.get('key')
-        time_warp = self.request.get('time_warp')
 
-        if not exid:
-            exid = 'addition_1'
-
+        exid = self.request_string("exid", default="addition_1")
         exercise = Exercise.get_by_name(exid)
 
         if not exercise: 
@@ -134,65 +129,23 @@ class ViewExercise(request_handler.RequestHandler):
         # When viewing a problem out-of-order, show read-only view
         read_only = problem_number != (user_exercise.total_done + 1)
 
-        exercise_non_summative = exercise.non_summative_exercise(problem_number)
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise)
 
-        # If read-only and an explicit exid is provided for non-summative content, use
-        # overriding exercise
-        if read_only:
-            exid_non_summative = self.request_string('exid_non_summative', default=None)
-            if exid_non_summative:
-                exercise_non_summative = Exercise.get_by_name(exid_non_summative)
-                
-        exercise_videos = exercise_non_summative.related_videos_fetch()
-
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-
-        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-               
-        # Note: if they just need a single problem for review they can just print this page.
-        num_problems_to_print = max(2, exercise.required_streak - user_exercise.streak)
-        
-        # If the user is proficient, assume they want to print a bunch of practice problems.
-        if exercise_states['proficient']:
-            num_problems_to_print = exercise.required_streak
-
-        if exercise.summative:
-            # Make sure UserExercise has proper summative value even before it's been set.
-            user_exercise.summative = True
-            # We can't currently print summative exercises.
-            num_problems_to_print = 0
+        exercise_body_html, exercise_inline_script, data_require = exercises.exercise_contents(exercise)
 
         template_values = {
-            'arithmetic_template': 'arithmetic_template.html',
-            'user_data': user_data,
-            'points': user_data.points,
-            'exercise_points': exercise_points,
-            'coaches': user_data.coaches,
-            'exercise_states': exercise_states,
-            'cookiename': user_data.nickname.replace('@', 'at'),
-            'key': user_exercise.key(),
             'exercise': exercise,
-            'exid': exid,
-            'start_time': time.time(),
-            'exercise_videos': exercise_videos,
-            'exercise_non_summative': exercise_non_summative,
-            'extitle': exid.replace('_', ' ').capitalize(),
             'user_exercise': user_exercise,
-            'streak': user_exercise.streak,
-            'time_warp': time_warp,
-            'problem_number': problem_number,
+            'exercise_body_html': exercise_body_html,
+            'exercise_inline_script': exercise_inline_script,
+            'data_require': data_require,
             'read_only': read_only,
             'selected_nav_link': 'practice',
-            'num_problems_to_print': num_problems_to_print,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
-        template_file = exercise_non_summative.name + '.html'
-        self.render_template(template_file, template_values)
-            
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
+        self.render_template("exercise_template.html", template_values)
+            
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
@@ -528,11 +481,6 @@ class VideolessExercises(request_handler.RequestHandler):
             videos = query.fetch(200)
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
-
-class KnowledgeMap(request_handler.RequestHandler):
-
-    def get(self):
-        self.redirect("/exercisedashboard")
 
 class RegisterAnswer(request_handler.RequestHandler):
 
@@ -1193,7 +1141,7 @@ def main():
         ('/exercises', ViewExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisesonmap', KnowledgeMap),
+        ('/viewexercisesonmap', ViewAllExercises),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),

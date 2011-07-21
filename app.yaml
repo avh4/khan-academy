@@ -46,6 +46,18 @@ handlers:
 - url: /javascript
   static_dir: javascript
 
+# Begin khan-exercises integration
+- url: /khan-exercises/khan-exercise.js
+  static_files: khan-exercises/khan-exercise.js
+  upload: khan-exercises/khan-exercise.js
+
+- url: /khan-exercises/utils
+  static_dir: khan-exercises/utils
+
+- url: /khan-exercises/css
+  static_dir: khan-exercises/css
+# End khan-exercises integration
+
 - url: /helperpages/d\.svg
   static_files: helperpages/d.svg
   upload: helperpages/d\.svg
