@@ -42,16 +42,32 @@ class ViewExercise(request_handler.RequestHandler):
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
-        # When viewing a problem out-of-order, show read-only view
-        read_only = problem_number != (user_exercise.total_done + 1)
+        student_user_data = self.request_user_data("student_email") or user_data
+        if student_user_data.key_email != user_data.key_email and not student_user_data.is_coached_by(user_data):
+            student_user_data = user_data
+
+        viewing_other = student_user_data.key_email != user_data.key_email
+
+        # Can't view your own problems ahead of schedule
+        if not viewing_other and problem_number > user_exercise.total_done + 1:
+            problem_number = user_exercise.total_done + 1
+
+        # When viewing another student's problem or a problem out-of-order, show read-only view
+        read_only = viewing_other or problem_number != (user_exercise.total_done + 1)
 
         exercise_states = user_data.get_exercise_states(exercise, user_exercise)
 
-        exercise_body_html, exercise_inline_script, data_require, sha1 = exercise_contents(exercise)
         exercise_template_html = exercise_template()
 
-        # Set extra properties so they're accessible by the exercise framework
+        exercise_body_html, exercise_inline_script, data_require, sha1 = exercise_contents(exercise)
         user_exercise.exercise_model.sha1 = sha1
+
+        if read_only:
+            # Override current problem number and user being inspected
+            user_exercise.total_done = problem_number - 1
+            user_exercise.user = student_user_data.user
+            user_exercise.read_only = True
+
         user_exercise_json = jsonify.jsonify(user_exercise)
 
         template_values = {
