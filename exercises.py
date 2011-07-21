@@ -2,6 +2,7 @@ import re
 import os
 import logging
 import itertools
+import hashlib
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -46,10 +47,12 @@ def exercise_contents(exercise):
     list_script_contents = re_script_contents.findall(contents)
     script_contents = ";".join(list_script_contents)
 
+    sha1 = hashlib.sha1(contents).hexdigest()
+
     if not len(body_contents):
         raise MissingExerciseException("Missing exercise body in template for exid '%s'" % exercise.name)
 
-    return (body_contents, script_contents, data_require)
+    return (body_contents, script_contents, data_require, sha1)
 
 def reset_streak(user_data, user_exercise):
     if user_exercise and user_exercise.belongs_to(user_data):
