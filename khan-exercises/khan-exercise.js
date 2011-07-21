@@ -1050,7 +1050,12 @@ function injectSite( html, htmlExercise ) {
 
 function prepareSite() {
 	
+    // Set exercise title
 	jQuery(".exercise-title").text( userExercise ? userExercise.exercise_model.display_name : document.title );
+
+    // Setup appropriate img URLs
+    jQuery("#sad").attr("src", urlBase + "css/images/face-sad.gif");
+    jQuery("#happy").attr("src", urlBase + "css/images/face-smiley.gif");
 
 	// Hide exercies summaries for now
 	// Will figure out something more elegant to do with them once the new
