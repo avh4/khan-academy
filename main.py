@@ -50,7 +50,7 @@ import activity_summary
 import exercises
 
 import models
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from phantom_users import util_notify
@@ -58,7 +58,7 @@ from badges import util_badges, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
-from custom_exceptions import MissingVideoException, MissingExerciseException
+from custom_exceptions import MissingVideoException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
@@ -67,8 +67,6 @@ from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_co
 from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
-from api import jsonify
-from api.auth.xsrf import ensure_xsrf_cookie
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -107,52 +105,7 @@ class KillLiveAssociations(request_handler.RequestHandler):
         for video_playlist in all_video_playlists:
             video_playlist.live_association = False
         db.put(all_video_playlists)
-
-class ViewExercise(request_handler.RequestHandler):
-    @ensure_xsrf_cookie
-    @create_phantom
-    def get(self):
-        user_data = UserData.current()
-
-        exid = self.request_string("exid", default="addition_1")
-        exercise = Exercise.get_by_name(exid)
-
-        if not exercise: 
-            raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
-
-        user_exercise = user_data.get_or_insert_exercise(exercise)
-
-        # Cache this so we don't have to worry about future lookups
-        user_exercise.exercise_model = exercise
-
-        problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
-
-        # When viewing a problem out-of-order, show read-only view
-        read_only = problem_number != (user_exercise.total_done + 1)
-
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise)
-
-        exercise_body_html, exercise_inline_script, data_require, sha1 = exercises.exercise_contents(exercise)
-        exercise_template_html = exercises.exercise_template()
-
-        # Set extra properties so they're accessible by the exercise framework
-        user_exercise.exercise_model.sha1 = sha1
-        user_exercise_json = jsonify.jsonify(user_exercise)
-
-        template_values = {
-            'exercise': exercise,
-            'user_exercise_json': user_exercise_json,
-            'exercise_body_html': exercise_body_html,
-            'exercise_template_html': exercise_template_html,
-            'exercise_inline_script': exercise_inline_script,
-            'data_require': data_require,
-            'read_only': read_only,
-            'selected_nav_link': 'practice',
-            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
-            }
-
-        self.render_template("exercise_template.html", template_values)
-            
+           
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
@@ -424,57 +377,6 @@ class ReportIssue(request_handler.RequestHandler):
 class ProvideFeedback(request_handler.RequestHandler):
     def get(self):
         self.render_template("provide_feedback.html", {})
-
-class ViewAllExercises(request_handler.RequestHandler):
-    @create_phantom
-    def get(self):
-        user_data = UserData.current()
-        
-        ex_graph = ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
-            user_data.put()
-
-        recent_exercises = ex_graph.get_recent_exercises()
-        review_exercises = ex_graph.get_review_exercises(self.get_time())
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
-
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
-            # if user_data.is_phantom:
-            #     exercise.phantom = True
-            # else:
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            if exercise in review_exercises:
-                exercise.review = True
-                exercise.status = "Review"
-
-        template_values = {
-            'exercises': ex_graph.exercises,
-            'recent_exercises': recent_exercises,
-            'review_exercises': review_exercises,
-            'suggested_exercises': suggested_exercises,
-            'user_data': user_data,
-            'expanded_all_exercises': user_data.expanded_all_exercises,
-            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
-            'selected_nav_link': 'practice',
-            }
-
-        self.render_template('viewexercises.html', template_values)
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
 
 class VideolessExercises(request_handler.RequestHandler):
 
@@ -1140,15 +1042,15 @@ def main():
         ('/about/downloads', util_about.ViewDownloads),
         ('/getinvolved', ViewGetInvolved),
         ('/donate', Donate),
-        ('/exercisedashboard', ViewAllExercises),
+        ('/exercisedashboard', exercises.ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
         ('/video_mapping', GenerateVideoMapping),  
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/exercises', ViewExercise),
+        ('/exercises', exercises.ViewExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisesonmap', ViewAllExercises),
+        ('/viewexercisesonmap', exercises.ViewAllExercises),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),

@@ -1439,7 +1439,7 @@ class ExerciseGraph(object):
             ex.phantom = phantom
                 
 
-    def get_review_exercises(self, now):
+    def get_review_exercises(self, now = datetime.datetime.now()):
 
 # An exercise ex should be reviewed iff all of the following are true:
 #   * ex and all of ex's covering ancestors either

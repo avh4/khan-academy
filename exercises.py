@@ -15,9 +15,102 @@ import request_handler
 import util
 import points
 import layer_cache
+import knowledgemap
 from badges import util_badges, last_action_cache, custom_badges
 from phantom_users import util_notify
+from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
+from api.auth.xsrf import ensure_xsrf_cookie
+from api import jsonify
+
+class ViewExercise(request_handler.RequestHandler):
+    @ensure_xsrf_cookie
+    @create_phantom
+    def get(self):
+        user_data = models.UserData.current()
+
+        exid = self.request_string("exid", default="addition_1")
+        exercise = models.Exercise.get_by_name(exid)
+
+        if not exercise: 
+            raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
+
+        user_exercise = user_data.get_or_insert_exercise(exercise)
+
+        # Cache this so we don't have to worry about future lookups
+        user_exercise.exercise_model = exercise
+
+        problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
+
+        # When viewing a problem out-of-order, show read-only view
+        read_only = problem_number != (user_exercise.total_done + 1)
+
+        exercise_states = user_data.get_exercise_states(exercise, user_exercise)
+
+        exercise_body_html, exercise_inline_script, data_require, sha1 = exercise_contents(exercise)
+        exercise_template_html = exercise_template()
+
+        # Set extra properties so they're accessible by the exercise framework
+        user_exercise.exercise_model.sha1 = sha1
+        user_exercise_json = jsonify.jsonify(user_exercise)
+
+        template_values = {
+            'exercise': exercise,
+            'user_exercise_json': user_exercise_json,
+            'exercise_body_html': exercise_body_html,
+            'exercise_template_html': exercise_template_html,
+            'exercise_inline_script': exercise_inline_script,
+            'data_require': data_require,
+            'read_only': read_only,
+            'selected_nav_link': 'practice',
+            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
+            }
+
+        self.render_template("exercise_template.html", template_values)
+
+class ViewAllExercises(request_handler.RequestHandler):
+    @create_phantom
+    def get(self):
+        user_data = models.UserData.current()
+        
+        ex_graph = models.ExerciseGraph(user_data)
+        if user_data.reassess_from_graph(ex_graph):
+            user_data.put()
+
+        recent_exercises = ex_graph.get_recent_exercises()
+        review_exercises = ex_graph.get_review_exercises()
+        suggested_exercises = ex_graph.get_suggested_exercises()
+        proficient_exercises = ex_graph.get_proficient_exercises()
+
+        for exercise in ex_graph.exercises:
+            exercise.phantom = False
+            exercise.suggested = False
+            exercise.proficient = False
+            exercise.review = False
+            exercise.status = ""
+
+            if exercise in suggested_exercises:
+                exercise.suggested = True
+                exercise.status = "Suggested"
+            if exercise in proficient_exercises:
+                exercise.proficient = True
+                exercise.status = "Proficient"
+            if exercise in review_exercises:
+                exercise.review = True
+                exercise.status = "Review"
+
+        template_values = {
+            'exercises': ex_graph.exercises,
+            'recent_exercises': recent_exercises,
+            'review_exercises': review_exercises,
+            'suggested_exercises': suggested_exercises,
+            'user_data': user_data,
+            'expanded_all_exercises': user_data.expanded_all_exercises,
+            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
+            'selected_nav_link': 'practice',
+            }
+
+        self.render_template('viewexercises.html', template_values)
 
 @layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def exercise_template():
