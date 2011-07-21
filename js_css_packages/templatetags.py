@@ -24,8 +24,6 @@ def css_package(package_name):
     package = packages.stylesheets[package_name]
     src_dir = "/stylesheets/%s-package" % package_name
 
-    ie_package = packages.stylesheets[package_name+'-ie']
-
     list_css = []
 
     if App.is_dev_server:
@@ -33,6 +31,8 @@ def css_package(package_name):
             list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
                 % (src_dir, filename))
     else:
+        ie_package = packages.stylesheets[package_name+'-ie']
+
         list_css.append("<!--[if (!IE)|(gte IE 8)]><!-->")
 
         # Stylesheets using data-uris
