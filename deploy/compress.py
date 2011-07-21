@@ -7,6 +7,7 @@ import md5
 import re
 import StringIO
 import base64
+import copy
 from string import lower
 
 sys.path.append(os.path.abspath("."))
@@ -19,6 +20,9 @@ PACKAGE_SUFFIX = "-package"
 HASHED_FILENAME_PREFIX = "hashed-"
 PATH_PACKAGES = "js_css_packages/packages.py"
 PATH_PACKAGES_TEMP = "js_css_packages/packages.compresstemp.py"
+
+packages_stylesheets = copy.deepcopy(packages.stylesheets)
+packages_javascript = copy.deepcopy(packages.javascript)
 
 def revert_js_css_hashes():
     print "Reverting %s" % PATH_PACKAGES
@@ -52,6 +56,14 @@ def compress_all_packages(path, dict_packages, suffix):
 
         compress_package(package_name, package_path, package["files"], suffix)
 
+        hashed_content = "javascript=%s\nstylesheets=%s" % \
+            (str(packages_javascript), str(packages_stylesheets))
+        f = open(PATH_PACKAGES_TEMP, "w")
+        f.write(hashed_content)
+        f.close()
+
+        shutil.move(PATH_PACKAGES_TEMP, PATH_PACKAGES)
+
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
@@ -59,19 +71,23 @@ def compress_package(name, path, files, suffix):
 
     path_combined = combine_package(path, files, suffix)
 
-    # don't use data-uri's for IE < 8 or mobile browsers
-    if suffix != '.css' or '-ie' in name or 'mobile' in name:
-        path_with_uris = path_combined
-    else:
-        path_with_uris = remove_urls(path, path_combined, suffix)
+    # Create an IE package and a data-uri one. Skip this step for mobile css
+    # and js.
+    if suffix == '.css' and 'mobile' not in name:
+        path_with_uris = remove_images(path, path_combined, suffix)
+        path_compressed = minify_package(path, path_with_uris, suffix)
+        path_hashed = hash_package(name, path, path_compressed, suffix)
 
-    path_compressed = minify_package(path, path_with_uris, suffix)
+        if not os.path.exists(path_hashed):
+            raise Exception("Did not successfully compress and hash: %s" % path)
+
+        suffix = '-ie'+suffix
+
+    path_compressed = minify_package(path, path_combined, suffix)
     path_hashed = hash_package(name, path, path_compressed, suffix)
 
     if not os.path.exists(path_hashed):
         raise Exception("Did not successfully compress and hash: %s" % path)
-
-    return path_hashed
 
 # Remove previous combined.js\.css and compress.js\.css files
 def remove_working_files(path, suffix):
@@ -114,8 +130,8 @@ def remove_images_from_line(filename):
 
     return filename
 
-def remove_urls(path, path_combined, suffix):
-    if suffix != '.css': # don't touch js
+def remove_images(path, path_combined, suffix):
+    if suffix != '.css': # don't touch js (yes, this is redundant)
         return path_combined
 
     path_without_urls = os.path.join(path, URI_FILENAME + suffix)
@@ -149,10 +165,7 @@ def hash_package(name, path, path_compressed, suffix):
     f.close()
 
     hash_sig = md5.new(content).hexdigest()
-    if '-ie' in name:
-        path_hashed = os.path.join(path, "hashed-ie-%s%s" % (hash_sig, suffix))
-    else:
-        path_hashed = os.path.join(path, "hashed-%s%s" % (hash_sig, suffix))
+    path_hashed = os.path.join(path, "hashed-%s%s" % (hash_sig, suffix))
     
     print "Copying %s into %s" % (path_compressed, path_hashed)
     shutil.copyfile(path_compressed, path_hashed)
@@ -167,22 +180,11 @@ def hash_package(name, path, path_compressed, suffix):
 def insert_hash_sig(name, hash_sig, suffix):
     print "Inserting %s sig (%s) into %s\n" % (name, hash_sig, PATH_PACKAGES)
 
-    f = open(PATH_PACKAGES, "r")
-    content = f.read()
-    f.close()
-
-    re_search = "@%s@%s" % (name, suffix)
-    re_replace = "%s%s" % (hash_sig, suffix)
-    hashed_content = re.sub(re_search, re_replace, content)
-
-    if content == hashed_content:
-        raise Exception("Hash sig insertion failed: %s" % name)
-
-    f = open(PATH_PACKAGES_TEMP, "w")
-    f.write(hashed_content)
-    f.close()
-
-    shutil.move(PATH_PACKAGES_TEMP, PATH_PACKAGES)
+    current_dict = packages_stylesheets if suffix == '.css' else packages_javascript
+    if name not in current_dict:
+        current_dict[name] = {"hashed-filename": "hashed-%s.css" % hash_sig}
+    else:
+        current_dict[name]["hashed-filename"] = "hashed-%s.css" % hash_sig
 
 # Combine all files into a single combined.js\.css
 def combine_package(path, files, suffix):
