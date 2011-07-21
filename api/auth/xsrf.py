@@ -2,7 +2,6 @@
 import datetime
 import cookie_util
 import base64
-import hashlib
 import os
 from functools import wraps
 import logging
