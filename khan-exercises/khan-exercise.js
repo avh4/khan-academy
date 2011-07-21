@@ -372,7 +372,10 @@ Khan.loadScripts( scripts, function() {
 			}
 			
 			hintUsed = true;
-			request( "reset_streak" );
+
+			if (!(typeof userExercise !== "undefined" && userExercise.read_only)) {
+				request( "reset_streak" );
+			}
 			
 			// Make sure we don't reset the streak more than once
 			doHintSave = false;
@@ -457,7 +460,7 @@ Khan.loadScripts( scripts, function() {
 	function updateData( data ) {
 		// Make sure we have current data
 		data = data || getData();
-		
+
 		// Change users, if needed
 		user = data.user;
 		
@@ -507,20 +510,20 @@ Khan.loadScripts( scripts, function() {
 	=============================================================================== 
 	*/
 	
-    /* Number */ 
-    function crc32( /* String */ str, /* Number */ crc ) { 
-        if( crc == window.undefined ) crc = 0; 
-        var n = 0; //a number between 0 and 255 
-        var x = 0; //an hex number 
+	/* Number */ 
+	function crc32( /* String */ str, /* Number */ crc ) { 
+		if( crc == window.undefined ) crc = 0; 
+		var n = 0; //a number between 0 and 255 
+		var x = 0; //an hex number 
 
-        crc = crc ^ (-1); 
-        for( var i = 0, iTop = str.length; i < iTop; i++ ) { 
-            n = ( crc ^ str.charCodeAt( i ) ) & 0xFF; 
-            x = "0x" + table.substr( n * 9, 8 ); 
-            crc = ( crc >>> 8 ) ^ x; 
-        } 
-        return Math.abs( crc ^ (-1) ); 
-    }
+		crc = crc ^ (-1); 
+		for( var i = 0, iTop = str.length; i < iTop; i++ ) { 
+			n = ( crc ^ str.charCodeAt( i ) ) & 0xFF; 
+			x = "0x" + table.substr( n * 9, 8 ); 
+			crc = ( crc >>> 8 ) ^ x; 
+		} 
+		return Math.abs( crc ^ (-1) ); 
+	}
 
 	var remoteCount = 0;
 
@@ -962,7 +965,7 @@ function makeProblem( id, seed ) {
 
 	// Show the debug info
 	if ( testMode && Khan.query.debug != null ) {
-		jQuery( "body" ).keypress( function( e ) {
+		jQuery( document ).keypress( function( e ) {
 			if ( e.charCode === 104 ) {
 				jQuery("#hint").click();
 			}
@@ -1049,6 +1052,15 @@ function prepareSite() {
 	jQuery("#sad").attr("src", urlBase + "css/images/face-sad.gif");
 	jQuery("#happy").attr("src", urlBase + "css/images/face-smiley.gif");
 
+	if (typeof userExercise !== "undefined" && userExercise.read_only) {
+		jQuery( "#answercontent" ).hide();
+
+		jQuery( "#readonly" )
+			.find( "#readonly-problem" ).text("Problem #" + (userExercise.total_done + 1)).end()
+			.find( "#readonly-start" ).attr("href", "/exercises?exid=" + userExercise.exercise).end()
+			.show();
+	}
+
 	// Hide exercies summaries for now
 	// Will figure out something more elegant to do with them once the new
 	// framework is shipped and we can worry about rounding out the summaries
@@ -1060,7 +1072,12 @@ function prepareSite() {
 	
 	function handleSubmit( e ) {
 		var pass = validator();
-		
+
+		// Stop if the user didn't enter a response
+		if ( jQuery.trim( validator.guess ) === "" ) {
+			return false;
+		}
+
 		// Figure out if the response was correct
 		if ( pass ) {
 			// Show a congratulations message
@@ -1087,8 +1104,6 @@ function prepareSite() {
 		
 		jQuery(Khan).trigger( "checkAnswer", pass );
 
-		// Why is this necessary along with the return false? Not sure. Chrome needs it, at least.
-		e.preventDefault();
 		return false;
 	}
 
@@ -1354,7 +1369,7 @@ function prepareSite() {
 			jQuery( "#next-question-button" ).trigger( "click" );
 		} );
 
-		jQuery( "body" ).keyup( function( e ) {
+		jQuery( document ).keyup( function( e ) {
 			if ( e.keyCode === "H".charCodeAt( 0 ) ) {
 				jQuery( "#hint" ).click();
 			}
