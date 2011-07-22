@@ -102,6 +102,7 @@ def exercise_problems_graph_context(user_data_student, exid):
         x_axis_label += " (Last %d problems)" % max_problems_in_graph
 
     return {
+        'student_email': user_data_student.email,
         'exercise_display_name': models.Exercise.to_display_name(exid),
         'exid': exid,
         'problem_list': problem_list,
