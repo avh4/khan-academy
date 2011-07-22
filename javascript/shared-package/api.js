@@ -14,7 +14,7 @@ var APIActionResults = {
 
                 if (result && result.action_results) {
                     $(APIActionResults.hooks).each(function(ix, el) {
-                        if (result.action_results[el.prop]) {
+                        if (typeof result.action_results[el.prop] !== "undefined") {
                             el.fxn(result.action_results[el.prop]);
                         }
                     });
@@ -60,13 +60,35 @@ $(function(){ APIActionResults.register("user_info_html",
 // Update exercise message after appropriate API ajax requests
 $(function(){ APIActionResults.register("exercise_message_html", 
         function(sExerciseMessageHtml) {
+            var jel = $("#exercise-message-container");
             var jelNew = $(sExerciseMessageHtml);
             if (jelNew.children().length) {
-                var jel = $("#exercise-message-container");
                 jel.empty().append(jelNew.children());
-
                 setTimeout(function(){ jel.slideDown(); }, 50);
             }
+            else {
+                jel.slideUp();
+            }
+        }
+    );
+});
+
+// Update exercise icons after appropriate API ajax requests
+$(function(){ APIActionResults.register("exercise_states", 
+        function(dictExerciseStates) {
+            var sPrefix = dictExerciseStates.summative ? "node-challenge" : "node";
+            var src = "";
+
+            if (dictExerciseStates.review)
+                src = "/images/node-review.png";
+            else if (dictExerciseStates.suggested)
+                src = "/images/" + sPrefix + "-suggested.png";
+            else if (dictExerciseStates.proficient)
+                src = "/images/" + sPrefix + "-complete.png";
+            else
+                src = "/images/" + sPrefix + "-not-started.png";
+
+            $("#exercise-icon-container img").attr("src", src);
         }
     );
 });
