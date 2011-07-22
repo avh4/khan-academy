@@ -110,6 +110,9 @@ def related_videos(exercise_videos, show_points=False):
 
 @register.simple_tag
 def exercise_icon(exercise, App):
+    return webapp.template.render("exercise_icon.html", exercise_icon_context(exercise, App))
+
+def exercise_icon_context(exercise, App):
     s_prefix = "node"
     if exercise.summative:
         s_prefix = "node-challenge"
@@ -125,22 +128,27 @@ def exercise_icon(exercise, App):
     #     src = "/images/node-not-started.png"
     else:
         src = "/images/%s-not-started.png" % s_prefix
-
     return webapp.template.render("exercise_icon.html", {
         "src": src, "version": App.version
     })
 
-@register.simple_tag
-def exercise_message(exercise, coaches, exercise_states):
-    return webapp.template.render("exercise_message.html", dict({"exercise": exercise, "coaches": coaches}, **exercise_states))
+def exercise_message_context(exercise, coaches, exercise_states):
+    return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
 
 @register.simple_tag
-def user_points(user_data):
+def exercise_message(exercise, coaches, exercise_states):
+    return webapp.template.render("exercise_message.html", exercise_message_context(exercise, coaches, exercise_states))
+
+def user_points_context(user_data):
     if user_data:
         points = user_data.points
     else:
         points = 0
-    return webapp.template.render("user_points.html", {"points": points})
+    return {"points": points}
+
+@register.simple_tag
+def user_points(user_data):
+    return webapp.template.render("user_points.html", user_points_context(user_data))
 
 @register.simple_tag
 def possible_points_badge(points, possible_points, logged_in=True):
@@ -156,8 +164,7 @@ def simple_student_info(user_data):
         "member_for": seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False)
     })
 
-@register.simple_tag
-def streak_bar(user_exercise):
+def streak_bar_context(user_exercise):
     streak = user_exercise.streak
     longest_streak = 0
 
@@ -192,17 +199,21 @@ def streak_bar(user_exercise):
         if longest_streak > consts.MAX_STREAK_SHOWN:
             longest_streak = "Max"
 
-    return webapp.template.render("streak_bar.html", {
-            "streak": streak,
-            "longest_streak": longest_streak,
-            "streak_width": streak_width, 
-            "longest_streak_width": longest_streak_width, 
-            "streak_max_width": streak_max_width,
-            "streak_icon_width": streak_icon_width,
-            "show_streak_label": show_streak_label,
-            "show_longest_streak_label": show_longest_streak_label,
-            "levels": levels
-            })
+    return {
+        "streak": streak,
+        "longest_streak": longest_streak,
+        "streak_width": streak_width,
+        "longest_streak_width": longest_streak_width,
+        "streak_max_width": streak_max_width,
+        "streak_icon_width": streak_icon_width,
+        "show_streak_label": show_streak_label,
+        "show_longest_streak_label": show_longest_streak_label,
+        "levels": levels
+    }
+
+@register.simple_tag
+def streak_bar(user_exercise):
+    return webapp.template.render("streak_bar.html", streak_bar_context(user_exercise))
 
 @register.simple_tag
 def reports_navigation(coach_email, current_report="classreport"):

@@ -9,6 +9,9 @@ register = webapp.template.create_template_register()
 
 @register.simple_tag
 def badge_notifications():
+    return webapp.template.render("badges/notifications.html", badge_notifications_context())
+
+def badge_notifications_context():
     user_badges = UserNotifier.pop_for_current_user_data()["badges"]
     
     all_badges_dict = util_badges.all_badges_dict()
@@ -22,11 +25,13 @@ def badge_notifications():
     if len(user_badges) > 1:
         user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserNotifier.NOTIFICATION_LIMIT]
 
-    return webapp.template.render("badges/notifications.html", {"user_badges": user_badges})
+    return {"user_badges": user_badges}
 
 @register.simple_tag
 def badge_counts(user_data):
+    return webapp.template.render('badges/badge_counts.html', badge_counts_context(user_data))
 
+def badge_counts_context(user_data):
     counts_dict = {}
     if user_data:
         counts_dict = util_badges.get_badge_counts(user_data)
@@ -37,15 +42,15 @@ def badge_counts(user_data):
     for key in counts_dict:
         sum_counts += counts_dict[key]
 
-    return webapp.template.render('badges/badge_counts.html', {
-            "sum": sum_counts,
-            "bronze": counts_dict[badges.BadgeCategory.BRONZE],
-            "silver": counts_dict[badges.BadgeCategory.SILVER],
-            "gold": counts_dict[badges.BadgeCategory.GOLD],
-            "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
-            "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
-            "master": counts_dict[badges.BadgeCategory.MASTER],
-    })
+    return {
+        "sum": sum_counts,
+        "bronze": counts_dict[badges.BadgeCategory.BRONZE],
+        "silver": counts_dict[badges.BadgeCategory.SILVER],
+        "gold": counts_dict[badges.BadgeCategory.GOLD],
+        "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
+        "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
+        "master": counts_dict[badges.BadgeCategory.MASTER],
+    }
 
 @register.simple_tag
 def badge_block(badge, user_badge=None, show_frequency=False):
