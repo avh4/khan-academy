@@ -128,9 +128,7 @@ def exercise_icon_context(exercise, App):
     #     src = "/images/node-not-started.png"
     else:
         src = "/images/%s-not-started.png" % s_prefix
-    return webapp.template.render("exercise_icon.html", {
-        "src": src, "version": App.version
-    })
+    return {"src": src, "version": App.version}
 
 def exercise_message_context(exercise, coaches, exercise_states):
     return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
