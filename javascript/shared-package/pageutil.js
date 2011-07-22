@@ -620,8 +620,8 @@ var Notifications = {
                 // Queue:false to make sure all of these run at the same time
                 var animationOptions = {duration: 350, queue: false};
                 
-                $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
-                $("#top-header").animate({ marginTop: 35 }, animationOptions);
+                $("body").animate({ backgroundPosition: "0px 35px" }, animationOptions);
+                $("header").animate({ paddingTop: 35 }, animationOptions);
                 jel.show().animate({ top: 0 }, animationOptions);
 
             }, 100);
@@ -634,8 +634,8 @@ var Notifications = {
         // Queue:false to make sure all of these run at the same time
         var animationOptions = {duration: 350, queue: false};
         
-        $("body").animate({ backgroundPosition: "0px 0px", top: 0 }, animationOptions);
-        $("#top-header").animate({ marginTop: 0 }, animationOptions);
+        $("body").animate({ backgroundPosition: "0px 0px" }, animationOptions);
+        $("header").animate({ paddingTop: 0 }, animationOptions);
         jel.animate(
                 { top: -1 * jel.height() }, 
                 $.extend(animationOptions, 
