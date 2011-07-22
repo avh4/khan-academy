@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html data-require="math graphie math-format">
+<head>
+	<title>Distance formula</title>
+	<script src="../khan-exercise.js"></script>
+	<style>
+		.point1 {
+			color: #0969A2;
+		}
+
+		.point2 {
+			color: #A62ADD;
+		}
+	</style>
+</head>
+<body>
+	<div class="exercise">
+		<div class="vars">
+			<var id="X1">randRange( -9, 7 )</var>
+			<var id="X2">randRange( -9, 7 )</var>
+			<var id="Y1">randRange( -9, 8 )</var>
+			<var id="Y2">randRange( -9, 8 )</var>
+			<var id="X_DIST">abs( X2 - X1 )</var>
+			<var id="Y_DIST">abs( Y2 - Y1 )</var>
+			<var id="HYP2">X_DIST * X_DIST + Y_DIST * Y_DIST</var>
+
+			<var id="SOLUTION">splitRadical( X_DIST * X_DIST + Y_DIST * Y_DIST )</var>
+			<var id="SOLUTION_COEFFICIENT">SOLUTION[0] === 1 ? "" : SOLUTION[0]</var>
+			<var id="SOLUTION_RADICAL">SOLUTION[1] == 1 ? "" : SOLUTION[1]</var>
+		</div>
+
+		<div class="problems">
+			<div>
+				<p class="question">Find the distance between the points <span class="point1">(<var>X1</var>, <var>Y1</var>)</span> and <span class="point2">(<var>X2</var>, <var>Y2</var>)</span>.</p>
+				<div class="graphie" id="graph">
+					graphInit({
+						range: 10,
+						scale: 20,
+						tickStep: 1,
+						axisArrows: "->",
+					});
+
+					label([ X1, Y1 ], "(" + X1 + ", " + Y1 + ")", "left", { color: "#0969a2" } );
+					label([ X2, Y2 ], "(" + X2 + ", " + Y2 + ")", "right", { color: "#a62add" } );
+
+					circle([ X1, Y1 ], 3 / 20, { stroke: "none", fill: "#0969a2" } );
+					circle([ X2, Y2 ], 3 / 20, { stroke: "none", fill: "#a62add" } );
+				</div>
+
+				<div class="solution" data-type="radical">
+					<span><var>SOLUTION_COEFFICIENT</var></span><span><var>SOLUTION_RADICAL</var></span>
+				</div>
+			</div>
+		</div>
+
+		<div class="hints">
+			<div>
+				<p>
+					<span style="color: #679B00">Change in <code>x</code>:</span>
+					<span data-if="X2 - X1 > 0">
+						<span class="point2"><var>X2</var></span> - <span class="point1"><var>X1</var></span>
+					</span>
+					<span data-else>
+						<span class="point1"><var>X1</var></span> - <span class="point2"><var>X2</var></span>
+					</span>
+					= <span style="color: #679B00"><var>X_DIST</var></span>
+				</p>
+
+				<div class="graphie" data-update="graph">
+					style({
+						color: "#679b00",
+						stroke: "#679b00"
+					}, function() {
+						line( [ X1, Y1 ], [ X2, Y1 ] );
+						label( [ ( X1 + X2 ) / 2, Y1 ], X_DIST, "above" );
+					});
+				</div>
+			</div>
+
+			<div>
+				<p>
+				<span style="color: #A66000">Change in <code>y</code>:</span>
+					<span data-if="Y2 - Y1 > 0">
+						<span class="point2"><var>Y2</var></span> - <span class="point1"><var>Y1</var></span>
+					</span>
+					<span data-else>
+						<span class="point1"><var>Y1</var></span> - <span class="point2"><var>Y2</var></span>
+					</span>
+					= <span style="color: #A66000"><var>Y_DIST</var></span>
+				</p>
+
+				<div class="graphie" data-update="graph">
+					style({
+						color: "#a66000",
+						stroke: "#a66000"
+					}, function() {
+						line( [ X2, Y1 ], [ X2, Y2 ] );
+						label( [ X2, ( Y1 + Y2 ) / 2 ], Y_DIST, "left" );
+					});
+				</div>
+			</div>
+
+			<div>
+				<p>The distance is the <span style="color: #FF4900">length of the hypotenuse</span> of this right triangle.</p>
+
+				<div class="graphie" data-update="graph">
+					style({
+						stroke: "#ff4900"
+					}, function() {
+						line( [ X1, Y1 ], [ X2, Y2 ] );
+					});
+				</div>
+			</div>
+
+			<div>
+				<p>By the Pythagorean Theorem, <span style="color: #FF4900">that length</span> is equal to:</p>
+				<p><code>\sqrt{<var>X_DIST</var>^2 + <var>Y_DIST</var>^2}</code></p>
+				<p><code>{}= \sqrt{<var>Math.pow( X_DIST, 2 ) + pow( Y_DIST, 2 )</var>}</code></p>
+				<p data-if="squareRootCanSimplify(HYP2)" style="color: #FF4900"><code>{}= <var>formattedSquareRootOf(HYP2)</var></code>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>
+
+
