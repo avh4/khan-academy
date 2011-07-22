@@ -32,7 +32,7 @@ javascript = {
     "profile": {
         "hashed-filename": "hashed-@profile@.js", # @content@ will be replaced with hash by deploy script
         "files": [
-            "jquery.address-1.3.1.min.js",
+            "jquery.address-1.4.min.js",
             "highcharts.js",
             "profile.js",
         ]
