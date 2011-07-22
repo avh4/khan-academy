@@ -1,2 +1,103 @@
-javascript={'profile': {'files': ['jquery.address-1.3.1.min.js', 'highcharts.js', 'profile.js'], 'hashed-filename': 'hashed-7ba546980acfd279f43981162b20057a.js'}, 'mobile': {'files': ['jquery.js', 'jquery.mobile-1.0a4.1.js', 'iscroll-lite.min.js'], 'hashed-filename': 'hashed-23673462582d271b19e93c75d31947c7.js'}, 'maps': {'files': ['fastmarkeroverlay.js', 'knowledgemap.js'], 'hashed-filename': 'hashed-65e68976d3f46afa4063d0fa585d153f.js'}, 'video': {'files': ['video.js', 'discussion.js', 'jquery.qtip.js'], 'hashed-filename': 'hashed-8e0799090abcd01af47b5309bfc5701d.js'}, 'exercises': {'files': ['ASCIIMathML.js', 'raphael.js', 'ASCIIsvg-wrapper.js', 'fontdetect.js', 'seedrandom.js', 'metautil.js', 'exerciseutil.js', 'graphutil.js', 'g.raphael-min.js', 'g.pie-min.js', 'g.line-min.js'], 'hashed-filename': 'hashed-d5485d5cfb283af02fd62ef9975c9f6e.js'}, 'shared': {'files': ['jquery.js', 'jquery-ui.js', 'jquery.ui.menu.js', 'jquery.watermark.js', 'jquery.placeholder.js', 'pageutil.js', 'social.js'], 'hashed-filename': 'hashed-d1c5782d6f970c7167ae61be62f7d549.js'}, 'studentlists': {'files': ['studentlists.js', 'classprofile.js'], 'hashed-filename': 'hashed-de07252453078af37b3f028f01e2b51f.js'}, 'homepage': {'files': ['jquery.easing.1.1.1.js', 'jquery.cycle.all.min.js', 'waypoints.min.js', 'homepage.js'], 'hashed-filename': 'hashed-f0f231feae90f684b4d163e211e14115.js'}}
-stylesheets={'video': {'files': ['video.css', 'discussion.css', 'jquery.qtip.css'], 'hashed-filename': 'hashed-29770e0ea239bf495442d1615dfa9fc9.css'}, 'shared-ie': {'hashed-filename': 'hashed-47295efbe8dda8c333aa983a5eb0d646-ie.css'}, 'mobile': {'files': ['jquery.mobile-1.0a4.1.css', 'mobile.css'], 'hashed-filename': 'hashed-45f773d1b4e9e107b7be49eaa3dfe228.css'}, 'video-ie': {'hashed-filename': 'hashed-29770e0ea239bf495442d1615dfa9fc9-ie.css'}, 'studentlists-ie': {'hashed-filename': 'hashed-4a5d2a81b393d3e2a48d0ef25c5f8909-ie.css'}, 'shared': {'files': ['default.css', 'rating.css', 'stylesheet.css', 'menu.css', 'profile.css', 'museo-sans.css', 'jquery-ui-1.8.4.custom.css'], 'hashed-filename': 'hashed-6ed9c3f79f0dffa4d5123401fd589c7a.css'}, 'studentlists': {'files': ['viewstudentlists.css', 'viewclassprofile.css'], 'hashed-filename': 'hashed-4a5d2a81b393d3e2a48d0ef25c5f8909.css'}}
+javascript = {
+    "shared": {
+        "files": [
+            "jquery.js",
+            "jquery-ui.js",
+            "jquery.ui.menu.js",
+            "jquery.watermark.js",
+            "jquery.placeholder.js",
+            "pageutil.js",
+			"social.js",
+        ]
+    },
+    "video": {
+        "files": [
+            "video.js",
+            "discussion.js",
+            "jquery.qtip.js",
+        ]
+    },
+    "homepage": {
+        "files": [
+            "jquery.easing.1.1.1.js",
+            "jquery.cycle.all.min.js",
+            "waypoints.min.js",
+            "homepage.js",
+        ]
+    },
+    "exercises": {
+        "files": [
+            "ASCIIMathML.js",
+            "raphael.js",
+            "ASCIIsvg-wrapper.js",
+            "fontdetect.js",
+            "seedrandom.js",
+            "metautil.js",
+            "exerciseutil.js",
+            "graphutil.js",
+            "g.raphael-min.js",
+            "g.pie-min.js",
+            "g.line-min.js",
+        ]
+    },
+    "profile": {
+        "files": [
+            "jquery.address-1.3.1.min.js",
+            "highcharts.js",
+            "profile.js",
+        ]
+    },
+    "maps": {
+        "files": [
+            "fastmarkeroverlay.js",
+            "knowledgemap.js",
+        ]
+    },
+    "mobile": {
+        "files": [
+            "jquery.js",
+            "jquery.mobile-1.0a4.1.js",
+            "iscroll-lite.min.js",
+        ]
+    },
+    "studentlists": {
+        "files": [
+            "studentlists.js",
+            "classprofile.js",
+        ]
+    },
+}
+
+stylesheets = {
+    "shared": {
+        "files": [
+            "default.css",
+            "rating.css",
+            "stylesheet.css",
+            "menu.css",
+            "profile.css",
+            "museo-sans.css",
+            "jquery-ui-1.8.4.custom.css",
+        ]
+    },
+    "mobile": {
+        "files": [
+            "jquery.mobile-1.0a4.1.css",
+            "mobile.css",
+        ]
+    },
+    "video": {
+        "files": [
+            "video.css",
+            "discussion.css",
+            "jquery.qtip.css",
+        ]
+    },
+    "studentlists": {
+        "files": [
+            "viewstudentlists.css",
+            "viewclassprofile.css",
+        ]
+    },
+}
+
