@@ -51,7 +51,7 @@ def exercise_problems_graph_context(user_data_student, exid):
 
     user_exercise = user_data_student.get_or_insert_exercise(exercise)
 
-    related_videos = exercise.related_videos()
+    related_videos = exercise.related_videos_query()
     video_list = []
 
     for exercise_video in related_videos:

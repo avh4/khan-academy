@@ -193,7 +193,7 @@ class Exercise(db.Model):
         else:
             return exercise
 
-    def related_videos(self):
+    def related_videos_query(self):
         exercise_videos = None
         query = ExerciseVideo.all()
         query.filter('exercise =', self.key()).order('exercise_order')
@@ -201,7 +201,7 @@ class Exercise(db.Model):
 
     @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def related_videos_fetch(self):
-        exercise_videos = self.related_videos().fetch(10)
+        exercise_videos = self.related_videos_query().fetch(10)
         for exercise_video in exercise_videos:
             exercise_video.video # Pre-cache video entity
         return exercise_videos
