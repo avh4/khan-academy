@@ -200,7 +200,7 @@ def exercises(exercise_name):
 def exercise_videos(exercise_name):
     exercise = models.Exercise.get_by_name(exercise_name)
     if exercise:
-        exercise_videos = exercise.related_videos()
+        exercise_videos = exercise.related_videos_query()
         return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
 
@@ -421,7 +421,7 @@ def user_exercises_specific(exercise_name):
                 user_exercise.user = user_data_student.user
 
             # Cheat and send back related videos when grabbing a single UserExercise for ease of exercise integration
-            user_exercise.exercise_model.related_videos = user_exercise.exercise_model.related_videos_fetch()
+            user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
             return user_exercise
 
     return None

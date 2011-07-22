@@ -43,6 +43,8 @@ class ViewExercise(request_handler.RequestHandler):
 
         # Temporarily work around in-app memory caching bug
         exercise.user_exercise = None
+        exercise.prerequisites_ex = None
+        exercise.coverers = None
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
@@ -65,6 +67,8 @@ class ViewExercise(request_handler.RequestHandler):
 
         exercise_body_html, exercise_inline_script, data_require, sha1 = exercise_contents(exercise)
         user_exercise.exercise_model.sha1 = sha1
+
+        user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
 
         renderable = True
 

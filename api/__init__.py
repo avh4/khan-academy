@@ -71,6 +71,7 @@ def format_api_errors(func):
         except Exception, e:
             # If any exception makes it all the way up to the top of an API request,
             # send possibly helpful message down for consumer
+            logging.exception(e)
             return current_app.response_class("API error. %s" % e.message, status=500)
 
     return api_errors_formatted
