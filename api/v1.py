@@ -421,7 +421,7 @@ def user_exercises_specific(exercise_name):
                 user_exercise.user = user_data_student.user
 
             # Cheat and send back related videos when grabbing a single UserExercise for ease of exercise integration
-            user_exercise.exercise_model.related_videos = user_exercise.exercise_model.related_videos_fetch()
+            user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
             return user_exercise
 
     return None
