@@ -30,7 +30,6 @@ if os.path.exists(PATH_PACKAGES_HASH):
 else:
     hashes = {}
     
-
 def revert_js_css_hashes():
     print "Reverting %s" % PATH_PACKAGES
     popen_results(['hg', 'revert', PATH_PACKAGES])
@@ -100,11 +99,11 @@ def compress_package(name, path, files, suffix):
         ie_fullname = ie_name + suffix
         path_with_uris = remove_images(path, path_compressed, suffix)
 
-        with open(path_with_uris, 'r') as compressed_again:
-            content_again = compressed_again.read()
-        new_hash_again = md5.new(content_again).hexdigest()
+        with open(path_with_uris, 'r') as compressed:
+            content = compressed.read()
+        new_hash = md5.new(content).hexdigest()
 
-        if ie_fullname in hashes and hashes[ie_fullname] == new_hash_again:
+        if ie_fullname in hashes and hashes[ie_fullname] == new_hash:
             pass#insert_hash_sig(ie_name, new_hash, suffix)
         else:
             good_to_go = False
@@ -206,6 +205,7 @@ def remove_images(path, path_combined, suffix):
     return path_without_urls
 
 def hash_package(name, path, path_compressed, suffix):
+    print "NAME: %s\n PATH_COMPRESSED: %s\nSUFFIX: %s\n" % (name, path_compressed, suffix)
     f = open(path_compressed, "r")
     content = f.read()
     f.close()
@@ -224,12 +224,12 @@ def hash_package(name, path, path_compressed, suffix):
     return path_hashed
 
 def insert_hash_sig(name, hash_sig, suffix):
-    print "Inserting %s sig (%s) into %s\n" % (name, hash_sig, PATH_PACKAGES)
-
-    current_dict = packages_stylesheets if suffix.endswith('.css') else packages_javascript
     if suffix == '-ie.css':
         name = name+'-ie'
 
+    print "Inserting %s sig (%s) into %s\n" % (name, hash_sig, PATH_PACKAGES)
+
+    current_dict = packages_stylesheets if suffix.endswith('.css') else packages_javascript
     if name not in current_dict:
         current_dict[name] = {}
     current_dict[name]["hashed-filename"] = "hashed-%s%s" % (hash_sig, suffix)
