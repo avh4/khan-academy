@@ -82,12 +82,6 @@ handlers:
 - url: /scratchpad-2011-04-06
   static_dir: scratchpad
 
-  # The url below needs to be updated whenever we change/upgrade Jit.
-  # Unfortunately, we can't use a regex due to a GAE bug:
-  # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /Jit-2.0.0a
-  static_dir: Jit
-
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin  
