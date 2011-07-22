@@ -47,19 +47,19 @@ def compress_all_packages(path, dict_packages, suffix):
 
     for package_name in dict_packages:
         package = dict_packages[package_name]
+        if 'files' in package:
+            dir_name = "%s-package" % package_name
+            package_path = os.path.join(path, dir_name)
 
-        dir_name = "%s-package" % package_name
-        package_path = os.path.join(path, dir_name)
+            compress_package(package_name, package_path, package["files"], suffix)
 
-        compress_package(package_name, package_path, package["files"], suffix)
+            hashed_content = "javascript=%s\nstylesheets=%s" % \
+                (str(packages_javascript), str(packages_stylesheets))
+            f = open(PATH_PACKAGES_TEMP, "w")
+            f.write(hashed_content)
+            f.close()
 
-        hashed_content = "javascript=%s\nstylesheets=%s" % \
-            (str(packages_javascript), str(packages_stylesheets))
-        f = open(PATH_PACKAGES_TEMP, "w")
-        f.write(hashed_content)
-        f.close()
-
-        shutil.move(PATH_PACKAGES_TEMP, PATH_PACKAGES)
+            shutil.move(PATH_PACKAGES_TEMP, PATH_PACKAGES)
 
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
@@ -67,27 +67,38 @@ def compress_package(name, path, files, suffix):
 
     remove_combined_files(path, suffix)
     path_combined = combine_package(path, files, suffix)
+  
+    with open(PATH_PACKAGES_HASH, 'r') as hash_file:
+        lines = hash_file.read().splitlines()
+    with open(PATH_PACKAGES_HASH, 'w') as hash_file:
+        with open(path_combined, 'r') as combined:
+            content = combined.read()
+            new_hash = md5.new(content).hexdigest()
 
-    for line in fileinput.input(PATH_PACKAGES_HASH, inplace=1):
-        if line.find(name):
-            # example line:
-            # shared 47295efbe8dda8c333aa983a5eb0d646
-            # <----> <------------------------------>
-            #    |                  |
-            #   [0]                [1]
-            new_hash = line.split()[1]
+            same = False
+            found = False
+            for line in lines:
+                if line.find(name) >= 0:
+                    found == True
 
-            with open(path_combined, "r") as combined:
-                content = combined.read()
-                old_hash = md5.new(content).hexdigest()
+                    # example line:
+                    # shared.css 47295efbe8dda8c333aa983a5eb0d646
+                    # <--------> <------------------------------>
+                    #      |                   |
+                    #     [0]                 [1]
+                    old_hash = line.split()[1]
+                    if old_hash == new_hash:
+                        same = True
 
-                if new_hash == old_hash:
-                    return
+                    hash_file.write('%s%s %s\n' % (name, suffix, new_hash))
                 else:
-                    # This does not print to the console, it replaces the old
-                    # hash with the new one *in the file*.
-                    print '%s%s %s' % (name, suffix, new_hash)
-
+                    hash_file.write('%s\n' % line)
+            if same:
+                insert_hash_sig(name, new_hash, suffix)
+                return
+            elif not found:
+                hash_file.write('%s%s %s\n' % (name, suffix, new_hash))
+                
     remove_working_files(path, suffix)
 
     # Create an IE package and a data-uri one. Skip this step for mobile css
