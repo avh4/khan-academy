@@ -45,19 +45,19 @@ class HighlightNode(template.Node):
         text = re.sub(regex, r'<span class="highlight">\1</span>', text)
         return text
 
-@register.inclusion_tag("column_major_order_styles.html")
+@register.simple_tag
 def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
     col_list = range(0, num_cols)
     link_height = font_size * 1.5
     
-    return {
+    return webapp.template.render("column_major_order_styles.html", {
         "columns": col_list,
         "font_size": font_size,
         "link_height": link_height,
         "column_width": column_width,
         "column_width_plus_gutter": column_width + gutter,
-    }
-@register.inclusion_tag(("column_major_order_videos.html", "../column_major_order_videos.html"))
+    })
+@register.simple_tag
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
@@ -67,38 +67,48 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
     # the remainder to the left-most columns first, and correctly increment the indices for remaining columns
     column_indices = [(items_in_column * multiplier + (multiplier if multiplier <= remainder else remainder)) for multiplier in range(1, num_cols + 1)]
         
-    return {
+    return webapp.template.render("column_major_order_videos.html", {
                "videos": videos,
                "column_width": column_width,
                "current_playlist": current_playlist,
                "column_indices": column_indices,
                "link_height": link_height,
                "list_height": column_indices[0] * link_height,
-          }
+          })
 
-@register.inclusion_tag(("youtube_player_embed.html", "../youtube_player_embed.html"))
+@register.simple_tag
 def youtube_player_embed(youtube_id, width=800, height=480):
-    return {"youtube_id": youtube_id, "width": width, "height": height}
+    return webapp.template.render("youtube_player_embed.html", {
+        "youtube_id": youtube_id,
+        "width": width,
+        "height": height
+    })
 
-@register.inclusion_tag(("flv_player_embed.html", "../flv_player_embed.html"))
+@register.simple_tag
 def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     if exercise_video:
         video_path = video_path + exercise_video.video_folder + "/" + exercise_video.readable_id + ".flv"
-    return {"video_path": video_path, "width": width, "height": height}
+    return webapp.template.render("flv_player_embed.html", {
+        "video_path": video_path, "width": width, "height": height
+    })
 
-@register.inclusion_tag(("knowledgemap_embed.html", "../knowledgemap_embed.html"))
+@register.simple_tag
 def knowledgemap_embed(exercises, map_coords, admin=False):
-    return {"App": App,  "exercises": exercises, "map_coords": map_coords, 'admin':json.dumps(admin)}
+    return webapp.template.render("knowledgemap_embed.html", {
+        "App": App,  "exercises": exercises, "map_coords": map_coords, 'admin':json.dumps(admin)
+    })
 
-@register.inclusion_tag(("related_videos.html", "../related_videos.html"))
+@register.simple_tag
 def related_videos_with_points(exercise_videos):
     return related_videos(exercise_videos, True)
 
-@register.inclusion_tag(("related_videos.html", "../related_videos.html"))
+@register.simple_tag
 def related_videos(exercise_videos, show_points=False):
-    return {"exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE, "show_points": show_points}
+    return webapp.template.render("related_videos.html", {
+        "exercise_videos": exercise_videos, "video_points_base": consts.VIDEO_POINTS_BASE, "show_points": show_points
+    })
 
-@register.inclusion_tag(("exercise_icon.html", "../exercise_icon.html"))
+@register.simple_tag
 def exercise_icon(exercise, App):
     s_prefix = "node"
     if exercise.summative:
@@ -116,33 +126,37 @@ def exercise_icon(exercise, App):
     else:
         src = "/images/%s-not-started.png" % s_prefix
 
-    return {"src": src, "version": App.version }
+    return webapp.template.render("exercise_icon.html", {
+        "src": src, "version": App.version
+    })
 
-@register.inclusion_tag("exercise_message.html")
+@register.simple_tag
 def exercise_message(exercise, coaches, exercise_states):
-    return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
+    return webapp.template.render("exercise_message.html", dict({"exercise": exercise, "coaches": coaches}, **exercise_states))
 
-@register.inclusion_tag(("user_points.html", "../user_points.html"))
+@register.simple_tag
 def user_points(user_data):
     if user_data:
         points = user_data.points
     else:
         points = 0
-    return {"points": points}
+    return webapp.template.render("user_points.html", {"points": points})
 
-@register.inclusion_tag(("possible_points_badge.html", "../possible_points_badge.html"))
+@register.simple_tag
 def possible_points_badge(points, possible_points, logged_in=True):
-    return {"points": points, "possible_points": possible_points, "logged_in": logged_in}
+    return webapp.template.render("possible_points_badge.html", {
+        "points": points, "possible_points": possible_points, "logged_in": logged_in
+    })
 
-@register.inclusion_tag(("simple_student_info.html", "../simple_student_info.html"))
+@register.simple_tag
 def simple_student_info(user_data):
     coach_count = len(user_data.coaches)
 
-    return { 
-            "member_for": seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False),
-           }
+    return webapp.template.render('simple_student_info.html', {
+        "member_for": seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False)
+    })
 
-@register.inclusion_tag(("streak_bar.html", "../streak_bar.html"))
+@register.simple_tag
 def streak_bar(user_exercise):
     streak = user_exercise.streak
     longest_streak = 0
@@ -178,7 +192,7 @@ def streak_bar(user_exercise):
         if longest_streak > consts.MAX_STREAK_SHOWN:
             longest_streak = "Max"
 
-    return {
+    return webapp.template.render("streak_bar.html", {
             "streak": streak,
             "longest_streak": longest_streak,
             "streak_width": streak_width, 
@@ -188,15 +202,19 @@ def streak_bar(user_exercise):
             "show_streak_label": show_streak_label,
             "show_longest_streak_label": show_longest_streak_label,
             "levels": levels
-            }
+            })
 
-@register.inclusion_tag(("reports_navigation.html", "../reports_navigation.html"))
+@register.simple_tag
 def reports_navigation(coach_email, current_report="classreport"):
-    return {'coach_email': coach_email, 'current_report': current_report }
+    return webapp.template.render("reports_navigation.html", {
+        'coach_email': coach_email, 'current_report': current_report
+    })
     
-@register.inclusion_tag(("playlist_browser.html", "../playlist_browser.html"))
+@register.simple_tag
 def playlist_browser(browser_id):
-    return {'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE}
+    return webapp.template.render("playlist_browser.html", {
+        'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE
+    })
 
 @register.simple_tag
 def playlist_browser_structure(structure, class_name="", level=0):
@@ -242,18 +260,20 @@ def playlist_browser_structure(structure, class_name="", level=0):
 def static_url(relative_url):
     return util.static_url(relative_url)
 
-@register.inclusion_tag(("empty_class_instructions.html", "../empty_class_instructions.html"))
+@register.simple_tag
 def empty_class_instructions(class_is_empty=True):
     user_data = UserData.current()
     coach_email = "Not signed in. Please sign in to see your Coach ID."
     if user_data:
         coach_email = user_data.email
             
-    return {'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email }
+    return webapp.template.render("empty_class_instructions.html", {
+        'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email
+    })
 
-@register.inclusion_tag(("crazyegg_tracker.html", "../crazyegg_tracker.html"))
+@register.simple_tag
 def crazyegg_tracker(enabled=True):
-	return { 'enabled': enabled }
+	return webapp.template.render("crazyegg_tracker.html", { 'enabled': enabled })
 
 register.tag(highlight)
 

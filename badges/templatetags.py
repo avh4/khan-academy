@@ -7,7 +7,7 @@ from notifications import UserNotifier
 
 register = webapp.template.create_template_register()
 
-@register.inclusion_tag(("../badges/notifications.html", "badges/notifications.html"))
+@register.simple_tag
 def badge_notifications():
     user_badges = UserNotifier.pop_for_current_user_data()["badges"]
     
@@ -22,9 +22,9 @@ def badge_notifications():
     if len(user_badges) > 1:
         user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserNotifier.NOTIFICATION_LIMIT]
 
-    return {"user_badges": user_badges}
+    return webapp.template.render("badges/notifications.html", {"user_badges": user_badges})
 
-@register.inclusion_tag(("../badges/badge_counts.html", "badges/badge_counts.html"))
+@register.simple_tag
 def badge_counts(user_data):
 
     counts_dict = {}
@@ -37,7 +37,7 @@ def badge_counts(user_data):
     for key in counts_dict:
         sum_counts += counts_dict[key]
 
-    return {
+    return webapp.template.render('badges/badge_counts.html', {
             "sum": sum_counts,
             "bronze": counts_dict[badges.BadgeCategory.BRONZE],
             "silver": counts_dict[badges.BadgeCategory.SILVER],
@@ -45,19 +45,24 @@ def badge_counts(user_data):
             "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
             "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
             "master": counts_dict[badges.BadgeCategory.MASTER],
-    }
+    })
 
-@register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
+@register.simple_tag
 def badge_block(badge, user_badge=None, show_frequency=False):
 
     if user_badge:
         badge.is_owned = True
 
     if badge.is_hidden():
-        return {} # Don't render anything for this hidden badge
+        return "" # Don't render anything for this hidden badge
 
     frequency = None
     if show_frequency:
         frequency = badge.frequency()
 
-    return {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
+    return webapp.template.render("badges/badge_block.html", {
+        "badge": badge,
+        "user_badge": user_badge,
+        "extended_description": badge.safe_extended_description,
+        "frequency": frequency
+    })
