@@ -8,6 +8,7 @@ import models
 import request_handler
 import util
 import itertools
+import logging
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -54,7 +55,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
         recent_exercises = ex_graph.get_recent_exercises()
         suggested_exercises = ex_graph.get_suggested_exercises()
         proficient_exercises = ex_graph.get_proficient_exercises()
-
+        exercises = []
         for exercise in ex_graph.exercises:
             exercise.phantom = False
             exercise.suggested = False
@@ -70,8 +71,10 @@ class ExerciseAdmin(request_handler.RequestHandler):
             if exercise in proficient_exercises:
                 exercise.proficient = True
                 exercise.status = "Proficient"
-           
-        template_values = {'App' : App,'admin': True,  'exercises': ex_graph.exercises, 'map_coords': (0,0,0)}
+            exercises.append(exercise)
+            
+        exercises.sort(key=lambda e: e.name)
+        template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
         self.render_template('exerciseadmin.html', template_values)
 
