@@ -67,6 +67,16 @@ def compress_all_packages(path, dict_packages, suffix):
     with open(PATH_PACKAGES_HASH, 'w') as hash_file:
         hash_file.write('hashes = %s\n' % str(hashes))
 
+# Overview:
+# Take a set of js or css files then:
+# 1. Combine them into one large file
+# 2. If they are non-mobile css files, replace images where directed to,
+#    possibly creating another file
+# 3. Hash the file(s)
+# 4. Check the hash to see if we already have a copy of the file, stop if we do
+# 5. Compress the file
+# 6. Create a new file using the hash in its name
+# 7. Insert the hash into packages.py and packages_hash.py
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
