@@ -8,7 +8,6 @@ import re
 import StringIO
 import base64
 import copy
-import fileinput
 from string import lower
 
 sys.path.append(os.path.abspath("."))
@@ -73,25 +72,51 @@ def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
 
-    remove_combined_files(path, suffix)
+    # Remove the old combined and minified files then replace them
+    remove_working_files_1(path, suffix)
     path_combined = combine_package(path, files, suffix)
+    path_compressed = minify_package(path, path_combined, suffix)
   
-    with open(path_combined, 'r') as combined:
-        content = combined.read()
-
+    with open(path_compressed, 'r') as compressed:
+        content = compressed.read()
     new_hash = md5.new(content).hexdigest()
-    if name+suffix in hashes and hashes[name+suffix] == new_hash:
+
+    # Good to go if the file (or files) is the same as the previous version
+    # (which is still there)
+    good_to_go = True
+
+    # If the file's hash is the same we re-insert it into packages.py to be
+    # safe, if it's not then we're going to have to re-minify it
+    # TODO fix above
+    fullname = name+suffix
+    if fullname in hashes and hashes[fullname] == new_hash:
+        pass#insert_hash_sig(name, new_hash, suffix)
+    else:
+        good_to_go = False
+    hashes[fullname] = new_hash
+
+    if suffix == '.css' and 'mobile' not in name:
+        ie_name = name+'-ie'
+        ie_fullname = ie_name + suffix
+        path_with_uris = remove_images(path, path_compressed, suffix)
+
+        with open(path_with_uris, 'r') as compressed_again:
+            content_again = compressed_again.read()
+        new_hash_again = md5.new(content_again).hexdigest()
+
+        if ie_fullname in hashes and hashes[ie_fullname] == new_hash_again:
+            pass#insert_hash_sig(ie_name, new_hash, suffix)
+        else:
+            good_to_go = False
+        hashes[ie_fullname] = new_hash
+
+    remove_working_files_2(path, suffix)
+
+    if good_to_go:
         return
 
-    hashes[name+suffix] = new_hash
-                
-    remove_working_files(path, suffix)
-
-    # Create an IE package and a data-uri one. Skip this step for mobile css
-    # and js.
+    # Don't replace images for js and mobile css
     if suffix == '.css' and 'mobile' not in name:
-        path_with_uris = remove_images(path, path_combined, suffix)
-        path_compressed = minify_package(path, path_with_uris, suffix)
         path_hashed = hash_package(name, path, path_compressed, suffix)
 
         if not os.path.exists(path_hashed):
@@ -99,26 +124,25 @@ def compress_package(name, path, files, suffix):
 
         suffix = '-ie'+suffix
 
-    path_compressed = minify_package(path, path_combined, suffix)
     path_hashed = hash_package(name, path, path_compressed, suffix)
 
     if not os.path.exists(path_hashed):
         raise Exception("Did not successfully compress and hash: %s" % path)
 
-# Remove previous hashed-*.js\.css, uri.css, and compress.js\.css files
-def remove_working_files(path, suffix):
+# Remove previous combined.js\.css, and compress.js\.css files
+def remove_working_files_1(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
-        if filename.endswith(COMPRESSED_FILENAME + suffix) \
-                or filename.endswith(URI_FILENAME + suffix) \
-                or filename.startswith(HASHED_FILENAME_PREFIX):
+        if filename.endswith(COMBINED_FILENAME + suffix) \
+                or filename.endswith(COMPRESSED_FILENAME + suffix):
             os.remove(os.path.join(path, filename))
 
-# Remove previous combined.js\.css 
-def remove_combined_files(path, suffix):
+# Remove previous hashed-*.js\.css and uri.css
+def remove_working_files_2(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
-        if filename.endswith(COMBINED_FILENAME + suffix):
+        if filename.endswith(URI_FILENAME + suffix) \
+                or filename.startswith(HASHED_FILENAME_PREFIX):
             os.remove(os.path.join(path, filename))
 
 # Use YUICompressor to minify the combined file
