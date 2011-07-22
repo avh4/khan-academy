@@ -190,7 +190,7 @@ def exercise_contents(exercise):
     match_body_contents = re_body_contents.search(contents)
     body_contents = match_body_contents.groups()[0]
 
-    re_script_contents = re.compile("<script>(.*?)</script>", re.DOTALL)
+    re_script_contents = re.compile("<script[^>]*>(.*?)</script>", re.DOTALL)
     list_script_contents = re_script_contents.findall(contents)
     script_contents = ";".join(list_script_contents)
 
