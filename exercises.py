@@ -3,6 +3,7 @@ import os
 import logging
 import itertools
 import hashlib
+import urllib
 
 from google.appengine.ext import db
 from google.appengine.api import users
@@ -145,6 +146,13 @@ class ViewAllExercises(request_handler.RequestHandler):
 
         self.render_template('viewexercises.html', template_values)
 
+class RawExercise(request_handler.RequestHandler):
+    def get(self):
+        path = self.request.path
+        exercise_file = urllib.unquote(path.rpartition('/')[2])
+        self.response.headers["Content-Type"] = "text/html";
+        self.response.out.write(raw_exercise_contents(exercise_file))
+
 @layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def exercise_template():
     path = os.path.join(os.path.dirname(__file__), "khan-exercises/exercises/khan-exercise.html")
@@ -163,21 +171,9 @@ def exercise_template():
 
     return contents
 
-@layer_cache.cache_with_key_fxn(lambda exercise: "exercise_html_%s" % exercise.name, layer=layer_cache.Layers.InAppMemory)
+@layer_cache.cache_with_key_fxn(lambda exercise: "exercise_contents_%s" % exercise.name, layer=layer_cache.Layers.InAppMemory)
 def exercise_contents(exercise):
-    path = os.path.join(os.path.dirname(__file__), "khan-exercises/exercises/%s.html" % exercise.name)
-
-    contents = ""
-    f = open(path)
-
-    if f:
-        try:
-            contents = f.read()
-        finally:
-            f.close()
-
-    if not len(contents):
-        raise MissingExerciseException("Missing exercise content for exid '%s'" % exercise.name)
+    contents = raw_exercise_contents("%s.html" % exercise.name)
 
     re_data_require = re.compile("^<html.*(data-require=\".*\").*>", re.MULTILINE)
     match_data_require = re_data_require.search(contents)
@@ -197,6 +193,27 @@ def exercise_contents(exercise):
         raise MissingExerciseException("Missing exercise body in content for exid '%s'" % exercise.name)
 
     return (body_contents, script_contents, data_require, sha1)
+
+@layer_cache.cache_with_key_fxn(lambda exercise_file: "exercise_raw_html_%s" % exercise_file, layer=layer_cache.Layers.InAppMemory)
+def raw_exercise_contents(exercise_file):
+    path = os.path.join(os.path.dirname(__file__), "khan-exercises/exercises/%s" % exercise_file)
+
+    f = None
+    contents = ""
+
+    try:
+        f = open(path)
+        contents = f.read()
+    except:
+        raise MissingExerciseException("Missing exercise file for exid '%s'" % exercise_file)
+    finally:
+        if f:
+            f.close()
+
+    if not len(contents):
+        raise MissingExerciseException("Missing exercise content for exid '%s'" % exercise.name)
+
+    return contents
 
 def reset_streak(user_data, user_exercise):
     if user_exercise and user_exercise.belongs_to(user_data):

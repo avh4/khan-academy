@@ -1048,6 +1048,7 @@ def main():
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
         ('/exercises', exercises.ViewExercise),
+        ('/khan-exercises/exercises/.*', exercises.RawExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
         ('/viewexercisesonmap', exercises.ViewAllExercises),
