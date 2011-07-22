@@ -3,23 +3,46 @@
 {% block meta_page_title %}{{ exercise.display_name|escape }} | {% endblock meta_page_title %}
 
 {% block pagescript %}
-<style>#page_sub_nav {display: none;}</style>
 
-<script>
-    var userExercise = {{ user_exercise_json }};
-</script>
+{% if renderable %}
 
-<script src="/khan-exercises/khan-exercise.js"></script>
+    <style>
+        #page_sub_nav {display: none;}
+    </style>
 
-<script>
-    {{ exercise_inline_script }}
-</script>
+    <script>var userExercise = {{ user_exercise_json }};</script>
+    <script src="/khan-exercises/khan-exercise.js"></script>
+    <script>{{ exercise_inline_script }}</script>
+
+    {% else %}
+
+    <style>
+        #cannot-render { padding:0 9px; margin:0 1px; background: white; }
+        #cannot-render p { margin-top: 0; }
+    </style>
+
+    {% endif %}
 
 {% endblock pagescript %}
 
 {% block pagecontent %}
 <div id="container" class="single-exercise visited-no-recolor" style="overflow: hidden">
+    {% if renderable %}
+
     {{ exercise_body_html }}
     {{ exercise_template_html }}
+
+    {% else %}
+
+    <div id="cannot-render">
+        <p>
+            This specific problem from the past was created with a very old version of Khan Academy, and we're unable to show it to you. <strong>No progress has been lost.</strong> This inconvenience is restricted to very old problems, and it will not affect any current or future work.
+        </p>
+        <p>
+            If you believe this is a mistake, please don't hesitate to <a href="/reportissue?type=Defect">let us know</a>.
+        <p/>
+    </div>
+
+    {% endif %}
 </div>
 {% endblock pagecontent %}

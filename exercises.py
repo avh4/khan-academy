@@ -42,11 +42,11 @@ class ViewExercise(request_handler.RequestHandler):
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
-        student_user_data = self.request_user_data("student_email") or user_data
-        if student_user_data.key_email != user_data.key_email and not student_user_data.is_coached_by(user_data):
-            student_user_data = user_data
+        user_data_student = self.request_user_data("student_email") or user_data
+        if user_data_student.key_email != user_data.key_email and not user_data_student.is_coached_by(user_data):
+            user_data_student = user_data
 
-        viewing_other = student_user_data.key_email != user_data.key_email
+        viewing_other = user_data_student.key_email != user_data.key_email
 
         # Can't view your own problems ahead of schedule
         if not viewing_other and problem_number > user_exercise.total_done + 1:
@@ -62,11 +62,27 @@ class ViewExercise(request_handler.RequestHandler):
         exercise_body_html, exercise_inline_script, data_require, sha1 = exercise_contents(exercise)
         user_exercise.exercise_model.sha1 = sha1
 
+        renderable = True
+
         if read_only:
             # Override current problem number and user being inspected
+            # so proper exercise content will be generated
             user_exercise.total_done = problem_number - 1
-            user_exercise.user = student_user_data.user
+            user_exercise.user = user_data_student.user
             user_exercise.read_only = True
+
+            # Load up the actual problem and make sure we can show its contents
+            problem_logs = models.ProblemLog.all()
+            problem_logs.filter("user =", user_data_student.user)
+            problem_logs.filter("exercise =", exid)
+            problem_logs.filter("problem_number =", problem_number)
+            problem_log = problem_logs.get()
+
+            if problem_log and not problem_log.sha1:
+                # We cannot render old problems that were created in the v1 exercise framework.
+                # We use sha1's existence as this identifier. In the future, we may do something smarter
+                # when past sha1s conflict with current exercise contents.
+                renderable = False
 
         user_exercise_json = jsonify.jsonify(user_exercise)
 
@@ -79,6 +95,7 @@ class ViewExercise(request_handler.RequestHandler):
             'data_require': data_require,
             'read_only': read_only,
             'selected_nav_link': 'practice',
+            'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
