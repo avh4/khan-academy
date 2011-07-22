@@ -21,10 +21,16 @@ PACKAGE_SUFFIX = "-package"
 HASHED_FILENAME_PREFIX = "hashed-"
 PATH_PACKAGES = "js_css_packages/packages.py"
 PATH_PACKAGES_TEMP = "js_css_packages/packages.compresstemp.py"
-PATH_PACKAGES_HASH = "js_css_packages/packages_hash"
+PATH_PACKAGES_HASH = "js_css_packages/packages_hash.py"
 
 packages_stylesheets = copy.deepcopy(packages.stylesheets)
 packages_javascript = copy.deepcopy(packages.javascript)
+if os.path.exists(PATH_PACKAGES_HASH):
+    import js_css_packages.packages_hash
+    hashes = copy.deepcopy(js_css_packages.packages_hash.hashes)
+else:
+    hashes = {}
+    
 
 def revert_js_css_hashes():
     print "Reverting %s" % PATH_PACKAGES
@@ -53,13 +59,15 @@ def compress_all_packages(path, dict_packages, suffix):
 
             compress_package(package_name, package_path, package["files"], suffix)
 
-            hashed_content = "javascript=%s\nstylesheets=%s" % \
+            hashed_content = "javascript=%s\nstylesheets=%s\n" % \
                 (str(packages_javascript), str(packages_stylesheets))
-            f = open(PATH_PACKAGES_TEMP, "w")
-            f.write(hashed_content)
-            f.close()
+            with open(PATH_PACKAGES_TEMP, "w") as f:
+                f.write(hashed_content)
 
             shutil.move(PATH_PACKAGES_TEMP, PATH_PACKAGES)
+
+    with open(PATH_PACKAGES_HASH, 'w') as hash_file:
+        hash_file.write('hashes = %s\n' % str(hashes))
 
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
@@ -68,36 +76,14 @@ def compress_package(name, path, files, suffix):
     remove_combined_files(path, suffix)
     path_combined = combine_package(path, files, suffix)
   
-    with open(PATH_PACKAGES_HASH, 'r') as hash_file:
-        lines = hash_file.read().splitlines()
-    with open(PATH_PACKAGES_HASH, 'w') as hash_file:
-        with open(path_combined, 'r') as combined:
-            content = combined.read()
-            new_hash = md5.new(content).hexdigest()
+    with open(path_combined, 'r') as combined:
+        content = combined.read()
 
-            same = False
-            found = False
-            for line in lines:
-                if line.find(name) >= 0:
-                    found == True
+    new_hash = md5.new(content).hexdigest()
+    if name+suffix in hashes and hashes[name+suffix] == new_hash:
+        return
 
-                    # example line:
-                    # shared.css 47295efbe8dda8c333aa983a5eb0d646
-                    # <--------> <------------------------------>
-                    #      |                   |
-                    #     [0]                 [1]
-                    old_hash = line.split()[1]
-                    if old_hash == new_hash:
-                        same = True
-
-                    hash_file.write('%s%s %s\n' % (name, suffix, new_hash))
-                else:
-                    hash_file.write('%s\n' % line)
-            if same:
-                insert_hash_sig(name, new_hash, suffix)
-                return
-            elif not found:
-                hash_file.write('%s%s %s\n' % (name, suffix, new_hash))
+    hashes[name+suffix] = new_hash
                 
     remove_working_files(path, suffix)
 
