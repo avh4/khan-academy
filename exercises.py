@@ -41,6 +41,9 @@ class ViewExercise(request_handler.RequestHandler):
         # Cache this so we don't have to worry about future lookups
         user_exercise.exercise_model = exercise
 
+        # Temporarily work around in-app memory caching bug
+        exercise.user_exercise = None
+
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
         user_data_student = self.request_user_data("student_email") or user_data
