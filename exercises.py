@@ -43,6 +43,8 @@ class ViewExercise(request_handler.RequestHandler):
 
         # Temporarily work around in-app memory caching bug
         exercise.user_exercise = None
+        exercise.prerequisites_ex = None
+        exercise.coverers = None
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
