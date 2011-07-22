@@ -510,7 +510,8 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_string("seed"),
                     request.request_bool("complete"),
                     request.request_bool("hint_used"),
-                    int(request.request_float("time_taken"))
+                    int(request.request_float("time_taken")),
+                    request.request_string("non_summative"),
                     )
 
             exercise_states = user_data.get_exercise_states(exercise, user_exercise)

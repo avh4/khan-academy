@@ -222,7 +222,7 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken):
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative):
 
     if user_exercise and user_exercise.belongs_to(user_data):
 
@@ -266,7 +266,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
         )
 
         if exercise.summative:
-            problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
+            problem_log.exercise_non_summative = exercise_non_summative
 
         # If this is the first attempt, update review schedule appropriately
         if attempt_number == 1:
