@@ -1,0 +1,8 @@
+# pack-refs with: peeled 
+a80f5da8919718f4b3be30db0daa21203839b3c2 refs/remotes/origin/summaries
+d97d632f2c7ac688a13d13488970b1cfd5415067 refs/remotes/origin/mathquill
+8b200aa02fe83483a80a57035ad0caebfd5ce656 refs/remotes/origin/master
+f50f26b52c55cdde6e70f1478ab7935a5f32707b refs/remotes/origin/integration
+b34941e41a6aa18f49a11296ad42205e45df8be7 refs/remotes/origin/hint-inheritance
+862c8427ba3f0cd04df36f34dfe8181fa3acdd0a refs/remotes/origin/expressions
+872922730646a7202a03cb9159dc1a1ac21d2d0c refs/remotes/origin/duplicates
