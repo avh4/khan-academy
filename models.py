@@ -41,21 +41,23 @@ class Setting(db.Model):
     value = db.StringProperty()
 
     @staticmethod
-    def get_or_set_with_key(key, val = None):
+    def entity_group_key():
+        return db.Key.from_path('Settings', 'default_settings')
+
+    @staticmethod
+    def _get_or_set_with_key(key, val = None):
         if val is None:
-            return Setting.cache_get_by_key_name(key)
+            return Setting._cache_get_by_key_name(key)
         else:
-            setting = Setting.get_or_insert(key)
-            setting.value = str(val)
-            setting.put()
-
-            Setting.get_settings_dict(bust_cache=True)
-
+            setting = Setting(Setting.entity_group_key(), key, value=str(val))
+            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
+            db.put([setting, setting_old])
+            Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
     @staticmethod
-    def cache_get_by_key_name(key):
-        setting = Setting.get_settings_dict().get(key)
+    def _cache_get_by_key_name(key):
+        setting = Setting._get_settings_dict().get(key)
         if setting is not None:
             return setting.value
         return None
@@ -63,24 +65,34 @@ class Setting(db.Model):
     @staticmethod
     @request_cache.cache()
     @layer_cache.cache(layer=layer_cache.Layers.Memcache)
-    def get_settings_dict(bust_cache = False):
-        return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
+    def _get_settings_dict(bust_cache = False):
+        # ancestor query to ensure consistent results
+        query = Setting.all().ancestor(Setting.entity_group_key())
+        results = dict((setting.key().name(), setting) for setting in query.fetch(20))
+
+        # backfill with old style settings
+        for setting in Setting.all().fetch(20):
+            key = setting.key()
+            if key.parent() is None and not key.name() in results.keys():
+                results[key.name()] = setting
+
+        return results
 
     @staticmethod
     def cached_library_content_date(val = None):
-        return Setting.get_or_set_with_key("cached_library_content_date", val)
+        return Setting._get_or_set_with_key("cached_library_content_date", val)
 
     @staticmethod
     def cached_exercises_date(val = None):
-        return Setting.get_or_set_with_key("cached_exercises_date", val)
+        return Setting._get_or_set_with_key("cached_exercises_date", val)
 
     @staticmethod
     def count_videos(val = None):
-        return Setting.get_or_set_with_key("count_videos", val) or 0
+        return Setting._get_or_set_with_key("count_videos", val) or 0
 
     @staticmethod
     def last_youtube_sync_generation_start(val = None):
-        return Setting.get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
+        return Setting._get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
 
 class Exercise(db.Model):
 
@@ -138,6 +150,13 @@ class Exercise(db.Model):
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
+    @property
+    def required_streak(self):
+        if self.summative:
+            return consts.REQUIRED_STREAK * len(self.prerequisites)
+        else:
+            return consts.REQUIRED_STREAK
+
     @staticmethod
     def to_short_name(name):
         exercise = Exercise.get_by_name(name)
@@ -153,14 +172,8 @@ class Exercise(db.Model):
     def is_visible_to_current_user(self):
         return self.live or users.is_current_user_admin()
 
-    def required_streak(self):
-        if self.summative:
-            return consts.REQUIRED_STREAK * len(self.prerequisites)
-        else:
-            return consts.REQUIRED_STREAK
-
     def struggling_threshold(self):
-        return 3 * self.required_streak()
+        return 3 * self.required_streak
 
     def summative_children(self):
         if not self.summative:
@@ -195,7 +208,7 @@ class Exercise(db.Model):
     def related_videos(self):
         exercise_videos = None
         query = ExerciseVideo.all()
-        query.filter('exercise =', self.key())
+        query.filter('exercise =', self.key()).order('exercise_order')
         return query
 
     @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
@@ -284,7 +297,31 @@ class UserExercise(db.Model):
     
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
-    _serialize_blacklist = ["review_interval_secs", "exercise_model"]
+    _serialize_blacklist = ["review_interval_secs"]
+
+    @property
+    def required_streak(self):
+        if self.summative:
+            return self.exercise_model.required_streak
+        else:
+            return consts.REQUIRED_STREAK
+
+    @property
+    def next_points(self):
+        user_data = None
+
+        if hasattr(self, "_user_data"):
+            user_data = self._user_data
+        else:
+            user_data = UserData.get_from_db_key_email(self.user.email())
+
+        suggested = proficient = False
+
+        if user_data:
+            suggested = user_data.is_suggested(self.exercise)
+            proficient = user_data.is_proficient_at(self.exercise)
+
+        return points.ExercisePointCalculator(self, suggested, proficient)
 
     @staticmethod
     def get_key_for_email(email):
@@ -316,9 +353,6 @@ class UserExercise(db.Model):
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
 
-    def required_streak(self):
-        return self.exercise_model.required_streak()
-
     def reset_streak(self):
         if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
@@ -331,7 +365,7 @@ class UserExercise(db.Model):
 
     @staticmethod
     def is_struggling_with(user_exercise, exercise):
-        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak() and user_exercise.total_done > exercise.struggling_threshold() 
+        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak and user_exercise.total_done > exercise.struggling_threshold() 
 
     def is_struggling(self):
         return UserExercise.is_struggling_with(self, self.exercise_model)
@@ -348,7 +382,7 @@ class UserExercise(db.Model):
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
         # If the user is not now and never has been proficient, don't schedule a review
-        if (self.streak + correct) < self.required_streak() and self.longest_streak < self.required_streak():
+        if (self.streak + correct) < self.required_streak and self.longest_streak < self.required_streak:
             return
 
         # If the user is hitting a new streak either for the first time or after having lost
@@ -371,7 +405,7 @@ class UserExercise(db.Model):
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
 
     def set_proficient(self, proficient, user_data):
-        if not proficient and self.longest_streak < self.required_streak():
+        if not proficient and self.longest_streak < self.required_streak:
             # Not proficient and never has been so nothing to do
             return
 
@@ -473,6 +507,7 @@ class UserData(db.Model):
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()
+    last_badge_review = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
@@ -619,7 +654,7 @@ class UserData(db.Model):
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
         struggling = UserExercise.is_struggling_with(user_exercise, exercise)
-        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak()
+        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
         
         return {
             'phantom': phantom,
@@ -688,6 +723,9 @@ class UserData(db.Model):
         	    if student_data.key().id_or_name() not in students_set:
         		    students_data.append(student_data)
         return students_data
+
+    def has_students(self):
+        return len(self.get_students_data()) > 0
 
     def coach_emails(self):
         emails = []
@@ -780,6 +818,12 @@ class Video(Searchable, db.Model):
                     "png": "%s/%s.png" % (download_url_base, self.youtube_id),
                     }
 
+        return None
+
+    def download_video_url(self):
+        download_urls = self.download_urls
+        if download_urls:
+            return download_urls.get("mp4")
         return None
     
     @staticmethod
@@ -947,6 +991,7 @@ class VideoLog(db.Model):
     video_title = db.StringProperty()
     time_watched = db.DateTimeProperty(auto_now_add = True)
     seconds_watched = db.IntegerProperty(default = 0)
+    last_second_watched = db.IntegerProperty()
     points_earned = db.IntegerProperty(default = 0)
     playlist_titles = db.StringListProperty()
 
@@ -1001,6 +1046,7 @@ class VideoLog(db.Model):
         video_log.video = video
         video_log.video_title = video.title
         video_log.seconds_watched = seconds_watched
+        video_log.last_second_watched = last_second_watched
 
         if last_second_watched > user_video.last_second_watched:
             user_video.last_second_watched = last_second_watched
@@ -1241,7 +1287,8 @@ class ExerciseVideo(db.Model):
 
     video = db.ReferenceProperty(Video)
     exercise = db.ReferenceProperty(Exercise)
-
+    exercise_order = db.IntegerProperty()
+    
     def key_for_video(self):
         return ExerciseVideo.video.get_value_for_datastore(self)
 
@@ -1343,7 +1390,7 @@ class ExerciseGraph(object):
             
         for ex in exercises:
             compute_suggested(ex)
-            ex.points = points.ExercisePointCalculator(ex, ex, ex.suggested, ex.proficient)            
+            ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)            
 
         phantom = user_data.is_phantom
         for ex in exercises:

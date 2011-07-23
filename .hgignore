@@ -17,3 +17,6 @@ sample_data/bulkloader-*
 *.DS_Store
 index.yaml
 offline/*
+*.orig
+.*.swp
+.*.un~

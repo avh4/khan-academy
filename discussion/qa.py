@@ -143,7 +143,7 @@ class AddAnswer(request_handler.RequestHandler):
 
         if answer_text and video and question:
 
-            answer = models_discussion.Feedback()
+            answer = models_discussion.Feedback(parent=user_data)
             answer.set_author(user_data)
             answer.content = answer_text
             answer.targets = [video.key(), question.key()]
@@ -166,7 +166,7 @@ class Answers(request_handler.RequestHandler):
         question = db.get(question_key)
 
         if question:
-            video = question.first_target()
+            video = question.video()
             dict_votes = models_discussion.FeedbackVote.get_dict_for_user_data_and_video(user_data, video)
 
             answers = models_discussion.Feedback.gql("WHERE types = :1 AND targets = :2 AND deleted = :3 AND is_hidden_by_flags = :4", models_discussion.FeedbackType.Answer, question.key(), False, False).fetch(1000)
@@ -210,7 +210,7 @@ class AddQuestion(request_handler.RequestHandler):
             if len(question_text) > 500:
                 question_text = question_text[0:500] # max question length, also limited by client
 
-            question = models_discussion.Feedback()
+            question = models_discussion.Feedback(parent=user_data)
             question.set_author(user_data)
             question.content = question_text
             question.targets = [video.key()]
@@ -245,29 +245,14 @@ class EditEntity(request_handler.RequestHandler):
                     if feedback.is_type(models_discussion.FeedbackType.Question):
 
                         page = self.request.get("page")
-                        video = feedback.first_target()
+                        video = feedback.video()
                         self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=%s&qa_expand_id=%s" % 
                                         (video.key(), playlist_key, page, feedback.key().id()))
 
                     elif feedback.is_type(models_discussion.FeedbackType.Answer):
 
-                        question = feedback.parent()
+                        question = feedback.question()
                         self.redirect("/discussion/answers?question_key=%s" % question.key())
-
-class VoteEntity(request_handler.RequestHandler):
-    @disallow_phantoms
-    def post(self):
-        # You have to be logged in to vote
-        user_data = models.UserData.current()
-        if not user_data:
-            return
-
-        key = self.request_string("entity_key", default="")
-        flag = self.request_string("flag", default="")
-        if key and models_discussion.FeedbackFlag.is_valid(flag):
-            entity = db.get(key)
-            if entity and entity.add_flag_by(flag, user_data):
-                entity.put()
 
 class FlagEntity(request_handler.RequestHandler):
     @disallow_phantoms
@@ -348,7 +333,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     if sort_override >= 0:
         sort_order = sort_override
 
-    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question)
+    questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question, user_data)
     questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
 
     if qa_expand_id:
@@ -363,7 +348,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
                 count_preceding += 1
             page = 1 + (count_preceding / limit_per_page)
 
-    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer)
+    answers = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Answer, user_data)
     answers.reverse() # Answers are initially in date descending -- we want ascending before the points sort
     answers = voting.VotingSortOrder.sort(answers)
 
@@ -381,7 +366,7 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     # Just grab all answers for this video and cache in page's questions
     for answer in answers:
         # Grab the key only for each answer, don't run a full gql query on the ReferenceProperty
-        question_key = answer.parent_key()
+        question_key = answer.question_key()
         if (dict_questions.has_key(question_key)):
             question = dict_questions[question_key]
             voting.add_vote_expando_properties(answer, dict_votes)

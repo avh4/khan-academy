@@ -7,13 +7,12 @@ from notifications import UserNotifier
 
 register = webapp.template.create_template_register()
 
-@register.inclusion_tag(("../badges/notifications.html", "badges/notifications.html"))
+@register.simple_tag
 def badge_notifications():
-    user_badges = UserNotifier.pop_for_current_user_data()
-    
-    if len(user_badges) > 0:
-        user_badges = user_badges[0]
-    
+    return webapp.template.render("badges/notifications.html", badge_notifications_context())
+
+def badge_notifications_context():
+    user_badges = UserNotifier.pop_for_current_user_data()["badges"]
     
     all_badges_dict = util_badges.all_badges_dict()
     for user_badge in user_badges:
@@ -28,9 +27,11 @@ def badge_notifications():
 
     return {"user_badges": user_badges}
 
-@register.inclusion_tag(("../badges/badge_counts.html", "badges/badge_counts.html"))
+@register.simple_tag
 def badge_counts(user_data):
+    return webapp.template.render('badges/badge_counts.html', badge_counts_context(user_data))
 
+def badge_counts_context(user_data):
     counts_dict = {}
     if user_data:
         counts_dict = util_badges.get_badge_counts(user_data)
@@ -42,26 +43,31 @@ def badge_counts(user_data):
         sum_counts += counts_dict[key]
 
     return {
-            "sum": sum_counts,
-            "bronze": counts_dict[badges.BadgeCategory.BRONZE],
-            "silver": counts_dict[badges.BadgeCategory.SILVER],
-            "gold": counts_dict[badges.BadgeCategory.GOLD],
-            "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
-            "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
-            "master": counts_dict[badges.BadgeCategory.MASTER],
+        "sum": sum_counts,
+        "bronze": counts_dict[badges.BadgeCategory.BRONZE],
+        "silver": counts_dict[badges.BadgeCategory.SILVER],
+        "gold": counts_dict[badges.BadgeCategory.GOLD],
+        "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
+        "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
+        "master": counts_dict[badges.BadgeCategory.MASTER],
     }
 
-@register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
+@register.simple_tag
 def badge_block(badge, user_badge=None, show_frequency=False):
 
     if user_badge:
         badge.is_owned = True
 
     if badge.is_hidden():
-        return {} # Don't render anything for this hidden badge
+        return "" # Don't render anything for this hidden badge
 
     frequency = None
     if show_frequency:
         frequency = badge.frequency()
 
-    return {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
+    return webapp.template.render("badges/badge_block.html", {
+        "badge": badge,
+        "user_badge": user_badge,
+        "extended_description": badge.safe_extended_description,
+        "frequency": frequency
+    })

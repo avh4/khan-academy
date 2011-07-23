@@ -8,6 +8,7 @@ import urllib
 import logging
 import re
 from pprint import pformat
+from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
 
@@ -60,8 +61,8 @@ from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
-from templatetags import streak_bar, exercise_message, exercise_icon, user_points
-from badges.templatetags import badge_notifications, badge_counts
+from templatetags import streak_bar_context, exercise_message_context, exercise_icon_context, user_points_context
+from badges.templatetags import badge_notifications_context, badge_counts_context
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
 from phantom_users.cloner import Clone
@@ -124,6 +125,9 @@ class ViewExercise(request_handler.RequestHandler):
 
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
+        # Cache this so we don't have to worry about future lookups
+        user_exercise.exercise_model = exercise
+
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
         # When viewing a problem out-of-order, show read-only view
@@ -142,14 +146,14 @@ class ViewExercise(request_handler.RequestHandler):
 
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
 
-        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
                
         # Note: if they just need a single problem for review they can just print this page.
-        num_problems_to_print = max(2, exercise.required_streak() - user_exercise.streak)
+        num_problems_to_print = max(2, exercise.required_streak - user_exercise.streak)
         
         # If the user is proficient, assume they want to print a bunch of practice problems.
         if exercise_states['proficient']:
-            num_problems_to_print = exercise.required_streak()
+            num_problems_to_print = exercise.required_streak
 
         if exercise.summative:
             # Make sure UserExercise has proper summative value even before it's been set.
@@ -279,7 +283,7 @@ class ViewVideo(request_handler.RequestHandler):
         if App.offline_mode:
             video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
         else:
-            video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+            video_path = video.download_video_url()
 
         exercise = None
         exercise_video = video.get_related_exercise()
@@ -345,8 +349,11 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
+        user_points_html = self.render_template_block_to_string(
+            "user_points.html",
+            "user_points_block",
+            user_points_context(user_data)
+        )
         
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
@@ -492,7 +499,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             if exercise in review_exercises:
                 exercise.review = True
                 exercise.status = "Review"
-
+   
         template_values = {
             'exercises': ex_graph.exercises,
             'recent_exercises': recent_exercises,
@@ -503,7 +510,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
             'selected_nav_link': 'practice',
             }
-
+            
         self.render_template('viewexercises.html', template_values)
 
     def get_time(self):
@@ -586,7 +593,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
             if correct:
                 suggested = user_data.is_suggested(exid)
-                points_possible = points.ExercisePointCalculator(exercise, user_exercise, suggested, proficient)
+                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 problem_log.points_earned = points_possible
                 user_data.add_points(points_possible)
             
@@ -611,7 +618,7 @@ class RegisterAnswer(request_handler.RequestHandler):
 
                 if user_exercise.streak > user_exercise.longest_streak:
                     user_exercise.longest_streak = user_exercise.streak
-                if user_exercise.streak >= exercise.required_streak() and not proficient:
+                if user_exercise.streak >= exercise.required_streak and not proficient:
                     user_exercise.set_proficient(True, user_data)
                     user_exercise.proficient_date = datetime.datetime.now()                    
                     user_data.reassess_if_necessary()
@@ -654,27 +661,45 @@ class RegisterAnswer(request_handler.RequestHandler):
         
     def send_json(self, user_data, user_exercise, exercise, key, time_warp):
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-        exercise_points = points.ExercisePointCalculator(exercise, user_exercise, exercise_states['suggested'], exercise_states['proficient'])
+        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
         
-        streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)
+        streak_bar_html = self.render_template_block_to_string(
+            "streak_bar.html",
+            "streak_bar_block",
+            streak_bar_context(user_exercise)
+        )
         
-        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-        exercise_message_html = self.render_template_block_to_string("exercise_message.html", "exercise_message_block", exercise_message_context)
+        exercise_message_html = self.render_template_block_to_string(
+            "exercise_message.html",
+            "exercise_message_block",
+            exercise_message_context(exercise, user_data.coaches, exercise_states)
+        )
         
-        exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = self.render_template_block_to_string("exercise_icon.html", "exercise_icon_block", exercise_icon_context)
+        exercise_icon_html = self.render_template_block_to_string(
+            "exercise_icon.html",
+            "exercise_icon_block",
+            exercise_icon_context(exercise, App)
+        )
         
         badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
-        badge_count_context = badge_counts(user_data)
-        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
+        badge_count_html = render_block_to_string(
+            badge_count_path,
+            'badge_count_block',
+            badge_counts_context(user_data)
+        ).strip()
         
         badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
-        badge_notification_context = badge_notifications()
-        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
+        badge_notification_html = render_block_to_string(
+            badge_notification_path,
+            'badge_notification_block',
+            badge_notifications_context()
+        ).strip()
         
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
+        user_points_html = self.render_template_block_to_string(
+            "user_points.html",
+            "user_points_block",
+            user_points_context(user_data)
+        )
         
         updated_values = {
             'exercise_states': exercise_states,
@@ -772,11 +797,13 @@ class GenerateLibraryContent(request_handler.RequestHandler):
 
     def post(self):
         # We support posts so we can fire task queues at this handler
-        self.get()
+        self.get(from_task_queue = True)
 
-    def get(self):
+    def get(self, from_task_queue = False):
         library.library_content_html(bust_cache=True)
-        self.response.out.write("Library content regenerated")  
+
+        if not from_task_queue:
+            self.redirect("/")
 
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
@@ -859,6 +886,13 @@ class Crash(request_handler.RequestHandler):
         else:
             # Even Watson isn't perfect
             raise Exception("What is Toronto?")
+
+class ReadOnlyDowntime(request_handler.RequestHandler):
+    def get(self):
+        raise CapabilityDisabledError("App Engine maintenance period")
+
+    def post(self):
+        return self.get()
 
 class SendToLog(request_handler.RequestHandler):
     def post(self):
@@ -1044,7 +1078,7 @@ class RetargetFeedback(bulk_update.handler.UpdateKind):
         return False
     
     def update(self, feedback):
-        orig_video = feedback.first_target()
+        orig_video = feedback.video()
 
         if orig_video == None or type(orig_video).__name__ != "Video":
             return False
@@ -1302,15 +1336,20 @@ class PostLogin(request_handler.RequestHandler):
             email = phantom_user.email()
             phantom_data = UserData.get_from_db_key_email(email) 
 
+            # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
-                UserNotifier.clear_all(phantom_data)
-                logging.info("New Account: %s", user_data.current().email)
-                phantom_data.current_user = user_data.current_user
-                if phantom_data.put():
-                    # Phantom user was just transitioned to real user
-                    user_counter.add(1)
-                    user_data.delete()
-                cont = "/newaccount?continue=%s" % cont
+
+                # Make sure user has no students
+                if not user_data.has_students():
+
+                    UserNotifier.clear_all(phantom_data)
+                    logging.info("New Account: %s", user_data.current().email)
+                    phantom_data.current_user = user_data.current_user
+                    if phantom_data.put():
+                        # Phantom user was just transitioned to real user
+                        user_counter.add(1)
+                        user_data.delete()
+                    cont = "/newaccount?continue=%s" % cont
 
         self.delete_cookie('ureg_id')
         self.redirect(cont)
@@ -1372,50 +1411,10 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
-class GoBackInTimeAndRecordRegisteredUsers(request_handler.RequestHandler):
-    def get(self):
-      if self.request_bool("start", default=False):
-          self.response.out.write("Sync started")
-          taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': 0})
-          self.redirect('/admin/gobackintimeandrecordregisteredusers')
-      else:
-          self.redirect('/')
 
-    def post(self):
-        step = self.request_int("step", default=0)
-        delta = datetime.timedelta(days=1)
-        start_time = datetime.datetime(2011, 3, 12) + step*delta
-        end_time = datetime.datetime(2011, 3, 12) + (step + 1)*delta
-
-        if start_time > datetime.datetime.now():
-            return
-
-        # count registered users
-        c = 0
-        possible_results = True
-        cursor = None
-
-        while possible_results:
-            query = db.GqlQuery("SELECT * FROM UserData WHERE joined > :1 AND joined <= :2", start_time, end_time)
-            if cursor:
-                query.with_cursor(cursor)
-
-            possible_results = False
-            for udata in query.fetch(250):
-                possible_results = True
-                if udata.user and not udata.is_phantom:
-                    c += 1
-
-            cursor = query.cursor()
-
-        user_counter.add(c)
-        models.UserLog._add_entry(user_counter.get_count(), end_time)
-
-        logging.info("Completed step %s of recording registered users: start_date: %s, end_date: %s" % (step, start_time, end_time))
-
-        taskqueue.add(url='/admin/gobackintimeandrecordregisteredusers', queue_name='gobackintimeandrecordregisteredusers-queue', params={'step': step+1})
-                        
+        
 def main():
+
     webapp.template.register_template_library('templateext')    
     application = webapp.WSGIApplication([ 
         ('/', ViewHomePage),
@@ -1487,7 +1486,7 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
-        ('/admin/gobackintimeandrecordregisteredusers', GoBackInTimeAndRecordRegisteredUsers),
+        ('/admin/movemapnode', exercises.MoveMapNode),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents), 

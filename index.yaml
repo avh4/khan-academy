@@ -64,13 +64,10 @@ indexes:
   - name: __key__
     direction: desc
 
-- kind: Feedback
+- kind: ExerciseVideo
   properties:
-  - name: deleted
-  - name: is_flagged
-  - name: targets
-  - name: types
-  - name: date
+  - name: exercise
+  - name: exercise_order
 
 - kind: Feedback
   properties:
@@ -79,6 +76,14 @@ indexes:
   - name: targets
   - name: types
   - name: date
+
+- kind: Feedback
+  properties:
+  - name: deleted
+  - name: is_flagged
+  - name: targets
+  - name: types
+  - name: date
     direction: desc
 
 - kind: Feedback
@@ -116,6 +121,25 @@ indexes:
 - kind: Feedback
   properties:
   - name: deleted
+  - name: targets
+  - name: types
+  - name: date
+    direction: desc
+
+- kind: Feedback
+  ancestor: yes
+  properties:
+  - name: deleted
+  - name: is_hidden_by_flags
+  - name: targets
+  - name: date
+    direction: desc
+
+- kind: Feedback
+  ancestor: yes
+  properties:
+  - name: deleted
+  - name: is_hidden_by_flags
   - name: targets
   - name: types
   - name: date

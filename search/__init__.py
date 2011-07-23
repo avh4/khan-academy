@@ -48,8 +48,7 @@ from google.appengine.api import datastore_types
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 
-# TODO -- This will eventually be moved out of labs namespace
-from google.appengine.api.labs import taskqueue
+from google.appengine.api import taskqueue
 
 # Use python port of Porter2 stemmer.
 from search.pyporter2 import Stemmer
