@@ -72,11 +72,18 @@ def compress_all_packages(path, dict_packages, suffix):
 # 1. Combine them into one large file
 # 2. If they are non-mobile css files, replace images where directed to,
 #    possibly creating another file
-# 3. Hash the file(s)
+# For each file:
+# 3. Hash the file
 # 4. Check the hash to see if we already have a copy of the file, stop if we do
-# 5. Compress the file
-# 6. Create a new file using the hash in its name
-# 7. Insert the hash into packages.py and packages_hash.py
+# 5. Insert the hash into packages_hash.py
+# 6. Compress the file
+# 7. Hash the file again
+# 8. Create a new file using the hash in its name
+# 9. Insert the hash into packages.py
+#
+# Note: The two hashes will be different. The reason we hash twice is because
+# we use the hash in packages_hash.py to check if we need to compress the file
+# and the second hash to identify the created file.
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
         raise Exception("Path does not exist: %s" % path)
@@ -84,74 +91,56 @@ def compress_package(name, path, files, suffix):
     # Remove the old combined and minified files then replace them
     remove_working_files_1(path, suffix)
     path_combined = combine_package(path, files, suffix)
-    path_compressed = minify_package(path, path_combined, suffix)
-  
-    with open(path_compressed, 'r') as compressed:
+    remove_working_files_2(path, suffix)
+
+    with open(path_combined, 'r') as compressed:
         content = compressed.read()
     new_hash = md5.new(content).hexdigest()
 
-    # Good to go if the file (or files) is the same as the previous version
-    # (which is still there)
-    good_to_go = True
-
-    # If the file's hash is the same we re-insert it into packages.py to be
-    # safe, if it's not then we're going to have to re-minify it
-    # TODO fix above
     fullname = name+suffix
-    if fullname in hashes and hashes[fullname] == new_hash:
-        pass#insert_hash_sig(name, new_hash, suffix)
-    else:
-        good_to_go = False
-    hashes[fullname] = new_hash
-
-    if suffix == '.css' and 'mobile' not in name:
-        ie_name = name+'-ie'
-        ie_fullname = ie_name + suffix
-        path_with_uris = remove_images(path, path_compressed, suffix)
-
-        with open(path_with_uris, 'r') as compressed:
-            content = compressed.read()
-        new_hash = md5.new(content).hexdigest()
-
-        if ie_fullname in hashes and hashes[ie_fullname] == new_hash:
-            pass#insert_hash_sig(ie_name, new_hash, suffix)
-        else:
-            good_to_go = False
-        hashes[ie_fullname] = new_hash
-
-    remove_working_files_2(path, suffix)
-
-    if good_to_go:
-        return
-
-    # Don't replace images for js and mobile css
-    if suffix == '.css' and 'mobile' not in name:
+    if fullname not in hashes or hashes[fullname] != new_hash:
+        path_compressed = minify_package(path, path_combined, suffix)
         path_hashed = hash_package(name, path, path_compressed, suffix)
 
         if not os.path.exists(path_hashed):
             raise Exception("Did not successfully compress and hash: %s" % path)
 
-        suffix = '-ie'+suffix
+        hashes[fullname] = new_hash
 
-    path_hashed = hash_package(name, path, path_compressed, suffix)
+    if suffix == '.css' and 'mobile' not in name:
+        ie_name = name+'-ie'
+        ie_fullname = ie_name + suffix
+        path_with_uris = remove_images(path, path_combined, suffix)
 
-    if not os.path.exists(path_hashed):
-        raise Exception("Did not successfully compress and hash: %s" % path)
+        with open(path_with_uris, 'r') as compressed:
+            content = compressed.read()
+        new_hash = md5.new(content).hexdigest()
 
-# Remove previous combined.js\.css, and compress.js\.css files
+        if ie_fullname not in hashes or hashes[ie_fullname] != new_hash:
+            path_compressed = minify_package(path, path_with_uris, suffix)
+            suffix = '-ie'+suffix
+            path_hashed = hash_package(name, path, path_compressed, suffix)
+
+            if not os.path.exists(path_hashed):
+                raise Exception("Did not successfully compress and hash: %s" % \
+                    path)
+
+            hashes[ie_fullname] = new_hash
+
+# Remove previous combined.js\.css
 def remove_working_files_1(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
-        if filename.endswith(COMBINED_FILENAME + suffix) \
-                or filename.endswith(COMPRESSED_FILENAME + suffix):
+        if filename.endswith(COMBINED_FILENAME + suffix):
             os.remove(os.path.join(path, filename))
 
-# Remove previous hashed-*.js\.css and uri.css
+# Remove previous hashed-*.js\.css, uri.css, and compress.js\.css files
 def remove_working_files_2(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
         if filename.endswith(URI_FILENAME + suffix) \
-                or filename.startswith(HASHED_FILENAME_PREFIX):
+                or filename.startswith(HASHED_FILENAME_PREFIX) \
+                or filename.endswith(COMPRESSED_FILENAME + suffix):
             os.remove(os.path.join(path, filename))
 
 # Use YUICompressor to minify the combined file
@@ -215,7 +204,6 @@ def remove_images(path, path_combined, suffix):
     return path_without_urls
 
 def hash_package(name, path, path_compressed, suffix):
-    print "NAME: %s\n PATH_COMPRESSED: %s\nSUFFIX: %s\n" % (name, path_compressed, suffix)
     f = open(path_compressed, "r")
     content = f.read()
     f.close()
