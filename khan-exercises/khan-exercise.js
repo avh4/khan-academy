@@ -347,7 +347,9 @@ Khan.loadScripts( scripts, function() {
 			hintUsed = false;
 			attempts = 0;
 			lastAction = (new Date).getTime();
-			
+
+			jQuery("#hint").val("I'd like a hint");
+
 			if ( once ) {
 				updateData();
 				once = false;
@@ -405,8 +407,7 @@ Khan.loadScripts( scripts, function() {
 				} else {
 					jQuery( "#answerform input" ).removeAttr( "disabled" );
 				}
-			},
-			function() {
+			}, function() {
 				// Error during submit. Cheat, for now, and reload the page in
 				// an attempt to get updated data.
 				window.location.reload();
@@ -488,6 +489,15 @@ Khan.loadScripts( scripts, function() {
 	};
 	
 	function request( method, data, fn, fnError ) {
+		if ( testMode ) {
+			// Pretend we have success
+			if ( jQuery.isFunction( fn ) ) {
+				fn();
+			}
+
+			return;
+		}
+
 		jQuery.ajax({
 			// Do a request to the server API
 			url: server + "/api/v1/user/exercises/" + exerciseName + "/" + method,
@@ -1206,6 +1216,8 @@ function prepareSite() {
 			$render = jQuery( render );
 
 		if ( hint ) {
+
+			jQuery("#hint").val("Next step");
 
 			var problem = $hint.parent();
 
