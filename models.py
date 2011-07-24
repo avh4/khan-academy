@@ -3,7 +3,6 @@
 import datetime, logging
 import math
 import urllib
-import random
 
 import config_django
 
@@ -1189,6 +1188,11 @@ def commit_problem_log(problem_log_source):
     if not problem_log_source or not problem_log_source.key().name:
         return
 
+    def insert_in_position(index, items, val, filler):
+        if index >= len(items):
+            items.extend([filler] * (index + 1 - len(items)))            
+        items[index] = val
+
     # Committing transaction combines existing problem log with any followup attempts
     def txn():
         problem_log = ProblemLog.get_by_key_name(problem_log_source.key().name())
@@ -1205,17 +1209,13 @@ def commit_problem_log(problem_log_source):
                 exercise_non_summative = problem_log_source.exercise_non_summative,
         )
 
-        next_attempt = problem_log.count_attempts + 1
-        if next_attempt < problem_log_source.count_attempts:
-            # Problem logs must be committed in order of their attempts.
-            raise Exception("Problem log committed out of order by taskqueue (%s vs %s), raising exception for retry later." % 
-                    (problem_log.count_attempts, problem_log_source.count_attempts))
-        elif next_attempt > problem_log_source.count_attempts:
-            # Trying to re-put an attempt that was already logged. Ignore this dupe taskqueue attempt.
+        index_attempt = max(0, problem_log_source.count_attempts - 1)
+        if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
+            # This attempt has already been logged. Ignore this dupe taskqueue execution.
             return
 
         # Bump up attempt count
-        problem_log.count_attempts = problem_log_source.count_attempts
+        problem_log.count_attempts += 1
 
         # Hint used cannot be changed from True to False
         problem_log.hint_used = problem_log.hint_used or problem_log_source.hint_used
@@ -1225,10 +1225,10 @@ def commit_problem_log(problem_log_source):
 
         # Add time_taken for this individual attempt
         problem_log.time_taken += problem_log_source.time_taken
-        problem_log.time_taken_attempts.append(problem_log_source.time_taken)
+        insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
 
         # Add actual attempt content
-        problem_log.attempts.append(problem_log_source.attempts[0])
+        insert_in_position(index_attempt, problem_log.attempts, problem_log_source.attempts[0], filler="")
 
         # Points should only be earned once per problem, regardless of attempt count
         problem_log.points_earned = max(problem_log.points_earned, problem_log_source.points_earned)
