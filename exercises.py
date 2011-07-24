@@ -284,15 +284,16 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
             user_exercise.total_done += 1
 
             proficient = user_data.is_proficient_at(user_exercise.exercise)
+            suggested = user_data.is_suggested(user_exercise.exercise)
+
+            # Points are awarded on completion of problem, regardless
+            # of how many attempts it took to complete.
+            problem_log.points_earned = points.ExercisePointCalculator(user_exercise, suggested, proficient)
+            user_data.add_points(problem_log.points_earned)
 
             if problem_log.correct:
 
-                suggested = user_data.is_suggested(user_exercise.exercise)
-                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
-
-                problem_log.points_earned = points_possible
-                user_data.add_points(points_possible)
-
+                # Streak only increments if problem was solved correctly (on first attempt)
                 user_exercise.total_correct += 1
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
