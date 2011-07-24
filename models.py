@@ -492,7 +492,6 @@ class UserData(db.Model):
     coaches = db.StringListProperty()
     student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
-    hide_notifications = db.BooleanProperty(default=True)
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()
@@ -504,7 +503,7 @@ class UserData(db.Model):
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
-            "last_login", "user", "current_user"
+            "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
     ]
 
     @property
