@@ -12,6 +12,7 @@ class ProblemPoint:
         self.exercise_non_summative = problem_log.exercise_non_summative
         self.exercise_non_summative_display_name = models.Exercise.to_display_name(problem_log.exercise_non_summative)
         self.dt = problem_log.time_done
+        self.problem_number = problem_log.problem_number
         self.video_point = None
 
     def video_titles_html(self):
