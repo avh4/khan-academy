@@ -14,19 +14,19 @@ import util
 
 register = webapp.template.create_template_register()
 
-@register.inclusion_tag("discussion/video_comments.html")
+@register.simple_tag
 def video_comments(video, playlist, page=0):
     user_data = models.UserData.current()
-    return {
+    return webapp.template.render("discussion/video_comments.html", {
             "video": video,
             "playlist": playlist,
             "page": 0,
             "logged_in": user_data and not user_data.is_phantom,
             "user_data": user_data,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
-            }
+            })
 
-@register.inclusion_tag("discussion/video_qa.html")
+@register.simple_tag
 def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_override=-1):
 
     sort_order = voting.VotingSortOrder.HighestPointsFirst
@@ -35,7 +35,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
     if sort_override >= 0:
         sort_order = sort_override
 
-    return {
+    return webapp.template.render("discussion/video_qa.html", {
             "user_data": user_data,
             "video": video,
             "playlist": playlist,
@@ -45,37 +45,37 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "logged_in": user_data and not user_data.is_phantom,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
-            }
+            })
 
-@register.inclusion_tag(("../discussion/signature.html", "discussion/signature.html"))
+@register.simple_tag
 def signature(target=None, verb=None):
-    return {
+    return webapp.template.render("discussion/signature.html", {
                 "target": target, 
                 "verb": verb, 
                 "is_mod": is_current_user_moderator(),
                 "is_author": target and target.authored_by(models.UserData.current()),
                 "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
-            }
+            })
 
-@register.inclusion_tag(("../discussion/mod_tools.html", "discussion/mod_tools.html"))
+@register.simple_tag
 def mod_tools(target):
-    return {
+    return webapp.template.render("discussion/mod_tools.html", {
                 "target": target,
                 "type_question": models_discussion.FeedbackType.Question,
                 "type_comment": models_discussion.FeedbackType.Comment,
                 "is_question": target.is_type(models_discussion.FeedbackType.Question),
                 "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
-            }
+            })
 
-@register.inclusion_tag(("../discussion/flag_tools.html", "discussion/flag_tools.html"))
+@register.simple_tag
 def flag_tools(target):
-    return {"target": target}
+    return webapp.template.render("discussion/flag_tools.html", {"target": target})
 
-@register.inclusion_tag(("../discussion/vote_tools.html", "discussion/vote_tools.html"))
+@register.simple_tag
 def vote_tools(target):
-    return { "target": target, "is_comment": target.is_type(models_discussion.FeedbackType.Comment) }
+    return webapp.template.render("discussion/vote_tools.html", { "target": target, "is_comment": target.is_type(models_discussion.FeedbackType.Comment) })
 
-@register.inclusion_tag(("../discussion/vote_sum.html", "discussion/vote_sum.html"))
+@register.simple_tag
 def vote_sum(target):
     sum_original = target.sum_votes_incremented()
     if target.up_voted:
@@ -83,63 +83,63 @@ def vote_sum(target):
     elif target.down_voted:
         sum_original += 1
 
-    return {
+    return webapp.template.render("discussion/vote_sum.html", {
             "target": target, 
             "sum_original": sum_original,
             "is_comment": target.is_type(models_discussion.FeedbackType.Comment),
-            }
+            })
 
-@register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
+@register.simple_tag
 def author_tools(target):
-    return {
+    return webapp.template.render("discussion/author_tools.html", {
                 "target": target,
                 "editable": not target.is_type(models_discussion.FeedbackType.Comment)
-            }
+            })
 
-@register.inclusion_tag(("../discussion/question_answers.html", "discussion/question_answers.html"))
+@register.simple_tag
 def question_answers(answers):
-    return { "answers": answers }
+    return webapp.template.render("discussion/question_answers.html", { "answers": answers })
 
-@register.inclusion_tag(("../discussion/question_answers.html", "discussion/question_answers.html"))
+@register.simple_tag
 def standalone_answers(video, playlist, dict_answers):
-    return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
+    return webapp.template.render("discussion/question_answers.html", { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True })
 
-@register.inclusion_tag(("../discussion/username_and_notification.html", "discussion/username_and_notification.html"))
+@register.simple_tag
 def username_and_notification(username, user_data):
     count = user_data.feedback_notification_count() if user_data else 0
-    return { "username": username, "count": count }
+    return webapp.template.render("discussion/username_and_notification.html", { "username": username, "count": count })
 
-@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+@register.simple_tag
 def feedback_controls_question(button_label, target=None):
-    return {
+    return webapp.template.render("discussion/feedback_controls.html", {
                 "feedback_type": models_discussion.FeedbackType.Question,
                 "button_label": button_label,
                 "show_chars_remaining": True,
                 "target": target,
                 "hidden": True
-            }
+            })
 
-@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+@register.simple_tag
 def feedback_controls_answer(button_label, target=None):
-    return {
+    return webapp.template.render("discussion/feedback_controls.html", {
                 "feedback_type": models_discussion.FeedbackType.Answer,
                 "button_label": button_label,
                 "show_chars_remaining": False,
                 "target": target,
                 "hidden": True
-            }
+            })
 
-@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+@register.simple_tag
 def feedback_controls_comment(button_label, target=None):
-    return {
+    return webapp.template.render("discussion/feedback_controls.html", {
                 "feedback_type": models_discussion.FeedbackType.Comment,
                 "button_label": button_label,
                 "show_chars_remaining": True,
                 "target": target,
                 "hidden": False
-            }
+            })
 
-@register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))
+@register.simple_tag
 def honeypots():
     # Honeypots are used to attact spam bots
-    return {}
+    return webapp.template.render("discussion/honeypots.html", {})
