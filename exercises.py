@@ -65,7 +65,7 @@ class ViewExercise(request_handler.RequestHandler):
 
         exercise_template_html = exercise_template()
 
-        exercise_body_html, exercise_inline_script, data_require, sha1 = exercise_contents(exercise)
+        exercise_body_html, exercise_inline_script, exercise_inline_style, data_require, sha1 = exercise_contents(exercise)
         user_exercise.exercise_model.sha1 = sha1
 
         user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
@@ -100,6 +100,7 @@ class ViewExercise(request_handler.RequestHandler):
             'exercise_body_html': exercise_body_html,
             'exercise_template_html': exercise_template_html,
             'exercise_inline_script': exercise_inline_script,
+            'exercise_inline_style': exercise_inline_style,
             'data_require': data_require,
             'read_only': read_only,
             'selected_nav_link': 'practice',
@@ -194,12 +195,16 @@ def exercise_contents(exercise):
     list_script_contents = re_script_contents.findall(contents)
     script_contents = ";".join(list_script_contents)
 
+    re_style_contents = re.compile("<style[^>]*>(.*?)</style>", re.DOTALL)
+    list_style_contents = re_style_contents.findall(contents)
+    style_contents = "\n".join(list_style_contents)
+
     sha1 = hashlib.sha1(contents).hexdigest()
 
     if not len(body_contents):
         raise MissingExerciseException("Missing exercise body in content for exid '%s'" % exercise.name)
 
-    return (body_contents, script_contents, data_require, sha1)
+    return (body_contents, script_contents, style_contents, data_require, sha1)
 
 @layer_cache.cache_with_key_fxn(lambda exercise_file: "exercise_raw_html_%s" % exercise_file, layer=layer_cache.Layers.InAppMemory)
 def raw_exercise_contents(exercise_file):
