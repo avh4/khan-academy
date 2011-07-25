@@ -4,7 +4,8 @@ from google.appengine.ext import webapp
 from django import template
 from django.template.defaultfilters import linebreaksbr
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.filter
 def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
