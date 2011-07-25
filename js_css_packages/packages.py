@@ -23,7 +23,7 @@ javascript = {
     "homepage": {
         "hashed-filename": "hashed-@homepage@.js", # @content@ will be replaced with hash by deploy script
         "files": [
-            "jquery.easing.1.1.1.js",
+            "jquery.easing.1.3.js",
             "jquery.cycle.all.min.js",
             "waypoints.min.js",
             "homepage.js",
