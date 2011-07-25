@@ -511,6 +511,8 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
+    nickname = db.StringProperty()
+    email = db.StringProperty()
     
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
@@ -518,14 +520,6 @@ class UserData(db.Model):
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user"
     ]
-
-    @property
-    def nickname(self):
-        return nicknames.get_nickname_for(self.current_user)
-
-    @property
-    def email(self):
-        return self.current_user.email()
 
     @property
     def key_email(self):
@@ -596,7 +590,9 @@ class UserData(db.Model):
             assigned_exercises=[],
             need_to_reassess=True,
             points=0,
-            coaches=[]
+            coaches=[],
+            nickname=nicknames.get_nickname_for(user),
+            email = users.get_current_user().email()
             )
 
         if not user_data.is_phantom:

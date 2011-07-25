@@ -42,6 +42,9 @@ def _get_current_user_from_oauth_map(oauth_map):
 # never be used in our JSONP-enabled API. All calling code should just use _get_current_user.
 def _get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
+    if user:
+        newemail = "http://googleid.khanacademy.org/"+user.user_id()
+        user = users.User(newemail)
     if not user:
         user = facebook_util.get_current_facebook_user_from_cookies()
     if not user:
