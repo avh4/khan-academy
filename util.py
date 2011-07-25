@@ -43,6 +43,7 @@ def _get_current_user_from_oauth_map(oauth_map):
 def _get_current_user_from_cookies_unsafe():
     user = users.get_current_user()
     if user:
+        #To prevent users losing data, use user_id instead of actual email
         newemail = "http://googleid.khanacademy.org/"+user.user_id()
         user = users.User(newemail)
     if not user:

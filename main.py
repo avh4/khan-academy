@@ -1320,10 +1320,11 @@ class PostLogin(request_handler.RequestHandler):
 
                 # Make sure user has no students
                 if not user_data.has_students():
-
+                    #Clear all "login" notifications
                     UserNotifier.clear_all(phantom_data)
                     logging.info("New Account: %s", user_data.current().email)
-                    phantom_data.current_user = user_data.current_user
+                    # Update current_user, nickname, email values
+                    phantom_data.current_user = user_data.current_user 
                     phantom_data.nickname = nicknames.get_nickname_for(user_data.current_user)
                     phantom_data.email = user_data.current_user.email()
                     if phantom_data.put():
