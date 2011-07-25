@@ -639,7 +639,7 @@ var Notifications = {
         jel.animate(
                 { top: -1 * jel.height() }, 
                 $.extend(animationOptions, 
-                    { complete: function(){ jel.remove(); } }
+                    { complete: function(){ jel.empty(); } }
                 )
         );
 
