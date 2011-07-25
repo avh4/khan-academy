@@ -1,6 +1,5 @@
 from phantom_users.phantom_util import is_phantom_email
 import facebook_util
-from google.appengine.api import users
 
 def get_nickname_for(user):
     if not user:
@@ -11,6 +10,6 @@ def get_nickname_for(user):
     elif is_phantom_email(user.email()):
         nickname =  "" # No nickname, results in "Login" in header
     else:
-        nickname = users.get_current_user().nickname().split('@')[0]
+        nickname = user.nickname().split('@')[0]
 
     return nickname
