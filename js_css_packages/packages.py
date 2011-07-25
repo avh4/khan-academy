@@ -122,4 +122,12 @@ stylesheets = {
             "viewclassprofile.css",
         ]
     },
+    "exercises": {
+        "hashed-filename": "hashed-@exercises@.css", # @content@ will be replaced with hash by deploy script
+        "base_path": "../khan-exercises/css",
+        "base_url": "/khan-exercises/css",
+        "files": [
+            "khan-exercise.css",
+        ]
+    },
 }

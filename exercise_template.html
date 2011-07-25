@@ -6,13 +6,11 @@
 
 {% if renderable %}
 
-    <link rel="stylesheet" type="text/css" href="/khan-exercises/css/khan-exercise.css"/>
-    <style>
-        #page_sub_nav {display: none;}
-    </style>
+    <style>#page_sub_nav {display: none;}</style>
 
     <script>var userExercise = {{ user_exercise_json }};</script>
 
+    {% css_package "exercises" %}
     {% js_package "exercises" %}
 
     <script>{{ exercise_inline_script }}</script>
