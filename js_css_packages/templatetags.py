@@ -30,21 +30,24 @@ def css_package(package_name):
         for filename in package["files"]:
             list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
                 % (src_dir, filename))
+    elif package_name+'-non-ie' not in packages.stylesheets:
+        list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
+            % (util.static_url(src_dir), package["hashed-filename"]))
     else:
-        ie_package = packages.stylesheets[package_name+'-ie']
+        non_ie_package = packages.stylesheets[package_name+'-non-ie']
 
         list_css.append("<!--[if (!IE)|(gte IE 8)]><!-->")
 
         # Stylesheets using data-uris
         list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
-            % (util.static_url(src_dir), package["hashed-filename"]))
+            % (util.static_url(src_dir), non_ie_package["hashed-filename"]))
 
         list_css.append("<!--<![endif]-->")
         list_css.append("<!--[if lte IE 7]>")
 
         # Without data-uris, for IE <= 7
         list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
-            % (util.static_url(src_dir), ie_package["hashed-filename"]))
+            % (util.static_url(src_dir), package["hashed-filename"]))
 
         list_css.append("<![endif]-->")
 
