@@ -59,6 +59,32 @@ javascript = {
             "classprofile.js",
         ]
     },
+    "exercises": {
+        "hashed-filename": "hashed-@exercises@.js", # @content@ will be replaced with hash by deploy script
+        "base_path": "../khan-exercises",
+        "base_url": "/khan-exercises",
+        "files": [
+            "khan-exercise.js",
+            "utils/angles.js",
+            "utils/answer-types.js",
+            "utils/calculus.js",
+            "utils/convert-values.js",
+            "utils/exponents.js",
+            "utils/expressions.js",
+            "utils/graphie-helpers.js",
+            "utils/graphie.js",
+            "utils/kinematics.js",
+            "utils/math-format.js",
+            "utils/math.js",
+            "utils/polynomials.js",
+            "utils/probability.js",
+            "utils/raphael.js",
+            "utils/scratchpad.js",
+            "utils/stat.js",
+            "utils/tmpl.js",
+            "utils/word-problems.js",
+        ]
+    },
 }
 
 stylesheets = {

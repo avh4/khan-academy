@@ -10,7 +10,6 @@ from js_css_packages import packages
 
 COMBINED_FILENAME = "combined"
 COMPRESSED_FILENAME = "compressed"
-PACKAGE_SUFFIX = "-package"
 HASHED_FILENAME_PREFIX = "hashed-"
 PATH_PACKAGES = "js_css_packages/packages.py"
 PATH_PACKAGES_TEMP = "js_css_packages/packages.compresstemp.py"
@@ -19,26 +18,27 @@ def revert_js_css_hashes():
     print "Reverting %s" % PATH_PACKAGES
     popen_results(['hg', 'revert', PATH_PACKAGES])
 
-def compress_all_javascript(path):
+def compress_all_javascript():
     dict_packages = packages.javascript
-    compress_all_packages(path, dict_packages, ".js")
+    compress_all_packages(os.path.join("..", "javascript"), dict_packages, ".js")
 
-def compress_all_stylesheets(path):
+def compress_all_stylesheets():
     dict_packages = packages.stylesheets
-    compress_all_packages(path, dict_packages, ".css")
+    compress_all_packages(os.path.join("..", "stylesheets"), dict_packages, ".css")
 
 # Combine all .js\.css files in all "-package" suffixed directories
 # into a single combined.js\.css file for each package, then
 # minify into a single compressed.js\.css file.
-def compress_all_packages(path, dict_packages, suffix):
-    if not os.path.exists(path):
-        raise Exception("Path does not exist: %s" % path)
-
+def compress_all_packages(default_path, dict_packages, suffix):
     for package_name in dict_packages:
         package = dict_packages[package_name]
+        package_path = package.get("base_path")
 
-        dir_name = "%s-package" % package_name
-        package_path = os.path.join(path, dir_name)
+        if not package_path:
+            dir_name = "%s-package" % package_name
+            package_path = os.path.join(default_path, dir_name)
+
+        package_path = os.path.join(os.path.dirname(__file__), package_path)
 
         compress_package(package_name, package_path, package["files"], suffix)
 
