@@ -61,8 +61,8 @@ from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from render import render_block_to_string
-from templatetags import streak_bar, exercise_message, exercise_icon, user_points
-from badges.templatetags import badge_notifications, badge_counts
+from templatetags import streak_bar_context, exercise_message_context, exercise_icon_context, user_points_context
+from badges.templatetags import badge_notifications_context, badge_counts_context
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
 from phantom_users.cloner import Clone
@@ -349,8 +349,11 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
+        user_points_html = self.render_template_block_to_string(
+            "user_points.html",
+            "user_points_block",
+            user_points_context(user_data)
+        )
         
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
@@ -660,25 +663,43 @@ class RegisterAnswer(request_handler.RequestHandler):
         exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
         exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
         
-        streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)
+        streak_bar_html = self.render_template_block_to_string(
+            "streak_bar.html",
+            "streak_bar_block",
+            streak_bar_context(user_exercise)
+        )
         
-        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-        exercise_message_html = self.render_template_block_to_string("exercise_message.html", "exercise_message_block", exercise_message_context)
+        exercise_message_html = self.render_template_block_to_string(
+            "exercise_message.html",
+            "exercise_message_block",
+            exercise_message_context(exercise, user_data.coaches, exercise_states)
+        )
         
-        exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = self.render_template_block_to_string("exercise_icon.html", "exercise_icon_block", exercise_icon_context)
+        exercise_icon_html = self.render_template_block_to_string(
+            "exercise_icon.html",
+            "exercise_icon_block",
+            exercise_icon_context(exercise, App)
+        )
         
         badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
-        badge_count_context = badge_counts(user_data)
-        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
+        badge_count_html = render_block_to_string(
+            badge_count_path,
+            'badge_count_block',
+            badge_counts_context(user_data)
+        ).strip()
         
         badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
-        badge_notification_context = badge_notifications()
-        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
+        badge_notification_html = render_block_to_string(
+            badge_notification_path,
+            'badge_notification_block',
+            badge_notifications_context()
+        ).strip()
         
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
+        user_points_html = self.render_template_block_to_string(
+            "user_points.html",
+            "user_points_block",
+            user_points_context(user_data)
+        )
         
         updated_values = {
             'exercise_states': exercise_states,
