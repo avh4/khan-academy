@@ -522,8 +522,11 @@ class UserData(db.Model):
     
     @property
     def nickname(self):
-        return nicknames.get_nickname_for(self.current_user)
-    
+        nickname = nicknames.get_nickname_for(self.current_user)
+        if nickname == "Google":
+            nickname = self.email.split('@')[0]
+        return nickname
+        
     @property
     def key_email(self):
         return self.user.email()
