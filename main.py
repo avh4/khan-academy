@@ -391,18 +391,6 @@ class VideolessExercises(request_handler.RequestHandler):
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
 
-class RegisterAnswer(request_handler.RequestHandler):
-
-    # RegisterAnswer uses a GET request to solve the IE-behind-firewall
-    # issue with occasionally stripped POST data.
-    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
-    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
-    def post(self):
-        self.get()
-
-    def get(self):
-        self.redirect('/exercises?exid=' + self.request_string("exid"))
-
 class GenerateLibraryContent(request_handler.RequestHandler):
 
     def post(self):
@@ -1056,7 +1044,6 @@ def main():
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
-        ('/registeranswer', RegisterAnswer),
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo), # Backwards URL compatibility
