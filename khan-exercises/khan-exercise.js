@@ -936,7 +936,7 @@ function makeProblem( id, seed ) {
 	// A working solution was not generated
 	if ( !validator ) {
 		// Making the problem failed, let's try again
-		makeProblem( id, seed );
+		makeProblem( id, randomSeed );
 		return;
 	}
 
@@ -1256,6 +1256,45 @@ function prepareSite() {
 		
 		jQuery(Khan).trigger( "showHint" );
 	});
+
+	jQuery( "#report-beta-issue-success" ).hide();
+	jQuery( "#report-beta-issue-fail" ).hide();
+
+	// if we're on the beta server. probably shouldn't be hard-coded...
+	if ( document.URL.indexOf( "http://khan-masterslave" ) === 0 ) {
+		$( "#report-beta-issue" ).css( "display", "block" );
+	
+		jQuery( "#report-beta-issue" ).click( function() {
+
+			var title = prompt( "Issue title" );
+
+			// Don't do anything on clicking Cancel
+			if ( title == null ) return;
+
+			title = encodeURI( title );
+			var body = encodeURI( prompt( "Provide a brief description of the issue" ) );
+
+			jQuery.ajax({
+				url: "http://66.220.0.98:2563/file_exercise_tester_bug?title=" + title + "&body=" + body,
+				dataType: "jsonp",
+				success: function( json ) {
+					if ( json.meta.status === 201 ) {
+						jQuery( "#report-beta-issue-fail" ).hide();
+						jQuery( "#report-beta-issue-success" ).show();
+						jQuery( "#report-beta-issue-title" ).html( json.data.title );
+						jQuery( "#report-beta-issue-link" ).html( "<a href=" + json.data.html_url + ">here</a>" );
+					} else {
+						jQuery( "#report-beta-issue-success" ).hide();
+						jQuery( "#report-beta-issue-fail" ).show();
+					}
+				},
+				error: function( json ) {
+					jQuery( "#report-beta-issue-success" ).hide();
+					jQuery( "#report-beta-issue-fail" ).show();
+				}
+			});
+		});
+	}
 
 	jQuery( "#print_ten" ).data( "show", true )
 		.click( function( e ) {

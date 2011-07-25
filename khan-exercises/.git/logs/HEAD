@@ -1,6 +1,0 @@
-0000000000000000000000000000000000000000 8b200aa02fe83483a80a57035ad0caebfd5ce656 Ben Alpert <spicyjalapeno@gmail.com> 1311372742 -0700	clone: from git://github.com/Khan/khan-exercises.git
-8b200aa02fe83483a80a57035ad0caebfd5ce656 8b200aa02fe83483a80a57035ad0caebfd5ce656 Ben Alpert <spicyjalapeno@gmail.com> 1311373421 -0700	checkout: moving from master to master
-8b200aa02fe83483a80a57035ad0caebfd5ce656 d0cb844d2a0b1af3f72e854bbf37be3ca11fc276 Ben Alpert <spicyjalapeno@gmail.com> 1311373438 -0700	pull : Fast-forward
-d0cb844d2a0b1af3f72e854bbf37be3ca11fc276 91e3892d3c4dff65b7f0588b3bbc8ad46be70776 Ben Alpert <spicyjalapeno@gmail.com> 1311374180 -0700	pull : Fast-forward
-91e3892d3c4dff65b7f0588b3bbc8ad46be70776 d0cb844d2a0b1af3f72e854bbf37be3ca11fc276 Ben Alpert <spicyjalapeno@gmail.com> 1311374284 -0700	checkout: moving from master to d0cb844d2a0b1af3f72e854bbf37be3ca11fc276
-d0cb844d2a0b1af3f72e854bbf37be3ca11fc276 d0cb844d2a0b1af3f72e854bbf37be3ca11fc276 Ben Alpert <spicyjalapeno@gmail.com> 1311374337 -0700	checkout: moving from d0cb844d2a0b1af3f72e854bbf37be3ca11fc276 to master
