@@ -100,25 +100,29 @@ def profile_exercise_progress_block(exercise_data, exercise):
     })
 
 @register.simple_tag
-def profile_recent_activity(user_data):
-    return webapp.template.render("profiles/recent_activity.html",
-                                  recent_activity.recent_activity_context(user_data))
+def profile_recent_activity(user_data, view="standard"):
+    context = recent_activity.recent_activity_context(user_data)
+    context["view"] = view
+    return webapp.template.render("profiles/recent_activity.html", context)
 
 @register.simple_tag
-def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry):
+def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry, view="standard"):
     return webapp.template.render("profiles/recent_activity_entry_badge.html", {
         "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email
+        "student_email": user_data_student.email,
+        "view": view
     })
 @register.simple_tag
-def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry):
+def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry, view="standard"):
     return webapp.template.render("profiles/recent_activity_entry_exercise.html", {
         "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email
+        "student_email": user_data_student.email,
+        "view": view
     })
 @register.simple_tag
-def profile_recent_activity_entry_video(user_data_student, recent_activity_entry):
+def profile_recent_activity_entry_video(user_data_student, recent_activity_entry, view="standard"):
     return webapp.template.render("profiles/recent_activity_entry_video.html", {
         "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email
+        "student_email": user_data_student.email,
+        "view": view
     })
