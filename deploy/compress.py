@@ -98,19 +98,18 @@ def compress_package(name, path, files, suffix):
     new_hash = md5.new(content).hexdigest()
 
     fullname = name+suffix
-    path_hashed = os.path.join(path, "hashed-%s%s" % (new_hash, suffix))
     if fullname not in hashes \
-            or hashes[fullname] != new_hash \
-            or not os.path.exists(path_hashed):
+            or hashes[fullname][0] != new_hash \
+            or not os.path.exists(hashes[fullname][2]):
         path_compressed = minify_package(path, path_combined, suffix)
-        path_hashed = hash_package(name, path, path_compressed, suffix)
+        path_hashed, hash_sig = hash_package(name, path, path_compressed, suffix)
 
         if not os.path.exists(path_hashed):
             raise Exception("Did not successfully compress and hash: %s" % path)
 
-        hashes[fullname] = new_hash
+        hashes[fullname] = new_hash, hash_sig, path_hashed
     else:
-        insert_hash_sig(name, hashes[fullname], suffix)
+        insert_hash_sig(name, hashes[fullname][1], suffix)
 
     if suffix == '.css' and 'mobile' not in name:
         ie_name = name+'-ie'
@@ -121,21 +120,20 @@ def compress_package(name, path, files, suffix):
             content = compressed.read()
         new_hash = md5.new(content).hexdigest()
 
-        path_hashed = os.path.join(path, "hashed-%s-ie%s" % (new_hash, suffix))
         if ie_fullname not in hashes \
-                or hashes[ie_fullname] != new_hash \
-                or not os.path.exists(path_hashed):
+                or hashes[ie_fullname][0] != new_hash \
+                or not os.path.exists(hashes[ie_fullname][2]):
             path_compressed = minify_package(path, path_with_uris, suffix)
             suffix = '-ie'+suffix
-            path_hashed = hash_package(name, path, path_compressed, suffix)
+            path_hashed, hash_sig = hash_package(name, path, path_compressed, suffix)
 
             if not os.path.exists(path_hashed):
                 raise Exception("Did not successfully compress and hash: %s" % \
                     path)
 
-            hashes[ie_fullname] = new_hash
+            hashes[ie_fullname] = new_hash, hash_sig, path_hashed
         else:
-            insert_hash_sig(name, hashes[ie_fullname], '-ie'+suffix)
+            insert_hash_sig(name, hashes[ie_fullname][1], '-ie'+suffix)
 
 # Remove previous combined.js\.css
 def remove_working_files_1(path, suffix):
@@ -229,7 +227,7 @@ def hash_package(name, path, path_compressed, suffix):
 
     insert_hash_sig(name, hash_sig, suffix)
 
-    return path_hashed
+    return path_hashed, hash_sig
 
 def insert_hash_sig(name, hash_sig, suffix):
     if suffix == '-ie.css':
