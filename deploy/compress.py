@@ -103,7 +103,6 @@ def compress_package(name, path, files, suffix):
     if fullname not in hashes \
             or hashes[fullname][0] != new_hash \
             or not os.path.exists(hashes[fullname][2]):
-        remove_hashed_files(path, suffix)
 
         path_compressed = minify_package(path, path_combined, suffix)
         path_hashed, hash_sig = hash_package(name, path, path_compressed, suffix)
@@ -128,10 +127,8 @@ def compress_package(name, path, files, suffix):
         if non_ie_fullname not in hashes \
                 or hashes[non_ie_fullname][0] != new_hash \
                 or not os.path.exists(hashes[non_ie_fullname][2]):
-            remove_hashed_files(path, suffix)
 
             path_compressed = minify_package(path, path_with_uris, suffix)
-            # suffix = '-non-ie'+suffix
             path_hashed, hash_sig = hash_package(name, path, path_compressed, suffix)
 
             insert_hash_sig(name+'-non-ie', hash_sig, suffix)
@@ -157,13 +154,6 @@ def remove_working_files_2(path, suffix):
     for filename in filenames:
         if filename.endswith(URI_FILENAME + suffix) \
                 or filename.endswith(COMPRESSED_FILENAME + suffix):
-            os.remove(os.path.join(path, filename))
-
-# Remove previous hashed-*.js\.css
-def remove_hashed_files(path, suffix):
-    filenames = os.listdir(path)
-    for filename in filenames:
-        if filename.startswith(HASHED_FILENAME_PREFIX):
             os.remove(os.path.join(path, filename))
 
 # Use YUICompressor to minify the combined file
