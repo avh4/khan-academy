@@ -183,7 +183,7 @@ def remove_images_from_line(filename):
         with open(filename) as img:
             f = StringIO.StringIO()
             f.write(img.read())
-            return 'data:image/%s;base64,%s'% (ext, base64.b64encode(f.getvalue()))
+            return '\'data:image/%s;base64,%s\''% (ext, base64.b64encode(f.getvalue()))
 
     return filename
 
@@ -196,7 +196,7 @@ def remove_images(path, path_combined, suffix):
 
     new_file = open(path_without_urls, 'w')
 
-    r = re.compile('data-uri\(/images/(\S+)\.(png|gif|GIF|jpg)\)')
+    r = re.compile('data-uri\(\'?/images/(\S+)\.(png|gif|GIF|jpg)\'?\)')
     with open(path_combined) as f:
         for line in f:
             if r.search(line):
