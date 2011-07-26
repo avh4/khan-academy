@@ -7,7 +7,8 @@ from google.appengine.ext.webapp import template
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
 from profiles import class_exercises_over_time_graph, class_progress_report_graph, class_energy_points_per_minute_graph, class_time_graph
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.inclusion_tag("profiles/graph_control.html")
 def profile_graph_control():
