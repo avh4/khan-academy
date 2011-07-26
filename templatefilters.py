@@ -8,8 +8,9 @@ from django.template.defaultfilters import timesince, pluralize
 
 import util
 import logging
-# get registry, we need it to register our filter later.
-register = webapp.template.create_template_register()
+
+import template_cached
+register = template_cached.create_template_register()
 
 def smart_truncate(content, length=100, suffix='...'):
     if len(content) <= length:
@@ -103,7 +104,7 @@ def youtube_timestamp_links(content):
 @register.simple_tag
 def youtube_jump_link(content, seconds):
     return "<span class='youTube' seconds='%s'>%s</span>" % (seconds, content)
-    
+
 @register.filter
 def phantom_login_link(login_notifications, continue_url):
     return login_notifications.replace("[login]", "<a href='/login?continue="+continue_url+"' class='simple-button action-gradient green'>Log in to save your progress</a>")
@@ -118,7 +119,7 @@ def mod(content, i):
 
 def multiply(x, y):
     return (x * y)
-    
+
 def in_list(content, list):
     return content in list
 
