@@ -269,7 +269,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                 time_taken = time_taken,
                 time_done = dt_now,
                 hint_used = hint_used,
-                correct = completed and (attempt_number == 1),
+                correct = completed and not hint_used and (attempt_number == 1),
                 sha1 = sha1,
                 seed = seed,
                 count_attempts = attempt_number,
