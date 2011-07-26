@@ -91,9 +91,9 @@ def compress_package(name, path, files, suffix):
         raise Exception("Path does not exist: %s" % path)
 
     # Remove the old combined and minified files then replace them
-    remove_working_files_1(path, suffix)
+    remove_combined(path, suffix)
     path_combined = combine_package(path, files, suffix)
-    remove_working_files_2(path, suffix)
+    remove_compressed(path, suffix)
 
     with open(path_combined, 'r') as compressed:
         content = compressed.read()
@@ -142,14 +142,14 @@ def compress_package(name, path, files, suffix):
             insert_hash_sig(name+'-non-ie', hashes[non_ie_fullname][1], suffix)
 
 # Remove previous combined.js\.css
-def remove_working_files_1(path, suffix):
+def remove_combined(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
         if filename.endswith(COMBINED_FILENAME + suffix):
             os.remove(os.path.join(path, filename))
 
 # Remove previous uri.css and compress.js\.css files
-def remove_working_files_2(path, suffix):
+def remove_compressed(path, suffix):
     filenames = os.listdir(path)
     for filename in filenames:
         if filename.endswith(URI_FILENAME + suffix) \
