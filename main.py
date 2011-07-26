@@ -487,9 +487,6 @@ class ViewAllExercises(request_handler.RequestHandler):
             exercise.proficient = False
             exercise.review = False
             exercise.status = ""
-            # if user_data.is_phantom:
-            #     exercise.phantom = True
-            # else:
             if exercise in suggested_exercises:
                 exercise.suggested = True
                 exercise.status = "Suggested"

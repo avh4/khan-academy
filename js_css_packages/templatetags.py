@@ -34,6 +34,8 @@ def css_package(package_name):
         list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
             % (util.static_url(src_dir), package["hashed-filename"]))
     else:
+        # Thank you Jammit (https://github.com/documentcloud/jammit) for the
+        # conditional comments.
         non_ie_package = packages.stylesheets[package_name+'-non-ie']
 
         list_css.append("<!--[if (!IE)|(gte IE 8)]><!-->")

@@ -79,12 +79,12 @@ def compress_all_packages(path, dict_packages, suffix):
 # 6. Compress the file
 # 7. Hash the file again
 # 8. Create a new file using the hash in its name
-# 9. Insert the hash into packages.py
+# 9. Insert the hash into packages.py and packages_hash.py
 #
 # Note: The two hashes will be different. The reason we hash twice is because
-# we use the hash in packages_hash.py to check if we need to compress the file
-# and the second hash to identify the created file.
-# hashes file format: 
+# we use the first hash in packages_hash.py to check if we need to compress the
+# file and the second hash to identify the created file.
+# packages_hash file format: 
 #     hashes = {'file': (combined hash, compressed hash, final path), ...}
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
