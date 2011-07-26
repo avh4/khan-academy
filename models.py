@@ -645,6 +645,7 @@ class UserData(db.Model):
                 first_done=datetime.datetime.now(),
                 last_done=datetime.datetime.now(),
                 total_done=0,
+                summative=exercise.summative,
                 )
 
         return userExercise

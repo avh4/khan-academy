@@ -41,6 +41,7 @@ class ViewExercise(request_handler.RequestHandler):
         # Cache this so we don't have to worry about future lookups
         user_exercise.exercise_model = exercise
         user_exercise._user_data = user_data
+        user_exercise.summative = exercise.summative
 
         # Temporarily work around in-app memory caching bug
         exercise.user_exercise = None
