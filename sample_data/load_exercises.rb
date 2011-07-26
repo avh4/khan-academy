@@ -6,8 +6,9 @@ begin
   require 'rubygems'
   require 'mechanize'
   require 'json'
-rescue
-  puts "Run \"sudo gem install mechanize json\" to install the gems required for this script."
+rescue LoadError => e
+  puts "Run \"sudo gem install mechanize json\" to install the required gems."
+  exit
 end
 
 @agent = Mechanize.new
