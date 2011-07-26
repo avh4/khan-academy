@@ -56,6 +56,10 @@ handlers:
 
 - url: /khan-exercises/css
   static_dir: khan-exercises/css
+
+- url: /khan-exercises/(hashed.+\.js)
+  static_files: khan-exercises/\1
+  upload: khan-exercises/(hashed.+\.js)
 # End khan-exercises integration
 
 - url: /helperpages/d\.svg
