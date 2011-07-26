@@ -7,6 +7,7 @@ import random
 import urllib
 import logging
 import re
+import devpanel
 from pprint import pformat
 from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
@@ -1487,6 +1488,9 @@ def main():
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
+        
+        ('/devadmin/emailchange', devpanel.Email),
+        ('/devadmin/managedevs', devpanel.Manage),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents),
