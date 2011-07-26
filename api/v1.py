@@ -514,11 +514,8 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_string("non_summative"),
                     )
 
-            exercise_states = user_data.get_exercise_states(exercise, user_exercise)
-
             add_action_results(user_exercise, {
-                "exercise_states": exercise_states,
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, exercise_states),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise.exercise_states),
             })
 
             return user_exercise

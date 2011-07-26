@@ -40,6 +40,7 @@ class ViewExercise(request_handler.RequestHandler):
 
         # Cache this so we don't have to worry about future lookups
         user_exercise.exercise_model = exercise
+        user_exercise._user_data = user_data
 
         # Temporarily work around in-app memory caching bug
         exercise.user_exercise = None
@@ -60,8 +61,6 @@ class ViewExercise(request_handler.RequestHandler):
 
         # When viewing another student's problem or a problem out-of-order, show read-only view
         read_only = viewing_other or problem_number != (user_exercise.total_done + 1)
-
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise)
 
         exercise_template_html = exercise_template()
 

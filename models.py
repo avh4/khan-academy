@@ -294,13 +294,15 @@ class UserExercise(db.Model):
             return consts.REQUIRED_STREAK
 
     @property
-    def next_points(self):
-        user_data = None
+    def exercise_states(self):
+        user_data = self.get_user_data()
+        if user_data:
+            return user_data.get_exercise_states(self.exercise_model, self)
+        return None
 
-        if hasattr(self, "_user_data"):
-            user_data = self._user_data
-        else:
-            user_data = UserData.get_from_db_key_email(self.user.email())
+    @property
+    def next_points(self):
+        user_data = self.get_user_data()
 
         suggested = proficient = False
 
@@ -329,6 +331,16 @@ class UserExercise(db.Model):
             user_exercises = UserExercise.get_for_user_data(user_data).fetch(1000)
             memcache.set(user_exercises_key, user_exercises, namespace=App.version)
         return user_exercises
+
+    def get_user_data(self):
+        user_data = None
+
+        if hasattr(self, "_user_data"):
+            user_data = self._user_data
+        else:
+            user_data = UserData.get_from_db_key_email(self.user.email())
+
+        return user_data
 
     def clear_memcache(self):
         memcache.delete(UserExercise.get_key_for_email(self.user.email()), namespace=App.version)
