@@ -5,7 +5,7 @@ import itertools
 from collections import deque
 from pprint import pformat
 from math import sqrt, ceil
-    
+
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
@@ -59,11 +59,11 @@ class ViewStudents(RequestHandler):
         if user_data:
 
             invalid_student = self.request_bool("invalid_student", default = False)
-            
+
             coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
 
             student_lists_models = StudentList.all().filter("coaches = ", user_data.key())
-            
+
             student_lists_list = [];
             for student_list in student_lists_models:
                 student_lists_list.append({
@@ -71,7 +71,7 @@ class ViewStudents(RequestHandler):
                     'name': student_list.name,
                 })
             student_lists_dict = dict((g['key'], g) for g in student_lists_list)
-            
+
             students_data = user_data.get_students_data()
             students = map(lambda s: {
                 'key': str(s.key()),
@@ -114,7 +114,7 @@ class RegisterCoach(RequestHandler):
             if not self.is_ajax_request():
                 self.redirect("/coaches")
             return
-        
+
         if self.is_ajax_request():
             self.response.set_status(400)
         else:
@@ -165,7 +165,7 @@ class AcceptCoach(RequestHandler):
             user_data_student = user_data
         elif user_data_student:
             user_data_coach = user_data
-        
+
         if user_data_coach and not user_data_student.is_coached_by(user_data_coach):
             coach_request = CoachRequest.get_for(user_data_coach, user_data_student)
             if coach_request:
@@ -198,7 +198,7 @@ class UnregisterCoach(RequestHandler):
 
             user_data.put()
 
-        self.redirect("/coaches") 
+        self.redirect("/coaches")
 
 class UnregisterStudent(RequestHandler):
     @disallow_phantoms
@@ -230,19 +230,19 @@ class CreateStudentList(RequestHandler):
 
         if not coach_data:
             return
-        
+
         list_name = self.request_string('list_name')
         if not list_name:
             raise Exception('Invalid list name')
 
         student_list = StudentList(coaches=[coach_data.key()], name=list_name)
         student_list.put()
-        
+
         student_list_json = {
             'name': student_list.name,
             'key': str(student_list.key())
         }
-        
+
         self.render_json(student_list_json)
 
 class DeleteStudentList(RequestHandler):
@@ -262,7 +262,7 @@ class AddStudentToList(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
-        
+
         student_data.student_lists.append(student_list.key())
         student_data.put()
 
@@ -270,7 +270,7 @@ class RemoveStudentFromList(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
-        
+
         student_data.student_lists.remove(student_list.key())
         student_data.put()
 
@@ -282,20 +282,20 @@ class ViewIndividualReport(RequestHandler):
 class ViewSharedPoints(RequestHandler):
     def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassEnergyPointsPerMinuteGraph.GRAPH_TYPE)
-        
+
 class ViewProgressChart(RequestHandler):
-    def get(self):    
+    def get(self):
         self.redirect("/profile?selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
-             
+
 class ViewClassTime(RequestHandler):
     def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassTimeGraph.GRAPH_TYPE)
 
 class ViewClassReport(RequestHandler):
-    def get(self):            
+    def get(self):
         self.redirect("/class_profile?selected_graph_type=%s" % ClassProgressReportGraph.GRAPH_TYPE)
 
 class ViewCharts(RequestHandler):
     def get(self):
-        self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" % 
+        self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" %
                 (ExerciseProblemsGraph.GRAPH_TYPE, self.request_string("student_email"), self.request_string("exercise_name")))
