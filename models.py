@@ -663,7 +663,8 @@ class UserData(db.Model):
             'suggested': suggested,
             'reviewing': reviewing,
             'struggling': struggling,
-            'endangered': endangered
+            'endangered': endangered,
+            'summative': exercise.summative,
         }
         
     def reassess_from_graph(self, ex_graph):
