@@ -58,6 +58,10 @@ class ViewStudents(RequestHandler):
 
         if user_data:
 
+            user_data_override = self.request_user_data("coach_email")
+            if users.is_current_user_admin() and user_data_override:
+                user_data = user_data_override
+
             invalid_student = self.request_bool("invalid_student", default = False)
 
             coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
