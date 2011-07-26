@@ -1694,17 +1694,20 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .exercise-badge.single-exercise .related-content .video-energy-points {
         display: none;
     }
-    .exercise-badge.single-exercise .related-content ul#related-video-list {
+    .exercise-badge.single-exercise .related-content ul.related-video-list {
         list-style: none;
         padding: 0;
         margin: 0;
         display: inline;
     }
-        .exercise-badge.single-exercise .related-content ul#related-video-list li {
+        .exercise-badge.single-exercise .related-content ul.related-video-list li {
             float: left;
         }
-        .exercise-badge.single-exercise .related-content ul#related-video-list li span.separator {
+        .exercise-badge.single-exercise .related-content ul.related-video-list li span.separator {
             padding-right: 5px;
+        }
+        .exercise-badge.single-exercise .related-content ul.related-video-list li.related-video-extended {
+            display: none;
         }
 #extras.single-exercise {
     text-align: right;
@@ -1803,12 +1806,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         #answer_area .info-box #related-video-list li {
             display: block;
-            margin-bottom: 5px;
+            margin: 0px 14px 5px 14px;
         }
         #answer_area .info-box #related-video-list a {
             display: block;
             float: left;
-            margin: 4px 0 0 2px;
+            margin: 0px 0 0 2px;
             width: 70%;
             overflow: hidden;
             text-overflow: ellipsis;
