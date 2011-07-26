@@ -198,7 +198,6 @@ def get_mangled_playlist_name(playlist_name):
     return playlist_name
 
 class ViewVideo(request_handler.RequestHandler):
-    @create_phantom
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -325,8 +324,8 @@ class LogVideoProgress(request_handler.RequestHandler):
     def post(self):
         self.get()
 
+    @create_phantom
     def get(self):
-
         user_data = UserData.current()
         video_points_total = 0
         points_total = 0

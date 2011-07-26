@@ -54,36 +54,20 @@ def create_phantom(method):
         user_data = models.UserData.current()
 
         if not user_data:
-            uastring = self.request.headers.get('user_agent').lower()
-            # some strings that will occur in some of the most popular crawlers
-            bots = ['bot', 'slurp', 'yahoo', 'search.msn.com', 'nutch', 'simpy', 
-                    'aspseek', 'crawler', 'libwww-perl', 'fast', 'baidu', 
-                    'bing', 'yandex', 'heeii', 'rassler', 'archiver'
-                   ]
-
-            for botname in bots:
-                if uastring in botname:
-                    user = users.User('webcrawler')
-                    user_data = models.UserData.insert_for(user.email())
-                    cookie = 'webcrawler'
-                    break
-
-            if not user_data:
-                user = _create_phantom_user()
-                user_data = models.UserData.insert_for(user.email())
+            user = _create_phantom_user()
+            user_data = models.UserData.insert_for(user.email())
             
-                # we set just a 20 digit random string as the cookie, 
-                # not the entire fake email
-                cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
+            # Bust the cache so later calls to models.UserData.current() return 
+            # the phantom user
+            models.UserData.current(bust_cache=True)
 
+            # we set just a 20 digit random string as the cookie, 
+            # not the entire fake email
+            cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
             # set the cookie on the user's computer
             self.set_cookie(PHANTOM_MORSEL_KEY, cookie)
             # make it appear like the cookie was already set
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))
-
-        # Bust the cache so later calls to models.UserData.current() return 
-        # the phantom user
-        models.UserData.current(bust_cache=True)
 
         return method(self, *args, **kwargs)
     return wrapper
