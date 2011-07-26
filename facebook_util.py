@@ -53,7 +53,7 @@ def get_user_from_profile(profile):
 
     if profile is not None:
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
-        name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+        name = unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
 
         # We create a fake user, substituting the user's Facebook uid for their email 
         user = users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"])
