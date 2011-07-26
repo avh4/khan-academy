@@ -1677,7 +1677,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     top: 21px;
     right: 66px;
 }
-.exercise-badge.single-exercise .related-content {
+.exercise-badge.single-exercise .related-content,
+.exercise-badge.single-exercise .summative-help {
     bottom: 7px;
     left: 75px;
     position: absolute;
