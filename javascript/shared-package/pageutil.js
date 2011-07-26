@@ -211,7 +211,7 @@ var VideoControls = {
             timeout: 0,
             speed: 550,
             slideResize: 0,
-            easing: 'backinout',
+            easing: 'easeInOutBack',
             startingSlide: 0,
             prev: '#arrow-left',
             next: '#arrow-right'
