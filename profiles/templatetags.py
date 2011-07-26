@@ -9,9 +9,9 @@ from profiles import class_exercises_over_time_graph, class_progress_report_grap
 
 register = webapp.template.create_template_register()
 
-@register.simple_tag
+@register.inclusion_tag("profiles/graph_control.html")
 def profile_graph_control():
-    return webapp.template.render("profiles/graph_control.html", {})
+    return {}
 
 def render_graph_html_and_context(filename, context):
     path = os.path.join(os.path.dirname(__file__), filename)
@@ -53,76 +53,76 @@ def class_profile_time_graph(user_data_coach, dt, tz_offset, student_list):
     return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset, student_list))
 # End class profile graph types
 
-@register.simple_tag
+@register.inclusion_tag("profiles/graph_link.html")
 def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
     selected = (graph_type == selected_graph_type)
-    return webapp.template.render("profiles/graph_link.html", {
+    return {
         "user_data_student": user_data,
         "graph_name": graph_name,
         "graph_type": graph_type,
         "selected": selected
-    })
+    }
 
-@register.simple_tag
+@register.inclusion_tag("profiles/graph_link.html")
 def profile_class_graph_link(user_data_coach, graph_name, graph_type, selected_graph_type, list_id):
     selected = (graph_type == selected_graph_type)
-    return webapp.template.render("profiles/graph_link.html", {
+    return {
         "user": None,
         "user_data_coach": user_data_coach,
         "graph_name": graph_name,
         "graph_type": graph_type,
         "selected": selected,
         'list_id': list_id
-    })
+    }
 
-@register.simple_tag
+@register.inclusion_tag("profiles/graph_date_picker.html")
 def profile_graph_date_picker(user_data, graph_type):
-    return webapp.template.render("profiles/graph_date_picker.html", {
+    return {
         "user_data": user_data,
         "graph_type": graph_type
-    })
+    }
 
-@register.simple_tag
+@register.inclusion_tag("profiles/graph_calendar_picker.html")
 def profile_graph_calendar_picker(user_data, graph_type):
-    return webapp.template.render("profiles/graph_calendar_picker.html", {
+    return {
         "user_data": user_data,
         "graph_type": graph_type
-    })
+    }
 
-@register.simple_tag
+@register.inclusion_tag("profiles/exercise_progress_block.html")
 def profile_exercise_progress_block(exercise_data, exercise):
-    return webapp.template.render("profiles/exercise_progress_block.html", {
+    return {
         'chart_link': exercise_data[exercise.name]["chart_link"],
         'ex_link': exercise_data[exercise.name]["ex_link"],
         'hover': exercise_data[exercise.name]["hover"],
         'color': exercise_data[exercise.name]["color"],
         'short_name': exercise_data[exercise.name]["short_name"]
-    })
+    }
 
-@register.simple_tag
+@register.inclusion_tag("profiles/recent_activity.html")
 def profile_recent_activity(user_data, view="standard"):
     context = recent_activity.recent_activity_context(user_data)
     context["view"] = view
-    return webapp.template.render("profiles/recent_activity.html", context)
+    return context
 
-@register.simple_tag
+@register.inclusion_tag("profiles/recent_activity_entry_badge.html")
 def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry, view="standard"):
-    return webapp.template.render("profiles/recent_activity_entry_badge.html", {
+    return {
         "recent_activity": recent_activity_entry,
         "student_email": user_data_student.email,
         "view": view
-    })
-@register.simple_tag
+    }
+@register.inclusion_tag("profiles/recent_activity_entry_exercise.html")
 def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry, view="standard"):
-    return webapp.template.render("profiles/recent_activity_entry_exercise.html", {
+    return {
         "recent_activity": recent_activity_entry,
         "student_email": user_data_student.email,
         "view": view
-    })
-@register.simple_tag
+    }
+@register.inclusion_tag("profiles/recent_activity_entry_video.html")
 def profile_recent_activity_entry_video(user_data_student, recent_activity_entry, view="standard"):
-    return webapp.template.render("profiles/recent_activity_entry_video.html", {
+    return {
         "recent_activity": recent_activity_entry,
         "student_email": user_data_student.email,
         "view": view
-    })
+    }
