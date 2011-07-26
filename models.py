@@ -10,7 +10,7 @@ import config_django
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
-
+from api.jsonify import jsonify
 # Do not remove this webapp.template import, as suggested
 # by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
 from google.appengine.ext.webapp import template
@@ -490,6 +490,7 @@ class UserData(db.Model):
     user = db.UserProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
+    developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
     proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
@@ -611,7 +612,8 @@ class UserData(db.Model):
 
     def delete(self):
         logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
-
+        logging.info("Dumping user data for %s: %s" % (self.current_user.email(), jsonify(self)))
+        
         if not self.is_phantom:
             user_counter.add(-1)
 

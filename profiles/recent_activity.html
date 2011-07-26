@@ -6,15 +6,15 @@
             {% for recent_activity in list_recent_activity %}
 			
                 {% ifequal recent_activity.s_type "Badge" %}
-                    <li>{% profile_recent_activity_entry_badge user_data_student recent_activity %}</li>
+                    <li>{% profile_recent_activity_entry_badge user_data_student recent_activity view %}</li>
                 {% endifequal %}
 
                 {% ifequal recent_activity.s_type "Exercise" %}
-                    <li>{% profile_recent_activity_entry_exercise user_data_student recent_activity %}</li>
+                    <li>{% profile_recent_activity_entry_exercise user_data_student recent_activity view %}</li>
                 {% endifequal %}
 
                 {% ifequal recent_activity.s_type "Video" %}
-                    <li>{% profile_recent_activity_entry_video user_data_student recent_activity %}</li>
+                    <li>{% profile_recent_activity_entry_video user_data_student recent_activity view %}</li>
                 {% endifequal %}
 
             {% endfor %}

@@ -19,7 +19,7 @@ def is_facebook_email(email):
     return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
 
 def get_facebook_nickname_key(user):
-    return "facebook_nickname_%s" % user.email()
+    return "facebook_nickname_key_%s" % user.email()
 
 @request_cache.cache_with_key_fxn(get_facebook_nickname_key)
 @layer_cache.cache_with_key_fxn(
