@@ -8,7 +8,8 @@ import badges
 import util_badges
 from notifications import UserNotifier
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.simple_tag
 def badge_notifications():
@@ -30,7 +31,7 @@ def badge_notifications_html(user_badges):
     path = os.path.join(os.path.dirname(__file__), "notifications.html")
     return template.render(path, {"user_badges": user_badges})
 
-@register.inclusion_tag(("../badges/badge_counts.html", "badges/badge_counts.html"))
+@register.inclusion_tag("badges/badge_counts.html")
 def badge_counts(user_data):
 
     counts_dict = {}
@@ -53,7 +54,7 @@ def badge_counts(user_data):
             "master": counts_dict[badges.BadgeCategory.MASTER],
     }
 
-@register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
+@register.inclusion_tag("badges/badge_block.html")
 def badge_block(badge, user_badge=None, show_frequency=False):
 
     if user_badge:

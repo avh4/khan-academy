@@ -6,7 +6,8 @@ from google.appengine.ext.webapp import template
 from notifications import UserNotifier
 from .badges import badges, util_badges
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.simple_tag
 def login_notifications(user_data, continue_url):
@@ -19,7 +20,7 @@ def login_notifications_html(login_notifications, user_data, continue_url="/"):
     path = os.path.join(os.path.dirname(__file__), "notifications.html")
     return template.render(path, {"login_notification": login_notification, "continue": continue_url, "user_data":user_data})
 
-@register.inclusion_tag(("../phantom_users/badge_counts.html", "phantom_users/badge_counts.html"))
+@register.inclusion_tag("phantom_users/badge_counts.html")
 def badge_info(user_data):
 
     counts_dict = {}
@@ -42,7 +43,7 @@ def badge_info(user_data):
             "master": counts_dict[badges.BadgeCategory.MASTER],
     }
     
-@register.inclusion_tag(("../phantom_users/user_points.html", "phantom_users/user_points.html"))
+@register.inclusion_tag("phantom_users/user_points.html")
 def point_info(user_data):
     if user_data:
         points = user_data.points

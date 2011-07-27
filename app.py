@@ -42,6 +42,8 @@ class App(object):
     constant_contact_password = secrets.constant_contact_password
 
     flask_secret_key = secrets.flask_secret_key
+
+    root = os.path.dirname(__file__)
     
     is_dev_server = False
     if os.environ["SERVER_SOFTWARE"].startswith('Development'):
