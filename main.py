@@ -50,6 +50,7 @@ import exercise_statistics
 import backfill
 import activity_summary
 import exercises
+import dashboard
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
@@ -1571,6 +1572,8 @@ def main():
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
+
+        ('/dashboard', dashboard.Dashboard),
 
         ('/sendtolog', SendToLog),
 
