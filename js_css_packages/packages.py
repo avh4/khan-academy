@@ -1,6 +1,5 @@
 javascript = {
     "shared": {
-        "hashed-filename": "hashed-@shared@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "jquery.js",
             "jquery-ui.js",
@@ -13,7 +12,6 @@ javascript = {
         ]
     },
     "video": {
-        "hashed-filename": "hashed-@video@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "video.js",
             "discussion.js",
@@ -21,7 +19,6 @@ javascript = {
         ]
     },
     "homepage": {
-        "hashed-filename": "hashed-@homepage@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "jquery.easing.1.3.js",
             "jquery.cycle.all.min.js",
@@ -29,8 +26,22 @@ javascript = {
             "homepage.js",
         ]
     },
+    "exercises": {
+        "files": [
+            "ASCIIMathML.js",
+            "raphael.js",
+            "ASCIIsvg-wrapper.js",
+            "fontdetect.js",
+            "seedrandom.js",
+            "metautil.js",
+            "exerciseutil.js",
+            "graphutil.js",
+            "g.raphael-min.js",
+            "g.pie-min.js",
+            "g.line-min.js",
+        ]
+    },
     "profile": {
-        "hashed-filename": "hashed-@profile@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "jquery.address-1.4.min.js",
             "highcharts.js",
@@ -38,14 +49,12 @@ javascript = {
         ]
     },
     "maps": {
-        "hashed-filename": "hashed-@maps@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "fastmarkeroverlay.js",
             "knowledgemap.js",
         ]
     },
     "mobile": {
-        "hashed-filename": "hashed-@mobile@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "jquery.js",
             "jquery.mobile-1.0a4.1.js",
@@ -53,14 +62,12 @@ javascript = {
         ]
     },
     "studentlists": {
-        "hashed-filename": "hashed-@studentlists@.js", # @content@ will be replaced with hash by deploy script
         "files": [
             "studentlists.js",
             "classprofile.js",
         ]
     },
     "exercises": {
-        "hashed-filename": "hashed-@exercises@.js", # @content@ will be replaced with hash by deploy script
         "base_path": "../khan-exercises",
         "base_url": "/khan-exercises",
         "files": [
@@ -89,7 +96,6 @@ javascript = {
 
 stylesheets = {
     "shared": {
-        "hashed-filename": "hashed-@shared@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "default.css",
             "rating.css",
@@ -101,14 +107,12 @@ stylesheets = {
         ]
     },
     "mobile": {
-        "hashed-filename": "hashed-@mobile@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "jquery.mobile-1.0a4.1.css",
             "mobile.css",
         ]
     },
     "video": {
-        "hashed-filename": "hashed-@video@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "video.css",
             "discussion.css",
@@ -116,14 +120,12 @@ stylesheets = {
         ]
     },
     "studentlists": {
-        "hashed-filename": "hashed-@studentlists@.css", # @content@ will be replaced with hash by deploy script
         "files": [
             "viewstudentlists.css",
             "viewclassprofile.css",
         ]
     },
     "exercises": {
-        "hashed-filename": "hashed-@exercises@.css", # @content@ will be replaced with hash by deploy script
         "base_path": "../khan-exercises/css",
         "base_url": "/khan-exercises/css",
         "files": [

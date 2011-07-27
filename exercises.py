@@ -137,9 +137,11 @@ class ViewExercise(request_handler.RequestHandler):
         self.render_template("exercise_template.html", template_values)
 
 class ViewAllExercises(request_handler.RequestHandler):
-    @create_phantom
     def get(self):
         user_data = models.UserData.current()
+        if not user_data:
+            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
+            user_data = UserData.insert_for(user.email())
         
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
