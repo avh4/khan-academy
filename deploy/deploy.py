@@ -118,9 +118,7 @@ def main():
         version = options.version
 
     if options.clean:
-        filename = os.path.join('..', 'js_css_packages/packages_hash.py')
-        if os.path.exists(filename):
-            os.remove(filename)
+        compress.hashes = {}
 
     print "Deploying version " + str(version)
     compress.revert_js_css_hashes()

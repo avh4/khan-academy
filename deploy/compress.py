@@ -23,12 +23,12 @@ PATH_PACKAGES_HASH = "js_css_packages/packages_hash.py"
 
 packages_stylesheets = copy.deepcopy(packages.stylesheets)
 packages_javascript = copy.deepcopy(packages.javascript)
-if os.path.exists(PATH_PACKAGES_HASH):
+if os.path.isfile(PATH_PACKAGES_HASH):
     import js_css_packages.packages_hash
     hashes = copy.deepcopy(js_css_packages.packages_hash.hashes)
 else:
     hashes = {}
-    
+
 def revert_js_css_hashes():
     print "Reverting %s" % PATH_PACKAGES
     popen_results(['hg', 'revert', PATH_PACKAGES])
@@ -100,6 +100,7 @@ def compress_package(name, path, files, suffix):
         content = compressed.read()
     new_hash = md5.new(content).hexdigest()
 
+    path_compressed = ''
     fullname = name+suffix
     if fullname not in hashes \
             or hashes[fullname][0] != new_hash \
@@ -119,18 +120,14 @@ def compress_package(name, path, files, suffix):
 
     if suffix == '.css' and 'mobile' not in name:
         non_ie_fullname = name + '-non-ie' + suffix
-        path_with_uris = remove_images(path, path_compressed, suffix)
-
-        with open(path_with_uris, 'r') as imagesremoved:
-            content = imagesremoved.read()
-        new_hash = md5.new(content).hexdigest()
-
         if non_ie_fullname not in hashes \
                 or hashes[non_ie_fullname][0] != new_hash \
                 or not os.path.exists(hashes[non_ie_fullname][2]):
 
+            if path_compressed == '':
+                path_compressed = minify_package(path, path_combined, suffix)
+            path_with_uris = remove_images(path, path_compressed, suffix)
             path_hashed, hash_sig = hash_package(name, path, path_with_uris, suffix)
-
             insert_hash_sig(name+'-non-ie', hash_sig, suffix)
 
             if not os.path.exists(path_hashed):
@@ -183,7 +180,8 @@ def remove_images_from_line(filename):
         with open(filename) as img:
             f = StringIO.StringIO()
             f.write(img.read())
-            return '\'data:image/%s;base64,%s\''% (ext, base64.b64encode(f.getvalue()))
+            return '\'data:image/%s;base64,%s\'' % \
+                (ext, base64.b64encode(f.getvalue()))
 
     return filename
 
