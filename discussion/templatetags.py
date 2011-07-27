@@ -1,4 +1,4 @@
-# import the webapp module
+import os
 import re
 from google.appengine.ext import webapp
 from django import template
@@ -105,10 +105,11 @@ def question_answers(answers):
 def standalone_answers(video, playlist, dict_answers):
     return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
 
-@register.inclusion_tag("discussion/username_and_notification.html")
+@register.simple_tag
 def username_and_notification(username, user_data):
     count = user_data.feedback_notification_count() if user_data else 0
-    return { "username": username, "count": count }
+    path = os.path.join(os.path.dirname(__file__), "username_and_notification.html")
+    return webapp.template.render(path, { "username": username, "count": count })
 
 @register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_question(button_label, target=None):
