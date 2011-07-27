@@ -641,7 +641,7 @@ var Notifications = {
         jel.animate(
                 { top: -jel.height() - 2 }, // 2 for border and outline
                 $.extend({}, animationOptions, 
-                    { complete: function(){ jel.empty(); } }
+                    { complete: function(){ jel.empty().css("display", "none"); } }
                 )
         );
 
