@@ -371,12 +371,38 @@ class ExerciseAdmin(request_handler.RequestHandler):
         if not users.is_current_user_admin():
             self.redirect(users.create_login_url(self.request.uri))
             return
-
+        
+        user_data = models.UserData.current()
         user = models.UserData.current().user
-        query = models.Exercise.all().order('name')
-        exercises = query.fetch(1000)
 
-        template_values = {'App' : App, 'exercises': exercises}
+        
+        ex_graph = models.ExerciseGraph(user_data)
+        if user_data.reassess_from_graph(ex_graph):
+            user_data.put()
+
+        recent_exercises = ex_graph.get_recent_exercises()
+        suggested_exercises = ex_graph.get_suggested_exercises()
+        proficient_exercises = ex_graph.get_proficient_exercises()
+        exercises = []
+        for exercise in ex_graph.exercises:
+            exercise.phantom = False
+            exercise.suggested = False
+            exercise.proficient = False
+            exercise.review = False
+            exercise.status = ""
+            # if user_data.is_phantom:
+            #     exercise.phantom = True
+            # else:
+            if exercise in suggested_exercises:
+                exercise.suggested = True
+                exercise.status = "Suggested"
+            if exercise in proficient_exercises:
+                exercise.proficient = True
+                exercise.status = "Proficient"
+            exercises.append(exercise)
+            
+        exercises.sort(key=lambda e: e.name)
+        template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
         self.render_template('exerciseadmin.html', template_values)
 

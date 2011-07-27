@@ -145,15 +145,14 @@ def exercise_message(exercise, coaches, exercise_states):
     path = os.path.join(os.path.dirname(__file__), "exercise_message.html")
     return webapp_template.render(path, dict({"exercise": exercise, "coaches": coaches}, **exercise_states))
 
-@register.simple_tag
+@register.inclusion_tag("user_points.html")
 def user_points(user_data):
     if user_data:
         points = user_data.points
     else:
         points = 0
 
-    path = os.path.join(os.path.dirname(__file__), "user_points.html")
-    return webapp_template.render(path, {"points": points})
+    return {"points": points}
 
 @register.inclusion_tag("possible_points_badge.html")
 def possible_points_badge(points, possible_points, logged_in=True):
