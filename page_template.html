@@ -69,7 +69,8 @@
     </head>
 
     <body class="light">
-	{% login_notifications user_data continue %}
+    <div id="outer-wrapper">
+    {% login_notifications user_data continue %}
     <div id="page-container">
     <div id="page-container-inner">
         {# Facebook connect root #}
@@ -148,6 +149,7 @@
             
             {% badge_notifications %}
             
+    </div>
     </div>
     </div>
     <div class="push"></div>

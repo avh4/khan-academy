@@ -68,15 +68,18 @@ body {
 }
 body.dark { background: url(/images/dark-page-bg.png) repeat-x; }
 
-#page-container {
+#outer-wrapper {
     min-height: 100%;
     height: auto !important;
     height: 100%;
-    margin: 0 auto -77px;
+    margin: 0 0 -77px;
+}
+#page-container {
+    background: transparent url(/images/content-border.1.png) no-repeat 0 85px;
     min-width: 1000px;
     max-width: 1200px;
     position: relative;
-    background: transparent url(/images/content-border.1.png) no-repeat 0 85px;
+    margin: 0 auto;
 }
 #page-container-inner {
     background: transparent url(/images/content-border.1.png) no-repeat right 85px;
@@ -3020,6 +3023,11 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     position:relative !important;
     top:2px !important;
 }
+
+.notification-bar-spacer {
+    height: 0;
+}
+
 @media screen and (min-width: 1200px) {
     .dark #homepage, .dark #contribute, .dark #container, .dark #page_sub_nav, .dark #container .exercise-badge.single-exercise {
         -moz-border-radius-topleft: 4px;

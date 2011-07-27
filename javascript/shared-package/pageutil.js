@@ -614,14 +614,13 @@ var Notifications = {
                 jel
                     .css("visibility", "hidden")
                     .css("display", "")
-                    .css("top",-1*jel.height())
+                    .css("top",-jel.height() - 2) // 2 for border and outline
                     .css("visibility", "visible");
 
                 // Queue:false to make sure all of these run at the same time
                 var animationOptions = {duration: 350, queue: false};
                 
-                $("body").animate({ backgroundPosition: "0px 35px" }, animationOptions);
-                $("header").animate({ paddingTop: 35 }, animationOptions);
+                $(".notification-bar-spacer").animate({ height: 35 }, animationOptions);
                 jel.show().animate({ top: 0 }, animationOptions);
 
             }, 100);
@@ -634,11 +633,10 @@ var Notifications = {
         // Queue:false to make sure all of these run at the same time
         var animationOptions = {duration: 350, queue: false};
         
-        $("body").animate({ backgroundPosition: "0px 0px" }, animationOptions);
-        $("header").animate({ paddingTop: 0 }, animationOptions);
+        $(".notification-bar-spacer").animate({ height: 0 }, animationOptions);
         jel.animate(
-                { top: -1 * jel.height() }, 
-                $.extend(animationOptions, 
+                { top: -jel.height() - 2 }, // 2 for border and outline
+                $.extend({}, animationOptions, 
                     { complete: function(){ jel.empty(); } }
                 )
         );
