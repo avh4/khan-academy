@@ -102,7 +102,7 @@ def knowledgemap_embed(exercises, map_coords, admin=False):
         'admin':json.dumps(admin)
     }
 
-@register.simple_tag
+@register.inclusion_tag("related_videos.html")
 def related_videos_with_points(exercise_videos):
     return related_videos(exercise_videos, True)
 
