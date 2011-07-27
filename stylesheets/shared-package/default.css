@@ -1912,6 +1912,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .exercise.button:hover, #answer_area input.button:hover {
         color: #000;
     }
+    .exercise.button::-moz-focus-inner, #answer_area input.button::-moz-focus-inner {
+        border: 0;
+        padding: 0;
+    }
     #answer_area .info-box .select-choice {
         margin: 5px 0 10px;
     }
