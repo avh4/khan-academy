@@ -19,7 +19,7 @@ def is_facebook_email(email):
     return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
 
 def get_facebook_nickname_key(user):
-    return "facebook_nickname_%s" % user.email()
+    return "facebook_nickname_key_%s" % user.email()
 
 @request_cache.cache_with_key_fxn(get_facebook_nickname_key)
 @layer_cache.cache_with_key_fxn(
@@ -35,7 +35,8 @@ def get_facebook_nickname(user):
     try:
         profile = graph.get_object(id)
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
-        return unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+        # Bug fixed, utf-8 and nonascii is okay
+        return unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
     except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError):
         # In the event of an FB error, don't cache the result.
         return layer_cache.UncachedResult(email)
@@ -52,7 +53,7 @@ def get_user_from_profile(profile):
 
     if profile is not None:
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
-        name = unicodedata.normalize('NFKD', profile["name"]).encode('ascii', 'ignore')
+        name = unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
 
         # We create a fake user, substituting the user's Facebook uid for their email 
         user = users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"])

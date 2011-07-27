@@ -24,6 +24,32 @@ from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
 
+class MoveMapNode(request_handler.RequestHandler):
+    def post(self):
+        self.get()
+    def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+        
+        node = self.request_string('exercise')
+        direction = self.request_string('direction')
+    
+        exercise = models.Exercise.get_by_name(node)
+    
+        if direction=="up":
+            exercise.h_position -= 1
+            exercise.put()
+        elif direction=="down":
+            exercise.h_position += 1
+            exercise.put()
+        elif direction=="left":
+            exercise.v_position -= 1
+            exercise.put()
+        elif direction=="right":
+            exercise.v_position += 1
+            exercise.put()
+
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
     @create_phantom
@@ -513,4 +539,5 @@ class UpdateExercise(request_handler.RequestHandler):
 
 
         self.redirect('/editexercise?saved=1&name=' + exercise_name)
+
 

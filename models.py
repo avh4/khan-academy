@@ -9,7 +9,7 @@ import config_django
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
-
+from api.jsonify import jsonify
 # Do not remove this webapp.template import, as suggested
 # by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
 from google.appengine.ext.webapp import template
@@ -40,21 +40,23 @@ class Setting(db.Model):
     value = db.StringProperty()
 
     @staticmethod
-    def get_or_set_with_key(key, val = None):
+    def entity_group_key():
+        return db.Key.from_path('Settings', 'default_settings')
+
+    @staticmethod
+    def _get_or_set_with_key(key, val = None):
         if val is None:
-            return Setting.cache_get_by_key_name(key)
+            return Setting._cache_get_by_key_name(key)
         else:
-            setting = Setting.get_or_insert(key)
-            setting.value = str(val)
-            setting.put()
-
-            Setting.get_settings_dict(bust_cache=True)
-
+            setting = Setting(Setting.entity_group_key(), key, value=str(val))
+            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
+            db.put([setting, setting_old])
+            Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
     @staticmethod
-    def cache_get_by_key_name(key):
-        setting = Setting.get_settings_dict().get(key)
+    def _cache_get_by_key_name(key):
+        setting = Setting._get_settings_dict().get(key)
         if setting is not None:
             return setting.value
         return None
@@ -62,24 +64,34 @@ class Setting(db.Model):
     @staticmethod
     @request_cache.cache()
     @layer_cache.cache(layer=layer_cache.Layers.Memcache)
-    def get_settings_dict(bust_cache = False):
-        return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
+    def _get_settings_dict(bust_cache = False):
+        # ancestor query to ensure consistent results
+        query = Setting.all().ancestor(Setting.entity_group_key())
+        results = dict((setting.key().name(), setting) for setting in query.fetch(20))
+
+        # backfill with old style settings
+        for setting in Setting.all().fetch(20):
+            key = setting.key()
+            if key.parent() is None and not key.name() in results.keys():
+                results[key.name()] = setting
+
+        return results
 
     @staticmethod
     def cached_library_content_date(val = None):
-        return Setting.get_or_set_with_key("cached_library_content_date", val)
+        return Setting._get_or_set_with_key("cached_library_content_date", val)
 
     @staticmethod
     def cached_exercises_date(val = None):
-        return Setting.get_or_set_with_key("cached_exercises_date", val)
+        return Setting._get_or_set_with_key("cached_exercises_date", val)
 
     @staticmethod
     def count_videos(val = None):
-        return Setting.get_or_set_with_key("count_videos", val) or 0
+        return Setting._get_or_set_with_key("count_videos", val) or 0
 
     @staticmethod
     def last_youtube_sync_generation_start(val = None):
-        return Setting.get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
+        return Setting._get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
 
 class Exercise(db.Model):
 
@@ -491,6 +503,7 @@ class UserData(db.Model):
     user = db.UserProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
+    developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
     proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
@@ -507,6 +520,7 @@ class UserData(db.Model):
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()
+    last_badge_review = db.DateTimeProperty()
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
@@ -610,7 +624,8 @@ class UserData(db.Model):
 
     def delete(self):
         logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
-
+        logging.info("Dumping user data for %s: %s" % (self.current_user.email(), jsonify(self)))
+        
         if not self.is_phantom:
             user_counter.add(-1)
 
@@ -821,6 +836,12 @@ class Video(Searchable, db.Model):
                     "png": "%s/%s.png" % (download_url_base, self.youtube_id),
                     }
 
+        return None
+
+    def download_video_url(self):
+        download_urls = self.download_urls
+        if download_urls:
+            return download_urls.get("mp4")
         return None
     
     @staticmethod

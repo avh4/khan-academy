@@ -81,10 +81,12 @@
                        	Subtitles
                 </a>
 
+                {% if video_path %}
                 <a href="{{video_path}}" title="Download this lesson" style="z-index:101;" class="simple-button action-gradient with-icon download-icon download-link">
                 <img src="/images/download-icon-small.png" />
                          Download
-                 </a>
+                </a>
+                {% endif %}
                   
                  <a href="#" style="z-index:101;" class="simple-button action-gradient with-icon download-icon share-link">
                  <img src="/images/share-icon-small.png" />

@@ -49,3 +49,4 @@ def point_info(user_data):
     else:
         points = 0
     return {"points": points}
+

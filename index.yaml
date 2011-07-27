@@ -126,6 +126,25 @@ indexes:
   - name: date
     direction: desc
 
+- kind: Feedback
+  ancestor: yes
+  properties:
+  - name: deleted
+  - name: is_hidden_by_flags
+  - name: targets
+  - name: date
+    direction: desc
+
+- kind: Feedback
+  ancestor: yes
+  properties:
+  - name: deleted
+  - name: is_hidden_by_flags
+  - name: targets
+  - name: types
+  - name: date
+    direction: desc
+
 - kind: FeedbackNotification
   properties:
   - name: user

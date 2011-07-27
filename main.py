@@ -7,10 +7,11 @@ import random
 import urllib
 import logging
 import re
+import devpanel
 from pprint import pformat
 from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
-from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
+from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 
 import config_django
 
@@ -48,6 +49,7 @@ import exercise_statistics
 import backfill
 import activity_summary
 import exercises
+import dashboard
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -105,7 +107,7 @@ class KillLiveAssociations(request_handler.RequestHandler):
         for video_playlist in all_video_playlists:
             video_playlist.live_association = False
         db.put(all_video_playlists)
-           
+
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
@@ -116,7 +118,7 @@ class ViewVideo(request_handler.RequestHandler):
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
-        # To do that we first need to find the appropriate playlist.  If we aren't 
+        # To do that we first need to find the appropriate playlist.  If we aren't
         # given the playlist title in a query param, we need to find a playlist that
         # the video is a part of.  That requires finding the video, given it readable_id
         # or, to support old URLs, it's youtube_id.
@@ -127,9 +129,9 @@ class ViewVideo(request_handler.RequestHandler):
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
         readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
- 
-        # If either the readable_id or playlist title is missing, 
-        # redirect to the canonical URL that contains them 
+
+        # If either the readable_id or playlist title is missing,
+        # redirect to the canonical URL that contains them
         redirect_to_canonical_url = False
         if video_id: # Support for old links
             query = Video.all()
@@ -168,17 +170,17 @@ class ViewVideo(request_handler.RequestHandler):
                 raise MissingVideoException("Missing video '%s'" % readable_id)
 
             redirect_to_canonical_url = True
- 
+
         if redirect_to_canonical_url:
             self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
             return
-            
+
         # If we got here, we have a readable_id and a playlist_title, so we can display
-        # the playlist and the video in it that has the readable_id.  Note that we don't 
+        # the playlist and the video in it that has the readable_id.  Note that we don't
         # query the Video entities for one with the requested readable_id because in some
         # cases there are multiple Video objects in the datastore with the same readable_id
-        # (e.g. there are 2 "Order of Operations" videos).          
-            
+        # (e.g. there are 2 "Order of Operations" videos).
+
         videos = VideoPlaylist.get_cached_videos_for_playlist(playlist)
         previous_video = None
         next_video = None
@@ -195,15 +197,15 @@ class ViewVideo(request_handler.RequestHandler):
             raise MissingVideoException("Missing video '%s'" % readable_id)
 
         if App.offline_mode:
-            video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+            video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv"
         else:
-            video_path = "http://www.archive.org/download/KhanAcademy_" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+            video_path = video.download_video_url()
 
         exercise = None
         exercise_video = video.get_related_exercise()
         if exercise_video and exercise_video.exercise:
-            exercise = exercise_video.exercise.name            
-                            
+            exercise = exercise_video.exercise.name
+
         if video.description == video.title:
             video.description = None
 
@@ -231,7 +233,7 @@ class ViewVideo(request_handler.RequestHandler):
         self.render_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
-    
+
     # LogVideoProgress uses a GET request to solve the IE-behind-firewall
     # issue with occasionally stripped POST data.
     # See http://code.google.com/p/khanacademy/issues/detail?id=3098
@@ -263,19 +265,22 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
-        
+        user_points_html = self.render_template_block_to_string(
+            "user_points.html",
+            "user_points_block",
+            user_points(user_data)
+        )
+
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
 class PrintProblem(request_handler.RequestHandler):
-    
+
     def get(self):
-        
+
         exid = self.request.get('exid')
         problem_number = self.request.get('problem_number')
-        
+
         template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
@@ -283,13 +288,13 @@ class PrintProblem(request_handler.RequestHandler):
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'problem_number': self.request.get('problem_number')
                 }
-        
+
         self.render_template(exid + '.html', template_values)
-        
+
 class PrintExercise(request_handler.RequestHandler):
 
     def get(self):
-        
+
         user_data = UserData.current()
 
         if user_data:
@@ -312,7 +317,7 @@ class PrintExercise(request_handler.RequestHandler):
                 exid = 'addition_1'
 
             user_exercise = user_data.get_or_insert_exercise(exercise)
-            
+
             if not problem_number:
                 problem_number = user_exercise.total_done+1
             proficient = False
@@ -337,9 +342,9 @@ class PrintExercise(request_handler.RequestHandler):
                 'num_problems': num_problems,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
-            
+
             self.render_template('print_template.html', template_values)
-                
+
         else:
 
             self.redirect(util.create_login_url(self.request.uri))
@@ -349,7 +354,7 @@ class ReportIssue(request_handler.RequestHandler):
     def get(self):
         issue_type = self.request.get('type')
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
-        
+
     def write_response(self, issue_type, extra_template_values):
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
@@ -421,9 +426,9 @@ class ShowUnusedPlaylists(request_handler.RequestHandler):
 
 class GenerateVideoMapping(request_handler.RequestHandler):
 
-    def get(self): 
+    def get(self):
         video_mapping = {}
-        for playlist_title in all_topics_list:            
+        for playlist_title in all_topics_list:
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -432,19 +437,19 @@ class GenerateVideoMapping(request_handler.RequestHandler):
             query.filter('live_association = ', True)
             query.order('video_position')
             playlist_name = get_mangled_playlist_name(playlist_title)
-            playlist = []   
+            playlist = []
             video_mapping[playlist_name] = playlist
             for pv in query.fetch(500):
                 v = pv.video
                 filename = v.title.replace(":", "").replace(",", ".")
-                playlist.append((filename, v.youtube_id, v.readable_id)) 
-        self.response.out.write("video_mapping = " + pformat(video_mapping))            
-        
-        
+                playlist.append((filename, v.youtube_id, v.readable_id))
+        self.response.out.write("video_mapping = " + pformat(video_mapping))
+
+
 class YoutubeVideoList(request_handler.RequestHandler):
 
     def get(self):
-        for playlist_title in all_topics_list:            
+        for playlist_title in all_topics_list:
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -454,7 +459,7 @@ class YoutubeVideoList(request_handler.RequestHandler):
             query.order('video_position')
             for pv in query.fetch(500):
                 v = pv.video
-                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')       
+                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')
 
 class ExerciseAndVideoEntityList(request_handler.RequestHandler):
 
@@ -512,60 +517,60 @@ class ViewHomePage(request_handler.RequestHandler):
     def get(self):
         thumbnail_link_sets = [
             [
-                { 
-                    "href": "/video/khan-academy-on-the-gates-notes", 
-                    "class": "thumb-gates_thumbnail", 
+                {
+                    "href": "/video/khan-academy-on-the-gates-notes",
+                    "class": "thumb-gates_thumbnail",
                     "desc": "Khan Academy on the Gates Notes",
                     "youtube_id": "UuMTSU9DcqQ",
                     "selected": False,
                 },
-                { 
-                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs", 
-                    "class": "thumb-overview_thumbnail", 
+                {
+                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs",
+                    "class": "thumb-overview_thumbnail",
                     "desc": "Overview of our video library",
                     "youtube_id": "dsFQ9kM1qDs",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference", 
-                    "class": "thumb-gel_thumbnail", 
+                {
+                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference",
+                    "class": "thumb-gel_thumbnail",
                     "desc": "Sal Khan talk at GEL 2010",
                     "youtube_id": "yTXKCzrFh3c",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/khan-academy-on-pbs-newshour--edited", 
-                    "class": "thumb-pbs_thumbnail", 
+                {
+                    "href": "/video/khan-academy-on-pbs-newshour--edited",
+                    "class": "thumb-pbs_thumbnail",
                     "desc": "Khan Academy on PBS NewsHour",
                     "youtube_id": "4jXv03sktik",
                     "selected": False,
                 },
             ],
             [
-                { 
-                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html", 
-                    "class": "thumb-ted_thumbnail", 
+                {
+                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html",
+                    "class": "thumb-ted_thumbnail",
                     "desc": "Sal on the Khan Academy @ TED",
                     "youtube_id": "gM95HHI4gLk",
                     "selected": False,
                 },
-                { 
-                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
-                    "class": "thumb-tech_award_thumbnail", 
+                {
+                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA",
+                    "class": "thumb-tech_award_thumbnail",
                     "desc": "What is the Khan Academy?",
                     "youtube_id": "p6l8-1kHUsA",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/khan-academy-exercise-software", 
-                    "class": "thumb-exercises_thumbnail", 
+                {
+                    "href": "/video/khan-academy-exercise-software",
+                    "class": "thumb-exercises_thumbnail",
                     "desc": "Overview of our exercise software",
                     "youtube_id": "hw5k98GV7po",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/forbes--names-you-need-to-know---khan-academy", 
-                    "class": "thumb-forbes_thumbnail", 
+                {
+                    "href": "/video/forbes--names-you-need-to-know---khan-academy",
+                    "class": "thumb-forbes_thumbnail",
                     "desc": "Forbes Names You Need To Know",
                     "youtube_id": "UkfppuS0Plg",
                     "selected": False,
@@ -582,7 +587,7 @@ class ViewHomePage(request_handler.RequestHandler):
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
-        
+
         template_values = {
                             'video_id': movie_youtube_id,
                             'thumbnail_link_sets': thumbnail_link_sets,
@@ -592,7 +597,7 @@ class ViewHomePage(request_handler.RequestHandler):
                             'approx_vid_count': consts.APPROX_VID_COUNT,
                         }
         self.render_template('homepage.html', template_values)
-        
+
 class ViewFAQ(request_handler.RequestHandler):
     def get(self):
         self.redirect("/about/faq", True)
@@ -629,7 +634,7 @@ class ViewDMCA(request_handler.RequestHandler):
 class ViewStore(request_handler.RequestHandler):
     def get(self):
         self.render_template('store.html', {})
-        
+
 class ViewHowToHelp(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
@@ -651,7 +656,7 @@ class ViewSAT(request_handler.RequestHandler):
         template_values = {
                 'videos': playlist_videos,
         }
-                                                  
+
         self.render_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
@@ -663,9 +668,9 @@ class ViewGMAT(request_handler.RequestHandler):
                             'data_sufficiency': data_sufficiency,
                             'problem_solving': problem_solving,
         }
-                                                  
+
         self.render_template('gmat.html', template_values)
-                       
+
 
 class RetargetFeedback(bulk_update.handler.UpdateKind):
     def get_keys_query(self, kind):
@@ -674,9 +679,9 @@ class RetargetFeedback(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, feedback):
-        orig_video = feedback.first_target()
+        orig_video = feedback.video()
 
         if orig_video == None or type(orig_video).__name__ != "Video":
             return False
@@ -707,7 +712,7 @@ class DeleteStaleVideoPlaylists(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, video_playlist):
         if video_playlist.live_association == True:
             logging.debug("Keeping VideoPlaylist %s", video_playlist.key().id())
@@ -723,7 +728,7 @@ class DeleteStaleVideos(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, video):
         query = ExerciseVideo.all()
         query.filter('video =', video)
@@ -749,7 +754,7 @@ class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, playlist):
         query = VideoPlaylist.all()
         query.filter('playlist =', playlist)
@@ -765,7 +770,7 @@ class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
 class FixVideoRef(bulk_update.handler.UpdateKind):
     def use_transaction(self):
         return False
-    
+
     def update(self, entity):
         orig_video = entity.video
 
@@ -790,11 +795,11 @@ class FixVideoRef(bulk_update.handler.UpdateKind):
             return True
         else:
             return False
-            
+
 class FixPlaylistRef(bulk_update.handler.UpdateKind):
     def use_transaction(self):
         return False
-    
+
     def update(self, entity):
         orig_playlist = entity.playlist
 
@@ -818,9 +823,9 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
             return True
         else:
             return False
-            
+
 class ChangeEmail(bulk_update.handler.UpdateKind):
-    
+
     def get_email_params(self):
         old_email = self.request.get('old')
         new_email = self.request.get('new')
@@ -832,7 +837,7 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         if prop is None or len(prop) == 0:
             prop = "user"
         return (old_email, new_email, prop)
-        
+
     def get(self):
         (old_email, new_email, prop) = self.get_email_params()
         if new_email == old_email:
@@ -840,14 +845,14 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         self.response.out.write("To prevent a CSRF attack from changing email addresses, you initiate an email address change from the browser. ")
         self.response.out.write("Instead, run the following from remote_api_shell.py.<pre>\n")
         self.response.out.write("import bulk_update.handler\n")
-        self.response.out.write("bulk_update.handler.start_task('%s',{'kind':'%s', 'old':'%s', 'new':'%s'})\n" 
+        self.response.out.write("bulk_update.handler.start_task('%s',{'kind':'%s', 'old':'%s', 'new':'%s'})\n"
                                 % (self.request.path, self.request.get('kind'), old_email, new_email))
         self.response.out.write("</pre>and then check the logs in the admin console")
 
-        
+
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
-        
+
         (old_email, new_email, prop) = self.get_email_params()
         # When a user's personal Google account is replaced by their transitioned Google Apps account with the same email,
         # the Google user ID changes and the new User object's are not considered equal to the old User object's with the same
@@ -859,12 +864,12 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, entity):
         (old_email, new_email, prop) = self.get_email_params()
         if getattr(entity, prop).email() != old_email:
             # This should never occur, but just in case, don't change or reput the entity.
-            return False 
+            return False
         setattr(entity, prop, users.User(new_email))
         return True
 
@@ -874,18 +879,18 @@ class ViewArticle(request_handler.RequestHandler):
         video = None
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
-        
+
         article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
         if readable_id == "fortune":
             article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-            
+
         template_values = {
                 'article_url': article_url,
                 'issue_labels': ('Component-Videos,Video-%s' % readable_id),
         }
 
         self.render_template("article.html", template_values)
-            
+
 class Login(request_handler.RequestHandler):
     def get(self):
         return self.post()
@@ -901,7 +906,7 @@ class Login(request_handler.RequestHandler):
                 return
             self.redirect(users.create_login_url(cont))
             return
-                    
+
         if App.facebook_app_secret is None:
             self.redirect(users.create_login_url(cont))
             return
@@ -923,7 +928,7 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry, 
+        # Immediately after login we make sure this user has a UserData entry,
         # also delete phantom cookies
 
         # If new user is new, 0 points, migrate data
@@ -932,7 +937,7 @@ class PostLogin(request_handler.RequestHandler):
 
         if user_data and phantom_user:
             email = phantom_user.email()
-            phantom_data = UserData.get_from_db_key_email(email) 
+            phantom_data = UserData.get_from_db_key_email(email)
 
             # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
@@ -959,11 +964,11 @@ class Logout(request_handler.RequestHandler):
 
 class Search(request_handler.RequestHandler):
 
-    def get(self):        
+    def get(self):
         query = self.request.get('page_search_query')
         template_values = { 'page_search_query': query }
         query = query.strip()
-        query_too_short = None 
+        query_too_short = None
         if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
             if len(query) > 0:
                 template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
@@ -1009,10 +1014,12 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+
+
 def main():
 
-    webapp.template.register_template_library('templateext')    
-    application = webapp.WSGIApplication([ 
+    webapp.template.register_template_library('templateext')
+    application = webapp.WSGIApplication([
         ('/', ViewHomePage),
         ('/about', util_about.ViewAbout),
         ('/about/blog', blog.ViewBlog),
@@ -1032,7 +1039,7 @@ def main():
         ('/donate', Donate),
         ('/exercisedashboard', exercises.ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
-        ('/video_mapping', GenerateVideoMapping),  
+        ('/video_mapping', GenerateVideoMapping),
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
         ('/exercises', exercises.ViewExercise),
@@ -1050,7 +1057,7 @@ def main():
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
-        ('/store', ViewStore),        
+        ('/store', ViewStore),
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),
         ('/search', Search),
@@ -1062,7 +1069,7 @@ def main():
 
         ('/mobilefullsite', MobileFullSite),
         ('/mobilesite', MobileSite),
-        
+
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
         ('/admin/fixvideoref', FixVideoRef),
@@ -1080,9 +1087,13 @@ def main():
         ('/admin/youtubesync', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
+        ('/admin/movemapnode', exercises.MoveMapNode),
+        
+        ('/devadmin/emailchange', devpanel.Email),
+        ('/devadmin/managedevs', devpanel.Manage),
 
         ('/coaches', coaches.ViewCoaches),
-        ('/students', coaches.ViewStudents), 
+        ('/students', coaches.ViewStudents),
         ('/registercoach', coaches.RegisterCoach),
         ('/unregistercoach', coaches.UnregisterCoach),
         ('/unregisterstudent', coaches.UnregisterStudent),
@@ -1095,8 +1106,8 @@ def main():
         ('/addstudenttolist', coaches.AddStudentToList),
 
         ('/individualreport', coaches.ViewIndividualReport),
-        ('/progresschart', coaches.ViewProgressChart),        
-        ('/sharedpoints', coaches.ViewSharedPoints),        
+        ('/progresschart', coaches.ViewProgressChart),
+        ('/sharedpoints', coaches.ViewSharedPoints),
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
@@ -1123,10 +1134,10 @@ def main():
         ('/logout', Logout),
 
         ('/api-apps/register', oauth_apps.Register),
-        
+
         # These are dangerous, should be able to clean things manually from the remote python shell
 
-        ('/deletevideoplaylists', DeleteVideoPlaylists), 
+        ('/deletevideoplaylists', DeleteVideoPlaylists),
         ('/killliveassociations', KillLiveAssociations),
 
         # Below are all discussion related pages
@@ -1154,12 +1165,14 @@ def main():
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
-        
+
         ('/notifierclose', util_notify.ToggleNotify),
         ('/newaccount', Clone),
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
+
+        ('/dashboard', dashboard.Dashboard),
 
         ('/sendtolog', SendToLog),
 
@@ -1170,10 +1183,6 @@ def main():
         ('/_ah/warmup.*', warmup.Warmup),
 
         ], debug=True)
-
-    if not capabilities.CapabilitySet('datastore_v3', capabilities=['write']).is_enabled():
-        logging.info("Shortcircuiting request due to disabled datastore write.")
-        application = webapp.WSGIApplication([('.*', ReadOnlyDowntime)])
 
     application = profiler.ProfilerWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)

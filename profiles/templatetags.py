@@ -7,9 +7,10 @@ from google.appengine.ext.webapp import template
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
 from profiles import class_exercises_over_time_graph, class_progress_report_graph, class_energy_points_per_minute_graph, class_time_graph
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
-@register.inclusion_tag(("../profiles/graph_control.html", "profiles/graph_control.html"))
+@register.inclusion_tag("profiles/graph_control.html")
 def profile_graph_control():
     return {}
 
@@ -53,43 +54,76 @@ def class_profile_time_graph(user_data_coach, dt, tz_offset, student_list):
     return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset, student_list))
 # End class profile graph types
 
-@register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
+@register.inclusion_tag("profiles/graph_link.html")
 def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
     selected = (graph_type == selected_graph_type)
-    return { "user_data_student": user_data, "graph_name": graph_name, "graph_type": graph_type, "selected": selected }
+    return {
+        "user_data_student": user_data,
+        "graph_name": graph_name,
+        "graph_type": graph_type,
+        "selected": selected
+    }
 
-@register.inclusion_tag(("../profiles/graph_link.html", "profiles/graph_link.html"))
+@register.inclusion_tag("profiles/graph_link.html")
 def profile_class_graph_link(user_data_coach, graph_name, graph_type, selected_graph_type, list_id):
     selected = (graph_type == selected_graph_type)
-    return { "user": None, "user_data_coach": user_data_coach, "graph_name": graph_name, "graph_type": graph_type, "selected": selected, 'list_id': list_id }
+    return {
+        "user": None,
+        "user_data_coach": user_data_coach,
+        "graph_name": graph_name,
+        "graph_type": graph_type,
+        "selected": selected,
+        'list_id': list_id
+    }
 
-@register.inclusion_tag(("../profiles/graph_date_picker.html", "profiles/graph_date_picker.html"))
+@register.inclusion_tag("profiles/graph_date_picker.html")
 def profile_graph_date_picker(user_data, graph_type):
-    return { "user_data": user_data, "graph_type": graph_type }
+    return {
+        "user_data": user_data,
+        "graph_type": graph_type
+    }
 
-@register.inclusion_tag(("../profiles/graph_calendar_picker.html", "profiles/graph_calendar_picker.html"))
+@register.inclusion_tag("profiles/graph_calendar_picker.html")
 def profile_graph_calendar_picker(user_data, graph_type):
-    return { "user_data": user_data, "graph_type": graph_type }
+    return {
+        "user_data": user_data,
+        "graph_type": graph_type
+    }
 
-@register.inclusion_tag(("../profiles/exercise_progress_block.html", "profiles/exercise_progress_block.html"))
+@register.inclusion_tag("profiles/exercise_progress_block.html")
 def profile_exercise_progress_block(exercise_data, exercise):
-    context = { 'chart_link': exercise_data[exercise.name]["chart_link"],
-                'ex_link': exercise_data[exercise.name]["ex_link"],
-                'hover': exercise_data[exercise.name]["hover"],
-                'color': exercise_data[exercise.name]["color"],
-                'short_name': exercise_data[exercise.name]["short_name"], }
+    return {
+        'chart_link': exercise_data[exercise.name]["chart_link"],
+        'ex_link': exercise_data[exercise.name]["ex_link"],
+        'hover': exercise_data[exercise.name]["hover"],
+        'color': exercise_data[exercise.name]["color"],
+        'short_name': exercise_data[exercise.name]["short_name"]
+    }
+
+@register.inclusion_tag("profiles/recent_activity.html")
+def profile_recent_activity(user_data, view="standard"):
+    context = recent_activity.recent_activity_context(user_data)
+    context["view"] = view
     return context
 
-@register.inclusion_tag(("../profiles/recent_activity.html", "profiles/recent_activity.html"))
-def profile_recent_activity(user_data):
-    return recent_activity.recent_activity_context(user_data)
-
-@register.inclusion_tag(("../profiles/recent_activity_entry_badge.html", "profiles/recent_activity_entry_badge.html"))
-def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email }
-@register.inclusion_tag(("../profiles/recent_activity_entry_exercise.html", "profiles/recent_activity_entry_exercise.html"))
-def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email }
-@register.inclusion_tag(("../profiles/recent_activity_entry_video.html", "profiles/recent_activity_entry_video.html"))
-def profile_recent_activity_entry_video(user_data_student, recent_activity_entry):
-    return { "recent_activity": recent_activity_entry, "student_email": user_data_student.email }
+@register.inclusion_tag("profiles/recent_activity_entry_badge.html")
+def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry, view="standard"):
+    return {
+        "recent_activity": recent_activity_entry,
+        "student_email": user_data_student.email,
+        "view": view
+    }
+@register.inclusion_tag("profiles/recent_activity_entry_exercise.html")
+def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry, view="standard"):
+    return {
+        "recent_activity": recent_activity_entry,
+        "student_email": user_data_student.email,
+        "view": view
+    }
+@register.inclusion_tag("profiles/recent_activity_entry_video.html")
+def profile_recent_activity_entry_video(user_data_student, recent_activity_entry, view="standard"):
+    return {
+        "recent_activity": recent_activity_entry,
+        "student_email": user_data_student.email,
+        "view": view
+    }

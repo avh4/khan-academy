@@ -67,3 +67,4 @@ def badge_block(badge, user_badge=None, show_frequency=False):
         frequency = badge.frequency()
 
     return {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
+

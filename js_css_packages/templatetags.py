@@ -4,7 +4,8 @@ from app import App
 from js_css_packages import packages
 import util
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.simple_tag
 def js_package(package_name):
