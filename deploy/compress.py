@@ -119,7 +119,7 @@ def compress_package(name, path, files, suffix):
 
     if suffix == '.css' and 'mobile' not in name:
         non_ie_fullname = name + '-non-ie' + suffix
-        path_with_uris = remove_images(path, path_combined, suffix)
+        path_with_uris = remove_images(path, path_compressed, suffix)
 
         with open(path_with_uris, 'r') as imagesremoved:
             content = imagesremoved.read()
@@ -129,8 +129,7 @@ def compress_package(name, path, files, suffix):
                 or hashes[non_ie_fullname][0] != new_hash \
                 or not os.path.exists(hashes[non_ie_fullname][2]):
 
-            path_compressed = minify_package(path, path_with_uris, suffix)
-            path_hashed, hash_sig = hash_package(name, path, path_compressed, suffix)
+            path_hashed, hash_sig = hash_package(name, path, path_with_uris, suffix)
 
             insert_hash_sig(name+'-non-ie', hash_sig, suffix)
 
@@ -197,7 +196,7 @@ def remove_images(path, path_combined, suffix):
 
     new_file = open(path_without_urls, 'w')
 
-    r = re.compile('data-uri\(\'?/images/(\S+)\.(png|gif|GIF|jpg)\'?\)')
+    r = re.compile('/\*! *data-uri\(\'?/images/(\S+)\.(png|gif|GIF|jpg)\'?\) *\*/')
     with open(path_combined) as f:
         for line in f:
             if r.search(line):
