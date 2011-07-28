@@ -1,2 +1,135 @@
-javascript={'profile': {'files': ['jquery.address-1.4.min.js', 'highcharts.js', 'profile.js'], 'hashed-filename': 'hashed-b6d4069d8dfc92764a1cf1b028996637.js'}, 'mobile': {'files': ['jquery.js', 'jquery.mobile-1.0a4.1.js', 'iscroll-lite.min.js'], 'hashed-filename': 'hashed-2a92a6df278d5904886a1f2a423f4900.js'}, 'maps': {'files': ['fastmarkeroverlay.js', 'knowledgemap.js'], 'hashed-filename': 'hashed-ebc9e9f7f89937543da2c0efbf830d6f.js'}, 'video': {'files': ['video.js', 'discussion.js', 'jquery.qtip.js'], 'hashed-filename': 'hashed-61becf7250b7ea545338cfb76362c35b.js'}, 'exercises': {'files': ['khan-exercise.js', 'utils/angles.js', 'utils/answer-types.js', 'utils/calculus.js', 'utils/convert-values.js', 'utils/exponents.js', 'utils/expressions.js', 'utils/graphie-helpers.js', 'utils/graphie.js', 'utils/kinematics.js', 'utils/math-format.js', 'utils/math.js', 'utils/polynomials.js', 'utils/probability.js', 'utils/raphael.js', 'utils/scratchpad.js', 'utils/stat.js', 'utils/tmpl.js', 'utils/word-problems.js'], 'hashed-filename': 'hashed-b5d18d0fd154cb0d40fbb4389dd37ab8.js', 'base_url': '/khan-exercises', 'base_path': '../khan-exercises'}, 'shared': {'files': ['jquery.js', 'jquery-ui.js', 'jquery.ui.menu.js', 'jquery.watermark.js', 'jquery.placeholder.js', 'pageutil.js', 'api.js', 'social.js'], 'hashed-filename': 'hashed-7172324ef848d69ed1611cac3dbec649.js'}, 'studentlists': {'files': ['studentlists.js', 'classprofile.js'], 'hashed-filename': 'hashed-0347c50cfb930ce6e788e36d4eb34895.js'}, 'homepage': {'files': ['jquery.easing.1.3.js', 'jquery.cycle.all.min.js', 'waypoints.min.js', 'homepage.js'], 'hashed-filename': 'hashed-de49fdcb7c6cf06b5beec586c8eb5f61.js'}}
-stylesheets={'exercises-non-ie': {'hashed-filename': 'hashed-a0a9a0912f8a6b2b640540dd65e09196.css'}, 'studentlists-non-ie': {'hashed-filename': 'hashed-4a5d2a81b393d3e2a48d0ef25c5f8909.css'}, 'mobile': {'files': ['jquery.mobile-1.0a4.1.css', 'mobile.css'], 'hashed-filename': 'hashed-45f773d1b4e9e107b7be49eaa3dfe228.css'}, 'shared-non-ie': {'hashed-filename': 'hashed-64377b7f15b284e5d11a3bca5fef18bd.css'}, 'video': {'files': ['video.css', 'discussion.css', 'jquery.qtip.css'], 'hashed-filename': 'hashed-29770e0ea239bf495442d1615dfa9fc9.css'}, 'exercises': {'files': ['khan-exercise.css'], 'hashed-filename': 'hashed-a0a9a0912f8a6b2b640540dd65e09196.css', 'base_url': '/khan-exercises/css', 'base_path': '../khan-exercises/css'}, 'shared': {'files': ['default.css', 'rating.css', 'stylesheet.css', 'menu.css', 'profile.css', 'museo-sans.css', 'jquery-ui-1.8.4.custom.css'], 'hashed-filename': 'hashed-64377b7f15b284e5d11a3bca5fef18bd.css'}, 'video-non-ie': {'hashed-filename': 'hashed-29770e0ea239bf495442d1615dfa9fc9.css'}, 'studentlists': {'files': ['viewstudentlists.css', 'viewclassprofile.css'], 'hashed-filename': 'hashed-4a5d2a81b393d3e2a48d0ef25c5f8909.css'}}
+javascript = {
+    "shared": {
+        "files": [
+            "jquery.js",
+            "jquery-ui.js",
+            "jquery.ui.menu.js",
+            "jquery.watermark.js",
+            "jquery.placeholder.js",
+            "pageutil.js",
+            "api.js",
+			"social.js",
+        ]
+    },
+    "video": {
+        "files": [
+            "video.js",
+            "discussion.js",
+            "jquery.qtip.js",
+        ]
+    },
+    "homepage": {
+        "files": [
+            "jquery.easing.1.3.js",
+            "jquery.cycle.all.min.js",
+            "waypoints.min.js",
+            "homepage.js",
+        ]
+    },
+    "exercises": {
+        "files": [
+            "ASCIIMathML.js",
+            "raphael.js",
+            "ASCIIsvg-wrapper.js",
+            "fontdetect.js",
+            "seedrandom.js",
+            "metautil.js",
+            "exerciseutil.js",
+            "graphutil.js",
+            "g.raphael-min.js",
+            "g.pie-min.js",
+            "g.line-min.js",
+        ]
+    },
+    "profile": {
+        "files": [
+            "jquery.address-1.4.min.js",
+            "highcharts.js",
+            "profile.js",
+        ]
+    },
+    "maps": {
+        "files": [
+            "fastmarkeroverlay.js",
+            "knowledgemap.js",
+        ]
+    },
+    "mobile": {
+        "files": [
+            "jquery.js",
+            "jquery.mobile-1.0a4.1.js",
+            "iscroll-lite.min.js",
+        ]
+    },
+    "studentlists": {
+        "files": [
+            "studentlists.js",
+            "classprofile.js",
+        ]
+    },
+    "exercises": {
+        "base_path": "../khan-exercises",
+        "base_url": "/khan-exercises",
+        "files": [
+            "khan-exercise.js",
+            "utils/angles.js",
+            "utils/answer-types.js",
+            "utils/calculus.js",
+            "utils/convert-values.js",
+            "utils/exponents.js",
+            "utils/expressions.js",
+            "utils/graphie-helpers.js",
+            "utils/graphie.js",
+            "utils/kinematics.js",
+            "utils/math-format.js",
+            "utils/math.js",
+            "utils/polynomials.js",
+            "utils/probability.js",
+            "utils/raphael.js",
+            "utils/scratchpad.js",
+            "utils/stat.js",
+            "utils/tmpl.js",
+            "utils/word-problems.js",
+        ]
+    },
+}
+
+stylesheets = {
+    "shared": {
+        "files": [
+            "default.css",
+            "rating.css",
+            "stylesheet.css",
+            "menu.css",
+            "profile.css",
+            "museo-sans.css",
+            "jquery-ui-1.8.4.custom.css",
+        ]
+    },
+    "mobile": {
+        "files": [
+            "jquery.mobile-1.0a4.1.css",
+            "mobile.css",
+        ]
+    },
+    "video": {
+        "files": [
+            "video.css",
+            "discussion.css",
+            "jquery.qtip.css",
+        ]
+    },
+    "studentlists": {
+        "files": [
+            "viewstudentlists.css",
+            "viewclassprofile.css",
+        ]
+    },
+    "exercises": {
+        "base_path": "../khan-exercises/css",
+        "base_url": "/khan-exercises/css",
+        "files": [
+            "khan-exercise.css",
+        ]
+    },
+}
