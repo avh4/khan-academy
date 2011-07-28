@@ -1219,7 +1219,12 @@ class ProblemLog(db.Model):
 
 # commit_problem_log is used by our deferred problem log insertion process
 def commit_problem_log(problem_log_source):
-    if not problem_log_source or not problem_log_source.key().name:
+
+    try:
+        if not problem_log_source or not problem_log_source.key().name:
+            return
+    except db.NotSavedError:
+        # Handle special case during new exercise deploy
         return
 
     def insert_in_position(index, items, val, filler):
