@@ -71,16 +71,15 @@ def compress_all_packages(default_path, dict_packages, suffix):
 # Overview:
 # Take a set of js or css files then:
 # 1. Combine them into one large file
-# 2. If they are non-mobile css files, replace images where directed to,
-#    possibly creating another file
-# For each file:
-# 3. Hash the file
-# 4. Check the hash to see if we already have a copy of the file, stop if we do
-# 5. Insert the hash into packages_hash.py
-# 6. Compress the file
-# 7. Hash the file again
-# 8. Create a new file using the hash in its name
-# 9. Insert the hash into packages.py and packages_hash.py
+# 2. Hash the file
+# 3. Check the hash to see if we already have a copy of the file, stop if we do
+# 4. Compress the file
+# 5. Replace any images in the file that need replaced (creating a second file)
+# For each file (one or two of them):
+# 6. Hash the file again
+# 7. Create a new file using the second hash in its name
+# 8. Insert the hashes into packages_hash.py
+# 9. Insert the second hash into packages.py
 #
 # Note: The two hashes will be different. The reason we hash twice is because
 # we use the first hash in packages_hash.py to check if we need to compress the
