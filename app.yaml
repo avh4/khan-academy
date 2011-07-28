@@ -1,4 +1,4 @@
-application: khan-masterslave
+application: khanexercises
 version: 764
 runtime: python
 api_version: 1
