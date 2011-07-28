@@ -66,7 +66,7 @@ class ViewStudents(RequestHandler):
 
             coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
 
-            student_lists_models = StudentList.all().filter("coaches = ", user_data.key())
+            student_lists_models = StudentList.get_for_coach(user_data.key())
 
             student_lists_list = [];
             for student_list in student_lists_models:
