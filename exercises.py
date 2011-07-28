@@ -109,6 +109,9 @@ class ViewExercise(request_handler.RequestHandler):
                 # We cannot render old problems that were created in the v1 exercise framework.
                 renderable = False
 
+        browser_disabled = self.is_older_ie()
+        renderable = renderable and not browser_disabled
+
         user_exercise_json = jsonify.jsonify(user_exercise)
 
         template_values = {
@@ -121,6 +124,7 @@ class ViewExercise(request_handler.RequestHandler):
             'data_require': data_require,
             'read_only': read_only,
             'selected_nav_link': 'practice',
+            'browser_disabled': browser_disabled,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
