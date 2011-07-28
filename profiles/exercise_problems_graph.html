@@ -6,7 +6,11 @@
 var chart;
 
 function exercise_url(point) {
-    return "/exercises?exid={{ exid|escapejs }}&student_email={{ student_email|escapejs }}&problem_number=" + point.problem_number + (point.exercise_non_summative ? "&exid_non_summative=" + point.exercise_non_summative : ""); 
+    return "/exercises?exid={{ exid|escapejs }}&" +
+            "student_email={{ student_email|escapejs }}&" +
+            "problem_number=" + point.problem_number + 
+            (point.exercise_non_summative ? "&exid_non_summative=" + point.exercise_non_summative : "") +
+            (!point.renderable ? "&renderable=0" : ""); 
 }
 
 			$(document).ready(function() {
@@ -147,6 +151,7 @@ function exercise_url(point) {
                                     problem_number: {{ problem.problem_number|escapejs }},
                                     x: {{ forloop.counter }} + {{ x_offset }},
                                     y: {{ problem.time_taken }},
+                                    renderable: {% if problem.renderable %}true{% else %}false{% endif %},
                                     color: '{% if problem.correct %}#ADD8E6{% else %}red{% endif %}'
                                 }
                                 {% if not forloop.last %},{% endif %}

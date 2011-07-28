@@ -15,6 +15,11 @@ class ProblemPoint:
         self.problem_number = problem_log.problem_number
         self.video_point = None
 
+        # We cannot render old problems that were created in the v1 exercise framework.
+        # We use sha1's existence as this identifier. In the future, we may do something smarter
+        # when past sha1s conflict with current exercise contents.
+        self.renderable = len(problem_log.sha1 or "") > 0
+
     def video_titles_html(self):
         if not self.video_point:
             return ""
