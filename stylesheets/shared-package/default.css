@@ -144,6 +144,9 @@ hr {
     
     text-shadow: 0 1px 0 #fff;
 }
+input.simple-button {
+    line-height: 15px;
+}
 .simple-button:after {
 	position: absolute;
 	left: 0;
