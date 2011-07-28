@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
-      xmlns:fb="http://www.facebook.com/2008/fbml">
+    xmlns:fb="http://www.facebook.com/2008/fbml" {{ data_require }}>
       <head>
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
         <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
@@ -17,9 +17,8 @@
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
         <meta name="description" content="{{video.description}}" />
         <meta name="keywords" content="{{video.keywords}}" />
-        {% else %}{% if exercise %}<title>{{exercise.display_name|escape}} | Khan Academy</title>
-	{% else %}<title>{% block meta_page_title %}{% endblock meta_page_title %}Khan Academy</title>
-	{% endif %}
+        {% else %}
+	    <title>{% block meta_page_title %}{% endblock meta_page_title %}Khan Academy</title>
         {% endif %}
         <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -->
         <meta property="fb:page_id" content="159403248441" />
@@ -44,6 +43,8 @@
             {% block pagecss %}{% endblock pagecss %}
             {% js_package "shared" %}
         {% endif %}
+
+        {% xsrf_value %}
 		
         {% block pagescript %}
         {% endblock pagescript %}
@@ -68,7 +69,8 @@
     </head>
 
     <body class="light">
-	{% login_notifications continue user_data %}
+    <div id="outer-wrapper">
+    {% login_notifications user_data continue %}
     <div id="page-container">
     <div id="page-container-inner">
         {# Facebook connect root #}
@@ -82,18 +84,13 @@
                     <div id="top-header-links">
                         <span class="page_links" id="page_auth">
                             {% if logged_in %}
-                                <span id="user-info">
-                                    {% username_and_notification username user_data %}
-
-                                    {% badge_counts user_data %}
-                                    
-                                    {% user_points user_data %}
+                                <span id="user-info" class="badge-target">
+                                    {% user_info username user_data %}
                                 </span>
                                 <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-                            	<span class="achievement-badge-counts" style="left:-60px;"></span> <!--Fix for unregistered users-->
-								<a href="{{ login_url|escape }}">Login</a>
+								<a class="badge-target" href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator"></span>
                             <a href="/contribute" id="donate-link">Donate</a>
@@ -152,6 +149,7 @@
             
             {% badge_notifications %}
             
+    </div>
     </div>
     </div>
     <div class="push"></div>

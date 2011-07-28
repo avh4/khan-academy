@@ -2,7 +2,12 @@ import re
 import logging
 import cgi
 import math
+import os
+from inspect import getmembers
+import simplejson as json
+
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template as webapp_template
 from django import template
 from django.template.defaultfilters import escape, slugify
 
@@ -13,8 +18,7 @@ import consts
 import util
 import topics_list
 import models
-from inspect import getmembers
-import simplejson as json
+from api.auth import xsrf
 
 # get registry, we need it to register our filter later.
 import template_cached
@@ -45,6 +49,11 @@ class HighlightNode(template.Node):
         text = cgi.escape(text)
         text = re.sub(regex, r'<span class="highlight">\1</span>', text)
         return text
+
+@register.simple_tag
+def user_info(username, user_data):
+    path = os.path.join(os.path.dirname(__file__), "user_info.html")
+    return webapp_template.render(path, {"username": username, "user_data": user_data})
 
 @register.inclusion_tag("column_major_order_styles.html")
 def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
@@ -102,7 +111,7 @@ def knowledgemap_embed(exercises, map_coords, admin=False):
         'admin':json.dumps(admin)
     }
 
-@register.simple_tag
+@register.inclusion_tag("related_videos.html")
 def related_videos_with_points(exercise_videos):
     return related_videos(exercise_videos, True)
 
@@ -127,15 +136,14 @@ def exercise_icon(exercise, App):
         src = "/images/%s-suggested.png" % s_prefix
     elif exercise.proficient:
         src = "/images/%s-complete.png" % s_prefix
-    # elif exercise.phantom:
-    #     src = "/images/node-not-started.png"
     else:
         src = "/images/%s-not-started.png" % s_prefix
     return {"src": src, "version": App.version}
 
-@register.inclusion_tag("exercise_message.html")
+@register.simple_tag
 def exercise_message(exercise, coaches, exercise_states):
-    return dict({"exercise": exercise, "coaches": coaches}, **exercise_states)
+    path = os.path.join(os.path.dirname(__file__), "exercise_message.html")
+    return webapp_template.render(path, dict({"exercise": exercise, "coaches": coaches}, **exercise_states))
 
 @register.inclusion_tag("user_points.html")
 def user_points(user_data):
@@ -143,6 +151,7 @@ def user_points(user_data):
         points = user_data.points
     else:
         points = 0
+
     return {"points": points}
 
 @register.inclusion_tag("possible_points_badge.html")
@@ -278,6 +287,10 @@ def empty_class_instructions(class_is_empty=True):
 @register.inclusion_tag("crazyegg_tracker.html")
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
+
+@register.simple_tag
+def xsrf_value():
+    return xsrf.render_xsrf_js()
 
 register.tag(highlight)
 

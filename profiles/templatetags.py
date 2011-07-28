@@ -101,24 +101,29 @@ def profile_exercise_progress_block(exercise_data, exercise):
     }
 
 @register.inclusion_tag("profiles/recent_activity.html")
-def profile_recent_activity(user_data):
-    return recent_activity.recent_activity_context(user_data)
+def profile_recent_activity(user_data, view="standard"):
+    context = recent_activity.recent_activity_context(user_data)
+    context["view"] = view
+    return context
 
 @register.inclusion_tag("profiles/recent_activity_entry_badge.html")
-def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry):
+def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry, view="standard"):
     return {
         "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email
+        "student_email": user_data_student.email,
+        "view": view
     }
 @register.inclusion_tag("profiles/recent_activity_entry_exercise.html")
-def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry):
+def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry, view="standard"):
     return {
         "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email
+        "student_email": user_data_student.email,
+        "view": view
     }
 @register.inclusion_tag("profiles/recent_activity_entry_video.html")
-def profile_recent_activity_entry_video(user_data_student, recent_activity_entry):
+def profile_recent_activity_entry_video(user_data_student, recent_activity_entry, view="standard"):
     return {
         "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email
+        "student_email": user_data_student.email,
+        "view": view
     }

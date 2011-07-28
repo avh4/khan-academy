@@ -67,6 +67,8 @@ class UserBadge(db.Model):
     target_context_name = db.StringProperty()
     points_earned = db.IntegerProperty(default = 0)
 
+    _serialize_blacklist = ["badge"]
+
     @staticmethod
     def get_for(user_data):
         query = UserBadge.all()

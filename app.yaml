@@ -46,6 +46,22 @@ handlers:
 - url: /javascript
   static_dir: javascript
 
+# Begin khan-exercises integration
+- url: /khan-exercises/khan-exercise.js
+  static_files: khan-exercises/khan-exercise.js
+  upload: khan-exercises/khan-exercise.js
+
+- url: /khan-exercises/utils
+  static_dir: khan-exercises/utils
+
+- url: /khan-exercises/css
+  static_dir: khan-exercises/css
+
+- url: /khan-exercises/(hashed.+\.js)
+  static_files: khan-exercises/\1
+  upload: khan-exercises/(hashed.+\.js)
+# End khan-exercises integration
+
 - url: /helperpages/d\.svg
   static_files: helperpages/d.svg
   upload: helperpages/d\.svg
@@ -69,12 +85,6 @@ handlers:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
 - url: /scratchpad-2011-04-06
   static_dir: scratchpad
-
-  # The url below needs to be updated whenever we change/upgrade Jit.
-  # Unfortunately, we can't use a regex due to a GAE bug:
-  # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /Jit-2.0.0a
-  static_dir: Jit
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
@@ -105,6 +115,7 @@ builtins:
 - datastore_admin: on
 - remote_api: on
 - deferred: on
+- remote_api: on
 
 inbound_services:
 - warmup

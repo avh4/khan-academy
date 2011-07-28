@@ -1,4 +1,4 @@
-# import the webapp module
+import os
 import re
 from google.appengine.ext import webapp
 from django import template

@@ -56,13 +56,11 @@ def check_secrets():
 
 def compress_js():
     print "Compressing javascript"
-    path = os.path.join(os.path.dirname(__file__), "..", "javascript")
-    compress.compress_all_javascript(path)
+    compress.compress_all_javascript()
 
 def compress_css():
     print "Compressing stylesheets"
-    path = os.path.join(os.path.dirname(__file__), "..", "stylesheets")
-    compress.compress_all_stylesheets(path)
+    compress.compress_all_stylesheets()
 
 def deploy(version):
     print "Deploying version " + str(version)

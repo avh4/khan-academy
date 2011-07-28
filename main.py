@@ -7,6 +7,7 @@ import random
 import urllib
 import logging
 import re
+import devpanel
 from pprint import pformat
 from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
@@ -23,7 +24,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
 from google.appengine.api import taskqueue
-from google.appengine.ext import deferred
 
 import bulk_update.handler
 import facebook
@@ -49,17 +49,18 @@ import exercise_statistics
 import backfill
 import activity_summary
 import exercises
+import dashboard
 
 import models
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from phantom_users import util_notify
-from badges import util_badges, last_action_cache, custom_badges
+from badges import util_badges, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
-from custom_exceptions import MissingVideoException, MissingExerciseException
+from custom_exceptions import MissingVideoException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
@@ -106,91 +107,6 @@ class KillLiveAssociations(request_handler.RequestHandler):
         for video_playlist in all_video_playlists:
             video_playlist.live_association = False
         db.put(all_video_playlists)
-
-class ViewExercise(request_handler.RequestHandler):
-    @create_phantom
-    def get(self):
-        user_data = UserData.current()
-        exid = self.request.get('exid')
-        key = self.request.get('key')
-        time_warp = self.request.get('time_warp')
-
-        if not exid:
-            exid = 'addition_1'
-
-        exercise = Exercise.get_by_name(exid)
-
-        if not exercise:
-            raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
-
-        user_exercise = user_data.get_or_insert_exercise(exercise)
-
-        # Cache this so we don't have to worry about future lookups
-        user_exercise.exercise_model = exercise
-
-        problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
-
-        # When viewing a problem out-of-order, show read-only view
-        read_only = problem_number != (user_exercise.total_done + 1)
-
-        exercise_non_summative = exercise.non_summative_exercise(problem_number)
-
-        # If read-only and an explicit exid is provided for non-summative content, use
-        # overriding exercise
-        if read_only:
-            exid_non_summative = self.request_string('exid_non_summative', default=None)
-            if exid_non_summative:
-                exercise_non_summative = Exercise.get_by_name(exid_non_summative)
-
-        exercise_videos = exercise_non_summative.related_videos_fetch()
-
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-
-        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-
-        # Note: if they just need a single problem for review they can just print this page.
-        num_problems_to_print = max(2, exercise.required_streak - user_exercise.streak)
-
-        # If the user is proficient, assume they want to print a bunch of practice problems.
-        if exercise_states['proficient']:
-            num_problems_to_print = exercise.required_streak
-
-        if exercise.summative:
-            # Make sure UserExercise has proper summative value even before it's been set.
-            user_exercise.summative = True
-            # We can't currently print summative exercises.
-            num_problems_to_print = 0
-
-        template_values = {
-            'arithmetic_template': 'arithmetic_template.html',
-            'user_data': user_data,
-            'points': user_data.points,
-            'exercise_points': exercise_points,
-            'coaches': user_data.coaches,
-            'exercise_states': exercise_states,
-            'cookiename': user_data.nickname.replace('@', 'at'),
-            'key': user_exercise.key(),
-            'exercise': exercise,
-            'exid': exid,
-            'start_time': time.time(),
-            'exercise_videos': exercise_videos,
-            'exercise_non_summative': exercise_non_summative,
-            'extitle': exid.replace('_', ' ').capitalize(),
-            'user_exercise': user_exercise,
-            'streak': user_exercise.streak,
-            'time_warp': time_warp,
-            'problem_number': problem_number,
-            'read_only': read_only,
-            'selected_nav_link': 'practice',
-            'num_problems_to_print': num_problems_to_print,
-            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
-            }
-        template_file = exercise_non_summative.name + '.html'
-        self.render_template(template_file, template_values)
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
 
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
@@ -467,57 +383,6 @@ class ProvideFeedback(request_handler.RequestHandler):
     def get(self):
         self.render_template("provide_feedback.html", {})
 
-class ViewAllExercises(request_handler.RequestHandler):
-    @create_phantom
-    def get(self):
-        user_data = UserData.current()
-
-        ex_graph = ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
-            user_data.put()
-
-        recent_exercises = ex_graph.get_recent_exercises()
-        review_exercises = ex_graph.get_review_exercises(self.get_time())
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
-
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
-            # if user_data.is_phantom:
-            #     exercise.phantom = True
-            # else:
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            if exercise in review_exercises:
-                exercise.review = True
-                exercise.status = "Review"
-
-        template_values = {
-            'exercises': ex_graph.exercises,
-            'recent_exercises': recent_exercises,
-            'review_exercises': review_exercises,
-            'suggested_exercises': suggested_exercises,
-            'user_data': user_data,
-            'expanded_all_exercises': user_data.expanded_all_exercises,
-            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
-            'selected_nav_link': 'practice',
-            }
-
-        self.render_template('viewexercises.html', template_values)
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-
 class VideolessExercises(request_handler.RequestHandler):
 
     def get(self):
@@ -530,268 +395,6 @@ class VideolessExercises(request_handler.RequestHandler):
             videos = query.fetch(200)
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
-
-class KnowledgeMap(request_handler.RequestHandler):
-
-    def get(self):
-        self.redirect("/exercisedashboard")
-
-class RegisterAnswer(request_handler.RequestHandler):
-
-    # RegisterAnswer uses a GET request to solve the IE-behind-firewall
-    # issue with occasionally stripped POST data.
-    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
-    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
-    def post(self):
-        self.get()
-
-    def get(self):
-        exid = self.request_string('exid')
-        time_warp = self.request_string('time_warp')
-
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request_string('key')
-
-            if not exid or not key:
-                logging.warning("Missing exid or key data in RegisterAnswer")
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            dt_done = datetime.datetime.now()
-            correct = self.request_bool('correct')
-
-            problem_number = self.request_int('problem_number')
-            start_time = self.request_float('start_time')
-            hint_used = self.request_bool('hint_used', default=False)
-
-            elapsed_time = int(float(time.time()) - start_time)
-
-            user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user_data):
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            exercise = user_exercise.exercise_model
-
-            user_exercise.last_done = datetime.datetime.now()
-            user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
-            user_exercise.summative = exercise.summative
-
-            user_data.last_activity = user_exercise.last_done
-
-            # If a non-admin tries to answer a problem out-of-order, just ignore it and
-            # display the next problem.
-            if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
-                # Only admins can answer problems out of order.
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            problem_log = ProblemLog()
-            proficient = user_data.is_proficient_at(exid)
-
-            if correct:
-                suggested = user_data.is_suggested(exid)
-                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
-                problem_log.points_earned = points_possible
-                user_data.add_points(points_possible)
-
-            problem_log.user = user_data.user
-            problem_log.exercise = exid
-            problem_log.correct = correct
-            problem_log.time_done = dt_done
-            problem_log.time_taken = elapsed_time
-            problem_log.problem_number = problem_number
-            problem_log.hint_used = hint_used
-
-            if exercise.summative:
-                problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
-
-            user_exercise.total_done += 1
-            util_notify.update(user_data,user_exercise)
-
-            if correct:
-
-                user_exercise.total_correct += 1
-                user_exercise.streak += 1
-
-                if user_exercise.streak > user_exercise.longest_streak:
-                    user_exercise.longest_streak = user_exercise.streak
-                if user_exercise.streak >= exercise.required_streak and not proficient:
-                    user_exercise.set_proficient(True, user_data)
-                    user_exercise.proficient_date = datetime.datetime.now()
-                    user_data.reassess_if_necessary()
-                    problem_log.earned_proficiency = True
-
-            else:
-                # Just in case RegisterCorrectness didn't get called.
-                user_exercise.reset_streak()
-
-            util_badges.update_with_user_exercise(
-                user_data,
-                user_exercise,
-                include_other_badges = True,
-                action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
-
-
-            # Manually clear exercise's memcache since we're throwing it in a bulk put
-            user_exercise.clear_memcache()
-
-            # Bulk put
-            db.put([user_data, user_exercise])
-
-            # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
-            # and want to shift it off to an automatically-retrying task queue.
-            # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-            deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
-
-            if not self.is_ajax_request():
-                self.redirect("/exercises?exid=%s" % exid)
-            else:
-                self.send_json(user_data, user_exercise, exercise, key, time_warp)
-
-        else:
-            # Redirect to display the problem again which requires authentication
-            self.redirect('/exercises?exid=' + exid)
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-
-        streak_bar_html = self.render_template_block_to_string(
-            "streak_bar.html",
-            "streak_bar_block",
-            streak_bar(user_exercise)
-        )
-
-        exercise_message_html = self.render_template_block_to_string(
-            "exercise_message.html",
-            "exercise_message_block",
-            exercise_message(exercise, user_data.coaches, exercise_states)
-        )
-
-        exercise_icon_html = self.render_template_block_to_string(
-            "exercise_icon.html",
-            "exercise_icon_block",
-            exercise_icon(exercise, App)
-        )
-
-        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
-        badge_count_html = render_block_to_string(
-            badge_count_path,
-            'badge_count_block',
-            badge_counts(user_data)
-        ).strip()
-
-        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
-        badge_notification_html = render_block_to_string(
-            badge_notification_path,
-            'badge_notification_block',
-            badge_notifications()
-        ).strip()
-
-        user_points_html = self.render_template_block_to_string(
-            "user_points.html",
-            "user_points_block",
-            user_points(user_data)
-        )
-
-        updated_values = {
-            'exercise_states': exercise_states,
-            'exercise_points':  exercise_points,
-            'key': key,
-            'start_time': time.time(),
-            'streak': user_exercise.streak,
-            'time_warp': time_warp,
-            'problem_number': user_exercise.total_done + 1,
-            'streak_bar_html': streak_bar_html,
-            'exercise_message_html': exercise_message_html,
-            'exercise_icon_html': exercise_icon_html,
-            'badge_count_html': badge_count_html,
-            'badge_notification_html': badge_notification_html,
-            'user_points_html': user_points_html
-            }
-
-            #
-            #    'exercise_non_summative': exercise_non_summative,
-            #    'read_only': read_only,
-            #    'num_problems_to_print': num_problems_to_print,
-            #
-        json = simplejson.dumps(updated_values)
-        self.response.out.write(json)
-
-class RegisterCorrectness(request_handler.RequestHandler):
-
-    # RegisterCorrectness uses a GET request to solve the IE-behind-firewall
-    # issue with occasionally stripped POST data.
-    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
-    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
-    def post(self):
-        self.get()
-
-    # A GET request is made via AJAX when the user clicks "Check Answer".
-    # This allows us to reset the user's streak if the answer was wrong.  If we wait
-    # until he clicks the "Next Problem" button, he can avoid resetting his streak
-    # by just reloading the page.
-    def get(self):
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request.get('key')
-
-            if not key:
-                logging.warning("Missing key data in RegisterCorrectness")
-                self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
-                return
-
-            correct = int(self.request.get('correct'))
-
-            hint_used = self.request_bool('hint_used', default=False)
-            user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user_data):
-                return
-
-            user_exercise.schedule_review(correct == 1, self.get_time())
-            if correct == 0:
-                if user_exercise.streak == 0:
-                    # 2+ in a row wrong -> not proficient
-                    user_exercise.set_proficient(False, user_data)
-                user_exercise.reset_streak()
-            if hint_used:
-                user_exercise.reset_streak()
-            user_exercise.put()
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-
-class ResetStreak(request_handler.RequestHandler):
-
-# This resets the user's streak through an AJAX post request when the user
-# clicks on the Hint button.
-
-    def post(self):
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request.get('key')
-            user_exercise = db.get(key)
-
-            if not user_exercise.belongs_to(user_data):
-                return
-
-            user_exercise.reset_streak()
-            user_exercise.put()
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
@@ -1434,22 +1037,20 @@ def main():
         ('/about/downloads', util_about.ViewDownloads),
         ('/getinvolved', ViewGetInvolved),
         ('/donate', Donate),
-        ('/exercisedashboard', ViewAllExercises),
+        ('/exercisedashboard', exercises.ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
         ('/video_mapping', GenerateVideoMapping),
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/exercises', ViewExercise),
+        ('/exercises', exercises.ViewExercise),
+        ('/khan-exercises/exercises/.*', exercises.RawExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisesonmap', KnowledgeMap),
+        ('/viewexercisesonmap', exercises.ViewAllExercises),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
-        ('/registeranswer', RegisterAnswer),
-        ('/registercorrectness', RegisterCorrectness),
-        ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo), # Backwards URL compatibility
@@ -1487,6 +1088,9 @@ def main():
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
+        
+        ('/devadmin/emailchange', devpanel.Email),
+        ('/devadmin/managedevs', devpanel.Manage),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents),
@@ -1567,6 +1171,8 @@ def main():
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
+
+        ('/dashboard', dashboard.Dashboard),
 
         ('/sendtolog', SendToLog),
 

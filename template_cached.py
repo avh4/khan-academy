@@ -1,7 +1,12 @@
+import os
+import logging
+
 from django import template
 from inspect import getargspec
 from django.utils.functional import curry
 from google.appengine.ext import webapp
+
+from app import App
 
 def create_template_register():
   return Library()
@@ -42,7 +47,7 @@ class Library(template.Library):
                     dict = func(*args)
 
                     if not getattr(self, 'nodelist', False):
-                        t = webapp.template.load(file_name)
+                        t = webapp.template.load(os.path.join(App.root, file_name))
                         self.nodelist = t.nodelist
                     return self.nodelist.render(context_class(dict))
 

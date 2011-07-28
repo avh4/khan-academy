@@ -1,9 +1,9 @@
 
 var Social = {
 
-	init: function() {
+	init: function(jelContainer) {
 		/*--We're using a custom Twitter button, this code enables a popup--*/
-		$('.twitterShare').click(function(event) {
+		$('.twitterShare', jelContainer).click(function(event) {
 	  		var width  = 550,
 			height = 370,
 			left   = ($(window).width()  - width)  / 2,
@@ -17,14 +17,16 @@ var Social = {
 			window.open(url, 'twitter', opts);
 			return false;
 		});
-		 
-		$('.sharepop').hide();
-		$('.notif-share').click(function() {
+
+		$('.sharepop', jelContainer).hide();
+
+		$('.notif-share', jelContainer).click(function() {
 			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
 			return false;
-				});
+		});
 		
     },
+
 	facebookBadge:function(desc,icon,ext,activity) {
 		
 		FB.ui(

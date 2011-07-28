@@ -12,11 +12,15 @@ from flask.session import Session
 
 from app import App
 from api.auth.models import OAuthMap
+from api.auth.xsrf import validate_xsrf_value
 from oauth_provider.oauth import build_authenticate_header, OAuthError
 import cookie_util
 
 def oauth_error_response(e):
     return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
+
+def unauthorized_response():
+    return current_app.response_class("Unauthorized", status=401)
 
 def access_token_response(oauth_map):
     if not oauth_map:
@@ -73,10 +77,15 @@ def requested_oauth_callback():
     return request.values.get("oauth_callback") or ("%sapi/auth/default_callback" % request.host_url)
 
 def allow_cookie_based_auth():
+
     # Don't allow cookie-based authentication for API calls which
-    # may return JSONP
+    # may return JSONP, unless they include a valid XSRF token.
     path = os.environ.get("PATH_INFO")
-    return not path or not path.lower().startswith("/api/")
+
+    if path and path.lower().startswith("/api/"):
+        return validate_xsrf_value()
+
+    return True
 
 def current_oauth_map():
     oauth_map = None

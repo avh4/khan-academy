@@ -1,23 +1,24 @@
-# import the webapp module
+import os
+
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template
+
 from notifications import UserNotifier
 from .badges import badges, util_badges
 
 import template_cached
 register = template_cached.create_template_register()
 
-@register.inclusion_tag("phantom_users/notifications.html")
-def login_notifications(continue_url, user_data):
+@register.simple_tag
+def login_notifications(user_data, continue_url):
     login_notifications = UserNotifier.pop_for_current_user_data()["login"]
+    return login_notifications_html(login_notifications, user_data, continue_url)
 
-    if len(login_notifications) > 0:
-        login_notifications = login_notifications[0]
+def login_notifications_html(login_notifications, user_data, continue_url="/"):
+    login_notification = None if len(login_notifications) == 0 else login_notifications[0]
 
-    return {
-        "login_notifications": login_notifications,
-        "continue": continue_url,
-        "user_data": user_data
-    }
+    path = os.path.join(os.path.dirname(__file__), "notifications.html")
+    return template.render(path, {"login_notification": login_notification, "continue": continue_url, "user_data":user_data})
 
 @register.inclusion_tag("phantom_users/badge_counts.html")
 def badge_info(user_data):
@@ -33,15 +34,15 @@ def badge_info(user_data):
         sum_counts += counts_dict[key]
 
     return {
-        "sum": sum_counts,
-        "bronze": counts_dict[badges.BadgeCategory.BRONZE],
-        "silver": counts_dict[badges.BadgeCategory.SILVER],
-        "gold": counts_dict[badges.BadgeCategory.GOLD],
-        "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
-        "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
-        "master": counts_dict[badges.BadgeCategory.MASTER],
+            "sum": sum_counts,
+            "bronze": counts_dict[badges.BadgeCategory.BRONZE],
+            "silver": counts_dict[badges.BadgeCategory.SILVER],
+            "gold": counts_dict[badges.BadgeCategory.GOLD],
+            "platinum": counts_dict[badges.BadgeCategory.PLATINUM],
+            "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
+            "master": counts_dict[badges.BadgeCategory.MASTER],
     }
-
+    
 @register.inclusion_tag("phantom_users/user_points.html")
 def point_info(user_data):
     if user_data:
@@ -49,3 +50,4 @@ def point_info(user_data):
     else:
         points = 0
     return {"points": points}
+

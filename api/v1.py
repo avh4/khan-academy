@@ -9,39 +9,56 @@ from flask import request, current_app
 import models
 import layer_cache
 import topics_list
+import templatetags # Must be imported to register template tags
 from badges import badges, util_badges, models_badges
+from badges.templatetags import badge_notifications_html
+from phantom_users.templatetags import login_notifications_html
+from exercises import attempt_problem, reset_streak
 import util
 import notifications
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional
+from api.auth.auth_util import unauthorized_response
+from api.api_util import api_error_response
 
-def api_error_response(e):
-    return current_app.response_class("API error. %s" % e.message, status=500)
+def add_action_results(obj, dict_results):
 
-def add_action_results_property(obj, dict_results):
     badges_earned = []
-
     user_data = models.UserData.current()
+
     if user_data:
+        dict_results["user_data"] = user_data
+        dict_results["user_info_html"] = templatetags.user_info(user_data.nickname, user_data)
 
-        badge_counts = util_badges.get_badge_counts(user_data)
+        user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
 
-        user_badges = notifications.UserNotifier.pop_for_user_data(user_data)["badges"]
-        badges_dict = util_badges.all_badges_dict()
+        # Add any new badge notifications
+        user_badges = user_notifications_dict["badges"]
+        if len(user_badges) > 0:
+            badges_dict = util_badges.all_badges_dict()
 
-        for user_badge in user_badges:
-            badge = badges_dict.get(user_badge.badge_name)
+            for user_badge in user_badges:
+                badge = badges_dict.get(user_badge.badge_name)
 
-            if badge:
-                if not hasattr(badge, "user_badges"):
-                    badge.user_badges = []
-                badge.user_badges.append(user_badge)
-                badge.is_owned = True
-                badges_earned.append(badge)
+                if badge:
 
-    dict_results["badges_earned"] = badges_earned
+                    if not hasattr(badge, "user_badges"):
+                        badge.user_badges = []
+
+                    badge.user_badges.append(user_badge)
+                    badge.is_owned = True
+                    badges_earned.append(badge)
+
+        if len(badges_earned) > 0:
+            dict_results["badges_earned"] = badges_earned
+            dict_results["badges_earned_html"] = badge_notifications_html(user_badges)
+
+        # Add any new login notifications for phantom users
+        login_notifications = user_notifications_dict["login"]
+        if len(login_notifications) > 0:
+            dict_results["login_notifications_html"] = login_notifications_html(login_notifications, user_data)
 
     obj.action_results = dict_results
 
@@ -183,7 +200,7 @@ def exercises(exercise_name):
 def exercise_videos(exercise_name):
     exercise = models.Exercise.get_by_name(exercise_name)
     if exercise:
-        exercise_videos = exercise.related_videos()
+        exercise_videos = exercise.related_videos_query()
         return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
 
@@ -347,7 +364,7 @@ def log_user_video(youtube_id):
             user_video, video_log, video_points_total = models.VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
             if video_log:
-                add_action_results_property(video_log, {"user_video": user_video, "user_data": user_data})
+                add_action_results(video_log, {"user_video": user_video})
 
     return video_log
 
@@ -384,7 +401,7 @@ def user_exercises_all():
     return None
 
 @route("/api/v1/user/exercises/<exercise_name>", methods=["GET"])
-@oauth_required()
+@oauth_optional()
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
@@ -392,10 +409,20 @@ def user_exercises_specific(exercise_name):
 
     if user_data and exercise_name:
         user_data_student = get_visible_user_data_from_request()
+        exercise = models.Exercise.get_by_name(exercise_name)
 
-        if user_data_student:
-            user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name)
-            return user_exercises.get()
+        if user_data_student and exercise:
+            user_exercise = models.UserExercise.all().filter("user =", user_data_student.user).filter("exercise =", exercise_name).get()
+
+            if not user_exercise:
+                user_exercise = models.UserExercise()
+                user_exercise.exercise_model = exercise
+                user_exercise.exercise = exercise_name
+                user_exercise.user = user_data_student.user
+
+            # Cheat and send back related videos when grabbing a single UserExercise for ease of exercise integration
+            user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
+            return user_exercise
 
     return None
 
@@ -459,6 +486,54 @@ def user_problem_logs(exercise_name):
             return problem_log_query.fetch(500)
 
     return None
+
+@route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/attempt", methods=["POST"])
+@oauth_optional()
+@jsonp
+@jsonify
+def attempt_problem_number(exercise_name, problem_number):
+    user_data = models.UserData.current()
+
+    if user_data:
+        exercise = models.Exercise.get_by_name(exercise_name)
+        user_exercise = user_data.get_or_insert_exercise(exercise)
+
+        if user_exercise and problem_number:
+
+            user_exercise = attempt_problem(
+                    user_data, 
+                    user_exercise, 
+                    problem_number, 
+                    request.request_int("attempt_number"),
+                    request.request_string("attempt_content"),
+                    request.request_string("sha1"),
+                    request.request_string("seed"),
+                    request.request_bool("complete"),
+                    request.request_bool("hint_used"),
+                    int(request.request_float("time_taken")),
+                    request.request_string("non_summative"),
+                    )
+
+            add_action_results(user_exercise, {
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise.exercise_states),
+            })
+
+            return user_exercise
+
+    return unauthorized_response()
+
+@route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["POST"])
+@oauth_optional()
+@jsonp
+@jsonify
+def reset_problem_streak(exercise_name):
+    user_data = models.UserData.current()
+
+    if user_data and exercise_name:
+        user_exercise = user_data.get_or_insert_exercise(models.Exercise.get_by_name(exercise_name))
+        return reset_streak(user_data, user_exercise)
+
+    return unauthorized_response()
 
 @route("/api/v1/user/videos/<youtube_id>/log", methods=["GET"])
 @oauth_required()
