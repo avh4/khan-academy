@@ -156,5 +156,47 @@
             {{/if}}
         </div>
 
+        <div class="expand">
+            <a href="#logs-link" class="logs-link link uses_script">Logs</a>
+            <div class="summary">
+                {{each [0,1,2,3,4]}}
+                    {{if log_count[$value] > 0}}
+                        <span class='loglevel ll${$value}'></span> &#215; ${log_count[$value]}
+                    {{/if}}
+                {{/each}}
+            </div>
+        </div>
+
+        <div class="logs-details details fancy-scrollbar" style="display:none;">
+            <ul class="boxes">
+                <li><label><input type="checkbox" class="ll0">Debug</label></li>
+                <li><label><input type="checkbox" class="ll1">Info</label></li>
+                <li><label><input type="checkbox" class="ll2">Warning</label></li>
+                <li><label><input type="checkbox" class="ll3">Critical</label></li>
+                <li><label><input type="checkbox" class="ll4">Error</label></li>
+            </ul>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="left">log</th>
+                        <th class="left">time</th>
+                        <th class="left"><nobr>fn</nobr></th>
+                        <th class="left"><nobr>file</nobr></th>
+                        <th class="left"><nobr>line</nobr></th>
+                        <th class="left"><nobr>message</nobr></th>
+                    </tr>
+                </thead>
+                {{each logs}}
+                    <tr class="level-ll${$value[0]}">
+                        <td class="left" class="${$value[0]}"><span class='loglevel ll${$value[0]}'><span>${$value[0]}</span></span></td>
+                        <td class="left">${$value[1]}</td>
+                        <td class="left">${$value[2]}</td>
+                        <td class="left">${$value[3]}</td>
+                        <td class="left">${$value[4]}</td>
+                        <td class="left">${$value[5]}</td>
+                    </tr>
+                {{/each}}
+            </table>
+        </div>
     </div>
 </script>

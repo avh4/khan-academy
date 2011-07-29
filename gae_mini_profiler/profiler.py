@@ -69,7 +69,9 @@ class RequestStatsHandler(RequestHandler):
 
 class RequestStats(object):
 
-    serialized_properties = ["request_id", "url", "url_short", "s_dt", "profiler_results", "appstats_results", "temporary_redirect"]
+    serialized_properties = ["request_id", "url", "url_short", "s_dt",
+                             "profiler_results", "appstats_results",
+                             "temporary_redirect", "logs"]
 
     def __init__(self, request_id, environ, middleware):
         self.request_id = request_id
@@ -86,6 +88,7 @@ class RequestStats(object):
 
         self.profiler_results = RequestStats.calc_profiler_results(middleware)
         self.appstats_results = RequestStats.calc_appstats_results(middleware)
+        self.logs = middleware.logs
 
         self.temporary_redirect = middleware.temporary_redirect
         self.disabled = False
@@ -289,6 +292,21 @@ class ProfilerWSGIMiddleware(object):
             import os
             request_id = base64.urlsafe_b64encode(os.urandom(5))
 
+            # Set up another handler so we can save all logged messages for this request
+            log_buffer = StringIO.StringIO()
+            handler = logging.StreamHandler(log_buffer)
+            handler.setLevel(logging.ALL)
+            formatter = logging.Formatter("\t".join([
+                '%(levelno)s',
+                '%(asctime)s%(msecs)d',
+                '%(funcName)s',
+                '%(filename)s',
+                '%(lineno)d',
+                '%(message)s',
+            ]), '%M:%S.')
+            handler.setFormatter(formatter)
+            logging.getLogger().addHandler(handler)
+
             # Send request id in headers so jQuery ajax calls can pick
             # up profiles.
             def profiled_start_response(status, headers, exc_info = None):
@@ -339,6 +357,16 @@ class ProfilerWSGIMiddleware(object):
             else:
                 for value in result:
                     yield value
+
+            # Remove the log handler, save logs
+            logging.getLogger().removeHandler(handler)
+            lines = [l for l in log_buffer.getvalue().split("\n") if l]
+            fields = [l.split("\t") for l in lines]
+            #convert levelnos down to [0,1,2,3,4]
+            for f in fields:
+                f[0] = int(f[0])/10 - 1
+            log_buffer.close()
+            self.logs = fields
 
             # Store stats for later access
             RequestStats(request_id, environ, self).store()

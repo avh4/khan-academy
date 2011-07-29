@@ -97,11 +97,27 @@ var GaeMiniProfiler = {
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
             .find(".rpc-link")
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
+            .find(".logs-link")
+                .click(function() { GaeMiniProfiler.toggleSection(this, ".logs-details"); return false; }).end()
             .find(".callers-link")
                 .click(function() { $(this).parents("td").find(".callers").slideToggle("fast"); return false; }).end()
             .click(function(e) { e.stopPropagation(); })
             .css("left", jCorner.offset().left + jCorner.width() + 18)
             .slideDown("fast");
+
+        var toggleLogRows = function(el) {
+            var level = $(el).attr('class');
+            var checked = $(el).attr('checked')
+            if (checked) {
+                $('.level-'+level).show();
+            }
+            else {
+                $('.level-'+level).hide();
+            }
+        };
+        $('input.ll2, input.ll3, input.ll4').attr('checked', true);
+        $(".boxes input").click(function(ev) { toggleLogRows(ev.target) })
+                         .each(function(i, el) { toggleLogRows(el)});
     },
 
     toggleSection: function(elLink, selector) {
@@ -123,6 +139,12 @@ var GaeMiniProfiler = {
     },
 
     renderPopup: function(data) {
+        var counts = [0, 0, 0, 0, 0];
+        $.each(data.logs, function(i, log) {
+            counts[log[0]] += 1;
+        });
+        data.log_count = counts;
+
         return $("#profilerTemplate").tmplPlugin(data);
     },
 
