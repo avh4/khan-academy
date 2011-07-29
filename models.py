@@ -479,10 +479,14 @@ class CoachRequest(db.Model):
 class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
+    deleted = db.BooleanProperty(default=False)
 
     def delete(self, *args, **kwargs):
         self.remove_all_students()
-        db.Model.delete(self, *args, **kwargs)
+        self.deleted = True
+        self.put()
+        # Don't actually delete until we're on the HR datastore.
+        # db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
         students = self.get_students_data()
@@ -498,6 +502,12 @@ class StudentList(db.Model):
     def get_students_data(self):
         return [s for s in self.students]
 
+    @staticmethod
+    def get_for_coach(key):
+        query = StudentList.all()
+        query.filter('deleted =', False)
+        query.filter("coaches = ", key)
+        return query
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -1219,7 +1229,12 @@ class ProblemLog(db.Model):
 
 # commit_problem_log is used by our deferred problem log insertion process
 def commit_problem_log(problem_log_source):
-    if not problem_log_source or not problem_log_source.key().name:
+
+    try:
+        if not problem_log_source or not problem_log_source.key().name:
+            return
+    except db.NotSavedError:
+        # Handle special case during new exercise deploy
         return
 
     def insert_in_position(index, items, val, filler):

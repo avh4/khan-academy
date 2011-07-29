@@ -55,7 +55,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             students_data = user_data_coach.get_students_data()
             
-            student_lists = StudentList.all().filter("coaches = ", user_data_coach.key())
+            student_lists = StudentList.get_for_coach(user_data_coach.key())
             
             student_lists_list = [{
                 'key': 'allstudents',

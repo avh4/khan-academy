@@ -564,11 +564,13 @@ var Badges = {
         });
 
         var jelTarget = $(".badge-target");
+        var jelContainer = $("#container");
+
         var top = jelTarget.offset().top + jelTarget.height() + 5;
 
         setTimeout(function(){
             jel.css("visibility", "hidden").css("display", "");
-            jel.css("left", jelTarget.offset().left + jelTarget.width() - jel.width()).css("top", -1 * jel.height());
+            jel.css("left", jelContainer.offset().left + (jelContainer.width() / 2) - (jel.width() / 2)).css("top", -1 * jel.height());
             var topBounce = top + 10;
             jel.css("display", "").css("visibility", "visible");
             jel.animate({top: topBounce}, 300, function(){jel.animate({top: top}, 100);});
@@ -641,7 +643,7 @@ var Notifications = {
         jel.animate(
                 { top: -jel.height() - 2 }, // 2 for border and outline
                 $.extend({}, animationOptions, 
-                    { complete: function(){ jel.empty(); } }
+                    { complete: function(){ jel.empty().css("display", "none"); } }
                 )
         );
 

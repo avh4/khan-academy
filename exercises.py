@@ -105,18 +105,12 @@ class ViewExercise(request_handler.RequestHandler):
             user_exercise.user = user_data_student.user
             user_exercise.read_only = True
 
-            # Load up the actual problem and make sure we can show its contents
-            problem_logs = models.ProblemLog.all()
-            problem_logs.filter("user =", user_data_student.user)
-            problem_logs.filter("exercise =", exid)
-            problem_logs.filter("problem_number =", problem_number)
-            problem_log = problem_logs.get()
-
-            if problem_log and not problem_log.sha1:
+            if not self.request_bool("renderable", True):
                 # We cannot render old problems that were created in the v1 exercise framework.
-                # We use sha1's existence as this identifier. In the future, we may do something smarter
-                # when past sha1s conflict with current exercise contents.
                 renderable = False
+
+        browser_disabled = self.is_older_ie()
+        renderable = renderable and not browser_disabled
 
         user_exercise_json = jsonify.jsonify(user_exercise)
 
@@ -130,6 +124,7 @@ class ViewExercise(request_handler.RequestHandler):
             'data_require': data_require,
             'read_only': read_only,
             'selected_nav_link': 'practice',
+            'browser_disabled': browser_disabled,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
