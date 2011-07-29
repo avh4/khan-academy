@@ -1014,6 +1014,10 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+class ViewRenderTemplate(request_handler.RequestHandler):
+    def get(self):
+        template = self.request_string('template', 'templatetest.html')
+        self.render_template(template, { 'user_data': UserData.current() })
 
 
 def main():
@@ -1088,6 +1092,7 @@ def main():
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
+        ('/admin/rendertemplate', ViewRenderTemplate),
         
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
