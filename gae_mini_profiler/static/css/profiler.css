@@ -226,6 +226,28 @@
 .g-m-p .ll1 { background-color: #3C0; }
 .g-m-p .ll0 { background-color: #09F; }
 
+#slider {
+    padding: 5px 0 3px 0;
+}
+
+#slider .container {
+    width: 150px;
+    display: inline-block;
+}
+
+#slider .minlevel-text {
+    display: inline-block;
+    width: 4em;
+}
+
+#slider .loglevel {
+    margin-left: .5em;
+}
+
+#slider .ui-slider-horizontal {
+    /*height: .2em;*/
+}
+
 /* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
 .g-m-p .fancy-scrollbar::-webkit-scrollbar {
   height: 8px;

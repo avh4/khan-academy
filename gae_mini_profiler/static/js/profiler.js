@@ -79,7 +79,7 @@ var GaeMiniProfiler = {
 
     expand: function(elEntry, data) {
         var jPopup = $(".g-m-p");
-    
+
         if (jPopup.length)
             jPopup.remove();
         else
@@ -105,19 +105,31 @@ var GaeMiniProfiler = {
             .css("left", jCorner.offset().left + jCorner.width() + 18)
             .slideDown("fast");
 
-        var toggleLogRows = function(el) {
-            var level = $(el).attr('class');
-            var checked = $(el).attr('checked')
-            if (checked) {
-                $('.level-'+level).show();
-            }
-            else {
-                $('.level-'+level).hide();
+        var toggleLogRows = function(level) {
+            var names = ['Debug', 'Info', 'Warning', 'Critical', 'Error'];
+            $('#slider .minlevel-text').text(names[level]);
+            $('#slider .loglevel').attr('class', 'loglevel ll'+level);
+            for (var i = 0; i<5; i++) {
+                var rows = $('tr.ll'+i);
+                if (i<level)
+                    rows.hide();
+                else
+                    rows.show();
             }
         };
-        $('input.ll2, input.ll3, input.ll4').attr('checked', true);
-        $(".boxes input").click(function(ev) { toggleLogRows(ev.target) })
-                         .each(function(i, el) { toggleLogRows(el)});
+
+        var initLevel = 2;
+        $('#slider .control').slider({
+            value: initLevel,
+            min: 0,
+            max: 4,
+            step: 1,
+            range: 'min',
+            slide: function( event, ui ) {
+                toggleLogRows(ui.value);
+            }
+        });
+        toggleLogRows(initLevel);
     },
 
     toggleSection: function(elLink, selector) {

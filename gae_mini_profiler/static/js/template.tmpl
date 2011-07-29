@@ -161,20 +161,19 @@
             <div class="summary">
                 {{each [0,1,2,3,4]}}
                     {{if log_count[$value] > 0}}
-                        <span class='loglevel ll${$value}'></span> &#215; ${log_count[$value]}
+                        <span class='loglevel ll${$value}'></span> &#215;${log_count[$value]}
                     {{/if}}
                 {{/each}}
             </div>
         </div>
 
         <div class="logs-details details fancy-scrollbar" style="display:none;">
-            <ul class="boxes">
-                <li><label><input type="checkbox" class="ll0">Debug</label></li>
-                <li><label><input type="checkbox" class="ll1">Info</label></li>
-                <li><label><input type="checkbox" class="ll2">Warning</label></li>
-                <li><label><input type="checkbox" class="ll3">Critical</label></li>
-                <li><label><input type="checkbox" class="ll4">Error</label></li>
-            </ul>
+            <div id="slider">
+                Min level:
+                <span class="loglevel"></span>
+                <span class="minlevel-text"></span>
+                <div class="container"><div class="control"></div></div>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -187,7 +186,7 @@
                     </tr>
                 </thead>
                 {{each logs}}
-                    <tr class="level-ll${$value[0]}">
+                    <tr class="ll${$value[0]}">
                         <td class="left" class="${$value[0]}"><span class='loglevel ll${$value[0]}'><span>${$value[0]}</span></span></td>
                         <td class="left">${$value[1]}</td>
                         <td class="left">${$value[2]}</td>
