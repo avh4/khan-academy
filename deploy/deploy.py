@@ -90,6 +90,10 @@ def main():
         action="store_true", dest="dryrun",
         help="Dry run without the final deploy-to-App-Engine step", default=False)
 
+    parser.add_option('-c', '--clean',
+        action="store_true", dest="clean",
+        help="Clean the old packages and generate them again", default=False)
+
     options, args = parser.parse_args()
 
     if not options.force:
@@ -112,6 +116,9 @@ def main():
 
     if len(options.version) > 0:
         version = options.version
+
+    if options.clean:
+        compress.hashes = {}
 
     print "Deploying version " + str(version)
     compress.revert_js_css_hashes()

@@ -66,7 +66,7 @@ body {
     line-height: 22px;
     background: url(/images/light-page-bg.png) repeat-x;
 }
-body.dark { background: url(/images/dark-page-bg.png) repeat-x; }
+body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /* data-uri(/images/dark-page-bg.png) */
 
 #outer-wrapper {
     min-height: 100%;
@@ -345,7 +345,7 @@ header, footer {
 footer {
     height: 208px;
     clear: both;
-    background: url(/images/footer-bg.png) repeat-x 0 0;
+    background: url(/images/footer-bg.png) repeat-x 0 0; /* data-uri(/images/footer-bg.png) */
     min-width: 970px;
     position: relative;
 }
@@ -784,7 +784,7 @@ footer {
         color: #e45c02;
     }
     #top-header #top-header-links #page_auth .css-menu > ul > li:after {
-        background-image: url(/images/pulldown-green.png);
+        background-image: url(/images/pulldown-green.png); /* data-uri(/images/pulldown-green.png) */ 
     }
 
     #top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
@@ -1093,7 +1093,7 @@ article.video ol {
     display: inline;
     background: #eee;
     background-break: continuous; /* CSS3 */
-    background-image: url(/images/798white_798grey.png);
+    background-image: url(/images/798white_798grey.png); /* data-uri(/images/798white_798grey.png) */
 }
 
 article.video p#keywords {
@@ -3075,11 +3075,21 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 #devpanel td{
     border:black 2px solid;
     padding:3px;
+}
     
+.images-email {
+  background-image: url(/images/email.png); /* data-uri(/images/email.png) */
+  width: 16px;
+  height: 11px;
 }
 
 #devpanel {
    margin: 0px auto;
    width:500px;
+}
     
+.images-email-gray {
+  background-image: url(/images/email.png); /* data-uri(/images/email.png) */
+  width: 16px;
+  height: 11px;
 }
