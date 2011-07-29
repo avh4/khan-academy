@@ -62,14 +62,6 @@ handlers:
   upload: khan-exercises/(hashed.+\.js)
 # End khan-exercises integration
 
-- url: /helperpages/d\.svg
-  static_files: helperpages/d.svg
-  upload: helperpages/d\.svg
-  mime_type: image/svg+xml
-
-- url: /helperpages
-  static_dir: helperpages
-  
 - url: /downloads/(.*)
   static_files: downloads/\1
   upload: downloads/(.*)
