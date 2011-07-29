@@ -364,7 +364,10 @@ class ProfilerWSGIMiddleware(object):
             fields = [l.split("\t") for l in lines]
             #convert levelnos down to [0,1,2,3,4]
             for f in fields:
-                f[0] = int(f[0])/10 - 1
+                try:
+                    f[0] = int(f[0])/10 - 1
+                except ValueError:
+                    f[0] = 0
             log_buffer.close()
             self.logs = fields
 
