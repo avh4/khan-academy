@@ -108,7 +108,8 @@
 }
 
 .g-m-p .summary {
-    float:right;
+    float: right;
+    display: inline;
 }
 
 .g-m-p .details {
