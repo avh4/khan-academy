@@ -1,4 +1,5 @@
 {% extends "page_template.html" %}
+{% block meta_page_title %}Manage Students | {% endblock meta_page_title %}
 {% block pagescript %}
 {% css_package "studentlists" %}
 <style type="text/css" media="screen">
@@ -15,6 +16,7 @@
 
 {% block pagesubmenu %}
 <span class="breadcrumbs_nav">
+    <a href="/coaches" id="manage-coaches">Manage Coaches</a>
     <a href="/students" id="manage-students" class="selected">Manage Students</a>
     <a href="/class_profile" id="class-stats">Class Stats</a>
 </span>

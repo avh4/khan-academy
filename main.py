@@ -7,11 +7,12 @@ import random
 import urllib
 import logging
 import re
+import devpanel
 from pprint import pformat
 from email.utils import formatdate, parsedate
 from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
-from google.appengine.runtime.apiproxy_errors import DeadlineExceededError 
+from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 
 import config_django
 
@@ -24,7 +25,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
 from google.appengine.api import taskqueue
-from google.appengine.ext import deferred
 
 import bulk_update.handler
 import facebook
@@ -50,17 +50,18 @@ import exercise_statistics
 import backfill
 import activity_summary
 import exercises
+import dashboard
 
 import models
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, ExerciseGraph, Setting, UserVideo, UserPlaylist, VideoLog
+from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from phantom_users import util_notify
-from badges import util_badges, last_action_cache, custom_badges
+from badges import util_badges, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import topics_list, all_topics_list, DVD_list
-from custom_exceptions import MissingVideoException, MissingExerciseException
+from custom_exceptions import MissingVideoException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
@@ -108,102 +109,16 @@ class KillLiveAssociations(request_handler.RequestHandler):
             video_playlist.live_association = False
         db.put(all_video_playlists)
 
-class ViewExercise(request_handler.RequestHandler):
-    @create_phantom
-    def get(self):
-        user_data = UserData.current()
-        exid = self.request.get('exid')
-        key = self.request.get('key')
-        time_warp = self.request.get('time_warp')
-
-        if not exid:
-            exid = 'addition_1'
-
-        exercise = Exercise.get_by_name(exid)
-
-        if not exercise: 
-            raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
-
-        user_exercise = user_data.get_or_insert_exercise(exercise)
-
-        # Cache this so we don't have to worry about future lookups
-        user_exercise.exercise_model = exercise
-
-        problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
-
-        # When viewing a problem out-of-order, show read-only view
-        read_only = problem_number != (user_exercise.total_done + 1)
-
-        exercise_non_summative = exercise.non_summative_exercise(problem_number)
-
-        # If read-only and an explicit exid is provided for non-summative content, use
-        # overriding exercise
-        if read_only:
-            exid_non_summative = self.request_string('exid_non_summative', default=None)
-            if exid_non_summative:
-                exercise_non_summative = Exercise.get_by_name(exid_non_summative)
-                
-        exercise_videos = exercise_non_summative.related_videos_fetch()
-
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-
-        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-               
-        # Note: if they just need a single problem for review they can just print this page.
-        num_problems_to_print = max(2, exercise.required_streak - user_exercise.streak)
-        
-        # If the user is proficient, assume they want to print a bunch of practice problems.
-        if exercise_states['proficient']:
-            num_problems_to_print = exercise.required_streak
-
-        if exercise.summative:
-            # Make sure UserExercise has proper summative value even before it's been set.
-            user_exercise.summative = True
-            # We can't currently print summative exercises.
-            num_problems_to_print = 0
-
-        template_values = {
-            'arithmetic_template': 'arithmetic_template.html',
-            'user_data': user_data,
-            'points': user_data.points,
-            'exercise_points': exercise_points,
-            'coaches': user_data.coaches,
-            'exercise_states': exercise_states,
-            'cookiename': user_data.nickname.replace('@', 'at'),
-            'key': user_exercise.key(),
-            'exercise': exercise,
-            'exid': exid,
-            'start_time': time.time(),
-            'exercise_videos': exercise_videos,
-            'exercise_non_summative': exercise_non_summative,
-            'extitle': exid.replace('_', ' ').capitalize(),
-            'user_exercise': user_exercise,
-            'streak': user_exercise.streak,
-            'time_warp': time_warp,
-            'problem_number': problem_number,
-            'read_only': read_only,
-            'selected_nav_link': 'practice',
-            'num_problems_to_print': num_problems_to_print,
-            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
-            }
-        template_file = exercise_non_summative.name + '.html'
-        self.render_template(template_file, template_values)
-            
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
 def get_mangled_playlist_name(playlist_name):
     for char in " :()":
         playlist_name = playlist_name.replace(char, "")
     return playlist_name
 
 class ViewVideo(request_handler.RequestHandler):
-    @create_phantom
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
-        # To do that we first need to find the appropriate playlist.  If we aren't 
+        # To do that we first need to find the appropriate playlist.  If we aren't
         # given the playlist title in a query param, we need to find a playlist that
         # the video is a part of.  That requires finding the video, given it readable_id
         # or, to support old URLs, it's youtube_id.
@@ -214,9 +129,9 @@ class ViewVideo(request_handler.RequestHandler):
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
         readable_id = re.sub('-+$', '', readable_id)  # remove any trailing dashes (see issue 1140)
- 
-        # If either the readable_id or playlist title is missing, 
-        # redirect to the canonical URL that contains them 
+
+        # If either the readable_id or playlist title is missing,
+        # redirect to the canonical URL that contains them
         redirect_to_canonical_url = False
         if video_id: # Support for old links
             query = Video.all()
@@ -255,17 +170,17 @@ class ViewVideo(request_handler.RequestHandler):
                 raise MissingVideoException("Missing video '%s'" % readable_id)
 
             redirect_to_canonical_url = True
- 
+
         if redirect_to_canonical_url:
             self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
             return
-            
+
         # If we got here, we have a readable_id and a playlist_title, so we can display
-        # the playlist and the video in it that has the readable_id.  Note that we don't 
+        # the playlist and the video in it that has the readable_id.  Note that we don't
         # query the Video entities for one with the requested readable_id because in some
         # cases there are multiple Video objects in the datastore with the same readable_id
-        # (e.g. there are 2 "Order of Operations" videos).          
-            
+        # (e.g. there are 2 "Order of Operations" videos).
+
         videos = VideoPlaylist.get_cached_videos_for_playlist(playlist)
         previous_video = None
         next_video = None
@@ -282,15 +197,15 @@ class ViewVideo(request_handler.RequestHandler):
             raise MissingVideoException("Missing video '%s'" % readable_id)
 
         if App.offline_mode:
-            video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv" 
+            video_path = "/videos/" + get_mangled_playlist_name(playlist_title) + "/" + video.readable_id + ".flv"
         else:
             video_path = video.download_video_url()
 
         exercise = None
         exercise_video = video.get_related_exercise()
         if exercise_video and exercise_video.exercise:
-            exercise = exercise_video.exercise.name            
-                            
+            exercise = exercise_video.exercise.name
+
         if video.description == video.title:
             video.description = None
 
@@ -318,7 +233,7 @@ class ViewVideo(request_handler.RequestHandler):
         self.render_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
-    
+
     # LogVideoProgress uses a GET request to solve the IE-behind-firewall
     # issue with occasionally stripped POST data.
     # See http://code.google.com/p/khanacademy/issues/detail?id=3098
@@ -326,8 +241,8 @@ class LogVideoProgress(request_handler.RequestHandler):
     def post(self):
         self.get()
 
+    @create_phantom
     def get(self):
-
         user_data = UserData.current()
         video_points_total = 0
         points_total = 0
@@ -350,19 +265,22 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
-        
+        user_points_html = self.render_template_block_to_string(
+            "user_points.html",
+            "user_points_block",
+            user_points(user_data)
+        )
+
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
 class PrintProblem(request_handler.RequestHandler):
-    
+
     def get(self):
-        
+
         exid = self.request.get('exid')
         problem_number = self.request.get('problem_number')
-        
+
         template_values = {
                 'App' : App,
                 'arithmetic_template': 'arithmetic_print_template.html',
@@ -370,13 +288,13 @@ class PrintProblem(request_handler.RequestHandler):
                 'extitle': exid.replace('_', ' ').capitalize(),
                 'problem_number': self.request.get('problem_number')
                 }
-        
+
         self.render_template(exid + '.html', template_values)
-        
+
 class PrintExercise(request_handler.RequestHandler):
 
     def get(self):
-        
+
         user_data = UserData.current()
 
         if user_data:
@@ -399,7 +317,7 @@ class PrintExercise(request_handler.RequestHandler):
                 exid = 'addition_1'
 
             user_exercise = user_data.get_or_insert_exercise(exercise)
-            
+
             if not problem_number:
                 problem_number = user_exercise.total_done+1
             proficient = False
@@ -424,9 +342,9 @@ class PrintExercise(request_handler.RequestHandler):
                 'num_problems': num_problems,
                 'problem_numbers': range(problem_number, problem_number+num_problems),
                 }
-            
+
             self.render_template('print_template.html', template_values)
-                
+
         else:
 
             self.redirect(util.create_login_url(self.request.uri))
@@ -436,7 +354,7 @@ class ReportIssue(request_handler.RequestHandler):
     def get(self):
         issue_type = self.request.get('type')
         self.write_response(issue_type, {'issue_labels': self.request.get('issue_labels'),})
-        
+
     def write_response(self, issue_type, extra_template_values):
         user_agent = self.request.headers.get('User-Agent')
         if user_agent is None:
@@ -465,57 +383,6 @@ class ProvideFeedback(request_handler.RequestHandler):
     def get(self):
         self.render_template("provide_feedback.html", {})
 
-class ViewAllExercises(request_handler.RequestHandler):
-    @create_phantom
-    def get(self):
-        user_data = UserData.current()
-        
-        ex_graph = ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
-            user_data.put()
-
-        recent_exercises = ex_graph.get_recent_exercises()
-        review_exercises = ex_graph.get_review_exercises(self.get_time())
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
-
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
-            # if user_data.is_phantom:
-            #     exercise.phantom = True
-            # else:
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            if exercise in review_exercises:
-                exercise.review = True
-                exercise.status = "Review"
-   
-        template_values = {
-            'exercises': ex_graph.exercises,
-            'recent_exercises': recent_exercises,
-            'review_exercises': review_exercises,
-            'suggested_exercises': suggested_exercises,
-            'user_data': user_data,
-            'expanded_all_exercises': user_data.expanded_all_exercises,
-            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
-            'selected_nav_link': 'practice',
-            }
-            
-        self.render_template('viewexercises.html', template_values)
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-
 class VideolessExercises(request_handler.RequestHandler):
 
     def get(self):
@@ -528,250 +395,6 @@ class VideolessExercises(request_handler.RequestHandler):
             videos = query.fetch(200)
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
-
-class KnowledgeMap(request_handler.RequestHandler):
-
-    def get(self):
-        self.redirect("/exercisedashboard")
-
-class RegisterAnswer(request_handler.RequestHandler):
-
-    # RegisterAnswer uses a GET request to solve the IE-behind-firewall
-    # issue with occasionally stripped POST data.
-    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
-    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
-    def post(self):
-        self.get()
-
-    def get(self):
-        exid = self.request_string('exid')
-        time_warp = self.request_string('time_warp')
-
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request_string('key')
-
-            if not exid or not key:
-                logging.warning("Missing exid or key data in RegisterAnswer")
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            dt_done = datetime.datetime.now()
-            correct = self.request_bool('correct')
-
-            problem_number = self.request_int('problem_number')
-            start_time = self.request_float('start_time')
-            hint_used = self.request_bool('hint_used', default=False)
-
-            elapsed_time = int(float(time.time()) - start_time)
-
-            user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user_data):
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            exercise = user_exercise.exercise_model
-
-            user_exercise.last_done = datetime.datetime.now()
-            user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
-            user_exercise.summative = exercise.summative
-
-            user_data.last_activity = user_exercise.last_done
-            
-            # If a non-admin tries to answer a problem out-of-order, just ignore it and
-            # display the next problem.
-            if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
-                # Only admins can answer problems out of order.
-                self.redirect('/exercises?exid=' + exid)
-                return
-
-            problem_log = ProblemLog()
-            proficient = user_data.is_proficient_at(exid)
-
-            if correct:
-                suggested = user_data.is_suggested(exid)
-                points_possible = points.ExercisePointCalculator(user_exercise, suggested, proficient)
-                problem_log.points_earned = points_possible
-                user_data.add_points(points_possible)
-            
-            problem_log.user = user_data.user
-            problem_log.exercise = exid
-            problem_log.correct = correct
-            problem_log.time_done = dt_done
-            problem_log.time_taken = elapsed_time
-            problem_log.problem_number = problem_number
-            problem_log.hint_used = hint_used
-
-            if exercise.summative:
-                problem_log.exercise_non_summative = exercise.non_summative_exercise(problem_number).name
-
-            user_exercise.total_done += 1
-            util_notify.update(user_data,user_exercise)
-            
-            if correct:
-
-                user_exercise.total_correct += 1
-                user_exercise.streak += 1
-
-                if user_exercise.streak > user_exercise.longest_streak:
-                    user_exercise.longest_streak = user_exercise.streak
-                if user_exercise.streak >= exercise.required_streak and not proficient:
-                    user_exercise.set_proficient(True, user_data)
-                    user_exercise.proficient_date = datetime.datetime.now()                    
-                    user_data.reassess_if_necessary()
-                    problem_log.earned_proficiency = True
-                    
-            else:
-                # Just in case RegisterCorrectness didn't get called.
-                user_exercise.reset_streak()
-
-            util_badges.update_with_user_exercise(
-                user_data, 
-                user_exercise, 
-                include_other_badges = True, 
-                action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
-
-
-            # Manually clear exercise's memcache since we're throwing it in a bulk put
-            user_exercise.clear_memcache()
-
-            # Bulk put
-            db.put([user_data, user_exercise])
-
-            # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
-            # and want to shift it off to an automatically-retrying task queue.
-            # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-            deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
-
-            if not self.is_ajax_request():
-                self.redirect("/exercises?exid=%s" % exid)
-            else:
-                self.send_json(user_data, user_exercise, exercise, key, time_warp)
-            
-        else:
-            # Redirect to display the problem again which requires authentication
-            self.redirect('/exercises?exid=' + exid)
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-        
-    def send_json(self, user_data, user_exercise, exercise, key, time_warp):
-        exercise_states = user_data.get_exercise_states(exercise, user_exercise, self.get_time())
-        exercise_points = points.ExercisePointCalculator(user_exercise, exercise_states['suggested'], exercise_states['proficient'])
-        
-        streak_bar_context = streak_bar(user_exercise)
-        streak_bar_html = self.render_template_block_to_string("streak_bar.html", "streak_bar_block", streak_bar_context)
-        
-        exercise_message_context = exercise_message(exercise, user_data.coaches, exercise_states)
-        exercise_message_html = self.render_template_block_to_string("exercise_message.html", "exercise_message_block", exercise_message_context)
-        
-        exercise_icon_context = exercise_icon(exercise, App)
-        exercise_icon_html = self.render_template_block_to_string("exercise_icon.html", "exercise_icon_block", exercise_icon_context)
-        
-        badge_count_path = os.path.join(os.path.dirname(__file__), 'badges/badge_counts.html')
-        badge_count_context = badge_counts(user_data)
-        badge_count_html = render_block_to_string(badge_count_path, 'badge_count_block', badge_count_context).strip()
-        
-        badge_notification_path = os.path.join(os.path.dirname(__file__), 'badges/notifications.html')
-        badge_notification_context = badge_notifications()
-        badge_notification_html = render_block_to_string(badge_notification_path, 'badge_notification_block', badge_notification_context).strip()
-        
-        user_points_context = user_points(user_data)
-        user_points_html = self.render_template_block_to_string("user_points.html", "user_points_block", user_points_context)
-        
-        updated_values = {
-            'exercise_states': exercise_states,
-            'exercise_points':  exercise_points,
-            'key': key,
-            'start_time': time.time(),
-            'streak': user_exercise.streak,
-            'time_warp': time_warp,
-            'problem_number': user_exercise.total_done + 1,
-            'streak_bar_html': streak_bar_html,
-            'exercise_message_html': exercise_message_html,
-            'exercise_icon_html': exercise_icon_html,
-            'badge_count_html': badge_count_html,
-            'badge_notification_html': badge_notification_html,
-            'user_points_html': user_points_html
-            }
-            
-            #
-            #    'exercise_non_summative': exercise_non_summative,
-            #    'read_only': read_only,
-            #    'num_problems_to_print': num_problems_to_print,
-            #
-        json = simplejson.dumps(updated_values)
-        self.response.out.write(json)
-
-class RegisterCorrectness(request_handler.RequestHandler):
-
-    # RegisterCorrectness uses a GET request to solve the IE-behind-firewall
-    # issue with occasionally stripped POST data.
-    # See http://code.google.com/p/khanacademy/issues/detail?id=3098
-    # and http://stackoverflow.com/questions/328281/why-content-length-0-in-post-requests
-    def post(self):
-        self.get()
-
-    # A GET request is made via AJAX when the user clicks "Check Answer".
-    # This allows us to reset the user's streak if the answer was wrong.  If we wait
-    # until he clicks the "Next Problem" button, he can avoid resetting his streak
-    # by just reloading the page.
-    def get(self):
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request.get('key')
-
-            if not key:
-                logging.warning("Missing key data in RegisterCorrectness")
-                self.redirect("/exercises?exid=%s" % self.request_string("exid", default=""))
-                return
-
-            correct = int(self.request.get('correct'))
-
-            hint_used = self.request_bool('hint_used', default=False)
-            user_exercise = db.get(key)
-            if not user_exercise.belongs_to(user_data):
-                return
-
-            user_exercise.schedule_review(correct == 1, self.get_time())
-            if correct == 0:
-                if user_exercise.streak == 0:
-                    # 2+ in a row wrong -> not proficient
-                    user_exercise.set_proficient(False, user_data)
-                user_exercise.reset_streak()
-            if hint_used:
-                user_exercise.reset_streak()
-            user_exercise.put()
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
-
-    def get_time(self):
-        time_warp = int(self.request.get('time_warp') or '0')
-        return datetime.datetime.now() + datetime.timedelta(days=time_warp)
-
-
-class ResetStreak(request_handler.RequestHandler):
-
-# This resets the user's streak through an AJAX post request when the user
-# clicks on the Hint button. 
-
-    def post(self):
-        user_data = UserData.current()
-
-        if user_data:
-            key = self.request.get('key')
-            user_exercise = db.get(key)
-
-            if not user_exercise.belongs_to(user_data):
-                return
-
-            user_exercise.reset_streak()
-            user_exercise.put()
-        else:
-            self.redirect(util.create_login_url(self.request.uri))
 
 class GenerateLibraryContent(request_handler.RequestHandler):
 
@@ -803,9 +426,9 @@ class ShowUnusedPlaylists(request_handler.RequestHandler):
 
 class GenerateVideoMapping(request_handler.RequestHandler):
 
-    def get(self): 
+    def get(self):
         video_mapping = {}
-        for playlist_title in all_topics_list:            
+        for playlist_title in all_topics_list:
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -814,19 +437,19 @@ class GenerateVideoMapping(request_handler.RequestHandler):
             query.filter('live_association = ', True)
             query.order('video_position')
             playlist_name = get_mangled_playlist_name(playlist_title)
-            playlist = []   
+            playlist = []
             video_mapping[playlist_name] = playlist
             for pv in query.fetch(500):
                 v = pv.video
                 filename = v.title.replace(":", "").replace(",", ".")
-                playlist.append((filename, v.youtube_id, v.readable_id)) 
-        self.response.out.write("video_mapping = " + pformat(video_mapping))            
-        
-        
+                playlist.append((filename, v.youtube_id, v.readable_id))
+        self.response.out.write("video_mapping = " + pformat(video_mapping))
+
+
 class YoutubeVideoList(request_handler.RequestHandler):
 
     def get(self):
-        for playlist_title in all_topics_list:            
+        for playlist_title in all_topics_list:
             query = Playlist.all()
             query.filter('title =', playlist_title)
             playlist = query.get()
@@ -836,7 +459,7 @@ class YoutubeVideoList(request_handler.RequestHandler):
             query.order('video_position')
             for pv in query.fetch(500):
                 v = pv.video
-                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')       
+                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')
 
 class ExerciseAndVideoEntityList(request_handler.RequestHandler):
 
@@ -894,60 +517,60 @@ class ViewHomePage(request_handler.RequestHandler):
     def get(self):
         thumbnail_link_sets = [
             [
-                { 
-                    "href": "/video/khan-academy-on-the-gates-notes", 
-                    "class": "thumb-gates_thumbnail", 
+                {
+                    "href": "/video/khan-academy-on-the-gates-notes",
+                    "class": "thumb-gates_thumbnail",
                     "desc": "Khan Academy on the Gates Notes",
                     "youtube_id": "UuMTSU9DcqQ",
                     "selected": False,
                 },
-                { 
-                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs", 
-                    "class": "thumb-overview_thumbnail", 
+                {
+                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs",
+                    "class": "thumb-overview_thumbnail",
                     "desc": "Overview of our video library",
                     "youtube_id": "dsFQ9kM1qDs",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference", 
-                    "class": "thumb-gel_thumbnail", 
+                {
+                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference",
+                    "class": "thumb-gel_thumbnail",
                     "desc": "Sal Khan talk at GEL 2010",
                     "youtube_id": "yTXKCzrFh3c",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/khan-academy-on-pbs-newshour--edited", 
-                    "class": "thumb-pbs_thumbnail", 
+                {
+                    "href": "/video/khan-academy-on-pbs-newshour--edited",
+                    "class": "thumb-pbs_thumbnail",
                     "desc": "Khan Academy on PBS NewsHour",
                     "youtube_id": "4jXv03sktik",
                     "selected": False,
                 },
             ],
             [
-                { 
-                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html", 
-                    "class": "thumb-ted_thumbnail", 
+                {
+                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html",
+                    "class": "thumb-ted_thumbnail",
                     "desc": "Sal on the Khan Academy @ TED",
                     "youtube_id": "gM95HHI4gLk",
                     "selected": False,
                 },
-                { 
-                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA", 
-                    "class": "thumb-tech_award_thumbnail", 
+                {
+                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA",
+                    "class": "thumb-tech_award_thumbnail",
                     "desc": "What is the Khan Academy?",
                     "youtube_id": "p6l8-1kHUsA",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/khan-academy-exercise-software", 
-                    "class": "thumb-exercises_thumbnail", 
+                {
+                    "href": "/video/khan-academy-exercise-software",
+                    "class": "thumb-exercises_thumbnail",
                     "desc": "Overview of our exercise software",
                     "youtube_id": "hw5k98GV7po",
                     "selected": False,
                 },
-                { 
-                    "href": "/video/forbes--names-you-need-to-know---khan-academy", 
-                    "class": "thumb-forbes_thumbnail", 
+                {
+                    "href": "/video/forbes--names-you-need-to-know---khan-academy",
+                    "class": "thumb-forbes_thumbnail",
                     "desc": "Forbes Names You Need To Know",
                     "youtube_id": "UkfppuS0Plg",
                     "selected": False,
@@ -974,7 +597,7 @@ class ViewHomePage(request_handler.RequestHandler):
                             'approx_vid_count': consts.APPROX_VID_COUNT,
                         }
         self.render_template('homepage.html', template_values)
-        
+
 class ViewFAQ(request_handler.RequestHandler):
     def get(self):
         self.redirect("/about/faq", True)
@@ -1011,7 +634,7 @@ class ViewDMCA(request_handler.RequestHandler):
 class ViewStore(request_handler.RequestHandler):
     def get(self):
         self.render_template('store.html', {})
-        
+
 class ViewHowToHelp(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
@@ -1033,7 +656,7 @@ class ViewSAT(request_handler.RequestHandler):
         template_values = {
                 'videos': playlist_videos,
         }
-                                                  
+
         self.render_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
@@ -1045,9 +668,9 @@ class ViewGMAT(request_handler.RequestHandler):
                             'data_sufficiency': data_sufficiency,
                             'problem_solving': problem_solving,
         }
-                                                  
+
         self.render_template('gmat.html', template_values)
-                       
+
 
 class RetargetFeedback(bulk_update.handler.UpdateKind):
     def get_keys_query(self, kind):
@@ -1056,9 +679,9 @@ class RetargetFeedback(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, feedback):
-        orig_video = feedback.first_target()
+        orig_video = feedback.video()
 
         if orig_video == None or type(orig_video).__name__ != "Video":
             return False
@@ -1089,7 +712,7 @@ class DeleteStaleVideoPlaylists(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, video_playlist):
         if video_playlist.live_association == True:
             logging.debug("Keeping VideoPlaylist %s", video_playlist.key().id())
@@ -1105,7 +728,7 @@ class DeleteStaleVideos(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, video):
         query = ExerciseVideo.all()
         query.filter('video =', video)
@@ -1131,7 +754,7 @@ class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, playlist):
         query = VideoPlaylist.all()
         query.filter('playlist =', playlist)
@@ -1147,7 +770,7 @@ class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
 class FixVideoRef(bulk_update.handler.UpdateKind):
     def use_transaction(self):
         return False
-    
+
     def update(self, entity):
         orig_video = entity.video
 
@@ -1172,11 +795,11 @@ class FixVideoRef(bulk_update.handler.UpdateKind):
             return True
         else:
             return False
-            
+
 class FixPlaylistRef(bulk_update.handler.UpdateKind):
     def use_transaction(self):
         return False
-    
+
     def update(self, entity):
         orig_playlist = entity.playlist
 
@@ -1200,9 +823,9 @@ class FixPlaylistRef(bulk_update.handler.UpdateKind):
             return True
         else:
             return False
-            
+
 class ChangeEmail(bulk_update.handler.UpdateKind):
-    
+
     def get_email_params(self):
         old_email = self.request.get('old')
         new_email = self.request.get('new')
@@ -1214,7 +837,7 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         if prop is None or len(prop) == 0:
             prop = "user"
         return (old_email, new_email, prop)
-        
+
     def get(self):
         (old_email, new_email, prop) = self.get_email_params()
         if new_email == old_email:
@@ -1222,14 +845,14 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         self.response.out.write("To prevent a CSRF attack from changing email addresses, you initiate an email address change from the browser. ")
         self.response.out.write("Instead, run the following from remote_api_shell.py.<pre>\n")
         self.response.out.write("import bulk_update.handler\n")
-        self.response.out.write("bulk_update.handler.start_task('%s',{'kind':'%s', 'old':'%s', 'new':'%s'})\n" 
+        self.response.out.write("bulk_update.handler.start_task('%s',{'kind':'%s', 'old':'%s', 'new':'%s'})\n"
                                 % (self.request.path, self.request.get('kind'), old_email, new_email))
         self.response.out.write("</pre>and then check the logs in the admin console")
 
-        
+
     def get_keys_query(self, kind):
         """Returns a keys-only query to get the keys of the entities to update"""
-        
+
         (old_email, new_email, prop) = self.get_email_params()
         # When a user's personal Google account is replaced by their transitioned Google Apps account with the same email,
         # the Google user ID changes and the new User object's are not considered equal to the old User object's with the same
@@ -1241,12 +864,12 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
 
     def use_transaction(self):
         return False
-    
+
     def update(self, entity):
         (old_email, new_email, prop) = self.get_email_params()
         if getattr(entity, prop).email() != old_email:
             # This should never occur, but just in case, don't change or reput the entity.
-            return False 
+            return False
         setattr(entity, prop, users.User(new_email))
         return True
 
@@ -1256,18 +879,18 @@ class ViewArticle(request_handler.RequestHandler):
         video = None
         path = self.request.path
         readable_id  = urllib.unquote(path.rpartition('/')[2])
-        
+
         article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
         if readable_id == "fortune":
             article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-            
+
         template_values = {
                 'article_url': article_url,
                 'issue_labels': ('Component-Videos,Video-%s' % readable_id),
         }
 
         self.render_template("article.html", template_values)
-            
+
 class Login(request_handler.RequestHandler):
     def get(self):
         return self.post()
@@ -1283,7 +906,7 @@ class Login(request_handler.RequestHandler):
                 return
             self.redirect(users.create_login_url(cont))
             return
-                    
+
         if App.facebook_app_secret is None:
             self.redirect(users.create_login_url(cont))
             return
@@ -1305,7 +928,7 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry, 
+        # Immediately after login we make sure this user has a UserData entry,
         # also delete phantom cookies
 
         # If new user is new, 0 points, migrate data
@@ -1314,7 +937,7 @@ class PostLogin(request_handler.RequestHandler):
 
         if user_data and phantom_user:
             email = phantom_user.email()
-            phantom_data = UserData.get_from_db_key_email(email) 
+            phantom_data = UserData.get_from_db_key_email(email)
 
             # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
@@ -1341,11 +964,11 @@ class Logout(request_handler.RequestHandler):
 
 class Search(request_handler.RequestHandler):
 
-    def get(self):        
+    def get(self):
         query = self.request.get('page_search_query')
         template_values = { 'page_search_query': query }
         query = query.strip()
-        query_too_short = None 
+        query_too_short = None
         if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
             if len(query) > 0:
                 template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
@@ -1404,8 +1027,8 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
 def main():
 
-    webapp.template.register_template_library('templateext')    
-    application = webapp.WSGIApplication([ 
+    webapp.template.register_template_library('templateext')
+    application = webapp.WSGIApplication([
         ('/', ViewHomePage),
         ('/about', util_about.ViewAbout),
         ('/about/blog', blog.ViewBlog),
@@ -1423,29 +1046,27 @@ def main():
         ('/about/downloads', util_about.ViewDownloads),
         ('/getinvolved', ViewGetInvolved),
         ('/donate', Donate),
-        ('/exercisedashboard', ViewAllExercises),
+        ('/exercisedashboard', exercises.ViewAllExercises),
         ('/library_content', GenerateLibraryContent),
-        ('/video_mapping', GenerateVideoMapping),  
+        ('/video_mapping', GenerateVideoMapping),
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/exercises', ViewExercise),
+        ('/exercises', exercises.ViewExercise),
+        ('/khan-exercises/exercises/.*', exercises.RawExercise),
         ('/printexercise', PrintExercise),
         ('/printproblem', PrintProblem),
-        ('/viewexercisesonmap', KnowledgeMap),
+        ('/viewexercisesonmap', exercises.ViewAllExercises),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
-        ('/registeranswer', RegisterAnswer),
-        ('/registercorrectness', RegisterCorrectness),
-        ('/resetstreak', ResetStreak),
         ('/video/.*', ViewVideo),
         ('/v/.*', ViewVideo),
         ('/video', ViewVideo), # Backwards URL compatibility
         ('/logvideoprogress', LogVideoProgress),
         ('/sat', ViewSAT),
         ('/gmat', ViewGMAT),
-        ('/store', ViewStore),        
+        ('/store', ViewStore),
         ('/reportissue', ReportIssue),
         ('/provide-feedback', ProvideFeedback),
         ('/search', Search),
@@ -1457,7 +1078,7 @@ def main():
 
         ('/mobilefullsite', MobileFullSite),
         ('/mobilesite', MobileSite),
-        
+
         ('/admin/reput', bulk_update.handler.UpdateKind),
         ('/admin/retargetfeedback', RetargetFeedback),
         ('/admin/fixvideoref', FixVideoRef),
@@ -1476,9 +1097,12 @@ def main():
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
+        
+        ('/devadmin/emailchange', devpanel.Email),
+        ('/devadmin/managedevs', devpanel.Manage),
 
         ('/coaches', coaches.ViewCoaches),
-        ('/students', coaches.ViewStudents), 
+        ('/students', coaches.ViewStudents),
         ('/registercoach', coaches.RegisterCoach),
         ('/unregistercoach', coaches.UnregisterCoach),
         ('/unregisterstudent', coaches.UnregisterStudent),
@@ -1491,8 +1115,8 @@ def main():
         ('/addstudenttolist', coaches.AddStudentToList),
 
         ('/individualreport', coaches.ViewIndividualReport),
-        ('/progresschart', coaches.ViewProgressChart),        
-        ('/sharedpoints', coaches.ViewSharedPoints),        
+        ('/progresschart', coaches.ViewProgressChart),
+        ('/sharedpoints', coaches.ViewSharedPoints),
         ('/classreport', coaches.ViewClassReport),
         ('/classtime', coaches.ViewClassTime),
         ('/charts', coaches.ViewCharts),
@@ -1519,10 +1143,10 @@ def main():
         ('/logout', Logout),
 
         ('/api-apps/register', oauth_apps.Register),
-        
+
         # These are dangerous, should be able to clean things manually from the remote python shell
 
-        ('/deletevideoplaylists', DeleteVideoPlaylists), 
+        ('/deletevideoplaylists', DeleteVideoPlaylists),
         ('/killliveassociations', KillLiveAssociations),
 
         # Below are all discussion related pages
@@ -1550,12 +1174,14 @@ def main():
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
-        
+
         ('/notifierclose', util_notify.ToggleNotify),
         ('/newaccount', Clone),
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
+
+        ('/dashboard', dashboard.Dashboard),
 
         ('/sendtolog', SendToLog),
 

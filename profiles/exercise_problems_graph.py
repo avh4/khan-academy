@@ -12,7 +12,13 @@ class ProblemPoint:
         self.exercise_non_summative = problem_log.exercise_non_summative
         self.exercise_non_summative_display_name = models.Exercise.to_display_name(problem_log.exercise_non_summative)
         self.dt = problem_log.time_done
+        self.problem_number = problem_log.problem_number
         self.video_point = None
+
+        # We cannot render old problems that were created in the v1 exercise framework.
+        # We use sha1's existence as this identifier. In the future, we may do something smarter
+        # when past sha1s conflict with current exercise contents.
+        self.renderable = len(problem_log.sha1 or "") > 0
 
     def video_titles_html(self):
         if not self.video_point:
@@ -51,7 +57,7 @@ def exercise_problems_graph_context(user_data_student, exid):
 
     user_exercise = user_data_student.get_or_insert_exercise(exercise)
 
-    related_videos = exercise.related_videos()
+    related_videos = exercise.related_videos_query()
     video_list = []
 
     for exercise_video in related_videos:
@@ -102,6 +108,7 @@ def exercise_problems_graph_context(user_data_student, exid):
         x_axis_label += " (Last %d problems)" % max_problems_in_graph
 
     return {
+        'student_email': user_data_student.email,
         'exercise_display_name': models.Exercise.to_display_name(exid),
         'exid': exid,
         'problem_list': problem_list,

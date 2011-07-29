@@ -155,6 +155,11 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 user_agent_lower.find("webos") > -1 or \
                 user_agent_lower.find("android") > -1
 
+    def is_older_ie(self):
+        user_agent_lower = self.user_agent().lower()
+        return user_agent_lower.find("msie 7.") > -1 or \
+                user_agent_lower.find("msie 6.") > -1
+
     def is_mobile(self):
         if self.is_mobile_capable():
             return not self.has_mobile_full_site_cookie()

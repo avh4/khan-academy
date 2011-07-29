@@ -3,7 +3,6 @@
 import datetime, logging
 import math
 import urllib
-import random
 import pickle
 
 import config_django
@@ -11,7 +10,7 @@ import config_django
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
-
+from api.jsonify import jsonify
 # Do not remove this webapp.template import, as suggested
 # by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
 from google.appengine.ext.webapp import template
@@ -42,21 +41,23 @@ class Setting(db.Model):
     value = db.StringProperty()
 
     @staticmethod
-    def get_or_set_with_key(key, val = None):
+    def entity_group_key():
+        return db.Key.from_path('Settings', 'default_settings')
+
+    @staticmethod
+    def _get_or_set_with_key(key, val = None):
         if val is None:
-            return Setting.cache_get_by_key_name(key)
+            return Setting._cache_get_by_key_name(key)
         else:
-            setting = Setting.get_or_insert(key)
-            setting.value = str(val)
-            setting.put()
-
-            Setting.get_settings_dict(bust_cache=True)
-
+            setting = Setting(Setting.entity_group_key(), key, value=str(val))
+            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
+            db.put([setting, setting_old])
+            Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
     @staticmethod
-    def cache_get_by_key_name(key):
-        setting = Setting.get_settings_dict().get(key)
+    def _cache_get_by_key_name(key):
+        setting = Setting._get_settings_dict().get(key)
         if setting is not None:
             return setting.value
         return None
@@ -64,24 +65,34 @@ class Setting(db.Model):
     @staticmethod
     @request_cache.cache()
     @layer_cache.cache(layer=layer_cache.Layers.Memcache)
-    def get_settings_dict(bust_cache = False):
-        return dict((setting.key().name(), setting) for setting in Setting.all().fetch(20))
+    def _get_settings_dict(bust_cache = False):
+        # ancestor query to ensure consistent results
+        query = Setting.all().ancestor(Setting.entity_group_key())
+        results = dict((setting.key().name(), setting) for setting in query.fetch(20))
+
+        # backfill with old style settings
+        for setting in Setting.all().fetch(20):
+            key = setting.key()
+            if key.parent() is None and not key.name() in results.keys():
+                results[key.name()] = setting
+
+        return results
 
     @staticmethod
     def cached_library_content_date(val = None):
-        return Setting.get_or_set_with_key("cached_library_content_date", val)
+        return Setting._get_or_set_with_key("cached_library_content_date", val)
 
     @staticmethod
     def cached_exercises_date(val = None):
-        return Setting.get_or_set_with_key("cached_exercises_date", val)
+        return Setting._get_or_set_with_key("cached_exercises_date", val)
 
     @staticmethod
     def count_videos(val = None):
-        return Setting.get_or_set_with_key("count_videos", val) or 0
+        return Setting._get_or_set_with_key("count_videos", val) or 0
 
     @staticmethod
     def last_youtube_sync_generation_start(val = None):
-        return Setting.get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
+        return Setting._get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
 
 class Exercise(db.Model):
 
@@ -194,7 +205,7 @@ class Exercise(db.Model):
         else:
             return exercise
 
-    def related_videos(self):
+    def related_videos_query(self):
         exercise_videos = None
         query = ExerciseVideo.all()
         query.filter('exercise =', self.key()).order('exercise_order')
@@ -202,7 +213,7 @@ class Exercise(db.Model):
 
     @layer_cache.cache_with_key_fxn(lambda self: "related_videos_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def related_videos_fetch(self):
-        exercise_videos = self.related_videos().fetch(10)
+        exercise_videos = self.related_videos_query().fetch(10)
         for exercise_video in exercise_videos:
             exercise_video.video # Pre-cache video entity
         return exercise_videos
@@ -296,13 +307,15 @@ class UserExercise(db.Model):
             return consts.REQUIRED_STREAK
 
     @property
-    def next_points(self):
-        user_data = None
+    def exercise_states(self):
+        user_data = self.get_user_data()
+        if user_data:
+            return user_data.get_exercise_states(self.exercise_model, self)
+        return None
 
-        if hasattr(self, "_user_data"):
-            user_data = self._user_data
-        else:
-            user_data = UserData.get_from_db_key_email(self.user.email())
+    @property
+    def next_points(self):
+        user_data = self.get_user_data()
 
         suggested = proficient = False
 
@@ -331,6 +344,16 @@ class UserExercise(db.Model):
             user_exercises = UserExercise.get_for_user_data(user_data).fetch(1000)
             memcache.set(user_exercises_key, user_exercises, namespace=App.version)
         return user_exercises
+
+    def get_user_data(self):
+        user_data = None
+
+        if hasattr(self, "_user_data"):
+            user_data = self._user_data
+        else:
+            user_data = UserData.get_from_db_key_email(self.user.email())
+
+        return user_data
 
     def clear_memcache(self):
         memcache.delete(UserExercise.get_key_for_email(self.user.email()), namespace=App.version)
@@ -400,9 +423,12 @@ class UserExercise(db.Model):
 
         if proficient:
             if self.exercise not in user_data.proficient_exercises:
+                self.proficient_date = datetime.datetime.now()
+
                 user_data.proficient_exercises.append(self.exercise)
                 user_data.need_to_reassess = True
                 user_data.put()
+
                 util_notify.update(user_data, self, False, True)
 
         else:
@@ -410,7 +436,6 @@ class UserExercise(db.Model):
                 user_data.proficient_exercises.remove(self.exercise)
                 user_data.need_to_reassess = True
                 user_data.put()
-                    
 
 class CoachRequest(db.Model):
     coach_requesting = db.UserProperty()
@@ -455,10 +480,14 @@ class CoachRequest(db.Model):
 class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
+    deleted = db.BooleanProperty(default=False)
 
     def delete(self, *args, **kwargs):
         self.remove_all_students()
-        db.Model.delete(self, *args, **kwargs)
+        self.deleted = True
+        self.put()
+        # Don't actually delete until we're on the HR datastore.
+        # db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
         students = self.get_students_data()
@@ -473,6 +502,13 @@ class StudentList(db.Model):
     # these methods have the same interface as the methods on UserData
     def get_students_data(self):
         return [s for s in self.students]
+
+    @staticmethod
+    def get_for_coach(key):
+        query = StudentList.all()
+        query.filter('deleted =', False)
+        query.filter("coaches = ", key)
+        return query
 
 class UserVideoCss(db.Model):
     user = db.UserProperty()
@@ -549,6 +585,7 @@ class UserData(db.Model):
     user = db.UserProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
+    developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
     proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
@@ -562,7 +599,6 @@ class UserData(db.Model):
     coaches = db.StringListProperty()
     student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
-    hide_notifications = db.BooleanProperty(default=True)
     expanded_all_exercises = db.BooleanProperty(default=True)
     videos_completed = db.IntegerProperty(default = -1)
     last_daily_summary = db.DateTimeProperty()
@@ -575,7 +611,7 @@ class UserData(db.Model):
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
-            "last_login", "user", "current_user"
+            "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
     ]
 
     @property
@@ -670,13 +706,16 @@ class UserData(db.Model):
 
     def delete(self):
         logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
-
+        logging.info("Dumping user data for %s: %s" % (self.current_user.email(), jsonify(self)))
+        
         if not self.is_phantom:
             user_counter.add(-1)
 
         db.delete(self)
 
     def get_or_insert_exercise(self, exercise, allow_insert = True):
+        if not exercise:
+            return None
 
         exid = exercise.name
         userExercise = UserExercise.get_by_key_name(exid, parent=self)
@@ -703,11 +742,12 @@ class UserData(db.Model):
                 first_done=datetime.datetime.now(),
                 last_done=datetime.datetime.now(),
                 total_done=0,
+                summative=exercise.summative,
                 )
 
         return userExercise
         
-    def get_exercise_states(self, exercise, user_exercise, current_time):
+    def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
         phantom = exercise.phantom = util._is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
@@ -721,7 +761,8 @@ class UserData(db.Model):
             'suggested': suggested,
             'reviewing': reviewing,
             'struggling': struggling,
-            'endangered': endangered
+            'endangered': endangered,
+            'summative': exercise.summative,
         }
         
     def reassess_from_graph(self, ex_graph):
@@ -1219,14 +1260,19 @@ class ProblemLog(db.Model):
 
     user = db.UserProperty()
     exercise = db.StringProperty()
-    correct = db.BooleanProperty()
-    time_done = db.DateTimeProperty()
-    time_taken = db.IntegerProperty()
+    correct = db.BooleanProperty(default = False)
+    time_done = db.DateTimeProperty(auto_now_add=True)
+    time_taken = db.IntegerProperty(default = 0)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
+    sha1 = db.StringProperty()
+    seed = db.StringProperty()
+    count_attempts = db.IntegerProperty(default = 0)
+    time_taken_attempts = db.ListProperty(int)
+    attempts = db.StringListProperty()
 
     @property
     def ka_url(self):
@@ -1259,8 +1305,66 @@ class ProblemLog(db.Model):
         return util.minutes_between(self.time_started(), self.time_ended())
 
 # commit_problem_log is used by our deferred problem log insertion process
-def commit_problem_log(problem_log):
-    problem_log.put()
+def commit_problem_log(problem_log_source):
+
+    try:
+        if not problem_log_source or not problem_log_source.key().name:
+            return
+    except db.NotSavedError:
+        # Handle special case during new exercise deploy
+        return
+
+    def insert_in_position(index, items, val, filler):
+        if index >= len(items):
+            items.extend([filler] * (index + 1 - len(items)))            
+        items[index] = val
+
+    # Committing transaction combines existing problem log with any followup attempts
+    def txn():
+        problem_log = ProblemLog.get_by_key_name(problem_log_source.key().name())
+        
+        if not problem_log:
+            problem_log = ProblemLog(
+                key_name = problem_log_source.key().name(),
+                user = problem_log_source.user,
+                exercise = problem_log_source.exercise,
+                problem_number = problem_log_source.problem_number,
+                time_done = problem_log_source.time_done,
+                sha1 = problem_log_source.sha1,
+                seed = problem_log_source.seed,
+                exercise_non_summative = problem_log_source.exercise_non_summative,
+        )
+
+        index_attempt = max(0, problem_log_source.count_attempts - 1)
+        if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
+            # This attempt has already been logged. Ignore this dupe taskqueue execution.
+            return
+
+        # Bump up attempt count
+        problem_log.count_attempts += 1
+
+        # Hint used cannot be changed from True to False
+        problem_log.hint_used = problem_log.hint_used or problem_log_source.hint_used
+
+        # Correct cannot be changed from False to True after first attempt
+        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hint_used
+
+        # Add time_taken for this individual attempt
+        problem_log.time_taken += problem_log_source.time_taken
+        insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
+
+        # Add actual attempt content
+        insert_in_position(index_attempt, problem_log.attempts, problem_log_source.attempts[0], filler="")
+
+        # Points should only be earned once per problem, regardless of attempt count
+        problem_log.points_earned = max(problem_log.points_earned, problem_log_source.points_earned)
+
+        # Proficiency earned should never change per problem
+        problem_log.earned_proficiency = problem_log.earned_proficiency or problem_log_source.earned_proficiency
+
+        problem_log.put()
+
+    db.run_in_transaction(txn)
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and
@@ -1461,7 +1565,7 @@ class ExerciseGraph(object):
             ex.phantom = phantom
                 
 
-    def get_review_exercises(self, now):
+    def get_review_exercises(self, now = datetime.datetime.now()):
 
 # An exercise ex should be reviewed iff all of the following are true:
 #   * ex and all of ex's covering ancestors either

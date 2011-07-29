@@ -1,4 +1,4 @@
-# import the webapp module
+import os
 import re
 from google.appengine.ext import webapp
 from django import template
@@ -12,7 +12,8 @@ import voting
 import app
 import util
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.inclusion_tag("discussion/video_comments.html")
 def video_comments(video, playlist, page=0):
@@ -47,17 +48,17 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
 
-@register.inclusion_tag(("../discussion/signature.html", "discussion/signature.html"))
+@register.inclusion_tag("discussion/signature.html")
 def signature(target=None, verb=None):
     return {
-                "target": target, 
-                "verb": verb, 
+                "target": target,
+                "verb": verb,
                 "is_mod": is_current_user_moderator(),
                 "is_author": target and target.authored_by(models.UserData.current()),
                 "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
             }
 
-@register.inclusion_tag(("../discussion/mod_tools.html", "discussion/mod_tools.html"))
+@register.inclusion_tag("discussion/mod_tools.html")
 def mod_tools(target):
     return {
                 "target": target,
@@ -67,15 +68,15 @@ def mod_tools(target):
                 "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
             }
 
-@register.inclusion_tag(("../discussion/flag_tools.html", "discussion/flag_tools.html"))
+@register.inclusion_tag("discussion/flag_tools.html")
 def flag_tools(target):
     return {"target": target}
 
-@register.inclusion_tag(("../discussion/vote_tools.html", "discussion/vote_tools.html"))
+@register.inclusion_tag("discussion/vote_tools.html")
 def vote_tools(target):
     return { "target": target, "is_comment": target.is_type(models_discussion.FeedbackType.Comment) }
 
-@register.inclusion_tag(("../discussion/vote_sum.html", "discussion/vote_sum.html"))
+@register.inclusion_tag("discussion/vote_sum.html")
 def vote_sum(target):
     sum_original = target.sum_votes_incremented()
     if target.up_voted:
@@ -84,32 +85,32 @@ def vote_sum(target):
         sum_original += 1
 
     return {
-            "target": target, 
+            "target": target,
             "sum_original": sum_original,
             "is_comment": target.is_type(models_discussion.FeedbackType.Comment),
             }
 
-@register.inclusion_tag(("../discussion/author_tools.html", "discussion/author_tools.html"))
+@register.inclusion_tag("discussion/author_tools.html")
 def author_tools(target):
     return {
                 "target": target,
                 "editable": not target.is_type(models_discussion.FeedbackType.Comment)
             }
 
-@register.inclusion_tag(("../discussion/question_answers.html", "discussion/question_answers.html"))
+@register.inclusion_tag("discussion/question_answers.html")
 def question_answers(answers):
     return { "answers": answers }
 
-@register.inclusion_tag(("../discussion/question_answers.html", "discussion/question_answers.html"))
+@register.inclusion_tag("discussion/question_answers.html")
 def standalone_answers(video, playlist, dict_answers):
     return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
 
-@register.inclusion_tag(("../discussion/username_and_notification.html", "discussion/username_and_notification.html"))
+@register.inclusion_tag("discussion/username_and_notification.html")
 def username_and_notification(username, user_data):
     count = user_data.feedback_notification_count() if user_data else 0
     return { "username": username, "count": count }
 
-@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+@register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_question(button_label, target=None):
     return {
                 "feedback_type": models_discussion.FeedbackType.Question,
@@ -119,7 +120,7 @@ def feedback_controls_question(button_label, target=None):
                 "hidden": True
             }
 
-@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+@register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_answer(button_label, target=None):
     return {
                 "feedback_type": models_discussion.FeedbackType.Answer,
@@ -129,7 +130,7 @@ def feedback_controls_answer(button_label, target=None):
                 "hidden": True
             }
 
-@register.inclusion_tag(("discussion/feedback_controls.html","feedback_controls.html"))
+@register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_comment(button_label, target=None):
     return {
                 "feedback_type": models_discussion.FeedbackType.Comment,
@@ -139,7 +140,7 @@ def feedback_controls_comment(button_label, target=None):
                 "hidden": False
             }
 
-@register.inclusion_tag(("discussion/honeypots.html", "honeypots.html"))
+@register.inclusion_tag("discussion/honeypots.html")
 def honeypots():
     # Honeypots are used to attact spam bots
     return {}

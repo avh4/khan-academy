@@ -1,16 +1,22 @@
-# import the webapp module
+import os
+import logging
+
 from google.appengine.ext import webapp
+from google.appengine.ext.webapp import template
 
 import badges
 import util_badges
 from notifications import UserNotifier
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
-@register.inclusion_tag(("../badges/notifications.html", "badges/notifications.html"))
+@register.simple_tag
 def badge_notifications():
     user_badges = UserNotifier.pop_for_current_user_data()["badges"]
-    
+    return badge_notifications_html(user_badges)
+
+def badge_notifications_html(user_badges):
     all_badges_dict = util_badges.all_badges_dict()
     for user_badge in user_badges:
         user_badge.badge = all_badges_dict.get(user_badge.badge_name)
@@ -22,9 +28,10 @@ def badge_notifications():
     if len(user_badges) > 1:
         user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserNotifier.NOTIFICATION_LIMIT]
 
-    return {"user_badges": user_badges}
+    path = os.path.join(os.path.dirname(__file__), "notifications.html")
+    return template.render(path, {"user_badges": user_badges})
 
-@register.inclusion_tag(("../badges/badge_counts.html", "badges/badge_counts.html"))
+@register.inclusion_tag("badges/badge_counts.html")
 def badge_counts(user_data):
 
     counts_dict = {}
@@ -47,7 +54,7 @@ def badge_counts(user_data):
             "master": counts_dict[badges.BadgeCategory.MASTER],
     }
 
-@register.inclusion_tag(("../badges/badge_block.html", "badges/badge_block.html"))
+@register.inclusion_tag("badges/badge_block.html")
 def badge_block(badge, user_badge=None, show_frequency=False):
 
     if user_badge:
@@ -61,3 +68,4 @@ def badge_block(badge, user_badge=None, show_frequency=False):
         frequency = badge.frequency()
 
     return {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
+

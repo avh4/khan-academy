@@ -40,18 +40,29 @@ var Profile = {
              clickedBadge.siblings().removeClass("selected");
 
              if ($("#badge-container > #" + category ).is(":visible")) {
-                $("#badge-container > #" + category ).slideUp(300, function(){
-                        $("#badge-container").css("display", "none");
-                        clickedBadge.removeClass("selected");
-                    });
+                if (clickedBadge.parents().hasClass("standard-view")) {
+                    $("#badge-container > #" + category ).slideUp(300, function(){
+                            $("#badge-container").css("display", "none");
+                            clickedBadge.removeClass("selected");
+                        });
+                }
+                else {
+                    $("#badge-container > #" + category ).hide();
+                    $("#badge-container").css("display", "none");
+                    clickedBadge.removeClass("selected");                    
+                }
              }
              else {
                 var jelContainer = $("#badge-container");
                 $(jelContainer).css("min-height", jelContainer.height());
                 $(jelContainer).children().hide();
-                $("#" + category, jelContainer).slideDown(300, function() {
-                    $(jelContainer).animate({"min-height": 0}, 200);
-                });
+                if (clickedBadge.parents().hasClass("standard-view")) {
+                    $("#" + category, jelContainer).slideDown(300, function() {
+                        $(jelContainer).animate({"min-height": 0}, 200);
+                    });
+                } else {
+                    $("#" + category, jelContainer).show();
+                }
                 clickedBadge.addClass("selected");
              }
         });
