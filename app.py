@@ -1,7 +1,6 @@
 import datetime
 import os
 import logging
-from stat import ST_MTIME, ST_MODE, S_ISDIR
 
 from google.appengine.api import users
 
