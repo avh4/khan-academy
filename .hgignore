@@ -10,6 +10,7 @@ syntax: glob
 *.espressostorage
 hashed-*.css
 hashed-*.js
+js_css_packages/packages_hash.py
 *.pem
 secrets.py
 datastore/*
