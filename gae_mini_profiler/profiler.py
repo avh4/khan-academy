@@ -295,7 +295,7 @@ class ProfilerWSGIMiddleware(object):
             # Set up another handler so we can save all logged messages for this request
             log_buffer = StringIO.StringIO()
             handler = logging.StreamHandler(log_buffer)
-            handler.setLevel(logging.ALL)
+            handler.setLevel(logging.DEBUG)
             formatter = logging.Formatter("\t".join([
                 '%(levelno)s',
                 '%(asctime)s%(msecs)d',
