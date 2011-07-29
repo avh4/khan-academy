@@ -15,6 +15,7 @@ skip_files:
 - ^(.*/)?.*/RCS/.*
 - ^(.*/)?\..*
 - ^(.*/)?sample_data/.*
+- ^(.*/)?khan-exercises/test/.*
 
 handlers:
 - url: /videos
