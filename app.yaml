@@ -19,13 +19,13 @@ skip_files:
 handlers:
 - url: /videos
   static_dir: offline/Khan Academy/videos
-  
+
 - url: /flvplayer
   static_dir: flvplayer
 
 - url: /stylesheets
   static_dir: stylesheets
-  
+
 - url: /favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
@@ -69,11 +69,11 @@ handlers:
 
 - url: /helperpages
   static_dir: helperpages
-  
+
 - url: /downloads/(.*)
   static_files: downloads/\1
   upload: downloads/(.*)
-  
+
   # The url below needs to be updated whenever we change/upgrade MathJax.
   # Unfortunately, we can't use a regex due to a GAE bug:
   # http://code.google.com/p/googleappengine/issues/detail?id=3380
@@ -88,7 +88,7 @@ handlers:
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin  
+  login: admin
 
 - url: /admin/.*
   script: main.py
@@ -109,13 +109,12 @@ handlers:
 
 - url: .*
   script: main.py
-    
+
 builtins:
 - appstats: on
 - datastore_admin: on
 - remote_api: on
 - deferred: on
-- remote_api: on
 
 inbound_services:
 - warmup
