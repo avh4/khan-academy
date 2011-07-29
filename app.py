@@ -54,29 +54,3 @@ class App(object):
     if is_dev_server:
         accepts_openid = False # Change to True when we plan to support it on the live server.
     offline_mode = False
-
-    # Last modified date of entire app subdirectory. Only to be used in dev server.
-    @staticmethod
-    def last_modified_date(top = None):
-
-        if not App.is_dev_server:
-            raise Exception("last_modified_date should not be called on the production servers")
-
-        if not top:
-            top = os.path.abspath(os.path.join(__file__, ".."))
-
-        dt = os.stat(top)[ST_MTIME]
-
-        for f in os.listdir(top):
-            pathname = os.path.join(top, f)
-            try:
-                mode = os.stat(pathname)[ST_MODE]
-                if S_ISDIR(mode):
-                    # It's a directory, recurse into it
-                    dt_subdir = App.last_modified_date(pathname)
-                    if dt_subdir > dt:
-                        dt = dt_subdir
-            except OSError:
-                pass
-
-        return dt
