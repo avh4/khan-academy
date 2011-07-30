@@ -1,24 +1,58 @@
+import sys
 import re
 import subprocess
 import os
 import optparse
 
+sys.path.append(os.path.abspath("."))
 import compress
+from secrets import hipchat_deploy_token
+
+import hipchat.room
+import hipchat.config
+hipchat.config.manual_init(hipchat_deploy_token)
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     return proc.communicate()[0]
 
-def hg_st():
+def send_hipchat_deploy_message(version):
+    url = "%s.%s.appspot.com" % (version, get_app_id())
+    hipchat_message("Ooh ooh, aah aah. Deployed to <a href='http://%s'>%s</a>. website id: %s, khan-exercises id: %s" % (url, url, hg_version(), git_version()))
 
-    output = popen_results(['hg', 'st', '-mard'])
+def hipchat_message(msg):
+    for room in hipchat.room.Room.list():
+
+        if room.name in ('1s and 0s', 'Exercises'):
+
+            result = ""
+            msg = {"room_id": room.room_id, "from": "Deploy Monkey", "message": msg, "color": "purple"}
+
+            try:
+                result = str(hipchat.room.Room.message(**msg))
+            except:
+                pass
+
+            if "sent" in result:
+                print "Notified Hipchat room %s" % room.name
+            else:
+                print "Failed to send message to Hipchat: %s" % msg
+
+def get_app_id():
+    f = open("app.yaml", "r")
+    contents = f.read()
+    f.close()
+
+    app_re = re.compile("^application:\s+(.+)$", re.MULTILINE)
+    match = app_re.search(contents)
+
+    return match.groups()[0]
+
+def hg_st():
+    output = popen_results(['hg', 'st', '-mard', '-S'])
     return len(output) > 0
 
 def hg_pull_up():
-
-    version = -1
-    pattern = re.compile("^changeset:\\s+\\d+:(.+)$")
-
     # Pull latest
     popen_results(['hg', 'pull'])
 
@@ -27,17 +61,26 @@ def hg_pull_up():
     lines = output.split("\n")
     if len(lines) != 2 or lines[0].find("files updated") < 0:
         # Ran into merge or other problem
-        return version
+        return -1
 
-    # Grab the tip changeset hash
+    return hg_version()
+
+def hg_version():
+    # grab the tip changeset hash
+    pattern = re.compile("^changeset:\\s+\\d+:(.+)$")
+
     output = popen_results(['hg', 'tip'])
     lines = output.split("\n")
     for line in lines:
         match = pattern.match(line)
         if match:
-            version = match.groups()[0]
+            return match.groups()[0]
 
-    return version
+    return -1
+
+def git_version():
+    # grab the tip changeset hash
+    return popen_results(['git', '--work-tree=khan-exercises/', '--git-dir=khan-exercises/.git', 'rev-parse', 'HEAD'])
 
 def check_secrets():
     content = ""
@@ -90,6 +133,10 @@ def main():
         action="store_true", dest="dryrun",
         help="Dry run without the final deploy-to-App-Engine step", default=False)
 
+    parser.add_option('-c', '--clean',
+        action="store_true", dest="clean",
+        help="Clean the old packages and generate them again", default=False)
+
     options, args = parser.parse_args()
 
     if not options.force:
@@ -113,6 +160,9 @@ def main():
     if len(options.version) > 0:
         version = options.version
 
+    if options.clean:
+        compress.hashes = {}
+
     print "Deploying version " + str(version)
     compress.revert_js_css_hashes()
     compress_js()
@@ -121,6 +171,8 @@ def main():
     if not options.dryrun:
         deploy(version)
         compress.revert_js_css_hashes()
+
+    send_hipchat_deploy_message(version)
 
 if __name__ == "__main__":
     main()

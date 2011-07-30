@@ -479,10 +479,14 @@ class CoachRequest(db.Model):
 class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
+    deleted = db.BooleanProperty(default=False)
 
     def delete(self, *args, **kwargs):
         self.remove_all_students()
-        db.Model.delete(self, *args, **kwargs)
+        self.deleted = True
+        self.put()
+        # Don't actually delete until we're on the HR datastore.
+        # db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
         students = self.get_students_data()
@@ -498,6 +502,12 @@ class StudentList(db.Model):
     def get_students_data(self):
         return [s for s in self.students]
 
+    @staticmethod
+    def get_for_coach(key):
+        query = StudentList.all()
+        query.filter('deleted =', False)
+        query.filter("coaches = ", key)
+        return query
 
 class UserData(db.Model):
     user = db.UserProperty()

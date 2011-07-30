@@ -79,7 +79,7 @@ var GaeMiniProfiler = {
 
     expand: function(elEntry, data) {
         var jPopup = $(".g-m-p");
-    
+
         if (jPopup.length)
             jPopup.remove();
         else
@@ -97,11 +97,39 @@ var GaeMiniProfiler = {
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".profiler-details"); return false; }).end()
             .find(".rpc-link")
                 .click(function() { GaeMiniProfiler.toggleSection(this, ".rpc-details"); return false; }).end()
+            .find(".logs-link")
+                .click(function() { GaeMiniProfiler.toggleSection(this, ".logs-details"); return false; }).end()
             .find(".callers-link")
                 .click(function() { $(this).parents("td").find(".callers").slideToggle("fast"); return false; }).end()
             .click(function(e) { e.stopPropagation(); })
             .css("left", jCorner.offset().left + jCorner.width() + 18)
             .slideDown("fast");
+
+        var toggleLogRows = function(level) {
+            var names = ['Debug', 'Info', 'Warning', 'Critical', 'Error'];
+            $('#slider .minlevel-text').text(names[level]);
+            $('#slider .loglevel').attr('class', 'loglevel ll'+level);
+            for (var i = 0; i<5; i++) {
+                var rows = $('tr.ll'+i);
+                if (i<level)
+                    rows.hide();
+                else
+                    rows.show();
+            }
+        };
+
+        var initLevel = 2;
+        $('#slider .control').slider({
+            value: initLevel,
+            min: 0,
+            max: 4,
+            step: 1,
+            range: 'min',
+            slide: function( event, ui ) {
+                toggleLogRows(ui.value);
+            }
+        });
+        toggleLogRows(initLevel);
     },
 
     toggleSection: function(elLink, selector) {
@@ -123,6 +151,12 @@ var GaeMiniProfiler = {
     },
 
     renderPopup: function(data) {
+        var counts = [0, 0, 0, 0, 0];
+        $.each(data.logs, function(i, log) {
+            counts[log[0]] += 1;
+        });
+        data.log_count = counts;
+
         return $("#profilerTemplate").tmplPlugin(data);
     },
 

@@ -114,7 +114,6 @@ def get_mangled_playlist_name(playlist_name):
     return playlist_name
 
 class ViewVideo(request_handler.RequestHandler):
-    @create_phantom
     def get(self):
 
         # This method displays a video in the context of a particular playlist.
@@ -241,8 +240,8 @@ class LogVideoProgress(request_handler.RequestHandler):
     def post(self):
         self.get()
 
+    @create_phantom
     def get(self):
-
         user_data = UserData.current()
         video_points_total = 0
         points_total = 0
@@ -1014,6 +1013,10 @@ class UserStatistics(request_handler.RequestHandler):
         models.UserLog.add_current_state()
         self.response.out.write("Registered user statistics recorded.")
 
+class ViewRenderTemplate(request_handler.RequestHandler):
+    def get(self):
+        template = self.request_string('template', 'templatetest.html')
+        self.render_template(template, { 'user_data': UserData.current() })
 
 
 def main():
@@ -1088,6 +1091,7 @@ def main():
         ('/admin/changeemail', ChangeEmail),
         ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
+        ('/admin/rendertemplate', ViewRenderTemplate),
         
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),

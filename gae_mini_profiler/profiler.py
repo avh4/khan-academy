@@ -69,7 +69,9 @@ class RequestStatsHandler(RequestHandler):
 
 class RequestStats(object):
 
-    serialized_properties = ["request_id", "url", "url_short", "s_dt", "profiler_results", "appstats_results", "temporary_redirect"]
+    serialized_properties = ["request_id", "url", "url_short", "s_dt",
+                             "profiler_results", "appstats_results",
+                             "temporary_redirect", "logs"]
 
     def __init__(self, request_id, environ, middleware):
         self.request_id = request_id
@@ -86,6 +88,7 @@ class RequestStats(object):
 
         self.profiler_results = RequestStats.calc_profiler_results(middleware)
         self.appstats_results = RequestStats.calc_appstats_results(middleware)
+        self.logs = middleware.logs
 
         self.temporary_redirect = middleware.temporary_redirect
         self.disabled = False
@@ -156,15 +159,15 @@ class RequestStats(object):
 
             callers_names = map(lambda func_name: pstats.func_std_string(func_name), callers.keys())
             callers_desc = map(
-                    lambda name: {"func_desc": name, "func_desc_short": RequestStats.short_method_fmt(name)}, 
+                    lambda name: {"func_desc": name, "func_desc_short": RequestStats.short_method_fmt(name)},
                     callers_names)
 
             results["calls"].append({
-                "primitive_call_count": primitive_call_count, 
-                "total_call_count": total_call_count, 
-                "total_time": RequestStats.seconds_fmt(total_time), 
+                "primitive_call_count": primitive_call_count,
+                "total_call_count": total_call_count,
+                "total_time": RequestStats.seconds_fmt(total_time),
                 "per_call": RequestStats.seconds_fmt(total_time / total_call_count) if total_call_count else "",
-                "cumulative_time": RequestStats.seconds_fmt(cumulative_time), 
+                "cumulative_time": RequestStats.seconds_fmt(cumulative_time),
                 "per_call_cumulative": RequestStats.seconds_fmt(cumulative_time / primitive_call_count) if primitive_call_count else "",
                 "func_desc": func_desc,
                 "func_desc_short": RequestStats.short_method_fmt(func_desc),
@@ -174,7 +177,7 @@ class RequestStats(object):
         output.close()
 
         return results
-        
+
     @staticmethod
     def calc_appstats_results(middleware):
         if middleware.recorder:
@@ -213,9 +216,9 @@ class RequestStats(object):
 
                 stack_frames_desc = []
                 for frame in trace.call_stack_:
-                    stack_frames_desc.append("%s:%s %s" % 
-                            (RequestStats.short_rpc_file_fmt(frame.class_or_file_name()), 
-                                frame.line_number(), 
+                    stack_frames_desc.append("%s:%s %s" %
+                            (RequestStats.short_rpc_file_fmt(frame.class_or_file_name()),
+                                frame.line_number(),
                                 frame.function_name()))
 
                 request = trace.request_data_summary()
@@ -289,6 +292,21 @@ class ProfilerWSGIMiddleware(object):
             import os
             request_id = base64.urlsafe_b64encode(os.urandom(5))
 
+            # Set up another handler so we can save all logged messages for this request
+            log_buffer = StringIO.StringIO()
+            handler = logging.StreamHandler(log_buffer)
+            handler.setLevel(logging.DEBUG)
+            formatter = logging.Formatter("\t".join([
+                '%(levelno)s',
+                '%(asctime)s%(msecs)d',
+                '%(funcName)s',
+                '%(filename)s',
+                '%(lineno)d',
+                '%(message)s',
+            ]), '%M:%S.')
+            handler.setFormatter(formatter)
+            logging.getLogger().addHandler(handler)
+
             # Send request id in headers so jQuery ajax calls can pick
             # up profiles.
             def profiled_start_response(status, headers, exc_info = None):
@@ -339,6 +357,19 @@ class ProfilerWSGIMiddleware(object):
             else:
                 for value in result:
                     yield value
+
+            # Remove the log handler, save logs
+            logging.getLogger().removeHandler(handler)
+            lines = [l for l in log_buffer.getvalue().split("\n") if l]
+            fields = [l.split("\t") for l in lines]
+            #convert levelnos down to [0,1,2,3,4]
+            for f in fields:
+                try:
+                    f[0] = int(f[0])/10 - 1
+                except ValueError:
+                    f[0] = 0
+            log_buffer.close()
+            self.logs = fields
 
             # Store stats for later access
             RequestStats(request_id, environ, self).store()
