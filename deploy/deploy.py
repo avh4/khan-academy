@@ -10,8 +10,7 @@ def popen_results(args):
     return proc.communicate()[0]
 
 def hg_st():
-
-    output = popen_results(['hg', 'st', '-mard'])
+    output = popen_results(['hg', 'st', '-mard', '-S'])
     return len(output) > 0
 
 def hg_pull_up():
