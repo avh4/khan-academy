@@ -100,8 +100,6 @@ def main():
             print "Local changes found in this directory, canceling deploy."
             return
 
-    return
-
     version = -1
 
     if not options.noup or len(options.version) == 0:
