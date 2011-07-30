@@ -18,7 +18,18 @@ def popen_results(args):
 
 def send_hipchat_deploy_message(version):
     url = "%s.%s.appspot.com" % (version, get_app_id())
-    hipchat_message("Ooh ooh, aah aah. Deployed to <a href='http://%s'>%s</a>. website id: %s, khan-exercises id: %s" % (url, url, hg_version(), git_version()))
+
+    hg_id = hg_version()
+    kiln_url = "https://khanacademy.kilnhg.com/Search?search=%s" % hg_id
+
+    git_id = git_version()
+    github_url = "https://github.com/Khan/khan-exercises/commit/%s" % git_id
+
+    hipchat_message( \
+            """Ooh ooh, ahh ahh.
+            Deployed to <a href='http://%s'>%s</a>.
+            website: <a href='%s'>version %s</a>,
+            khan-exercises: <a href='%s'>version %s</a>""" % (url, url, kiln_url, hg_id, github_url, git_id))
 
 def hipchat_message(msg):
     for room in hipchat.room.Room.list():
@@ -26,10 +37,10 @@ def hipchat_message(msg):
         if room.name in ('1s and 0s', 'Exercises'):
 
             result = ""
-            msg = {"room_id": room.room_id, "from": "Deploy Monkey", "message": msg, "color": "purple"}
+            msg_dict = {"room_id": room.room_id, "from": "Deploy Monkey", "message": msg, "color": "purple"}
 
             try:
-                result = str(hipchat.room.Room.message(**msg))
+                result = str(hipchat.room.Room.message(**msg_dict))
             except:
                 pass
 
@@ -171,7 +182,6 @@ def main():
     if not options.dryrun:
         deploy(version)
         compress.revert_js_css_hashes()
-
     send_hipchat_deploy_message(version)
 
 if __name__ == "__main__":
