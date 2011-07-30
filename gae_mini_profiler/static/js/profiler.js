@@ -106,7 +106,7 @@ var GaeMiniProfiler = {
             .slideDown("fast");
 
         var toggleLogRows = function(level) {
-            var names = ['Debug', 'Info', 'Warning', 'Critical', 'Error'];
+            var names = ['Debug', 'Info', 'Warning', 'Error', 'Critical'];
             $('#slider .minlevel-text').text(names[level]);
             $('#slider .loglevel').attr('class', 'loglevel ll'+level);
             for (var i = 0; i<5; i++) {
