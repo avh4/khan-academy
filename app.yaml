@@ -17,6 +17,7 @@ skip_files:
 - ^(.*/)?sample_data/.*
 - ^(.*/)?khan-exercises/test/.*
 - ^(.*/)?presskit/.*
+- ^(.*/)?deploy/.*
 
 handlers:
 - url: /videos
