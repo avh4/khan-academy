@@ -46,7 +46,7 @@ def send_hipchat_deploy_message(version, includes_local_changes):
 def hipchat_message(msg):
     for room in hipchat.room.Room.list():
 
-        if room.name in ['BenTest']: #['1s and 0s', 'Exercises']:
+        if room.name in ['1s and 0s', 'Exercises']:
 
             result = ""
             msg_dict = {"room_id": room.room_id, "from": "Deploy Monkey", "message": msg, "color": "purple"}
