@@ -144,7 +144,7 @@ def compress_css():
 def deploy(version):
     print "Deploying version " + str(version)
     output = popen_results(['appcfg.py', '-V', str(version), "update", "."])
-    return "Success" in output
+    return "Deployment successful." in output
 
 def main():
 
