@@ -3,7 +3,7 @@ import logging
 from google.appengine.api import users
 
 import request_handler
-from dashboard.models import DailyStatistic
+from dashboard.models import DailyStatistic, RegisteredUserCount
 
 class Dashboard(request_handler.RequestHandler):
 
@@ -13,23 +13,23 @@ class Dashboard(request_handler.RequestHandler):
             return
 
         # Grab last ~4 months
-        user_logs = models.UserLog.all().order("-time").fetch(31 * 4)
+        user_counts = RegisteredUserCount.all().order("-dt").fetch(31 * 4)
 
         # Flip 'em around
-        user_logs.reverse()
+        user_counts.reverse()
 
         # Grab deltas
-        user_log_last = None
-        for user_log in user_logs:
-            if user_log_last:
-                user_log.delta_registered = user_log.registered_users - user_log_last.registered_users
+        user_count_last = None
+        for user_count in user_counts:
+            if user_count_last:
+                user_count.delta_registered = user_count.val - user_count_last.val
 
-            user_log.js_month = user_log.time.month - 1
-            user_log_last = user_log
+            user_count.js_month = user_count.dt.month - 1
+            user_count_last = user_count
 
-        user_logs = filter(lambda user_log: hasattr(user_log, "delta_registered"), user_logs)
+        user_counts = filter(lambda user_count: hasattr(user_count, "delta_registered"), user_counts)
 
-        self.render_template("dashboard/users.html", {"user_logs": user_logs})
+        self.render_template("dashboard/users.html", {"user_counts": user_counts})
 
 class RecordStatistics(request_handler.RequestHandler):
     def get(self):

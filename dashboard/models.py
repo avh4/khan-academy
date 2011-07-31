@@ -17,16 +17,23 @@ class DailyStatisticLog(db.Model):
 
 class DailyStatistic(object):
 
+    @classmethod
+    def all(cls):
+        return DailyStatisticLog.all().filter("stat_name =", cls.__name__)
+
     def calc(self):
         raise Exception("Not implemented")
-    
-    def record(self, val = None, dt = None):
 
+    def name(self):
         # Use subclass name as stat identifier
         stat_name = self.__class__.__name__
 
         if stat_name == DailyStatistic.__name__:
             raise Exception("Not implemented")
+
+        return stat_name
+    
+    def record(self, val = None, dt = None):
 
         if val is None:
             # Grab actual stat value, implemented by subclass
@@ -36,6 +43,8 @@ class DailyStatistic(object):
             dt = datetime.datetime.now()
 
         if not val is None:
+
+            stat_name = self.name()
 
             # Use stat name and date (w/ hours/secs/mins stripped) as keyname so we don't record
             # duplicate stats

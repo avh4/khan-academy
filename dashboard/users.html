@@ -66,10 +66,12 @@
                 {
                     name: 'Users',
                     data: [
-                        {% for user_log in user_logs %}
-                        [
-                            Date.UTC({{ user_log.time.year }}, {{ user_log.js_month }}, {{ user_log.time.day }}), {{ user_log.delta_registered }}
-                        ]{% if not forloop.last %},{% endif %}
+                        {% for user_count in user_counts %}
+                        {
+                            x: Date.UTC({{ user_count.dt.year }}, {{ user_count.js_month }}, {{ user_count.dt.day }}),
+                            y: {{ user_count.delta_registered }},
+                            total: {{ user_count.val }}
+                        }{% if not forloop.last %},{% endif %}
                         {% endfor %}
                     ]
                 }
