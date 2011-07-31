@@ -3,7 +3,7 @@ import logging
 from google.appengine.api import users
 
 import request_handler
-import models
+from dashboard.models import DailyStatistic
 
 class Dashboard(request_handler.RequestHandler):
 
@@ -30,4 +30,15 @@ class Dashboard(request_handler.RequestHandler):
         user_logs = filter(lambda user_log: hasattr(user_log, "delta_registered"), user_logs)
 
         self.render_template("dashboard/users.html", {"user_logs": user_logs})
+
+class RecordStatistics(request_handler.RequestHandler):
+    def get(self):
+        return self.post()
+
+    def post(self):
+        if not users.is_current_user_admin():
+            return
+
+        DailyStatistic.record_all()
+        self.response.out.write("Dashboard statistics recorded.")
 
