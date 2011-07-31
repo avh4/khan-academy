@@ -17,24 +17,33 @@ def popen_results(args):
     return proc.communicate()[0]
 
 def send_hipchat_deploy_message(version):
-    url = "%s.%s.appspot.com" % (version, get_app_id())
+    url = "http://%s.%s.appspot.com" % (version, get_app_id())
 
     hg_id = hg_version()
+    hg_msg = hg_changeset_msg(hg_id)
     kiln_url = "https://khanacademy.kilnhg.com/Search?search=%s" % hg_id
 
     git_id = git_version()
+    git_msg = git_revision_msg(git_id)
     github_url = "https://github.com/Khan/khan-exercises/commit/%s" % git_id
 
-    hipchat_message( \
-            """Ooh ooh, ahh ahh.
-            Deployed to <a href='http://%s'>%s</a>.
-            website: <a href='%s'>version %s</a>,
-            khan-exercises: <a href='%s'>version %s</a>""" % (url, url, kiln_url, hg_id, github_url, git_id))
+    hipchat_message("""
+            Just deployed %(hg_id)s to <a href='%(url)s'>a non-default url</a>, which includes
+            latest website changeset, "<a href='%(kiln_url)s'>%(hg_msg)s</a>," and latest khan-exercises
+            revision, "<a href='%(github_url)s'>%(git_msg)s</a>."
+            """ % {
+                "url": url,
+                "hg_id": hg_id,
+                "kiln_url": kiln_url,
+                "hg_msg": hg_msg,
+                "github_url": github_url,
+                "git_msg": git_msg,
+            })
 
 def hipchat_message(msg):
     for room in hipchat.room.Room.list():
 
-        if room.name in ('1s and 0s', 'Exercises'):
+        if room.name in ['BenTest']: #['1s and 0s', 'Exercises']:
 
             result = ""
             msg_dict = {"room_id": room.room_id, "from": "Deploy Monkey", "message": msg, "color": "purple"}
@@ -78,20 +87,32 @@ def hg_pull_up():
 
 def hg_version():
     # grab the tip changeset hash
-    pattern = re.compile("^changeset:\\s+\\d+:(.+)$")
-
     output = popen_results(['hg', 'tip'])
-    lines = output.split("\n")
-    for line in lines:
-        match = pattern.match(line)
-        if match:
-            return match.groups()[0]
+    changeset = parse_hg_info(output, "changeset")
 
+    if changeset:
+        return changeset.split(":")[1]
+    
     return -1
+
+def hg_changeset_msg(changeset_id):
+    # grab the summary and date
+    output = popen_results(['hg', 'log', '-r', changeset_id])
+    return parse_hg_info(output, "summary")
+
+def parse_hg_info(output, label):
+    pattern = re.compile("^%s:\\s+(.+)$" % label, re.MULTILINE)
+    matches = pattern.search(output)
+    if matches:
+        return matches.groups()[0].strip()
+    return None
 
 def git_version():
     # grab the tip changeset hash
-    return popen_results(['git', '--work-tree=khan-exercises/', '--git-dir=khan-exercises/.git', 'rev-parse', 'HEAD'])
+    return popen_results(['git', '--work-tree=khan-exercises/', '--git-dir=khan-exercises/.git', 'rev-parse', 'HEAD']).strip()
+
+def git_revision_msg(revision_id):
+    return popen_results(['git', '--work-tree=khan-exercises/', '--git-dir=khan-exercises/.git', 'show', '-s', '--pretty=format:%s', revision_id]).strip()
 
 def check_secrets():
     content = ""
@@ -182,7 +203,7 @@ def main():
     if not options.dryrun:
         deploy(version)
         compress.revert_js_css_hashes()
-    send_hipchat_deploy_message(version)
+        send_hipchat_deploy_message(version)
 
 if __name__ == "__main__":
     main()
