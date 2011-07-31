@@ -67,20 +67,24 @@ class DailyStatistic(object):
         # Record stats for all implementing subclasses
         for subclass in DailyStatistic.__subclasses__():
             instance = subclass()
-            instance.record(dt)
+            instance.record(dt = dt)
 
 class ProblemLogCount(DailyStatistic):
 
     def calc(self):
-        kind_stat = stats.KindStat.all().filter("kind_name =", "ProblemLog")
-
-        if kind_stat:
-            return kind_stat.count()
-
-        return None
+        return get_approximate_entity_count("ProblemLog")
 
 class RegisteredUserCount(DailyStatistic):
 
     def calc(self):
         return user_counter.get_count()
 
+# Use ~once-or-twice-a-day-updated google.appengine.ext.db.stats to grab entity count
+def get_approximate_entity_count(kind_name):
+    kind_stats = stats.KindStat.all().filter("kind_name =", kind_name).fetch(100)
+
+    if kind_stats:
+        kind_stats.sort(key = lambda kind_stat: kind_stat.timestamp, reverse=True)
+        return kind_stats[0].count
+
+    return None
