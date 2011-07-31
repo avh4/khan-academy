@@ -16,7 +16,7 @@ def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     return proc.communicate()[0]
 
-def send_hipchat_deploy_message(version):
+def send_hipchat_deploy_message(version, includes_local_changes):
     url = "http://%s.%s.appspot.com" % (version, get_app_id())
 
     hg_id = hg_version()
@@ -27,10 +27,12 @@ def send_hipchat_deploy_message(version):
     git_msg = git_revision_msg(git_id)
     github_url = "https://github.com/Khan/khan-exercises/commit/%s" % git_id
 
+    local_changes_warning = " (including uncommitted local changes)" if includes_local_changes else ""
+
     hipchat_message("""
-            Just deployed %(hg_id)s to <a href='%(url)s'>a non-default url</a>, which includes
-            latest website changeset, "<a href='%(kiln_url)s'>%(hg_msg)s</a>," and latest khan-exercises
-            revision, "<a href='%(github_url)s'>%(git_msg)s</a>."
+            Just deployed %(hg_id)s%(local_changes_warning)s to <a href='%(url)s'>a non-default url</a>. Includes
+            website changeset "<a href='%(kiln_url)s'>%(hg_msg)s</a>" and khan-exercises
+            revision "<a href='%(github_url)s'>%(git_msg)s</a>."
             """ % {
                 "url": url,
                 "hg_id": hg_id,
@@ -38,6 +40,7 @@ def send_hipchat_deploy_message(version):
                 "hg_msg": hg_msg,
                 "github_url": github_url,
                 "git_msg": git_msg,
+                "local_changes_warning": local_changes_warning,
             })
 
 def hipchat_message(msg):
@@ -171,10 +174,10 @@ def main():
 
     options, args = parser.parse_args()
 
-    if not options.force:
-        if hg_st():
-            print "Local changes found in this directory, canceling deploy."
-            return
+    includes_local_changes = hg_st()
+    if not options.force and includes_local_changes:
+        print "Local changes found in this directory, canceling deploy."
+        return
 
     version = -1
 
@@ -203,7 +206,7 @@ def main():
     if not options.dryrun:
         deploy(version)
         compress.revert_js_css_hashes()
-        send_hipchat_deploy_message(version)
+        send_hipchat_deploy_message(version, includes_local_changes)
 
 if __name__ == "__main__":
     main()
