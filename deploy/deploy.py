@@ -3,6 +3,7 @@ import re
 import subprocess
 import os
 import optparse
+import datetime
 
 sys.path.append(os.path.abspath("."))
 import compress
@@ -28,7 +29,7 @@ def send_hipchat_deploy_message(version, includes_local_changes):
     github_url = "https://github.com/Khan/khan-exercises/commit/%s" % git_id
 
     local_changes_warning = " (including uncommitted local changes)" if includes_local_changes else ""
-
+    
     hipchat_message("""
             Just deployed %(hg_id)s%(local_changes_warning)s to <a href='%(url)s'>a non-default url</a>. Includes
             website changeset "<a href='%(kiln_url)s'>%(hg_msg)s</a>" and khan-exercises
@@ -142,9 +143,12 @@ def compress_css():
 
 def deploy(version):
     print "Deploying version " + str(version)
-    os.system("appcfg.py -V " + str(version) + " update .")
+    output = popen_results(['appcfg.py', '-V', str(version), "update", "."])
+    return "Success" in output
 
 def main():
+
+    start = datetime.datetime.now()
 
     parser = optparse.OptionParser()
 
@@ -204,9 +208,13 @@ def main():
     compress_css()
 
     if not options.dryrun:
-        deploy(version)
+        success = deploy(version)
         compress.revert_js_css_hashes()
-        send_hipchat_deploy_message(version, includes_local_changes)
+        if success:
+            send_hipchat_deploy_message(version, includes_local_changes)
+
+    end = datetime.datetime.now()
+    print "Done. Duration: %s" % (end - start)
 
 if __name__ == "__main__":
     main()
