@@ -12,7 +12,6 @@ class Dashboard(request_handler.RequestHandler):
     def get(self):
         if not users.is_current_user_admin():
             if App.dashboard_secret and self.request_string("x", default=None) != App.dashboard_secret:
-                logging.critical(App.dashboard_secret)
                 self.redirect(users.create_login_url(self.request.uri))
                 return
 
