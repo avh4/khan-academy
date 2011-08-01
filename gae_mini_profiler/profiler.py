@@ -273,6 +273,7 @@ class ProfilerWSGIMiddleware(object):
         self.prof = None
         self.recorder = None
         self.temporary_redirect = False
+        self.handler = None
 
     def __call__(self, environ, start_response):
 
@@ -292,19 +293,7 @@ class ProfilerWSGIMiddleware(object):
             import os
             request_id = base64.urlsafe_b64encode(os.urandom(5))
 
-            # Set up another handler so we can save all logged messages for this request
-            handler = logging.StreamHandler(StringIO.StringIO())
-            handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter("\t".join([
-                '%(levelno)s',
-                '%(asctime)s%(msecs)d',
-                '%(funcName)s',
-                '%(filename)s',
-                '%(lineno)d',
-                '%(message)s',
-            ]), '%M:%S.')
-            handler.setFormatter(formatter)
-            logging.getLogger().addHandler(handler)
+            self.add_handler()
 
             # Send request id in headers so jQuery ajax calls can pick
             # up profiles.
@@ -357,17 +346,10 @@ class ProfilerWSGIMiddleware(object):
                 for value in result:
                     yield value
 
-            # Remove the log handler, save logs
-            logging.getLogger().removeHandler(handler)
-            lines = [l for l in handler.stream.getvalue().split("\n") if l]
-            fields = [l.split("\t") for l in lines]
-            #convert levelnos down to [0,1,2,3,4]
-            for f in fields:
-                try:
-                    f[0] = int(f[0])/10 - 1
-                except ValueError:
-                    f[0] = 0
-            self.logs = fields
+            self.logs = self.get_logs(self.handler)
+            logging.getLogger().removeHandler(self.handler)
+            self.handler.stream.close()
+            self.handler = None
 
             # Store stats for later access
             RequestStats(request_id, environ, self).store()
@@ -381,6 +363,38 @@ class ProfilerWSGIMiddleware(object):
             result = self.app(environ, start_response)
             for value in result:
                 yield value
+
+    def add_handler(self):
+        if self.handler is None:
+            self.handler = ProfilerWSGIMiddleware.create_handler()
+        logging.getLogger().addHandler(self.handler)
+
+    @staticmethod
+    def create_handler():
+        handler = logging.StreamHandler(StringIO.StringIO())
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter("\t".join([
+            '%(levelno)s',
+            '%(asctime)s%(msecs)d',
+            '%(funcName)s',
+            '%(filename)s',
+            '%(lineno)d',
+            '%(message)s',
+        ]), '%M:%S.')
+        handler.setFormatter(formatter)
+        return handler
+
+    @staticmethod
+    def get_logs(handler):
+        lines = [l for l in handler.stream.getvalue().split("\n") if l]
+        fields = [l.split("\t") for l in lines]
+        #convert levelnos down to [0,1,2,3,4]
+        for f in fields:
+            try:
+                f[0] = int(f[0])/10 - 1
+            except ValueError:
+                f[0] = 0
+        return fields
 
     @staticmethod
     def headers_with_modified_redirect(environ, headers):
