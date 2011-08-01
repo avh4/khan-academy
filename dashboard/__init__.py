@@ -3,7 +3,7 @@ import logging
 from google.appengine.api import users
 
 import request_handler
-from dashboard.models import DailyStatistic, RegisteredUserCount
+from dashboard.models import DailyStatistic, RegisteredUserCount, ProblemLogCount
 
 class Dashboard(request_handler.RequestHandler):
 
@@ -12,24 +12,29 @@ class Dashboard(request_handler.RequestHandler):
             self.redirect(users.create_login_url(self.request.uri))
             return
 
-        # Grab last ~4 months
-        user_counts = RegisteredUserCount.all().order("-dt").fetch(31 * 4)
+        context = {}
+        context.update(daily_graph_context(RegisteredUserCount, "user_counts"))
+        context.update(daily_graph_context(ProblemLogCount, "problem_counts"))
 
-        # Flip 'em around
-        user_counts.reverse()
+        self.render_template("dashboard/dashboard.html", context)
 
-        # Grab deltas
-        user_count_last = None
-        for user_count in user_counts:
-            if user_count_last:
-                user_count.delta_registered = user_count.val - user_count_last.val
+def daily_graph_context(cls, key):
+    # Grab last ~4 months
+    counts = cls.all().order("-dt").fetch(31 * 4)
 
-            user_count.js_month = user_count.dt.month - 1
-            user_count_last = user_count
+    # Flip 'em around
+    counts.reverse()
 
-        user_counts = filter(lambda user_count: hasattr(user_count, "delta_registered"), user_counts)
+    # Grab deltas
+    count_last = None
+    for count in counts:
+        if count_last:
+            count.delta = count.val - count_last.val
 
-        self.render_template("dashboard/users.html", {"user_counts": user_counts})
+        count.js_month = count.dt.month - 1
+        count_last = count
+
+    return { key: filter(lambda count: hasattr(count, "delta"), counts) }
 
 class RecordStatistics(request_handler.RequestHandler):
     def get(self):

@@ -1,0 +1,170 @@
+{% extends "../page_template_mini.html" %}
+
+{% block pagecontent %}
+
+    <script>
+
+    $(document).ready(function() {
+        var chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'users-highchart',
+                defaultSeriesType: 'scatter'
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                scatter: {
+                    cursor: 'pointer',
+                    dashStyle: 'Solid',
+                    lineWidth: 1
+                },
+                series: {
+                    showInLegend: false,
+                    marker: {
+                        radius: 6
+                    }
+                }
+            },
+            title: {
+                text: "",
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                title: {
+                    text: 'Date'
+                },
+                type: 'datetime',
+                dateTimeLabelFormats: { // don't display the dummy year
+                    month: '%e. %b',
+                    year: '%b'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            yAxis: {
+                title: {
+                    text: 'New users registered'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            series: [
+                {
+                    name: 'Users',
+                    data: [
+                        {% for user_count in user_counts %}
+                        {
+                            x: Date.UTC({{ user_count.dt.year }}, {{ user_count.js_month }}, {{ user_count.dt.day }}),
+                            y: {{ user_count.delta }},
+                            total: {{ user_count.val }}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }
+            ]
+        });
+    });
+
+
+
+    $(document).ready(function() {
+        var chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'problems-highchart',
+                defaultSeriesType: 'scatter'
+            },
+            credits: {
+                enabled: false
+            },
+            plotOptions: {
+                scatter: {
+                    cursor: 'pointer',
+                    dashStyle: 'Solid',
+                    lineWidth: 1
+                },
+                series: {
+                    showInLegend: false,
+                    marker: {
+                        radius: 6
+                    }
+                }
+            },
+            title: {
+                text: "",
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                title: {
+                    text: 'Date'
+                },
+                type: 'datetime',
+                dateTimeLabelFormats: { // don't display the dummy year
+                    month: '%e. %b',
+                    year: '%b'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            yAxis: {
+                title: {
+                    text: 'Problems done'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            series: [
+                {
+                    name: 'Problems',
+                    data: [
+                        {% for problem_count in problem_counts %}
+                        {
+                            x: Date.UTC({{ problem_count.dt.year }}, {{ problem_count.js_month }}, {{ problem_count.dt.day }}),
+                            y: {{ problem_count.delta }},
+                            total: {{ problem_count.val }}
+                        }{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                }
+            ]
+        });
+    });
+
+    </script>
+
+    <br/><h2>New Users Registered / Day</h2>
+    <div id="highchart-container">
+        <div id="users-highchart"></div>
+    </div>
+
+    <br/><h2>Problems Done / Day</h2>
+    <div id="highchart-container">
+        <div id="problems-highchart"></div>
+    </div>
+
+    {% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {% js_package "profile" %}
+{% endblock bottompagescript %}
+
