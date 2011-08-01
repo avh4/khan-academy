@@ -5,8 +5,6 @@ from google.appengine.ext.db import stats
 
 from counters import user_counter
 
-# TODO: backfill just a couple weeks of problemlog counts
-
 class DailyStatisticLog(db.Model):
     val = db.IntegerProperty(required=True, default=0)
     dt = db.DateTimeProperty(auto_now_add=True)
