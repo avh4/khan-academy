@@ -293,8 +293,7 @@ class ProfilerWSGIMiddleware(object):
             request_id = base64.urlsafe_b64encode(os.urandom(5))
 
             # Set up another handler so we can save all logged messages for this request
-            log_buffer = StringIO.StringIO()
-            handler = logging.StreamHandler(log_buffer)
+            handler = logging.StreamHandler(StringIO.StringIO())
             handler.setLevel(logging.DEBUG)
             formatter = logging.Formatter("\t".join([
                 '%(levelno)s',
@@ -360,7 +359,7 @@ class ProfilerWSGIMiddleware(object):
 
             # Remove the log handler, save logs
             logging.getLogger().removeHandler(handler)
-            lines = [l for l in log_buffer.getvalue().split("\n") if l]
+            lines = [l for l in handler.stream.getvalue().split("\n") if l]
             fields = [l.split("\t") for l in lines]
             #convert levelnos down to [0,1,2,3,4]
             for f in fields:
@@ -368,7 +367,6 @@ class ProfilerWSGIMiddleware(object):
                     f[0] = int(f[0])/10 - 1
                 except ValueError:
                     f[0] = 0
-            log_buffer.close()
             self.logs = fields
 
             # Store stats for later access
