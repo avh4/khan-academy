@@ -2,7 +2,6 @@ from __future__ import with_statement
 import os
 import shutil
 import subprocess
-import sys
 import md5
 import re
 import StringIO
@@ -10,7 +9,6 @@ import base64
 import copy
 from string import lower
 
-sys.path.append(os.path.abspath("."))
 from js_css_packages import packages
 
 COMBINED_FILENAME = "combined"

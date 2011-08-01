@@ -5,10 +5,11 @@ from mapreduce import operation as op
 
 import request_handler
 import models
-import consts
-import points
-import nicknames
-from facebook_util import is_facebook_email
+from dashboard.models import RegisteredUserCount
+
+#def transfer_user_logs(user_log):
+#    if RegisteredUserCount().record(val = user_log.registered_users, dt = user_log.time):
+#        user_log.delete()
     
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
@@ -17,12 +18,12 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
         # so this can be called by a cron job.
 
         # Start a new Mapper task.
-        # mapreduce_id = control.start_map(
-        #         name = "BackfillExerciseOrder",
-        #         handler_spec = "backfill.order_related_videos",
-        #         reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-        #         reader_parameters = {"entity_kind": "models.Exercise"},
-        #         shard_count = 64,
-        #         queue_name = "backfill-mapreduce-queue",
-        #         )
-        # self.response.out.write("OK: " + str(mapreduce_id))
+        #mapreduce_id = control.start_map(
+        #        name = "BackfillExerciseOrder",
+        #        handler_spec = "backfill.transfer_user_logs",
+        #        reader_spec = "mapreduce.input_readers.DatastoreInputReader",
+        #        reader_parameters = {"entity_kind": "models.UserLog"},
+        #        shard_count = 64,
+        #        queue_name = "backfill-mapreduce-queue",
+        #        )
+        #self.response.out.write("OK: " + str(mapreduce_id))

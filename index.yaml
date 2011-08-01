@@ -49,6 +49,12 @@ indexes:
   - name: user
   - name: date
 
+- kind: DailyStatisticLog
+  properties:
+  - name: stat_name
+  - name: dt
+    direction: desc
+
 - kind: Exercise
   properties:
   - name: __key__

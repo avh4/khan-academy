@@ -506,9 +506,8 @@ class StudentList(db.Model):
     @staticmethod
     def get_for_coach(key):
         query = StudentList.all()
-        query.filter('deleted =', False)
         query.filter("coaches = ", key)
-        return query
+        return [l for l in query.fetch(100) if not l.deleted]
 
 class UserVideoCss(db.Model):
     user = db.UserProperty()
@@ -857,22 +856,6 @@ class UserData(db.Model):
             self.count_feedback_notification = models_discussion.FeedbackNotification.gql("WHERE user = :1", self.user).count()
             self.put()
         return self.count_feedback_notification
-
-class UserLog(db.Model):
-    registered_users = db.IntegerProperty(required=True, default=0)
-    time = db.DateTimeProperty(auto_now_add=True)
-
-    @staticmethod
-    def _add_entry(registered_users, time=None):
-        log = UserLog(registered_users=registered_users)
-        if time: # time defaults to now
-            log.time = time
-
-        log.put()
-
-    @staticmethod
-    def add_current_state():
-        UserLog._add_entry(user_counter.get_count())
 
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()
