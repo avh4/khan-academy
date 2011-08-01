@@ -505,9 +505,8 @@ class StudentList(db.Model):
     @staticmethod
     def get_for_coach(key):
         query = StudentList.all()
-        query.filter('deleted =', False)
         query.filter("coaches = ", key)
-        return query
+        return [l for l in query.fetch(100) if not l.deleted]
 
 class UserData(db.Model):
     user = db.UserProperty()
