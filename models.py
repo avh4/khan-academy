@@ -786,22 +786,6 @@ class UserData(db.Model):
             self.put()
         return self.count_feedback_notification
 
-class UserLog(db.Model):
-    registered_users = db.IntegerProperty(required=True, default=0)
-    time = db.DateTimeProperty(auto_now_add=True)
-
-    @staticmethod
-    def _add_entry(registered_users, time=None):
-        log = UserLog(registered_users=registered_users)
-        if time: # time defaults to now
-            log.time = time
-
-        log.put()
-
-    @staticmethod
-    def add_current_state():
-        UserLog._add_entry(user_counter.get_count())
-
 class Video(Searchable, db.Model):
     youtube_id = db.StringProperty()
     url = db.StringProperty()

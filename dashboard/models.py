@@ -6,9 +6,6 @@ from google.appengine.ext.db import stats
 from counters import user_counter
 
 # TODO: backfill just a couple weeks of problemlog counts
-# TODO: hook up graphs
-# TODO: test stats in production
-# TODO: test cron
 
 class DailyStatisticLog(db.Model):
     val = db.IntegerProperty(required=True, default=0)
