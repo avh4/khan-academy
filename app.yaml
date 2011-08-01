@@ -15,6 +15,9 @@ skip_files:
 - ^(.*/)?.*/RCS/.*
 - ^(.*/)?\..*
 - ^(.*/)?sample_data/.*
+- ^(.*/)?khan-exercises/test/.*
+- ^(.*/)?presskit/.*
+- ^(.*/)?deploy/.*
 
 handlers:
 - url: /videos
@@ -46,36 +49,26 @@ handlers:
 - url: /javascript
   static_dir: javascript
 
-- url: /helperpages/d\.svg
-  static_files: helperpages/d.svg
-  upload: helperpages/d\.svg
-  mime_type: image/svg+xml
+# Begin khan-exercises integration
+- url: /khan-exercises/khan-exercise.js
+  static_files: khan-exercises/khan-exercise.js
+  upload: khan-exercises/khan-exercise.js
 
-- url: /helperpages
-  static_dir: helperpages
-  
+- url: /khan-exercises/utils
+  static_dir: khan-exercises/utils
+
+- url: /khan-exercises/css
+  static_dir: khan-exercises/css
+
+- url: /khan-exercises/(hashed.+\.js)
+  static_files: khan-exercises/\1
+  upload: khan-exercises/(hashed.+\.js)
+# End khan-exercises integration
+
 - url: /downloads/(.*)
   static_files: downloads/\1
   upload: downloads/(.*)
   
-  # The url below needs to be updated whenever we change/upgrade MathJax.
-  # Unfortunately, we can't use a regex due to a GAE bug:
-  # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /MathJax-1.1
-  static_dir: MathJax
-
-  # The url below needs to be updated whenever we change/upgrade scratchpad.
-  # Unfortunately, we can't use a regex due to a GAE bug:
-  # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /scratchpad-2011-04-06
-  static_dir: scratchpad
-
-  # The url below needs to be updated whenever we change/upgrade Jit.
-  # Unfortunately, we can't use a regex due to a GAE bug:
-  # http://code.google.com/p/googleappengine/issues/detail?id=3380
-- url: /Jit-2.0.0a
-  static_dir: Jit
-
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin  
@@ -104,6 +97,7 @@ builtins:
 - appstats: on
 - datastore_admin: on
 - deferred: on
+- remote_api: on
 
 inbound_services:
 - warmup

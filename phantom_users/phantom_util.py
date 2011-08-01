@@ -56,7 +56,7 @@ def create_phantom(method):
         if not user_data:
             user_id = _create_phantom_user_id()
             user_data = models.UserData.insert_for(user_id,"")
-        
+
             # we set just a 20 digit random string as the cookie, 
             # not the entire fake email
             cookie = user_id.split(PHANTOM_ID_EMAIL_PREFIX)[1]
@@ -64,10 +64,10 @@ def create_phantom(method):
             self.set_cookie(PHANTOM_MORSEL_KEY, cookie)
             # make it appear like the cookie was already set
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))
-
-        # Bust the cache so later calls to models.UserData.current() return 
-        # the phantom user
-        models.UserData.current(bust_cache=True)
+            
+            # Bust the cache so later calls to models.UserData.current() return 
+            # the phantom user
+            models.UserData.current(bust_cache=True)
 
         return method(self, *args, **kwargs)
     return wrapper

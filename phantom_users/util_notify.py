@@ -1,4 +1,7 @@
+import logging
+
 from google.appengine.api import memcache
+
 import util
 import models
 from notifications import UserNotifier

@@ -7,7 +7,8 @@ from google.appengine.ext import webapp
 
 from gae_mini_profiler import profiler
 
-register = webapp.template.create_template_register()
+import template_cached
+register = template_cached.create_template_register()
 
 @register.simple_tag
 def profiler_includes_request_id(request_id, show_immediately = False):

@@ -211,7 +211,7 @@ var VideoControls = {
             timeout: 0,
             speed: 550,
             slideResize: 0,
-            easing: 'backinout',
+            easing: 'easeInOutBack',
             startingSlide: 0,
             prev: '#arrow-left',
             next: '#arrow-right'
@@ -544,20 +544,36 @@ var Drawer = {
 
 var Badges = {
 
-    show: function() {
+    show: function(sBadgeContainerHtml) {
         var jel = $(".badge-award-container");
+
+        if (sBadgeContainerHtml)
+        {
+            jel.remove();
+            $("body").append(sBadgeContainerHtml);
+            jel = $(".badge-award-container");
+
+            if (jel.length) Social.init(jel);
+        }
+
+        if (!jel.length) return;
+
         $(".achievement-badge", jel).click(function(){
             window.location = "/badges/view";
             return false;
         });
+
+        var jelTarget = $(".badge-target");
+        var jelContainer = $("#container");
+
+        var top = jelTarget.offset().top + jelTarget.height() + 5;
+
         setTimeout(function(){
-            var jelTarget = $(".achievement-badge-counts");
             jel.css("visibility", "hidden").css("display", "");
-            jel.css("left", jelTarget.offset().left + jelTarget.width() - jel.width()).css("top", -1 * jel.height());
-            var top = jelTarget.offset().top + jelTarget.height() + 5;
+            jel.css("left", jelContainer.offset().left + (jelContainer.width() / 2) - (jel.width() / 2)).css("top", -1 * jel.height());
             var topBounce = top + 10;
             jel.css("display", "").css("visibility", "visible");
-            jel.animate({top: topBounce}, 500, function(){jel.animate({top: top}, 100);});
+            jel.animate({top: topBounce}, 300, function(){jel.animate({top: top}, 100);});
         }, 100);
     },
 
@@ -582,32 +598,39 @@ var Badges = {
     }
 }
 
-
 var Notifications = {
 
-    show: function() {
+    show: function(sNotificationContainerHtml) {
         var jel = $(".notification-bar");
-        $(".notification-bar-close").click(function(){
+
+        if (sNotificationContainerHtml)
+        {
+            var jelNew = $(sNotificationContainerHtml);
+            jel.empty().append(jelNew.children());
+        }
+
+        $(".notification-bar-close a").click(function(){
             Notifications.hide();
             return false;
-            });
-        setTimeout(function(){
-            
-            jel
-                .css("visibility", "hidden")
-                .css("display", "")
-                .css("top",-1*jel.height())
-                .css("visibility", "visible");
+        });
 
-            // Queue:false to make sure all of these run at the same time
-            var animationOptions = {duration: 350, queue: false};
-            
-            $("body").animate({ backgroundPosition: "0px 35px", top: 35 }, animationOptions);
-            $("#top-header").animate({ marginTop: 35 }, animationOptions);
-            jel.show().animate({ top: 0 }, animationOptions);
+        if (!jel.is(":visible")) {
+            setTimeout(function(){
+                
+                jel
+                    .css("visibility", "hidden")
+                    .css("display", "")
+                    .css("top",-jel.height() - 2) // 2 for border and outline
+                    .css("visibility", "visible");
 
-        }, 100);
+                // Queue:false to make sure all of these run at the same time
+                var animationOptions = {duration: 350, queue: false};
+                
+                $(".notification-bar-spacer").animate({ height: 35 }, animationOptions);
+                jel.show().animate({ top: 0 }, animationOptions);
 
+            }, 100);
+        }
     },
 
     hide: function() {
@@ -616,18 +639,16 @@ var Notifications = {
         // Queue:false to make sure all of these run at the same time
         var animationOptions = {duration: 350, queue: false};
         
-        $("body").animate({ backgroundPosition: "0px 0px", top: 0 }, animationOptions);
-        $("#top-header").animate({ marginTop: 0 }, animationOptions);
+        $(".notification-bar-spacer").animate({ height: 0 }, animationOptions);
         jel.animate(
-                { top: -1 * jel.height() }, 
-                $.extend(animationOptions, 
-                    { complete: function(){ jel.remove(); } }
+                { top: -jel.height() - 2 }, // 2 for border and outline
+                $.extend({}, animationOptions, 
+                    { complete: function(){ jel.empty().css("display", "none"); } }
                 )
         );
 
         $.post("/notifierclose"); 
     }
-
 }
 
 var Timezone = {

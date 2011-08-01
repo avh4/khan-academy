@@ -10,7 +10,7 @@ import util
 import models
 import consts
 from badges import util_badges
-from phantom_users.phantom_util import create_phantom, disallow_phantoms
+from phantom_users.phantom_util import disallow_phantoms
 from models import StudentList, UserData
 import simplejson as json
 
@@ -55,7 +55,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             students_data = user_data_coach.get_students_data()
             
-            student_lists = StudentList.all().filter("coaches = ", user_data_coach.key())
+            student_lists = StudentList.get_for_coach(user_data_coach.key())
             
             student_lists_list = [{
                 'key': 'allstudents',
@@ -109,9 +109,11 @@ class ViewClassProfile(request_handler.RequestHandler):
             self.redirect(util.create_login_url(self.request.uri))
 
 class ViewProfile(request_handler.RequestHandler):
-    @create_phantom
     def get(self):
         user_data_student = models.UserData.current()
+        if not user_data_student:
+            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
+            user_data_student = UserData.insert_for(user.email())
 
         user_data_override = self.request_user_data("student_email")
         if user_data_override and user_data_override.key_email != user_data_student.key_email:

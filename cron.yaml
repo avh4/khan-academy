@@ -20,6 +20,6 @@ cron:
   url: /admin/youtubesync?start=1
   schedule: every 24 hours
 
-- description: record number of registered users
-  url: /admin/userstatistics?start=1
+- description: record daily dashboard statistics
+  url: /admin/dashboard/record_statistics
   schedule: every 24 hours
