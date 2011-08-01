@@ -17,6 +17,11 @@ def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     return proc.communicate()[0]
 
+def popen_return_code(args):
+    proc = subprocess.Popen(args, stdout=subprocess.PIPE)
+    proc.communicate()
+    return proc.returncode
+
 def send_hipchat_deploy_message(version, includes_local_changes):
     url = "http://%s.%s.appspot.com" % (version, get_app_id())
 
@@ -143,8 +148,7 @@ def compress_css():
 
 def deploy(version):
     print "Deploying version " + str(version)
-    output = popen_results(['appcfg.py', '-V', str(version), "update", "."])
-    return "Deployment successful." in output
+    return 0 == popen_return_code(['appcfg.py', '-V', str(version), "update", "."])
 
 def main():
 
