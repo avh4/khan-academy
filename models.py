@@ -488,7 +488,7 @@ class StudentList(db.Model):
 
 class UserData(db.Model):
     user = db.UserProperty()
-    current_user = db.UserProperty()
+    user_id = db.StringProperty()
     moderator = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
@@ -517,16 +517,14 @@ class UserData(db.Model):
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
-            "last_login", "user", "current_user"
+            "last_login", "user"
     ]
     
     @property
     def nickname(self):
-        nickname = nicknames.get_nickname_for(self.current_user)
-        if nickname == "Google":
-            nickname = self.email.split('@')[0]
+        nickname = nicknames.get_nickname_for(self.user_id,self.email)
         return nickname
-        
+    
     @property
     def key_email(self):
         return self.user.email()
@@ -539,29 +537,33 @@ class UserData(db.Model):
     @request_cache.cache()
     def current(bust_cache=True):
         if bust_cache:
-            util._get_current_user_email(bust_cache=True)
-        email = util._get_current_user_email()
-        if email:
+            util.get_current_user_id(bust_cache=True)
+        user_id = util.get_current_user_id()
+        user = users.get_current_user()
+        email = user_id
+        if user:
+            email = user.email()
+        if user_id:
             # Once we have rekeyed legacy entities,
             # we will be able to simplify this.
 
-            return  UserData.get_from_user_input_email(email) or \
+            return  UserData.get_from_user_id(user_id) or \
                     UserData.get_from_db_key_email(email) or \
-                    UserData.insert_for(email)
+                    UserData.insert_for(user_id,email)
         return None
 
     @property
     def is_phantom(self):
-        return util._is_phantom_user(self.current_user)
+        return util.is_phantom_user(self.user_id)
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)
-    def get_from_user_input_email(email):
-        if not email:
+    @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id_%s" % user_id)
+    def get_from_user_id(user_id):
+        if not user_id:
             return None
 
         query = UserData.all()
-        query.filter('current_user =', users.User(email))
+        query.filter('user_id =', user_id)
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()
@@ -578,17 +580,17 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod
-    def insert_for(email):
-        if not email:
+    def insert_for(user_id,email):
+        if not user_id:
             return None
 
-        user = users.User(email)
-        key = "user_email_key_%s" % email
+        user = users.User(user_id)
+        key = "user_email_key_%s" % user_id
 
         user_data = UserData.get_or_insert(
             key_name=key,
             user=user,
-            current_user=user,
+            user_id=user_id,
             moderator=False,
             last_login=datetime.datetime.now(),
             proficient_exercises=[],
@@ -597,7 +599,7 @@ class UserData(db.Model):
             need_to_reassess=True,
             points=0,
             coaches=[],
-            email = users.get_current_user().email()
+            email=email
             )
 
         if not user_data.is_phantom:
@@ -650,7 +652,7 @@ class UserData(db.Model):
         return userExercise
         
     def get_exercise_states(self, exercise, user_exercise, current_time):
-        phantom = exercise.phantom = util._is_phantom_user(self.user)
+        # phantom = exercise.phantom = util.is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
@@ -658,7 +660,7 @@ class UserData(db.Model):
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
         
         return {
-            'phantom': phantom,
+            # 'phantom': phantom,
             'proficient': proficient,
             'suggested': suggested,
             'reviewing': reviewing,

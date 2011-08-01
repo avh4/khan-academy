@@ -235,6 +235,12 @@ indexes:
   - name: points
     direction: desc
 
+- kind: UserData
+  properties:
+  - name: user_id
+  - name: points
+    direction: desc
+
 - kind: UserExercise
   properties:
   - name: exercise

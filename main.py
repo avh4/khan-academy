@@ -64,7 +64,7 @@ from render import render_block_to_string
 from templatetags import streak_bar_context, exercise_message_context, exercise_icon_context, user_points_context
 from badges.templatetags import badge_notifications_context, badge_counts_context
 from oauth_provider import apps as oauth_apps
-from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
+from phantom_users.phantom_util import create_phantom, get_phantom_user_id_from_cookies
 from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
@@ -471,7 +471,7 @@ class ViewAllExercises(request_handler.RequestHandler):
     @create_phantom
     def get(self):
         user_data = UserData.current()
-        
+        logging.critical(user_data)
         ex_graph = ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -1329,12 +1329,15 @@ class PostLogin(request_handler.RequestHandler):
         # also delete phantom cookies
 
         # If new user is new, 0 points, migrate data
-        phantom_user = _get_phantom_user_from_cookies()
+        phantom_id = get_phantom_user_id_from_cookies()
         user_data = UserData.current()
-
-        if user_data and phantom_user:
-            email = phantom_user.email()
-            phantom_data = UserData.get_from_db_key_email(email) 
+        current_email = users.get_current_user().email()
+        #if the user has changed their email, update it
+        if user_data and current_email != user_data.email:
+            user_data.email = current_email
+            user_data.put()
+        if user_data and phantom_id:
+            phantom_data = UserData.get_from_db_key_email(phantom_id) 
 
             # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
@@ -1344,10 +1347,9 @@ class PostLogin(request_handler.RequestHandler):
                     #Clear all "login" notifications
                     UserNotifier.clear_all(phantom_data)
                     logging.info("New Account: %s", user_data.current().email)
-                    # Update current_user, nickname, email values
-                    phantom_data.current_user = user_data.current_user 
-                    phantom_data.nickname = nicknames.get_nickname_for(user_data.current_user)
-                    phantom_data.email = user_data.current_user.email()
+                    # Update user_data, email values
+                    phantom_data.user_id = user_data.user_id
+                    phantom_data.email = user_data.email
                     if phantom_data.put():
                         # Phantom user was just transitioned to real user
                         user_counter.add(1)

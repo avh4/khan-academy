@@ -94,4 +94,4 @@ class OAuthMap(db.Model):
 
 from api.auth.auth_util import append_url_params
 from api.auth.google_util import get_google_user_from_oauth_map
-from ..facebook_util import get_facebook_user_from_oauth_map
+from ..facebook_util import get_facebook_user_id_from_oauth_map
