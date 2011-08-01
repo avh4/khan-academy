@@ -4,6 +4,7 @@ import datetime, logging
 import math
 import urllib
 import pickle
+import os
 
 import config_django
 
@@ -889,7 +890,7 @@ class Video(Searchable, db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/video/%s" % self.readable_id
+      return 'http://%s/video/%s' % (os.environ['HTTP_HOST'], self.readable_id)
 
     @property
     def download_urls(self):
