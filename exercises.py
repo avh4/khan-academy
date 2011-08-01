@@ -95,6 +95,8 @@ class ViewExercise(request_handler.RequestHandler):
         user_exercise.exercise_model.sha1 = sha1
 
         user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
+        for video in user_exercise.exercise_model.related_videos:
+            video.id = video.key().id()
 
         renderable = True
 
