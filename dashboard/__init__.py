@@ -3,6 +3,7 @@ import logging
 
 from google.appengine.api import users
 
+from app import App
 import request_handler
 from dashboard.models import DailyStatistic, RegisteredUserCount, ProblemLogCount
 
@@ -10,8 +11,10 @@ class Dashboard(request_handler.RequestHandler):
 
     def get(self):
         if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
+            if App.dashboard_secret and self.request_string("x", default=None) != App.dashboard_secret:
+                logging.critical(App.dashboard_secret)
+                self.redirect(users.create_login_url(self.request.uri))
+                return
 
         context = {}
         context.update(daily_graph_context(RegisteredUserCount, "user_counts"))
