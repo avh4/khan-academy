@@ -387,14 +387,7 @@ class ProfilerWSGIMiddleware(object):
     @staticmethod
     def get_logs(handler):
         lines = [l for l in handler.stream.getvalue().split("\n") if l]
-        fields = [l.split("\t") for l in lines]
-        #convert levelnos down to [0,1,2,3,4]
-        for f in fields:
-            try:
-                f[0] = int(f[0])/10 - 1
-            except ValueError:
-                f[0] = 0
-        return fields
+        return [l.split("\t") for l in lines]
 
     @staticmethod
     def headers_with_modified_redirect(environ, headers):

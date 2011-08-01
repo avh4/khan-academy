@@ -215,17 +215,17 @@
 .g-m-p .summary span.loglevel {
     margin: 0 .1em 0 .6em;
 }
-.g-m-p span.loglevel.ll4:before { content: 'C'; }
-.g-m-p span.loglevel.ll3:before { content: 'E'; }
-.g-m-p span.loglevel.ll2:before { content: 'W'; }
-.g-m-p span.loglevel.ll1:before { content: 'I'; }
-.g-m-p span.loglevel.ll0:before { content: 'D'; }
+.g-m-p span.loglevel.ll50:before { content: 'C'; }
+.g-m-p span.loglevel.ll40:before { content: 'E'; }
+.g-m-p span.loglevel.ll30:before { content: 'W'; }
+.g-m-p span.loglevel.ll20:before { content: 'I'; }
+.g-m-p span.loglevel.ll10:before { content: 'D'; }
 
-.g-m-p .ll4 { background-color: #F22; }
-.g-m-p .ll3 { background-color: #F90; }
-.g-m-p .ll2 { background-color: #Fd0; }
-.g-m-p .ll1 { background-color: #3C0; }
-.g-m-p .ll0 { background-color: #09F; }
+.g-m-p .ll50 { background-color: #F22; }
+.g-m-p .ll40 { background-color: #F90; }
+.g-m-p .ll30 { background-color: #Fd0; }
+.g-m-p .ll20 { background-color: #3C0; }
+.g-m-p .ll10 { background-color: #09F; }
 
 #slider {
     padding: 5px 0 3px 0;
