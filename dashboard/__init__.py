@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from google.appengine.api import users
@@ -31,7 +32,9 @@ def daily_graph_context(cls, key):
         if count_last:
             count.delta = count.val - count_last.val
 
-        count.js_month = count.dt.month - 1
+        # Better to show date previous to date stat recorded.
+        count.dt_display = count.dt - datetime.timedelta(days=1)
+        count.js_month = count.dt_display.month - 1
         count_last = count
 
     return { key: filter(lambda count: hasattr(count, "delta"), counts) }

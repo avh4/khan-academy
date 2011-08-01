@@ -70,7 +70,7 @@
                     data: [
                         {% for count in counts %}
                         {
-                            x: Date.UTC({{ count.dt.year }}, {{ count.js_month }}, {{ count.dt.day }}),
+                            x: Date.UTC({{ count.dt_display.year }}, {{ count.js_month }}, {{ count.dt_display.day }}),
                             y: {{ count.delta }},
                             total: {{ count.val }}
                         }{% if not forloop.last %},{% endif %}
