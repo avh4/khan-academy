@@ -56,7 +56,7 @@ class RequestInputHandler(object):
     def request_user_data(self, key):
         user_id = self.request_string(key)
         if user_id:
-            return UserData.get_from_user_id(user_id)
+            return UserData.get_from_user_email(user_id)
         return None
 
     def request_float(self, key, default = None):

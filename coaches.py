@@ -67,7 +67,6 @@ class ViewStudents(RequestHandler):
             coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
 
             student_lists_models = StudentList.get_for_coach(user_data.key())
-
             student_lists_list = [];
             for student_list in student_lists_models:
                 student_lists_list.append({
@@ -132,7 +131,6 @@ class RequestStudent(RequestHandler):
         if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
-
         user_data_student = self.request_user_data("student_email")
         if user_data_student:
             if not user_data_student.is_coached_by(user_data):

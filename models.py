@@ -504,6 +504,7 @@ class StudentList(db.Model):
 
     @staticmethod
     def get_for_coach(key):
+        logging.critical(key)
         query = StudentList.all()
         query.filter("coaches = ", key)
         return [l for l in query.fetch(100) if not l.deleted]
@@ -589,6 +590,18 @@ class UserData(db.Model):
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()
+
+    @staticmethod    
+    def get_from_user_email(email):
+        if not email:
+            return None
+
+        query = UserData.all()
+        query.filter('email =', email)
+        query.order('-points') # Temporary workaround for issue 289
+
+        return query.get()
+
 
     @staticmethod    
     def get_from_db_key_email(email):

@@ -237,6 +237,12 @@ indexes:
 
 - kind: UserData
   properties:
+  - name: email
+  - name: points
+    direction: desc
+
+- kind: UserData
+  properties:
   - name: user
   - name: points
     direction: desc
