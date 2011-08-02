@@ -226,7 +226,7 @@ var QA = {
 
         $(window).resize(QA.repositionStickyNote);
 
-        QA.loadPage($("#qa_page").val() || 0, true, $("#qa_expand_id").val());
+        QA.loadPage($("#qa_page").val() || 0, true, $("#qa_expand_key").val());
         QA.enable();
     },
 
@@ -293,7 +293,7 @@ var QA = {
         QA.enable();
     },
 
-    loadPage: function(page, fInitialLoad, qa_expand_id) {
+    loadPage: function(page, fInitialLoad, qa_expand_key) {
 
         try { page = parseInt(page); }
         catch(e) { return; }
@@ -305,7 +305,7 @@ var QA = {
                     video_key: $("#video_key").val(), 
                     playlist_key: $("#playlist_key").val(),
                     sort: $("#sort").val(),
-                    qa_expand_id: qa_expand_id,
+                    qa_expand_key: qa_expand_key,
                     page: page
                 }, 
                 function(data) { QA.finishLoadPage(data, fInitialLoad); });
@@ -324,8 +324,8 @@ var QA = {
         VideoControls.initJumpLinks();
 
         var hash = "qa";
-        if (dict_json.qa_expand_id && parseInt(dict_json.qa_expand_id) > 0)
-            hash = "q_" + dict_json.qa_expand_id;
+        if (dict_json.qa_expand_key)
+            hash = "q_" + dict_json.qa_expand_key;
 
         if (!fInitialLoad || hash != "qa")
             document.location = "#" + hash;
@@ -528,9 +528,9 @@ var QA = {
 
         $(this).addClass("question_container_expanded");
 
-        var id = $(".question", this).attr("data-question_id");
+        var key = $(".question", this).attr("data-question_key");
         $.post("/discussion/expandquestion", 
-                {qa_expand_id: id}, 
+                {qa_expand_key: key}, 
                 function(){ /* Fire and forget */ });
 
         // If user clicks on a link inside of a question during the expand, don't follow the link.

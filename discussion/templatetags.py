@@ -28,7 +28,7 @@ def video_comments(video, playlist, page=0):
             }
 
 @register.inclusion_tag("discussion/video_qa.html")
-def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_override=-1):
+def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_override=-1):
 
     sort_order = voting.VotingSortOrder.HighestPointsFirst
     if user_data:
@@ -41,7 +41,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_id=None, sort_overrid
             "video": video,
             "playlist": playlist,
             "page": page,
-            "qa_expand_id": qa_expand_id,
+            "qa_expand_key": qa_expand_key,
             "sort_order": sort_order,
             "logged_in": user_data and not user_data.is_phantom,
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
