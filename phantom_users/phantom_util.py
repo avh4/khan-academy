@@ -72,6 +72,28 @@ def create_phantom(method):
         return method(self, *args, **kwargs)
     return wrapper
 
+def create_api_phantom(method):
+    '''Decorator used to create phantom users in api calls if necessary.'''
+
+    @wraps(method)
+    def wrapper(*args, **kwargs):
+        if models.UserData.current():
+            return method(*args, **kwargs)
+        else:
+            # This mirrors create_phantom above, see there for clarification
+            user = _create_phantom_user()
+            user_data = models.UserData.insert_for(user.email())
+
+            cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
+            kwargs['user_email'] = user_data.email
+            response = method(*args, **kwargs)
+            response.set_cookie(PHANTOM_MORSEL_KEY, cookie)
+
+            models.UserData.current(bust_cache=True)
+            return response
+
+    return wrapper
+
 def disallow_phantoms(method, redirect_to='/login'):
     '''Decorator used to redirect phantom users.'''
 

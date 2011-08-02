@@ -68,4 +68,3 @@ def decompress(func):
         return zlib.decompress(func(*args, **kwargs)).decode('utf-8')
     return decompressed
 
-
