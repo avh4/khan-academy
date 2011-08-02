@@ -24,7 +24,7 @@ class DailyStatistic(object):
         stat_name = self.__class__.__name__
 
         if stat_name == DailyStatistic.__name__:
-            raise Exception("Not implemented")
+            raise Exception("DailyStatistic cannot be used directly. Must use an implementing subclass.")
 
         return stat_name
     
@@ -37,7 +37,7 @@ class DailyStatistic(object):
         if dt is None:
             dt = datetime.datetime.now()
 
-        if not val is None:
+        if val is not None:
 
             stat_name = self.name()
 
