@@ -225,7 +225,8 @@ class UnregisterStudent(RequestHandler):
 
             user_data_student.put()
 
-        self.redirect("/students")
+        if not self.is_ajax_request():
+            self.redirect("/students")
 
 class CreateStudentList(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
