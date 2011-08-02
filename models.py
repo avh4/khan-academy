@@ -116,7 +116,7 @@ class Exercise(db.Model):
     # students.
     author = db.UserProperty()
     raw_html = db.TextProperty()
-    last_modified = db.DateTimeProperty()    
+    last_modified = db.DateTimeProperty()
     safe_html = db.TextProperty()
     safe_js = db.TextProperty()
     last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
@@ -234,7 +234,7 @@ class Exercise(db.Model):
             return Exercise.__get_all_use_cache_unsafe__()
         else:
             return Exercise.__get_all_use_cache_safe__()
-    
+
     @staticmethod
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_unsafe_%s" % Setting.cached_exercises_date())
     def __get_all_use_cache_unsafe__():
@@ -293,7 +293,7 @@ class UserExercise(db.Model):
     proficient_date = db.DateTimeProperty()
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
     summative = db.BooleanProperty(default=False)
-    
+
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
     _serialize_blacklist = ["review_interval_secs"]
@@ -356,7 +356,7 @@ class UserExercise(db.Model):
 
     def clear_memcache(self):
         memcache.delete(UserExercise.get_key_for_email(self.user.email()), namespace=App.version)
-    
+
     def put(self):
         self.clear_memcache()
         db.Model.put(self)
@@ -376,7 +376,7 @@ class UserExercise(db.Model):
 
     @staticmethod
     def is_struggling_with(user_exercise, exercise):
-        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak and user_exercise.total_done > exercise.struggling_threshold() 
+        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak and user_exercise.total_done > exercise.struggling_threshold()
 
     def is_struggling(self):
         return UserExercise.is_struggling_with(self, self.exercise_model)
@@ -475,7 +475,7 @@ class CoachRequest(db.Model):
     @staticmethod
     def get_for_coach(user_data_coach):
         return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
-        
+
 class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
@@ -506,8 +506,9 @@ class StudentList(db.Model):
     def get_for_coach(key):
         logging.critical(key)
         query = StudentList.all()
+        query.filter('deleted =', False)
         query.filter("coaches = ", key)
-        return [l for l in query.fetch(100) if not l.deleted]
+        return query
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -517,7 +518,7 @@ class UserData(db.Model):
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty()
     proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
-    all_proficient_exercises = db.StringListProperty() # Names of all exercises in which the user is proficient    
+    all_proficient_exercises = db.StringListProperty() # Names of all exercises in which the user is proficient
     suggested_exercises = db.StringListProperty()
     assigned_exercises = db.StringListProperty()
     badges = db.StringListProperty() # All awarded badges
@@ -536,6 +537,7 @@ class UserData(db.Model):
     question_sort_order = db.IntegerProperty(default = -1)
     email = db.StringProperty()
     
+
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
@@ -602,8 +604,7 @@ class UserData(db.Model):
 
         return query.get()
 
-
-    @staticmethod    
+    @staticmethod
     def get_from_db_key_email(email):
         if not email:
             return None
@@ -650,7 +651,7 @@ class UserData(db.Model):
     def delete(self):
         logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
         logging.info("Dumping user data for %s: %s" % (self.current_user.email(), jsonify(self)))
-        
+
         if not self.is_phantom:
             user_counter.add(-1)
 
@@ -689,7 +690,7 @@ class UserData(db.Model):
                 )
 
         return userExercise
-        
+
     def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
         phantom = exercise.phantom = util.is_phantom_user(self.user)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
@@ -697,7 +698,7 @@ class UserData(db.Model):
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
         struggling = UserExercise.is_struggling_with(user_exercise, exercise)
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
-        
+
         return {
             # 'phantom': phantom,
             'proficient': proficient,
@@ -707,7 +708,7 @@ class UserData(db.Model):
             'endangered': endangered,
             'summative': exercise.summative,
         }
-        
+
     def reassess_from_graph(self, ex_graph):
         all_proficient_exercises = []
         for ex in ex_graph.get_proficient_exercises():
@@ -715,19 +716,19 @@ class UserData(db.Model):
         suggested_exercises = []
         for ex in ex_graph.get_suggested_exercises():
             suggested_exercises.append(ex.name)
-        is_changed = (all_proficient_exercises != self.all_proficient_exercises or 
+        is_changed = (all_proficient_exercises != self.all_proficient_exercises or
                       suggested_exercises != self.suggested_exercises)
         self.all_proficient_exercises = all_proficient_exercises
         self.suggested_exercises = suggested_exercises
         self.need_to_reassess = False
         return is_changed
-    
+
     def reassess_if_necessary(self):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
         ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
-        
+
     def is_proficient_at(self, exid):
         self.reassess_if_necessary()
         return (exid in self.all_proficient_exercises)
@@ -754,7 +755,7 @@ class UserData(db.Model):
         return (exid in self.suggested_exercises)
 
     def get_students_data(self):
-        coach_email = self.key_email   
+        coach_email = self.key_email
         query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
         students_data = []
         for student_data in query:
@@ -787,7 +788,7 @@ class UserData(db.Model):
         if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
             util_notify.update(self,None,True)
         self.points += points
-        
+
 
     def get_videos_completed(self):
         if self.videos_completed < 0:
@@ -817,7 +818,7 @@ class Video(Searchable, db.Model):
     views = db.IntegerProperty(default = 0)
 
     # Date first added via KA library sync with YouTube.
-    # This property hasn't always existsed, so for many old videos 
+    # This property hasn't always existsed, so for many old videos
     # this date may be much later than the actual YouTube upload date.
     date_added = db.DateTimeProperty(auto_now_add=True)
 
@@ -852,7 +853,7 @@ class Video(Searchable, db.Model):
         if download_urls:
             return download_urls.get("mp4")
         return None
-    
+
     @staticmethod
     def get_for_readable_id(readable_id):
         video = None
@@ -1101,7 +1102,7 @@ class VideoLog(db.Model):
                     action_cache.push_video_log(video_log)
 
                 util_badges.update_with_user_playlist(
-                        user_data, 
+                        user_data,
                         user_playlist,
                         include_other_badges = first_video_playlist,
                         action_cache = action_cache)
@@ -1238,13 +1239,13 @@ def commit_problem_log(problem_log_source):
 
     def insert_in_position(index, items, val, filler):
         if index >= len(items):
-            items.extend([filler] * (index + 1 - len(items)))            
+            items.extend([filler] * (index + 1 - len(items)))
         items[index] = val
 
     # Committing transaction combines existing problem log with any followup attempts
     def txn():
         problem_log = ProblemLog.get_by_key_name(problem_log_source.key().name())
-        
+
         if not problem_log:
             problem_log = ProblemLog(
                 key_name = problem_log_source.key().name(),
@@ -1378,7 +1379,7 @@ class ExerciseVideo(db.Model):
     video = db.ReferenceProperty(Video)
     exercise = db.ReferenceProperty(Exercise)
     exercise_order = db.IntegerProperty()
-    
+
     def key_for_video(self):
         return ExerciseVideo.video.get_value_for_datastore(self)
 
@@ -1401,7 +1402,7 @@ class ExerciseGraph(object):
         user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
         exercises = Exercise.get_all_use_cache()
         self.exercises = exercises
-        self.exercise_by_name = {}        
+        self.exercise_by_name = {}
         for ex in exercises:
             self.exercise_by_name[ex.name] = ex
             ex.coverers = []
@@ -1458,7 +1459,7 @@ class ExerciseGraph(object):
 
         for ex in exercises:
             compute_proficient(ex)
-            
+
         def compute_suggested(ex):
             if ex.suggested is not None:
                 return ex.suggested
@@ -1475,17 +1476,17 @@ class ExerciseGraph(object):
             for prereq in ex.prerequisites_ex:
                 if not prereq.proficient:
                     ex.suggested = False
-                    break            
-            return ex.suggested 
-            
+                    break
+            return ex.suggested
+
         for ex in exercises:
             compute_suggested(ex)
-            ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)            
+            ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)
 
         phantom = user_data.is_phantom
         for ex in exercises:
             ex.phantom = phantom
-                
+
 
     def get_review_exercises(self, now = datetime.datetime.now()):
 
@@ -1497,7 +1498,7 @@ class ExerciseGraph(object):
 #   * The user is proficient at ex
 # The algorithm:
 #   For each exercise:
-#     traverse it's ancestors, computing and storing the next review time (if not already done), 
+#     traverse it's ancestors, computing and storing the next review time (if not already done),
 #     using now as the next review time if proficient and streak==0
 #   Select and mark the exercises in which the user is proficient but with next review times in the past as review candidates
 #   For each of those candidates:
@@ -1540,7 +1541,7 @@ class ExerciseGraph(object):
             if not compute_is_ancestor_review_candidate(rc):
                 review_exercises.append(rc)
         return review_exercises
-    
+
     def get_proficient_exercises(self):
         proficient_exercises = []
         for ex in self.exercises:
@@ -1554,10 +1555,10 @@ class ExerciseGraph(object):
             if ex.summative:
                 summative_exercises.append(ex)
         return summative_exercises
-    
+
     def get_suggested_exercises(self):
         # Mark an exercise as proficient if it or a a covering ancestor is proficient
-        # Select all the exercises where the user is not proficient but the 
+        # Select all the exercises where the user is not proficient but the
         # user is proficient in all prereqs.
         suggested_exercises = []
         for ex in self.exercises:
@@ -1568,7 +1569,7 @@ class ExerciseGraph(object):
     def get_recent_exercises(self, n_recent=2):
         recent_exercises = sorted(self.exercises, reverse=True,
                 key=lambda ex: ex.last_done if hasattr(ex, "last_done") else datetime.datetime.min)
-        
+
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)

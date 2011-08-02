@@ -106,10 +106,10 @@ var GaeMiniProfiler = {
             .slideDown("fast");
 
         var toggleLogRows = function(level) {
-            var names = ['Debug', 'Info', 'Warning', 'Critical', 'Error'];
+            var names = {10:'Debug', 20:'Info', 30:'Warning', 40:'Error', 50:'Critical'};
             $('#slider .minlevel-text').text(names[level]);
             $('#slider .loglevel').attr('class', 'loglevel ll'+level);
-            for (var i = 0; i<5; i++) {
+            for (var i = 10; i<=50; i += 10) {
                 var rows = $('tr.ll'+i);
                 if (i<level)
                     rows.hide();
@@ -118,12 +118,12 @@ var GaeMiniProfiler = {
             }
         };
 
-        var initLevel = 2;
+        var initLevel = 30;
         $('#slider .control').slider({
             value: initLevel,
-            min: 0,
-            max: 4,
-            step: 1,
+            min: 10,
+            max: 50,
+            step: 10,
             range: 'min',
             slide: function( event, ui ) {
                 toggleLogRows(ui.value);
@@ -151,9 +151,10 @@ var GaeMiniProfiler = {
     },
 
     renderPopup: function(data) {
-        var counts = [0, 0, 0, 0, 0];
+        var counts = {}
         $.each(data.logs, function(i, log) {
-            counts[log[0]] += 1;
+            var c = counts[log[0]] || 0;
+            counts[log[0]] = c + 1;
         });
         data.log_count = counts;
 

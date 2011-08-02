@@ -1088,7 +1088,7 @@ def main():
         ('/admin/changeemail', ChangeEmail),
         ('/admin/movemapnode', exercises.MoveMapNode),
         ('/admin/rendertemplate', ViewRenderTemplate),
-        
+
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
 
@@ -1174,6 +1174,7 @@ def main():
 
         ('/dashboard', dashboard.Dashboard),
         ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
+        ('/admin/entitycounts', dashboard.EntityCounts),
 
         ('/sendtolog', SendToLog),
 
