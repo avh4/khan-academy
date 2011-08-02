@@ -39,16 +39,14 @@ class MoveMapNode(request_handler.RequestHandler):
     
         if direction=="up":
             exercise.h_position -= 1
-            exercise.put()
         elif direction=="down":
             exercise.h_position += 1
-            exercise.put()
         elif direction=="left":
             exercise.v_position -= 1
-            exercise.put()
         elif direction=="right":
             exercise.v_position += 1
-            exercise.put()
+
+        exercise.put()
 
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
