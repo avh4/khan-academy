@@ -85,7 +85,7 @@ def create_api_phantom(method):
             user_data = models.UserData.insert_for(user.email())
 
             cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
-            kwargs['user_email'] = user_data.email
+            set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))
             response = method(*args, **kwargs)
             response.set_cookie(PHANTOM_MORSEL_KEY, cookie)
 

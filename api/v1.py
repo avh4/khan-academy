@@ -493,11 +493,8 @@ def user_problem_logs(exercise_name):
 @create_api_phantom
 @jsonp
 @jsonify
-def attempt_problem_number(exercise_name, problem_number, user_email=None):
-    if user_email:
-        user_data = models.UserData.get_from_db_key_email(user_email)
-    else:
-        user_data = models.UserData.current()
+def attempt_problem_number(exercise_name, problem_number):
+    user_data = models.UserData.current()
 
     if user_data:
         exercise = models.Exercise.get_by_name(exercise_name)
