@@ -1248,8 +1248,6 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.vl {
 				font-weight: normal;	
-                background-image: url(/images/vid-progress-not-started.png);
-                background-position: -56px -36px;
 				padding: 0 2px 0 2px;
 				line-height: 18px;
                 text-decoration: none;
