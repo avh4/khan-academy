@@ -1,7 +1,7 @@
 {% for question in questions %}
     <a name="q_{{question.key}}"></a>
     <div class="question_container
-        {% ifequal qa_expand_key question.key %}
+        {% ifequal qa_expand_key question.key.__str__ %}
             question_container_expanded
         {% endifequal %}
     ">
