@@ -1,11 +1,12 @@
 import datetime
-import logging
 
 from google.appengine.api import users
 
 from app import App
 import request_handler
 from dashboard.models import DailyStatistic, RegisteredUserCount, ProblemLogCount
+from google.appengine.ext.db import stats
+from itertools import groupby
 
 class Dashboard(request_handler.RequestHandler):
 
@@ -52,3 +53,18 @@ class RecordStatistics(request_handler.RequestHandler):
         DailyStatistic.record_all()
         self.response.out.write("Dashboard statistics recorded.")
 
+class EntityCounts(request_handler.RequestHandler):
+    def get(self):
+        if not users.is_current_user_admin():
+            self.redirect(users.create_login_url(self.request.uri))
+            return
+
+        kind_stats = [s for s in stats.KindStat.all().fetch(1000)]
+
+        counts = []
+        kind_stats.sort(key=lambda s: s.kind_name)
+        for key,group in groupby(kind_stats, lambda s: s.kind_name):
+            grouped = sorted(group, key=lambda s: s.timestamp, reverse=True)
+            counts.append(dict(kind=key, count=grouped[0].count, timestamp=grouped[0].timestamp))
+
+        self.render_template("dashboard/entitycounts.html", {'counts':counts})
