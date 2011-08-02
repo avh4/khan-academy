@@ -1,4 +1,5 @@
 import os
+import logging
 
 from google.appengine.api import users
 from google.appengine.ext import db
@@ -121,23 +122,17 @@ def new_answer_for_video_question(video, question, answer):
 
     db.put([notification, user_data])
 
-def clear_question_answers_for_current_user(s_question_id):
+def clear_question_answers_for_current_user(question_key):
 
     user_data = models.UserData.current()
 
     if not user_data:
         return
 
-    question_id = -1
-    try:
-        question_id = int(s_question_id)
-    except:
+    if not question_key:
         return
 
-    if question_id < 0:
-        return
-
-    question = models_discussion.Feedback.get_by_id(question_id)
+    question = models_discussion.Feedback.get(question_key)
     if not question:
         return;
 

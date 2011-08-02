@@ -74,7 +74,7 @@ class YouTubeSync(request_handler.RequestHandler):
             self.task_step(step + 1)
 
     def task_step(self, step):
-        taskqueue.add(url='/admin/youtubesync', queue_name='youtube-sync-queue', params={'step': step})
+        taskqueue.add(url='/admin/youtubesync/%s' % step, queue_name='youtube-sync-queue', params={'step': step})
 
     def startYouTubeSync(self):
         Setting.last_youtube_sync_generation_start(int(Setting.last_youtube_sync_generation_start()) + 1)
@@ -197,12 +197,14 @@ class YouTubeSync(request_handler.RequestHandler):
     def commitLiveAssociations(self):
         association_generation = int(Setting.last_youtube_sync_generation_start())
 
-        video_playlists = []
+        video_playlists_to_put = []
         for video_playlist in VideoPlaylist.all():
-            video_playlist.live_association = (video_playlist.last_live_association_generation >= association_generation)
-            video_playlists.append(video_playlist)
+            live = (video_playlist.last_live_association_generation >= association_generation)
+            if video_playlist.live_association != live:
+                video_playlist.live_association = live
+                video_playlists_to_put.append(video_playlist)
 
-        db.put(video_playlists)
+        db.put(video_playlists_to_put)
 
     def indexVideoData(self):
         videos = Video.all().fetch(10000)

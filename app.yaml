@@ -1,4 +1,4 @@
-application: khanexercises
+application: khan-academy
 version: 764
 runtime: python
 api_version: 1
@@ -22,13 +22,13 @@ skip_files:
 handlers:
 - url: /videos
   static_dir: offline/Khan Academy/videos
-  
+
 - url: /flvplayer
   static_dir: flvplayer
 
 - url: /stylesheets
   static_dir: stylesheets
-  
+
 - url: /favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
@@ -65,13 +65,33 @@ handlers:
   upload: khan-exercises/(hashed.+\.js)
 # End khan-exercises integration
 
+- url: /helperpages/d\.svg
+  static_files: helperpages/d.svg
+  upload: helperpages/d\.svg
+  mime_type: image/svg+xml
+
+- url: /helperpages
+  static_dir: helperpages
+
 - url: /downloads/(.*)
   static_files: downloads/\1
   upload: downloads/(.*)
-  
+
+  # The url below needs to be updated whenever we change/upgrade MathJax.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /MathJax-1.1
+  static_dir: MathJax
+
+  # The url below needs to be updated whenever we change/upgrade scratchpad.
+  # Unfortunately, we can't use a regex due to a GAE bug:
+  # http://code.google.com/p/googleappengine/issues/detail?id=3380
+- url: /scratchpad-2011-04-06
+  static_dir: scratchpad
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin  
+  login: admin
 
 - url: /admin/.*
   script: main.py
@@ -92,12 +112,12 @@ handlers:
 
 - url: .*
   script: main.py
-    
+
 builtins:
 - appstats: on
 - datastore_admin: on
-- deferred: on
 - remote_api: on
+- deferred: on
 
 inbound_services:
 - warmup
