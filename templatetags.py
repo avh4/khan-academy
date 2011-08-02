@@ -301,7 +301,7 @@ def user_video_css(user_data):
         uvc = UserVideoCss.get_for_user_data(user_data)
 
         return "<link "\
-                    "rel='stylesheet "\
+                    "rel='stylesheet' "\
                     "type='text/css' "\
                     "href='/user_video_css?version=%d&id=%d'>"\
                 "</link>" % (uvc.version,hash(user_data.user))
