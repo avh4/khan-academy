@@ -28,7 +28,7 @@ def current_google_oauth_email():
         pass
 
     if user:
-        return user.email()
+        return user.user_id()
 
     return ""
 
