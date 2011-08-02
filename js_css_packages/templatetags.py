@@ -1,18 +1,36 @@
+import os
+import cgi
+import logging
+
 from google.appengine.ext import webapp
 
 from app import App
 from js_css_packages import packages
 import util
+import request_cache
 
 import template_cached
 register = template_cached.create_template_register()
+
+@request_cache.cache()
+def use_compressed_packages():
+
+    if App.is_dev_server:
+        return False
+
+    qs = os.environ.get("QUERY_STRING")
+    dict_qs = cgi.parse_qs(qs)
+    if ["1"] == dict_qs.get("uncompressed_packages"):
+        return False
+
+    return True
 
 @register.simple_tag
 def js_package(package_name):
     package = packages.javascript[package_name]
     base_url = package.get("base_url") or "/javascript/%s-package" % package_name
 
-    if App.is_dev_server:
+    if not use_compressed_packages():
         list_js = []
         for filename in package["files"]:
             list_js.append("<script type='text/javascript' src='%s/%s'></script>" % (base_url, filename))
@@ -27,7 +45,7 @@ def css_package(package_name):
 
     list_css = []
 
-    if App.is_dev_server:
+    if not use_compressed_packages():
         for filename in package["files"]:
             list_css.append("<link rel='stylesheet' type='text/css' href='%s/%s'/>" \
                 % (base_url, filename))

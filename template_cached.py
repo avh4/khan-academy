@@ -57,61 +57,24 @@ class Library(template.Library):
             return func
         return dec
 
-# monkey patch webapp.template.load so we can log cache misses
+# monkey patch to warn on filesystem access
+import django.template.loaders.filesystem as filesystem
+get_template_sources = filesystem.get_template_sources
+from django.template import TemplateDoesNotExist
 
-import logging
-import os
-import django.template.loader
+def load_template_source(template_name, template_dirs=None):
+    tried = []
+    for filepath in get_template_sources(template_name, template_dirs):
+        try:
+            logging.warning("Accessing filesystem: %s", filepath)
+            return (open(filepath).read(), filepath)
+        except IOError:
+            tried.append(filepath)
+    if tried:
+        error_msg = "Tried %s" % tried
+    else:
+        error_msg = "Your TEMPLATE_DIRS setting is empty. Change it to point to at least one template directory."
+    raise TemplateDoesNotExist, error_msg
+load_template_source.is_usable = True
 
-template_cache = webapp.template.template_cache
-_swap_settings = webapp.template._swap_settings
-_urlnode_render_replacement = webapp.template._urlnode_render_replacement
-def load(path, debug=False):
-  """Loads the Django template from the given path.
-
-  It is better to use this function than to construct a Template using the
-  class below because Django requires you to load the template with a method
-  if you want imports and extends to work in the template.
-  """
-  abspath = os.path.abspath(path)
-
-  if not debug:
-    template = template_cache.get(abspath, None)
-  else:
-    template = None
-
-  if not template:
-    logging.warning("cache miss for file: %s", path)
-    directory, file_name = os.path.split(abspath)
-    new_settings = {
-        'TEMPLATE_DIRS': (directory,),
-        'TEMPLATE_DEBUG': debug,
-        'DEBUG': debug,
-        }
-    old_settings = _swap_settings(new_settings)
-    try:
-      template = django.template.loader.get_template(file_name)
-    finally:
-      _swap_settings(old_settings)
-
-    if not debug:
-      template_cache[abspath] = template
-
-    def wrap_render(context, orig_render=template.render):
-
-
-      URLNode = django.template.defaulttags.URLNode
-      save_urlnode_render = URLNode.render
-      old_settings = _swap_settings(new_settings)
-      try:
-        URLNode.render = _urlnode_render_replacement
-        return orig_render(context)
-      finally:
-        _swap_settings(old_settings)
-        URLNode.render = save_urlnode_render
-
-    template.render = wrap_render
-
-  return template
-
-webapp.template.load = load
+filesystem.load_template_source = load_template_source

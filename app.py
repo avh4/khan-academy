@@ -17,6 +17,7 @@ except:
         constant_contact_username = None
         constant_contact_password = None
         flask_secret_key = None
+        dashboard_secret = None
 
 # A singleton shared across requests
 class App(object):
@@ -41,6 +42,8 @@ class App(object):
     constant_contact_password = secrets.constant_contact_password
 
     flask_secret_key = secrets.flask_secret_key
+
+    dashboard_secret = secrets.dashboard_secret
 
     root = os.path.dirname(__file__)
     

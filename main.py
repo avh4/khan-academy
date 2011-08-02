@@ -1005,14 +1005,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
 
-class UserStatistics(request_handler.RequestHandler):
-    def get(self):
-        return self.post()
-
-    def post(self):
-        models.UserLog.add_current_state()
-        self.response.out.write("Registered user statistics recorded.")
-
 class ViewRenderTemplate(request_handler.RequestHandler):
     def get(self):
         template = self.request_string('template', 'templatetest.html')
@@ -1089,10 +1081,9 @@ def main():
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
-        ('/admin/userstatistics', UserStatistics),
         ('/admin/movemapnode', exercises.MoveMapNode),
         ('/admin/rendertemplate', ViewRenderTemplate),
-        
+
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
 
@@ -1177,6 +1168,8 @@ def main():
         ('/jobs/.*', RedirectToJobvite),
 
         ('/dashboard', dashboard.Dashboard),
+        ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
+        ('/admin/entitycounts', dashboard.EntityCounts),
 
         ('/sendtolog', SendToLog),
 

@@ -1,6 +1,6 @@
 import sharded_counter
 
-# Keep a global count of registered users, used to create `UserLog`s.
+# Keep a global count of registered users
 
 def get_count():
     '''Get the number of registered users'''
