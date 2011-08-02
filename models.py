@@ -503,10 +503,9 @@ class StudentList(db.Model):
         return [s for s in self.students]
 
     @staticmethod
-    def get_for_coach(key, exclude_deleted=True, keys_only=False):
-        query = StudentList.all(keys_only=keys_only)
-        if exclude_deleted:
-            query.filter('deleted =', False)
+    def get_for_coach(key):
+        query = StudentList.all()
+        query.filter('deleted =', False)
         query.filter("coaches = ", key)
         return query
 
