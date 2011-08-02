@@ -37,7 +37,7 @@ class DailyStatistic(object):
         if dt is None:
             dt = datetime.datetime.now()
 
-        if not val is None:
+        if val is not None:
 
             stat_name = self.name()
 
