@@ -4,7 +4,6 @@ import datetime, logging
 import math
 import urllib
 import pickle
-import os
 
 import config_django
 
@@ -131,7 +130,7 @@ class Exercise(db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/exercises?exid=%s" % self.name
+        return absolute_url("/exercises?exid=%s" % self.name)
 
     @staticmethod
     def get_by_name(name):
@@ -890,7 +889,7 @@ class Video(Searchable, db.Model):
 
     @property
     def ka_url(self):
-      return 'http://%s/video/%s' % (os.environ['HTTP_HOST'], self.readable_id)
+      return util.absolute_url('/video/%s' % self.readable_id)
 
     @property
     def download_urls(self):
@@ -980,7 +979,7 @@ class Playlist(Searchable, db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/#%s" % urllib.quote(slugify(self.title))
+        return util.absolute_url('#%s' % urllib.quote(slugify(self.title)))
 
     @staticmethod
     def get_for_all_topics():
@@ -1260,7 +1259,8 @@ class ProblemLog(db.Model):
 
     @property
     def ka_url(self):
-        return "http://www.khanacademy.org/exercises?exid=%s&problem_number=%s" % (self.exercise, self.problem_number)
+        return absolute_url("/exercises?exid=%s&problem_number=%s" % \
+            (self.exercise, self.problem_number))
 
     @staticmethod
     def get_for_user_data_between_dts(user_data, dt_a, dt_b):
