@@ -64,6 +64,9 @@
     background: url(/images/list-item-black-left.png) no-repeat 0 6px;
     padding-left: 10px;
 }
+    #prev_video a .vid-progress {
+        margin-left: 5px;
+    }
 #playlists {
     display: block;
     float: left;
@@ -76,6 +79,9 @@
     background: url(/images/list-item-black.png) no-repeat 100% 6px;
     padding-right: 10px;
 }
+    #next_video a .vid-progress {
+          margin: 0 3px 0 2px;
+      }
 
 #youtube_blocked {
     visibility: hidden;

@@ -3,6 +3,7 @@
 import datetime, logging
 import math
 import urllib
+import pickle
 
 import config_django
 
@@ -508,6 +509,77 @@ class StudentList(db.Model):
         query.filter('deleted =', False)
         query.filter("coaches = ", key)
         return query
+
+class UserVideoCss(db.Model):
+    user = db.UserProperty()
+    video_css = db.TextProperty()
+    pickled_dict = db.BlobProperty()
+    last_modified = db.DateTimeProperty(required=True, auto_now=True)
+    version = db.IntegerProperty(default=0)
+
+    @staticmethod
+    def get_for_user_data(user_data):
+        p = pickle.dumps({'started': set([]), 'completed': set([])})
+        return UserVideoCss.get_or_insert(UserVideoCss._key_for(user_data),
+                                          user=user_data.user,
+                                          video_css='',
+                                          pickled_dict=p,
+                                          version=0
+                                          )
+
+    @staticmethod
+    def _key_for(user_data):
+        return 'user_video_css_%s' % user_data.key_email
+
+    @staticmethod
+    def set_started(user_data, video):
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), STARTED)
+
+    @staticmethod
+    def set_completed(user_data, video):
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), COMPLETED)
+
+    def load_pickled(self):
+        max_selectors = 20
+        css_list = []
+        css = pickle.loads(self.pickled_dict)
+
+        started_css = '{background-image:url(/images/video-indicator-started.png)}'
+        complete_css = '{background-image:url(/images/video-indicator-complete.png)}'
+
+        for id in _chunker(list(css['started']), max_selectors):
+            css_list.append(','.join(id))
+            css_list.append(started_css)
+
+        for id in _chunker(list(css['completed']), max_selectors):
+            css_list.append(','.join(id))
+            css_list.append(complete_css)
+
+        self.video_css = ''.join(css_list)
+
+STARTED, COMPLETED = range(2)
+
+def _chunker(seq, size):
+    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
+
+def set_css_deferred(user_data_key, video_key, status):
+    user_data = UserData.get(user_data_key)
+    video = Video.get(video_key)
+    uvc = UserVideoCss.get_for_user_data(user_data)
+    css = pickle.loads(uvc.pickled_dict)
+
+    id = '.v%d' % video.key().id()
+    if status == STARTED:
+        css['completed'].discard(id)
+        css['started'].add(id)
+    else:
+        css['started'].discard(id)
+        css['completed'].add(id)
+
+    uvc.pickled_dict = pickle.dumps(css)
+    uvc.load_pickled()
+    uvc.version += 1
+    uvc.put()
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -1064,6 +1136,9 @@ class VideoLog(db.Model):
             user_video.last_second_watched = last_second_watched
 
         if seconds_watched > 0:
+            if user_video.seconds_watched == 0:
+                UserVideoCss.set_started(user_data, user_video.video)
+
             user_video.seconds_watched += seconds_watched
             user_data.total_seconds_watched += seconds_watched
 
@@ -1105,6 +1180,8 @@ class VideoLog(db.Model):
             # Just finished this video for the first time
             user_video.completed = True
             user_data.videos_completed = -1
+
+            UserVideoCss.set_completed(user_data, user_video.video)
 
         if video_points_received > 0:
             video_log.points_earned = video_points_received
