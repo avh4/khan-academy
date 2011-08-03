@@ -42,9 +42,10 @@ def backfill_user_data(user_data):
             css_dict['started'].add('.v'+str(user_video.video.key().id()))
         cursor = user_video_query.cursor()
 
-    user_video_css.pickled_dict = pickle.dumps(css_dict)
-    user_video_css.load_pickled()
-    user_video_css.version += 1
-    user_video_css.put()
+    if len(css_dict['started']) and len(css_dict['completed']):
+        user_video_css.pickled_dict = pickle.dumps(css_dict)
+        user_video_css.load_pickled()
+        user_video_css.version += 1
+        yield op.db.Put(user_video_css)
         
     logging.info('Completed video_css backfill for %s' % user_data.user)
