@@ -46,7 +46,7 @@ def get_current_user_id_from_cookies_unsafe():
         user_id = "http://googleid.khanacademy.org/"+user.user_id()
     if not user:
         user_id = facebook_util.get_current_facebook_user_id_from_cookies()
-    if not user:
+    if not user_id:
         user_id = get_phantom_user_id_from_cookies()
     return user_id
 

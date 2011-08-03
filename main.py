@@ -933,7 +933,12 @@ class PostLogin(request_handler.RequestHandler):
         # If new user is new, 0 points, migrate data
         phantom_id = get_phantom_user_id_from_cookies()
         user_data = UserData.current()
-        current_email = users.get_current_user().email()
+
+        current_user = users.get_current_user()
+        if current_user:
+            current_email = current_user.email()
+        else:
+            current_email = user_data.email
         #if the user has changed their email, update it
         if user_data and current_email != user_data.email:
             user_data.email = current_email
