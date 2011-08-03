@@ -1,9 +1,9 @@
 {% extends "../page_template_mini.html" %}
 
 {% block pagecontent %}
-
-    {% dashboard_daily_graph "entities" "Entities created per day" kind counts %}
-
+    {% for graph in graphs %}
+    {% dashboard_daily_graph graph.kind_name graph.title graph.kind_name graph.data %}
+    {% endfor %}
 {% endblock pagecontent %}
 
 {% block bottompagescript %}

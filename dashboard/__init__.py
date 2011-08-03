@@ -30,10 +30,16 @@ class Entityboard(request_handler.RequestHandler):
                 self.redirect(users.create_login_url(self.request.uri))
                 return
 
-        kind = self.request_string("kind", "ProblemLog")
-        context = daily_graph_context(EntityStatistic(kind), "counts")
-        context.update({'kind': kind})
-        self.render_template("dashboard/entityboard.html", context)
+        kinds = self.request_string("kinds", "ProblemLog").split(',')
+
+        graphs = []
+        for kind in kinds:
+            d = daily_graph_context(EntityStatistic(kind), "data")
+            d['kind_name'] = kind
+            d['title'] = "%s created per day" % kind
+            graphs.append(d)
+
+        self.render_template("dashboard/entityboard.html", {'graphs': graphs})
 
 def daily_graph_context(cls, key):
     # Grab last ~4 months
