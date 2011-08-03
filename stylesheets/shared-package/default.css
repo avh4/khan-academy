@@ -1248,8 +1248,6 @@ a:link.google-analytics-link-track
             }
 			#library #library-content #library-content-main a.vl {
 				font-weight: normal;	
-                background-image: url(/images/vid-progress-not-started.png);
-                background-position: -56px -36px;
 				padding: 0 2px 0 2px;
 				line-height: 18px;
                 text-decoration: none;
@@ -1437,7 +1435,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         line-height: 18px;
     }
     .streak-bar-challenge {
-        background: url(/images/streak-meter-empty-challenge.png) no-repeat;
+        background: url(/images/streak-meter-empty-challenge.png) no-repeat; 
+        /*! data-uri(/images/streak-meter-empty-challenge.png) */
     }
     .exercise-badge .streak-bar {
          position: absolute;
@@ -2239,12 +2238,15 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         }
         #the-team .team-card .card-info .contact-email, .general-contact .contact-email {
             background: url(/images/contact-email.png) no-repeat left center;
+            /*! data-uri(/images/contact-email.png) */
         }
         #the-team .team-card .card-info .contact-twitter {
             background: url(/images/contact-twitter.png) no-repeat left center;
+            /*! data-uri(/images/contact-twitter.png) */
         }
         #the-team .team-card .card-info .contact-blog {
             background: url(/images/contact-blog.png) no-repeat left center;
+            /*! data-uri(/images/contact-blog.png) */
         }
 /* end of team styles */
 /* Blog styles */
@@ -2931,7 +2933,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar {
-    background: #005987 url(/images/candy-stripe.png) repeat-x;
+    background: #005987 url(/images/candy-stripe.png) repeat-x; /*! data-uri(/images/candy-stripe.png) */
     width:100%;
     height:35px;
     text-align:center;
