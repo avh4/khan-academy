@@ -47,9 +47,6 @@ class RecordStatistics(request_handler.RequestHandler):
         return self.post()
 
     def post(self):
-        if not users.is_current_user_admin():
-            return
-
         DailyStatistic.record_all()
         self.response.out.write("Dashboard statistics recorded.")
 
