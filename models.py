@@ -17,7 +17,6 @@ from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
-import cajole
 import app
 import util
 import consts
