@@ -570,8 +570,7 @@ class UserData(db.Model):
             email = user.email()
         if user_id:
             # Once we have rekeyed legacy entities,
-            # we will be able to simplify this.
-
+            # we will be able to simplify this.we make 
             return  UserData.get_from_user_id(user_id) or \
                     UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(user_id,email)
@@ -616,7 +615,7 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod
-    def insert_for(user_id,email):
+    def insert_for(user_id,email=""):
         if not user_id:
             return None
 
@@ -650,7 +649,7 @@ class UserData(db.Model):
 
     def delete(self):
         logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
-        logging.info("Dumping user data for %s: %s" % (self.current_user.email(), jsonify(self)))
+        logging.info("Dumping user data for %s: %s" % (self.user_id, jsonify(self)))
 
         if not self.is_phantom:
             user_counter.add(-1)
@@ -692,7 +691,7 @@ class UserData(db.Model):
         return userExercise
 
     def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
-        phantom = exercise.phantom = util.is_phantom_user(self.user)
+        phantom = exercise.phantom = util.is_phantom_user(self.user_id)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)

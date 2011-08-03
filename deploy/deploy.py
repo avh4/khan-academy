@@ -7,11 +7,11 @@ import datetime
 
 sys.path.append(os.path.abspath("."))
 import compress
-from secrets import hipchat_deploy_token
+# from secrets import hipchat_deploy_token
 
-import hipchat.room
-import hipchat.config
-hipchat.config.manual_init(hipchat_deploy_token)
+# import hipchat.room
+# import hipchat.config
+# hipchat.config.manual_init(hipchat_deploy_token)
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -214,8 +214,8 @@ def main():
     if not options.dryrun:
         success = deploy(version)
         compress.revert_js_css_hashes()
-        if success:
-            send_hipchat_deploy_message(version, includes_local_changes)
+        # if success:
+            # send_hipchat_deploy_message(version, includes_local_changes)
 
     end = datetime.datetime.now()
     print "Done. Duration: %s" % (end - start)
