@@ -14,6 +14,7 @@ from badges import badges, util_badges, models_badges
 from badges.templatetags import badge_notifications_html
 from phantom_users.templatetags import login_notifications_html
 from exercises import attempt_problem, reset_streak
+from phantom_users.phantom_util import create_api_phantom
 import util
 import notifications
 
@@ -489,6 +490,7 @@ def user_problem_logs(exercise_name):
 
 @route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/attempt", methods=["POST"])
 @oauth_optional()
+@create_api_phantom
 @jsonp
 @jsonify
 def attempt_problem_number(exercise_name, problem_number):

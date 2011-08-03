@@ -3,7 +3,6 @@ import logging
 import cgi
 import math
 import os
-from inspect import getmembers
 import simplejson as json
 
 from google.appengine.ext import webapp
@@ -13,7 +12,7 @@ from django.template.defaultfilters import escape, slugify
 
 from app import App
 from templatefilters import seconds_to_time_string
-from models import UserData
+from models import UserData, UserVideoCss
 import consts
 import util
 import topics_list
@@ -291,6 +290,23 @@ def crazyegg_tracker(enabled=True):
 @register.simple_tag
 def xsrf_value():
     return xsrf.render_xsrf_js()
+
+@register.simple_tag
+def video_name_and_progress(video):
+    return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), video.title)
+
+@register.simple_tag
+def user_video_css(user_data):
+    if user_data:
+        uvc = UserVideoCss.get_for_user_data(user_data)
+
+        return "<link "\
+                    "rel='stylesheet' "\
+                    "type='text/css' "\
+                    "href='/user_video_css?version=%d&id=%d'>"\
+                "</link>" % (uvc.version,hash(user_data.user))
+    else:
+        return ''
 
 register.tag(highlight)
 
