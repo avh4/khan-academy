@@ -8,7 +8,7 @@ import os
 import datetime
 import urllib
 
-from django.utils import simplejson as json
+import simplejson as json
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 

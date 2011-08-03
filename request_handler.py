@@ -2,8 +2,8 @@ import os
 import logging
 import datetime
 import urllib
+import simplejson
 
-from django.utils import simplejson
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
