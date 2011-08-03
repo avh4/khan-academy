@@ -1,0 +1,12 @@
+{% extends "../page_template_mini.html" %}
+
+{% block pagecontent %}
+
+    {% dashboard_daily_graph "entities" "Entities created per day" kind counts %}
+
+{% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {% js_package "profile" %}
+{% endblock bottompagescript %}
+
