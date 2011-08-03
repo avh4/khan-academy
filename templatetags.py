@@ -293,8 +293,7 @@ def xsrf_value():
 
 @register.simple_tag
 def video_name_and_progress(video):
-    # The &nbsp; is so the image will be shown
-    return "<span class='vid-progress v%d'>&nbsp;</span>%s" % (video.key().id(), video.title)
+    return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), video.title)
 
 @register.simple_tag
 def user_video_css(user_data):
@@ -302,7 +301,7 @@ def user_video_css(user_data):
         uvc = UserVideoCss.get_for_user_data(user_data)
 
         return "<link "\
-                    "rel='stylesheet "\
+                    "rel='stylesheet' "\
                     "type='text/css' "\
                     "href='/user_video_css?version=%d&id=%d'>"\
                 "</link>" % (uvc.version,hash(user_data.user))

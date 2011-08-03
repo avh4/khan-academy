@@ -1179,6 +1179,7 @@ def main():
         ('/jobs/.*', RedirectToJobvite),
 
         ('/dashboard', dashboard.Dashboard),
+        ('/entityboard', dashboard.Entityboard),
         ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
         ('/admin/entitycounts', dashboard.EntityCounts),
 

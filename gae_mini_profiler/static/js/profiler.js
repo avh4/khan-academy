@@ -179,7 +179,7 @@ var GaeMiniProfiler = {
                     );
         }
         return null;
-    },
+    }
 };
 
 var GaeMiniProfilerTemplate = {
