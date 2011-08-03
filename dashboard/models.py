@@ -73,7 +73,7 @@ class EntityStatistic(DailyStatistic):
         self.kind_name = kind_name
 
     def all(self):
-        return DailyStatisticLog.all().filter("stat_name =", self.kind_name)
+        return DailyStatisticLog.all().filter("stat_name =", self.kind_name+'Count')
 
     # actually updates for all entity kinds
     def record(self, val = None, dt = None):
@@ -85,7 +85,7 @@ class EntityStatistic(DailyStatistic):
             stat = kinds.next()
             logs.append(DailyStatisticLog(
                 key_name=DailyStatisticLog.make_key(stat.kind_name, dt),
-                stat_name=stat.kind_name,
+                stat_name=stat.kind_name+'Count',
                 val=stat.count,
                 dt=dt
             ))
