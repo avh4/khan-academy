@@ -1,5 +1,4 @@
 import datetime
-import logging
 
 from google.appengine.api import users
 
@@ -48,9 +47,6 @@ class RecordStatistics(request_handler.RequestHandler):
         return self.post()
 
     def post(self):
-        if not users.is_current_user_admin():
-            return
-
         DailyStatistic.record_all()
         self.response.out.write("Dashboard statistics recorded.")
 
@@ -67,6 +63,5 @@ class EntityCounts(request_handler.RequestHandler):
         for key,group in groupby(kind_stats, lambda s: s.kind_name):
             grouped = sorted(group, key=lambda s: s.timestamp, reverse=True)
             counts.append(dict(kind=key, count=grouped[0].count, timestamp=grouped[0].timestamp))
-        logging.critical(counts)
 
         self.render_template("dashboard/entitycounts.html", {'counts':counts})

@@ -180,50 +180,49 @@ class AcceptCoach(RequestHandler):
         if not self.is_ajax_request():
             self.redirect("/coaches")
 
-class UnregisterCoach(RequestHandler):
-    @disallow_phantoms
-    def get(self):
-        user_data = UserData.current()
+class UnregisterStudentCoach(RequestHandler):
+    @staticmethod
+    def remove_student_from_coach(student, coach):
+        if student.student_lists:
+            actual_lists = StudentList.get(student.student_lists)
+            student.student_lists = [l for l in actual_lists if coach.key() not in l.coaches]
 
-        if not user_data:
+        try:
+            student.coaches.remove(coach.key_email)
+            student.coaches.remove(coach.key_email.lower())
+        except ValueError:
+            pass
+
+        student.put()
+
+    def do_request(self, student, coach, redirect_to):
+        if not UserData.current():
             self.redirect(util.create_login_url(self.request.uri))
             return
 
-        user_data_coach = self.request_user_data("coach")
+        if student and coach:
+            self.remove_student_from_coach(student, coach)
 
-        if user_data_coach:
-            try:
-                user_data.coaches.remove(user_data_coach.key_email)
-                user_data.coaches.remove(user_data_coach.key_email.lower())
-            except ValueError:
-                pass
+        if not self.is_ajax_request():
+            self.redirect(redirect_to)
 
-            user_data.put()
-
-        self.redirect("/coaches")
-
-class UnregisterStudent(RequestHandler):
+class UnregisterCoach(UnregisterStudentCoach):
     @disallow_phantoms
     def get(self):
-        user_data = UserData.current()
+        return self.do_request(
+            UserData.current(),
+            self.request_user_data("coach"),
+            "/coaches"
+        )
 
-        if not user_data:
-            self.redirect(util.create_login_url(self.request.uri))
-            return
-
-        user_data_student = self.request_user_data("student_email")
-
-        if user_data_student:
-
-            try:
-                user_data_student.coaches.remove(user_data.key_email)
-                user_data_student.coaches.remove(user_data.key_email.lower())
-            except ValueError:
-                pass
-
-            user_data_student.put()
-
-        self.redirect("/students")
+class UnregisterStudent(UnregisterStudentCoach):
+    @disallow_phantoms
+    def get(self):
+        return self.do_request(
+            self.request_user_data("student_email"),
+            UserData.current(),
+            "/students"
+        )
 
 class CreateStudentList(RequestHandler):
     @RequestHandler.exceptions_to_http(400)
