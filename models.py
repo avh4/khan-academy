@@ -515,7 +515,6 @@ class UserVideoCss(db.Model):
     video_css = db.TextProperty()
     pickled_dict = db.BlobProperty()
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
-    version = db.IntegerProperty(default=0)
 
     @staticmethod
     def get_for_user_data(user_data):
@@ -524,7 +523,6 @@ class UserVideoCss(db.Model):
                                           user=user_data.user,
                                           video_css='',
                                           pickled_dict=p,
-                                          version=0
                                           )
 
     @staticmethod
@@ -579,8 +577,8 @@ def set_css_deferred(user_data_key, video_key, status):
 
     uvc.pickled_dict = pickle.dumps(css)
     uvc.load_pickled()
-    uvc.version += 1
-    uvc.put()
+    user_data.uservideocss_version += 1
+    db.put([uvc, user_data])
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -607,6 +605,7 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
+    uservideocss_version = db.IntegerProperty(default = 0)
 
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
