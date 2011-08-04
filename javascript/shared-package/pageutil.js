@@ -239,7 +239,7 @@ var VideoControls = {
 
 var VideoStats = {
 
-    dPercentGranularity: 0.05,
+    dPercentGranularity: 0.20,
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
