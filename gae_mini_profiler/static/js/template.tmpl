@@ -159,7 +159,7 @@
         <div class="expand">
             <a href="#logs-link" class="logs-link link uses_script">Logs</a>
             <div class="summary">
-                {{each [0,1,2,3,4]}}
+                {{each [10,20,30,40,50]}}
                     {{if log_count[$value] > 0}}
                         <span class='loglevel ll${$value}'></span> &#215;${log_count[$value]}
                     {{/if}}

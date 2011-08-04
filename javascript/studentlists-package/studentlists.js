@@ -128,7 +128,10 @@ var StudentLists = {
                 StudentLists.Data.removeStudent(student);
 
                 // update view
-                $('#student-'+student.key).remove();
+                $('.student-row[data-student_id='+student.key+']').fadeOut(
+                    400,
+                    function() { $(this).remove(); }
+                );
                 StudentLists.redrawListView();
             }
         }
