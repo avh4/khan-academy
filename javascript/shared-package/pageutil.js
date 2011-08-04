@@ -262,7 +262,7 @@ var VideoStats = {
     getPercentWatched: function() {
         if (!this.player) return 0;
 
-        var duration = this.player.getDuration() || 0;
+        var duration = this.player.getDuration() || 0
         if (duration <= 0) return 0;
 
         return this.getSecondsWatched() / duration;
@@ -288,7 +288,7 @@ var VideoStats = {
         {
             // Every 10 seconds check to see if we've crossed over our percent
             // granularity logging boundary
-            setInterval(function(){VideoStats.playerStateChange(-2);}, 10000);
+            setInterval(function(){VideoStats.saveIfChanged();}, 10000);
             this.fIntervalStarted = true;
         }
     },
@@ -305,23 +305,21 @@ var VideoStats = {
     },
 
     playerStateChange: function(state) {
-        if (state == -2) { // playing normally
-            var percent = this.getPercentWatched();
-            if (percent > (this.dPercentLastSaved + this.dPercentGranularity))
-            {
-                // Another 10% has been watched
-                this.save();
-            }
-        } else if (state == 0) { // ended
-            this.save();
-        } else if (state == 2) { // paused
-            if (this.getSecondsWatchedRestrictedByPageTime() > 1) {
-              this.save();
-            }
-        } else if (state == 1) { // play
-            this.dtSinceSave = new Date();
+        // YouTube's "ended" state
+        if (state == 0)
+        {
+            this.saveIfChanged();
         }
-        // If state is buffering, unstarted, or cued, don't do anything
+    },
+
+    saveIfChanged: function() {
+        var percent = this.getPercentWatched();
+        if (percent > this.dPercentLastSaved && 
+                (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
+        {
+            // Either video was finished or another 10% has been watched
+            this.save();
+        }
     },
 
     save: function() {
