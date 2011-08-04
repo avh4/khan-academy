@@ -28,13 +28,14 @@ def backfill_user_data(user_data):
         query_results = False
         for user_video in user_video_query.fetch(batch_size):
             query_results = True
-            try:
-                css_dict['completed'].add('.v'+str(user_video.video.key().id()))
-            except ReferencePropertyResolveError:
-                pass
+
+            video_key = UserVideo.video.get_value_for_datastore(user_video)
+            css_dict['completed'].add('.v'+str(video_key.id()))
+
         cursor = user_video_query.cursor()
 
     query_results = True
+    cursor = None
         
     # Set css for started videos
     while query_results:
@@ -46,10 +47,10 @@ def backfill_user_data(user_data):
         query_results = False
         for user_video in user_video_query.fetch(batch_size):
             query_results = True
-            try:
-                css_dict['started'].add('.v'+str(user_video.video.key().id()))
-            except ReferencePropertyResolveError:
-                pass
+
+            video_key = UserVideo.video.get_value_for_datastore(user_video)
+            css_dict['started'].add('.v'+str(video_key.id()))
+
         cursor = user_video_query.cursor()
 
     if len(css_dict['started']) or len(css_dict['completed']):
