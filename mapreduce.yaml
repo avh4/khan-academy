@@ -6,3 +6,7 @@ mapreduce:
     params:
     - name: entity_kind
       default: models.UserData
+    - name: shard_count
+      default: 64
+    - name: queue_name
+      default: backfill-mapreduce-queue

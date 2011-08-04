@@ -533,11 +533,17 @@ class UserVideoCss(db.Model):
 
     @staticmethod
     def set_started(user_data, video):
-        deferred.defer(set_css_deferred, user_data.key(), video.key(), STARTED)
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.STARTED)
 
     @staticmethod
     def set_completed(user_data, video):
-        deferred.defer(set_css_deferred, user_data.key(), video.key(), COMPLETED)
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.COMPLETED)
+
+    STARTED, COMPLETED = range(2)
+
+    @staticmethod
+    def _chunker(seq, size):
+        return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
     def load_pickled(self):
         max_selectors = 20
@@ -547,20 +553,15 @@ class UserVideoCss(db.Model):
         started_css = '{background-image:url(/images/video-indicator-started.png)}'
         complete_css = '{background-image:url(/images/video-indicator-complete.png)}'
 
-        for id in _chunker(list(css['started']), max_selectors):
+        for id in UserVideoCss._chunker(list(css['started']), max_selectors):
             css_list.append(','.join(id))
             css_list.append(started_css)
 
-        for id in _chunker(list(css['completed']), max_selectors):
+        for id in UserVideoCss._chunker(list(css['completed']), max_selectors):
             css_list.append(','.join(id))
             css_list.append(complete_css)
 
         self.video_css = ''.join(css_list)
-
-STARTED, COMPLETED = range(2)
-
-def _chunker(seq, size):
-    return (seq[pos:pos + size] for pos in xrange(0, len(seq), size))
 
 def set_css_deferred(user_data_key, video_key, status):
     user_data = UserData.get(user_data_key)
@@ -569,7 +570,7 @@ def set_css_deferred(user_data_key, video_key, status):
     css = pickle.loads(uvc.pickled_dict)
 
     id = '.v%d' % video.key().id()
-    if status == STARTED:
+    if status == UserVideoCss.STARTED:
         css['completed'].discard(id)
         css['started'].add(id)
     else:
