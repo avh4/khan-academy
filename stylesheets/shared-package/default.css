@@ -3076,9 +3076,12 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .vid-progress {
-  padding-left: 14px;
   background-repeat: no-repeat;
   background-position: 0% 50%;
+}
+
+#library .vl > .vid-progress, #related-video-list > .related-video-list .vid-progress, #video_menu > .ui-menu .vid-progress {
+  padding-left: 14px;
 }
 
 #devpanel td{

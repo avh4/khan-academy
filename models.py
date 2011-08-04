@@ -550,8 +550,8 @@ class UserVideoCss(db.Model):
         css_list = []
         css = pickle.loads(self.pickled_dict)
 
-        started_css = '{background-image:url(/images/video-indicator-started.png)}'
-        complete_css = '{background-image:url(/images/video-indicator-complete.png)}'
+        started_css = '{background-image:url(/images/video-indicator-started.png);padding-left:14px;}'
+        complete_css = '{background-image:url(/images/video-indicator-complete.png);padding-left:14px;}'
 
         for id in UserVideoCss._chunker(list(css['started']), max_selectors):
             css_list.append(','.join(id))
