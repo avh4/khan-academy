@@ -17,7 +17,7 @@ from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 import config_django
 
 from django.template.loader import render_to_string
-from django.utils import simplejson
+import simplejson
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp

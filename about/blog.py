@@ -2,7 +2,7 @@ import logging
 import urllib
 import urllib2
 
-from django.utils import simplejson
+import simplejson
 from google.appengine.api import memcache
 
 import request_handler
