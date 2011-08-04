@@ -39,22 +39,22 @@ class MoveMapNode(request_handler.RequestHandler):
     
         if direction=="up":
             exercise.h_position -= 1
-            exercise.put()
         elif direction=="down":
             exercise.h_position += 1
-            exercise.put()
         elif direction=="left":
             exercise.v_position -= 1
-            exercise.put()
         elif direction=="right":
             exercise.v_position += 1
-            exercise.put()
+
+        exercise.put()
 
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
-    @create_phantom
     def get(self):
         user_data = models.UserData.current()
+        if not user_data:
+            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
+            user_data = models.UserData.insert_for(user.email())
 
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
@@ -95,6 +95,8 @@ class ViewExercise(request_handler.RequestHandler):
         user_exercise.exercise_model.sha1 = sha1
 
         user_exercise.exercise_model.related_videos = map(lambda exercise_video: exercise_video.video, user_exercise.exercise_model.related_videos_fetch())
+        for video in user_exercise.exercise_model.related_videos:
+            video.id = video.key().id()
 
         renderable = True
 

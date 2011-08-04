@@ -22,13 +22,13 @@ skip_files:
 handlers:
 - url: /videos
   static_dir: offline/Khan Academy/videos
-  
+
 - url: /flvplayer
   static_dir: flvplayer
 
 - url: /stylesheets
   static_dir: stylesheets
-  
+
 - url: /favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
@@ -68,10 +68,10 @@ handlers:
 - url: /downloads/(.*)
   static_files: downloads/\1
   upload: downloads/(.*)
-  
+
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin  
+  login: admin
 
 - url: /admin/.*
   script: main.py
@@ -90,9 +90,13 @@ handlers:
 - url: /gae_mini_profiler/.*
   script: gae_mini_profiler/main.py
 
+- url: /backends/.*
+  script: backends/videoprogress.py
+  login: admin
+
 - url: .*
   script: main.py
-    
+
 builtins:
 - appstats: on
 - datastore_admin: on
