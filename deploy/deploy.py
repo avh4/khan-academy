@@ -55,7 +55,7 @@ def hipchat_message(msg):
         if room.name in ['1s and 0s', 'Exercises']:
 
             result = ""
-            msg_dict = {"room_id": room.room_id, "from": "Deploy Donkey", "message": msg, "color": "purple"}
+            msg_dict = {"room_id": room.room_id, "from": "Mr Monkey", "message": msg, "color": "purple"}
 
             try:
                 result = str(hipchat.room.Room.message(**msg_dict))

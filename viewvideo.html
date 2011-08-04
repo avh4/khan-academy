@@ -2,6 +2,7 @@
 
 {% block pagecss %}
     {% css_package "video" %}
+    {% user_video_css user_data %}
 {% endblock pagecss %}
 {% block pagesubmenu %}
 <span class="breadcrumbs_nav video-nav">
@@ -14,7 +15,7 @@
         <div id="video_menu">
             <ol>
                 {% for v in videos %}
-                <li data-selected='{{v.selected|default:""}}'><a href="/video/{{v.readable_id}}?playlist={{playlist.title|urlencode}}">{{v.title|escape}}</a></li>
+                <li data-selected='{{v.selected|default:""}}'><a href="/video/{{v.readable_id}}?playlist={{playlist.title|urlencode}}">{% video_name_and_progress v %}</a></li>
                 {% endfor %}
             </ol>
         </div>
@@ -42,12 +43,12 @@
     	<nav class="prev_next_nav desktop-only">
         	{% if previous_video %}
             <label id="prev_video">
-            	<a rel=prev href="/video/{{previous_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Previous Video:</b> {{previous_video.title}}</a>
+              <a rel=prev href="/video/{{previous_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Previous Video:</b>{% video_name_and_progress previous_video %}</a>
             </label>
             	{% endif %}
                 {% if next_video %}
             <label id="next_video">
-            	<a rel=next href="/video/{{next_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Next Video:</b> {{next_video.title}}</a>
+            	<a rel=next href="/video/{{next_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Next Video:</b> {% video_name_and_progress next_video %}</a>
             </label>
                 {% endif %}
             <div class="clear"></div>

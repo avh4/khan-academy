@@ -97,3 +97,6 @@ def static_url(relative_url):
         return relative_url
     else:
         return "http://khan-academy.appspot.com%s" % relative_url
+
+def absolute_url(relative_url):
+		return 'http://%s%s' % (os.environ['HTTP_HOST'], relative_url)
