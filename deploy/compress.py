@@ -200,8 +200,11 @@ def remove_images(path, path_combined, suffix):
                     #         <----------> <->
                     #             |         |
                     #         i.group(1) i.group(2)
-                    urlpath = '/images/'+i.group(1)+'.'+i.group(2)
-                    line = re.sub(urlpath, remove_images_from_line, line, 1)
+                    urlpath = '/images/%s.%s' % (i.group(1), i.group(2))
+                    line = re.sub(urlpath, remove_images_from_line, line)
+
+                # remove the data-uri comments
+                line = r.sub('', line)
             new_file.write(line)
 
     new_file.close()
