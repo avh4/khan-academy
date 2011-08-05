@@ -72,7 +72,7 @@ def create_phantom(method):
         return method(self, *args, **kwargs)
     return wrapper
 
-def create_api_phantom(method):
+def api_create_phantom(method):
     '''Decorator used to create phantom users in api calls if necessary.'''
 
     @wraps(method)
