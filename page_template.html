@@ -3,7 +3,15 @@
     xmlns:fb="http://www.facebook.com/2008/fbml" {{ data_require }}>
       <head>
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
+        <script type="text/javascript">
+            var loc = window.location;
+            if ( loc.host.indexOf("www.khanacademy.org") == 0 ) {
+                window.location = loc.protocol + "//khan-academy.appspot.com" + loc.pathname + loc.search + loc.hash;
+            }
+        </script>
+
         <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
+
 
         <script type="text/javascript">
             var _sf_startpt=(new Date()).getTime(); // for Chartbeat Analytics
@@ -45,7 +53,7 @@
         {% endif %}
 
         {% xsrf_value %}
-		
+
         {% user_video_css user_data %}
 
         {% block pagescript %}
@@ -77,10 +85,10 @@
     <div id="page-container-inner">
         {# Facebook connect root #}
         <div id="fb-root"></div>
-    
+
     	{# Make script-requiring elements visible. #}
     	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
-    
+
             <header>
                 <div id="top-header">
                     <div id="top-header-links">
@@ -134,23 +142,23 @@
                     </div>
                     <div class="clear"></div>
                 </div>
-                
-                
+
+
                 <nav id="page_sub_nav">
                     {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
                     {% endblock pagesubmenu %}
                 </nav>
                 {% block pagemessage %}
-    
+
                 {% endblock pagemessage %}
             </header>
             {% block pagecontent %}
             {% endblock pagecontent %}
             <div style="padding: 10px;">&nbsp;</div>
 
-            
+
             {% badge_notifications %}
-            
+
     </div>
     </div>
     </div>
