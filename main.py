@@ -9,7 +9,6 @@ import logging
 import re
 import devpanel
 from pprint import pformat
-from email.utils import formatdate, parsedate
 from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
@@ -1021,16 +1020,6 @@ class ViewRenderTemplate(request_handler.RequestHandler):
         template = self.request_string('template', 'templatetest.html')
         self.render_template(template, { 'user_data': UserData.current() })
 
-class ServeUserVideoCss(request_handler.RequestHandler):
-    def get(self):
-        user_data = UserData.current()
-        if user_data == None:
-            return
-
-        user_video_css = models.UserVideoCss.get_for_user_data(user_data)
-        self.response.headers['Content-Type'] = 'text/css'
-        self.response.headers['Cache-Control'] = 'public,max-age=1000000'
-        self.response.out.write(user_video_css.video_css)
 
 def main():
 
@@ -1189,13 +1178,10 @@ def main():
         ('/jobs/.*', RedirectToJobvite),
 
         ('/dashboard', dashboard.Dashboard),
-        ('/entityboard', dashboard.Entityboard),
         ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
         ('/admin/entitycounts', dashboard.EntityCounts),
 
         ('/sendtolog', SendToLog),
-
-        ('/user_video_css', ServeUserVideoCss),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),

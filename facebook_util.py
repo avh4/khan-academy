@@ -53,7 +53,7 @@ def get_user_id_from_profile(profile):
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
 
-        user_id = FACEBOOK_ID_EMAIL_PREFIX+profile["id"]
+        user_id = FACEBOOK_ID_EMAIL_PREFIX + profile["id"]
 
         # Cache any future lookup of current user's facebook nickname in this request
         request_cache.set(get_facebook_nickname_key(user_id), name)
