@@ -14,7 +14,7 @@ class GoogleOAuthClient(object):
     def fetch_request_token(self, oauth_map):
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
-                http_url = "http://www.khanacademy.org/_ah/OAuthGetRequestToken",
+                http_url = "http://khanacademy.org/_ah/OAuthGetRequestToken",
                 callback = "%sapi/auth/google_token_callback?oauth_map_id=%s" % (request.host_url, oauth_map.key().id())
                 )
 
@@ -32,7 +32,7 @@ class GoogleOAuthClient(object):
                 GoogleOAuthClient.Consumer,
                 token = token,
                 verifier = oauth_map.google_verification_code,
-                http_url = "http://www.khanacademy.org/_ah/OAuthGetAccessToken"
+                http_url = "http://khanacademy.org/_ah/OAuthGetAccessToken"
                 )
 
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)

@@ -5,7 +5,7 @@ OAUTH_SIGNATURE_METHODS = ['plaintext', 'hmac-sha1']
 
 #this is the realm that will be used within the Authorization headers sent bto
 #the client
-OAUTH_REALM_KEY_NAME = 'http://www.khanacademy.org'
+OAUTH_REALM_KEY_NAME = 'http://khanacademy.org'
 
 #this is a list of sites that should not be allowed to be consumers of this API
 OAUTH_BLACKLISTED_HOSTNAMES = []

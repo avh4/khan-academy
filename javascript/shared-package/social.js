@@ -35,7 +35,7 @@ var Social = {
 		     name: 'I just earned the '+desc+' badge in '+activity+' at Khan Academy!',
 		     link: 'http://www.KhanAcademy.org',
 		     picture: 'http://khanacademy.org/'+icon,
-		     caption: 'www.khanacademy.org',
+		     caption: 'khanacademy.org',
 		     description: 'You can earn this too if you '+ext
 		 
 		   });	
@@ -48,9 +48,9 @@ var Social = {
 		   {
 		     method: 'feed',
 		     name: name,
-		     link: 'http://www.khanacademy.org/'+url,
-		     picture: 'http://www.khanacademy.org/images/handtreehorizontal_facebook.png',
-		     caption: 'www.khanacademy.org',
+		     link: 'http://khanacademy.org/'+url,
+		     picture: 'http://khanacademy.org/images/handtreehorizontal_facebook.png',
+		     caption: 'khanacademy.org',
 		     description: desc ,
 		     message: 'I just learned about '+name+' on Khan Academy'
 		   });	
@@ -64,9 +64,9 @@ var Social = {
 		   {
 		     method: 'feed',
 		     name: amount+' question'+plural+' answered!',
-		     link: 'http://www.khanacademy.org/exercisedashboard',
-		     picture: 'http://www.khanacademy.org/images/proficient-badge-complete.png',
-		     caption: 'www.khanacademy.org',
+		     link: 'http://khanacademy.org/exercisedashboard',
+		     picture: 'http://khanacademy.org/images/proficient-badge-complete.png',
+		     caption: 'khanacademy.org',
 		     description: 'I just answered '+amount+' question'+plural+' '+prof+' '+exer+' on KhanAcademy.org' ,
 		     message: 'I\'ve been practicing '+exer+' on http://KhanAcademy.org'
 		   });	
