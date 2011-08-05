@@ -12,10 +12,10 @@ import facebook
 import layer_cache
 import request_cache
 
-FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
+FACEBOOK_ID_PREFIX = "http://facebookid.khanacademy.org/"
 
-def is_facebook_user(user_id):
-    return user_id.startswith(FACEBOOK_ID_EMAIL_PREFIX)
+def is_facebook_user_id(user_id):
+    return user_id.startswith(FACEBOOK_ID_PREFIX)
 
 def get_facebook_nickname_key(user_id):
     return "facebook_nickname_%s" % user_id
@@ -27,7 +27,7 @@ def get_facebook_nickname_key(user_id):
         persist_across_app_versions=True)
 def get_facebook_nickname(user_id):
 
-    id = user_id.replace(FACEBOOK_ID_EMAIL_PREFIX, "")
+    id = user_id.replace(FACEBOOK_ID_PREFIX, "")
     graph = facebook.GraphAPI()
 
     try:
@@ -53,7 +53,7 @@ def get_user_id_from_profile(profile):
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
 
-        user_id = FACEBOOK_ID_EMAIL_PREFIX + profile["id"]
+        user_id = FACEBOOK_ID_PREFIX + profile["id"]
 
         # Cache any future lookup of current user's facebook nickname in this request
         request_cache.set(get_facebook_nickname_key(user_id), name)
