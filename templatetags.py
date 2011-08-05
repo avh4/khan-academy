@@ -294,13 +294,11 @@ def video_name_and_progress(video):
 @register.simple_tag
 def user_video_css(user_data):
     if user_data:
-        uvc = UserVideoCss.get_for_user_data(user_data)
-
         return "<link "\
                     "rel='stylesheet' "\
                     "type='text/css' "\
                     "href='/user_video_css?version=%d&id=%d'>"\
-                "</link>" % (uvc.version,hash(user_data.user))
+                "</link>" % (user_data.uservideocss_version, hash(user_data.user))
     else:
         return ''
 
