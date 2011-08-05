@@ -8,7 +8,7 @@ class ProblemPoint:
         self.time_taken = problem_log.time_taken_capped_for_reporting()
         self.time_done = problem_log.time_done
         self.correct = problem_log.correct
-        self.hint_used = problem_log.hint_used
+        self.hints_used = problem_log.hints_used
         self.exercise_non_summative = problem_log.exercise_non_summative
         self.exercise_non_summative_display_name = models.Exercise.to_display_name(problem_log.exercise_non_summative)
         self.dt = problem_log.time_done

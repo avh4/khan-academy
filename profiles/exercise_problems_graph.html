@@ -101,7 +101,7 @@ function exercise_url(point) {
                                             'href="' + exercise_url(point) + '"' +
                                             '>Problem ' + point.x + 
                                             '</a><b style="font-size: 15px;"> - ' + (point.correct ? "Correct" : "Incorrect") +
-                                            (point.hint_used ? '<span style="color: red; font-style: italic; font-weight:bold">(Hint Used)' : '') +
+                                            (point.hints_used ? '<span style="color: red; font-style: italic; font-weight:bold">(Hint Used)' : '') +
                                             '</b><br/>' +
                                             point.time_used + ' used<br/><br/>' +
                                             point.timesince +
@@ -140,7 +140,7 @@ function exercise_url(point) {
                                 {
                                     fSummary: true,
                                     correct: {% if problem.correct %}true{% else %}false{% endif %},
-                                    hint_used: {% if problem.hint_used %}true{% else %}false{% endif %},
+                                    hints_used: {% if problem.hints_used %}true{% else %}false{% endif %},
                                     time_used: '{{ problem.exercise_time|escapejs }}',
                                     timesince: '{{ problem.time_done|timesince_ago }}',
                                     {% if problem.exercise_non_summative %}
@@ -188,7 +188,7 @@ function exercise_url(point) {
                                 {
                                     fHint: true,
                                     x: {{ forloop.counter }} + {{ x_offset }},
-                                    {% if problem.hint_used %}
+                                    {% if problem.hints_used %}
                                         y: {{ problem.time_taken }},
                                         desc: 'Hint used',
                                         time_watched: '{{ problem.video_time|escapejs }}',

@@ -511,7 +511,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_string("sha1"),
                     request.request_string("seed"),
                     request.request_bool("complete"),
-                    request.request_bool("hint_used"),
+                    request.request_int("hints_used"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     )

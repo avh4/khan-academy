@@ -1249,7 +1249,7 @@ class ProblemLog(db.Model):
     time_taken = db.IntegerProperty(default = 0)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
-    hint_used = db.BooleanProperty(default = False)
+    hints_used = db.IntegerProperty(default = 0)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
     sha1 = db.StringProperty()
@@ -1329,10 +1329,11 @@ def commit_problem_log(problem_log_source):
         problem_log.count_attempts += 1
 
         # Hint used cannot be changed from True to False
-        problem_log.hint_used = problem_log.hint_used or problem_log_source.hint_used
+        # TODO: confirm this is the intended behavior
+        problem_log.hints_used = min(problem_log.hints_used, problem_log_source.hints_used)
 
         # Correct cannot be changed from False to True after first attempt
-        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hint_used
+        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hints_used
 
         # Add time_taken for this individual attempt
         problem_log.time_taken += problem_log_source.time_taken
