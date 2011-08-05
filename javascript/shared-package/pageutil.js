@@ -239,7 +239,7 @@ var VideoControls = {
 
 var VideoStats = {
 
-    dPercentGranularity: 0.05,
+    dPercentGranularity: 0.20,
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
@@ -316,7 +316,7 @@ var VideoStats = {
             this.save();
         } else if (state == 2) { // paused
             if (this.getSecondsWatchedRestrictedByPageTime() > 1) {
-              this.save();
+              //this.save();
             }
         } else if (state == 1) { // play
             this.dtSinceSave = new Date();
