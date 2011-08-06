@@ -139,7 +139,7 @@ class ApiDict():
         return {
             'youtube_id':  video.youtube_id,
             'youtube_url': video.url,
-            'ka_url': "http://khanacademy.org/video/%s?playlist=%s" % (video.readable_id, urllib.quote_plus(playlist_title)),
+            'ka_url': "http://www.khanacademy.org/video/%s?playlist=%s" % (video.readable_id, urllib.quote_plus(playlist_title)),
             'title': video.title, 
             'description': video.description,
             'keywords': video.keywords,                         
@@ -162,7 +162,7 @@ class ApiDict():
             'title': playlist.title, 
             'description': playlist.description,
             'videos': [],
-            'api_url': "http://khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist.title)),
+            'api_url': "http://www.khanacademy.org/api/playlistvideos?playlist=%s" % (urllib.quote_plus(playlist.title)),
         }
 
 

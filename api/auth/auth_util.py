@@ -17,7 +17,7 @@ from oauth_provider.oauth import build_authenticate_header, OAuthError
 import cookie_util
 
 def oauth_error_response(e):
-    return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://khanacademy.org"))
+    return current_app.response_class("OAuth error. %s" % e.message, status=401, headers=build_authenticate_header(realm="http://www.khanacademy.org"))
 
 def unauthorized_response():
     return current_app.response_class("Unauthorized", status=401)
