@@ -106,7 +106,6 @@ def authorize_token():
         # since the user already authorized FB/Google. If we need to do this
         # for security reasons later, there's no reason we can't.
         token = oauth_server.authorize_token(token, user)
-
         oauth_map.verifier = token.verifier
         oauth_map.put()
 

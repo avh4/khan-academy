@@ -61,7 +61,7 @@ def hipchat_message(msg):
                 result = str(hipchat.room.Room.message(**msg_dict))
             except:
                 pass
-
+            
             if "sent" in result:
                 print "Notified Hipchat room %s" % room.name
             else:

@@ -1,6 +1,6 @@
 import logging
 from urlparse import urlparse
-
+from google.appengine.api import users
 import config
 
 OAUTH_BLACKLISTED_HOSTNAMES = getattr(config,'OAUTH_BLACKLISTED_HOSTNAMES',[])
@@ -149,9 +149,12 @@ class GAEOAuthDataStore(oauth.OAuthDataStore):
             # OAuth 1.0a: if there is a callback confirmed, we must set a verifier
             if self.request_token.callback_confirmed:
                 self.request_token.verifier = generate_random(VERIFIER_SIZE)
-            
-            self.request_token.user = user
-            self.request_token.put()
+            if user.email().startswith("http://facebookid"):
+                self.request_token.user = users.User(user)
+                self.request_token.put()
+            else:
+                self.request_token.user = user
+                self.request_token.put()
             return self.request_token
         raise OAuthError('Token key does not match.')
 

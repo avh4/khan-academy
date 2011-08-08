@@ -2,7 +2,7 @@ import os
 import datetime
 import urllib
 import request_cache
-
+import logging
 from google.appengine.api import users
 from google.appengine.api import oauth
 from asynctools import AsyncMultiTask, QueryTask
@@ -32,10 +32,10 @@ def get_current_user_id(bust_cache=False):
 def get_current_user_id_from_oauth_map(oauth_map):
     user = get_google_user_from_oauth_map(oauth_map)
     if user:
-        user_id = "http://googleid.khanacademy.org/" + user.user_id()
+        user_id = "http://googleid.khanacademy.org/" + user.email()
     if not user:
         user = facebook_util.get_facebook_user_from_oauth_map(oauth_map)
-        user_id = user.email()
+        user_id = user
     if user_id:
         return user_id
     return None
