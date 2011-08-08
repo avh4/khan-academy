@@ -149,7 +149,7 @@ class GAEOAuthDataStore(oauth.OAuthDataStore):
             # OAuth 1.0a: if there is a callback confirmed, we must set a verifier
             if self.request_token.callback_confirmed:
                 self.request_token.verifier = generate_random(VERIFIER_SIZE)
-            if user.email().startswith("http://facebookid"):
+            if (users.User(user)).email().startswith("http://facebookid"):
                 self.request_token.user = users.User(user)
                 self.request_token.put()
             else:
