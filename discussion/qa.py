@@ -101,7 +101,13 @@ class PageQuestions(request_handler.RequestHandler):
         playlist_key = self.request.get("playlist_key")
         qa_expand_key = self.request_string("qa_expand_key")
         sort = self.request_int("sort", default=-1)
-        video = db.get(video_key)
+
+        try:
+            video = db.get(video_key)
+        except db.BadRequestError:
+            # Temporarily ignore errors caused by cached google pages of non-HR app
+            return
+
         playlist = db.get(playlist_key)
 
         user_data = models.UserData.current()

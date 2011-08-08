@@ -27,7 +27,13 @@ class PageComments(request_handler.RequestHandler):
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
         sort_order = self.request_int("sort_order", default=voting.VotingSortOrder.HighestPointsFirst)
-        video = db.get(video_key)
+
+        try:
+            video = db.get(video_key)
+        except db.BadRequestError:
+            # Temporarily ignore errors caused by cached google pages of non-HR app
+            return
+
         playlist = db.get(playlist_key)
 
         if video:
