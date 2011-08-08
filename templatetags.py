@@ -289,7 +289,7 @@ def xsrf_value():
 
 @register.simple_tag
 def video_name_and_progress(video):
-    return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), video.title)
+    return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), escape(video.title.encode('utf-8', 'ignore')))
 
 @register.simple_tag
 def user_video_css(user_data):
