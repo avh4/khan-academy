@@ -693,7 +693,7 @@ class UserData(db.Model):
             return None
 
         user = users.User(user_id)
-        key = "user_email_key_%s" % user_id
+        key = "user_id_key_%s" % user_id
 
         user_data = UserData.get_or_insert(
             key_name=key,
