@@ -32,21 +32,22 @@ def get_current_user_id(bust_cache=False):
 def get_current_user_id_from_oauth_map(oauth_map):
     user = get_google_user_from_oauth_map(oauth_map)
     if user:
-        user_id = "http://googleid.khanacademy.org/"+user.user_id()
+        user_id = "http://googleid.khanacademy.org/" + user.user_id()
     if not user:
         user = facebook_util.get_facebook_user_from_oauth_map(oauth_map)
         user_id = user.email()
-    return user_id
-
+    if user_id:
+        return user_id
+    return None
 # _get_current_user_from_cookies_unsafe is labeled unsafe because it should
 # never be used in our JSONP-enabled API. All calling code should just use _get_current_user.
 def get_current_user_id_from_cookies_unsafe():
     user = users.get_current_user()
-    if user:
-        user_id = "http://googleid.khanacademy.org/"+user.user_id()
-    if not user:
+    if user: #if we have a google account
+        user_id = "http://googleid.khanacademy.org/" + user.user_id()
+    if not user: #if not a google account, try facebook
         user_id = facebook_util.get_current_facebook_user_id_from_cookies()
-    if not user_id:
+    if not user_id: #if we don't have a user_id, then it's not facebook or google
         user_id = get_phantom_user_id_from_cookies()
     return user_id
 

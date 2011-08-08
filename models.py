@@ -620,7 +620,7 @@ class UserData(db.Model):
     
     @property
     def nickname(self):
-        nickname = nicknames.get_nickname_for(self.user_id,self.email)
+        nickname = nicknames.get_nickname_for(self.user_id, self.email)
         return nickname
     
     @property
@@ -646,7 +646,7 @@ class UserData(db.Model):
             # we will be able to simplify this.we make 
             return  UserData.get_from_user_id(user_id) or \
                     UserData.get_from_db_key_email(email) or \
-                    UserData.insert_for(user_id,email)
+                    UserData.insert_for(user_id, email)
         return None
 
     @property
@@ -688,7 +688,7 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod
-    def insert_for(user_id,email=""):
+    def insert_for(user_id, email=""):
         if not user_id:
             return None
 
@@ -772,7 +772,7 @@ class UserData(db.Model):
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
 
         return {
-            # 'phantom': phantom,
+            'phantom': phantom,
             'proficient': proficient,
             'suggested': suggested,
             'reviewing': reviewing,

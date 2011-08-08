@@ -100,22 +100,22 @@ class AwardCustomBadge(request_handler.RequestHandler):
 
         if custom_badge_awarded:
             # Award badges and show successful email addresses
-            user_ids_newlines = self.request_string("emails", default="")
-            user_ids = user_ids_newlines.split()
-            user_ids = map(lambda user_id: user_id.strip(), user_ids)
+            emails_newlines = self.request_string("emails", default="")
+            emails = emails_newlines.split()
+            emails = map(lambda email: email.strip(), emails)
 
-            for user_id in user_ids:
-                user_data = UserData.get_from_user_email(user_id)
+            for email in emails:
+                user_data = UserData.get_from_user_email(email)
                 if user_data:
                     if not custom_badge_awarded.is_already_owned_by(user_data):
                         custom_badge_awarded.award_to(user_data)
                         user_data.put()
-                        user_ids_awarded.append(user_id)
+                        emails_awarded.append(email)
         
         template_values = {
                 "custom_badges": CustomBadge.all(),
                 "custom_badge_awarded": custom_badge_awarded, 
-                "emails_awarded": user_ids_awarded
+                "emails_awarded": emails_awarded
                 }
 
         self.render_template("badges/award_custom_badge.html", template_values)
