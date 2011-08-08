@@ -34,8 +34,7 @@ def get_current_user_id_from_oauth_map(oauth_map):
     if user:
         user_id = "http://googleid.khanacademy.org/" + user.email()
     if not user:
-        user = facebook_util.get_facebook_user_from_oauth_map(oauth_map)
-        user_id = user
+        user_id = facebook_util.get_facebook_user_id_from_oauth_map(oauth_map)
     if user_id:
         return user_id
     return None

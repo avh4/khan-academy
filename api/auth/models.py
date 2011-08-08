@@ -61,7 +61,7 @@ class OAuthMap(db.Model):
         if self.uses_google():
             return get_google_user_from_oauth_map(self)
         else:
-            return get_facebook_user_from_oauth_map(self)
+            return get_facebook_user_id_from_oauth_map(self)
 
     @staticmethod
     def if_not_expired(oauth_map):
@@ -94,4 +94,4 @@ class OAuthMap(db.Model):
 
 from api.auth.auth_util import append_url_params
 from api.auth.google_util import get_google_user_from_oauth_map
-from ..facebook_util import get_facebook_user_from_oauth_map
+from ..facebook_util import get_facebook_user_id_from_oauth_map

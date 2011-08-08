@@ -42,7 +42,7 @@ def get_facebook_nickname(user_id):
 def get_current_facebook_user_id_from_cookies():
     return get_user_id_from_profile(get_profile_from_cookies())
 
-def get_facebook_user_from_oauth_map(oauth_map):
+def get_facebook_user_id_from_oauth_map(oauth_map):
     if oauth_map:
         return get_user_id_from_profile(get_profile_from_fb_token(oauth_map.facebook_access_token))
     return None
