@@ -9,7 +9,6 @@ from math import sqrt, ceil
 from google.appengine.ext import db
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
-from django.utils import simplejson
 
 from app import App
 import app

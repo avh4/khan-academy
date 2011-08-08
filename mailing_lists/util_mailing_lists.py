@@ -4,7 +4,7 @@ import urllib2
 import datetime
 import xml.dom.minidom as minidom
 
-from django.utils import simplejson
+import simplejson
 
 from app import App
 import request_handler

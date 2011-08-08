@@ -295,7 +295,7 @@
             }
         
     #individual_report #achievements #achievement-list {
-        margin: 10px 0 30px;
+        margin: 0 0 30px;
     }
     #individual_report #achievements #achievement-list .achievement-badge {
         float: left;
@@ -308,24 +308,27 @@
     #individual_report #achievements #achievement-list > ul li {
         display: block;
         float: left;
+        padding-top: 10px;
         opacity: 0.5;
         width: auto;
         text-align: center;
         min-width: 16%;
         margin-right: 5px;
     }
+        #individual_report #achievements #achievement-list > ul li img {
+            /* On iOS, disable the Save popup so that holding an image down makes the gray background */
+            -webkit-touch-callout: none;
+        }
         #individual_report #achievements #achievement-list > ul li.platinum,
         #individual_report #achievements #achievement-list > ul li.diamond {
-            padding-top: 10px;
+            margin-top: 10px;
         }
         #individual_report #achievements #achievement-list > ul li.gold {
-            padding-top: 20px;
+            margin-top: 20px;
         }
-        #individual_report #achievements #achievement-list > ul li.silver {
-            padding-top: 30px;
-        }
+        #individual_report #achievements #achievement-list > ul li.silver,
         #individual_report #achievements #achievement-list > ul li.bronze {
-            padding-top: 30px;
+            margin-top: 30px;
         }
         #individual_report #achievements #achievement-list > ul li.owned {
             opacity: 1;

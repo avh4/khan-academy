@@ -1,26 +1,26 @@
 {% for question in questions %}
-    <a name="q_{{question.key.id}}"></a>
+    <a name="q_{{question.key}}"></a>
     <div class="question_container
-        {% ifequal qa_expand_id question.key.id %}
+        {% ifequal qa_expand_key question.key.__str__ %}
             question_container_expanded
         {% endifequal %}
     ">
         <input type="hidden" name="entity_key" value="{{ question.key }}" />
-        <div class="question" data-question_id="{{ question.key.id }}">
+        <div class="question" data-question_key="{{ question.key }}">
             {% vote_tools question %}
-            {% ifnotequal qa_expand_id question.key.id %}
-                <a class="question_link" href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">
+            {% ifnotequal qa_expand_key question.key.__str__ %}
+                <a class="question_link" href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{question.key}}#q_{{question.key}}" onclick="return false;">
                     <span>{{ question.content|escape|linebreaksbr_ellipsis|youtube_timestamp_links }}</span>
                 </a>
             {% endifnotequal %}
             <span
-            {% ifnotequal qa_expand_id question.key.id %}
+            {% ifnotequal qa_expand_key question.key.__str__ %}
                 class="question_content_urlized" style="display:none;"
             {% endifnotequal %}
             >{{ question.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
         </div>
 
-        {% ifnotequal qa_expand_id question.key.id %}
+        {% ifnotequal qa_expand_key question.key.__str__ %}
             <div class="question_answer_count
             {% if not question.children_cache %}
                 unanswered
@@ -28,7 +28,7 @@
             ">
                 <table><tr>
                 <td style="vertical-align: middle;">
-                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_id={{question.key.id}}#q_{{question.key.id}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{question.key}}#q_{{question.key}}" onclick="return false;">{{ question.children_cache|length }} answer{{ question.children_cache|length|pluralize }}</a>
                 </td>
                 <td>
                     <span class="question_answer_count_add_yours">
@@ -46,7 +46,7 @@
         {% feedback_controls_question "Edit this question" question %}
 
         <div class="answers_and_form_container"
-            {% ifnotequal qa_expand_id question.key.id %}
+            {% ifnotequal qa_expand_key question.key.__str__ %}
                 style="display:none;"
             {% endifnotequal %}
         >

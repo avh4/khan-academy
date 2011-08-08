@@ -54,9 +54,10 @@ var Profile = {
              }
              else {
                 var jelContainer = $("#badge-container");
-                $(jelContainer).css("min-height", jelContainer.height());
+                var oldHeight = jelContainer.height();
                 $(jelContainer).children().hide();
                 if (clickedBadge.parents().hasClass("standard-view")) {
+                    $(jelContainer).css("min-height", oldHeight);
                     $("#" + category, jelContainer).slideDown(300, function() {
                         $(jelContainer).animate({"min-height": 0}, 200);
                     });

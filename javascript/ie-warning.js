@@ -1,10 +1,10 @@
 var msg1 = "Did you know that your Internet Explorer is out of date?";
 var msg2 = "To use Khan Academy we recommend that you upgrade to a newer version or another web browser. A list of the most popular web browsers can be found below.";
 var msg3 = "Just click on the icons to get to the download page";
-var br1 = "Chrome 2.0+";
-var br2 = "Firefox 3+";
+var br1 = "Chrome 12.0+";
+var br2 = "Firefox 4+";
 var br3 = "Safari 3+";
-var br4 = "Internet Explorer 7+";
+var br4 = "Internet Explorer 8+";
 var br5 = "Opera 9.5+";
 var url1 = "http://www.google.com/chrome";
 var url2 = "http://www.mozilla.com/firefox/";
