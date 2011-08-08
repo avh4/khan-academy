@@ -16,7 +16,7 @@ from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 import config_django
 
 from django.template.loader import render_to_string
-from django.utils import simplejson
+import simplejson
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -249,10 +249,19 @@ class LogVideoProgress(request_handler.RequestHandler):
         if user_data:
 
             video = None
-            video_key = self.request_string("video_key", default = "")
+            key_str = self.request_string("video_key", default = "")
 
-            if video_key:
-                video = db.get(video_key)
+            if key_str:
+                key = db.Key(key_str)
+                app_id = os.environ['APPLICATION_ID']
+                if key.app() != app_id:
+                    new_key = db.Key.from_path(
+                        key.kind(),
+                        key.id() or key.name(),
+                        _app=app_id)
+                    logging.warning("Key '%s' had invalid app_id '%s'. Changed to new key '%s'", str(key), key.app(), str(new_key))
+                    key = new_key
+                video = db.get(key)
 
             if video:
 
@@ -1089,7 +1098,7 @@ def main():
         ('/admin/backfill', backfill.StartNewBackfillMapReduce),
         ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
-        ('/admin/youtubesync', youtube_sync.YouTubeSync),
+        ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/movemapnode', exercises.MoveMapNode),
         ('/admin/rendertemplate', ViewRenderTemplate),

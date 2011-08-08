@@ -99,7 +99,7 @@ def static_url(relative_url):
     if App.is_dev_server or not os.environ['HTTP_HOST'].lower().endswith(".khanacademy.org"):
         return relative_url
     else:
-        return "http://khanexercises.appspot.com%s" % relative_url
+        return "http://khan-academy.appspot.com%s" % relative_url
 
 def absolute_url(relative_url):
 		return 'http://%s%s' % (os.environ['HTTP_HOST'], relative_url)

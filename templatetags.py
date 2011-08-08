@@ -1,5 +1,4 @@
 import re
-import logging
 import cgi
 import math
 import os
@@ -71,15 +70,12 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
     link_height = font_size * 1.5
-    current_playlist = videos[0]["playlist"].title.replace(' ', '-')
     # Calculate the column indexes (tops of columns). Since video lists won't divide evenly, distribute
     # the remainder to the left-most columns first, and correctly increment the indices for remaining columns
     column_indices = [(items_in_column * multiplier + (multiplier if multiplier <= remainder else remainder)) for multiplier in range(1, num_cols + 1)]
-
     return {
         "videos": videos,
         "column_width": column_width,
-        "current_playlist": current_playlist,
         "column_indices": column_indices,
         "link_height": link_height,
         "list_height": column_indices[0] * link_height,
@@ -293,18 +289,16 @@ def xsrf_value():
 
 @register.simple_tag
 def video_name_and_progress(video):
-    return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), video.title)
+    return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), escape(video.title.encode('utf-8', 'ignore')))
 
 @register.simple_tag
 def user_video_css(user_data):
     if user_data:
-        uvc = UserVideoCss.get_for_user_data(user_data)
-
         return "<link "\
                     "rel='stylesheet' "\
                     "type='text/css' "\
                     "href='/user_video_css?version=%d&id=%d'>"\
-                "</link>" % (uvc.version,hash(user_data.user))
+                "</link>" % (user_data.uservideocss_version, hash(user_data.user))
     else:
         return ''
 

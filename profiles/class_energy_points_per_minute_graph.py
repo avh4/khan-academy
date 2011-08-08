@@ -1,6 +1,6 @@
 from google.appengine.api import users
 
-from django.utils import simplejson
+import simplejson
 
 import models
 import util

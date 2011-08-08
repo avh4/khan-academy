@@ -1,7 +1,6 @@
 import datetime
 import urllib
 
-from django.utils import simplejson
 from google.appengine.api import users
 
 from profiles import templatetags
@@ -12,7 +11,7 @@ import consts
 from badges import util_badges
 from phantom_users.phantom_util import disallow_phantoms
 from models import StudentList, UserData
-import simplejson as json
+import simplejson
 
 def get_student(coach_data, request_handler):
     student_data = request_handler.request_user_data('student_email')
@@ -94,7 +93,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'list_id': list_id,
                     'student_list': current_list,
                     'student_lists': student_lists_list,
-                    'student_lists_json': json.dumps(student_lists_list),
+                    'student_lists_json': simplejson.dumps(student_lists_list),
                     'coach_nickname': user_data_coach.nickname,
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,

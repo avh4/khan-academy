@@ -265,6 +265,14 @@ indexes:
   - name: user
   - name: proficient_date
 
+- kind: UserExercise
+  ancestor: yes
+  properties:
+  - name: exercise
+  - name: user
+  - name: total_done
+    direction: desc
+
 - kind: UserVideo
   properties:
   - name: __key__

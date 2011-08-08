@@ -86,7 +86,7 @@ class StartNewFlagUpdateMapReduce(request_handler.RequestHandler):
 
 class ExpandQuestion(request_handler.RequestHandler):
     def post(self):
-        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_id"))
+        notification.clear_question_answers_for_current_user(self.request.get("qa_expand_key"))
 
 class PageQuestions(request_handler.RequestHandler):
     def get(self):
@@ -99,23 +99,29 @@ class PageQuestions(request_handler.RequestHandler):
 
         video_key = self.request.get("video_key")
         playlist_key = self.request.get("playlist_key")
-        qa_expand_id = int(self.request.get("qa_expand_id")) if self.request.get("qa_expand_id") else -1
+        qa_expand_key = self.request_string("qa_expand_key")
         sort = self.request_int("sort", default=-1)
-        video = db.get(video_key)
+
+        try:
+            video = db.get(video_key)
+        except db.BadRequestError:
+            # Temporarily ignore errors caused by cached google pages of non-HR app
+            return
+
         playlist = db.get(playlist_key)
 
         user_data = models.UserData.current()
 
         if video:
-            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_id, sort)
+            template_values = video_qa_context(user_data, video, playlist, page, qa_expand_key, sort)
             html = self.render_template_to_string("discussion/video_qa_content.html", template_values)
-            self.render_json({"html": html, "page": page, "qa_expand_id": qa_expand_id})
+            self.render_json({"html": html, "page": page, "qa_expand_key": qa_expand_key})
 
-        if qa_expand_id > 0:
+        if qa_expand_key > 0:
             # If a QA question is being expanded, we want to clear notifications for its
             # answers before we render page_template so the notification icon shows
             # its updated count. 
-            notification.clear_question_answers_for_current_user(qa_expand_id)
+            notification.clear_question_answers_for_current_user(qa_expand_key)
 
         return
 
@@ -216,9 +222,9 @@ class AddQuestion(request_handler.RequestHandler):
             question.targets = [video.key()]
             question.types = [models_discussion.FeedbackType.Question]
             question.put()
-            question_key = question.key().id()
+            question_key = question.key()
 
-        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&qa_expand_id=%s" % 
+        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&qa_expand_key=%s" % 
                 (video_key, playlist_key, question_key))
 
 class EditEntity(request_handler.RequestHandler):
@@ -246,8 +252,8 @@ class EditEntity(request_handler.RequestHandler):
 
                         page = self.request.get("page")
                         video = feedback.video()
-                        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=%s&qa_expand_id=%s" % 
-                                        (video.key(), playlist_key, page, feedback.key().id()))
+                        self.redirect("/discussion/pagequestions?video_key=%s&playlist_key=%s&page=%s&qa_expand_key=%s" % 
+                                        (video.key(), playlist_key, page, feedback.key()))
 
                     elif feedback.is_type(models_discussion.FeedbackType.Answer):
 
@@ -321,7 +327,7 @@ class DeleteEntity(request_handler.RequestHandler):
 
         self.redirect("/discussion/flaggedfeedback")
 
-def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None, sort_override=-1):
+def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_key=None, sort_override=-1):
     limit_per_page = 5
 
     if page <= 0:
@@ -336,10 +342,10 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
     questions = util_discussion.get_feedback_by_type_for_video(video, models_discussion.FeedbackType.Question, user_data)
     questions = voting.VotingSortOrder.sort(questions, sort_order=sort_order)
 
-    if qa_expand_id:
+    if qa_expand_key:
         # If we're showing an initially expanded question,
         # make sure we're on the correct page
-        question = models_discussion.Feedback.get_by_id(qa_expand_id)
+        question = models_discussion.Feedback.get(qa_expand_key)
         if question:
             count_preceding = 0
             for question_test in questions:
@@ -386,14 +392,14 @@ def video_qa_context(user_data, video, playlist=None, page=0, qa_expand_id=None,
             "current_page_1_based": page,
             "next_page_1_based": page + 1,
             "show_page_controls": pages_total > 1,
-            "qa_expand_id": qa_expand_id,
+            "qa_expand_key": qa_expand_key,
             "sort_order": sort_order,
            }
 
 def add_template_values(dict, request):
     dict["comments_page"] = int(request.get("comments_page")) if request.get("comments_page") else 0
     dict["qa_page"] = int(request.get("qa_page")) if request.get("qa_page") else 0
-    dict["qa_expand_id"] = int(request.get("qa_expand_id")) if request.get("qa_expand_id") else -1
+    dict["qa_expand_key"] = request.get("qa_expand_key")
     dict["sort"] = int(request.get("sort")) if request.get("sort") else -1
 
     return dict
