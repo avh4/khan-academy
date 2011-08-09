@@ -581,6 +581,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
 
 class UserData(db.Model):
     user = db.UserProperty()
+    user_id = db.StringProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     developer = db.BooleanProperty(default=False)
