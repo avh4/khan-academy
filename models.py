@@ -536,7 +536,7 @@ class UserVideoCss(db.Model):
         deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.STARTED, version)
 
     @staticmethod
-    def set_completed(user_data, video):
+    def set_completed(user_data, video, version):
         deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.COMPLETED, version)
 
     @staticmethod
