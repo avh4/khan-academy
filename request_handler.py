@@ -60,7 +60,7 @@ class RequestInputHandler(object):
         return None
 
     def request_float(self, key, default = None):
-        try:        
+        try:
             return float(self.request_string(key))
         except ValueError:
             if default is not None:
@@ -212,6 +212,8 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
                 template_values['is_mobile'] = self.is_mobile()
 
+        template_values['hide_analytics'] = os.environ.get('SERVER_SOFTWARE').startswith('Devel')
+
         return template_values
 
     def render_template(self, template_name, template_values):
@@ -225,7 +227,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         return template.render(path, template_values)
- 
+
     @staticmethod
     def render_template_block_to_string(template_name, block, context):
         path = os.path.join(os.path.dirname(__file__), template_name)
