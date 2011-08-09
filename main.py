@@ -1028,7 +1028,11 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         user_video_css = models.UserVideoCss.get_for_user_data(user_data)
         self.response.headers['Content-Type'] = 'text/css'
-        self.response.headers['Cache-Control'] = 'public,max-age=1000000'
+
+        if user_video_css.version != user_data.uservideocss_version:
+            # Don't cache if there's a version mismatch and update isn't finished
+            self.response.headers['Cache-Control'] = 'public,max-age=1000000'
+
         self.response.out.write(user_video_css.video_css)
 
 def main():

@@ -23,7 +23,13 @@ def popen_return_code(args):
     return proc.returncode
 
 def send_hipchat_deploy_message(version, includes_local_changes):
-    url = "http://%s.%s.appspot.com" % (version, get_app_id())
+
+    app_id = get_app_id()
+    if app_id != "khan-academy":
+        # Don't notify hipchat about deployments to test apps
+        return
+
+    url = "http://%s.%s.appspot.com" % (version, app_id)
 
     hg_id = hg_version()
     hg_msg = hg_changeset_msg(hg_id)
