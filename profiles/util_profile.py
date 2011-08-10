@@ -200,7 +200,7 @@ class ProfileGraph(request_handler.RequestHandler):
     def redirect_if_not_ajax(self, user_data_student):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
-            self.redirect("/profile?selected_graph_type=%s&student_email=%s&graph_query_params=%s" % 
+            self.redirect("/profile?k&selected_graph_type=%s&student_email=%s&graph_query_params=%s" % 
                     (self.GRAPH_TYPE, urllib.quote(user_data_student.email), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
