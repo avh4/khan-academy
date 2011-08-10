@@ -279,7 +279,7 @@ class RemoveStudentFromList(RequestHandler):
 class ViewIndividualReport(RequestHandler):
     def get(self):
         # Individual reports being replaced by user profile
-        self.redirect("/profile")
+        self.redirect("/profile?k")
 
 class ViewSharedPoints(RequestHandler):
     def get(self):

@@ -118,7 +118,7 @@ class ViewProfile(request_handler.RequestHandler):
         if user_data_override and user_data_override.key_email != user_data_student.key_email:
             if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
                 # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
-                self.redirect("/profile")
+                self.redirect("/profile?k")
                 return
             else:
                 # Allow access to this student's profile
