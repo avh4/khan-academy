@@ -1,4 +1,4 @@
-DOMAIN = "http://127.0.0.1:8080" || ARGV[0]
+DOMAIN = ARGV.length > 0 ? ARGV[0].gsub(/^\d+$/, "http://127.0.0.1:\\0") : "http://127.0.0.1:8080"
 
 ###
 

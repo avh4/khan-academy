@@ -124,7 +124,7 @@ class Exercise(db.Model):
 
     _serialize_blacklist = [
             "author", "raw_html", "last_modified", "safe_html", "safe_js",
-            "last_sanitized", "sanitizer_used"
+            "last_sanitized", "sanitizer_used", "coverers", "prerequisites_ex", "assigned",
             ]
 
     @property
