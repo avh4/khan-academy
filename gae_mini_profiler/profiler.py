@@ -12,7 +12,11 @@ import zlib
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
 
-from gae_mini_profiler import config
+import gae_mini_profiler.config
+if os.environ["SERVER_SOFTWARE"].startswith("Devel"):
+    config = gae_mini_profiler.config.ProfilerConfigDevelopment
+else:
+    config = gae_mini_profiler.config.ProfilerConfigProduction
 
 # request_id is a per-request identifier accessed by a couple other pieces of gae_mini_profiler
 request_id = None

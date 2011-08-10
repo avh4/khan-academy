@@ -53,6 +53,8 @@
         {% block pagescript %}
         {% endblock pagescript %}
 
+    {% if hide_analytics %}
+    {% else %}
 	<!-- New, faster Google Analytics async tag START -->
 	<script type="text/javascript">
 
@@ -69,6 +71,7 @@
 
 	</script>
 	<!-- New, faster Google Analytics async tag END -->
+    {% endif %}
 
     </head>
 
@@ -164,6 +167,8 @@
     {% block bottompagescript %}
     {% endblock bottompagescript %}
 
+    {% if hide_analytics %}
+    {% else %}
 	<script type="text/javascript">
         // Chartbeat
         var _sf_async_config={uid:10894,domain:"khanacademy.org"};
@@ -190,6 +195,7 @@
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 	</script>
+    {% endif %}
 
     {% profiler_includes %}
 
