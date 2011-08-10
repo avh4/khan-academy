@@ -809,9 +809,9 @@ var FacebookHook = {
         
         var sCookie = "";
         $.each(session, function( key ) {
-            sCookie += key + "=" + session[key] + "&";
+            sCookie += key + "=" + encodeURIComponent(session[key]) + "&";
         });
-        
+
         createCookie("fbs_" + FB_APP_ID, "\"" + sCookie + "\"", 3);
     }
 }
