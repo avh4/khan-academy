@@ -169,7 +169,7 @@
                         {% if forloop.first %}
                         <tr>
                             <td class="tableFirstCol student-email" style="vertical-align: none;">
-                                <a style="color:#006699;" href="/profile?selected_graph_type=exerciseprogress&student_email={{ student_email|escape }}">
+                                <a style="color:#006699;" href="/profile?k&selected_graph_type=exerciseprogress&student_email={{ student_email|escape }}">
                                     <nobr>{{ exercise_data|hash:exercise_name|hash:student_email|hash:"short_name"|escape }}</nobr>
                                 </a>
                             </td>
