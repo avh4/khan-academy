@@ -186,7 +186,7 @@ class UnregisterStudentCoach(RequestHandler):
     def remove_student_from_coach(student, coach):
         if student.student_lists:
             actual_lists = StudentList.get(student.student_lists)
-            student.student_lists = [l for l in actual_lists if coach.key() not in l.coaches]
+            student.student_lists = [l.key() for l in actual_lists if coach.key() not in l.coaches]
 
         try:
             student.coaches.remove(coach.key_email)
