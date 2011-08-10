@@ -812,7 +812,7 @@ var FacebookHook = {
             sCookie += key + "=" + session[key] + "&";
         });
         
-        createCookie("fbs_" + FB_APP_ID, sCookie, 3);
+        createCookie("fbs_" + FB_APP_ID, "\"" + sCookie + "\"", 3);
     }
 }
 FacebookHook.init();
