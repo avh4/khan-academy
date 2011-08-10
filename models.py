@@ -1336,7 +1336,7 @@ def commit_problem_log(problem_log_source):
 
         # Hint used cannot be changed from True to False
         # TODO: confirm this is the intended behavior
-        problem_log.hints_used = min(problem_log.hints_used, problem_log_source.hints_used)
+        problem_log.hints_used = max(problem_log.hints_used, problem_log_source.hints_used)
 
         # Correct cannot be changed from False to True after first attempt
         problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hints_used

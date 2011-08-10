@@ -121,29 +121,26 @@ class ViewExercise(request_handler.RequestHandler):
             user_activity = []
 
             if problem_log:
-                if len(problem_log.attempts) == 1 and problem_log.correct:
-                    user_activity.append(["correct-activity",
-                        "Answered %s in %ds" % (str(problem_log.attempts[0]),
-                            max(0, problem_log.time_taken_attempts[0]))
+                for i in range(0, len(problem_log.attempts)):
+                    user_activity.append([
+                        "correct-activity" if problem_log.correct else "incorrect-activity",
+                        "Answered <code>%s</code> in %ds" % (unicode(problem_log.attempts[i]),
+                        max(0, problem_log.time_taken_attempts[i]))
                         ])
-                else:
-                    for i in range(0, len(problem_log.attempts)):
-                        user_activity.append([
-                            "incorrect-activity",
-                            "Answered %s in %ds" % (str(problem_log.attempts[i]), 
-                                max(0, problem_log.time_taken_attempts[i]))
-                            ])
 
-                logging.critical(problem_log.hints_used)
                 if problem_log.hints_used is not None:
                     user_exercise.hints_used = problem_log.hints_used
             else:
                 user_activity.append([
                     "unavailable-activity",
-                    "Activity Unavailable"
+                    "Activity Unavailable",
+                    0
                     ])
 
             user_exercise.user_activity = user_activity
+
+            if not hasattr(user_exercise, 'hints_used'):
+                user_exercise.hints_used = 0
 
         browser_disabled = self.is_older_ie()
         renderable = renderable and not browser_disabled
