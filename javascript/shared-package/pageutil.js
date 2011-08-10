@@ -806,13 +806,17 @@ var FacebookHook = {
         // In certain circumstances, Facebook's JS SDK fails to set their cookie
         // but still thinks users are logged in. To avoid continuous reloads, we
         // set the cookie manually. See http://forum.developers.facebook.net/viewtopic.php?id=67438.
-        
+
+        if (readCookie("fbs_" + FB_APP_ID))
+            return;
+
         var sCookie = "";
         $.each(session, function( key ) {
             sCookie += key + "=" + encodeURIComponent(session[key]) + "&";
         });
 
-        createCookie("fbs_" + FB_APP_ID, "\"" + sCookie + "\"", 3);
+        // Explicitly use a session cookie here for IE's sake.
+        createCookie("fbs_" + FB_APP_ID, "\"" + sCookie + "\"");
     }
 }
 FacebookHook.init();

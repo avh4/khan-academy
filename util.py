@@ -58,7 +58,10 @@ def create_mobile_oauth_login_url(dest_url):
     return "/login/mobileoauth?continue=%s" % urllib.quote(dest_url)
 
 def create_post_login_url(dest_url):
-    return "/postlogin?continue=%s" % urllib.quote(dest_url)
+    if dest_url.startswith("/postlogin"):
+        return dest_url
+    else:
+        return "/postlogin?continue=%s" % urllib.quote(dest_url)
 
 def create_logout_url(dest_url):
     return "/logout?continue=%s" % urllib.quote(dest_url)
