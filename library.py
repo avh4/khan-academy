@@ -44,7 +44,9 @@ def library_content_html(bust_cache = False):
             else:
                 dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
 
-            dict_videos_counted[video.youtube_id] = True
+            if dict_playlists_by_title.has_key(playlist.title):
+                # Only count videos in topics_list
+                dict_videos_counted[video.youtube_id] = True
 
     # Update count of all distinct videos associated w/ a live playlist
     Setting.count_videos(len(dict_videos_counted.keys()))
