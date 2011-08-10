@@ -767,7 +767,7 @@ var FacebookHook = {
             if (!USERNAME) {
                 FB.Event.subscribe('auth.login', function(response) {
                     if (response.session) {
-                        // FacebookHook.fixMissingCookie(response.session);
+                        FacebookHook.fixMissingCookie(response.session);
                     }
                     
                     window.location = URL_CONTINUE || "/";
