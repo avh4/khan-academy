@@ -7,9 +7,19 @@ import request_handler
 import models
 from dashboard.models import RegisteredUserCount
 
-def update_student_lists(student_list):
-    student_list.deleted = student_list.deleted
-    yield op.db.Put(student_list)
+def add_user_id(user_data):
+    user = user_data.current_user
+    user_id = user.user_id()
+    logging.critical(user)
+    logging.critical(user_id)
+    if user_id:
+        logging.critical("Google")
+        user_data.user_id = user_id
+    else:
+        logging.critical("Facebook")
+        logging.critical(user_data.email)
+        user_data.user_id = user_data.email
+    yield op.db.Put(user_data)
 
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
@@ -29,10 +39,10 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
         # self.response.out.write("OK: " + str(mapreduce_id))
         
         mapreduce_id = control.start_map(
-               name = "BackfillExerciseOrder",
-               handler_spec = "backfill.update_student_lists",
+               name = "BackfillAddUserID",
+               handler_spec = "backfill.add_user_id",
                reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-               reader_parameters = {"entity_kind": "models.StudentList"},
+               reader_parameters = {"entity_kind": "models.UserData"},
                shard_count = 64,
                queue_name = "backfill-mapreduce-queue",
                )

@@ -685,7 +685,7 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod
-    def insert_for(user_id, email=""):
+    def insert_for(user_id, email):
         if not user_id:
             return None
 
