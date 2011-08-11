@@ -994,6 +994,54 @@ class Playlist(Searchable, db.Model):
                 playlists.append(playlist)
         return playlists
 
+    @property
+    def exercises(self):
+        video_query = Video.all(keys_only=True)
+        video_query.filter('playlists = ', self.title)
+        video_keys = video_query.fetch(1000)
+
+        exercise_query = Exercise.all()
+        exercise_key_dict = Exercise.get_dict(exercise_query, lambda exercise: exercise.key())
+
+        exercise_video_query = ExerciseVideo.all()
+        exercise_video_key_dict = ExerciseVideo.get_key_dict(exercise_video_query)
+
+        playlist_exercise_dict = {}
+        for video_key in video_keys:
+            if exercise_video_key_dict.has_key(video_key):
+                for exercise_key in exercise_video_key_dict[video_key]:
+                    if exercise_key_dict.has_key(exercise_key):
+                        exercise = exercise_key_dict[exercise_key]
+                        playlist_exercise_dict[exercise_key] = exercise
+
+        playlist_exercises = []
+        for exercise_key in playlist_exercise_dict:
+            playlist_exercises.append(playlist_exercise_dict[exercise_key])
+
+        return playlist_exercises
+
+    @property
+    def videos(self):
+        video_query = Video.all()
+        video_query.filter('playlists = ', self.title)
+        video_key_dict = Video.get_dict(video_query, lambda video: video.key())
+
+        video_playlist_query = VideoPlaylist.all()
+        video_playlist_query.filter('playlist =', self)
+        video_playlist_query.filter('live_association =', True)
+        video_playlist_key_dict = VideoPlaylist.get_key_dict(video_playlist_query)
+
+        video_playlists = sorted(video_playlist_key_dict[self.key()].values(), key=lambda video_playlist: video_playlist.video_position)
+
+        videos = []
+        for video_playlist in video_playlists:
+            video = video_key_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)]
+            video.position = video_playlist.video_position
+            videos.append(video)
+
+        return videos
+
+
 class UserPlaylist(db.Model):
     user = db.UserProperty()
     playlist = db.ReferenceProperty(Playlist)

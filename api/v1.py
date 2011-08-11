@@ -85,25 +85,8 @@ def playlist_videos(playlist_title):
 
     if not playlist:
         return None
-
-    video_query = models.Video.all()
-    video_query.filter('playlists = ', playlist_title)
-    video_key_dict = models.Video.get_dict(video_query, lambda video: video.key())
-
-    video_playlist_query = models.VideoPlaylist.all()
-    video_playlist_query.filter('playlist =', playlist)
-    video_playlist_query.filter('live_association =', True)
-    video_playlist_key_dict = models.VideoPlaylist.get_key_dict(video_playlist_query)
-
-    video_playlists = sorted(video_playlist_key_dict[playlist.key()].values(), key=lambda video_playlist: video_playlist.video_position)
-
-    videos = []
-    for video_playlist in video_playlists:
-        video = video_key_dict[models.VideoPlaylist.video.get_value_for_datastore(video_playlist)]
-        video.position = video_playlist.video_position
-        videos.append(video)
     
-    return videos
+    return playlist.videos;
 
 @route("/api/v1/playlists/<playlist_title>/exercises", methods=["GET"])
 @jsonp
@@ -119,29 +102,7 @@ def playlist_exercises(playlist_title):
     if not playlist:
         return None
 
-    video_query = models.Video.all(keys_only=True)
-    video_query.filter('playlists = ', playlist_title)
-    video_keys = video_query.fetch(1000)
-
-    exercise_query = models.Exercise.all()
-    exercise_key_dict = models.Exercise.get_dict(exercise_query, lambda exercise: exercise.key())
-
-    exercise_video_query = models.ExerciseVideo.all()
-    exercise_video_key_dict = models.ExerciseVideo.get_key_dict(exercise_video_query)
-
-    playlist_exercise_dict = {}
-    for video_key in video_keys:
-        if exercise_video_key_dict.has_key(video_key):
-            for exercise_key in exercise_video_key_dict[video_key]:
-                if exercise_key_dict.has_key(exercise_key):
-                    exercise = exercise_key_dict[exercise_key]
-                    playlist_exercise_dict[exercise_key] = exercise
-
-    playlist_exercises = []
-    for exercise_key in playlist_exercise_dict:
-        playlist_exercises.append(playlist_exercise_dict[exercise_key])
-
-    return playlist_exercises
+    return playlist.exercises;
 
 @route("/api/v1/playlists/library", methods=["GET"])
 @etag(lambda: models.Setting.cached_library_content_date())
@@ -182,12 +143,6 @@ def playlists_library_list():
 @jsonify
 def playlists_library_list_fresh():
     return fully_populated_playlists()
-
-@route("/api/v1/exercises", methods=["GET"])
-@jsonp
-@jsonify
-def exercises():
-    return models.Exercise.get_all_use_cache()
 
 @route("/api/v1/exercises/<exercise_name>", methods=["GET"])
 @jsonp
