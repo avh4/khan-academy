@@ -23,7 +23,6 @@ def dumps(obj):
     elif isinstance(obj, dict):
         properties = {}
         for key in obj:
-            logging.info("dumping key %s" % key)
             properties[key] = dumps(obj[key])
         return properties
 
@@ -46,7 +45,6 @@ def dumps(obj):
                 valueClass = str(value.__class__)
                 if is_visible_class_name(valueClass):
                     value = dumps(value)
-                    logging.info("dumping prop %s" % property)
                     properties[property] = value
             except:
                 continue
