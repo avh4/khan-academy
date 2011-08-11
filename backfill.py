@@ -12,7 +12,8 @@ def add_user_id(user_data):
         return
         
     user = user_data.current_user
-    
+    if user_data.user_id and user_data.user_email:
+        return
     user_id = user.user_id()
     logging.critical(user)
     logging.critical(user_id)
