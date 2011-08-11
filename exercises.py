@@ -71,8 +71,6 @@ class ViewExercise(request_handler.RequestHandler):
 
         # Temporarily work around in-app memory caching bug
         exercise.user_exercise = None
-        exercise.prerequisites_ex = None
-        exercise.coverers = None
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
@@ -139,7 +137,7 @@ class ViewAllExercises(request_handler.RequestHandler):
         if not user_data:
             user_email = 'http://nouserid.khanacademy.org/pre-phantom-user'
             user_data = models.UserData.insert_for(user_email, user_email)
-        
+
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()

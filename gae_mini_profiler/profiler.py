@@ -12,7 +12,11 @@ import zlib
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
 
-from gae_mini_profiler import config
+import gae_mini_profiler.config
+if os.environ["SERVER_SOFTWARE"].startswith("Devel"):
+    config = gae_mini_profiler.config.ProfilerConfigDevelopment
+else:
+    config = gae_mini_profiler.config.ProfilerConfigProduction
 
 # request_id is a per-request identifier accessed by a couple other pieces of gae_mini_profiler
 request_id = None
@@ -386,8 +390,21 @@ class ProfilerWSGIMiddleware(object):
 
     @staticmethod
     def get_logs(handler):
-        lines = [l for l in handler.stream.getvalue().split("\n") if l]
-        return [l.split("\t") for l in lines]
+        raw_lines = [l for l in handler.stream.getvalue().split("\n") if l]
+
+        lines = []
+        for line in raw_lines:
+            if "\t" in line:
+                fields = line.split("\t")
+                lines.append(fields)
+            else: # line is part of a multiline log message (prob a traceback)
+                prevline = lines[-1][-1]
+                if prevline: # ignore leading blank lines in the message
+                    prevline += "\n"
+                prevline += line
+                lines[-1][-1] = prevline
+
+        return lines
 
     @staticmethod
     def headers_with_modified_redirect(environ, headers):

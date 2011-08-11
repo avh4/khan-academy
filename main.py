@@ -965,8 +965,8 @@ class PostLogin(request_handler.RequestHandler):
                     logging.info("New Account: %s", user_data.current().email)
                     # Update user_data, email values
                     phantom_data.user_id = user_data.user_id
-                    phantom_data.email = user_data.email
                     phantom_data.current_user = user_data.current_user
+                    phantom_data.user_email = user_data.current().email
                     if phantom_data.put():
                         # Phantom user was just transitioned to real user
                         user_counter.add(1)
@@ -1030,6 +1030,20 @@ class ViewRenderTemplate(request_handler.RequestHandler):
         template = self.request_string('template', 'templatetest.html')
         self.render_template(template, { 'user_data': UserData.current() })
 
+class ServeUserVideoCss(request_handler.RequestHandler):
+    def get(self):
+        user_data = UserData.current()
+        if user_data == None:
+            return
+
+        user_video_css = models.UserVideoCss.get_for_user_data(user_data)
+        self.response.headers['Content-Type'] = 'text/css'
+
+        if user_video_css.version == user_data.uservideocss_version:
+            # Don't cache if there's a version mismatch and update isn't finished
+            self.response.headers['Cache-Control'] = 'public,max-age=1000000'
+
+        self.response.out.write(user_video_css.video_css)
 
 def main():
 

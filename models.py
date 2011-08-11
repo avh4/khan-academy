@@ -124,7 +124,7 @@ class Exercise(db.Model):
 
     _serialize_blacklist = [
             "author", "raw_html", "last_modified", "safe_html", "safe_js",
-            "last_sanitized", "sanitizer_used"
+            "last_sanitized", "sanitizer_used", "coverers", "prerequisites_ex", "assigned",
             ]
 
     @property
@@ -515,6 +515,9 @@ class UserVideoCss(db.Model):
     video_css = db.TextProperty()
     pickled_dict = db.BlobProperty()
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
+    version = db.IntegerProperty(default=0)
+
+    STARTED, COMPLETED = range(2)
 
     @staticmethod
     def get_for_user_data(user_data):
@@ -530,14 +533,12 @@ class UserVideoCss(db.Model):
         return 'user_video_css_%s' % user_data.key_email
 
     @staticmethod
-    def set_started(user_data, video):
-        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.STARTED)
+    def set_started(user_data, video, version):
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.STARTED, version)
 
     @staticmethod
-    def set_completed(user_data, video):
-        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.COMPLETED)
-
-    STARTED, COMPLETED = range(2)
+    def set_completed(user_data, video, version):
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.COMPLETED, version)
 
     @staticmethod
     def _chunker(seq, size):
@@ -561,13 +562,12 @@ class UserVideoCss(db.Model):
 
         self.video_css = ''.join(css_list)
 
-def set_css_deferred(user_data_key, video_key, status):
+def set_css_deferred(user_data_key, video_key, status, version):
     user_data = UserData.get(user_data_key)
-    video = Video.get(video_key)
     uvc = UserVideoCss.get_for_user_data(user_data)
     css = pickle.loads(uvc.pickled_dict)
 
-    id = '.v%d' % video.key().id()
+    id = '.v%d' % video_key.id()
     if status == UserVideoCss.STARTED:
         css['completed'].discard(id)
         css['started'].add(id)
@@ -577,8 +577,8 @@ def set_css_deferred(user_data_key, video_key, status):
 
     uvc.pickled_dict = pickle.dumps(css)
     uvc.load_pickled()
-    user_data.uservideocss_version += 1
-    db.put([uvc, user_data])
+    uvc.version = version
+    db.put(uvc)
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -620,17 +620,17 @@ class UserData(db.Model):
     def nickname(self):
         nickname = nicknames.get_nickname_for(self.user_id, self.email)
         return nickname
-    
-    @property
-    def key_email(self):
-        return self.user.email()
-        
+
     @property
     def email(self):
         if self.user_email:
             return self.user_email
         else:
             return self.current_user.email()
+
+    @property
+    def key_email(self):
+        return self.user.email()
 
     @property
     def badge_counts(self):
@@ -644,6 +644,7 @@ class UserData(db.Model):
         user_id = util.get_current_user_id()
         user = users.get_current_user()
         email = user_id
+
         if user:
             email = user.email()
         if user_id:
@@ -713,7 +714,8 @@ class UserData(db.Model):
             need_to_reassess=True,
             points=0,
             coaches=[],
-            email=email
+            user_email=email
+
             )
 
         if not user_data.is_phantom:
@@ -1164,7 +1166,8 @@ class VideoLog(db.Model):
 
         if seconds_watched > 0:
             if user_video.seconds_watched == 0:
-                UserVideoCss.set_started(user_data, user_video.video)
+                user_data.uservideocss_version += 1
+                UserVideoCss.set_started(user_data, user_video.video, user_data.uservideocss_version)
 
             user_video.seconds_watched += seconds_watched
             user_data.total_seconds_watched += seconds_watched
@@ -1208,7 +1211,8 @@ class VideoLog(db.Model):
             user_video.completed = True
             user_data.videos_completed = -1
 
-            UserVideoCss.set_completed(user_data, user_video.video)
+            user_data.uservideocss_version += 1
+            UserVideoCss.set_completed(user_data, user_video.video, user_data.uservideocss_version)
 
         if video_points_received > 0:
             video_log.points_earned = video_points_received
