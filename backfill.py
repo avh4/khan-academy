@@ -8,7 +8,11 @@ import models
 from dashboard.models import RegisteredUserCount
 
 def add_user_id(user_data):
+    if not user_data or not user_data.current_user:
+        return
+        
     user = user_data.current_user
+    
     user_id = user.user_id()
     logging.critical(user)
     logging.critical(user_id)
