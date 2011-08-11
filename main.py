@@ -966,6 +966,7 @@ class PostLogin(request_handler.RequestHandler):
                     # Update user_data, email values
                     phantom_data.user_id = user_data.user_id
                     phantom_data.email = user_data.email
+                    phantom_data.current_user = user_data.current_user
                     if phantom_data.put():
                         # Phantom user was just transitioned to real user
                         user_counter.add(1)
