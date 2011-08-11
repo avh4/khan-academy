@@ -64,7 +64,7 @@ var Social = {
 		   {
 		     method: 'feed',
 		     name: amount+' question'+plural+' answered!',
-		     link: 'http://www.khanacademy.org/exercisedashboard',
+		     link: 'http://www.khanacademy.org/exercisedashboard?k',
 		     picture: 'http://www.khanacademy.org/images/proficient-badge-complete.png',
 		     caption: 'www.khanacademy.org',
 		     description: 'I just answered '+amount+' question'+plural+' '+prof+' '+exer+' on www.khanacademy.org' ,

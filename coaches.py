@@ -186,7 +186,7 @@ class UnregisterStudentCoach(RequestHandler):
     def remove_student_from_coach(student, coach):
         if student.student_lists:
             actual_lists = StudentList.get(student.student_lists)
-            student.student_lists = [l for l in actual_lists if coach.key() not in l.coaches]
+            student.student_lists = [l.key() for l in actual_lists if coach.key() not in l.coaches]
 
         try:
             student.coaches.remove(coach.key_email)
@@ -279,7 +279,7 @@ class RemoveStudentFromList(RequestHandler):
 class ViewIndividualReport(RequestHandler):
     def get(self):
         # Individual reports being replaced by user profile
-        self.redirect("/profile")
+        self.redirect("/profile?k")
 
 class ViewSharedPoints(RequestHandler):
     def get(self):
@@ -287,7 +287,7 @@ class ViewSharedPoints(RequestHandler):
 
 class ViewProgressChart(RequestHandler):
     def get(self):
-        self.redirect("/profile?selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
+        self.redirect("/profile?k&selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
 
 class ViewClassTime(RequestHandler):
     def get(self):
@@ -299,5 +299,5 @@ class ViewClassReport(RequestHandler):
 
 class ViewCharts(RequestHandler):
     def get(self):
-        self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" %
+        self.redirect("/profile?k&selected_graph_type=%s&student_email=%s&exid=%s" %
                 (ExerciseProblemsGraph.GRAPH_TYPE, self.request_string("student_email"), self.request_string("exercise_name")))
