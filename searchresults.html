@@ -86,7 +86,7 @@
         <dl>
         {% for playlist in playlists %}
             {% if playlist.description %}
-            <dt><a href="/#{{playlist.title|urlencode}}">{% highlight searched_phrases playlist.title %}</a></dt><dd>{% highlight searched_phrases playlist.description %}</dd>
+            <dt><a href="/#{{playlist.title|slugify|escape}}">{% highlight searched_phrases playlist.title %}</a></dt><dd>{% highlight searched_phrases playlist.description %}</dd>
             {% endif %}
         {% endfor %}        
         </dl>
