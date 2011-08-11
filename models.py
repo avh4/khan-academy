@@ -583,6 +583,7 @@ def set_css_deferred(user_data_key, video_key, status):
 class UserData(db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
+    current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
@@ -605,7 +606,7 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
-    email = db.StringProperty()
+    user_email = db.StringProperty()
     uservideocss_version = db.IntegerProperty(default = 0)
 
     _serialize_blacklist = [
@@ -623,6 +624,13 @@ class UserData(db.Model):
     @property
     def key_email(self):
         return self.user.email()
+        
+    @property
+    def email(self):
+        if self.user_email:
+            return self.user_email
+        else:
+            return self.current_user.email()
 
     @property
     def badge_counts(self):
@@ -686,7 +694,7 @@ class UserData(db.Model):
 
     @staticmethod
     def insert_for(user_id, email):
-        if not user_id:
+        if not user_id or not email:
             return None
 
         user = users.User(user_id)
@@ -695,6 +703,7 @@ class UserData(db.Model):
         user_data = UserData.get_or_insert(
             key_name=key,
             user=user,
+            current_user=user,
             user_id=user_id,
             moderator=False,
             last_login=datetime.datetime.now(),

@@ -1,3 +1,4 @@
+import logging
 from phantom_users.phantom_util import is_phantom_id
 import facebook_util
 
@@ -11,9 +12,9 @@ def to_unicode(s):
         return s
 
 def get_nickname_for(user_id, email):
-    if not user_id:
+    if not user_id or not email:
         return None
-
+        
     if facebook_util.is_facebook_user_id(user_id):
         nickname = facebook_util.get_facebook_nickname(user_id)
     elif is_phantom_id(user_id):
