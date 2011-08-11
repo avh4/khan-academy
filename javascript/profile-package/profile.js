@@ -265,7 +265,7 @@ var Profile = {
         {
             // Add history entry for browser
             if ($.address)
-                $.address.parameter("graph_url", href, false);
+                $.address.parameter("graph_url", encodeURIComponent(href), false);
         }
 
         this.showGraphThrobber(false);
@@ -280,7 +280,8 @@ var Profile = {
     },
 
     historyChange: function(e) {
-        var href = ($.address ? $.address.parameter("graph_url") : "") || this.initialGraphUrl;
+        var href = $.address ? $.address.parameter("graph_url") : "" || this.initialGraphUrl;
+        href = decodeURIComponent(href);
         if (href)
         {
             this.expandAccordionForHref(href);

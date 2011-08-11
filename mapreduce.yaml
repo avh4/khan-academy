@@ -1,8 +1,8 @@
 mapreduce:
-- name: Backfill UserVideoCss
+- name: Backfill UserID
   mapper:
     input_reader: mapreduce.input_readers.DatastoreInputReader
-    handler:  backfill_uservideocss.backfill_user_data
+    handler:  backfill.add_user_id
     params:
     - name: entity_kind
       default: models.UserData
@@ -11,4 +11,4 @@ mapreduce:
     - name: queue_name
       default: backfill-mapreduce-queue
     - name: processing_rate
-      default: 1000
+      default: 2000
