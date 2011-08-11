@@ -111,8 +111,8 @@ class ViewProfile(request_handler.RequestHandler):
     def get(self):
         user_data_student = models.UserData.current()
         if not user_data_student:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data_student = UserData.insert_for(user.email(), user.email())
+            user_email = 'http://nouserid.khanacademy.org/pre-phantom-user'
+            user_data_student = UserData.insert_for(user_email, user_email)
 
         user_data_override = self.request_user_data("student_email")
         if user_data_override and user_data_override.key_email != user_data_student.key_email:

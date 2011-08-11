@@ -53,8 +53,8 @@ class ViewExercise(request_handler.RequestHandler):
     def get(self):
         user_data = models.UserData.current()
         if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email(), user.email())
+            user_email = 'http://nouserid.khanacademy.org/pre-phantom-user'
+            user_data = models.UserData.insert_for(user_email, user_email)
 
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
@@ -137,8 +137,8 @@ class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
         user_data = models.UserData.current()
         if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email(), user.email())
+            user_email = 'http://nouserid.khanacademy.org/pre-phantom-user'
+            user_data = models.UserData.insert_for(user_email, user_email)
         
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
