@@ -55,7 +55,7 @@ def create_phantom(method):
 
         if not user_data:
             user = _create_phantom_user()
-            user_data = models.UserData.insert_for(user.email())
+            user_data = models.UserData.insert_for(user.email(),user.email())
 
             # we set just a 20 digit random string as the cookie, 
             # not the entire fake email
@@ -82,7 +82,7 @@ def create_api_phantom(method):
         else:
             # This mirrors create_phantom above, see there for clarification
             user = _create_phantom_user()
-            user_data = models.UserData.insert_for(user.email())
+            user_data = models.UserData.insert_for(user.email(),user.email())
 
             cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))

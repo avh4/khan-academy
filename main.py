@@ -957,6 +957,8 @@ class PostLogin(request_handler.RequestHandler):
                     UserNotifier.clear_all(phantom_data)
                     logging.info("New Account: %s", user_data.current().email)
                     phantom_data.current_user = user_data.current_user
+                    phantom_data.user_id = user_data.user_id
+                    phantom_data.user_email = user_data.current().email
                     if phantom_data.put():
                         # Phantom user was just transitioned to real user
                         user_counter.add(1)

@@ -606,6 +606,7 @@ class UserData(db.Model):
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
     uservideocss_version = db.IntegerProperty(default = 0)
+    user_email = db.StringProperty()
 
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
@@ -620,7 +621,10 @@ class UserData(db.Model):
 
     @property
     def email(self):
-        return self.current_user.email()
+        if self.user_email:
+            return self.user_email
+        else:
+            return self.current_user.email()
 
     @property
     def key_email(self):
@@ -636,13 +640,22 @@ class UserData(db.Model):
         if bust_cache:
             util._get_current_user_email(bust_cache=True)
         email = util._get_current_user_email()
+        user = users.get_current_user()
+        user_id = None
+        if user:
+            user_id = user.user_id()
+        if user_id:
+            user_id = "http://googleid.khanacademy.org/" + user_id
+        else:
+            user_id = email
+        
         if email:
             # Once we have rekeyed legacy entities,
             # we will be able to simplify this.
 
             return  UserData.get_from_user_input_email(email) or \
                     UserData.get_from_db_key_email(email) or \
-                    UserData.insert_for(email)
+                    UserData.insert_for(user_id,email)
         return None
 
     @property
@@ -673,8 +686,8 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod
-    def insert_for(email):
-        if not email:
+    def insert_for(user_id, email):
+        if not email or not user_id:
             return None
 
         user = users.User(email)
@@ -684,6 +697,7 @@ class UserData(db.Model):
             key_name=key,
             user=user,
             current_user=user,
+            user_id=user_id,
             moderator=False,
             last_login=datetime.datetime.now(),
             proficient_exercises=[],
@@ -691,7 +705,8 @@ class UserData(db.Model):
             assigned_exercises=[],
             need_to_reassess=True,
             points=0,
-            coaches=[]
+            coaches=[],
+            user_email=email
             )
 
         if not user_data.is_phantom:
