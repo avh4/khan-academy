@@ -18,7 +18,6 @@ from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
-import cajole
 import app
 import util
 import consts
@@ -125,7 +124,7 @@ class Exercise(db.Model):
 
     _serialize_blacklist = [
             "author", "raw_html", "last_modified", "safe_html", "safe_js",
-            "last_sanitized", "sanitizer_used"
+            "last_sanitized", "sanitizer_used", "coverers", "prerequisites_ex", "assigned",
             ]
 
     @property
@@ -515,6 +514,9 @@ class UserVideoCss(db.Model):
     video_css = db.TextProperty()
     pickled_dict = db.BlobProperty()
     last_modified = db.DateTimeProperty(required=True, auto_now=True)
+    version = db.IntegerProperty(default=0)
+
+    STARTED, COMPLETED = range(2)
 
     @staticmethod
     def get_for_user_data(user_data):
@@ -530,14 +532,12 @@ class UserVideoCss(db.Model):
         return 'user_video_css_%s' % user_data.key_email
 
     @staticmethod
-    def set_started(user_data, video):
-        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.STARTED)
+    def set_started(user_data, video, version):
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.STARTED, version)
 
     @staticmethod
-    def set_completed(user_data, video):
-        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.COMPLETED)
-
-    STARTED, COMPLETED = range(2)
+    def set_completed(user_data, video, version):
+        deferred.defer(set_css_deferred, user_data.key(), video.key(), UserVideoCss.COMPLETED, version)
 
     @staticmethod
     def _chunker(seq, size):
@@ -561,13 +561,12 @@ class UserVideoCss(db.Model):
 
         self.video_css = ''.join(css_list)
 
-def set_css_deferred(user_data_key, video_key, status):
+def set_css_deferred(user_data_key, video_key, status, version):
     user_data = UserData.get(user_data_key)
-    video = Video.get(video_key)
     uvc = UserVideoCss.get_for_user_data(user_data)
     css = pickle.loads(uvc.pickled_dict)
 
-    id = '.v%d' % video.key().id()
+    id = '.v%d' % video_key.id()
     if status == UserVideoCss.STARTED:
         css['completed'].discard(id)
         css['started'].add(id)
@@ -577,8 +576,8 @@ def set_css_deferred(user_data_key, video_key, status):
 
     uvc.pickled_dict = pickle.dumps(css)
     uvc.load_pickled()
-    user_data.uservideocss_version += 1
-    db.put([uvc, user_data])
+    uvc.version = version
+    db.put(uvc)
 
 class UserData(db.Model):
     user = db.UserProperty()
@@ -724,11 +723,16 @@ class UserData(db.Model):
             # There are some old entities lying around that don't have keys.
             # We have to check for them here, but once we have reparented and rekeyed legacy entities,
             # this entire function can just be a call to .get_or_insert()
-            query = UserExercise.all()
+            query = UserExercise.all(keys_only = True)
             query.filter('user =', self.user)
             query.filter('exercise =', exid)
             query.order('-total_done') # Temporary workaround for issue 289
-            userExercise = query.get()
+
+            # In order to guarantee consistency in the HR datastore, we need to query
+            # via db.get for these old, parent-less entities.
+            key_user_exercise = query.get()
+            if key_user_exercise:
+                userExercise = UserExercise.get(str(key_user_exercise))
 
         if allow_insert and not userExercise:
             userExercise = UserExercise.get_or_insert(
@@ -1137,7 +1141,8 @@ class VideoLog(db.Model):
 
         if seconds_watched > 0:
             if user_video.seconds_watched == 0:
-                UserVideoCss.set_started(user_data, user_video.video)
+                user_data.uservideocss_version += 1
+                UserVideoCss.set_started(user_data, user_video.video, user_data.uservideocss_version)
 
             user_video.seconds_watched += seconds_watched
             user_data.total_seconds_watched += seconds_watched
@@ -1181,7 +1186,8 @@ class VideoLog(db.Model):
             user_video.completed = True
             user_data.videos_completed = -1
 
-            UserVideoCss.set_completed(user_data, user_video.video)
+            user_data.uservideocss_version += 1
+            UserVideoCss.set_completed(user_data, user_video.video, user_data.uservideocss_version)
 
         if video_points_received > 0:
             video_log.points_earned = video_points_received

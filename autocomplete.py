@@ -2,7 +2,7 @@ import logging
 
 from google.appengine.ext import db
 from django.template.defaultfilters import slugify
-from django.utils import simplejson
+import simplejson
 
 import app
 from app import App

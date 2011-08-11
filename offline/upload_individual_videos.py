@@ -12,7 +12,7 @@ def get_mangled_playlist_name(playlist_name):
     
     
 def get_video_mapping():
-    data = urllib.urlopen("http://www.khanacademy.org/api/playlists").read()
+    data = urllib.urlopen("http://khanacademy.org/api/playlists").read()
     playlists = json.loads(data)
     for playlist in playlists:
         print "loading playlist info for", playlist['title']    

@@ -12,9 +12,8 @@ from topics_list import topics_list
 
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
-        ) 
+        )
 def library_content_html(bust_cache = False):
-
     # No cache found -- regenerate HTML
     all_playlists = []
 
@@ -51,7 +50,9 @@ def library_content_html(bust_cache = False):
             else:
                 dict_video_playlists[playlist_key] = [fast_video_playlist_dict]
 
-            dict_videos_counted[video_key] = True
+            if dict_playlists_by_title.has_key(playlist.title):
+                # Only count videos in topics_list
+                dict_videos_counted[video.youtube_id] = True
 
     # Update count of all distinct videos associated w/ a live playlist
     Setting.count_videos(len(dict_videos_counted.keys()))
@@ -60,7 +61,10 @@ def library_content_html(bust_cache = False):
         if topic in dict_playlists_by_title:
             playlist = dict_playlists_by_title[topic]
             playlist_key = playlist.key()
-            playlist_videos = dict_video_playlists[playlist_key]
+            playlist_videos = dict_video_playlists.get(playlist_key) or []
+
+            if not playlist_videos:
+                logging.error('Playlist %s has no videos!', playlist.title)
 
             playlist_data = {
                      'title': topic,

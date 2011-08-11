@@ -3,7 +3,9 @@
     xmlns:fb="http://www.facebook.com/2008/fbml" {{ data_require }}>
       <head>
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
+
         <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
+
 
         <script type="text/javascript">
             var _sf_startpt=(new Date()).getTime(); // for Chartbeat Analytics
@@ -45,12 +47,14 @@
         {% endif %}
 
         {% xsrf_value %}
-		
+
         {% user_video_css user_data %}
 
         {% block pagescript %}
         {% endblock pagescript %}
 
+    {% if hide_analytics %}
+    {% else %}
 	<!-- New, faster Google Analytics async tag START -->
 	<script type="text/javascript">
 
@@ -67,6 +71,7 @@
 
 	</script>
 	<!-- New, faster Google Analytics async tag END -->
+    {% endif %}
 
     </head>
 
@@ -77,10 +82,10 @@
     <div id="page-container-inner">
         {# Facebook connect root #}
         <div id="fb-root"></div>
-    
+
     	{# Make script-requiring elements visible. #}
     	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
-    
+
             <header>
                 <div id="top-header">
                     <div id="top-header-links">
@@ -107,7 +112,7 @@
                                 <nav>
                                   <span class="links">
                                       <a href="/#browse" {% ifequal selected_nav_link "watch" %}class="selected watch-link"{% else %}class="watch-link"{% endifequal %}>Watch</a>
-                                    <a href="/exercisedashboard" {% ifequal selected_nav_link "practice" %}class="selected practice-link"{% endifequal %}>Practice</a>
+                                    <a href="/exercisedashboard?k" {% ifequal selected_nav_link "practice" %}class="selected practice-link"{% endifequal %}>Practice</a>
                                     <a href="/class_profile" {% ifequal selected_nav_link "coach" %}class="selected coach-link"{% endifequal %}>Coach</a>
                                     <a href="/contribute" {% ifequal selected_nav_link "contribute" %}class="selected contribute-link"{% endifequal %}>Contribute</a>
                                     <a href="/about" {% ifequal selected_nav_link "about" %}class="selected about-link"{% endifequal %}>About</a>
@@ -134,23 +139,23 @@
                     </div>
                     <div class="clear"></div>
                 </div>
-                
-                
+
+
                 <nav id="page_sub_nav">
                     {% block pagesubmenu %}<b>{% block pagetitle %}{% endblock pagetitle %}</b>
                     {% endblock pagesubmenu %}
                 </nav>
                 {% block pagemessage %}
-    
+
                 {% endblock pagemessage %}
             </header>
             {% block pagecontent %}
             {% endblock pagecontent %}
-            <div style="padding: 10px;">&nbsp;</div>
+            <div id="end-of-page-spacer" style="padding: 10px;">&nbsp;</div>
 
-            
+
             {% badge_notifications %}
-            
+
     </div>
     </div>
     </div>
@@ -162,6 +167,8 @@
     {% block bottompagescript %}
     {% endblock bottompagescript %}
 
+    {% if hide_analytics %}
+    {% else %}
 	<script type="text/javascript">
         // Chartbeat
         var _sf_async_config={uid:10894,domain:"khanacademy.org"};
@@ -188,6 +195,7 @@
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
 	</script>
+    {% endif %}
 
     {% profiler_includes %}
 

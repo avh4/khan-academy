@@ -1,7 +1,6 @@
 import datetime
 import urllib
 
-from django.utils import simplejson
 from google.appengine.api import users
 
 from profiles import templatetags
@@ -12,7 +11,7 @@ import consts
 from badges import util_badges
 from phantom_users.phantom_util import disallow_phantoms
 from models import StudentList, UserData
-import simplejson as json
+import simplejson
 
 def get_student(coach_data, request_handler):
     student_data = request_handler.request_user_data('student_email')
@@ -94,7 +93,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'list_id': list_id,
                     'student_list': current_list,
                     'student_lists': student_lists_list,
-                    'student_lists_json': json.dumps(student_lists_list),
+                    'student_lists_json': simplejson.dumps(student_lists_list),
                     'coach_nickname': user_data_coach.nickname,
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
@@ -119,7 +118,7 @@ class ViewProfile(request_handler.RequestHandler):
         if user_data_override and user_data_override.key_email != user_data_student.key_email:
             if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
                 # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
-                self.redirect("/profile")
+                self.redirect("/profile?k")
                 return
             else:
                 # Allow access to this student's profile
@@ -201,7 +200,7 @@ class ProfileGraph(request_handler.RequestHandler):
     def redirect_if_not_ajax(self, user_data_student):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
-            self.redirect("/profile?selected_graph_type=%s&student_email=%s&graph_query_params=%s" % 
+            self.redirect("/profile?k&selected_graph_type=%s&student_email=%s&graph_query_params=%s" % 
                     (self.GRAPH_TYPE, urllib.quote(user_data_student.email), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False

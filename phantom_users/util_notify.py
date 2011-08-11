@@ -44,14 +44,14 @@ def update(user_data, user_exercise, threshold=False, isProf=False, gotBadge=Fal
         UserNotifier.push_login_for_user_data(user_data,"You're proficient in "+str(prof)+". You should [login]")
     #First Badge
     if numbadge != None and len(numbadge) == 1 and gotBadge:
-        UserNotifier.push_login_for_user_data(user_data,"Congrats on your first <a href='/profile'>badge</a>! You should [login]")
+        UserNotifier.push_login_for_user_data(user_data,"Congrats on your first <a href='/profile?k'>badge</a>! You should [login]")
     #Every badge after
     if numbadge != None and len(numbadge) > 1 and gotBadge:
-        UserNotifier.push_login_for_user_data(user_data,"You've earned <a href='/profile'>"+str(len(numbadge))+" badges</a> so far. You should [login]")
+        UserNotifier.push_login_for_user_data(user_data,"You've earned <a href='/profile?k'>"+str(len(numbadge))+" badges</a> so far. You should [login]")
     #Every 2.5k points
     if numpoint != None and threshold:
         numpoint = 2500*(numpoint/2500)+2500
-        UserNotifier.push_login_for_user_data(user_data,"You've earned over <a href='/profile'>"+str(numpoint)+ " points</a>! You should [login]")
+        UserNotifier.push_login_for_user_data(user_data,"You've earned over <a href='/profile?k'>"+str(numpoint)+ " points</a>! You should [login]")
 
 
 #Toggle Notify allows the user to close the notification bar (by deleting the memcache) until a new notification occurs. 

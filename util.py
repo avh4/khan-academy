@@ -52,13 +52,16 @@ def _is_phantom_user(user):
     return user and is_phantom_email(user.email())
 
 def create_login_url(dest_url):
-    return "/login?continue=%s" % urllib.quote(dest_url)
+    return "/login?k&continue=%s" % urllib.quote(dest_url)
 
 def create_mobile_oauth_login_url(dest_url):
     return "/login/mobileoauth?continue=%s" % urllib.quote(dest_url)
 
 def create_post_login_url(dest_url):
-    return "/postlogin?continue=%s" % urllib.quote(dest_url)
+    if dest_url.startswith("/postlogin"):
+        return dest_url
+    else:
+        return "/postlogin?continue=%s" % urllib.quote(dest_url)
 
 def create_logout_url(dest_url):
     return "/logout?continue=%s" % urllib.quote(dest_url)
@@ -96,7 +99,7 @@ def static_url(relative_url):
     if App.is_dev_server or not os.environ['HTTP_HOST'].lower().endswith(".khanacademy.org"):
         return relative_url
     else:
-        return "http://khanexercises.appspot.com%s" % relative_url
+        return "http://khan-academy.appspot.com%s" % relative_url
 
 def absolute_url(relative_url):
 		return 'http://%s%s' % (os.environ['HTTP_HOST'], relative_url)

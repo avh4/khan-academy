@@ -239,7 +239,7 @@ var VideoControls = {
 
 var VideoStats = {
 
-    dPercentGranularity: 0.20,
+    dPercentGranularity: 0.05,
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
@@ -262,7 +262,7 @@ var VideoStats = {
     getPercentWatched: function() {
         if (!this.player) return 0;
 
-        var duration = this.player.getDuration() || 0
+        var duration = this.player.getDuration() || 0;
         if (duration <= 0) return 0;
 
         return this.getSecondsWatched() / duration;
@@ -288,7 +288,7 @@ var VideoStats = {
         {
             // Every 10 seconds check to see if we've crossed over our percent
             // granularity logging boundary
-            setInterval(function(){VideoStats.saveIfChanged();}, 10000);
+            setInterval(function(){VideoStats.playerStateChange(-2);}, 10000);
             this.fIntervalStarted = true;
         }
     },
@@ -305,21 +305,23 @@ var VideoStats = {
     },
 
     playerStateChange: function(state) {
-        // YouTube's "ended" state
-        if (state == 0)
-        {
-            this.saveIfChanged();
-        }
-    },
-
-    saveIfChanged: function() {
-        var percent = this.getPercentWatched();
-        if (percent > this.dPercentLastSaved && 
-                (percent > (this.dPercentLastSaved + this.dPercentGranularity) || percent >= 0.99))
-        {
-            // Either video was finished or another 10% has been watched
+        if (state == -2) { // playing normally
+            var percent = this.getPercentWatched();
+            if (percent > (this.dPercentLastSaved + this.dPercentGranularity))
+            {
+                // Another 10% has been watched
+                this.save();
+            }
+        } else if (state == 0) { // ended
             this.save();
+        } else if (state == 2) { // paused
+            if (this.getSecondsWatchedRestrictedByPageTime() > 1) {
+              this.save();
+            }
+        } else if (state == 1) { // play
+            this.dtSinceSave = new Date();
         }
+        // If state is buffering, unstarted, or cued, don't do anything
     },
 
     save: function() {
@@ -764,23 +766,32 @@ var FacebookHook = {
 
             if (!USERNAME) {
                 FB.Event.subscribe('auth.login', function(response) {
-                    if (URL_CONTINUE)
-                        window.location = URL_CONTINUE;
-                    else
-                        window.location.reload();
+                    if (response.session) {
+                        FacebookHook.fixMissingCookie(response.session);
+                    }
+                    
+                    window.location = URL_CONTINUE || "/";
                });
             }
 
             FB.getLoginStatus(function(response) {
-                if (response.session) {
-                    $('#page_logout').click(function(e) {
+                
+                $('#page_logout').click(function(e) {
+                    
+                    eraseCookie("fbs_" + FB_APP_ID);
+                    
+                    if (response.session) {
+                        
                         FB.logout(function() { 
                             window.location = $("#page_logout").attr("href"); 
                         });
+                        
                         e.preventDefault();
                         return false;
-                    });
-                }
+                    }
+                    
+                });
+                
             });
         };
 
@@ -788,7 +799,24 @@ var FacebookHook = {
             var e = document.createElement('script'); e.async = true;
             e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
             document.getElementById('fb-root').appendChild(e);
-        }); 
+        });
+    },
+    
+    fixMissingCookie: function(session) {
+        // In certain circumstances, Facebook's JS SDK fails to set their cookie
+        // but still thinks users are logged in. To avoid continuous reloads, we
+        // set the cookie manually. See http://forum.developers.facebook.net/viewtopic.php?id=67438.
+
+        if (readCookie("fbs_" + FB_APP_ID))
+            return;
+
+        var sCookie = "";
+        $.each(session, function( key ) {
+            sCookie += key + "=" + encodeURIComponent(session[key]) + "&";
+        });
+
+        // Explicitly use a session cookie here for IE's sake.
+        createCookie("fbs_" + FB_APP_ID, "\"" + sCookie + "\"");
     }
 }
 FacebookHook.init();

@@ -2,8 +2,8 @@ import os
 import logging
 import datetime
 import urllib
+import simplejson
 
-from django.utils import simplejson
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -60,7 +60,7 @@ class RequestInputHandler(object):
         return None
 
     def request_float(self, key, default = None):
-        try:        
+        try:
             return float(self.request_string(key))
         except ValueError:
             if default is not None:
@@ -110,7 +110,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         elif type(e) is MissingExerciseException:
 
             title = "This exercise isn't here right now."
-            message_html = "Either this exercise doesn't exist or it's temporarily hiding. You should <a href='/exercisedashboard'>head back to our other exercises</a>."
+            message_html = "Either this exercise doesn't exist or it's temporarily hiding. You should <a href='/exercisedashboard?k'>head back to our other exercises</a>."
             sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
 
         elif type(e) is MissingVideoException:
@@ -212,6 +212,12 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
                 template_values['is_mobile'] = self.is_mobile()
 
+        # overridable hide_analytics querystring that defaults to true in dev
+        # mode but false for prod.
+        hide_analytics = os.environ.get('SERVER_SOFTWARE').startswith('Devel')
+        hide_analytics = self.request_bool("hide_analytics", hide_analytics)
+        template_values['hide_analytics'] = hide_analytics
+
         return template_values
 
     def render_template(self, template_name, template_values):
@@ -225,7 +231,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
         return template.render(path, template_values)
- 
+
     @staticmethod
     def render_template_block_to_string(template_name, block, context):
         path = os.path.join(os.path.dirname(__file__), template_name)
