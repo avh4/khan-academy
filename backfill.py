@@ -14,15 +14,10 @@ def add_user_id(user_data):
     user = user_data.current_user
     
     user_id = user.user_id()
-    logging.critical(user)
-    logging.critical(user_id)
     if user_id:
-        logging.critical("Google")
         user_data.user_id = "http://googleid.khanacademy.org/"+user_id
         user_data.user_email = user.email()
     else:
-        logging.critical("Facebook")
-        logging.critical(user_data.email)
         user_data.user_id = user_data.email
         user_data.user_email = user.email()
     yield op.db.Put(user_data)
