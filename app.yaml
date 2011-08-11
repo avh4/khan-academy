@@ -86,6 +86,7 @@ handlers:
 
 - url: /gae_mini_profiler/static
   static_dir: gae_mini_profiler/static
+  expiration: "300s"
 
 - url: /gae_mini_profiler/.*
   script: gae_mini_profiler/main.py
