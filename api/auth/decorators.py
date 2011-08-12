@@ -4,7 +4,7 @@ import flask
 from flask import request
 
 from api.auth.auth_util import oauth_error_response
-from api.auth.models import OAuthMap
+from api.auth.auth_models import OAuthMap
 
 from oauth_provider.decorators import is_valid_request, validate_token
 from oauth_provider.oauth import OAuthError

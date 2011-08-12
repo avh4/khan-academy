@@ -41,14 +41,14 @@ class GoogleOAuthClient(object):
 
         return OAuthToken.from_string(response)
 
-    def access_user_email(self, oauth_map):
+    def access_user_id(self, oauth_map):
 
         token = OAuthToken(oauth_map.google_access_token, oauth_map.google_access_token_secret)
 
         oauth_request = OAuthRequest.from_consumer_and_token(
                 GoogleOAuthClient.Consumer,
                 token = token,
-                http_url = "%sapi/auth/current_google_oauth_email" % request.host_url
+                http_url = "%sapi/auth/current_google_oauth_user_id" % request.host_url
                 )
 
         oauth_request.sign_request(OAuthSignatureMethod_HMAC_SHA1(), GoogleOAuthClient.Consumer, token)

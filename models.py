@@ -659,7 +659,7 @@ class UserData(db.Model):
         return util.is_phantom_user(self.user_id)
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id_%s" % user_id)
+    @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id:%s" % user_id)
     def get_from_user_id(user_id):
         if not user_id:
             return None
