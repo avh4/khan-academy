@@ -147,7 +147,7 @@
             <div id="divHeader" class="sizeOnResize" style="overflow:hidden;width:450px; line-height: 15px;">
                 <table cellspacing="0" cellpadding="0" border="1" style="width: 100%">
                   <tr>
-                    {% for exercise_name in exercise_names %}
+                    {% for exercise_name in exercise_names_sorted %}
                         <th><div class="tableHeader">{{ exercise_names|hash:exercise_name|escape}}</div></th>
                     {% endfor %}
                     <th style="background: transparent; border-color: transparent; max-width:5px; min-width: 5px; width: 5px">&nbsp;</th>
@@ -160,7 +160,7 @@
         <td style="vertical-align: top;">
           <div id="firstcol" style="overflow:hidden;height:325px;">
             <table cellspacing="0" cellpadding="0" border="0" >
-                {% for student_email in student_emails %}
+                {% for student_email in student_emails_sorted %}
                 <tr>
                     <td class="tableFirstCol student-email" style="vertical-align: none;">
                         <a style="color:#006699;" href="/profile?k&selected_graph_type=exerciseprogress&student_email={{ student_email|escape }}">
@@ -177,9 +177,9 @@
         <td valign="top">
             <div id="table_div" class="sizeOnResize fancy-scrollbar" style="overflow:scroll;height:325px;width:450px;position:relative;" onscroll="ProgressReport.onScroll();" >
                 <table style="width:100%;" cellspacing="0" cellpadding="0" border="0">
-                    {% for student_email in student_emails %}
+                    {% for student_email in student_emails_sorted %}
                     <tr {% if forloop.first %}id="firstTr"{% endif %}>
-                    {% for exercise_name in exercise_names %}
+                    {% for exercise_name in exercise_names_sorted %}
                     <td class="student-module-status {{ exercise_data|hash:exercise_name|hash:student_email|hash:"color"}}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('{{exercise_data|hash:exercise_name|hash:student_email|hash:"link"}}');" data-hover="{{exercise_data|hash:exercise_name|hash:student_email|hash:"hover"|escape}}"></td>
                     {% endfor %}
                     </tr>

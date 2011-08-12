@@ -122,7 +122,10 @@ def class_progress_report_graph_context(user_data, student_list):
 
     return {
         'student_emails': student_emails,
+        'student_emails_sorted': sorted(student_emails.keys()),
         'exercise_names': exercise_names,
+        # might be better to sort this by difficulty
+        'exercise_names_sorted': sorted(exercise_names.keys()),
         'exercise_data': exercise_data,
         'coach_email': user_data.email,
     }
