@@ -3,6 +3,7 @@ from templateext import escapejs
 
 import models
 import util
+from itertools import izip
 
 def get_class_exercises(students):
 
@@ -41,27 +42,24 @@ def class_progress_report_graph_context(user_data, student_list):
     else:
         list_students = user_data.get_students_data()
 
-
-
-    student_emails = dict((escape(s.email), truncate_to(s.nickname, 18)) for s in list_students)
-    emails_escapejsed = dict((escape(s.email), escapejs(s.email)) for s in list_students)
+    student_emails = sorted([(escape(s.email), truncate_to(s.nickname, 18)) for s in list_students], key=lambda s: s[1])
+    emails_escapejsed = [escapejs(s.email) for s in list_students]
 
     exercises = get_class_exercises(list_students)
     exercises_all = models.Exercise.get_all_use_cache()
     exercises_found = []
 
     for exercise in exercises_all:
-        for email in student_emails:
+        for (email, _) in student_emails:
             if exercises[email].has_key(exercise.name):
                 exercises_found.append(exercise)
                 break
 
-    exercise_names = dict((e.name, e.display_name) for e in exercises_found)
-    exercise_names_escapejsed = dict((e.name, escapejs(e.name)) for e in exercises_found)
+    exercise_names = [(e.name, e.display_name, escapejs(e.name)) for e in exercises_found]
 
     exercise_data = {}
 
-    for student_email in student_emails:
+    for ((student_email, _), email_escapejsed) in izip(student_emails, emails_escapejsed):
 
         student = exercises[student_email]["user_data_student"]
         if not student:
@@ -69,7 +67,7 @@ def class_progress_report_graph_context(user_data, student_list):
 
         escaped_name = escape(student.nickname)
 
-        for exercise in exercises_found:
+        for (exercise, (_, exercise_display, exercise_name_js)) in izip(exercises_found, exercise_names):
 
             exercise_name = exercise.name
             user_exercise = models.UserExercise()
@@ -80,7 +78,7 @@ def class_progress_report_graph_context(user_data, student_list):
                 exercise_data[exercise_name] = {}
 
             link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % \
-                (emails_escapejsed[student_email], exercise_names_escapejsed[exercise_name])
+                (email_escapejsed, exercise_name_js)
 
             status = ""
             hover = ""
@@ -100,11 +98,9 @@ def class_progress_report_graph_context(user_data, student_list):
                 status = "Started"
                 color = "started"
 
-            exercise_display = exercise_names[exercise_name]
-
             if len(status) > 0:
-                hover = """
-<b>%s</b><br/>
+                hover = \
+"""<b>%s</b><br/>
 <b>%s</b><br/>
 <em><nobr>Status: %s</nobr></em><br/>
 <em>Streak: %s</em><br/>
@@ -122,10 +118,7 @@ def class_progress_report_graph_context(user_data, student_list):
 
     return {
         'student_emails': student_emails,
-        'student_emails_sorted': sorted(student_emails.keys()),
         'exercise_names': exercise_names,
-        # might be better to sort this by difficulty
-        'exercise_names_sorted': sorted(exercise_names.keys()),
         'exercise_data': exercise_data,
         'coach_email': user_data.email,
     }
