@@ -950,7 +950,7 @@ class PostLogin(request_handler.RequestHandler):
             current_email = user_data.email
         #if the user has changed their email, update it
         if user_data and current_email != user_data.email:
-            user_data.email = current_email
+            user_data.user_email = current_email
             user_data.put()
         if user_data and phantom_id:
             phantom_data = UserData.get_from_db_key_email(phantom_id) 
