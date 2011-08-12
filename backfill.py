@@ -11,6 +11,8 @@ def add_user_id(user_data):
     if not user_data or not user_data.current_user:
         return
     user = user_data.current_user
+    if user_data.user_id and user_data.user_email:
+        return
     user_id = user.user_id()
     if user_id:
         user_data.user_id = "http://googleid.khanacademy.org/"+user_id
