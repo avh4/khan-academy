@@ -18,6 +18,7 @@ except:
         constant_contact_password = None
         flask_secret_key = None
         dashboard_secret = None
+        khanbugz_passwd = None
 
 # A singleton shared across requests
 class App(object):
@@ -45,8 +46,10 @@ class App(object):
 
     dashboard_secret = secrets.dashboard_secret
 
+    khanbugz_passwd = secrets.khanbugz_passwd
+
     root = os.path.dirname(__file__)
-    
+
     is_dev_server = False
     if os.environ["SERVER_SOFTWARE"].startswith('Development'):
         is_dev_server = True
