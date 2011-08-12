@@ -30,7 +30,7 @@ class NewPost(request_handler.RequestHandler):
     def post(self):
 
         # FIXME: proper repo URL
-        url = "https://api.github.com/repos/jruberg/kathack-fork/issues"
+        url = "https://api.github.com/repos/Khan/khan-exercises/issues"
         data = self.request.body
 
         opener = urllib2.build_opener(BetterHTTPErrorProcessor)
@@ -65,7 +65,7 @@ class NewComment(request_handler.RequestHandler):
 
         data = json.loads(self.request.body)
         # FIXME: proper repo URL
-        url = ("https://api.github.com/repos/jruberg/kathack-fork/issues/%d/comments" %
+        url = ("https://api.github.com/repos/Khan/khan-exercises/issues/%d/comments" %
                data['id'])
 
         opener = urllib2.build_opener(BetterHTTPErrorProcessor)
