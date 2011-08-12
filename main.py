@@ -50,6 +50,7 @@ import backfill
 import activity_summary
 import exercises
 import dashboard
+import github
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -953,9 +954,9 @@ class PostLogin(request_handler.RequestHandler):
         if user_data and current_email != user_data.email:
             user_data.user_email = current_email
             user_data.put()
-            
+
         if user_data and phantom_id:
-            phantom_data = UserData.get_from_db_key_email(phantom_id) 
+            phantom_data = UserData.get_from_db_key_email(phantom_id)
             # First make sure user has 0 points and phantom user has some activity
             if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
                 # Make sure user has no students
@@ -1191,6 +1192,9 @@ def main():
         ('/discussion/moderatorlist', qa.ModeratorList),
         ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
 
+        ('/githubpost', github.NewPost),
+        ('/githubcomment', github.NewComment),
+
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
         ('/badges/custom/award', custom_badges.AwardCustomBadge),
@@ -1207,9 +1211,9 @@ def main():
         ('/admin/entitycounts', dashboard.EntityCounts),
 
         ('/sendtolog', SendToLog),
-        
+
         ('/user_video_css', ServeUserVideoCss),
-        
+
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
         ('/index\.html', PermanentRedirectToHome),
