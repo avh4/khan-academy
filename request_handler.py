@@ -127,10 +127,16 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             webapp.RequestHandler.handle_exception(self, e, args)
 
         # Never show stack traces on production machines
-        if not App.is_dev_server:
-            self.response.clear()
+        if App.is_dev_server:
+            stack_trace = self.response.out.getvalue()
 
-        self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
+            # Strip off the <pre>
+            stack_trace = stack_trace[5:-6]
+        else:
+            stack_trace = ""
+        self.response.clear()
+
+        self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html, "stack_trace": stack_trace })
 
     @classmethod
     def exceptions_to_http(klass, status):
