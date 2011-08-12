@@ -280,7 +280,7 @@ var Profile = {
     },
 
     historyChange: function(e) {
-        var href = $.address ? $.address.parameter("graph_url") : "" || this.initialGraphUrl;
+        var href = ($.address ? $.address.parameter("graph_url") : "") || this.initialGraphUrl;
         href = decodeURIComponent(href);
         if (href)
         {

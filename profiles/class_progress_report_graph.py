@@ -1,4 +1,5 @@
 from django.template.defaultfilters import escape
+from templateext import escapejs
 
 import models
 import util
@@ -23,6 +24,12 @@ def get_class_exercises(students):
 
     return exercises
 
+def truncate_to(s, length):
+    if len(s) > length:
+        return s[18:] + '...'
+    else:
+        return s
+
 def class_progress_report_graph_context(user_data, student_list):
 
     if not user_data:
@@ -34,9 +41,12 @@ def class_progress_report_graph_context(user_data, student_list):
     else:
         list_students = user_data.get_students_data()
 
-    student_emails = [s.email for s in list_students]
-    exercises = get_class_exercises(list_students)
 
+
+    student_emails = dict((escape(s.email), truncate_to(s.nickname, 18)) for s in list_students)
+    emails_escapejsed = dict((escape(s.email), escapejs(s.email)) for s in list_students)
+
+    exercises = get_class_exercises(list_students)
     exercises_all = models.Exercise.get_all_use_cache()
     exercises_found = []
 
@@ -46,7 +56,9 @@ def class_progress_report_graph_context(user_data, student_list):
                 exercises_found.append(exercise)
                 break
 
-    exercises_found_names = [e.name for e in exercises_found]
+    exercise_names = dict((e.name, e.display_name) for e in exercises_found)
+    exercise_names_escapejsed = dict((e.name, escapejs(e.name)) for e in exercises_found)
+
     exercise_data = {}
 
     for student_email in student_emails:
@@ -55,8 +67,7 @@ def class_progress_report_graph_context(user_data, student_list):
         if not student:
             continue
 
-        name = student.nickname
-        i = 0
+        escaped_name = escape(student.nickname)
 
         for exercise in exercises_found:
 
@@ -68,7 +79,8 @@ def class_progress_report_graph_context(user_data, student_list):
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
 
-            link = "/profile/graph/exerciseproblems?student_email=" + student.email + "&exercise_name="+exercise_name
+            link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % \
+                (emails_escapejsed[student_email], exercise_names_escapejsed[exercise_name])
 
             status = ""
             hover = ""
@@ -88,27 +100,32 @@ def class_progress_report_graph_context(user_data, student_list):
                 status = "Started"
                 color = "started"
 
-            exercise_display = models.Exercise.to_display_name(exercise_name)
-            short_name = name
-            if len(short_name) > 18:
-                short_name = short_name[0:18] + "..."
+            exercise_display = exercise_names[exercise_name]
 
             if len(status) > 0:
-                hover = "<b>%s</b><br/><br/><b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (escape(name), exercise_display, status, user_exercise.streak, user_exercise.total_done)
+                hover = """
+<b>%s</b><br/>
+<b>%s</b><br/>
+<em><nobr>Status: %s</nobr></em><br/>
+<em>Streak: %s</em><br/>
+<em>Problems attempted: %s</em>""" % (escaped_name,
+                                      exercise_display,
+                                      status,
+                                      user_exercise.streak,
+                                      user_exercise.total_done)
 
             exercise_data[exercise_name][student_email] = {
-                    "name": name,
-                    "short_name": short_name,
-                    "exercise_display": exercise_display,
-                    "link": link,
-                    "hover": hover,
-                    "color": color
-                    }
-            i += 1
+                "link": link,
+                "hover": hover,
+                "color": color
+            }
 
     return {
-            'student_emails': student_emails,
-            'exercise_names': exercises_found_names,
-            'exercise_data': exercise_data,
-            'coach_email': user_data.email,
-        }
+        'student_emails': student_emails,
+        'student_emails_sorted': sorted(student_emails.keys()),
+        'exercise_names': exercise_names,
+        # might be better to sort this by difficulty
+        'exercise_names_sorted': sorted(exercise_names.keys()),
+        'exercise_data': exercise_data,
+        'coach_email': user_data.email,
+    }
