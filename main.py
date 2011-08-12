@@ -1202,11 +1202,14 @@ def main():
         ('/jobs/.*', RedirectToJobvite),
 
         ('/dashboard', dashboard.Dashboard),
+        ('/entityboard', dashboard.Entityboard),
         ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
         ('/admin/entitycounts', dashboard.EntityCounts),
 
         ('/sendtolog', SendToLog),
-
+        
+        ('/user_video_css', ServeUserVideoCss),
+        
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
         ('/index\.html', PermanentRedirectToHome),

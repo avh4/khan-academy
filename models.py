@@ -504,7 +504,6 @@ class StudentList(db.Model):
 
     @staticmethod
     def get_for_coach(key):
-        logging.critical(key)
         query = StudentList.all()
         query.filter('deleted =', False)
         query.filter("coaches = ", key)
@@ -613,7 +612,7 @@ class UserData(db.Model):
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
-            "last_login", "user", "map_coords", "expanded_all_exercises",
+            "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
     ]
     
     @property
