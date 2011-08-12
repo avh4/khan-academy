@@ -614,7 +614,7 @@ class UserData(db.Model):
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
     ]
-    
+
     @property
     def nickname(self):
         nickname = nicknames.get_nickname_for(self.user_id, self.email)
@@ -648,7 +648,7 @@ class UserData(db.Model):
             email = user.email()
         if user_id:
             # Once we have rekeyed legacy entities,
-            # we will be able to simplify this.we make 
+            # we will be able to simplify this.we make
             return  UserData.get_from_user_id(user_id) or \
                     UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(user_id, email)
@@ -670,7 +670,7 @@ class UserData(db.Model):
 
         return query.get()
 
-    @staticmethod    
+    @staticmethod
     def get_from_user_email(email):
         if not email:
             return None
