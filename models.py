@@ -679,7 +679,7 @@ class UserData(db.Model):
             return None
 
         query = UserData.all()
-        query.filter('email =', email)
+        query.filter('user_email =', email)
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()
