@@ -352,6 +352,9 @@ class UserExercise(db.Model):
         else:
             user_data = UserData.get_from_db_key_email(self.user.email())
 
+        if not user_data:
+            logging.critical("Empty user data for UserExercise w/ .user = %s" % self.user)
+
         return user_data
 
     def clear_memcache(self):
