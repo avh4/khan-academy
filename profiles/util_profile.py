@@ -6,6 +6,7 @@ from google.appengine.api import users
 from profiles import templatetags
 import request_handler
 import util
+import user_util
 import models
 import consts
 from badges import util_badges
@@ -48,7 +49,7 @@ class ViewClassProfile(request_handler.RequestHandler):
         if user_data_coach:
 
             user_data_override = self.request_user_data("coach_email")
-            if users.is_current_user_admin() and user_data_override:
+            if user_util.is_current_user_developer() and user_data_override:
                 # Site administrators can look at any class profile
                 user_data_coach = user_data_override
 
@@ -116,7 +117,7 @@ class ViewProfile(request_handler.RequestHandler):
 
         user_data_override = self.request_user_data("student_email")
         if user_data_override and user_data_override.key_email != user_data_student.key_email:
-            if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
+            if (not user_util.is_current_user_developer()) and (not user_data_override.is_coached_by(user_data_student)):
                 # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                 self.redirect("/profile?k")
                 return
@@ -188,7 +189,7 @@ class ProfileGraph(request_handler.RequestHandler):
         if user_data_student:
             user_data_override = self.request_user_data("student_email")
             if user_data_override and user_data_override.key_email != user_data_student.key_email:
-                if (not users.is_current_user_admin()) and (not user_data_override.is_coached_by(user_data_student)):
+                if (not user_util.is_current_user_developer()) and (not user_data_override.is_coached_by(user_data_student)):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     user_data_student = None
                 else:
@@ -217,7 +218,7 @@ class ClassProfileGraph(ProfileGraph):
 
         if user_data_coach:
             user_data_override = self.request_user_data("coach_email")
-            if users.is_current_user_admin() and user_data_override:
+            if user_util.is_current_user_developer() and user_data_override:
                 # Site administrators can look at any class profile
                 user_data_coach = user_data_override
 

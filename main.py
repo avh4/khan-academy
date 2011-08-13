@@ -44,6 +44,7 @@ import request_handler
 from app import App
 import app
 import util
+import user_util
 import points
 import exercise_statistics
 import backfill
@@ -73,10 +74,8 @@ from notifications import UserNotifier
 
 class VideoDataTest(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
         self.response.out.write('<html>')
         videos = Video.all()
         for video in videos:
@@ -85,10 +84,8 @@ class VideoDataTest(request_handler.RequestHandler):
 
 class DeleteVideoPlaylists(request_handler.RequestHandler):
 # Deletes at most 200 Video-Playlist associations that are no longer live.  Should be run every-now-and-then to make sure the table doesn't get too big
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
         query = VideoPlaylist.all()
         all_video_playlists = query.fetch(200)
         video_playlists_to_delete = []
@@ -99,10 +96,8 @@ class DeleteVideoPlaylists(request_handler.RequestHandler):
 
 
 class KillLiveAssociations(request_handler.RequestHandler):
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
         query = VideoPlaylist.all()
         all_video_playlists = query.fetch(100000)
         for video_playlist in all_video_playlists:

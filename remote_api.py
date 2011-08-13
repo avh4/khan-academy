@@ -8,6 +8,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 import re
+import user_util
 
 from app import App
 
@@ -19,7 +20,7 @@ class ApiCallHandler(handler.ApiCallHandler):
       # We probably don't need to check both is_users.current_user_admin() 
       # and handler.ApiCallHandler.CheckIsAdmin(self) below, but since we don't have any
       # control over handler.ApiCallHandler.CheckIsAdmin(self), we are being extra careful.
-      return App.is_dev_server or (users.is_current_user_admin() and handler.ApiCallHandler.CheckIsAdmin(self))
+      return App.is_dev_server or (user_util.is_current_user_developer() and handler.ApiCallHandler.CheckIsAdmin(self))
     login_cookie = self.request.cookies.get('dev_appserver_login', '')
     match = cookie_re.search(login_cookie)
     if (match and match.group(1) == App.remote_api_secret

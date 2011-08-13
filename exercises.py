@@ -14,6 +14,7 @@ import datetime
 import models
 import request_handler
 import util
+import user_util
 import points
 import layer_cache
 import knowledgemap
@@ -27,11 +28,9 @@ from api import jsonify
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
         self.get()
+
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
         node = self.request_string('exercise')
         direction = self.request_string('direction')
     
@@ -270,8 +269,8 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
 
         user_data.last_activity = user_exercise.last_done
         
-        # If a non-admin tries to answer a problem out-of-order, just ignore it
-        if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
+        # If a non-dev tries to answer a problem out-of-order, just ignore it
+        if problem_number != user_exercise.total_done+1 and not user_util.is_current_user_developer():
             # Only admins can answer problems out of order.
             raise Exception("Problem number out of order")
 
@@ -362,11 +361,8 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
 
 class ExerciseAdmin(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
         user_data = models.UserData.current()
         user = models.UserData.current().user
 
@@ -403,11 +399,8 @@ class ExerciseAdmin(request_handler.RequestHandler):
 
 class EditExercise(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         exercise_name = self.request.get('name')
         if exercise_name:
             query = models.Exercise.all().order('name')
@@ -436,11 +429,8 @@ class UpdateExercise(request_handler.RequestHandler):
     def post(self):
         self.get()
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         user = models.UserData.current().user
 
         exercise_name = self.request.get('name')
