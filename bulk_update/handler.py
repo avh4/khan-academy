@@ -111,7 +111,7 @@ def _is_in_progress(task_path):
     return result
     
 class UpdateKind(webapp.RequestHandler):
-    @user_util.developer_only
+    @user_util.admin_only
     def get(self):
         if self.request.get('cancel'):
             cancel_task(self.request.path)
