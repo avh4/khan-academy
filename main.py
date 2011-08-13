@@ -1077,6 +1077,7 @@ def main():
         ('/viewexercisesonmap', exercises.ViewAllExercises),
         ('/editexercise', exercises.EditExercise),
         ('/updateexercise', exercises.UpdateExercise),
+        ('/moveexercisemapnode', exercises.MoveMapNode),
         ('/admin94040', exercises.ExerciseAdmin),
         ('/videoless', VideolessExercises),
         ('/video/.*', ViewVideo),
@@ -1114,7 +1115,6 @@ def main():
         ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
         ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
-        ('/admin/movemapnode', exercises.MoveMapNode),
         ('/admin/rendertemplate', ViewRenderTemplate),
 
         ('/devadmin/emailchange', devpanel.Email),
