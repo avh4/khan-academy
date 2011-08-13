@@ -65,7 +65,7 @@ class NewPost(request_handler.RequestHandler):
     def get(self):
 
         data = self.request.get('json')
-        url = "https://api.github.com/repos/jruberg/kathack-fork/issues" + \
+        url = "https://api.github.com/repos/Khan/khan-exercises/issues" + \
               "?callback=" + self.request.get('callback')
 
         self.response.headers.add_header("Content-Type", "text/javascript")
@@ -83,7 +83,7 @@ class NewComment(request_handler.RequestHandler):
     def post(self):
 
         data = json.loads(self.request.body)["json"]
-        url = ("https://api.github.com/repos/jruberg/kathack-fork/issues/%d/comments" %
+        url = ("https://api.github.com/repos/Khan/khan-exercises/issues/%d/comments" %
                data['id'])
 
         gh_post(self, url, json.dumps(data), HEADERS)
