@@ -840,16 +840,15 @@ class UserData(db.Model):
 
     def get_students_data(self):
         coach_email = self.key_email
-        query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
-        students_data = []
-        for student_data in query:
-            students_data.append(student_data)
+        query = UserData.all().filter('coaches =', coach_email)
+        students_data = [s for s in query.fetch(1000)]
+
         if coach_email.lower() != coach_email:
-            students_set = set(map(lambda student_data: student_data.key().id_or_name(), students_data))
-            query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email.lower())
+            students_set = set([s.key().id_or_name() for s in students_data])
+            query = UserData.all().filter('coaches =', coach_email.lower())
             for student_data in query:
-        	    if student_data.key().id_or_name() not in students_set:
-        		    students_data.append(student_data)
+                if student_data.key().id_or_name() not in students_set:
+                    students_data.append(student_data)
         return students_data
 
     def has_students(self):
