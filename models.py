@@ -614,7 +614,7 @@ class UserData(db.Model):
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
     ]
-    
+
     @property
     def nickname(self):
         nickname = nicknames.get_nickname_for(self.user_id, self.email)
@@ -648,7 +648,7 @@ class UserData(db.Model):
             email = user.email()
         if user_id:
             # Once we have rekeyed legacy entities,
-            # we will be able to simplify this.we make 
+            # we will be able to simplify this.we make
             return  UserData.get_from_user_id(user_id) or \
                     UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(user_id, email)
@@ -670,7 +670,7 @@ class UserData(db.Model):
 
         return query.get()
 
-    @staticmethod    
+    @staticmethod
     def get_from_user_email(email):
         if not email:
             return None
@@ -840,16 +840,15 @@ class UserData(db.Model):
 
     def get_students_data(self):
         coach_email = self.key_email
-        query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
-        students_data = []
-        for student_data in query:
-            students_data.append(student_data)
+        query = UserData.all().filter('coaches =', coach_email)
+        students_data = [s for s in query.fetch(1000)]
+
         if coach_email.lower() != coach_email:
-            students_set = set(map(lambda student_data: student_data.key().id_or_name(), students_data))
-            query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email.lower())
+            students_set = set([s.key().id_or_name() for s in students_data])
+            query = UserData.all().filter('coaches =', coach_email.lower())
             for student_data in query:
-        	    if student_data.key().id_or_name() not in students_set:
-        		    students_data.append(student_data)
+                if student_data.key().id_or_name() not in students_set:
+                    students_data.append(student_data)
         return students_data
 
     def has_students(self):
