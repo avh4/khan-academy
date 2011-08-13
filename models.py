@@ -352,6 +352,9 @@ class UserExercise(db.Model):
         else:
             user_data = UserData.get_from_db_key_email(self.user.email())
 
+        if not user_data:
+            logging.critical("Empty user data for UserExercise w/ .user = %s" % self.user)
+
         return user_data
 
     def clear_memcache(self):
@@ -659,7 +662,7 @@ class UserData(db.Model):
         return util.is_phantom_user(self.user_id)
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id_%s" % user_id)
+    @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id:%s" % user_id)
     def get_from_user_id(user_id):
         if not user_id:
             return None
@@ -676,7 +679,7 @@ class UserData(db.Model):
             return None
 
         query = UserData.all()
-        query.filter('email =', email)
+        query.filter('user_email =', email)
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()

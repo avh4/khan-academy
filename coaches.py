@@ -188,6 +188,10 @@ class UnregisterStudentCoach(RequestHandler):
 
         try:
             student.coaches.remove(coach.key_email)
+        except ValueError:
+            pass
+
+        try:
             student.coaches.remove(coach.key_email.lower())
         except ValueError:
             pass

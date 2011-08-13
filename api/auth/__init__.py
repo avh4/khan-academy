@@ -7,7 +7,7 @@ from flask import request, redirect
 from flask import current_app
 
 from api import route
-from api.auth.models import OAuthMap
+from api.auth.auth_models import OAuthMap
 from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response, custom_scheme_redirect, set_current_oauth_map_in_session
 from api.auth.google_util import google_request_token_handler
 from api.auth.facebook_util import facebook_request_token_handler
@@ -97,15 +97,15 @@ def authorize_token():
         raise OAuthError("Unable to find oauth_map from request token during authorization.")
 
     # Get user from oauth map using either FB or Google access token
-    user = oauth_map.get_user()
-    if not user:
+    user_data = oauth_map.get_user_data()
+    if not user_data:
         return oauth_error_response(OAuthError("User not logged in during authorize_token process."))
 
     try:
         # For now we don't require user intervention to authorize our tokens,
         # since the user already authorized FB/Google. If we need to do this
         # for security reasons later, there's no reason we can't.
-        token = oauth_server.authorize_token(token, user)
+        token = oauth_server.authorize_token(token, user_data.user)
         oauth_map.verifier = token.verifier
         oauth_map.put()
 
