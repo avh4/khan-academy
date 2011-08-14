@@ -1,8 +1,8 @@
 mapreduce:
-- name: Backfill UserID
+- name: BackfillCheckUserProperties
   mapper:
     input_reader: mapreduce.input_readers.DatastoreInputReader
-    handler:  backfill.add_user_id
+    handler:  backfill.check_user_properties
     params:
     - name: entity_kind
       default: models.UserData
@@ -11,4 +11,4 @@ mapreduce:
     - name: queue_name
       default: backfill-mapreduce-queue
     - name: processing_rate
-      default: 2000
+      default: 500
