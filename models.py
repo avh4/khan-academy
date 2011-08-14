@@ -702,7 +702,7 @@ class UserData(db.Model):
         if not user_id or not email:
             return None
 
-        user = users.User(user_id)
+        user = users.User(email)
         key = "user_id_key_%s" % user_id
 
         user_data = UserData.get_or_insert(
