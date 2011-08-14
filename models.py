@@ -1512,6 +1512,9 @@ class ExerciseGraph(object):
             ex.streak = 0
             ex.longest_streak = 0
             ex.total_done = 0
+            if hasattr(ex, 'last_done'):
+                # Clear leftovers from cache to fix random recents on new accounts
+                del ex.last_done
         for name in user_data.proficient_exercises:
             ex = self.exercise_by_name.get(name)
             if ex:
