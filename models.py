@@ -643,12 +643,14 @@ class UserData(db.Model):
     def current(bust_cache=True):
         if bust_cache:
             util.get_current_user_id(bust_cache=True)
+
         user_id = util.get_current_user_id()
-        user = users.get_current_user()
         email = user_id
 
-        if user:
-            email = user.email()
+        google_user = users.get_current_user()
+        if google_user:
+            email = google_user.email()
+
         if user_id:
             # Once we have rekeyed legacy entities,
             # we will be able to simplify this.we make 
