@@ -937,47 +937,47 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry,
-        # also delete phantom cookies
-
-        # If new user is new, 0 points, migrate data
-        phantom_id = get_phantom_user_id_from_cookies()
+        # Immediately after login we make sure this user has a UserData entity
         user_data = UserData.current()
-
         if user_data:
-            current_user = users.get_current_user()
-            if current_user:
-                current_email = current_user.email()
-            else:
-                current_email = user_data.email
 
-            # If the user has changed their email, update it
-            if current_email != user_data.email:
-                user_data.user_email = current_email
+            # Update email address if it has changed
+            current_google_user = users.get_current_user()
+            if current_google_user and current_google_user.email() != user_data.email:
+                user_data.user_email = current_google_user.email()
                 user_data.put()
+
+            # If user is brand new and has 0 points, migrate data
+            phantom_id = get_phantom_user_id_from_cookies()
+            if phantom_id:
+                phantom_data = UserData.get_from_db_key_email(phantom_id)
+
+                # First make sure user has 0 points and phantom user has some activity
+                if user_data.points == 0 and phantom_data and phantom_data.points > 0:
+
+                    # Make sure user has no students
+                    if not user_data.has_students():
+
+                        # Clear all "login" notifications
+                        UserNotifier.clear_all(phantom_data)
+
+                        # Update phantom user_data to real user_data
+                        phantom_data.user_id = user_data.user_id
+                        phantom_data.current_user = user_data.current_user
+                        phantom_data.user_email = user_data.user_email
+
+                        if phantom_data.put():
+                            # Phantom user was just transitioned to real user
+                            user_counter.add(1)
+                            user_data.delete()
+
+                        cont = "/newaccount?continue=%s" % cont
         else:
             logging.critical("Missing UserData during PostLogin, with %s" % util.get_current_user_id())
 
-        if user_data and phantom_id:
-            phantom_data = UserData.get_from_db_key_email(phantom_id)
-            # First make sure user has 0 points and phantom user has some activity
-            if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
-                # Make sure user has no students
-                if not user_data.has_students():
-                    #Clear all "login" notifications
-                    UserNotifier.clear_all(phantom_data)
-                    logging.info("New Account: %s", user_data.current().email)
-                    # Update user_data, email values
-                    phantom_data.user_id = user_data.user_id
-                    phantom_data.current_user = user_data.current_user
-                    phantom_data.user_email = user_data.current().email
-                    if phantom_data.put():
-                        # Phantom user was just transitioned to real user
-                        user_counter.add(1)
-                        user_data.delete()
-                    cont = "/newaccount?continue=%s" % cont
-
+        # Always delete phantom user cookies on login
         self.delete_cookie('ureg_id')
+
         self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
