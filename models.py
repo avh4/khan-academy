@@ -674,7 +674,7 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod    
-    def get_from_user_email(email):
+    def get_from_user_input_email(email):
         if not email:
             return None
 
