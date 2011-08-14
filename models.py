@@ -659,6 +659,11 @@ class UserData(db.Model):
                     UserData.insert_for(user_id, email)
         return None
 
+    @staticmethod
+    def pre_phantom():
+        pre_phantom_email = "http://nouserid.khanacademy.org/pre-phantom-user"
+        return UserData.insert_for(pre_phantom_email, pre_phantom_email)
+
     @property
     def is_phantom(self):
         return util.is_phantom_user(self.user_id)

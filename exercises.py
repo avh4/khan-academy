@@ -51,10 +51,7 @@ class MoveMapNode(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user_email = 'http://nouserid.khanacademy.org/pre-phantom-user'
-            user_data = models.UserData.insert_for(user_email, user_email)
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
 
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
@@ -133,10 +130,7 @@ class ViewExercise(request_handler.RequestHandler):
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user_email = 'http://nouserid.khanacademy.org/pre-phantom-user'
-            user_data = models.UserData.insert_for(user_email, user_email)
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
 
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
