@@ -480,7 +480,7 @@ class CoachRequest(db.Model):
     def get_for_coach(user_data_coach):
         return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
 
-class StudentList(db.Expando):
+class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
 
@@ -506,7 +506,7 @@ class StudentList(db.Expando):
     def get_for_coach(key):
         query = StudentList.all()
         query.filter("coaches = ", key)
-        return [s for s in query.fetch(100) if not getattr(s, 'deleted', False)]
+        return query
 
 class UserVideoCss(db.Model):
     user = db.UserProperty()
