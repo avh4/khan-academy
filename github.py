@@ -49,8 +49,8 @@ def gh_post(handler, url, data, headers):
     else:
         if response.code == 201:
             handler.response.set_status(201)
-            handler.render_json(response.read())
-        elif 'callback' in url:
+            handler.render_json(json.loads(response.read()))
+        elif 'callback' in url and response.code == 200:
             handler.response.set_status(201)
             handler.response.out.write(response.read())
         else:
@@ -63,8 +63,8 @@ def gh_post(handler, url, data, headers):
 class NewPost(request_handler.RequestHandler):
 
     def get(self):
-        # The GET method will be called when using jsonp on a local webserver
-        # to allow cross-domain requests.
+        # This is a fall back when using jsonp on a local webserver to allow
+        # cross-domain requests.
 
         data = self.request.get('json')
         url = "https://api.github.com/repos/Khan/khan-exercises/issues" + \
@@ -77,16 +77,20 @@ class NewPost(request_handler.RequestHandler):
     def post(self):
         # the POST method will be the standard means of communication.
 
-        data = json.loads(self.request.body)["json"]
+        data = self.request.body
         url = "https://api.github.com/repos/Khan/khan-exercises/issues"
 
-        gh_post(self, url, json.dumps(data), HEADERS)
+        self.response.headers.add_header("Content-Type", "application/json")
+
+        gh_post(self, url, data, HEADERS)
 
 class NewComment(request_handler.RequestHandler):
     def post(self):
 
-        data = json.loads(self.request.body)["json"]
+        data = json.loads(self.request.body)
         url = ("https://api.github.com/repos/Khan/khan-exercises/issues/%d/comments" %
                data['id'])
+
+        self.response.headers.add_header("Content-Type", "application/json")
 
         gh_post(self, url, json.dumps(data), HEADERS)
