@@ -7,6 +7,8 @@ import sys
 import re
 import traceback
 
+import google
+import django
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -130,7 +132,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             webapp.RequestHandler.handle_exception(self, e, args)
 
         # Show a nice stack trace on development machines, but not in production
-        if App.is_dev_server:
+        if App.is_dev_server or users.is_current_user_admin():
             try:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
 
@@ -140,10 +142,13 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 http_method = self.request.method
                 title = '%s in %s.%s' % (exc_type.__name__, class_name, http_method.lower())
 
-                sdk_root = [path for path in sys.path if re.search(r'google_appengine$', path)][0]
-                sdk_version = os.environ['SDK_VERSION']
+                sdk_root = os.path.normpath(os.path.join(os.path.dirname(google.__file__), '..'))
+                sdk_version = os.environ['SDK_VERSION'] if os.environ.has_key('SDK_VERSION') else os.environ['SERVER_SOFTWARE'].split('/')[-1]
+                django_root = os.path.normpath(os.path.join(os.path.dirname(django.__file__), '..'))
+                django_version = '.'.join(str(v) for v in django.VERSION if v != None)
                 app_root = '%s' % os.path.dirname(__file__)
                 r_sdk_root = re.compile(r'^%s/' % re.escape(sdk_root))
+                r_django_root = re.compile(r'^%s/' % re.escape(django_root))
                 r_app_root = re.compile(r'^%s/' % re.escape(app_root))
 
                 (template_filename, template_line, extracted_source) = (None, None, None)
@@ -166,6 +171,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
                 def format_frame(frame):
                     filename, line, function, text = frame
+                    filename = r_django_root.sub('django (%s) ' % django_version, filename)
                     filename = r_sdk_root.sub('google_appengine (%s) ' % sdk_version, filename)
                     filename = r_app_root.sub('', filename)
                     return "%s:%s:in `%s'" % (filename, line, function)
@@ -294,7 +300,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     @staticmethod
     def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
-        debug = App.is_dev_server
+        debug = App.is_dev_server or users.is_current_user_admin()
         return template.render(path, template_values, debug)
 
     @staticmethod
