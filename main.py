@@ -973,7 +973,10 @@ class PostLogin(request_handler.RequestHandler):
 
                         cont = "/newaccount?continue=%s" % cont
         else:
-            logging.critical("Missing UserData during PostLogin, with %s" % util.get_current_user_id())
+            logging.critical("Missing UserData during PostLogin, with id: %s, cookies: (%s), google user: %s" % (
+                    util.get_current_user_id(), os.environ.get('HTTP_COOKIE', ''), users.get_current_user()
+                )
+            )
 
         # Always delete phantom user cookies on login
         self.delete_cookie('ureg_id')
