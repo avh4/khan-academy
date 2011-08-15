@@ -31,7 +31,7 @@ def get_list(coach_data, request_handler):
     return student_list
 
 def get_coach_student_and_student_list(request_handler):
-    coach_data = models.UserData.current()
+    coach_data = UserData.current()
     student_list = get_list(coach_data, request_handler)
     student_data = get_student(coach_data, request_handler)
     return (coach_data, student_data, student_list)
@@ -43,7 +43,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
     @disallow_phantoms
     def get(self):
-        user_data_coach = models.UserData.current()
+        user_data_coach = UserData.current()
 
         if user_data_coach:
 
@@ -109,7 +109,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
 class ViewProfile(request_handler.RequestHandler):
     def get(self):
-        user_data_student = models.UserData.current() or models.UserData.pre_phantom()
+        user_data_student = UserData.current() or UserData.pre_phantom()
 
         user_data_override = self.request_user_data("student_email")
         if user_data_override and user_data_override.key_email != user_data_student.key_email:
@@ -180,7 +180,7 @@ class ProfileGraph(request_handler.RequestHandler):
             self.response.out.write(json)
 
     def get_profile_target_user_data(self):
-        user_data_student = models.UserData.current()
+        user_data_student = UserData.current()
 
         if user_data_student:
             user_data_override = self.request_user_data("student_email")
@@ -210,7 +210,7 @@ class ProfileGraph(request_handler.RequestHandler):
 
 class ClassProfileGraph(ProfileGraph):
     def get_profile_target_user_data(self):
-        user_data_coach = models.UserData.current()
+        user_data_coach = UserData.current()
 
         if user_data_coach:
             user_data_override = self.request_user_data("coach_email")
