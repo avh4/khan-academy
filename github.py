@@ -63,6 +63,8 @@ def gh_post(handler, url, data, headers):
 class NewPost(request_handler.RequestHandler):
 
     def get(self):
+        # The GET method will be called when using jsonp on a local webserver
+        # to allow cross-domain requests.
 
         data = self.request.get('json')
         url = "https://api.github.com/repos/Khan/khan-exercises/issues" + \
@@ -73,9 +75,10 @@ class NewPost(request_handler.RequestHandler):
         gh_post(self, url, data, HEADERS)
 
     def post(self):
+        # the POST method will be the standard means of communication.
 
         data = json.loads(self.request.body)["json"]
-        url = "https://api.github.com/repos/jruberg/kathack-fork/issues"
+        url = "https://api.github.com/repos/Khan/khan-exercises/issues"
 
         gh_post(self, url, json.dumps(data), HEADERS)
 
