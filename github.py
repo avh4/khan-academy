@@ -25,71 +25,68 @@ class BetterHTTPErrorProcessor(urllib2.BaseHandler):
         return response
 
 
+def gh_post(handler, url, data, headers):
+
+    opener = urllib2.build_opener(BetterHTTPErrorProcessor)
+    urllib2.install_opener(opener)
+
+    try:
+        request = urllib2.Request(url, data, headers)
+        response = urllib2.urlopen(request)
+
+    except urllib2.HTTPError, e:
+        logging.info("Encountered HTTPError %s" % e)
+        handler.response.set_status(500)
+        handler.render_json(e.read())
+        e.close()
+
+    except urllib2.URLError, e:
+        logging.info("Encountered URLError %s" % e)
+        handler.response.set_status(500)
+        handler.render_json(e.read())
+        e.close()
+
+    else:
+        if response.code == 201:
+            handler.response.set_status(201)
+            handler.render_json(response.read())
+        elif 'callback' in url:
+            handler.response.set_status(201)
+            handler.response.out.write(response.read())
+        else:
+            logging.info("Encountered non-201 HTTP status code %s" % response.read())
+            handler.response.set_status(500)
+            handler.render_json(response.read())
+
+        response.close()
+
 class NewPost(request_handler.RequestHandler):
 
+    def get(self):
+        # The GET method will be called when using jsonp on a local webserver
+        # to allow cross-domain requests.
+
+        data = self.request.get('json')
+        url = "https://api.github.com/repos/Khan/khan-exercises/issues" + \
+              "?callback=" + self.request.get('callback')
+
+        self.response.headers.add_header("Content-Type", "text/javascript")
+
+        gh_post(self, url, data, HEADERS)
+
     def post(self):
+        # the POST method will be the standard means of communication.
 
-        # FIXME: proper repo URL
+        data = json.loads(self.request.body)["json"]
         url = "https://api.github.com/repos/Khan/khan-exercises/issues"
-        data = self.request.body
 
-        opener = urllib2.build_opener(BetterHTTPErrorProcessor)
-        urllib2.install_opener(opener)
-
-        try:
-            request = urllib2.Request(url, data, HEADERS)
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError, e:
-            logging.info("Encountered HTTPError %s" % e)
-            self.response.set_status(500)
-            self.render_json(e.read())
-            e.close()
-        except urllib2.URLError, e:
-            logging.info("Encountered URLError %s" % e)
-            self.response.set_status(500)
-            self.render_json(e.read())
-            e.close()
-        else:
-            if response.code == 201:
-                self.response.set_status(201)
-                self.render_json(response.read())
-            else:
-                logging.info("Encountered non-201 HTTP status code %s" % response)
-                self.response.set_status(500)
-                self.render_json(response.read())
-            response.close()
-
+        gh_post(self, url, json.dumps(data), HEADERS)
 
 class NewComment(request_handler.RequestHandler):
     def post(self):
 
-        data = json.loads(self.request.body)
-        # FIXME: proper repo URL
+        data = json.loads(self.request.body)["json"]
         url = ("https://api.github.com/repos/Khan/khan-exercises/issues/%d/comments" %
                data['id'])
 
-        opener = urllib2.build_opener(BetterHTTPErrorProcessor)
-        urllib2.install_opener(opener)
-
-        try:
-            request = urllib2.Request(url, json.dumps(data), HEADERS)
-            response = urllib2.urlopen(request)
-        except urllib2.HTTPError, e:
-            logging.info("Encountered HTTPError %s" % e)
-            self.response.set_status(500)
-            self.render_json(e.read())
-            e.close()
-        except urllib2.URLError, e:
-            logging.info("Encountered URLError %s" % e)
-            self.response.set_status(500)
-            self.render_json(e.read())
-            e.close()
-        else:
-            if response.code == 201:
-                self.response.set_status(201)
-                self.render_json(response.read())
-            else:
-                logging.info("Encountered non-201 HTTP status code %s" % response)
-                self.response.set_status(500)
-                self.render_json(response.read())
-            response.close()
+        gh_post(self, url, json.dumps(data), HEADERS)

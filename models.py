@@ -30,6 +30,7 @@ from discussion import models_discussion
 from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
+from facebook_util import is_facebook_user_id
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -352,6 +353,9 @@ class UserExercise(db.Model):
         else:
             user_data = UserData.get_from_db_key_email(self.user.email())
 
+        if not user_data:
+            logging.critical("Empty user data for UserExercise w/ .user = %s" % self.user)
+
         return user_data
 
     def clear_memcache(self):
@@ -582,6 +586,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
 class UserData(db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
+    user_nickname = db.StringProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     developer = db.BooleanProperty(default=False)
@@ -613,12 +618,16 @@ class UserData(db.Model):
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
+            "user_nickname", "user_email",
     ]
 
     @property
     def nickname(self):
-        nickname = nicknames.get_nickname_for(self.user_id, self.email)
-        return nickname
+        # Only return cached value if it exists and it wasn't cached during a Facebook API hiccup
+        if self.user_nickname and not is_facebook_user_id(self.user_nickname):
+            return self.user_nickname
+        else:
+            return nicknames.get_nickname_for(self)
 
     @property
     def email(self):
@@ -640,12 +649,14 @@ class UserData(db.Model):
     def current(bust_cache=True):
         if bust_cache:
             util.get_current_user_id(bust_cache=True)
+
         user_id = util.get_current_user_id()
-        user = users.get_current_user()
         email = user_id
 
-        if user:
-            email = user.email()
+        google_user = users.get_current_user()
+        if google_user:
+            email = google_user.email()
+
         if user_id:
             # Once we have rekeyed legacy entities,
             # we will be able to simplify this.we make
@@ -653,6 +664,11 @@ class UserData(db.Model):
                     UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(user_id, email)
         return None
+
+    @staticmethod
+    def pre_phantom():
+        pre_phantom_email = "http://nouserid.khanacademy.org/pre-phantom-user-2"
+        return UserData.insert_for(pre_phantom_email, pre_phantom_email)
 
     @property
     def is_phantom(self):
@@ -671,12 +687,12 @@ class UserData(db.Model):
         return query.get()
 
     @staticmethod
-    def get_from_user_email(email):
+    def get_from_user_input_email(email):
         if not email:
             return None
 
         query = UserData.all()
-        query.filter('email =', email)
+        query.filter('user_email =', email)
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()
@@ -697,7 +713,7 @@ class UserData(db.Model):
         if not user_id or not email:
             return None
 
-        user = users.User(user_id)
+        user = users.User(email)
         key = "user_id_key_%s" % user_id
 
         user_data = UserData.get_or_insert(
@@ -768,7 +784,7 @@ class UserData(db.Model):
                 streak=0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),
-                last_done=datetime.datetime.now(),
+                last_done=None,
                 total_done=0,
                 summative=exercise.summative,
                 )
@@ -1508,6 +1524,9 @@ class ExerciseGraph(object):
             ex.streak = 0
             ex.longest_streak = 0
             ex.total_done = 0
+            if hasattr(ex, 'last_done'):
+                # Clear leftovers from cache to fix random recents on new accounts
+                del ex.last_done
         for name in user_data.proficient_exercises:
             ex = self.exercise_by_name.get(name)
             if ex:
@@ -1659,11 +1678,11 @@ class ExerciseGraph(object):
 
     def get_recent_exercises(self, n_recent=2):
         recent_exercises = sorted(self.exercises, reverse=True,
-                key=lambda ex: ex.last_done if hasattr(ex, "last_done") else datetime.datetime.min)
+                key=lambda ex: ex.last_done if hasattr(ex, "last_done") and ex.last_done else datetime.datetime.min)
 
         recent_exercises = recent_exercises[0:n_recent]
 
-        return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
+        return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
