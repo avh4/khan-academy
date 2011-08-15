@@ -7,11 +7,15 @@ import datetime
 
 sys.path.append(os.path.abspath("."))
 import compress
-from secrets import hipchat_deploy_token
 
-import hipchat.room
-import hipchat.config
-hipchat.config.manual_init(hipchat_deploy_token)
+try:
+    from secrets import hipchat_deploy_token
+
+    import hipchat.room
+    import hipchat.config
+    hipchat.config.manual_init(hipchat_deploy_token)
+except:
+    None
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
