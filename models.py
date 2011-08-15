@@ -487,10 +487,7 @@ class StudentList(db.Model):
 
     def delete(self, *args, **kwargs):
         self.remove_all_students()
-        self.deleted = True
-        self.put()
-        # Don't actually delete until we're on the HR datastore.
-        # db.Model.delete(self, *args, **kwargs)
+        db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
         students = self.get_students_data()
