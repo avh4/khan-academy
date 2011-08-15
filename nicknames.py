@@ -11,7 +11,14 @@ def to_unicode(s):
     else:
         return s
 
-def get_nickname_for(user_id, email):
+def get_nickname_for(user_data):
+
+    if not user_data:
+        return None
+
+    user_id = user_data.user_id
+    email = user_data.email
+
     if not user_id or not email:
         return None
         

@@ -30,6 +30,7 @@ from discussion import models_discussion
 from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
+from facebook_util import is_facebook_user_id
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -585,6 +586,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
 class UserData(db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
+    user_nickname = db.StringProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     developer = db.BooleanProperty(default=False)
@@ -616,12 +618,16 @@ class UserData(db.Model):
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
+            "user_nickname", "user_email",
     ]
     
     @property
     def nickname(self):
-        nickname = nicknames.get_nickname_for(self.user_id, self.email)
-        return nickname
+        # Only return cached value if it exists and it wasn't cached during a Facebook API hiccup
+        if self.user_nickname and not is_facebook_user_id(self.user_nickname):
+            return self.user_nickname
+        else:
+            return nicknames.get_nickname_for(self)
 
     @property
     def email(self):

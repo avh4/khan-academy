@@ -70,6 +70,7 @@ from phantom_users.phantom_util import create_phantom, get_phantom_user_id_from_
 from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
+from nicknames import get_nickname_for
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -947,6 +948,12 @@ class PostLogin(request_handler.RequestHandler):
                 user_data.user_email = current_google_user.email()
                 user_data.put()
 
+            # Update nickname if it has changed
+            current_nickname = get_nickname_for(user_data)
+            if user_data.user_nickname != current_nickname:
+                user_data.user_nickname = current_nickname
+                user_data.put()
+
             # If user is brand new and has 0 points, migrate data
             phantom_id = get_phantom_user_id_from_cookies()
             if phantom_id:
@@ -965,6 +972,7 @@ class PostLogin(request_handler.RequestHandler):
                         phantom_data.user_id = user_data.user_id
                         phantom_data.current_user = user_data.current_user
                         phantom_data.user_email = user_data.user_email
+                        phantom_data.user_nickname = user_data.user_nickname
 
                         if phantom_data.put():
                             # Phantom user was just transitioned to real user

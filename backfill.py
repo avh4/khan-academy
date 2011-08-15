@@ -6,6 +6,16 @@ from mapreduce import operation as op
 import request_handler
 import models
 import facebook_util
+from nicknames import get_nickname_for
+
+def cache_user_nickname(user_data):
+    if not user_data or not user_data.user:
+        return
+
+    current_nickname = get_nickname_for(user_data)
+    if user_data.user_nickname != current_nickname:
+        user_data.user_nickname = current_nickname
+        yield op.db.Put(user_data)
 
 def check_user_properties(user_data):
     if not user_data or not user_data.user:

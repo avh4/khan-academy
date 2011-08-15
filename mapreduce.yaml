@@ -12,3 +12,17 @@ mapreduce:
       default: backfill-mapreduce-queue
     - name: processing_rate
       default: 500
+
+- name: BackfillCacheUserNickname
+  mapper:
+    input_reader: mapreduce.input_readers.DatastoreInputReader
+    handler:  backfill.cache_user_nickname
+    params:
+    - name: entity_kind
+      default: models.UserData
+    - name: shard_count
+      default: 64
+    - name: queue_name
+      default: backfill-mapreduce-queue
+    - name: processing_rate
+      default: 500
