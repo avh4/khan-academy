@@ -265,9 +265,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
         user_data.last_activity = user_exercise.last_done
         
         # If a non-admin tries to answer a problem out-of-order, just ignore it
-        if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
+        if problem_number != user_exercise.total_done + 1 and not users.is_current_user_admin():
             # Only admins can answer problems out of order.
-            raise Exception("Problem number out of order")
+            raise Exception("Problem number out of order (%s vs %s) for user_id: %s" % (problem_number, user_exercise.total_done + 1, user_data.user_id))
 
         if len(sha1) <= 0:
             raise Exception("Missing sha1 hash of problem content.")
