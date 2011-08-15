@@ -53,9 +53,9 @@ class ViewClassProfile(request_handler.RequestHandler):
                 user_data_coach = user_data_override
 
             students_data = user_data_coach.get_students_data()
-            
+
             student_lists = StudentList.get_for_coach(user_data_coach.key())
-            
+
             student_lists_list = [{
                 'key': 'allstudents',
                 'name': 'All students',
@@ -70,14 +70,14 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'nstudents': len(students),
                     'class_points': self.class_points(students)
                 })
-            
+
             list_id = self.request_string('list_id', 'allstudents')
             current_list = None
             for student_list in student_lists_list:
                 if student_list['key'] == list_id:
                     current_list = student_list
-            
-            dict_students = map(lambda student_data: { 
+
+            dict_students = map(lambda student_data: {
                 "email": student_data.email,
                 "nickname": student_data.nickname,
             }, students_data)
@@ -86,7 +86,7 @@ class ViewClassProfile(request_handler.RequestHandler):
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(user_data_coach.email), urllib.unquote(self.request_string("graph_query_params", default="")))
             if list_id:
                 initial_graph_url += 'list_id=%s' % list_id
-            
+
             template_values = {
                     'user_data_coach': user_data_coach,
                     'coach_email': user_data_coach.email,
@@ -157,7 +157,7 @@ class ProfileGraph(request_handler.RequestHandler):
 
         user_data_target = self.get_profile_target_user_data()
         if user_data_target:
-            
+
             if self.redirect_if_not_ajax(user_data_target):
                 return
 
@@ -197,7 +197,7 @@ class ProfileGraph(request_handler.RequestHandler):
     def redirect_if_not_ajax(self, user_data_student):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
-            self.redirect("/profile?k&selected_graph_type=%s&student_email=%s&graph_query_params=%s" % 
+            self.redirect("/profile?k&selected_graph_type=%s&student_email=%s&graph_query_params=%s" %
                     (self.GRAPH_TYPE, urllib.quote(user_data_student.email), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
@@ -223,11 +223,11 @@ class ClassProfileGraph(ProfileGraph):
     def redirect_if_not_ajax(self, user_data_coach):
         if not self.is_ajax_request():
             # If it's not an ajax request, redirect to the appropriate /profile URL
-            self.redirect("/class_profile?selected_graph_type=%s&coach_email=%s&graph_query_params=%s" % 
+            self.redirect("/class_profile?selected_graph_type=%s&coach_email=%s&graph_query_params=%s" %
                     (self.GRAPH_TYPE, urllib.quote(user_data_coach.email), urllib.quote(urllib.quote(self.request.query_string))))
             return True
         return False
-    
+
     def get_student_list(self, user_data_coach):
         list_id = self.request_string("list_id")
         if list_id and list_id != 'allstudents':
@@ -319,7 +319,7 @@ class ProfileDateRangeGraph(ProfileDateToolsGraph):
 
         # If no dates were specified and activity was empty, try max day range instead of default 7.
         if dt_start_ctz_test == datetime.datetime.min and dt_end_ctz_test == datetime.datetime.min:
-            self.redirect(self.request_url_with_additional_query_params("dt_start=lastmonth&dt_end=today&is_ajax_override=1")) 
+            self.redirect(self.request_url_with_additional_query_params("dt_start=lastmonth&dt_end=today&is_ajax_override=1"))
             return True
 
         return False
