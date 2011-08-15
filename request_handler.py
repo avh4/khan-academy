@@ -330,6 +330,7 @@ import util
 # monkey patch webapp.template.load to fix the following issue:
 # http://code.google.com/p/googleappengine/issues/detail?id=1520
 import django.conf
+import google.appengine.ext.webapp
 ORIG_TEMPLATE_DIRS = django.conf.settings.TEMPLATE_DIRS
 def _swap_settings_override(new):
     settings = django.conf.settings
