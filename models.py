@@ -661,7 +661,7 @@ class UserData(db.Model):
 
     @staticmethod
     def pre_phantom():
-        pre_phantom_email = "http://nouserid.khanacademy.org/pre-phantom-user"
+        pre_phantom_email = "http://nouserid.khanacademy.org/pre-phantom-user-2"
         return UserData.insert_for(pre_phantom_email, pre_phantom_email)
 
     @property
@@ -778,7 +778,7 @@ class UserData(db.Model):
                 streak=0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),
-                last_done=datetime.datetime.now(),
+                last_done=None,
                 total_done=0,
                 summative=exercise.summative,
                 )
@@ -1673,11 +1673,11 @@ class ExerciseGraph(object):
 
     def get_recent_exercises(self, n_recent=2):
         recent_exercises = sorted(self.exercises, reverse=True,
-                key=lambda ex: ex.last_done if hasattr(ex, "last_done") else datetime.datetime.min)
+                key=lambda ex: ex.last_done if hasattr(ex, "last_done") and ex.last_done else datetime.datetime.min)
 
         recent_exercises = recent_exercises[0:n_recent]
 
-        return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
+        return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
