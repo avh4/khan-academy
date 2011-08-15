@@ -4,6 +4,7 @@ import datetime, logging
 import math
 import urllib
 import pickle
+import random
 
 import config_django
 
@@ -1279,6 +1280,12 @@ class ProblemLog(db.Model):
     count_attempts = db.IntegerProperty(default = 0)
     time_taken_attempts = db.ListProperty(int)
     attempts = db.StringListProperty()
+    random_float = db.FloatProperty() # Add a random float in [0, 1) for easy random sampling
+
+    def put(self):
+        if self.random_float is None:
+            self.random_float = random.random()
+        db.Model.put(self)
 
     @property
     def ka_url(self):
