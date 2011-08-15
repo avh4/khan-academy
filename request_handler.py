@@ -140,7 +140,9 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 class_name = '%s.%s' % (re.sub(r'^__|__$', '', self.__class__.__module__), type(self).__name__)
 
                 http_method = self.request.method
-                title = '%s in %s.%s' % (exc_type.__name__, class_name, http_method.lower())
+                title = '%s in %s.%s' % ((exc_value.exc_info[0] if hasattr(exc_value, 'exc_info') else exc_type).__name__, class_name, http_method.lower())
+
+                message = str(exc_value.exc_info[1]) if hasattr(exc_value, 'exc_info') else str(exc_value)
 
                 sdk_root = os.path.normpath(os.path.join(os.path.dirname(google.__file__), '..'))
                 sdk_version = os.environ['SDK_VERSION'] if os.environ.has_key('SDK_VERSION') else os.environ['SERVER_SOFTWARE'].split('/')[-1]
@@ -177,6 +179,8 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                     return "%s:%s:in `%s'" % (filename, line, function)
 
                 extracted = traceback.extract_tb(exc_traceback)
+                if hasattr(exc_value, 'exc_info'):
+                    extracted += traceback.extract_tb(exc_value.exc_info[2])
 
                 application_frames = reversed([frame for frame in extracted if r_app_root.match(frame[0])])
                 framework_frames = reversed([frame for frame in extracted if not r_app_root.match(frame[0])])
@@ -194,7 +198,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 env_dump = '\n'.join('%s: %s' % (k, environ[k]) for k in sorted(environ))
 
                 self.response.clear()
-                self.render_template('viewtraceback.html', { "title": title, "message": str(exc_value), "template_filename": template_filename, "template_line": template_line, "extracted_source": extracted_source, "app_root": app_root, "application_trace": application_trace, "framework_trace": framework_trace, "full_trace": full_trace, "params_dump": params_dump, "env_dump": env_dump })
+                self.render_template('viewtraceback.html', { "title": title, "message": message, "template_filename": template_filename, "template_line": template_line, "extracted_source": extracted_source, "app_root": app_root, "application_trace": application_trace, "framework_trace": framework_trace, "full_trace": full_trace, "params_dump": params_dump, "env_dump": env_dump })
             except:
                 # We messed something up showing the backtrace nicely; just show it normally
                 None
