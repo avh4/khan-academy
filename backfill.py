@@ -38,12 +38,20 @@ def check_user_properties(user_data):
             logging.critical("facebook user's user_id does not match user_email: %s" % user_data.user)
 
 def remove_deleted_studentlists(studentlist):
-    if studentlist.deleted:
-        yield op.db.Delete(studentlist)
+    try:
+        deleted = studentlist.deleted
+        del studentlist.deleted
+        if deleted:
+            yield op.db.Delete(studentlist)
+        else:
+            yield op.db.Put(studentlist)
+    except AttributeError:
+        pass
+        # do nothing, as this studentlist is fine.
 
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
-        pass
+        # pass
 
         # Admin-only restriction is handled by /admin/* URL pattern
         # so this can be called by a cron job.

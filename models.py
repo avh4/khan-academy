@@ -480,10 +480,9 @@ class CoachRequest(db.Model):
     def get_for_coach(user_data_coach):
         return CoachRequest.all().filter("coach_requesting = ", user_data_coach.user)
 
-class StudentList(db.Model):
+class StudentList(db.Expando):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
-    deleted = db.BooleanProperty(default=False)
 
     def delete(self, *args, **kwargs):
         self.remove_all_students()
@@ -506,9 +505,8 @@ class StudentList(db.Model):
     @staticmethod
     def get_for_coach(key):
         query = StudentList.all()
-        query.filter('deleted =', False)
         query.filter("coaches = ", key)
-        return query
+        return [s for s in query.fetch(100) if not getattr(s, 'deleted', False)]
 
 class UserVideoCss(db.Model):
     user = db.UserProperty()
