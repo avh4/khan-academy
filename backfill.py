@@ -37,20 +37,32 @@ def check_user_properties(user_data):
         if user_data.user_id != user_data.user_email:
             logging.critical("facebook user's user_id does not match user_email: %s" % user_data.user)
 
+def remove_deleted_studentlists(studentlist):
+    try:
+        deleted = studentlist.deleted
+        del studentlist.deleted
+        if deleted:
+            yield op.db.Delete(studentlist)
+        else:
+            yield op.db.Put(studentlist)
+    except AttributeError:
+        pass
+        # do nothing, as this studentlist is fine.
+
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
-        pass
+        # pass
 
         # Admin-only restriction is handled by /admin/* URL pattern
         # so this can be called by a cron job.
 
         # Start a new Mapper task.
-        # mapreduce_id = control.start_map(
-        #     name = "BackfillExerciseOrder",
-        #     handler_spec = "backfill.transfer_user_logs",
-        #     reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-        #     reader_parameters = {"entity_kind": "models.UserLog"},
-        #     shard_count = 64,
-        #     queue_name = "backfill-mapreduce-queue",
-        #   )
-        # self.response.out.write("OK: " + str(mapreduce_id))
+        mapreduce_id = control.start_map(
+            name = "RemoveDeletedStudentlists",
+            handler_spec = "backfill.remove_deleted_studentlists",
+            reader_spec = "mapreduce.input_readers.DatastoreInputReader",
+            reader_parameters = {"entity_kind": "models.StudentList"},
+            shard_count = 64,
+            queue_name = "backfill-mapreduce-queue",
+          )
+        self.response.out.write("OK: " + str(mapreduce_id))
