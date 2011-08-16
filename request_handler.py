@@ -304,7 +304,9 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     @staticmethod
     def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
-        debug = App.is_dev_server or users.is_current_user_admin()
+
+        # Don't turn on debug in production even for admins because filesystem access is sloooow
+        debug = App.is_dev_server
         return template.render(path, template_values, debug)
 
     @staticmethod
