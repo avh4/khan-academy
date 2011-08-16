@@ -514,6 +514,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_bool("hint_used"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
+                    request.request_string("problem_type"),
                     )
 
             add_action_results(user_exercise, {

@@ -1293,6 +1293,7 @@ class ProblemLog(db.Model):
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
     sha1 = db.StringProperty()
     seed = db.StringProperty()
+    problem_type = db.StringProperty()
     count_attempts = db.IntegerProperty(default = 0)
     time_taken_attempts = db.ListProperty(int)
     attempts = db.StringListProperty()
@@ -1366,6 +1367,7 @@ def commit_problem_log(problem_log_source):
                 time_done = problem_log_source.time_done,
                 sha1 = problem_log_source.sha1,
                 seed = problem_log_source.seed,
+                problem_type = problem_log_source.problem_type,
                 exercise_non_summative = problem_log_source.exercise_non_summative,
         )
 
