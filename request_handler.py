@@ -201,7 +201,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 self.render_template('viewtraceback.html', { "title": title, "message": message, "template_filename": template_filename, "template_line": template_line, "extracted_source": extracted_source, "app_root": app_root, "application_trace": application_trace, "framework_trace": framework_trace, "full_trace": full_trace, "params_dump": params_dump, "env_dump": env_dump })
             except:
                 # We messed something up showing the backtrace nicely; just show it normally
-                None
+                pass
         else:
             self.response.clear()
             self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
