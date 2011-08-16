@@ -5,6 +5,8 @@ use_library('django', '0.96')
 
 import django.conf
 
+ORIG_TEMPLATE_DIRS = (os.path.dirname(__file__),)
+
 try:
     django.conf.settings.configure(
         DEBUG=False,
@@ -12,7 +14,7 @@ try:
         TEMPLATE_LOADERS=(
           'django.template.loaders.filesystem.load_template_source',
         ),
-        TEMPLATE_DIRS=(os.path.dirname(__file__),)
+        TEMPLATE_DIRS=ORIG_TEMPLATE_DIRS
     )
 except EnvironmentError:
     pass
@@ -21,7 +23,6 @@ except EnvironmentError:
 # http://code.google.com/p/googleappengine/issues/detail?id=1520
 import django.conf
 import google.appengine.ext.webapp.template
-ORIG_TEMPLATE_DIRS = django.conf.settings.TEMPLATE_DIRS
 def _swap_settings_override(new):
     settings = django.conf.settings
     old = {}
