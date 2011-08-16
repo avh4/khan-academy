@@ -3,6 +3,7 @@ from functools import wraps
 from google.appengine.api import users
 
 import models
+import request_cache
 
 def admin_only(method):
     '''Decorator that requires a admin account.'''
@@ -22,6 +23,7 @@ def admin_only(method):
 
     return wrapper
 
+@request_cache.cache()
 def is_current_user_developer():
     user_data = models.UserData.current()
     return bool(users.is_current_user_admin() or (user_data and user_data.developer))
