@@ -1339,6 +1339,10 @@ def commit_problem_log(problem_log_source):
         # Handle special case during new exercise deploy
         return
 
+    if problem_log_source.count_attempts > 1000:
+        logging.info("Ignoring attempt to write problem log w/ attempts over 1000.")
+        return
+
     def insert_in_position(index, items, val, filler):
         if index >= len(items):
             items.extend([filler] * (index + 1 - len(items)))
@@ -1361,6 +1365,7 @@ def commit_problem_log(problem_log_source):
         )
 
         index_attempt = max(0, problem_log_source.count_attempts - 1)
+
         if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
             return
