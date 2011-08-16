@@ -1253,16 +1253,18 @@ class ProblemLog(db.Model):
     correct = db.BooleanProperty(default = False)
     time_done = db.DateTimeProperty(auto_now_add=True)
     time_taken = db.IntegerProperty(default = 0)
+    attempt_time_taken_list = db.ListProperty(int)
+    hint_time_taken_list = db.ListProperty(int)
+    hint_after_attempt_list = db.ListProperty(int)
+    attempt_list = db.StringListProperty()
+    count_attempts = db.IntegerProperty(default = 0)
+    count_hints = db.IntegerProperty(default = 0)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
-    hints_used = db.IntegerProperty(default = 0)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
     sha1 = db.StringProperty()
     seed = db.StringProperty()
-    count_attempts = db.IntegerProperty(default = 0)
-    time_taken_attempts = db.ListProperty(int)
-    attempts = db.StringListProperty()
 
     @property
     def ka_url(self):
@@ -1305,6 +1307,9 @@ def commit_problem_log(problem_log_source):
         # Handle special case during new exercise deploy
         return
 
+    # This does not have the same behavior as .insert(). This is used because
+    # tasks can be run out of order so we extend the list as needed and insert
+    # values.
     def insert_in_position(index, items, val, filler):
         if index >= len(items):
             items.extend([filler] * (index + 1 - len(items)))
@@ -1327,32 +1332,43 @@ def commit_problem_log(problem_log_source):
         )
 
         index_attempt = max(0, problem_log_source.count_attempts - 1)
-        if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
+        index_hint = max(0, problem_log_source.count_hints - 1)
+        if index_attempt < len(problem_log.attempt_time_taken_list) \
+           and problem_log.attempt_time_taken_list[index_attempt] != -1 \
+           and index_hint < len(problem_log.hint_time_taken_list) \
+           and problem_log.hint_time_taken_list[index_hint] != -1:
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
             return
 
+        problem_log.count_hints = max(problem_log.count_hints, problem_log_source.count_hints)
+
         # Bump up attempt count
-        problem_log.count_attempts += 1
+        if problem_log_source.attempt_list[0] != "hint": # attempt
+            problem_log.count_attempts += 1
 
-        # Hint used cannot be changed from True to False
-        # TODO: confirm this is the intended behavior
-        problem_log.hints_used = max(problem_log.hints_used, problem_log_source.hints_used)
+            # Add time_taken for this individual attempt
+            problem_log.time_taken += problem_log_source.time_taken
+            insert_in_position(index_attempt, problem_log.attempt_time_taken_list, problem_log_source.time_taken, filler=-1)
 
-        # Correct cannot be changed from False to True after first attempt
-        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hints_used
+            # Add actual attempt content
+            insert_in_position(index_attempt, problem_log.attempt_list, problem_log_source.attempt_list[0], filler="")
 
-        # Add time_taken for this individual attempt
-        problem_log.time_taken += problem_log_source.time_taken
-        insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
+            # Proficiency earned should never change per problem
+            problem_log.earned_proficiency = problem_log.earned_proficiency or \
+                problem_log_source.earned_proficiency
 
-        # Add actual attempt content
-        insert_in_position(index_attempt, problem_log.attempts, problem_log_source.attempts[0], filler="")
+        else: # hint
+            # Add time taken for hint
+            insert_in_position(index_hint, problem_log.hint_time_taken_list, problem_log_source.time_taken, filler=-1)
+
+            # Add problem number this hint follows
+            insert_in_position(index_hint, problem_log.hint_after_attempt_list, index_attempt, filler=-1)
 
         # Points should only be earned once per problem, regardless of attempt count
         problem_log.points_earned = max(problem_log.points_earned, problem_log_source.points_earned)
 
-        # Proficiency earned should never change per problem
-        problem_log.earned_proficiency = problem_log.earned_proficiency or problem_log_source.earned_proficiency
+        # Correct cannot be changed from False to True after first attempt
+        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.count_hints
 
         problem_log.put()
 

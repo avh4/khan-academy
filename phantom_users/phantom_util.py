@@ -64,7 +64,7 @@ def create_phantom(method):
             self.set_cookie(PHANTOM_MORSEL_KEY, cookie)
             # make it appear like the cookie was already set
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))
-            
+
             # Bust the cache so later calls to models.UserData.current() return 
             # the phantom user
             models.UserData.current(bust_cache=True)

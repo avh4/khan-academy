@@ -503,17 +503,55 @@ def attempt_problem_number(exercise_name, problem_number):
         if user_exercise and problem_number:
 
             user_exercise = attempt_problem(
-                    user_data, 
-                    user_exercise, 
-                    problem_number, 
+                    user_data,
+                    user_exercise,
+                    problem_number,
                     request.request_int("attempt_number"),
                     request.request_string("attempt_content"),
                     request.request_string("sha1"),
                     request.request_string("seed"),
                     request.request_bool("complete"),
-                    request.request_int("hints_used"),
+                    request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
+                    hint = False
+                    )
+
+            add_action_results(user_exercise, {
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise.exercise_states),
+            })
+
+            return user_exercise
+
+    return unauthorized_response()
+
+@route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/hint", methods=["POST"])
+@oauth_optional()
+@api_create_phantom
+@jsonp
+@jsonify
+def attempt_problem_number(exercise_name, problem_number):
+    user_data = models.UserData.current()
+
+    if user_data:
+        exercise = models.Exercise.get_by_name(exercise_name)
+        user_exercise = user_data.get_or_insert_exercise(exercise)
+
+        if user_exercise and problem_number:
+
+            user_exercise = attempt_problem(
+                    user_data,
+                    user_exercise,
+                    problem_number,
+                    request.request_int("attempt_number"),
+                    request.request_string("attempt_content"),
+                    request.request_string("sha1"),
+                    request.request_string("seed"),
+                    request.request_bool("complete"),
+                    request.request_int("count_hints"),
+                    int(request.request_float("time_taken")),
+                    request.request_string("non_summative"),
+                    hint = True
                     )
 
             add_action_results(user_exercise, {

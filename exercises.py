@@ -121,15 +121,15 @@ class ViewExercise(request_handler.RequestHandler):
             user_activity = []
 
             if problem_log:
-                for i in range(0, len(problem_log.attempts)):
+                for i in range(0, len(problem_log.attempt_list)):
                     user_activity.append([
                         "correct-activity" if problem_log.correct else "incorrect-activity",
-                        "Answered <code>%s</code> in %ds" % (unicode(problem_log.attempts[i]),
-                        max(0, problem_log.time_taken_attempts[i]))
+                        unicode(problem_log.attempt_list[i]),
+                        max(0, problem_log.attempt_time_taken_list[i])
                         ])
 
-                if problem_log.hints_used is not None:
-                    user_exercise.hints_used = problem_log.hints_used
+                if problem_log.count_hints is not None:
+                    user_exercise.count_hints = problem_log.count_hints
             else:
                 user_activity.append([
                     "unavailable-activity",
@@ -139,8 +139,8 @@ class ViewExercise(request_handler.RequestHandler):
 
             user_exercise.user_activity = user_activity
 
-            if not hasattr(user_exercise, 'hints_used'):
-                user_exercise.hints_used = 0
+            if not hasattr(user_exercise, 'count_hints'):
+                user_exercise.count_hints = 0
 
         browser_disabled = self.is_older_ie()
         renderable = renderable and not browser_disabled
@@ -290,7 +290,9 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hints_used, time_taken, exercise_non_summative):
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
+    attempt_content, sha1, seed, completed, count_hints, time_taken,
+    exercise_non_summative, hint):
 
     if user_exercise and user_exercise.belongs_to(user_data):
 
@@ -302,7 +304,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
         user_exercise.summative = exercise.summative
 
         user_data.last_activity = user_exercise.last_done
-        
+
         # If a non-admin tries to answer a problem out-of-order, just ignore it
         if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
             # Only admins can answer problems out of order.
@@ -325,12 +327,12 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                 problem_number = problem_number,
                 time_taken = time_taken,
                 time_done = dt_now,
-                hints_used = hints_used,
-                correct = completed and not hints_used and (attempt_number == 1),
+                count_hints = count_hints,
+                correct = completed and not count_hints and (attempt_number == 1),
                 sha1 = sha1,
                 seed = seed,
                 count_attempts = attempt_number,
-                attempts = [attempt_content],
+                attempt_list = [attempt_content],
         )
 
         if exercise.summative:
