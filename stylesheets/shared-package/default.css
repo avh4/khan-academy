@@ -1235,7 +1235,7 @@ a:link.google-analytics-link-track
 			}
             #library #library-content #library-content-main ol {
                 list-style: none none;
-                margin-left: 0;
+                margin-left: -15px;
                 padding-left: 0;
             }
             #library #library-content #library-content-main li {
@@ -2082,7 +2082,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .achievement-badges-container, #login-page, 
 #about-us, #homepage, #video-page, #contribute,
 #credits, #report-problem, #tos, #privacy-policy,
-#dmca {
+#dmca, #search_results {
     padding: 0 19px;
     background: #fff;
     position: relative;

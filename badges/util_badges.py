@@ -270,8 +270,8 @@ def is_badge_review_waiting(user_data):
     if not user_data.user:
         return False
 
-    if not user_data.current_user:
-        logging.error("UserData with user and no current_user: %s" % user_data.user)
+    if not user_data.user_id:
+        logging.error("UserData with user and no current_user: %s" % user_data.email)
         return False
 
     if user_data.is_phantom:

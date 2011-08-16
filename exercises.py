@@ -14,6 +14,7 @@ import datetime
 import models
 import request_handler
 import util
+import user_util
 import points
 import layer_cache
 import knowledgemap
@@ -27,11 +28,9 @@ from api import jsonify
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
         self.get()
+
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
         node = self.request_string('exercise')
         direction = self.request_string('direction')
     
@@ -51,10 +50,7 @@ class MoveMapNode(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email())
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
 
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
@@ -71,8 +67,6 @@ class ViewExercise(request_handler.RequestHandler):
 
         # Temporarily work around in-app memory caching bug
         exercise.user_exercise = None
-        exercise.prerequisites_ex = None
-        exercise.coverers = None
 
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
@@ -166,11 +160,8 @@ class ViewExercise(request_handler.RequestHandler):
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email())
-        
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
+
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -290,9 +281,13 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
+<<<<<<< local
 def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
     attempt_content, sha1, seed, completed, count_hints, time_taken,
     exercise_non_summative, hint):
+=======
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative, problem_type):
+>>>>>>> other
 
     if user_exercise and user_exercise.belongs_to(user_data):
 
@@ -306,9 +301,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         user_data.last_activity = user_exercise.last_done
 
         # If a non-admin tries to answer a problem out-of-order, just ignore it
-        if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
+        if problem_number != user_exercise.total_done + 1 and not user_util.is_current_user_developer():
             # Only admins can answer problems out of order.
-            raise Exception("Problem number out of order")
+            raise Exception("Problem number out of order (%s vs %s) for user_id: %s" % (problem_number, user_exercise.total_done + 1, user_data.user_id))
 
         if len(sha1) <= 0:
             raise Exception("Missing sha1 hash of problem content.")
@@ -331,6 +326,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 correct = completed and not count_hints and (attempt_number == 1),
                 sha1 = sha1,
                 seed = seed,
+                problem_type = problem_type,
                 count_attempts = attempt_number,
                 attempt_list = [attempt_content],
         )
@@ -350,6 +346,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)
                 suggested = user_data.is_suggested(user_exercise.exercise)
+                problem_log.suggested = suggested
 
                 problem_log.points_earned = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 user_data.add_points(problem_log.points_earned)
@@ -397,11 +394,8 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
 class ExerciseAdmin(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
         user_data = models.UserData.current()
         user = models.UserData.current().user
 
@@ -438,11 +432,8 @@ class ExerciseAdmin(request_handler.RequestHandler):
 
 class EditExercise(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         exercise_name = self.request.get('name')
         if exercise_name:
             query = models.Exercise.all().order('name')
@@ -471,11 +462,8 @@ class UpdateExercise(request_handler.RequestHandler):
     def post(self):
         self.get()
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         user = models.UserData.current().user
 
         exercise_name = self.request.get('name')

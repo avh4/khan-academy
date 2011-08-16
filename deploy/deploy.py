@@ -7,11 +7,15 @@ import datetime
 
 sys.path.append(os.path.abspath("."))
 import compress
-from secrets import hipchat_deploy_token
 
-import hipchat.room
-import hipchat.config
-hipchat.config.manual_init(hipchat_deploy_token)
+try:
+    from secrets import hipchat_deploy_token
+
+    import hipchat.room
+    import hipchat.config
+    hipchat.config.manual_init(hipchat_deploy_token)
+except:
+    hipchat_deploy_token = None
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -23,6 +27,8 @@ def popen_return_code(args):
     return proc.returncode
 
 def send_hipchat_deploy_message(version, includes_local_changes):
+    if hipchat_deploy_token is None:
+        return
 
     app_id = get_app_id()
     if app_id != "khan-academy":
@@ -56,6 +62,9 @@ def send_hipchat_deploy_message(version, includes_local_changes):
             })
 
 def hipchat_message(msg):
+    if hipchat_deploy_token is None:
+        return
+
     for room in hipchat.room.Room.list():
 
         if room.name in ['1s and 0s', 'Exercises']:
@@ -67,7 +76,7 @@ def hipchat_message(msg):
                 result = str(hipchat.room.Room.message(**msg_dict))
             except:
                 pass
-
+            
             if "sent" in result:
                 print "Notified Hipchat room %s" % room.name
             else:

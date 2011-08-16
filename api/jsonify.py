@@ -45,7 +45,6 @@ def dumps(obj):
                 valueClass = str(value.__class__)
                 if is_visible_class_name(valueClass):
                     value = dumps(value)
-                    logging.info("dumping %s" % property)
                     properties[property] = value
             except:
                 continue

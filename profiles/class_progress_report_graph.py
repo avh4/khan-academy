@@ -1,87 +1,94 @@
-import logging
-
-from google.appengine.api import users
 from django.template.defaultfilters import escape
+from templateext import escapejs
 
 import models
 import util
+from itertools import izip
 
-def get_class_exercises(list_student_data):
+def get_class_exercises(students):
 
-    class_exercise_dict = {}
+    exercises = {}
     async_queries = []
 
-    for user_data_student in list_student_data:
-        class_exercise_dict[user_data_student.email] = {"user_data_student": user_data_student}
-        async_queries.append(models.UserExercise.get_for_user_data(user_data_student))
+    for s in students:
+        exercises[s.email] = {"user_data_student": s}
+        async_queries.append(models.UserExercise.get_for_user_data(s))
 
     results = util.async_queries(async_queries)
 
-    for i, user_data_student in enumerate(list_student_data):
+    for i, s in enumerate(students):
 
         user_exercises = results[i].get_result()
         for user_exercise in user_exercises:
-            if user_exercise.exercise not in class_exercise_dict[user_data_student.email]:
-                class_exercise_dict[user_data_student.email][user_exercise.exercise] = user_exercise
+            if user_exercise.exercise not in exercises[s.email]:
+                exercises[s.email][user_exercise.exercise] = user_exercise
 
-    return class_exercise_dict
+    return exercises
+
+def truncate_to(s, length):
+    if len(s) > length:
+        return s[18:] + '...'
+    else:
+        return s
 
 def class_progress_report_graph_context(user_data, student_list):
 
     if not user_data:
         return {}
-        
-    list_student_data = None
+
+    list_students = None
     if student_list:
-        list_student_data = student_list.get_students_data()
+        list_students = student_list.get_students_data()
     else:
-        list_student_data = user_data.get_students_data()
+        list_students = user_data.get_students_data()
 
-    student_emails = map(lambda user_data_student: user_data_student.email, list_student_data)
-    class_exercises = get_class_exercises(list_student_data)
+    student_emails = sorted([(escape(s.email), truncate_to(s.nickname, 18)) for s in list_students], key=lambda s: s[1])
+    emails_escapejsed = [escapejs(s.email) for s in list_students]
 
+    exercises = get_class_exercises(list_students)
     exercises_all = models.Exercise.get_all_use_cache()
     exercises_found = []
 
     for exercise in exercises_all:
-        for student_email in student_emails:
-            if class_exercises[student_email].has_key(exercise.name):
+        for (email, _) in student_emails:
+            if exercises[email].has_key(exercise.name):
                 exercises_found.append(exercise)
                 break
 
-    exercises_found_names = map(lambda exercise: exercise.name, exercises_found)
+    exercise_names = [(e.name, e.display_name, escapejs(e.name)) for e in exercises_found]
+
     exercise_data = {}
 
-    for student_email in student_emails:
+    for ((student_email, _), email_escapejsed) in izip(student_emails, emails_escapejsed):
 
-        user_data_student = class_exercises[student_email]["user_data_student"]
-        if not user_data_student:
+        student = exercises[student_email]["user_data_student"]
+        if not student:
             continue
 
-        name = user_data_student.nickname
-        i = 0
+        escaped_name = escape(student.nickname)
 
-        for exercise in exercises_found:
+        for (exercise, (_, exercise_display, exercise_name_js)) in izip(exercises_found, exercise_names):
 
             exercise_name = exercise.name
             user_exercise = models.UserExercise()
-            if class_exercises[student_email].has_key(exercise_name):
-                user_exercise = class_exercises[student_email][exercise_name]
+            if exercises[student_email].has_key(exercise_name):
+                user_exercise = exercises[student_email][exercise_name]
 
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
 
-            link = "/profile/graph/exerciseproblems?student_email=" + user_data_student.email + "&exercise_name="+exercise_name
+            link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % \
+                (email_escapejsed, exercise_name_js)
 
             status = ""
             hover = ""
             color = "transparent"
 
-            if user_data_student.is_proficient_at(exercise_name):
+            if student.is_proficient_at(exercise_name):
                 status = "Proficient"
                 color = "proficient"
 
-                if not user_data_student.is_explicitly_proficient_at(exercise_name):
+                if not student.is_explicitly_proficient_at(exercise_name):
                     status = "Proficient (due to proficiency in a more advanced module)"
 
             elif user_exercise.exercise is not None and models.UserExercise.is_struggling_with(user_exercise, exercise):
@@ -91,27 +98,27 @@ def class_progress_report_graph_context(user_data, student_list):
                 status = "Started"
                 color = "started"
 
-            exercise_display = models.Exercise.to_display_name(exercise_name)
-            short_name = name
-            if len(short_name) > 18:
-                short_name = short_name[0:18] + "..."
-
             if len(status) > 0:
-                hover = "<b>%s</b><br/><br/><b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (escape(name), exercise_display, status, user_exercise.streak, user_exercise.total_done)
+                hover = \
+"""<b>%s</b><br/>
+<b>%s</b><br/>
+<em><nobr>Status: %s</nobr></em><br/>
+<em>Streak: %s</em><br/>
+<em>Problems attempted: %s</em>""" % (escaped_name,
+                                      exercise_display,
+                                      status,
+                                      user_exercise.streak,
+                                      user_exercise.total_done)
 
             exercise_data[exercise_name][student_email] = {
-                    "name": name, 
-                    "short_name": short_name, 
-                    "exercise_display": exercise_display, 
-                    "link": link, 
-                    "hover": hover,
-                    "color": color
-                    }
-            i += 1
+                "link": link,
+                "hover": hover,
+                "color": color
+            }
 
-    return { 
-            'student_emails': student_emails,
-            'exercise_names': exercises_found_names,
-            'exercise_data': exercise_data,
-            'coach_email': user_data.email,
-        }
+    return {
+        'student_emails': student_emails,
+        'exercise_names': exercise_names,
+        'exercise_data': exercise_data,
+        'coach_email': user_data.email,
+    }

@@ -11,7 +11,7 @@ from flask import current_app, request, redirect, session
 from flask.session import Session
 
 from app import App
-from api.auth.models import OAuthMap
+from api.auth.auth_models import OAuthMap
 from api.auth.xsrf import validate_xsrf_value
 from oauth_provider.oauth import build_authenticate_header, OAuthError
 import cookie_util

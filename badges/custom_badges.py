@@ -3,6 +3,7 @@ import logging
 from google.appengine.api import users
 
 import request_handler
+import user_util
 import util_badges
 from badges import Badge, BadgeContextType, BadgeCategory
 from models_badges import CustomBadgeType
@@ -41,10 +42,8 @@ class CustomBadge(Badge):
         return Badge.icon_src(self)
 
 class CreateCustomBadge(request_handler.RequestHandler):
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            return
-        
         template_values = {
                 "badge_categories": BadgeCategory.empty_count_dict().keys(),
                 "failed": self.request_bool("failed", default=False),
@@ -52,10 +51,8 @@ class CreateCustomBadge(request_handler.RequestHandler):
 
         self.render_template("badges/create_custom_badge.html", template_values)
 
+    @user_util.developer_only
     def post(self):
-        if not users.is_current_user_admin():
-            return
-
         name = self.request_string("name")
         description = self.request_string("description")
         full_description = self.request_string("full_description")
@@ -75,20 +72,16 @@ class CreateCustomBadge(request_handler.RequestHandler):
         self.redirect("/badges/custom/create?failed=1")
 
 class AwardCustomBadge(request_handler.RequestHandler):
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            return
-
         template_values = {
                 "custom_badges": CustomBadge.all(),
                 }
 
         self.render_template("badges/award_custom_badge.html", template_values)
 
+    @user_util.developer_only
     def post(self):
-        if not users.is_current_user_admin():
-            return
-
         custom_badge_name = self.request_string("name", default="")
         custom_badges = CustomBadge.all()
         custom_badge_awarded = None

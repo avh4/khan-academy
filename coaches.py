@@ -14,6 +14,7 @@ from app import App
 import app
 import facebook_util
 import util
+import user_util
 from request_handler import RequestHandler
 
 from models import UserData, CoachRequest, StudentList
@@ -58,7 +59,7 @@ class ViewStudents(RequestHandler):
         if user_data:
 
             user_data_override = self.request_user_data("coach_email")
-            if users.is_current_user_admin() and user_data_override:
+            if user_util.is_current_user_developer() and user_data_override:
                 user_data = user_data_override
 
             invalid_student = self.request_bool("invalid_student", default = False)
@@ -66,7 +67,6 @@ class ViewStudents(RequestHandler):
             coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
 
             student_lists_models = StudentList.get_for_coach(user_data.key())
-
             student_lists_list = [];
             for student_list in student_lists_models:
                 student_lists_list.append({
@@ -131,7 +131,6 @@ class RequestStudent(RequestHandler):
         if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
-
         user_data_student = self.request_user_data("student_email")
         if user_data_student:
             if not user_data_student.is_coached_by(user_data):
@@ -186,10 +185,14 @@ class UnregisterStudentCoach(RequestHandler):
     def remove_student_from_coach(student, coach):
         if student.student_lists:
             actual_lists = StudentList.get(student.student_lists)
-            student.student_lists = [l for l in actual_lists if coach.key() not in l.coaches]
+            student.student_lists = [l.key() for l in actual_lists if coach.key() not in l.coaches]
 
         try:
             student.coaches.remove(coach.key_email)
+        except ValueError:
+            pass
+
+        try:
             student.coaches.remove(coach.key_email.lower())
         except ValueError:
             pass
@@ -279,7 +282,7 @@ class RemoveStudentFromList(RequestHandler):
 class ViewIndividualReport(RequestHandler):
     def get(self):
         # Individual reports being replaced by user profile
-        self.redirect("/profile")
+        self.redirect("/profile?k")
 
 class ViewSharedPoints(RequestHandler):
     def get(self):
@@ -287,7 +290,7 @@ class ViewSharedPoints(RequestHandler):
 
 class ViewProgressChart(RequestHandler):
     def get(self):
-        self.redirect("/profile?selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
+        self.redirect("/profile?k&selected_graph_type=" + ExercisesOverTimeGraph.GRAPH_TYPE)
 
 class ViewClassTime(RequestHandler):
     def get(self):
@@ -299,5 +302,5 @@ class ViewClassReport(RequestHandler):
 
 class ViewCharts(RequestHandler):
     def get(self):
-        self.redirect("/profile?selected_graph_type=%s&student_email=%s&exid=%s" %
+        self.redirect("/profile?k&selected_graph_type=%s&student_email=%s&exid=%s" %
                 (ExerciseProblemsGraph.GRAPH_TYPE, self.request_string("student_email"), self.request_string("exercise_name")))

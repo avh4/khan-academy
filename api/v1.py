@@ -514,6 +514,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
+                    request.request_string("problem_type"),
                     hint = False
                     )
 
@@ -551,6 +552,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
+                    request.request_string("problem_type"),
                     hint = True
                     )
 

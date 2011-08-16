@@ -2,6 +2,7 @@ from google.appengine.api import users
 
 import datetime
 import logging
+import user_util
 
 from google.appengine.api import memcache
 
@@ -14,7 +15,7 @@ class RateLimiter:
 
     def is_allowed(self):
         return len(self.purge()) < self.hourly_limit or \
-                users.is_current_user_admin() or \
+                user_util.is_current_user_developer() or \
                 self.user_data.moderator
 
     def increment(self):

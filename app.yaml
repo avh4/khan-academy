@@ -49,6 +49,24 @@ handlers:
 - url: /javascript
   static_dir: javascript
 
+# Begin GTV integration
+- url: /gtv/css
+  static_dir: gtv/css
+
+- url: /gtv/images
+  static_dir: gtv/images
+
+- url: /gtv/js
+  static_dir: gtv/js
+
+- url: /gtv/fullscreen.html
+  static_files: gtv/fullscreen.html
+  upload: gtv/fullscreen.html
+
+- url: /gtv.*
+  script: gtv/main.py
+# End GTV integration
+
 # Begin khan-exercises integration
 - url: /khan-exercises/khan-exercise.js
   static_files: khan-exercises/khan-exercise.js
@@ -86,6 +104,7 @@ handlers:
 
 - url: /gae_mini_profiler/static
   static_dir: gae_mini_profiler/static
+  expiration: "300s"
 
 - url: /gae_mini_profiler/.*
   script: gae_mini_profiler/main.py

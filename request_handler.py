@@ -3,7 +3,12 @@ import logging
 import datetime
 import urllib
 import simplejson
+import sys
+import re
+import traceback
 
+import google
+import django
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
@@ -60,7 +65,7 @@ class RequestInputHandler(object):
         return None
 
     def request_float(self, key, default = None):
-        try:        
+        try:
             return float(self.request_string(key))
         except ValueError:
             if default is not None:
@@ -110,7 +115,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         elif type(e) is MissingExerciseException:
 
             title = "This exercise isn't here right now."
-            message_html = "Either this exercise doesn't exist or it's temporarily hiding. You should <a href='/exercisedashboard'>head back to our other exercises</a>."
+            message_html = "Either this exercise doesn't exist or it's temporarily hiding. You should <a href='/exercisedashboard?k'>head back to our other exercises</a>."
             sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
 
         elif type(e) is MissingVideoException:
@@ -126,11 +131,80 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         if not silence_report:
             webapp.RequestHandler.handle_exception(self, e, args)
 
-        # Never show stack traces on production machines
-        if not App.is_dev_server:
-            self.response.clear()
+        # Show a nice stack trace on development machines, but not in production
+        if App.is_dev_server or users.is_current_user_admin():
+            try:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
 
-        self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
+                # Grab module and convert "__main__" to just "main"
+                class_name = '%s.%s' % (re.sub(r'^__|__$', '', self.__class__.__module__), type(self).__name__)
+
+                http_method = self.request.method
+                title = '%s in %s.%s' % ((exc_value.exc_info[0] if hasattr(exc_value, 'exc_info') else exc_type).__name__, class_name, http_method.lower())
+
+                message = str(exc_value.exc_info[1]) if hasattr(exc_value, 'exc_info') else str(exc_value)
+
+                sdk_root = os.path.normpath(os.path.join(os.path.dirname(google.__file__), '..'))
+                sdk_version = os.environ['SDK_VERSION'] if os.environ.has_key('SDK_VERSION') else os.environ['SERVER_SOFTWARE'].split('/')[-1]
+                django_root = os.path.normpath(os.path.join(os.path.dirname(django.__file__), '..'))
+                django_version = '.'.join(str(v) for v in django.VERSION if v != None)
+                app_root = '%s' % os.path.dirname(__file__)
+                r_sdk_root = re.compile(r'^%s/' % re.escape(sdk_root))
+                r_django_root = re.compile(r'^%s/' % re.escape(django_root))
+                r_app_root = re.compile(r'^%s/' % re.escape(app_root))
+
+                (template_filename, template_line, extracted_source) = (None, None, None)
+                if hasattr(exc_value, 'source'):
+                    origin, (start, end) = exc_value.source
+                    template_filename = str(origin)
+
+                    f = open(template_filename)
+                    template_contents = f.read()
+                    f.close()
+
+                    template_lines = template_contents.split('\n')
+                    template_line = 1 + template_contents[:start].count('\n')
+                    template_end_line = 1 + template_contents[:end].count('\n')
+
+                    ctx_start = max(1, template_line - 3)
+                    ctx_end = min(len(template_lines), template_end_line + 3)
+
+                    extracted_source = '\n'.join('%s: %s' % (num, template_lines[num - 1]) for num in range(ctx_start, ctx_end + 1))
+
+                def format_frame(frame):
+                    filename, line, function, text = frame
+                    filename = r_django_root.sub('django (%s) ' % django_version, filename)
+                    filename = r_sdk_root.sub('google_appengine (%s) ' % sdk_version, filename)
+                    filename = r_app_root.sub('', filename)
+                    return "%s:%s:in `%s'" % (filename, line, function)
+
+                extracted = traceback.extract_tb(exc_traceback)
+                if hasattr(exc_value, 'exc_info'):
+                    extracted += traceback.extract_tb(exc_value.exc_info[2])
+
+                application_frames = reversed([frame for frame in extracted if r_app_root.match(frame[0])])
+                framework_frames = reversed([frame for frame in extracted if not r_app_root.match(frame[0])])
+                full_frames = reversed([frame for frame in extracted])
+
+                application_trace = '\n'.join(format_frame(frame) for frame in application_frames)
+                framework_trace = '\n'.join(format_frame(frame) for frame in framework_frames)
+                full_trace = '\n'.join(format_frame(frame) for frame in full_frames)
+
+                param_keys = self.request.arguments()
+                params = ',\n    '.join('%s: %s' % (repr(k.encode('utf8')), repr(self.request.get(k).encode('utf8'))) for k in param_keys)
+                params_dump = '{\n    %s\n}' % params if len(param_keys) else '{}'
+
+                environ = self.request.environ
+                env_dump = '\n'.join('%s: %s' % (k, environ[k]) for k in sorted(environ))
+
+                self.response.clear()
+                self.render_template('viewtraceback.html', { "title": title, "message": message, "template_filename": template_filename, "template_line": template_line, "extracted_source": extracted_source, "app_root": app_root, "application_trace": application_trace, "framework_trace": framework_trace, "full_trace": full_trace, "params_dump": params_dump, "env_dump": env_dump })
+            except:
+                # We messed something up showing the backtrace nicely; just show it normally
+                pass
+        else:
+            self.response.clear()
+            self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
 
     @classmethod
     def exceptions_to_http(klass, status):
@@ -212,6 +286,12 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             if 'is_mobile_allowed' in template_values and template_values['is_mobile_allowed']:
                 template_values['is_mobile'] = self.is_mobile()
 
+        # overridable hide_analytics querystring that defaults to true in dev
+        # mode but false for prod.
+        hide_analytics = os.environ.get('SERVER_SOFTWARE').startswith('Devel')
+        hide_analytics = self.request_bool("hide_analytics", hide_analytics)
+        template_values['hide_analytics'] = hide_analytics
+
         return template_values
 
     def render_template(self, template_name, template_values):
@@ -224,8 +304,11 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     @staticmethod
     def render_template_to_string(template_name, template_values):
         path = os.path.join(os.path.dirname(__file__), template_name)
-        return template.render(path, template_values)
- 
+
+        # Don't turn on debug in production even for admins because filesystem access is sloooow
+        debug = App.is_dev_server
+        return template.render(path, template_values, debug)
+
     @staticmethod
     def render_template_block_to_string(template_name, block, context):
         path = os.path.join(os.path.dirname(__file__), template_name)
