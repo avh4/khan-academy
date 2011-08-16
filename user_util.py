@@ -13,9 +13,12 @@ def admin_only(method):
         if users.is_current_user_admin():
             return method(self, *args, **kwargs)
         else:
+            user_data = models.UserData.current()
+            logging.warning("Attempt by %s to access admin-only page" % user_data.user_id)
+
             url = users.create_login_url(self.request.uri)
 
-            if users.get_current_user:
+            if users.get_current_user():
                 url = users.create_logout_url(url)
 
             self.redirect(url)
@@ -36,6 +39,9 @@ def developer_only(method):
         if is_current_user_developer():
             return method(self, *args, **kwargs)
         else:
+            user_data = models.UserData.current()
+            logging.warning("Attempt by %s to access developer-only page" % user_data.user_id)
+
             url = users.create_login_url(self.request.uri)
 
             if users.get_current_user():
