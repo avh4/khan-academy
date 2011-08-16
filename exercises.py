@@ -309,6 +309,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)
                 suggested = user_data.is_suggested(user_exercise.exercise)
+                problem_log.suggested = suggested
 
                 problem_log.points_earned = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 user_data.add_points(problem_log.points_earned)

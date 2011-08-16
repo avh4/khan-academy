@@ -1291,6 +1291,7 @@ class ProblemLog(db.Model):
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
+    suggested = db.BooleanProperty(default = False) # True if the exercise was suggested to the user
     sha1 = db.StringProperty()
     seed = db.StringProperty()
     problem_type = db.StringProperty()
@@ -1368,6 +1369,7 @@ def commit_problem_log(problem_log_source):
                 sha1 = problem_log_source.sha1,
                 seed = problem_log_source.seed,
                 problem_type = problem_log_source.problem_type,
+                suggested = problem_log_source.suggested,
                 exercise_non_summative = problem_log_source.exercise_non_summative,
         )
 
