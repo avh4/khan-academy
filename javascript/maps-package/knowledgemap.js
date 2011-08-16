@@ -351,7 +351,7 @@ var KnowledgeMap = {
                 }
 
                 if ( 37 <= e.keyCode && e.keyCode <= 40 ) {
-                    $.post("/admin/movemapnode", { exercise: node.id, direction: dir } );
+                    $.post("/moveexercisemapnode", { exercise: node.id, direction: dir } );
                     
                     var zoom =KnowledgeMap.map.getZoom();
                     KnowledgeMap.markers = [];

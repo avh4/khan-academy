@@ -4,6 +4,7 @@ from google.appengine.api import users
 
 from app import App
 import request_handler
+import user_util
 from dashboard.models import DailyStatistic, RegisteredUserCount, EntityStatistic
 from google.appengine.ext.db import stats
 from itertools import groupby
@@ -11,7 +12,7 @@ from itertools import groupby
 class Dashboard(request_handler.RequestHandler):
 
     def get(self):
-        if not users.is_current_user_admin():
+        if not user_util.is_current_user_developer():
             if App.dashboard_secret and self.request_string("x", default=None) != App.dashboard_secret:
                 self.redirect(users.create_login_url(self.request.uri))
                 return
@@ -25,7 +26,7 @@ class Dashboard(request_handler.RequestHandler):
 class Entityboard(request_handler.RequestHandler):
 
     def get(self):
-        if not users.is_current_user_admin():
+        if not user_util.is_current_user_developer():
             if App.dashboard_secret and self.request_string("x", default=None) != App.dashboard_secret:
                 self.redirect(users.create_login_url(self.request.uri))
                 return
@@ -70,11 +71,8 @@ class RecordStatistics(request_handler.RequestHandler):
         self.response.out.write("Dashboard statistics recorded.")
 
 class EntityCounts(request_handler.RequestHandler):
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         kind_stats = [s for s in stats.KindStat.all().fetch(1000)]
 
         counts = []
