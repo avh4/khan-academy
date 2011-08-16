@@ -626,10 +626,7 @@ class UserData(db.Model):
 
     @property
     def email(self):
-        if self.user_email:
-            return self.user_email
-        else:
-            return self.current_user.email()
+        return self.user_email
 
     @property
     def key_email(self):
