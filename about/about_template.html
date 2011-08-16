@@ -1,4 +1,4 @@
-{% extends "../page_template.html" %}
+{% extends "page_template.html" %}
 {% block meta_page_title %}About | {% endblock meta_page_title %}
 {% block pagescript %}
     <style>
@@ -32,7 +32,3 @@
 {% block bottompagescript %}
     {% crazyegg_tracker 0 %}
 {% endblock bottompagescript %}
-
-{% block pagefooter %}
-{% include "../page_footer_short.html" %}
-{% endblock %}

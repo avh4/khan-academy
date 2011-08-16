@@ -4,6 +4,7 @@ import datetime, logging
 import math
 import urllib
 import pickle
+import random
 
 import config_django
 
@@ -626,10 +627,7 @@ class UserData(db.Model):
 
     @property
     def email(self):
-        if self.user_email:
-            return self.user_email
-        else:
-            return self.current_user.email()
+        return self.user_email
 
     @property
     def key_email(self):
@@ -1297,6 +1295,12 @@ class ProblemLog(db.Model):
     count_attempts = db.IntegerProperty(default = 0)
     time_taken_attempts = db.ListProperty(int)
     attempts = db.StringListProperty()
+    random_float = db.FloatProperty() # Add a random float in [0, 1) for easy random sampling
+
+    def put(self):
+        if self.random_float is None:
+            self.random_float = random.random()
+        db.Model.put(self)
 
     @property
     def ka_url(self):
@@ -1339,6 +1343,10 @@ def commit_problem_log(problem_log_source):
         # Handle special case during new exercise deploy
         return
 
+    if problem_log_source.count_attempts > 1000:
+        logging.info("Ignoring attempt to write problem log w/ attempts over 1000.")
+        return
+
     def insert_in_position(index, items, val, filler):
         if index >= len(items):
             items.extend([filler] * (index + 1 - len(items)))
@@ -1361,6 +1369,7 @@ def commit_problem_log(problem_log_source):
         )
 
         index_attempt = max(0, problem_log_source.count_attempts - 1)
+
         if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
             return
