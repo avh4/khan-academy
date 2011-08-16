@@ -587,7 +587,7 @@ h3 {
 }
 
 #video {
-	border: 4px solid #353535;
+	border: 0px solid #353535;
 	position:relative;
 	margin-left:7px;
 }
