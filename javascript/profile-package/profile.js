@@ -221,11 +221,7 @@ var Profile = {
         if ($dropdown.length == 1) {
             var list_id = $dropdown.data('selected').key;
             var qs = this.parseQueryString(url);
-            if (list_id != 'allstudents')
-                qs['list_id'] = list_id;
-            else
-                delete qs['list_id'];
-
+            qs['list_id'] = list_id;
             url = this.baseGraphHref(url) + '?' + this.reconstructQueryString(qs);
         }
 
