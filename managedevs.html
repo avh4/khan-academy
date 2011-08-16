@@ -19,34 +19,21 @@
 
     <div id="devpanel" style="padding: 9px 23px;">
         <div>
-            <form type="GET" action="">
-            Add Dev:<input type="text" name="adddev" />   
-            <input type="submit" value="Add as developer" />
-            
+            <h2>Manage Developers</h2>
+            <p style="color:red;">{{errormessage}}</p>
+
+            <div><b>Current Devs:</b></div>
+
+            <ul>
+            {% for dev in developers %}
+                <li>{{ dev.email }} &ndash; <a href="/devadmin/managedevs?removedev={{ dev.email|urlencode }}">remove</a></li>
+            {% endfor %}
+            </ul>
+
+            <form type="GET" action="" style="display: block; margin: 22px 0">
+                Add Dev:<input type="text" name="adddev">
+                <input type="submit" value="Add as developer">
             </form>
-            <br />
-            <form type="GET" action="">
-            Remove Dev:<input type="text" name="removedev" />   
-            <input type="submit" value="Remove from developers" />
-            </form>
-            
-            <br />
-            <span style="color:red;">{{errormessage}}</span>
-            <table>
-                
-                <tr>
-                    <td style="border:none;">Current Devs:</td>
-                </tr>
-                
-                {% for dev in developers %}
-                <tr>
-                    <td>{{dev.email}}</td>
-                </tr>
-                {% endfor %}
-                    
-                
-            </table>
-            
         </div>
     </div>
 
