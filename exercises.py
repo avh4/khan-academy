@@ -250,7 +250,7 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative):
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative, problem_type):
 
     if user_exercise and user_exercise.belongs_to(user_data):
 
@@ -289,6 +289,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                 correct = completed and not hint_used and (attempt_number == 1),
                 sha1 = sha1,
                 seed = seed,
+                problem_type = problem_type,
                 count_attempts = attempt_number,
                 attempts = [attempt_content],
         )
@@ -308,6 +309,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)
                 suggested = user_data.is_suggested(user_exercise.exercise)
+                problem_log.suggested = suggested
 
                 problem_log.points_earned = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 user_data.add_points(problem_log.points_earned)

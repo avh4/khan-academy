@@ -14,6 +14,43 @@ from phantom_users.phantom_util import disallow_phantoms
 from models import StudentList, UserData
 import simplejson
 
+def get_last_student_list(request_handler, student_lists, use_cookie=True):
+    student_lists = student_lists.fetch(100)
+
+    # default_list is the default list for this user
+    if student_lists:
+        default_list = str(student_lists[0].key())
+    else:
+        default_list = 'allstudents'
+
+    # desired list is the list the user asked for (via cookie or querystring)
+    desired_list = None
+
+    if use_cookie:
+        cookie_val = request_handler.get_cookie_value('studentlist_id')
+        desired_list = cookie_val or desired_list
+
+    # override cookie with explicitly set querystring
+    desired_list = request_handler.request_string('list_id', desired_list)
+
+    # now validate desired_list exists
+    current_list = None
+    list_id = 'allstudents'
+    if desired_list != 'allstudents':
+        for s in student_lists:
+            if str(s.key()) == desired_list:
+                current_list = s
+                list_id = desired_list
+                break
+
+        if current_list is None:
+            list_id = default_list
+
+    if use_cookie:
+        request_handler.set_cookie('studentlist_id', list_id)
+
+    return list_id, current_list
+
 def get_student(coach, request_handler):
     student = request_handler.request_user_data('student_email')
     if student is None:
@@ -72,7 +109,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'class_points': self.class_points(students)
                 })
 
-            list_id = self.request_string('list_id', 'allstudents')
+            list_id, _ = get_last_student_list(self, student_lists, coach==UserData.current())
             current_list = None
             for student_list in student_lists_list:
                 if student_list['key'] == list_id:
@@ -85,8 +122,7 @@ class ViewClassProfile(request_handler.RequestHandler):
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email), urllib.unquote(self.request_string("graph_query_params", default="")))
-            if list_id:
-                initial_graph_url += 'list_id=%s' % list_id
+            initial_graph_url += 'list_id=%s' % list_id
 
             template_values = {
                     'user_data_coach': coach,
@@ -230,11 +266,9 @@ class ClassProfileGraph(ProfileGraph):
         return False
 
     def get_student_list(self, coach):
-        list_id = self.request_string("list_id")
-        if list_id and list_id != 'allstudents':
-            return get_list(coach, self)
-        else:
-            return None
+        student_lists = StudentList.get_for_coach(coach.key())
+        _, actual_list = get_last_student_list(self, student_lists, coach.key()==UserData.current().key())
+        return actual_list
 
 class ProfileDateToolsGraph(ProfileGraph):
 
