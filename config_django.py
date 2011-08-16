@@ -21,8 +21,8 @@ except EnvironmentError:
 
 # monkey patch webapp.template.load to fix the following issue:
 # http://code.google.com/p/googleappengine/issues/detail?id=1520
-import django.conf
-import google.appengine.ext.webapp.template
+from google.appengine.ext.webapp import template
+
 def _swap_settings_override(new):
     settings = django.conf.settings
     old = {}
@@ -32,4 +32,5 @@ def _swap_settings_override(new):
             value = value + ORIG_TEMPLATE_DIRS
         setattr(settings, key, value)
     return old
-google.appengine.ext.webapp.template._swap_settings = _swap_settings_override
+
+template._swap_settings = _swap_settings_override
