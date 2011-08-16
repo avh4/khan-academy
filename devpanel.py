@@ -61,10 +61,10 @@ class Manage(request_handler.RequestHandler):
         if remove_dev and errormessage == "":
             dev = UserData.get_from_user_email(remove_dev)
             if dev.developer == True:
-                errormessage = "%s is not a developer to begin with" % remove_dev
-            else:
                 dev.developer = False
                 dev.put()
+            else:
+                errormessage = "%s is not a developer to begin with" % remove_dev
    
         developers = UserData.all()
         developers.filter('developer = ', True).fetch(1000)
