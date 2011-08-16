@@ -21,6 +21,7 @@ from google.appengine.ext import db
 import object_property
 import app
 import util
+import user_util
 import consts
 import points
 from search import Searchable
@@ -171,7 +172,7 @@ class Exercise(db.Model):
         return self.display_name[:11]
 
     def is_visible_to_current_user(self):
-        return self.live or users.is_current_user_admin()
+        return self.live or user_util.is_current_user_developer()
 
     def struggling_threshold(self):
         return 3 * self.required_streak
@@ -222,7 +223,7 @@ class Exercise(db.Model):
     @classmethod
     def all(cls, live_only = False):
         query = super(Exercise, cls).all()
-        if live_only or not users.is_current_user_admin():
+        if live_only or not user_util.is_current_user_developer():
             query.filter("live =", True)
         return query
 
@@ -232,7 +233,7 @@ class Exercise(db.Model):
 
     @staticmethod
     def get_all_use_cache():
-        if users.is_current_user_admin():
+        if user_util.is_current_user_developer():
             return Exercise.__get_all_use_cache_unsafe__()
         else:
             return Exercise.__get_all_use_cache_safe__()

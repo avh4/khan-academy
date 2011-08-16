@@ -1,6 +1,7 @@
 from google.appengine.api import users
 
 import util
+import user_util
 
 class Privileges:
 
@@ -9,7 +10,7 @@ class Privileges:
 
     @staticmethod
     def has_privilege(user_data, points_required):
-        return users.is_current_user_admin() or \
+        return user_util.is_current_user_developer() or \
                 user_data.moderator or \
                 user_data.points >= points_required
 

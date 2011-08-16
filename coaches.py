@@ -14,6 +14,7 @@ from app import App
 import app
 import facebook_util
 import util
+import user_util
 from request_handler import RequestHandler
 
 from models import UserData, CoachRequest, StudentList
@@ -58,7 +59,7 @@ class ViewStudents(RequestHandler):
         if user_data:
 
             user_data_override = self.request_user_data("coach_email")
-            if users.is_current_user_admin() and user_data_override:
+            if user_util.is_current_user_developer() and user_data_override:
                 user_data = user_data_override
 
             invalid_student = self.request_bool("invalid_student", default = False)
