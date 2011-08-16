@@ -1,4 +1,5 @@
 from functools import wraps
+import logging
 
 from google.appengine.api import users
 
@@ -14,7 +15,8 @@ def admin_only(method):
             return method(self, *args, **kwargs)
         else:
             user_data = models.UserData.current()
-            logging.warning("Attempt by %s to access admin-only page" % user_data.user_id)
+            if user_data:
+                logging.warning("Attempt by %s to access admin-only page" % user_data.user_id)
 
             url = users.create_login_url(self.request.uri)
 
@@ -40,7 +42,8 @@ def developer_only(method):
             return method(self, *args, **kwargs)
         else:
             user_data = models.UserData.current()
-            logging.warning("Attempt by %s to access developer-only page" % user_data.user_id)
+            if user_data:
+                logging.warning("Attempt by %s to access developer-only page" % user_data.user_id)
 
             url = users.create_login_url(self.request.uri)
 
