@@ -9,7 +9,6 @@ import logging
 import re
 import devpanel
 from pprint import pformat
-from email.utils import formatdate, parsedate
 from google.appengine.api import capabilities
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
@@ -51,6 +50,7 @@ import backfill
 import activity_summary
 import exercises
 import dashboard
+import github
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -66,10 +66,11 @@ from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
-from phantom_users.phantom_util import create_phantom, _get_phantom_user_from_cookies
+from phantom_users.phantom_util import create_phantom, get_phantom_user_id_from_cookies
 from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
+from nicknames import get_nickname_for
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -937,35 +938,61 @@ class PostLogin(request_handler.RequestHandler):
     def get(self):
         cont = self.request_string('continue', default = "/")
 
-        # Immediately after login we make sure this user has a UserData entry,
-        # also delete phantom cookies
-
-        # If new user is new, 0 points, migrate data
-        phantom_user = _get_phantom_user_from_cookies()
+        # Immediately after login we make sure this user has a UserData entity
         user_data = UserData.current()
+        if user_data:
 
-        if user_data and phantom_user:
-            email = phantom_user.email()
-            phantom_data = UserData.get_from_db_key_email(email)
+            # Update email address if it has changed
+            current_google_user = users.get_current_user()
+            if current_google_user and current_google_user.email() != user_data.email:
+                user_data.user_email = current_google_user.email()
+                user_data.put()
 
-            # First make sure user has 0 points and phantom user has some activity
-            if user_data.points == 0 and phantom_data != None and phantom_data.points > 0:
+            # Update nickname if it has changed
+            current_nickname = get_nickname_for(user_data)
+            if user_data.user_nickname != current_nickname:
+                user_data.user_nickname = current_nickname
+                user_data.put()
 
-                # Make sure user has no students
-                if not user_data.has_students():
+            # If user is brand new and has 0 points, migrate data
+            phantom_id = get_phantom_user_id_from_cookies()
+            if phantom_id:
+                phantom_data = UserData.get_from_db_key_email(phantom_id)
 
-                    UserNotifier.clear_all(phantom_data)
-                    logging.info("New Account: %s", user_data.current().email)
-                    phantom_data.current_user = user_data.current_user
-                    phantom_data.user_id = user_data.user_id
-                    phantom_data.user_email = user_data.current().email
-                    if phantom_data.put():
-                        # Phantom user was just transitioned to real user
-                        user_counter.add(1)
-                        user_data.delete()
-                    cont = "/newaccount?continue=%s" % cont
+                # First make sure user has 0 points and phantom user has some activity
+                if user_data.points == 0 and phantom_data and phantom_data.points > 0:
 
+                    # Make sure user has no students
+                    if not user_data.has_students():
+
+                        # Clear all "login" notifications
+                        UserNotifier.clear_all(phantom_data)
+
+                        # Update phantom user_data to real user_data
+                        phantom_data.user_id = user_data.user_id
+                        phantom_data.current_user = user_data.current_user
+                        phantom_data.user_email = user_data.user_email
+                        phantom_data.user_nickname = user_data.user_nickname
+
+                        if phantom_data.put():
+                            # Phantom user was just transitioned to real user
+                            user_counter.add(1)
+                            user_data.delete()
+
+                        cont = "/newaccount?continue=%s" % cont
+        else:
+
+            # If nobody is logged in, clear any expired Facebook cookie that may be hanging around.
+            self.delete_cookie("fbs_" + App.facebook_app_id)
+
+            logging.critical("Missing UserData during PostLogin, with id: %s, cookies: (%s), google user: %s" % (
+                    util.get_current_user_id(), os.environ.get('HTTP_COOKIE', ''), users.get_current_user()
+                )
+            )
+
+        # Always delete phantom user cookies on login
         self.delete_cookie('ureg_id')
+
         self.redirect(cont)
 
 class Logout(request_handler.RequestHandler):
@@ -1182,6 +1209,9 @@ def main():
         ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
         ('/discussion/moderatorlist', qa.ModeratorList),
         ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
+
+        ('/githubpost', github.NewPost),
+        ('/githubcomment', github.NewComment),
 
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),

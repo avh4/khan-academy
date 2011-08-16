@@ -4,7 +4,7 @@ import flask
 from flask import request
 
 from api.auth.auth_util import oauth_error_response
-from api.auth.models import OAuthMap
+from api.auth.auth_models import OAuthMap
 
 from oauth_provider.decorators import is_valid_request, validate_token
 from oauth_provider.oauth import OAuthError
@@ -33,7 +33,7 @@ def oauth_required(require_anointed_consumer = False):
                         # for easy access during the rest of this request.
                         flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
 
-                        if not util._get_current_user_email():
+                        if not util.get_current_user_id():
                             # If our OAuth provider thinks you're logged in but the 
                             # identity providers we consume (Google/Facebook) disagree,
                             # we act as if our token is no longer valid.
@@ -51,7 +51,7 @@ def oauth_required(require_anointed_consumer = False):
 # Decorator for validating an oauth request and storing the OAuthMap for use
 # in the rest of the request.
 #
-# If oauth credentials don't pass, continue on, but util._get_current_user_email() will return None.
+# If oauth credentials don't pass, continue on, but util.get_current_user_id() will return None.
 def oauth_optional():
     def outer_wrapper(func):
         @wraps(func)
@@ -65,7 +65,7 @@ def oauth_optional():
                         # for easy access during the rest of this request.
                         flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
 
-                        if not util._get_current_user_email():
+                        if not util.get_current_user_id():
                             # If our OAuth provider thinks you're logged in but the 
                             # identity providers we consume (Google/Facebook) disagree,
                             # we act as if our token is no longer valid.

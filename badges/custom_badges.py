@@ -92,7 +92,7 @@ class AwardCustomBadge(request_handler.RequestHandler):
         custom_badge_name = self.request_string("name", default="")
         custom_badges = CustomBadge.all()
         custom_badge_awarded = None
-        emails_awarded = []
+        user_ids_awarded = []
         
         for custom_badge in custom_badges:
             if custom_badge.name == custom_badge_name:

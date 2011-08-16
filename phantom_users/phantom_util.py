@@ -20,10 +20,10 @@ from cookie_util import set_request_cookie
 PHANTOM_ID_EMAIL_PREFIX = "http://nouserid.khanacademy.org/"
 PHANTOM_MORSEL_KEY = 'ureg_id'
 
-def is_phantom_email(email):
-    return email.startswith(PHANTOM_ID_EMAIL_PREFIX)
+def is_phantom_id(user_id):
+    return user_id.startswith(PHANTOM_ID_EMAIL_PREFIX)
 
-def _get_phantom_user_from_cookies():
+def get_phantom_user_id_from_cookies():
     cookies = None
     try:
         cookies = Cookie.BaseCookie(os.environ.get('HTTP_COOKIE',''))
@@ -33,14 +33,14 @@ def _get_phantom_user_from_cookies():
 
     morsel = cookies.get(PHANTOM_MORSEL_KEY)
     if morsel and morsel.value:
-        return users.User(PHANTOM_ID_EMAIL_PREFIX+morsel.value)
+        return PHANTOM_ID_EMAIL_PREFIX+morsel.value
     else:
         return None
 
-def _create_phantom_user():
+def _create_phantom_user_id():
     rs = os.urandom(20)
     random_string = hashlib.md5(rs).hexdigest()
-    return users.User(PHANTOM_ID_EMAIL_PREFIX+random_string)
+    return PHANTOM_ID_EMAIL_PREFIX+random_string
 
 def create_phantom(method):
     '''Decorator used to create phantom users if necessary.
@@ -54,12 +54,12 @@ def create_phantom(method):
         user_data = models.UserData.current()
 
         if not user_data:
-            user = _create_phantom_user()
-            user_data = models.UserData.insert_for(user.email(),user.email())
+            user_id = _create_phantom_user_id()
+            user_data = models.UserData.insert_for(user_id, user_id)
 
             # we set just a 20 digit random string as the cookie, 
             # not the entire fake email
-            cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
+            cookie = user_id.split(PHANTOM_ID_EMAIL_PREFIX)[1]
             # set the cookie on the user's computer
             self.set_cookie(PHANTOM_MORSEL_KEY, cookie)
             # make it appear like the cookie was already set
@@ -81,8 +81,8 @@ def create_api_phantom(method):
             return method(*args, **kwargs)
         else:
             # This mirrors create_phantom above, see there for clarification
-            user = _create_phantom_user()
-            user_data = models.UserData.insert_for(user.email(),user.email())
+            user_id = _create_phantom_user_id()
+            user_data = models.UserData.insert_for(user_id, user_id)
 
             cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))

@@ -4,7 +4,6 @@ import logging
 import unicodedata
 import urllib2
 
-from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 
@@ -13,23 +12,22 @@ import facebook
 import layer_cache
 import request_cache
 
-FACEBOOK_ID_EMAIL_PREFIX = "http://facebookid.khanacademy.org/"
+FACEBOOK_ID_PREFIX = "http://facebookid.khanacademy.org/"
 
-def is_facebook_email(email):
-    return email.startswith(FACEBOOK_ID_EMAIL_PREFIX)
+def is_facebook_user_id(user_id):
+    return user_id.startswith(FACEBOOK_ID_PREFIX)
 
-def get_facebook_nickname_key(user):
-    return "facebook_nickname_key_%s" % user.email()
+def get_facebook_nickname_key(user_id):
+    return "facebook_nickname_%s" % user_id
 
 @request_cache.cache_with_key_fxn(get_facebook_nickname_key)
 @layer_cache.cache_with_key_fxn(
         get_facebook_nickname_key, 
         layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore,
         persist_across_app_versions=True)
-def get_facebook_nickname(user):
+def get_facebook_nickname(user_id):
 
-    email = user.email()
-    id = email.replace(FACEBOOK_ID_EMAIL_PREFIX, "")
+    id = user_id.replace(FACEBOOK_ID_PREFIX, "")
     graph = facebook.GraphAPI()
 
     try:
@@ -39,29 +37,28 @@ def get_facebook_nickname(user):
         return unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
     except (facebook.GraphAPIError, urlfetch.DownloadError, AttributeError, urllib2.HTTPError):
         # In the event of an FB error, don't cache the result.
-        return layer_cache.UncachedResult(email)
+        return layer_cache.UncachedResult(user_id)
 
-def get_current_facebook_user_from_cookies():
-    return get_user_from_profile(get_profile_from_cookies())
+def get_current_facebook_user_id_from_cookies():
+    return get_user_id_from_profile(get_profile_from_cookies())
 
-def get_facebook_user_from_oauth_map(oauth_map):
+def get_facebook_user_id_from_oauth_map(oauth_map):
     if oauth_map:
-        return get_user_from_profile(get_profile_from_fb_token(oauth_map.facebook_access_token))
+        return get_user_id_from_profile(get_profile_from_fb_token(oauth_map.facebook_access_token))
     return None
 
-def get_user_from_profile(profile):
+def get_user_id_from_profile(profile):
 
     if profile is not None:
         # Workaround http://code.google.com/p/googleappengine/issues/detail?id=573
         name = unicodedata.normalize('NFKD', profile["name"]).encode('utf-8', 'ignore')
 
-        # We create a fake user, substituting the user's Facebook uid for their email 
-        user = users.User(FACEBOOK_ID_EMAIL_PREFIX+profile["id"])
+        user_id = FACEBOOK_ID_PREFIX + profile["id"]
 
         # Cache any future lookup of current user's facebook nickname in this request
-        request_cache.set(get_facebook_nickname_key(user), name)
+        request_cache.set(get_facebook_nickname_key(user_id), name)
 
-        return user
+        return user_id
 
     return None
 

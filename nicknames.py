@@ -1,4 +1,5 @@
-from phantom_users.phantom_util import is_phantom_email
+import logging
+from phantom_users.phantom_util import is_phantom_id
 import facebook_util
 
 # Now that we're supporting unicode nicknames, ensure all callers get a
@@ -10,15 +11,21 @@ def to_unicode(s):
     else:
         return s
 
-def get_nickname_for(user):
-    if not user:
+def get_nickname_for(user_data):
+
+    if not user_data:
         return None
 
-    if facebook_util.is_facebook_email(user.email()):
-        nickname = facebook_util.get_facebook_nickname(user)
-    elif is_phantom_email(user.email()):
+    user_id = user_data.user_id
+    email = user_data.email
+
+    if not user_id or not email:
+        return None
+        
+    if facebook_util.is_facebook_user_id(user_id):
+        nickname = facebook_util.get_facebook_nickname(user_id)
+    elif is_phantom_id(user_id):
         nickname =  "" # No nickname, results in "Login" in header
     else:
-        nickname = user.nickname().split('@')[0]
-
+        nickname = email.split('@')[0]
     return to_unicode(nickname)

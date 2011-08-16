@@ -28,6 +28,8 @@ class Email(request_handler.RequestHandler):
         
         if swap and currdata: #are we swapping? make sure account exists
             currdata.current_user = users.User(new_email)
+            currdata.user_email = new_email
+            currdata.user_id = new_data.user_id
             currdata.put()
             if newdata: #delete old account 
                 newdata.delete()

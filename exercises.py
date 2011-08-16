@@ -51,10 +51,7 @@ class MoveMapNode(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email(),user.email())
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
 
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
@@ -133,11 +130,8 @@ class ViewExercise(request_handler.RequestHandler):
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email(),user.email())
-        
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
+
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -271,9 +265,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
         user_data.last_activity = user_exercise.last_done
         
         # If a non-admin tries to answer a problem out-of-order, just ignore it
-        if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
+        if problem_number != user_exercise.total_done + 1 and not users.is_current_user_admin():
             # Only admins can answer problems out of order.
-            raise Exception("Problem number out of order")
+            raise Exception("Problem number out of order (%s vs %s) for user_id: %s" % (problem_number, user_exercise.total_done + 1, user_data.user_id))
 
         if len(sha1) <= 0:
             raise Exception("Missing sha1 hash of problem content.")
