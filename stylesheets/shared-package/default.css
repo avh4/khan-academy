@@ -1235,7 +1235,7 @@ a:link.google-analytics-link-track
 			}
             #library #library-content #library-content-main ol {
                 list-style: none none;
-                margin-left: 0;
+                margin-left: -15px;
                 padding-left: 0;
             }
             #library #library-content #library-content-main li {

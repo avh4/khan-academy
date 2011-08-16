@@ -769,8 +769,19 @@ var FacebookHook = {
                     if (response.session) {
                         FacebookHook.fixMissingCookie(response.session);
                     }
+
+                    var url = URL_CONTINUE || "/";
+                    if (url.indexOf("?") > -1)
+                        url += "&fb=1";
+                    else
+                        url += "?fb=1";
+
+                    var hasCookie = !!readCookie("fbs_" + FB_APP_ID);
+                    url += "&hc=" + (hasCookie ? "1" : "0");
+
+                    url += "&hs=" + (response.session ? "1": "0");
                     
-                    window.location = URL_CONTINUE || "/";
+                    window.location = url;
                });
             }
 
