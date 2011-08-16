@@ -778,6 +778,8 @@ var FacebookHook = {
 
                     var hasCookie = !!readCookie("fbs_" + FB_APP_ID);
                     url += "&hc=" + (hasCookie ? "1" : "0");
+
+                    url += "&hs=" + (response.session ? "1": "0");
                     
                     window.location = url;
                });
