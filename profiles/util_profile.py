@@ -14,6 +14,8 @@ from models import StudentList, UserData
 import simplejson
 
 def get_last_student_list(request_handler, student_lists, use_cookie=True):
+    student_lists = student_lists.fetch(100)
+
     # default_list is the default list for this user
     if student_lists:
         default_list = str(student_lists[0].key())
