@@ -56,7 +56,7 @@ class GetFancyExerciseStatisticsTest(request_handler.RequestHandler):
         # 
         # self.response.out.write("OK: " + str(mapreduce_id))
 
-        self.response.headers.add_header("Content-Type", "text/plain")
+        self.response.headers["Content-Type"] = "text/plain"
 
         self.response.out.write("%s\n" % datetime.datetime.now())
 
