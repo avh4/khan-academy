@@ -281,13 +281,9 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-<<<<<<< local
 def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
     attempt_content, sha1, seed, completed, count_hints, time_taken,
-    exercise_non_summative, hint):
-=======
-def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative, problem_type):
->>>>>>> other
+    exercise_non_summative, problem_type, hint):
 
     if user_exercise and user_exercise.belongs_to(user_data):
 

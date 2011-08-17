@@ -1380,10 +1380,10 @@ def commit_problem_log(problem_log_source):
 
         index_attempt = max(0, problem_log_source.count_attempts - 1)
         index_hint = max(0, problem_log_source.count_hints - 1)
-        if index_attempt < len(problem_log.attempt_time_taken_list) \
-           and problem_log.attempt_time_taken_list[index_attempt] != -1 \
-           and index_hint < len(problem_log.hint_time_taken_list) \
-           and problem_log.hint_time_taken_list[index_hint] != -1:
+        if (index_attempt < len(problem_log.attempt_time_taken_list) \
+           and problem_log.attempt_time_taken_list[index_attempt] != -1) \
+           or (index_hint < len(problem_log.hint_time_taken_list) \
+           and problem_log.hint_time_taken_list[index_hint] != -1):
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
             return
 
