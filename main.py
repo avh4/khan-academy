@@ -51,6 +51,7 @@ import backfill
 import activity_summary
 import exercises
 import dashboard
+import exercisestats
 import github
 
 import models
@@ -1226,6 +1227,9 @@ def main():
         ('/sendtolog', SendToLog),
 
         ('/user_video_css', ServeUserVideoCss),
+
+        ('/exercisestats/test', exercisestats.Test),
+        ('/exercisestats/getfancyexercisestatisticstest', exercisestats.GetFancyExerciseStatisticsTest),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
