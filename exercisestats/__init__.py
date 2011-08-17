@@ -14,6 +14,8 @@ import models
 import consts
 import user_util
 
+from dashboard.models import DailyStatisticLog
+
 class Test(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
@@ -30,17 +32,17 @@ class Test(request_handler.RequestHandler):
             count = grouped.get(time, 0)
             cumulative += count
             hist.append({
-                "time": time,
-                "count": count,
-                "cumulative": cumulative,
-                "percent": 100.0 * count / total,
-                "percent_cumulative": 100.0 * cumulative / total,
-                "percent_cumulative_tenth": 10.0 * cumulative / total,
+                'time': time,
+                'count': count,
+                'cumulative': cumulative,
+                'percent': 100.0 * count / total,
+                'percent_cumulative': 100.0 * cumulative / total,
+                'percent_cumulative_tenth': 10.0 * cumulative / total,
             })
 
-        context = { "selected_nav_link": "practice", "hist": hist, "total": total }
+        context = { 'selected_nav_link': 'practice', 'hist': hist, 'total': total }
 
-        self.render_template("exercisestats/test.html", context)
+        self.render_template('exercisestats/test.html', context)
 
 class GetFancyExerciseStatisticsTest(request_handler.RequestHandler):
     @user_util.developer_only
@@ -56,19 +58,19 @@ class GetFancyExerciseStatisticsTest(request_handler.RequestHandler):
         # 
         # self.response.out.write("OK: " + str(mapreduce_id))
 
-        self.response.headers["Content-Type"] = "text/plain"
+        self.response.headers['Content-Type'] = 'text/plain'
 
-        self.response.out.write("%s\n" % datetime.datetime.now())
+        self.response.out.write('%s\n' % datetime.datetime.now())
 
-        exid = self.request_string("exid")
-        days = self.request_float("days", default = 1.0)
-        delete = self.request_bool("delete", default = False)
-        force_gc = self.request_bool("force_gc", default = False)
-        gc_gen = self.request_int("gc_gen", default = -1)
+        exid = self.request_string('exid')
+        days = self.request_float('days', default = 1.0)
+        delete = self.request_bool('delete', default = False)
+        force_gc = self.request_bool('force_gc', default = False)
+        gc_gen = self.request_int('gc_gen', default = -1)
         res = fancy_statistics_test(exid, days, delete, force_gc, gc_gen)
 
-        self.response.out.write("%r\n" % (res,))
-        self.response.out.write("%s\n" % datetime.datetime.now())
+        self.response.out.write('%r\n' % (res,))
+        self.response.out.write('%s\n' % datetime.datetime.now())
 
 # fancy_statistics_update_map is called by a background MapReduce task.
 # Each call updates the statistics for a single exercise.
