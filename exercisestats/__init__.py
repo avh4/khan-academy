@@ -15,7 +15,7 @@ import consts
 import user_util
 
 class Test(request_handler.RequestHandler):
-
+    @user_util.developer_only
     def get(self):
         problem_log_query = models.ProblemLog.all()
         problem_logs = problem_log_query.fetch(1000)
