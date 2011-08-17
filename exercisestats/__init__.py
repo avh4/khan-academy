@@ -2,6 +2,7 @@ import operator
 import itertools
 import datetime
 import math
+import gc
 
 from google.appengine.api import users
 from mapreduce import control
@@ -61,14 +62,17 @@ class GetFancyExerciseStatisticsTest(request_handler.RequestHandler):
 
         exid = self.request_string("exid")
         days = self.request_float("days", default = 1.0)
-        res = fancy_statistics_test(exid, days)
+        delete = self.request_bool("delete", default = False)
+        force_gc = self.request_bool("force_gc", default = False)
+        gc_gen = self.request_int("gc_gen", default = -1)
+        res = fancy_statistics_test(exid, days, delete, force_gc, gc_gen)
 
         self.response.out.write("%r\n" % (res,))
         self.response.out.write("%s\n" % datetime.datetime.now())
 
 # fancy_statistics_update_map is called by a background MapReduce task.
 # Each call updates the statistics for a single exercise.
-def fancy_statistics_test(exid, days):
+def fancy_statistics_test(exid, days, delete, force_gc, gc_gen):
     
     query = models.ProblemLog.all()
     if len(exid) > 0:
@@ -102,6 +106,14 @@ def fancy_statistics_test(exid, days):
                 reasonable_count += 1
 
         query.with_cursor(query.cursor())
+
+        if delete:
+            del problem_logs
+        if force_gc:
+            if gc_gen >= 0:
+                gc.collect(gc_gen)
+            else:
+                gc.collect()
 
     list_time_taken = []
     for time in sorted(reasonable_freq_table.keys()):
