@@ -395,7 +395,6 @@ class ExerciseAdmin(request_handler.RequestHandler):
         user_data = models.UserData.current()
         user = models.UserData.current().user
 
-        
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -410,9 +409,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
             exercise.proficient = False
             exercise.review = False
             exercise.status = ""
-            # if user_data.is_phantom:
-            #     exercise.phantom = True
-            # else:
+
             if exercise in suggested_exercises:
                 exercise.suggested = True
                 exercise.status = "Suggested"
@@ -420,7 +417,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
                 exercise.proficient = True
                 exercise.status = "Proficient"
             exercises.append(exercise)
-            
+
         exercises.sort(key=lambda e: e.name)
         template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
