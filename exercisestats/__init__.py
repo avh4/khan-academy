@@ -112,6 +112,7 @@ def fancy_stats_from_logs(problem_logs):
 
     freq_table = {}
     count = 0
+    sugg_freq_table = {}
     prof_freq_table = {}
 
     for problem_log in problem_logs:
@@ -121,11 +122,14 @@ def fancy_stats_from_logs(problem_logs):
         freq_table[time] = 1 + freq_table.get(time, 0)
         count += 1
 
+        if problem_log.suggested:
+            sugg_freq_table[time] = 1 + sugg_freq_table.get(time, 0)
+
         if problem_log.earned_proficiency:
             problem_num = int(problem_log.problem_number)
             prof_freq_table[problem_num] = 1 + prof_freq_table.get(problem_num, 0)
 
-    return { 'time_taken_frequencies': freq_table, 'log_count': count, 'proficiency_problem_number_frequencies': prof_freq_table }
+    return { 'time_taken_frequencies': freq_table, 'log_count': count, 'suggested_time_taken_frequencies': sugg_freq_table, 'proficiency_problem_number_frequencies': prof_freq_table }
 
 def fancy_stats_shard_reducer(exid, start_dt):
     logging.warn("summing all stats")
@@ -139,12 +143,14 @@ def fancy_stats_shard_reducer(exid, start_dt):
     results = {
         'time_taken_frequencies': {},
         'log_count': 0,
+        'suggested_time_taken_frequencies': {},
         'proficiency_problem_number_frequencies': {},
     }
 
     def accumulate_from_stat_shard(stat_shard):
         shard_val = pickle.loads(stat_shard.blob_val)
         freq_table = shard_val['time_taken_frequencies']
+        sugg_freq_table = shard_val['suggested_time_taken_frequencies']
         prof_freq_table = shard_val['proficiency_problem_number_frequencies']
 
         for time in freq_table:
@@ -152,6 +158,10 @@ def fancy_stats_shard_reducer(exid, start_dt):
             results['time_taken_frequencies'][time] = freq_table[time] + so_far
 
         results['log_count'] += shard_val['log_count']
+
+        for num in sugg_freq_table:
+            so_far = results['suggested_time_taken_frequencies'].get(num, 0)
+            results['suggested_time_taken_frequencies'][num] = sugg_freq_table[num] + so_far
 
         for num in prof_freq_table:
             so_far = results['proficiency_problem_number_frequencies'].get(num, 0)
