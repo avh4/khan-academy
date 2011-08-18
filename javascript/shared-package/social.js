@@ -32,13 +32,13 @@ var Social = {
 		FB.ui(
 		   {
 		     method: 'feed',
-		     name: 'I just earned the '+desc+' badge in '+activity+' at Khan Academy!',
+		     name: 'I just earned the '+desc+' badge' + ( activity ? ' in ' + activity : '' ) + ' at Khan Academy!',
 		     link: 'http://www.khanacademy.org',
-		     picture: 'http://www.khanacademy.org/'+icon,
+		     picture: ( icon.substring(0, 7) === 'http://' ? icon : 'http://www.khanacademy.org/'+icon ),
 		     caption: 'www.khanacademy.org',
 		     description: 'You can earn this too if you '+ext
 		 
-		   });	
+		   });
 		return false;
 		
 	},
