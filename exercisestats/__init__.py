@@ -86,7 +86,7 @@ def fancy_stats_deferred(exid, start_dt, cursor):
     freq_table = {}
     total_count = 0
 
-    problem_logs = query.fetch(10)
+    problem_logs = query.fetch(1000)
     if len(problem_logs) > 0:
         stats = fancy_stats_from_logs(problem_logs)
         pickled = pickle.dumps(stats)
@@ -112,6 +112,7 @@ def fancy_stats_from_logs(problem_logs):
 
     freq_table = {}
     count = 0
+    prof_freq_table = {}
 
     for problem_log in problem_logs:
         # cast longs to ints when possible
@@ -120,7 +121,11 @@ def fancy_stats_from_logs(problem_logs):
         freq_table[time] = 1 + freq_table.get(time, 0)
         count += 1
 
-    return { 'time_taken_frequencies': freq_table, 'log_count': count }
+        if problem_log.earned_proficiency:
+            problem_num = int(problem_log.problem_number)
+            prof_freq_table[problem_num] = 1 + prof_freq_table.get(problem_num, 0)
+
+    return { 'time_taken_frequencies': freq_table, 'log_count': count, 'proficiency_problem_number_frequencies': prof_freq_table }
 
 def fancy_stats_shard_reducer(exid, start_dt):
     logging.warn("summing all stats")
@@ -134,11 +139,13 @@ def fancy_stats_shard_reducer(exid, start_dt):
     results = {
         'time_taken_frequencies': {},
         'log_count': 0,
+        'proficiency_problem_number_frequencies': {},
     }
 
     def accumulate_from_stat_shard(stat_shard):
         shard_val = pickle.loads(stat_shard.blob_val)
         freq_table = shard_val['time_taken_frequencies']
+        prof_freq_table = shard_val['proficiency_problem_number_frequencies']
 
         for time in freq_table:
             so_far = results['time_taken_frequencies'].get(time, 0)
@@ -146,8 +153,12 @@ def fancy_stats_shard_reducer(exid, start_dt):
 
         results['log_count'] += shard_val['log_count']
 
+        for num in prof_freq_table:
+            so_far = results['proficiency_problem_number_frequencies'].get(num, 0)
+            results['proficiency_problem_number_frequencies'][num] = prof_freq_table[num] + so_far
+
     while True:
-        stat_shards = query.fetch(2)
+        stat_shards = query.fetch(1000)
 
         if len(stat_shards) <= 0:
             break
