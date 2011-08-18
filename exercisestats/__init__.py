@@ -1,12 +1,19 @@
+import logging
+logging.critical("hmm.")
 import operator
 import itertools
+import time
 import datetime
 import math
-import gc
+import pickle
+logging.critical(time)
 
 from google.appengine.api import users
+from google.appengine.ext import db
+from google.appengine.ext import deferred
 from mapreduce import control
 from mapreduce import operation as op
+logging.critical("hmm!")
 
 from app import App
 import request_handler
@@ -72,6 +79,70 @@ class GetFancyExerciseStatisticsTest(request_handler.RequestHandler):
         self.response.out.write('%r\n' % (res,))
         self.response.out.write('%s\n' % datetime.datetime.now())
 
+class KickOffDeferredStuff(request_handler.RequestHandler):
+    @user_util.developer_only
+    def get(self):
+        exid = self.request_string('exid')
+        days = self.request_float('days', default = 1.0)
+        start_dt = datetime.datetime.now() - datetime.timedelta(days = days)
+        deferred.defer(fancy_stats_deferred, exid, start_dt, None, _queue = 'fancy-exercise-stats-queue')
+        self.response.out.write('started, methinks')
+
+class ExerciseStatisticShard(db.Model):
+    # key_name is fancy
+    exid = db.StringProperty(required=True)
+    start_dt = db.DateTimeProperty(required=True)
+    cursor = db.StringProperty(required=True)
+    blob_val = db.BlobProperty()
+
+def fancy_stats_deferred(exid, start_dt, cursor):
+    unix_time = int(time.mktime(start_dt.timetuple()))
+    key_name = "%s:%d:%s" % (exid, unix_time, cursor)
+
+    if cursor and ExerciseStatisticShard.get_by_key_name(key_name):
+        # We've already run, die.
+        return
+
+    query = models.ProblemLog.all()
+    if len(exid) > 0:
+        query.filter('exercise =', exid)
+    query.filter('correct = ', True)
+    query.filter('time_done >', start_dt)
+    query.order('-time_done')
+
+    if cursor:
+        query.with_cursor(cursor)
+
+    # { time_taken: frequency } pairs
+    freq_table = {}
+    total_count = 0
+
+    if len(problem_logs) > 0:
+        logging.warn("processing %d logs!" % len(problem_logs))
+
+        for problem_log in problem_logs:
+            time = problem_log.time_taken
+
+            freq_table[time] = 1 + freq_table.get(time, 0)
+            total_count += 1
+
+        pickled = pickle.dumps({
+            time_taken_frequencies: freq_table,
+            log_count: total_count,
+        })
+
+        ExerciseStatisticShard.get_or_insert(
+            key_name,
+            exid = exid,
+            start_dt = start_dt,
+            cursor = cursor,
+            blob_val = pickled,
+        )
+
+        deferred.defer(fancy_stats_deferred, exid, start_dt, query.cursor(), _name = key_name, _queue = 'fancy-exercise-stats-queue')
+    else:
+        logging.warn("done processing.")
+
 # fancy_statistics_update_map is called by a background MapReduce task.
 # Each call updates the statistics for a single exercise.
 def fancy_statistics_test(exid, days, delete, force_gc, gc_gen):
@@ -92,7 +163,7 @@ def fancy_statistics_test(exid, days, delete, force_gc, gc_gen):
     reasonable_count = 0
 
     while True:
-        problem_logs = query.fetch(1000)
+        problem_logs = query.fetch(10)
 
         if len(problem_logs) <= 0:
             break
@@ -107,15 +178,9 @@ def fancy_statistics_test(exid, days, delete, force_gc, gc_gen):
                 reasonable_freq_table[time] = 1 + reasonable_freq_table.get(time, 0)
                 reasonable_count += 1
 
-        query.with_cursor(query.cursor())
-
-        if delete:
-            del problem_logs
-        if force_gc:
-            if gc_gen >= 0:
-                gc.collect(gc_gen)
-            else:
-                gc.collect()
+        cursor = query.cursor()
+        query.with_cursor(cursor)
+        logging.warning("CURSOR %r" % cursor)
 
     list_time_taken = []
     for time in sorted(reasonable_freq_table.keys()):

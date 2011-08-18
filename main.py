@@ -1230,6 +1230,7 @@ def main():
 
         ('/exercisestats/test', exercisestats.Test),
         ('/exercisestats/getfancyexercisestatisticstest', exercisestats.GetFancyExerciseStatisticsTest),
+        ('/exercisestats/kickoffdeferredstuff', exercisestats.KickOffDeferredStuff),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
