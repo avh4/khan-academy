@@ -102,8 +102,7 @@ def fancy_stats_deferred(exid, start_dt, cursor):
         return
 
     query = models.ProblemLog.all()
-    if len(exid) > 0:
-        query.filter('exercise =', exid)
+    query.filter('exercise =', exid)
     query.filter('correct = ', True)
     query.filter('time_done >', start_dt)
     query.order('-time_done')
@@ -120,14 +119,15 @@ def fancy_stats_deferred(exid, start_dt, cursor):
         logging.warn("processing %d logs!" % len(problem_logs))
 
         for problem_log in problem_logs:
-            time = problem_log.time_taken
+            # cast longs to ints when possible
+            time = int(problem_log.time_taken)
 
             freq_table[time] = 1 + freq_table.get(time, 0)
             total_count += 1
 
         pickled = pickle.dumps({
-            "time_taken_frequencies": freq_table,
-            "log_count": total_count,
+            'time_taken_frequencies': freq_table,
+            'log_count': total_count,
         })
 
         ExerciseStatisticShard.get_or_insert(
@@ -135,14 +135,44 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             exid = exid,
             start_dt = start_dt,
             cursor = cursor,
-            blob_val = pickled,
-        )
+            blob_val = pickled)
 
         # task names must match ^[a-zA-Z0-9_-]{1,500}$
         task_name = hashlib.sha1(key_name).hexdigest()
-        deferred.defer(fancy_stats_deferred, exid, start_dt, query.cursor(), _name = task_name, _queue = 'fancy-exercise-stats-queue')
+        deferred.defer(fancy_stats_deferred, exid, start_dt, query.cursor(),
+            _name = task_name,
+            _queue = 'fancy-exercise-stats-queue')
     else:
-        logging.warn("done processing.")
+        logging.warn("done processing, summing all stats")
+
+        query = ExerciseStatisticShard.all()
+        query.filter('exid =', exid)
+        query.filter('start_dt =', start_dt)
+
+        sum_freq_table = {}
+        sum_total_count = 0
+
+        while True:
+            stat_shards = query.fetch(2)
+
+            if len(stat_shards) <= 0:
+                break
+
+            for stat_shard in stat_shards:
+                shard_val = pickle.loads(stat_shard.blob_val)
+                freq_table = shard_val['time_taken_frequencies']
+
+                for time in freq_table:
+                    sum_freq_table[time] = freq_table[time] + sum_freq_table.get(time, 0)
+
+                sum_total_count += shard_val['log_count']
+
+            # Don't need the stat shards any more; get rid of them!
+            db.delete(stat_shards)
+
+            query.with_cursor(query.cursor())
+
+        logging.critical("%r" % ((sum_freq_table, sum_total_count),))
 
 # fancy_statistics_update_map is called by a background MapReduce task.
 # Each call updates the statistics for a single exercise.
