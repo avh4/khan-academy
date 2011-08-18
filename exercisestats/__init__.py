@@ -86,21 +86,10 @@ def fancy_stats_deferred(exid, start_dt, cursor):
     freq_table = {}
     total_count = 0
 
-    problem_logs = query.fetch(1000)
+    problem_logs = query.fetch(10)
     if len(problem_logs) > 0:
-        logging.warn("processing %d logs!" % len(problem_logs))
-
-        for problem_log in problem_logs:
-            # cast longs to ints when possible
-            time = int(problem_log.time_taken)
-
-            freq_table[time] = 1 + freq_table.get(time, 0)
-            total_count += 1
-
-        pickled = pickle.dumps({
-            'time_taken_frequencies': freq_table,
-            'log_count': total_count,
-        })
+        stats = fancy_stats_from_logs(problem_logs)
+        pickled = pickle.dumps(stats)
 
         ExerciseStatisticShard.get_or_insert(
             key_name,
@@ -115,36 +104,63 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             _name = task_name,
             _queue = 'fancy-exercise-stats-queue')
     else:
-        logging.warn("done processing, summing all stats")
+        all_stats = fancy_stats_shard_reducer(exid, start_dt)
+        logging.critical("%r", all_stats)
 
-        query = ExerciseStatisticShard.all()
-        query.filter('exid =', exid)
-        query.filter('start_dt =', start_dt)
+def fancy_stats_from_logs(problem_logs):
+    logging.warn("processing %d logs" % len(problem_logs))
 
-        sum_freq_table = {}
-        sum_total_count = 0
+    freq_table = {}
+    count = 0
 
-        while True:
-            stat_shards = query.fetch(2)
+    for problem_log in problem_logs:
+        # cast longs to ints when possible
+        time = int(problem_log.time_taken)
 
-            if len(stat_shards) <= 0:
-                break
+        freq_table[time] = 1 + freq_table.get(time, 0)
+        count += 1
 
-            for stat_shard in stat_shards:
-                shard_val = pickle.loads(stat_shard.blob_val)
-                freq_table = shard_val['time_taken_frequencies']
+    return { 'time_taken_frequencies': freq_table, 'log_count': count }
 
-                for time in freq_table:
-                    sum_freq_table[time] = freq_table[time] + sum_freq_table.get(time, 0)
+def fancy_stats_shard_reducer(exid, start_dt):
+    logging.warn("summing all stats")
 
-                sum_total_count += shard_val['log_count']
+    query = ExerciseStatisticShard.all()
+    query.filter('exid =', exid)
+    query.filter('start_dt =', start_dt)
 
-            # Don't need the stat shards any more; get rid of them!
-            db.delete(stat_shards)
+    # log_count can't be just a normal variable because Python closures are confusing
+    # http://stackoverflow.com/questions/4851463
+    results = {
+        'time_taken_frequencies': {},
+        'log_count': 0,
+    }
 
-            query.with_cursor(query.cursor())
+    def accumulate_from_stat_shard(stat_shard):
+        shard_val = pickle.loads(stat_shard.blob_val)
+        freq_table = shard_val['time_taken_frequencies']
 
-        logging.critical("%r" % ((sum_freq_table, sum_total_count),))
+        for time in freq_table:
+            so_far = results['time_taken_frequencies'].get(time, 0)
+            results['time_taken_frequencies'][time] = freq_table[time] + so_far
+
+        results['log_count'] += shard_val['log_count']
+
+    while True:
+        stat_shards = query.fetch(2)
+
+        if len(stat_shards) <= 0:
+            break
+
+        for stat_shard in stat_shards:
+            accumulate_from_stat_shard(stat_shard)
+
+        # Don't need the stat shards any more; get rid of them!
+        db.delete(stat_shards)
+
+        query.with_cursor(query.cursor())
+
+    return results
 
 # See http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def percentile(N, percent, key=lambda x:x):
