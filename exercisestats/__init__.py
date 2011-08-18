@@ -53,28 +53,36 @@ class KickOffDeferredStuff(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
         exid = self.request_string('exid')
-        days = self.request_float('days', default = 1.0)
-        start_dt = datetime.datetime.now() - datetime.timedelta(days = days)
-        deferred.defer(fancy_stats_deferred, exid, start_dt, None, _queue = 'fancy-exercise-stats-queue')
+
+        yesterday_str = (datetime.datetime.now() - datetime.timedelta(days = 1)).strftime('%Y-%m-%d')
+        date_str = self.request_string('date', default = yesterday_str)
+        start_dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+        end_dt = start_dt + datetime.timedelta(days = 1)
+
+        deferred.defer(fancy_stats_deferred, exid, start_dt, end_dt, None, _queue = 'fancy-exercise-stats-queue')
         self.response.out.write('started, methinks')
 
 class ExerciseStatisticShard(db.Model):
-    # key_name is "%s:%d:%s" % (exid, unix_time, cursor)
+    # key_name is "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
     exid = db.StringProperty(required=True)
     start_dt = db.DateTimeProperty(required=True)
+    end_dt = db.DateTimeProperty(required=True)
     cursor = db.StringProperty()
     blob_val = db.BlobProperty()
 
 class ExerciseStatistic(db.Model):
-    # key_name is "%s:%d" % (exid, unix_time)
+    # key_name is "%s:%d:%d" % (exid, unix_start, unix_end)
     exid = db.StringProperty(required=True)
+    start_dt = db.DateTimeProperty(required=True)
+    end_dt = db.DateTimeProperty(required=True)
     blob_val = db.BlobProperty(required=True)
     log_count = db.IntegerProperty(required=True)
     time_logged = db.DateTimeProperty(auto_now_add=True)
 
-def fancy_stats_deferred(exid, start_dt, cursor):
-    unix_time = int(mktime(start_dt.timetuple()))
-    key_name = "%s:%d:%s" % (exid, unix_time, cursor)
+def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
+    unix_start = int(mktime(start_dt.timetuple()))
+    unix_end = int(mktime(end_dt.timetuple()))
+    key_name = "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
 
     if cursor and ExerciseStatisticShard.get_by_key_name(key_name):
         # We've already run, die.
@@ -83,7 +91,8 @@ def fancy_stats_deferred(exid, start_dt, cursor):
     query = models.ProblemLog.all()
     query.filter('exercise =', exid)
     query.filter('correct = ', True)
-    query.filter('time_done >', start_dt)
+    query.filter('time_done >=', start_dt)
+    query.filter('time_done <', end_dt)
     query.order('-time_done')
 
     if cursor:
@@ -102,20 +111,23 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             key_name,
             exid = exid,
             start_dt = start_dt,
+            end_dt = end_dt,
             cursor = cursor,
             blob_val = pickled)
 
         # task names must match ^[a-zA-Z0-9_-]{1,500}$
         task_name = hashlib.sha1(key_name).hexdigest()
-        deferred.defer(fancy_stats_deferred, exid, start_dt, query.cursor(),
+        deferred.defer(fancy_stats_deferred, exid, start_dt, end_dt, query.cursor(),
             _name = task_name,
             _queue = 'fancy-exercise-stats-queue')
     else:
-        all_stats = fancy_stats_shard_reducer(exid, start_dt)
+        all_stats = fancy_stats_shard_reducer(exid, start_dt, end_dt)
 
         ExerciseStatistic.get_or_insert(
-            "%s:%d" % (exid, unix_time),
+            "%s:%d:%d" % (exid, unix_start, unix_end),
             exid = exid,
+            start_dt = start_dt,
+            end_dt = end_dt,
             blob_val = pickle.dumps(all_stats, 2),
             log_count = all_stats['log_count'])
 
@@ -145,12 +157,13 @@ def fancy_stats_from_logs(problem_logs):
 
     return { 'time_taken_frequencies': freq_table, 'log_count': count, 'suggested_time_taken_frequencies': sugg_freq_table, 'proficiency_problem_number_frequencies': prof_freq_table }
 
-def fancy_stats_shard_reducer(exid, start_dt):
+def fancy_stats_shard_reducer(exid, start_dt, end_dt):
     logging.warn("summing all stats")
 
     query = ExerciseStatisticShard.all()
     query.filter('exid =', exid)
     query.filter('start_dt =', start_dt)
+    query.filter('end_dt =', end_dt)
 
     # log_count can't be just a normal variable because Python closures are confusing
     # http://stackoverflow.com/questions/4851463
