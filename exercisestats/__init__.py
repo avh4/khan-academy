@@ -49,34 +49,6 @@ class Test(request_handler.RequestHandler):
 
         self.render_template('exercisestats/test.html', context)
 
-class GetFancyExerciseStatisticsTest(request_handler.RequestHandler):
-    @user_util.developer_only
-    def get(self):
-        # Admin-only
-        # mapreduce_id = control.start_map(
-        #         name = "UpdateFancyExerciseStatistics",
-        #         handler_spec = "exercisestats.fancy_statistics_update_map",
-        #         reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-        #         reader_parameters = {"entity_kind": "models.Exercise"},
-        #         queue_name = "fancy-exercise-statistics-mapreduce-queue",
-        #         )
-        # 
-        # self.response.out.write("OK: " + str(mapreduce_id))
-
-        self.response.headers['Content-Type'] = 'text/plain'
-
-        self.response.out.write('%s\n' % datetime.datetime.now())
-
-        exid = self.request_string('exid')
-        days = self.request_float('days', default = 1.0)
-        delete = self.request_bool('delete', default = False)
-        force_gc = self.request_bool('force_gc', default = False)
-        gc_gen = self.request_int('gc_gen', default = -1)
-        res = fancy_statistics_test(exid, days, delete, force_gc, gc_gen)
-
-        self.response.out.write('%r\n' % (res,))
-        self.response.out.write('%s\n' % datetime.datetime.now())
-
 class KickOffDeferredStuff(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
@@ -173,55 +145,6 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             query.with_cursor(query.cursor())
 
         logging.critical("%r" % ((sum_freq_table, sum_total_count),))
-
-# fancy_statistics_update_map is called by a background MapReduce task.
-# Each call updates the statistics for a single exercise.
-def fancy_statistics_test(exid, days, delete, force_gc, gc_gen):
-    
-    query = models.ProblemLog.all()
-    if len(exid) > 0:
-        query.filter('exercise =', exid)
-    query.filter('correct = ', True)
-    query.filter('time_done >', datetime.datetime.now() - datetime.timedelta(days = days))
-    query.order('-time_done')
-
-    # { time_taken: frequency } pairs
-    freq_table = {}
-    total_count = 0
-
-    # { time_taken: frequency } pairs for 3 < time_taken < consts.MAX_WORKING_ON_PROBLEM_SECONDS
-    reasonable_freq_table = {}
-    reasonable_count = 0
-
-    while True:
-        problem_logs = query.fetch(10)
-
-        if len(problem_logs) <= 0:
-            break
-
-        for problem_log in problem_logs:
-            time = problem_log.time_taken
-
-            freq_table[time] = 1 + freq_table.get(time, 0)
-            total_count += 1
-
-            if 3.0 < time < consts.MAX_WORKING_ON_PROBLEM_SECONDS:
-                reasonable_freq_table[time] = 1 + reasonable_freq_table.get(time, 0)
-                reasonable_count += 1
-
-        cursor = query.cursor()
-        query.with_cursor(cursor)
-        logging.warning("CURSOR %r" % cursor)
-
-    list_time_taken = []
-    for time in sorted(reasonable_freq_table.keys()):
-        # Cast to an int to (hopefully) save some memory over a long
-        list_time_taken.extend([int(time)] * freq_table[time])
-
-    fastest_percentile = percentile(list_time_taken, consts.FASTEST_EXERCISE_PERCENTILE)
-    fastest_percentile = min(consts.MAX_SECONDS_PER_FAST_PROBLEM, fastest_percentile)
-    fastest_percentile = max(consts.MIN_SECONDS_PER_FAST_PROBLEM, fastest_percentile)
-    return (freq_table, list_time_taken, total_count, fastest_percentile)
 
 # See http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def percentile(N, percent, key=lambda x:x):
