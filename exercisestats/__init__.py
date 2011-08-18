@@ -1,19 +1,16 @@
 import logging
-logging.critical("hmm.")
 import operator
 import itertools
-import time
+from time import mktime
 import datetime
 import math
 import pickle
-logging.critical(time)
 
 from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import deferred
 from mapreduce import control
 from mapreduce import operation as op
-logging.critical("hmm!")
 
 from app import App
 import request_handler
@@ -96,7 +93,7 @@ class ExerciseStatisticShard(db.Model):
     blob_val = db.BlobProperty()
 
 def fancy_stats_deferred(exid, start_dt, cursor):
-    unix_time = int(time.mktime(start_dt.timetuple()))
+    unix_time = int(mktime(start_dt.timetuple()))
     key_name = "%s:%d:%s" % (exid, unix_time, cursor)
 
     if cursor and ExerciseStatisticShard.get_by_key_name(key_name):
