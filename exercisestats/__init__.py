@@ -59,11 +59,18 @@ class KickOffDeferredStuff(request_handler.RequestHandler):
         self.response.out.write('started, methinks')
 
 class ExerciseStatisticShard(db.Model):
-    # key_name is fancy
+    # key_name is "%s:%d:%s" % (exid, unix_time, cursor)
     exid = db.StringProperty(required=True)
     start_dt = db.DateTimeProperty(required=True)
     cursor = db.StringProperty()
     blob_val = db.BlobProperty()
+
+class ExerciseStatistic(db.Model):
+    # key_name is "%s:%d" % (exid, unix_time)
+    exid = db.StringProperty(required=True)
+    blob_val = db.BlobProperty(required=True)
+    log_count = db.IntegerProperty(required=True)
+    time_logged = db.DateTimeProperty(auto_now_add=True)
 
 def fancy_stats_deferred(exid, start_dt, cursor):
     unix_time = int(mktime(start_dt.timetuple()))
@@ -89,7 +96,7 @@ def fancy_stats_deferred(exid, start_dt, cursor):
     problem_logs = query.fetch(1000)
     if len(problem_logs) > 0:
         stats = fancy_stats_from_logs(problem_logs)
-        pickled = pickle.dumps(stats)
+        pickled = pickle.dumps(stats, 2)
 
         ExerciseStatisticShard.get_or_insert(
             key_name,
@@ -105,6 +112,13 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             _queue = 'fancy-exercise-stats-queue')
     else:
         all_stats = fancy_stats_shard_reducer(exid, start_dt)
+
+        ExerciseStatistic.get_or_insert(
+            "%s:%d" % (exid, unix_time),
+            exid = exid,
+            blob_val = pickle.dumps(all_stats, 2),
+            log_count = all_stats['log_count'])
+
         logging.critical("%r", all_stats)
 
 def fancy_stats_from_logs(problem_logs):
