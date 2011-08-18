@@ -62,6 +62,29 @@ class KickOffDeferredStuff(request_handler.RequestHandler):
         deferred.defer(fancy_stats_deferred, exid, start_dt, end_dt, None, _queue = 'fancy-exercise-stats-queue')
         self.response.out.write('started, methinks')
 
+class CollectFancyExerciseStatistics(request_handler.RequestHandler):
+    @user_util.developer_only
+    def get(self):
+        query = models.Exercise.all()
+        query.order('h_position')
+
+        # from the beginning of yesterday to the beginning of today
+        end_dt = datetime.datetime.combine(datetime.date.today(), datetime.time())
+        start_dt = end_dt - datetime.timedelta(days = 1)
+
+        while True:
+            exercises = query.fetch(1000)
+
+            if len(exercises) <= 0:
+                break
+
+            for ex in exercises:
+                logging.info("adding task for %s", ex.name)
+                deferred.defer(fancy_stats_deferred, ex.name, start_dt, end_dt, None,
+                    _queue = 'fancy-exercise-stats-queue')
+
+            query.with_cursor(query.cursor())
+
 class ExerciseStatisticShard(db.Model):
     # key_name is "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
     exid = db.StringProperty(required=True)
@@ -104,6 +127,8 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
 
     problem_logs = query.fetch(1000)
     if len(problem_logs) > 0:
+        logging.info("processing %d logs for %s" % (len(problem_logs), exid))
+
         stats = fancy_stats_from_logs(problem_logs)
         pickled = pickle.dumps(stats, 2)
 
@@ -121,6 +146,8 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
             _name = task_name,
             _queue = 'fancy-exercise-stats-queue')
     else:
+        logging.info("summing all stats")
+
         all_stats = fancy_stats_shard_reducer(exid, start_dt, end_dt)
 
         ExerciseStatistic.get_or_insert(
@@ -131,11 +158,9 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
             blob_val = pickle.dumps(all_stats, 2),
             log_count = all_stats['log_count'])
 
-        logging.critical("%r", all_stats)
+        logging.info("done processing %d logs for %s", all_stats['log_count'], exid)
 
 def fancy_stats_from_logs(problem_logs):
-    logging.warn("processing %d logs" % len(problem_logs))
-
     freq_table = {}
     count = 0
     sugg_freq_table = {}
@@ -158,8 +183,6 @@ def fancy_stats_from_logs(problem_logs):
     return { 'time_taken_frequencies': freq_table, 'log_count': count, 'suggested_time_taken_frequencies': sugg_freq_table, 'proficiency_problem_number_frequencies': prof_freq_table }
 
 def fancy_stats_shard_reducer(exid, start_dt, end_dt):
-    logging.warn("summing all stats")
-
     query = ExerciseStatisticShard.all()
     query.filter('exid =', exid)
     query.filter('start_dt =', start_dt)
