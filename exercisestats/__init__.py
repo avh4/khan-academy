@@ -147,25 +147,19 @@ def fancy_stats_shard_reducer(exid, start_dt):
         'proficiency_problem_number_frequencies': {},
     }
 
+    # like dict.update, but it adds instead of replacing
+    def dict_update_sum(accumulated, updates):
+        for key in updates:
+            so_far = accumulated.get(key, 0)
+            accumulated[key] = so_far + updates[key]
+
     def accumulate_from_stat_shard(stat_shard):
         shard_val = pickle.loads(stat_shard.blob_val)
-        freq_table = shard_val['time_taken_frequencies']
-        sugg_freq_table = shard_val['suggested_time_taken_frequencies']
-        prof_freq_table = shard_val['proficiency_problem_number_frequencies']
 
-        for time in freq_table:
-            so_far = results['time_taken_frequencies'].get(time, 0)
-            results['time_taken_frequencies'][time] = freq_table[time] + so_far
+        for dict_name in ['time_taken_frequencies', 'suggested_time_taken_frequencies', 'proficiency_problem_number_frequencies']:
+            dict_update_sum(results[dict_name], shard_val[dict_name])
 
         results['log_count'] += shard_val['log_count']
-
-        for num in sugg_freq_table:
-            so_far = results['suggested_time_taken_frequencies'].get(num, 0)
-            results['suggested_time_taken_frequencies'][num] = sugg_freq_table[num] + so_far
-
-        for num in prof_freq_table:
-            so_far = results['proficiency_problem_number_frequencies'].get(num, 0)
-            results['proficiency_problem_number_frequencies'][num] = prof_freq_table[num] + so_far
 
     while True:
         stat_shards = query.fetch(1000)
