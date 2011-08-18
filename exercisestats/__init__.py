@@ -5,6 +5,7 @@ from time import mktime
 import datetime
 import math
 import pickle
+import hashlib
 
 from google.appengine.api import users
 from google.appengine.ext import db
@@ -89,7 +90,7 @@ class ExerciseStatisticShard(db.Model):
     # key_name is fancy
     exid = db.StringProperty(required=True)
     start_dt = db.DateTimeProperty(required=True)
-    cursor = db.StringProperty(required=True)
+    cursor = db.StringProperty()
     blob_val = db.BlobProperty()
 
 def fancy_stats_deferred(exid, start_dt, cursor):
@@ -114,6 +115,7 @@ def fancy_stats_deferred(exid, start_dt, cursor):
     freq_table = {}
     total_count = 0
 
+    problem_logs = query.fetch(1000)
     if len(problem_logs) > 0:
         logging.warn("processing %d logs!" % len(problem_logs))
 
@@ -124,8 +126,8 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             total_count += 1
 
         pickled = pickle.dumps({
-            time_taken_frequencies: freq_table,
-            log_count: total_count,
+            "time_taken_frequencies": freq_table,
+            "log_count": total_count,
         })
 
         ExerciseStatisticShard.get_or_insert(
@@ -136,7 +138,9 @@ def fancy_stats_deferred(exid, start_dt, cursor):
             blob_val = pickled,
         )
 
-        deferred.defer(fancy_stats_deferred, exid, start_dt, query.cursor(), _name = key_name, _queue = 'fancy-exercise-stats-queue')
+        # task names must match ^[a-zA-Z0-9_-]{1,500}$
+        task_name = hashlib.sha1(key_name).hexdigest()
+        deferred.defer(fancy_stats_deferred, exid, start_dt, query.cursor(), _name = task_name, _queue = 'fancy-exercise-stats-queue')
     else:
         logging.warn("done processing.")
 
