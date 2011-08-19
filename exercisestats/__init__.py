@@ -1,8 +1,5 @@
 import logging
-import itertools
-from time import mktime
-import datetime
-import math
+import datetime as dt
 import pickle
 import hashlib
 
@@ -10,89 +7,36 @@ from google.appengine.ext import db
 from google.appengine.ext import deferred
 
 import request_handler
-import models
+from models import ProblemLog, Exercise
+from exercisestats.models import ExerciseStatisticShard, ExerciseStatistic
 import user_util
 
-class Test(request_handler.RequestHandler):
-    @user_util.developer_only
-    def get(self):
-        problem_log_query = models.ProblemLog.all()
-        problem_logs = problem_log_query.fetch(1000)
-
-        problem_logs.sort(key=lambda log: log.time_taken)
-        grouped = dict((k, sum(1 for i in v)) for (k, v) in itertools.groupby(problem_logs, key=lambda log: log.time_taken))
-
-        hist = []
-        total = sum(grouped[k] for k in grouped)
-        cumulative = 0
-        for time in range(180):
-            count = grouped.get(time, 0)
-            cumulative += count
-            hist.append({
-                'time': time,
-                'count': count,
-                'cumulative': cumulative,
-                'percent': 100.0 * count / total,
-                'percent_cumulative': 100.0 * cumulative / total,
-                'percent_cumulative_tenth': 10.0 * cumulative / total,
-            })
-
-        context = { 'selected_nav_link': 'practice', 'hist': hist, 'total': total }
-
-        self.render_template('exercisestats/test.html', context)
-
+# handler that kicks off task chain per exercise
 class CollectFancyExerciseStatistics(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
-        query = models.Exercise.all()
+        # from the beginning of yesterday to the beginning of today
+        end_dt = dt.datetime.combine(dt.date.today(), dt.time())
+        start_dt = end_dt - dt.timedelta(days = 1)
+
+        query = Exercise.all()
         query.order('h_position')
 
-        # from the beginning of yesterday to the beginning of today
-        end_dt = datetime.datetime.combine(datetime.date.today(), datetime.time())
-        start_dt = end_dt - datetime.timedelta(days = 1)
-
-        while True:
-            exercises = query.fetch(1000)
-
-            if len(exercises) <= 0:
-                break
-
-            for ex in exercises:
-                logging.info("adding task for %s", ex.name)
-                deferred.defer(fancy_stats_deferred, ex.name, start_dt, end_dt, None,
-                    _queue = 'fancy-exercise-stats-queue')
-
-            query.with_cursor(query.cursor())
-
-class ExerciseStatisticShard(db.Model):
-    # key_name is "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
-    exid = db.StringProperty(required=True)
-    start_dt = db.DateTimeProperty(required=True)
-    end_dt = db.DateTimeProperty(required=True)
-    cursor = db.StringProperty()
-    blob_val = db.BlobProperty()
-
-class ExerciseStatistic(db.Model):
-    # key_name is "%s:%d:%d" % (exid, unix_start, unix_end)
-    exid = db.StringProperty(required=True)
-    start_dt = db.DateTimeProperty(required=True)
-    end_dt = db.DateTimeProperty(required=True)
-    blob_val = db.BlobProperty(required=True)
-    log_count = db.IntegerProperty(required=True)
-    time_logged = db.DateTimeProperty(auto_now_add=True)
+        for exercise in query:
+            logging.info("Creating task for %s", exercise.name)
+            deferred.defer(fancy_stats_deferred, exercise.name,
+                           start_dt, end_dt, None,
+                           _queue = 'fancy-exercise-stats-queue')
 
 def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
-    unix_start = int(mktime(start_dt.timetuple()))
-    unix_end = int(mktime(end_dt.timetuple()))
-    key_name = "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
-
+    key_name = ExerciseStatisticShard.make_key(exit, start_dt, end_dt, cursor)
     if cursor and ExerciseStatisticShard.get_by_key_name(key_name):
         # We've already run, die.
         return
 
-    query = models.ProblemLog.all()
+    query = ProblemLog.all()
     query.filter('exercise =', exid)
-    query.filter('correct = ', True)
+    query.filter('correct =', True)
     query.filter('time_done >=', start_dt)
     query.filter('time_done <', end_dt)
     query.order('-time_done')
@@ -107,13 +51,14 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
         stats = fancy_stats_from_logs(problem_logs)
         pickled = pickle.dumps(stats, 2)
 
-        ExerciseStatisticShard.get_or_insert(
+        shard = ExerciseStatisticShard(
             key_name,
             exid = exid,
             start_dt = start_dt,
             end_dt = end_dt,
             cursor = cursor,
             blob_val = pickled)
+        shard.put()
 
         # task names must match ^[a-zA-Z0-9_-]{1,500}$
         task_name = hashlib.sha1(key_name).hexdigest()
@@ -121,17 +66,19 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
             _name = task_name,
             _queue = 'fancy-exercise-stats-queue')
     else:
-        logging.info("summing all stats")
+        # No more problem logs left to process
+        logging.info("Summing all stats for %s", exid)
 
         all_stats = fancy_stats_shard_reducer(exid, start_dt, end_dt)
 
-        ExerciseStatistic.get_or_insert(
-            "%s:%d:%d" % (exid, unix_start, unix_end),
+        model = ExerciseStatistic(
+            ExerciseStatistic.make_key(exid, start_dt, end_dt),
             exid = exid,
             start_dt = start_dt,
             end_dt = end_dt,
             blob_val = pickle.dumps(all_stats, 2),
             log_count = all_stats['log_count'])
+        model.put()
 
         logging.info("done processing %d logs for %s", all_stats['log_count'], exid)
 
@@ -201,25 +148,3 @@ def fancy_stats_shard_reducer(exid, start_dt, end_dt):
         query.with_cursor(query.cursor())
 
     return results
-
-# See http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
-def percentile(N, percent, key=lambda x:x):
-    """
-    Find the percentile of a list of values.
-
-    @parameter N - is a list of values. Note N MUST BE already sorted.
-    @parameter percent - a float value from 0.0 to 1.0.
-    @parameter key - optional key function to compute value from each element of N.
-
-    @return - the percentile of the values
-    """
-    if not N:
-        return None
-    k = (len(N)-1) * percent
-    f = math.floor(k)
-    c = math.ceil(k)
-    if f == c:
-        return key(N[int(k)])
-    d0 = key(N[int(f)]) * (k-f)
-    d1 = key(N[int(c)]) * (c-k)
-    return d0+d1
