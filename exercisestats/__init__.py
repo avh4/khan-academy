@@ -49,19 +49,6 @@ class Test(request_handler.RequestHandler):
 
         self.render_template('exercisestats/test.html', context)
 
-class KickOffDeferredStuff(request_handler.RequestHandler):
-    @user_util.developer_only
-    def get(self):
-        exid = self.request_string('exid')
-
-        yesterday_str = (datetime.datetime.now() - datetime.timedelta(days = 1)).strftime('%Y-%m-%d')
-        date_str = self.request_string('date', default = yesterday_str)
-        start_dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-        end_dt = start_dt + datetime.timedelta(days = 1)
-
-        deferred.defer(fancy_stats_deferred, exid, start_dt, end_dt, None, _queue = 'fancy-exercise-stats-queue')
-        self.response.out.write('started, methinks')
-
 class CollectFancyExerciseStatistics(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):

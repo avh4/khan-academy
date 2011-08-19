@@ -1229,7 +1229,6 @@ def main():
         ('/user_video_css', ServeUserVideoCss),
 
         ('/exercisestats/test', exercisestats.Test),
-        ('/exercisestats/kickoffdeferredstuff', exercisestats.KickOffDeferredStuff),
         ('/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
 
         # Redirect any links to old JSP version
