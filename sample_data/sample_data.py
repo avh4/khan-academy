@@ -12,18 +12,18 @@
 #      this list of conditions and the following disclaimer in the documentation
 #      and/or other materials provided with the distribution.
 #    * Neither the name of Dean Brettle nor the names of its contributors may be
-#      used to endorse or promote products derived from this software without 
+#      used to endorse or promote products derived from this software without
 #      specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
 # IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
 # INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
 # NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
 # PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
 """ Wrapper for uploading/downloading all the system-wide data """
@@ -34,16 +34,16 @@ from optparse import OptionParser
 
 
 def main():
-    kinds = ('Exercise', 
-             'Video', 
-             'Playlist', 
-             'ExerciseVideo', 
-             'ExercisePlaylist', 
+    kinds = ('Exercise',
+             'Video',
+             'Playlist',
+             'ExerciseVideo',
+             'ExercisePlaylist',
              'VideoPlaylist',
              'StemmedIndex',
-             'LiteralIndex'
+             'LiteralIndex',
              )
-    parser = OptionParser(usage="%prog [options] upload|download", 
+    parser = OptionParser(usage="%prog [options] upload|download",
                           description="Uploads the sample data to a server or downloads it from the server.")
     parser.add_option("-U", "--url", default="http://localhost:8080/remote_api",
                       help="The location of the remote_api endpoint.")
@@ -55,7 +55,7 @@ def main():
     parser.add_option("-p", "--python", default=(sys.executable if platform.system() == "Windows" else None), help="Path of python executable.")
     parser.add_option("-a", "--appcfg", default='appcfg.py', help="Path of appcfg.py (Google App Engine).")
     parser.add_option("-A", "--application", default='s~khan-academy', help="GAE application name")
-    
+
     (options, args) = parser.parse_args()
     if len(args) < 1:
         parser.print_help()
@@ -72,7 +72,7 @@ def main():
 
         if options.email == parser.get_option('--email').default:
             call_args.append('--passin')
-        
+
         if options.python is not None:
             call_args.insert(0, options.python)
 
