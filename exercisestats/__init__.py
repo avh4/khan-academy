@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import logging
 import datetime as dt
 import pickle
@@ -7,8 +9,10 @@ from google.appengine.ext import db
 from google.appengine.ext import deferred
 
 import request_handler
+
+
 from models import ProblemLog, Exercise
-from exercisestats.models import ExerciseStatisticShard, ExerciseStatistic
+from .models import ExerciseStatisticShard, ExerciseStatistic
 import user_util
 
 # handler that kicks off task chain per exercise
@@ -83,8 +87,8 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
         logging.info("done processing %d logs for %s", all_stats['log_count'], exid)
 
 def fancy_stats_from_logs(problem_logs):
-    freq_table = {}
     count = 0
+    freq_table = {}
     sugg_freq_table = {}
     prof_freq_table = {}
 
@@ -92,8 +96,8 @@ def fancy_stats_from_logs(problem_logs):
         # cast longs to ints when possible
         time = int(problem_log.time_taken)
 
-        freq_table[time] = 1 + freq_table.get(time, 0)
         count += 1
+        freq_table[time] = 1 + freq_table.get(time, 0)
 
         if problem_log.suggested:
             sugg_freq_table[time] = 1 + sugg_freq_table.get(time, 0)
@@ -102,7 +106,12 @@ def fancy_stats_from_logs(problem_logs):
             problem_num = int(problem_log.problem_number)
             prof_freq_table[problem_num] = 1 + prof_freq_table.get(problem_num, 0)
 
-    return { 'time_taken_frequencies': freq_table, 'log_count': count, 'suggested_time_taken_frequencies': sugg_freq_table, 'proficiency_problem_number_frequencies': prof_freq_table }
+    return {
+        'log_count': count,
+        'time_taken_frequencies': freq_table,
+        'suggested_time_taken_frequencies': sugg_freq_table,
+        'proficiency_problem_number_frequencies': prof_freq_table
+    }
 
 def fancy_stats_shard_reducer(exid, start_dt, end_dt):
     query = ExerciseStatisticShard.all()
@@ -113,8 +122,8 @@ def fancy_stats_shard_reducer(exid, start_dt, end_dt):
     # log_count can't be just a normal variable because Python closures are confusing
     # http://stackoverflow.com/questions/4851463
     results = {
-        'time_taken_frequencies': {},
         'log_count': 0,
+        'time_taken_frequencies': {},
         'suggested_time_taken_frequencies': {},
         'proficiency_problem_number_frequencies': {},
     }

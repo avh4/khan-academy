@@ -51,7 +51,7 @@ import backfill
 import activity_summary
 import exercises
 import dashboard
-import exercisestats
+import exercisestats.report
 import github
 
 import models

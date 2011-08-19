@@ -1,23 +1,56 @@
+from __future__ import absolute_import
+
 import request_handler
 import user_util
 
 from itertools import groupby
 from models import ProblemLog
+from .models import ExerciseStatistic
+
+import datetime as dt
 
 class Test(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
+        return self.from_exercise_stats()
+
+    def from_exercise_stats(self):
+        hist = self.request_string('hist', 'time_taken_frequencies')
+        exid = self.request_string('exid', 'addition_1')
+        date = self.request_string('date')
+
+        if date:
+            try:
+                date = dt.datetime.strptime(date, "%Y/%m/%d")
+            except:
+                pass
+        if not date:
+            date = dt.datetime.combine(dt.date.today(), dt.time())
+
+        bounds = ExerciseStatistic.date_to_bounds(date)
+        key_name = ExerciseStatistic.make_key(exid, bounds[0], bounds[1])
+        ex = ExerciseStatistic.get_by_key_name(key_name)
+        if not ex:
+            raise Exception("No ExerciseStatistic found with key_name %s", key_name)
+
+        return self.render_hist(ex.histogram[hist])
+
+    # only used for testing
+    def from_problem_logs(self):
         problem_log_query = ProblemLog.all()
         problem_logs = problem_log_query.fetch(1000)
 
         problem_logs.sort(key=lambda log: log.time_taken)
         grouped = dict((k, sum(1 for i in v)) for (k, v) in groupby(problem_logs, key=lambda log: log.time_taken))
+        return self.render_hist(grouped)
 
+    def render_hist(self, data):
+        max_t = min(180, max(data.keys()))
         hist = []
-        total = sum(grouped[k] for k in grouped)
+        total = sum(data[k] for k in data)
         cumulative = 0
-        for time in range(180):
-            count = grouped.get(time, 0)
+        for time in range(max_t+2):
+            count = data.get(time, 0)
             cumulative += count
             hist.append({
                 'time': time,
