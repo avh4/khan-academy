@@ -19,13 +19,9 @@ class Test(request_handler.RequestHandler):
         exid = self.request_string('exid', 'addition_1')
         date = self.request_string('date')
 
-        if date:
-            try:
-                date = dt.datetime.strptime(date, "%Y/%m/%d")
-            except:
-                pass
-        if not date:
-            date = dt.datetime.combine(dt.date.today(), dt.time())
+        yesterday = dt.date.today() - dt.timedelta(days=1)
+        yesterday_dt = dt.datetime.combine(yesterday, dt.time())
+        date = self.request_date('date', "%Y/%m/%d", yesterday_dt)
 
         bounds = ExerciseStatistic.date_to_bounds(date)
         key_name = ExerciseStatistic.make_key(exid, bounds[0], bounds[1])

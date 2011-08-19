@@ -19,14 +19,13 @@ import user_util
 class CollectFancyExerciseStatistics(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
-        # from the beginning of yesterday to the beginning of today
-        end_dt = dt.datetime.combine(dt.date.today(), dt.time())
-        start_dt = end_dt - dt.timedelta(days = 1)
+        yesterday = dt.date.today() - dt.timedelta(days=1)
+        yesterday_dt = dt.datetime.combine(yesterday, dt.time())
+        date = self.request_date('date', "%Y/%m/%d", yesterday_dt)
 
-        query = Exercise.all()
-        query.order('h_position')
+        start_dt, end_dt = ExerciseStatistic.date_to_bounds(date)
 
-        for exercise in query:
+        for exercise in Exercise.all():
             logging.info("Creating task for %s", exercise.name)
             deferred.defer(fancy_stats_deferred, exercise.name,
                            start_dt, end_dt, None,
