@@ -22,12 +22,16 @@ class CollectFancyExerciseStatistics(request_handler.RequestHandler):
         yesterday = dt.date.today() - dt.timedelta(days=1)
         yesterday_dt = dt.datetime.combine(yesterday, dt.time())
         date = self.request_date('date', "%Y/%m/%d", yesterday_dt)
-
         start_dt, end_dt = ExerciseStatistic.date_to_bounds(date)
 
-        for exercise in Exercise.all():
-            logging.info("Creating task for %s", exercise.name)
-            deferred.defer(fancy_stats_deferred, exercise.name,
+        exercises = self.request_string('exercises', '')
+        exercises = [e for e in exercises.split(',') if e]
+        if not exercises:
+            exercises = [e.name for i in Exercise.all()]
+
+        for exercise in exercises:
+            logging.info("Creating task for %s", exercise)
+            deferred.defer(fancy_stats_deferred, exercise,
                            start_dt, end_dt, None,
                            _queue = 'fancy-exercise-stats-queue')
 
@@ -55,7 +59,7 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
         pickled = pickle.dumps(stats, 2)
 
         shard = ExerciseStatisticShard(
-            key_name,
+            key_name = key_name,
             exid = exid,
             start_dt = start_dt,
             end_dt = end_dt,
@@ -75,7 +79,7 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
         all_stats = fancy_stats_shard_reducer(exid, start_dt, end_dt)
 
         model = ExerciseStatistic(
-            ExerciseStatistic.make_key(exid, start_dt, end_dt),
+            key_name = ExerciseStatistic.make_key(exid, start_dt, end_dt),
             exid = exid,
             start_dt = start_dt,
             end_dt = end_dt,
