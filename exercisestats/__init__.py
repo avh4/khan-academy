@@ -1,5 +1,4 @@
 import logging
-import operator
 import itertools
 from time import mktime
 import datetime
@@ -7,19 +6,12 @@ import math
 import pickle
 import hashlib
 
-from google.appengine.api import users
 from google.appengine.ext import db
 from google.appengine.ext import deferred
-from mapreduce import control
-from mapreduce import operation as op
 
-from app import App
 import request_handler
 import models
-import consts
 import user_util
-
-from dashboard.models import DailyStatisticLog
 
 class Test(request_handler.RequestHandler):
     @user_util.developer_only
@@ -107,10 +99,6 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
 
     if cursor:
         query.with_cursor(cursor)
-
-    # { time_taken: frequency } pairs
-    freq_table = {}
-    total_count = 0
 
     problem_logs = query.fetch(1000)
     if len(problem_logs) > 0:
