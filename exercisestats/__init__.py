@@ -14,6 +14,7 @@ from .models import ExerciseStatisticShard, ExerciseStatistic
 import user_util
 
 import uuid
+import re
 
 # handler that kicks off task chain per exercise
 class CollectFancyExerciseStatistics(RequestHandler):
@@ -41,6 +42,7 @@ def enqueue_task(exid, start_dt, end_dt, cursor, uid, i):
     try:
         key_name = ExerciseStatisticShard.make_key(exid, start_dt, end_dt, cursor)
         task_name = '_'.join(map(str, [key_name, uid, i]))
+        task_name = re.sub(r'[^a-zA-Z0-9_-]{1}', '_', task_name)
 
         deferred.defer( fancy_stats_deferred, exid, start_dt, end_dt,
                         cursor, uid, i,
