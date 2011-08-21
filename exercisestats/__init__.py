@@ -3,22 +3,25 @@ from __future__ import absolute_import
 import logging
 import datetime as dt
 import pickle
-import hashlib
 
-from google.appengine.ext import db
-from google.appengine.ext import deferred
+from google.appengine.ext import db, deferred
+from google.appengine.api import taskqueue
 
-import request_handler
-
+from request_handler import RequestHandler
 
 from models import ProblemLog, Exercise
 from .models import ExerciseStatisticShard, ExerciseStatistic
 import user_util
 
+import uuid
+
 # handler that kicks off task chain per exercise
-class CollectFancyExerciseStatistics(request_handler.RequestHandler):
+class CollectFancyExerciseStatistics(RequestHandler):
     @user_util.developer_only
     def get(self):
+        # task name token
+        uid = self.request_string('uid', uuid.uuid4())
+
         yesterday = dt.date.today() - dt.timedelta(days=1)
         yesterday_dt = dt.datetime.combine(yesterday, dt.time())
         date = self.request_date('date', "%Y/%m/%d", yesterday_dt)
@@ -30,13 +33,25 @@ class CollectFancyExerciseStatistics(request_handler.RequestHandler):
             exercises = [e.name for i in Exercise.all()]
 
         for exercise in exercises:
-            logging.info("Creating task for %s", exercise)
-            deferred.defer(fancy_stats_deferred, exercise,
-                           start_dt, end_dt, None,
-                           _queue = 'fancy-exercise-stats-queue')
+            logging.info("Creating task chain for %s", exercise)
+            enqueue_task(exercise, start_dt, end_dt, None, uid, 0)
 
-def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
-    key_name = ExerciseStatisticShard.make_key(exit, start_dt, end_dt, cursor)
+def enqueue_task(exid, start_dt, end_dt, cursor, uid, i):
+    # see http://blog.notdot.net/2010/03/Task-Queue-task-chaining-done-right
+    try:
+        key_name = ExerciseStatisticShard.make_key(exid, start_dt, end_dt, cursor)
+        task_name = '_'.join(map(str, [key_name, uid, i]))
+
+        deferred.defer( fancy_stats_deferred, exid, start_dt, end_dt,
+                        cursor, uid, i,
+                        _name = task_name,
+                        _queue = 'fancy-exercise-stats-queue')
+
+    except (taskqueue.TaskAlreadyExistsError, taskqueue.TombstonedTaskError):
+        logging.info("Ignoring task named '%s' as it already exists", task_name)
+
+def fancy_stats_deferred(exid, start_dt, end_dt, cursor, uid, i):
+    key_name = ExerciseStatisticShard.make_key(exid, start_dt, end_dt, cursor)
     if cursor and ExerciseStatisticShard.get_by_key_name(key_name):
         # We've already run, die.
         return
@@ -67,11 +82,7 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor):
             blob_val = pickled)
         shard.put()
 
-        # task names must match ^[a-zA-Z0-9_-]{1,500}$
-        task_name = hashlib.sha1(key_name).hexdigest()
-        deferred.defer(fancy_stats_deferred, exid, start_dt, end_dt, query.cursor(),
-            _name = task_name,
-            _queue = 'fancy-exercise-stats-queue')
+        enqueue_task(exid, start_dt, end_dt, query.cursor(), uid, i+1)
     else:
         # No more problem logs left to process
         logging.info("Summing all stats for %s", exid)
