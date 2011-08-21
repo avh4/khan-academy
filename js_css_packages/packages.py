@@ -41,6 +41,11 @@ javascript = {
             "g.line-min.js",
         ]
     },
+    "exercisestats": {
+        "files": [
+            "highcharts.js",
+        ]
+    },
     "profile": {
         "files": [
             "jquery.address-1.4.min.js",
