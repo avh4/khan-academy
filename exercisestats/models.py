@@ -10,12 +10,11 @@ class ExerciseStatisticShard(db.Model):
     cursor = db.StringProperty()
     blob_val = db.BlobProperty()
 
-    # key_name is "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
     @staticmethod
     def make_key(exid, start_dt, end_dt, cursor):
         unix_start = int(mktime(start_dt.timetuple()))
         unix_end = int(mktime(end_dt.timetuple()))
-        key_name = "%s:%d:%d:%s" % (exid, unix_start, unix_end, cursor)
+        key_name = "%s_%d_%d_%s" % (exid, unix_start, unix_end, cursor)
         return key_name
 
 class ExerciseStatistic(db.Model):
@@ -26,12 +25,11 @@ class ExerciseStatistic(db.Model):
     log_count = db.IntegerProperty(required=True)
     time_logged = db.DateTimeProperty(auto_now_add=True)
 
-    # key_name is "%s:%d:%d" % (exid, unix_start, unix_end)
     @staticmethod
     def make_key(exid, start_dt, end_dt):
         unix_start = int(mktime(start_dt.timetuple()))
         unix_end = int(mktime(end_dt.timetuple()))
-        key_name = "%s:%d:%d" % (exid, unix_start, unix_end)
+        key_name = "%s_%d_%d" % (exid, unix_start, unix_end)
         return key_name
 
     @property
