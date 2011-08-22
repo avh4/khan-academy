@@ -1231,7 +1231,9 @@ class VideoLog(db.Model):
         # Defer the put of VideoLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(commit_video_log, video_log, _queue="video-log-queue")
+        deferred.defer(commit_video_log, video_log,
+                       _queue="video-log-queue",
+                       _url="/_ah/queue/deferred_videolog")
 
         return (user_video, video_log, video_points_total)
 
