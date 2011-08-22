@@ -24,3 +24,7 @@ cron:
   url: /admin/dashboard/record_statistics
   schedule: every 24 hours
 
+- description: fancy exercise stats
+  url: /exercisestats/collectfancyexercisestatistics
+  schedule: every day 00:30
+  timezone: US/Pacific
