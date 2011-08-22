@@ -31,7 +31,7 @@ class CollectFancyExerciseStatistics(RequestHandler):
         exercises = self.request_string('exercises', '')
         exercises = [e for e in exercises.split(',') if e]
         if not exercises:
-            exercises = [e.name for i in Exercise.all()]
+            exercises = [e.name for e in Exercise.all()]
 
         for exercise in exercises:
             logging.info("Creating task chain for %s", exercise)
