@@ -2,27 +2,33 @@ cron:
 
 - description: badge update
   url: /admin/startnewbadgemapreduce
-  schedule: every 24 hours
+  schedule: every day 00:00
+  timezone: US/Pacific
 
 - description: badge statistics
   url: /admin/badgestatistics
-  schedule: every 24 hours
+  schedule: every day 22:00
+  timezone: US/Pacific
 
 - description: daily_activity_log
   url: /admin/dailyactivitylog
   schedule: every 12 hours
+  timezone: US/Pacific
 
 - description: exercise statistics update
   url: /admin/startnewexercisestatisticsmapreduce
-  schedule: every saturday 12:00
+  schedule: every sunday 03:00
+  timezone: US/Pacific
 
 - description: youtube video sync
   url: /admin/youtubesync?start=1
-  schedule: every 24 hours
+  schedule: every day 03:00
+  timezone: US/Pacific
 
 - description: record daily dashboard statistics
   url: /admin/dashboard/record_statistics
-  schedule: every 24 hours
+  schedule: every day 22:30
+  timezone: US/Pacific
 
 - description: fancy exercise stats
   url: /exercisestats/collectfancyexercisestatistics
