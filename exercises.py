@@ -114,6 +114,9 @@ class ViewExercise(request_handler.RequestHandler):
 
             user_activity = []
 
+            # Don't include incomplete information
+            problem_log.hint_after_attempt_list = filter(lambda x: x != -1, problem_log.hint_after_attempt_list)
+
             if problem_log:
                 for i in range(0, len(problem_log.attempt_list)):
                     user_activity.append([
@@ -121,6 +124,14 @@ class ViewExercise(request_handler.RequestHandler):
                         unicode(problem_log.attempt_list[i]),
                         max(0, problem_log.attempt_time_taken_list[i])
                         ])
+
+                    while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i:
+                        user_activity.append([
+                            "hint-activity",
+                            0,
+                            0
+                            ])
+                        problem_log.hint_after_attempt_list.pop(0)
 
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints

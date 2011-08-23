@@ -1340,7 +1340,6 @@ class ProblemLog(db.Model):
 
 # commit_problem_log is used by our deferred problem log insertion process
 def commit_problem_log(problem_log_source):
-
     try:
         if not problem_log_source or not problem_log_source.key().name:
             return
@@ -1378,19 +1377,17 @@ def commit_problem_log(problem_log_source):
                 exercise_non_summative = problem_log_source.exercise_non_summative,
         )
 
-        index_attempt = max(0, problem_log_source.count_attempts - 1)
-        index_hint = max(0, problem_log_source.count_hints - 1)
-        if (index_attempt < len(problem_log.attempt_time_taken_list) \
-           and problem_log.attempt_time_taken_list[index_attempt] != -1) \
-           or (index_hint < len(problem_log.hint_time_taken_list) \
-           and problem_log.hint_time_taken_list[index_hint] != -1):
-            # This attempt has already been logged. Ignore this dupe taskqueue execution.
-            return
-
         problem_log.count_hints = max(problem_log.count_hints, problem_log_source.count_hints)
+        index_attempt = max(0, problem_log_source.count_attempts - 1)
 
         # Bump up attempt count
         if problem_log_source.attempt_list[0] != "hint": # attempt
+
+            if index_attempt < len(problem_log.attempt_time_taken_list) \
+               and problem_log.attempt_time_taken_list[index_attempt] != -1:
+                # This attempt has already been logged. Ignore this dupe taskqueue execution.
+                return
+
             problem_log.count_attempts += 1
 
             # Add time_taken for this individual attempt
@@ -1405,6 +1402,13 @@ def commit_problem_log(problem_log_source):
                 problem_log_source.earned_proficiency
 
         else: # hint
+            index_hint = max(0, problem_log_source.count_hints - 1)
+
+            if index_hint < len(problem_log.hint_time_taken_list) \
+               and problem_log.hint_time_taken_list[index_hint] != -1:
+                # This attempt has already been logged. Ignore this dupe taskqueue execution.
+                return
+
             # Add time taken for hint
             insert_in_position(index_hint, problem_log.hint_time_taken_list, problem_log_source.time_taken, filler=-1)
 
