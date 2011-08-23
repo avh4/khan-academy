@@ -1365,8 +1365,10 @@ def commit_problem_log(problem_log_source):
     # Committing transaction combines existing problem log with any followup attempts
     def txn():
         problem_log = ProblemLog.get_by_key_name(problem_log_source.key().name())
+        exists = True
 
         if not problem_log:
+            exists = False
             problem_log = ProblemLog(
                 key_name = problem_log_source.key().name(),
                 user = problem_log_source.user,
@@ -1384,7 +1386,7 @@ def commit_problem_log(problem_log_source):
 
         if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
-            logging.info("Skipping problem log commit due dupe taskqueue execution")
+            logging.info("Skipping problem log commit due to dupe taskqueue execution for attempt: %s, exists: %s, key.name: %s, time_taken_attempts: %s" % (index_attempt, exists, problem_log_source.key().name(), problem_log.time_taken_attempts))
             return
 
         # Bump up attempt count
