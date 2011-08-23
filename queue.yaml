@@ -26,3 +26,6 @@ queue:
 
 - name: slow-background-queue
   rate: 10/s
+
+- name: fancy-exercise-stats-queue
+  rate: 1/s

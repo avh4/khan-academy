@@ -409,15 +409,17 @@ gtv.jq.VideoControl.prototype.showVideo = function(videoInfo) {
     }
   } else {
     var detailedDescription = '';
-    if( videoInfo.description )
-        detailedDescription = detailedDescription + videoInfo.description + '<br><br>';
+    if( videoInfo ) {
+       if( videoInfo.description )
+           detailedDescription = detailedDescription + videoInfo.description + '<br><br>';
 
-    if( videoInfo.description )
-        detailedDescription = detailedDescription + 'Keywords: ' + videoInfo.keywords;
+       if( videoInfo.keywords )
+           detailedDescription = detailedDescription + 'Keywords: ' + videoInfo.keywords;
 
-    $('#content').html(detailedDescription);
-    var source = videoInfo.download_urls.mp4;
-    $(video).attr('src', source.src?source.src:source);
+       $('#content').html(detailedDescription);
+       var source = videoInfo.download_urls.mp4;
+       $(video).attr('src', source.src?source.src:source);
+    }
   }
 
   videoControl.loadedTime = 0;

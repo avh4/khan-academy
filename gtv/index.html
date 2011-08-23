@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Khan Academy - Google TV</title>
+<title>Google TV HTML5 Template 1</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="gtv-autozoom" content="off" />
-<link rel="stylesheet" href="/gtv/css/controls.css" />
-<link rel="stylesheet" href="/gtv/css/template_controls.css" />
-<link rel="stylesheet" href="/gtv/css/styles.css" type="text/css"/>
+<link rel="stylesheet" href="/gtv/css/controls.css?1" />
+<link rel="stylesheet" href="/gtv/css/template_controls.css?1" />
+<link rel="stylesheet" href="/gtv/css/styles.css?1" type="text/css"/>
 </head>
 
 <body style="visibility:hidden;">
@@ -14,27 +14,33 @@
 	<div id="wrapper">
 		<div id="mainMenu" class="menu-div">
   		<div id="logo">
-  		  <img src="/gtv/images/khan_logo.jpg" alt="Khan Academy" />
-		  </div>
-    	<div class="clear"></div>
+  		  <img src="/gtv/images/khanacademy_logo.png" width="180" alt="Khan Academy" />
 		</div>
+    	<div class="clear"></div>
+  		<div id="searchbox">
+    	        <div>Search Videos</div>
+                <form method="GET" action="/gtv/fullscreen.html">
+                <input type="text" name="keyword" size="15" class="searchkeyword">
+                </form>
+		</div>
+        </div>
     <div id="grid"></div>
   </div>
   <div class="bottomGradient"></div>
 
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script type="text/javascript" language="javascript"
-    src="/gtv/js/gtvcore.js"></script>
+    src="/gtv/js/gtvcore.js?1"></script>
 <script type="text/javascript" language="javascript"
-    src="/gtv/js/keycontrol.js"></script>
+    src="/gtv/js/keycontrol.js?1"></script>
 <script type="text/javascript" language="javascript"
-    src="/gtv/js/sidenav.js"></script>
+    src="/gtv/js/sidenav.js?1"></script>
 <script type="text/javascript" language="javascript"
-    src="/gtv/js/gridcontrol.js"></script>
+    src="/gtv/js/gridcontrol.js?1"></script>
 <script type="text/javascript" language="javascript"
-    src="/gtv/js/dataprovider.js"></script>
+    src="/gtv/js/dataprovider.js?1"></script>
 <script type="text/javascript" language="javascript"
-    src="/gtv/js/index.js"></script>
+    src="/gtv/js/index.js?1"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/swfobject/2/swfobject.js"></script>
 
 </body>

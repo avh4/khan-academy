@@ -148,7 +148,7 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 sdk_version = os.environ['SDK_VERSION'] if os.environ.has_key('SDK_VERSION') else os.environ['SERVER_SOFTWARE'].split('/')[-1]
                 django_root = os.path.normpath(os.path.join(os.path.dirname(django.__file__), '..'))
                 django_version = '.'.join(str(v) for v in django.VERSION if v != None)
-                app_root = '%s' % os.path.dirname(__file__)
+                app_root = App.root
                 r_sdk_root = re.compile(r'^%s/' % re.escape(sdk_root))
                 r_django_root = re.compile(r'^%s/' % re.escape(django_root))
                 r_app_root = re.compile(r'^%s/' % re.escape(app_root))
