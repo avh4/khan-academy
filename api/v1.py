@@ -518,7 +518,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     )
 
             add_action_results(user_exercise, {
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise.exercise_states),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
             })
 
             return user_exercise
