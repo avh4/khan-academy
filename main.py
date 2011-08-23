@@ -1022,6 +1022,10 @@ class RedirectToJobvite(request_handler.RequestHandler):
     def get(self):
         self.redirect("http://hire.jobvite.com/CompanyJobs/Careers.aspx?k=JobListing&c=qd69Vfw7")
 
+class RedirectToToolkit(request_handler.RequestHandler):
+    def get(self):
+        self.redirect("https://sites.google.com/a/khanacademy.org/schools/")
+
 class PermanentRedirectToHome(request_handler.RequestHandler):
     def get(self):
 
@@ -1208,6 +1212,8 @@ def main():
 
         ('/githubpost', github.NewPost),
         ('/githubcomment', github.NewComment),
+
+        ('/toolkit', RedirectToToolkit),
 
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
