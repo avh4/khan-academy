@@ -45,7 +45,7 @@ class CreateCustomBadge(request_handler.RequestHandler):
     @user_util.developer_only
     def get(self):
         template_values = {
-                "badge_categories": BadgeCategory.empty_count_dict().keys(),
+                "badge_categories": [(badge_id, BadgeCategory.get_type_label(badge_id)) for badge_id in BadgeCategory.empty_count_dict()],
                 "failed": self.request_bool("failed", default=False),
                 }
 
