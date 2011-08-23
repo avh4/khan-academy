@@ -1343,9 +1343,14 @@ def commit_problem_log(problem_log_source):
 
     try:
         if not problem_log_source or not problem_log_source.key().name:
+            if not problem_log_source:
+                logging.critical("Skipping problem log commit due to missing problem_log_source")
+            else:
+                logging.critical("Skipping problem log commit due to missing problem_log_source.key().name")
             return
     except db.NotSavedError:
         # Handle special case during new exercise deploy
+        logging.critical("Skipping problem log commit due to db.NotSavedError")
         return
 
     if problem_log_source.count_attempts > 1000:
@@ -1379,6 +1384,7 @@ def commit_problem_log(problem_log_source):
 
         if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
+            logging.info("Skipping problem log commit due dupe taskqueue execution")
             return
 
         # Bump up attempt count
