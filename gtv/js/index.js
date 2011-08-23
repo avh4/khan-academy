@@ -93,6 +93,7 @@ gtv.jq.TemplatePage.prototype.makeSideNav = function(selectedCategoryIndex) {
   function choiceCallback(selectedItem) {
     templatePage.makeGrid(selectedItem.data('index'));
   }
+
 };
 
 /**
@@ -131,13 +132,17 @@ gtv.jq.TemplatePage.prototype.makeGrid = function( index) {
 
   var pageItems = [];
   var k=0;
+  var pName;
 
   for (var i=0; i<category.items.length; i++) {
     var catItem = category.items[i];
 
     if (catItem.playlist ) {
       var descDiv = $('<div></div>').addClass('slider-text-desc');
-      descDiv.append($('<p></p>').append(catItem.name));
+      pName = catItem.name;
+      if( pName.length > 28 ) 
+          pName = pName.substring(0,28) + '...';
+      descDiv.append($('<p></p>').append(pName));
       //descDiv.append($('<p></p>').append(catItem.playlist.description));
       pageItems.push({ content: descDiv, description: descDiv, data:[index, k]});
       k++;
@@ -145,7 +150,9 @@ gtv.jq.TemplatePage.prototype.makeGrid = function( index) {
     else {
       for (var j=0; j<catItem.items.length; j++) {
         var descDiv = $('<div></div>').addClass('slider-text-desc');
-        var pName = catItem.name + ' : ' + catItem.items[j].name;
+        pName = catItem.name + ' : ' + catItem.items[j].name;
+        if( pName.length > 28 ) 
+            pName = pName.substring(0,28) + '...';
         descDiv.append($('<p></p>').append(pName));
         pageItems.push({ content: descDiv, description: descDiv, data:[index, k]});
         k++;

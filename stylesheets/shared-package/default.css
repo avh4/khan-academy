@@ -2082,7 +2082,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .achievement-badges-container, #login-page, 
 #about-us, #homepage, #video-page, #contribute,
 #credits, #report-problem, #tos, #privacy-policy,
-#dmca, #search_results {
+#dmca, #search_results, #exercise-stats {
     padding: 0 19px;
     background: #fff;
     position: relative;

@@ -688,8 +688,38 @@ gtv.jq.TemplatePage.prototype.fadeControlsOut = function() {
  * Instanciates data from the data provider.
  */
 gtv.jq.TemplatePage.prototype.instanciateData = function() {
+
+
+function searchByKeyword(keyword, json){
+  if (!(json && "object" === typeof json)) { return; }
+  if (json.kind === 'Video' && json.title && json.description) { 
+     var desc = json.description; 
+     desc = desc.toLowerCase();
+     var title = json.title; 
+     title = title.toLowerCase();
+     keyword = keyword.toLowerCase();
+     var keys = keyword.split('+');
+     if( title && desc ) {
+        if(desc.indexOf(keys[0]) != -1 || title.indexOf(keys[0]) != -1 ) {
+           templatePage.item.videos.push(json);
+        }
+        if( keys[1] && (desc.indexOf(keys[1]) != -1 || title.indexOf(keys[1]) != -1 ) ) {
+           templatePage.item.videos.push(json);
+        }
+     }
+  }
+  for (var x in json){
+    if (Object.hasOwnProperty.call(json, x)) {
+      var result = searchByKeyword(keyword, json[x]);
+      if (result !== undefined) { return result; }
+    }
+  }
+}
+
   templatePage.dataProvider = new gtv.jq.DataProvider();
   templatePage.dataProvider.getData(function(data) {
+     templatePage.item= {};
+     templatePage.item.videos = [];
      templatePage.data = data;
 
      var queryString = location.search;
@@ -700,40 +730,50 @@ gtv.jq.TemplatePage.prototype.instanciateData = function() {
 
      var parms = queryString.substring(1).split('&');
 
-     if (parms.length != 2) {
-       return;
+     if (parms.length == 2) {
+        // category and playlist item specified  
+        var categoryIndex = parseInt(parms[0].substring(9));
+        var itemIndex = parseInt(parms[1].substring(5));
+
+        templatePage.category = templatePage.data[categoryIndex];
+
+        if (!templatePage.category) {
+          return;
+        }
+
+        // extract all playlists in a linear order
+        var category = templatePage.category;
+
+        var playlists = [];
+        for (var i=0; i<category.items.length; i++) {
+          var catItem = category.items[i];
+
+          if (catItem.playlist ) {
+            playlists.push(catItem.playlist);
+          }
+          else {
+            for (var j=0; j<catItem.items.length; j++) {
+               if (catItem.items[j].playlist ) {
+                  playlists.push(catItem.items[j].playlist);
+               }
+            }
+          }
+        }
+        // get the playlist specified by itemIndex
+        templatePage.item = playlists[itemIndex];
+        templatePage.renderUIComponents();
+     }
+     else if (parms.length == 1) {
+        // search by keyword
+        var keyword = parms[0].substring(8);
+
+        var categories = templatePage.data;
+        var playlists = [];
+        searchByKeyword(keyword, categories);
+        if( templatePage.item.videos.length ) 
+            templatePage.renderUIComponents();
      }
 
-     var categoryIndex = parseInt(parms[0].substring(9));
-     var itemIndex = parseInt(parms[1].substring(5));
-
-     templatePage.category = templatePage.data[categoryIndex];
-
-     if (!templatePage.category) {
-       return;
-     }
-
-  var category = templatePage.category;
-
-  var playlists = [];
-  for (var i=0; i<category.items.length; i++) {
-    var catItem = category.items[i];
-
-    if (catItem.playlist ) {
-      playlists.push(catItem.playlist);
-    }
-    else {
-      for (var j=0; j<catItem.items.length; j++) {
-         if (catItem.items[j].playlist ) {
-            playlists.push(catItem.items[j].playlist);
-         }
-      }
-    }
-  }
-     templatePage.item = playlists[itemIndex];
-
-//     templatePage.item = templatePage.category.items[itemIndex];
-     templatePage.renderUIComponents();
   });
 };
 

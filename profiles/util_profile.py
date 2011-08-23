@@ -47,7 +47,7 @@ def get_last_student_list(request_handler, student_lists, use_cookie=True):
             list_id = default_list
 
     if use_cookie:
-        request_handler.set_cookie('studentlist_id', list_id)
+        request_handler.set_cookie('studentlist_id', list_id, max_age=2629743)
 
     return list_id, current_list
 

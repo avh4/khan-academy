@@ -58,11 +58,24 @@ table {
 #wrapper { 
 }
 
+#searchbox {
+	font-size:22px;
+	text-align:center;
+	margin-bottom:15px;
+	padding:5px;
+}
+
+#searchbox input {
+	font-size:25px;
+	font-weight:bold; 
+	margin:5px;
+}
+
 #logo {
 	font-size:24px;
 	font-weight:bold; 
 	text-align:center;
-	margin-bottom:55px;
+	margin-bottom:25px;
 	text-shadow: 2px 1px 5px #1cc2ec;
 }
 
@@ -88,7 +101,7 @@ table {
 }
 
 .menu-option {
-	font-size:16pt; 
+	font-size:18pt; 
 	text-align:center;
 	height:50px;
 	margin:7px 15px 15px 15px;
@@ -115,8 +128,9 @@ table {
 
 #grid {
 	float:left;
-	height:650px;
-	padding:38px 0 0 85px;
+	height:680px;
+	margin: 20px;
+	padding:30px 0 0 20px;
 	font-size:24px;
 	overflow:hidden;
 }
@@ -147,11 +161,12 @@ table {
 .grid-item-off{ 
 	border: 0px solid #606060;
 	padding: 5px;
-	margin: 12px;
+	margin: 10px;
 }
 
 #grid p{
 	line-height:12px;
+	padding: 3px;
 }
 
 .carousel-photo {
@@ -448,12 +463,12 @@ table {
 }
 
 .tooltip h2 { 
-	font-size:14px;
+	font-size:18px;
 	margin:0;
 }
 
 .tooltip h3 { 
-	font-size:16px; 
+	font-size:18px; 
 	color:#6b6b6b;
 	margin:0 0 5px 0;
 }
@@ -775,7 +790,7 @@ a:hover{
 }
 
 .slider-text-desc {
-    font-size:16px;
+    font-size:25px;
     font-family:Arial, Helvetica, sans-serif;
     color: #AAAAAA;
 }

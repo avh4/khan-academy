@@ -91,6 +91,14 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
 
+- url: /_ah/queue/deferred_problemlog
+  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
+  login: admin
+
+- url: /_ah/queue/deferred_videolog
+  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
+  login: admin
+
 - url: /admin/.*
   script: main.py
   login: admin

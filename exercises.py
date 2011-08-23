@@ -33,9 +33,9 @@ class MoveMapNode(request_handler.RequestHandler):
     def get(self):
         node = self.request_string('exercise')
         direction = self.request_string('direction')
-    
+
         exercise = models.Exercise.get_by_name(node)
-    
+
         if direction=="up":
             exercise.h_position -= 1
         elif direction=="down":
@@ -55,7 +55,7 @@ class ViewExercise(request_handler.RequestHandler):
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
 
-        if not exercise: 
+        if not exercise:
             raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
 
         user_exercise = user_data.get_or_insert_exercise(exercise)
@@ -368,11 +368,11 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                     user_data.reassess_if_necessary()
 
                     problem_log.earned_proficiency = True
-                    
+
             util_badges.update_with_user_exercise(
-                user_data, 
-                user_exercise, 
-                include_other_badges = True, 
+                user_data,
+                user_exercise,
+                include_other_badges = True,
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
 
             # Update phantom user notifications
@@ -395,7 +395,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
+        deferred.defer(models.commit_problem_log, problem_log,
+                       _queue="problem-log-queue",
+                       _url="/_ah/queue/deferred_problemlog")
 
         return user_exercise
 
@@ -462,7 +464,7 @@ class EditExercise(request_handler.RequestHandler):
             self.render_template("editexercise.html", template_values)
 
 class UpdateExercise(request_handler.RequestHandler):
-    
+
     def post(self):
         self.get()
 
@@ -537,7 +539,7 @@ class UpdateExercise(request_handler.RequestHandler):
             existing_video_keys.append(exercise_video.video.key())
             if not exercise_video.video.key() in video_keys:
                 exercise_video.delete()
-        
+
         for video_key in video_keys:
             if not video_key in existing_video_keys:
                 exercise_video = models.ExerciseVideo()
@@ -547,15 +549,15 @@ class UpdateExercise(request_handler.RequestHandler):
                 exercise_video.put()
 
         exercise.put()
-        
+
         #Start ordering
         ExerciseVideos = models.ExerciseVideo.all().filter('exercise =', exercise.key()).fetch(1000)
         playlists = []
         for exercise_video in ExerciseVideos:
             playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video))
-        
+
         if playlists:
-            
+
             playlists = list(itertools.chain(*playlists))
             titles = map(lambda pl: pl.title, playlists)
             playlist_sorted = []
@@ -563,7 +565,7 @@ class UpdateExercise(request_handler.RequestHandler):
                 playlist_sorted.append([p, titles.count(p.title)])
             playlist_sorted.sort(key = lambda p: p[1])
             playlist_sorted.reverse()
-                
+
             playlists = []
             for p in playlist_sorted:
                 playlists.append(p[0])
@@ -580,7 +582,7 @@ class UpdateExercise(request_handler.RequestHandler):
                 if playlist_dict[p.title]:
                     playlist_dict[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
                     exercise_list.append(playlist_dict[p.title])
-        
+
             if exercise_list:
                 exercise_list = list(itertools.chain(*exercise_list))
                 for e in exercise_list:
