@@ -1090,7 +1090,7 @@ class UserVideo(db.Model):
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
 
-    # Farthest second in video watched
+    # Most recently watched second in video (playhead state)
     last_second_watched = db.IntegerProperty(default = 0)
 
     # Number of seconds actually spent watching this video, regardless of jumping around to various
@@ -1169,9 +1169,6 @@ class VideoLog(db.Model):
         video_log.seconds_watched = seconds_watched
         video_log.last_second_watched = last_second_watched
 
-        if last_second_watched > user_video.last_second_watched:
-            user_video.last_second_watched = last_second_watched
-
         if seconds_watched > 0:
             if user_video.seconds_watched == 0:
                 user_data.uservideocss_version += 1
@@ -1206,6 +1203,7 @@ class VideoLog(db.Model):
 
                 first_video_playlist = False
 
+        user_video.last_second_watched = last_second_watched
         user_video.last_watched = datetime.datetime.now()
         user_video.duration = video.duration
 
