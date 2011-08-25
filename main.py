@@ -53,6 +53,7 @@ import exercises
 import dashboard
 import exercisestats.report
 import github
+import paypal
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -1214,6 +1215,8 @@ def main():
         ('/githubcomment', github.NewComment),
 
         ('/toolkit', RedirectToToolkit),
+
+        ('/paypal/ipn', paypal.IPN),
 
         ('/badges/view', util_badges.ViewBadges),
         ('/badges/custom/create', custom_badges.CreateCustomBadge),
