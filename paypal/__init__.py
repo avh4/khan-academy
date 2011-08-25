@@ -59,9 +59,15 @@ class IPN(request_handler.RequestHandler):
                 sender = FROM_EMAIL, \
                 to = email, \
                 subject = "Thank you!", \
-                body = """%sThank you so much for your donation to the Khan Academy!
+                body = """%sWe greatly appreciate your contribution. With the support of generous donors like you, we are able to increase our efforts to create more video and exercise content, translate content into the world's most common languages, improve our website functionality, and extend our educational reach.
 
--Khan Academy
+We are excited about the progress that has been made, but we realize that we have only just begun. Thank you for believing in Khan Academy and supporting our mission to provide a free world class education to anyone anywhere.
+
+Best wishes,
+
+Sal Khan
+
+Khan Academy, a 501(c)(3) not for profit organization, has not provided any goods or services to you in consideration for this voluntary contribution. The donation is tax deductible to the extent allowed by law. For federal tax purposes Khan Academy's FEIN # is: 26-1544963. 
 """ % greeting)
 
         logging.info("Sent 'thank you for your donation' email to %s" % email)
