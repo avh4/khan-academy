@@ -523,6 +523,7 @@ def attempt_problem_number(exercise_name, problem_number):
 
             return user_exercise
 
+    logging.warning("Problem %d attempted with no user_data present", problem_number)
     return unauthorized_response()
 
 @route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["POST"])
