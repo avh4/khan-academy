@@ -263,7 +263,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
 
         user_data.last_activity = user_exercise.last_done
 
-        logging.info("Attempt by user_id: %s submitting attempt content: %s with seed: %s" % (user_data.user_id, attempt_content, seed))
+        logging.warning("Attempt by user_id: %s submitting attempt content: %s with seed: %s" % (user_data.user_id, attempt_content, seed))
 
         # If a non-admin tries to answer a problem out-of-order, just ignore it
         if problem_number != user_exercise.total_done + 1 and not user_util.is_current_user_developer():
