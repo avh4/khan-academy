@@ -875,6 +875,9 @@ class UserData(db.Model):
     def is_coached_by(self, user_data_coach):
         return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
+    def is_visible_to(self, user_data):
+        return self.is_coached_by(user_data) or user_data.developer
+
     def add_points(self, points):
         if self.points == None:
             self.points = 0
