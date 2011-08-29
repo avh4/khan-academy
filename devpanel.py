@@ -47,3 +47,20 @@ class Manage(request_handler.RequestHandler):
 
         self.render_template('managedevs.html', template_values) 
         
+class ManageCoworkers(request_handler.RequestHandler):
+
+    @user_util.developer_only
+    def get(self):
+
+        user_data_coach = self.request_user_data("coach_email")
+        user_data_coworkers = []
+
+        if user_data_coach:
+            user_data_coworkers = user_data_coach.get_coworkers_data()
+
+        template_values = {
+            "user_data_coach": user_data_coach,
+            "user_data_coworkers": user_data_coworkers
+        }
+
+        self.render_template("managecoworkers.html", template_values)

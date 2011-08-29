@@ -86,8 +86,9 @@ class ViewClassProfile(request_handler.RequestHandler):
         if coach:
 
             user_override = self.request_user_data("coach_email")
-            if user_util.is_current_user_developer() and user_override:
-                # Site administrators can look at any class profile
+            if user_override and user_override.are_students_visible_to(coach):
+                # Only allow looking at a student list other than your own
+                # if you are a dev, admin, or coworker.
                 coach = user_override
 
             students_data = coach.get_students_data()
@@ -150,7 +151,7 @@ class ViewProfile(request_handler.RequestHandler):
 
         user_override = self.request_user_data("student_email")
         if user_override and user_override.key_email != student.key_email:
-            if (not user_util.is_current_user_developer()) and (not user_override.is_coached_by(student)):
+            if not user_override.is_visible_to(student):
                 # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                 self.redirect("/profile?k")
                 return
@@ -222,7 +223,7 @@ class ProfileGraph(request_handler.RequestHandler):
         if student:
             user_override = self.request_user_data("student_email")
             if user_override and user_override.key_email != student.key_email:
-                if (not user_util.is_current_user_developer()) and (not user_override.is_coached_by(student)):
+                if not user_override.is_visible_to(student):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     student = None
                 else:
@@ -251,8 +252,9 @@ class ClassProfileGraph(ProfileGraph):
 
         if coach:
             user_override = self.request_user_data("coach_email")
-            if user_util.is_current_user_developer() and user_override:
-                # Site administrators can look at any class profile
+            if user_override and user_override.are_students_visible_to(coach):
+                # Only allow looking at a student list other than your own
+                # if you are a dev, admin, or coworker.
                 coach = user_override
 
         return coach
