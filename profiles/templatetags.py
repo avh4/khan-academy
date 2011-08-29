@@ -7,6 +7,9 @@ from google.appengine.ext.webapp import template
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
 from profiles import class_exercises_over_time_graph, class_progress_report_graph, class_energy_points_per_minute_graph, class_time_graph
 
+from urlparse import urlunparse
+from urllib import urlencode
+
 import template_cached
 register = template_cached.create_template_register()
 
@@ -54,13 +57,25 @@ def class_profile_time_graph(user_data_coach, dt, tz_offset, student_list):
     return render_graph_html_and_context("class_time_graph.html", class_time_graph.class_time_graph_context(user_data_coach, dt, tz_offset, student_list))
 # End class profile graph types
 
+def get_graph_url(graph_type, student, coach, list_id):
+    qs = {}
+    if student:
+        qs['student_email'] = student.email
+    if coach:
+        qs['coach_email'] = coach.email
+    if list_id:
+        qs['list_id'] = list_id
+
+    urlpath = "/profile/graph/%s" % graph_type
+    return urlunparse(('', '', urlpath, '', urlencode(qs), ''))
+
 @register.inclusion_tag("profiles/graph_link.html")
 def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
     selected = (graph_type == selected_graph_type)
     return {
+        "url": get_graph_url(graph_type, user_data, None, None),
         "user_data_student": user_data,
         "graph_name": graph_name,
-        "graph_type": graph_type,
         "selected": selected
     }
 
@@ -68,12 +83,9 @@ def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
 def profile_class_graph_link(user_data_coach, graph_name, graph_type, selected_graph_type, list_id):
     selected = (graph_type == selected_graph_type)
     return {
-        "user": None,
-        "user_data_coach": user_data_coach,
+        "url": get_graph_url(graph_type, None, user_data_coach, list_id),
         "graph_name": graph_name,
-        "graph_type": graph_type,
         "selected": selected,
-        'list_id': list_id
     }
 
 @register.inclusion_tag("profiles/graph_date_picker.html")
