@@ -2,8 +2,6 @@ import copy
 import datetime
 import logging
 
-from google.appengine.api import users
-
 from flask import request, current_app
 
 import models
@@ -20,7 +18,7 @@ import notifications
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
-from api.auth.decorators import oauth_required, oauth_optional
+from api.auth.decorators import oauth_required, oauth_optional, admin_required
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
@@ -605,3 +603,33 @@ def badge_categories():
 @jsonify
 def badge_category(category):
     return filter(lambda badge_category: str(badge_category.category) == category, badges.BadgeCategory.all())
+
+@route("/api/v1/developers/add", methods=["POST"])
+@admin_required
+@jsonp
+@jsonify
+def add_developer():
+    user_data_developer = request.request_user_data("email")
+
+    if not user_data_developer:
+        return False
+
+    user_data_developer.developer = True
+    user_data_developer.put()
+
+    return True
+
+@route("/api/v1/developers/remove", methods=["POST"])
+@admin_required
+@jsonp
+@jsonify
+def remove_developer():
+    user_data_developer = request.request_user_data("email")
+
+    if not user_data_developer:
+        return False
+
+    user_data_developer.developer = False
+    user_data_developer.put()
+
+    return True
