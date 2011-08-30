@@ -324,7 +324,6 @@ var KnowledgeMap = {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
-       
         if (KnowledgeMap.admin)
         {
             
@@ -374,13 +373,10 @@ var KnowledgeMap = {
             
         }
         else
-         // Go to exercise
-        window.location = node.url;
-        
-        
-        
-        
-        
+        {
+            // Go to exercise
+            window.location = node.url;
+        }
     },
 
     onNodeMouseover: function(el, node) {
