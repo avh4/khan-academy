@@ -9,9 +9,9 @@ from .models import ExerciseStatistic
 import datetime as dt
 import time
 
-# NOTE: Assumptions: cron job is run everyday.
+# NOTE: Assumptions: Collect Fancy Exercise Statistics cron job is run everyday.
 class Data(request_handler.RequestHandler):
-    @user_util.developer_only
+    #@user_util.developer_only
     def get(self):
         chart = self.request_string('chart', 'gecko_line')
         exid = self.request_string('exid', 'addition_1')
@@ -51,6 +51,8 @@ class Data(request_handler.RequestHandler):
             done_list.append(Data.num_done(ex))
 
         title = Exercise.to_display_name(exid)
+        # TODO: This is just a quick hack to ensure the proficiency area does not mask the # done area
+        prof_y_max = max(prof_list) * 2
 
         # TODO: load this data from a template or file or something
         data = {
@@ -86,15 +88,26 @@ class Data(request_handler.RequestHandler):
                     'name': 'Done',
                     'pointStart': start_ts,
                     'pointInterval': 24 * 3600 * 1000,
+                    'yAxis': 0,
                 },
                 {
                     'data': prof_list,
                     'name': 'Proficient',
                     'pointStart': start_ts,
                     'pointInterval': 24 * 3600 * 1000,
+                    'yAxis': 1,
                 },
             ],
-            'yAxis': { 'title': None },
+            'yAxis': [
+                {
+                    'title': { 'text': 'Problems Done' }
+                },
+                {
+                    'title': { 'text': 'Proficient' },
+                    'opposite': True,
+                    'max': prof_y_max,
+                },
+            ],
             'xAxis': { 'type': 'datetime' },
         }
 
