@@ -52,6 +52,7 @@ import activity_summary
 import exercises
 import dashboard
 import exercisestats.report
+import exercisestats.report_json
 import github
 import paypal
 
@@ -1239,6 +1240,7 @@ def main():
 
         ('/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
         ('/exercisestats/report', exercisestats.report.Test),
+        ('/exercisestats/json', exercisestats.report_json.Data),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),

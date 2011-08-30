@@ -65,6 +65,16 @@ indexes:
   - name: live
   - name: h_position
 
+- kind: ExerciseStatistic
+  properties:
+  - name: exercise
+  - name: start_dt
+
+- kind: ExerciseStatistic
+  properties:
+  - name: exid
+  - name: start_dt
+
 - kind: ExerciseVideo
   properties:
   - name: __key__
@@ -175,9 +185,33 @@ indexes:
 - kind: ProblemLog
   properties:
   - name: correct
+  - name: earned_proficiency
+  - name: exercise
+  - name: time_done
+
+- kind: ProblemLog
+  properties:
+  - name: correct
+  - name: exercise
+  - name: time_done
+
+- kind: ProblemLog
+  properties:
+  - name: correct
   - name: exercise
   - name: time_done
     direction: desc
+
+- kind: ProblemLog
+  properties:
+  - name: earned_proficiency
+  - name: exercise
+  - name: time_done
+
+- kind: ProblemLog
+  properties:
+  - name: exercise
+  - name: time_done
 
 - kind: ProblemLog
   properties:
