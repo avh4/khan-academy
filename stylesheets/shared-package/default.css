@@ -1813,13 +1813,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         #answer_area .info-box #related-video-list li {
             display: block;
-            margin: 0px 14px 5px 14px;
+            margin: 0 0 5px 5px;
         }
         #answer_area .info-box #related-video-list a {
             display: block;
             float: left;
-            margin: 0px 0 0 2px;
-            width: 70%;
+            margin: 0;
+            width: 95%%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
