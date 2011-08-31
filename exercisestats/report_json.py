@@ -31,94 +31,49 @@ class Data(request_handler.RequestHandler):
         return { 'gecko_line': self.gecko_line,
                  'area_spline': self.area_spline }[chart](exid, query, end_dt)
 
-    @staticmethod
-    def num_proficient(ex):
-        return sum(ex.histogram['proficiency_problem_number_frequencies'].values())
-
-    @staticmethod
-    def num_done(ex):
-        return ex.log_count
-
     def area_spline(self, exid, stat_query, end_dt):
         prof_list, done_list = [], []
         start_ts = 0
         for ex in stat_query:
+
             if (ex.end_dt > end_dt):
                 continue
+
             if not start_ts:
                 start_ts = int(time.mktime(ex.start_dt.timetuple()) * 1000)
-            prof_list.append(Data.num_proficient(ex))
-            done_list.append(Data.num_done(ex))
+
+            prof_list.append(ex.num_proficient())
+            done_list.append(ex.num_problems_done())
 
         title = Exercise.to_display_name(exid)
         # TODO: This is just a quick hack to ensure the proficiency area does not mask the # done area
         prof_y_max = max(prof_list) * 2
 
-        # TODO: load this data from a template or file or something
-        data = {
-            'chart': {
-                'renderTo': 'container',
-                'plotBackgroundColor': 'rgba(35,37,38,0)',
-                'backgroundColor': 'rgba(35,37,38,100)',
-                'borderColor': 'rgba(35,37,38,100)',
-                'lineColor': 'rgba(35,37,38,100)',
-                'plotBorderColor': 'rgba(35,37,38,100)',
-                'plotBorderWidth': None,
-                'plotShadow': False,
-                'height': 340,
-                'type': 'areaspline',
+        context = {
+            'title': title,
+            'series1': {
+                'name': 'Problems Done', 
+                'max': 'null',
+                'values': done_list,
             },
-            'colors': [ '#058DC7', '#50B432', '#EF561A' ],
-            'credits': { 'enabled': False },
-            'title': { 'text': title },
-            'legend': {
-                'borderColor': 'rgba(35,37,38,100)',
-                'margin': 5,
+            'series2': {
+                'name': 'Proficient',
+                'max': prof_y_max,
+                'values': prof_list,
             },
-            'plotOptions': {
-                'areaspline': {
-                    'dataLabels': { 'enabled': False },
-                    'showInLegend': True,
-                    'size': '100%',
-                },
-            },
-            'series': [
-                {
-                    'data': done_list,
-                    'name': 'Done',
-                    'pointStart': start_ts,
-                    'pointInterval': 24 * 3600 * 1000,
-                    'yAxis': 0,
-                },
-                {
-                    'data': prof_list,
-                    'name': 'Proficient',
-                    'pointStart': start_ts,
-                    'pointInterval': 24 * 3600 * 1000,
-                    'yAxis': 1,
-                },
-            ],
-            'yAxis': [
-                {
-                    'title': { 'text': 'Problems Done' }
-                },
-                {
-                    'title': { 'text': 'Proficient' },
-                    'opposite': True,
-                    'max': prof_y_max,
-                },
-            ],
-            'xAxis': { 'type': 'datetime' },
+            'start_ts': start_ts,
+            'interval': 24 * 60 * 60 * 1000,
         }
 
-        self.render_json(data)
+        self.render_template('exercisestats/highcharts_area_spline.json', context)
 
     def gecko_line(self, exid, stat_query, end_dt):
         # Acceptable values are "done" and "proficient"
         hist = self.request_string('hist', 'done')
 
         values, months = [], []
-        num_func = { 'done': Data.num_done, 'proficient': Data.num_proficient }[hist]
+        num_func = { 'done': ExerciseStatistic.num_problems_done,
+                     'proficient': ExerciseStatistic.num_proficient }[hist]
         for ex in stat_query:
             # We can't just add another filter to the query because of GQL restrictions
             if (ex.end_dt > end_dt):
@@ -140,4 +95,4 @@ class Data(request_handler.RequestHandler):
             }
         }
 
-        print self.render_json(gecko_dict)
+        self.render_json(gecko_dict)

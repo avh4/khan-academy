@@ -1,0 +1,57 @@
+{
+    "chart": {
+        "renderTo": "container",
+        "plotBackgroundColor": "rgba(35,37,38,0)",
+        "backgroundColor": "rgba(35,37,38,100)",
+        "borderColor": "rgba(35,37,38,100)",
+        "lineColor": "rgba(35,37,38,100)",
+        "plotBorderColor": "rgba(35,37,38,100)",
+        "plotBorderWidth": null,
+        "plotShadow": false,
+        "height": 340,
+        "type": "areaspline"
+    },
+    "colors": [ "#058DC7", "#50B432", "#EF561A" ],
+    "credits": { "enabled": false },
+    "title": { "text": "{{ title }}" },
+    "legend": {
+        "borderColor": "rgba(35,37,38,100)",
+        "margin": 5
+    },
+    "plotOptions": {
+        "areaspline": {
+            "dataLabels": { "enabled": false },
+            "showInLegend": true,
+            "size": "100%"
+        }
+    },
+    "series": [
+        {
+            "data": {{ series1.values }},
+            "name": "{{ series1.name }}",
+            "pointStart": {{ start_ts }},
+            "pointInterval": {{ interval }},
+            "yAxis": 0
+        },
+        {
+            "data": {{ series2.values }},
+            "name": "{{ series2.name }}",
+            "pointStart": {{ start_ts }},
+            "pointInterval": {{ interval }},
+            "yAxis": 1
+        }
+    ],
+    "yAxis": [
+        {
+            "title": { "text": "{{ series1.name }}" },
+            "max": {{ series1.max }}
+
+        },
+        {
+            "title": { "text": "{{ series2.name }}" },
+            "opposite": true,
+            "max": {{ series2.max }}
+        }
+    ],
+    "xAxis": { "type": "datetime" }
+}
