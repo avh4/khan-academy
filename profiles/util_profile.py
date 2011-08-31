@@ -1,4 +1,5 @@
 import datetime
+import gc
 import urllib
 
 from google.appengine.api import users
@@ -86,8 +87,9 @@ class ViewClassProfile(request_handler.RequestHandler):
         if coach:
 
             user_override = self.request_user_data("coach_email")
-            if user_util.is_current_user_developer() and user_override:
-                # Site administrators can look at any class profile
+            if user_override and user_override.are_students_visible_to(coach):
+                # Only allow looking at a student list other than your own
+                # if you are a dev, admin, or coworker.
                 coach = user_override
 
             students_data = coach.get_students_data()
@@ -150,7 +152,7 @@ class ViewProfile(request_handler.RequestHandler):
 
         user_override = self.request_user_data("student_email")
         if user_override and user_override.key_email != student.key_email:
-            if (not user_util.is_current_user_developer()) and (not user_override.is_coached_by(student)):
+            if not user_override.is_visible_to(student):
                 # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                 self.redirect("/profile?k")
                 return
@@ -188,6 +190,7 @@ class ViewProfile(request_handler.RequestHandler):
         self.render_template('viewprofile.html', template_values)
 
 class ProfileGraph(request_handler.RequestHandler):
+
     def get(self):
         html = ""
         json_update = ""
@@ -213,8 +216,30 @@ class ProfileGraph(request_handler.RequestHandler):
         if len(json_update) > 0:
             self.response.out.write(json_update)
         else:
-            json = simplejson.dumps({"html": html, "url": self.request.url}, ensure_ascii=False)
+            html_and_url = ProfileGraph.insert_html_chunks({ "url": self.request.url }, html)
+
+            # Force garbage collection before we step into simplejson to alleviate
+            # MemoryError pressure
+            gc.collect()
+
+            json = simplejson.dumps(html_and_url, ensure_ascii=False)
             self.response.out.write(json)
+
+    @staticmethod
+    def insert_html_chunks(context, html):
+
+        def chunks(html, length=500):
+            pos = 0
+            end = len(html)
+
+            while pos < end:
+                pos_next = min(pos + length, end)
+                yield html[pos:pos_next]
+                pos = pos_next
+
+        context["html_chunks"] = [s for s in chunks(html)]
+
+        return context
 
     def get_profile_target_user_data(self):
         student = UserData.current()
@@ -222,7 +247,7 @@ class ProfileGraph(request_handler.RequestHandler):
         if student:
             user_override = self.request_user_data("student_email")
             if user_override and user_override.key_email != student.key_email:
-                if (not user_util.is_current_user_developer()) and (not user_override.is_coached_by(student)):
+                if not user_override.is_visible_to(student):
                     # If current user isn't an admin or student's coach, they can't look at anything other than their own profile.
                     student = None
                 else:
@@ -251,8 +276,9 @@ class ClassProfileGraph(ProfileGraph):
 
         if coach:
             user_override = self.request_user_data("coach_email")
-            if user_util.is_current_user_developer() and user_override:
-                # Site administrators can look at any class profile
+            if user_override and user_override.are_students_visible_to(coach):
+                # Only allow looking at a student list other than your own
+                # if you are a dev, admin, or coworker.
                 coach = user_override
 
         return coach

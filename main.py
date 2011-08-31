@@ -1140,6 +1140,7 @@ def main():
 
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
+        ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents),
