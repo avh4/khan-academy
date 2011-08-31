@@ -41,3 +41,9 @@ class ExerciseStatistic(db.Model):
         start_dt = dt.datetime.combine(date, dt.time())
         end_dt = start_dt + dt.timedelta(days=1)
         return (start_dt, end_dt)
+
+    def num_proficient(self):
+        return sum(self.histogram['proficiency_problem_number_frequencies'].values())
+
+    def num_problems_done(self):
+        return int(self.log_count)

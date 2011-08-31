@@ -242,7 +242,7 @@ class ProfileGraph(request_handler.RequestHandler):
         return context
 
     def get_profile_target_user_data(self):
-        student = UserData.current()
+        student = UserData.current() or UserData.pre_phantom()
 
         if student:
             user_override = self.request_user_data("student_email")
