@@ -27,7 +27,6 @@ def sum_keys(key_value_pairs):
     return ret
 
 def exercises_in_bucket(num_buckets, bucket_index):
-    # TODO: Optimization: Don't re-calculate exercise data each time
     exercises = [e.name for e in Exercise.get_all_use_cache()]
     exercises.sort()
 
@@ -41,7 +40,7 @@ def exercises_in_bucket(num_buckets, bucket_index):
 
 class ExerciseDoneProfGraph(request_handler.RequestHandler):
     def get(self):
-        chart = self.request_string('chart', 'gecko_line')
+        chart = self.request_string('chart', 'area_spline')
 
         past_days = self.request_int('past_days', 7)
         today = dt.date.today()
