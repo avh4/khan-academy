@@ -156,8 +156,8 @@ def exercises(exercise_name):
 def exercise_videos(exercise_name):
     exercise = models.Exercise.get_by_name(exercise_name)
     if exercise:
-        exercise_videos = exercise.related_videos_query()
-        return map(lambda exercise_video: exercise_video.video, exercise_videos)
+        exercise_videos = [e.video for e in exercise.related_videos_query()]
+        return list(set(exercise_videos))
     return []
 
 @route("/api/v1/videos/<video_id>", methods=["GET"])
