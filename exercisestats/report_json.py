@@ -10,7 +10,21 @@ import datetime as dt
 import math
 import random
 import time
-import logging
+import simplejson as json
+
+
+# Create a new list of KVPs with the values of all KVPs with identical keys summed
+def sum_keys(key_value_pairs):
+    key_value_pairs.sort()
+    ret = []
+    last = None
+    for k, v in key_value_pairs:
+        if last == None or last != k:
+            ret.append([k, v])
+            last = k
+        else:
+            ret[-1][1] += v
+    return ret
 
 def exercises_in_bucket(num_buckets, bucket_index):
     # TODO: Optimization: Don't re-calculate exercise data each time
@@ -25,21 +39,21 @@ def exercises_in_bucket(num_buckets, bucket_index):
     first = bucket_index * bucket_size + min(bucket_rem, bucket_index)
     return exercises[ first : first + bucket_size + (1 if bucket_index < bucket_rem else 0) ]
 
-# NOTE: Assumptions: Collect Fancy Exercise Statistics cron job is run everyday.
 class ExerciseDoneProfGraph(request_handler.RequestHandler):
     def get(self):
         chart = self.request_string('chart', 'gecko_line')
 
         past_days = self.request_int('past_days', 7)
-        end_dt = dt.datetime.combine(dt.date.today(), dt.time()) + dt.timedelta(days=1)
-        start_dt = end_dt - dt.timedelta(days=past_days)
-
-        query = ExerciseStatistic.all()
-        query.filter('start_dt >=', start_dt)
-        query.order('start_dt')
+        today = dt.date.today()
+        # We don't use App Engine Query filters so as to avoid adding entries to index.yaml
+        days = [ today - dt.timedelta(days=i) for i in range(past_days - 1, -1, -1) ]
 
         if chart == 'aggregate':
-            return self.area_spline(query, end_dt, 'All Exercises')
+            # For-loop for clarity and to get flattened list (over list comp.)
+            ex_stats = []
+            for ex in Exercise.get_all_use_cache():
+                ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
+            return self.area_spline(ex_stats, 'All Exercises')
 
         num_buckets = self.request_int('n', 1)
         bucket_index = self.request_int('ix', 0)
@@ -48,61 +62,54 @@ class ExerciseDoneProfGraph(request_handler.RequestHandler):
         if not exercises:
             exercises = exercises_in_bucket(num_buckets, bucket_index)
         exid = random.choice(exercises)
-        query.filter('exid = ', exid)
+
+        ex_stats = ExerciseStatistic.get_by_dates(exid, days)
 
         return { 'gecko_line': self.gecko_line,
-                 'area_spline': self.area_spline }[chart](query, end_dt, exid)
+                 'area_spline': self.area_spline }[chart](ex_stats, exid)
 
-    def area_spline(self, stat_query, end_dt, title=''):
+    def area_spline(self, exercise_stats, title=''):
         prof_list, done_list = [], []
-        start_ts = 0
+        for ex in exercise_stats:
+            start_unix = int(time.mktime(ex.start_dt.timetuple()) * 1000)
+            prof_list.append([start_unix, ex.num_proficient()])
+            done_list.append([start_unix, ex.num_problems_done()])
 
-        for ex in stat_query:
-            if (ex.end_dt > end_dt):
-                continue
-
-            if not start_ts:
-                start_ts = int(time.mktime(ex.start_dt.timetuple()) * 1000)
-
-            prof_list.append(ex.num_proficient())
-            done_list.append(ex.num_problems_done())
+        done_list = sum_keys(done_list)
+        prof_list = sum_keys(prof_list)
 
         title = Exercise.to_display_name(title)
 
         # Make the peak of the proficiency line about half as high as the peak
         # of the # problems graph
-        done_y_max = max(done_list) if len(done_list) else 1
-        prof_y_max = max(prof_list) * 2 if len(prof_list) else 1
+        done_y_max = max([x[1] for x in done_list]) if len(done_list) else 1
+        prof_y_max = max([x[1] for x in prof_list]) * 2 if len(prof_list) else 1
 
         context = {
             'title': title,
             'series1': {
                 'name': 'Problems Done', 
                 'max': done_y_max,
-                'values': done_list,
+                'values': json.dumps(done_list),
             },
             'series2': {
                 'name': 'Proficient',
                 'max': prof_y_max,
-                'values': prof_list,
+                'values': json.dumps(prof_list),
             },
-            'start_ts': start_ts,
-            'interval': 24 * 60 * 60 * 1000,
         }
 
         self.render_template('exercisestats/highcharts_area_spline.json', context)
 
-    def gecko_line(self, stat_query, end_dt, title):
+    def gecko_line(self, exercise_stats, title):
         # Acceptable values are "done" and "proficient"
         hist = self.request_string('hist', 'done')
 
         values, months = [], []
         num_func = { 'done': ExerciseStatistic.num_problems_done,
                      'proficient': ExerciseStatistic.num_proficient }[hist]
-        for ex in stat_query:
-            # We can't just add another filter to the query because of GQL restrictions
-            if (ex.end_dt > end_dt):
-                continue
+
+        for ex in exercise_stats:
             values.append(num_func(ex))
             month = ex.start_dt.strftime('%b')
             if len(months) == 0 or month != months[-1]:

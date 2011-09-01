@@ -26,15 +26,11 @@
         {
             "data": {{ series1.values }},
             "name": "{{ series1.name }}",
-            "pointStart": {{ start_ts }},
-            "pointInterval": {{ interval }},
             "yAxis": 0
         },
         {
             "data": {{ series2.values }},
             "name": "{{ series2.name }}",
-            "pointStart": {{ start_ts }},
-            "pointInterval": {{ interval }},
             "yAxis": 1
         }
     ],
