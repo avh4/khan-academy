@@ -18,7 +18,7 @@ import notifications
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
-from api.auth.decorators import oauth_required, oauth_optional, admin_required
+from api.auth.decorators import oauth_required, oauth_optional, admin_required, developer_required
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
@@ -631,5 +631,43 @@ def remove_developer():
 
     user_data_developer.developer = False
     user_data_developer.put()
+
+    return True
+
+@route("/api/v1/coworkers/add", methods=["POST"])
+@developer_required
+@jsonp
+@jsonify
+def add_coworker():
+    user_data_coach = request.request_user_data("coach_email")
+    user_data_coworker = request.request_user_data("coworker_email")
+
+    if user_data_coach and user_data_coworker:
+        if not user_data_coworker.key_email in user_data_coach.coworkers:
+            user_data_coach.coworkers.append(user_data_coworker.key_email)
+            user_data_coach.put()
+
+        if not user_data_coach.key_email in user_data_coworker.coworkers:
+            user_data_coworker.coworkers.append(user_data_coach.key_email)
+            user_data_coworker.put()
+
+    return True
+
+@route("/api/v1/coworkers/remove", methods=["POST"])
+@developer_required
+@jsonp
+@jsonify
+def remove_coworker():
+    user_data_coach = request.request_user_data("coach_email")
+    user_data_coworker = request.request_user_data("coworker_email")
+
+    if user_data_coach and user_data_coworker:
+        if user_data_coworker.key_email in user_data_coach.coworkers:
+            user_data_coach.coworkers.remove(user_data_coworker.key_email)
+            user_data_coach.put()
+
+        if user_data_coach.key_email in user_data_coworker.coworkers:
+            user_data_coworker.coworkers.remove(user_data_coach.key_email)
+            user_data_coworker.put()
 
     return True

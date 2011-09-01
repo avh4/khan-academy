@@ -112,8 +112,7 @@ var KnowledgeMap = {
                 "h_position": jel.attr("data-h_position"),
                 "v_position": jel.attr("data-v_position"),
                 "status": jel.attr("data-status"),
-                "summative": jel.attr("data-summative") == "True",
-                "url": "/exercises?exid=" + jel.attr("data-id")
+                "summative": jel.attr("data-summative") == "True"
             });
         });
 
@@ -324,7 +323,6 @@ var KnowledgeMap = {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
-       
         if (KnowledgeMap.admin)
         {
             
@@ -374,13 +372,10 @@ var KnowledgeMap = {
             
         }
         else
-         // Go to exercise
-        window.location = node.url;
-        
-        
-        
-        
-        
+        {
+            // Go to exercise via true link click.
+            $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"] .exercise-title a").click();
+        }
     },
 
     onNodeMouseover: function(el, node) {

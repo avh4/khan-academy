@@ -1067,7 +1067,6 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
 def main():
 
-    webapp.template.register_template_library('templateext')
     application = webapp.WSGIApplication([
         ('/', ViewHomePage),
         ('/about', util_about.ViewAbout),
@@ -1140,6 +1139,7 @@ def main():
 
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
+        ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
 
         ('/coaches', coaches.ViewCoaches),
         ('/students', coaches.ViewStudents),
