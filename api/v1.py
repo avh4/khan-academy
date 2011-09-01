@@ -2,8 +2,6 @@ import copy
 import datetime
 import logging
 
-from google.appengine.api import users
-
 from flask import request, current_app
 
 import models
@@ -20,7 +18,7 @@ import notifications
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
-from api.auth.decorators import oauth_required, oauth_optional
+from api.auth.decorators import oauth_required, oauth_optional, admin_required, developer_required
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
@@ -559,11 +557,12 @@ def attempt_problem_number(exercise_name, problem_number):
                     )
 
             add_action_results(user_exercise, {
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise.exercise_states),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
             })
 
             return user_exercise
 
+    logging.warning("Problem %d attempted with no user_data present", problem_number)
     return unauthorized_response()
 
 @route("/api/v1/user/exercises/<exercise_name>/reset_streak", methods=["POST"])
@@ -645,3 +644,71 @@ def badge_categories():
 @jsonify
 def badge_category(category):
     return filter(lambda badge_category: str(badge_category.category) == category, badges.BadgeCategory.all())
+
+@route("/api/v1/developers/add", methods=["POST"])
+@admin_required
+@jsonp
+@jsonify
+def add_developer():
+    user_data_developer = request.request_user_data("email")
+
+    if not user_data_developer:
+        return False
+
+    user_data_developer.developer = True
+    user_data_developer.put()
+
+    return True
+
+@route("/api/v1/developers/remove", methods=["POST"])
+@admin_required
+@jsonp
+@jsonify
+def remove_developer():
+    user_data_developer = request.request_user_data("email")
+
+    if not user_data_developer:
+        return False
+
+    user_data_developer.developer = False
+    user_data_developer.put()
+
+    return True
+
+@route("/api/v1/coworkers/add", methods=["POST"])
+@developer_required
+@jsonp
+@jsonify
+def add_coworker():
+    user_data_coach = request.request_user_data("coach_email")
+    user_data_coworker = request.request_user_data("coworker_email")
+
+    if user_data_coach and user_data_coworker:
+        if not user_data_coworker.key_email in user_data_coach.coworkers:
+            user_data_coach.coworkers.append(user_data_coworker.key_email)
+            user_data_coach.put()
+
+        if not user_data_coach.key_email in user_data_coworker.coworkers:
+            user_data_coworker.coworkers.append(user_data_coach.key_email)
+            user_data_coworker.put()
+
+    return True
+
+@route("/api/v1/coworkers/remove", methods=["POST"])
+@developer_required
+@jsonp
+@jsonify
+def remove_coworker():
+    user_data_coach = request.request_user_data("coach_email")
+    user_data_coworker = request.request_user_data("coworker_email")
+
+    if user_data_coach and user_data_coworker:
+        if user_data_coworker.key_email in user_data_coach.coworkers:
+            user_data_coach.coworkers.remove(user_data_coworker.key_email)
+            user_data_coach.put()
+
+        if user_data_coach.key_email in user_data_coworker.coworkers:
+            user_data_coworker.coworkers.remove(user_data_coach.key_email)
+            user_data_coworker.put()
+
+    return True

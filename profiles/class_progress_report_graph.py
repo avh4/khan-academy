@@ -42,7 +42,9 @@ def class_progress_report_graph_context(user_data, student_list):
     else:
         list_students = user_data.get_students_data()
 
-    student_emails = sorted([(escape(s.email), truncate_to(s.nickname, 18)) for s in list_students], key=lambda s: s[1])
+    list_students = sorted(list_students, key=lambda student: student.nickname)
+
+    student_emails = [(escape(s.email), truncate_to(s.nickname, 18)) for s in list_students]
     emails_escapejsed = [escapejs(s.email) for s in list_students]
 
     exercises = get_class_exercises(list_students)

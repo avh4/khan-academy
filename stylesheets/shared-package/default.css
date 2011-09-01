@@ -1,4 +1,4 @@
-/* http://meyerweb.com/eric/tools/css/reset/ 
+/* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
 */
@@ -12,8 +12,8 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
 	margin: 0;
@@ -24,7 +24,7 @@ time, mark, audio, video {
 	vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
@@ -94,7 +94,7 @@ h1 {font-size:25px; margin-bottom: 22px;}
     .main-headline a:hover, .section-headline a:hover { text-decoration: underline;}
     .main-headline a:visited, .section-headline a:visited { color: #7EA800 };
     h1.main-headline {font-size: 32px; position: relative; line-height: 37px; z-index: 10;}
-    
+
 h2 {font-size:20px; margin-bottom: 22px;}
 h3 {font-size:18px; margin-bottom: 22px;}
 h4 {font-size:15px; margin-bottom: 22px;}
@@ -137,11 +137,11 @@ hr {
     *position: static;
     margin: 0;
     text-decoration: none !important;
-    
+
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    
+
     text-shadow: 0 1px 0 #fff;
 }
 input.simple-button {
@@ -155,7 +155,7 @@ input.simple-button {
 	bottom:0;
 	content: " ";
 	border-top: 1px solid rgba(255,255,255, .3);
-	
+
 	border-radius: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -215,7 +215,7 @@ input.simple-button {
 .vertical-shadow {
     border: 1px solid #ccc;
     border-bottom: 1px solid #aaa;
-    
+
     -webkit-box-shadow: 0 1px 3px #ccc;
     -moz-box-shadow: 0 1px 3px #ccc;
     box-shadow: 0 1px 3px #ccc;
@@ -300,7 +300,7 @@ a:link:hover, a:link:focus, a:visited:hover, a:visited:focus {
 }
 
 /*
- * Hide links with href=# and other script-requiring elements from non-scripting users, 
+ * Hide links with href=# and other script-requiring elements from non-scripting users,
  * since they will only be confusing.  They will be made visible by script.
  */
 a[href="#"], .requires_script {
@@ -310,10 +310,10 @@ a[href="#"], .requires_script {
 /*
  * Give script-using links a dotted underline when they are visible.
  */
-  
-a[href="#"]:link, 
-a.uses_script:link, 
-a[href="#"]:visited, 
+
+a[href="#"]:link,
+a.uses_script:link,
+a[href="#"]:visited,
 a.uses_script:visited {
     text-decoration: none;
     border-bottom: dotted 1px #0075b1;
@@ -464,7 +464,7 @@ footer {
         position: absolute;
         left: 5px;
         top: 6px;
-        z-index: 1;    
+        z-index: 1;
     }
     #top-header #logo #logo-image {
         width: 280px;
@@ -564,8 +564,8 @@ footer {
         width: auto;
         float: right;
     }
-    #page_sub_nav .breadcrumbs_nav > a, 
-    #page_sub_nav .breadcrumbs_nav .breadcrumb-separator, 
+    #page_sub_nav .breadcrumbs_nav > a,
+    #page_sub_nav .breadcrumbs_nav .breadcrumb-separator,
     #page_sub_nav .breadcrumbs_nav #video_dropdown {
         display: block;
         float: left;
@@ -576,16 +576,16 @@ footer {
         #page_sub_nav .breadcrumbs_nav a#faq {
             padding-top: 0;
         }
-        #page_sub_nav .breadcrumbs_nav.video-nav a, 
+        #page_sub_nav .breadcrumbs_nav.video-nav a,
         #page_sub_nav .breadcrumbs_nav.video-nav .breadcrumb-separator {
-            margin-left: 9px;   
+            margin-left: 9px;
         }
     #page_sub_nav .breadcrumbs_nav a.selected {
         position: relative;
     }
-    
+
 /* Visual indicator of selected nav element */
-#page_sub_nav .breadcrumbs_nav a.selected:before, 
+#page_sub_nav .breadcrumbs_nav a.selected:before,
 #sitewide-navigation a.selected:before,
 #page_sub_nav .breadcrumbs_nav.video-nav span.selected:before {
         position: relative;
@@ -612,14 +612,14 @@ footer {
         #page_sub_nav .breadcrumbs_nav a#getting-started.selected:before {left: 54px;}
         #page_sub_nav .breadcrumbs_nav a#blog.selected:before {left: 14px;}
         #page_sub_nav .breadcrumbs_nav a#the-team.selected:before {left: 31px;}
-        #page_sub_nav .breadcrumbs_nav.video-nav span.selected:before { 
+        #page_sub_nav .breadcrumbs_nav.video-nav span.selected:before {
             top: 24px;
             left: 20px;
             border-left-width: 5px;
             border-right-width: 5px;
             border-bottom-width: 5px;
         }
-        
+
 #page_sub_nav .breadcrumbs_nav a.selected:after,
 #sitewide-navigation a.selected:after,
 #page_sub_nav .breadcrumbs_nav.video-nav span.selected:after {
@@ -647,7 +647,7 @@ footer {
     #page_sub_nav .breadcrumbs_nav a#getting-started.selected:after {left: 55px;}
     #page_sub_nav .breadcrumbs_nav a#blog.selected:after {left: 15px;}
     #page_sub_nav .breadcrumbs_nav a#the-team.selected:after {left: 32px;}
-    #page_sub_nav .breadcrumbs_nav.video-nav span.selected:after { 
+    #page_sub_nav .breadcrumbs_nav.video-nav span.selected:after {
         top: 25px;
         left: 20px;
         border-left-width: 5px;
@@ -726,7 +726,7 @@ footer {
         margin: 0 8px;
         display: inline-block;
         height: 20px;
-        
+
         /* For IE */
         *top: 0;
     }
@@ -747,7 +747,7 @@ footer {
     #top-header #top-header-links .page_links a:hover {
         text-decoration: underline;
     }
-    
+
 #top-header #top-header-links #page_auth.page_links {
     float: right;
     display: block;
@@ -784,7 +784,7 @@ footer {
         color: #e45c02;
     }
     #top-header #top-header-links #page_auth .css-menu > ul > li:after {
-        background-image: url(/images/pulldown-green.png); /*! data-uri(/images/pulldown-green.png) */ 
+        background-image: url(/images/pulldown-green.png); /*! data-uri(/images/pulldown-green.png) */
     }
 
     #top-header #top-header-links span.badge_count_container { vertical-align:baseline; }
@@ -814,7 +814,7 @@ footer {
 
         opacity: 0.75;
         filter:alpha(opacity=75);
-        
+
         /* X-browser inline-block support */
         display:-moz-inline-stack;
         display:inline-block;
@@ -878,7 +878,7 @@ footer {
         /* For jquery-ui autocomplete */
         z-index: 100;
         position: relative;
-        
+
         /* For IE */
         height: 22px\9;
         padding-top: 5px\9;
@@ -899,11 +899,11 @@ footer {
         /* For jquery-ui autocomplete */
         z-index: 100;
         position: relative;
-        
+
         /* For IE */
         height: 22px\9;
         padding-top: 5px\9;
-        
+
         -webkit-box-shadow: inset 0 1px 3px #1A222C, 0 1px 0 #37495D;
         -moz-box-shadow: inset 0 1px 3px #1A222C, 0 1px 0 #37495D;
         box-shadow: inset 0 1px 3px #1A222C, 0 1px 0 #37495D;
@@ -924,11 +924,11 @@ img.rounded-background,
     border-bottom: 1px solid #aaa;
     margin: 0 auto;
     max-width: 90%;
-    
+
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
-    
+
     -moz-box-shadow: 0 1px 3px #ccc;
     -webkit-box-shadow: 0 1px 3px #ccc;
     box-shadow: 0 1px 3px #ccc;
@@ -1108,7 +1108,7 @@ span.video_extra_links {
 span.video_extra_links div.video-energy-points {
     float: left;
 }
-a:visited.google-analytics-link-track, 
+a:visited.google-analytics-link-track,
 a:link.google-analytics-link-track
  { /*these GA click tracking links have onclick= JS tags -- need to undo the dotted border style that applies to these by default */
     border-bottom: none;
@@ -1148,7 +1148,7 @@ a:link.google-analytics-link-track
 #library { }
 	#library #library-search {
 		text-align: right;
-		padding-top: 2px;	
+		padding-top: 2px;
 	}
 	#library #library-search #videosearch {
 		color: #204E93;
@@ -1180,7 +1180,7 @@ a:link.google-analytics-link-track
 				border-right: 1px solid #fff;
 				border-left: 1px solid #ccc;
 				list-style: none;
-				float: left;	
+				float: left;
 			}
 				#library #library-nav-links li.first {
 					border-left: none;
@@ -1203,14 +1203,14 @@ a:link.google-analytics-link-track
 				left:10px; /* value = (:before left) + (:before border-left) - (:after border-left) */
 				width:20px;
 				height:11px;
-				z-index: 10;				
+				z-index: 10;
 			}
 			#library #library-nav-links .video-count, #library #library-content #library-sub-nav #list-of-lists .video-count {
 				font-size: 90%;
 				padding-left: 4px;
 				color: #999;
 			}
-			
+
 	#library #library-content {
 		background-color: #fff;
 		border-top: 0;
@@ -1247,7 +1247,7 @@ a:link.google-analytics-link-track
                 line-height: 18px;
             }
 			#library #library-content #library-content-main a.vl {
-				font-weight: normal;	
+				font-weight: normal;
 				padding: 0 2px 0 2px;
 				line-height: 18px;
                 text-decoration: none;
@@ -1306,7 +1306,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         z-index: 1;
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
-        box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
+        box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
     }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
@@ -1316,7 +1316,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     #container #dashboard-drawer h3 .subheader {
         font-weight: normal;
     }
-    
+
     #container #dashboard-header {
         background: #fafafa;
         border-width: 0 0 1px 0;
@@ -1353,7 +1353,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         position: absolute;
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
-        box-shadow: 2px 0px 3px rgba(0, 0, 0, .1); 
+        box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         z-index: 1;
     }
         #container #dashboard-header #dashboard-title #dashboard-icon {
@@ -1362,7 +1362,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             width: 16px;
             height: 16px;
         }
-        
+
     #container #dashboard-header #dashboard-nav {
         float: right;
         font-weight: bold;
@@ -1393,7 +1393,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     height: 79px;
     cursor: pointer;
     border: 1px solid #ddd;
-    
+
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
@@ -1435,7 +1435,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         line-height: 18px;
     }
     .streak-bar-challenge {
-        background: url(/images/streak-meter-empty-challenge.png) no-repeat; 
+        background: url(/images/streak-meter-empty-challenge.png) no-repeat;
         /*! data-uri(/images/streak-meter-empty-challenge.png) */
     }
     .exercise-badge .streak-bar {
@@ -1464,7 +1464,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     height: 90px;
     opacity: 0.75;
     filter:alpha(opacity=75);
-    
+
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
@@ -1481,11 +1481,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#dddddd');
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#EEE), to(#ddd));
     background: -moz-linear-gradient( top, #eee, #ddd );
-    
+
     -moz-box-shadow: 0 1px 1px #ccc;
     -webkit-box-shadow: 0 1px 1px #ccc;
     box-shadow: 0 1px 1px #ccc;
-    
+
     text-shadow: 0 1px 0 #fff;
 }
 .achievement-badge-owned #outline-box {
@@ -1589,7 +1589,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .achievement-badge.category-5 #outline-box {
         border-top: none;
     }
-.badge-award-container {width:302px;}    
+.badge-award-container {width:302px;}
 .badge-award-container .achievement-badge.category-5, .achievement-badge.category-5.achievement-badge-owned {
     border: none;
     -webkit-box-shadow: none;
@@ -1605,7 +1605,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 .badge-award-container .achievement-badge.category-5 {
     min-width: 195px;
-}    
+}
 .badge-award-container .achievement-badge.category-5 .energy-points-badge {
     right: -5px;
 }
@@ -1639,11 +1639,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     min-width: 887px;
     width: auto;
     padding-left: 5px;
-    
+
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
-    
+
     -webkit-box-shadow: none !important;
     -moz-box-shadow: none;
     box-shadow: none !important;
@@ -1745,7 +1745,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border-left: 1px solid #ddd;
     border-top: 1px solid #C6D1AD;
     border-bottom: 1px solid #ddd;
-    
+
     color: #666;
     float: left;
     font-size: 11px;
@@ -1782,7 +1782,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         padding: 10px;
         position: relative;
         z-index: 10;
-        
+
         box-shadow: 0 1px 2px #ccc;
         -moz-box-shadow: 0 1px 2px #ccc;
         -webkit-box-shadow: 0 1px 2px #ccc;
@@ -1813,13 +1813,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         #answer_area .info-box #related-video-list li {
             display: block;
-            margin: 0px 14px 5px 14px;
+            margin: 0 0 5px 5px;
         }
         #answer_area .info-box #related-video-list a {
             display: block;
             float: left;
-            margin: 0px 0 0 2px;
-            width: 70%;
+            margin: 0;
+            width: 95%%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -1851,7 +1851,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            
+
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
             border-radius: 5px;
@@ -1879,7 +1879,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .exercise.button, #answer_area input.button {
         background-color: #CCCCCC;
         border-top: 1px solid #D2D2D2;
-        border-left: 1px solid #D2D2D2;        
+        border-left: 1px solid #D2D2D2;
         border-right: 1px solid #ACACAC;
         border-bottom: 1px solid #ACACAC;
         color: #333;
@@ -1889,11 +1889,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         padding: 2px 5px;
         position: relative;
         top: -1px;
-        
+
         -webkit-border-radius: 5px;
         -moz-border-radius: 5px;
         border-radius: 5px;
-        
+
         box-shadow: 0 1px 2px #666;
         -webkit-box-shadow: 0 1px 2px #666;
         -moz-box-shadow: 0 1px 2px #666;
@@ -2008,7 +2008,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     min-width: 85px;
 }
 .progress-legend, #module-progress .student-module-status {
-    border: 1px solid #eee;    
+    border: 1px solid #eee;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
@@ -2046,11 +2046,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding: 5px;
     min-width: 150px;
     z-index: 10;
-    
+
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
-    
+
     -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, .35);
     -moz-box-shadow: 1px 1px 3px rgba(0, 0, 0, .35);
     box-shadow: 1px 1px 3px rgba(0, 0, 0, .35);
@@ -2078,8 +2078,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 /* One-Off Page Styles */
 
-#coaches, #students, #donate, #individual_report, 
-.achievement-badges-container, #login-page, 
+#coaches, #students, #donate, #individual_report,
+.achievement-badges-container, #login-page,
 #about-us, #homepage, #video-page, #contribute,
 #credits, #report-problem, #tos, #privacy-policy,
 #dmca, #search_results, #exercise-stats {
@@ -2090,8 +2090,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     border-top: 1px solid #C6D1AD;
 }
 
-.dark #coaches, .dark #students, .dark #donate, .dark #individual_report, .dark 
-.achievement-badges-container, .dark #login-page, .dark #about-us, 
+.dark #coaches, .dark #students, .dark #donate, .dark #individual_report, .dark
+.achievement-badges-container, .dark #login-page, .dark #about-us,
 .dark #homepage, .dark #video-page, .dark #contribute,
 .dark #credits, .dark #report-problem, .dark #tos, .dark #privacy-policy,
 .dark #dmca {
@@ -2183,30 +2183,30 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     margin-bottom: 10px;
 }
 #the-team .team-photo {
-    width: 95%; 
-    display: block; 
-    margin: 0 auto; 
-    padding: 9px; 
+    width: 95%;
+    display: block;
+    margin: 0 auto;
+    padding: 9px;
     background: #f7f7f7;
 }
 #the-team .team-card {
-    width: 47%; 
-    float: left; 
-    margin-right: 1%; 
+    width: 47%;
+    float: left;
+    margin-right: 1%;
     padding: 10px 10px 10px 0;
     margin-bottom: 36px;
     min-height: 267px;
     position: relative;
 }
     #the-team .team-card .card-photo {
-        padding: 5px; 
-        background: #eee; 
+        padding: 5px;
+        background: #eee;
         width: 200px;
-        
-        position: absolute; 
-        left: 0; 
+
+        position: absolute;
+        left: 0;
         top: 10px;
-        
+
         -webkit-border-radius: 3px;
         -moz-border-radius: 3px;
         border-radius: 3px;
@@ -2422,7 +2422,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #thumbnails td div.thumb-pbs_thumbnail { background-position: 0 -1050px; }
 #thumbnails td div.thumb-tech_award_thumbnail { background-position: 0 -1200px; }
 #thumbnails td div.thumb-ted_thumbnail { background-position: 0 -1350px; }
-#thumbnails td div.thumb-translation_thumbnail { background-position: 0 -1500px; } 
+#thumbnails td div.thumb-translation_thumbnail { background-position: 0 -1500px; }
 
 #thumbnails td div.thumbnail_label {
     padding: 2px 2px 0;
@@ -2439,11 +2439,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     height: 100px;
     position: relative;
     width: 27px;
-    
+
     border-radius: 5px;
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
-    
+
     text-shadow: 0 1px 0 #fff;
 }
 
@@ -2457,7 +2457,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     #arrow-right.thumbnail_arrow:hover {
         right: 1px;
     }
-    
+
 #arrow-right {
     float: right;
 }
@@ -2467,7 +2467,7 @@ div.arrow-right, div.arrow-left {
     height: 0;
     border-top: 15px solid transparent;
     border-bottom: 15px solid transparent;
-    
+
     position: absolute;
     top: 35px;
     z-index: 2;
@@ -2480,13 +2480,13 @@ div.arrow-right, div.arrow-left {
         border-right: 15px solid #777;
         right: 7px;
     }
-    
+
 div.arrow-right-shadow, div.arrow-left-shadow {
     width: 0;
     height: 0;
     border-top: 16px solid transparent;
     border-bottom: 16px solid transparent;
-    
+
     position: absolute;
     top: 35px;
 }
@@ -2506,7 +2506,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     margin-bottom: 0;
 }
 #homepage .playlist_browser_title {
-    display: inline-block; 
+    display: inline-block;
     float: left;
 }
 #homepage #browse-fixed {
@@ -2515,7 +2515,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     margin: 0;
     z-index: 100;
     display: none;
-} 
+}
 
 #homepage #main-video {
     position: absolute;
@@ -2566,11 +2566,11 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     margin-right: 20px;
     min-height: 80px;
     position: relative;
-    
+
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     border-radius: 5px;
-    
+
     -moz-box-shadow: 2px 2px 5px #ccc;
     -webkit-box-shadow: 2px 2px 5px #ccc;
     box-shadow: 2px 2px 5px #ccc;
@@ -2580,7 +2580,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     border-color: #aaa;
     left: 2px;
     top: 2px;
-    
+
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     box-shadow: none;
@@ -2622,7 +2622,7 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     margin: 18px auto !important;
     padding: 18px;
     width: 600px;
-    
+
     -webkit-box-shadow: 0px 1px 3px #ccc;
     -moz-box-shadow: 0px 1px 3px #ccc;
     box-shadow: 0px 1px 3px #ccc;
@@ -2642,11 +2642,11 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     margin-bottom: 18px;
     font-size: 16px;
     text-align: center;
-    
+
     -webkit-box-shadow: inset 0 0 3px #ddd;
     -moz-box-shadow: inset 0 0 3px #ddd;
     box-shadow: inset 0 0 3px #ddd;
-    
+
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
@@ -2918,7 +2918,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 	border-style:solid;
 	border-color:#000000 transparent;
     /* reduce the damage in FF3.0 */
-    display:block; 
+    display:block;
     width:0;
 }
 
@@ -2929,7 +2929,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 	left:auto;
 	border-width:0 5px 5px; /* vary these values to change the angle of the vertex */
 	border-color:#000000 transparent;
-	
+
 }
 
 .notification-bar {
@@ -2955,8 +2955,8 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar-content a:link{
-    text-decoration:underline; 
-    color:#eee;   
+    text-decoration:underline;
+    color:#eee;
 }
 .notification-bar-content .simple-button {
 	padding: 2px 10px 4px;
@@ -2964,13 +2964,13 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 	top: -1px;
 }
 .notification-bar-content a:visited{
-    text-decoration:underline;  
-    color:#eee;  
+    text-decoration:underline;
+    color:#eee;
 }
 
 .notification-bar-content a:hover{
-    text-decoration:underline;  
-    border-bottom:none;  
+    text-decoration:underline;
+    border-bottom:none;
     color:#eee;
 }
 
@@ -3002,14 +3002,14 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .notification-bar .notify-badge{
-    color:#eee; 
+    color:#eee;
 }
 
 .notification-bar-flair a:link,
 .notification-bar-flair a:visited,
 .notification-bar-flair a:hover,
 .notification-bar-flair a:active {
-    color:#eee; 
+    color:#eee;
 }
 
 .notification-bar-flair .user-points-container{
@@ -3048,7 +3048,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     height: 23px;
     cursor: pointer;
     border: 1px solid #ddd;
-    
+
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
@@ -3071,7 +3071,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
         border-top-right-radius: 4px;
     }
     .dark #page-container, .dark #page-container-inner {
-        background-position-y: 107px; 
+        background-position-y: 107px;
     }
 }
 
@@ -3102,7 +3102,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     border:black 2px solid;
     padding:3px;
 }
-    
+
 .images-email {
   background-image: url(/images/email.png); /*! data-uri(/images/email.png) */
   width: 16px;
@@ -3113,7 +3113,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
    margin: 0px auto;
    width:500px;
 }
-    
+
 .images-email-gray {
   background-image: url(/images/email.png); /*! data-uri(/images/email.png) */
   width: 16px;

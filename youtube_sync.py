@@ -90,86 +90,94 @@ class YouTubeSync(request_handler.RequestHandler):
         yt_service.developer_key = "AI39si6ctKTnSR_Vx7o7GpkpeSZAKa6xjbZz6WySzTvKVYRDAO7NHBVwofphk82oP-OSUwIZd0pOJyNuWK8bbOlqzJc9OFozrQ"
         yt_service.client_id = "n/a"
 
-        playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=1&max-results=50')
-
         video_youtube_id_dict = Video.get_dict(Video.all(), lambda video: video.youtube_id)
         video_playlist_key_dict = VideoPlaylist.get_key_dict(VideoPlaylist.all())
 
         association_generation = int(Setting.last_youtube_sync_generation_start())
 
-        for playlist in playlist_feed.entry:
+        playlist_start_index = 1
+        playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=%s&max-results=50' % playlist_start_index)
 
-            self.response.out.write('<p>Playlist  ' + playlist.id.text)
-            playlist_id = playlist.id.text.replace('http://gdata.youtube.com/feeds/api/users/khanacademy/playlists/', '')
-            playlist_uri = playlist.id.text.replace('users/khanacademy/', '')
-            query = Playlist.all()
-            query.filter('youtube_id =', playlist_id)
-            playlist_data = query.get()
-            if not playlist_data:
-                playlist_data = Playlist(youtube_id=playlist_id)
-                self.response.out.write('<p><strong>Creating Playlist: ' + playlist.title.text + '</strong>')
-            playlist_data.url = playlist_uri
-            playlist_data.title = playlist.title.text
-            playlist_data.description = playlist.description.text
-            playlist_data.put()
-            
-            for i in range(0, 10):
-                start_index = i * 50 + 1
-                video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri + '?start-index=' + str(start_index) + '&max-results=50')
-                video_data_list = []
+        while len(playlist_feed.entry) > 0:
 
-                if len(video_feed.entry) <= 0:
-                    # No more videos in playlist
-                    break
+            for playlist in playlist_feed.entry:
 
-                for video in video_feed.entry:
+                self.response.out.write('<p>Playlist  ' + playlist.id.text)
+                playlist_id = playlist.id.text.replace('http://gdata.youtube.com/feeds/api/users/khanacademy/playlists/', '')
+                playlist_uri = playlist.id.text.replace('users/khanacademy/', '')
+                query = Playlist.all()
+                query.filter('youtube_id =', playlist_id)
+                playlist_data = query.get()
+                if not playlist_data:
+                    playlist_data = Playlist(youtube_id=playlist_id)
+                    self.response.out.write('<p><strong>Creating Playlist: ' + playlist.title.text + '</strong>')
+                playlist_data.url = playlist_uri
+                playlist_data.title = playlist.title.text
+                playlist_data.description = playlist.description.text
+                playlist_data.put()
+                
+                for i in range(0, 10):
+                    start_index = i * 50 + 1
+                    video_feed = yt_service.GetYouTubePlaylistVideoFeed(uri=playlist_uri + '?start-index=' + str(start_index) + '&max-results=50')
+                    video_data_list = []
 
-                    video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0].decode('utf-8')
+                    if len(video_feed.entry) <= 0:
+                        # No more videos in playlist
+                        break
 
-                    video_data = None
-                    if video_youtube_id_dict.has_key(video_id):
-                        video_data = video_youtube_id_dict[video_id]
-                    
-                    if not video_data:
-                        video_data = Video(youtube_id=video_id)
-                        self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('utf-8') + '</strong>')
-                        video_data.playlists = []
+                    for video in video_feed.entry:
 
-                    video_data.title = video.media.title.text.decode('utf-8')
-                    video_data.url = video.media.player.url.decode('utf-8')
-                    video_data.duration = int(video.media.duration.seconds)
+                        video_id = cgi.parse_qs(urlparse(video.media.player.url).query)['v'][0].decode('utf-8')
 
-                    if video.statistics:
-                        video_data.views = int(video.statistics.view_count)
+                        video_data = None
+                        if video_youtube_id_dict.has_key(video_id):
+                            video_data = video_youtube_id_dict[video_id]
+                        
+                        if not video_data:
+                            video_data = Video(youtube_id=video_id)
+                            self.response.out.write('<p><strong>Creating Video: ' + video.media.title.text.decode('utf-8') + '</strong>')
+                            video_data.playlists = []
 
-                    if video.media.description.text is not None:
-                        video_data.description = video.media.description.text.decode('utf-8')
-                    else:
-                        video_data.decription = ' '
+                        video_data.title = video.media.title.text.decode('utf-8')
+                        video_data.url = video.media.player.url.decode('utf-8')
+                        video_data.duration = int(video.media.duration.seconds)
 
-                    if playlist.title.text not in video_data.playlists:
-                        video_data.playlists.append(playlist.title.text.decode('utf-8'))
-                    video_data.keywords = video.media.keywords.text.decode('utf-8')
-                    video_data.position = video.position
-                    video_data_list.append(video_data)
-                db.put(video_data_list)
+                        if video.statistics:
+                            video_data.views = int(video.statistics.view_count)
 
-                playlist_videos = []
-                for video_data in video_data_list:                
-                    playlist_video = None
-                    if video_playlist_key_dict.has_key(playlist_data.key()):
-                        if video_playlist_key_dict[playlist_data.key()].has_key(video_data.key()):
-                            playlist_video = video_playlist_key_dict[playlist_data.key()][video_data.key()]
+                        if video.media.description.text is not None:
+                            video_data.description = video.media.description.text.decode('utf-8')
+                        else:
+                            video_data.decription = ' '
 
-                    if not playlist_video:
-                        playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
-                        self.response.out.write('<p><strong>Creating VideoPlaylist(' + playlist_data.title + ',' + video_data.title + ')</strong>')
-                    else:
-                        self.response.out.write('<p>Updating VideoPlaylist(' + playlist_video.playlist.title + ',' + playlist_video.video.title + ')')
-                    playlist_video.last_live_association_generation = association_generation
-                    playlist_video.video_position = int(video_data.position.text)
-                    playlist_videos.append(playlist_video)
-                db.put(playlist_videos)
+                        if playlist.title.text not in video_data.playlists:
+                            video_data.playlists.append(playlist.title.text.decode('utf-8'))
+                        video_data.keywords = video.media.keywords.text.decode('utf-8')
+                        video_data.position = video.position
+                        video_data_list.append(video_data)
+                    db.put(video_data_list)
+
+                    playlist_videos = []
+                    for video_data in video_data_list:                
+                        playlist_video = None
+                        if video_playlist_key_dict.has_key(playlist_data.key()):
+                            if video_playlist_key_dict[playlist_data.key()].has_key(video_data.key()):
+                                playlist_video = video_playlist_key_dict[playlist_data.key()][video_data.key()]
+
+                        if not playlist_video:
+                            playlist_video = VideoPlaylist(playlist=playlist_data.key(), video=video_data.key())
+                            self.response.out.write('<p><strong>Creating VideoPlaylist(' + playlist_data.title + ',' + video_data.title + ')</strong>')
+                        else:
+                            self.response.out.write('<p>Updating VideoPlaylist(' + playlist_video.playlist.title + ',' + playlist_video.video.title + ')')
+                        playlist_video.last_live_association_generation = association_generation
+                        playlist_video.video_position = int(video_data.position.text)
+                        playlist_videos.append(playlist_video)
+                    db.put(playlist_videos)
+
+            # Check next set of playlists
+
+            playlist_start_index += 50
+            playlist_feed = yt_service.GetYouTubePlaylistFeed(uri='http://gdata.youtube.com/feeds/api/users/khanacademy/playlists?start-index=%s&max-results=50' % playlist_start_index)
 
     def updateVideoAndPlaylistReadableNames(self):
         # Makes sure every video and playlist has a unique "name" that can be used in URLs

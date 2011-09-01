@@ -87,7 +87,11 @@ def api_create_phantom(method):
             cookie = user_data.email.split(PHANTOM_ID_EMAIL_PREFIX)[1]
             set_request_cookie(PHANTOM_MORSEL_KEY, str(cookie))
 
-            models.UserData.current(bust_cache=True)
+            user_data = models.UserData.current(bust_cache=True)
+
+            if not user_data:
+                logging.warning("create_api_phantom failed to create user_data properly")
+
             response = method(*args, **kwargs)
 
             response.set_cookie(PHANTOM_MORSEL_KEY, cookie)

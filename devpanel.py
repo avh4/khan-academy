@@ -8,6 +8,7 @@ from models import UserData
 import request_handler
 import user_util
 import itertools
+from api.auth.xsrf import ensure_xsrf_cookie
 
 
 class Email(request_handler.RequestHandler):
@@ -34,40 +35,31 @@ class Email(request_handler.RequestHandler):
 
         self.render_template('devemailpanel.html', template_values)
         
-        
 class Manage(request_handler.RequestHandler):
 
     @user_util.admin_only # only admins may add devs, devs cannot add devs
+    @ensure_xsrf_cookie
     def get(self):
-        errormessage = ""
-        add_dev = self.request.get('adddev', None) #email that is currently used 
-        remove_dev = self.request.get('removedev', None) #email the user wants to change to     
-        if add_dev and not UserData.get_from_user_input_email(add_dev):
-            errormessage = "You can't add a user that doesn't exist!"
-        
-        if remove_dev and not UserData.get_from_user_input_email(remove_dev):
-            errormessage = "You can't remove a user that doesn't exist!"
-            
-        
-        if add_dev and errormessage == "":
-            dev = UserData.get_from_user_input_email(add_dev)
-            if dev.developer == True:
-                errormessage = "%s is already flagged as a developer!" % add_dev
-            else:
-                dev.developer = True
-                dev.put()
-    
-        if remove_dev and errormessage == "":
-            dev = UserData.get_from_user_input_email(remove_dev)
-            if dev.developer == True:
-                dev.developer = False
-                dev.put()
-            else:
-                errormessage = "%s is not a developer to begin with" % remove_dev
-   
         developers = UserData.all()
         developers.filter('developer = ', True).fetch(1000)
-        template_values = {'App' : App,  "developers": developers, "errormessage":errormessage}
+        template_values = { "developers": developers }
 
         self.render_template('managedevs.html', template_values) 
         
+class ManageCoworkers(request_handler.RequestHandler):
+
+    @user_util.developer_only
+    def get(self):
+
+        user_data_coach = self.request_user_data("coach_email")
+        user_data_coworkers = []
+
+        if user_data_coach:
+            user_data_coworkers = user_data_coach.get_coworkers_data()
+
+        template_values = {
+            "user_data_coach": user_data_coach,
+            "user_data_coworkers": user_data_coworkers
+        }
+
+        self.render_template("managecoworkers.html", template_values)

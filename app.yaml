@@ -78,6 +78,9 @@ handlers:
 - url: /khan-exercises/css
   static_dir: khan-exercises/css
 
+- url: /khan-exercises/images
+  static_dir: khan-exercises/images
+
 - url: /khan-exercises/(hashed.+\.js)
   static_files: khan-exercises/\1
   upload: khan-exercises/(hashed.+\.js)

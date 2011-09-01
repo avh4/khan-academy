@@ -12,6 +12,30 @@
 
 {% block pagecontent %}
 
+    <script>
+        $(function() {
+            $(".remove-dev").click(function(e) {
+                $.post("/api/v1/developers/remove", { email: $(this).data("email") })
+
+                $(this).parents("li").first().remove();
+
+                e.preventDefault();
+            });
+
+            $("#add-dev").submit(function(e) {
+                $.post(
+                    "/api/v1/developers/add", 
+                    { email: $("#add-dev-email").val() },
+                    function() { window.location.reload(); }
+                );
+
+                $("#add-dev-submit").replaceWith("...adding...");
+
+                e.preventDefault();
+            });
+        });
+    </script>
+
     <style>
         .exercise-properties td { padding-right: 9px; }
         #footer { z-index:0 ; }
@@ -20,19 +44,18 @@
     <div id="devpanel" style="padding: 9px 23px;">
         <div>
             <h2>Manage Developers</h2>
-            <p style="color:red;">{{errormessage}}</p>
 
-            <div><b>Current Devs:</b></div>
+            <div><b>Current developers:</b></div>
 
             <ul>
             {% for dev in developers %}
-                <li>{{ dev.email }} &ndash; <a href="/devadmin/managedevs?removedev={{ dev.email|urlencode }}">remove</a></li>
+            <li>{{ dev.email }} &ndash; <a href="#" class="remove-dev" data-email="{{ dev.email|escape }}">remove</a></li>
             {% endfor %}
             </ul>
 
-            <form type="GET" action="" style="display: block; margin: 22px 0">
-                Add Dev:<input type="text" name="adddev">
-                <input type="submit" value="Add as developer">
+            <form id="add-dev" style="display: block; margin: 22px 0">
+                <input id="add-dev-email" type="text" />
+                <input id="add-dev-submit" type="submit" value="Add as developer" />
             </form>
         </div>
     </div>

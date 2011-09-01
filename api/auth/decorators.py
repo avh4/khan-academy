@@ -1,15 +1,18 @@
 from functools import wraps
 
+from google.appengine.api import users
+
 import flask
 from flask import request
 
-from api.auth.auth_util import oauth_error_response
+from api.auth.auth_util import oauth_error_response, unauthorized_response
 from api.auth.auth_models import OAuthMap
 
 from oauth_provider.decorators import is_valid_request, validate_token
 from oauth_provider.oauth import OAuthError
 
 import util
+import models
 
 # Decorator for validating an oauth request and storing the OAuthMap for use
 # in the rest of the request.
@@ -80,3 +83,29 @@ def oauth_optional():
 
         return wrapper
     return outer_wrapper
+
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        # Make sure current UserData exists as well as is_current_user_admin
+        # because UserData properly verifies xsrf token
+        user_data = models.UserData.current()
+
+        if user_data and users.is_current_user_admin():
+            return func(*args, **kwargs)
+    
+        return unauthorized_response()
+    return wrapper
+
+def developer_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user_data = models.UserData.current()
+
+        if user_data and (users.is_current_user_admin() or user_data.developer):
+            return func(*args, **kwargs)
+    
+        return unauthorized_response()
+    return wrapper
+

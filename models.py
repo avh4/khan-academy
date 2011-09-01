@@ -598,6 +598,7 @@ class UserData(db.Model):
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
+    coworkers = db.StringListProperty()
     student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
@@ -861,6 +862,10 @@ class UserData(db.Model):
                     students_data.append(student_data)
         return students_data
 
+    def get_coworkers_data(self):
+        return filter(lambda user_data: user_data is not None, \
+                map(lambda coworker_email: UserData.get_from_db_key_email(coworker_email) , self.coworkers))
+
     def has_students(self):
         return len(self.get_students_data()) > 0
 
@@ -875,13 +880,33 @@ class UserData(db.Model):
     def is_coached_by(self, user_data_coach):
         return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
+    def is_coworker_of(self, user_data_coworker):
+        return user_data_coworker.key_email in self.coworkers
+
+    def is_coached_by_coworker_of_coach(self, user_data_coach):
+        for coworker_email in user_data_coach.coworkers:
+            if coworker_email in self.coaches:
+                return True
+        return False
+
+    def is_administrator(self):
+        # Only works for currently logged in user. Make sure there
+        # is both a current user data and current user is an admin.
+        user_data = UserData.current()
+        return user_data and users.is_current_user_admin()
+
+    def is_visible_to(self, user_data):
+        return self.is_coached_by(user_data) or self.is_coached_by_coworker_of_coach(user_data) or user_data.developer or user_data.is_administrator()
+
+    def are_students_visible_to(self, user_data):
+        return self.is_coworker_of(user_data) or user_data.developer or user_data.is_administrator()
+
     def add_points(self, points):
         if self.points == None:
             self.points = 0
         if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
             util_notify.update(self,None,True)
         self.points += points
-
 
     def get_videos_completed(self):
         if self.videos_completed < 0:
@@ -1090,7 +1115,7 @@ class UserVideo(db.Model):
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
 
-    # Farthest second in video watched
+    # Most recently watched second in video (playhead state)
     last_second_watched = db.IntegerProperty(default = 0)
 
     # Number of seconds actually spent watching this video, regardless of jumping around to various
@@ -1169,9 +1194,6 @@ class VideoLog(db.Model):
         video_log.seconds_watched = seconds_watched
         video_log.last_second_watched = last_second_watched
 
-        if last_second_watched > user_video.last_second_watched:
-            user_video.last_second_watched = last_second_watched
-
         if seconds_watched > 0:
             if user_video.seconds_watched == 0:
                 user_data.uservideocss_version += 1
@@ -1206,6 +1228,7 @@ class VideoLog(db.Model):
 
                 first_video_playlist = False
 
+        user_video.last_second_watched = last_second_watched
         user_video.last_watched = datetime.datetime.now()
         user_video.duration = video.duration
 
@@ -1344,9 +1367,11 @@ class ProblemLog(db.Model):
 def commit_problem_log(problem_log_source):
     try:
         if not problem_log_source or not problem_log_source.key().name:
+            logging.critical("Skipping problem log commit due to missing problem_log_source or key().name")
             return
     except db.NotSavedError:
         # Handle special case during new exercise deploy
+        logging.critical("Skipping problem log commit due to db.NotSavedError")
         return
 
     if problem_log_source.count_attempts > 1000:
@@ -1384,10 +1409,14 @@ def commit_problem_log(problem_log_source):
 
         # Bump up attempt count
         if problem_log_source.attempt_list[0] != "hint": # attempt
-
             if index_attempt < len(problem_log.attempt_time_taken_list) \
                and problem_log.attempt_time_taken_list[index_attempt] != -1:
                 # This attempt has already been logged. Ignore this dupe taskqueue execution.
+                logging.info("Skipping problem log commit due to dupe taskqueue\
+                    execution for attempt: %s, key.name: %s, \
+                    time_taken_attempts: %s" % \
+                    (index_attempt, problem_log_source.key().name(),
+                      problem_log.time_taken_attempts))
                 return
 
             problem_log.count_attempts += 1

@@ -32,12 +32,12 @@
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
-            <span id="count_students">{{ student_lists.0.nstudents|thousands_separated }}</span><br />
+            <span id="count_students">{{ student_list.nstudents|thousands_separated }}</span><br />
             <span class="label">Students</span>
         </span>
     </span>
     <span id="energy-points">
-        <span class="energy-points-badge">{{ student_lists.0.class_points|thousands_separated }}</span><br />
+        <span class="energy-points-badge">{{ student_list.class_points|thousands_separated }}</span><br />
         <span class="label">Class Energy Points</span>
     </span>
 </div>
