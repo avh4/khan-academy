@@ -69,7 +69,7 @@
 {% endblock graph_accordion %}
 
 {% block profile_extended_sections %}
-    <div id="achievements" class="{% ifnotequal view "mobile" %}standard-view{% endifnotequal %}">
+    <div id="achievements" class="{% ifnotequal view "mobile" %}standard-view{% else %}mobile-view{% endifnotequal %}">
         <h2><a name="achievements">Achievements</a></h2>
         <div id="achievement-list">
             <ul>
