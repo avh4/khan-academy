@@ -13,7 +13,9 @@
                     <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="mobile-only"></a>
                 </div>
                 <div data-role="content">
-                    <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
+                    {% if playlist_data.playlist.description %}
+                        <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
+                    {% endif %}
                     {% column_major_sorted_videos playlist_data.videos %}
                     <div class="clear desktop-only">
                     {% if playlist_data.next %}

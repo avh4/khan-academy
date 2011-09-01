@@ -11,7 +11,7 @@
 	{% ifnotequal view "mobile" %}
 	<!-- is this the right thing? -->
 	 <span class="recent-share">
-	<a href="#" class="simple-button action-gradient with-icon download-icon share-link">
+	<a href="#" class="simple-button action-gradient with-icon download-icon share-link" onclick="_gaq.push(['_trackEvent', 'Click', 'Recent-Activity-Button']);return false;">
         <img src="/images/share-icon-small.png" />
         Share
     </a>
