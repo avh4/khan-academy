@@ -4,7 +4,7 @@ import logging
 from templatefilters import seconds_to_time_string
 
 class ProblemPoint:
-    def __init__(self, problem_log):
+    def __init__(self, problem_log, current_sha1):
         self.time_taken = problem_log.time_taken_capped_for_reporting()
         self.time_done = problem_log.time_done
         self.correct = problem_log.correct
@@ -19,6 +19,8 @@ class ProblemPoint:
         # We use sha1's existence as this identifier. In the future, we may do something smarter
         # when past sha1s conflict with current exercise contents.
         self.renderable = len(problem_log.sha1 or "") > 0
+
+        self.current = self.renderable and problem_log.sha1 == current_sha1
 
     def video_titles_html(self):
         if not self.video_point:
@@ -57,6 +59,9 @@ def exercise_problems_graph_context(user_data_student, exid):
 
     user_exercise = user_data_student.get_or_insert_exercise(exercise)
 
+    from exercises import exercise_contents
+    dontcare1, dontcare2, dontcare3, dontcare4, sha1 = exercise_contents(exercise)
+
     related_videos = exercise.related_videos_query()
     video_list = []
 
@@ -68,7 +73,7 @@ def exercise_problems_graph_context(user_data_student, exid):
     problem_list = []
     problem_logs = models.ProblemLog.all().filter('user =', user_data_student.user).filter('exercise =', exid).order("time_done")
     for problem_log in problem_logs:
-        problem_list.append(ProblemPoint(problem_log))
+        problem_list.append(ProblemPoint(problem_log, sha1))
 
     max_problems_in_graph = 35
     x_offset = 0

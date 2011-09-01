@@ -117,21 +117,37 @@ class ViewExercise(request_handler.RequestHandler):
             # Don't include incomplete information
             problem_log.hint_after_attempt_list = filter(lambda x: x != -1, problem_log.hint_after_attempt_list)
 
+            while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == 0:
+                user_activity.append([
+                    "hint-activity",
+                    0,
+                    max(0, problem_log.hint_time_taken_list[0])
+                    ])
+                problem_log.hint_after_attempt_list.pop(0)
+                problem_log.hint_time_taken_list.pop(0)
+
             if problem_log:
+                # For each attempt, add it to the list and then add any hints
+                # that came after it
                 for i in range(0, len(problem_log.attempt_list)):
                     user_activity.append([
                         "correct-activity" if problem_log.correct else "incorrect-activity",
-                        unicode(problem_log.attempt_list[i]),
+                        unicode(problem_log.attempt_list[i] if problem_log.attempt_list[i] else 0),
                         max(0, problem_log.attempt_time_taken_list[i])
                         ])
 
-                    while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i:
+                    # Here i is 0-indexed but problems are numbered starting at 1
+                    while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i+1:
                         user_activity.append([
                             "hint-activity",
                             0,
-                            0
+                            max(0, problem_log.hint_time_taken_list[0])
                             ])
+
+                        # easiest to just pop these instead of maintaining
+                        # another index into this list
                         problem_log.hint_after_attempt_list.pop(0)
+                        problem_log.hint_time_taken_list.pop(0)
 
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints
@@ -294,10 +310,9 @@ def reset_streak(user_data, user_exercise):
 
 def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
     attempt_content, sha1, seed, completed, count_hints, time_taken,
-    exercise_non_summative, problem_type, hint):
+    exercise_non_summative, problem_type):
 
     if user_exercise and user_exercise.belongs_to(user_data):
-
         dt_now = datetime.datetime.now()
         exercise = user_exercise.exercise_model
 
@@ -591,5 +606,4 @@ class UpdateExercise(request_handler.RequestHandler):
 
 
         self.redirect('/editexercise?saved=1&name=' + exercise_name)
-
 

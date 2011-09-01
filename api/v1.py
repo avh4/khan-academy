@@ -514,8 +514,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
-                    request.request_string("problem_type"),
-                    hint = False
+                    request.request_string("problem_type")
                     )
 
             add_action_results(user_exercise, {
@@ -538,7 +537,11 @@ def attempt_problem_number(exercise_name, problem_number):
         exercise = models.Exercise.get_by_name(exercise_name)
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
+        logging.critical( user_exercise )
+
         if user_exercise and problem_number:
+
+            logging.critical( problem_number )
 
             user_exercise = attempt_problem(
                     user_data,
@@ -552,8 +555,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
-                    request.request_string("problem_type"),
-                    hint = True
+                    request.request_string("problem_type")
                     )
 
             add_action_results(user_exercise, {

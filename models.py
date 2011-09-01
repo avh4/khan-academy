@@ -1415,7 +1415,7 @@ def commit_problem_log(problem_log_source):
             insert_in_position(index_hint, problem_log.hint_time_taken_list, problem_log_source.time_taken, filler=-1)
 
             # Add problem number this hint follows
-            insert_in_position(index_hint, problem_log.hint_after_attempt_list, index_attempt, filler=-1)
+            insert_in_position(index_hint, problem_log.hint_after_attempt_list, problem_log.count_attempts, filler=-1)
 
         # Points should only be earned once per problem, regardless of attempt count
         problem_log.points_earned = max(problem_log.points_earned, problem_log_source.points_earned)
