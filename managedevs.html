@@ -12,6 +12,30 @@
 
 {% block pagecontent %}
 
+    <script>
+        $(function() {
+            $(".remove-dev").click(function(e) {
+                $.post("/api/v1/developers/remove", { email: $(this).data("email") })
+
+                $(this).parents("li").first().remove();
+
+                e.preventDefault();
+            });
+
+            $("#add-dev").submit(function(e) {
+                $.post(
+                    "/api/v1/developers/add", 
+                    { email: $("#add-dev-email").val() },
+                    function() { window.location.reload(); }
+                );
+
+                $("#add-dev-submit").replaceWith("...adding...");
+
+                e.preventDefault();
+            });
+        });
+    </script>
+
     <style>
         .exercise-properties td { padding-right: 9px; }
         #footer { z-index:0 ; }
@@ -19,34 +43,20 @@
 
     <div id="devpanel" style="padding: 9px 23px;">
         <div>
-            <form type="GET" action="">
-            Add Dev:<input type="text" name="adddev" />   
-            <input type="submit" value="Add as developer" />
-            
+            <h2>Manage Developers</h2>
+
+            <div><b>Current developers:</b></div>
+
+            <ul>
+            {% for dev in developers %}
+            <li>{{ dev.email }} &ndash; <a href="#" class="remove-dev" data-email="{{ dev.email|escape }}">remove</a></li>
+            {% endfor %}
+            </ul>
+
+            <form id="add-dev" style="display: block; margin: 22px 0">
+                <input id="add-dev-email" type="text" />
+                <input id="add-dev-submit" type="submit" value="Add as developer" />
             </form>
-            <br />
-            <form type="GET" action="">
-            Remove Dev:<input type="text" name="removedev" />   
-            <input type="submit" value="Remove from developers" />
-            </form>
-            
-            <br />
-            <span style="color:red;">{{errormessage}}</span>
-            <table>
-                
-                <tr>
-                    <td style="border:none;">Current Devs:</td>
-                </tr>
-                
-                {% for dev in developers %}
-                <tr>
-                    <td>{{dev.email}}</td>
-                </tr>
-                {% endfor %}
-                    
-                
-            </table>
-            
         </div>
     </div>
 

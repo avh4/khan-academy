@@ -52,7 +52,7 @@ def statistics_update_map(exercise):
 
     list_time_taken = sorted(list_time_taken)
 
-    # The smallest times are the fastest 10th percentile
+    # The smallest times are the fastest 25th percentile
     fastest_percentile = percentile(list_time_taken, consts.FASTEST_EXERCISE_PERCENTILE)
     fastest_percentile = min(consts.MAX_SECONDS_PER_FAST_PROBLEM, fastest_percentile)
     fastest_percentile = max(consts.MIN_SECONDS_PER_FAST_PROBLEM, fastest_percentile)

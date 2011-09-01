@@ -80,6 +80,7 @@ bulk_update.handler.start_task('/admin/myupdate', {'kind': 'ModelClass'})
 import cgi
 import datetime
 import logging
+import user_util
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -110,10 +111,8 @@ def _is_in_progress(task_path):
     return result
     
 class UpdateKind(webapp.RequestHandler):
+    @user_util.admin_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
         if self.request.get('cancel'):
             cancel_task(self.request.path)
             self.response.out.write('Your request to interrupt has been filed.')

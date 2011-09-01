@@ -9,7 +9,7 @@ from app import App
 
 from api import route
 from api.auth.auth_util import oauth_error_response, get_response, get_parsed_params, append_url_params, authorize_token_redirect, access_token_response
-from api.auth.models import OAuthMap
+from api.auth.auth_models import OAuthMap
 
 from oauth_provider.oauth import OAuthError
 

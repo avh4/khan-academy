@@ -1,15 +1,18 @@
 from functools import wraps
 
+from google.appengine.api import users
+
 import flask
 from flask import request
 
-from api.auth.auth_util import oauth_error_response
-from api.auth.models import OAuthMap
+from api.auth.auth_util import oauth_error_response, unauthorized_response
+from api.auth.auth_models import OAuthMap
 
 from oauth_provider.decorators import is_valid_request, validate_token
 from oauth_provider.oauth import OAuthError
 
 import util
+import models
 
 # Decorator for validating an oauth request and storing the OAuthMap for use
 # in the rest of the request.
@@ -33,7 +36,7 @@ def oauth_required(require_anointed_consumer = False):
                         # for easy access during the rest of this request.
                         flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
 
-                        if not util._get_current_user_email():
+                        if not util.get_current_user_id():
                             # If our OAuth provider thinks you're logged in but the 
                             # identity providers we consume (Google/Facebook) disagree,
                             # we act as if our token is no longer valid.
@@ -51,7 +54,7 @@ def oauth_required(require_anointed_consumer = False):
 # Decorator for validating an oauth request and storing the OAuthMap for use
 # in the rest of the request.
 #
-# If oauth credentials don't pass, continue on, but util._get_current_user_email() will return None.
+# If oauth credentials don't pass, continue on, but util.get_current_user_id() will return None.
 def oauth_optional():
     def outer_wrapper(func):
         @wraps(func)
@@ -65,7 +68,7 @@ def oauth_optional():
                         # for easy access during the rest of this request.
                         flask.g.oauth_map = OAuthMap.get_from_access_token(token.key_)
 
-                        if not util._get_current_user_email():
+                        if not util.get_current_user_id():
                             # If our OAuth provider thinks you're logged in but the 
                             # identity providers we consume (Google/Facebook) disagree,
                             # we act as if our token is no longer valid.
@@ -80,3 +83,29 @@ def oauth_optional():
 
         return wrapper
     return outer_wrapper
+
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        # Make sure current UserData exists as well as is_current_user_admin
+        # because UserData properly verifies xsrf token
+        user_data = models.UserData.current()
+
+        if user_data and users.is_current_user_admin():
+            return func(*args, **kwargs)
+    
+        return unauthorized_response()
+    return wrapper
+
+def developer_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        user_data = models.UserData.current()
+
+        if user_data and (users.is_current_user_admin() or user_data.developer):
+            return func(*args, **kwargs)
+    
+        return unauthorized_response()
+    return wrapper
+

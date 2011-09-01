@@ -49,6 +49,24 @@ handlers:
 - url: /javascript
   static_dir: javascript
 
+# Begin GTV integration
+- url: /gtv/css
+  static_dir: gtv/css
+
+- url: /gtv/images
+  static_dir: gtv/images
+
+- url: /gtv/js
+  static_dir: gtv/js
+
+- url: /gtv/fullscreen.html
+  static_files: gtv/fullscreen.html
+  upload: gtv/fullscreen.html
+
+- url: /gtv.*
+  script: gtv/main.py
+# End GTV integration
+
 # Begin khan-exercises integration
 - url: /khan-exercises/khan-exercise.js
   static_files: khan-exercises/khan-exercise.js
@@ -59,6 +77,9 @@ handlers:
 
 - url: /khan-exercises/css
   static_dir: khan-exercises/css
+
+- url: /khan-exercises/images
+  static_dir: khan-exercises/images
 
 - url: /khan-exercises/(hashed.+\.js)
   static_files: khan-exercises/\1
@@ -71,6 +92,14 @@ handlers:
 
 - url: /remote_api
   script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+- url: /_ah/queue/deferred_problemlog
+  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
+  login: admin
+
+- url: /_ah/queue/deferred_videolog
+  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
   login: admin
 
 - url: /admin/.*

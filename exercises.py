@@ -14,6 +14,7 @@ import datetime
 import models
 import request_handler
 import util
+import user_util
 import points
 import layer_cache
 import knowledgemap
@@ -27,16 +28,14 @@ from api import jsonify
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
         self.get()
+
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
         node = self.request_string('exercise')
         direction = self.request_string('direction')
-    
+
         exercise = models.Exercise.get_by_name(node)
-    
+
         if direction=="up":
             exercise.h_position -= 1
         elif direction=="down":
@@ -51,15 +50,12 @@ class MoveMapNode(request_handler.RequestHandler):
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email(),user.email())
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
 
         exid = self.request_string("exid", default="addition_1")
         exercise = models.Exercise.get_by_name(exid)
 
-        if not exercise: 
+        if not exercise:
             raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
 
         user_exercise = user_data.get_or_insert_exercise(exercise)
@@ -75,7 +71,7 @@ class ViewExercise(request_handler.RequestHandler):
         problem_number = self.request_int('problem_number', default=(user_exercise.total_done + 1))
 
         user_data_student = self.request_user_data("student_email") or user_data
-        if user_data_student.key_email != user_data.key_email and not user_data_student.is_coached_by(user_data):
+        if user_data_student.key_email != user_data.key_email and not user_data_student.is_visible_to(user_data):
             user_data_student = user_data
 
         viewing_other = user_data_student.key_email != user_data.key_email
@@ -133,11 +129,8 @@ class ViewExercise(request_handler.RequestHandler):
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
-        user_data = models.UserData.current()
-        if not user_data:
-            user = users.User('http://nouserid.khanacademy.org/pre-phantom-user')
-            user_data = models.UserData.insert_for(user.email(),user.email())
-        
+        user_data = models.UserData.current() or models.UserData.pre_phantom()
+
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -257,7 +250,7 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative):
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative, problem_type):
 
     if user_exercise and user_exercise.belongs_to(user_data):
 
@@ -269,11 +262,11 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
         user_exercise.summative = exercise.summative
 
         user_data.last_activity = user_exercise.last_done
-        
+
         # If a non-admin tries to answer a problem out-of-order, just ignore it
-        if problem_number != user_exercise.total_done+1 and not users.is_current_user_admin():
+        if problem_number != user_exercise.total_done + 1 and not user_util.is_current_user_developer():
             # Only admins can answer problems out of order.
-            raise Exception("Problem number out of order")
+            raise Exception("Problem number out of order (%s vs %s) for user_id: %s submitting attempt content: %s with seed: %s" % (problem_number, user_exercise.total_done + 1, user_data.user_id, attempt_content, seed))
 
         if len(sha1) <= 0:
             raise Exception("Missing sha1 hash of problem content.")
@@ -296,6 +289,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                 correct = completed and not hint_used and (attempt_number == 1),
                 sha1 = sha1,
                 seed = seed,
+                problem_type = problem_type,
                 count_attempts = attempt_number,
                 attempts = [attempt_content],
         )
@@ -315,6 +309,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)
                 suggested = user_data.is_suggested(user_exercise.exercise)
+                problem_log.suggested = suggested
 
                 problem_log.points_earned = points.ExercisePointCalculator(user_exercise, suggested, proficient)
                 user_data.add_points(problem_log.points_earned)
@@ -329,11 +324,11 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                     user_data.reassess_if_necessary()
 
                     problem_log.earned_proficiency = True
-                    
+
             util_badges.update_with_user_exercise(
-                user_data, 
-                user_exercise, 
-                include_other_badges = True, 
+                user_data,
+                user_exercise,
+                include_other_badges = True,
                 action_cache=last_action_cache.LastActionCache.get_cache_and_push_problem_log(user_data, problem_log))
 
             # Update phantom user notifications
@@ -356,21 +351,20 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(models.commit_problem_log, problem_log, _queue="problem-log-queue")
+        deferred.defer(models.commit_problem_log, problem_log,
+                       _queue="problem-log-queue",
+                       _url="/_ah/queue/deferred_problemlog")
 
         return user_exercise
 
 class ExerciseAdmin(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-        
         user_data = models.UserData.current()
         user = models.UserData.current().user
 
-        
+
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -395,7 +389,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
                 exercise.proficient = True
                 exercise.status = "Proficient"
             exercises.append(exercise)
-            
+
         exercises.sort(key=lambda e: e.name)
         template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
@@ -403,11 +397,8 @@ class ExerciseAdmin(request_handler.RequestHandler):
 
 class EditExercise(request_handler.RequestHandler):
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         exercise_name = self.request.get('name')
         if exercise_name:
             query = models.Exercise.all().order('name')
@@ -432,15 +423,12 @@ class EditExercise(request_handler.RequestHandler):
             self.render_template("editexercise.html", template_values)
 
 class UpdateExercise(request_handler.RequestHandler):
-    
+
     def post(self):
         self.get()
 
+    @user_util.developer_only
     def get(self):
-        if not users.is_current_user_admin():
-            self.redirect(users.create_login_url(self.request.uri))
-            return
-
         user = models.UserData.current().user
 
         exercise_name = self.request.get('name')
@@ -510,7 +498,7 @@ class UpdateExercise(request_handler.RequestHandler):
             existing_video_keys.append(exercise_video.video.key())
             if not exercise_video.video.key() in video_keys:
                 exercise_video.delete()
-        
+
         for video_key in video_keys:
             if not video_key in existing_video_keys:
                 exercise_video = models.ExerciseVideo()
@@ -520,15 +508,15 @@ class UpdateExercise(request_handler.RequestHandler):
                 exercise_video.put()
 
         exercise.put()
-        
+
         #Start ordering
         ExerciseVideos = models.ExerciseVideo.all().filter('exercise =', exercise.key()).fetch(1000)
         playlists = []
         for exercise_video in ExerciseVideos:
             playlists.append(models.VideoPlaylist.get_cached_playlists_for_video(exercise_video.video))
-        
+
         if playlists:
-            
+
             playlists = list(itertools.chain(*playlists))
             titles = map(lambda pl: pl.title, playlists)
             playlist_sorted = []
@@ -536,7 +524,7 @@ class UpdateExercise(request_handler.RequestHandler):
                 playlist_sorted.append([p, titles.count(p.title)])
             playlist_sorted.sort(key = lambda p: p[1])
             playlist_sorted.reverse()
-                
+
             playlists = []
             for p in playlist_sorted:
                 playlists.append(p[0])
@@ -553,7 +541,7 @@ class UpdateExercise(request_handler.RequestHandler):
                 if playlist_dict[p.title]:
                     playlist_dict[p.title].sort(key = lambda e: models.VideoPlaylist.all().filter('video =', e.video).filter('playlist =',p).get().video_position)
                     exercise_list.append(playlist_dict[p.title])
-        
+
             if exercise_list:
                 exercise_list = list(itertools.chain(*exercise_list))
                 for e in exercise_list:

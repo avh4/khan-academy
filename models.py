@@ -4,6 +4,7 @@ import datetime, logging
 import math
 import urllib
 import pickle
+import random
 
 import config_django
 
@@ -20,6 +21,7 @@ from google.appengine.ext import db
 import object_property
 import app
 import util
+import user_util
 import consts
 import points
 from search import Searchable
@@ -30,6 +32,7 @@ from discussion import models_discussion
 from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
+from facebook_util import is_facebook_user_id
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -169,7 +172,7 @@ class Exercise(db.Model):
         return self.display_name[:11]
 
     def is_visible_to_current_user(self):
-        return self.live or users.is_current_user_admin()
+        return self.live or user_util.is_current_user_developer()
 
     def struggling_threshold(self):
         return 3 * self.required_streak
@@ -220,7 +223,7 @@ class Exercise(db.Model):
     @classmethod
     def all(cls, live_only = False):
         query = super(Exercise, cls).all()
-        if live_only or not users.is_current_user_admin():
+        if live_only or not user_util.is_current_user_developer():
             query.filter("live =", True)
         return query
 
@@ -230,7 +233,7 @@ class Exercise(db.Model):
 
     @staticmethod
     def get_all_use_cache():
-        if users.is_current_user_admin():
+        if user_util.is_current_user_developer():
             return Exercise.__get_all_use_cache_unsafe__()
         else:
             return Exercise.__get_all_use_cache_safe__()
@@ -351,6 +354,9 @@ class UserExercise(db.Model):
             user_data = self._user_data
         else:
             user_data = UserData.get_from_db_key_email(self.user.email())
+
+        if not user_data:
+            logging.critical("Empty user data for UserExercise w/ .user = %s" % self.user)
 
         return user_data
 
@@ -479,14 +485,10 @@ class CoachRequest(db.Model):
 class StudentList(db.Model):
     name = db.StringProperty()
     coaches = db.ListProperty(db.Key)
-    deleted = db.BooleanProperty(default=False)
 
     def delete(self, *args, **kwargs):
         self.remove_all_students()
-        self.deleted = True
-        self.put()
-        # Don't actually delete until we're on the HR datastore.
-        # db.Model.delete(self, *args, **kwargs)
+        db.Model.delete(self, *args, **kwargs)
 
     def remove_all_students(self):
         students = self.get_students_data()
@@ -505,7 +507,6 @@ class StudentList(db.Model):
     @staticmethod
     def get_for_coach(key):
         query = StudentList.all()
-        query.filter('deleted =', False)
         query.filter("coaches = ", key)
         return query
 
@@ -582,6 +583,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
 class UserData(db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
+    user_nickname = db.StringProperty()
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     developer = db.BooleanProperty(default=False)
@@ -596,6 +598,7 @@ class UserData(db.Model):
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
+    coworkers = db.StringListProperty()
     student_lists = db.ListProperty(db.Key)
     map_coords = db.StringProperty()
     expanded_all_exercises = db.BooleanProperty(default=True)
@@ -605,26 +608,28 @@ class UserData(db.Model):
     last_activity = db.DateTimeProperty()
     count_feedback_notification = db.IntegerProperty(default = -1)
     question_sort_order = db.IntegerProperty(default = -1)
-    uservideocss_version = db.IntegerProperty(default = 0)
     user_email = db.StringProperty()
+    uservideocss_version = db.IntegerProperty(default = 0)
 
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
+            "user_nickname", "user_email",
     ]
 
     @property
     def nickname(self):
-        return nicknames.get_nickname_for(self.current_user)
+        # Only return cached value if it exists and it wasn't cached during a Facebook API hiccup
+        if self.user_nickname and not is_facebook_user_id(self.user_nickname):
+            return self.user_nickname
+        else:
+            return nicknames.get_nickname_for(self)
 
     @property
     def email(self):
-        if self.user_email:
-            return self.user_email
-        else:
-            return self.current_user.email()
+        return self.user_email
 
     @property
     def key_email(self):
@@ -638,38 +643,51 @@ class UserData(db.Model):
     @request_cache.cache()
     def current(bust_cache=True):
         if bust_cache:
-            util._get_current_user_email(bust_cache=True)
-        email = util._get_current_user_email()
-        user = users.get_current_user()
-        user_id = None
-        if user:
-            user_id = user.user_id()
-        if user_id:
-            user_id = "http://googleid.khanacademy.org/" + user_id
-        else:
-            user_id = email
-        
-        if email:
-            # Once we have rekeyed legacy entities,
-            # we will be able to simplify this.
+            util.get_current_user_id(bust_cache=True)
 
-            return  UserData.get_from_user_input_email(email) or \
+        user_id = util.get_current_user_id()
+        email = user_id
+
+        google_user = users.get_current_user()
+        if google_user:
+            email = google_user.email()
+
+        if user_id:
+            # Once we have rekeyed legacy entities,
+            # we will be able to simplify this.we make
+            return  UserData.get_from_user_id(user_id) or \
                     UserData.get_from_db_key_email(email) or \
-                    UserData.insert_for(user_id,email)
+                    UserData.insert_for(user_id, email)
         return None
+
+    @staticmethod
+    def pre_phantom():
+        pre_phantom_email = "http://nouserid.khanacademy.org/pre-phantom-user-2"
+        return UserData.insert_for(pre_phantom_email, pre_phantom_email)
 
     @property
     def is_phantom(self):
-        return util._is_phantom_user(self.current_user)
+        return util.is_phantom_user(self.user_id)
 
     @staticmethod
-    @request_cache.cache_with_key_fxn(lambda email: "UserData_email_%s" % email)
+    @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id:%s" % user_id)
+    def get_from_user_id(user_id):
+        if not user_id:
+            return None
+
+        query = UserData.all()
+        query.filter('user_id =', user_id)
+        query.order('-points') # Temporary workaround for issue 289
+
+        return query.get()
+
+    @staticmethod
     def get_from_user_input_email(email):
         if not email:
             return None
 
         query = UserData.all()
-        query.filter('current_user =', users.User(email))
+        query.filter('user_email =', email)
         query.order('-points') # Temporary workaround for issue 289
 
         return query.get()
@@ -687,11 +705,11 @@ class UserData(db.Model):
 
     @staticmethod
     def insert_for(user_id, email):
-        if not email or not user_id:
+        if not user_id or not email:
             return None
 
         user = users.User(email)
-        key = "user_email_key_%s" % email
+        key = "user_id_key_%s" % user_id
 
         user_data = UserData.get_or_insert(
             key_name=key,
@@ -707,6 +725,7 @@ class UserData(db.Model):
             points=0,
             coaches=[],
             user_email=email
+
             )
 
         if not user_data.is_phantom:
@@ -721,7 +740,7 @@ class UserData(db.Model):
 
     def delete(self):
         logging.info("Deleting user data for %s with points %s" % (self.key_email, self.points))
-        logging.info("Dumping user data for %s: %s" % (self.current_user.email(), jsonify(self)))
+        logging.info("Dumping user data for %s: %s" % (self.user_id, jsonify(self)))
 
         if not self.is_phantom:
             user_counter.add(-1)
@@ -760,7 +779,7 @@ class UserData(db.Model):
                 streak=0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),
-                last_done=datetime.datetime.now(),
+                last_done=None,
                 total_done=0,
                 summative=exercise.summative,
                 )
@@ -768,7 +787,7 @@ class UserData(db.Model):
         return userExercise
 
     def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
-        phantom = exercise.phantom = util._is_phantom_user(self.user)
+        phantom = exercise.phantom = util.is_phantom_user(self.user_id)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
@@ -832,17 +851,20 @@ class UserData(db.Model):
 
     def get_students_data(self):
         coach_email = self.key_email
-        query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email)
-        students_data = []
-        for student_data in query:
-            students_data.append(student_data)
+        query = UserData.all().filter('coaches =', coach_email)
+        students_data = [s for s in query.fetch(1000)]
+
         if coach_email.lower() != coach_email:
-            students_set = set(map(lambda student_data: student_data.key().id_or_name(), students_data))
-            query = db.GqlQuery("SELECT * FROM UserData WHERE coaches = :1", coach_email.lower())
+            students_set = set([s.key().id_or_name() for s in students_data])
+            query = UserData.all().filter('coaches =', coach_email.lower())
             for student_data in query:
-        	    if student_data.key().id_or_name() not in students_set:
-        		    students_data.append(student_data)
+                if student_data.key().id_or_name() not in students_set:
+                    students_data.append(student_data)
         return students_data
+
+    def get_coworkers_data(self):
+        return filter(lambda user_data: user_data is not None, \
+                map(lambda coworker_email: UserData.get_from_db_key_email(coworker_email) , self.coworkers))
 
     def has_students(self):
         return len(self.get_students_data()) > 0
@@ -858,13 +880,33 @@ class UserData(db.Model):
     def is_coached_by(self, user_data_coach):
         return user_data_coach.key_email in self.coaches or user_data_coach.key_email.lower() in self.coaches
 
+    def is_coworker_of(self, user_data_coworker):
+        return user_data_coworker.key_email in self.coworkers
+
+    def is_coached_by_coworker_of_coach(self, user_data_coach):
+        for coworker_email in user_data_coach.coworkers:
+            if coworker_email in self.coaches:
+                return True
+        return False
+
+    def is_administrator(self):
+        # Only works for currently logged in user. Make sure there
+        # is both a current user data and current user is an admin.
+        user_data = UserData.current()
+        return user_data and users.is_current_user_admin()
+
+    def is_visible_to(self, user_data):
+        return self.is_coached_by(user_data) or self.is_coached_by_coworker_of_coach(user_data) or user_data.developer or user_data.is_administrator()
+
+    def are_students_visible_to(self, user_data):
+        return self.is_coworker_of(user_data) or user_data.developer or user_data.is_administrator()
+
     def add_points(self, points):
         if self.points == None:
             self.points = 0
         if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
             util_notify.update(self,None,True)
         self.points += points
-
 
     def get_videos_completed(self):
         if self.videos_completed < 0:
@@ -1121,7 +1163,7 @@ class UserVideo(db.Model):
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
 
-    # Farthest second in video watched
+    # Most recently watched second in video (playhead state)
     last_second_watched = db.IntegerProperty(default = 0)
 
     # Number of seconds actually spent watching this video, regardless of jumping around to various
@@ -1200,9 +1242,6 @@ class VideoLog(db.Model):
         video_log.seconds_watched = seconds_watched
         video_log.last_second_watched = last_second_watched
 
-        if last_second_watched > user_video.last_second_watched:
-            user_video.last_second_watched = last_second_watched
-
         if seconds_watched > 0:
             if user_video.seconds_watched == 0:
                 user_data.uservideocss_version += 1
@@ -1237,6 +1276,7 @@ class VideoLog(db.Model):
 
                 first_video_playlist = False
 
+        user_video.last_second_watched = last_second_watched
         user_video.last_watched = datetime.datetime.now()
         user_video.duration = video.duration
 
@@ -1262,7 +1302,9 @@ class VideoLog(db.Model):
         # Defer the put of VideoLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(commit_video_log, video_log, _queue="video-log-queue")
+        deferred.defer(commit_video_log, video_log,
+                       _queue="video-log-queue",
+                       _url="/_ah/queue/deferred_videolog")
 
         return (user_video, video_log, video_points_total)
 
@@ -1322,11 +1364,19 @@ class ProblemLog(db.Model):
     hint_used = db.BooleanProperty(default = False)
     points_earned = db.IntegerProperty(default = 0)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
+    suggested = db.BooleanProperty(default = False) # True if the exercise was suggested to the user
     sha1 = db.StringProperty()
     seed = db.StringProperty()
+    problem_type = db.StringProperty()
     count_attempts = db.IntegerProperty(default = 0)
     time_taken_attempts = db.ListProperty(int)
     attempts = db.StringListProperty()
+    random_float = db.FloatProperty() # Add a random float in [0, 1) for easy random sampling
+
+    def put(self):
+        if self.random_float is None:
+            self.random_float = random.random()
+        db.Model.put(self)
 
     @property
     def ka_url(self):
@@ -1364,9 +1414,15 @@ def commit_problem_log(problem_log_source):
 
     try:
         if not problem_log_source or not problem_log_source.key().name:
+            logging.critical("Skipping problem log commit due to missing problem_log_source or key().name")
             return
     except db.NotSavedError:
         # Handle special case during new exercise deploy
+        logging.critical("Skipping problem log commit due to db.NotSavedError")
+        return
+
+    if problem_log_source.count_attempts > 1000:
+        logging.info("Ignoring attempt to write problem log w/ attempts over 1000.")
         return
 
     def insert_in_position(index, items, val, filler):
@@ -1387,12 +1443,16 @@ def commit_problem_log(problem_log_source):
                 time_done = problem_log_source.time_done,
                 sha1 = problem_log_source.sha1,
                 seed = problem_log_source.seed,
+                problem_type = problem_log_source.problem_type,
+                suggested = problem_log_source.suggested,
                 exercise_non_summative = problem_log_source.exercise_non_summative,
         )
 
         index_attempt = max(0, problem_log_source.count_attempts - 1)
+
         if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
             # This attempt has already been logged. Ignore this dupe taskqueue execution.
+            logging.info("Skipping problem log commit due to dupe taskqueue execution for attempt: %s, key.name: %s, time_taken_attempts: %s" % (index_attempt, problem_log_source.key().name(), problem_log.time_taken_attempts))
             return
 
         # Bump up attempt count
@@ -1549,6 +1609,9 @@ class ExerciseGraph(object):
             ex.streak = 0
             ex.longest_streak = 0
             ex.total_done = 0
+            if hasattr(ex, 'last_done'):
+                # Clear leftovers from cache to fix random recents on new accounts
+                del ex.last_done
         for name in user_data.proficient_exercises:
             ex = self.exercise_by_name.get(name)
             if ex:
@@ -1700,11 +1763,11 @@ class ExerciseGraph(object):
 
     def get_recent_exercises(self, n_recent=2):
         recent_exercises = sorted(self.exercises, reverse=True,
-                key=lambda ex: ex.last_done if hasattr(ex, "last_done") else datetime.datetime.min)
+                key=lambda ex: ex.last_done if hasattr(ex, "last_done") and ex.last_done else datetime.datetime.min)
 
         recent_exercises = recent_exercises[0:n_recent]
 
-        return filter(lambda ex: hasattr(ex, "last_done"), recent_exercises)
+        return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify

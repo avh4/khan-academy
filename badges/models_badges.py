@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import models
 
 from google.appengine.ext import db
 
@@ -90,5 +91,19 @@ class UserBadge(db.Model):
     def count_by_badge_name(name):
         query = UserBadge.all(keys_only=True)
         query.filter('badge_name = ', name)
-        return query.count(1000000)
+
+        count = 0
+        while count % 1000 == 0:
+
+            current_count = len(query.fetch(1000))
+            if current_count == 0:
+                break
+
+            count += current_count
+
+            if current_count == 1000:
+                cursor = query.cursor()
+                query.with_cursor(cursor)
+
+        return count
 

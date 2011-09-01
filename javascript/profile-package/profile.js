@@ -6,10 +6,10 @@ var Profile = {
     fLoadedGraph: false,
 
     init: function() {
-		
+
 		$('.recent-share').hide();
 		$('.sharepop').hide();
-			
+
 		$(".achievement,.exercise,.video").hover(
 			function () {
 			    $(this).find(".recent-share").show();
@@ -22,11 +22,11 @@ var Profile = {
 		$('.recent-share').click(function() {
 		if ( $.browser.msie && (parseInt($.browser.version, 10) < 8) )
 			$(this).next(".sharepop").toggle();
-		else			
-			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
+		else
+			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");
 		return false;
 				});
-		
+
         if ($.address)
             $.address.externalChange(function(){ Profile.historyChange(); });
 
@@ -35,7 +35,7 @@ var Profile = {
         $("#individual_report #achievements #achievement-list > ul li").click(function() {
              var category = $(this).attr('id');
              var clickedBadge = $(this);
-             
+
              $("#badge-container").css("display", "");
              clickedBadge.siblings().removeClass("selected");
 
@@ -49,7 +49,7 @@ var Profile = {
                 else {
                     $("#badge-container > #" + category ).hide();
                     $("#badge-container").css("display", "none");
-                    clickedBadge.removeClass("selected");                    
+                    clickedBadge.removeClass("selected");
                 }
              }
              else {
@@ -81,8 +81,8 @@ var Profile = {
             }
         }, 1000);
     },
-	
-	
+
+
     highlightPoints: function(chart, fxnHighlight) {
 
         if (!chart) return;
@@ -139,7 +139,7 @@ var Profile = {
 
                 for (var ixData = 0; ixData < series.data.length; ixData++) {
                     series.data[ixData].options.marker = {
-                        enabled: fSelected, 
+                        enabled: fSelected,
                         radius: fSelected ? 5 : 4
                     };
                 }
@@ -209,26 +209,22 @@ var Profile = {
         $(".graph-sub-link").removeClass("graph-sub-link-selected");
         $(".graph-sub-link[href*='" + this.baseGraphHref(href) + "'][href*='" + sDtStart + "']").addClass("graph-sub-link-selected");
     },
-    
+
     // called whenever user clicks graph type accordion
     loadGraphFromLink: function(el) {
         if (!el) return;
         Profile.loadGraphStudentListAware(el.href);
     },
-    
+
     loadGraphStudentListAware: function(url) {
         var $dropdown = $('#studentlists_dropdown ol');
         if ($dropdown.length == 1) {
             var list_id = $dropdown.data('selected').key;
             var qs = this.parseQueryString(url);
-            if (list_id != 'allstudents')
-                qs['list_id'] = list_id;
-            else
-                delete qs['list_id'];
-        
+            qs['list_id'] = list_id;
             url = this.baseGraphHref(url) + '?' + this.reconstructQueryString(qs);
         }
-        
+
         this.loadGraph(url);
     },
 
@@ -280,7 +276,7 @@ var Profile = {
     },
 
     historyChange: function(e) {
-        var href = $.address ? $.address.parameter("graph_url") : "" || this.initialGraphUrl;
+        var href = ($.address ? $.address.parameter("graph_url") : "") || this.initialGraphUrl;
         href = decodeURIComponent(href);
         if (href)
         {
@@ -295,7 +291,7 @@ var Profile = {
         else
             $("#graph-progress-bar").slideUp("fast");
     },
-    
+
     parseQueryString: function(url) {
         var qs = {};
         var parts = url.split('?');
@@ -309,7 +305,7 @@ var Profile = {
         }
         return qs;
     },
-    
+
     reconstructQueryString: function(hash, kvjoin, eljoin) {
         kvjoin = kvjoin || '=';
         eljoin = eljoin || '&';

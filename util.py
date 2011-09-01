@@ -2,7 +2,7 @@ import os
 import datetime
 import urllib
 import request_cache
-
+import logging
 from google.appengine.api import users
 from google.appengine.api import oauth
 from asynctools import AsyncMultiTask, QueryTask
@@ -10,46 +10,51 @@ from asynctools import AsyncMultiTask, QueryTask
 from app import App
 import nicknames
 import facebook_util
-from phantom_users.phantom_util import _get_phantom_user_from_cookies, \
-    is_phantom_email
+from phantom_users.phantom_util import get_phantom_user_id_from_cookies, \
+    is_phantom_id
 
-from api.auth.google_util import get_google_user_from_oauth_map
+from api.auth.google_util import get_google_user_id_from_oauth_map
 from api.auth.auth_util import current_oauth_map, allow_cookie_based_auth
 
 @request_cache.cache()
-def _get_current_user_email(bust_cache=False):
-    user = None
+def get_current_user_id(bust_cache=False):
+    user_id = None
 
     oauth_map = current_oauth_map()
     if oauth_map:
-        user = _get_current_user_from_oauth_map(oauth_map)
+        user_id = get_current_user_id_from_oauth_map(oauth_map)
 
-    if not user and allow_cookie_based_auth():
-        user = _get_current_user_from_cookies_unsafe()
+    if not user_id and allow_cookie_based_auth():
+        user_id = get_current_user_id_from_cookies_unsafe()
 
-    if user:
-        return user.email()
+    return user_id
 
-    return None
+def get_current_user_id_from_oauth_map(oauth_map):
+    user_id = None
 
-def _get_current_user_from_oauth_map(oauth_map):
-    user = get_google_user_from_oauth_map(oauth_map)
-    if not user:
-        user = facebook_util.get_facebook_user_from_oauth_map(oauth_map)
-    return user
+    if oauth_map.uses_google():
+        user_id = get_google_user_id_from_oauth_map(oauth_map)
+    elif oauth_map.uses_facebook():
+        user_id = facebook_util.get_facebook_user_id_from_oauth_map(oauth_map)
+    
+    return user_id
 
 # _get_current_user_from_cookies_unsafe is labeled unsafe because it should
 # never be used in our JSONP-enabled API. All calling code should just use _get_current_user.
-def _get_current_user_from_cookies_unsafe():
+def get_current_user_id_from_cookies_unsafe():
     user = users.get_current_user()
-    if not user:
-        user = facebook_util.get_current_facebook_user_from_cookies()
-    if not user:
-        user = _get_phantom_user_from_cookies()
-    return user
+    
+    if user: #if we have a google account
+        user_id = "http://googleid.khanacademy.org/" + user.user_id()
+    else: #if not a google account, try facebook
+        user_id = facebook_util.get_current_facebook_user_id_from_cookies()
+   
+    if not user_id: #if we don't have a user_id, then it's not facebook or google
+        user_id = get_phantom_user_id_from_cookies()
+    return user_id
 
-def _is_phantom_user(user):
-    return user and is_phantom_email(user.email())
+def is_phantom_user(user_id):
+    return user_id and is_phantom_id(user_id)
 
 def create_login_url(dest_url):
     return "/login?k&continue=%s" % urllib.quote(dest_url)

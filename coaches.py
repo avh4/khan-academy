@@ -14,6 +14,7 @@ from app import App
 import app
 import facebook_util
 import util
+import user_util
 from request_handler import RequestHandler
 
 from models import UserData, CoachRequest, StudentList
@@ -58,7 +59,7 @@ class ViewStudents(RequestHandler):
         if user_data:
 
             user_data_override = self.request_user_data("coach_email")
-            if users.is_current_user_admin() and user_data_override:
+            if user_util.is_current_user_developer() and user_data_override:
                 user_data = user_data_override
 
             invalid_student = self.request_bool("invalid_student", default = False)
@@ -66,7 +67,6 @@ class ViewStudents(RequestHandler):
             coach_requests = [x.student_requested_data.email for x in CoachRequest.get_for_coach(user_data)]
 
             student_lists_models = StudentList.get_for_coach(user_data.key())
-
             student_lists_list = [];
             for student_list in student_lists_models:
                 student_lists_list.append({
@@ -131,7 +131,6 @@ class RequestStudent(RequestHandler):
         if not user_data:
             self.redirect(util.create_login_url(self.request.uri))
             return
-
         user_data_student = self.request_user_data("student_email")
         if user_data_student:
             if not user_data_student.is_coached_by(user_data):
@@ -190,6 +189,10 @@ class UnregisterStudentCoach(RequestHandler):
 
         try:
             student.coaches.remove(coach.key_email)
+        except ValueError:
+            pass
+
+        try:
             student.coaches.remove(coach.key_email.lower())
         except ValueError:
             pass
