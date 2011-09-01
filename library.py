@@ -8,6 +8,7 @@ from app import App
 import layer_cache
 from models import Video, Playlist, VideoPlaylist, Setting
 from topics_list import topics_list
+import request_handler
 
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
@@ -89,4 +90,15 @@ def library_content_html(bust_cache = False):
 
     return html
 
+class GenerateLibraryContent(request_handler.RequestHandler):
+
+    def post(self):
+        # We support posts so we can fire task queues at this handler
+        self.get(from_task_queue = True)
+
+    def get(self, from_task_queue = False):
+        library_content_html(bust_cache=True)
+
+        if not from_task_queue:
+            self.redirect("/")
 
