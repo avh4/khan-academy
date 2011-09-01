@@ -14,14 +14,11 @@
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
     "title": { "text": "{{ title }}" },
-    "legend": {
-        "borderColor": "rgba(35,37,38,100)",
-        "margin": 5
-    },
+    "legend": { "enabled": false },
     "plotOptions": {
         "areaspline": {
             "dataLabels": { "enabled": false },
-            "showInLegend": true,
+            "showInLegend": false,
             "size": "100%"
         }
     },
@@ -43,12 +40,12 @@
     ],
     "yAxis": [
         {
-            "title": { "text": "{{ series1.name }}" },
+            "title": { "text": null },
             "max": {{ series1.max }}
 
         },
         {
-            "title": { "text": "{{ series2.name }}" },
+            "title": { "text": null },
             "opposite": true,
             "max": {{ series2.max }}
         }
