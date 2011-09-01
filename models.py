@@ -132,7 +132,7 @@ class Exercise(db.Model):
 
     @property
     def ka_url(self):
-        return absolute_url("/exercises?exid=%s" % self.name)
+        return util.absolute_url("/exercises?exid=%s" % self.name)
 
     @staticmethod
     def get_by_name(name):
@@ -952,7 +952,7 @@ class Video(Searchable, db.Model):
 
     @property
     def ka_url(self):
-      return util.absolute_url('/video/%s' % self.readable_id)
+        return util.absolute_url('/video/%s' % self.readable_id)
 
     @property
     def download_urls(self):
@@ -1336,7 +1336,7 @@ class ProblemLog(db.Model):
 
     @property
     def ka_url(self):
-        return absolute_url("/exercises?exid=%s&problem_number=%s" % \
+        return util.absolute_url("/exercises?exid=%s&problem_number=%s" % \
             (self.exercise, self.problem_number))
 
     @staticmethod
