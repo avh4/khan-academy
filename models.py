@@ -972,6 +972,9 @@ class Video(Searchable, db.Model):
             return download_urls.get("mp4")
         return None
 
+    def youtube_thumbnail_url(self):
+        return "http://img.youtube.com/vi/%s/default.jpg" % self.youtube_id
+
     @staticmethod
     def get_for_readable_id(readable_id):
         video = None
@@ -1034,6 +1037,7 @@ class Playlist(Searchable, db.Model):
     title = db.StringProperty()
     description = db.TextProperty()
     readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
+    tags = db.StringListProperty()
     INDEX_ONLY = ['title', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False

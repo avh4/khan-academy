@@ -2395,7 +2395,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 #thumbnails td div.thumb {
-    background: url(/images/splashthumbnails/splash_thumbnail_sprites.png) no-repeat top left;
+    background-position: no-repeat top left;
     width: 200px;
     height: 100px;
     border: 1px solid #aaa;
@@ -2411,18 +2411,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     -moz-box-shadow: 1px 2px 6px #aaa;
     box-shadow: 1px 2px 6px #aaa;
 }
-
-#thumbnails td div.thumb-cnn_thumbnail { background-position: 0 0; }
-#thumbnails td div.thumb-exercises_thumbnail { background-position: 0 -150px; }
-#thumbnails td div.thumb-forbes_thumbnail { background-position: 0 -300px; }
-#thumbnails td div.thumb-fortune_thumbnail { background-position: 0 -450px; }
-#thumbnails td div.thumb-gates_thumbnail { background-position: 0 -600px; }
-#thumbnails td div.thumb-gel_thumbnail { background-position: 0 -750px; }
-#thumbnails td div.thumb-overview_thumbnail { background-position: 0 -900px; }
-#thumbnails td div.thumb-pbs_thumbnail { background-position: 0 -1050px; }
-#thumbnails td div.thumb-tech_award_thumbnail { background-position: 0 -1200px; }
-#thumbnails td div.thumb-ted_thumbnail { background-position: 0 -1350px; }
-#thumbnails td div.thumb-translation_thumbnail { background-position: 0 -1500px; }
 
 #thumbnails td div.thumbnail_label {
     padding: 2px 2px 0;

@@ -1,9 +1,40 @@
-import random
-from topics_list import DVD_list
-
 import consts
 import library
 import request_handler
+import models
+import layer_cache
+from topics_list import DVD_list
+
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
+def new_and_noteworthy_link_sets():
+
+    playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()
+    if not playlist:
+        return []
+
+    videos = models.VideoPlaylist.get_cached_videos_for_playlist(playlist)
+
+    sets = []
+    current_set = []
+
+    for video in videos:
+
+        if len(current_set) >= 4:
+            sets.append(current_set)
+            current_set = []
+
+        current_set.append({
+            "href": video.ka_url,
+            "thumb_url": video.youtube_thumbnail_url(),
+            "desc": video.title,
+            "youtube_id": video.youtube_id,
+            "selected": False,
+        })
+
+    if len(current_set) > 0:
+        sets.append(current_set)
+
+    return sets
 
 class ViewHomePage(request_handler.RequestHandler):
     def get(self):
@@ -70,7 +101,7 @@ class ViewHomePage(request_handler.RequestHandler):
             ]
         ]
 
-        random.shuffle(thumbnail_link_sets)
+        thumbnail_link_sets = new_and_noteworthy_link_sets()
 
         # Highlight video #1 from the first set of off-screen thumbnails
         selected_thumbnail = thumbnail_link_sets[1][0]
