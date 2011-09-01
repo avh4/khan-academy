@@ -305,6 +305,7 @@ def user_video_css(user_data):
 register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')
+webapp.template.register_template_library('templateext')
 webapp.template.register_template_library('discussion.templatetags')
 webapp.template.register_template_library('badges.templatetags')
 webapp.template.register_template_library('phantom_users.templatetags')
