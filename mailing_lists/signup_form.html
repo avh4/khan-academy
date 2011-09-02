@@ -3,6 +3,6 @@
         <input type="email" name="email" class="placeholder email" placeholder="{{ teaser|escape }}" value="" />
         <input type="submit" value="{{ action|escape }}" class="simple-button action-gradient" />
     </form>
-    <span style="display:none;" class="error">Invalid email address.</span>
+    <span style="display:none;" class="error"><p>Invalid email address.</p></span>
 </div>
 <script>MailingList.init("{{ list_id|escapejs }}");</script>
