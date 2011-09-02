@@ -10,14 +10,45 @@ import layer_cache
 import templatetags
 from topics_list import DVD_list
 
+def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
+
+    if video:
+        return {
+            "href": video.ka_url,
+            "thumb_url": video.youtube_thumbnail_url(),
+            "desc_html": templatetags.video_name_and_progress(video),
+            "teaser": video.description,
+            "youtube_id": video.youtube_id,
+            "selected": False,
+            "key": video.key(),
+        }
+
+    if exercise:
+        return {
+            "href": exercise.ka_url,
+            "thumb_url": thumb_url,
+            "desc_html": escape(exercise.display_name),
+            "teaser": "Try an exercise! Practice your %s skills." % exercise.display_name,
+            "youtube_id": "",
+            "selected": False,
+            "key": exercise.key,
+        }
+
+    return None
+
 @layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
 def new_and_noteworthy_link_sets():
 
     playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()
     if not playlist:
+        # If we can't find the playlist, just show the default TED talk.
         return []
 
     videos = models.VideoPlaylist.get_cached_videos_for_playlist(playlist)
+    if len(videos) < 2:
+        # If there's only one video, don't bother.
+        return []
+
     exercises = []
 
     # We use playlist tags to identify new and noteworthy exercises
@@ -48,15 +79,8 @@ def new_and_noteworthy_link_sets():
         if next_exercise < len(exercises) and len(current_set) == current_set_exercise_position:
             exercise = exercises[next_exercise]
 
-            current_set.append({
-                "href": exercise.ka_url,
-                "thumb_url": "/images/splashthumbnails/exercises/%s" % (exercise_icon_files[next_exercise % (len(exercise_icon_files))]),
-                "desc_html": escape(exercise.display_name),
-                "teaser": "Try an exercise! Practice your %s skills." % exercise.display_name,
-                "youtube_id": "",
-                "selected": False,
-                "key": exercise.key,
-            })
+            thumb_url = "/images/splashthumbnails/exercises/%s" % (exercise_icon_files[next_exercise % (len(exercise_icon_files))])
+            current_set.append(thumbnail_link_dict(exercise = exercise, thumb_url = thumb_url))
 
             next_exercise += 1
 
@@ -65,15 +89,7 @@ def new_and_noteworthy_link_sets():
             current_set = []
             current_set_exercise_position = random.randint(0, items_per_set - 1)
 
-        current_set.append({
-            "href": video.ka_url,
-            "thumb_url": video.youtube_thumbnail_url(),
-            "desc_html": templatetags.video_name_and_progress(video),
-            "teaser": video.description,
-            "youtube_id": video.youtube_id,
-            "selected": False,
-            "key": video.key()
-        })
+        current_set.append(thumbnail_link_dict(video = video))
 
     if len(current_set) > 0:
         sets.append(current_set)
@@ -86,16 +102,24 @@ class ViewHomePage(request_handler.RequestHandler):
 
         thumbnail_link_sets = new_and_noteworthy_link_sets()
 
-        # Highlight video #1 from the first set of off-screen thumbnails
-        selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
-        selected_thumbnail["selected"] = True
+        # If all else fails, just show the TED talk on the homepage
+        video_id, video_key = "gM95HHI4gLk", ""
+
+        # If possible, highlight video #1 from the first set of off-screen thumbnails
+        if len(thumbnail_link_sets) > 1 and len(thumbnail_link_sets[1]) > 0:
+
+            selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
+            selected_thumbnail["selected"] = True
+
+            video_id = selected_thumbnail["youtube_id"]
+            video_key = selected_thumbnail["key"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
 
         template_values = {
-                            'video_id': selected_thumbnail["youtube_id"],
-                            'video_key': selected_thumbnail["key"],
+                            'video_id': video_id,
+                            'video_key': video_key,
                             'thumbnail_link_sets': thumbnail_link_sets,
                             'library_content': library_content,
                             'DVD_list': DVD_list,
