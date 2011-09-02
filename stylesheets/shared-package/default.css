@@ -2716,6 +2716,11 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 }
 .mailing_list_container input.email {
     padding: 3px;
+    box-shadow:none;
+}
+.mailing_list_container input.email:-moz-placeholder,
+.mailing_list_container input.email:invalid {
+    box-shadow:none !important;
 }
 .mailing_list_container p {
     margin: 0;
