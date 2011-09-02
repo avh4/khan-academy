@@ -996,7 +996,9 @@ class Video(Searchable, db.Model):
         query = VideoPlaylist.all().filter('live_association = ', True)
         vps = query.fetch(10000)
         keys = [VideoPlaylist.video.get_value_for_datastore(vp) for vp in vps]
-        return Video.get(keys)
+        config = db.create_config(read_policy=db.EVENTUAL_CONSISTENCY)
+        return Video.get(keys, config=config)
+
 
     def first_playlist(self):
         query = VideoPlaylist.all()
