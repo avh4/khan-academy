@@ -702,7 +702,7 @@ var MailingList = {
             if (validateEmail(jelEmail.val()))
             {
                 $.post("/mailing-lists/subscribe", {list_id: sIdList, email: jelEmail.val()});
-                jelMailingListContainer.html("Done!");
+                jelMailingListContainer.html("<p>Done!</p>");
             }
             e.preventDefault();
             return false;

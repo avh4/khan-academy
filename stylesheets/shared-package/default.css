@@ -710,6 +710,12 @@ footer {
         height: 20px;
         vertical-align: top;
     }
+    #social-actions .mailing_list_container input.simple-button {
+        display: inline;
+    }
+    #social-actions .mailing_list_container input.email {
+        width: 200px;
+    }
 
 #top-header #top-header-links {
     position: absolute;
@@ -2300,7 +2306,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     #about-blog #blog-sidebar input.email {
         width: 90%;
-        padding: 3px;
         margin-bottom: 9px;
     }
     #about-blog #blog-sidebar #social-links .social-button {
@@ -2668,6 +2673,15 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 }
 /* End No students page styles */
 
+.mailing_list_container input.simple-button {
+    display: block;
+}
+.mailing_list_container input.email {
+    padding: 3px;
+}
+.mailing_list_container p {
+    margin: 0;
+}
 .mailing_list_container .error {
     color: red;
 }
