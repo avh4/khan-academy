@@ -19,7 +19,7 @@ def new_and_noteworthy_link_sets():
 
     # We use playlist tags to identify new and noteworthy exercises
     # just so Sal has a really simple, fast, all-YouTube interface
-    playlist.tags = ['addition_1', 'measuring_angles']
+    playlist.tags = ['addition_1', 'measuring_angles', 'addition_1', 'measuring_angles']
     for tag in playlist.tags:
         exercise = models.Exercise.get_by_name(tag)
         if exercise:
@@ -30,6 +30,10 @@ def new_and_noteworthy_link_sets():
     sets = []
     current_set = []
     current_set_exercise_position = random.randint(0, items_per_set - 1)
+    next_exercise = 0
+
+    exercise_icon_files = ["ex1.png", "ex2.png", "ex3.png", "ex4.png"]
+    random.shuffle(exercise_icon_files)
 
     for video in videos:
 
@@ -38,17 +42,19 @@ def new_and_noteworthy_link_sets():
             current_set = []
             current_set_exercise_position = random.randint(0, items_per_set - 1)
 
-        if len(exercises) > 0 and len(current_set) == current_set_exercise_position:
-            exercise = exercises.pop(0)
+        if next_exercise < len(exercises) and len(current_set) == current_set_exercise_position:
+            exercise = exercises[next_exercise]
 
             current_set.append({
                 "href": exercise.ka_url,
-                "thumb_url": "/images/screenshot-tour/problems.png",
+                "thumb_url": "/images/splashthumbnails/exercises/%s" % (exercise_icon_files[next_exercise % (len(exercise_icon_files))]),
                 "desc": exercise.display_name,
                 "youtube_id": "",
                 "selected": False,
                 "key": exercise.key,
             })
+
+            next_exercise += 1
 
         if len(current_set) >= items_per_set:
             sets.append(current_set)
