@@ -269,7 +269,7 @@ var Profile = {
 
         this.showGraphThrobber(false);
         this.styleSublinkFromHref(dict_json.url);
-        $("#graph-content").html(dict_json.html_chunks.join(""));
+        $("#graph-content").html(dict_json.html);
     },
 
     finishLoadGraphError: function() {

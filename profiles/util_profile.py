@@ -1,4 +1,5 @@
 import datetime
+import logging
 import gc
 import urllib
 
@@ -216,30 +217,9 @@ class ProfileGraph(request_handler.RequestHandler):
         if len(json_update) > 0:
             self.response.out.write(json_update)
         else:
-            html_and_url = ProfileGraph.insert_html_chunks({ "url": self.request.url }, html)
-
-            # Force garbage collection before we step into simplejson to alleviate
-            # MemoryError pressure
-            gc.collect()
-
+            html_and_url = { "html": html, "url": self.request.url }
             json = simplejson.dumps(html_and_url, ensure_ascii=False)
             self.response.out.write(json)
-
-    @staticmethod
-    def insert_html_chunks(context, html):
-
-        def chunks(html, length=500):
-            pos = 0
-            end = len(html)
-
-            while pos < end:
-                pos_next = min(pos + length, end)
-                yield html[pos:pos_next]
-                pos = pos_next
-
-        context["html_chunks"] = [s for s in chunks(html)]
-
-        return context
 
     def get_profile_target_user_data(self):
         student = UserData.current()

@@ -3,7 +3,6 @@
 import os
 import datetime
 import time
-import random
 import urllib
 import logging
 import re
@@ -36,6 +35,7 @@ import consts
 import youtube_sync
 import warmup
 import library
+import homepage
 
 from search import Searchable
 import search
@@ -63,7 +63,7 @@ from phantom_users import util_notify
 from badges import util_badges, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
-from topics_list import topics_list, all_topics_list, DVD_list
+from topics_list import all_topics_list
 from custom_exceptions import MissingVideoException
 from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
@@ -403,18 +403,6 @@ class VideolessExercises(request_handler.RequestHandler):
             if not videos:
                 self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
 
-class GenerateLibraryContent(request_handler.RequestHandler):
-
-    def post(self):
-        # We support posts so we can fire task queues at this handler
-        self.get(from_task_queue = True)
-
-    def get(self, from_task_queue = False):
-        library.library_content_html(bust_cache=True)
-
-        if not from_task_queue:
-            self.redirect("/")
-
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
     def get(self):
@@ -430,28 +418,6 @@ class ShowUnusedPlaylists(request_handler.RequestHandler):
         for playlist_unused in playlists_unused:
             self.response.out.write(" + " + playlist_unused.title + "<br/>")
         self.response.out.write("</br>Done")
-
-class GenerateVideoMapping(request_handler.RequestHandler):
-
-    def get(self):
-        video_mapping = {}
-        for playlist_title in all_topics_list:
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True)
-            query.order('video_position')
-            playlist_name = get_mangled_playlist_name(playlist_title)
-            playlist = []
-            video_mapping[playlist_name] = playlist
-            for pv in query.fetch(500):
-                v = pv.video
-                filename = v.title.replace(":", "").replace(",", ".")
-                playlist.append((filename, v.youtube_id, v.readable_id))
-        self.response.out.write("video_mapping = " + pformat(video_mapping))
-
 
 class YoutubeVideoList(request_handler.RequestHandler):
 
@@ -519,91 +485,6 @@ class MobileSite(request_handler.RequestHandler):
     def get(self):
         self.set_mobile_full_site_cookie(False)
         self.redirect("/")
-
-class ViewHomePage(request_handler.RequestHandler):
-    def get(self):
-        thumbnail_link_sets = [
-            [
-                {
-                    "href": "/video/khan-academy-on-the-gates-notes",
-                    "class": "thumb-gates_thumbnail",
-                    "desc": "Khan Academy on the Gates Notes",
-                    "youtube_id": "UuMTSU9DcqQ",
-                    "selected": False,
-                },
-                {
-                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs",
-                    "class": "thumb-overview_thumbnail",
-                    "desc": "Overview of our video library",
-                    "youtube_id": "dsFQ9kM1qDs",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference",
-                    "class": "thumb-gel_thumbnail",
-                    "desc": "Sal Khan talk at GEL 2010",
-                    "youtube_id": "yTXKCzrFh3c",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/khan-academy-on-pbs-newshour--edited",
-                    "class": "thumb-pbs_thumbnail",
-                    "desc": "Khan Academy on PBS NewsHour",
-                    "youtube_id": "4jXv03sktik",
-                    "selected": False,
-                },
-            ],
-            [
-                {
-                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html",
-                    "class": "thumb-ted_thumbnail",
-                    "desc": "Sal on the Khan Academy @ TED",
-                    "youtube_id": "gM95HHI4gLk",
-                    "selected": False,
-                },
-                {
-                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA",
-                    "class": "thumb-tech_award_thumbnail",
-                    "desc": "What is the Khan Academy?",
-                    "youtube_id": "p6l8-1kHUsA",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/khan-academy-exercise-software",
-                    "class": "thumb-exercises_thumbnail",
-                    "desc": "Overview of our exercise software",
-                    "youtube_id": "hw5k98GV7po",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/forbes--names-you-need-to-know---khan-academy",
-                    "class": "thumb-forbes_thumbnail",
-                    "desc": "Forbes Names You Need To Know",
-                    "youtube_id": "UkfppuS0Plg",
-                    "selected": False,
-                },
-            ]
-        ]
-
-        random.shuffle(thumbnail_link_sets)
-
-        # Highlight video #1 from the first set of off-screen thumbnails
-        selected_thumbnail = thumbnail_link_sets[1][0]
-        selected_thumbnail["selected"] = True
-        movie_youtube_id = selected_thumbnail["youtube_id"]
-
-        # Get pregenerated library content from our in-memory/memcache two-layer cache
-        library_content = library.library_content_html()
-
-        template_values = {
-                            'video_id': movie_youtube_id,
-                            'thumbnail_link_sets': thumbnail_link_sets,
-                            'library_content': library_content,
-                            'DVD_list': DVD_list,
-                            'is_mobile_allowed': True,
-                            'approx_vid_count': consts.APPROX_VID_COUNT,
-                        }
-        self.render_template('homepage.html', template_values)
 
 class ViewFAQ(request_handler.RequestHandler):
     def get(self):
@@ -1067,9 +948,8 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
 def main():
 
-    webapp.template.register_template_library('templateext')
     application = webapp.WSGIApplication([
-        ('/', ViewHomePage),
+        ('/', homepage.ViewHomePage),
         ('/about', util_about.ViewAbout),
         ('/about/blog', blog.ViewBlog),
         ('/about/blog/.*', blog.ViewBlogPost),
@@ -1087,8 +967,7 @@ def main():
         ('/getinvolved', ViewGetInvolved),
         ('/donate', Donate),
         ('/exercisedashboard', exercises.ViewAllExercises),
-        ('/library_content', GenerateLibraryContent),
-        ('/video_mapping', GenerateVideoMapping),
+        ('/library_content', library.GenerateLibraryContent),
         ('/youtube_list', YoutubeVideoList),
         ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
         ('/exercises', exercises.ViewExercise),

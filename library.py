@@ -3,11 +3,13 @@ import os
 import logging
 
 from google.appengine.ext.webapp import template
+from django.utils import simplejson
 
 from app import App
 import layer_cache
 from models import Video, Playlist, VideoPlaylist, Setting
 from topics_list import topics_list
+import request_handler
 
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
@@ -37,7 +39,12 @@ def library_content_html(bust_cache = False):
         if dict_videos.has_key(video_key) and dict_playlists.has_key(playlist_key):
             video = dict_videos[video_key]
             playlist = dict_playlists[playlist_key]
-            fast_video_playlist_dict = {"video":video, "playlist":playlist}
+            exercises = []
+            related_exercises = video.related_exercises()
+            if related_exercises and related_exercises.count() > 0:
+              # exercises is a json list for embedding as a data attr
+              exercises = simplejson.dumps([e.exercise.name for e in related_exercises])
+            fast_video_playlist_dict = {"video":video, "playlist":playlist, "exercises":exercises}
 
             if dict_video_playlists.has_key(playlist_key):
                 dict_video_playlists[playlist_key].append(fast_video_playlist_dict)
@@ -89,4 +96,15 @@ def library_content_html(bust_cache = False):
 
     return html
 
+class GenerateLibraryContent(request_handler.RequestHandler):
+
+    def post(self):
+        # We support posts so we can fire task queues at this handler
+        self.get(from_task_queue = True)
+
+    def get(self, from_task_queue = False):
+        library_content_html(bust_cache=True)
+
+        if not from_task_queue:
+            self.redirect("/")
 
