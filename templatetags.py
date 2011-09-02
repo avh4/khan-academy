@@ -145,6 +145,7 @@ def exercise_message(exercise, coaches, exercise_states):
         state = '_proficient'
     elif exercise_states['struggling']:
         state = '_struggling'
+        exercise_states['exercise_videos'] = exercise.related_videos_fetch()
     else:
         state = ''
     filename = "exercise_message%s.html" % state
