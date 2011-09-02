@@ -6,7 +6,6 @@ javascript = {
             "jquery.ui.menu.js",
             "jquery.watermark.js",
             "jquery.placeholder.js",
-            "jquery.qtip.js",
             "pageutil.js",
             "api.js",
 			"social.js",
@@ -14,6 +13,7 @@ javascript = {
     },
     "video": {
         "files": [
+            "jquery.qtip.js",
             "video.js",
             "discussion.js",
         ]
@@ -110,7 +110,6 @@ stylesheets = {
             "profile.css",
             "museo-sans.css",
             "jquery-ui-1.8.4.custom.css",
-            "jquery.qtip.css",
         ]
     },
     "mobile": {
@@ -121,6 +120,7 @@ stylesheets = {
     },
     "video": {
         "files": [
+            "jquery.qtip.css",
             "video.css",
             "discussion.css",
         ]
