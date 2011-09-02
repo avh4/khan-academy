@@ -114,19 +114,21 @@ class ViewExercise(request_handler.RequestHandler):
 
             user_activity = []
 
-            # Don't include incomplete information
-            problem_log.hint_after_attempt_list = filter(lambda x: x != -1, problem_log.hint_after_attempt_list)
+            if not problem_log:
+                renderable = False
+            else:
+                # Don't include incomplete information
+                problem_log.hint_after_attempt_list = filter(lambda x: x != -1, problem_log.hint_after_attempt_list)
 
-            while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == 0:
-                user_activity.append([
-                    "hint-activity",
-                    0,
-                    max(0, problem_log.hint_time_taken_list[0])
-                    ])
-                problem_log.hint_after_attempt_list.pop(0)
-                problem_log.hint_time_taken_list.pop(0)
+                while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == 0:
+                    user_activity.append([
+                        "hint-activity",
+                        0,
+                        max(0, problem_log.hint_time_taken_list[0])
+                        ])
+                    problem_log.hint_after_attempt_list.pop(0)
+                    problem_log.hint_time_taken_list.pop(0)
 
-            if problem_log:
                 # For each attempt, add it to the list and then add any hints
                 # that came after it
                 for i in range(0, len(problem_log.attempt_list)):
@@ -149,19 +151,10 @@ class ViewExercise(request_handler.RequestHandler):
                         problem_log.hint_after_attempt_list.pop(0)
                         problem_log.hint_time_taken_list.pop(0)
 
+                user_exercise.user_activity = user_activity
+
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints
-            else:
-                user_activity.append([
-                    "unavailable-activity",
-                    "Activity Unavailable",
-                    0
-                    ])
-
-            user_exercise.user_activity = user_activity
-
-            if not hasattr(user_exercise, 'count_hints'):
-                user_exercise.count_hints = 0
 
         browser_disabled = self.is_older_ie()
         renderable = renderable and not browser_disabled
