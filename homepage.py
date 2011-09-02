@@ -34,7 +34,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
             "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
             "youtube_id": "",
             "selected": False,
-            "key": exercise.key,
+            "key": exercise.key(),
             "type": "exercise-thumb",
         }
 
@@ -47,7 +47,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     return None
 
-@layer_cache.cache(layer=layer_cache.Layers.InAppMemory, expiration=60*60*24) # Expire daily
+@layer_cache.cache(expiration=60*60*24) # Expire daily
 def new_and_noteworthy_link_sets():
 
     playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()
@@ -81,8 +81,10 @@ def new_and_noteworthy_link_sets():
 
     sets = []
     current_set = []
-    current_set_exercise_position = random.randint(0, items_per_set - 1)
     next_exercise = 0
+
+    # Randomly place exercises one per set in 2, 3, or 4
+    current_set_exercise_position = random.randint(1, items_per_set - 1)
 
     exercise_icon_files = ["ex1.png", "ex2.png", "ex3.png", "ex4.png"]
     random.shuffle(exercise_icon_files)
