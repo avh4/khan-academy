@@ -18,7 +18,7 @@ import logging
 # Constants for Geckoboard display.
 NUM_BUCKETS = 20
 PAST_DAYS_TO_SHOW = 7
-REFRESH_SECS = 10
+REFRESH_SECS = 30
 
 CACHE_EXPIRATION_SECS = 60 * 60
 
