@@ -16,7 +16,6 @@ secrets.py
 datastore/*
 sample_data/bulkloader-*
 *.DS_Store
-index.yaml
 offline/*
 .*.swp
 .*.un~
