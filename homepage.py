@@ -12,27 +12,36 @@ from topics_list import DVD_list
 
 def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
+    link_dict = None
+
     if video:
-        return {
+        link_dict = {
             "href": video.ka_url,
             "thumb_url": video.youtube_thumbnail_url(),
             "desc_html": templatetags.video_name_and_progress(video),
-            "teaser": video.description,
+            "teaser_html": video.description,
             "youtube_id": video.youtube_id,
             "selected": False,
             "key": video.key(),
         }
 
     if exercise:
-        return {
+        link_dict = {
             "href": exercise.ka_url,
             "thumb_url": thumb_url,
             "desc_html": escape(exercise.display_name),
-            "teaser": "Try an exercise! Practice your %s skills." % exercise.display_name,
+            "teaser_html": "Exercise your %s skills" % escape(exercise.display_name),
             "youtube_id": "",
             "selected": False,
             "key": exercise.key,
         }
+
+    if link_dict:
+
+        if len(link_dict["teaser_html"]) > 60:
+            link_dict["teaser_html"] = link_dict["teaser_html"][:60] + "&hellip;"
+
+        return link_dict
 
     return None
 

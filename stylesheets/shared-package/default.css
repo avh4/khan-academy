@@ -2407,6 +2407,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     white-space: pre;
 }
 
+#thumbnails td a:hover {
+    text-decoration: none;
+}
+
 #thumbnails td div.thumb {
     background-position: no-repeat top left;
     width: 200px;
@@ -2436,6 +2440,21 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     color: #fff;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+#thumbnails td div.thumbnail_desc {
+    width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#thumbnails td div.thumbnail_teaser {
+    height: 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    text-decoration: none;
+    font-size: 11px;
 }
 
 #thumbnails td.selected div.thumbnail_label {
