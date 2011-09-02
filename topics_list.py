@@ -144,6 +144,10 @@ PLAYLIST_STRUCTURE = [
                 "playlist": "History"
             },
             {
+                "name": "American Civics",
+                "playlist": "American Civics"
+            },
+            {
                 "name": "Finance",
                 "items": [
                     {
