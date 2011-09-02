@@ -204,6 +204,9 @@ var VideoControls = {
 
     initThumbnails: function() {
 
+        // Queue:false to make sure all of these run at the same time
+        var animationOptions = {duration: 150, queue: false};
+
         $("#thumbnails")
             .cycle({ 
                 fx:     'scrollHorz', 
@@ -217,7 +220,20 @@ var VideoControls = {
             })
             .css({ width: "" }) // We want #thumbnails to be full width even though the cycle plugin doesn't
             .find(".thumbnail_link")
-                .click(VideoControls.thumbnailClick);
+                .click(VideoControls.thumbnailClick).end()
+            .find(".thumbnail_td")
+                .hover(
+                        function() {
+                            $(this)
+                                .find(".thumbnail_label").animate({ marginTop: -93 }, animationOptions).end()
+                                .find(".thumbnail_teaser").animate({ height: 60 }, animationOptions);
+                        },
+                        function() {
+                            $(this)
+                                .find(".thumbnail_label").animate({ marginTop: -33 }, animationOptions).end()
+                                .find(".thumbnail_teaser").animate({ height: 0 }, animationOptions);
+                        }
+            );
 
     },
 

@@ -12,12 +12,14 @@ from topics_list import DVD_list
 
 def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
+    link_dict = None
+
     if video:
-        return {
+        link_dict = {
             "href": video.ka_url,
             "thumb_url": video.youtube_thumbnail_url(),
             "desc_html": templatetags.video_name_and_progress(video),
-            "teaser": video.description,
+            "teaser_html": video.description,
             "youtube_id": video.youtube_id,
             "selected": False,
             "key": video.key(),
@@ -25,20 +27,27 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
         }
 
     if exercise:
-        return {
+        link_dict = {
             "href": exercise.ka_url,
             "thumb_url": thumb_url,
             "desc_html": escape(exercise.display_name),
-            "teaser": "Try an exercise! Practice your %s skills." % exercise.display_name,
+            "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
             "youtube_id": "",
             "selected": False,
             "key": exercise.key,
             "type": "exercise",
         }
 
+    if link_dict:
+
+        if len(link_dict["teaser_html"]) > 60:
+            link_dict["teaser_html"] = link_dict["teaser_html"][:60] + "&hellip;"
+
+        return link_dict
+
     return None
 
-@layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
+@layer_cache.cache(layer=layer_cache.Layers.InAppMemory, expiration=60*60*24) # Expire daily
 def new_and_noteworthy_link_sets():
 
     playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()
@@ -55,11 +64,18 @@ def new_and_noteworthy_link_sets():
 
     # We use playlist tags to identify new and noteworthy exercises
     # just so Sal has a really simple, fast, all-YouTube interface
-    playlist.tags = ['addition_1', 'measuring_angles', 'addition_1', 'measuring_angles']
     for tag in playlist.tags:
         exercise = models.Exercise.get_by_name(tag)
         if exercise:
             exercises.append(exercise)
+
+    if len(exercises) == 0:
+        # Temporary hard-coding of a couple exercises until Sal picks a few
+        playlist.tags = ['solid_geometry', 'estimation_with_decimals', 'multiplication_4']
+        for tag in playlist.tags:
+            exercise = models.Exercise.get_by_name(tag)
+            if exercise:
+                exercises.append(exercise)
 
     items_per_set = 4
 
