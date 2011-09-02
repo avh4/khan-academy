@@ -2429,6 +2429,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 #thumbnails td.video-thumb div.thumb {
     background-position-y: -25px;
+    /* IE doesn't support background-size, so we'll just reposition the larger background */
+    background-position-y: -80px\9;
+    background-position-x: -100px\9;
 }
 
 #thumbnails td.selected div.thumb {
