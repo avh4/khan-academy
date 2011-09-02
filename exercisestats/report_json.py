@@ -12,6 +12,9 @@ import random
 import time
 import simplejson as json
 
+# Constants for Geckoboard display.
+NUM_BUCKETS = 20
+PAST_DAYS_TO_SHOW = 7
 
 # Create a new list of KVPs with the values of all KVPs with identical keys summed
 def sum_keys(key_value_pairs):
@@ -27,16 +30,16 @@ def sum_keys(key_value_pairs):
     return ret
 
 def exercises_in_bucket(num_buckets, bucket_index):
-    exercises = [e.name for e in Exercise.get_all_use_cache()]
-    exercises.sort()
+    exercise_names = [ex.name for ex in Exercise.get_all_use_cache()]
+    exercise_names.sort()
 
     # These calculations evenly distribute exercises among buckets, with excess
     # going to the first few buckets.
     # In particular, max_capcity(buckets) - min_capacity(buckets) <= 1.
-    bucket_size = len(exercises) / num_buckets
-    bucket_rem = len(exercises) % num_buckets
+    bucket_size = len(exercise_names) / num_buckets
+    bucket_rem = len(exercise_names) % num_buckets
     first = bucket_index * bucket_size + min(bucket_rem, bucket_index)
-    return exercises[ first : first + bucket_size + (1 if bucket_index < bucket_rem else 0) ]
+    return exercise_names[ first : first + bucket_size + (1 if bucket_index < bucket_rem else 0) ]
 
 class ExerciseDoneProfGraph(request_handler.RequestHandler):
     def get(self):
@@ -52,16 +55,18 @@ class ExerciseDoneProfGraph(request_handler.RequestHandler):
             ex_stats = []
             for ex in Exercise.get_all_use_cache():
                 ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
+
             return self.area_spline(ex_stats, 'All Exercises')
 
         num_buckets = self.request_int('n', 1)
         bucket_index = self.request_int('ix', 0)
-        exercises = self.request_string('exercises', '')
-        exercises = [e for e in exercises.split(',') if e]
-        if not exercises:
-            exercises = exercises_in_bucket(num_buckets, bucket_index)
-        exid = random.choice(exercises)
+        exercise_names = self.request_string('exercise_names', '')
 
+        exercise_names = [e for e in exercise_names.split(',') if e]
+        if not exercise_names:
+            exercise_names = exercises_in_bucket(num_buckets, bucket_index)
+
+        exid = random.choice(exercise_names)
         ex_stats = ExerciseStatistic.get_by_dates(exid, days)
 
         return { 'gecko_line': self.gecko_line,
@@ -131,4 +136,5 @@ class ExerciseDoneProfGraph(request_handler.RequestHandler):
 class GeckoboardExercisesRedirect(request_handler.RequestHandler):
     def get(self):
         bucket_index = self.request_int('ix', 0)
-        return self.redirect('/exercisestats/json?chart=area_spline&past_days=7&n=20&ix=%d' % bucket_index)
+        return self.redirect('/exercisestats/json?chart=area_spline&past_days=%d&n=%d&ix=%d'
+            % (PAST_DAYS_TO_SHOW, NUM_BUCKETS, bucket_index))

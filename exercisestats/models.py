@@ -50,6 +50,8 @@ class ExerciseStatistic(db.Model):
 
     @staticmethod
     def get_by_dates(exid, dates):
+        # Optimizations: we could either parallelize the datastore calls or do
+        # a batch get of all the keys to reduce round trips
         ex_stats = [ ExerciseStatistic.get_by_date(exid, d) for d in dates ]
         return filter(lambda x: x != None, ex_stats)
 
