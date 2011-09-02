@@ -204,23 +204,24 @@ var VideoControls = {
 
     initThumbnails: function() {
 
-        var jelThumbnails = $("#thumbnails");
+        $("#thumbnails")
+            .cycle({ 
+                fx:     'scrollHorz', 
+                timeout: 0,
+                speed: 550,
+                slideResize: 0,
+                easing: 'easeInOutBack',
+                startingSlide: 0,
+                prev: '#arrow-left',
+                next: '#arrow-right'
+            })
+            .css({ width: "" }) // We want #thumbnails to be full width even though the cycle plugin doesn't
+            .find(".thumbnail_link")
+                .click(VideoControls.thumbnailClick).end()
+            .find(".thumbnail_td").each(function() {
+                VideoStats.tooltip(this, $(this).data("teaser"));
+            });
 
-        jelThumbnails.cycle({ 
-            fx:     'scrollHorz', 
-            timeout: 0,
-            speed: 550,
-            slideResize: 0,
-            easing: 'easeInOutBack',
-            startingSlide: 0,
-            prev: '#arrow-left',
-            next: '#arrow-right'
-        });
-
-        // We want #thumbnails to be full width even though the cycle plugin doesn't
-        jelThumbnails.css({ width: "" });
-
-        $(".thumbnail_link", jelThumbnails).click(VideoControls.thumbnailClick);
     },
 
     thumbnailClick: function() {

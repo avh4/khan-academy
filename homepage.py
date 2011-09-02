@@ -52,6 +52,7 @@ def new_and_noteworthy_link_sets():
                 "href": exercise.ka_url,
                 "thumb_url": "/images/splashthumbnails/exercises/%s" % (exercise_icon_files[next_exercise % (len(exercise_icon_files))]),
                 "desc_html": escape(exercise.display_name),
+                "teaser": "Try an exercise! Practice your %s skills." % exercise.display_name,
                 "youtube_id": "",
                 "selected": False,
                 "key": exercise.key,
@@ -68,6 +69,7 @@ def new_and_noteworthy_link_sets():
             "href": video.ka_url,
             "thumb_url": video.youtube_thumbnail_url(),
             "desc_html": templatetags.video_name_and_progress(video),
+            "teaser": video.description,
             "youtube_id": video.youtube_id,
             "selected": False,
             "key": video.key()
