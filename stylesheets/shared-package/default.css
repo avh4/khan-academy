@@ -698,8 +698,6 @@ footer {
 }
 
 #social-actions {
-    padding-left: 36px;
-    padding-right: 36px;
 }
     #social-actions td.social-action {
         text-align: center;
@@ -710,17 +708,23 @@ footer {
         height: 20px;
         vertical-align: top;
     }
-    #social-actions .mailing_list_container input.simple-button {
-        display: inline;
+    .homepage-mailing {
+        float: right;
+        position: relative;
+        top: -2px;
     }
-    #social-actions .mailing_list_container input.email {
-        width: 200px;
+    .homepage-mailing .mailing_list_container input.simple-button {
+        display: inline;
+        padding: 4px 10px 3px;
+    }
+    .homepage-mailing .mailing_list_container input.email {
+        width: 298px;
     }
 
 #top-header #top-header-links {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 10px;
     left: 0;
     margin-left: 290px;
     min-width: 680px;
@@ -2324,9 +2328,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     font-size:  16px;
     line-height: 24px;
 }
-#homepage-text p.call-to-action-buttons {
-    margin: 38px 0;
-}
 #homepage-text a.call-to-action {
     display: block;
     font-size: 20px;
@@ -2390,7 +2391,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #thumbnails_container {
     clear: both;
-    min-height: 145px;
 }
 
 #thumbnails_container td {
@@ -2404,6 +2404,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 #thumbnails td a {
     outline: none;
     color: #fff;
+    white-space: pre;
 }
 
 #thumbnails td div.thumb {
@@ -2425,13 +2426,16 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 #thumbnails td div.thumbnail_label {
-    padding: 5px 10px 5px 20px;
-    max-width: 170px;
+    padding: 5px 10px;
+    max-width: 180px;
     margin: 0 auto;
     text-align: left;
     margin-top: -33px;
     background: #333;
-    background: rgba(30, 30, 30, 0.9);
+    background-color: rgba(30, 30, 30, 0.9);
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #thumbnails td.selected div.thumbnail_label {
