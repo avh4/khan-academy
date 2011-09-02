@@ -719,10 +719,12 @@ footer {
 }
 .homepage-mailing .mailing_list_container input.simple-button {
     display: inline;
-    padding: 4px 10px 3px;
+    padding: 4px 10px;
 }
 .homepage-mailing .mailing_list_container input.email {
     width: 298px;
+    border: 1px solid #ccc;
+    height: 17px;
 }
 
 #top-header #top-header-links {
@@ -2428,7 +2430,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background-size: 200px 150px;
 }
 #thumbnails td.video-thumb div.thumb {
-    background-position-y: -25px;
+    background-position: 0px -25px;
     /* IE doesn't support background-size, so we'll just reposition the larger background */
     background-position-y: -80px\9;
     background-position-x: -100px\9;
