@@ -697,6 +697,20 @@ footer {
     font-size: 12px;
 }
 
+#social-actions {
+    padding-left: 36px;
+    padding-right: 36px;
+}
+    #social-actions td.social-action {
+        text-align: center;
+    }
+    #social-actions #fb-like-badge {
+        display: inline-block;
+        width: 90px;
+        height: 20px;
+        vertical-align: top;
+    }
+
 #top-header #top-header-links {
     position: absolute;
     top: 0;
@@ -705,14 +719,6 @@ footer {
     margin-left: 290px;
     min-width: 680px;
 }
-    #top-header #top-header-links #fb-like-badge, #sitewide-navigation #fb-like-badge {
-        display: inline-block;
-        width: 90px;
-        height: 20px;
-    }
-        #sitewide-navigation #fb-like-badge {
-            vertical-align: top;
-        }
     #top-header #top-header-links span {
         vertical-align: middle;
     }

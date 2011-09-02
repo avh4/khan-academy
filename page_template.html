@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
+<html itemscope itemtype="http://schema.org/Organization"
+    xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
     xmlns:fb="http://www.facebook.com/2008/fbml" {{ data_require }}>
       <head>
         <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8"/>
@@ -32,6 +33,13 @@
         <meta property="og:site_name" content="khanacademy.org"/>
         <meta property="fb:admins" content="100000121497109,1305017"/> {# Sal/Ben #}
         <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
+
+        {# Google+ #}
+        <meta itemprop="name" content="Khan Academy">
+        <meta itemprop="description" content="Watch. Practice. Learn almost anything for free.">
+        <meta itemprop="image" content="http://www.khanacademy.org/images/khan-logo-vertical-transparent.png">
+        {# End Google+ #}
+
         <meta property="og:description"
               content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  Despite being the work of one man, Salman Khan, this 2100+ video library is the most-used educational video resource as measured by YouTube video views per day and unique users per month."/>
         <link rel="shortcut icon" href="/favicon.ico?leaf">
@@ -101,10 +109,6 @@
                             {% endif %}
                             <span class="separator"></span>
                             <a href="/contribute" id="donate-link">Donate</a>
-                            <span class="separator"></span>
-                            <span id="fb-like-badge">
-                                <fb:like id="page_fb_like" href="http://www.khanacademy.org" layout="button_count" show_faces="false" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
-                            </span>
                         </span>
                         <div class="clear"></div>
                         <div id="nav-and-search">

@@ -24,6 +24,23 @@
         	<a href="/#browse" class="call-to-action simple-button action-gradient green">Watch a video</a>
         	<a href="/exercisedashboard?k" class="call-to-action simple-button action-gradient blue">Practice with an exercise </a>
         </p>
+        <div id="social-actions">
+            <table width="100%">
+                <tr>
+                    <td class="social-action" width="33%">
+                        <span id="fb-like-badge">
+                            <fb:like id="page_fb_like" href="http://www.khanacademy.org" layout="button_count" show_faces="false" font="arial" ref="Like-Button-Top-Header-Left"></fb:like>
+                        </span>
+                    </td>
+                    <td class="social-action" width="33%">
+                        <g:plusone size="medium" href="http://www.khanacademy.org"></g:plusone>
+                    </td>
+                    <td class="social-action" width="33%">
+                        <a href="http://twitter.com/khanacademy" data-width="150px" data-show-screen-name="false" class="twitter-follow-button">&nbsp;</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <div id="thumbnails_container">
@@ -103,7 +120,23 @@
         {% js_package "homepage" %}
     {% endif %}
 
-    <script>$(function(){VideoStats.startLoggingProgress("{{ video_key }}");});</script>
+    <script type="text/javascript">
+        $(function(){VideoStats.startLoggingProgress("{{ video_key }}");});
+
+        (function(){
+            var twitterWidgets = document.createElement('script');
+            twitterWidgets.type = 'text/javascript';
+            twitterWidgets.async = true;
+            twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+            document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+        })();
+
+        (function() {
+            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/plusone.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+        })();
+    </script>
 
     {% crazyegg_tracker 1 %}
 {% endblock bottompagescript %}
