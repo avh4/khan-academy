@@ -61,7 +61,7 @@
                         {% for thumbnail_link_set in thumbnail_link_sets %}
                             <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}
-                            <td style="width:25%" class="thumbnail_td {% if thumbnail_link|hash:"selected" %}selected{% endif %}" data-key="{{ thumbnail_link|hash:"key"|escape }}" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}">
+                            <td style="width:25%" class="thumbnail_td {{ thumbnail_link|hash:"type" }} {% if thumbnail_link|hash:"selected" %}selected{% endif %}" data-key="{{ thumbnail_link|hash:"key"|escape }}" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}">
 
                                     <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><div class="thumb" style="background-image:url('{{ thumbnail_link|hash:"thumb_url"|escape }}')"></div></a>
 

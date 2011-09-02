@@ -2427,6 +2427,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     box-shadow: 1px 2px 2px #ccc;
     background-size: 200px 150px;
 }
+#thumbnails td.video-thumb div.thumb {
+    background-position-y: -25px;
+}
 
 #thumbnails td.selected div.thumb {
     -webkit-box-shadow: 1px 2px 6px #aaa;
