@@ -3,6 +3,7 @@
 <style>
 	#page_sub_nav { display: none; }
 	td { vertical-align: top; }
+	.ui-tooltip, .qtip { max-width: 200px; }
 </style>
 
 {% endblock pagescript %}
@@ -40,11 +41,9 @@
                     </td>
                 </tr>
             </table>
-
-            {% mailing_list_signup_form 3 "Send me updates!" "Enter your email to get updates about new courses" %}
         </div>
     </div>
-
+    <h2>New & Noteworthy <span class="homepage-mailing">{% mailing_list_signup_form 3 "Send me updates!" "Enter your email to get updates about new courses" %}</span></h2>
     <div id="thumbnails_container">
         <table width="100%">
             <tr>
@@ -78,7 +77,6 @@
         </table>
     </div>
     <div class="clear"></div>
-<hr class="desktop-only">
 
 <div data-role="page" data-theme"b" {% if is_mobile %}id="browse"{% endif %}>
     <div data-role="content">
