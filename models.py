@@ -973,7 +973,7 @@ class Video(Searchable, db.Model):
         return None
 
     def youtube_thumbnail_url(self):
-        return "http://img.youtube.com/vi/%s/default.jpg" % self.youtube_id
+        return "http://img.youtube.com/vi/%s/hqdefault.jpg" % self.youtube_id
 
     @staticmethod
     def get_for_readable_id(readable_id):
