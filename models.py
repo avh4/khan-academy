@@ -991,6 +991,15 @@ class Video(Searchable, db.Model):
         # End of hack
         return video
 
+    @staticmethod
+    def get_all_live():
+        query = VideoPlaylist.all().filter('live_association = ', True)
+        vps = query.fetch(10000)
+        keys = [VideoPlaylist.video.get_value_for_datastore(vp) for vp in vps]
+        config = db.create_config(read_policy=db.EVENTUAL_CONSISTENCY)
+        return Video.get(keys, config=config)
+
+
     def first_playlist(self):
         query = VideoPlaylist.all()
         query.filter('video =', self)

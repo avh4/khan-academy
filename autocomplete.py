@@ -26,7 +26,7 @@ class Autocomplete(request_handler.RequestHandler):
 
         if query:
 
-            # Instead of using memcache and iterating through all videos and playlists, we could use the "fake prefix match" example at 
+            # Instead of using memcache and iterating through all videos and playlists, we could use the "fake prefix match" example at
             # code.google.com/appengine/docs/python/datastore/queriesandindexes.html to query the GAE datastore directly
             # for any Video/Playlist titles prefixed by query, but this would A) be less powerful b/c it only matches prefixes
             # and B) require us to make us to use a title_lowercase DerivedProperty or something similar to avoid case
@@ -46,13 +46,15 @@ class Autocomplete(request_handler.RequestHandler):
 
 @layer_cache.cache(expiration=CACHE_EXPIRATION_SECONDS)
 def video_title_dicts():
-    live_video_dict = {}
-    for video_playlist in VideoPlaylist.all().filter('live_association = ', True):
-        live_video_dict[VideoPlaylist.video.get_value_for_datastore(video_playlist)] = True
-
-    live_videos = filter(lambda video: video.key() in live_video_dict, Video.all())
-    return map(lambda video: {"title": video.title, "key": str(video.key()), "url": "/video/%s" % video.readable_id}, live_videos)
+    return map(lambda video: {
+        "title": video.title,
+        "key": str(video.key()),
+        "url": "/video/%s" % video.readable_id
+    }, Video.get_all_live())
 
 @layer_cache.cache(expiration=CACHE_EXPIRATION_SECONDS)
 def playlist_title_dicts():
-    return map(lambda playlist: {"title": playlist.title, "url": "/#%s" % slugify(playlist.title.lower())}, Playlist.all())
+    return map(lambda playlist: {
+        "title": playlist.title,
+        "url": "/#%s" % slugify(playlist.title.lower())
+    }, Playlist.all())
