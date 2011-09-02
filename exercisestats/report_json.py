@@ -92,7 +92,8 @@ class ExerciseDoneProfGraph(request_handler.RequestHandler):
     def get(self):
         self.response.out.write(self.get_use_cache())
 
-    @layer_cache.cache_with_key_fxn(get_cache_key, expiration=CACHE_EXPIRATION_SECS)
+    @layer_cache.cache_with_key_fxn(get_cache_key,
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def get_use_cache(self):
         params = self.get_request_params()
 
