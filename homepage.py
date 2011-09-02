@@ -21,6 +21,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
             "youtube_id": video.youtube_id,
             "selected": False,
             "key": video.key(),
+            "type": "video",
         }
 
     if exercise:
@@ -32,6 +33,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
             "youtube_id": "",
             "selected": False,
             "key": exercise.key,
+            "type": "exercise",
         }
 
     return None
