@@ -166,10 +166,13 @@ var Profile = {
     },
 
     baseGraphHref: function(href) {
-
-        var ixProtocol = href.indexOf("://");
-        if (ixProtocol > -1)
-            href = href.substring(ixProtocol + "://".length);
+        // regex for matching scheme:// part of uri
+        // see http://tools.ietf.org/html/rfc3986#section-3.1
+        var reScheme = /^\w[\w\d+-.]*:\/\//;
+        var match = href.match(reScheme);
+        if (match) {
+            href = href.substring(match[0].length);
+        }
 
         var ixSlash = href.indexOf("/");
         if (ixSlash > -1)
