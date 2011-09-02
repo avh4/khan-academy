@@ -40,4 +40,3 @@ var Homepage = {
 }
 
 $(function(){Homepage.init();});
-

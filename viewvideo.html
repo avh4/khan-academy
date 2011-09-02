@@ -122,7 +122,7 @@
 {% block bottompagescript %}
     {% js_package "video" %}
     <script>
-      $(function(){VideoStats.startLoggingProgress();});
+      $(function(){VideoStats.startLoggingProgress("{{ video.key|escapejs }}");});
 
       // We take the message in the title of the energy points box and place it
       // in a tooltip, and if it's the message with a link to the login we 

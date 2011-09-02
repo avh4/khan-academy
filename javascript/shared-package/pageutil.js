@@ -232,6 +232,9 @@ var VideoControls = {
             VideoControls.scrollToPlayer();
             $("#thumbnails td.selected").removeClass("selected");
             jelParent.addClass("selected");
+
+            VideoStats.startLoggingProgress(jelParent.attr("data-key"));
+
             return false;
         }
     }
@@ -245,9 +248,11 @@ var VideoStats = {
     player: null,
     fIntervalStarted: false,
     fAlternativePlayer: false,
+    fEventsAttached: false,
     cachedDuration: 0, // For use by alternative FLV player
     cachedCurrentTime: 0, // For use by alternative FLV player
     dtSinceSave: null,
+    sVideoKey: null,
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
@@ -268,12 +273,17 @@ var VideoStats = {
         return this.getSecondsWatched() / duration;
     },
 
-    startLoggingProgress: function() {
+    startLoggingProgress: function(sVideoKey) {
 
+        if (!sVideoKey) return;
+
+        this.sVideoKey = sVideoKey;
         this.dPercentLastSaved = 0;
         this.cachedDuration = 0;
         this.cachedCurrentTime = 0;
         this.dtSinceSave = new Date();
+
+        if (this.fEventsAttached) return;
 
         // Listen to state changes in player to detect final end of video
         if (this.player) this.listenToPlayerStateChange();
@@ -291,6 +301,8 @@ var VideoStats = {
             setInterval(function(){VideoStats.playerStateChange(-2);}, 10000);
             this.fIntervalStarted = true;
         }
+
+        this.fEventsAttached = true;
     },
 
     listenToPlayerStateChange: function() {
@@ -335,7 +347,7 @@ var VideoStats = {
         $.ajax({type: "GET",
                 url: "/logvideoprogress", 
                 data: {
-                    video_key: $(".video_key_primary").val(),
+                    video_key: this.sVideoKey,
                     last_second_watched: this.getSecondsWatched(),
                     seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
                 },
@@ -386,12 +398,16 @@ var VideoStats = {
         {
             // Update the energy points box with the new data.
             var jelPoints = $(".video-energy-points");
-            jelPoints.data("title", jelPoints.data("title").replace(/^\d+/, dict_json.video_points));
-            $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
-            $("#user-points-container").html(dict_json.user_points_html);
+            if (jelPoints.length)
+            {
+                jelPoints.data("title", jelPoints.data("title").replace(/^\d+/, dict_json.video_points));
+                $(".video-energy-points-current", jelPoints).text(dict_json.video_points);
 
-            // Replace the old tooltip with an updated one.
-            VideoStats.tooltip('#points-badge-hover', jelPoints.data('title'));
+                // Replace the old tooltip with an updated one.
+                VideoStats.tooltip('#points-badge-hover', jelPoints.data('title'));
+            }
+
+            $("#user-points-container").html(dict_json.user_points_html);
         }
     },
 

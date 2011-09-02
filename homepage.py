@@ -45,9 +45,9 @@ def new_and_noteworthy_link_sets():
                 "href": exercise.ka_url,
                 "thumb_url": "/images/screenshot-tour/problems.png",
                 "desc": exercise.display_name,
-                "youtube_id": None,
+                "youtube_id": "",
                 "selected": False,
-                "type": "exercise",
+                "key": exercise.key,
             })
 
         if len(current_set) >= items_per_set:
@@ -61,7 +61,7 @@ def new_and_noteworthy_link_sets():
             "desc": video.title,
             "youtube_id": video.youtube_id,
             "selected": False,
-            "type": "video",
+            "key": video.key()
         })
 
     if len(current_set) > 0:
@@ -76,15 +76,15 @@ class ViewHomePage(request_handler.RequestHandler):
         thumbnail_link_sets = new_and_noteworthy_link_sets()
 
         # Highlight video #1 from the first set of off-screen thumbnails
-        selected_thumbnail = filter(lambda item: item["type"] == "video", thumbnail_link_sets[1])[0]
+        selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
         selected_thumbnail["selected"] = True
-        movie_youtube_id = selected_thumbnail["youtube_id"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
 
         template_values = {
-                            'video_id': movie_youtube_id,
+                            'video_id': selected_thumbnail["youtube_id"],
+                            'video_key': selected_thumbnail["key"],
                             'thumbnail_link_sets': thumbnail_link_sets,
                             'library_content': library_content,
                             'DVD_list': DVD_list,

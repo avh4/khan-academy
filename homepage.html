@@ -39,7 +39,7 @@
                         {% for thumbnail_link_set in thumbnail_link_sets %}
                             <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}
-                                <td style="width:25%" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}" {% if thumbnail_link|hash:"selected" %}class="selected"{% endif %}>
+                            <td style="width:25%" data-key="{{ thumbnail_link|hash:"key"|escape }}" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}" {% if thumbnail_link|hash:"selected" %}class="selected"{% endif %}>
                                     <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><div class="thumb" style="background-image:url('{{ thumbnail_link|hash:"thumb_url"|escape }}')"></div></a>
                                     <div class="thumbnail_label">
                                         <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link">{{ thumbnail_link|hash:"desc"|escape }}</a>
@@ -102,5 +102,8 @@
     {% if not is_mobile %}
         {% js_package "homepage" %}
     {% endif %}
+
+    <script>$(function(){VideoStats.startLoggingProgress("{{ video_key }}");});</script>
+
     {% crazyegg_tracker 1 %}
 {% endblock bottompagescript %}
