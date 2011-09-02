@@ -3,35 +3,35 @@
     {% if endangered or reviewing or proficient or struggling %}
         <div class="exercise_message">
         {% if endangered %}
-        	Uh oh.&nbsp;  You missed a problem in an exercise that you'd previously mastered.&nbsp;
-        	If you finish this problem and get the next one right without any hints, I'll assume you're still proficient.
+            Uh oh.&nbsp;  You missed a problem in an exercise that you'd previously mastered.&nbsp;
+            If you finish this problem and get the next one right without any hints, I'll assume you're still proficient.
         {% else %}
-        	{% if reviewing %}
-        		You haven't done an exercise that covers this in a while.&nbsp;  Let's see if you still remember how to do it.
-        	{% else %}
-        		{% if proficient %}
-        			<h2 class="pulls">Nice work!</h2>You're proficient in this topic. <a href="/exercisedashboard?k" class="exercise button green">Choose a new exercise</a> to earn more points, or you can do more problems to increase your streak. 
-        		{% else %}
-        			{% if struggling %}
+            {% if reviewing %}
+                You haven't done an exercise that covers this in a while.&nbsp;  Let's see if you still remember how to do it.
+            {% else %}
+                {% if proficient %}
+                    <h2 class="pulls">Nice work!</h2>You're proficient in this topic. <a href="/exercisedashboard?k" class="exercise button green">Choose a new exercise</a> to earn more points, or you can do more problems to increase your streak.
+                {% else %}
+                    {% if struggling %}
                     Are you having trouble with this exercise?&nbsp;  You've done more than {{ exercise.struggling_threshold }} problems now but
                     haven't gotten {{ exercise.required_streak }} in a row right yet.&nbsp;  Why don't you
-          				{% if exercise_videos %}
-          					watch the related videos again, or
-          				{% endif %}
-        				ask
-        				{% if coaches|length_is:"0" %}
-        				    someone
-        				{% else %}
-        					{% if coaches|length_is:"1" %}
-        				        your <a href="coaches">coach</a>
-        					{% else %}
-        	   			        one of your <a href="coaches">coaches</a>
-        					{% endif %}
-        				{% endif %}
-        				for help?
-        			{% endif %}
-        		{% endif %}
-        	{% endif %}
+                        {% if exercise_videos %}
+                            watch the related videos again, or
+                        {% endif %}
+                        ask
+                        {% if coaches|length_is:"0" %}
+                            someone
+                        {% else %}
+                            {% if coaches|length_is:"1" %}
+                                your <a href="coaches">coach</a>
+                            {% else %}
+                                one of your <a href="coaches">coaches</a>
+                            {% endif %}
+                        {% endif %}
+                        for help?
+                    {% endif %}
+                {% endif %}
+            {% endif %}
         {% endif %}
         </div>
     {% endif %}
