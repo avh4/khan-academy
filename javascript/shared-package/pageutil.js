@@ -217,10 +217,7 @@ var VideoControls = {
             })
             .css({ width: "" }) // We want #thumbnails to be full width even though the cycle plugin doesn't
             .find(".thumbnail_link")
-                .click(VideoControls.thumbnailClick).end()
-            .find(".thumbnail_td").each(function() {
-                VideoStats.tooltip(this, $(this).data("teaser"));
-            });
+                .click(VideoControls.thumbnailClick);
 
     },
 
