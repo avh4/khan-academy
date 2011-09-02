@@ -137,8 +137,21 @@ def exercise_icon(exercise, App):
 
 @register.simple_tag
 def exercise_message(exercise, coaches, exercise_states):
-    path = os.path.join(os.path.dirname(__file__), "exercise_message.html")
-    return webapp_template.render(path, dict({"exercise": exercise, "coaches": coaches}, **exercise_states))
+    if exercise_states['endangered']:
+        state = '_endangered'
+    elif exercise_states['reviewing']:
+        state = '_reviewing'
+    elif exercise_states['proficient']:
+        state = '_proficient'
+    elif exercise_states['struggling']:
+        state = '_struggling'
+    else:
+        state = ''
+    filename = "exercise_message%s.html" % state
+    path = os.path.join(os.path.dirname(__file__), filename)
+
+    exercise_states.update({"exercise": exercise, "coaches": coaches})
+    return webapp_template.render(path, exercise_states)
 
 @register.inclusion_tag("user_points.html")
 def user_points(user_data):
