@@ -2403,6 +2403,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #thumbnails td a {
     outline: none;
+    color: #fff;
 }
 
 #thumbnails td div.thumb {
@@ -2424,7 +2425,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 }
 
 #thumbnails td div.thumbnail_label {
-    padding: 2px 2px 0;
+    padding: 5px 10px 5px 20px;
+    max-width: 170px;
+    margin: 0 auto;
+    text-align: left;
+    margin-top: -33px;
+    background: #333;
+    background: rgba(30, 30, 30, 0.9);
 }
 
 #thumbnails td.selected div.thumbnail_label {
