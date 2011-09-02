@@ -18,7 +18,7 @@
         <h1>Learn almost anything for free.</h1>
         <p>
             With a library of over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> covering 
-            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">125 practice exercises</a>,
+            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">150 practice exercises</a>,
             <a href="/about">we're on a mission</a> to help you learn whatever you want, whenever you want, at your own pace.
         </p>
         <p class="call-to-action-buttons">
@@ -44,7 +44,7 @@
         </div>
     </div>
     <h2>
-        New & Noteworthy
+        New <span class="ampersand">&</span> Noteworthy
         <span class="homepage-mailing">{% mailing_list_signup_form 3 "Send me updates!" "Enter your email to get updates about new courses" %}</span>
     </h2>
     {% if thumbnail_link_sets %}
@@ -142,5 +142,5 @@
         })();
     </script>
 
-    {% crazyegg_tracker 1 %}
+    {% crazyegg_tracker 0 %}
 {% endblock bottompagescript %}
