@@ -1,10 +1,13 @@
 import random
 
+from django.template.defaultfilters import escape
+
 import consts
 import library
 import request_handler
 import models
 import layer_cache
+import templatetags
 from topics_list import DVD_list
 
 @layer_cache.cache(layer=layer_cache.Layers.InAppMemory)
@@ -48,7 +51,7 @@ def new_and_noteworthy_link_sets():
             current_set.append({
                 "href": exercise.ka_url,
                 "thumb_url": "/images/splashthumbnails/exercises/%s" % (exercise_icon_files[next_exercise % (len(exercise_icon_files))]),
-                "desc": exercise.display_name,
+                "desc_html": escape(exercise.display_name),
                 "youtube_id": "",
                 "selected": False,
                 "key": exercise.key,
@@ -64,7 +67,7 @@ def new_and_noteworthy_link_sets():
         current_set.append({
             "href": video.ka_url,
             "thumb_url": video.youtube_thumbnail_url(),
-            "desc": video.title,
+            "desc_html": templatetags.video_name_and_progress(video),
             "youtube_id": video.youtube_id,
             "selected": False,
             "key": video.key()
