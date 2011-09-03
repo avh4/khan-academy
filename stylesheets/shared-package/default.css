@@ -705,6 +705,7 @@ footer {
 }
 #social-actions td.social-action {
     text-align: center;
+    width: 25%;
 }
 #social-actions #fb-like-badge {
     display: inline-block;
