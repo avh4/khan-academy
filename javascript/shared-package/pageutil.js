@@ -230,7 +230,7 @@ var VideoControls = {
                         },
                         function() {
                             $(this)
-                                .find(".thumbnail_label").animate({ marginTop: -33 }, animationOptions).end()
+                                .find(".thumbnail_label").animate({ marginTop: -32 }, animationOptions).end()
                                 .find(".thumbnail_teaser").animate({ height: 0 }, animationOptions);
                         }
             );
