@@ -19,7 +19,7 @@
         <p>
             With a library of over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> covering 
             everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">150 practice exercises</a>,
-            <a href="/about">we're on a mission</a> to help you learn whatever you want, whenever you want, at your own pace.
+            <a href="/about">we're on a mission</a> to help you learn what you want, when you want, at your own pace.
         </p>
         <p class="call-to-action-buttons">
         	<a href="/#browse" class="call-to-action simple-button action-gradient green">Watch a video</a>
@@ -30,14 +30,19 @@
                 <tr>
                     <td class="social-action">
                         <span id="fb-like-badge">
-                            <div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=259326814091703&amp;xfbml=1"></script><fb:like href="http://www.khanacademy.org" send="true" layout="button_count" width="100" show_faces="false" font=""></fb:like>
+                            <div id="fb-root"></div><fb:like href="http://www.khanacademy.org" send="true" layout="button_count" width="100" show_faces="false" font=""></fb:like>
                         </span>
                     </td>
                     <td class="social-action">
-                        <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.khanacademy.org" data-text="Watch. Practice. Learn almost anything for free." data-count="horizontal" data-via="khanacademy">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+                        <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://www.khanacademy.org" data-text="Watch. Practice. Learn almost anything for free." data-count="horizontal" data-via="khanacademy">Tweet</a>
                     </td>
                     <td class="social-action">
                         <g:plusone size="medium" href="http://www.khanacademy.org"></g:plusone>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=3 class="homepage-mailing">
+                        <span>{% mailing_list_signup_form 3 "Get Updates" "Enter your email to learn about new courses." %}</span>
                     </td>
                 </tr>
             </table>
@@ -45,7 +50,6 @@
     </div>
     <h2>
         New <span class="ampersand">&</span> Noteworthy
-        <span class="homepage-mailing">{% mailing_list_signup_form 3 "Send me updates!" "Enter your email to get updates about new courses" %}</span>
     </h2>
     {% if thumbnail_link_sets %}
     <div id="thumbnails_container">

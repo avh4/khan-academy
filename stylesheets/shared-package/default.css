@@ -713,16 +713,14 @@ footer {
     vertical-align: top;
 }
 .homepage-mailing {
-    float: right;
-    position: relative;
-    top: -2px;
+    padding-top: 13px;
 }
 .homepage-mailing .mailing_list_container input.simple-button {
     display: inline;
     padding: 4px 10px;
 }
 .homepage-mailing .mailing_list_container input.email {
-    width: 298px;
+    width: 250px;
     border: 1px solid #ccc;
     height: 17px;
 }
