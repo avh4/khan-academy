@@ -16,7 +16,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     if video:
         link_dict = {
-            "href": video.ka_url,
+            "href": "/video/%s" % video.readable_id,
             "thumb_url": video.youtube_thumbnail_url(),
             "desc_html": templatetags.video_name_and_progress(video),
             "teaser_html": video.description,
