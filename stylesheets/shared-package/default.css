@@ -703,9 +703,6 @@ footer {
 #playlist-jump nav > ul > li ul {
     font-size: 12px;
 }
-#social-actions td.social-action {
-    width: 25%;
-}
 #social-actions #fb-like-badge {
     display: inline-block;
     width: 165px;
