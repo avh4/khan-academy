@@ -22,6 +22,9 @@ REFRESH_SECS = 30
 
 CACHE_EXPIRATION_SECS = 60 * 60
 
+# For a point on the exercise map
+MAX_POINT_RADIUS = 10
+
 # Create a new list of KVPs with the values of all KVPs with identical keys summed
 def sum_keys(key_value_pairs):
     key_value_pairs.sort()
@@ -155,5 +158,55 @@ class ExerciseDoneProfGraph(request_handler.RequestHandler):
 class GeckoboardExercisesRedirect(request_handler.RequestHandler):
     def get(self):
         bucket_index = self.request_int('ix', 0)
-        return self.redirect('/exercisestats/json?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
+        return self.redirect('/exercisestats/ex_done_prof?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
             % (PAST_DAYS_TO_SHOW, REFRESH_SECS, NUM_BUCKETS, bucket_index))
+
+# Castro roulette
+# We now have more exercises than x. Last exercise developer was X
+
+# TODO: caching 
+class ExerciseStatsMap(request_handler.RequestHandler):
+
+    def get(self):
+        yesterday = dt.date.today() - dt.timedelta(days=3)
+
+        most_done = 1
+        ex_stat_dict = {}
+        for ex in Exercise.get_all_use_cache():
+            stat = ExerciseStatistic.get_by_date(ex.name, yesterday)
+            ex_stat_dict[ex.name] = stat
+            if stat:
+                most_done = max(most_done, stat.num_problems_done())
+
+        done_coords, prof_coords = [], []
+        for ex in Exercise.get_all_use_cache():
+            stat = ex_stat_dict[ex.name]
+            x, y = int(ex.h_position), int(ex.v_position)
+            radius = 1
+            if stat:
+                radius = math.sqrt(float(stat.num_problems_done()) / most_done) * MAX_POINT_RADIUS
+
+            point = {
+                'x': x,
+                'y': y,
+                'name': ex.display_name,
+                'marker': {
+                    'radius': max(radius, 1)
+                }
+            }
+            done_coords.append(point)
+            #prof_coords.append([x, y])
+
+        context = {
+            'title': 'Exercises Map',
+            'series1': {
+                'name': 'Problems Done',
+                'values': json.dumps(done_coords),
+            },
+            'series2': {
+                'name': 'Proficient',
+                'values': json.dumps(prof_coords),
+            },
+        }
+
+        self.render_template('exercisestats/highcharts_scatter_map.json', context)
