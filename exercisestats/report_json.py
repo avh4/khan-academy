@@ -27,16 +27,12 @@ MAX_POINT_RADIUS = 10
 
 # Create a new list of KVPs with the values of all KVPs with identical keys summed
 def sum_keys(key_value_pairs):
-    key_value_pairs.sort()
-    ret = []
-    last = None
-    for k, v in key_value_pairs:
-        if last == None or last != k:
-            ret.append([k, v])
-            last = k
-        else:
-            ret[-1][1] += v
-    return ret
+    histogram  = {}
+    for key, value in key_value_pairs:
+        cur_val = histogram.get(key, 0)
+        histogram[key] = cur_val + value
+
+    return list(histogram.items())
 
 def exercises_in_bucket(num_buckets, bucket_index):
     exercise_names = [ex.name for ex in Exercise.get_all_use_cache()]
