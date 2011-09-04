@@ -308,6 +308,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
             if problem_log.correct:
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)
+                explicitly_proficient = user_data.is_explicitly_proficient_at(user_exercise.exercise)
                 suggested = user_data.is_suggested(user_exercise.exercise)
                 problem_log.suggested = suggested
 
@@ -319,7 +320,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
 
-                if user_exercise.streak >= exercise.required_streak and not proficient:
+                if user_exercise.streak >= exercise.required_streak and not explicitly_proficient:
                     user_exercise.set_proficient(True, user_data)
                     user_data.reassess_if_necessary()
 
