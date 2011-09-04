@@ -27,7 +27,7 @@ MAX_POINT_RADIUS = 10
 
 # Create a new list of KVPs with the values of all KVPs with identical keys summed
 def sum_keys(key_value_pairs):
-    histogram  = {}
+    histogram = {}
     for key, value in key_value_pairs:
         cur_val = histogram.get(key, 0)
         histogram[key] = cur_val + value
