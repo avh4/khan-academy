@@ -64,7 +64,7 @@ def get_bucket_cursor(refresh_secs, bucket_size):
     ret = (unix_secs / refresh_secs) % bucket_size
     return ret
 
-class ExerciseDoneProfGraph(request_handler.RequestHandler):
+class ExerciseOverTimeGraph(request_handler.RequestHandler):
     def get_request_params(self):
         chart = self.request_string('chart', 'area_spline')
         past_days = self.request_int('past_days', 7)
@@ -155,17 +155,17 @@ class ExerciseDoneProfGraph(request_handler.RequestHandler):
 
 # This redirect is to eliminate duplicate code so we don't have to change every
 # Geckoboard widgets' URL for a general change
-class GeckoboardExercisesRedirect(request_handler.RequestHandler):
+class GeckoboardExerciseRedirect(request_handler.RequestHandler):
     def get(self):
         bucket_index = self.request_int('ix', 0)
-        return self.redirect('/exercisestats/ex_done_prof?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
+        return self.redirect('/exercisestats/exerciseovertime?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
             % (PAST_DAYS_TO_SHOW, REFRESH_SECS, NUM_BUCKETS, bucket_index))
 
 # Castro roulette
 # We now have more exercises than x. Last exercise developer was X
 
 # TODO: caching 
-class ExerciseStatsMap(request_handler.RequestHandler):
+class ExerciseStatsMapGraph(request_handler.RequestHandler):
 
     def get(self):
         yesterday = dt.date.today() - dt.timedelta(days=3)
