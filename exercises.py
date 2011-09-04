@@ -159,6 +159,11 @@ class ViewExercise(request_handler.RequestHandler):
         browser_disabled = self.is_older_ie()
         renderable = renderable and not browser_disabled
 
+        url_pattern = "/exercises?exid=%s&student_email=%s&problem_number=%d"
+
+        user_exercise.previous_problem_url = url_pattern % (exid, user_data_student.key_email , problem_number-1)
+        user_exercise.next_problem_url = url_pattern % (exid, user_data_student.key_email , problem_number+1)
+
         user_exercise_json = jsonify.jsonify(user_exercise)
 
         template_values = {
