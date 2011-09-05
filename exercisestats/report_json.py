@@ -9,6 +9,7 @@ from models import ProblemLog, Exercise
 from .models import ExerciseStatistic
 
 import bisect
+import cgi
 import datetime as dt
 import math
 import random
@@ -278,38 +279,32 @@ class ExercisesLastAuthorCounter(request_handler.RequestHandler):
 
 class ExerciseNumberTrivia(request_handler.RequestHandler):
     def get(self):
-        # TODO: request string
-        number = 129
+        number = self.request_int('num', len(Exercise.get_all_use_cache()))
         self.render_json(self.number_facts_for_geckboard_text(number))
 
+    # Not caching because there is no datastore access in this function
     @staticmethod
-    # TODO: cache
     def number_facts_for_geckboard_text(number):
-        math_fact = number_trivia.math_facts[number]
-        year_fact = number_trivia.year_facts[number]
+        math_fact = number_trivia.math_facts.get(number,
+            'This number is interesting. Why? Suppose there exists uninteresting '
+            'natural numbers. Then the smallest in that set would be '
+            'interesting by virtue of being the first: a contradiction. '
+            'Thus all natural numbers are interesting.')
+        year_fact = number_trivia.year_facts.get(number, 'nothing interesting happened')
 
         misc_fact_keys = sorted(number_trivia.misc_facts.keys())
         first_available_num = misc_fact_keys[bisect.bisect_left(misc_fact_keys, number) - 1]
         greater_than_fact = number_trivia.misc_facts[first_available_num]
 
-        # TODO: HTML escape
-        text1 = 'We now have more exercises than %s (%s)!' % (greater_than_fact, first_available_num)
+        text1 = 'We now have more exercises than %s (%s)!' % (
+            cgi.escape(greater_than_fact), str(first_available_num))
         text2 = math_fact
-        text3 = "In year %d, %s." % (number, year_fact)
+        text3 = "In year %d, %s." % (number, cgi.escape(year_fact))
 
         return {
             'item': [
-                {
-                    'text': text1,
-                    'type': 2,
-                },
-                {
-                    'text': text2,
-                    'type': 2,
-                },
-                {
-                    'text': text3,
-                    'type': 2,
-                },
+                { 'text': text1 },
+                { 'text': text2 },
+                { 'text': text3 },
             ]
         }
