@@ -1,8 +1,9 @@
+from google.appengine.ext import db
 
-def Experiment(db.Model):
+class _GAE_Bingo_Experiment(db.Model):
     name = db.StringProperty()
     live = db.BooleanProperty(default = False)
-    dt_started = db.DateTimeProperty()
+    dt_started = db.DateTimeProperty() # TODO: set dt_started appropriately
 
     @staticmethod
     def key_for_name(name):
@@ -12,8 +13,8 @@ def Experiment(db.Model):
     def exists(name):
         return cache.exists(Experiment.key_for_name(name))
 
-def Alternative(db.Model):
-    uid = db.IntegerProperty()
+class _GAE_Bingo_Alternative(db.Model):
+    number = db.IntegerProperty()
     experiment_name = db.StringProperty()
     content = db.TextProperty()
     weight = db.FloatProperty()
@@ -23,3 +24,21 @@ def Alternative(db.Model):
     def key_for_self(self):
         return "_gae_alternative:%s:%s" % (self.parent.name, self.alternative_id)
 
+def create_experiment_and_alternatives(test_name, unparsed_alternatives, conversion):
+    experiment = Experiment()
+    experiment.name = test_name
+
+    i = 0
+    alternatives = []
+
+    for unparsed_alternative in unparsed_alternatives:
+
+        alternative = Alternative()
+        alternative.number = i
+        alternative.content = unparsed_alternative
+
+        i += 1
+
+    # TODO: set weights appropriately
+
+    return experiment, alternatives

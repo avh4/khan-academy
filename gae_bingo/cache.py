@@ -1,8 +1,8 @@
 
 # Use same trick we use in last_action_cache --> all experiments and alternatives are stored in a single memcache key/value for all users, but only deserialize when necessary
-# TODO: once every 5 minutes, persist this to datastore...and add ability to load from datastore
+# TODO: once every 5 minutes, persist both of these to datastore...and add ability to load from datastore
 
-class BingoCache
+class BingoCache(object):
 
     MEMCACHE_KEY = "_gae_bingo_cache"
 
@@ -33,10 +33,21 @@ class BingoCache
         if not alternative.experiment_name in self.alternatives:
             self.alternatives[experiment.name] = {}
 
-        self.alternative_models[alternative.experiment_name][alternative.uid] = alternative
-        self.alternatives[alternative.experiment_name][alternative.uid] = db.model_to_protobuf(alternative).Encode()
+        self.alternative_models[alternative.experiment_name][alternative.number] = alternative
+        self.alternatives[alternative.experiment_name][alternative.number] = db.model_to_protobuf(alternative).Encode()
 
-class BingoIdentityCache
+    def experiment_and_alternatives(self, test_name):
+        return self.get_experiment(test_name), self.get_alternatives(test_name)
+
+    def get_experiment(test_name):
+        # TODO: Handle deserialization appropriately here
+        return self.experiment_models.get(test_name)
+
+    def get_alternatives(test_name):
+        # TODO: deserialization
+        return self.alternative_models.get(test_name) or []
+
+class BingoIdentityCache(object):
 
     MEMCACHE_KEY = "_gae_identity_cache:%s"
 
@@ -51,6 +62,7 @@ class BingoIdentityCache
 
     def __init__(self):
         self.participating_tests = [] # List of test names currently participating in
+        self.converted_tests = {} # Dict of test names:number of times user has successfully converted
 
 def bingo_and_identity_cache():
     # TODO: make 5 use real identity logic here

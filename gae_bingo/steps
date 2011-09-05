@@ -45,6 +45,7 @@
     figure out "expires_in" stuff and whether or not we need it
     alternative parsing?
     handle all TODO comments
+    actually use weights
     testing
 
     QUESTIONS:
