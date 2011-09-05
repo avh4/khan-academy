@@ -105,7 +105,7 @@ def score_conversion(test_name):
 def find_alternative_for_user(test_name, alternatives):
     return alternatives[modulo_choice(test_name, len(alternatives))]
 
-def module_choice(test_name, alternatives_count):
+def modulo_choice(test_name, alternatives_count):
 
     # TODO: use real identity here
     identity = 5

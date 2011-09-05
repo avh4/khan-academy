@@ -1,3 +1,5 @@
+import logging
+
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
@@ -55,10 +57,10 @@ class BingoCache(object):
 
     def update_alternative(self, alternative):
         if not alternative.experiment_name in self.alternative_models:
-            self.alternative_models[experiment.name] = {}
+            self.alternative_models[alternative.experiment_name] = {}
 
         if not alternative.experiment_name in self.alternatives:
-            self.alternatives[experiment.name] = {}
+            self.alternatives[alternative.experiment_name] = {}
 
         self.alternative_models[alternative.experiment_name][alternative.number] = alternative
         self.alternatives[alternative.experiment_name][alternative.number] = db.model_to_protobuf(alternative).Encode()
