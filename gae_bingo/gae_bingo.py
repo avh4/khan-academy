@@ -8,7 +8,7 @@ from google.appengine.datastore import entity_pb
 from cache import BingoCache, bingo_and_identity_cache
 from .models import create_experiment_and_alternatives
 
-def ab_test(test_name, unparsed_alternatives, conversion):
+def ab_test(test_name, alternative_params, conversion):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 
@@ -35,7 +35,7 @@ def ab_test(test_name, unparsed_alternatives, conversion):
 
             # We have the lock, go ahead and create the experiment if still necessary
             if test_name not in BingoCache.get().experiments:
-                experiment, alternatives = new_experiment_and_alternatives(test_name, unparsed_alternatives, conversion)
+                experiment, alternatives = new_experiment_and_alternatives(test_name, alternative_params, conversion)
                 bingo_cache.add_experiment(experiment, alternatives)
 
         finally:

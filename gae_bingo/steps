@@ -46,14 +46,14 @@
     figure out "expires_in" stuff and whether or not we need it
     alternative parsing?
     handle all TODO comments
-    actually use weights
     testing
 
     QUESTIONS:
     sharded counter issues
     do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?
 
-
+    NEXT VERSION:
+    weights
 
 
 

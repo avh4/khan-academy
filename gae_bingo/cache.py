@@ -21,7 +21,6 @@ class BingoCache(object):
         self.experiment_names_by_conversion_names = {} # Mapping of conversion names to experiment names
 
     def add_experiment(self, experiment, alternatives):
-        # TODO: handle concurrency issues here during initial creation
         self.experiment_models[experiment.name] = experiment
         self.experiments[experiment.name] = db.model_to_protobuf(experiment).Encode()
 
@@ -45,17 +44,24 @@ class BingoCache(object):
     def experiment_and_alternatives(self, test_name):
         return self.get_experiment(test_name), self.get_alternatives(test_name)
 
-    def get_experiment(test_name):
-        # TODO: Handle deserialization appropriately here
+    def get_experiment(self, test_name):
+        if test_name not in self.experiment_models:
+            if test_name in self.experiments:
+                self.experiment_models[test_name] = db.model_from_protobuf(entity_pb.EntityProto(self.experiments[test_name]))
+
         return self.experiment_models.get(test_name)
 
     def get_alternatives(test_name):
-        # TODO: deserialization
+        if test_name not in self.alternative_models:
+            if test_name in self.alternatives:
+                self.alternative_models[test_name] = []
+                for serialized_alternative in self.alternatives[test_name]:
+                    self.alternative_models[test_name].append(db.model_from_protobuf(entity_pb.EntityProto(serialized_alternative))
+
         return self.alternative_models.get(test_name) or []
 
     def get_experiment_names_by_conversion_name(conversion_name):
-        # TODO: Handle deserialization and lookups
-        return self.experiment_names_by_conversion_names.get(conversion_name)
+        return self.experiment_names_by_conversion_names.get(conversion_name) or []
 
 class BingoIdentityCache(object):
 

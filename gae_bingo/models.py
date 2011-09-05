@@ -18,28 +18,26 @@ class _GAE_Bingo_Alternative(db.Model):
     number = db.IntegerProperty()
     experiment_name = db.StringProperty()
     content = db.TextProperty()
-    weight = db.FloatProperty()
     conversions = db.IntegerProperty(default = 0)
     participants = db.IntegerProperty(default = 0)
 
     def key_for_self(self):
         return "_gae_alternative:%s:%s" % (self.parent.name, self.alternative_id)
 
-def create_experiment_and_alternatives(test_name, unparsed_alternatives, conversion):
+def create_experiment_and_alternatives(test_name, alternative_params, conversion):
+
     experiment = Experiment()
     experiment.name = test_name
 
-    i = 0
     alternatives = []
+    i = 0
 
-    for unparsed_alternative in unparsed_alternatives:
+    for content in alternative_params:
 
         alternative = Alternative()
         alternative.number = i
-        alternative.content = unparsed_alternative
+        alternative.content = content
 
         i += 1
-
-    # TODO: set weights appropriately
 
     return experiment, alternatives
