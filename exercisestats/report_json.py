@@ -179,6 +179,7 @@ class GeckoboardExerciseRedirect(request_handler.RequestHandler):
 # TODO: Either allow returning graphs for other statistics, such as #
 #     proficient, or somehow display more statistics on the same graph nicely
 class ExerciseStatsMapGraph(request_handler.RequestHandler):
+    # TODO: Just move this logic into get and make get_use_cache take a day parameter.
     def get_request_params(self):
         yesterday = dt.date.today() - dt.timedelta(days=1)
         interested_day = self.request_date('date', "%Y/%m/%d", yesterday)
@@ -237,3 +238,37 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
 
         return self.render_template_to_string(
             'exercisestats/highcharts_scatter_map.json', context)
+
+class ExercisesLastAuthorCounter(request_handler.RequestHandler):
+    def get(self):
+        self.render_json(self.geckoboard_rag_response())
+
+    @layer_cache.cache(expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    def geckoboard_rag_response(self):
+        exercises = Exercise.get_all_use_cache()
+        # TODO: Last_modified field seems to be none (at least locally). Sort
+        #     by another field, or actually use last_modified and author fields.
+        exercises.sort(key=lambda ex: ex.last_modified)
+
+        last_exercise = exercises[-1]
+        num_exercises = len(exercises)
+
+        text = "Thanks %s for %s!" % (
+            last_exercise.author.nickname(), last_exercise.display_name)
+
+        return {
+            'item': [
+                {
+                    'value': None,
+                    'text': '',
+                },
+                {
+                    'value': None,
+                    'text': '',
+                },
+                {
+                    'value': num_exercises,
+                    'text': text,
+                },
+            ]
+        }

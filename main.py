@@ -1123,6 +1123,7 @@ def main():
         ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
         ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
         ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
+        ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
