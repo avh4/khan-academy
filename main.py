@@ -28,6 +28,7 @@ import bulk_update.handler
 import facebook
 import request_cache
 from gae_mini_profiler import profiler
+from gae_bingo.middleware import GAEBingoWSGIMiddleware
 import autocomplete
 import coaches
 import knowledgemap
@@ -1129,6 +1130,7 @@ def main():
         ], debug=True)
 
     application = profiler.ProfilerWSGIMiddleware(application)
+    application = GAEBingoWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)

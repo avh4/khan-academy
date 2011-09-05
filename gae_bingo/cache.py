@@ -7,14 +7,22 @@ from google.appengine.datastore import entity_pb
 # Use same trick we use in last_action_cache --> all experiments and alternatives are stored in a single memcache key/value for all users, but only deserialize when necessary
 # TODO: once every 5 minutes, persist both of these to datastore...and add ability to load from datastore
 
+# REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware
+REQUEST_CACHE = {}
+
+def flush_request_cache():
+    global REQUEST_CACHE
+    REQUEST_CACHE = {}
+
 class BingoCache(object):
 
     MEMCACHE_KEY = "_gae_bingo_cache"
 
     @staticmethod
     def get():
-        # TODO: implement request caching for this
-        return memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache()
+        if not REQUEST_CACHE.get(BingoCache.MEMCACHE_KEY):
+            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache()
+        return REQUEST_CACHE[BingoCache.MEMCACHE_KEY]
 
     def store_if_dirty(self):
 
@@ -81,8 +89,8 @@ class BingoCache(object):
         if test_name not in self.alternative_models:
             if test_name in self.alternatives:
                 self.alternative_models[test_name] = []
-                for serialized_alternative in self.alternatives[test_name]:
-                    self.alternative_models[test_name].append(db.model_from_protobuf(entity_pb.EntityProto(serialized_alternative)))
+                for alternative_number in self.alternatives[test_name]:
+                    self.alternative_models[test_name].append(db.model_from_protobuf(entity_pb.EntityProto(self.alternatives[test_name][alternative_number])))
 
         return self.alternative_models.get(test_name) or []
 
@@ -99,8 +107,11 @@ class BingoIdentityCache(object):
 
     @staticmethod
     def get_for_identity(identity):
-        # TODO: implement request caching here, too, maybe collapse both memcached requests into a single bulk get
-        return memcache.get(BingoIdentityCache.key_for_identity(identity)) or BingoIdentityCache()
+        # TODO: maybe collapse both memcached requests into a single bulk get
+        key = BingoIdentityCache.key_for_identity(identity)
+        if not REQUEST_CACHE.get(key):
+            REQUEST_CACHE[key] = memcache.get(key) or BingoIdentityCache()
+        return REQUEST_CACHE[key]
 
     def store_for_identity_if_dirty(self, identity):
         if not self.dirty:
@@ -132,8 +143,12 @@ def bingo_and_identity_cache():
     return BingoCache.get(), BingoIdentityCache.get_for_identity(5)
 
 def store_if_dirty():
-    # TODO: only load here if loading from request cache, don't load from memcache
-    bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
-    
-    bingo_cache.store_if_dirty()
-    bingo_identity_cache.store_if_dirty()
+    # Only load from request cache here -- if it hasn't been loaded from memcache previously, it's not dirty.
+    bingo_cache = REQUEST_CACHE.get(BingoCache.MEMCACHE_KEY)
+    bingo_identity_cache = REQUEST_CACHE.get(BingoIdentityCache.key_for_identity(5)) # TODO: real identity
+
+    if bingo_cache:
+        bingo_cache.store_if_dirty()
+
+    if bingo_identity_cache:
+        bingo_identity_cache.store_for_identity_if_dirty(5) # TODO: real identity

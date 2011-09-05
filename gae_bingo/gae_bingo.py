@@ -4,7 +4,7 @@ import time
 
 from google.appengine.api import memcache
 
-from cache import BingoCache, bingo_and_identity_cache, store_if_dirty
+from cache import BingoCache, bingo_and_identity_cache
 from .models import create_experiment_and_alternatives
 
 def ab_test(test_name, alternative_params, conversion):
@@ -112,16 +112,3 @@ def modulo_choice(test_name, alternatives_count):
     sig = hashlib.md5(test_name + str(identity)).hexdigest()
     sig_num = int(sig, base=16)
     return sig_num % alternatives_count
-
-class GAEBingoWSGIMiddleware(object):
-
-    def __init__(self, app):
-        self.app = app
-
-    def __call__(self, environ, start_response):
-
-        result = self.app(environ, start_response)
-        for value in result:
-            yield value
-
-        store_if_dirty()
