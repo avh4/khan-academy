@@ -1,8 +1,8 @@
 import hashlib
 import time
 
-from google.appengine.api import memcache
 from google.appengine.ext import db
+from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
 
 from cache import BingoCache, bingo_and_identity_cache
@@ -54,8 +54,7 @@ def ab_test(test_name, alternative_params, conversion):
     if test_name not in bingo_identity_cache.participating_tests:
         bingo_identity_cache.participating_tests.append(test_name)
 
-        # TODO: handle counter sharding or something of the sort
-        alternative.participants += 1
+        alternative.increment_participants()
         bingo_cache.update_alternative(alternative)
 
     return alternative.content
@@ -91,8 +90,7 @@ def score_conversion(test_name):
 
     alternative = find_alternative_for_user(test_name, bingo_cache.get_alternatives(test_name))
 
-    # TODO: sharded counter handling
-    alternative.conversions += 1
+    alternative.increment_conversions()
     bingo_cache.update_alternative(alternative)
 
     # TODO: multiple participation handling

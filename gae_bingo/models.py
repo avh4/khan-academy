@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import memcache
 
 class _GAE_Bingo_Experiment(db.Model):
     name = db.StringProperty()
@@ -22,7 +23,21 @@ class _GAE_Bingo_Alternative(db.Model):
     participants = db.IntegerProperty(default = 0)
 
     def key_for_self(self):
-        return "_gae_alternative:%s:%s" % (self.parent.name, self.alternative_id)
+        return "_gae_alternative:%s:%s" % (self.parent().name, self.alternative_id)
+
+    def increment_participants(self):
+        # Use a memcache.incr-backed counter to keep track of increments in a scalable fashion.
+        # It's possible that the cached _GAE_Bingo_Alternative entities will fall a bit behind
+        # due to concurrency issues, but the memcache.incr'd version should stay up-to-date and
+        # be persisted.
+        self.participants = long(memcache.incr("%s:participants" % self.key_for_self(), initial_value=0))
+
+    def increment_conversions(self):
+        # Use a memcache.incr-backed counter to keep track of increments in a scalable fashion.
+        # It's possible that the cached _GAE_Bingo_Alternative entities will fall a bit behind
+        # due to concurrency issues, but the memcache.incr'd version should stay up-to-date and
+        # be persisted.
+        self.conversions = long(memcache.incr("%s:conversions" % self.key_for_self(), initial_value=0))
 
 def create_experiment_and_alternatives(test_name, alternative_params, conversion):
 
