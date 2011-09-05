@@ -1,12 +1,14 @@
 from __future__ import absolute_import
 
 import layer_cache
+import exercisestats.number_trivia as number_trivia
 import request_handler
 import user_util
 
 from models import ProblemLog, Exercise
 from .models import ExerciseStatistic
 
+import bisect
 import datetime as dt
 import math
 import random
@@ -241,10 +243,11 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
 
 class ExercisesLastAuthorCounter(request_handler.RequestHandler):
     def get(self):
-        self.render_json(self.geckoboard_rag_response())
+        self.render_json(self.exercise_counter_for_geckoboard_rag())
 
+    @staticmethod
     @layer_cache.cache(expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
-    def geckoboard_rag_response(self):
+    def exercise_counter_for_geckoboard_rag():
         exercises = Exercise.get_all_use_cache()
         # TODO: Last_modified field seems to be none (at least locally). Sort
         #     by another field, or actually use last_modified and author fields.
@@ -269,6 +272,44 @@ class ExercisesLastAuthorCounter(request_handler.RequestHandler):
                 {
                     'value': num_exercises,
                     'text': text,
+                },
+            ]
+        }
+
+class ExerciseNumberTrivia(request_handler.RequestHandler):
+    def get(self):
+        # TODO: request string
+        number = 129
+        self.render_json(self.number_facts_for_geckboard_text(number))
+
+    @staticmethod
+    # TODO: cache
+    def number_facts_for_geckboard_text(number):
+        math_fact = number_trivia.math_facts[number]
+        year_fact = number_trivia.year_facts[number]
+
+        misc_fact_keys = sorted(number_trivia.misc_facts.keys())
+        first_available_num = misc_fact_keys[bisect.bisect_left(misc_fact_keys, number) - 1]
+        greater_than_fact = number_trivia.misc_facts[first_available_num]
+
+        # TODO: HTML escape
+        text1 = 'We now have more exercises than %s (%s)!' % (greater_than_fact, first_available_num)
+        text2 = math_fact
+        text3 = "In year %d, %s." % (number, year_fact)
+
+        return {
+            'item': [
+                {
+                    'text': text1,
+                    'type': 2,
+                },
+                {
+                    'text': text2,
+                    'type': 2,
+                },
+                {
+                    'text': text3,
+                    'type': 2,
                 },
             ]
         }

@@ -1124,6 +1124,7 @@ def main():
         ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
         ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
         ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
+        ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
