@@ -60,6 +60,21 @@ def ab_test(test_name, unparsed_alternatives, conversion):
 
     return alternative.content
 
+def bingo(param):
+
+    if type(param) == list:
+
+        # Bingo for all conversions in list
+        for test_name in param:
+            bingo(test_name)
+        return
+
+    elif type(param) == str:
+
+        # Bingo for all experiments associated with this conversion
+        for experiment_name in BingoCache.get().get_experiment_names_by_conversion_name(param):
+            score_conversion(experiment_name)
+
 def score_conversion(test_name):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()

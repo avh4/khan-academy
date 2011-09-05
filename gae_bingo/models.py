@@ -2,6 +2,7 @@ from google.appengine.ext import db
 
 class _GAE_Bingo_Experiment(db.Model):
     name = db.StringProperty()
+    conversion_name = db.StringProperty()
     live = db.BooleanProperty(default = False)
     dt_started = db.DateTimeProperty() # TODO: set dt_started appropriately
 

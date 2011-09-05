@@ -18,10 +18,16 @@ class BingoCache(object):
         self.alternatives = {} # Protobuf version of alternatives for extremely fast (de)serialization
         self.alternative_models = {} # Deserialized alternative models
 
+        self.experiment_names_by_conversion_names = {} # Mapping of conversion names to experiment names
+
     def add_experiment(self, experiment, alternatives):
         # TODO: handle concurrency issues here during initial creation
         self.experiment_models[experiment.name] = experiment
         self.experiments[experiment.name] = db.model_to_protobuf(experiment).Encode()
+
+        if not experiment.conversion_name in self.experiment_names_by_conversion_name:
+            self.experiment_names_by_conversion_names[experiment.conversion_name] = []
+        self.experiment_names_by_conversion_names[experiment.conversion_name].append(experiment.name)
 
         for alternative in alternatives:
             self.update_alternative(alternative)
@@ -46,6 +52,10 @@ class BingoCache(object):
     def get_alternatives(test_name):
         # TODO: deserialization
         return self.alternative_models.get(test_name) or []
+
+    def get_experiment_names_by_conversion_name(conversion_name):
+        # TODO: Handle deserialization and lookups
+        return self.experiment_names_by_conversion_names.get(conversion_name)
 
 class BingoIdentityCache(object):
 
