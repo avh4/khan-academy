@@ -308,3 +308,28 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
                 { 'text': text3 },
             ]
         }
+
+class UserLocationsMap(request_handler.RequestHandler):
+    def get(self):
+        yesterday = dt.date.today() - dt.timedelta(days=1)
+        date = self.request_date('date', "%Y/%m/%d", yesterday)
+
+        self.render_json(self.get_ip_addresses_for_geckoboard_map(date))
+
+    @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda date: str(date),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    def get_ip_addresses_for_geckoboard_map(date):
+        ip_addresses = []
+
+        for ex in Exercise.get_all_use_cache():
+            stat = ExerciseStatistic.get_by_date(ex.name, date)
+
+            if stat:
+                ip_addresses += stat.histogram.get('ip_addresses', [])
+
+        return {
+            'points': {
+                'point': [{'ip': addr} for addr in ip_addresses]
+            }
+        }

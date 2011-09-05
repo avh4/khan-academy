@@ -16,6 +16,9 @@ import user_util
 import uuid
 import re
 
+# TODO: Experiment with this number. How many problem logs do we get per day?
+IP_ADDRESS_SAMPLE_RATE = 0.0001
+
 # handler that kicks off task chain per exercise
 class CollectFancyExerciseStatistics(RequestHandler):
     @user_util.developer_only
@@ -108,6 +111,7 @@ def fancy_stats_from_logs(problem_logs):
     freq_table = {}
     sugg_freq_table = {}
     prof_freq_table = {}
+    ip_addresses = []
 
     for problem_log in problem_logs:
         # cast longs to ints when possible
@@ -127,12 +131,16 @@ def fancy_stats_from_logs(problem_logs):
             problem_num = int(problem_log.problem_number)
             prof_freq_table[problem_num] = 1 + prof_freq_table.get(problem_num, 0)
 
+        if problem_log.random_float < IP_ADDRESS_SAMPLE_RATE and problem_log.ip_address:
+            ip_addresses.append(problem_log.ip_address)
+
     return {
         'log_count': log_count,
         'new_user_count': new_user_count,
         'time_taken_frequencies': freq_table,
         'suggested_time_taken_frequencies': sugg_freq_table,
-        'proficiency_problem_number_frequencies': prof_freq_table
+        'proficiency_problem_number_frequencies': prof_freq_table,
+        'ip_addresses': ip_addresses,
     }
 
 def fancy_stats_shard_reducer(exid, start_dt, end_dt):
@@ -149,6 +157,7 @@ def fancy_stats_shard_reducer(exid, start_dt, end_dt):
         'time_taken_frequencies': {},
         'suggested_time_taken_frequencies': {},
         'proficiency_problem_number_frequencies': {},
+        'ip_addresses': [],
     }
 
     # like dict.update, but it adds instead of replacing

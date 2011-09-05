@@ -1125,6 +1125,7 @@ def main():
         ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
         ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
         ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
+        ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
