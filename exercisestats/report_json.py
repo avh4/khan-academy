@@ -115,34 +115,50 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
         return self.area_spline(ex_stats, exid)
 
     def area_spline(self, exercise_stats, title=''):
-        prof_list, done_list = [], []
+        prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = int(time.mktime(ex.start_dt.timetuple()) * 1000)
             prof_list.append([start_unix, ex.num_proficient()])
             done_list.append([start_unix, ex.num_problems_done()])
+            new_users_list.append([start_unix, ex.num_new_users()])
 
+        # It's possible that the ExerciseStats that we go through has multiple
+        # entries for a particular day (eg. if we were aggregating more than
+        # one exercise). Sum them.
         done_list = sum_keys(done_list)
         prof_list = sum_keys(prof_list)
+        new_users_list = sum_keys(new_users_list)
 
         title = Exercise.to_display_name(title)
 
-        # Make the peak of the proficiency line about half as high as the peak
-        # of the # problems graph
-        done_y_max = max([x[1] for x in done_list]) if len(done_list) else 1
-        prof_y_max = max([x[1] for x in prof_list]) * 2 if len(prof_list) else 1
+        # Make the peak of the new users and proficiency series about half as
+        # high as the peak of the # problems line
+        left_axis_max = max([x[1] for x in done_list]) if done_list else 1
+        right_axis_max = max([x[1] for x in new_users_list]) * 2 if new_users_list else 1
 
         context = {
             'title': title,
-            'series1': {
-                'name': 'Problems Done', 
-                'max': done_y_max,
-                'values': json.dumps(done_list),
-            },
-            'series2': {
-                'name': 'Proficient',
-                'max': prof_y_max,
-                'values': json.dumps(prof_list),
-            },
+            'series': [
+                {
+                    'name': 'Problems Done',
+                    'values': json.dumps(done_list),
+                    'axis': 0,
+                },
+                {
+                    'name': 'Proficient',
+                    'values': json.dumps(prof_list),
+                    'axis': 1,
+                },
+                {
+                    'name': 'New users',
+                    'values': json.dumps(new_users_list),
+                    'axis': 1,
+                },
+            ],
+            'axes': [
+                { 'max': left_axis_max },
+                { 'max': right_axis_max },
+            ],
         }
 
         return self.render_template_to_string(

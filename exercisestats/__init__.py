@@ -103,7 +103,8 @@ def fancy_stats_deferred(exid, start_dt, end_dt, cursor, uid, i):
         logging.info("done processing %d logs for %s", all_stats['log_count'], exid)
 
 def fancy_stats_from_logs(problem_logs):
-    count = 0
+    log_count = 0
+    new_user_count = 0
     freq_table = {}
     sugg_freq_table = {}
     prof_freq_table = {}
@@ -112,7 +113,11 @@ def fancy_stats_from_logs(problem_logs):
         # cast longs to ints when possible
         time = int(problem_log.time_taken)
 
-        count += 1
+        log_count += 1
+
+        # The # of new users who did this exercise is the # of problem 1s done
+        new_user_count += 1 if problem_log.problem_number == 1 else 0
+
         freq_table[time] = 1 + freq_table.get(time, 0)
 
         if problem_log.suggested:
@@ -123,7 +128,8 @@ def fancy_stats_from_logs(problem_logs):
             prof_freq_table[problem_num] = 1 + prof_freq_table.get(problem_num, 0)
 
     return {
-        'log_count': count,
+        'log_count': log_count,
+        'new_user_count': new_user_count,
         'time_taken_frequencies': freq_table,
         'suggested_time_taken_frequencies': sugg_freq_table,
         'proficiency_problem_number_frequencies': prof_freq_table
@@ -139,6 +145,7 @@ def fancy_stats_shard_reducer(exid, start_dt, end_dt):
     # http://stackoverflow.com/questions/4851463
     results = {
         'log_count': 0,
+        'new_user_count': 0,
         'time_taken_frequencies': {},
         'suggested_time_taken_frequencies': {},
         'proficiency_problem_number_frequencies': {},
@@ -153,10 +160,11 @@ def fancy_stats_shard_reducer(exid, start_dt, end_dt):
     def accumulate_from_stat_shard(stat_shard):
         shard_val = pickle.loads(stat_shard.blob_val)
 
-        for dict_name in ['time_taken_frequencies', 'suggested_time_taken_frequencies', 'proficiency_problem_number_frequencies']:
-            dict_update_sum(results[dict_name], shard_val[dict_name])
-
-        results['log_count'] += shard_val['log_count']
+        for k, v in shard_val.items():
+            if isinstance(v, dict):
+                dict_update_sum(results[k], v)
+            else:
+                results[k] += v
 
     while True:
         stat_shards = query.fetch(1000)

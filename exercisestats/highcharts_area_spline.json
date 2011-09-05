@@ -23,28 +23,24 @@
         }
     },
     "series": [
-        {
-            "data": {{ series1.values }},
-            "name": "{{ series1.name }}",
-            "yAxis": 0
-        },
-        {
-            "data": {{ series2.values }},
-            "name": "{{ series2.name }}",
-            "yAxis": 1
-        }
+        {% for data in series %}
+            {
+                "data": {{ data.values }},
+                "name": "{{ data.name }}",
+                "yAxis": {{ data.axis }},
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
     ],
     "yAxis": [
-        {
-            "title": { "text": null },
-            "max": {{ series1.max }}
-
-        },
-        {
-            "title": { "text": null },
-            "opposite": true,
-            "max": {{ series2.max }}
-        }
+        {% for axis in axes %}
+            {
+                "title": { "text": null },
+                "max": {{ axis.max }}
+                {% if forloop.last %}
+                    , "opposite": true
+                {% endif %}
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
     ],
     "xAxis": { "type": "datetime" }
 }
