@@ -1,0 +1,72 @@
+
+    http://www.bingocardcreator.com/abingo/usage
+
+    In view:
+
+        show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4])
+        show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion="proficiency")
+        ...
+        bingo!("show_streak_bar_after_streak_count")
+
+        use_new_streak_bar = ab_test("use_new_streak_bar")
+        use_new_streak_bar = ab_test("use_new_streak_bar", conversion="proficiency")
+        ...
+        bingo!(["show_streak_bar_after_streak_count", "use_new_streak_bar"])
+
+        if exercise.name == "addition_4":
+            file_name = ab_test("addition_4_tweak", ["addition_4", "addition_4_tweaked"], conversion="addition_4_proficiency")
+            contents = raw_exercise_contents("%s.html" % file_name)
+            ...
+            bingo!("addition_4_proficiency")
+
+    In models:
+
+        limit_related_videos = ab_test("limit_related_videos", [1, 3, 10], conversion="watch_related_video")
+        exercise_videos = self.related_videos_query().fetch(limit_related_videos)
+        ...
+        bingo!("watch_related_video")
+
+        def struggling_threshold(self):
+            return ab_test("struggling_threshold_constant', [2, 3, 4], conversion="proficiency_after_struggling") * self.required_streak
+        ...
+        bingo!("proficiency_after_struggling")
+
+
+    In template:
+        {% ab_test "homepage_practice_text" "Practice" "Exercise" %}
+        {% ab_test_with_conversion "homepage_practice_text" "Practice" "Exercise" "proficiency" %}
+
+
+    TODO:
+    actual ab test selection and persistence
+    user identity hookups
+    dashboard and statistical analysis
+    bot detection stuff
+    figure out "expires_in" stuff and whether or not we need it
+    alternative parsing?
+    handle all TODO comments
+    testing
+
+    QUESTIONS:
+    sharded counter issues
+    do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Great design docs:
+    http://www.bingocardcreator.com/abingo/design
+
+Further reading:
+    http://elem.com/~btilly/effective-ab-testing/

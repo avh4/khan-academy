@@ -24,6 +24,7 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
+from gae_bingo.gae_bingo import ab_test
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -122,6 +123,7 @@ class ViewExercise(request_handler.RequestHandler):
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
             'renderable': renderable,
+            'show_streak_bar': ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion="proficiency"),
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
