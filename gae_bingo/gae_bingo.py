@@ -24,23 +24,30 @@ def ab_test(test_name, alternative_params, conversion):
 
             # Make sure only one experiment gets created
             while not got_lock:
-                if not client.gets(lock_key):
-                    # If lock is empty, try to get it with compare and set (expiration of 10 seconds)
+                locked = client.gets(lock_key)
+
+                while locked is None:
+                    # Initialize the lock if necessary
+                    client.set(lock_key, False)
+                    locked = client.gets(lock_key)
+
+                if not locked:
+                    # Lock looks available, try to take it with compare and set (expiration of 10 seconds)
                     got_lock = client.cas(lock_key, True, time=10)
                 
                 if not got_lock:
-                    # If we didn't get it or it wasn't empty, wait a bit and try again
+                    # If we didn't get it, wait a bit and try again
                     time.sleep(0.1)
 
             # We have the lock, go ahead and create the experiment if still necessary
             if test_name not in BingoCache.get().experiments:
-                experiment, alternatives = new_experiment_and_alternatives(test_name, alternative_params, conversion)
+                experiment, alternatives = create_experiment_and_alternatives(test_name, alternative_params, conversion)
                 bingo_cache.add_experiment(experiment, alternatives)
 
         finally:
             if got_lock:
                 # Release the lock
-                memcache.delete(lock_key)
+                client.set(lock_key, False)
 
     experiment, alternatives = bingo_cache.experiment_and_alternatives(test_name)
 

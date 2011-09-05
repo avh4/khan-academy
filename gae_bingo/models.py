@@ -1,3 +1,5 @@
+import logging
+
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
@@ -41,7 +43,7 @@ class _GAE_Bingo_Alternative(db.Model):
 
 def create_experiment_and_alternatives(test_name, alternative_params, conversion):
 
-    experiment = Experiment()
+    experiment = _GAE_Bingo_Experiment()
     experiment.name = test_name
 
     alternatives = []
@@ -49,9 +51,9 @@ def create_experiment_and_alternatives(test_name, alternative_params, conversion
 
     for content in alternative_params:
 
-        alternative = Alternative()
+        alternative = _GAE_Bingo_Alternative()
         alternative.number = i
-        alternative.content = content
+        alternative.content = str(content)
 
         i += 1
 
