@@ -175,27 +175,47 @@ class GeckoboardExerciseRedirect(request_handler.RequestHandler):
 # Castro roulette
 # We now have more exercises than x. Last exercise developer was X
 
-# TODO: caching 
+
+# TODO: Either allow returning graphs for other statistics, such as #
+#     proficient, or somehow display more statistics on the same graph nicely
 class ExerciseStatsMapGraph(request_handler.RequestHandler):
+    def get_request_params(self):
+        yesterday = dt.date.today() - dt.timedelta(days=1)
+        interested_day = self.request_date('date', "%Y/%m/%d", yesterday)
+
+        return {
+            'interested_day': interested_day
+        }
 
     def get(self):
-        yesterday = dt.date.today() - dt.timedelta(days=3)
+        self.response.out.write(self.get_use_cache())
 
-        most_done = 1
+    @layer_cache.cache_with_key_fxn(lambda self: str(self.get_request_params()),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    def get_use_cache(self):
+        params = self.get_request_params()
+
+        # Get the maximum so we know how the data label circles should be scaled
+        most_new_users = 1
         ex_stat_dict = {}
         for ex in Exercise.get_all_use_cache():
-            stat = ExerciseStatistic.get_by_date(ex.name, yesterday)
+            stat = ExerciseStatistic.get_by_date(ex.name, params['interested_day'])
             ex_stat_dict[ex.name] = stat
             if stat:
-                most_done = max(most_done, stat.num_problems_done())
+                most_done = max(most_new_users, stat.num_new_users())
 
-        done_coords, prof_coords = [], []
+        data_points = []
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
+
+            # The exercise map is rotated 90 degrees because we can fit more on
+            # Geckoboard's tiny 2x2 widget that way.
             x, y = int(ex.h_position), int(ex.v_position)
+
+            # Set the area of the circle proportional to the data value
             radius = 1
             if stat:
-                radius = math.sqrt(float(stat.num_problems_done()) / most_done) * MAX_POINT_RADIUS
+                radius = math.sqrt(float(stat.num_new_users()) / most_done) * MAX_POINT_RADIUS
 
             point = {
                 'x': x,
@@ -203,21 +223,17 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
                 'name': ex.display_name,
                 'marker': {
                     'radius': max(radius, 1)
-                }
+                },
             }
-            done_coords.append(point)
-            #prof_coords.append([x, y])
+            data_points.append(point)
 
         context = {
             'title': 'Exercises Map',
-            'series1': {
-                'name': 'Problems Done',
-                'values': json.dumps(done_coords),
-            },
-            'series2': {
-                'name': 'Proficient',
-                'values': json.dumps(prof_coords),
+            'series': {
+                'name': 'New Users',
+                'values': json.dumps(data_points),
             },
         }
 
-        self.render_template('exercisestats/highcharts_scatter_map.json', context)
+        return self.render_template_to_string(
+            'exercisestats/highcharts_scatter_map.json', context)
