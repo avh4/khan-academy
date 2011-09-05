@@ -1,11 +1,10 @@
+import logging
 import hashlib
 import time
 
-from google.appengine.ext import db
 from google.appengine.api import memcache
-from google.appengine.datastore import entity_pb
 
-from cache import BingoCache, bingo_and_identity_cache
+from cache import BingoCache, bingo_and_identity_cache, store_if_dirty
 from .models import create_experiment_and_alternatives
 
 def ab_test(test_name, alternative_params, conversion):
@@ -52,7 +51,7 @@ def ab_test(test_name, alternative_params, conversion):
 
     # TODO: multiple participation handling goes here
     if test_name not in bingo_identity_cache.participating_tests:
-        bingo_identity_cache.participating_tests.append(test_name)
+        bingo_identity_cache.participate_in(test_name)
 
         alternative.increment_participants()
         bingo_cache.update_alternative(alternative)
@@ -94,7 +93,7 @@ def score_conversion(test_name):
     bingo_cache.update_alternative(alternative)
 
     # TODO: multiple participation handling
-    bingo_identity_cache.converted_tests[test_name] = 1
+    bingo_identity_cache.convert_in(test_name)
 
 def find_alternative_for_user(test_name, alternatives):
     return alternatives[modulo_choice(test_name, len(alternatives))]
@@ -106,3 +105,16 @@ def module_choice(test_name, alternatives_count):
     sig = hashlib.md5(test_name + str(identity)).hexdigest()
     sig_num = int(sig, base=16)
     return sig_num % alternatives_count
+
+class GAEBingoWSGIMiddleware(object):
+
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+
+        result = self.app(environ, start_response)
+        for value in result:
+            yield value
+
+        store_if_dirty()
