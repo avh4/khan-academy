@@ -9,6 +9,7 @@ javascript = {
             "pageutil.js",
             "api.js",
 			"social.js",
+			"ga_social_tracking.js",
         ]
     },
     "video": {
