@@ -50,20 +50,19 @@ class _GAE_Bingo_Alternative(db.Model):
         # It's possible that the cached _GAE_Bingo_Alternative entities will fall a bit behind
         # due to concurrency issues, but the memcache.incr'd version should stay up-to-date and
         # be persisted.
-        self.participants = long(memcache.incr("%s:participants" % self.key_for_self(), initial_value=0))
+        self.participants = long(memcache.incr("%s:participants" % self.key_for_self(), initial_value=self.participants))
 
     def increment_conversions(self):
         # Use a memcache.incr-backed counter to keep track of increments in a scalable fashion.
         # It's possible that the cached _GAE_Bingo_Alternative entities will fall a bit behind
         # due to concurrency issues, but the memcache.incr'd version should stay up-to-date and
         # be persisted.
-        self.conversions = long(memcache.incr("%s:conversions" % self.key_for_self(), initial_value=0))
+        self.conversions = long(memcache.incr("%s:conversions" % self.key_for_self(), initial_value=self.conversions))
 
     def load_latest_counts(self):
-        # TODO: when memcache is cleared, this erases current max...
         # When persisting to datastore, we want to store the most recent value we've got
-        self.participants = long(memcache.get("%s:participants" % self.key_for_self()) or 0)
-        self.conversions = long(memcache.get("%s:conversions" % self.key_for_self()) or 0)
+        self.participants = max(self.participants, long(memcache.get("%s:participants" % self.key_for_self()) or 0))
+        self.conversions = max(self.conversions, long(memcache.get("%s:conversions" % self.key_for_self()) or 0))
 
 class _GAE_Bingo_Identity(db.Model):
     identity = db.StringProperty()

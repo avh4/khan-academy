@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import base64
+import logging
 import random
 
 from google.appengine.ext import db
@@ -9,7 +10,7 @@ from gae_bingo import cookies
 from models import UserData
 from .models import GAEBingoIdentityModel
 
-def unique_bingo_identity():
+def logged_in_bingo_identity():
     # This should return either:
     #   A) a db.Model that identifies the current user, like models.UserData.current(), or
     #   B) a unique string that consistently identifies the current user, like users.get_current_user().unique_id()
@@ -39,12 +40,15 @@ def identity():
     if IDENTITY_CACHE is None:
         # Try to get unique (hopefully persistent) identity from user's implementation,
         # otherwise grab the current cookie value, otherwise grab random value.
-        IDENTITY_CACHE = str(get_unique_bingo_identity_value() or get_identity_cookie_value() or get_random_identity_value())
+        IDENTITY_CACHE = str(get_logged_in_bingo_identity_value() or get_identity_cookie_value() or get_random_identity_value())
 
     return IDENTITY_CACHE
 
-def get_unique_bingo_identity_value():
-    val = unique_bingo_identity()
+def using_logged_in_bingo_identity():
+    return identity() and identity() == get_logged_in_bingo_identity_value()
+
+def get_logged_in_bingo_identity_value():
+    val = logged_in_bingo_identity()
 
     if val is None:
         return None
@@ -94,6 +98,9 @@ def get_identity_cookie_value():
 
 def set_identity_cookie_header():
     return cookies.set_cookie_value(IDENTITY_COOKIE_KEY, base64.urlsafe_b64encode(identity()))
+
+def delete_identity_cookie_header():
+    return cookies.set_cookie_value(IDENTITY_COOKIE_KEY, "")
 
 def flush_identity_cache():
     global IDENTITY_CACHE

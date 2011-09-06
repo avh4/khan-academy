@@ -1,5 +1,5 @@
 from cache import flush_request_cache, store_if_dirty
-from identity import identity, get_identity_cookie_value, set_identity_cookie_header, flush_identity_cache
+from identity import identity, get_identity_cookie_value, set_identity_cookie_header, delete_identity_cookie_header, using_logged_in_bingo_identity, flush_identity_cache
 
 class GAEBingoWSGIMiddleware(object):
 
@@ -14,9 +14,16 @@ class GAEBingoWSGIMiddleware(object):
 
         def gae_bingo_start_response(status, headers, exc_info = None):
 
-            # If current identity isn't already stored in cookie, do it now.
-            if identity() != get_identity_cookie_value():
-                headers.append(("Set-Cookie", set_identity_cookie_header()))
+            if using_logged_in_bingo_identity():
+                if get_identity_cookie_value():
+                    # If using logged in identity, clear cookie b/c we don't need it
+                    # and it can cause issues after logging out.
+                    headers.append(("Set-Cookie", delete_identity_cookie_header()))
+            else:
+                # Not using logged-in identity. If current identity isn't already stored in cookie, 
+                # do it now.
+                if identity() != get_identity_cookie_value():
+                    headers.append(("Set-Cookie", set_identity_cookie_header()))
 
             return start_response(status, headers, exc_info)
 
