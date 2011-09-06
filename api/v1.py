@@ -84,7 +84,7 @@ def playlist_videos(playlist_title):
     if not playlist:
         return None
     
-    return playlist.videos;
+    return playlist.get_videos();
 
 @route("/api/v1/playlists/<playlist_title>/exercises", methods=["GET"])
 @jsonp
@@ -100,7 +100,7 @@ def playlist_exercises(playlist_title):
     if not playlist:
         return None
 
-    return playlist.exercises;
+    return playlist.get_exercises();
 
 @route("/api/v1/playlists/library", methods=["GET"])
 @etag(lambda: models.Setting.cached_library_content_date())
