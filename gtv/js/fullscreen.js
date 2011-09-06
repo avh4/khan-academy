@@ -770,8 +770,12 @@ function searchByKeyword(keyword, json){
         var categories = templatePage.data;
         var playlists = [];
         searchByKeyword(keyword, categories);
-        if( templatePage.item.videos.length ) 
-            templatePage.renderUIComponents();
+        if( templatePage.item.videos.length ) {
+          templatePage.renderUIComponents();
+        }
+        else {
+          location.assign('/gtv/'); 
+        }
      }
 
   });

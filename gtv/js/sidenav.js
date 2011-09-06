@@ -226,7 +226,15 @@ gtv.jq.SideNavControl.prototype.showControl = function(showParams) {
     13: function(selectedItem, newSelected) {
       sideNavControl.handleChosenAction_(selectedItem);
       return new gtv.jq.Selection('skip');
-    }
+    },
+    38: function(selectedItem, newSelected) {
+      if( !newSelected[0] ) { // test if it's input or menu items
+        $('#keyword').focus();
+        $('#keyword').val(' ');
+        $('#keyword').removeClass('keyword-hint').addClass('keyword-text');
+      }
+      return new gtv.jq.Selection('none');
+    },
   };
   var navSelectors = {
     item: '.sidenav-item',
