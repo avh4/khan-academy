@@ -1,3 +1,4 @@
+import base64
 import random
 
 import cookies
@@ -22,10 +23,18 @@ def identity():
     return IDENTITY_CACHE
 
 def get_identity_cookie_value():
-    return cookies.get_cookie_value(IDENTITY_COOKIE_KEY)
+    cookie_val = cookies.get_cookie_value(IDENTITY_COOKIE_KEY)
+
+    if cookie_val:
+        try:
+            return base64.urlsafe_b64decode(cookie_val)
+        except:
+            pass
+
+    return None
 
 def set_identity_cookie_header():
-    return cookies.set_cookie_value(IDENTITY_COOKIE_KEY, identity())
+    return cookies.set_cookie_value(IDENTITY_COOKIE_KEY, base64.urlsafe_b64encode(identity()))
 
 def flush_identity_cache():
     global IDENTITY_CACHE
