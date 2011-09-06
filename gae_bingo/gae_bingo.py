@@ -8,13 +8,13 @@ from .cache import BingoCache, bingo_and_identity_cache
 from .models import create_experiment_and_alternatives
 from .identity import identity
 
-def ab_test(test_name, alternative_params, conversion):
+def ab_test(experiment_name, alternative_params, conversion_name):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 
     # TODO: short-circuit goes here
 
-    if test_name not in bingo_cache.experiments:
+    if experiment_name not in bingo_cache.experiments:
 
         # Creation logic w/ high concurrency protection
         client = memcache.Client()
@@ -41,8 +41,8 @@ def ab_test(test_name, alternative_params, conversion):
                     time.sleep(0.1)
 
             # We have the lock, go ahead and create the experiment if still necessary
-            if test_name not in BingoCache.get().experiments:
-                experiment, alternatives = create_experiment_and_alternatives(test_name, alternative_params, conversion)
+            if experiment_name not in BingoCache.get().experiments:
+                experiment, alternatives = create_experiment_and_alternatives(experiment_name, alternative_params, conversion_name)
                 bingo_cache.add_experiment(experiment, alternatives)
                 bingo_cache.store_if_dirty()
 
@@ -51,16 +51,16 @@ def ab_test(test_name, alternative_params, conversion):
                 # Release the lock
                 client.set(lock_key, False)
 
-    experiment, alternatives = bingo_cache.experiment_and_alternatives(test_name)
+    experiment, alternatives = bingo_cache.experiment_and_alternatives(experiment_name)
 
     if not experiment or not alternatives:
-        raise Exception("Could not find experiment or alternatives with test_name %s" % test_name)
+        raise Exception("Could not find experiment or alternatives with experiment_name %s" % experiment_name)
 
-    alternative = find_alternative_for_user(test_name, alternatives)
+    alternative = find_alternative_for_user(experiment_name, alternatives)
 
     # TODO: multiple participation handling goes here
-    if test_name not in bingo_identity_cache.participating_tests:
-        bingo_identity_cache.participate_in(test_name)
+    if experiment_name not in bingo_identity_cache.participating_tests:
+        bingo_identity_cache.participate_in(experiment_name)
 
         alternative.increment_participants()
         bingo_cache.update_alternative(alternative)
@@ -72,8 +72,8 @@ def bingo(param):
     if type(param) == list:
 
         # Bingo for all conversions in list
-        for test_name in param:
-            bingo(test_name)
+        for experiment_name in param:
+            bingo(experiment_name)
         return
 
     elif type(param) == str:
@@ -82,32 +82,32 @@ def bingo(param):
         for experiment_name in BingoCache.get().get_experiment_names_by_conversion_name(param):
             score_conversion(experiment_name)
 
-def score_conversion(test_name):
+def score_conversion(experiment_name):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 
     # TODO: assume participation logic goes here
-    if test_name not in bingo_identity_cache.participating_tests:
+    if experiment_name not in bingo_identity_cache.participating_tests:
         return
 
     # TODO: multiple participation handling goes here
-    if test_name in bingo_identity_cache.converted_tests:
+    if experiment_name in bingo_identity_cache.converted_tests:
         return
 
     # TODO: is_human handling goes here
 
-    alternative = find_alternative_for_user(test_name, bingo_cache.get_alternatives(test_name))
+    alternative = find_alternative_for_user(experiment_name, bingo_cache.get_alternatives(experiment_name))
 
     alternative.increment_conversions()
     bingo_cache.update_alternative(alternative)
 
     # TODO: multiple participation handling
-    bingo_identity_cache.convert_in(test_name)
+    bingo_identity_cache.convert_in(experiment_name)
 
-def find_alternative_for_user(test_name, alternatives):
-    return alternatives[modulo_choice(test_name, len(alternatives))]
+def find_alternative_for_user(experiment_name, alternatives):
+    return alternatives[modulo_choice(experiment_name, len(alternatives))]
 
-def modulo_choice(test_name, alternatives_count):
-    sig = hashlib.md5(test_name + str(identity())).hexdigest()
+def modulo_choice(experiment_name, alternatives_count):
+    sig = hashlib.md5(experiment_name + str(identity())).hexdigest()
     sig_num = int(sig, base=16)
     return sig_num % alternatives_count

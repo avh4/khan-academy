@@ -6,7 +6,7 @@ from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
 from google.appengine.ext.webapp import RequestHandler
 
-from .models import _GAE_Bingo_Experiment, _GAE_Bingo_Alternative, _GAE_Bingo_Identity, persist_gae_bingo_identity
+from .models import _GAEBingoExperiment, _GAEBingoAlternative, _GAEBingoIdentityRecord, persist_gae_bingo_identity_record
 from identity import identity
 
 # REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware.
@@ -81,11 +81,11 @@ class BingoCache(object):
         alternatives_dict = {}
 
         # TODO: parallelize these datastore calls
-        experiments = _GAE_Bingo_Experiment.all().filter("live =", True)
+        experiments = _GAEBingoExperiment.all().filter("live =", True)
         for experiment in experiments:
             experiment_dict[experiment.name] = experiment
 
-        alternatives = _GAE_Bingo_Alternative.all().filter("live =", True)
+        alternatives = _GAEBingoAlternative.all().filter("live =", True)
         for alternative in alternatives:
             if alternative.experiment_name not in alternatives_dict:
                 alternatives_dict[alternative.experiment_name] = []
@@ -128,24 +128,24 @@ class BingoCache(object):
 
         self.dirty = True
 
-    def experiment_and_alternatives(self, test_name):
-        return self.get_experiment(test_name), self.get_alternatives(test_name)
+    def experiment_and_alternatives(self, experiment_name):
+        return self.get_experiment(experiment_name), self.get_alternatives(experiment_name)
 
-    def get_experiment(self, test_name):
-        if test_name not in self.experiment_models:
-            if test_name in self.experiments:
-                self.experiment_models[test_name] = db.model_from_protobuf(entity_pb.EntityProto(self.experiments[test_name]))
+    def get_experiment(self, experiment_name):
+        if experiment_name not in self.experiment_models:
+            if experiment_name in self.experiments:
+                self.experiment_models[experiment_name] = db.model_from_protobuf(entity_pb.EntityProto(self.experiments[experiment_name]))
 
-        return self.experiment_models.get(test_name)
+        return self.experiment_models.get(experiment_name)
 
-    def get_alternatives(self, test_name):
-        if test_name not in self.alternative_models:
-            if test_name in self.alternatives:
-                self.alternative_models[test_name] = []
-                for alternative_number in self.alternatives[test_name]:
-                    self.alternative_models[test_name].append(db.model_from_protobuf(entity_pb.EntityProto(self.alternatives[test_name][alternative_number])))
+    def get_alternatives(self, experiment_name):
+        if experiment_name not in self.alternative_models:
+            if experiment_name in self.alternatives:
+                self.alternative_models[experiment_name] = []
+                for alternative_number in self.alternatives[experiment_name]:
+                    self.alternative_models[experiment_name].append(db.model_from_protobuf(entity_pb.EntityProto(self.alternatives[experiment_name][alternative_number])))
 
-        return self.alternative_models.get(test_name) or []
+        return self.alternative_models.get(experiment_name) or []
 
     def get_experiment_names_by_conversion_name(self, conversion_name):
         return self.experiment_names_by_conversion_name.get(conversion_name) or []
@@ -182,11 +182,11 @@ class BingoIdentityCache(object):
 
     def persist_to_datastore(self, identity):
         # TODO: add specific queue here
-        deferred.defer(persist_gae_bingo_identity, self, identity)
+        deferred.defer(persist_gae_bingo_identity_record, self, identity)
 
     @staticmethod
     def load_from_datastore():
-        return _GAE_Bingo_Identity.load(identity()) or BingoIdentityCache()
+        return _GAEBingoIdentityRecord.load(identity()) or BingoIdentityCache()
 
     def __init__(self):
         self.dirty = False
@@ -194,13 +194,13 @@ class BingoIdentityCache(object):
         self.participating_tests = [] # List of test names currently participating in
         self.converted_tests = {} # Dict of test names:number of times user has successfully converted
 
-    def participate_in(self, test_name):
-        self.participating_tests.append(test_name)
+    def participate_in(self, experiment_name):
+        self.participating_tests.append(experiment_name)
         self.dirty = True
 
-    def convert_in(self, test_name):
+    def convert_in(self, experiment_name):
         # TODO: multiple participation handling
-        self.converted_tests[test_name] = 1
+        self.converted_tests[experiment_name] = 1
         self.dirty = True
 
 def bingo_and_identity_cache():

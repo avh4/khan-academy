@@ -111,7 +111,7 @@ class ViewExercise(request_handler.RequestHandler):
 
         user_exercise_json = jsonify.jsonify(user_exercise)
         
-        show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion="proficiency"),
+        show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion_name="proficiency"),
 
         if self.request_bool("convert", default=False):
             bingo("proficiency")
