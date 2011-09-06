@@ -10,7 +10,7 @@ from .models import _GAE_Bingo_Experiment, _GAE_Bingo_Alternative, _GAE_Bingo_Id
 from identity import identity
 
 # REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware.
-# NOTE: this will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
+# NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
 REQUEST_CACHE = {}
 
 def flush_request_cache():

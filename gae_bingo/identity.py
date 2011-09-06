@@ -11,14 +11,15 @@ from .models import GAEBingoIdentityModel
 
 def unique_bingo_identity():
     # This should return either:
-    #       A) a db.Model that identifies the current user, or
-    #       B) a unique string that consistently identifies the current user
+    #   A) a db.Model that identifies the current user, like models.UserData.current(), or
+    #   B) a unique string that consistently identifies the current user, like users.get_current_user().unique_id()
     #
     # Ideally, this should be connected to your app's existing identity system.
+    # If your app has no way of identifying the current user of this specific request, this function should return None.
     # If this function returns None, gae_bingo will automatically use a random unique identifier.
     #
-    # To get the strongest identity tracking, return a model that inherits from GaeBingoIdentityModel.
-    # See docs for details.
+    # To get the strongest identity tracking from random identifier to logged in users,
+    # return a model that inherits from GaeBingoIdentityModel. See docs for details.
 
     # Examples:
     #   return models.UserData.current()
@@ -28,6 +29,7 @@ def unique_bingo_identity():
     # TODO: clean up this file for open source version
     return UserData.current()
 
+# NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
 IDENTITY_CACHE = None
 IDENTITY_COOKIE_KEY = "gae_b_id"
 
@@ -51,6 +53,20 @@ def get_unique_bingo_identity_value():
 
         if isinstance(val, GAEBingoIdentityModel):
             # If it's a db.Model that inherited from GAEBingoIdentityModel, return bingo identity
+
+            if not val.gae_bingo_identity:
+                if is_random_identity_value(get_identity_cookie_value()):
+                    # If the current model doesn't have a bingo identity associated w/ it
+                    # and we have a random cookie value already set, associate it with this identity model.
+                    #
+                    # This keeps the user's experience consistent between using the site pre- and post-login.
+                    val.gae_bingo_identity = get_identity_cookie_value()
+                else:
+                    # Otherwise just use the key, it's guaranteed to be unique
+                    val.gae_bingo_identity = str(val.key())
+
+                val.put()
+
             return val.gae_bingo_identity
 
         # If it's just a normal db instance, just use its unique key
@@ -60,7 +76,10 @@ def get_unique_bingo_identity_value():
     return str(val)
 
 def get_random_identity_value():
-    return random.randint(0, 10 ** 10)
+    return "_gae_bingo_random:%s" % random.randint(0, 10 ** 10)
+
+def is_random_identity_value(val):
+    return val and val.startswith("_gae_bingo_random")
 
 def get_identity_cookie_value():
     cookie_val = cookies.get_cookie_value(IDENTITY_COOKIE_KEY)
