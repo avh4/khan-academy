@@ -24,7 +24,7 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
-from gae_bingo.gae_bingo import ab_test
+from gae_bingo.gae_bingo import ab_test, bingo
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -110,6 +110,9 @@ class ViewExercise(request_handler.RequestHandler):
         renderable = renderable and not browser_disabled
 
         user_exercise_json = jsonify.jsonify(user_exercise)
+
+        if self.request_bool("convert", default=False):
+            bingo("proficiency")
 
         template_values = {
             'exercise': exercise,

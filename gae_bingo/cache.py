@@ -149,7 +149,7 @@ class BingoCache(object):
 
         return self.alternative_models.get(test_name) or []
 
-    def get_experiment_names_by_conversion_name(conversion_name):
+    def get_experiment_names_by_conversion_name(self, conversion_name):
         return self.experiment_names_by_conversion_name.get(conversion_name) or []
 
 class BingoIdentityCache(object):
