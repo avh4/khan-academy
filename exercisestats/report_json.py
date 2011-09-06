@@ -28,6 +28,8 @@ CACHE_EXPIRATION_SECS = 60 * 60
 # For a point on the exercise map
 MAX_POINT_RADIUS = 10
 
+################################################################################
+
 # Create a new list of KVPs with the values of all KVPs with identical keys summed
 def sum_keys(key_value_pairs):
     histogram = {}
@@ -35,6 +37,9 @@ def sum_keys(key_value_pairs):
         histogram[k] = histogram.get(k, 0) + v
 
     return list(histogram.items())
+
+def to_unix_secs(date_and_time):
+    return int(time.mktime(date_and_time.timetuple()))
 
 def exercises_in_bucket(num_buckets, bucket_index):
     exercise_names = [ex.name for ex in Exercise.get_all_use_cache()]
@@ -58,9 +63,11 @@ def get_bucket_size(num_buckets, bucket_index):
 # Choose the exercise based on the time, so we can cycle predictably and also
 # use the cache
 def get_bucket_cursor(refresh_secs, bucket_size):
-    unix_secs = int( time.mktime(dt.datetime.now().timetuple()) )
+    unix_secs = to_unix_secs(dt.datetime.now())
     ret = (unix_secs / refresh_secs) % bucket_size
     return ret
+
+################################################################################
 
 class ExerciseOverTimeGraph(request_handler.RequestHandler):
     def get_request_params(self):
@@ -120,7 +127,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
     def area_spline(self, exercise_stats, title=''):
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
-            start_unix = int(time.mktime(ex.start_dt.timetuple()) * 1000)
+            start_unix = to_unix_secs(ex.start_dt) * 1000
             prof_list.append([start_unix, ex.num_proficient()])
             done_list.append([start_unix, ex.num_problems_done()])
             new_users_list.append([start_unix, ex.num_new_users()])
@@ -331,3 +338,52 @@ class UserLocationsMap(request_handler.RequestHandler):
                 'point': [{'ip': addr} for addr in ip_addresses]
             }
         }
+
+class ExercisesCreatedHistogram(request_handler.RequestHandler):
+    def get(self):
+        past_days = self.request_int('past_days', 7)
+        today_dt = dt.datetime.combine(dt.date.today(), dt.time())
+        earliest_dt = today_dt- dt.timedelta(days=past_days)
+
+        self.response.out.write(self.get_histogram_spline_for_highcharts(earliest_dt))
+
+    @layer_cache.cache_with_key_fxn(lambda self, date: str(date),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    def get_histogram_spline_for_highcharts(self, earliest_dt=dt.datetime.min):
+        histogram = {}
+        for ex in Exercise.get_all_use_cache():
+            timestamp = to_unix_secs(ex.creation_date) * 1000 if ex.creation_date else 0
+            histogram[timestamp] = histogram.get(timestamp, 0) + 1
+
+        total_exercises = {}
+        prev_value = 0
+        for day, value in sorted(histogram.items()):
+            prev_value = total_exercises[day] = prev_value + value
+
+        # Only retain recent dates
+        earliest_unix = to_unix_secs(earliest_dt) * 1000
+        histogram = [[k,v] for k,v in histogram.items() if k >= earliest_unix]
+        total_exercises = [[k,v] for k,v in total_exercises.items() if k >= earliest_unix]
+
+        context = {
+            'series': [
+                {
+                    'type': 'column',
+                    'values': json.dumps(histogram),
+                    'axis': 0,
+                },
+                {
+                    'type': 'spline',
+                    'values': json.dumps(total_exercises),
+                    'axis': 1,
+                }
+            ],
+            # Let highcharts determine the scales for now.
+            'axes': [
+                { 'max': 'null' },
+                { 'max': 'null' },
+            ],
+        }
+
+        return self.render_template_to_string(
+            'exercisestats/highcharts_exercises_created_histogram.json', context)
