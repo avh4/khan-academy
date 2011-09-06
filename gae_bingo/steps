@@ -40,6 +40,7 @@
     TODO:
     test_name-->experiment_name
     conversion-->conversion_name
+    _GAE_Bingo_Identity --> _GAEBingoIdentity
     actual ab test selection and persistence
     user identity hookups
     dashboard and statistical analysis

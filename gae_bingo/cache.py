@@ -1,11 +1,12 @@
 import logging
 
 from google.appengine.ext import db
+from google.appengine.ext import deferred
 from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
 from google.appengine.ext.webapp import RequestHandler
 
-from .models import _GAE_Bingo_Experiment, _GAE_Bingo_Alternative
+from .models import _GAE_Bingo_Experiment, _GAE_Bingo_Alternative, _GAE_Bingo_Identity, persist_gae_bingo_identity
 
 # Use same trick we use in last_action_cache --> all experiments and alternatives are stored in a single memcache key/value for all users, but only deserialize when necessary
 # TODO: once every 5 minutes, persist both of these to datastore...and add ability to load from datastore
@@ -25,7 +26,7 @@ class BingoCache(object):
     @staticmethod
     def get():
         if not REQUEST_CACHE.get(BingoCache.MEMCACHE_KEY):
-            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache().load_from_datastore()
+            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache.load_from_datastore()
         return REQUEST_CACHE[BingoCache.MEMCACHE_KEY]
 
     def __init__(self):
@@ -70,14 +71,18 @@ class BingoCache(object):
                 alternative_model.load_latest_counts()
                 alternative_model.put()
 
-    def load_from_datastore(self):
+    @staticmethod
+    def load_from_datastore():
 
         # This shouldn't happen often (should only happen when memcache has been completely evicted),
         # but we still want to be as fast as possible.
 
+        bingo_cache = BingoCache()
+
         experiment_dict = {}
         alternatives_dict = {}
 
+        # TODO: parallelize these datastore calls
         experiments = _GAE_Bingo_Experiment.all().filter("live =", True)
         for experiment in experiments:
             experiment_dict[experiment.name] = experiment
@@ -89,12 +94,12 @@ class BingoCache(object):
             alternatives_dict[alternative.experiment_name].append(alternative)
 
         for experiment_name in experiment_dict:
-            self.add_experiment(experiment_dict.get(experiment_name), alternatives_dict.get(experiment_name))
+            bingo_cache.add_experiment(experiment_dict.get(experiment_name), alternatives_dict.get(experiment_name))
 
         # Immediately store in memcache as soon as possible after loading from datastore to minimize # of datastore loads
-        self.store_if_dirty()
+        bingo_cache.store_if_dirty()
 
-        return self
+        return bingo_cache
 
     def add_experiment(self, experiment, alternatives):
 
@@ -149,7 +154,7 @@ class BingoCache(object):
 
 class BingoIdentityCache(object):
 
-    MEMCACHE_KEY = "_gae_identity_cache:%s"
+    MEMCACHE_KEY = "_gae_bingo_identity_cache:%s"
 
     @staticmethod
     def key_for_identity(identity):
@@ -157,10 +162,10 @@ class BingoIdentityCache(object):
 
     @staticmethod
     def get_for_identity(identity):
-        # TODO: maybe collapse both memcached requests into a single bulk get
+        # TODO: collapse both memcached and datastore requests into a single bulk get
         key = BingoIdentityCache.key_for_identity(identity)
         if not REQUEST_CACHE.get(key):
-            REQUEST_CACHE[key] = memcache.get(key) or BingoIdentityCache()
+            REQUEST_CACHE[key] = memcache.get(key) or BingoIdentityCache.load_from_datastore()
         return REQUEST_CACHE[key]
 
     def store_for_identity_if_dirty(self, identity):
@@ -172,6 +177,19 @@ class BingoIdentityCache(object):
 
         # TODO: maybe collapse both memcached sets into a single bulk set
         memcache.set(BingoIdentityCache.key_for_identity(identity), self)
+
+        # Always fire off a task queue to persist bingo identity cache
+        # since there's no cron job persisting these objects like BingoCache.
+        self.persist_to_datastore(identity)
+
+    def persist_to_datastore(self, identity):
+        # TODO: add specific queue here
+        deferred.defer(persist_gae_bingo_identity, self, identity)
+
+    @staticmethod
+    def load_from_datastore():
+        # TODO: use real identity here
+        return _GAE_Bingo_Identity.load(5) or BingoIdentityCache()
 
     def __init__(self):
         self.dirty = False

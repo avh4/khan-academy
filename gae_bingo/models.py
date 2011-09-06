@@ -1,7 +1,10 @@
+import pickle
 import logging
 
 from google.appengine.ext import db
 from google.appengine.api import memcache
+
+# TODO: add note about deferred entrypoint and startup config here
 
 class _GAE_Bingo_Experiment(db.Model):
     name = db.StringProperty()
@@ -50,6 +53,30 @@ class _GAE_Bingo_Alternative(db.Model):
         # When persisting to datastore, we want to store the most recent value we've got
         self.participants = long(memcache.get("%s:participants" % self.key_for_self()) or 0)
         self.conversions = long(memcache.get("%s:conversions" % self.key_for_self()) or 0)
+
+class _GAE_Bingo_Identity(db.Model):
+    identity = db.IntegerProperty()
+    pickled = db.BlobProperty()
+
+    @staticmethod
+    def key_for_identity(identity):
+        return "_gae_bingo_identity:%s" % identity
+
+    @staticmethod
+    def load(identity):
+        gae_bingo_identity = _GAE_Bingo_Identity.all().filter("identity =", identity).get()
+        if gae_bingo_identity:
+            return pickle.loads(gae_bingo_identity.pickled)
+
+        return None
+
+def persist_gae_bingo_identity(bingo_identity_cache, identity):
+    bingo_identity = _GAE_Bingo_Identity(
+                key_name = _GAE_Bingo_Identity.key_for_identity(identity),
+                identity = identity,
+                pickled = pickle.dumps(bingo_identity_cache),
+            )
+    bingo_identity.put()
 
 def create_experiment_and_alternatives(test_name, alternative_params, conversion_name):
 
