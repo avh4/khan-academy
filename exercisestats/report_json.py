@@ -250,15 +250,13 @@ class ExercisesLastAuthorCounter(request_handler.RequestHandler):
     @layer_cache.cache(expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def exercise_counter_for_geckoboard_rag():
         exercises = Exercise.get_all_use_cache()
-        # TODO: Last_modified field seems to be none (at least locally). Sort
-        #     by another field, or actually use last_modified and author fields.
-        exercises.sort(key=lambda ex: ex.last_modified)
+        exercises.sort(key=lambda ex: ex.creation_date, reverse=True)
 
         last_exercise = exercises[-1]
         num_exercises = len(exercises)
+        last_exercise_author = last_exercise.author.nickname() if last_exercise.author else 'random person'
 
-        text = "Thanks %s for %s!" % (
-            last_exercise.author.nickname(), last_exercise.display_name)
+        text = "Thanks %s for %s!" % (last_exercise_author, last_exercise.display_name)
 
         return {
             'item': [

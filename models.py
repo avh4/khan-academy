@@ -124,6 +124,7 @@ class Exercise(db.Model):
     safe_js = db.TextProperty()
     last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
     sanitizer_used = db.StringProperty()
+    creation_date = db.DateTimeProperty(auto_now_add=True)
 
     _serialize_blacklist = [
             "author", "raw_html", "last_modified", "safe_html", "safe_js",
