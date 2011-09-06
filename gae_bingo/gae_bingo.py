@@ -43,6 +43,7 @@ def ab_test(test_name, alternative_params, conversion):
             if test_name not in BingoCache.get().experiments:
                 experiment, alternatives = create_experiment_and_alternatives(test_name, alternative_params, conversion)
                 bingo_cache.add_experiment(experiment, alternatives)
+                bingo_cache.store_if_dirty()
 
         finally:
             if got_lock:

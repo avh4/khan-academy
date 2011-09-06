@@ -3,11 +3,15 @@ import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
+from google.appengine.ext.webapp import RequestHandler
+
+from .models import _GAE_Bingo_Experiment, _GAE_Bingo_Alternative
 
 # Use same trick we use in last_action_cache --> all experiments and alternatives are stored in a single memcache key/value for all users, but only deserialize when necessary
 # TODO: once every 5 minutes, persist both of these to datastore...and add ability to load from datastore
 
-# REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware
+# REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware.
+# NOTE: this will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
 REQUEST_CACHE = {}
 
 def flush_request_cache():
@@ -21,8 +25,19 @@ class BingoCache(object):
     @staticmethod
     def get():
         if not REQUEST_CACHE.get(BingoCache.MEMCACHE_KEY):
-            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache()
+            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache().load_from_datastore()
         return REQUEST_CACHE[BingoCache.MEMCACHE_KEY]
+
+    def __init__(self):
+        self.dirty = False
+
+        self.experiments = {} # Protobuf version of experiments for extremely fast (de)serialization
+        self.experiment_models = {} # Deserialized experiment models
+
+        self.alternatives = {} # Protobuf version of alternatives for extremely fast (de)serialization
+        self.alternative_models = {} # Deserialized alternative models
+
+        self.experiment_names_by_conversion_name = {} # Mapping of conversion names to experiment names
 
     def store_if_dirty(self):
 
@@ -39,18 +54,53 @@ class BingoCache(object):
 
         memcache.set(BingoCache.MEMCACHE_KEY, self)
 
-    def __init__(self):
-        self.dirty = False
+    def persist_to_datastore(self):
 
-        self.experiments = {} # Protobuf version of experiments for extremely fast (de)serialization
-        self.experiment_models = {} # Deserialized experiment models
+        # Persist current state of experiment and alternative models to datastore.
+        # Their sums might be slightly out-of-date during any given persist, but not by much.
+        for experiment_name in self.experiments:
+            experiment_model = self.get_experiment(experiment_name)
+            if experiment_model:
+                experiment_model.put()
 
-        self.alternatives = {} # Protobuf version of alternatives for extremely fast (de)serialization
-        self.alternative_models = {} # Deserialized alternative models
+        for experiment_name in self.alternatives:
+            alternative_models = self.get_alternatives(experiment_name)
+            for alternative_model in alternative_models:
+                # When persisting to datastore, we want to store the most recent value we've got
+                alternative_model.load_latest_counts()
+                alternative_model.put()
 
-        self.experiment_names_by_conversion_name = {} # Mapping of conversion names to experiment names
+    def load_from_datastore(self):
+
+        # This shouldn't happen often (should only happen when memcache has been completely evicted),
+        # but we still want to be as fast as possible.
+
+        experiment_dict = {}
+        alternatives_dict = {}
+
+        experiments = _GAE_Bingo_Experiment.all().filter("live =", True)
+        for experiment in experiments:
+            experiment_dict[experiment.name] = experiment
+
+        alternatives = _GAE_Bingo_Alternative.all().filter("live =", True)
+        for alternative in alternatives:
+            if alternative.experiment_name not in alternatives_dict:
+                alternatives_dict[alternative.experiment_name] = []
+            alternatives_dict[alternative.experiment_name].append(alternative)
+
+        for experiment_name in experiment_dict:
+            self.add_experiment(experiment_dict.get(experiment_name), alternatives_dict.get(experiment_name))
+
+        # Immediately store in memcache as soon as possible after loading from datastore to minimize # of datastore loads
+        self.store_if_dirty()
+
+        return self
 
     def add_experiment(self, experiment, alternatives):
+
+        if not experiment or not alternatives:
+            raise Exception("Cannot add empty experiment or empty alternatives to BingoCache")
+
         self.experiment_models[experiment.name] = experiment
         self.experiments[experiment.name] = db.model_to_protobuf(experiment).Encode()
 
@@ -152,3 +202,7 @@ def store_if_dirty():
 
     if bingo_identity_cache:
         bingo_identity_cache.store_for_identity_if_dirty(5) # TODO: real identity
+
+class PersistToDatastore(RequestHandler):
+    def get(self):
+        BingoCache.get().persist_to_datastore()

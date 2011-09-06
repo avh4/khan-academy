@@ -48,6 +48,8 @@
     alternative parsing?
     handle all TODO comments
     testing
+    cron.yaml and app.yaml
+    documentation and contact patrick
 
     QUESTIONS:
     sharded counter issues

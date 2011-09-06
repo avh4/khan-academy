@@ -23,24 +23,33 @@ class _GAE_Bingo_Alternative(db.Model):
     content = db.TextProperty()
     conversions = db.IntegerProperty(default = 0)
     participants = db.IntegerProperty(default = 0)
+    live = db.BooleanProperty(default = False)
 
     @staticmethod
     def key_for_experiment_name_and_number(experiment_name, number):
         return "_gae_alternative:%s:%s" % (experiment_name, number)
+
+    def key_for_self(self):
+        return _GAE_Bingo_Alternative.key_for_experiment_name_and_number(self.experiment_name, self.number)
 
     def increment_participants(self):
         # Use a memcache.incr-backed counter to keep track of increments in a scalable fashion.
         # It's possible that the cached _GAE_Bingo_Alternative entities will fall a bit behind
         # due to concurrency issues, but the memcache.incr'd version should stay up-to-date and
         # be persisted.
-        self.participants = long(memcache.incr("%s:participants" % self.key_for_experiment_name_and_number(self.experiment_name, self.number), initial_value=0))
+        self.participants = long(memcache.incr("%s:participants" % self.key_for_self(), initial_value=0))
 
     def increment_conversions(self):
         # Use a memcache.incr-backed counter to keep track of increments in a scalable fashion.
         # It's possible that the cached _GAE_Bingo_Alternative entities will fall a bit behind
         # due to concurrency issues, but the memcache.incr'd version should stay up-to-date and
         # be persisted.
-        self.conversions = long(memcache.incr("%s:conversions" % self.key_for_experiment_name_and_number(self.experiment_name, self.number), initial_value=0))
+        self.conversions = long(memcache.incr("%s:conversions" % self.key_for_self(), initial_value=0))
+
+    def load_latest_counts(self):
+        # When persisting to datastore, we want to store the most recent value we've got
+        self.participants = long(memcache.get("%s:participants" % self.key_for_self()) or 0)
+        self.conversions = long(memcache.get("%s:conversions" % self.key_for_self()) or 0)
 
 def create_experiment_and_alternatives(test_name, alternative_params, conversion_name):
 
@@ -62,6 +71,7 @@ def create_experiment_and_alternatives(test_name, alternative_params, conversion
                         experiment_name = experiment.name,
                         number = i,
                         content = str(content),
+                        live = False,
                     )
                 )
         i += 1
