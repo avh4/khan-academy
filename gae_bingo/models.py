@@ -6,6 +6,16 @@ from google.appengine.api import memcache
 
 # TODO: add note about deferred entrypoint and startup config here
 
+# If you use a datastore model to uniquely identify each user,
+# let it inherit from this class, like so...
+#
+#       class UserData(GAEBingoIdentityModel, db.Model)
+#
+# ...this will let gae_bingo automatically take care of persisting ab_test
+# identities from unregistered users to logged in users.
+class GAEBingoIdentityModel(db.Model):
+    gae_bingo_identity = db.StringProperty()
+
 class _GAE_Bingo_Experiment(db.Model):
     name = db.StringProperty()
     conversion_name = db.StringProperty()

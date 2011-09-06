@@ -52,7 +52,7 @@
     REFACTORS:
     test_name-->experiment_name
     conversion-->conversion_name
-    _GAE_Bingo_Identity --> _GAEBingoIdentity
+    _GAE_Bingo_Identity --> _GAEBingoIdentityCache
  
     QUESTIONS:
     do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?

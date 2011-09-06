@@ -33,6 +33,7 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -580,7 +581,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
     uvc.version = version
     db.put(uvc)
 
-class UserData(db.Model):
+class UserData(GAEBingoIdentityModel, db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
     user_nickname = db.StringProperty()
