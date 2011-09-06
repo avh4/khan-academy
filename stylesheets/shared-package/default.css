@@ -163,7 +163,6 @@ input.simple-button {
 .simple-button:hover {
     border-color: #aaa;
     color: #0075b1 !important;
-    left: 1px;
     top: 1px;
     text-decoration: none !important;
 }
