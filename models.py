@@ -1065,8 +1065,7 @@ class Playlist(Searchable, db.Model):
                 playlists.append(playlist)
         return playlists
 
-    @property
-    def exercises(self):
+    def get_exercises(self):
         video_query = Video.all(keys_only=True)
         video_query.filter('playlists = ', self.title)
         video_keys = video_query.fetch(1000)
@@ -1091,8 +1090,7 @@ class Playlist(Searchable, db.Model):
 
         return playlist_exercises
 
-    @property
-    def videos(self):
+    def get_videos(self):
         video_query = Video.all()
         video_query.filter('playlists = ', self.title)
         video_key_dict = Video.get_dict(video_query, lambda video: video.key())

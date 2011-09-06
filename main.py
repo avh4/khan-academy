@@ -52,6 +52,7 @@ import activity_summary
 import exercises
 import dashboard
 import exercisestats.report
+import exercisestats.report_json
 import github
 import paypal
 
@@ -1117,8 +1118,10 @@ def main():
 
         ('/user_video_css', ServeUserVideoCss),
 
-        ('/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
+        ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
         ('/exercisestats/report', exercisestats.report.Test),
+        ('/exercisestats/json', exercisestats.report_json.ExerciseDoneProfGraph),
+        ('/exercisestats/gecko_ex_buckets', exercisestats.report_json.GeckoboardExercisesRedirect),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
