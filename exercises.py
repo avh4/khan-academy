@@ -110,6 +110,8 @@ class ViewExercise(request_handler.RequestHandler):
         renderable = renderable and not browser_disabled
 
         user_exercise_json = jsonify.jsonify(user_exercise)
+        
+        show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion="proficiency"),
 
         if self.request_bool("convert", default=False):
             bingo("proficiency")
@@ -126,7 +128,7 @@ class ViewExercise(request_handler.RequestHandler):
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
             'renderable': renderable,
-            'show_streak_bar': ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion="proficiency"),
+            'show_streak_bar': show_streak_bar,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
