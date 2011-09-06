@@ -38,10 +38,6 @@
 
 
     TODO:
-    test_name-->experiment_name
-    conversion-->conversion_name
-    _GAE_Bingo_Identity --> _GAEBingoIdentity
-    actual ab test selection and persistence
     user identity hookups
     dashboard and statistical analysis
     remove test ab_test and bingo code from exercises.py
@@ -53,8 +49,12 @@
     cron.yaml and app.yaml
     documentation and contact patrick
 
+    REFACTORS:
+    test_name-->experiment_name
+    conversion-->conversion_name
+    _GAE_Bingo_Identity --> _GAEBingoIdentity
+ 
     QUESTIONS:
-    sharded counter issues
     do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?
 
     NEXT VERSION:

@@ -7,9 +7,7 @@ from google.appengine.datastore import entity_pb
 from google.appengine.ext.webapp import RequestHandler
 
 from .models import _GAE_Bingo_Experiment, _GAE_Bingo_Alternative, _GAE_Bingo_Identity, persist_gae_bingo_identity
-
-# Use same trick we use in last_action_cache --> all experiments and alternatives are stored in a single memcache key/value for all users, but only deserialize when necessary
-# TODO: once every 5 minutes, persist both of these to datastore...and add ability to load from datastore
+from identity import identity
 
 # REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware.
 # NOTE: this will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
@@ -188,8 +186,7 @@ class BingoIdentityCache(object):
 
     @staticmethod
     def load_from_datastore():
-        # TODO: use real identity here
-        return _GAE_Bingo_Identity.load(5) or BingoIdentityCache()
+        return _GAE_Bingo_Identity.load(identity()) or BingoIdentityCache()
 
     def __init__(self):
         self.dirty = False
@@ -207,19 +204,18 @@ class BingoIdentityCache(object):
         self.dirty = True
 
 def bingo_and_identity_cache():
-    # TODO: make 5 use real identity logic here
-    return BingoCache.get(), BingoIdentityCache.get_for_identity(5)
+    return BingoCache.get(), BingoIdentityCache.get_for_identity(identity())
 
 def store_if_dirty():
     # Only load from request cache here -- if it hasn't been loaded from memcache previously, it's not dirty.
     bingo_cache = REQUEST_CACHE.get(BingoCache.MEMCACHE_KEY)
-    bingo_identity_cache = REQUEST_CACHE.get(BingoIdentityCache.key_for_identity(5)) # TODO: real identity
+    bingo_identity_cache = REQUEST_CACHE.get(BingoIdentityCache.key_for_identity(identity()))
 
     if bingo_cache:
         bingo_cache.store_if_dirty()
 
     if bingo_identity_cache:
-        bingo_identity_cache.store_for_identity_if_dirty(5) # TODO: real identity
+        bingo_identity_cache.store_for_identity_if_dirty(identity())
 
 class PersistToDatastore(RequestHandler):
     def get(self):

@@ -50,12 +50,13 @@ class _GAE_Bingo_Alternative(db.Model):
         self.conversions = long(memcache.incr("%s:conversions" % self.key_for_self(), initial_value=0))
 
     def load_latest_counts(self):
+        # TODO: when memcache is cleared, this erases current max...
         # When persisting to datastore, we want to store the most recent value we've got
         self.participants = long(memcache.get("%s:participants" % self.key_for_self()) or 0)
         self.conversions = long(memcache.get("%s:conversions" % self.key_for_self()) or 0)
 
 class _GAE_Bingo_Identity(db.Model):
-    identity = db.IntegerProperty()
+    identity = db.StringProperty()
     pickled = db.BlobProperty()
 
     @staticmethod

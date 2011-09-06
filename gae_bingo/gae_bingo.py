@@ -4,8 +4,9 @@ import time
 
 from google.appengine.api import memcache
 
-from cache import BingoCache, bingo_and_identity_cache
+from .cache import BingoCache, bingo_and_identity_cache
 from .models import create_experiment_and_alternatives
+from .identity import identity
 
 def ab_test(test_name, alternative_params, conversion):
 
@@ -107,9 +108,6 @@ def find_alternative_for_user(test_name, alternatives):
     return alternatives[modulo_choice(test_name, len(alternatives))]
 
 def modulo_choice(test_name, alternatives_count):
-
-    # TODO: use real identity here
-    identity = 5
-    sig = hashlib.md5(test_name + str(identity)).hexdigest()
+    sig = hashlib.md5(test_name + str(identity())).hexdigest()
     sig_num = int(sig, base=16)
     return sig_num % alternatives_count
