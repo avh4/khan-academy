@@ -1118,7 +1118,7 @@ def main():
 
         ('/user_video_css', ServeUserVideoCss),
 
-        ('/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
+        ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
         ('/exercisestats/report', exercisestats.report.Test),
         ('/exercisestats/json', exercisestats.report_json.ExerciseDoneProfGraph),
         ('/exercisestats/gecko_ex_buckets', exercisestats.report_json.GeckoboardExercisesRedirect),

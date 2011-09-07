@@ -31,6 +31,6 @@ cron:
   timezone: US/Pacific
 
 - description: fancy exercise stats
-  url: /exercisestats/collectfancyexercisestatistics
+  url: /admin/exercisestats/collectfancyexercisestatistics
   schedule: every day 00:30
   timezone: US/Pacific
