@@ -81,11 +81,11 @@ class BingoCache(object):
         alternatives_dict = {}
 
         # TODO: parallelize these datastore calls
-        experiments = _GAEBingoExperiment.all().filter("live =", True)
+        experiments = _GAEBingoExperiment.all()
         for experiment in experiments:
             experiment_dict[experiment.name] = experiment
 
-        alternatives = _GAEBingoAlternative.all().filter("live =", True)
+        alternatives = _GAEBingoAlternative.all()
         for alternative in alternatives:
             if alternative.experiment_name not in alternatives_dict:
                 alternatives_dict[alternative.experiment_name] = []
@@ -186,13 +186,26 @@ class BingoIdentityCache(object):
 
     @staticmethod
     def load_from_datastore():
-        return _GAEBingoIdentityRecord.load(identity()) or BingoIdentityCache()
+        bingo_identity_cache = _GAEBingoIdentityRecord.load(identity()) or BingoIdentityCache()
+        bingo_identity_cache.purge()
+        return bingo_identity_cache
 
     def __init__(self):
         self.dirty = False
 
         self.participating_tests = [] # List of test names currently participating in
         self.converted_tests = {} # Dict of test names:number of times user has successfully converted
+
+    def purge(self):
+        bingo_cache = BingoCache.get()
+        
+        for participating_test in self.participating_tests:
+            if not participating_test in bingo_cache.experiments:
+                self.participating_tests.remove(participating_test)
+
+        for converted_test in self.converted_tests:
+            if not converted_test in bingo_cache.experiments:
+                del self.converted_tests[converted_test]
 
     def participate_in(self, experiment_name):
         self.participating_tests.append(experiment_name)

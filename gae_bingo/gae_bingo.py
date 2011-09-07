@@ -12,8 +12,6 @@ def ab_test(experiment_name, alternative_params, conversion_name):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 
-    # TODO: short-circuit goes here
-
     if experiment_name not in bingo_cache.experiments:
 
         # Creation logic w/ high concurrency protection
@@ -55,6 +53,10 @@ def ab_test(experiment_name, alternative_params, conversion_name):
 
     if not experiment or not alternatives:
         raise Exception("Could not find experiment or alternatives with experiment_name %s" % experiment_name)
+
+    if not experiment.live:
+        # Experiment has ended. Short-circuit and use selected winner before user has had a chance to remove relevant ab_test code.
+        return experiment.short_circuit_content
 
     alternative = find_alternative_for_user(experiment_name, alternatives)
 

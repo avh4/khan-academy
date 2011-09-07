@@ -19,8 +19,9 @@ class GAEBingoIdentityModel(db.Model):
 class _GAEBingoExperiment(db.Model):
     name = db.StringProperty()
     conversion_name = db.StringProperty()
-    live = db.BooleanProperty(default = False)
-    dt_started = db.DateTimeProperty() # TODO: set dt_started appropriately
+    live = db.BooleanProperty(default = True)
+    dt_started = db.DateTimeProperty(auto_now_add = True)
+    short_circuit_content = db.TextProperty()
 
     @staticmethod
     def key_for_name(name):
@@ -36,7 +37,7 @@ class _GAEBingoAlternative(db.Model):
     content = db.TextProperty()
     conversions = db.IntegerProperty(default = 0)
     participants = db.IntegerProperty(default = 0)
-    live = db.BooleanProperty(default = False)
+    live = db.BooleanProperty(default = True)
 
     @staticmethod
     def key_for_experiment_name_and_number(experiment_name, number):
@@ -94,7 +95,7 @@ def create_experiment_and_alternatives(experiment_name, alternative_params, conv
                 key_name = _GAEBingoExperiment.key_for_name(experiment_name),
                 name = experiment_name,
                 conversion_name = conversion_name,
-                live = False,
+                live = True,
             )
 
     alternatives = []
@@ -108,7 +109,7 @@ def create_experiment_and_alternatives(experiment_name, alternative_params, conv
                         experiment_name = experiment.name,
                         number = i,
                         content = str(content),
-                        live = False,
+                        live = True,
                     )
                 )
         i += 1
