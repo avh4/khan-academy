@@ -372,11 +372,13 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
         context = {
             'series': [
                 {
+                    'name': 'Histogram (created per day)',
                     'type': 'column',
                     'values': json.dumps(histogram),
                     'axis': 0,
                 },
                 {
+                    'name': 'Total exercises',
                     'type': 'spline',
                     'values': json.dumps(total_exercises),
                     'axis': 1,

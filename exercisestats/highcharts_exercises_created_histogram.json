@@ -13,7 +13,7 @@
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
     "title": { "text": "Exercise creation over time" },
-    "legend": { "enabled": false },
+    "legend": { "enabled": true },
     "plotOptions": {
         "column": {
             "pointPadding": 0,
@@ -23,6 +23,7 @@
     "series": [
         {% for data in series %}
             {
+                "name": "{{ data.name }}",
                 "type": "{{ data.type }}",
                 "data": {{ data.values }},
                 "yAxis": {{ data.axis }},
