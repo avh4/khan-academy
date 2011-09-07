@@ -470,7 +470,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_string("sha1"),
                     request.request_string("seed"),
                     request.request_bool("complete"),
-                    request.request_int("count_hints"),
+                    request.request_int("count_hints", default=0),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     request.request_string("problem_type")
@@ -482,6 +482,7 @@ def attempt_problem_number(exercise_name, problem_number):
 
             return user_exercise
 
+    logging.warning("Problem %d attempted with no user_data present", problem_number)
     return unauthorized_response()
 
 @route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/hint", methods=["POST"])
@@ -496,11 +497,7 @@ def attempt_problem_number(exercise_name, problem_number):
         exercise = models.Exercise.get_by_name(exercise_name)
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
-        logging.critical( user_exercise )
-
         if user_exercise and problem_number:
-
-            logging.critical( problem_number )
 
             user_exercise = attempt_problem(
                     user_data,

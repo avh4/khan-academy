@@ -114,7 +114,7 @@ class ViewExercise(request_handler.RequestHandler):
 
             user_activity = []
 
-            if not problem_log:
+            if not problem_log or not hasattr(problem_log, "hint_after_attempt_list"):
                 renderable = False
             else:
                 # Don't include incomplete information
@@ -160,9 +160,10 @@ class ViewExercise(request_handler.RequestHandler):
         renderable = renderable and not browser_disabled
 
         url_pattern = "/exercises?exid=%s&student_email=%s&problem_number=%d"
-
-        user_exercise.previous_problem_url = url_pattern % (exid, user_data_student.key_email , problem_number-1)
-        user_exercise.next_problem_url = url_pattern % (exid, user_data_student.key_email , problem_number+1)
+        user_exercise.previous_problem_url = url_pattern % \
+            (exid, user_data_student.key_email , problem_number-1)
+        user_exercise.next_problem_url = url_pattern % \
+            (exid, user_data_student.key_email , problem_number+1)
 
         user_exercise_json = jsonify.jsonify(user_exercise)
 

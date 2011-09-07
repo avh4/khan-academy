@@ -1472,10 +1472,8 @@ def commit_problem_log(problem_log_source):
                and problem_log.attempt_time_taken_list[index_attempt] != -1:
                 # This attempt has already been logged. Ignore this dupe taskqueue execution.
                 logging.info("Skipping problem log commit due to dupe taskqueue\
-                    execution for attempt: %s, key.name: %s, \
-                    time_taken_attempts: %s" % \
-                    (index_attempt, problem_log_source.key().name(),
-                      problem_log.time_taken_attempts))
+                    execution for attempt: %s, key.name: %s" % \
+                    (index_attempt, problem_log_source.key().name()))
                 return
 
             problem_log.count_attempts += 1
