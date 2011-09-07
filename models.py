@@ -133,7 +133,7 @@ class Exercise(db.Model):
 
     @property
     def ka_url(self):
-        return absolute_url("/exercises?exid=%s" % self.name)
+        return util.absolute_url("/exercises?exid=%s" % self.name)
 
     @staticmethod
     def get_by_name(name):
@@ -953,7 +953,7 @@ class Video(Searchable, db.Model):
 
     @property
     def ka_url(self):
-      return util.absolute_url('/video/%s' % self.readable_id)
+        return util.absolute_url('/video/%s' % self.readable_id)
 
     @property
     def download_urls(self):
@@ -972,6 +972,9 @@ class Video(Searchable, db.Model):
         if download_urls:
             return download_urls.get("mp4")
         return None
+
+    def youtube_thumbnail_url(self):
+        return "http://img.youtube.com/vi/%s/hqdefault.jpg" % self.youtube_id
 
     @staticmethod
     def get_for_readable_id(readable_id):
@@ -1044,6 +1047,7 @@ class Playlist(Searchable, db.Model):
     title = db.StringProperty()
     description = db.TextProperty()
     readable_id = db.StringProperty() #human readable, but unique id that can be used in URLS
+    tags = db.StringListProperty()
     INDEX_ONLY = ['title', 'description']
     INDEX_TITLE_FROM_PROP = 'title'
     INDEX_USES_MULTI_ENTITIES = False
@@ -1062,8 +1066,7 @@ class Playlist(Searchable, db.Model):
                 playlists.append(playlist)
         return playlists
 
-    @property
-    def exercises(self):
+    def get_exercises(self):
         video_query = Video.all(keys_only=True)
         video_query.filter('playlists = ', self.title)
         video_keys = video_query.fetch(1000)
@@ -1088,8 +1091,7 @@ class Playlist(Searchable, db.Model):
 
         return playlist_exercises
 
-    @property
-    def videos(self):
+    def get_videos(self):
         video_query = Video.all()
         video_query.filter('playlists = ', self.title)
         video_key_dict = Video.get_dict(video_query, lambda video: video.key())
@@ -1391,7 +1393,7 @@ class ProblemLog(db.Model):
 
     @property
     def ka_url(self):
-        return absolute_url("/exercises?exid=%s&problem_number=%s" % \
+        return util.absolute_url("/exercises?exid=%s&problem_number=%s" % \
             (self.exercise, self.problem_number))
 
     @staticmethod

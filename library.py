@@ -3,7 +3,6 @@ import os
 import logging
 
 from google.appengine.ext.webapp import template
-from django.utils import simplejson
 
 from app import App
 import layer_cache
@@ -24,27 +23,22 @@ def library_content_html(bust_cache = False):
     dict_playlists_by_title = {}
     dict_video_playlists = {}
 
-    for video in Video.all():
+    for video in Video.all().fetch(10000):
         dict_videos[video.key()] = video
 
-    for playlist in Playlist.all():
+    for playlist in Playlist.all().fetch(1000):
         dict_playlists[playlist.key()] = playlist
         if playlist.title in topics_list:
             dict_playlists_by_title[playlist.title] = playlist
 
-    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
+    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position').fetch(10000):
         playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
         video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
 
         if dict_videos.has_key(video_key) and dict_playlists.has_key(playlist_key):
             video = dict_videos[video_key]
             playlist = dict_playlists[playlist_key]
-            exercises = []
-            related_exercises = video.related_exercises()
-            if related_exercises and related_exercises.count() > 0:
-              # exercises is a json list for embedding as a data attr
-              exercises = simplejson.dumps([e.exercise.name for e in related_exercises])
-            fast_video_playlist_dict = {"video":video, "playlist":playlist, "exercises":exercises}
+            fast_video_playlist_dict = {"video":video, "playlist":playlist}
 
             if dict_video_playlists.has_key(playlist_key):
                 dict_video_playlists[playlist_key].append(fast_video_playlist_dict)

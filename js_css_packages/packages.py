@@ -13,9 +13,9 @@ javascript = {
     },
     "video": {
         "files": [
+            "jquery.qtip.js",
             "video.js",
             "discussion.js",
-            "jquery.qtip.js",
         ]
     },
     "homepage": {
@@ -24,6 +24,7 @@ javascript = {
             "jquery.cycle.all.min.js",
             "waypoints.min.js",
             "homepage.js",
+            "ga_social_tracking.js",
         ]
     },
     "exercises": {
@@ -83,6 +84,7 @@ javascript = {
             "utils/convert-values.js",
             "utils/exponents.js",
             "utils/expressions.js",
+            "utils/graphie-geometry.js",
             "utils/graphie-helpers-arithmetic.js",
             "utils/graphie-helpers.js",
             "utils/graphie.js",
@@ -120,9 +122,9 @@ stylesheets = {
     },
     "video": {
         "files": [
+            "jquery.qtip.css",
             "video.css",
             "discussion.css",
-            "jquery.qtip.css",
         ]
     },
     "studentlists": {

@@ -21,7 +21,6 @@ IP_ADDRESS_SAMPLE_RATE = 0.0001
 
 # handler that kicks off task chain per exercise
 class CollectFancyExerciseStatistics(RequestHandler):
-    @user_util.developer_only
     def get(self):
         # task name token
         uid = self.request_string('uid', uuid.uuid4())

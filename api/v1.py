@@ -84,7 +84,7 @@ def playlist_videos(playlist_title):
     if not playlist:
         return None
     
-    return playlist.videos;
+    return playlist.get_videos();
 
 @route("/api/v1/playlists/<playlist_title>/exercises", methods=["GET"])
 @jsonp
@@ -100,7 +100,7 @@ def playlist_exercises(playlist_title):
     if not playlist:
         return None
 
-    return playlist.exercises;
+    return playlist.get_exercises();
 
 @route("/api/v1/playlists/library", methods=["GET"])
 @etag(lambda: models.Setting.cached_library_content_date())
@@ -142,6 +142,12 @@ def playlists_library_list():
 def playlists_library_list_fresh():
     return fully_populated_playlists()
 
+@route("/api/v1/exercises", methods=["GET"])
+@jsonp
+@jsonify
+def exercises():
+    return models.Exercise.get_all_use_cache()
+
 @route("/api/v1/exercises/<exercise_name>", methods=["GET"])
 @jsonp
 @jsonify
@@ -154,8 +160,8 @@ def exercises(exercise_name):
 def exercise_videos(exercise_name):
     exercise = models.Exercise.get_by_name(exercise_name)
     if exercise:
-        exercise_videos = [e.video for e in exercise.related_videos_query()]
-        return list(set(exercise_videos))
+        exercise_videos = exercise.related_videos_query()
+        return map(lambda exercise_video: exercise_video.video, exercise_videos)
     return []
 
 @route("/api/v1/videos/<video_id>", methods=["GET"])

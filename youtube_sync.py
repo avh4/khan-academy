@@ -114,6 +114,12 @@ class YouTubeSync(request_handler.RequestHandler):
                 playlist_data.url = playlist_uri
                 playlist_data.title = playlist.title.text
                 playlist_data.description = playlist.description.text
+
+                playlist_data.tags = []
+                for category in playlist.category:
+                    if "tags.cat" in category.scheme:
+                        playlist_data.tags.append(category.term)
+
                 playlist_data.put()
                 
                 for i in range(0, 10):
