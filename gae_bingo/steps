@@ -33,8 +33,7 @@
 
 
     In template:
-        {% ab_test "homepage_practice_text" "Practice" "Exercise" %}
-        {% ab_test_with_conversion "homepage_practice_text" "Practice" "Exercise" "proficiency" %}
+        # NOPE THIS IS DJANGO SON YOU BES CHECK YOSELF
 
 
     TODO:
@@ -55,6 +54,7 @@
 
     NEXT VERSION:
     weights
+    template sugar? or docs explaining why we don't do ab_test in templates
 
 
 
