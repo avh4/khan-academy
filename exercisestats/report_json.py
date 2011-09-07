@@ -115,7 +115,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             for ex in Exercise.get_all_use_cache():
                 ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
 
-            return self.area_spline(ex_stats, 'All Exercises')
+            return self.area_spline(ex_stats, 'All Exercises', showLegend=True)
 
         exercise_names = exercises_in_bucket(params['num_buckets'], params['bucket_index'])
 
@@ -124,7 +124,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 
         return self.area_spline(ex_stats, exid)
 
-    def area_spline(self, exercise_stats, title=''):
+    def area_spline(self, exercise_stats, title='', showLegend=False):
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = to_unix_secs(ex.start_dt) * 1000
@@ -148,6 +148,9 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 
         dates_to_display_unix = [x[0] for x in done_list] if done_list else [0]
 
+        # TODO: Call a function to render all values in this dict as JSON
+        #     string before giving it to the template, so we don't need to call
+        #     json.dumps on all the values.
         context = {
             'title': title,
             'series': [
@@ -173,6 +176,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             ],
             'minXValue': min(dates_to_display_unix),
             'maxXValue': max(dates_to_display_unix),
+            'showLegend': json.dumps(showLegend),
         }
 
         return self.render_template_to_string(
