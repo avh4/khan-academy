@@ -54,6 +54,7 @@
 
     NEXT VERSION:
     weights
+    add to nifty little control panel in upper left corner like gae_mini_profiler
     template sugar? or docs explaining why we don't do ab_test in templates
 
 
