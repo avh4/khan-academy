@@ -1120,8 +1120,13 @@ def main():
 
         ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
         ('/exercisestats/report', exercisestats.report.Test),
-        ('/exercisestats/json', exercisestats.report_json.ExerciseDoneProfGraph),
-        ('/exercisestats/gecko_ex_buckets', exercisestats.report_json.GeckoboardExercisesRedirect),
+        ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
+        ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
+        ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
+        ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
+        ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
+        ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
+        ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
