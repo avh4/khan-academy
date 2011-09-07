@@ -20,6 +20,9 @@
             "dataLabels": { 
                 "enabled": false
             },
+            "marker": {
+                "lineWidth": 1
+            },
             "showInLegend": true,
             "size": "100%"
         }
