@@ -53,7 +53,6 @@
     do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?
 
     NEXT VERSION:
-    weights
     add to nifty little control panel in upper left corner like gae_mini_profiler
     template sugar? or docs explaining why we don't do ab_test in templates
 

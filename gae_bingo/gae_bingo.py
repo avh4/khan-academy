@@ -107,9 +107,17 @@ def score_conversion(experiment_name):
     bingo_identity_cache.convert_in(experiment_name)
 
 def find_alternative_for_user(experiment_name, alternatives):
-    return alternatives[modulo_choice(experiment_name, len(alternatives))]
+    return alternatives[modulo_choice(experiment_name, alternatives)]
 
-def modulo_choice(experiment_name, alternatives_count):
+def modulo_choice(experiment_name, alternatives):
+    alternatives_weight = sum(map(lambda alternative: alternative.weight, alternatives))
+
     sig = hashlib.md5(experiment_name + str(identity())).hexdigest()
     sig_num = int(sig, base=16)
-    return sig_num % alternatives_count
+    index_weight = sig_num % alternatives_weight
+
+    current_weight = alternatives_weight
+    for i, alternative in enumerate(alternatives):
+        current_weight -= alternative.weight
+        if index_weight >= current_weight:
+            return i

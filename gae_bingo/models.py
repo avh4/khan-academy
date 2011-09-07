@@ -42,6 +42,7 @@ class _GAEBingoAlternative(db.Model):
     conversions = db.IntegerProperty(default = 0)
     participants = db.IntegerProperty(default = 0)
     live = db.BooleanProperty(default = True)
+    weight = db.IntegerProperty(default = 1)
 
     @staticmethod
     def key_for_experiment_name_and_number(experiment_name, number):
@@ -116,9 +117,10 @@ def create_experiment_and_alternatives(experiment_name, alternative_params = Non
             )
 
     alternatives = []
-    i = 0
 
-    for content in alternative_params:
+    is_dict = type(alternative_params) == dict
+    for i, content in enumerate(alternative_params):
+
         alternatives.append(
                 _GAEBingoAlternative(
                         key_name = _GAEBingoAlternative.key_for_experiment_name_and_number(experiment_name, i),
@@ -127,8 +129,8 @@ def create_experiment_and_alternatives(experiment_name, alternative_params = Non
                         number = i,
                         pickled_content = pickle.dumps(content),
                         live = True,
+                        weight = alternative_params[content] if is_dict else 1,
                     )
                 )
-        i += 1
 
     return experiment, alternatives

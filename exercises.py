@@ -112,6 +112,7 @@ class ViewExercise(request_handler.RequestHandler):
         user_exercise_json = jsonify.jsonify(user_exercise)
         
         show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion_name="proficiency")
+        favorite_number = ab_test("favorite_number_2", {0: 1, 5: 100, 13: 20})
         use_stars = ab_test("use_stars")
 
         if self.request_bool("convert", default=False):

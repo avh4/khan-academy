@@ -92,7 +92,7 @@ class BingoCache(object):
 
         # Kick both of these off w/ run() so they'll prefetch asynchronously
         experiments = _GAEBingoExperiment.all().run()
-        alternatives = _GAEBingoAlternative.all().run()
+        alternatives = _GAEBingoAlternative.all().order("number").run()
 
         for experiment in experiments:
             experiment_dict[experiment.name] = experiment
