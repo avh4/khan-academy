@@ -473,7 +473,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_int("count_hints", default=0),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
-                    request.request_string("problem_type")
+                    request.request_string("problem_type"),
                     request.remote_addr,
                     )
 
@@ -512,7 +512,6 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
-                    request.request_string("problem_type")
                     request.request_string("problem_type"),
                     request.remote_addr,
                     )
