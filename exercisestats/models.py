@@ -60,3 +60,8 @@ class ExerciseStatistic(db.Model):
 
     def num_problems_done(self):
         return int(self.log_count)
+
+    # This accessor takes a default because new_user_count is a new property
+    # added and not all ExerciseStatistic objects have it
+    def num_new_users(self, default=0):
+        return self.histogram.get('new_user_count', default)

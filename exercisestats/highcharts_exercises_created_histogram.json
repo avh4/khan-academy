@@ -9,24 +9,22 @@
         "plotBorderWidth": null,
         "plotShadow": false,
         "height": 340,
-        "type": "areaspline"
     },
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
-    "title": { "text": "{{ title }}" },
+    "title": { "text": "Exercise creation over time" },
     "legend": { "enabled": false },
     "plotOptions": {
-        "areaspline": {
-            "dataLabels": { "enabled": false },
-            "showInLegend": false,
-            "size": "100%"
+        "column": {
+            "pointPadding": 0,
+            "groupPadding": 0
         }
     },
     "series": [
         {% for data in series %}
             {
+                "type": "{{ data.type }}",
                 "data": {{ data.values }},
-                "name": "{{ data.name }}",
                 "yAxis": {{ data.axis }},
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
@@ -35,6 +33,7 @@
         {% for axis in axes %}
             {
                 "title": { "text": null },
+                "allowDecimals": false,
                 "max": {{ axis.max }}
                 {% if forloop.last %}
                     , "opposite": true
