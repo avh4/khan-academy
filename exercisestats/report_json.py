@@ -157,13 +157,13 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                     'axis': 0,
                 },
                 {
-                    'name': 'Proficient',
-                    'values': json.dumps(prof_list),
+                    'name': 'New users',
+                    'values': json.dumps(new_users_list),
                     'axis': 1,
                 },
                 {
-                    'name': 'New users',
-                    'values': json.dumps(new_users_list),
+                    'name': 'Proficient',
+                    'values': json.dumps(prof_list),
                     'axis': 1,
                 },
             ],
