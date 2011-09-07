@@ -124,6 +124,7 @@ class Exercise(db.Model):
     safe_js = db.TextProperty()
     last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
     sanitizer_used = db.StringProperty()
+    creation_date = db.DateTimeProperty(auto_now_add=True, default=datetime.datetime(2011, 1, 1))
 
     _serialize_blacklist = [
             "author", "raw_html", "last_modified", "safe_html", "safe_js",
@@ -1385,6 +1386,7 @@ class ProblemLog(db.Model):
     seed = db.StringProperty()
     problem_type = db.StringProperty()
     random_float = db.FloatProperty() # Add a random float in [0, 1) for easy random sampling
+    ip_address = db.StringProperty()
 
     def put(self):
         if self.random_float is None:
@@ -1461,6 +1463,7 @@ def commit_problem_log(problem_log_source):
                 problem_type = problem_log_source.problem_type,
                 suggested = problem_log_source.suggested,
                 exercise_non_summative = problem_log_source.exercise_non_summative,
+                ip_address = problem_log_source.ip_address,
         )
 
         problem_log.count_hints = max(problem_log.count_hints, problem_log_source.count_hints)

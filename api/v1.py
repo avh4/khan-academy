@@ -474,6 +474,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     request.request_string("problem_type")
+                    request.remote_addr,
                     )
 
             add_action_results(user_exercise, {
@@ -512,6 +513,8 @@ def attempt_problem_number(exercise_name, problem_number):
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     request.request_string("problem_type")
+                    request.request_string("problem_type"),
+                    request.remote_addr,
                     )
 
             add_action_results(user_exercise, {

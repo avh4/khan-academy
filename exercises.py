@@ -309,7 +309,7 @@ def reset_streak(user_data, user_exercise):
 
 def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
     attempt_content, sha1, seed, completed, count_hints, time_taken,
-    exercise_non_summative, problem_type):
+    exercise_non_summative, problem_type, ip_address):
 
     if user_exercise and user_exercise.belongs_to(user_data):
         dt_now = datetime.datetime.now()
@@ -350,6 +350,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 problem_type = problem_type,
                 count_attempts = attempt_number,
                 attempt_list = [attempt_content],
+                ip_address = ip_address,
         )
 
         if exercise.summative:
