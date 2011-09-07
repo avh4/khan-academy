@@ -24,6 +24,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
             "desc_html": templatetags.video_name_and_progress(video),
             "teaser_html": video.description,
             "youtube_id": video.youtube_id,
+            "marquee": ("marquee" in video.keywords),
             "selected": False,
             "key": video.key(),
             "type": "video-thumb",
@@ -36,6 +37,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
             "desc_html": escape(exercise.display_name),
             "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
             "youtube_id": "",
+            "marquee": False,
             "selected": False,
             "key": exercise.key(),
             "type": "exercise-thumb",
@@ -119,12 +121,14 @@ def new_and_noteworthy_link_sets():
 
 class ViewHomePage(request_handler.RequestHandler):
 
+    # See https://sites.google.com/a/khanacademy.org/forge/for-team-members/how-to-use-new-and-noteworthy-content
+    # for info on how to update the New & Noteworthy videos
     def get(self):
 
         thumbnail_link_sets = new_and_noteworthy_link_sets()
 
         # If all else fails, just show the TED talk on the homepage
-        video_id, video_key = "gM95HHI4gLk", ""
+        video_id, video_key, found_marquee_video = "gM95HHI4gLk", "", False
 
         if len(thumbnail_link_sets) > 1:
 
@@ -137,15 +141,31 @@ class ViewHomePage(request_handler.RequestHandler):
                 current_link_set_offset = 0
 
             thumbnail_link_sets = thumbnail_link_sets[current_link_set_offset:] + thumbnail_link_sets[:current_link_set_offset]
+
+            # Try to find the next-off-screen video that's decorated as a marquee video
+            for i in range(1, len(thumbnail_link_sets)):
+                eligible_marquee_video_links = filter(lambda item: item["marquee"], thumbnail_link_sets[i])
+
+                if len(eligible_marquee_video_links) > 0:
+                    selected_thumbnail = eligible_marquee_video_links[0]
+                    selected_thumbnail["selected"] = True
+
+                    video_id = selected_thumbnail["youtube_id"]
+                    video_key = selected_thumbnail["key"]
+
+                    found_marquee_video = True
+                    break
             
-            # If possible, highlight video #1 from the first set of off-screen thumbnails
-            if len(thumbnail_link_sets[1]) > 0:
+            # If no marquee video found, highlight video #1 from the first set of off-screen thumbnails
+            if not found_marquee_video and len(thumbnail_link_sets[1]) > 0:
+                eligible_marquee_video_links = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])
 
-                selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
-                selected_thumbnail["selected"] = True
+                if len(eligible_marquee_video_links) > 0:
+                    selected_thumbnail = eligible_marquee_video_links[0]
+                    selected_thumbnail["selected"] = True
 
-                video_id = selected_thumbnail["youtube_id"]
-                video_key = selected_thumbnail["key"]
+                    video_id = selected_thumbnail["youtube_id"]
+                    video_key = selected_thumbnail["key"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
