@@ -213,7 +213,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             stat = ExerciseStatistic.get_by_date(ex.name, params['interested_day'])
             ex_stat_dict[ex.name] = stat
             if stat:
-                most_done = max(most_new_users, stat.num_new_users())
+                most_new_users = max(most_new_users, stat.num_new_users())
 
         data_points = []
         for ex in Exercise.get_all_use_cache():
@@ -226,7 +226,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             # Set the area of the circle proportional to the data value
             radius = 1
             if stat:
-                radius = math.sqrt(float(stat.num_new_users()) / most_done) * MAX_POINT_RADIUS
+                radius = math.sqrt(float(stat.num_new_users()) / most_new_users) * MAX_POINT_RADIUS
 
             point = {
                 'x': x,
