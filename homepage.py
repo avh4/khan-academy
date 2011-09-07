@@ -1,3 +1,4 @@
+import datetime
 import random
 
 from django.template.defaultfilters import escape
@@ -9,6 +10,8 @@ import models
 import layer_cache
 import templatetags
 from topics_list import DVD_list
+
+ITEMS_PER_SET = 4
 
 def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
@@ -77,24 +80,22 @@ def new_and_noteworthy_link_sets():
             if exercise:
                 exercises.append(exercise)
 
-    items_per_set = 4
-
     sets = []
     current_set = []
     next_exercise = 0
 
     # Randomly place exercises one per set in 2, 3, or 4
-    current_set_exercise_position = random.randint(1, items_per_set - 1)
+    current_set_exercise_position = random.randint(1, ITEMS_PER_SET - 1)
 
     exercise_icon_files = ["ex1.png", "ex2.png", "ex3.png", "ex4.png"]
     random.shuffle(exercise_icon_files)
 
     for video in videos:
 
-        if len(current_set) >= items_per_set:
+        if len(current_set) >= ITEMS_PER_SET:
             sets.append(current_set)
             current_set = []
-            current_set_exercise_position = random.randint(0, items_per_set - 1)
+            current_set_exercise_position = random.randint(0, ITEMS_PER_SET - 1)
 
         if next_exercise < len(exercises) and len(current_set) == current_set_exercise_position:
             exercise = exercises[next_exercise]
@@ -104,10 +105,10 @@ def new_and_noteworthy_link_sets():
 
             next_exercise += 1
 
-        if len(current_set) >= items_per_set:
+        if len(current_set) >= ITEMS_PER_SET:
             sets.append(current_set)
             current_set = []
-            current_set_exercise_position = random.randint(0, items_per_set - 1)
+            current_set_exercise_position = random.randint(0, ITEMS_PER_SET - 1)
 
         current_set.append(thumbnail_link_dict(video = video))
 
@@ -125,14 +126,26 @@ class ViewHomePage(request_handler.RequestHandler):
         # If all else fails, just show the TED talk on the homepage
         video_id, video_key = "gM95HHI4gLk", ""
 
-        # If possible, highlight video #1 from the first set of off-screen thumbnails
-        if len(thumbnail_link_sets) > 1 and len(thumbnail_link_sets[1]) > 0:
+        if len(thumbnail_link_sets) > 1:
 
-            selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
-            selected_thumbnail["selected"] = True
+            # Switch up the first 4 New & Noteworthy videos on a daily basis
+            current_link_set_offset = datetime.datetime.now().day % len(thumbnail_link_sets)
 
-            video_id = selected_thumbnail["youtube_id"]
-            video_key = selected_thumbnail["key"]
+            if len(thumbnail_link_sets[current_link_set_offset]) < ITEMS_PER_SET:
+                # If the current offset lands on a set of videos that isn't a full set, just start
+                # again at the first set, which is most likely full.
+                current_link_set_offset = 0
+
+            thumbnail_link_sets = thumbnail_link_sets[current_link_set_offset:] + thumbnail_link_sets[:current_link_set_offset]
+            
+            # If possible, highlight video #1 from the first set of off-screen thumbnails
+            if len(thumbnail_link_sets[1]) > 0:
+
+                selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
+                selected_thumbnail["selected"] = True
+
+                video_id = selected_thumbnail["youtube_id"]
+                video_key = selected_thumbnail["key"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
