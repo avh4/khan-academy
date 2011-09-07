@@ -182,10 +182,6 @@ class GeckoboardExerciseRedirect(request_handler.RequestHandler):
         return self.redirect('/exercisestats/exerciseovertime?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
             % (PAST_DAYS_TO_SHOW, REFRESH_SECS, NUM_BUCKETS, bucket_index))
 
-# Castro roulette
-# We now have more exercises than x. Last exercise developer was X
-
-
 # TODO: Either allow returning graphs for other statistics, such as #
 #     proficient, or somehow display more statistics on the same graph nicely
 class ExerciseStatsMapGraph(request_handler.RequestHandler):
