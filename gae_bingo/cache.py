@@ -51,6 +51,7 @@ class BingoCache(object):
         # No longer dirty
         self.dirty = False
 
+        # TODO: maybe collapse both memcached sets into a single bulk set
         memcache.set(BingoCache.MEMCACHE_KEY, self)
 
     def persist_to_datastore(self):
@@ -80,12 +81,13 @@ class BingoCache(object):
         experiment_dict = {}
         alternatives_dict = {}
 
-        # TODO: parallelize these datastore calls
-        experiments = _GAEBingoExperiment.all()
+        # Kick both of these off w/ run() so they'll prefetch asynchronously
+        experiments = _GAEBingoExperiment.all().run()
+        alternatives = _GAEBingoAlternative.all().run()
+
         for experiment in experiments:
             experiment_dict[experiment.name] = experiment
 
-        alternatives = _GAEBingoAlternative.all()
         for alternative in alternatives:
             if alternative.experiment_name not in alternatives_dict:
                 alternatives_dict[alternative.experiment_name] = []
@@ -181,7 +183,6 @@ class BingoIdentityCache(object):
         self.persist_to_datastore(identity)
 
     def persist_to_datastore(self, identity):
-        # TODO: add specific queue here
         deferred.defer(persist_gae_bingo_identity_record, self, identity)
 
     @staticmethod
