@@ -23,15 +23,15 @@ def library_content_html(bust_cache = False):
     dict_playlists_by_title = {}
     dict_video_playlists = {}
 
-    for video in Video.all():
+    for video in Video.all().fetch(10000):
         dict_videos[video.key()] = video
 
-    for playlist in Playlist.all():
+    for playlist in Playlist.all().fetch(1000):
         dict_playlists[playlist.key()] = playlist
         if playlist.title in topics_list:
             dict_playlists_by_title[playlist.title] = playlist
 
-    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position'):
+    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position').fetch(10000):
         playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
         video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
 

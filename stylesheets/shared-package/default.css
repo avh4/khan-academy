@@ -110,6 +110,13 @@ em { font-style: italic; }
 a.simple-link { text-decoration: none; }
 a.simple-link:hover { text-decoration: underline; }
 
+.ampersand {
+    font-family: Tahoma, sans-serif;
+}
+    h2 .ampersand {
+        font-size: 19px;
+    }
+    
 hr {
     background: #CCC;
     border: none;
@@ -143,27 +150,19 @@ hr {
     -webkit-border-radius: 5px;
 
     text-shadow: 0 1px 0 #fff;
+    
+    -moz-box-shadow: inset 0 1px 0 rgba(255,255,255, .3);
+    -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255, .3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255, .3);;
+    
 }
 input.simple-button {
     line-height: 15px;
 }
-.simple-button:after {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom:0;
-	content: " ";
-	border-top: 1px solid rgba(255,255,255, .3);
 
-	border-radius: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-}
 .simple-button:hover {
     border-color: #aaa;
     color: #0075b1 !important;
-    left: 1px;
     top: 1px;
     text-decoration: none !important;
 }
@@ -188,6 +187,17 @@ input.simple-button {
 .simple-button.green:hover {
 	color: #c8f255 !important;
 	border-color:  #13181f !important;
+}
+/* An orange color scheme for the simple button */
+.simple-button.orange {
+	color: #fff !important;
+	border-color: #bf4f04 !important;
+	border-bottom-color: #803503 !important;
+	text-shadow:  0 -1px 0 #a64403;
+}
+.simple-button.orange:hover {
+	color: #ffbb8d !important;
+	border-color:  #803503 !important;
 }
 .simple-button.with-icon {
     padding-left: 30px;
@@ -242,6 +252,13 @@ input.simple-button {
     background-image: -webkit-gradient(linear, left top, left bottom,  from(#8aba08), to(#6e9700));
     background-image: -moz-linear-gradient( top, #8aba08, #6e9700 );
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#8aba08', endColorstr='#6e9700');
+}
+/* orange button gradient */
+.action-gradient.orange {
+    background: #e35d04;
+    background-image: -webkit-gradient(linear, left top, left bottom,  from(#e35d04), to(#bf4f04));
+    background-image: -moz-linear-gradient( top, #e35d04, #bf4f04 );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e35d04', endColorstr='#bf4f04');
 }
 
 .mobile-only { display: none; }
@@ -696,23 +713,33 @@ footer {
 #playlist-jump nav > ul > li ul {
     font-size: 12px;
 }
+#social-actions #fb-like-badge {
+    display: inline-block;
+    width: 165px;
+    height: 20px;
+    vertical-align: top;
+}
+.homepage-mailing {
+    padding-top: 13px;
+}
+.homepage-mailing .mailing_list_container input.simple-button {
+    display: inline;
+    padding: 4px 10px;
+}
+.homepage-mailing .mailing_list_container input.email {
+    width: 250px;
+    border: 1px solid #ccc;
+    height: 17px;
+}
 
 #top-header #top-header-links {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 10px;
     left: 0;
     margin-left: 290px;
     min-width: 680px;
 }
-    #top-header #top-header-links #fb-like-badge, #sitewide-navigation #fb-like-badge {
-        display: inline-block;
-        width: 90px;
-        height: 20px;
-    }
-        #sitewide-navigation #fb-like-badge {
-            vertical-align: top;
-        }
     #top-header #top-header-links span {
         vertical-align: middle;
     }
@@ -1819,7 +1846,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             display: block;
             float: left;
             margin: 0;
-            width: 95%%;
+            width: 95%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -2294,7 +2321,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     #about-blog #blog-sidebar input.email {
         width: 90%;
-        padding: 3px;
         margin-bottom: 9px;
     }
     #about-blog #blog-sidebar #social-links .social-button {
@@ -2312,9 +2338,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     height: 435px;
     font-size:  16px;
     line-height: 24px;
-}
-#homepage-text p.call-to-action-buttons {
-    margin: 38px 0;
 }
 #homepage-text a.call-to-action {
     display: block;
@@ -2379,7 +2402,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #thumbnails_container {
     clear: both;
-    min-height: 145px;
 }
 
 #thumbnails_container td {
@@ -2392,40 +2414,63 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 #thumbnails td a {
     outline: none;
+    color: #fff;
+    white-space: pre;
+}
+
+#thumbnails td a:hover {
+    text-decoration: none;
 }
 
 #thumbnails td div.thumb {
-    background: url(/images/splashthumbnails/splash_thumbnail_sprites.png) no-repeat top left;
+    background-position: no-repeat top left;
     width: 200px;
     height: 100px;
     border: 1px solid #aaa;
     margin-left: auto;
     margin-right: auto;
-    -webkit-box-shadow: 1px 2px 2px #ccc;
-    -moz-box-shadow: 1px 2px 2px #ccc;
-    box-shadow: 1px 2px 2px #ccc;
+    -webkit-box-shadow: 0 0 3px #ccc;
+    -moz-box-shadow: 0 0 3px #ccc;
+    box-shadow: 0 0 3px #ccc;
+    background-size: 200px 150px;
+}
+#thumbnails td.video-thumb div.thumb {
+    background-position: 0px -25px;
+    /* IE doesn't support background-size, so we'll just reposition the larger background */
+    background-position-y: -80px\9;
+    background-position-x: -100px\9;
 }
 
 #thumbnails td.selected div.thumb {
-    -webkit-box-shadow: 1px 2px 6px #aaa;
-    -moz-box-shadow: 1px 2px 6px #aaa;
-    box-shadow: 1px 2px 6px #aaa;
+    border: 2px solid #89B908;
 }
 
-#thumbnails td div.thumb-cnn_thumbnail { background-position: 0 0; }
-#thumbnails td div.thumb-exercises_thumbnail { background-position: 0 -150px; }
-#thumbnails td div.thumb-forbes_thumbnail { background-position: 0 -300px; }
-#thumbnails td div.thumb-fortune_thumbnail { background-position: 0 -450px; }
-#thumbnails td div.thumb-gates_thumbnail { background-position: 0 -600px; }
-#thumbnails td div.thumb-gel_thumbnail { background-position: 0 -750px; }
-#thumbnails td div.thumb-overview_thumbnail { background-position: 0 -900px; }
-#thumbnails td div.thumb-pbs_thumbnail { background-position: 0 -1050px; }
-#thumbnails td div.thumb-tech_award_thumbnail { background-position: 0 -1200px; }
-#thumbnails td div.thumb-ted_thumbnail { background-position: 0 -1350px; }
-#thumbnails td div.thumb-translation_thumbnail { background-position: 0 -1500px; }
-
 #thumbnails td div.thumbnail_label {
-    padding: 2px 2px 0;
+    padding: 5px 10px;
+    max-width: 180px;
+    margin: 0 auto;
+    text-align: left;
+    margin-top: -33px;
+    background: #333;
+    background-color: rgba(30, 30, 30, 0.9);
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#thumbnails td div.thumbnail_desc {
+    width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#thumbnails td div.thumbnail_teaser {
+    height: 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    text-decoration: none;
+    font-size: 11px;
 }
 
 #thumbnails td.selected div.thumbnail_label {
@@ -2674,6 +2719,20 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 }
 /* End No students page styles */
 
+.mailing_list_container input.simple-button {
+    display: block;
+}
+.mailing_list_container input.email {
+    padding: 3px;
+    box-shadow:none;
+}
+.mailing_list_container input.email:-moz-placeholder,
+.mailing_list_container input.email:invalid {
+    box-shadow:none !important;
+}
+.mailing_list_container p {
+    margin: 0;
+}
 .mailing_list_container .error {
     color: red;
 }

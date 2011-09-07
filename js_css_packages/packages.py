@@ -9,13 +9,14 @@ javascript = {
             "pageutil.js",
             "api.js",
 			"social.js",
+			"ga_social_tracking.js",
         ]
     },
     "video": {
         "files": [
+            "jquery.qtip.js",
             "video.js",
             "discussion.js",
-            "jquery.qtip.js",
         ]
     },
     "homepage": {
@@ -120,9 +121,9 @@ stylesheets = {
     },
     "video": {
         "files": [
+            "jquery.qtip.css",
             "video.css",
             "discussion.css",
-            "jquery.qtip.css",
         ]
     },
     "studentlists": {

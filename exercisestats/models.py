@@ -41,3 +41,22 @@ class ExerciseStatistic(db.Model):
         start_dt = dt.datetime.combine(date, dt.time())
         end_dt = start_dt + dt.timedelta(days=1)
         return (start_dt, end_dt)
+
+    @staticmethod
+    def get_by_date(exid, date):
+        bounds = ExerciseStatistic.date_to_bounds(date)
+        key_name = ExerciseStatistic.make_key(exid, bounds[0], bounds[1])
+        return ExerciseStatistic.get_by_key_name(key_name)
+
+    @staticmethod
+    def get_by_dates(exid, dates):
+        # Optimizations: we could either parallelize the datastore calls or do
+        # a batch get of all the keys to reduce round trips
+        ex_stats = [ ExerciseStatistic.get_by_date(exid, d) for d in dates ]
+        return filter(lambda x: x != None, ex_stats)
+
+    def num_proficient(self):
+        return sum(self.histogram['proficiency_problem_number_frequencies'].values())
+
+    def num_problems_done(self):
+        return int(self.log_count)

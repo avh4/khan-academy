@@ -3,6 +3,7 @@
 <style>
 	#page_sub_nav { display: none; }
 	td { vertical-align: top; }
+	.ui-tooltip, .qtip { max-width: 200px; }
 </style>
 
 {% endblock pagescript %}
@@ -17,15 +18,40 @@
         <h1>Learn almost anything for free.</h1>
         <p>
             With a library of over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> covering 
-            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">125 practice exercises</a>,
-            <a href="/about">we're on a mission</a> to help you learn whatever you want, whenever you want, at your own pace.
+            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">150 practice exercises</a>,
+            <a href="/about">we're on a mission</a> to help you learn what you want, when you want, at your own pace.
         </p>
         <p class="call-to-action-buttons">
         	<a href="/#browse" class="call-to-action simple-button action-gradient green">Watch a video</a>
         	<a href="/exercisedashboard?k" class="call-to-action simple-button action-gradient blue">Practice with an exercise </a>
         </p>
+        <div id="social-actions">
+            <table>
+                <tr>
+                    <td class="social-action">
+                        <span id="fb-like-badge">
+                            <div id="fb-root"></div><fb:like href="http://www.khanacademy.org" send="true" layout="button_count" width="100" show_faces="false" font=""><script type="text/javascript">_ga.trackFacebook();</script></fb:like>
+                        </span>
+                    </td>
+                    <td class="social-action">
+                        <a href="http://twitter.com/share" class="twitter-share-button" data-counturl="http://www.khanacademy.org" data-url="http://www.khanacademy.org" data-text="Watch. Practice. Learn almost anything for free." data-count="horizontal" data-via="khanacademy">Tweet</a>
+                    </td>
+                    <td class="social-action">
+                        <g:plusone size="medium" href="http://www.khanacademy.org"></g:plusone>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=3 class="homepage-mailing">
+                        <span>{% mailing_list_signup_form 3 "Get Updates" "Enter your email to learn about new courses." %}</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
-
+    <h2>
+        New <span class="ampersand">&amp;</span> Noteworthy
+    </h2>
+    {% if thumbnail_link_sets %}
     <div id="thumbnails_container">
         <table width="100%">
             <tr>
@@ -39,11 +65,11 @@
                         {% for thumbnail_link_set in thumbnail_link_sets %}
                             <div {% if not forloop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}
-                                <td style="width:25%" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}" {% if thumbnail_link|hash:"selected" %}class="selected"{% endif %}>
-                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><div class="thumb {{ thumbnail_link|hash:"class"|escape }}"></div></a>
-                                    <div class="thumbnail_label">
-                                        <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link">{{ thumbnail_link|hash:"desc"|escape }}</a>
-                                    </div>
+                            <td style="width:25%" class="thumbnail_td {{ thumbnail_link|hash:"type" }} {% if thumbnail_link|hash:"selected" %}selected{% endif %}" data-key="{{ thumbnail_link|hash:"key"|escape }}" data-youtube-id="{{ thumbnail_link|hash:"youtube_id"|escape }}">
+
+                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><div class="thumb" style="background-image:url('{{ thumbnail_link|hash:"thumb_url"|escape }}')"></div></a>
+
+                                    <a href="{{ thumbnail_link|hash:"href"|escape }}" class="thumbnail_link"><div class="thumbnail_label"><div class="thumbnail_desc">{{ thumbnail_link|hash:"desc_html" }}</div><div class="thumbnail_teaser">{{ thumbnail_link|hash:"teaser_html" }}</div></div></a>
                                 </td>
                             {% endfor %}
                             </tr></table></div>
@@ -58,8 +84,9 @@
             </tr>
         </table>
     </div>
+    {% endif %}
+
     <div class="clear"></div>
-<hr class="desktop-only">
 
 <div data-role="page" data-theme"b" {% if is_mobile %}id="browse"{% endif %}>
     <div data-role="content">
@@ -102,5 +129,24 @@
     {% if not is_mobile %}
         {% js_package "homepage" %}
     {% endif %}
-    {% crazyegg_tracker 1 %}
+
+    <script type="text/javascript">
+        $(function(){VideoStats.startLoggingProgress("{{ video_key }}");});
+
+        (function(){
+            var twitterWidgets = document.createElement('script');
+            twitterWidgets.type = 'text/javascript';
+            twitterWidgets.async = true;
+            twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+            document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+        })();
+
+        (function() {
+            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/plusone.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+        })();
+    </script>
+
+    {% crazyegg_tracker 0 %}
 {% endblock bottompagescript %}

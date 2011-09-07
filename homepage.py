@@ -1,87 +1,145 @@
 import random
-from topics_list import DVD_list
+
+from django.template.defaultfilters import escape
 
 import consts
 import library
 import request_handler
+import models
+import layer_cache
+import templatetags
+from topics_list import DVD_list
+
+def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
+
+    link_dict = None
+
+    if video:
+        link_dict = {
+            "href": "/video/%s" % video.readable_id,
+            "thumb_url": video.youtube_thumbnail_url(),
+            "desc_html": templatetags.video_name_and_progress(video),
+            "teaser_html": video.description,
+            "youtube_id": video.youtube_id,
+            "selected": False,
+            "key": video.key(),
+            "type": "video-thumb",
+        }
+
+    if exercise:
+        link_dict = {
+            "href": exercise.ka_url,
+            "thumb_url": thumb_url,
+            "desc_html": escape(exercise.display_name),
+            "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
+            "youtube_id": "",
+            "selected": False,
+            "key": exercise.key(),
+            "type": "exercise-thumb",
+        }
+
+    if link_dict:
+
+        if len(link_dict["teaser_html"]) > 60:
+            link_dict["teaser_html"] = link_dict["teaser_html"][:60] + "&hellip;"
+
+        return link_dict
+
+    return None
+
+@layer_cache.cache(expiration=60*60*24) # Expire daily
+def new_and_noteworthy_link_sets():
+
+    playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()
+    if not playlist:
+        # If we can't find the playlist, just show the default TED talk.
+        return []
+
+    videos = models.VideoPlaylist.get_cached_videos_for_playlist(playlist)
+    if len(videos) < 2:
+        # If there's only one video, don't bother.
+        return []
+
+    exercises = []
+
+    # We use playlist tags to identify new and noteworthy exercises
+    # just so Sal has a really simple, fast, all-YouTube interface
+    for tag in playlist.tags:
+        exercise = models.Exercise.get_by_name(tag)
+        if exercise:
+            exercises.append(exercise)
+
+    if len(exercises) == 0:
+        # Temporary hard-coding of a couple exercises until Sal picks a few
+        playlist.tags = ['solid_geometry', 'estimation_with_decimals', 'multiplication_4']
+        for tag in playlist.tags:
+            exercise = models.Exercise.get_by_name(tag)
+            if exercise:
+                exercises.append(exercise)
+
+    items_per_set = 4
+
+    sets = []
+    current_set = []
+    next_exercise = 0
+
+    # Randomly place exercises one per set in 2, 3, or 4
+    current_set_exercise_position = random.randint(1, items_per_set - 1)
+
+    exercise_icon_files = ["ex1.png", "ex2.png", "ex3.png", "ex4.png"]
+    random.shuffle(exercise_icon_files)
+
+    for video in videos:
+
+        if len(current_set) >= items_per_set:
+            sets.append(current_set)
+            current_set = []
+            current_set_exercise_position = random.randint(0, items_per_set - 1)
+
+        if next_exercise < len(exercises) and len(current_set) == current_set_exercise_position:
+            exercise = exercises[next_exercise]
+
+            thumb_url = "/images/splashthumbnails/exercises/%s" % (exercise_icon_files[next_exercise % (len(exercise_icon_files))])
+            current_set.append(thumbnail_link_dict(exercise = exercise, thumb_url = thumb_url))
+
+            next_exercise += 1
+
+        if len(current_set) >= items_per_set:
+            sets.append(current_set)
+            current_set = []
+            current_set_exercise_position = random.randint(0, items_per_set - 1)
+
+        current_set.append(thumbnail_link_dict(video = video))
+
+    if len(current_set) > 0:
+        sets.append(current_set)
+
+    return sets
 
 class ViewHomePage(request_handler.RequestHandler):
+
     def get(self):
-        thumbnail_link_sets = [
-            [
-                {
-                    "href": "/video/khan-academy-on-the-gates-notes",
-                    "class": "thumb-gates_thumbnail",
-                    "desc": "Khan Academy on the Gates Notes",
-                    "youtube_id": "UuMTSU9DcqQ",
-                    "selected": False,
-                },
-                {
-                    "href": "http://www.youtube.com/watch?v=dsFQ9kM1qDs",
-                    "class": "thumb-overview_thumbnail",
-                    "desc": "Overview of our video library",
-                    "youtube_id": "dsFQ9kM1qDs",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/salman-khan-speaks-at-gel--good-experience-live--conference",
-                    "class": "thumb-gel_thumbnail",
-                    "desc": "Sal Khan talk at GEL 2010",
-                    "youtube_id": "yTXKCzrFh3c",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/khan-academy-on-pbs-newshour--edited",
-                    "class": "thumb-pbs_thumbnail",
-                    "desc": "Khan Academy on PBS NewsHour",
-                    "youtube_id": "4jXv03sktik",
-                    "selected": False,
-                },
-            ],
-            [
-                {
-                    "href": "http://www.ted.com/talks/salman_khan_let_s_use_video_to_reinvent_education.html",
-                    "class": "thumb-ted_thumbnail",
-                    "desc": "Sal on the Khan Academy @ TED",
-                    "youtube_id": "gM95HHI4gLk",
-                    "selected": False,
-                },
-                {
-                    "href": "http://www.youtube.com/watch?v=p6l8-1kHUsA",
-                    "class": "thumb-tech_award_thumbnail",
-                    "desc": "What is the Khan Academy?",
-                    "youtube_id": "p6l8-1kHUsA",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/khan-academy-exercise-software",
-                    "class": "thumb-exercises_thumbnail",
-                    "desc": "Overview of our exercise software",
-                    "youtube_id": "hw5k98GV7po",
-                    "selected": False,
-                },
-                {
-                    "href": "/video/forbes--names-you-need-to-know---khan-academy",
-                    "class": "thumb-forbes_thumbnail",
-                    "desc": "Forbes Names You Need To Know",
-                    "youtube_id": "UkfppuS0Plg",
-                    "selected": False,
-                },
-            ]
-        ]
 
-        random.shuffle(thumbnail_link_sets)
+        thumbnail_link_sets = new_and_noteworthy_link_sets()
 
-        # Highlight video #1 from the first set of off-screen thumbnails
-        selected_thumbnail = thumbnail_link_sets[1][0]
-        selected_thumbnail["selected"] = True
-        movie_youtube_id = selected_thumbnail["youtube_id"]
+        # If all else fails, just show the TED talk on the homepage
+        video_id, video_key = "gM95HHI4gLk", ""
+
+        # If possible, highlight video #1 from the first set of off-screen thumbnails
+        if len(thumbnail_link_sets) > 1 and len(thumbnail_link_sets[1]) > 0:
+
+            selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
+            selected_thumbnail["selected"] = True
+
+            video_id = selected_thumbnail["youtube_id"]
+            video_key = selected_thumbnail["key"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
 
         template_values = {
-                            'video_id': movie_youtube_id,
+                            'video_id': video_id,
+                            'video_key': video_key,
                             'thumbnail_link_sets': thumbnail_link_sets,
                             'library_content': library_content,
                             'DVD_list': DVD_list,

@@ -144,6 +144,10 @@ PLAYLIST_STRUCTURE = [
                 "playlist": "History"
             },
             {
+                "name": "American Civics",
+                "playlist": "American Civics"
+            },
+            {
                 "name": "Finance",
                 "items": [
                     {
@@ -243,6 +247,8 @@ PLAYLIST_STRUCTURE = [
     }
 ]
 
+UNCATEGORIZED_PLAYLISTS = ['New and Noteworthy']
+
 # Each DVD needs to stay under 4.4GB
 
 DVDs_dict = {
@@ -313,6 +319,7 @@ DVD_list = DVDs_dict.get(None) #'Math'
 def sorted_playlist_titles():
     playlist_titles = []
     append_playlist_titles(playlist_titles, PLAYLIST_STRUCTURE)
+    playlist_titles.extend(UNCATEGORIZED_PLAYLISTS)
     return sorted(set(playlist_titles))
 
 def append_playlist_titles(playlist_titles, obj):

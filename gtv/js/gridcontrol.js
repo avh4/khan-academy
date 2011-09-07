@@ -284,7 +284,7 @@ gtv.jq.GridControl.prototype.showPage = function(selectedItem,
     height:newItem.parent().height()
   };
 
-  if ((liPos.top - divPos.top - this.topParent.scrollTop() + liDim.height) >
+  if ((liPos.top - divPos.top + liDim.height + 100) >
       divDim.height) {
     this.topParent.animate({
         scrollTop:this.topParent.scrollTop() + liDim.height
@@ -297,4 +297,5 @@ gtv.jq.GridControl.prototype.showPage = function(selectedItem,
       },
       getFinishCallback());
   }
+
 };
