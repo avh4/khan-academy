@@ -123,7 +123,7 @@ class ViewExercise(request_handler.RequestHandler):
                 while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == 0:
                     user_activity.append([
                         "hint-activity",
-                        0,
+                        "0",
                         max(0, problem_log.hint_time_taken_list[0])
                         ])
                     problem_log.hint_after_attempt_list.pop(0)
@@ -142,7 +142,7 @@ class ViewExercise(request_handler.RequestHandler):
                     while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i+1:
                         user_activity.append([
                             "hint-activity",
-                            0,
+                            "0",
                             max(0, problem_log.hint_time_taken_list[0])
                             ])
 
