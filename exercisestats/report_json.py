@@ -239,7 +239,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             data_points.append(point)
 
         context = {
-            'title': 'Exercises Map',
+            'title': 'Exercises Map - New Users',
             'series': {
                 'name': 'New Users',
                 'values': json.dumps(data_points),

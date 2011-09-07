@@ -14,7 +14,7 @@
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
     "title": { "text": "{{ title }}" },
-    "legend": { },
+    "legend": { "enabled": false },
     "plotOptions": {
         "scatter": {
             "dataLabels": { 
@@ -23,7 +23,6 @@
             "marker": {
                 "lineWidth": 1
             },
-            "showInLegend": true,
             "size": "100%"
         }
     },
