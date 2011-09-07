@@ -61,7 +61,6 @@ class BingoCache(object):
         # No longer dirty
         self.dirty = False
 
-        # TODO: maybe collapse both memcached sets into a single bulk set
         memcache.set(BingoCache.MEMCACHE_KEY, self)
 
     def persist_to_datastore(self):
@@ -187,7 +186,6 @@ class BingoIdentityCache(object):
         # No longer dirty
         self.dirty = False
 
-        # TODO: maybe collapse both memcached sets into a single bulk set
         memcache.set(BingoIdentityCache.key_for_identity(identity), self)
 
         # Always fire off a task queue to persist bingo identity cache
