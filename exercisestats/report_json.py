@@ -146,6 +146,8 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
         left_axis_max = max([x[1] for x in done_list]) if done_list else 1
         right_axis_max = max([x[1] for x in new_users_list]) * 2 if new_users_list else 1
 
+        dates_to_display_unix = [x[0] for x in done_list] if done_list else [0]
+
         context = {
             'title': title,
             'series': [
@@ -169,6 +171,8 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                 { 'max': left_axis_max },
                 { 'max': right_axis_max },
             ],
+            'minXValue': min(dates_to_display_unix),
+            'maxXValue': max(dates_to_display_unix),
         }
 
         return self.render_template_to_string(

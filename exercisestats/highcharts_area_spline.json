@@ -42,5 +42,24 @@
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ],
-    "xAxis": { "type": "datetime" }
+    "xAxis": {
+        "type": "datetime",
+        "plotLines": [
+            {
+                "width": 1,
+                "value": {{ minXValue }},
+                "color": "#058DC7"
+            },
+            {
+                "width": 2,
+                "value": {{ maxXValue }},
+                "color": "#50B432"
+            },
+            {
+                "width": 1,
+                "value": {{ maxXValue }},
+                "color": "#EF561A"
+            }
+        ],
+    }
 }
