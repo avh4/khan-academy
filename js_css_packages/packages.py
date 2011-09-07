@@ -84,6 +84,7 @@ javascript = {
             "utils/convert-values.js",
             "utils/exponents.js",
             "utils/expressions.js",
+            "utils/graphie-geometry.js",
             "utils/graphie-helpers-arithmetic.js",
             "utils/graphie-helpers.js",
             "utils/graphie.js",
