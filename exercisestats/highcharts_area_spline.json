@@ -44,6 +44,9 @@
     ],
     "xAxis": {
         "type": "datetime",
+        "dateTimeLabelFormats": {
+            "day": "%a %e %b"
+        },
         "plotLines": [
             {
                 "width": 1,
@@ -63,3 +66,4 @@
         ],
     }
 }
+
