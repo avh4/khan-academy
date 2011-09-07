@@ -217,9 +217,7 @@ class ProfileGraph(request_handler.RequestHandler):
         if len(json_update) > 0:
             self.response.out.write(json_update)
         else:
-            html_and_url = { "html": html, "url": self.request.url }
-            json = simplejson.dumps(html_and_url, ensure_ascii=False)
-            self.response.out.write(json)
+            self.response.out.write(html)
 
     def get_profile_target_user_data(self):
         student = UserData.current() or UserData.pre_phantom()
