@@ -8,7 +8,7 @@ from .cache import BingoCache, bingo_and_identity_cache
 from .models import create_experiment_and_alternatives
 from .identity import identity
 
-def ab_test(experiment_name, alternative_params, conversion_name):
+def ab_test(experiment_name, alternative_params = None, conversion_name = None):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 

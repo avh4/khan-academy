@@ -21,7 +21,11 @@ class _GAEBingoExperiment(db.Model):
     conversion_name = db.StringProperty()
     live = db.BooleanProperty(default = True)
     dt_started = db.DateTimeProperty(auto_now_add = True)
-    short_circuit_content = db.TextProperty()
+    short_circuit_pickled_content = db.BlobProperty()
+
+    @property
+    def short_circuit_content(self):
+        return pickle.loads(self.short_circuit_pickled_content)
 
     @staticmethod
     def key_for_name(name):
@@ -34,7 +38,7 @@ class _GAEBingoExperiment(db.Model):
 class _GAEBingoAlternative(db.Model):
     number = db.IntegerProperty()
     experiment_name = db.StringProperty()
-    content = db.TextProperty()
+    pickled_content = db.BlobProperty()
     conversions = db.IntegerProperty(default = 0)
     participants = db.IntegerProperty(default = 0)
     live = db.BooleanProperty(default = True)
@@ -42,6 +46,10 @@ class _GAEBingoAlternative(db.Model):
     @staticmethod
     def key_for_experiment_name_and_number(experiment_name, number):
         return "_gae_alternative:%s:%s" % (experiment_name, number)
+
+    @property
+    def content(self):
+        return pickle.loads(self.pickled_content)
 
     def key_for_self(self):
         return _GAEBingoAlternative.key_for_experiment_name_and_number(self.experiment_name, self.number)
@@ -89,7 +97,16 @@ def persist_gae_bingo_identity_record(bingo_identity_cache, identity):
             )
     bingo_identity.put()
 
-def create_experiment_and_alternatives(experiment_name, alternative_params, conversion_name):
+def create_experiment_and_alternatives(experiment_name, alternative_params = None, conversion_name = None):
+
+    if not experiment_name:
+        raise Exception("gae_bingo experiments must be named.")
+
+    conversion_name = conversion_name or experiment_name
+
+    if not alternative_params:
+        # Default to simple True/False testing
+        alternative_params = [True, False]
 
     experiment = _GAEBingoExperiment(
                 key_name = _GAEBingoExperiment.key_for_name(experiment_name),
@@ -108,7 +125,7 @@ def create_experiment_and_alternatives(experiment_name, alternative_params, conv
                         parent = experiment,
                         experiment_name = experiment.name,
                         number = i,
-                        content = str(content),
+                        pickled_content = pickle.dumps(content),
                         live = True,
                     )
                 )
