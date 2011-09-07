@@ -9,7 +9,6 @@ javascript = {
             "pageutil.js",
             "api.js",
 			"social.js",
-			"ga_social_tracking.js",
         ]
     },
     "video": {
@@ -25,6 +24,7 @@ javascript = {
             "jquery.cycle.all.min.js",
             "waypoints.min.js",
             "homepage.js",
+            "ga_social_tracking.js",
         ]
     },
     "exercises": {
