@@ -17,14 +17,24 @@ def flush_request_cache():
     global REQUEST_CACHE
     REQUEST_CACHE = {}
 
+def init_request_cache_from_memcache():
+    global REQUEST_CACHE
+
+    if not REQUEST_CACHE.get("loaded_from_memcache"):
+        REQUEST_CACHE = memcache.get_multi([BingoCache.MEMCACHE_KEY, BingoIdentityCache.key_for_identity(identity())])
+        REQUEST_CACHE["loaded_from_memcache"] = True
+
 class BingoCache(object):
 
     MEMCACHE_KEY = "_gae_bingo_cache"
 
     @staticmethod
     def get():
+        init_request_cache_from_memcache()
+
         if not REQUEST_CACHE.get(BingoCache.MEMCACHE_KEY):
-            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = memcache.get(BingoCache.MEMCACHE_KEY) or BingoCache.load_from_datastore()
+            REQUEST_CACHE[BingoCache.MEMCACHE_KEY] = BingoCache.load_from_datastore()
+
         return REQUEST_CACHE[BingoCache.MEMCACHE_KEY]
 
     def __init__(self):
@@ -161,11 +171,13 @@ class BingoIdentityCache(object):
         return BingoIdentityCache.MEMCACHE_KEY % identity
 
     @staticmethod
-    def get_for_identity(identity):
-        # TODO: collapse both memcached and datastore requests into a single bulk get
-        key = BingoIdentityCache.key_for_identity(identity)
+    def get():
+        init_request_cache_from_memcache()
+
+        key = BingoIdentityCache.key_for_identity(identity())
         if not REQUEST_CACHE.get(key):
-            REQUEST_CACHE[key] = memcache.get(key) or BingoIdentityCache.load_from_datastore()
+            REQUEST_CACHE[key] = BingoIdentityCache.load_from_datastore()
+
         return REQUEST_CACHE[key]
 
     def store_for_identity_if_dirty(self, identity):
@@ -187,8 +199,12 @@ class BingoIdentityCache(object):
 
     @staticmethod
     def load_from_datastore():
+
         bingo_identity_cache = _GAEBingoIdentityRecord.load(identity()) or BingoIdentityCache()
         bingo_identity_cache.purge()
+        bingo_identity_cache.dirty = True
+        bingo_identity_cache.store_for_identity_if_dirty(identity())
+
         return bingo_identity_cache
 
     def __init__(self):
@@ -218,7 +234,7 @@ class BingoIdentityCache(object):
         self.dirty = True
 
 def bingo_and_identity_cache():
-    return BingoCache.get(), BingoIdentityCache.get_for_identity(identity())
+    return BingoCache.get(), BingoIdentityCache.get()
 
 def store_if_dirty():
     # Only load from request cache here -- if it hasn't been loaded from memcache previously, it's not dirty.
