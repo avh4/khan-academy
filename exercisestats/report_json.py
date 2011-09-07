@@ -144,7 +144,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
         # Make the peak of the new users and proficiency series about half as
         # high as the peak of the # problems line
         left_axis_max = max([x[1] for x in done_list]) if done_list else 1
-        right_axis_max = max([x[1] for x in new_users_list]) * 2 if new_users_list else 1
+        right_axis_max = max([x[1] for x in new_users_list + prof_list]) * 2 if new_users_list else 1
 
         dates_to_display_unix = [x[0] for x in done_list] if done_list else [0]
 
