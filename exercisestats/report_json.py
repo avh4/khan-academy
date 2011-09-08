@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import layer_cache
-import exercisestats.number_trivia as number_trivia
 import request_handler
 import user_util
 
@@ -115,16 +114,16 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             for ex in Exercise.get_all_use_cache():
                 ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
 
-            return self.area_spline(ex_stats, 'All Exercises', showLegend=True)
+            return self.exercise_over_time_for_highcharts(ex_stats, 'All Exercises', showLegend=True)
 
         exercise_names = exercises_in_bucket(params['num_buckets'], params['bucket_index'])
 
         exid = exercise_names[params['bucket_cursor']]
         ex_stats = ExerciseStatistic.get_by_dates(exid, days)
 
-        return self.area_spline(ex_stats, exid)
+        return self.exercise_over_time_for_highcharts(ex_stats, exid)
 
-    def area_spline(self, exercise_stats, title='', showLegend=False):
+    def exercise_over_time_for_highcharts(self, exercise_stats, title='', showLegend=False):
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = to_unix_secs(ex.start_dt) * 1000
@@ -156,17 +155,20 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             'series': [
                 {
                     'name': 'Problems Done',
+                    'type': 'areaspline',
                     'values': json.dumps(done_list),
                     'axis': 0,
                 },
                 {
-                    'name': 'New users',
-                    'values': json.dumps(new_users_list),
+                    'name': 'Proficient',
+                    'type': 'column',
+                    'values': json.dumps(prof_list),
                     'axis': 1,
                 },
                 {
-                    'name': 'Proficient',
-                    'values': json.dumps(prof_list),
+                    'name': 'New users',
+                    'type': 'spline',
+                    'values': json.dumps(new_users_list),
                     'axis': 1,
                 },
             ],
@@ -220,12 +222,13 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
                 most_new_users = max(most_new_users, stat.num_new_users())
 
         data_points = []
+        min_y, max_y = -1, 1
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
 
-            # The exercise map is rotated 90 degrees because we can fit more on
-            # Geckoboard's tiny 2x2 widget that way.
-            x, y = int(ex.h_position), int(ex.v_position)
+            y, x = int(ex.h_position), int(ex.v_position)
+
+            min_y, max_y = min(y, min_y), max(y, max_y)
 
             # Set the area of the circle proportional to the data value
             radius = 1
@@ -248,6 +251,8 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
                 'name': 'New Users',
                 'values': json.dumps(data_points),
             },
+            'minYValue': min_y - 1,
+            'maxYValue': max_y + 1,
         }
 
         return self.render_template_to_string(
@@ -291,9 +296,12 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
         number = self.request_int('num', len(Exercise.get_all_use_cache()))
         self.render_json(self.number_facts_for_geckboard_text(number))
 
-    # Not caching because there is no datastore access in this function
     @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda number: str(number),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def number_facts_for_geckboard_text(number):
+        import exercisestats.number_trivia as number_trivia
+
         math_fact = number_trivia.math_facts.get(number,
             'This number is interesting. Why? Suppose there exists uninteresting '
             'natural numbers. Then the smallest in that set would be '
