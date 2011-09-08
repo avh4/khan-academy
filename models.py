@@ -1367,11 +1367,8 @@ class ProblemLog(db.Model):
     correct = db.BooleanProperty(default = False)
     time_done = db.DateTimeProperty(auto_now_add=True)
     time_taken = db.IntegerProperty(default = 0, indexed=False)
-    time_taken_attempts = db.ListProperty(int, indexed=False)
     hint_time_taken_list = db.ListProperty(int, indexed=False)
     hint_after_attempt_list = db.ListProperty(int, indexed=False)
-    attempts = db.StringListProperty(indexed=False)
-    count_attempts = db.IntegerProperty(default = 0, indexed=False)
     count_hints = db.IntegerProperty(default = 0, indexed=False)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty(indexed=False) # Used to reproduce problems from summative exercises
@@ -1381,6 +1378,9 @@ class ProblemLog(db.Model):
     sha1 = db.StringProperty(indexed=False)
     seed = db.StringProperty(indexed=False)
     problem_type = db.StringProperty(indexed=False)
+    count_attempts = db.IntegerProperty(default = 0, indexed=False)
+    time_taken_attempts = db.ListProperty(int, indexed=False)
+    attempts = db.StringListProperty(indexed=False)
     random_float = db.FloatProperty() # Add a random float in [0, 1) for easy random sampling
     ip_address = db.StringProperty(indexed=False)
 
