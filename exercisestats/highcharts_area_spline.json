@@ -34,7 +34,14 @@
         {% for axis in axes %}
             {
                 "title": { "text": null },
-                "max": {{ axis.max }}
+                "max": {{ axis.max }},
+                "labels": {
+                    {% if forloop.last %}
+                        "style": { "color": "#50B432" }
+                    {% else %}
+                        "style": { "color": "#058DC7" }
+                    {% endif %}
+                }
                 {% if forloop.last %}
                     , "opposite": true
                 {% endif %}
@@ -48,7 +55,7 @@
         },
         "plotLines": [
             {
-                "width": 1,
+                "width": 2,
                 "value": {{ minXValue }},
                 "color": "#058DC7"
             },
@@ -58,7 +65,7 @@
                 "color": "#50B432"
             },
             {
-                "width": 1,
+                "width": 2,
                 "value": {{ maxXValue }},
                 "color": "#EF561A"
             }
