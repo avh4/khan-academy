@@ -14,11 +14,10 @@
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
     "title": { "text": "{{ title }}" },
-    "legend": { "enabled": false },
+    "legend": { "enabled": {{ showLegend }} },
     "plotOptions": {
         "areaspline": {
             "dataLabels": { "enabled": false },
-            "showInLegend": false,
             "size": "100%"
         }
     },
@@ -42,5 +41,27 @@
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ],
-    "xAxis": { "type": "datetime" }
+    "xAxis": {
+        "type": "datetime",
+        "dateTimeLabelFormats": {
+            "day": "%a %e %b"
+        },
+        "plotLines": [
+            {
+                "width": 1,
+                "value": {{ minXValue }},
+                "color": "#058DC7"
+            },
+            {
+                "width": 2,
+                "value": {{ maxXValue }},
+                "color": "#50B432"
+            },
+            {
+                "width": 1,
+                "value": {{ maxXValue }},
+                "color": "#EF561A"
+            }
+        ],
+    }
 }

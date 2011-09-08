@@ -9,6 +9,7 @@ import layer_cache
 from models import Video, Playlist, VideoPlaylist, Setting
 from topics_list import topics_list
 import request_handler
+import util
 
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
@@ -23,15 +24,23 @@ def library_content_html(bust_cache = False):
     dict_playlists_by_title = {}
     dict_video_playlists = {}
 
-    for video in Video.all().fetch(10000):
+    async_queries = [
+        Video.all(),
+        Playlist.all(),
+        VideoPlaylist.all().filter('live_association = ', True).order('video_position'),
+    ]
+
+    results = util.async_queries(async_queries)
+
+    for video in results[0].get_result():
         dict_videos[video.key()] = video
 
-    for playlist in Playlist.all().fetch(1000):
+    for playlist in results[1].get_result():
         dict_playlists[playlist.key()] = playlist
         if playlist.title in topics_list:
             dict_playlists_by_title[playlist.title] = playlist
 
-    for video_playlist in VideoPlaylist.all().filter('live_association = ', True).order('video_position').fetch(10000):
+    for video_playlist in results[2].get_result():
         playlist_key = VideoPlaylist.playlist.get_value_for_datastore(video_playlist)
         video_key = VideoPlaylist.video.get_value_for_datastore(video_playlist)
 

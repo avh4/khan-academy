@@ -40,7 +40,7 @@ from facebook_util import is_facebook_user_id
 
 class Setting(db.Model):
 
-    value = db.StringProperty()
+    value = db.StringProperty(indexed=False)
 
     @staticmethod
     def entity_group_key():
@@ -120,15 +120,11 @@ class Exercise(db.Model):
     author = db.UserProperty()
     raw_html = db.TextProperty()
     last_modified = db.DateTimeProperty()
-    safe_html = db.TextProperty()
-    safe_js = db.TextProperty()
-    last_sanitized = db.DateTimeProperty(default=datetime.datetime.min)
-    sanitizer_used = db.StringProperty()
     creation_date = db.DateTimeProperty(auto_now_add=True, default=datetime.datetime(2011, 1, 1))
 
     _serialize_blacklist = [
-            "author", "raw_html", "last_modified", "safe_html", "safe_js",
-            "last_sanitized", "sanitizer_used", "coverers", "prerequisites_ex", "assigned",
+            "author", "raw_html", "last_modified",
+            "coverers", "prerequisites_ex", "assigned",
             ]
 
     @property
@@ -287,16 +283,16 @@ class UserExercise(db.Model):
     exercise = db.StringProperty()
     exercise_model = db.ReferenceProperty(Exercise)
     streak = db.IntegerProperty(default = 0)
-    longest_streak = db.IntegerProperty(default = 0)
+    longest_streak = db.IntegerProperty(default = 0, indexed=False)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
     total_correct = db.IntegerProperty(default = 0)
     last_review = db.DateTimeProperty(default=datetime.datetime.min)
-    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS)) # Default 7 days until review
+    review_interval_secs = db.IntegerProperty(default=(60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS), indexed=False) # Default 7 days until review
     proficient_date = db.DateTimeProperty()
-    seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
-    summative = db.BooleanProperty(default=False)
+    seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM, indexed=False) # Seconds expected to finish a problem 'quickly' for badge calculation
+    summative = db.BooleanProperty(default=False, indexed=False)
 
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
@@ -515,8 +511,8 @@ class UserVideoCss(db.Model):
     user = db.UserProperty()
     video_css = db.TextProperty()
     pickled_dict = db.BlobProperty()
-    last_modified = db.DateTimeProperty(required=True, auto_now=True)
-    version = db.IntegerProperty(default=0)
+    last_modified = db.DateTimeProperty(required=True, auto_now=True, indexed=False)
+    version = db.IntegerProperty(default=0, indexed=False)
 
     STARTED, COMPLETED = range(2)
 
@@ -584,33 +580,33 @@ def set_css_deferred(user_data_key, video_key, status, version):
 class UserData(db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
-    user_nickname = db.StringProperty()
+    user_nickname = db.StringProperty(indexed=False)
     current_user = db.UserProperty()
     moderator = db.BooleanProperty(default=False)
     developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
-    last_login = db.DateTimeProperty()
-    proficient_exercises = db.StringListProperty() # Names of exercises in which the user is *explicitly* proficient
-    all_proficient_exercises = db.StringListProperty() # Names of all exercises in which the user is proficient
-    suggested_exercises = db.StringListProperty()
-    assigned_exercises = db.StringListProperty()
-    badges = db.StringListProperty() # All awarded badges
-    need_to_reassess = db.BooleanProperty()
+    last_login = db.DateTimeProperty(indexed=False)
+    proficient_exercises = db.StringListProperty(indexed=False) # Names of exercises in which the user is *explicitly* proficient
+    all_proficient_exercises = db.StringListProperty(indexed=False) # Names of all exercises in which the user is proficient
+    suggested_exercises = db.StringListProperty(indexed=False)
+    assigned_exercises = db.StringListProperty(indexed=False)
+    badges = db.StringListProperty(indexed=False) # All awarded badges
+    need_to_reassess = db.BooleanProperty(indexed=False)
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
     coaches = db.StringListProperty()
     coworkers = db.StringListProperty()
     student_lists = db.ListProperty(db.Key)
-    map_coords = db.StringProperty()
-    expanded_all_exercises = db.BooleanProperty(default=True)
+    map_coords = db.StringProperty(indexed=False)
+    expanded_all_exercises = db.BooleanProperty(default=True, indexed=False)
     videos_completed = db.IntegerProperty(default = -1)
-    last_daily_summary = db.DateTimeProperty()
-    last_badge_review = db.DateTimeProperty()
-    last_activity = db.DateTimeProperty()
-    count_feedback_notification = db.IntegerProperty(default = -1)
-    question_sort_order = db.IntegerProperty(default = -1)
+    last_daily_summary = db.DateTimeProperty(indexed=False)
+    last_badge_review = db.DateTimeProperty(indexed=False)
+    last_activity = db.DateTimeProperty(indexed=False)
+    count_feedback_notification = db.IntegerProperty(default = -1, indexed=False)
+    question_sort_order = db.IntegerProperty(default = -1, indexed=False)
     user_email = db.StringProperty()
-    uservideocss_version = db.IntegerProperty(default = 0)
+    uservideocss_version = db.IntegerProperty(default = 0, indexed=False)
 
     _serialize_blacklist = [
             "assigned_exercises", "badges", "count_feedback_notification",
@@ -1117,7 +1113,7 @@ class UserPlaylist(db.Model):
     playlist = db.ReferenceProperty(Playlist)
     seconds_watched = db.IntegerProperty(default = 0)
     last_watched = db.DateTimeProperty(auto_now_add = True)
-    title = db.StringProperty()
+    title = db.StringProperty(indexed=False)
 
     @staticmethod
     def get_for_user_data(user_data):
@@ -1176,7 +1172,7 @@ class UserVideo(db.Model):
     video = db.ReferenceProperty(Video)
 
     # Most recently watched second in video (playhead state)
-    last_second_watched = db.IntegerProperty(default = 0)
+    last_second_watched = db.IntegerProperty(default = 0, indexed=False)
 
     # Number of seconds actually spent watching this video, regardless of jumping around to various
     # scrubber positions. This value can exceed the total duration of the video if it is watched
@@ -1184,7 +1180,7 @@ class UserVideo(db.Model):
     seconds_watched = db.IntegerProperty(default = 0)
 
     last_watched = db.DateTimeProperty(auto_now_add = True)
-    duration = db.IntegerProperty(default = 0)
+    duration = db.IntegerProperty(default = 0, indexed=False)
     completed = db.BooleanProperty(default = False)
 
     @property
@@ -1194,12 +1190,12 @@ class UserVideo(db.Model):
 class VideoLog(db.Model):
     user = db.UserProperty()
     video = db.ReferenceProperty(Video)
-    video_title = db.StringProperty()
+    video_title = db.StringProperty(indexed=False)
     time_watched = db.DateTimeProperty(auto_now_add = True)
-    seconds_watched = db.IntegerProperty(default = 0)
-    last_second_watched = db.IntegerProperty()
-    points_earned = db.IntegerProperty(default = 0)
-    playlist_titles = db.StringListProperty()
+    seconds_watched = db.IntegerProperty(default = 0, indexed=False)
+    last_second_watched = db.IntegerProperty(indexed=False)
+    points_earned = db.IntegerProperty(default = 0, indexed=False)
+    playlist_titles = db.StringListProperty(indexed=False)
 
     _serialize_blacklist = ["video"]
 
@@ -1370,23 +1366,23 @@ class ProblemLog(db.Model):
     exercise = db.StringProperty()
     correct = db.BooleanProperty(default = False)
     time_done = db.DateTimeProperty(auto_now_add=True)
-    time_taken = db.IntegerProperty(default = 0)
-    attempt_time_taken_list = db.ListProperty(int)
-    hint_time_taken_list = db.ListProperty(int)
-    hint_after_attempt_list = db.ListProperty(int)
-    attempt_list = db.StringListProperty()
-    count_attempts = db.IntegerProperty(default = 0)
-    count_hints = db.IntegerProperty(default = 0)
+    time_taken = db.IntegerProperty(default = 0, indexed=False)
+    attempt_time_taken_list = db.ListProperty(int, indexed=False)
+    hint_time_taken_list = db.ListProperty(int, indexed=False)
+    hint_after_attempt_list = db.ListProperty(int, indexed=False)
+    attempt_list = db.StringListProperty(indexed=False)
+    count_attempts = db.IntegerProperty(default = 0, indexed=False)
+    count_hints = db.IntegerProperty(default = 0, indexed=False)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
-    exercise_non_summative = db.StringProperty() # Used to reproduce problems from summative exercises
-    points_earned = db.IntegerProperty(default = 0)
+    exercise_non_summative = db.StringProperty(indexed=False) # Used to reproduce problems from summative exercises
+    points_earned = db.IntegerProperty(default = 0, indexed=False)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
     suggested = db.BooleanProperty(default = False) # True if the exercise was suggested to the user
-    sha1 = db.StringProperty()
-    seed = db.StringProperty()
-    problem_type = db.StringProperty()
+    sha1 = db.StringProperty(indexed=False)
+    seed = db.StringProperty(indexed=False)
+    problem_type = db.StringProperty(indexed=False)
     random_float = db.FloatProperty() # Add a random float in [0, 1) for easy random sampling
-    ip_address = db.StringProperty()
+    ip_address = db.StringProperty(indexed=False)
 
     def put(self):
         if self.random_float is None:

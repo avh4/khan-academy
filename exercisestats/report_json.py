@@ -115,7 +115,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             for ex in Exercise.get_all_use_cache():
                 ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
 
-            return self.area_spline(ex_stats, 'All Exercises')
+            return self.area_spline(ex_stats, 'All Exercises', showLegend=True)
 
         exercise_names = exercises_in_bucket(params['num_buckets'], params['bucket_index'])
 
@@ -124,7 +124,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 
         return self.area_spline(ex_stats, exid)
 
-    def area_spline(self, exercise_stats, title=''):
+    def area_spline(self, exercise_stats, title='', showLegend=False):
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = to_unix_secs(ex.start_dt) * 1000
@@ -144,8 +144,13 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
         # Make the peak of the new users and proficiency series about half as
         # high as the peak of the # problems line
         left_axis_max = max([x[1] for x in done_list]) if done_list else 1
-        right_axis_max = max([x[1] for x in new_users_list]) * 2 if new_users_list else 1
+        right_axis_max = max([x[1] for x in new_users_list + prof_list]) * 2 if new_users_list else 1
 
+        dates_to_display_unix = [x[0] for x in done_list] if done_list else [0]
+
+        # TODO: Call a function to render all values in this dict as JSON
+        #     string before giving it to the template, so we don't need to call
+        #     json.dumps on all the values.
         context = {
             'title': title,
             'series': [
@@ -155,13 +160,13 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                     'axis': 0,
                 },
                 {
-                    'name': 'Proficient',
-                    'values': json.dumps(prof_list),
+                    'name': 'New users',
+                    'values': json.dumps(new_users_list),
                     'axis': 1,
                 },
                 {
-                    'name': 'New users',
-                    'values': json.dumps(new_users_list),
+                    'name': 'Proficient',
+                    'values': json.dumps(prof_list),
                     'axis': 1,
                 },
             ],
@@ -169,6 +174,9 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                 { 'max': left_axis_max },
                 { 'max': right_axis_max },
             ],
+            'minXValue': min(dates_to_display_unix),
+            'maxXValue': max(dates_to_display_unix),
+            'showLegend': json.dumps(showLegend),
         }
 
         return self.render_template_to_string(
@@ -209,7 +217,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             stat = ExerciseStatistic.get_by_date(ex.name, params['interested_day'])
             ex_stat_dict[ex.name] = stat
             if stat:
-                most_done = max(most_new_users, stat.num_new_users())
+                most_new_users = max(most_new_users, stat.num_new_users())
 
         data_points = []
         for ex in Exercise.get_all_use_cache():
@@ -222,7 +230,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             # Set the area of the circle proportional to the data value
             radius = 1
             if stat:
-                radius = math.sqrt(float(stat.num_new_users()) / most_done) * MAX_POINT_RADIUS
+                radius = math.sqrt(float(stat.num_new_users()) / most_new_users) * MAX_POINT_RADIUS
 
             point = {
                 'x': x,
@@ -235,7 +243,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             data_points.append(point)
 
         context = {
-            'title': 'Exercises Map',
+            'title': 'Exercises Map - New Users',
             'series': {
                 'name': 'New Users',
                 'values': json.dumps(data_points),
@@ -364,11 +372,13 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
         context = {
             'series': [
                 {
+                    'name': 'Histogram (created per day)',
                     'type': 'column',
                     'values': json.dumps(histogram),
                     'axis': 0,
                 },
                 {
+                    'name': 'Total exercises',
                     'type': 'spline',
                     'values': json.dumps(total_exercises),
                     'axis': 1,
