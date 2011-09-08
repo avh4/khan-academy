@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import layer_cache
-import exercisestats.number_trivia as number_trivia
 import request_handler
 import user_util
 
@@ -297,9 +296,12 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
         number = self.request_int('num', len(Exercise.get_all_use_cache()))
         self.render_json(self.number_facts_for_geckboard_text(number))
 
-    # Not caching because there is no datastore access in this function
     @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda number: str(number),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def number_facts_for_geckboard_text(number):
+        import exercisestats.number_trivia as number_trivia
+
         math_fact = number_trivia.math_facts.get(number,
             'This number is interesting. Why? Suppose there exists uninteresting '
             'natural numbers. Then the smallest in that set would be '
