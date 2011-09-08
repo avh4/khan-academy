@@ -1370,7 +1370,7 @@ class ProblemLog(db.Model):
     time_taken_attempts = db.ListProperty(int, indexed=False)
     hint_time_taken_list = db.ListProperty(int, indexed=False)
     hint_after_attempt_list = db.ListProperty(int, indexed=False)
-    attempt_list = db.StringListProperty(indexed=False)
+    attempts = db.StringListProperty(indexed=False)
     count_attempts = db.IntegerProperty(default = 0, indexed=False)
     count_hints = db.IntegerProperty(default = 0, indexed=False)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
@@ -1466,7 +1466,7 @@ def commit_problem_log(problem_log_source):
         index_attempt = max(0, problem_log_source.count_attempts - 1)
 
         # Bump up attempt count
-        if problem_log_source.attempt_list[0] != "hint": # attempt
+        if problem_log_source.attempts[0] != "hint": # attempt
             if index_attempt < len(problem_log.time_taken_attempts) \
                and problem_log.time_taken_attempts[index_attempt] != -1:
                 # This attempt has already been logged. Ignore this dupe taskqueue execution.
@@ -1482,7 +1482,7 @@ def commit_problem_log(problem_log_source):
             insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
 
             # Add actual attempt content
-            insert_in_position(index_attempt, problem_log.attempt_list, problem_log_source.attempt_list[0], filler="")
+            insert_in_position(index_attempt, problem_log.attempts, problem_log_source.attempts[0], filler="")
 
             # Proficiency earned should never change per problem
             problem_log.earned_proficiency = problem_log.earned_proficiency or \

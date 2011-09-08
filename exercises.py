@@ -131,10 +131,10 @@ class ViewExercise(request_handler.RequestHandler):
 
                 # For each attempt, add it to the list and then add any hints
                 # that came after it
-                for i in range(0, len(problem_log.attempt_list)):
+                for i in range(0, len(problem_log.attempts)):
                     user_activity.append([
                         "correct-activity" if problem_log.correct else "incorrect-activity",
-                        unicode(problem_log.attempt_list[i] if problem_log.attempt_list[i] else 0),
+                        unicode(problem_log.attempts[i] if problem_log.attempts[i] else 0),
                         max(0, problem_log.time_taken_attempts[i])
                         ])
 
@@ -349,7 +349,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 seed = seed,
                 problem_type = problem_type,
                 count_attempts = attempt_number,
-                attempt_list = [attempt_content],
+                attempts = [attempt_content],
                 ip_address = ip_address,
         )
 
