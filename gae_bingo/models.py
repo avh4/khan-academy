@@ -52,6 +52,14 @@ class _GAEBingoAlternative(db.Model):
     def content(self):
         return pickle.loads(self.pickled_content)
 
+    @property
+    def conversion_rate(self):
+        return float(self.conversions) / float(self.participants)
+
+    @property
+    def pretty_conversion_rate(self):
+        return "%4.2f%%" % (self.conversion_rate * 100)
+
     def key_for_self(self):
         return _GAEBingoAlternative.key_for_experiment_name_and_number(self.experiment_name, self.number)
 

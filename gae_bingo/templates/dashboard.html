@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+
+        <style>
+            body.g-bingo {
+                text-align: center;
+            }
+
+            div.g-bingo-container {
+                padding: 20px;
+                width: 800px;
+                margin-left: auto;
+                margin-right: auto;
+                text-align: left;
+            }
+        </style>
+    </head>
+    <body class="g-bingo">
+        <div class="g-bingo-container">
+            <h1>Current GAE Bingo Experiments</h1>
+
+            {% for results in experiment_results %}
+            <h3 class="experiment-title">{{ results.0.name|escape }}</h3>
+
+            <table>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>Participants</th>
+                    <th>Conversions</th>
+                </tr>
+
+                <tr>
+                    <td class="title"><em>Total</em></td>
+                    <td>?</td>
+                    <td>?</td>
+                </tr>
+
+                {% for alternative in results.1 %}
+                <tr>
+                    <td class="title"><em>Alternative #{{ alternative.number }}:</em> {{ alternative.content|escape }}</td>
+                    <td>{{ alternative.participants }}</td>
+                    <td>{{ alternative.conversions }}</td>
+                </tr>
+                {% endfor %}
+
+            </table>
+
+            <p>{{ results.2|escape }}</p>
+
+            {% endfor %}
+        </div>
+    </body>
+</html>
+
