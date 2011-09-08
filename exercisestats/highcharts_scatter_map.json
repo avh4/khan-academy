@@ -35,7 +35,11 @@
     "yAxis": {
         "labels": { "enabled": false },
         "gridLineWidth": 0,
-        "title": { "text": null }
+        "title": { "text": null },
+        "endOnTick": false,
+        "startOnTick": false,
+        "min": {{ minYValue }},
+        "max": {{ maxYValue }}
     },
     "xAxis": {
         "labels": { "enabled": false },

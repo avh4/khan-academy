@@ -220,12 +220,13 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
                 most_new_users = max(most_new_users, stat.num_new_users())
 
         data_points = []
+        min_y, max_y = -1, 1
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
 
-            # The exercise map is rotated 90 degrees because we can fit more on
-            # Geckoboard's tiny 2x2 widget that way.
-            x, y = int(ex.h_position), int(ex.v_position)
+            y, x = int(ex.h_position), int(ex.v_position)
+
+            min_y, max_y = min(y, min_y), max(y, max_y)
 
             # Set the area of the circle proportional to the data value
             radius = 1
@@ -248,6 +249,8 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
                 'name': 'New Users',
                 'values': json.dumps(data_points),
             },
+            'minYValue': min_y - 1,
+            'maxYValue': max_y + 1,
         }
 
         return self.render_template_to_string(
