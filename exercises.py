@@ -135,7 +135,7 @@ class ViewExercise(request_handler.RequestHandler):
                     user_activity.append([
                         "correct-activity" if problem_log.correct else "incorrect-activity",
                         unicode(problem_log.attempt_list[i] if problem_log.attempt_list[i] else 0),
-                        max(0, problem_log.attempt_time_taken_list[i])
+                        max(0, problem_log.time_taken_attempts[i])
                         ])
 
                     # Here i is 0-indexed but problems are numbered starting at 1

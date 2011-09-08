@@ -1367,7 +1367,7 @@ class ProblemLog(db.Model):
     correct = db.BooleanProperty(default = False)
     time_done = db.DateTimeProperty(auto_now_add=True)
     time_taken = db.IntegerProperty(default = 0, indexed=False)
-    attempt_time_taken_list = db.ListProperty(int, indexed=False)
+    time_taken_attempts = db.ListProperty(int, indexed=False)
     hint_time_taken_list = db.ListProperty(int, indexed=False)
     hint_after_attempt_list = db.ListProperty(int, indexed=False)
     attempt_list = db.StringListProperty(indexed=False)
@@ -1467,8 +1467,8 @@ def commit_problem_log(problem_log_source):
 
         # Bump up attempt count
         if problem_log_source.attempt_list[0] != "hint": # attempt
-            if index_attempt < len(problem_log.attempt_time_taken_list) \
-               and problem_log.attempt_time_taken_list[index_attempt] != -1:
+            if index_attempt < len(problem_log.time_taken_attempts) \
+               and problem_log.time_taken_attempts[index_attempt] != -1:
                 # This attempt has already been logged. Ignore this dupe taskqueue execution.
                 logging.info("Skipping problem log commit due to dupe taskqueue\
                     execution for attempt: %s, key.name: %s" % \
@@ -1479,7 +1479,7 @@ def commit_problem_log(problem_log_source):
 
             # Add time_taken for this individual attempt
             problem_log.time_taken += problem_log_source.time_taken
-            insert_in_position(index_attempt, problem_log.attempt_time_taken_list, problem_log_source.time_taken, filler=-1)
+            insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
 
             # Add actual attempt content
             insert_in_position(index_attempt, problem_log.attempt_list, problem_log_source.attempt_list[0], filler="")
