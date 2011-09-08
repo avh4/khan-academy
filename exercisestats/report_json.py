@@ -115,16 +115,16 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             for ex in Exercise.get_all_use_cache():
                 ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
 
-            return self.area_spline(ex_stats, 'All Exercises', showLegend=True)
+            return self.exercise_over_time_for_highcharts(ex_stats, 'All Exercises', showLegend=True)
 
         exercise_names = exercises_in_bucket(params['num_buckets'], params['bucket_index'])
 
         exid = exercise_names[params['bucket_cursor']]
         ex_stats = ExerciseStatistic.get_by_dates(exid, days)
 
-        return self.area_spline(ex_stats, exid)
+        return self.exercise_over_time_for_highcharts(ex_stats, exid)
 
-    def area_spline(self, exercise_stats, title='', showLegend=False):
+    def exercise_over_time_for_highcharts(self, exercise_stats, title='', showLegend=False):
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = to_unix_secs(ex.start_dt) * 1000
@@ -156,17 +156,20 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             'series': [
                 {
                     'name': 'Problems Done',
+                    'type': 'areaspline',
                     'values': json.dumps(done_list),
                     'axis': 0,
                 },
                 {
-                    'name': 'New users',
-                    'values': json.dumps(new_users_list),
+                    'name': 'Proficient',
+                    'type': 'column',
+                    'values': json.dumps(prof_list),
                     'axis': 1,
                 },
                 {
-                    'name': 'Proficient',
-                    'values': json.dumps(prof_list),
+                    'name': 'New users',
+                    'type': 'spline',
+                    'values': json.dumps(new_users_list),
                     'axis': 1,
                 },
             ],

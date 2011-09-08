@@ -26,6 +26,7 @@
             {
                 "data": {{ data.values }},
                 "name": "{{ data.name }}",
+                "type": "{{ data.type }}",
                 "yAxis": {{ data.axis }},
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
@@ -52,23 +53,6 @@
         "type": "datetime",
         "dateTimeLabelFormats": {
             "day": "%a %e %b"
-        },
-        "plotLines": [
-            {
-                "width": 2,
-                "value": {{ minXValue }},
-                "color": "#058DC7"
-            },
-            {
-                "width": 2,
-                "value": {{ maxXValue }},
-                "color": "#50B432"
-            },
-            {
-                "width": 2,
-                "value": {{ maxXValue }},
-                "color": "#EF561A"
-            }
-        ],
+        }
     }
 }
