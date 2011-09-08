@@ -108,9 +108,17 @@ class ViewExercise(request_handler.RequestHandler):
             query = models.ProblemLog.all()
             query.filter("user = ", user_data.user)
             query.filter("exercise = ", exid)
-            query.filter("problem_number = ", problem_number)
 
-            problem_log = query.get()
+            # adding this ordering to ensure that query is served by an existing index.
+            # could be ok if we remove this
+            query.order('time_done')
+            problem_logs = query.fetch(500)
+
+            problem_log = None
+            for p in problem_logs:
+                if p.problem_number == problem_number:
+                    problem_log = p
+                    break
 
             user_activity = []
 
