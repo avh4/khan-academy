@@ -1372,6 +1372,7 @@ class ProblemLog(db.Model):
     count_hints = db.IntegerProperty(default = 0, indexed=False)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty(indexed=False) # Used to reproduce problems from summative exercises
+    hint_used = db.BooleanProperty(default = False, indexed=False)
     points_earned = db.IntegerProperty(default = 0, indexed=False)
     earned_proficiency = db.BooleanProperty(default = False) # True if proficiency was earned on this problem
     suggested = db.BooleanProperty(default = False) # True if the exercise was suggested to the user
@@ -1463,6 +1464,7 @@ def commit_problem_log(problem_log_source):
         )
 
         problem_log.count_hints = max(problem_log.count_hints, problem_log_source.count_hints)
+        problem_log.hints_used = problem_log.count_hints > 0
         index_attempt = max(0, problem_log_source.count_attempts - 1)
 
         # Bump up attempt count
