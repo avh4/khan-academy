@@ -2,6 +2,7 @@ import models
 import util
 import logging
 from templatefilters import seconds_to_time_string
+from exercises import exercise_contents
 
 class ProblemPoint:
     def __init__(self, problem_log, current_sha1):
@@ -59,8 +60,7 @@ def exercise_problems_graph_context(user_data_student, exid):
 
     user_exercise = user_data_student.get_or_insert_exercise(exercise)
 
-    from exercises import exercise_contents
-    dontcare1, dontcare2, dontcare3, dontcare4, sha1 = exercise_contents(exercise)
+    sha1 = exercise_contents(exercise)[4]
 
     related_videos = exercise.related_videos_query()
     video_list = []
