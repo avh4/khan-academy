@@ -49,10 +49,13 @@ class ExerciseStatistic(db.Model):
         return ExerciseStatistic.get_by_key_name(key_name)
 
     @staticmethod
-    def get_by_dates(exid, dates):
-        # Optimizations: we could either parallelize the datastore calls or do
-        # a batch get of all the keys to reduce round trips
-        ex_stats = [ ExerciseStatistic.get_by_date(exid, d) for d in dates ]
+    def get_by_dates_and_exids(exids, dates):
+        # TODO: Optimizations: we could either parallelize the datastore calls or
+        #     do a batch get of all the keys to reduce round trips
+        ex_stats = []
+        for exid in exids:
+            ex_stats += [ ExerciseStatistic.get_by_date(exid, d) for d in dates ]
+
         return filter(lambda x: x != None, ex_stats)
 
     def num_proficient(self):
