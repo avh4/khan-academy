@@ -1464,7 +1464,7 @@ def commit_problem_log(problem_log_source):
         )
 
         problem_log.count_hints = max(problem_log.count_hints, problem_log_source.count_hints)
-        problem_log.hints_used = problem_log.count_hints > 0
+        problem_log.hint_used = problem_log.count_hints > 0
         index_attempt = max(0, problem_log_source.count_attempts - 1)
 
         # Bump up attempt count
