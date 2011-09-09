@@ -25,7 +25,7 @@ REFRESH_SECS = 30
 CACHE_EXPIRATION_SECS = 60 * 60
 
 # For a point on the exercise map
-MAX_POINT_RADIUS = 10
+MAX_POINT_RADIUS = 15
 
 ################################################################################
 
