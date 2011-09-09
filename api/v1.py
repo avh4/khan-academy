@@ -228,12 +228,15 @@ def get_visible_user_data_from_request():
     if not user_data:
         return None
 
-    user_data_student = request.request_user_data("email") or user_data
+    if request.request_string("email"):
+        user_data_student = request.request_user_data("email")
 
-    if user_data_student and (user_data_student.key_email == user_data.key_email or user_data.developer or user_data_student.is_coached_by(user_data)):
-        return user_data_student
-
-    return None
+        if user_data_student and (user_data.developer or user_data_student.is_coached_by(user_data)):
+            return user_data_student
+        else:
+            return None
+    else:
+        return user_data
 
 @route("/api/v1/user", methods=["GET"])
 @oauth_required()
