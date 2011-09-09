@@ -25,7 +25,7 @@ REFRESH_SECS = 30
 CACHE_EXPIRATION_SECS = 60 * 60
 
 # For a point on the exercise map
-MAX_POINT_RADIUS = 10
+MAX_POINT_RADIUS = 15
 
 ################################################################################
 
@@ -69,61 +69,54 @@ def get_bucket_cursor(refresh_secs, bucket_size):
 ################################################################################
 
 class ExerciseOverTimeGraph(request_handler.RequestHandler):
-    def get_request_params(self):
-        chart = self.request_string('chart', 'area_spline')
-        past_days = self.request_int('past_days', 7)
-        num_buckets = self.request_int('n', 1)
-        bucket_index = self.request_int('ix', 0)
-        refresh_secs = self.request_int('rsecs', 30)
-
-        bucket_size = get_bucket_size(num_buckets, bucket_index)
-        bucket_cursor = get_bucket_cursor(refresh_secs, bucket_size)
-
-        return {
-            'chart': chart,
-            'past_days': past_days,
-            'num_buckets': num_buckets,
-            'bucket_index': bucket_index,
-            'bucket_cursor': bucket_cursor,
-        }
-
-    def get_cache_key(self):
-        params = self.get_request_params()
-
-        if (params['chart'] == 'aggregate'):
-            return "%s|%d" % (params['chart'], params['past_days'])
-
-        return "%s|%d|%d|%d|%d" % (params['chart'], params['past_days'],
-            params['num_buckets'], params['bucket_index'], params['bucket_cursor'])
-
     def get(self):
-        self.response.out.write(self.get_use_cache())
+        self.response.out.write(self.get_json_response())
 
-    @layer_cache.cache_with_key_fxn(get_cache_key,
-        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
-    def get_use_cache(self):
-        params = self.get_request_params()
+    def get_json_response(self):
+        # Currently accepts: { "buckets", "all", "newest" }
+        to_show = self.request_string('show', 'buckets')
+        past_days = self.request_int('past_days', 7)
+        refresh_secs = self.request_int('rsecs', 30)
 
         today = dt.date.today()
         # We don't use App Engine Query filters so as to avoid adding entries to index.yaml
-        days = [ today - dt.timedelta(days=i) for i in range(0, params['past_days']) ]
+        days = [ today - dt.timedelta(days=i) for i in range(0, past_days) ]
 
-        if params['chart'] == 'aggregate':
-            # For-loop for clarity and to get flattened list (over list comp.)
-            ex_stats = []
-            for ex in Exercise.get_all_use_cache():
-                ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
+        if to_show == 'all':
+            exercise_names = [ex.name for ex in Exercise.get_all_use_cache()]
+            return self.exercise_over_time_for_highcharts(exercise_names, days, 'All Exercises', showLegend=True)
 
-            return self.exercise_over_time_for_highcharts(ex_stats, 'All Exercises', showLegend=True)
+        if to_show == 'newest':
+            exercises = Exercise.get_all_use_cache()
+            exercises.sort(key=lambda ex: ex.creation_date, reverse=True)
+            exercise_names = [ex.name for ex in exercises]
 
-        exercise_names = exercises_in_bucket(params['num_buckets'], params['bucket_index'])
+            num_newest = self.request_int('newest', 5)
+            exid = exercise_names[get_bucket_cursor(refresh_secs, num_newest)]
 
-        exid = exercise_names[params['bucket_cursor']]
-        ex_stats = ExerciseStatistic.get_by_dates(exid, days)
+            title = 'Newest Exercises - %s' % Exercise.to_display_name(exid)
 
-        return self.exercise_over_time_for_highcharts(ex_stats, exid)
+            return self.exercise_over_time_for_highcharts([exid], days, title, showLegend=True)
 
-    def exercise_over_time_for_highcharts(self, exercise_stats, title='', showLegend=False):
+        num_buckets = self.request_int('buckets', 1)
+        bucket_index = self.request_int('ix', 0)
+        bucket_size = get_bucket_size(num_buckets, bucket_index)
+        bucket_cursor = get_bucket_cursor(refresh_secs, bucket_size)
+
+        exercise_names = exercises_in_bucket(num_buckets, bucket_index)
+        exid = exercise_names[bucket_cursor]
+
+        return self.exercise_over_time_for_highcharts([exid], days, Exercise.to_display_name(exid))
+
+    # TODO: What's the best way to deal with the wrapped function having default values?
+    def get_cache_key(self, exids, dates, title='', showLegend=False):
+        return "%s|%s|%s|%s" % (str(sorted(exids)), str(sorted(dates)), title, str(showLegend))
+
+    @layer_cache.cache_with_key_fxn(get_cache_key,
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    def exercise_over_time_for_highcharts(self, exids, dates, title='', showLegend=False):
+        exercise_stats = ExerciseStatistic.get_by_dates_and_exids(exids, dates)
+
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = to_unix_secs(ex.start_dt) * 1000
@@ -137,8 +130,6 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
         done_list = sum_keys(done_list)
         prof_list = sum_keys(prof_list)
         new_users_list = sum_keys(new_users_list)
-
-        title = Exercise.to_display_name(title)
 
         # Make the peak of the new users and proficiency series about half as
         # high as the peak of the # problems line
@@ -189,7 +180,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 class GeckoboardExerciseRedirect(request_handler.RequestHandler):
     def get(self):
         bucket_index = self.request_int('ix', 0)
-        return self.redirect('/exercisestats/exerciseovertime?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
+        return self.redirect('/exercisestats/exerciseovertime?chart=area_spline&past_days=%d&rsecs=%d&buckets=%d&ix=%d'
             % (PAST_DAYS_TO_SHOW, REFRESH_SECS, NUM_BUCKETS, bucket_index))
 
 # TODO: Either allow returning graphs for other statistics, such as #
@@ -226,7 +217,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
 
-            y, x = int(ex.h_position), int(ex.v_position)
+            y, x = -int(ex.h_position), int(ex.v_position)
 
             min_y, max_y = min(y, min_y), max(y, max_y)
 
