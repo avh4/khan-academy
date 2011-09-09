@@ -22,11 +22,11 @@
             }
 
             div.g-bingo-container div.experiment-container {
-                padding: 20px;
+                padding: 25px 20px;
             }
 
             div.g-bingo-container table.table th {
-                width: 25%;
+                width: 20%;
             }
 
         </style>
@@ -38,7 +38,14 @@
             {% for results in experiment_results %}
             <div class="experiment-container">
                 <h2 class="experiment-title">{{ results.0.name|escape }}</h2>
-                <p>Started {{ results.0.dt_started|timesince }} ago</p>
+                <p>
+                    <strong>Status: </strong>
+                    {% if results.0.live %}
+                    Running {{ results.0.dt_started|timesince }}
+                    {% else %}
+                    Ended manually
+                    {% endif %}
+                </p>
 
                 <table class="table">
                     <tbody>
@@ -51,6 +58,7 @@
                                 to <em>{{ results.0.conversion_name|escape }}</em>
                                 {% endifnotequal%}
                             </th>
+                            <th>&nbsp;</th>
                         </tr>
 
                         {% for alternative in results.1 %}
@@ -59,6 +67,17 @@
                             <td>{{ alternative.content|escape }}</td>
                             <td>{{ alternative.participants }}</td>
                             <td>{{ alternative.conversions }}</td>
+                            <td>
+                                {% if results.0.live %}
+                                &nbsp;
+                                {% else %}
+                                    {% ifequal results.0.short_circuit_content alternative.content %}
+                                    <strong>All users seeing this.</strong>
+                                    {% else %}
+                                    &nbsp;
+                                    {% endifequal %}
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
 
