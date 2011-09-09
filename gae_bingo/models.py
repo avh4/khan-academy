@@ -29,6 +29,10 @@ class _GAEBingoExperiment(db.Model):
     def short_circuit_content(self):
         return pickle.loads(self.short_circuit_pickled_content)
 
+    @property
+    def pretty_name(self):
+        return self.name.capitalize().replace("_", " ")
+
     @staticmethod
     def key_for_name(name):
         return "_gae_experiment:%s" % name
