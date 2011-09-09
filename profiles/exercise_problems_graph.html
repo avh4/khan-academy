@@ -41,7 +41,9 @@ function exercise_url(point) {
                             point: {
                                 events: {
                                     click: function() {
-                                        window.location = exercise_url(this);
+                                        if (this.current) {
+                                            window.location = exercise_url(this);
+                                        }
                                     }
                                 }
                             },
@@ -92,23 +94,24 @@ function exercise_url(point) {
 
                                 if (point.fVideo) {
                                     if (point.desc)
-                                    s += '<br><strong style="font-size: 13px; font-weight: bold;">Watched ' 
+                                    s += '<br/><strong style="font-size: 13px; font-weight: bold;">Watched ' 
                                     + point.time_watched + 
                                     ' of related videos<br><b style="font-size: 13px; font-weight: bold;">before answering:</strong><br/>' + point.desc;
                                 }
                                 else if (point.fSummary) {
-                                    s += '<a style="font-size: 15px;" ' + 
-                                            'href="' + exercise_url(point) + '"' +
-                                            '>Problem ' + point.x + 
-                                            '</a><b style="font-size: 15px;"> - ' + (point.correct ? "Correct" : "Incorrect") +
-                                            (point.hint_used ? '<span style="color: red; font-style: italic; font-weight:bold">(Hint Used)' : '') +
+                                    s += '<span style="font-size: 15px;">' + 
+                                            'Problem ' + point.x + 
+                                            '</span><b style="font-size: 15px;"> - ' + (point.correct ? "Correct" : "Incorrect") +
+                                            (point.count_hints ? '<span style="color: red; font-style: italic; font-weight:bold">(Hint Used)' : '') +
                                             '</b><br/>' +
                                             point.time_used + ' used<br/><br/>' +
                                             point.timesince +
                                             (point.exercise_non_summative ? '<br/><br/>From exercise: ' + point.exercise_non_summative_display_name : '');
-                                }
-                                else if (ix = this.points.length -1) {
-                                    s += '<br><br/><em>Click the graph to view this problem</em>.';
+                                     if (point.current) {
+                                       s += '<br/><br/><em>Click the graph to view this problem</em>.';
+                                     } else {
+                                       s += '<br/><br/><em>Detailed info no longer available</em>.';
+                                     }
                                 }
                             }
 
@@ -140,7 +143,7 @@ function exercise_url(point) {
                                 {
                                     fSummary: true,
                                     correct: {% if problem.correct %}true{% else %}false{% endif %},
-                                    hint_used: {% if problem.hint_used %}true{% else %}false{% endif %},
+                                    count_hints: {% if problem.count_hints %}true{% else %}false{% endif %},
                                     time_used: '{{ problem.exercise_time|escapejs }}',
                                     timesince: '{{ problem.time_done|timesince_ago }}',
                                     {% if problem.exercise_non_summative %}
@@ -152,7 +155,12 @@ function exercise_url(point) {
                                     x: {{ forloop.counter }} + {{ x_offset }},
                                     y: {{ problem.time_taken }},
                                     renderable: {% if problem.renderable %}true{% else %}false{% endif %},
-                                    color: '{% if problem.correct %}#ADD8E6{% else %}red{% endif %}'
+                                    color: '{% if problem.correct %}\
+                                              {% if problem.current %}#BAE8FA{% else %}#C4D6E0{% endif %}\
+                                            {% else %}\
+                                              {% if problem.current %}red{% else %}#FEA3A6{% endif %}\
+                                            {% endif %}',
+                                    current: {% if problem.current %}true{% else %}false{% endif %}
                                 }
                                 {% if not forloop.last %},{% endif %}
                                 {% endfor %}
@@ -188,7 +196,7 @@ function exercise_url(point) {
                                 {
                                     fHint: true,
                                     x: {{ forloop.counter }} + {{ x_offset }},
-                                    {% if problem.hint_used %}
+                                    {% if problem.count_hints %}
                                         y: {{ problem.time_taken }},
                                         desc: 'Hint used',
                                         time_watched: '{{ problem.video_time|escapejs }}',

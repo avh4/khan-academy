@@ -12,7 +12,7 @@ from badges import badges, util_badges, models_badges
 from badges.templatetags import badge_notifications_html
 from phantom_users.templatetags import login_notifications_html
 from exercises import attempt_problem, reset_streak
-from phantom_users.phantom_util import create_api_phantom
+from phantom_users.phantom_util import api_create_phantom
 import util
 import notifications
 
@@ -64,7 +64,7 @@ def add_action_results(obj, dict_results):
 @route("/api/v1/playlists", methods=["GET"])
 @jsonp
 @layer_cache.cache_with_key_fxn(
-    lambda: "api_playlists_%s" % models.Setting.cached_library_content_date(), 
+    lambda: "api_playlists_%s" % models.Setting.cached_library_content_date(),
     layer=layer_cache.Layers.Memcache)
 @jsonify
 def playlists():
@@ -73,7 +73,7 @@ def playlists():
 @route("/api/v1/playlists/<playlist_title>/videos", methods=["GET"])
 @jsonp
 @layer_cache.cache_with_key_fxn(
-    lambda playlist_title: "api_playlistvideos_%s_%s" % (playlist_title, models.Setting.cached_library_content_date()), 
+    lambda playlist_title: "api_playlistvideos_%s_%s" % (playlist_title, models.Setting.cached_library_content_date()),
     layer=layer_cache.Layers.Memcache)
 @jsonify
 def playlist_videos(playlist_title):
@@ -83,7 +83,7 @@ def playlist_videos(playlist_title):
 
     if not playlist:
         return None
-    
+
     return playlist.get_videos();
 
 @route("/api/v1/playlists/<playlist_title>/exercises", methods=["GET"])
@@ -107,7 +107,7 @@ def playlist_exercises(playlist_title):
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(
-    lambda: "api_library_%s" % models.Setting.cached_library_content_date(), 
+    lambda: "api_library_%s" % models.Setting.cached_library_content_date(),
     layer=layer_cache.Layers.Memcache)
 @compress
 @jsonify
@@ -127,7 +127,7 @@ def playlists_library():
 @jsonp
 @decompress # We compress and decompress around layer_cache so memcache never has any trouble storing the large amount of library data.
 @layer_cache.cache_with_key_fxn(
-    lambda: "api_library_list_%s" % models.Setting.cached_library_content_date(), 
+    lambda: "api_library_list_%s" % models.Setting.cached_library_content_date(),
     layer=layer_cache.Layers.Memcache)
 @compress
 @jsonify
@@ -449,7 +449,7 @@ def user_problem_logs(exercise_name):
 
 @route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/attempt", methods=["POST"])
 @oauth_optional()
-@create_api_phantom
+@api_create_phantom
 @jsonp
 @jsonify
 def attempt_problem_number(exercise_name, problem_number):
@@ -462,15 +462,54 @@ def attempt_problem_number(exercise_name, problem_number):
         if user_exercise and problem_number:
 
             user_exercise = attempt_problem(
-                    user_data, 
-                    user_exercise, 
-                    problem_number, 
+                    user_data,
+                    user_exercise,
+                    problem_number,
                     request.request_int("attempt_number"),
                     request.request_string("attempt_content"),
                     request.request_string("sha1"),
                     request.request_string("seed"),
                     request.request_bool("complete"),
-                    request.request_bool("hint_used"),
+                    request.request_int("count_hints", default=0),
+                    int(request.request_float("time_taken")),
+                    request.request_string("non_summative"),
+                    request.request_string("problem_type"),
+                    request.remote_addr,
+                    )
+
+            add_action_results(user_exercise, {
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
+            })
+
+            return user_exercise
+
+    logging.warning("Problem %d attempted with no user_data present", problem_number)
+    return unauthorized_response()
+
+@route("/api/v1/user/exercises/<exercise_name>/problems/<int:problem_number>/hint", methods=["POST"])
+@oauth_optional()
+@api_create_phantom
+@jsonp
+@jsonify
+def hint_problem_number(exercise_name, problem_number):
+    user_data = models.UserData.current()
+
+    if user_data:
+        exercise = models.Exercise.get_by_name(exercise_name)
+        user_exercise = user_data.get_or_insert_exercise(exercise)
+
+        if user_exercise and problem_number:
+
+            user_exercise = attempt_problem(
+                    user_data,
+                    user_exercise,
+                    problem_number,
+                    request.request_int("attempt_number"),
+                    request.request_string("attempt_content"),
+                    request.request_string("sha1"),
+                    request.request_string("seed"),
+                    request.request_bool("complete"),
+                    request.request_int("count_hints"),
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     request.request_string("problem_type"),
