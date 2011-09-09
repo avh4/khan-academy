@@ -113,7 +113,7 @@ class ViewExercise(request_handler.RequestHandler):
         
         show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion_name="proficiency")
         favorite_number = ab_test("favorite_number_2", {0: 1, 5: 100, 13: 20})
-        use_stars = ab_test("use_stars")
+        sparkline_instead_of_streak_bar = ab_test("sparkline_instead_of_streak_bar", conversion_name=["proficiency", "recovery_after_loss_of_streak"])
 
         if self.request_bool("convert", default=False):
             bingo(["proficiency", "use_stars"])

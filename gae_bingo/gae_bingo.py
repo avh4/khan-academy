@@ -8,11 +8,11 @@ from .cache import BingoCache, bingo_and_identity_cache
 from .models import create_experiment_and_alternatives
 from .identity import identity
 
-def ab_test(experiment_name, alternative_params = None, conversion_name = None):
+def ab_test(canonical_name, alternative_params = None, conversion_name = None):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 
-    if experiment_name not in bingo_cache.experiments:
+    if canonical_name not in bingo_cache.experiments:
 
         # Creation logic w/ high concurrency protection
         client = memcache.Client()
@@ -39,9 +39,24 @@ def ab_test(experiment_name, alternative_params = None, conversion_name = None):
                     time.sleep(0.1)
 
             # We have the lock, go ahead and create the experiment if still necessary
-            if experiment_name not in BingoCache.get().experiments:
-                experiment, alternatives = create_experiment_and_alternatives(experiment_name, alternative_params, conversion_name)
-                bingo_cache.add_experiment(experiment, alternatives)
+            if canonical_name not in BingoCache.get().experiments:
+
+                # Handle multiple conversions for a single experiment by just quietly
+                # creating multiple experiments for each conversion
+                conversion_names = conversion_name if type(conversion_name) == list else [conversion_name]
+
+                for i, conversion_name in enumerate(conversion_names):
+                    unique_experiment_name = canonical_name if i == 0 else "%s (%s)" % (canonical_name, i + 1)
+
+                    exp, alts = create_experiment_and_alternatives(
+                                    unique_experiment_name,
+                                    canonical_name,
+                                    alternative_params, 
+                                    conversion_name
+                                    )
+
+                    bingo_cache.add_experiment(exp, alts)
+
                 bingo_cache.store_if_dirty()
 
         finally:
@@ -49,25 +64,40 @@ def ab_test(experiment_name, alternative_params = None, conversion_name = None):
                 # Release the lock
                 client.set(lock_key, False)
 
-    experiment, alternatives = bingo_cache.experiment_and_alternatives(experiment_name)
+    # We might have multiple experiments connected to this single canonical experiment name
+    # if it was started w/ multiple conversion possibilities.
+    experiments, alternative_lists = bingo_cache.experiments_and_alternatives_from_canonical_name(canonical_name)
 
-    if not experiment or not alternatives:
-        raise Exception("Could not find experiment or alternatives with experiment_name %s" % experiment_name)
+    if not experiments or not alternative_lists:
+        raise Exception("Could not find experiment or alternatives with experiment_name %s" % canonical_name)
 
-    if not experiment.live:
-        # Experiment has ended. Short-circuit and use selected winner before user has had a chance to remove relevant ab_test code.
-        return experiment.short_circuit_content
+    returned_content = None
 
-    alternative = find_alternative_for_user(experiment_name, alternatives)
+    for i in range(len(experiments)):
 
-    # TODO: multiple participation handling goes here
-    if experiment_name not in bingo_identity_cache.participating_tests:
-        bingo_identity_cache.participate_in(experiment_name)
+        experiment, alternatives = experiments[i], alternative_lists[i]
 
-        alternative.increment_participants()
-        bingo_cache.update_alternative(alternative)
+        if not experiment.live:
 
-    return alternative.content
+            # Experiment has ended. Short-circuit and use selected winner before user has had a chance to remove relevant ab_test code.
+            returned_content = experiment.short_circuit_content
+
+        else:
+
+            alternative = find_alternative_for_user(canonical_name, alternatives)
+
+            # TODO: multiple participation handling goes here
+            if experiment.name not in bingo_identity_cache.participating_tests:
+                bingo_identity_cache.participate_in(experiment.name)
+
+                alternative.increment_participants()
+                bingo_cache.update_alternative(alternative)
+
+            # It shouldn't matter which experiment's alternative content we send back --
+            # alternative N should be the same across all experiments w/ same canonical name.
+            returned_content = alternative.content
+
+    return returned_content
 
 def bingo(param):
 

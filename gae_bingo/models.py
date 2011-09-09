@@ -18,6 +18,8 @@ class GAEBingoIdentityModel(db.Model):
 
 class _GAEBingoExperiment(db.Model):
     name = db.StringProperty()
+    # Not necessarily unique. Experiments "monkeys" and "monkeys (2)" both have canonical_name "monkeys"
+    canonical_name = db.StringProperty()
     conversion_name = db.StringProperty()
     live = db.BooleanProperty(default = True)
     dt_started = db.DateTimeProperty(auto_now_add = True)
@@ -106,7 +108,7 @@ def persist_gae_bingo_identity_record(bingo_identity_cache, identity):
             )
     bingo_identity.put()
 
-def create_experiment_and_alternatives(experiment_name, alternative_params = None, conversion_name = None):
+def create_experiment_and_alternatives(experiment_name, canonical_name, alternative_params = None, conversion_name = None):
 
     if not experiment_name:
         raise Exception("gae_bingo experiments must be named.")
@@ -120,6 +122,7 @@ def create_experiment_and_alternatives(experiment_name, alternative_params = Non
     experiment = _GAEBingoExperiment(
                 key_name = _GAEBingoExperiment.key_for_name(experiment_name),
                 name = experiment_name,
+                canonical_name = canonical_name,
                 conversion_name = conversion_name,
                 live = True,
             )

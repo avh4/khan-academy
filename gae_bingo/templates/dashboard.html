@@ -27,7 +27,11 @@
                 <tr>
                     <th>&nbsp;</th>
                     <th>Participants</th>
-                    <th>Conversions</th>
+                    <th>Conversions
+                        {% ifnotequal results.0.conversion_name results.0.name %}
+                        to <em>{{ results.0.conversion_name|escape }}</em>
+                        {% endifnotequal%}
+                    </th>
                 </tr>
 
                 <tr>

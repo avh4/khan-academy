@@ -24,6 +24,8 @@ class Dashboard(RequestHandler):
                 describe_result_in_words(bingo_cache.get_alternatives(experiment_name)),
             ])
 
+        experiment_results = sorted(experiment_results, key=lambda results: results[0].name)
+
         self.response.out.write(
             template.render(path, {
                 "experiment_results": experiment_results,

@@ -47,6 +47,7 @@ class BingoCache(object):
         self.alternative_models = {} # Deserialized alternative models
 
         self.experiment_names_by_conversion_name = {} # Mapping of conversion names to experiment names
+        self.experiment_names_by_canonical_name = {} # Mapping of canonical names to experiment names
 
     def store_if_dirty(self):
 
@@ -122,6 +123,10 @@ class BingoCache(object):
             self.experiment_names_by_conversion_name[experiment.conversion_name] = []
         self.experiment_names_by_conversion_name[experiment.conversion_name].append(experiment.name)
 
+        if not experiment.canonical_name in self.experiment_names_by_canonical_name:
+            self.experiment_names_by_canonical_name[experiment.canonical_name] = []
+        self.experiment_names_by_canonical_name[experiment.canonical_name].append(experiment.name)
+
         for alternative in alternatives:
             self.update_alternative(alternative)
 
@@ -139,8 +144,11 @@ class BingoCache(object):
 
         self.dirty = True
 
-    def experiment_and_alternatives(self, experiment_name):
-        return self.get_experiment(experiment_name), self.get_alternatives(experiment_name)
+    def experiments_and_alternatives_from_canonical_name(self, canonical_name):
+        experiment_names = self.get_experiment_names_by_canonical_name(canonical_name)
+
+        return [self.get_experiment(experiment_name) for experiment_name in experiment_names], \
+                [self.get_alternatives(experiment_name) for experiment_name in experiment_names]
 
     def get_experiment(self, experiment_name):
         if experiment_name not in self.experiment_models:
@@ -160,6 +168,9 @@ class BingoCache(object):
 
     def get_experiment_names_by_conversion_name(self, conversion_name):
         return self.experiment_names_by_conversion_name.get(conversion_name) or []
+
+    def get_experiment_names_by_canonical_name(self, canonical_name):
+        return self.experiment_names_by_canonical_name.get(canonical_name) or []
 
 class BingoIdentityCache(object):
 
@@ -218,7 +229,7 @@ class BingoIdentityCache(object):
             if not participating_test in bingo_cache.experiments:
                 self.participating_tests.remove(participating_test)
 
-        for converted_test in self.converted_tests:
+        for converted_test in self.converted_tests.keys():
             if not converted_test in bingo_cache.experiments:
                 del self.converted_tests[converted_test]
 
