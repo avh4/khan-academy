@@ -120,6 +120,10 @@ handlers:
 - url: /gae_mini_profiler/.*
   script: gae_mini_profiler/main.py
 
+- url: /gae_bingo/static
+  static_dir: gae_bingo/static
+  expiration: "300s"
+
 - url: /gae_bingo/.*
   script: gae_bingo/main.py
 

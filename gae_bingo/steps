@@ -48,6 +48,7 @@
 
     DOCS:
     multiple conversions sugar
+    mention https://github.com/pilu/web-app-theme
  
     QUESTIONS:
     do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?

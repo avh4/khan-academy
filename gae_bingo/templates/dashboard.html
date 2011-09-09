@@ -2,6 +2,8 @@
     <head>
         <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
 
+  <link rel="stylesheet" href="/gae_bingo/static/css/base.css" type="text/css" media="screen" /> 
+  <link rel="stylesheet" id="current-theme" href="/gae_bingo/static/css/style.css" type="text/css" media="screen" /> 
         <style>
             body.g-bingo {
                 text-align: center;
@@ -14,44 +16,63 @@
                 margin-right: auto;
                 text-align: left;
             }
+
+            div.g-bingo-container table.table {
+                width: 100%;
+            }
+
+            div.g-bingo-container div.experiment-container {
+                padding: 20px;
+            }
+
+            div.g-bingo-container table.table th {
+                width: 25%;
+            }
+
         </style>
     </head>
     <body class="g-bingo">
         <div class="g-bingo-container">
-            <h1>Current GAE Bingo Experiments</h1>
+            <div id="header"><h1>GAE Bingo Experiments</h1></div>
 
             {% for results in experiment_results %}
-            <h3 class="experiment-title">{{ results.0.name|escape }}</h3>
+            <div class="experiment-container">
+                <h3 class="experiment-title">{{ results.0.name|escape }}</h3>
+                <p>Started {{ results.0.dt_started|timesince }} ago</p>
 
-            <table>
-                <tr>
-                    <th>&nbsp;</th>
-                    <th>Participants</th>
-                    <th>Conversions
-                        {% ifnotequal results.0.conversion_name results.0.name %}
-                        to <em>{{ results.0.conversion_name|escape }}</em>
-                        {% endifnotequal%}
-                    </th>
-                </tr>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Content</th>
+                            <th>Participants</th>
+                            <th>Conversions
+                                {% ifnotequal results.0.conversion_name results.0.name %}
+                                to <em>{{ results.0.conversion_name|escape }}</em>
+                                {% endifnotequal%}
+                            </th>
+                        </tr>
 
-                <tr>
-                    <td class="title"><em>Total</em></td>
-                    <td>?</td>
-                    <td>?</td>
-                </tr>
+                        <tr>
+                            <td class="title"><em>Total</em></td>
+                            <td></td>
+                            <td>?</td>
+                            <td>?</td>
+                        </tr>
 
-                {% for alternative in results.1 %}
-                <tr>
-                    <td class="title"><em>Alternative #{{ alternative.number }}:</em> {{ alternative.content|escape }}</td>
-                    <td>{{ alternative.participants }}</td>
-                    <td>{{ alternative.conversions }}</td>
-                </tr>
-                {% endfor %}
+                        {% for alternative in results.1 %}
+                        <tr>
+                            <td class="title"><em>Alternative #{{ alternative.number }}</em></td>
+                            <td>{{ alternative.content|escape }}</td>
+                            <td>{{ alternative.participants }}</td>
+                            <td>{{ alternative.conversions }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-            </table>
-
-            <p>{{ results.2|escape }}</p>
-
+                <p>{{ results.2|escape }}</p>
+            </div>
             {% endfor %}
         </div>
     </body>
