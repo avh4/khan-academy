@@ -84,8 +84,8 @@ def describe_result_in_words(alternatives):
         words += """This difference is %(percentage_likelihood)s likely to be statistically significant, which means you can be 
         %(description)s that it is the result of your alternatives actually mattering, rather than 
         being due to random chance.  However, this statistical test can't measure how likely the currently 
-        observed magnitude of the difference is to be accurate or not.  It only says "better", not "better 
-        by so much".""" % {
+        observed magnitude of the difference is to be accurate or not.  It only says "better," not "better 
+        by so much.\"""" % {
                     "percentage_likelihood": PERCENTAGES[p],
                     "description": DESCRIPTION_IN_WORDS[p],
                 }

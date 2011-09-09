@@ -18,10 +18,16 @@ class Dashboard(RequestHandler):
 
         experiment_results = []
         for experiment_name in bingo_cache.experiments:
+
+            experiment = bingo_cache.get_experiment(experiment_name)
+            alternatives = bingo_cache.get_alternatives(experiment_name)
+
             experiment_results.append([
-                bingo_cache.get_experiment(experiment_name),
-                bingo_cache.get_alternatives(experiment_name),
-                describe_result_in_words(bingo_cache.get_alternatives(experiment_name)),
+                experiment,
+                alternatives,
+                reduce(lambda a, b: a + b, map(lambda alternative: alternative.participants, alternatives)),
+                reduce(lambda a, b: a + b, map(lambda alternative: alternative.conversions, alternatives)),
+                describe_result_in_words(alternatives),
             ])
 
         experiment_results = sorted(experiment_results, key=lambda results: results[0].name)

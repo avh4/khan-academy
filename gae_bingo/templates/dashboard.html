@@ -37,7 +37,7 @@
 
             {% for results in experiment_results %}
             <div class="experiment-container">
-                <h3 class="experiment-title">{{ results.0.name|escape }}</h3>
+                <h2 class="experiment-title">{{ results.0.name|escape }}</h2>
                 <p>Started {{ results.0.dt_started|timesince }} ago</p>
 
                 <table class="table">
@@ -53,13 +53,6 @@
                             </th>
                         </tr>
 
-                        <tr>
-                            <td class="title"><em>Total</em></td>
-                            <td></td>
-                            <td>?</td>
-                            <td>?</td>
-                        </tr>
-
                         {% for alternative in results.1 %}
                         <tr>
                             <td class="title"><em>Alternative #{{ alternative.number }}</em></td>
@@ -68,10 +61,17 @@
                             <td>{{ alternative.conversions }}</td>
                         </tr>
                         {% endfor %}
+
+                        <tr>
+                            <td class="title"><em>Total</em></td>
+                            <td>&nbsp;</td>
+                            <td>{{ results.2 }}</td>
+                            <td>{{ results.3 }}</td>
+                        </tr>
                     </tbody>
                 </table>
 
-                <p>{{ results.2|escape }}</p>
+                <p><strong>Analysis: </strong>{{ results.4|escape }}</p>
             </div>
             {% endfor %}
         </div>
