@@ -1,7 +1,7 @@
 DOMAIN = ARGV.length > 0 ? ARGV[0].gsub(/^\d+$/, "http://127.0.0.1:\\0") : "http://127.0.0.1:8080"
 
 ###
-
+require 'net/http'
 begin
   require 'rubygems'
   require 'mechanize'
@@ -13,7 +13,11 @@ end
 
 @agent = Mechanize.new
 @agent.redirect_ok = false
-@exercises = JSON.parse(File.read(File.join(File.dirname(__FILE__), 'exercises.json')))
+
+# get the exercise list from the website
+exercise_endpoint = URI.parse("http://www.khanacademy.org/api/v1/exercises")
+resp = Net::HTTP.get_response(exercise_endpoint)
+@exercises = JSON.parse(resp.body)
 
 @agent.get(DOMAIN + '/_ah/login?email=test%40example.com&admin=True&action=Login&continue=http%3A%2F%2F127.0.0.1%3A8082%2F')
 
