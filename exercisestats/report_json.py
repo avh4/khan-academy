@@ -217,7 +217,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
 
-            y, x = int(ex.h_position), int(ex.v_position)
+            y, x = -int(ex.h_position), int(ex.v_position)
 
             min_y, max_y = min(y, min_y), max(y, max_y)
 
