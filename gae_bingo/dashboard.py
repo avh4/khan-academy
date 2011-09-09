@@ -5,12 +5,15 @@ from google.appengine.ext.webapp import template, RequestHandler
 
 from .cache import BingoCache
 from .stats import describe_result_in_words
+from .config import can_control_experiments
 
 class Dashboard(RequestHandler):
 
     def get(self):
 
-        # TODO: restrict access
+        if not can_control_experiments():
+            self.redirect("/")
+            return
 
         path = os.path.join(os.path.dirname(__file__), "templates/dashboard.html")
 
