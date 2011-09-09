@@ -44,7 +44,12 @@ end
   end
 
   qs = Mechanize::Util.build_query_string(params)
-  @page = @agent.get(DOMAIN + "/updateexercise?#{qs}")
+  begin
+    # this will toss an exception sometimes
+    @page = @agent.get(DOMAIN + "/updateexercise?#{qs}")
+    puts " %3d of #{@exercises.length}: #{name}" % (exi + 1)
+  rescue
+    puts "! Problem with posting #{name}"
+  end
 
-  puts "%3d of #{@exercises.length}: #{name}" % (exi + 1)
 end
