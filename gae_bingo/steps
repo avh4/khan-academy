@@ -38,7 +38,6 @@
 
     TODO:
     dashboard and statistical analysis
-    multiple conversions ( ab_test("sparkline_or_streak_bar", conversion=["proficiency", "continue_after_lost_streak"]) )
     remove test ab_test and bingo code from exercises.py
     bot detection stuff
     figure out "expires_in" stuff and whether or not we need it
