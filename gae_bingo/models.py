@@ -86,6 +86,9 @@ class _GAEBingoAlternative(db.Model):
         # be persisted.
         self.conversions = long(memcache.incr("%s:conversions" % self.key_for_self(), initial_value=self.conversions))
 
+    def reset_counts(self):
+        memcache.delete_multi(["%s:participants" % self.key_for_self(), "%s:conversions" % self.key_for_self()])
+
     def load_latest_counts(self):
         # When persisting to datastore, we want to store the most recent value we've got
         self.participants = max(self.participants, long(memcache.get("%s:participants" % self.key_for_self()) or 0))

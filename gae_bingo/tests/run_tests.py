@@ -1,8 +1,40 @@
+import urllib
+import urllib2
+import urlparse
+import cookielib
+import json
+
+TEST_GAE_URL = "http://localhost:8080/gae_bingo/tests/run_step"
+
+last_opener = None
+
+def test_response(step, data={}, use_last_cookies=False, bot=False):
+
+    if not use_last_cookies or last_opener is None:
+        cj = cookielib.CookieJar()
+        last_opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
+        if bot:
+            last_opener.addheaders = [('User-agent', 'monkeysmonkeys Googlebot monkeysmonkeys')]
+
+    data["step"] = step
+
+    req = last_opener.open("%s?%s" % (TEST_GAE_URL, urllib.urlencode(data)))
+
+    try:
+        response = req.read()
+    finally:
+        req.close()
+
+    return json.loads(response)
 
 def run_tests():
 
     # Delete all experiments (response should be count of experiments left)
     assert(test_response("delete_all") == 0)
+
+    # Refresh bot's identity record so it doesn't pollute tests
+    assert(test_response("refresh_identity_record", bot=True) == True)
 
     # Participate in experiment A, check for correct alternative values being returned,
     for i in range(0, 20):

@@ -1,10 +1,11 @@
+import os
 import logging
-import json
+import simplejson
 
 from google.appengine.ext.webapp import template, RequestHandler
 
 from gae_bingo.gae_bingo import ab_test, bingo
-from gae_bingo.cache import BingoCache
+from gae_bingo.cache import BingoCache, BingoIdentityCache
 from gae_bingo.config import can_control_experiments
 from gae_bingo.dashboard import ControlExperiment
 
@@ -15,14 +16,13 @@ class RunStep(RequestHandler):
         if not os.environ["SERVER_SOFTWARE"].startswith('Development'):
             return
 
-        if not can_control_experiments():
-            return
-
         step = self.request.get("step")
         v = None
 
         if step == "delete_all":
             v = self.delete_all_experiments()
+        if step == "refresh_identity_record":
+            v = self.refresh_identity_record()
         elif step == "participate_in_monkeys":
             v = self.participate_in_monkeys()
         elif step == "participate_in_gorillas":
@@ -38,16 +38,19 @@ class RunStep(RequestHandler):
         elif step == "count_experiments":
             v = self.count_experiments()
 
-        self.response.out.write(json.dumps(v))
+        self.response.out.write(simplejson.dumps(v))
 
     def delete_all_experiments(self):
-
         bingo_cache = BingoCache.get()
         
-        for experiment_name in bingo_cache.experiments:
+        for experiment_name in bingo_cache.experiments.keys():
             bingo_cache.delete_experiment_and_alternatives(bingo_cache.get_experiment(experiment_name))
 
         return len(bingo_cache.experiments)
+
+    def refresh_identity_record(self):
+        BingoIdentityCache.get().load_from_datastore()
+        return True
 
     def participate_in_monkeys(self):
         return ab_test("monkeys")

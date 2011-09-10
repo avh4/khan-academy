@@ -1,5 +1,3 @@
-import logging
-
 from google.appengine.ext import db
 from google.appengine.ext import deferred
 from google.appengine.api import memcache
@@ -157,7 +155,10 @@ class BingoCache(object):
 
         # First delete from datastore
         experiment.delete()
-        db.delete(self.get_alternatives(experiment.name))
+
+        for alternative in self.get_alternatives(experiment.name):
+            alternative.reset_counts()
+            alternative.delete()
 
         # Remove from current cache
         if experiment.name in self.experiments:
@@ -212,6 +213,7 @@ class BingoCache(object):
         return self.experiment_names_by_canonical_name.get(canonical_name) or []
 
 class BingoIdentityCache(object):
+    #TODO: identity params poorly named here
 
     MEMCACHE_KEY = "_gae_bingo_identity_cache:%s"
 

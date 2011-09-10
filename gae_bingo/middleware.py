@@ -1,3 +1,5 @@
+import logging
+
 from cache import flush_request_cache, store_if_dirty
 from identity import identity, get_identity_cookie_value, set_identity_cookie_header, delete_identity_cookie_header, using_logged_in_bingo_identity, flush_identity_cache
 
