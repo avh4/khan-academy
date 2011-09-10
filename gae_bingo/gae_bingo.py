@@ -126,8 +126,6 @@ def score_conversion(experiment_name):
     if experiment_name in bingo_identity_cache.converted_tests:
         return
 
-    # TODO: is_human handling goes here
-
     alternative = find_alternative_for_user(experiment_name, bingo_cache.get_alternatives(experiment_name))
 
     alternative.increment_conversions()
@@ -151,3 +149,4 @@ def modulo_choice(experiment_name, alternatives):
         current_weight -= alternative.weight
         if index_weight >= current_weight:
             return i
+

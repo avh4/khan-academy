@@ -2,7 +2,9 @@ from __future__ import absolute_import
 
 import base64
 import logging
+import os
 import random
+import re
 
 from google.appengine.ext import db
 
@@ -38,9 +40,19 @@ def identity():
     global IDENTITY_CACHE
 
     if IDENTITY_CACHE is None:
-        # Try to get unique (hopefully persistent) identity from user's implementation,
-        # otherwise grab the current cookie value, otherwise grab random value.
-        IDENTITY_CACHE = str(get_logged_in_bingo_identity_value() or get_identity_cookie_value() or get_random_identity_value())
+
+        if is_bot():
+
+            # Just make all bots identify as the same single user so they don't
+            # bias results. Following simple suggestion in
+            # http://www.bingocardcreator.com/abingo/faq
+            IDENTITY_CACHE = "_gae_bingo_bot"
+
+        else:
+
+            # Try to get unique (hopefully persistent) identity from user's implementation,
+            # otherwise grab the current cookie value, otherwise grab random value.
+            IDENTITY_CACHE = str(get_logged_in_bingo_identity_value() or get_identity_cookie_value() or get_random_identity_value())
 
     return IDENTITY_CACHE
 
@@ -105,3 +117,13 @@ def delete_identity_cookie_header():
 def flush_identity_cache():
     global IDENTITY_CACHE
     IDENTITY_CACHE = None
+
+# I am well aware that this is a far-from-perfect, hacky method of quickly
+# determining who's a bot or not. If necessary, in the future we could implement
+# a javascript check like a/bingo and django-lean do -- but for now, I'm sticking
+# w/ the simplest possible implementation for devs (don't need to add JS in any template code)
+# that doesn't strongly bias the statistical outcome (undetected bots aren't a distaster,
+# because they shouldn't favor one side over the other).
+bot_regex = re.compile("(Baidu|Gigabot|Googlebot|libwww-perl|lwp-trivial|msnbot|SiteUptime|Slurp|WordPress|ZIBB|ZyBorg)", re.IGNORECASE)
+def is_bot():
+    return bool(bot_regex.search(os.environ.get("HTTP_USER_AGENT") or ""))
