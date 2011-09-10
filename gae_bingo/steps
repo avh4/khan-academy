@@ -48,6 +48,7 @@
     multiple conversions sugar
     cron.yaml, app.yaml
     bingo_alternative_number override
+    logged_in_bingo_identity models hookup
     mention https://github.com/pilu/web-app-theme
  
     QUESTIONS:
