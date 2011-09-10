@@ -9,6 +9,7 @@ TEST_GAE_URL = "http://localhost:8080/gae_bingo/tests/run_step"
 last_opener = None
 
 def test_response(step, data={}, use_last_cookies=False, bot=False):
+    global last_opener
 
     if not use_last_cookies or last_opener is None:
         cj = cookielib.CookieJar()
@@ -59,25 +60,31 @@ def run_tests():
 
     # Participate in experiment A, using cookies half of the time to maintain identity
     for i in range(0, 20):
-        assert(test_response("participate_in_monkeys", use_last_cookies=(i % 2 == 0)) in [True, False])
+        assert(test_response("participate_in_monkeys", use_last_cookies=(i % 2 == 1)) in [True, False])
 
-    # Check total participants in A
+    # Check total participants in A (should've only added 10 more in previous step)
     assert(test_response("count_participants_in", {"experiment_name": "monkeys"}) == 31)
 
     # Participate and convert in experiment A, using cookies to tie participation to conversions,
     # tracking conversions-per-alternative
     dict_conversions = {}
     for i in range(0, 35):
-        alternative = test_response("participate_in_monkeys")
+        alternative_key = str(test_response("participate_in_monkeys")).lower()
         assert(test_response("convert_in", {"conversion_name": "monkeys"}, use_last_cookies=True) == True)
 
-        if not alternative.number in dict_conversions:
-            dict_conversions[alternative.number] = 0
-        dict_conversions[alternative.number] += 1
+        if not alternative_key in dict_conversions:
+            dict_conversions[alternative_key] = 0
+        dict_conversions[alternative_key] += 1
 
     # Check total conversions-per-alternative in A
+    assert(len(dict_conversions) == 2)
     assert(35 == reduce(lambda a, b: a + b, map(lambda key: dict_conversions[key], dict_conversions)))
-    assert(test_response("count_conversions_in", {"experiment_name": "monkeys"}) == dict_conversions)
+
+    dict_conversions_server = test_response("count_conversions_in", {"experiment_name": "monkeys"})
+    assert(len(dict_conversions) == len(dict_conversions_server))
+
+    for key in dict_conversions:
+        assert(dict_conversions[str(key).lower()] == dict_conversions_server[str(key).lower()])
 
     # Participate in experiment B N times, using cookies to maintain identity
     #
@@ -98,6 +105,10 @@ def run_tests():
     # Make sure weighted alternatives work -> should be a < b < c < d < e, but they should all exist.
     #
     # Check experiments count
+    #
+    # Do some of above tests in multithreaded environment
+
+    print "Tests successful."
 
 if __name__ == "__main__":
     run_tests()

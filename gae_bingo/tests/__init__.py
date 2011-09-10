@@ -85,7 +85,7 @@ class RunStep(RequestHandler):
         dict_conversions = {}
 
         for alternative in BingoCache.get().get_alternatives(self.request.get("experiment_name")):
-            dict_conversions[alternative.number] = alternative.conversions
+            dict_conversions[alternative.content] = alternative.conversions
 
         return dict_conversions
 

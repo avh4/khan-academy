@@ -109,10 +109,12 @@ def bingo(param):
             bingo(experiment_name)
         return
 
-    elif type(param) == str:
+    else:
+
+        conversion_name = str(param)
 
         # Bingo for all experiments associated with this conversion
-        for experiment_name in BingoCache.get().get_experiment_names_by_conversion_name(param):
+        for experiment_name in BingoCache.get().get_experiment_names_by_conversion_name(conversion_name):
             score_conversion(experiment_name)
 
 def score_conversion(experiment_name):
