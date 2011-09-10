@@ -244,7 +244,6 @@ class BingoIdentityCache(object):
         self.dirty = True
 
     def convert_in(self, experiment_name):
-        # TODO: multiple participation handling
         self.converted_tests[experiment_name] = 1
         self.dirty = True
 

@@ -86,7 +86,6 @@ def ab_test(canonical_name, alternative_params = None, conversion_name = None):
 
             alternative = find_alternative_for_user(canonical_name, alternatives)
 
-            # TODO: multiple participation handling goes here
             if experiment.name not in bingo_identity_cache.participating_tests:
                 bingo_identity_cache.participate_in(experiment.name)
 
@@ -118,11 +117,9 @@ def score_conversion(experiment_name):
 
     bingo_cache, bingo_identity_cache = bingo_and_identity_cache()
 
-    # TODO: assume participation logic goes here
     if experiment_name not in bingo_identity_cache.participating_tests:
         return
 
-    # TODO: multiple participation handling goes here
     if experiment_name in bingo_identity_cache.converted_tests:
         return
 
@@ -131,7 +128,6 @@ def score_conversion(experiment_name):
     alternative.increment_conversions()
     bingo_cache.update_alternative(alternative)
 
-    # TODO: multiple participation handling
     bingo_identity_cache.convert_in(experiment_name)
 
 def find_alternative_for_user(experiment_name, alternatives):

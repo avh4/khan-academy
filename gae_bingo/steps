@@ -38,15 +38,15 @@
 
     TODO:
     remove test ab_test and bingo code from exercises.py
-    bot detection stuff
-    figure out "expires_in" stuff and whether or not we need it
-    handle all TODO comments
     cron persisting of bingocache
     testing
     cron.yaml and app.yaml
     deploy and add a real ab test or two
+    browser override to look at test versions
     contact patrick
     documentation
+    handle all TODO comments
+    post on github
     blog post
 
     DOCS:
@@ -60,6 +60,8 @@
     registered users-only tests
     add to nifty little control panel in upper left corner like gae_mini_profiler
     template sugar? or docs explaining why we don't do ab_test in templates
+    multiple participation
+    assume participation
 
 
 
