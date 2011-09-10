@@ -35,19 +35,19 @@
     In template:
         # NOPE THIS IS DJANGO SON YOU BES CHECK YOSELF
 
-
     TODO:
-    remove test ab_test and bingo code from exercises.py
     testing
     deploy and add a real ab test or two
     contact patrick
-    documentation (full, cron.yaml, app.yaml, bingo_alternative_number override, etc)
     handle all TODO comments
+    documentation
     post on github
     blog post
 
     DOCS:
     multiple conversions sugar
+    cron.yaml, app.yaml
+    bingo_alternative_number override
     mention https://github.com/pilu/web-app-theme
  
     QUESTIONS:

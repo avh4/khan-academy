@@ -24,7 +24,6 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
-from gae_bingo.gae_bingo import ab_test, bingo
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -111,13 +110,6 @@ class ViewExercise(request_handler.RequestHandler):
 
         user_exercise_json = jsonify.jsonify(user_exercise)
         
-        show_streak_bar = ab_test("show_streak_bar_after_streak_count", [0, 2, 4], conversion_name="proficiency")
-        favorite_number = ab_test("favorite_number_2", {0: 1, 5: 100, 13: 20})
-        sparkline_instead_of_streak_bar = ab_test("sparkline_instead_of_streak_bar", conversion_name=["proficiency", "recovery_after_loss_of_streak"])
-
-        if self.request_bool("convert", default=False):
-            bingo(["proficiency", "use_stars"])
-
         template_values = {
             'exercise': exercise,
             'user_exercise_json': user_exercise_json,
@@ -129,9 +121,7 @@ class ViewExercise(request_handler.RequestHandler):
             'read_only': read_only,
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
-            'favorite_number': favorite_number,
             'renderable': renderable,
-            'show_streak_bar': show_streak_bar,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
