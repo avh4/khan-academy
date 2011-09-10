@@ -401,7 +401,7 @@ class SetAllExerciseCreationDates(request_handler.RequestHandler):
         exercises = Exercise.get_all_use_cache()
         updated = []
         for ex in exercises:
-            ex.creation_date = dt.datetime.now()
+            ex.creation_date = date_to_set
             updated.append(ex)
 
         db.put(updated)
