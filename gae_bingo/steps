@@ -38,7 +38,6 @@
 
     TODO:
     remove test ab_test and bingo code from exercises.py
-    cron persisting of bingocache
     testing
     cron.yaml and app.yaml
     deploy and add a real ab test or two

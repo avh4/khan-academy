@@ -34,3 +34,7 @@ cron:
   url: /exercisestats/collectfancyexercisestatistics
   schedule: every day 00:30
   timezone: US/Pacific
+
+- description: persist gae bingo experiments to datastore
+  url: /gae_bingo/persist
+  schedule: every 5 minutes
