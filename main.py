@@ -1132,7 +1132,7 @@ def main():
         ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
         ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
         ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
-        ('/exercisestats/setallexercisecreationdates', exercisestats.report_json.SetAllExerciseCreationDates),
+        ('/exercisestats/admin/setallexercisecreationdates', exercisestats.report_json.SetAllExerciseCreationDates),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
