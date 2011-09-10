@@ -8,8 +8,7 @@ from gae_bingo import middleware
 application = webapp.WSGIApplication([
     ("/gae_bingo/persist", cache.PersistToDatastore),
     ("/gae_bingo/dashboard", dashboard.Dashboard),
-    ("/gae_bingo/dashboard/end_experiment", dashboard.EndExperiment),
-    ("/gae_bingo/dashboard/delete_experiment", dashboard.DeleteExperiment),
+    ("/gae_bingo/dashboard/control_experiment", dashboard.ControlExperiment),
 ])
 application = middleware.GAEBingoWSGIMiddleware(application)
 

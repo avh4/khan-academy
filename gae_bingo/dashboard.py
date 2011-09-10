@@ -41,15 +41,16 @@ class Dashboard(RequestHandler):
             })
         )
 
-class EndExperiment(RequestHandler):
+class ControlExperiment(RequestHandler):
 
     def post(self):
 
         if not can_control_experiments():
             return
 
+        action = self.request.get("action")
+
         experiment_name = self.request.get("experiment_name")
-        alternative_number = int(self.request.get("alternative_number"))
 
         if not experiment_name:
             return
@@ -60,6 +61,21 @@ class EndExperiment(RequestHandler):
 
         if not experiment:
             return
+
+        if action == "choose_alternative":
+            self.choose_alternative(experiment)
+        elif action == "delete":
+            self.delete(experiment)
+        elif action == "resume":
+            self.resume(experiment)
+
+        self.redirect("/gae_bingo/dashboard")
+
+    def choose_alternative(self, experiment):
+
+        alternative_number = int(self.request.get("alternative_number"))
+
+        bingo_cache = BingoCache.get()
 
         # Need to end all experiments that may have been kicked off
         # by an experiment with multiple conversions
@@ -78,34 +94,33 @@ class EndExperiment(RequestHandler):
                 experiment.set_short_circuit_content(alternative_chosen[0].content)
                 bingo_cache.update_experiment(experiment)
 
-        self.redirect("/gae_bingo/dashboard")
-
-class DeleteExperiment(RequestHandler):
-
-    def post(self):
-
-        if not can_control_experiments():
-            return
-
-        experiment_name = self.request.get("experiment_name")
-
-        if not experiment_name:
-            return
+    def delete(self, experiment):
 
         bingo_cache = BingoCache.get()
-
-        experiment = bingo_cache.get_experiment(experiment_name)
-
-        if not experiment:
-            return
 
         if experiment.live:
             raise Exception("Cannot delete a live experiment")
 
         bingo_cache.delete_experiment_and_alternatives(
                     experiment,
-                    bingo_cache.get_alternatives(experiment_name)
+                    bingo_cache.get_alternatives(experiment.name)
                 )
 
-        self.redirect("/gae_bingo/dashboard")
+    def resume(self, experiment):
+
+        bingo_cache = BingoCache.get()
+
+        # Need to resume all experiments that may have been kicked off
+        # by an experiment with multiple conversions
+        experiments, alternative_lists = bingo_cache.experiments_and_alternatives_from_canonical_name(experiment.canonical_name)
+
+        if not experiments or not alternative_lists:
+            return
+
+        for i in range(len(experiments)):
+            experiment, alternatives = experiments[i], alternative_lists[i]
+
+            experiment.live = True
+
+            bingo_cache.update_experiment(experiment)
 

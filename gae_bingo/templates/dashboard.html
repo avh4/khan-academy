@@ -73,12 +73,14 @@
                     Running {{ results.0.dt_started|timesince }}
                 </p>
                 {% else %}
-                <form action="/gae_bingo/dashboard/delete_experiment" method="POST">
+                <form action="/gae_bingo/dashboard/control_experiment" method="POST">
+                <input type="hidden" name="experiment_name" value="{{ results.0.name|escape }}"/>
                 <p>
                     <strong>Status: </strong>
-                    Ended manually. If your testing code has been removed, 
-                    <input type="hidden" name="experiment_name" value="{{ results.0.name|escape }}"/>
-                    <button type="submit" class="button delete-experiment">delete this experiment</button>
+                    Ended manually.
+                    You can <button type="submit" class="button delete-experiment" value="resume" name="action">resume this experiment</button> or,
+                    if your testing code has been removed, 
+                    <button type="submit" class="button delete-experiment" value="delete" name="action">delete this experiment</button>
                     from the dashboard.
                 </p>
                 </form>
@@ -107,10 +109,10 @@
                             <td>
                                 {% if results.0.live %}
 
-                                <form action="/gae_bingo/dashboard/end_experiment" method="POST">
+                                <form action="/gae_bingo/dashboard/control_experiment" method="POST">
                                     <input type="hidden" name="experiment_name" value="{{ alternative.experiment_name|escape }}"/>
                                     <input type="hidden" name="alternative_number" value="{{ alternative.number|escape }}"/>
-                                    <button type="submit" data-number="{{ alternative.number|escape }}" class="button end-experiment">End experiment, picking this</button>
+                                    <button type="submit" data-number="{{ alternative.number|escape }}" class="button end-experiment" name="action" value="choose_alternative">End experiment, picking this</button>
                                 </form>
 
                                 {% else %}
