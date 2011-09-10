@@ -26,7 +26,7 @@ class RunStep(RequestHandler):
         elif step == "participate_in_monkeys":
             v = self.participate_in_monkeys()
         elif step == "participate_in_gorillas":
-            v = self.participate_in_monkeys()
+            v = self.participate_in_gorillas()
         elif step == "participate_in_chimpanzees":
             v = self.participate_in_chimpanzees()
         elif step == "convert_in":
