@@ -30,6 +30,12 @@
             #main table.table th {
                 width: 20%;
             }
+
+            #main .delete-experiment {
+                float: none;
+                display: inline;
+                margin-right: 0;
+            }
         </style>
 
         <script>
@@ -61,14 +67,22 @@
             {% for results in experiment_results %}
             <div class="experiment-container block">
                 <h2 class="experiment-title">{{ results.0.pretty_name|escape }}</h2>
+                {% if results.0.live %}
                 <p>
                     <strong>Status: </strong>
-                    {% if results.0.live %}
                     Running {{ results.0.dt_started|timesince }}
-                    {% else %}
-                    Ended manually
-                    {% endif %}
                 </p>
+                {% else %}
+                <form action="/gae_bingo/dashboard/delete_experiment" method="POST">
+                <p>
+                    <strong>Status: </strong>
+                    Ended manually. If your testing code has been removed, 
+                    <input type="hidden" name="experiment_name" value="{{ results.0.name|escape }}"/>
+                    <button type="submit" class="button delete-experiment">delete this experiment</button>
+                    from the dashboard.
+                </p>
+                </form>
+                {% endif %}
 
                 <table class="table">
                     <tbody>

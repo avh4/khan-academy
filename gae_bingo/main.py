@@ -9,6 +9,7 @@ application = webapp.WSGIApplication([
     ("/gae_bingo/persist", cache.PersistToDatastore),
     ("/gae_bingo/dashboard", dashboard.Dashboard),
     ("/gae_bingo/dashboard/end_experiment", dashboard.EndExperiment),
+    ("/gae_bingo/dashboard/delete_experiment", dashboard.DeleteExperiment),
 ])
 application = middleware.GAEBingoWSGIMiddleware(application)
 

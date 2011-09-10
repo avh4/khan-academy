@@ -79,3 +79,33 @@ class EndExperiment(RequestHandler):
                 bingo_cache.update_experiment(experiment)
 
         self.redirect("/gae_bingo/dashboard")
+
+class DeleteExperiment(RequestHandler):
+
+    def post(self):
+
+        if not can_control_experiments():
+            return
+
+        experiment_name = self.request.get("experiment_name")
+
+        if not experiment_name:
+            return
+
+        bingo_cache = BingoCache.get()
+
+        experiment = bingo_cache.get_experiment(experiment_name)
+
+        if not experiment:
+            return
+
+        if experiment.live:
+            raise Exception("Cannot delete a live experiment")
+
+        bingo_cache.delete_experiment_and_alternatives(
+                    experiment,
+                    bingo_cache.get_alternatives(experiment_name)
+                )
+
+        self.redirect("/gae_bingo/dashboard")
+

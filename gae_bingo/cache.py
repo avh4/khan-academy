@@ -150,6 +150,36 @@ class BingoCache(object):
 
         self.dirty = True
 
+    def delete_experiment_and_alternatives(self, experiment, alternatives):
+
+        # First delete from datastore
+        experiment.delete()
+        db.delete(alternatives)
+
+        # Remove from current cache
+        if experiment.name in self.experiments:
+            del self.experiments[experiment.name]
+
+        if experiment.name in self.experiment_models:
+            del self.experiment_models[experiment.name]
+
+        if experiment.name in self.alternatives:
+            del self.alternatives[experiment.name]
+
+        if experiment.name in self.alternative_models:
+            del self.alternative_models[experiment.name]
+
+        if experiment.conversion_name in self.experiment_names_by_conversion_name:
+            self.experiment_names_by_conversion_name[experiment.conversion_name].remove(experiment.name)
+
+        if experiment.canonical_name in self.experiment_names_by_canonical_name:
+            self.experiment_names_by_canonical_name[experiment.canonical_name].remove(experiment.name)
+
+        self.dirty = True
+
+        # Immediately store in memcache as soon as possible after deleting from datastore
+        self.store_if_dirty()
+
     def experiments_and_alternatives_from_canonical_name(self, canonical_name):
         experiment_names = self.get_experiment_names_by_canonical_name(canonical_name)
 
