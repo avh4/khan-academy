@@ -132,6 +132,12 @@ class BingoCache(object):
 
         self.dirty = True
 
+    def update_experiment(self, experiment):
+        self.experiment_models[experiment.name] = experiment
+        self.experiments[experiment.name] = db.model_to_protobuf(experiment).Encode()
+
+        self.dirty = True
+
     def update_alternative(self, alternative):
         if not alternative.experiment_name in self.alternative_models:
             self.alternative_models[alternative.experiment_name] = {}

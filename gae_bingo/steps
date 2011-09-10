@@ -37,11 +37,11 @@
 
 
     TODO:
-    dashboard and statistical analysis
     remove test ab_test and bingo code from exercises.py
     bot detection stuff
     figure out "expires_in" stuff and whether or not we need it
     handle all TODO comments
+    cron persisting of bingocache
     testing
     cron.yaml and app.yaml
     documentation and contact patrick

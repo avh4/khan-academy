@@ -40,3 +40,42 @@ class Dashboard(RequestHandler):
                 "experiment_results": experiment_results,
             })
         )
+
+class EndExperiment(RequestHandler):
+
+    def post(self):
+
+        if not can_control_experiments():
+            return
+
+        experiment_name = self.request.get("experiment_name")
+        alternative_number = int(self.request.get("alternative_number"))
+
+        if not experiment_name:
+            return
+
+        bingo_cache = BingoCache.get()
+
+        experiment = bingo_cache.get_experiment(experiment_name)
+
+        if not experiment:
+            return
+
+        # Need to end all experiments that may have been kicked off
+        # by an experiment with multiple conversions
+        experiments, alternative_lists = bingo_cache.experiments_and_alternatives_from_canonical_name(experiment.canonical_name)
+
+        if not experiments or not alternative_lists:
+            return
+
+        for i in range(len(experiments)):
+            experiment, alternatives = experiments[i], alternative_lists[i]
+
+            alternative_chosen = filter(lambda alternative: alternative.number == alternative_number , alternatives)
+
+            if len(alternative_chosen) == 1:
+                experiment.live = False
+                experiment.set_short_circuit_content(alternative_chosen[0].content)
+                bingo_cache.update_experiment(experiment)
+
+        self.redirect("/gae_bingo/dashboard")
