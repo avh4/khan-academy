@@ -53,6 +53,7 @@ import activity_summary
 import exercises
 import dashboard
 import exercisestats.report
+import exercisestats.report_json
 import github
 import paypal
 
@@ -833,6 +834,11 @@ class PostLogin(request_handler.RequestHandler):
                 user_data.user_nickname = current_nickname
                 user_data.put()
 
+            # Set developer to True if user is admin
+            if not user_data.developer and users.is_current_user_admin():
+                user_data.developer = True
+                user_data.put()
+
             # If user is brand new and has 0 points, migrate data
             phantom_id = get_phantom_user_id_from_cookies()
             if phantom_id:
@@ -1118,8 +1124,16 @@ def main():
 
         ('/user_video_css', ServeUserVideoCss),
 
-        ('/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
+        ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
         ('/exercisestats/report', exercisestats.report.Test),
+        ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
+        ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
+        ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
+        ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
+        ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
+        ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
+        ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
+        ('/exercisestats/admin/setallexercisecreationdates', exercisestats.report_json.SetAllExerciseCreationDates),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),

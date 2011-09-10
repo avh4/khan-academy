@@ -4,7 +4,6 @@ from google.appengine.ext import db
 from google.appengine.api import users
 import util
 from app import App
-import models
 from models import UserData
 import request_handler
 import user_util

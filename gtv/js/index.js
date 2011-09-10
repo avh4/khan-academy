@@ -22,6 +22,7 @@ var gtv = gtv || {
   jq: {}
 };
 
+
 /**
  * TemplatePage class holds all the support for the page to work
  * and interact with javascript controls.
@@ -94,6 +95,27 @@ gtv.jq.TemplatePage.prototype.makeSideNav = function(selectedCategoryIndex) {
     templatePage.makeGrid(selectedItem.data('index'));
   }
 
+
+  var zone1 = new gtv.jq.KeyBehaviorZone({
+    containerSelector: '#searchbox',
+    navSelectors: {
+      item: '.item',
+      itemParent: '.item-parent',
+      itemRow: '.item-row',
+      itemPage: null
+    },
+    selectionClasses: {
+      basic: 'menu-item-selected'
+    },
+    keyMapping: {
+    },
+    actions: {
+    },
+    useGeometry: false
+  });
+
+  templatePage.keyController.addBehaviorZone(zone1, true);
+
 };
 
 /**
@@ -134,35 +156,42 @@ gtv.jq.TemplatePage.prototype.makeGrid = function( index) {
   var k=0;
   var pName;
 
+  var img = $('<img></img>')
+        .attr('src','http://cdn.adrise.tv/image/anime/angelic_layer_1_thumb.png')
+        .addClass('slider-photo');
+
   for (var i=0; i<category.items.length; i++) {
     var catItem = category.items[i];
+
 
     if (catItem.playlist ) {
       var descDiv = $('<div></div>').addClass('slider-text-desc');
       pName = catItem.name;
-      if( pName.length > 28 ) 
-          pName = pName.substring(0,28) + '...';
+      if( pName.length > 100 ) 
+          pName = pName.substring(0,100) + '...';
       descDiv.append($('<p></p>').append(pName));
       //descDiv.append($('<p></p>').append(catItem.playlist.description));
-      pageItems.push({ content: descDiv, description: descDiv, data:[index, k]});
+      //pageItems.push({ content: img, description: descDiv, data:[index, k]});
+      pageItems.push({ content: descDiv, data:[index, k]});
       k++;
     }
     else {
       for (var j=0; j<catItem.items.length; j++) {
         var descDiv = $('<div></div>').addClass('slider-text-desc');
         pName = catItem.name + ' : ' + catItem.items[j].name;
-        if( pName.length > 28 ) 
-            pName = pName.substring(0,28) + '...';
+        if( pName.length > 100 ) 
+            pName = pName.substring(0,100) + '...';
         descDiv.append($('<p></p>').append(pName));
-        pageItems.push({ content: descDiv, description: descDiv, data:[index, k]});
+        //pageItems.push({ content: img, description: descDiv, data:[index, k]});
+        pageItems.push({ content: descDiv, data:[index, k]});
         k++;
       }
     }
   }
 
   var behaviors = {
-    itemsPerRow: 2,
-    rowsPerPage:11 
+    itemsPerRow: 1,
+    rowsPerPage:20 
   };
 
   var gridParms = {

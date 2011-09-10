@@ -1,3 +1,4 @@
+import datetime
 import random
 
 from django.template.defaultfilters import escape
@@ -10,17 +11,20 @@ import layer_cache
 import templatetags
 from topics_list import DVD_list
 
+ITEMS_PER_SET = 4
+
 def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     link_dict = None
 
     if video:
         link_dict = {
-            "href": video.ka_url,
+            "href": "/video/%s" % video.readable_id,
             "thumb_url": video.youtube_thumbnail_url(),
             "desc_html": templatetags.video_name_and_progress(video),
             "teaser_html": video.description,
             "youtube_id": video.youtube_id,
+            "marquee": ("marquee" in video.keywords),
             "selected": False,
             "key": video.key(),
             "type": "video-thumb",
@@ -33,6 +37,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
             "desc_html": escape(exercise.display_name),
             "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
             "youtube_id": "",
+            "marquee": False,
             "selected": False,
             "key": exercise.key(),
             "type": "exercise-thumb",
@@ -77,24 +82,22 @@ def new_and_noteworthy_link_sets():
             if exercise:
                 exercises.append(exercise)
 
-    items_per_set = 4
-
     sets = []
     current_set = []
     next_exercise = 0
 
     # Randomly place exercises one per set in 2, 3, or 4
-    current_set_exercise_position = random.randint(1, items_per_set - 1)
+    current_set_exercise_position = random.randint(1, ITEMS_PER_SET - 1)
 
     exercise_icon_files = ["ex1.png", "ex2.png", "ex3.png", "ex4.png"]
     random.shuffle(exercise_icon_files)
 
     for video in videos:
 
-        if len(current_set) >= items_per_set:
+        if len(current_set) >= ITEMS_PER_SET:
             sets.append(current_set)
             current_set = []
-            current_set_exercise_position = random.randint(0, items_per_set - 1)
+            current_set_exercise_position = random.randint(0, ITEMS_PER_SET - 1)
 
         if next_exercise < len(exercises) and len(current_set) == current_set_exercise_position:
             exercise = exercises[next_exercise]
@@ -104,10 +107,10 @@ def new_and_noteworthy_link_sets():
 
             next_exercise += 1
 
-        if len(current_set) >= items_per_set:
+        if len(current_set) >= ITEMS_PER_SET:
             sets.append(current_set)
             current_set = []
-            current_set_exercise_position = random.randint(0, items_per_set - 1)
+            current_set_exercise_position = random.randint(0, ITEMS_PER_SET - 1)
 
         current_set.append(thumbnail_link_dict(video = video))
 
@@ -118,21 +121,51 @@ def new_and_noteworthy_link_sets():
 
 class ViewHomePage(request_handler.RequestHandler):
 
+    # See https://sites.google.com/a/khanacademy.org/forge/for-team-members/how-to-use-new-and-noteworthy-content
+    # for info on how to update the New & Noteworthy videos
     def get(self):
 
         thumbnail_link_sets = new_and_noteworthy_link_sets()
 
         # If all else fails, just show the TED talk on the homepage
-        video_id, video_key = "gM95HHI4gLk", ""
+        video_id, video_key, found_marquee_video = "gM95HHI4gLk", "", False
 
-        # If possible, highlight video #1 from the first set of off-screen thumbnails
-        if len(thumbnail_link_sets) > 1 and len(thumbnail_link_sets[1]) > 0:
+        if len(thumbnail_link_sets) > 1:
 
-            selected_thumbnail = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])[0]
-            selected_thumbnail["selected"] = True
+            # Switch up the first 4 New & Noteworthy videos on a daily basis
+            current_link_set_offset = datetime.datetime.now().day % len(thumbnail_link_sets)
 
-            video_id = selected_thumbnail["youtube_id"]
-            video_key = selected_thumbnail["key"]
+            if len(thumbnail_link_sets[current_link_set_offset]) < ITEMS_PER_SET:
+                # If the current offset lands on a set of videos that isn't a full set, just start
+                # again at the first set, which is most likely full.
+                current_link_set_offset = 0
+
+            thumbnail_link_sets = thumbnail_link_sets[current_link_set_offset:] + thumbnail_link_sets[:current_link_set_offset]
+
+            # Try to find the next-off-screen video that's decorated as a marquee video
+            for i in range(1, len(thumbnail_link_sets)):
+                eligible_marquee_video_links = filter(lambda item: item["marquee"], thumbnail_link_sets[i])
+
+                if len(eligible_marquee_video_links) > 0:
+                    selected_thumbnail = eligible_marquee_video_links[0]
+                    selected_thumbnail["selected"] = True
+
+                    video_id = selected_thumbnail["youtube_id"]
+                    video_key = selected_thumbnail["key"]
+
+                    found_marquee_video = True
+                    break
+            
+            # If no marquee video found, highlight video #1 from the first set of off-screen thumbnails
+            if not found_marquee_video and len(thumbnail_link_sets[1]) > 0:
+                eligible_marquee_video_links = filter(lambda item: len(item["youtube_id"]) > 0, thumbnail_link_sets[1])
+
+                if len(eligible_marquee_video_links) > 0:
+                    selected_thumbnail = eligible_marquee_video_links[0]
+                    selected_thumbnail["selected"] = True
+
+                    video_id = selected_thumbnail["youtube_id"]
+                    video_key = selected_thumbnail["key"]
 
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()

@@ -257,9 +257,6 @@ var Profile = {
 
         this.fLoadingGraph = false;
 
-        try { eval("var dict_json = " + data); }
-        catch(e) { this.finishLoadGraphError(); return; }
-
         if (!fNoHistoryEntry)
         {
             // Add history entry for browser
@@ -268,8 +265,8 @@ var Profile = {
         }
 
         this.showGraphThrobber(false);
-        this.styleSublinkFromHref(dict_json.url);
-        $("#graph-content").html(dict_json.html);
+        this.styleSublinkFromHref(href);
+        $("#graph-content").html(data);
     },
 
     finishLoadGraphError: function() {
