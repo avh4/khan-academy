@@ -129,6 +129,7 @@ class ViewExercise(request_handler.RequestHandler):
             'read_only': read_only,
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
+            'favorite_number': favorite_number,
             'renderable': renderable,
             'show_streak_bar': show_streak_bar,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))

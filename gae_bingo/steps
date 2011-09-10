@@ -39,11 +39,9 @@
     TODO:
     remove test ab_test and bingo code from exercises.py
     testing
-    cron.yaml and app.yaml
     deploy and add a real ab test or two
-    browser override to look at test versions
     contact patrick
-    documentation
+    documentation (full, cron.yaml, app.yaml, bingo_alternative_number override, etc)
     handle all TODO comments
     post on github
     blog post

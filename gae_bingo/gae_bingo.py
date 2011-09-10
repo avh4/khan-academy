@@ -1,5 +1,7 @@
 import logging
 import hashlib
+import os
+import cgi
 import time
 
 from google.appengine.api import memcache
@@ -131,6 +133,18 @@ def score_conversion(experiment_name):
     bingo_identity_cache.convert_in(experiment_name)
 
 def find_alternative_for_user(experiment_name, alternatives):
+
+    if os.environ["SERVER_SOFTWARE"].startswith('Development'):
+        # If dev server, allow possible override of alternative
+        qs_dict = cgi.parse_qs(os.environ.get("QUERY_STRING") or "")
+
+        alternative_number_override = qs_dict.get("bingo_alternative_number")
+        if alternative_number_override:
+
+            matches = filter(lambda alternative: alternative.number == int(alternative_number_override[0]), alternatives)
+            if len(matches) == 1:
+                return matches[0]
+
     return alternatives[modulo_choice(experiment_name, alternatives)]
 
 def modulo_choice(experiment_name, alternatives):
