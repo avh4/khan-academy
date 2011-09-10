@@ -150,11 +150,14 @@ class BingoCache(object):
 
         self.dirty = True
 
-    def delete_experiment_and_alternatives(self, experiment, alternatives):
+    def delete_experiment_and_alternatives(self, experiment):
+
+        if not experiment:
+            return
 
         # First delete from datastore
         experiment.delete()
-        db.delete(alternatives)
+        db.delete(self.get_alternatives(experiment.name))
 
         # Remove from current cache
         if experiment.name in self.experiments:

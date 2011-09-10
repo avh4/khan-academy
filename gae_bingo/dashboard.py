@@ -101,10 +101,7 @@ class ControlExperiment(RequestHandler):
         if experiment.live:
             raise Exception("Cannot delete a live experiment")
 
-        bingo_cache.delete_experiment_and_alternatives(
-                    experiment,
-                    bingo_cache.get_alternatives(experiment.name)
-                )
+        bingo_cache.delete_experiment_and_alternatives(experiment)
 
     def resume(self, experiment):
 
