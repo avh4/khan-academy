@@ -52,8 +52,7 @@ class Setting(db.Model):
             return Setting._cache_get_by_key_name(key)
         else:
             setting = Setting(Setting.entity_group_key(), key, value=str(val))
-            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
-            db.put([setting, setting_old])
+            db.put(setting)
             Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
@@ -71,13 +70,6 @@ class Setting(db.Model):
         # ancestor query to ensure consistent results
         query = Setting.all().ancestor(Setting.entity_group_key())
         results = dict((setting.key().name(), setting) for setting in query.fetch(20))
-
-        # backfill with old style settings
-        for setting in Setting.all().fetch(20):
-            key = setting.key()
-            if key.parent() is None and not key.name() in results.keys():
-                results[key.name()] = setting
-
         return results
 
     @staticmethod
