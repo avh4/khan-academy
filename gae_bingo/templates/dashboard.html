@@ -38,7 +38,7 @@
 
                     var alternativeNumber = $(this).data("number");
 
-                    if (!confirm("Are you sure you want to end this experiment and choose alternative #" + alternativeNumber + "?\n\n***If you have multiple experiments running with the same experiment name, you will end and choose this alternative for all of them.***")) {
+                    if (!confirm("Are you sure you want to end this experiment and choose alternative #" + alternativeNumber + "?\n\n***If you have multiple experiments running with the same experiment name, you will end and choose this alternative for all of them.***"))                     {
 
                         e.preventDefault();
 
@@ -50,6 +50,13 @@
     <body>
         <div id="main">
             <div id="header"><h1>GAE Bingo Experiments</h1></div>
+
+            {% if not experiment_results %}
+            <div class="experiment-container block">
+                <h3>No experiments yet.</h3>
+                <p>You really should try experimenting more.</p>
+            </div>
+            {% endif %}
 
             {% for results in experiment_results %}
             <div class="experiment-container block">
@@ -108,6 +115,7 @@
                             <td>&nbsp;</td>
                             <td>{{ results.2 }}</td>
                             <td>{{ results.3 }}</td>
+                            <td>&nbsp;</td>
                         </tr>
                     </tbody>
                 </table>
