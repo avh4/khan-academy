@@ -14,6 +14,7 @@ import math
 import random
 import time
 import simplejson as json
+from google.appengine.ext import db
 
 import logging
 
@@ -392,3 +393,15 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
 
         return self.render_template_to_string(
             'exercisestats/highcharts_exercises_created_histogram.json', context)
+
+class SetAllExerciseCreationDates(request_handler.RequestHandler):
+    def get(self):
+        date_to_set = self.request_date('date', "%Y/%m/%d")
+
+        exercises = Exercise.get_all_use_cache()
+        updated = []
+        for ex in exercises:
+            ex.creation_date = date_to_set
+            updated.append(ex)
+
+        db.put(updated)
