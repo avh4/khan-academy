@@ -213,13 +213,12 @@ class BingoCache(object):
         return self.experiment_names_by_canonical_name.get(canonical_name) or []
 
 class BingoIdentityCache(object):
-    #TODO: identity params poorly named here
 
     MEMCACHE_KEY = "_gae_bingo_identity_cache:%s"
 
     @staticmethod
-    def key_for_identity(identity):
-        return BingoIdentityCache.MEMCACHE_KEY % identity
+    def key_for_identity(ident):
+        return BingoIdentityCache.MEMCACHE_KEY % ident
 
     @staticmethod
     def get():
@@ -231,21 +230,21 @@ class BingoIdentityCache(object):
 
         return REQUEST_CACHE[key]
 
-    def store_for_identity_if_dirty(self, identity):
+    def store_for_identity_if_dirty(self, ident):
         if not self.dirty:
             return
 
         # No longer dirty
         self.dirty = False
 
-        memcache.set(BingoIdentityCache.key_for_identity(identity), self)
+        memcache.set(BingoIdentityCache.key_for_identity(ident), self)
 
         # Always fire off a task queue to persist bingo identity cache
         # since there's no cron job persisting these objects like BingoCache.
-        self.persist_to_datastore(identity)
+        self.persist_to_datastore(ident)
 
-    def persist_to_datastore(self, identity):
-        deferred.defer(persist_gae_bingo_identity_record, self, identity)
+    def persist_to_datastore(self, ident):
+        deferred.defer(persist_gae_bingo_identity_record, self, ident)
 
     @staticmethod
     def load_from_datastore():

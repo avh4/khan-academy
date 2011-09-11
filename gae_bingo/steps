@@ -31,7 +31,6 @@
         ...
         bingo!("proficiency_after_struggling")
 
-
     In template:
         # NOPE THIS IS DJANGO SON YOU BES CHECK YOSELF
 
@@ -39,8 +38,8 @@
     deploy and add a real ab test or two
     contact patrick
     handle all TODO comments
-    documentation
     post on github
+    documentation
     blog post
 
     DOCS:
