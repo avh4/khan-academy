@@ -3,6 +3,7 @@ import logging
 import simplejson
 
 from google.appengine.ext.webapp import template, RequestHandler
+from google.appengine.api import memcache
 
 from gae_bingo.gae_bingo import ab_test, bingo, choose_alternative
 from gae_bingo.cache import BingoCache, BingoIdentityCache
@@ -43,6 +44,10 @@ class RunStep(RequestHandler):
             v = self.count_experiments()
         elif step == "end_and_choose":
             v = self.end_and_choose()
+        elif step == "persist":
+            v = self.persist()
+        elif step == "flush_memcache":
+            v = self.flush_memcache()
 
         self.response.out.write(simplejson.dumps(v))
 
@@ -97,3 +102,11 @@ class RunStep(RequestHandler):
 
     def count_experiments(self):
         return len(BingoCache.get().experiments)
+
+    def persist(self):
+        BingoCache.get().persist_to_datastore()
+        return True
+
+    def flush_memcache(self):
+        memcache.flush_all()
+        return True

@@ -130,7 +130,7 @@ def run_tests():
 
     # Participate in experiment D (weight alternatives), keeping track of alternative returned count.
     dict_alternatives = {}
-    for i in range(0, 50):
+    for i in range(0, 75):
         alternative = test_response("participate_in_crocodiles")
         assert(alternative in ["a", "b", "c"])
 
@@ -151,6 +151,14 @@ def run_tests():
     assert(test_response("count_experiments") == 5)
 
     # Test persist and load from DS
+    assert(test_response("persist") == True)
+    assert(test_response("flush_memcache") == True)
+
+    # Check experiments and converion counts remain after persist and memcache flush
+    assert(test_response("count_experiments") == 5)
+
+    dict_conversions_server = test_response("count_conversions_in", {"experiment_name": "chimpanzees (2)"})
+    assert(expected_conversions == reduce(lambda a, b: a + b, map(lambda key: dict_conversions_server[key], dict_conversions_server)))
 
     print "Tests successful."
 
