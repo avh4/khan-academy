@@ -14,6 +14,7 @@ import math
 import random
 import time
 import simplejson as json
+from google.appengine.ext import db
 
 import logging
 
@@ -25,7 +26,7 @@ REFRESH_SECS = 30
 CACHE_EXPIRATION_SECS = 60 * 60
 
 # For a point on the exercise map
-MAX_POINT_RADIUS = 10
+MAX_POINT_RADIUS = 15
 
 ################################################################################
 
@@ -217,7 +218,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
 
-            y, x = int(ex.h_position), int(ex.v_position)
+            y, x = -int(ex.h_position), int(ex.v_position)
 
             min_y, max_y = min(y, min_y), max(y, max_y)
 
@@ -392,3 +393,15 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
 
         return self.render_template_to_string(
             'exercisestats/highcharts_exercises_created_histogram.json', context)
+
+class SetAllExerciseCreationDates(request_handler.RequestHandler):
+    def get(self):
+        date_to_set = self.request_date('date', "%Y/%m/%d")
+
+        exercises = Exercise.get_all_use_cache()
+        updated = []
+        for ex in exercises:
+            ex.creation_date = date_to_set
+            updated.append(ex)
+
+        db.put(updated)

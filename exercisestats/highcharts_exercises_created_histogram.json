@@ -35,7 +35,15 @@
             {
                 "title": { "text": null },
                 "allowDecimals": false,
-                "max": {{ axis.max }}
+                "min": 0,
+                "max": {{ axis.max }},
+                "labels": {
+                    {% if forloop.last %}
+                        "style": { "color": "#50B432" }
+                    {% else %}
+                        "style": { "color": "#058DC7" }
+                    {% endif %}
+                }
                 {% if forloop.last %}
                     , "opposite": true
                 {% endif %}

@@ -121,6 +121,7 @@ class ViewExercise(request_handler.RequestHandler):
                     break
 
             user_activity = []
+            previous_time = 0
 
             if not problem_log or not hasattr(problem_log, "hint_after_attempt_list"):
                 renderable = False
@@ -132,8 +133,10 @@ class ViewExercise(request_handler.RequestHandler):
                     user_activity.append([
                         "hint-activity",
                         "0",
-                        max(0, problem_log.hint_time_taken_list[0])
+                        max(0, problem_log.hint_time_taken_list[0] - previous_time)
                         ])
+
+                    previous_time = problem_log.hint_time_taken_list[0]
                     problem_log.hint_after_attempt_list.pop(0)
                     problem_log.hint_time_taken_list.pop(0)
 
@@ -146,14 +149,17 @@ class ViewExercise(request_handler.RequestHandler):
                         max(0, problem_log.time_taken_attempts[i])
                         ])
 
+                    previous_time = 0
+
                     # Here i is 0-indexed but problems are numbered starting at 1
                     while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i+1:
                         user_activity.append([
                             "hint-activity",
                             "0",
-                            max(0, problem_log.hint_time_taken_list[0])
+                            max(0, problem_log.hint_time_taken_list[0] - previous_time)
                             ])
 
+                        previous_time = problem_log.hint_time_taken_list[0]
                         # easiest to just pop these instead of maintaining
                         # another index into this list
                         problem_log.hint_after_attempt_list.pop(0)
