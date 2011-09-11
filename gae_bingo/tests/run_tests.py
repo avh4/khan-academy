@@ -1,6 +1,6 @@
+import random
 import urllib
 import urllib2
-import urlparse
 import cookielib
 import json
 
@@ -86,22 +86,67 @@ def run_tests():
     for key in dict_conversions:
         assert(dict_conversions[str(key).lower()] == dict_conversions_server[str(key).lower()])
 
-    # Participate in experiment B N times, using cookies to maintain identity
-    #
-    # Make sure alternatives for B are stable per identity
-    #
-    # Participate in experiment C N times, which is a multi-conversion experiment
-    #
-    # Convert in *one* of C's conversions a couple times
-    #
-    # Make sure conversion counts are correct for both of C's conversion experiments
-    #
+    # Participate in experiment B, using cookies to maintain identity
+    # and making sure alternatives for B are stable per identity
+    last_response = None
+    for i in range(0, 20):
+        use_last_cookies = last_response is not None and random.randint(0, 2) > 0
+
+        current_response = test_response("participate_in_gorillas", use_last_cookies=use_last_cookies)
+
+        if not use_last_cookies:
+            last_response = current_response
+
+        assert(current_response in ["a", "b", "c"])
+        assert(last_response == current_response)
+
+    # Participate in experiment C, which is a multi-conversion experiment,
+    # and occasionally convert in *one* of the conversions
+    expected_conversions = 0
+    for i in range(0, 20):
+        assert(test_response("participate_in_chimpanzees") in [True, False])
+
+        if random.randint(0, 2) > 0:
+            assert(test_response("convert_in", {"conversion_name": "chimps_conversion_2"}, use_last_cookies=True) == True)
+            expected_conversions += 1
+
+    # It's statistically possible but incredibly unlikely for this to fail based on random.randint()'s behavior
+    assert(expected_conversions > 0)
+
+    # Make sure conversions for the 2nd conversion type of this experiment are correct
+    dict_conversions_server = test_response("count_conversions_in", {"experiment_name": "chimpanzees (2)"})
+    assert(expected_conversions == reduce(lambda a, b: a + b, map(lambda key: dict_conversions_server[key], dict_conversions_server)))
+
+    # Make sure conversions for the 1st conversion type of this experiment are empty
+    dict_conversions_server = test_response("count_conversions_in", {"experiment_name": "chimpanzees"})
+    assert(0 == reduce(lambda a, b: a + b, map(lambda key: dict_conversions_server[key], dict_conversions_server)))
+    
     # End experiment C, choosing a short-circuit alternative
-    #
-    # Make sure short-circuited alternatives for both of C's experiments are set appropriately
-    #
-    # Participate in experiment D N times, keeping track of alternative returned count.
-    #
+    test_response("end_and_choose", {"experiment_name": "chimpanzees", "alternative_number": 1})
+
+    # Make sure short-circuited alternatives for C's experiments are set appropriately
+    for i in range(0, 5):
+        assert(test_response("participate_in_chimpanzees") == False)
+
+    # Participate in experiment D (weight alternatives), keeping track of alternative returned count.
+    dict_alternatives = {}
+    for i in range(0, 50):
+        alternative = test_response("participate_in_crocodiles")
+        print alternative
+        assert(alternative in ["a", "b", "c"])
+
+        if not alternative in dict_alternatives:
+            dict_alternatives[alternative] = 0
+        dict_alternatives[alternative] += 1
+
+    # Again, it is statistically possible for the following asserts to occasionally fail during
+    # these tests, but it should be exceedingly rare if weighted alternatives are working properly.
+    for key in ["a", "b", "c"]:
+        print("%s --> %s" % (key, dict_alternatives.get(key, 0)))
+        assert(dict_alternatives.get(key, 0) > 0)
+    assert(dict_alternatives.get("a", 0) < dict_alternatives.get("b", 0))
+    assert(dict_alternatives.get("b", 0) < dict_alternatives.get("c", 0))
+
     # Make sure weighted alternatives work -> should be a < b < c < d < e, but they should all exist.
     #
     # Check experiments count

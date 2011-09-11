@@ -147,9 +147,9 @@ def find_alternative_for_user(experiment_name, alternatives):
             if len(matches) == 1:
                 return matches[0]
 
-    return alternatives[modulo_choice(experiment_name, alternatives)]
+    return modulo_choose(experiment_name, alternatives)
 
-def modulo_choice(experiment_name, alternatives):
+def modulo_choose(experiment_name, alternatives):
     alternatives_weight = sum(map(lambda alternative: alternative.weight, alternatives))
 
     sig = hashlib.md5(experiment_name + str(identity())).hexdigest()
@@ -157,8 +157,8 @@ def modulo_choice(experiment_name, alternatives):
     index_weight = sig_num % alternatives_weight
 
     current_weight = alternatives_weight
-    for i, alternative in enumerate(alternatives):
+    for alternative in sorted(alternatives, key=lambda alternative: alternative.weight, reverse=True):
         current_weight -= alternative.weight
         if index_weight >= current_weight:
-            return i
+            return alternative
 

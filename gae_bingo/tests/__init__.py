@@ -9,6 +9,8 @@ from gae_bingo.cache import BingoCache, BingoIdentityCache
 from gae_bingo.config import can_control_experiments
 from gae_bingo.dashboard import ControlExperiment
 
+# See gae_bingo/tests/run_tests.py for the full explanation/sequence of these tests
+
 class RunStep(RequestHandler):
 
     def get(self):
@@ -29,6 +31,8 @@ class RunStep(RequestHandler):
             v = self.participate_in_gorillas()
         elif step == "participate_in_chimpanzees":
             v = self.participate_in_chimpanzees()
+        elif step == "participate_in_crocodiles":
+            v = self.participate_in_crocodiles()
         elif step == "convert_in":
             v = self.convert_in()
         elif step == "count_participants_in":
@@ -37,6 +41,8 @@ class RunStep(RequestHandler):
             v = self.count_conversions_in()
         elif step == "count_experiments":
             v = self.count_experiments()
+        elif step == "end_and_choose":
+            v = self.end_and_choose()
 
         self.response.out.write(simplejson.dumps(v))
 
@@ -59,11 +65,12 @@ class RunStep(RequestHandler):
         return ab_test("gorillas", ["a", "b", "c"])
 
     def participate_in_chimpanzees(self):
-        return ab_test("chimpanzees", conversion_name=["chimps_conversion_1, chimps_conversion_2"])
+        # Multiple conversions test
+        return ab_test("chimpanzees", conversion_name=["chimps_conversion_1", "chimps_conversion_2"])
 
     def participate_in_crocodiles(self):
         # Weighted test
-        return ab_test("crocodiles", {"a": 100, "b": 200, "c": 400, "d": 800, "e": 1600})
+        return ab_test("crocodiles", {"a": 100, "b": 200, "c": 400})
 
     def convert_in(self):
         bingo(self.request.get("conversion_name"))
