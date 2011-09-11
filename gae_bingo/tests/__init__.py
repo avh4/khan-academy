@@ -4,7 +4,7 @@ import simplejson
 
 from google.appengine.ext.webapp import template, RequestHandler
 
-from gae_bingo.gae_bingo import ab_test, bingo
+from gae_bingo.gae_bingo import ab_test, bingo, choose_alternative
 from gae_bingo.cache import BingoCache, BingoIdentityCache
 from gae_bingo.config import can_control_experiments
 from gae_bingo.dashboard import ControlExperiment
@@ -78,8 +78,7 @@ class RunStep(RequestHandler):
 
     def end_and_choose(self):
         bingo_cache = BingoCache.get()
-        experiment = bingo_cache.get_experiment(self.request.get("experiment_name"))
-        ControlExperiment.choose_alternative(self, experiment)
+        choose_alternative(self.request.get("experiment_name"), int(self.request.get("alternative_number")))
 
     def count_participants_in(self):
         return reduce(lambda a, b: a + b, 

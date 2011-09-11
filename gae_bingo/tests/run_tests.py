@@ -132,26 +132,25 @@ def run_tests():
     dict_alternatives = {}
     for i in range(0, 50):
         alternative = test_response("participate_in_crocodiles")
-        print alternative
         assert(alternative in ["a", "b", "c"])
 
         if not alternative in dict_alternatives:
             dict_alternatives[alternative] = 0
         dict_alternatives[alternative] += 1
 
+    # Make sure weighted alternatives work -> should be a < b < c < d < e, but they should all exist.
+    #
     # Again, it is statistically possible for the following asserts to occasionally fail during
     # these tests, but it should be exceedingly rare if weighted alternatives are working properly.
     for key in ["a", "b", "c"]:
-        print("%s --> %s" % (key, dict_alternatives.get(key, 0)))
         assert(dict_alternatives.get(key, 0) > 0)
     assert(dict_alternatives.get("a", 0) < dict_alternatives.get("b", 0))
     assert(dict_alternatives.get("b", 0) < dict_alternatives.get("c", 0))
-
-    # Make sure weighted alternatives work -> should be a < b < c < d < e, but they should all exist.
-    #
+    
     # Check experiments count
-    #
-    # Do some of above tests in multithreaded environment
+    assert(test_response("count_experiments") == 5)
+
+    # Test persist and load from DS
 
     print "Tests successful."
 

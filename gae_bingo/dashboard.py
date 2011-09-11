@@ -3,6 +3,7 @@ import os
 
 from google.appengine.ext.webapp import template, RequestHandler
 
+from .gae_bingo import choose_alternative, delete_experiment, resume_experiment
 from .cache import BingoCache
 from .stats import describe_result_in_words
 from .config import can_control_experiments
@@ -55,69 +56,11 @@ class ControlExperiment(RequestHandler):
         if not experiment_name:
             return
 
-        bingo_cache = BingoCache.get()
-
-        experiment = bingo_cache.get_experiment(experiment_name)
-
-        if not experiment:
-            return
-
         if action == "choose_alternative":
-            self.choose_alternative(experiment)
+            choose_alternative(experiment_name, int(self.request.get("alternative_number")))
         elif action == "delete":
-            self.delete(experiment)
+            delete_experiment(experiment_name)
         elif action == "resume":
-            self.resume(experiment)
+            resume_experiment(experiment_name)
 
         self.redirect("/gae_bingo/dashboard")
-
-    def choose_alternative(self, experiment):
-
-        alternative_number = int(self.request.get("alternative_number"))
-
-        bingo_cache = BingoCache.get()
-
-        # Need to end all experiments that may have been kicked off
-        # by an experiment with multiple conversions
-        experiments, alternative_lists = bingo_cache.experiments_and_alternatives_from_canonical_name(experiment.canonical_name)
-
-        if not experiments or not alternative_lists:
-            return
-
-        for i in range(len(experiments)):
-            experiment, alternatives = experiments[i], alternative_lists[i]
-
-            alternative_chosen = filter(lambda alternative: alternative.number == alternative_number , alternatives)
-
-            if len(alternative_chosen) == 1:
-                experiment.live = False
-                experiment.set_short_circuit_content(alternative_chosen[0].content)
-                bingo_cache.update_experiment(experiment)
-
-    def delete(self, experiment):
-
-        bingo_cache = BingoCache.get()
-
-        if experiment.live:
-            raise Exception("Cannot delete a live experiment")
-
-        bingo_cache.delete_experiment_and_alternatives(experiment)
-
-    def resume(self, experiment):
-
-        bingo_cache = BingoCache.get()
-
-        # Need to resume all experiments that may have been kicked off
-        # by an experiment with multiple conversions
-        experiments, alternative_lists = bingo_cache.experiments_and_alternatives_from_canonical_name(experiment.canonical_name)
-
-        if not experiments or not alternative_lists:
-            return
-
-        for i in range(len(experiments)):
-            experiment, alternatives = experiments[i], alternative_lists[i]
-
-            experiment.live = True
-
-            bingo_cache.update_experiment(experiment)
-
