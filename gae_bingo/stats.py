@@ -1,3 +1,4 @@
+import logging
 
 # This file in particular is almost a direct port from Patrick McKenzie's A/Bingo's abingo/lib/abingo/statistics.rb
 
@@ -11,6 +12,7 @@ DESCRIPTION_IN_WORDS = {
         }
 
 def zscore(alternatives):
+
     if len(alternatives) != 2:
         raise Exception("Sorry, can't currently automatically calculate statistics for A/B tests with > 2 alternatives.")
 
@@ -26,6 +28,9 @@ def zscore(alternatives):
     numerator = cr1 - cr2
     frac1 = cr1 * (1 - cr1) / float(n1)
     frac2 = cr2 * (1 - cr2) / float(n2)
+
+    if frac1 + frac2 == 0:
+        return 0
 
     return numerator / float((frac1 + frac2) ** 0.5)
 

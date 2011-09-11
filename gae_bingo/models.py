@@ -61,7 +61,9 @@ class _GAEBingoAlternative(db.Model):
 
     @property
     def conversion_rate(self):
-        return float(self.conversions) / float(self.participants)
+        if self.participants > 0:
+            return float(self.conversions) / float(self.participants)
+        return 0
 
     @property
     def pretty_conversion_rate(self):

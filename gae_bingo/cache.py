@@ -143,14 +143,14 @@ class BingoCache(object):
         self.dirty = True
 
     def update_alternative(self, alternative):
-        if not alternative.experiment_name in self.alternative_models:
-            self.alternative_models[alternative.experiment_name] = {}
-
         if not alternative.experiment_name in self.alternatives:
             self.alternatives[alternative.experiment_name] = {}
 
-        self.alternative_models[alternative.experiment_name][alternative.number] = alternative
         self.alternatives[alternative.experiment_name][alternative.number] = db.model_to_protobuf(alternative).Encode()
+
+        # Clear out alternative models cache so they'll be re-grabbed w/ next .get_alternatives
+        if alternative.experiment_name in self.alternative_models:
+            del self.alternative_models[alternative.experiment_name]
 
         self.dirty = True
 
