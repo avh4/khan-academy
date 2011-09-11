@@ -105,6 +105,7 @@ class RunStep(RequestHandler):
 
     def persist(self):
         BingoCache.get().persist_to_datastore()
+        BingoIdentityCache.persist_buckets_to_datastore()
         return True
 
     def flush_memcache(self):

@@ -1,4 +1,5 @@
 import random
+import time
 import urllib
 import urllib2
 import cookielib
@@ -53,7 +54,7 @@ def run_tests():
 
     # Check total participants in A (1 extra for bots)
     assert(test_response("count_participants_in", {"experiment_name": "monkeys"}) == 21)
-    
+
     # Participate in experiment B (responses should be "a" "b" or "c")
     for i in range(0, 15):
         assert(test_response("participate_in_gorillas") in ["a", "b", "c"])
@@ -64,6 +65,21 @@ def run_tests():
 
     # Check total participants in A (should've only added 10 more in previous step)
     assert(test_response("count_participants_in", {"experiment_name": "monkeys"}) == 31)
+
+    # Participate in A once more with a lot of followup, persisting to datastore and flushing memcache between followups
+    for i in range(0, 10):
+        assert(test_response("participate_in_monkeys", use_last_cookies=(i not in [0, 5])) in [True, False])
+
+        if i in [0, 5]:
+            assert(test_response("persist", use_last_cookies=True) == True)
+
+            # Wait 15 seconds for task queues to run
+            time.sleep(20)
+
+            assert(test_response("flush_memcache", use_last_cookies=True) == True)
+
+    # Check total participants in A (should've only added 2 more in previous step)
+    assert(test_response("count_participants_in", {"experiment_name": "monkeys"}) == 33)
 
     # Participate and convert in experiment A, using cookies to tie participation to conversions,
     # tracking conversions-per-alternative
