@@ -4,8 +4,6 @@ import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
-# TODO: add note about deferred entrypoint and startup config here
-
 # If you use a datastore model to uniquely identify each user,
 # let it inherit from this class, like so...
 #
@@ -109,14 +107,6 @@ class _GAEBingoIdentityRecord(db.Model):
             return pickle.loads(gae_bingo_identity_record.pickled)
 
         return None
-
-def persist_gae_bingo_identity_record(bingo_identity_cache, identity):
-    bingo_identity = _GAEBingoIdentityRecord(
-                key_name = _GAEBingoIdentityRecord.key_for_identity(identity),
-                identity = identity,
-                pickled = pickle.dumps(bingo_identity_cache),
-            )
-    bingo_identity.put()
 
 def create_experiment_and_alternatives(experiment_name, canonical_name, alternative_params = None, conversion_name = None):
 

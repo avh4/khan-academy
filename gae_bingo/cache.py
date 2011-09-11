@@ -1,11 +1,17 @@
+import logging
+import pickle
+import random
+
 from google.appengine.ext import db
 from google.appengine.ext import deferred
 from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
 from google.appengine.ext.webapp import RequestHandler
 
-from .models import _GAEBingoExperiment, _GAEBingoAlternative, _GAEBingoIdentityRecord, persist_gae_bingo_identity_record
+from .models import _GAEBingoExperiment, _GAEBingoAlternative, _GAEBingoIdentityRecord
 from identity import identity
+
+# TODO: add note about deferred entrypoint and startup config here
 
 # REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware.
 # NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
@@ -244,16 +250,54 @@ class BingoIdentityCache(object):
         self.persist_to_datastore(ident)
 
     def persist_to_datastore(self, ident):
-        deferred.defer(persist_gae_bingo_identity_record, self, ident)
+
+        # Add the memcache value to a random memcache bucket which
+        # will be persisted to the datastore when it overflows
+        # or when the periodic cron job is run
+        bucket = random.randint(0, 50)
+        key = "_gae_bingo_identity_bucket:%s" % bucket
+
+        list_identities = memcache.get(key) or []
+        list_identities.append(ident)
+
+        if len(list_identities) > 50:
+
+            # If over 50 identities are waiting for persistent storage, 
+            # go ahead and kick off a deferred task to do so
+            # in case it'll be a while before the cron job runs.
+            deferred.defer(persist_gae_bingo_identity_records, list_identities)
+
+            # There are race conditions here such that we could miss persistence
+            # of some identities, but that's not a big deal as long as
+            # there is no statistical correlation b/w the experiment and those
+            # being lost.
+            memcache.set(key, [])
+
+        else:
+
+            memcache.set(key, list_identities)
+
+    @staticmethod
+    def persist_buckets_to_datastore():
+        # Persist all memcache buckets to datastore
+        dict_buckets = memcache.get_multi(["_gae_bingo_identity_bucket:%s" % bucket for bucket in range(0, 50)])
+
+        for key in dict_buckets:
+            if len(dict_buckets[key]) > 0:
+                deferred.defer(persist_gae_bingo_identity_records, dict_buckets[key])
+                memcache.set(key, [])
 
     @staticmethod
     def load_from_datastore():
-
-        bingo_identity_cache = _GAEBingoIdentityRecord.load(identity()) or BingoIdentityCache()
-        bingo_identity_cache.purge()
-        bingo_identity_cache.dirty = True
-        bingo_identity_cache.store_for_identity_if_dirty(identity())
-
+        bingo_identity_cache = _GAEBingoIdentityRecord.load(identity())
+        
+        if bingo_identity_cache:
+            bingo_identity_cache.purge()
+            bingo_identity_cache.dirty = True
+            bingo_identity_cache.store_for_identity_if_dirty(identity())
+        else:
+            bingo_identity_cache = BingoIdentityCache()
+        
         return bingo_identity_cache
 
     def __init__(self):
@@ -295,6 +339,22 @@ def store_if_dirty():
     if bingo_identity_cache:
         bingo_identity_cache.store_for_identity_if_dirty(identity())
 
+def persist_gae_bingo_identity_records(list_identities):
+
+    dict_identity_caches = memcache.get_multi([BingoIdentityCache.key_for_identity(ident) for ident in list_identities])
+
+    for ident in list_identities:
+        identity_cache = dict_identity_caches.get(BingoIdentityCache.key_for_identity(ident))
+
+        if identity_cache:
+            bingo_identity = _GAEBingoIdentityRecord(
+                        key_name = _GAEBingoIdentityRecord.key_for_identity(ident),
+                        identity = ident,
+                        pickled = pickle.dumps(identity_cache),
+                    )
+            bingo_identity.put()
+
 class PersistToDatastore(RequestHandler):
     def get(self):
         BingoCache.get().persist_to_datastore()
+        BingoIdentityCache.persist_buckets_to_datastore()
