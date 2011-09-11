@@ -146,7 +146,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             'title': title,
             'series': [
                 {
-                    'name': 'Problems Done',
+                    'name': 'Problems done',
                     'type': 'areaspline',
                     'values': json.dumps(done_list),
                     'axis': 0,
@@ -158,7 +158,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                     'axis': 1,
                 },
                 {
-                    'name': 'New users',
+                    'name': 'First attempts',
                     'type': 'spline',
                     'values': json.dumps(new_users_list),
                     'axis': 1,
@@ -238,9 +238,9 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             data_points.append(point)
 
         context = {
-            'title': 'Exercises Map - New Users',
+            'title': 'Exercises map - First attempts',
             'series': {
-                'name': 'New Users',
+                'name': 'First attempts',
                 'values': json.dumps(data_points),
             },
             'minYValue': min_y - 1,
