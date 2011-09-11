@@ -127,6 +127,12 @@ def score_conversion(experiment_name):
     if experiment_name in bingo_identity_cache.converted_tests:
         return
 
+    experiment = bingo_cache.get_experiment(experiment_name)
+
+    if not experiment or not experiment.live:
+        # Don't count conversions for short-circuited experiments that are no longer live
+        return
+
     alternative = find_alternative_for_user(experiment_name, bingo_cache.get_alternatives(experiment_name))
 
     alternative.increment_conversions()

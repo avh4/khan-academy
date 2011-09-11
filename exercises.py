@@ -24,6 +24,7 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
+from gae_bingo.gae_bingo import bingo
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -227,6 +228,9 @@ class ViewAllExercises(request_handler.RequestHandler):
             if exercise in review_exercises:
                 exercise.review = True
                 exercise.status = "Review"
+
+        if self.request_bool("move_on", default=False):
+            bingo("proficiency_message_heading")
 
         template_values = {
             'exercises': ex_graph.exercises,
