@@ -35,7 +35,9 @@
         # NOPE THIS IS DJANGO SON YOU BES CHECK YOSELF
 
     TODO:
-    deploy and add a real ab test or two
+    figure out occasional 21 count test bug
+    add a real ab test or two
+    deploy
     contact patrick
     handle all TODO comments
     post on github
