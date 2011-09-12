@@ -35,16 +35,15 @@
         # NOPE THIS IS DJANGO SON YOU BES CHECK YOSELF
 
     TODO:
-    figure out occasional 21 count test bug
     add a real ab test or two
     deploy
-    contact patrick
     handle all TODO comments
     post on github
     documentation
     blog post
 
     DOCS:
+    tons of abingo/patio11 attribution
     multiple conversions sugar
     cron.yaml, app.yaml
     bingo_alternative_number override
@@ -55,6 +54,7 @@
     do things like struggling_threshold need ability to set user being ab_tested so teachers see consistent view w/ students who are in different AB tests?
 
     NEXT VERSION:
+    multivariate statistical analysis
     registered users-only tests
     add to nifty little control panel in upper left corner like gae_mini_profiler
     template sugar? or docs explaining why we don't do ab_test in templates

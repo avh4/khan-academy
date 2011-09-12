@@ -3,7 +3,6 @@ from __future__ import absolute_import
 import base64
 import logging
 import os
-import random
 import re
 
 from google.appengine.ext import db
@@ -92,7 +91,7 @@ def get_logged_in_bingo_identity_value():
     return str(val)
 
 def get_random_identity_value():
-    return "_gae_bingo_random:%s" % random.randint(0, 10 ** 10)
+    return "_gae_bingo_random:%s" % base64.urlsafe_b64encode(os.urandom(30))
 
 def is_random_identity_value(val):
     return val and val.startswith("_gae_bingo_random")
