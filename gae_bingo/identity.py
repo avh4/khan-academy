@@ -32,8 +32,13 @@ def logged_in_bingo_identity():
 
         # Examples:
         #   return models.UserData.current()
+        #
+        #
         #         or
-        #   return users.get_current_user().unique_id() if users.get_current_user() else None
+        #
+        #
+        #   from google.appengine.api import users
+        #   return users.get_current_user().user_id() if users.get_current_user() else None
 
         from models import UserData
         LOGGED_IN_IDENTITY_CACHE = UserData.current(bust_cache=True)
