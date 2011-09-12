@@ -49,6 +49,7 @@ class Manage(request_handler.RequestHandler):
 class ManageCoworkers(request_handler.RequestHandler):
 
     @user_util.developer_only
+    @ensure_xsrf_cookie
     def get(self):
 
         user_data_coach = self.request_user_data("coach_email")
