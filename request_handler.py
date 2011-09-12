@@ -19,6 +19,8 @@ from app import App
 from render import render_block_to_string
 import cookie_util
 
+from gae_bingo.gae_bingo import ab_test
+
 class RequestInputHandler(object):
 
     def request_string(self, key, default = ''):
@@ -291,6 +293,8 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         hide_analytics = os.environ.get('SERVER_SOFTWARE').startswith('Devel')
         hide_analytics = self.request_bool("hide_analytics", hide_analytics)
         template_values['hide_analytics'] = hide_analytics
+
+        template_values['contribute_text'] = ab_test("contribute_text", ["Contribute", "Volunteer", "Help us"])
 
         return template_values
 

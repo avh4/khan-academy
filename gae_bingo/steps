@@ -36,6 +36,7 @@
 
     TODO:
     add a real ab test or two
+    override alternative number per exercise
     deploy
     handle all TODO comments
     post on github

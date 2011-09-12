@@ -29,6 +29,7 @@ import facebook
 import request_cache
 from gae_mini_profiler import profiler
 from gae_bingo.middleware import GAEBingoWSGIMiddleware
+from gae_bingo.gae_bingo import bingo
 import autocomplete
 import coaches
 import knowledgemap
@@ -499,6 +500,10 @@ class ViewGetInvolved(request_handler.RequestHandler):
 
 class ViewContribute(request_handler.RequestHandler):
     def get(self):
+
+        if self.request_bool("convert", default=False):
+            bingo("contribute_text")
+
         self.render_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
