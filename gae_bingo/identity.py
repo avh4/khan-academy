@@ -35,7 +35,6 @@ def logged_in_bingo_identity():
         #         or
         #   return users.get_current_user().unique_id() if users.get_current_user() else None
 
-        # TODO: clean up this file for open source version
         from models import UserData
         LOGGED_IN_IDENTITY_CACHE = UserData.current(bust_cache=True)
 
