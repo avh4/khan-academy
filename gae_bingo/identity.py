@@ -8,7 +8,6 @@ import re
 from google.appengine.ext import db
 
 from gae_bingo import cookies
-from models import UserData
 from .models import GAEBingoIdentityModel
 
 # NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
@@ -37,6 +36,7 @@ def logged_in_bingo_identity():
         #   return users.get_current_user().unique_id() if users.get_current_user() else None
 
         # TODO: clean up this file for open source version
+        from models import UserData
         LOGGED_IN_IDENTITY_CACHE = UserData.current(bust_cache=True)
 
     return LOGGED_IN_IDENTITY_CACHE
