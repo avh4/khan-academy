@@ -9,6 +9,7 @@ from google.appengine.ext import db
 
 from gae_bingo import cookies
 from .models import GAEBingoIdentityModel
+from .config import current_logged_in_identity
 
 # NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
 IDENTITY_CACHE = None
@@ -19,29 +20,7 @@ def logged_in_bingo_identity():
     global LOGGED_IN_IDENTITY_CACHE
 
     if LOGGED_IN_IDENTITY_CACHE is None:
-        # This should return either:
-        #   A) a db.Model that identifies the current user, like models.UserData.current(), or
-        #   B) a unique string that consistently identifies the current user, like users.get_current_user().unique_id()
-        #
-        # Ideally, this should be connected to your app's existing identity system.
-        # If your app has no way of identifying the current user of this specific request, this function should return None.
-        # If this function returns None, gae_bingo will automatically use a random unique identifier.
-        #
-        # To get the strongest identity tracking from random identifier to logged in users,
-        # return a model that inherits from GaeBingoIdentityModel. See docs for details.
-
-        # Examples:
-        #   return models.UserData.current()
-        #
-        #
-        #         or
-        #
-        #
-        #   from google.appengine.api import users
-        #   return users.get_current_user().user_id() if users.get_current_user() else None
-
-        from models import UserData
-        LOGGED_IN_IDENTITY_CACHE = UserData.current(bust_cache=True)
+        LOGGED_IN_IDENTITY_CACHE = current_logged_in_identity()
 
     return LOGGED_IN_IDENTITY_CACHE
 
