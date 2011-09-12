@@ -35,7 +35,6 @@
         # NOPE THIS IS DJANGO SON YOU BES CHECK YOSELF
 
     TODO:
-    add a real ab test or two
     override alternative number per exercise
     deploy
     handle all TODO comments
