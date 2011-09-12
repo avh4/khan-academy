@@ -11,29 +11,35 @@ from gae_bingo import cookies
 from models import UserData
 from .models import GAEBingoIdentityModel
 
-def logged_in_bingo_identity():
-    # This should return either:
-    #   A) a db.Model that identifies the current user, like models.UserData.current(), or
-    #   B) a unique string that consistently identifies the current user, like users.get_current_user().unique_id()
-    #
-    # Ideally, this should be connected to your app's existing identity system.
-    # If your app has no way of identifying the current user of this specific request, this function should return None.
-    # If this function returns None, gae_bingo will automatically use a random unique identifier.
-    #
-    # To get the strongest identity tracking from random identifier to logged in users,
-    # return a model that inherits from GaeBingoIdentityModel. See docs for details.
-
-    # Examples:
-    #   return models.UserData.current()
-    #         or
-    #   return users.get_current_user().unique_id() if users.get_current_user() else None
-
-    # TODO: clean up this file for open source version
-    return UserData.current()
-
 # NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
 IDENTITY_CACHE = None
+LOGGED_IN_IDENTITY_CACHE = None
 IDENTITY_COOKIE_KEY = "gae_b_id"
+
+def logged_in_bingo_identity():
+    global LOGGED_IN_IDENTITY_CACHE
+
+    if LOGGED_IN_IDENTITY_CACHE is None:
+        # This should return either:
+        #   A) a db.Model that identifies the current user, like models.UserData.current(), or
+        #   B) a unique string that consistently identifies the current user, like users.get_current_user().unique_id()
+        #
+        # Ideally, this should be connected to your app's existing identity system.
+        # If your app has no way of identifying the current user of this specific request, this function should return None.
+        # If this function returns None, gae_bingo will automatically use a random unique identifier.
+        #
+        # To get the strongest identity tracking from random identifier to logged in users,
+        # return a model that inherits from GaeBingoIdentityModel. See docs for details.
+
+        # Examples:
+        #   return models.UserData.current()
+        #         or
+        #   return users.get_current_user().unique_id() if users.get_current_user() else None
+
+        # TODO: clean up this file for open source version
+        LOGGED_IN_IDENTITY_CACHE = UserData.current(bust_cache=True)
+
+    return LOGGED_IN_IDENTITY_CACHE
 
 def identity():
     global IDENTITY_CACHE
@@ -114,8 +120,9 @@ def delete_identity_cookie_header():
     return cookies.set_cookie_value(IDENTITY_COOKIE_KEY, "")
 
 def flush_identity_cache():
-    global IDENTITY_CACHE
+    global IDENTITY_CACHE, LOGGED_IN_IDENTITY_CACHE
     IDENTITY_CACHE = None
+    LOGGED_IN_IDENTITY_CACHE = None
 
 # I am well aware that this is a far-from-perfect, hacky method of quickly
 # determining who's a bot or not. If necessary, in the future we could implement
