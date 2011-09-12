@@ -106,7 +106,7 @@ class ViewExercise(request_handler.RequestHandler):
                 renderable = False
 
             query = models.ProblemLog.all()
-            query.filter("user = ", user_data.user)
+            query.filter("user = ", user_data_student.user)
             query.filter("exercise = ", exid)
 
             # adding this ordering to ensure that query is served by an existing index.
