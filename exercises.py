@@ -107,7 +107,7 @@ class ViewExercise(request_handler.RequestHandler):
                 renderable = False
 
             query = models.ProblemLog.all()
-            query.filter("user = ", user_data.user)
+            query.filter("user = ", user_data_student.user)
             query.filter("exercise = ", exid)
 
             # adding this ordering to ensure that query is served by an existing index.
@@ -171,7 +171,8 @@ class ViewExercise(request_handler.RequestHandler):
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints
 
-        browser_disabled = self.is_older_ie()
+        is_webos = self.is_webos()
+        browser_disabled = is_webos or self.is_older_ie()
         renderable = renderable and not browser_disabled
 
         url_pattern = "/exercises?exid=%s&student_email=%s&problem_number=%d"
@@ -193,6 +194,7 @@ class ViewExercise(request_handler.RequestHandler):
             'read_only': read_only,
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
+            'is_webos': is_webos,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
