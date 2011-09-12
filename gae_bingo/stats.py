@@ -14,7 +14,7 @@ DESCRIPTION_IN_WORDS = {
 def zscore(alternatives):
 
     if len(alternatives) != 2:
-        raise Exception("Sorry, can't currently automatically calculate statistics for A/B tests with > 2 alternatives.")
+        raise Exception("Sorry, can't currently automatically calculate statistics for A/B tests with > 2 alternatives. Need to brush up on some statistics via http://www.khanacademy.org/#statistics before implementing.")
 
     if alternatives[0].participants == 0 or alternatives[1].participants == 0:
         raise Exception("Can't calculate the z score if either of the alternatives lacks participants.")

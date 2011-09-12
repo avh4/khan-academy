@@ -11,7 +11,14 @@ from google.appengine.ext.webapp import RequestHandler
 from .models import _GAEBingoExperiment, _GAEBingoAlternative, _GAEBingoIdentityRecord
 from identity import identity
 
-# TODO: add note about deferred entrypoint and startup config here
+# gae_bingo relies on the deferred library,
+# and as such it is susceptible to the same path manipulation weaknesses explained here:
+# http://stackoverflow.com/questions/2502215/permanenttaskfailure-in-appengine-deferred-library
+#
+# ...if you need to run one-time configuration or path manipulation code when an instance
+# is started, you may need to add that code to this file as this file will become
+# a possibly instance-starting entry point. See docs and above Stack Oveflow question.
+import config_django
 
 # REQUEST_CACHE is cleared before and after every requests by gae_bingo.middleware.
 # NOTE: this request caching will need a bit of a touchup once Python 2.7 is released for GAE and concurrent requests are enabled.
