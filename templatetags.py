@@ -327,4 +327,5 @@ webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
 webapp.template.register_template_library('js_css_packages.templatetags')
 webapp.template.register_template_library('dashboard.templatetags')
+webapp.template.register_template_library('social.templatetags')
 
