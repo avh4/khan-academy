@@ -28,6 +28,8 @@ import bulk_update.handler
 import facebook
 import request_cache
 from gae_mini_profiler import profiler
+from gae_bingo.middleware import GAEBingoWSGIMiddleware
+from gae_bingo.gae_bingo import bingo
 import autocomplete
 import coaches
 import knowledgemap
@@ -498,6 +500,10 @@ class ViewGetInvolved(request_handler.RequestHandler):
 
 class ViewContribute(request_handler.RequestHandler):
     def get(self):
+
+        if self.request_bool("convert", default=False):
+            bingo("contribute_text")
+
         self.render_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
@@ -833,6 +839,11 @@ class PostLogin(request_handler.RequestHandler):
                 user_data.user_nickname = current_nickname
                 user_data.put()
 
+            # Set developer to True if user is admin
+            if not user_data.developer and users.is_current_user_admin():
+                user_data.developer = True
+                user_data.put()
+
             # If user is brand new and has 0 points, migrate data
             phantom_id = get_phantom_user_id_from_cookies()
             if phantom_id:
@@ -1127,6 +1138,7 @@ def main():
         ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
         ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
         ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
+        ('/exercisestats/admin/setallexercisecreationdates', exercisestats.report_json.SetAllExerciseCreationDates),
 
         # Redirect any links to old JSP version
         ('/.*\.jsp', PermanentRedirectToHome),
@@ -1137,6 +1149,7 @@ def main():
         ], debug=True)
 
     application = profiler.ProfilerWSGIMiddleware(application)
+    application = GAEBingoWSGIMiddleware(application)
     application = request_cache.RequestCacheMiddleware(application)
 
     run_wsgi_app(application)

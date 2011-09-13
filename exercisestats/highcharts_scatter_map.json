@@ -14,13 +14,15 @@
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
     "title": { "text": "{{ title }}" },
-    "legend": { },
+    "legend": { "enabled": false },
     "plotOptions": {
         "scatter": {
             "dataLabels": { 
                 "enabled": false
             },
-            "showInLegend": true,
+            "marker": {
+                "lineWidth": 1
+            },
             "size": "100%"
         }
     },
@@ -33,7 +35,11 @@
     "yAxis": {
         "labels": { "enabled": false },
         "gridLineWidth": 0,
-        "title": { "text": null }
+        "title": { "text": null },
+        "endOnTick": false,
+        "startOnTick": false,
+        "min": {{ minYValue }},
+        "max": {{ maxYValue }}
     },
     "xAxis": {
         "labels": { "enabled": false },

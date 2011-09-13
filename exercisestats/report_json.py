@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import layer_cache
-import exercisestats.number_trivia as number_trivia
 import request_handler
 import user_util
 
@@ -15,6 +14,7 @@ import math
 import random
 import time
 import simplejson as json
+from google.appengine.ext import db
 
 import logging
 
@@ -26,7 +26,7 @@ REFRESH_SECS = 30
 CACHE_EXPIRATION_SECS = 60 * 60
 
 # For a point on the exercise map
-MAX_POINT_RADIUS = 10
+MAX_POINT_RADIUS = 15
 
 ################################################################################
 
@@ -70,61 +70,54 @@ def get_bucket_cursor(refresh_secs, bucket_size):
 ################################################################################
 
 class ExerciseOverTimeGraph(request_handler.RequestHandler):
-    def get_request_params(self):
-        chart = self.request_string('chart', 'area_spline')
-        past_days = self.request_int('past_days', 7)
-        num_buckets = self.request_int('n', 1)
-        bucket_index = self.request_int('ix', 0)
-        refresh_secs = self.request_int('rsecs', 30)
-
-        bucket_size = get_bucket_size(num_buckets, bucket_index)
-        bucket_cursor = get_bucket_cursor(refresh_secs, bucket_size)
-
-        return {
-            'chart': chart,
-            'past_days': past_days,
-            'num_buckets': num_buckets,
-            'bucket_index': bucket_index,
-            'bucket_cursor': bucket_cursor,
-        }
-
-    def get_cache_key(self):
-        params = self.get_request_params()
-
-        if (params['chart'] == 'aggregate'):
-            return "%s|%d" % (params['chart'], params['past_days'])
-
-        return "%s|%d|%d|%d|%d" % (params['chart'], params['past_days'],
-            params['num_buckets'], params['bucket_index'], params['bucket_cursor'])
-
     def get(self):
-        self.response.out.write(self.get_use_cache())
+        self.response.out.write(self.get_json_response())
 
-    @layer_cache.cache_with_key_fxn(get_cache_key,
-        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
-    def get_use_cache(self):
-        params = self.get_request_params()
+    def get_json_response(self):
+        # Currently accepts: { "buckets", "all", "newest" }
+        to_show = self.request_string('show', 'buckets')
+        past_days = self.request_int('past_days', 7)
+        refresh_secs = self.request_int('rsecs', 30)
 
         today = dt.date.today()
         # We don't use App Engine Query filters so as to avoid adding entries to index.yaml
-        days = [ today - dt.timedelta(days=i) for i in range(0, params['past_days']) ]
+        days = [ today - dt.timedelta(days=i) for i in range(0, past_days) ]
 
-        if params['chart'] == 'aggregate':
-            # For-loop for clarity and to get flattened list (over list comp.)
-            ex_stats = []
-            for ex in Exercise.get_all_use_cache():
-                ex_stats += ExerciseStatistic.get_by_dates(ex.name, days)
+        if to_show == 'all':
+            exercise_names = [ex.name for ex in Exercise.get_all_use_cache()]
+            return self.exercise_over_time_for_highcharts(exercise_names, days, 'All Exercises', showLegend=True)
 
-            return self.area_spline(ex_stats, 'All Exercises')
+        if to_show == 'newest':
+            exercises = Exercise.get_all_use_cache()
+            exercises.sort(key=lambda ex: ex.creation_date, reverse=True)
+            exercise_names = [ex.name for ex in exercises]
 
-        exercise_names = exercises_in_bucket(params['num_buckets'], params['bucket_index'])
+            num_newest = self.request_int('newest', 5)
+            exid = exercise_names[get_bucket_cursor(refresh_secs, num_newest)]
 
-        exid = exercise_names[params['bucket_cursor']]
-        ex_stats = ExerciseStatistic.get_by_dates(exid, days)
+            title = 'Newest Exercises - %s' % Exercise.to_display_name(exid)
 
-        return self.area_spline(ex_stats, exid)
+            return self.exercise_over_time_for_highcharts([exid], days, title, showLegend=True)
 
-    def area_spline(self, exercise_stats, title=''):
+        num_buckets = self.request_int('buckets', 1)
+        bucket_index = self.request_int('ix', 0)
+        bucket_size = get_bucket_size(num_buckets, bucket_index)
+        bucket_cursor = get_bucket_cursor(refresh_secs, bucket_size)
+
+        exercise_names = exercises_in_bucket(num_buckets, bucket_index)
+        exid = exercise_names[bucket_cursor]
+
+        return self.exercise_over_time_for_highcharts([exid], days, Exercise.to_display_name(exid))
+
+    # TODO: What's the best way to deal with the wrapped function having default values?
+    def get_cache_key(self, exids, dates, title='', showLegend=False):
+        return "%s|%s|%s|%s" % (str(sorted(exids)), str(sorted(dates)), title, str(showLegend))
+
+    @layer_cache.cache_with_key_fxn(get_cache_key,
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    def exercise_over_time_for_highcharts(self, exids, dates, title='', showLegend=False):
+        exercise_stats = ExerciseStatistic.get_by_dates_and_exids(exids, dates)
+
         prof_list, done_list, new_users_list = [], [], []
         for ex in exercise_stats:
             start_unix = to_unix_secs(ex.start_dt) * 1000
@@ -139,28 +132,34 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
         prof_list = sum_keys(prof_list)
         new_users_list = sum_keys(new_users_list)
 
-        title = Exercise.to_display_name(title)
-
         # Make the peak of the new users and proficiency series about half as
         # high as the peak of the # problems line
         left_axis_max = max([x[1] for x in done_list]) if done_list else 1
-        right_axis_max = max([x[1] for x in new_users_list]) * 2 if new_users_list else 1
+        right_axis_max = max([x[1] for x in new_users_list + prof_list]) * 2 if new_users_list else 1
 
+        dates_to_display_unix = [x[0] for x in done_list] if done_list else [0]
+
+        # TODO: Call a function to render all values in this dict as JSON
+        #     string before giving it to the template, so we don't need to call
+        #     json.dumps on all the values.
         context = {
             'title': title,
             'series': [
                 {
                     'name': 'Problems Done',
+                    'type': 'areaspline',
                     'values': json.dumps(done_list),
                     'axis': 0,
                 },
                 {
                     'name': 'Proficient',
+                    'type': 'column',
                     'values': json.dumps(prof_list),
                     'axis': 1,
                 },
                 {
                     'name': 'New users',
+                    'type': 'spline',
                     'values': json.dumps(new_users_list),
                     'axis': 1,
                 },
@@ -169,6 +168,9 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                 { 'max': left_axis_max },
                 { 'max': right_axis_max },
             ],
+            'minXValue': min(dates_to_display_unix),
+            'maxXValue': max(dates_to_display_unix),
+            'showLegend': json.dumps(showLegend),
         }
 
         return self.render_template_to_string(
@@ -179,7 +181,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 class GeckoboardExerciseRedirect(request_handler.RequestHandler):
     def get(self):
         bucket_index = self.request_int('ix', 0)
-        return self.redirect('/exercisestats/exerciseovertime?chart=area_spline&past_days=%d&rsecs=%d&n=%d&ix=%d'
+        return self.redirect('/exercisestats/exerciseovertime?chart=area_spline&past_days=%d&rsecs=%d&buckets=%d&ix=%d'
             % (PAST_DAYS_TO_SHOW, REFRESH_SECS, NUM_BUCKETS, bucket_index))
 
 # TODO: Either allow returning graphs for other statistics, such as #
@@ -209,20 +211,21 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             stat = ExerciseStatistic.get_by_date(ex.name, params['interested_day'])
             ex_stat_dict[ex.name] = stat
             if stat:
-                most_done = max(most_new_users, stat.num_new_users())
+                most_new_users = max(most_new_users, stat.num_new_users())
 
         data_points = []
+        min_y, max_y = -1, 1
         for ex in Exercise.get_all_use_cache():
             stat = ex_stat_dict[ex.name]
 
-            # The exercise map is rotated 90 degrees because we can fit more on
-            # Geckoboard's tiny 2x2 widget that way.
-            x, y = int(ex.h_position), int(ex.v_position)
+            y, x = -int(ex.h_position), int(ex.v_position)
+
+            min_y, max_y = min(y, min_y), max(y, max_y)
 
             # Set the area of the circle proportional to the data value
             radius = 1
             if stat:
-                radius = math.sqrt(float(stat.num_new_users()) / most_done) * MAX_POINT_RADIUS
+                radius = math.sqrt(float(stat.num_new_users()) / most_new_users) * MAX_POINT_RADIUS
 
             point = {
                 'x': x,
@@ -235,11 +238,13 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             data_points.append(point)
 
         context = {
-            'title': 'Exercises Map',
+            'title': 'Exercises Map - New Users',
             'series': {
                 'name': 'New Users',
                 'values': json.dumps(data_points),
             },
+            'minYValue': min_y - 1,
+            'maxYValue': max_y + 1,
         }
 
         return self.render_template_to_string(
@@ -283,9 +288,12 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
         number = self.request_int('num', len(Exercise.get_all_use_cache()))
         self.render_json(self.number_facts_for_geckboard_text(number))
 
-    # Not caching because there is no datastore access in this function
     @staticmethod
+    @layer_cache.cache_with_key_fxn(lambda number: str(number),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def number_facts_for_geckboard_text(number):
+        import exercisestats.number_trivia as number_trivia
+
         math_fact = number_trivia.math_facts.get(number,
             'This number is interesting. Why? Suppose there exists uninteresting '
             'natural numbers. Then the smallest in that set would be '
@@ -364,11 +372,13 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
         context = {
             'series': [
                 {
+                    'name': 'Histogram (created per day)',
                     'type': 'column',
                     'values': json.dumps(histogram),
                     'axis': 0,
                 },
                 {
+                    'name': 'Total exercises',
                     'type': 'spline',
                     'values': json.dumps(total_exercises),
                     'axis': 1,
@@ -383,3 +393,15 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
 
         return self.render_template_to_string(
             'exercisestats/highcharts_exercises_created_histogram.json', context)
+
+class SetAllExerciseCreationDates(request_handler.RequestHandler):
+    def get(self):
+        date_to_set = self.request_date('date', "%Y/%m/%d")
+
+        exercises = Exercise.get_all_use_cache()
+        updated = []
+        for ex in exercises:
+            ex.creation_date = date_to_set
+            updated.append(ex)
+
+        db.put(updated)

@@ -14,11 +14,10 @@
     "colors": [ "#058DC7", "#50B432", "#EF561A" ],
     "credits": { "enabled": false },
     "title": { "text": "{{ title }}" },
-    "legend": { "enabled": false },
+    "legend": { "enabled": {{ showLegend }} },
     "plotOptions": {
         "areaspline": {
             "dataLabels": { "enabled": false },
-            "showInLegend": false,
             "size": "100%"
         }
     },
@@ -27,6 +26,7 @@
             {
                 "data": {{ data.values }},
                 "name": "{{ data.name }}",
+                "type": "{{ data.type }}",
                 "yAxis": {{ data.axis }},
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
@@ -35,12 +35,24 @@
         {% for axis in axes %}
             {
                 "title": { "text": null },
-                "max": {{ axis.max }}
+                "max": {{ axis.max }},
+                "labels": {
+                    {% if forloop.last %}
+                        "style": { "color": "#50B432" }
+                    {% else %}
+                        "style": { "color": "#058DC7" }
+                    {% endif %}
+                }
                 {% if forloop.last %}
                     , "opposite": true
                 {% endif %}
             }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ],
-    "xAxis": { "type": "datetime" }
+    "xAxis": {
+        "type": "datetime",
+        "dateTimeLabelFormats": {
+            "day": "%a %e %b"
+        }
+    }
 }

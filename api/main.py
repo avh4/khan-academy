@@ -11,9 +11,12 @@ from api import auth
 from api import v0
 from api import v1
 
+from gae_bingo import middleware
+
 def real_main():
 
     wsgi_app = request_cache.RequestCacheMiddleware(api_app)
+    wsgi_app = middleware.GAEBingoWSGIMiddleware(wsgi_app)
 
     if App.is_dev_server:
         try:
