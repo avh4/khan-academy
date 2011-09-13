@@ -3164,3 +3164,22 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
   width: 16px;
   height: 11px;
 }
+.sharepop {
+     display: none;
+}
+.badge-award-container .sharepop {
+    float:none;
+    position:relative;
+    right:90px;
+    top:10px;
+    z-index:100;
+    padding:1px;
+    height:40px;
+    margin-left:33px;
+    width:70px;
+}
+.badge-award-container .sharepop .triangle-isosceles.top {
+    position:absolute;
+    right:0px;
+    top:0px;"
+}
