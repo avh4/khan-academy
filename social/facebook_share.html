@@ -1,11 +1,11 @@
 {% if type %}
 {% ifequal type "badge" %}
-<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookBadge('{{desc|escape|escapejs}}','{{icon}}','{{extended_desc|escape|escapejs}}','{{activity|escape|escapejs}}');"></a>
+<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookBadge('{{desc|escapejs}}','{{icon}}','{{extended_desc|escapejs}}','{{activity|escapejs}}');"></a>
 {% endifequal %}
 {% ifequal type "video" %}
 <a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookVideo('{{name|escapejs}}','{{desc|escapejs}}','/video?v={{id}}');"></a>
 {% endifequal %}
 {% ifequal type "exercise" %}
-<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookExercise('{{problem_count}}','{{plural}}','{{proficiency}}','{{name|escapejs}}');"></a>
+<a href="javascript:void(0);" class="facebookShare" onclick="Social.facebookExercise('{{problem_count}}','{{plural}}','{{proficiency|escapejs}}','{{name|escapejs}}');"></a>
 {% endifequal %}
 {% endif %}
