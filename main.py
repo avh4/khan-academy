@@ -75,6 +75,8 @@ from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
 
+import config_jinja
+
 class VideoDataTest(request_handler.RequestHandler):
 
     @user_util.developer_only

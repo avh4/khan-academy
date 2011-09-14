@@ -30,7 +30,7 @@ def badge_notifications_html(user_badges):
     path = os.path.join(os.path.dirname(__file__), "notifications.html")
     return template.render(path, {"user_badges": user_badges})
 
-@register.inclusion_tag("badges/badge_counts.html")
+@register.simple_tag
 def badge_counts(user_data):
 
     counts_dict = {}
@@ -43,7 +43,7 @@ def badge_counts(user_data):
     for key in counts_dict:
         sum_counts += counts_dict[key]
 
-    return {
+    template_context = {
             "sum": sum_counts,
             "bronze": counts_dict[badges.BadgeCategory.BRONZE],
             "silver": counts_dict[badges.BadgeCategory.SILVER],
@@ -52,6 +52,9 @@ def badge_counts(user_data):
             "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
             "master": counts_dict[badges.BadgeCategory.MASTER],
     }
+
+    path = os.path.join(os.path.dirname(__file__), "badge_counts.html")
+    return template.render(path, template_context)
 
 @register.inclusion_tag("badges/badge_block.html")
 def badge_block(badge, user_badge=None, show_frequency=False):
