@@ -4,7 +4,6 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 from notifications import UserNotifier
-from .badges import badges, util_badges
 
 import template_cached
 register = template_cached.create_template_register()
@@ -22,6 +21,7 @@ def login_notifications_html(login_notifications, user_data, continue_url="/"):
 
 @register.inclusion_tag("phantom_users/badge_counts.html")
 def badge_info(user_data):
+    from .badges import badges, util_badges
 
     counts_dict = {}
     if user_data:

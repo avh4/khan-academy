@@ -179,4 +179,5 @@ class ViewHomePage(request_handler.RequestHandler):
                             'is_mobile_allowed': True,
                             'approx_vid_count': consts.APPROX_VID_COUNT,
                         }
+
         self.render_template('homepage.html', template_values)

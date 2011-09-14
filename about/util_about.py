@@ -10,7 +10,8 @@ class AboutRequestHandler(request_handler.RequestHandler):
 
 class ViewAbout(AboutRequestHandler):
     def get(self):
-        self.render_template('about/about-the-site.html', {"selected_id": "the-site", "approx_vid_count": consts.APPROX_VID_COUNT})
+        self.render_jinja2_template('about/about-the-site.html', {"selected_id": "the-site", "approx_vid_count": consts.APPROX_VID_COUNT})
+        #self.render_template('about/about-the-site.html', {"selected_id": "the-site", "approx_vid_count": consts.APPROX_VID_COUNT})
 
 class ViewAboutTheTeam(AboutRequestHandler):
     def get(self):

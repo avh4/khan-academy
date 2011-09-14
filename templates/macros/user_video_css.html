@@ -1,0 +1,5 @@
+{% macro user_video_css(user_data) -%}
+    {% if user_data %}
+    <link rel='stylesheet' type='text/css' href='/user_video_css?version={{ user_data.uservideocss_version }}&id={{ hash(user_data.user) }}' />
+    {% endif %}
+{%- endmacro %}

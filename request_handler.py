@@ -7,11 +7,12 @@ import sys
 import re
 import traceback
 
-import google
-import webapp2
 from google.appengine.api import users
 from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
+
+import webapp2
+from webapp2_extras import jinja2
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from app import App
@@ -134,6 +135,7 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
         if App.is_dev_server or users.is_current_user_admin():
             try:
                 import django
+                import google
 
                 exc_type, exc_value, exc_traceback = sys.exc_info()
 
@@ -297,6 +299,15 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
         template_values['hide_analytics'] = hide_analytics
 
         return template_values
+
+    @webapp2.cached_property
+    def jinja2(self):
+        # Returns a Jinja2 renderer cached in the app registry.
+        return jinja2.get_jinja2(app=self.app)
+
+    def render_jinja2_template(self, template_name, template_values):
+        response_text = self.jinja2.render_template(template_name, **template_values)
+        self.response.write(response_text)
 
     def render_template(self, template_name, template_values):
         self.add_global_template_values(template_values)

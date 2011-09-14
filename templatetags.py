@@ -81,14 +81,6 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
         "list_height": column_indices[0] * link_height,
     }
 
-@register.inclusion_tag("youtube_player_embed.html")
-def youtube_player_embed(youtube_id, width=800, height=480):
-    return {
-        "youtube_id": youtube_id,
-        "width": width,
-        "height": height
-    }
-
 @register.inclusion_tag("flv_player_embed.html")
 def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
     if exercise_video:

@@ -1,0 +1,9 @@
+{% import 'macros/username_and_notification.html' as username_and_notification %}
+{% import 'macros/badge_counts.html' as badge_counts %}
+{% import 'macros/user_points.html' as user_points %}
+
+{% macro user_info(username, user_data) -%}
+{{ username_and_notification(username user_data) }}
+{{ badge_counts user_data }}
+{{ user_points(user_data) }}
+{%- endmacro %}
