@@ -8,9 +8,8 @@ import re
 import traceback
 
 import google
-import django
+import webapp2
 from google.appengine.api import users
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
@@ -79,7 +78,7 @@ class RequestInputHandler(object):
         else:
             return self.request_int(key, 1 if default else 0) == 1
 
-class RequestHandler(webapp.RequestHandler, RequestInputHandler):
+class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
 
     def is_ajax_request(self):
         # jQuery sets X-Requested-With header for this detection.
@@ -129,11 +128,13 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
 
         if not silence_report:
-            webapp.RequestHandler.handle_exception(self, e, args)
+            webapp2.RequestHandler.handle_exception(self, e, args)
 
         # Show a nice stack trace on development machines, but not in production
         if App.is_dev_server or users.is_current_user_admin():
             try:
+                import django
+
                 exc_type, exc_value, exc_traceback = sys.exc_info()
 
                 # Grab module and convert "__main__" to just "main"
@@ -253,8 +254,11 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def set_cookie(self, key, value='', max_age=None,
                    path='/', domain=None, secure=None, httponly=False,
                    version=None, comment=None):
+
+        # We manually add the header here so we can support httponly cookies in Python 2.5,
+        # which self.response.set_cookie does not.
         header_value = cookie_util.set_cookie_value(key, value, max_age, path, domain, secure, httponly, version, comment)
-        self.response.headers._headers.append(('Set-Cookie', header_value))
+        self.response.headerlist.append(('Set-Cookie', header_value))
 
     def delete_cookie(self, key, path='/', domain=None):
         self.set_cookie(key, '', path=path, domain=domain, max_age=0)

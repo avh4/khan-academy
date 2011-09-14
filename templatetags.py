@@ -7,10 +7,10 @@ import simplejson as json
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template as webapp_template
 from django import template
-from django.template.defaultfilters import escape, slugify
+from django.template.defaultfilters import escape
 
 from app import App
-from templatefilters import seconds_to_time_string
+from templatefilters import seconds_to_time_string, slugify
 from models import UserData, UserVideoCss
 import consts
 import util

@@ -15,7 +15,6 @@ from api.jsonify import jsonify
 # Do not remove this webapp.template import, as suggested
 # by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
 from google.appengine.ext.webapp import template
-from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
@@ -33,6 +32,7 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+from templatefilters import slugify
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized

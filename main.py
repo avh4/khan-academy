@@ -14,11 +14,10 @@ from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
 
 import config_django
 
-from django.template.loader import render_to_string
 import simplejson
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
-from google.appengine.ext import webapp
+import webapp2
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
@@ -949,7 +948,7 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
 def main():
 
-    application = webapp.WSGIApplication([
+    application = webapp2.WSGIApplication([
         ('/', homepage.ViewHomePage),
         ('/about', util_about.ViewAbout),
         ('/about/blog', blog.ViewBlog),

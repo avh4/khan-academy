@@ -135,6 +135,11 @@ def column_height(list_item_index, column_breakpoints):
         height = list_item_index - column_breakpoints[column_breakpoints.index(list_item_index) - 1]
     return height
 
+def slugify(value):
+    # Just like Django's version of slugify
+    "Converts to lowercase, removes non-alpha chars and converts spaces to hyphens"
+    value = re.sub('[^\w\s-]', '', value).strip().lower()
+    return re.sub('[-\s]+', '-', value)
 
 @register.filter  #use to get model property value 
 def mygetattr(obj, name): 
