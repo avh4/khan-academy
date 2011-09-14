@@ -2965,8 +2965,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .triangle-isosceles.top {
-	width:150px;
-	height:50px;
+	min-width:72px;
+	min-height:25px;
+	padding: 5px;
 }
 
 .triangle-isosceles:after {
@@ -2983,7 +2984,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .triangle-isosceles.top:after {
 	top:-5px; /* value = - border-top-width - border-bottom-width */
-	right:25px; /* controls horizontal position */
+	right:36px; /* controls horizontal position */
 	bottom:auto;
 	left:auto;
 	border-width:0 5px 5px; /* vary these values to change the angle of the vertex */
@@ -3177,4 +3178,46 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
   background-image: url(/images/email.png); /*! data-uri(/images/email.png) */
   width: 16px;
   height: 11px;
+}
+.sharepop {
+     display: none;
+}
+.badge-award-container .sharepop {
+    float: right;
+    position: relative;
+    right: -5px;
+    top: 30px;
+    z-index: 100;
+    padding: 1px;
+    height: 40px;
+    margin-left: 33px;
+    left: auto;
+}
+
+.badge-award-container .share-link {
+    top:0px;
+    left:226px;
+}
+.twitterShare, .facebookShare, .emailShare {
+    background-repeat:no-repeat;
+    float:left;
+    height:24px;
+    width:24px;
+    display:block;
+    margin: 0;
+    text-decoration: none;
+    cursor: pointer;
+}
+.sharepop .twitterShare, .sharepop .facebookShare, .sharepop .emailShare {
+    margin: 0;
+}
+.twitterShare { 
+    background: url(/images/twitter.png);
+}
+.facebookShare {
+    background: url(/images/facebook.png);
+}
+.emailShare {
+    text-indent: -9999px;
+    background: url(/images/email-button-24.png) no-repeat;
 }

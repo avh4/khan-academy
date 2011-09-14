@@ -7,19 +7,19 @@ var Profile = {
 
     init: function() {
 
-		$('.recent-share').hide();
+		$('.share-link').hide();
 		$('.sharepop').hide();
 
 		$(".achievement,.exercise,.video").hover(
 			function () {
-			    $(this).find(".recent-share").show();
+			    $(this).find(".share-link").show();
 				},
 			function () {
-			    $(this).find(".recent-share").hide();
+			    $(this).find(".share-link").hide();
 				$(this).find(".sharepop").hide();
 			  });
 
-		$('.recent-share').click(function() {
+		$('.share-link').click(function() {
 		if ( $.browser.msie && (parseInt($.browser.version, 10) < 8) )
 			$(this).next(".sharepop").toggle();
 		else
