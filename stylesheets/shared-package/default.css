@@ -3206,6 +3206,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     display:block;
     margin: 0;
     text-decoration: none;
+    cursor: pointer;
 }
 .sharepop .twitterShare, .sharepop .facebookShare, .sharepop .emailShare {
     margin: 0;
@@ -3215,4 +3216,8 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 .facebookShare {
     background: url(/images/facebook.png);
+}
+.emailShare {
+    text-indent: -9999px;
+    background: url(/images/email.png) no-repeat 50% 50%;
 }
