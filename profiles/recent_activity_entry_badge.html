@@ -9,19 +9,7 @@
     {% endif %}
     <br /><span class="time">{{ recent_activity.timestamp|escape }}</span>
 		 {% ifnotequal view "mobile" %}
-		 <span class="recent-share">
-			<a href="#" class="simple-button action-gradient with-icon download-icon share-link" onclick="_gaq.push(['_trackEvent', 'Click', 'Recent-Activity-Share-Button']);return false;">
-		        <img src="/images/share-icon-small.png" />
-		        Share
-		    </a>
-			</span>
-
-			<div class="sharepop">
-				<div class="triangle-isosceles top">
-					{% facebook_share_badge recent_activity.badge.description recent_activity.badge.icon_src recent_activity.badge.extended_description recent_activity.user_badge.target_context_name "Recent-Activity-Share-Facebook" %}
-					{% twitter_share_badge recent_activity.badge.description recent_activity.user_badge.target_context_name "Recent-Activity-Share-Twitter" %}
-				</div>
-			</div>
+		 {% share_badge_button recent_activity.badge.description recent_activity.badge.icon_src recent_activity.badge.extended_description recent_activity.user_badge.target_context_name "Recent-Activity-Share" %}
 			{% endifnotequal %}
 		</div>
 		

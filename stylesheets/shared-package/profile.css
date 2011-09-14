@@ -396,7 +396,7 @@
             -moz-border-radius: 5px;
             border-radius: 5px;
          }
-        #individual_report #recent-activity #activity-list > ul > li img {
+        .activity-image img {
             max-width: 60px;
             max-height: 60px;
             vertical-align: middle;
@@ -467,7 +467,21 @@ div.graph-notification {
     margin: 0;
 }
 
-.recent-share {z-index:5;position:absolute;left:180px;top:25px;text-align:center;font-size:12px;}
+#recent-activity .share-link {
+    display: none;
+    z-index:5;
+    position:absolute;
+    left:-70px;
+    top:48px;
+    font-size:12px;
+}
+#recent-activity .simple-button {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+#recent-activity .simple-button:hover {
+    top: 48px;
+}
 .ach-text {
 	position:relative;
 	top:-50px;
@@ -478,7 +492,7 @@ div.graph-notification {
 .sharepop {
     z-index:3;
     position:absolute;
-    left:188px;
+    left:-62px;
     float:right;
     font-size:12px;
     height:50px;
@@ -486,7 +500,7 @@ div.graph-notification {
 }
 .triangle-isosceles.top{
     position:absolute;
-    top:16px;
+    top:36px;
     width:50px;
     height:25px;
     padding:5px;

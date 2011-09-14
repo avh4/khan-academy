@@ -6,18 +6,7 @@
             {% if user_badge.badge %}
 			<div class="badge-container" style="margin-bottom:5px;">
                 {% badge_block user_badge.badge %}
-				
-					<a href="#" style="top:0px;left:226px;" class="simple-button action-gradient with-icon download-icon share-link notif-share"onclick="_gaq.push(['_trackEvent', 'Click', 'Badge-Notification-Share-Button']);return false;">
-		             <img src="/images/share-icon-small.png" />
-		                     Share
-		             </a>
-				   <div class="sharepop">
- 						<div class="triangle-isosceles top">
- 							{% facebook_share_badge user_badge.badge.description user_badge.badge.icon_src user_badge.badge.extended_description user_badge.target_context_name "Badge-Notification-Share-Facebook" %}
- 							{% twitter_share_badge user_badge.badge.description user_badge.target_context_name "Badge-Notification-Share-Twitter" %}
- 						</div>
- 					</div>
-				</div>
+				{% share_badge_button user_badge.badge.description user_badge.badge.icon_src user_badge.badge.extended_description user_badge.target_context_name "Badge-Notification-Share" %}
 				<hr style="margin:0px; padding:0px;"/>
             {% endif %}
         {% endfor %}

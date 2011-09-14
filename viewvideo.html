@@ -89,17 +89,7 @@
                 </a>
                 {% endif %}
                   
-                 <a href="#" style="z-index:101;" class="simple-button action-gradient with-icon download-icon share-link" onclick="_gaq.push(['_trackEvent', 'Click', 'Video-Page-Share-Button']);return false;">
-                 <img src="/images/share-icon-small.png" />
-                         Share
-                 </a>
-
-                 <span class="sharepop" style="display: none;">
-					<span class="triangle-isosceles top">
-						{% facebook_share_video video.title video.description video.youtube_id "Video-Page-Share-Facebook"%}
-						{% twitter_share_video video.title video.youtube_id "Video-Page-Share-Twitter" %}
-					</span>
-				</span>
+                {% share_video_button video.title video.description video.youtube_id "Video-Page-Share" %}
 					
          	</div>
 			<span style="float:right;" id="points-badge-hover">

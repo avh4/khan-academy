@@ -142,6 +142,9 @@
 }
 .simple-button.with-icon.download-icon img { top: 5px; }
 
+.extra-link-bar a.share-link {
+    z-index: 101;
+}
 .extra-link-bar .sharepop {
 	position:absolute;
 	float:right;

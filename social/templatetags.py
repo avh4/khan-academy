@@ -3,6 +3,7 @@ import logging
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
+from django.template.defaultfilters import pluralize
 
 from urllib import urlencode
 
@@ -36,12 +37,12 @@ def facebook_share_video(name, desc, youtube_id, event_info=None):
     return context
 
 @register.inclusion_tag("social/facebook_share.html")
-def facebook_share_exercise(problem_count,plural,proficiency,name):
+def facebook_share_exercise(problem_count, proficiency, name, event_info=None):
     context = {}
-    if problems and name:
+    if problem_count and name:
         context = { 'type': 'exercise',
                     'problem_count': problem_count, 
-                    'plural': plural,
+                    'plural': pluralize(problem_count),
                     'proficiency': ("to achieve proficiency in" if proficiency else "in"),
                     'name': name,
                     'event_info': event_info }
@@ -74,13 +75,47 @@ def twitter_share_badge(desc, activity, event_info=None):
     return context
 
 @register.inclusion_tag("social/twitter_share.html")
-def twitter_share_exercise(name, problems, plural, proficiency, event_info=None):
+def twitter_share_exercise(name, problems, proficiency, event_info=None):
     context = {}
-    if name and problems and plural:
+    if name and problems:
         url = "http://khanacademy.org/exercisedashboard"
-        text = "just answered %s question%s right %s %s" % (problems, plural, ( "to achieve proficiency in" if proficiency else "in" ), name)
+        text = "just answered %s question%s right %s %s" % (problems, pluralize(problems), ( "to achieve proficiency in" if proficiency else "in" ), name)
         context = { 'url': url, 
                     'text': text,
                     'tagline': _site_tagline,
                     'event_info': event_info }
+    return context
+
+@register.inclusion_tag("social/share_button.html")
+def share_video_button(video_title, description, youtube_id, event_description=None):
+    context = {}
+    if video_title and description and youtube_id:
+        context = { 'type': 'video',
+                    'video_title': video_title,
+                    'description': description,
+                    'youtube_id': youtube_id,
+                    'event_description': event_description }
+    return context
+
+@register.inclusion_tag("social/share_button.html")
+def share_badge_button(description, icon_src, extended_description, context_name, event_description=None):
+    context = {}
+    if description and icon_src and extended_description:
+        context = { 'type': 'badge',
+                    'description': description,
+                    'icon_src': icon_src,
+                    'extended_description': extended_description,
+                    'target_context_name': context_name,
+                    'event_description': event_description }
+    return context
+    
+@register.inclusion_tag("social/share_button.html")
+def share_exercise_button(problem_count, proficiency, name, event_description=None):
+    context = {}
+    if problem_count and name:
+        context = { 'type': 'exercise',
+                    'problem_count': problem_count,
+                    'proficiency': proficiency,
+                    'name': name,
+                    'event_description': event_description }
     return context

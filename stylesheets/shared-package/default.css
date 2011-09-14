@@ -3182,18 +3182,23 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
      display: none;
 }
 .badge-award-container .sharepop {
-    float:none;
-    position:relative;
-    right:90px;
-    top:10px;
-    z-index:100;
-    padding:1px;
-    height:40px;
-    margin-left:33px;
-    width:70px;
+    float: right;
+    position: relative;
+    right: 9px;
+    top: 10px;
+    z-index: 100;
+    padding: 1px;
+    height: 40px;
+    margin-left: 33px;
+    width: 70px;
+    left: auto;
 }
 .badge-award-container .sharepop .triangle-isosceles.top {
     position:absolute;
     right:0px;
-    top:0px;"
+    top:20px;"
+}
+.badge-award-container .share-link {
+    top:0px;
+    left:226px;
 }
