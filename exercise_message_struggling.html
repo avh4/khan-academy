@@ -54,7 +54,7 @@ var randomElement = function(array, weights) {
     var sum = array.length;
     var cum;
     if (weights !== undefined) {
-        var cum = weights.slice();
+        cum = weights.slice();
         for(var i=1; i<cum.length; i++) {
             cum[i] = cum[i-1] + cum[i];
         }
