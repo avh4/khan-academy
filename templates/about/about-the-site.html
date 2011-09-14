@@ -1,7 +1,6 @@
 {% extends "about/about-template.html" %}
 
-{% import 'macros/youtube_player_embed.html' as youtube_player_embed %}
-{% import 'macros/youtube_jump_link.html' as youtube_jump_link %}
+{% import 'macros/youtube.html' as youtube %}
 
 {% block aboutcontent %}
 
@@ -23,23 +22,23 @@ materials and resources are available to you completely free of charge.
 <div class="clear"></div>
 <hr style="margin-bottom: 36px;">
 <div class="col1 sixty-forty">
-    {{ youtube_player_embed("hw5k98GV7po", "99%", 400) }}
+    {{ youtube.player_embed("hw5k98GV7po", "99%", 400) }}
 </div>
 
 <div class="col2 sixty-forty" >
     <h2>How it works for students</h2>
     <p>Students can make use of our extensive video library, practice exercises, and assessments from any computer with access to the web.</p>
     <ol>
-        <li>{{ youtube_jump_link("Complete custom self-paced learning tool", 0) }}</li>
-        <li>{{ youtube_jump_link("A dynamic system for getting help", 130) }}</li>
-        <li>{{ youtube_jump_link("A custom profile, points, and badges to measure progress", 208) }} </li>
+        <li>{{ youtube.jump_link("Complete custom self-paced learning tool", 0) }}</li>
+        <li>{{ youtube.jump_link("A dynamic system for getting help", 130) }}</li>
+        <li>{{ youtube.jump_link("A custom profile, points, and badges to measure progress", 208) }} </li>
     </ol><br/>
     <h2>Coaches, parents, and teachers</h2>
     <p>Coaches, parents, and teachers have unprecedented visibility into what their students are learning and doing on the Khan Academy.</p>
     <ol>
-        <li>{{ youtube_jump_link("Ability to see any student in detail", 341) }}</li>
-        <li>{{ youtube_jump_link("A real-time class report for all students", 490) }}</li>
-        <li>{{ youtube_jump_link("Better intelligence for doing targeted interventions", 535) }}</li>
+        <li>{{ youtube.jump_link("Ability to see any student in detail", 341) }}</li>
+        <li>{{ youtube.jump_link("A real-time class report for all students", 490) }}</li>
+        <li>{{ youtube.jump_link("Better intelligence for doing targeted interventions", 535) }}</li>
     </ol>
 </div>
 <div class="clear" style="margin-bottom:36px;"></div>

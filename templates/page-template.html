@@ -1,5 +1,4 @@
-{% import 'macros/user_video_css.html' as user_video_css %}
-{% import 'macros/user_info.html' as user_info %}
+{% import 'macros/user.html' as user %}
 
 <!DOCTYPE html>
 <html itemscope itemtype="http://schema.org/Organization"
@@ -57,9 +56,9 @@
             {{ js_package("shared") }}
         {% endif %}
 
-        {{ render_xsrf_js }}
+        {{ render_xsrf_js() }}
 
-        {{ user_video_css(user_data) }}
+        {{ user.user_video_css(user_data) }}
 
         {% block pagescript %}
         {% endblock pagescript %}
@@ -102,7 +101,7 @@
                         <span class="page_links" id="page_auth">
                             {% if logged_in %}
                                 <span id="user-info" class="badge-target">
-                                    {{ user_info(username, user_data) }}
+                                    {{ user.user_info(username, user_data) }}
                                 </span>
                                 <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
@@ -167,7 +166,7 @@
     </div>
     <div class="push"></div>
     {% block pagefooter %}
-    {% include "page_footer_short.html" %}
+    {% include "page-footer-short.html" %}
     {% endblock %}
 
     {% block bottompagescript %}

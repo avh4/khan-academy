@@ -1,4 +1,4 @@
-{% macro youtube_player_embed(youtube_id, width=800, height=480) -%}
+{% macro player_embed(youtube_id, width=800, height=480) -%}
 <object id="idOVideo" name="idOVideo" width="{{ width }}" height="{{ height }}" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
     <param name="movie" value="http://www.youtube.com/v/{{youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
     <param name="allowFullScreen" value="true">
@@ -7,3 +7,8 @@
     <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/{{youtube_id}}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="{{ width }}" height="{{ height }}">
 </object>
 {%- endmacro %}
+
+{% macro jump_link(content, seconds) -%}
+    <span class='youTube' seconds='{{ seconds }}'>{{ content }}</span>
+{%- endmacro %}
+

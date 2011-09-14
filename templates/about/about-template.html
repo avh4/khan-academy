@@ -1,6 +1,6 @@
 {% extends "page-template.html" %}
 
-{% import 'macros/crazyegg_tracker.html' as crazyegg_tracker %}
+{% import 'macros/analytics.html' as analytics %}
 
 {% block meta_page_title %}About | {% endblock meta_page_title %}
 {% block pagescript %}
@@ -33,5 +33,5 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {{ crazyegg_tracker(False) }}
+    {{ analytics.crazyegg_tracker(False) }}
 {% endblock bottompagescript %}

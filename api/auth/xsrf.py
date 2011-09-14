@@ -33,5 +33,6 @@ def validate_xsrf_value():
     return header_value and header_value == get_xsrf_cookie_value()
 
 def render_xsrf_js():
+    logging.critical("IN HERE!")
     return "<script>var fkey = '%s';</script>" % get_xsrf_cookie_value();
 

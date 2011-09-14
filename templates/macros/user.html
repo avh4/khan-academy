@@ -1,3 +1,14 @@
+{% macro user_info(username, user_data) -%}
+{{ username_and_notification(username, user_data) }}
+{{ badge_counts(user_data) }}
+{{ user_points(user_data) }}
+{%- endmacro %}
+
+{% macro user_points(user_data) -%}
+    {% set points = user_data.points if user_data else 0 %}
+    <span id="user-points-container">{% block user_points_block%}<span title="{{ points|thousands_separated }} energy points" class="energy-points-badge" onclick="location.href='/profile?k'" {% if not points %} style="display: none" {% endif %}>{{ points|thousands_separated }}</span>{% endblock %}</span>
+{%- endmacro %}
+
 {% macro username_and_notification(user_data) -%}
 {% set count = user_data.feedback_notification_count() if user_data else 0 %}
 <span class="username_and_notification "{% if count %}username_and_notification_shift{% endif %}">
@@ -17,4 +28,10 @@
     </span>
     <span class="user-name"><a href="/profile?k">{{username|escape}}</a></span>
 </span>
+{%- endmacro %}
+
+{% macro user_video_css(user_data) -%}
+    {% if user_data %}
+    <link rel='stylesheet' type='text/css' href='/user_video_css?version={{ user_data.uservideocss_version }}&id={{ hash(user_data.user) }}' />
+    {% endif %}
 {%- endmacro %}
