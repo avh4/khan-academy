@@ -150,7 +150,7 @@ def exercise_message(exercise, coaches, exercise_states):
         state = '_struggling'
         exercise_states['exercise_videos'] = exercise.related_videos_fetch()
     else:
-        state = ''
+        return None
     filename = "exercise_message%s.html" % state
     path = os.path.join(os.path.dirname(__file__), filename)
 
