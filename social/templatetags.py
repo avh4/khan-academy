@@ -91,7 +91,7 @@ def twitter_share_exercise(name, problems, proficiency, event_description=None):
     return context
 
 @register.inclusion_tag("social/email_share.html")
-def email_share_video(title, description, youtube_id, event_description=None):
+def email_share_video(title, youtube_id, event_description=None):
     contex = {}
     if title and youtube_id:
         subject = "I just learned about %s on Khan Academy" % title
