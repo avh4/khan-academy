@@ -1,5 +1,5 @@
 {% if type %}
-<a href="#" class="simple-button action-gradient with-icon download-icon share-link notif-share" onclick="_gaq.push(['_trackEvent', 'Click', 'Badge-Notification-Share-Button']);return false;">
+<a href="#" class="simple-button action-gradient with-icon download-icon share-link notif-share" onclick="{% if event_description %}_gaq.push(['_trackEvent', 'Click', '{{event_description}}-Button']){% endif %};return false;">
   <img src="/images/share-icon-small.png" />
           Share
   </a>

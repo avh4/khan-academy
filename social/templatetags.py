@@ -14,7 +14,7 @@ register = template_cached.create_template_register()
 SITE_TAGLINE = "Trying to make a world-class education available to anyone, anywhere."
 
 @register.inclusion_tag("social/facebook_share.html")
-def facebook_share_badge(desc, icon, extended_desc, activity, event_info=None):
+def facebook_share_badge(desc, icon, extended_desc, activity, event_description=None):
     context = {}
     if desc and icon and extended_desc:
         context = { 'type': 'badge', 
@@ -22,22 +22,22 @@ def facebook_share_badge(desc, icon, extended_desc, activity, event_info=None):
                     'icon': icon, 
                     'extended_desc': extended_desc,
                     'activity': activity, 
-                    'event_info': event_info }
+                    'event_description': event_description }
     return context
 
 @register.inclusion_tag("social/facebook_share.html")
-def facebook_share_video(name, desc, youtube_id, event_info=None):
+def facebook_share_video(name, desc, youtube_id, event_description=None):
     context = {}
     if name and desc and id:
         context = { 'type': 'video',
                     'name': name,
                     'desc': desc,
                     'id': youtube_id,
-                    'event_info': event_info }
+                    'event_description': event_description }
     return context
 
 @register.inclusion_tag("social/facebook_share.html")
-def facebook_share_exercise(problem_count, proficiency, name, event_info=None):
+def facebook_share_exercise(problem_count, proficiency, name, event_description=None):
     context = {}
     if problem_count and name:
         context = { 'type': 'exercise',
@@ -45,11 +45,11 @@ def facebook_share_exercise(problem_count, proficiency, name, event_info=None):
                     'plural': pluralize(problem_count),
                     'proficiency': ("to achieve proficiency in" if proficiency else "in"),
                     'name': name,
-                    'event_info': event_info }
+                    'event_description': event_description }
     return context
     
 @register.inclusion_tag("social/twitter_share.html")
-def twitter_share_video(title, youtube_id, event_info=None):
+def twitter_share_video(title, youtube_id, event_description=None):
     context = {}
     if title and youtube_id :
         url = "http://khanacademy.org/video?v=%s" % youtube_id
@@ -58,11 +58,11 @@ def twitter_share_video(title, youtube_id, event_info=None):
                     'url': url,
                     'text': text,
                     'tagline': SITE_TAGLINE, 
-                    'event-info': event_info } 
+                    'event_description': event_description } 
     return context
     
 @register.inclusion_tag("social/twitter_share.html")
-def twitter_share_badge(desc, activity, event_info=None):
+def twitter_share_badge(desc, activity, event_description=None):
     context= {}
     if desc:
         url = "http://khanacademy.org"
@@ -71,11 +71,11 @@ def twitter_share_badge(desc, activity, event_info=None):
                     'url': url,
                     'text': text,
                     'tagline': SITE_TAGLINE,
-                    'event-info': event_info }
+                    'event_description': event_description }
     return context
 
 @register.inclusion_tag("social/twitter_share.html")
-def twitter_share_exercise(name, problems, proficiency, event_info=None):
+def twitter_share_exercise(name, problems, proficiency, event_description=None):
     context = {}
     if name and problems:
         url = "http://khanacademy.org/exercisedashboard"
@@ -83,7 +83,7 @@ def twitter_share_exercise(name, problems, proficiency, event_info=None):
         context = { 'url': url, 
                     'text': text,
                     'tagline': SITE_TAGLINE,
-                    'event_info': event_info }
+                    'event_description': event_description }
     return context
 
 @register.inclusion_tag("social/share_button.html")
