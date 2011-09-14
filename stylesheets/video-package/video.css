@@ -163,6 +163,7 @@
 	height:25px;
 	position:absolute;
 	padding-left:0px;
+	top: 15px;
 }
 
 .twitterShare {background: url(/images/twitter.png);background-repeat:no-repeat; float:right;height:24px; padding:0px;width:24px;display:block;text-decoration: none;}
