@@ -1878,6 +1878,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-shadow: none;
 
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
