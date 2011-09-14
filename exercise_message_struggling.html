@@ -1,5 +1,3 @@
-{% extends "exercise_message.html" %}
-{% block exercise_message_block %}
 <div class="exercise_message">
     Are you having trouble with this exercise?&nbsp;  You've done more than {{ exercise.struggling_threshold }} problems now but haven't gotten {{ exercise.required_streak }} in a row right yet.&nbsp;  Why don't you
     {% if exercise_videos %}
@@ -17,4 +15,3 @@
     {% endif %}
     for help?
 </div>
-{% endblock %}
