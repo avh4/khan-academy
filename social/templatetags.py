@@ -11,7 +11,7 @@ from templateext import escapejs
 
 import template_cached
 register = template_cached.create_template_register()
-_site_tagline = "Trying to make a world-class education available to anyone, anywhere."
+SITE_TAGLINE = "Trying to make a world-class education available to anyone, anywhere."
 
 @register.inclusion_tag("social/facebook_share.html")
 def facebook_share_badge(desc, icon, extended_desc, activity, event_info=None):
@@ -57,7 +57,7 @@ def twitter_share_video(title, youtube_id, event_info=None):
         context = { 'type': 'video',
                     'url': url,
                     'text': text,
-                    'tagline': _site_tagline, 
+                    'tagline': SITE_TAGLINE, 
                     'event-info': event_info } 
     return context
     
@@ -70,7 +70,7 @@ def twitter_share_badge(desc, activity, event_info=None):
         context = { 'type': 'badge',
                     'url': url,
                     'text': text,
-                    'tagline': _site_tagline,
+                    'tagline': SITE_TAGLINE,
                     'event-info': event_info }
     return context
 
@@ -82,7 +82,7 @@ def twitter_share_exercise(name, problems, proficiency, event_info=None):
         text = "just answered %s question%s right %s %s" % (problems, pluralize(problems), ( "to achieve proficiency in" if proficiency else "in" ), name)
         context = { 'url': url, 
                     'text': text,
-                    'tagline': _site_tagline,
+                    'tagline': SITE_TAGLINE,
                     'event_info': event_info }
     return context
 
