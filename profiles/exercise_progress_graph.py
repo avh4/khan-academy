@@ -1,3 +1,4 @@
+import datetime
 import util
 import logging
 
@@ -30,10 +31,15 @@ def exercise_progress_graph_context(user_data_student):
         user_exercise = dict_user_exercises[exercise.name] if dict_user_exercises.has_key(exercise.name) else None
 
         if user_data_student.is_proficient_at(exercise.name):
-            status = "Proficient"
-            color = "proficient"
-            if not user_data_student.is_explicitly_proficient_at(exercise.name):
-                status = "Proficient (due to proficiency in a more advanced module)"
+
+            if user_data_student.is_reviewing( exercise.name, user_exercise, datetime.datetime.now() ) :
+                status = "Needs Review"
+                color = "review"
+            else :
+                status = "Proficient"
+                color = "proficient"
+                if not user_data_student.is_explicitly_proficient_at(exercise.name):
+                    status = "Proficient (due to proficiency in a more advanced module)"
 
         elif user_exercise is not None and UserExercise.is_struggling_with(user_exercise, exercise):
             status = "Struggling"

@@ -4,6 +4,7 @@ from templateext import escapejs
 import models
 import util
 from itertools import izip
+import datetime
 
 def get_class_exercises(students):
 
@@ -86,13 +87,18 @@ def class_progress_report_graph_context(user_data, student_list):
             hover = ""
             color = "transparent"
 
+
             if student.is_proficient_at(exercise_name):
-                status = "Proficient"
-                color = "proficient"
 
-                if not student.is_explicitly_proficient_at(exercise_name):
-                    status = "Proficient (due to proficiency in a more advanced module)"
-
+                if student.is_reviewing( exercise_name, user_exercise, datetime.datetime.now() ) :
+                    status = "Needs Review"
+                    color = "review"
+                else :
+                    status = "Proficient"
+                    color = "proficient"
+                    if not student.is_explicitly_proficient_at(exercise_name):
+                        status = "Proficient (due to proficiency in a more advanced module)"
+                        
             elif user_exercise.exercise is not None and models.UserExercise.is_struggling_with(user_exercise, exercise):
                 status = "Struggling"
                 color = "struggling"
