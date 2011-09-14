@@ -1346,6 +1346,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         width: 12px;
         height: 12px;
         margin-left: 3px;
+        
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+        border-radius: 2px;
     }
         .legend-color.proficient {
             background-color: #0080C9;
