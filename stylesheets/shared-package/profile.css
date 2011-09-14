@@ -384,8 +384,7 @@
     #individual_report #recent-activity #activity-list > ul > li {
         font-size: 18px;
         color: #555;
-        margin-bottom: 5px;
-		margin-top:10px;
+        padding: 10px 0;
     }
          #individual_report #recent-activity #activity-list > ul > li span.activity-image {
             width: 60px;
@@ -471,8 +470,8 @@ div.graph-notification {
     display: none;
     z-index:5;
     position:absolute;
-    left:-70px;
-    top:48px;
+    left:-76px;
+    top:20px;
     font-size:12px;
 }
 #recent-activity .simple-button {
@@ -480,7 +479,7 @@ div.graph-notification {
     padding-bottom: 2px;
 }
 #recent-activity .simple-button:hover {
-    top: 48px;
+    top: 20px;
 }
 .ach-text {
 	position:relative;
@@ -489,28 +488,18 @@ div.graph-notification {
 	height:1px;
 }	
 	
-.sharepop {
-    z-index:3;
-    position:absolute;
-    left:-62px;
-    float:right;
-    font-size:12px;
-    height:50px;
-    width:60px;
+#recent-activity .sharepop {
+    z-index: 3;
+    position: absolute;
+    left: -75px;
+    font-size: 12px;
+    top: 53px;
 }
-.triangle-isosceles.top{
-    position:absolute;
-    top:36px;
-    width:50px;
-    height:25px;
-    padding:5px;
+#recent-activity .triangle-isosceles.top:after {
+    right: 61px;
 }
 
 .badge-share-container {position:absolute;bottom:25px;left:5px;width:250px;}
 
-.share_link {position:absolute;z-index:1;}
 
 .sharebar {z-index:0; position:absolute;padding-left:100px;}
-
-.twitterShare {background: url(/images/twitter.png);background-repeat:no-repeat; float:right;height:24px; width:24px;display:block;text-decoration: none;}
-.facebookShare {background: url(/images/facebook.png);background-repeat:no-repeat; float:left;height:24px; width:24px;display:block;text-decoration: none;}
