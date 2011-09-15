@@ -82,7 +82,7 @@ def compress_all_packages(default_path, dict_packages, suffix):
 # Note: The two hashes will be different. The reason we hash twice is because
 # we use the first hash in packages_hash.py to check if we need to compress the
 # file and the second hash to identify the created file.
-# packages_hash file format: 
+# packages_hash file format:
 #     hashes = {'file': (combined hash, compressed hash, final path), ...}
 def compress_package(name, path, files, suffix):
     if not os.path.exists(path):
@@ -157,7 +157,7 @@ def minify_package(path, path_combined, suffix):
 
     print "Compressing %s into %s" % (path_combined, path_compressed)
     print popen_results(["java", "-jar", path_compressor, "--charset", "utf-8", path_combined, "-o", path_compressed])
-    
+
     if not os.path.exists(path_compressed):
         raise Exception("Unable to YUICompress: %s" % path_combined)
 
@@ -221,7 +221,7 @@ def hash_package(name, path, path_compressed, suffix):
 
     hash_sig = md5.new(content).hexdigest()
     path_hashed = os.path.join(path, "hashed-%s%s" % (hash_sig, suffix))
-    
+
     print "Copying %s into %s" % (path_compressed, path_hashed)
     shutil.copyfile(path_compressed, path_hashed)
 
