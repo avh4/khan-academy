@@ -80,28 +80,33 @@ $('.exercise_message .close-button').click(function(ev) {
 var videoState = ['unstarted', 'started', 'complete'];
 
 var getCssVideo = function() {
+    var videoStates = {};
+
     // get the user video css
     var css = $.grep(document.styleSheets, function(el,i) {
         return /user_video_css/.test(el.href);
     })[0];
 
-    var videoStates = {};
-    $.each(css.rules, function(i, rule) {
-        var href = rule.style['background-image'].toString();
-        var state = 0;
+    if (css) {
+        // IE uses rules, Firefox uses cssRules.
+        var rules = css.rules || css.cssRules;
+        $.each(rules, function(i, rule) {
+            var href = rule.style.backgroundImage.toString();
+            var state = 0;
 
-        if( href.match(videoState[1]) ) {
-            state = 1;
-        }
-        else if ( href.match(videoState[2]) ) {
-            state = 2;
-        }
+            if( href.match(videoState[1]) ) {
+                state = 1;
+            }
+            else if ( href.match(videoState[2]) ) {
+                state = 2;
+            }
 
-        var ids = rule.selectorText.match(/\d+/g);
-        $.each(ids, function(i, id) {
-            videoStates[id] = state;
+            var ids = rule.selectorText.match(/\d+/g);
+            $.each(ids, function(i, id) {
+                videoStates[id] = state;
+            });
         });
-    });
+    }
 
     return videoStates;
 };
