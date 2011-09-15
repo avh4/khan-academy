@@ -10,22 +10,21 @@ class AboutRequestHandler(request_handler.RequestHandler):
 
 class ViewAbout(AboutRequestHandler):
     def get(self):
-        self.render_jinja2_template('about/about-the-site.html', {"selected_id": "the-site", "approx_vid_count": consts.APPROX_VID_COUNT})
-        #self.render_template('about/about-the-site.html', {"selected_id": "the-site", "approx_vid_count": consts.APPROX_VID_COUNT})
+        self.render_jinja2_template('about/about_the_site.html', {"selected_id": "the-site", "approx_vid_count": consts.APPROX_VID_COUNT})
 
 class ViewAboutTheTeam(AboutRequestHandler):
     def get(self):
-        self.render_template('about/about-the-team.html', {"selected_id": "the-team"})
+        self.render_jinja2_template('about/about_the_team.html', {"selected_id": "the-team"})
         
 class ViewGettingStarted(AboutRequestHandler):
     def get(self):
-        self.render_template('about/getting-started.html', {"selected_id": "getting-started", "approx_vid_count": consts.APPROX_VID_COUNT, "App": App })
+        self.render_jinja2_template('about/getting_started.html', {"selected_id": "getting-started", "approx_vid_count": consts.APPROX_VID_COUNT, "App": App })
 
 class ViewFAQ(AboutRequestHandler):
     def get(self):
-        self.render_template('about/faq.html', {"selected_id": "faq", "approx_vid_count": consts.APPROX_VID_COUNT })
+        self.render_jinja2_template('about/faq.html', {"selected_id": "faq", "approx_vid_count": consts.APPROX_VID_COUNT })
 
 class ViewDownloads(AboutRequestHandler):
     def get(self):
-        self.render_template('about/downloads.html', {})
+        self.render_jinja2_template('about/downloads.html', {})
 
