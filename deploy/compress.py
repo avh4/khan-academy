@@ -29,7 +29,7 @@ else:
 
 def revert_js_css_hashes():
     print "Reverting %s" % PATH_PACKAGES
-    popen_results(['hg', 'revert', PATH_PACKAGES])
+    popen_results(['hg', 'revert', '--no-backup', PATH_PACKAGES])
 
 def compress_all_javascript():
     dict_packages = packages.javascript
