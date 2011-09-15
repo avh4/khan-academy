@@ -150,7 +150,7 @@ def exercise_message(exercise, coaches, exercise_states):
         state = '_struggling'
         exercise_states['exercise_videos'] = exercise.related_videos_fetch()
     else:
-        state = ''
+        return None
     filename = "exercise_message%s.html" % state
     path = os.path.join(os.path.dirname(__file__), filename)
 
@@ -300,6 +300,10 @@ def empty_class_instructions(class_is_empty=True):
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
 
+@register.inclusion_tag("exercise_legend.html")
+def exercise_legend():
+    return {}
+
 @register.simple_tag
 def xsrf_value():
     return xsrf.render_xsrf_js()
@@ -319,6 +323,7 @@ def user_video_css(user_data):
     else:
         return ''
 
+
 register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')
@@ -330,4 +335,5 @@ webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
 webapp.template.register_template_library('js_css_packages.templatetags')
 webapp.template.register_template_library('dashboard.templatetags')
+webapp.template.register_template_library('social.templatetags')
 

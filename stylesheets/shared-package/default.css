@@ -1325,6 +1325,45 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border-top: 1px solid #ddd;
         line-height: 18px;
     }
+    #container.dashboard .exercise-legend {
+        position: absolute; 
+        right: 5px; 
+        top: 40px;
+        z-index: 1;
+    }
+    .exercise-legend {
+        font-size: 12px;
+        color: #fff;
+    }
+    .exercise-legend .legend-color, .exercise-legend .legend-label {
+        display: inline-block;
+    }
+    .exercise-legend .legend-label {
+        position: relative;
+        top: -1px;
+    }
+    .exercise-legend .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-left: 3px;
+        
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+        border-radius: 2px;
+    }
+        .legend-color.proficient {
+            background-color: #0080C9;
+        }
+        .legend-color.suggested {
+            background-color: #73982C;
+        }
+        .legend-color.review {
+            background-color: #E35D04;
+        }
+        .legend-color.not-started {
+            background-color: #ccc;
+        }
+
     #container #dashboard-drawer {
         position: absolute;
         background: #fff;
@@ -1878,6 +1917,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-shadow: none;
 
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;
@@ -2965,8 +3005,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 
 .triangle-isosceles.top {
-	width:150px;
-	height:50px;
+	min-width:72px;
+	min-height:25px;
+	padding: 5px;
 }
 
 .triangle-isosceles:after {
@@ -2983,7 +3024,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 
 .triangle-isosceles.top:after {
 	top:-5px; /* value = - border-top-width - border-bottom-width */
-	right:25px; /* controls horizontal position */
+	right:36px; /* controls horizontal position */
 	bottom:auto;
 	left:auto;
 	border-width:0 5px 5px; /* vary these values to change the angle of the vertex */
@@ -3177,4 +3218,46 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
   background-image: url(/images/email.png); /*! data-uri(/images/email.png) */
   width: 16px;
   height: 11px;
+}
+.sharepop {
+     display: none;
+}
+.badge-award-container .sharepop {
+    float: right;
+    position: relative;
+    right: -5px;
+    top: 30px;
+    z-index: 100;
+    padding: 1px;
+    height: 40px;
+    margin-left: 33px;
+    left: auto;
+}
+
+.badge-award-container .share-link {
+    top:0px;
+    left:226px;
+}
+.twitterShare, .facebookShare, .emailShare {
+    background-repeat:no-repeat;
+    float:left;
+    height:24px;
+    width:24px;
+    display:block;
+    margin: 0;
+    text-decoration: none;
+    cursor: pointer;
+}
+.sharepop .twitterShare, .sharepop .facebookShare, .sharepop .emailShare {
+    margin: 0;
+}
+.twitterShare { 
+    background: url(/images/twitter.png);
+}
+.facebookShare {
+    background: url(/images/facebook.png);
+}
+.emailShare {
+    text-indent: -9999px;
+    background: url(/images/email-button-24.png) no-repeat;
 }
