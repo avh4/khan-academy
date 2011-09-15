@@ -958,6 +958,16 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         self.response.out.write(user_video_css.video_css)
 
+class RealtimeEntityCount(request_handler.RequestHandler):
+    def get(self):
+        if not App.is_dev_server:
+            raise Exception("Only works on dev servers.")
+        default_kinds = 'Exercise'
+        kinds = self.request_string("kinds", default_kinds).split(',')
+        for kind in kinds:
+            count = getattr(models, kind).all().count(10000)
+            self.response.out.write("%s: %d<br>" % (kind, count))
+
 def main():
 
     application = webapp.WSGIApplication([
@@ -1028,6 +1038,8 @@ def main():
         ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/rendertemplate', ViewRenderTemplate),
+        ('/admin/realtimeentitycount', RealtimeEntityCount),
+
 
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
