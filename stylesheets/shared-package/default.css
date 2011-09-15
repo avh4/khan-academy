@@ -1325,6 +1325,45 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         border-top: 1px solid #ddd;
         line-height: 18px;
     }
+    #container.dashboard .exercise-legend {
+        position: absolute; 
+        right: 5px; 
+        top: 40px;
+        z-index: 1;
+    }
+    .exercise-legend {
+        font-size: 12px;
+        color: #fff;
+    }
+    .exercise-legend .legend-color, .exercise-legend .legend-label {
+        display: inline-block;
+    }
+    .exercise-legend .legend-label {
+        position: relative;
+        top: -1px;
+    }
+    .exercise-legend .legend-color {
+        width: 12px;
+        height: 12px;
+        margin-left: 3px;
+        
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+        border-radius: 2px;
+    }
+        .legend-color.proficient {
+            background-color: #0080C9;
+        }
+        .legend-color.suggested {
+            background-color: #73982C;
+        }
+        .legend-color.review {
+            background-color: #E35D04;
+        }
+        .legend-color.not-started {
+            background-color: #ccc;
+        }
+
     #container #dashboard-drawer {
         position: absolute;
         background: #fff;
@@ -1878,6 +1917,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: white;
             font-weight: bold;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            text-shadow: none;
 
             -webkit-border-radius: 5px;
             -moz-border-radius: 5px;

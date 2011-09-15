@@ -300,6 +300,10 @@ def empty_class_instructions(class_is_empty=True):
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
 
+@register.inclusion_tag("exercise_legend.html")
+def exercise_legend():
+    return {}
+
 @register.simple_tag
 def xsrf_value():
     return xsrf.render_xsrf_js()
@@ -318,6 +322,7 @@ def user_video_css(user_data):
                 "</link>" % (user_data.uservideocss_version, hash(user_data.user))
     else:
         return ''
+
 
 register.tag(highlight)
 
