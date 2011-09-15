@@ -9,6 +9,7 @@ from phantom_users.templatetags import login_notifications
 from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
+from mailing_lists.templatetags import mailing_list_signup_form
 from templateext import escapejs
 from util import static_url, thousands_separated_number
 from app import App
@@ -28,6 +29,7 @@ jinja2.default_config = {
         "badge_notifications": badge_notifications,
         "badge_counts": badge_counts,
         "profiler_includes": profiler_includes,
+        "mailing_list_signup_form": mailing_list_signup_form,
         "UserData": UserData,
         "App": App,
     }, 
