@@ -180,4 +180,4 @@ class ViewHomePage(request_handler.RequestHandler):
                             'approx_vid_count': consts.APPROX_VID_COUNT,
                         }
 
-        self.render_template('homepage.html', template_values)
+        self.render_jinja2_template('homepage.html', template_values)

@@ -9,6 +9,8 @@ from google.appengine.ext.webapp import template as webapp_template
 from django import template
 from django.template.defaultfilters import escape
 
+from webapp2_extras import jinja2
+
 from app import App
 from templatefilters import seconds_to_time_string, slugify
 from models import UserData, UserVideoCss
@@ -65,7 +67,8 @@ def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size
         "column_width": column_width,
         "column_width_plus_gutter": column_width + gutter,
     }
-@register.inclusion_tag("column_major_order_videos.html")
+
+@register.simple_tag
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
@@ -73,13 +76,16 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
     # Calculate the column indexes (tops of columns). Since video lists won't divide evenly, distribute
     # the remainder to the left-most columns first, and correctly increment the indices for remaining columns
     column_indices = [(items_in_column * multiplier + (multiplier if multiplier <= remainder else remainder)) for multiplier in range(1, num_cols + 1)]
-    return {
+
+    template_values = {
         "videos": videos,
         "column_width": column_width,
         "column_indices": column_indices,
         "link_height": link_height,
         "list_height": column_indices[0] * link_height,
     }
+
+    return jinja2.get_jinja2().render_template("column_major_order_videos.html", **template_values)
 
 @register.inclusion_tag("flv_player_embed.html")
 def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
@@ -224,11 +230,14 @@ def reports_navigation(coach_email, current_report="classreport"):
         'coach_email': coach_email, 'current_report': current_report
     }
 
-@register.inclusion_tag("playlist_browser.html")
+@register.simple_tag
 def playlist_browser(browser_id):
-    return {
+    template_values = {
         'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE
     }
+
+    path = os.path.join(os.path.dirname(__file__), "playlist_browser.html")
+    return webapp_template.render(path, template_values)
 
 @register.simple_tag
 def playlist_browser_structure(structure, class_name="", level=0):

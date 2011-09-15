@@ -2,7 +2,7 @@ import datetime
 import os
 import logging
 
-from google.appengine.ext.webapp import template
+from webapp2_extras import jinja2
 
 from app import App
 import layer_cache
@@ -91,8 +91,8 @@ def library_content_html(bust_cache = False):
         'App' : App,
         'all_playlists': all_playlists,
         }
-    path = os.path.join(os.path.dirname(__file__), 'library_content_template.html')
-    html = template.render(path, template_values)
+
+    html = jinja2.get_jinja2().render_template("library_content_template.html", **template_values)
 
     # Set shared date of last generated content
     Setting.cached_library_content_date(str(datetime.datetime.now()))
