@@ -6,19 +6,7 @@
             {% if user_badge.badge %}
 			<div class="badge-container" style="margin-bottom:5px;">
                 {% badge_block user_badge.badge %}
-				
-					<a href="#" style="top:0px;left:226px;" class="simple-button action-gradient with-icon download-icon share-link notif-share"onclick="_gaq.push(['_trackEvent', 'Click', 'Badge-Notification-Share-Button']);return false;">
-		             <img src="/images/share-icon-small.png" />
-		                     Share
-		             </a>
-				   <div class="sharepop" style="float:none;position:relative;right:90px;top:10px;z-index:100;padding:1px;height:40px;margin-left:33px;width:70px;">
-				 						<div class="triangle-isosceles top" style="position:absolute;right:0px;top:0px;">
-				 							<a href="javascript:void(0);" class="facebookShare" onclick="_gaq.push(['_trackEvent', 'Click', 'Badge-Notification-Share-Facebook']);Social.facebookBadge('{{ user_badge.badge.description|escape|escapejs }}','{{ user_badge.badge.icon_src|escapejs }}','{{ user_badge.badge.extended_description|escape|escapejs }}',{% if user_badge.target_context_name %}'{{ user_badge.target_context_name|escape|escapejs }}'{% else %}''{% endif %});"></a> <a href="http://twitter.com/share?url=http:%2F%2Fkhanacademy.org&amp;text=just%20earned%20the%20{{ user_badge.badge.description|escape }}%20badge%20in%20{% if user_badge.target_context_name %}{{ user_badge.target_context_name|escape }}{% endif %}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" class="twitterShare" onclick="_gaq.push(['_trackEvent', 'Click', 'Badge-Notification-Share-Twitter']);"></a>
-				 						</div>
-				 					</div> 
-					
-				</div>
-				<hr style="margin:0px; padding:0px;"/>
+				{% share_badge_button user_badge.badge.description user_badge.badge.icon_src user_badge.badge.extended_description user_badge.target_context_name "Badge-Notification-Share" %}
             {% endif %}
         {% endfor %}
     {% endif %}

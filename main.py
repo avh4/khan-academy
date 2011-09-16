@@ -27,6 +27,8 @@ import bulk_update.handler
 import facebook
 import request_cache
 from gae_mini_profiler import profiler
+from gae_bingo.middleware import GAEBingoWSGIMiddleware
+from gae_bingo.gae_bingo import bingo
 import autocomplete
 import coaches
 import knowledgemap
@@ -499,6 +501,10 @@ class ViewGetInvolved(request_handler.RequestHandler):
 
 class ViewContribute(request_handler.RequestHandler):
     def get(self):
+
+        if self.request_bool("convert", default=False):
+            bingo("contribute_text")
+
         self.render_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
@@ -834,6 +840,11 @@ class PostLogin(request_handler.RequestHandler):
                 user_data.user_nickname = current_nickname
                 user_data.put()
 
+            # Set developer to True if user is admin
+            if not user_data.developer and users.is_current_user_admin():
+                user_data.developer = True
+                user_data.put()
+
             # If user is brand new and has 0 points, migrate data
             phantom_id = get_phantom_user_id_from_cookies()
             if phantom_id:
@@ -948,6 +959,16 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         self.response.out.write(user_video_css.video_css)
 
+class RealtimeEntityCount(request_handler.RequestHandler):
+    def get(self):
+        if not App.is_dev_server:
+            raise Exception("Only works on dev servers.")
+        default_kinds = 'Exercise'
+        kinds = self.request_string("kinds", default_kinds).split(',')
+        for kind in kinds:
+            count = getattr(models, kind).all().count(10000)
+            self.response.out.write("%s: %d<br>" % (kind, count))
+
 application = webapp2.WSGIApplication([
     ('/', homepage.ViewHomePage),
     ('/about', util_about.ViewAbout),
@@ -1016,6 +1037,7 @@ application = webapp2.WSGIApplication([
     ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
     ('/admin/changeemail', ChangeEmail),
     ('/admin/rendertemplate', ViewRenderTemplate),
+    ('/admin/realtimeentitycount', RealtimeEntityCount),
 
     ('/devadmin/emailchange', devpanel.Email),
     ('/devadmin/managedevs', devpanel.Manage),
@@ -1136,6 +1158,7 @@ application = webapp2.WSGIApplication([
     ], debug=True)
 
 application = profiler.ProfilerWSGIMiddleware(application)
+application = GAEBingoWSGIMiddleware(application)
 application = request_cache.RequestCacheMiddleware(application)
 
 def main():

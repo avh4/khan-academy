@@ -52,7 +52,9 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     return None
 
-@layer_cache.cache(expiration=60*60*24) # Expire daily
+@layer_cache.cache_with_key_fxn(
+        lambda *args, **kwargs: "new_and_noteworthy_link_sets_%s" % models.Setting.cached_library_content_date()
+        )
 def new_and_noteworthy_link_sets():
 
     playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()

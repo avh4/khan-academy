@@ -210,8 +210,8 @@ class StartNewDailyActivityLogMapReduce(request_handler.RequestHandler):
                 name = "DailyActivityLog",
                 handler_spec = "activity_summary.daily_activity_summary_map",
                 reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-                reader_parameters = {"entity_kind": "models.UserData"},
-                mapreduce_parameters = {"processing_rate": 250},
+                reader_parameters = {"entity_kind": "models.UserData", "processing_rate": 250},
+                mapreduce_parameters = {},
                 shard_count = 64,
                 queue_name = fast_slow_queue.QUEUE_NAME,)
         self.response.out.write("OK: " + str(mapreduce_id))

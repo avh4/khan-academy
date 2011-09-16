@@ -19,6 +19,8 @@ from app import App
 from render import render_block_to_string
 import cookie_util
 
+from gae_bingo.gae_bingo import ab_test
+
 class RequestInputHandler(object):
 
     def request_string(self, key, default = ''):
@@ -237,6 +239,11 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
         return user_agent_lower.find("msie 7.") > -1 or \
                 user_agent_lower.find("msie 6.") > -1
 
+    def is_webos(self):
+        user_agent_lower = self.user_agent().lower()
+        return user_agent_lower.find("webos") > -1 or \
+                user_agent_lower.find("hp-tablet") > -1
+
     def is_mobile(self):
         if self.is_mobile_capable():
             return not self.has_mobile_full_site_cookie()
@@ -297,6 +304,8 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
         hide_analytics = os.environ.get('SERVER_SOFTWARE').startswith('Devel')
         hide_analytics = self.request_bool("hide_analytics", hide_analytics)
         template_values['hide_analytics'] = hide_analytics
+
+        template_values['contribute_text'] = ab_test("contribute_text", ["Contribute", "Volunteer", "Help us"])
 
         return template_values
 

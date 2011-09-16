@@ -24,6 +24,7 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
+from gae_bingo.gae_bingo import bingo
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -105,11 +106,83 @@ class ViewExercise(request_handler.RequestHandler):
                 # We cannot render old problems that were created in the v1 exercise framework.
                 renderable = False
 
-        browser_disabled = self.is_older_ie()
+            query = models.ProblemLog.all()
+            query.filter("user = ", user_data_student.user)
+            query.filter("exercise = ", exid)
+
+            # adding this ordering to ensure that query is served by an existing index.
+            # could be ok if we remove this
+            query.order('time_done')
+            problem_logs = query.fetch(500)
+
+            problem_log = None
+            for p in problem_logs:
+                if p.problem_number == problem_number:
+                    problem_log = p
+                    break
+
+            user_activity = []
+            previous_time = 0
+
+            if not problem_log or not hasattr(problem_log, "hint_after_attempt_list"):
+                renderable = False
+            else:
+                # Don't include incomplete information
+                problem_log.hint_after_attempt_list = filter(lambda x: x != -1, problem_log.hint_after_attempt_list)
+
+                while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == 0:
+                    user_activity.append([
+                        "hint-activity",
+                        "0",
+                        max(0, problem_log.hint_time_taken_list[0] - previous_time)
+                        ])
+
+                    previous_time = problem_log.hint_time_taken_list[0]
+                    problem_log.hint_after_attempt_list.pop(0)
+                    problem_log.hint_time_taken_list.pop(0)
+
+                # For each attempt, add it to the list and then add any hints
+                # that came after it
+                for i in range(0, len(problem_log.attempts)):
+                    user_activity.append([
+                        "correct-activity" if problem_log.correct else "incorrect-activity",
+                        unicode(problem_log.attempts[i] if problem_log.attempts[i] else 0),
+                        max(0, problem_log.time_taken_attempts[i])
+                        ])
+
+                    previous_time = 0
+
+                    # Here i is 0-indexed but problems are numbered starting at 1
+                    while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i+1:
+                        user_activity.append([
+                            "hint-activity",
+                            "0",
+                            max(0, problem_log.hint_time_taken_list[0] - previous_time)
+                            ])
+
+                        previous_time = problem_log.hint_time_taken_list[0]
+                        # easiest to just pop these instead of maintaining
+                        # another index into this list
+                        problem_log.hint_after_attempt_list.pop(0)
+                        problem_log.hint_time_taken_list.pop(0)
+
+                user_exercise.user_activity = user_activity
+
+                if problem_log.count_hints is not None:
+                    user_exercise.count_hints = problem_log.count_hints
+
+        is_webos = self.is_webos()
+        browser_disabled = is_webos or self.is_older_ie()
         renderable = renderable and not browser_disabled
 
-        user_exercise_json = jsonify.jsonify(user_exercise)
+        url_pattern = "/exercises?exid=%s&student_email=%s&problem_number=%d"
+        user_exercise.previous_problem_url = url_pattern % \
+            (exid, user_data_student.key_email , problem_number-1)
+        user_exercise.next_problem_url = url_pattern % \
+            (exid, user_data_student.key_email , problem_number+1)
 
+        user_exercise_json = jsonify.jsonify(user_exercise)
+        
         template_values = {
             'exercise': exercise,
             'user_exercise_json': user_exercise_json,
@@ -121,6 +194,7 @@ class ViewExercise(request_handler.RequestHandler):
             'read_only': read_only,
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
+            'is_webos': is_webos,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
@@ -156,6 +230,9 @@ class ViewAllExercises(request_handler.RequestHandler):
             if exercise in review_exercises:
                 exercise.review = True
                 exercise.status = "Review"
+
+        if self.request_bool("move_on", default=False):
+            bingo("proficiency_message_heading")
 
         template_values = {
             'exercises': ex_graph.exercises,
@@ -250,10 +327,11 @@ def reset_streak(user_data, user_exercise):
 
         return user_exercise
 
-def attempt_problem(user_data, user_exercise, problem_number, attempt_number, attempt_content, sha1, seed, completed, hint_used, time_taken, exercise_non_summative, problem_type, ip_address):
+def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
+    attempt_content, sha1, seed, completed, count_hints, time_taken,
+    exercise_non_summative, problem_type, ip_address):
 
     if user_exercise and user_exercise.belongs_to(user_data):
-
         dt_now = datetime.datetime.now()
         exercise = user_exercise.exercise_model
 
@@ -285,8 +363,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number, at
                 problem_number = problem_number,
                 time_taken = time_taken,
                 time_done = dt_now,
-                hint_used = hint_used,
-                correct = completed and not hint_used and (attempt_number == 1),
+                count_hints = count_hints,
+                hint_used = count_hints > 0,
+                correct = completed and not count_hints and (attempt_number == 1),
                 sha1 = sha1,
                 seed = seed,
                 problem_type = problem_type,
@@ -366,7 +445,6 @@ class ExerciseAdmin(request_handler.RequestHandler):
         user_data = models.UserData.current()
         user = models.UserData.current().user
 
-
         ex_graph = models.ExerciseGraph(user_data)
         if user_data.reassess_from_graph(ex_graph):
             user_data.put()
@@ -381,9 +459,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
             exercise.proficient = False
             exercise.review = False
             exercise.status = ""
-            # if user_data.is_phantom:
-            #     exercise.phantom = True
-            # else:
+
             if exercise in suggested_exercises:
                 exercise.suggested = True
                 exercise.status = "Suggested"
@@ -552,5 +628,4 @@ class UpdateExercise(request_handler.RequestHandler):
 
 
         self.redirect('/editexercise?saved=1&name=' + exercise_name)
-
 

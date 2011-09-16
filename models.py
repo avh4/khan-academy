@@ -33,6 +33,7 @@ import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
 from templatefilters import slugify
+from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -52,8 +53,7 @@ class Setting(db.Model):
             return Setting._cache_get_by_key_name(key)
         else:
             setting = Setting(Setting.entity_group_key(), key, value=str(val))
-            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
-            db.put([setting, setting_old])
+            db.put(setting)
             Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
@@ -71,13 +71,6 @@ class Setting(db.Model):
         # ancestor query to ensure consistent results
         query = Setting.all().ancestor(Setting.entity_group_key())
         results = dict((setting.key().name(), setting) for setting in query.fetch(20))
-
-        # backfill with old style settings
-        for setting in Setting.all().fetch(20):
-            key = setting.key()
-            if key.parent() is None and not key.name() in results.keys():
-                results[key.name()] = setting
-
         return results
 
     @staticmethod
@@ -577,7 +570,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
     uvc.version = version
     db.put(uvc)
 
-class UserData(db.Model):
+class UserData(GAEBingoIdentityModel, db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
     user_nickname = db.StringProperty(indexed=False)
@@ -1367,6 +1360,9 @@ class ProblemLog(db.Model):
     correct = db.BooleanProperty(default = False)
     time_done = db.DateTimeProperty(auto_now_add=True)
     time_taken = db.IntegerProperty(default = 0, indexed=False)
+    hint_time_taken_list = db.ListProperty(int, indexed=False)
+    hint_after_attempt_list = db.ListProperty(int, indexed=False)
+    count_hints = db.IntegerProperty(default = 0, indexed=False)
     problem_number = db.IntegerProperty(default = -1) # Used to reproduce problems
     exercise_non_summative = db.StringProperty(indexed=False) # Used to reproduce problems from summative exercises
     hint_used = db.BooleanProperty(default = False, indexed=False)
@@ -1420,7 +1416,6 @@ class ProblemLog(db.Model):
 
 # commit_problem_log is used by our deferred problem log insertion process
 def commit_problem_log(problem_log_source):
-
     try:
         if not problem_log_source or not problem_log_source.key().name:
             logging.critical("Skipping problem log commit due to missing problem_log_source or key().name")
@@ -1434,6 +1429,9 @@ def commit_problem_log(problem_log_source):
         logging.info("Ignoring attempt to write problem log w/ attempts over 1000.")
         return
 
+    # This does not have the same behavior as .insert(). This is used because
+    # tasks can be run out of order so we extend the list as needed and insert
+    # values.
     def insert_in_position(index, items, val, filler):
         if index >= len(items):
             items.extend([filler] * (index + 1 - len(items)))
@@ -1458,34 +1456,52 @@ def commit_problem_log(problem_log_source):
                 ip_address = problem_log_source.ip_address,
         )
 
+        problem_log.count_hints = max(problem_log.count_hints, problem_log_source.count_hints)
+        problem_log.hint_used = problem_log.count_hints > 0
         index_attempt = max(0, problem_log_source.count_attempts - 1)
 
-        if index_attempt < len(problem_log.time_taken_attempts) and problem_log.time_taken_attempts[index_attempt] != -1:
-            # This attempt has already been logged. Ignore this dupe taskqueue execution.
-            logging.info("Skipping problem log commit due to dupe taskqueue execution for attempt: %s, key.name: %s, time_taken_attempts: %s" % (index_attempt, problem_log_source.key().name(), problem_log.time_taken_attempts))
-            return
-
         # Bump up attempt count
-        problem_log.count_attempts += 1
+        if problem_log_source.attempts[0] != "hint": # attempt
+            if index_attempt < len(problem_log.time_taken_attempts) \
+               and problem_log.time_taken_attempts[index_attempt] != -1:
+                # This attempt has already been logged. Ignore this dupe taskqueue execution.
+                logging.info("Skipping problem log commit due to dupe taskqueue\
+                    execution for attempt: %s, key.name: %s" % \
+                    (index_attempt, problem_log_source.key().name()))
+                return
 
-        # Hint used cannot be changed from True to False
-        problem_log.hint_used = problem_log.hint_used or problem_log_source.hint_used
+            problem_log.count_attempts += 1
 
-        # Correct cannot be changed from False to True after first attempt
-        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.hint_used
+            # Add time_taken for this individual attempt
+            problem_log.time_taken += problem_log_source.time_taken
+            insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
 
-        # Add time_taken for this individual attempt
-        problem_log.time_taken += problem_log_source.time_taken
-        insert_in_position(index_attempt, problem_log.time_taken_attempts, problem_log_source.time_taken, filler=-1)
+            # Add actual attempt content
+            insert_in_position(index_attempt, problem_log.attempts, problem_log_source.attempts[0], filler="")
 
-        # Add actual attempt content
-        insert_in_position(index_attempt, problem_log.attempts, problem_log_source.attempts[0], filler="")
+            # Proficiency earned should never change per problem
+            problem_log.earned_proficiency = problem_log.earned_proficiency or \
+                problem_log_source.earned_proficiency
+
+        else: # hint
+            index_hint = max(0, problem_log_source.count_hints - 1)
+
+            if index_hint < len(problem_log.hint_time_taken_list) \
+               and problem_log.hint_time_taken_list[index_hint] != -1:
+                # This attempt has already been logged. Ignore this dupe taskqueue execution.
+                return
+
+            # Add time taken for hint
+            insert_in_position(index_hint, problem_log.hint_time_taken_list, problem_log_source.time_taken, filler=-1)
+
+            # Add problem number this hint follows
+            insert_in_position(index_hint, problem_log.hint_after_attempt_list, problem_log.count_attempts, filler=-1)
 
         # Points should only be earned once per problem, regardless of attempt count
         problem_log.points_earned = max(problem_log.points_earned, problem_log_source.points_earned)
 
-        # Proficiency earned should never change per problem
-        problem_log.earned_proficiency = problem_log.earned_proficiency or problem_log_source.earned_proficiency
+        # Correct cannot be changed from False to True after first attempt
+        problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.count_hints
 
         problem_log.put()
 
