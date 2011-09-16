@@ -948,198 +948,197 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         self.response.out.write(user_video_css.video_css)
 
+application = webapp2.WSGIApplication([
+    ('/', homepage.ViewHomePage),
+    ('/about', util_about.ViewAbout),
+    ('/about/blog', blog.ViewBlog),
+    ('/about/blog/.*', blog.ViewBlogPost),
+    ('/about/the-team', util_about.ViewAboutTheTeam),
+    ('/about/getting-started', util_about.ViewGettingStarted),
+    ('/about/tos', ViewTOS ),
+    ('/about/privacy-policy', ViewPrivacyPolicy ),
+    ('/about/dmca', ViewDMCA ),
+    ('/contribute', ViewContribute ),
+    ('/contribute/credits', ViewCredits ),
+    ('/frequently-asked-questions', util_about.ViewFAQ),
+    ('/about/faq', util_about.ViewFAQ),
+    ('/downloads', util_about.ViewDownloads),
+    ('/about/downloads', util_about.ViewDownloads),
+    ('/getinvolved', ViewGetInvolved),
+    ('/donate', Donate),
+    ('/exercisedashboard', exercises.ViewAllExercises),
+    ('/library_content', library.GenerateLibraryContent),
+    ('/youtube_list', YoutubeVideoList),
+    ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
+    ('/exercises', exercises.ViewExercise),
+    ('/khan-exercises/exercises/.*', exercises.RawExercise),
+    ('/printexercise', PrintExercise),
+    ('/printproblem', PrintProblem),
+    ('/viewexercisesonmap', exercises.ViewAllExercises),
+    ('/editexercise', exercises.EditExercise),
+    ('/updateexercise', exercises.UpdateExercise),
+    ('/moveexercisemapnode', exercises.MoveMapNode),
+    ('/admin94040', exercises.ExerciseAdmin),
+    ('/videoless', VideolessExercises),
+    ('/video/.*', ViewVideo),
+    ('/v/.*', ViewVideo),
+    ('/video', ViewVideo), # Backwards URL compatibility
+    ('/logvideoprogress', LogVideoProgress),
+    ('/sat', ViewSAT),
+    ('/gmat', ViewGMAT),
+    ('/store', ViewStore),
+    ('/reportissue', ReportIssue),
+    ('/provide-feedback', ProvideFeedback),
+    ('/search', Search),
+    ('/autocomplete', autocomplete.Autocomplete),
+    ('/savemapcoords', knowledgemap.SaveMapCoords),
+    ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
+    ('/showunusedplaylists', ShowUnusedPlaylists),
+    ('/crash', Crash),
+
+    ('/mobilefullsite', MobileFullSite),
+    ('/mobilesite', MobileSite),
+
+    ('/admin/reput', bulk_update.handler.UpdateKind),
+    ('/admin/retargetfeedback', RetargetFeedback),
+    ('/admin/fixvideoref', FixVideoRef),
+    ('/admin/deletestalevideoplaylists', DeleteStaleVideoPlaylists),
+    ('/admin/deletestalevideos', DeleteStaleVideos),
+    ('/admin/fixplaylistref', FixPlaylistRef),
+    ('/admin/deletestaleplaylists', DeleteStalePlaylists),
+    ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
+    ('/admin/badgestatistics', util_badges.BadgeStatistics),
+    ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
+    ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
+    ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+    ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
+    ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
+    ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
+    ('/admin/changeemail', ChangeEmail),
+    ('/admin/rendertemplate', ViewRenderTemplate),
+
+    ('/devadmin/emailchange', devpanel.Email),
+    ('/devadmin/managedevs', devpanel.Manage),
+    ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
+
+    ('/coaches', coaches.ViewCoaches),
+    ('/students', coaches.ViewStudents),
+    ('/registercoach', coaches.RegisterCoach),
+    ('/unregistercoach', coaches.UnregisterCoach),
+    ('/unregisterstudent', coaches.UnregisterStudent),
+    ('/requeststudent', coaches.RequestStudent),
+    ('/acceptcoach', coaches.AcceptCoach),
+
+    ('/createstudentlist', coaches.CreateStudentList),
+    ('/deletestudentlist', coaches.DeleteStudentList),
+    ('/removestudentfromlist', coaches.RemoveStudentFromList),
+    ('/addstudenttolist', coaches.AddStudentToList),
+
+    ('/individualreport', coaches.ViewIndividualReport),
+    ('/progresschart', coaches.ViewProgressChart),
+    ('/sharedpoints', coaches.ViewSharedPoints),
+    ('/classreport', coaches.ViewClassReport),
+    ('/classtime', coaches.ViewClassTime),
+    ('/charts', coaches.ViewCharts),
+
+    ('/mailing-lists/subscribe', util_mailing_lists.Subscribe),
+
+    ('/profile/graph/activity', util_profile.ActivityGraph),
+    ('/profile/graph/focus', util_profile.FocusGraph),
+    ('/profile/graph/exercisesovertime', util_profile.ExercisesOverTimeGraph),
+    ('/profile/graph/exerciseproblems', util_profile.ExerciseProblemsGraph),
+    ('/profile/graph/exerciseprogress', util_profile.ExerciseProgressGraph),
+    ('/profile', util_profile.ViewProfile),
+
+    ('/profile/graph/classexercisesovertime', util_profile.ClassExercisesOverTimeGraph),
+    ('/profile/graph/classprogressreport', util_profile.ClassProgressReportGraph),
+    ('/profile/graph/classenergypointsperminute', util_profile.ClassEnergyPointsPerMinuteGraph),
+    ('/profile/graph/classtime', util_profile.ClassTimeGraph),
+    ('/class_profile', util_profile.ViewClassProfile),
+
+    ('/press/.*', ViewArticle),
+    ('/login', Login),
+    ('/login/mobileoauth', MobileOAuthLogin),
+    ('/postlogin', PostLogin),
+    ('/logout', Logout),
+
+    ('/api-apps/register', oauth_apps.Register),
+
+    # These are dangerous, should be able to clean things manually from the remote python shell
+
+    ('/deletevideoplaylists', DeleteVideoPlaylists),
+    ('/killliveassociations', KillLiveAssociations),
+
+    # Below are all discussion related pages
+    ('/discussion/addcomment', comments.AddComment),
+    ('/discussion/pagecomments', comments.PageComments),
+
+    ('/discussion/addquestion', qa.AddQuestion),
+    ('/discussion/expandquestion', qa.ExpandQuestion),
+    ('/discussion/addanswer', qa.AddAnswer),
+    ('/discussion/editentity', qa.EditEntity),
+    ('/discussion/answers', qa.Answers),
+    ('/discussion/pagequestions', qa.PageQuestions),
+    ('/discussion/clearflags', qa.ClearFlags),
+    ('/discussion/flagentity', qa.FlagEntity),
+    ('/discussion/voteentity', voting.VoteEntity),
+    ('/discussion/updateqasort', voting.UpdateQASort),
+    ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
+    ('/discussion/deleteentity', qa.DeleteEntity),
+    ('/discussion/changeentitytype', qa.ChangeEntityType),
+    ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
+    ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
+    ('/discussion/moderatorlist', qa.ModeratorList),
+    ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
+
+    ('/githubpost', github.NewPost),
+    ('/githubcomment', github.NewComment),
+
+    ('/toolkit', RedirectToToolkit),
+
+    ('/paypal/ipn', paypal.IPN),
+
+    ('/badges/view', util_badges.ViewBadges),
+    ('/badges/custom/create', custom_badges.CreateCustomBadge),
+    ('/badges/custom/award', custom_badges.AwardCustomBadge),
+
+    ('/notifierclose', util_notify.ToggleNotify),
+    ('/newaccount', Clone),
+
+    ('/jobs', RedirectToJobvite),
+    ('/jobs/.*', RedirectToJobvite),
+
+    ('/dashboard', dashboard.Dashboard),
+    ('/entityboard', dashboard.Entityboard),
+    ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
+    ('/admin/entitycounts', dashboard.EntityCounts),
+
+    ('/sendtolog', SendToLog),
+
+    ('/user_video_css', ServeUserVideoCss),
+
+    ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
+    ('/exercisestats/report', exercisestats.report.Test),
+    ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
+    ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
+    ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
+    ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
+    ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
+    ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
+    ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
+
+    # Redirect any links to old JSP version
+    ('/.*\.jsp', PermanentRedirectToHome),
+    ('/index\.html', PermanentRedirectToHome),
+
+    ('/_ah/warmup.*', warmup.Warmup),
+
+    ], debug=True)
+
+application = profiler.ProfilerWSGIMiddleware(application)
+application = request_cache.RequestCacheMiddleware(application)
+
 def main():
-
-    application = webapp2.WSGIApplication([
-        ('/', homepage.ViewHomePage),
-        ('/about', util_about.ViewAbout),
-        ('/about/blog', blog.ViewBlog),
-        ('/about/blog/.*', blog.ViewBlogPost),
-        ('/about/the-team', util_about.ViewAboutTheTeam),
-        ('/about/getting-started', util_about.ViewGettingStarted),
-        ('/about/tos', ViewTOS ),
-        ('/about/privacy-policy', ViewPrivacyPolicy ),
-        ('/about/dmca', ViewDMCA ),
-        ('/contribute', ViewContribute ),
-        ('/contribute/credits', ViewCredits ),
-        ('/frequently-asked-questions', util_about.ViewFAQ),
-        ('/about/faq', util_about.ViewFAQ),
-        ('/downloads', util_about.ViewDownloads),
-        ('/about/downloads', util_about.ViewDownloads),
-        ('/getinvolved', ViewGetInvolved),
-        ('/donate', Donate),
-        ('/exercisedashboard', exercises.ViewAllExercises),
-        ('/library_content', library.GenerateLibraryContent),
-        ('/youtube_list', YoutubeVideoList),
-        ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/exercises', exercises.ViewExercise),
-        ('/khan-exercises/exercises/.*', exercises.RawExercise),
-        ('/printexercise', PrintExercise),
-        ('/printproblem', PrintProblem),
-        ('/viewexercisesonmap', exercises.ViewAllExercises),
-        ('/editexercise', exercises.EditExercise),
-        ('/updateexercise', exercises.UpdateExercise),
-        ('/moveexercisemapnode', exercises.MoveMapNode),
-        ('/admin94040', exercises.ExerciseAdmin),
-        ('/videoless', VideolessExercises),
-        ('/video/.*', ViewVideo),
-        ('/v/.*', ViewVideo),
-        ('/video', ViewVideo), # Backwards URL compatibility
-        ('/logvideoprogress', LogVideoProgress),
-        ('/sat', ViewSAT),
-        ('/gmat', ViewGMAT),
-        ('/store', ViewStore),
-        ('/reportissue', ReportIssue),
-        ('/provide-feedback', ProvideFeedback),
-        ('/search', Search),
-        ('/autocomplete', autocomplete.Autocomplete),
-        ('/savemapcoords', knowledgemap.SaveMapCoords),
-        ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
-        ('/showunusedplaylists', ShowUnusedPlaylists),
-        ('/crash', Crash),
-
-        ('/mobilefullsite', MobileFullSite),
-        ('/mobilesite', MobileSite),
-
-        ('/admin/reput', bulk_update.handler.UpdateKind),
-        ('/admin/retargetfeedback', RetargetFeedback),
-        ('/admin/fixvideoref', FixVideoRef),
-        ('/admin/deletestalevideoplaylists', DeleteStaleVideoPlaylists),
-        ('/admin/deletestalevideos', DeleteStaleVideos),
-        ('/admin/fixplaylistref', FixPlaylistRef),
-        ('/admin/deletestaleplaylists', DeleteStalePlaylists),
-        ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
-        ('/admin/badgestatistics', util_badges.BadgeStatistics),
-        ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
-        ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
-        ('/admin/backfill', backfill.StartNewBackfillMapReduce),
-        ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
-        ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
-        ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
-        ('/admin/changeemail', ChangeEmail),
-        ('/admin/rendertemplate', ViewRenderTemplate),
-
-        ('/devadmin/emailchange', devpanel.Email),
-        ('/devadmin/managedevs', devpanel.Manage),
-        ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
-
-        ('/coaches', coaches.ViewCoaches),
-        ('/students', coaches.ViewStudents),
-        ('/registercoach', coaches.RegisterCoach),
-        ('/unregistercoach', coaches.UnregisterCoach),
-        ('/unregisterstudent', coaches.UnregisterStudent),
-        ('/requeststudent', coaches.RequestStudent),
-        ('/acceptcoach', coaches.AcceptCoach),
-
-        ('/createstudentlist', coaches.CreateStudentList),
-        ('/deletestudentlist', coaches.DeleteStudentList),
-        ('/removestudentfromlist', coaches.RemoveStudentFromList),
-        ('/addstudenttolist', coaches.AddStudentToList),
-
-        ('/individualreport', coaches.ViewIndividualReport),
-        ('/progresschart', coaches.ViewProgressChart),
-        ('/sharedpoints', coaches.ViewSharedPoints),
-        ('/classreport', coaches.ViewClassReport),
-        ('/classtime', coaches.ViewClassTime),
-        ('/charts', coaches.ViewCharts),
-
-        ('/mailing-lists/subscribe', util_mailing_lists.Subscribe),
-
-        ('/profile/graph/activity', util_profile.ActivityGraph),
-        ('/profile/graph/focus', util_profile.FocusGraph),
-        ('/profile/graph/exercisesovertime', util_profile.ExercisesOverTimeGraph),
-        ('/profile/graph/exerciseproblems', util_profile.ExerciseProblemsGraph),
-        ('/profile/graph/exerciseprogress', util_profile.ExerciseProgressGraph),
-        ('/profile', util_profile.ViewProfile),
-
-        ('/profile/graph/classexercisesovertime', util_profile.ClassExercisesOverTimeGraph),
-        ('/profile/graph/classprogressreport', util_profile.ClassProgressReportGraph),
-        ('/profile/graph/classenergypointsperminute', util_profile.ClassEnergyPointsPerMinuteGraph),
-        ('/profile/graph/classtime', util_profile.ClassTimeGraph),
-        ('/class_profile', util_profile.ViewClassProfile),
-
-        ('/press/.*', ViewArticle),
-        ('/login', Login),
-        ('/login/mobileoauth', MobileOAuthLogin),
-        ('/postlogin', PostLogin),
-        ('/logout', Logout),
-
-        ('/api-apps/register', oauth_apps.Register),
-
-        # These are dangerous, should be able to clean things manually from the remote python shell
-
-        ('/deletevideoplaylists', DeleteVideoPlaylists),
-        ('/killliveassociations', KillLiveAssociations),
-
-        # Below are all discussion related pages
-        ('/discussion/addcomment', comments.AddComment),
-        ('/discussion/pagecomments', comments.PageComments),
-
-        ('/discussion/addquestion', qa.AddQuestion),
-        ('/discussion/expandquestion', qa.ExpandQuestion),
-        ('/discussion/addanswer', qa.AddAnswer),
-        ('/discussion/editentity', qa.EditEntity),
-        ('/discussion/answers', qa.Answers),
-        ('/discussion/pagequestions', qa.PageQuestions),
-        ('/discussion/clearflags', qa.ClearFlags),
-        ('/discussion/flagentity', qa.FlagEntity),
-        ('/discussion/voteentity', voting.VoteEntity),
-        ('/discussion/updateqasort', voting.UpdateQASort),
-        ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
-        ('/discussion/deleteentity', qa.DeleteEntity),
-        ('/discussion/changeentitytype', qa.ChangeEntityType),
-        ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
-        ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
-        ('/discussion/moderatorlist', qa.ModeratorList),
-        ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
-
-        ('/githubpost', github.NewPost),
-        ('/githubcomment', github.NewComment),
-
-        ('/toolkit', RedirectToToolkit),
-
-        ('/paypal/ipn', paypal.IPN),
-
-        ('/badges/view', util_badges.ViewBadges),
-        ('/badges/custom/create', custom_badges.CreateCustomBadge),
-        ('/badges/custom/award', custom_badges.AwardCustomBadge),
-
-        ('/notifierclose', util_notify.ToggleNotify),
-        ('/newaccount', Clone),
-
-        ('/jobs', RedirectToJobvite),
-        ('/jobs/.*', RedirectToJobvite),
-
-        ('/dashboard', dashboard.Dashboard),
-        ('/entityboard', dashboard.Entityboard),
-        ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
-        ('/admin/entitycounts', dashboard.EntityCounts),
-
-        ('/sendtolog', SendToLog),
-
-        ('/user_video_css', ServeUserVideoCss),
-
-        ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
-        ('/exercisestats/report', exercisestats.report.Test),
-        ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
-        ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
-        ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
-        ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
-        ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
-        ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
-        ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
-
-        # Redirect any links to old JSP version
-        ('/.*\.jsp', PermanentRedirectToHome),
-        ('/index\.html', PermanentRedirectToHome),
-
-        ('/_ah/warmup.*', warmup.Warmup),
-
-        ], debug=True)
-
-    application = profiler.ProfilerWSGIMiddleware(application)
-    application = request_cache.RequestCacheMiddleware(application)
-
     run_wsgi_app(application)
 
 if __name__ == '__main__':
