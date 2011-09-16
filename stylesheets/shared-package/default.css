@@ -116,7 +116,7 @@ a.simple-link:hover { text-decoration: underline; }
     h2 .ampersand {
         font-size: 19px;
     }
-    
+
 hr {
     background: #CCC;
     border: none;
@@ -150,11 +150,11 @@ hr {
     -webkit-border-radius: 5px;
 
     text-shadow: 0 1px 0 #fff;
-    
+
     -moz-box-shadow: inset 0 1px 0 rgba(255,255,255, .3);
     -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255, .3);
     box-shadow: inset 0 1px 0 rgba(255,255,255, .3);;
-    
+
 }
 input.simple-button {
     line-height: 15px;
@@ -1326,8 +1326,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         line-height: 18px;
     }
     #container.dashboard .exercise-legend {
-        position: absolute; 
-        right: 5px; 
+        position: absolute;
+        right: 5px;
         top: 40px;
         z-index: 1;
     }
@@ -1346,7 +1346,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         width: 12px;
         height: 12px;
         margin-left: 3px;
-        
+
         -moz-border-radius: 2px;
         -webkit-border-radius: 2px;
         border-radius: 2px;
@@ -3251,7 +3251,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 .sharepop .twitterShare, .sharepop .facebookShare, .sharepop .emailShare {
     margin: 0;
 }
-.twitterShare { 
+.twitterShare {
     background: url(/images/twitter.png);
 }
 .facebookShare {
