@@ -23,7 +23,8 @@ from models import UserData
 
 jinja2.default_config = {
     "template_path": "templates", 
-    "force_compiled": False, 
+    "compiled_path": "compiled_templates",
+    "force_compiled": True, 
     "globals": {
         "css_package": css_package,
         "js_package": js_package,
@@ -53,6 +54,5 @@ jinja2.default_config = {
         "autoescape": False, 
         "extensions": [],
         }, 
-    "compiled_path": None
     }
 
