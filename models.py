@@ -276,8 +276,8 @@ class UserExercise(db.Model):
     exercise = db.StringProperty()
     exercise_model = db.ReferenceProperty(Exercise)
     streak = db.IntegerProperty(default = 0)
-    streak_start = db.FloatProperty(default = 0.0)  # The starting point of the streak bar as it appears to the user, in [0,1)
     longest_streak = db.IntegerProperty(default = 0, indexed=False)
+    streak_start = db.FloatProperty(default = 0.0)  # The starting point of the streak bar as it appears to the user, in [0,1)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
@@ -317,6 +317,20 @@ class UserExercise(db.Model):
             proficient = user_data.is_proficient_at(self.exercise)
 
         return points.ExercisePointCalculator(self, suggested, proficient)
+
+    # A float for the progress bar indicating how close the user is to
+    # attaining proficiency, in range [0,1]. This is so we can abstract away
+    # the internal algorithm so the front-end does not need to change.
+    # TODO: Refactor code to use this measure instead of streak
+    @property
+    def progress(self):
+        # Currently this is just the "more forgiving" streak bar
+
+        if self.summative:
+            # FIXME(david)
+            return 0.0
+        else:
+            return self.streak_start + float(self.streak) / consts.REQUIRED_STREAK * (1 - self.streak_start)
 
     @staticmethod
     def get_key_for_email(email):
@@ -366,9 +380,7 @@ class UserExercise(db.Model):
             # Reset streak to latest 10 milestone
             self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
         else:
-            current_bar_length = self.streak_start + float(self.streak) / consts.REQUIRED_STREAK * (1 - self.streak_start)
-            self.streak_start = float(current_bar_length * consts.STREAK_RESET_FACTOR)
-
+            self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
             self.streak = 0
 
     def struggling_threshold(self):
