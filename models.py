@@ -276,6 +276,7 @@ class UserExercise(db.Model):
     exercise = db.StringProperty()
     exercise_model = db.ReferenceProperty(Exercise)
     streak = db.IntegerProperty(default = 0)
+    streak_start = db.FloatProperty(default = 0.0)  # The starting point of the streak bar as it appears to the user, in [0,1)
     longest_streak = db.IntegerProperty(default = 0, indexed=False)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
@@ -365,6 +366,9 @@ class UserExercise(db.Model):
             # Reset streak to latest 10 milestone
             self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
         else:
+            current_bar_length = self.streak_start + float(self.streak) / consts.REQUIRED_STREAK * (1 - self.streak_start)
+            self.streak_start = float(current_bar_length * consts.STREAK_RESET_FACTOR)
+
             self.streak = 0
 
     def struggling_threshold(self):
@@ -767,6 +771,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 exercise=exid,
                 exercise_model=exercise,
                 streak=0,
+                streak_start=0.0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),
                 last_done=None,
