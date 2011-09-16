@@ -563,7 +563,7 @@ var Drawer = {
         var jel = $("#dashboard-drawer, #dashboard-drawer-inner, #dashboard-map");
         var jelDrawerInner = $("#dashboard-drawer-inner");
         var yTop = jel.offset().top;
-        jel.height($(window).height() - yTop - $("#footer").height());
+        jel.height($(window).height() - yTop - $("#end-of-page-spacer").outerHeight(true));
         // Account for padding in the dashboard drawer
         jelDrawerInner.height(jelDrawerInner.height() - 20);
 
