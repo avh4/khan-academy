@@ -13,6 +13,7 @@ from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
 from mailing_lists.templatetags import mailing_list_signup_form
+from discussion.templatetags import video_comments, video_qa
 from util import static_url, thousands_separated_number
 from app import App
 from models import UserData
@@ -35,6 +36,7 @@ jinja2.default_config = {
         "playlist_browser": playlist_browser,
         "column_major_sorted_videos": column_major_sorted_videos,
         "UserData": UserData,
+        "hash": hash,
         "App": App,
     }, 
     "filters": {
@@ -49,7 +51,7 @@ jinja2.default_config = {
     }, 
     "environment_args": {
         "autoescape": False, 
-        "extensions": []
+        "extensions": [],
         }, 
     "compiled_path": None
     }

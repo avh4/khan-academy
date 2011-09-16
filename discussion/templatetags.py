@@ -12,13 +12,15 @@ import voting
 import app
 import util
 
+from webapp2_extras import jinja2
+
 import template_cached
 register = template_cached.create_template_register()
 
-@register.inclusion_tag("discussion/video_comments.html")
+@register.simple_tag
 def video_comments(video, playlist, page=0):
     user_data = models.UserData.current()
-    return {
+    template_values = {
             "video": video,
             "playlist": playlist,
             "page": 0,
@@ -27,7 +29,9 @@ def video_comments(video, playlist, page=0):
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             }
 
-@register.inclusion_tag("discussion/video_qa.html")
+    return jinja2.get_jinja2().render_template("discussion/video_comments.html", **template_values)
+
+@register.simple_tag
 def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_override=-1):
 
     sort_order = voting.VotingSortOrder.HighestPointsFirst
@@ -36,7 +40,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_overri
     if sort_override >= 0:
         sort_order = sort_override
 
-    return {
+    template_values = {
             "user_data": user_data,
             "video": video,
             "playlist": playlist,
@@ -47,6 +51,8 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_overri
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
+
+    return jinja2.get_jinja2().render_template("discussion/video_qa.html", **template_values)
 
 @register.inclusion_tag("discussion/signature.html")
 def signature(target=None, verb=None):

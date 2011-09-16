@@ -85,12 +85,11 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
         "list_height": column_indices[0] * link_height,
     }
 
+    # TODO: nicer way to do these inclusion tag thingies for jinja
     return jinja2.get_jinja2().render_template("column_major_order_videos.html", **template_values)
 
 @register.inclusion_tag("flv_player_embed.html")
-def flv_player_embed(video_path, width=800, height=480, exercise_video=None):
-    if exercise_video:
-        video_path = video_path + exercise_video.video_folder + "/" + exercise_video.readable_id + ".flv"
+def flv_player_embed(video_path, width=800, height=480):
     return {
         "video_path": video_path, "width": width, "height": height
     }

@@ -230,7 +230,7 @@ class ViewVideo(request_handler.RequestHandler):
                         }
         template_values = qa.add_template_values(template_values, self.request)
 
-        self.render_template('viewvideo.html', template_values)
+        self.render_jinja2_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
 

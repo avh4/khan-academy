@@ -1,0 +1,31 @@
+<div class="video_comments requires_script">
+    <a name="comments"></a>
+    <strong>Comments:</strong>
+
+    <div class="comments_container"><em>Loading...</em> <img class="icon" src="{% static_url "/images/throbber.gif" %}"/></div>
+    
+
+    {% if logged_in %}
+
+    <a href="#" class="control comment_add"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Add a comment</a>
+    {% else %}
+    <a href="{{login_url}}" class="control"><img class="icon" src="{% static_url "/images/balloon-plus.png" %}" />Log in to add a comment</a>
+    {% endif %}
+
+    <span class="comments_show_more">
+        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&comments_page=1" class="comment_show control uses_script"><img class="icon" src="{% static_url "/images/balloons.png" %}" />Show more</a>
+    </span>
+
+    <div class="comment_form" style="display:none;">
+        <form class="comments" name="comments">
+            {% honeypots %}
+            <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
+            <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
+            <textarea name="comment_text" class="comment_text" rows="3" cols="40"></textarea><br/>
+            {% feedback_controls_comment "Comment" %}
+        </form>
+    </div>
+
+</div>
+
+
