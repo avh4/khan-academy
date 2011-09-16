@@ -9,6 +9,7 @@ sys.path.append(os.path.abspath("."))
 import jinja2
 
 # Modified from tipfy's template compilation steps
+# http://www.tipfy.org/
 
 def compile_templates():
 
