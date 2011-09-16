@@ -58,6 +58,7 @@ def compile_templates():
     except:
         pass
 
+    # Compile templates to zip, crashing on any compilation errors
     env.compile_templates(dest_path, extensions=None, 
             ignore_errors=False, py_compile=False, zip='deflated',
             filter_func=filter_templates)
