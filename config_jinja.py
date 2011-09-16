@@ -23,8 +23,9 @@ from models import UserData
 
 jinja2.default_config = {
     "template_path": "templates", 
-    "compiled_path": "compiled_templates",
-    "force_compiled": True, 
+    "compiled_path": "compiled_templates.zip",
+    "force_compiled": True, #not App.is_dev_server, 
+    "cache_size": 0 if App.is_dev_server else -1,
     "globals": {
         "css_package": css_package,
         "js_package": js_package,

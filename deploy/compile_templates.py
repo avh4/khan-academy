@@ -13,7 +13,7 @@ import jinja2
 def compile_templates():
 
     src_path = os.path.join(os.path.dirname(__file__), "..", "templates")
-    dest_path = os.path.join(os.path.dirname(__file__), "..", "compiled_templates")
+    dest_path = os.path.join(os.path.dirname(__file__), "..", "compiled_templates.zip")
 
     config = {
         "autoescape": False, 
@@ -55,7 +55,7 @@ def compile_templates():
         pass
 
     env.compile_templates(dest_path, extensions=None, 
-            ignore_errors=False, py_compile=False, zip=None,
+            ignore_errors=False, py_compile=False, zip='deflated',
             filter_func=filter_templates)
 
 def filter_templates(src):
