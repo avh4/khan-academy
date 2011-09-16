@@ -4,6 +4,7 @@ from webapp2_extras import jinja2
 
 from urllib import quote_plus
 
+from models import UserData
 from templateext import escapejs
 from templatetags import playlist_browser, column_major_sorted_videos
 from templatefilters import slugify, find_column_index, column_height, in_list
@@ -16,7 +17,6 @@ from mailing_lists.templatetags import mailing_list_signup_form
 from discussion.templatetags import video_comments, video_qa
 from util import static_url, thousands_separated_number
 from app import App
-from models import UserData
 
 # TODO: tweak config for production speed
 # TODO: globals "custom tag" loading
