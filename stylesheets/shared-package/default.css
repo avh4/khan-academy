@@ -1879,13 +1879,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         #answer_area .info-box #related-video-list li {
             display: block;
-            margin: 0 0 5px 5px;
+            margin: 0 0 5px 0;
         }
         #answer_area .info-box #related-video-list a {
             display: block;
             float: left;
             margin: 0;
-            width: 95%;
+            width: 98%;
             overflow: hidden;
             text-overflow: ellipsis;
         }
@@ -3194,7 +3194,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
  * #5 here and in /user_video_css we add 14px of left padding to any video with
  * an icon.
  */
-#library .vl > .vid-progress, #related-video-list > .related-video-list .vid-progress, #video_menu > .ui-menu .vid-progress {
+#library .vl > .vid-progress,
+#related-video-list > .related-video-list > li > a > .vid-progress,
+#video_menu > .ui-menu .vid-progress {
   padding-left: 14px;
 }
 
