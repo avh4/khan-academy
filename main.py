@@ -315,58 +315,6 @@ class ReportIssue(request_handler.RequestHandler):
 
         self.render_jinja2_template(page, template_values)
 
-class ShowUnusedPlaylists(request_handler.RequestHandler):
-
-    def get(self):
-
-        playlists = Playlist.all()
-        playlists_unused = []
-
-        for playlist in playlists:
-            if not playlist.title in all_topics_list:
-                playlists_unused.append(playlist)
-
-        self.response.out.write("Unused playlists:<br/><br/>")
-        for playlist_unused in playlists_unused:
-            self.response.out.write(" + " + playlist_unused.title + "<br/>")
-        self.response.out.write("</br>Done")
-
-class YoutubeVideoList(request_handler.RequestHandler):
-
-    def get(self):
-        for playlist_title in all_topics_list:
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True)
-            query.order('video_position')
-            for pv in query.fetch(500):
-                v = pv.video
-                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')
-
-class ExerciseAndVideoEntityList(request_handler.RequestHandler):
-
-    def get(self):
-        self.response.out.write("Exercises:\n")
-
-        for exercise in Exercise.all():
-            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name + "\n")
-
-        self.response.out.write("\n\nVideos:\n")
-        for playlist_title in all_topics_list:
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True)
-            query.order('video_position')
-            for pv in query.fetch(1000):
-                v = pv.video
-                self.response.out.write(str(v.key().id()) + "\t" + v.title + "\n")
-
 class Crash(request_handler.RequestHandler):
     def get(self):
         if self.request_bool("capability_disabled", default=False):
@@ -897,8 +845,6 @@ application = webapp2.WSGIApplication([
     ('/donate', Donate),
     ('/exercisedashboard', exercises.ViewAllExercises),
     ('/library_content', library.GenerateLibraryContent),
-    ('/youtube_list', YoutubeVideoList),
-    ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
     ('/exercises', exercises.ViewExercise),
     ('/khan-exercises/exercises/.*', exercises.RawExercise),
     ('/viewexercisesonmap', exercises.ViewAllExercises),
@@ -918,7 +864,6 @@ application = webapp2.WSGIApplication([
     ('/autocomplete', autocomplete.Autocomplete),
     ('/savemapcoords', knowledgemap.SaveMapCoords),
     ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
-    ('/showunusedplaylists', ShowUnusedPlaylists),
     ('/crash', Crash),
 
     ('/mobilefullsite', MobileFullSite),
