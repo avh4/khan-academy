@@ -509,7 +509,7 @@ class ViewContribute(request_handler.RequestHandler):
 
 class ViewCredits(request_handler.RequestHandler):
     def get(self):
-        self.render_template('viewcredits.html', {"selected_nav_link": "contribute"})
+        self.render_jinja2_template('viewcredits.html', {"selected_nav_link": "contribute"})
 
 class Donate(request_handler.RequestHandler):
     def get(self):
