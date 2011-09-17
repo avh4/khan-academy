@@ -517,7 +517,7 @@ class Donate(request_handler.RequestHandler):
 
 class ViewTOS(request_handler.RequestHandler):
     def get(self):
-        self.render_template('tos.html', {"selected_nav_link": "tos"})
+        self.render_jinja2_template('tos.html', {"selected_nav_link": "tos"})
 
 class ViewPrivacyPolicy(request_handler.RequestHandler):
     def get(self):
