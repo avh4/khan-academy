@@ -22,8 +22,8 @@
         <div class="comment_form" style="display:none;">
             <form class="comments" name="comments">
                 {{ honeypots() }}
-                <input type="hidden" id="video_key" name="video_key" value="{{ video.key }}" />
-                <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
+                <input type="hidden" id="video_key" name="video_key" value="{{ video.key() }}" />
+                <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key() }}" />
                 <textarea name="comment_text" class="comment_text" rows="3" cols="40"></textarea><br/>
                 {{ feedback_controls_comment("Comment") }}
             </form>
@@ -81,8 +81,8 @@
             <div class="question_form">
                 <form class="question" name="questions">
                     {{ honeypots() }}
-                    <input type="hidden" id="video_key" class="video_key_primary" name="video_key" value="{{ video.key }}" />
-                    <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key }}" />
+                    <input type="hidden" id="video_key" class="video_key_primary" name="video_key" value="{{ video.key() }}" />
+                    <input type="hidden" id="playlist_key" name="playlist_key" value="{{ playlist.key() }}" />
                     <div class="question_placeholder requires_script">
                         <textarea name="question_text" class="question_text" rows="3" cols="40" 
                                     watermark="Ask a question about this video"></textarea>
@@ -136,7 +136,7 @@
         <div class="{{ feedback_type }}_add_controls feedback_add_controls">
             <div class="controls">
                 {% if target %}
-                    <input name="entity_key" type="hidden" value="{{ target.key }}"/>
+                    <input name="entity_key" type="hidden" value="{{ target.key() }}"/>
                 {% endif %}
 
                 <input class="button {{ feedback_type }}_submit" type="button" value="{{ button_label }}"/>
@@ -159,4 +159,134 @@
         <input type="text" name="honey_input" value="" />
         <textarea name="honey_textarea"></textarea>
     </div>
+{%- endmacro %}
+
+{% macro vote_tools(target) -%}
+    <div class="vote_tools">
+        <div class="control vote_tools_show" >
+            <a href="#" class="control vote_for {% if target.up_voted %}voted{% endif %}" title="Vote up, this is encouraging or helpful (click again to undo)" data-key="{{ target.key()|escape }}" data-vote_type="1"><img src="{{ "/images/vote-up-gray.png"|static_url }}" class="vote_up_gray"/><img src="{{ "/images/vote-up.png"|static_url }}" class="vote_up"/></a>
+            {% if not target.is_type("comment") %}
+                {{ vote_sum(target) }}
+            {% endif %}
+            <a href="#" class="control vote_for {% if target.down_voted %}voted{% endif %}" title="Vote down, this is not encouraging or helpful (click again to undo)" data-key="{{ target.key()|escape }}" data-vote_type="-1"><img src="{{ "/images/vote-down-gray.png"|static_url }}" class="vote_down_gray"/><img src="{{ "/images/vote-down.png"|static_url }}" class="vote_down"></a>
+        </div>
+    </div>
+{%- endmacro %}
+
+{% macro vote_sum(target) -%}
+    {% set sum_original = target.sum_votes_incremented %}
+
+    {% if target.up_voted %}
+        {% set sum_original = sum_original - 1 %}
+    {% elif target.down_voted %}
+        {% set sum_original = sum_original + 1 %}
+    {% endif %}
+
+    {% if target.is_type("comment") %}
+    <span class="sum_votes" data-sum_original="{{ sum_original }}">{% if target.sum_votes_incremented %}{{ target.sum_votes_incremented }} vote{{ "s" if target.sum_votes_incremented != 1 else "" }}, {% else %}&nbsp;{% endif %}</span>
+    {% else %}
+    <div class="sum_votes" data-sum_original="{{ sum_original }}">{{ target.sum_votes_incremented }}</div>
+    {% endif %}
+
+{%- endmacro %}
+
+{% macro flag_tools(target) -%}
+    <span class="flag_tools">
+        <span class="control flag_tools_show">
+            <a href="#" class="control flag_show" title="Flag for moderator attention"><img class="feedback_flag_gray" src="{{ "/images/flag_gray.png"|static_url }}" /><img class="feedback_flag" src="{{ "/images/flag.png"|static_url }}" /></a>
+        </span>
+        <span class="flag_tools_hidden tools_hidden" style="display:none;">
+            Flag as:
+            <a href="#" class="control flag_as" title="Flag as inappropriate content" data-flag="inappropriate" data-key="{{ target.key() }}">inappropriate</a>
+            | <a href="#" class="control flag_as" title="Flag as low quality content" data-flag="lowquality" data-key="{{ target.key() }}">low quality</a>
+            | <a href="#" class="control flag_as" title="Flag as content that does not belong here" data-flag="doesnotbelong" data-key="{{ target.key() }}">does not belong here</a>
+            | <a href="#" class="control flag_as" title="Flag as spam" data-flag="spam" data-key="{{ target.key() }}">spam</a>
+        </span>
+    </span>
+{%- endmacro %}
+
+{% macro mod_tools(target) -%}
+    <span class="mod_tools">
+        <span class="control mod_tools_show">(<a href="#" class="control mod_show">mod</a>)</span>
+        <span class="mod_tools_hidden tools_hidden" style="display:none;">
+            mod tools:
+            <a href="#" class="control mod_edit" data-key="{{ target.key() }}">edit</a>
+            | <a href="#" class="control mod_delete" data-key="{{ target.key() }}">delete</a>
+
+            {% if not target.is_type("question") %}
+                | <a href="#" class="control mod_change" data-target_type="question" data-key="{{ target.key() }}">change to question</a>
+            {% endif%}
+
+            {% if not target.is_type("comment") %}
+                | <a href="#" class="control mod_change" data-target_type="comment" data-key="{{ target.key() }}">change to comment</a>
+            {% endif%}
+        </span>
+    </span>
+{%- endmacro %}
+
+{% macro author_tools(target) -%}
+    <span class="mod_tools">
+        <span class="mod_tools_hidden">
+            {% if not target.is_type("comment") %}
+                <a href="#" class="control mod_edit" data-key="{{ target.key() }}">edit</a>
+                | 
+            {% endif %}
+            <a href="#" class="control mod_delete" data-key="{{ target.key() }}">delete</a>
+        </span>
+    </span>
+{%- endmacro %}
+
+{% macro signature(target=None, verb=None) -%}
+    <nobr>
+        {% if target %}
+
+            {% if target and target.is_type("comment") %}
+                {{ vote_sum(target) }}
+            {% endif %}
+
+            {% if verb %}
+                {{ target.author_nickname|escape }} {{ verb }} {{ target.date|timesince_ago }}
+            {% else %}
+                {{ target.author_nickname|escape }}, {{ target.date|timesince_ago }}
+            {% endif %}
+
+            {{ flag_tools(target) }}
+
+            {% if UserData.current().moderator %}
+                {{ mod_tools(target) }}
+            {% else %}
+                {% if target and target.authored_by(UserData.current()) %}
+                    {{ author_tools(target) }}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            &ndash;Example
+        {% endif %}
+    </nobr>
+{%- endmacro %}
+
+{% macro question_answers(answers) -%}
+    {% block answers scoped %}
+        {% for answer in answers %}
+            <div class="answer_container">
+                <input type="hidden" name="entity_key" value="{{ answer.key() }}" />
+                <div class="answer">
+                    {{ vote_tools(answer) }}
+                    {% if standalone %}
+                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{answer.question.key}}#q_{{answer.question.key}}">
+                            {{ answer.content|truncate(40)|escape|linebreaksbr }}
+                        </a>
+                    {% else %}
+                        <span>{{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="answer_sig sig">
+                    {{ signature(answer, "answered") }}
+                </div>
+
+                {{ feedback_controls_answer("Edit this answer", answer) }}
+            </div>
+        {% endfor %}
+    {% endblock %}
 {%- endmacro %}

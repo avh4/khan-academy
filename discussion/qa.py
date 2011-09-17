@@ -114,7 +114,7 @@ class PageQuestions(request_handler.RequestHandler):
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_key, sort)
-            html = self.render_template_to_string("discussion/video_qa_content.html", template_values)
+            html = self.render_jinja2_template_to_string("discussion/video_qa_content.html", template_values)
             self.render_json({"html": html, "page": page, "qa_expand_key": qa_expand_key})
 
         if qa_expand_key > 0:

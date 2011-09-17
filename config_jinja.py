@@ -8,15 +8,15 @@ import simplejson as json
 from models import UserData
 from templateext import escapejs
 from templatetags import playlist_browser, column_major_sorted_videos, streak_bar
-from templatefilters import slugify, find_column_index, column_height, in_list
+from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago_short, youtube_timestamp_links
 from api.auth.xsrf import render_xsrf_js
 from phantom_users.templatetags import login_notifications
 from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
 from mailing_lists.templatetags import mailing_list_signup_form
+from util import static_url, thousands_separated_number, create_login_url, linebreaksbr, linebreaksbr_ellipsis
 from discussion.templatetags import video_comments, video_qa
-from util import static_url, thousands_separated_number, create_login_url, linebreaksbr
 from app import App
 
 # TODO: globals "custom tag" loading
@@ -51,6 +51,9 @@ jinja2.default_config = {
         "login_url": create_login_url,
         "slugify": slugify,
         "linebreaksbr": linebreaksbr,
+        "linebreaksbr_ellipsis": linebreaksbr_ellipsis,
+        "youtube_timestamp_links": youtube_timestamp_links,
+        "timesince_ago": timesince_ago_short,
         "find_column_index": find_column_index,
         "in_list": in_list,
         "column_height": column_height,

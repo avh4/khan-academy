@@ -538,9 +538,10 @@ class PostLogin(request_handler.RequestHandler):
                 user_data.user_nickname = current_nickname
                 user_data.put()
 
-            # Set developer to True if user is admin
-            if not user_data.developer and users.is_current_user_admin():
+            # Set developer and moderator to True if user is admin
+            if (not user_data.developer or not user_data.moderator) and users.is_current_user_admin():
                 user_data.developer = True
+                user_data.moderator = True
                 user_data.put()
 
             # If user is brand new and has 0 points, migrate data

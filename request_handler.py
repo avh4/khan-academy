@@ -316,7 +316,10 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
 
     def render_jinja2_template(self, template_name, template_values):
         self.add_global_template_values(template_values)
-        self.response.write(self.jinja2.render_template(template_name, **template_values))
+        self.response.write(self.render_jinja2_template_to_string(template_name, template_values))
+
+    def render_jinja2_template_to_string(self, template_name, template_values):
+        return self.jinja2.render_template(template_name, **template_values)
 
     def render_template(self, template_name, template_values):
         self.add_global_template_values(template_values)
