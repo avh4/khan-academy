@@ -313,7 +313,7 @@ class ReportIssue(request_handler.RequestHandler):
         elif issue_type == 'Question':
             page = 'askquestion.html'
 
-        self.render_template(page, template_values)
+        self.render_jinja2_template(page, template_values)
 
 class ProvideFeedback(request_handler.RequestHandler):
     def get(self):
