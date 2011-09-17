@@ -315,19 +315,6 @@ class ReportIssue(request_handler.RequestHandler):
 
         self.render_jinja2_template(page, template_values)
 
-class VideolessExercises(request_handler.RequestHandler):
-
-    def get(self):
-        query = Exercise.all().order('h_position')
-        exercises = query.fetch(200)
-        self.response.out.write('<html>')
-        for exercise in exercises:
-            query = ExerciseVideo.all()
-            query.filter('exercise =', exercise.key())
-            videos = query.fetch(200)
-            if not videos:
-                self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
-
 class ShowUnusedPlaylists(request_handler.RequestHandler):
 
     def get(self):
@@ -919,7 +906,6 @@ application = webapp2.WSGIApplication([
     ('/updateexercise', exercises.UpdateExercise),
     ('/moveexercisemapnode', exercises.MoveMapNode),
     ('/admin94040', exercises.ExerciseAdmin),
-    ('/videoless', VideolessExercises),
     ('/video/.*', ViewVideo),
     ('/v/.*', ViewVideo),
     ('/video', ViewVideo), # Backwards URL compatibility
