@@ -108,3 +108,6 @@ def static_url(relative_url):
 
 def absolute_url(relative_url):
 		return 'http://%s%s' % (os.environ['HTTP_HOST'], relative_url)
+
+def linebreaksbr(s):
+    return s.replace('\n', '<br/>')

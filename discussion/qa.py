@@ -66,7 +66,7 @@ class FlaggedFeedback(request_handler.RequestHandler):
                 "feedback_type_comment": models_discussion.FeedbackType.Comment,
                 }
 
-        self.render_template("discussion/flagged_feedback.html", template_content)
+        self.render_jinja2_template("discussion/flagged_feedback.html", template_content)
 
 def feedback_flag_update_map(feedback):
     feedback.recalculate_flagged()
