@@ -56,7 +56,6 @@ from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import all_topics_list
 from custom_exceptions import MissingVideoException
-from render import render_block_to_string
 from templatetags import streak_bar, exercise_message, exercise_icon, user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
