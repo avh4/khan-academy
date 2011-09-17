@@ -377,11 +377,11 @@ class ViewTOS(request_handler.RequestHandler):
 
 class ViewPrivacyPolicy(request_handler.RequestHandler):
     def get(self):
-        self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
+        self.render_jinja2_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
 
 class ViewDMCA(request_handler.RequestHandler):
     def get(self):
-        self.render_template('dmca.html', {"selected_nav_link": "dmca"})
+        self.render_jinja2_template('dmca.html', {"selected_nav_link": "dmca"})
 
 class ViewStore(request_handler.RequestHandler):
     def get(self):
