@@ -383,11 +383,6 @@ class ViewDMCA(request_handler.RequestHandler):
     def get(self):
         self.render_jinja2_template('dmca.html', {"selected_nav_link": "dmca"})
 
-class ViewHowToHelp(request_handler.RequestHandler):
-    def get(self):
-        self.redirect("/contribute", True)
-        return
-
 class ViewSAT(request_handler.RequestHandler):
 
     def get(self):
