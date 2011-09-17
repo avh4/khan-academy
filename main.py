@@ -285,81 +285,6 @@ class LogVideoProgress(request_handler.RequestHandler):
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
 
-class PrintProblem(request_handler.RequestHandler):
-
-    def get(self):
-
-        exid = self.request.get('exid')
-        problem_number = self.request.get('problem_number')
-
-        template_values = {
-                'App' : App,
-                'arithmetic_template': 'arithmetic_print_template.html',
-                'exid': exid,
-                'extitle': exid.replace('_', ' ').capitalize(),
-                'problem_number': self.request.get('problem_number')
-                }
-
-        self.render_template(exid + '.html', template_values)
-
-class PrintExercise(request_handler.RequestHandler):
-
-    def get(self):
-
-        user_data = UserData.current()
-
-        if user_data:
-            exid = self.request.get('exid')
-            key = self.request.get('key')
-            problem_number = int(self.request.get('problem_number') or '0')
-            num_problems = int(self.request.get('num_problems'))
-            time_warp = self.request.get('time_warp')
-
-            query = Exercise.all()
-            query.filter('name =', exid)
-            exercise = query.get()
-
-            exercise_videos = None
-            query = ExerciseVideo.all()
-            query.filter('exercise =', exercise.key())
-            exercise_videos = query.fetch(50)
-
-            if not exid:
-                exid = 'addition_1'
-
-            user_exercise = user_data.get_or_insert_exercise(exercise)
-
-            if not problem_number:
-                problem_number = user_exercise.total_done+1
-            proficient = False
-            endangered = False
-            reviewing = False
-
-            template_values = {
-                'arithmetic_template': 'arithmetic_print_template.html',
-                'proficient': proficient,
-                'endangered': endangered,
-                'reviewing': reviewing,
-                'key': user_exercise.key(),
-                'exercise': exercise,
-                'exid': exid,
-                'expath': exid + '.html',
-                'start_time': time.time(),
-                'exercise_videos': exercise_videos,
-                'extitle': exid.replace('_', ' ').capitalize(),
-                'user_exercise': user_exercise,
-                'time_warp': time_warp,
-                'user_data': user_data,
-                'num_problems': num_problems,
-                'problem_numbers': range(problem_number, problem_number+num_problems),
-                }
-
-            self.render_template('print_template.html', template_values)
-
-        else:
-
-            self.redirect(util.create_login_url(self.request.uri))
-
 class ReportIssue(request_handler.RequestHandler):
 
     def get(self):
@@ -993,8 +918,6 @@ application = webapp2.WSGIApplication([
     ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
     ('/exercises', exercises.ViewExercise),
     ('/khan-exercises/exercises/.*', exercises.RawExercise),
-    ('/printexercise', PrintExercise),
-    ('/printproblem', PrintProblem),
     ('/viewexercisesonmap', exercises.ViewAllExercises),
     ('/editexercise', exercises.EditExercise),
     ('/updateexercise', exercises.UpdateExercise),
