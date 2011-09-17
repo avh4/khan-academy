@@ -520,11 +520,11 @@ class Login(request_handler.RequestHandler):
                            'continue': cont,
                            'direct': direct
                            }
-        self.render_template('login.html', template_values)
+        self.render_jinja2_template('login.html', template_values)
 
 class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
-        self.render_template('login_mobile_oauth.html', {
+        self.render_jinja2_template('login_mobile_oauth.html', {
             "oauth_map_id": self.request_string("oauth_map_id", default=""),
             "anointed": self.request_bool("an", default=False),
             "view": self.request_string("view", default="")
