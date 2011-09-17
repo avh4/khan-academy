@@ -12,7 +12,7 @@ def get_class_exercises(students):
     async_queries = []
 
     for s in students:
-        exercises[s.email] = {"user_data_student": s}
+        exercises[s.email] = {"user_data_student": s, "user_exercises": {} }
         async_queries.append(models.UserExercise.get_for_user_data(s))
 
     results = util.async_queries(async_queries)
@@ -22,7 +22,7 @@ def get_class_exercises(students):
         user_exercises = results[i].get_result()
         for user_exercise in user_exercises:
             if user_exercise.exercise not in exercises[s.email]:
-                exercises[s.email][user_exercise.exercise] = user_exercise
+                exercises[s.email]["user_exercises"][user_exercise.exercise] = user_exercise
 
     return exercises
 
@@ -50,11 +50,12 @@ def class_progress_report_graph_context(user_data, student_list):
 
     exercises = get_class_exercises(list_students)
     exercises_all = models.Exercise.get_all_use_cache()
+    exercise_graph = models.ExerciseGraph()
     exercises_found = []
 
     for exercise in exercises_all:
         for (email, _) in student_emails:
-            if exercises[email].has_key(exercise.name):
+            if exercises[email]["user_exercises"].has_key(exercise.name):
                 exercises_found.append(exercise)
                 break
 
@@ -69,13 +70,16 @@ def class_progress_report_graph_context(user_data, student_list):
             continue
 
         escaped_name = escape(student.nickname)
+                
+        exercise_graph.initialize_for_user(student, exercises[student_email]["user_exercises"].values())
+        student_review_exercise_names = [e.name for e in exercise_graph.get_review_exercises()]
 
         for (exercise, (_, exercise_display, exercise_name_js)) in izip(exercises_found, exercise_names):
 
             exercise_name = exercise.name
             user_exercise = models.UserExercise()
-            if exercises[student_email].has_key(exercise_name):
-                user_exercise = exercises[student_email][exercise_name]
+            if exercises[student_email]["user_exercises"].has_key(exercise_name):
+                user_exercise = exercises[student_email]["user_exercises"][exercise_name]
 
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
@@ -90,10 +94,10 @@ def class_progress_report_graph_context(user_data, student_list):
 
             if student.is_proficient_at(exercise_name):
 
-                if student.is_reviewing( exercise_name, user_exercise, datetime.datetime.now() ) :
-                    status = "Needs Review"
+                if exercise_name in student_review_exercise_names:
+                    status = "Review"
                     color = "review"
-                else :
+                else:
                     status = "Proficient"
                     color = "proficient"
                     if not student.is_explicitly_proficient_at(exercise_name):

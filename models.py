@@ -1616,13 +1616,20 @@ class ExerciseVideo(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data):
-        user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
-        exercises = Exercise.get_all_use_cache()
-        self.exercises = exercises
+    def __init__(self, user_data=None):
+        
+        self.exercises = Exercise.get_all_use_cache()
         self.exercise_by_name = {}
-        for ex in exercises:
+        for ex in self.exercises:
             self.exercise_by_name[ex.name] = ex
+
+        if user_data is not None :
+            user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
+            self.initialize_for_user(user_data, user_exercises)
+            
+    def initialize_for_user(self, user_data, user_exercises):
+
+        for ex in self.exercises:
             ex.coverers = []
             ex.user_exercise = None
             ex.next_review = None  # Not set initially
@@ -1646,7 +1653,7 @@ class ExerciseGraph(object):
             ex = self.exercise_by_name.get(name)
             if ex:
                 ex.assigned = True
-        for ex in exercises:
+        for ex in self.exercises:
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
                 if ex_cover:
@@ -1678,7 +1685,7 @@ class ExerciseGraph(object):
                         break
             return ex.proficient
 
-        for ex in exercises:
+        for ex in self.exercises:
             compute_proficient(ex)
 
         def compute_suggested(ex):
@@ -1700,12 +1707,12 @@ class ExerciseGraph(object):
                     break
             return ex.suggested
 
-        for ex in exercises:
+        for ex in self.exercises:
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)
 
         phantom = user_data.is_phantom
-        for ex in exercises:
+        for ex in self.exercises:
             ex.phantom = phantom
 
 
