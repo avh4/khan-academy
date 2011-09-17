@@ -29,7 +29,7 @@ class ModeratorList(request_handler.RequestHandler):
             return
 
         mods = models.UserData.gql("WHERE moderator = :1", True)
-        self.render_template('discussion/mod_list.html', {"mods" : mods})
+        self.render_jinja2_template('discussion/mod_list.html', {"mods" : mods})
 
     def post(self):
 
