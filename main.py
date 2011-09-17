@@ -315,10 +315,6 @@ class ReportIssue(request_handler.RequestHandler):
 
         self.render_jinja2_template(page, template_values)
 
-class ProvideFeedback(request_handler.RequestHandler):
-    def get(self):
-        self.render_template("provide_feedback.html", {})
-
 class VideolessExercises(request_handler.RequestHandler):
 
     def get(self):
@@ -932,7 +928,6 @@ application = webapp2.WSGIApplication([
     ('/gmat', ViewGMAT),
     ('/store', ViewStore),
     ('/reportissue', ReportIssue),
-    ('/provide-feedback', ProvideFeedback),
     ('/search', Search),
     ('/autocomplete', autocomplete.Autocomplete),
     ('/savemapcoords', knowledgemap.SaveMapCoords),
