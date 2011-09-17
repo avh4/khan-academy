@@ -1,30 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-import datetime
-import time
 import urllib
 import logging
 import re
-import devpanel
-from pprint import pformat
-from google.appengine.api import capabilities
-from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
-from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
-
-import config_django
-
 import simplejson
-from google.appengine.ext.webapp import template
+
+from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.api import users
-import webapp2
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-from google.appengine.api import taskqueue
+import webapp2
 
+import devpanel
 import bulk_update.handler
-import facebook
 import request_cache
 from gae_mini_profiler import profiler
 from gae_bingo.middleware import GAEBingoWSGIMiddleware
@@ -38,7 +28,6 @@ import warmup
 import library
 import homepage
 
-from search import Searchable
 import search
 
 import request_handler
