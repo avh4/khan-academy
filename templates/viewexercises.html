@@ -1,0 +1,113 @@
+{% extends "page_template.html" %}
+
+{% import 'macros/exercises.html' as exercise_macros %}
+
+{% block meta_page_title %}Exercise Dashboard | {% endblock meta_page_title %}
+{% block pagescript %}
+<style>
+    /* Temporary styles to fit new dashboard into old template, will be removed when new template is dropped in. */
+    #page_sub_nav {display: none;}
+
+    #container.unregistered .energy-points-badge {
+        visibility: hidden;
+    }
+</style>
+<script type="text/javascript">
+  	function submitForm(value)
+  	{
+  		document.forms['addexercise'].submit();
+  	}
+
+	// Hide rows that a user is proficient in for the given table.
+	function hideProficient(tableId, checkboxId)
+	{
+		// Get the table we are working with.
+		table = document.getElementById(tableId);
+		// Get the checkbox to look at for on/off status.
+		checkbox = document.getElementById(checkboxId);
+		if (checkbox.checked)
+		{
+            $(".proficientTrue").css('display', 'none');
+		}
+		// If the checkbox is not checked then show this row.
+		else
+		{
+            $(".proficientTrue").css('display', 'table-row');
+		}
+	}
+	
+    $(function(){Drawer.init();});
+</script>
+{% endblock pagescript %}
+{% block pagetitle %}Exercise Dashboard{% endblock pagetitle %}
+{% block pagecontent %}
+<div id="background">
+  <div id="container" class="dashboard{% if not logged_in %} unregistered{% endif %}">
+    {{ exercise_macros.exercise_legend() }}
+    <div id="dashboard-header">
+        <div id="dashboard-nav">
+            <span class="selected"><a href="#">Knowledge Map{% if App.offline_mode %} (<em>not supported in offline mode</em>){% endif %}</a></span> |
+            <span class="menu"><a href="/profile?k">Vital Statistics</a></span>
+        </div>
+        <div id="dashboard-title"><img src="/images/dashboard-icon-active.png" id="dashboard-icon" width=22 height=22 /> Exercises <a href="#" id="collapse-drawer" class="toggle-drawer"><img src="/images/expand-left.png" width="25" height="25"/></a></div>
+            <a href="#" id="expand-drawer" class="toggle-drawer"><img src="/images/expand-right.png" width="25" height="25" /></a>
+        </div>
+    <div id="dashboard-drawer" class="drawer-hoverable">
+    <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
+       <h3>Suggested Exercises</h3>
+        {% if review_exercises %}
+        {% for exercise in review_exercises %}
+            <div class="exercise-badge" data-id="{{exercise.name}}">
+                {{ exercise_macros.exercise_icon(exercise) }}
+        		<div class="energy-points-badge">{{exercise.points}}</div>
+        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+
+                {{ streak_bar(exercise) }}
+            </div>
+        {% endfor %}
+        {% endif %}
+        {% for exercise in suggested_exercises %}
+            <div class="exercise-badge" data-id="{{exercise.name}}">
+                {{ exercise_macros.exercise_icon(exercise) }}
+        		<div class="energy-points-badge">{{exercise.points}}</div>
+        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+        		
+                {{ streak_bar(exercise) }}
+            </div>
+        {% endfor %}
+        <br>
+        {% if recent_exercises %}
+            <h3>Recent Exercises</h3>
+            {% for exercise in recent_exercises %}
+                <div class="exercise-badge" data-id="{{exercise.name}}">
+                    {{ exercise_macros.exercise_icon(exercise) }}
+                    <div class="energy-points-badge">{{exercise.points}}</div>
+                    <div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+
+                    {{ streak_bar(exercise) }}
+                </div>
+            {% endfor %}
+            <br/>
+        {% endif %}
+        <h3>All Exercises
+            <span class="subheader">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
+        </h3>
+        <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
+        {% for exercise in exercises %}
+            <div class="exercise-badge" data-id="{{exercise.name}}" id="{{exercise.name}}">
+                {{ exercise_macros.exercise_icon(exercise) }}
+        		<div class="energy-points-badge">{{exercise.points}}</div>
+        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+                {{ streak_bar(exercise) }}
+            </div>
+        {% endfor %}
+        </div>
+    </div></div>
+    </div>
+
+    <div id="dashboard-map">
+        {{ exercise_macros.knowledgemap(exercises, map_coords) }}
+    </div>
+</div>
+</div>
+{% endblock pagecontent %}

@@ -3,10 +3,11 @@
 from webapp2_extras import jinja2
 
 from urllib import quote_plus
+import simplejson as json
 
 from models import UserData
 from templateext import escapejs
-from templatetags import playlist_browser, column_major_sorted_videos
+from templatetags import playlist_browser, column_major_sorted_videos, streak_bar
 from templatefilters import slugify, find_column_index, column_height, in_list
 from api.auth.xsrf import render_xsrf_js
 from phantom_users.templatetags import login_notifications
@@ -37,8 +38,10 @@ jinja2.default_config = {
         "mailing_list_signup_form": mailing_list_signup_form,
         "playlist_browser": playlist_browser,
         "column_major_sorted_videos": column_major_sorted_videos,
+        "streak_bar": streak_bar,
         "UserData": UserData,
         "hash": hash,
+        "json": json,
         "App": App,
     }, 
     "filters": {

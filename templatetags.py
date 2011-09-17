@@ -140,7 +140,7 @@ def simple_student_info(user_data):
         "member_for": member_for
     }
 
-@register.inclusion_tag("streak_bar.html")
+@register.simple_tag
 def streak_bar(user_exercise):
     streak = user_exercise.streak
     longest_streak = 0
@@ -176,7 +176,7 @@ def streak_bar(user_exercise):
         if longest_streak > consts.MAX_STREAK_SHOWN:
             longest_streak = "Max"
 
-    return {
+    template_values = {
         "streak": streak,
         "longest_streak": longest_streak,
         "streak_width": streak_width,
@@ -187,6 +187,9 @@ def streak_bar(user_exercise):
         "show_longest_streak_label": show_longest_streak_label,
         "levels": levels
     }
+
+    # TODO: nicer way to do these inclusion tag thingies for jinja
+    return jinja2.get_jinja2().render_template("streak_bar.html", **template_values)
 
 @register.inclusion_tag("reports_navigation.html")
 def reports_navigation(coach_email, current_report="classreport"):
@@ -261,10 +264,6 @@ def empty_class_instructions(class_is_empty=True):
 @register.inclusion_tag("crazyegg_tracker.html")
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
-
-@register.inclusion_tag("exercise_legend.html")
-def exercise_legend():
-    return {}
 
 @register.simple_tag
 def xsrf_value():

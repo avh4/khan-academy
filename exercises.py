@@ -199,7 +199,7 @@ class ViewExercise(request_handler.RequestHandler):
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
-        self.render_template("exercise_template.html", template_values)
+        self.render_jinja2_template("exercise_template.html", template_values)
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
@@ -245,7 +245,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'selected_nav_link': 'practice',
             }
 
-        self.render_template('viewexercises.html', template_values)
+        self.render_jinja2_template('viewexercises.html', template_values)
 
 class RawExercise(request_handler.RequestHandler):
     def get(self):
