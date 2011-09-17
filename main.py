@@ -383,10 +383,6 @@ class ViewDMCA(request_handler.RequestHandler):
     def get(self):
         self.render_jinja2_template('dmca.html', {"selected_nav_link": "dmca"})
 
-class ViewStore(request_handler.RequestHandler):
-    def get(self):
-        self.render_template('store.html', {})
-
 class ViewHowToHelp(request_handler.RequestHandler):
     def get(self):
         self.redirect("/contribute", True)
@@ -858,7 +854,6 @@ application = webapp2.WSGIApplication([
     ('/logvideoprogress', LogVideoProgress),
     ('/sat', ViewSAT),
     ('/gmat', ViewGMAT),
-    ('/store', ViewStore),
     ('/reportissue', ReportIssue),
     ('/search', Search),
     ('/autocomplete', autocomplete.Autocomplete),
