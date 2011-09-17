@@ -18,13 +18,12 @@ from discussion.templatetags import video_comments, video_qa
 from util import static_url, thousands_separated_number
 from app import App
 
-# TODO: tweak config for production speed
 # TODO: globals "custom tag" loading
 
 jinja2.default_config = {
     "template_path": "templates", 
     "compiled_path": "compiled_templates.zip",
-    "force_compiled": True, #not App.is_dev_server, # Only use compiled templates in production 
+    "force_compiled": not App.is_dev_server, # Only use compiled templates in production 
     "cache_size": 0 if App.is_dev_server else -1, # Only cache in production
     "auto_reload": App.is_dev_server, # Don't check for template updates in production
     "globals": {
@@ -44,7 +43,7 @@ jinja2.default_config = {
     }, 
     "filters": {
         "escapejs": escapejs,
-        "urlencode": quote_plus,
+        "urlencode": lambda s: quote_plus(s or ""),
         "static_url": static_url,
         "slugify": slugify,
         "find_column_index": find_column_index,
