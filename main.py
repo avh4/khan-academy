@@ -405,7 +405,7 @@ class ViewSAT(request_handler.RequestHandler):
                 'videos': playlist_videos,
         }
 
-        self.render_template('sat.html', template_values)
+        self.render_jinja2_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
 
@@ -417,7 +417,7 @@ class ViewGMAT(request_handler.RequestHandler):
                             'problem_solving': problem_solving,
         }
 
-        self.render_template('gmat.html', template_values)
+        self.render_jinja2_template('gmat.html', template_values)
 
 
 class RetargetFeedback(bulk_update.handler.UpdateKind):
