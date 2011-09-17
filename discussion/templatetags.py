@@ -5,8 +5,6 @@ from django import template
 
 import models
 import models_discussion
-from comments import video_comments_context
-from qa import video_qa_context
 from util_discussion import is_current_user_moderator
 import voting
 import app

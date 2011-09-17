@@ -16,7 +16,7 @@ from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
 from mailing_lists.templatetags import mailing_list_signup_form
 from discussion.templatetags import video_comments, video_qa
-from util import static_url, thousands_separated_number
+from util import static_url, thousands_separated_number, create_login_url
 from app import App
 
 # TODO: globals "custom tag" loading
@@ -48,6 +48,7 @@ jinja2.default_config = {
         "escapejs": escapejs,
         "urlencode": lambda s: quote_plus(s or ""),
         "static_url": static_url,
+        "login_url": create_login_url,
         "slugify": slugify,
         "find_column_index": find_column_index,
         "in_list": in_list,
