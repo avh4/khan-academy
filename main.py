@@ -649,11 +649,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
 
-class ViewRenderTemplate(request_handler.RequestHandler):
-    def get(self):
-        template = self.request_string('template', 'templatetest.html')
-        self.render_template(template, { 'user_data': UserData.current() })
-
 class ServeUserVideoCss(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
@@ -733,7 +728,6 @@ application = webapp2.WSGIApplication([
     ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
     ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
     ('/admin/changeemail', ChangeEmail),
-    ('/admin/rendertemplate', ViewRenderTemplate),
     ('/admin/realtimeentitycount', RealtimeEntityCount),
 
     ('/devadmin/emailchange', devpanel.Email),
