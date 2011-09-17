@@ -471,7 +471,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
         exercises.sort(key=lambda e: e.name)
         template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
-        self.render_template('exerciseadmin.html', template_values)
+        self.render_jinja2_template('exerciseadmin.html', template_values)
 
 class EditExercise(request_handler.RequestHandler):
 
@@ -498,7 +498,7 @@ class EditExercise(request_handler.RequestHandler):
                 'saved': self.request_bool('saved', default=False),
                 }
 
-            self.render_template("editexercise.html", template_values)
+            self.render_jinja2_template("editexercise.html", template_values)
 
 class UpdateExercise(request_handler.RequestHandler):
 
