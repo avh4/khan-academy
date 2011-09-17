@@ -26,32 +26,6 @@ from gae_bingo.gae_bingo import ab_test
 import template_cached
 register = template_cached.create_template_register()
 
-def highlight(parser, token):
-    try:
-        tag_name, phrases_to_highlight, text = token.split_contents()
-    except ValueError:
-        raise template.TemplateSyntaxError, "%r tag requires exactly 2 arguments" % token.contents[0]
-    return HighlightNode(phrases_to_highlight, text)
-
-class HighlightNode(template.Node):
-    def __init__(self, phrases_to_highlight, text):
-        self.phrases_to_highlight = phrases_to_highlight
-        self.text = text
-
-    def render(self, context):
-        phrases = []
-        text = ''
-        try:
-            phrases = template.resolve_variable(self.phrases_to_highlight, context)
-            text = template.resolve_variable(self.text, context)
-        except template.VariableDoesNotExist:
-            pass
-        phrases = [(re.escape(p)+r'\w*') for p in phrases]
-        regex = re.compile("(%s)" % "|".join(phrases), re.IGNORECASE)
-        text = cgi.escape(text)
-        text = re.sub(regex, r'<span class="highlight">\1</span>', text)
-        return text
-
 @register.simple_tag
 def user_info(username, user_data):
     path = os.path.join(os.path.dirname(__file__), "user_info.html")
@@ -311,8 +285,6 @@ def user_video_css(user_data):
     else:
         return ''
 
-
-register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')
 webapp.template.register_template_library('templateext')

@@ -611,7 +611,7 @@ class Search(request_handler.RequestHandler):
         if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
             if len(query) > 0:
                 template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
-            self.render_template("searchresults.html", template_values)
+            self.render_jinja2_template("searchresults.html", template_values)
             return
         searched_phrases = []
         playlists = Playlist.search(query, limit=50, searched_phrases_out=searched_phrases)
@@ -621,7 +621,7 @@ class Search(request_handler.RequestHandler):
                            'videos': videos,
                            'searched_phrases': searched_phrases
                            })
-        self.render_template("searchresults.html", template_values)
+        self.render_jinja2_template("searchresults.html", template_values)
 
 class RedirectToJobvite(request_handler.RequestHandler):
     def get(self):
