@@ -497,24 +497,6 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         setattr(entity, prop, users.User(new_email))
         return True
 
-class ViewArticle(request_handler.RequestHandler):
-
-    def get(self):
-        video = None
-        path = self.request.path
-        readable_id  = urllib.unquote(path.rpartition('/')[2])
-
-        article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-        if readable_id == "fortune":
-            article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-
-        template_values = {
-                'article_url': article_url,
-                'issue_labels': ('Component-Videos,Video-%s' % readable_id),
-        }
-
-        self.render_template("article.html", template_values)
-
 class Login(request_handler.RequestHandler):
     def get(self):
         return self.post()
@@ -793,7 +775,6 @@ application = webapp2.WSGIApplication([
     ('/profile/graph/classtime', util_profile.ClassTimeGraph),
     ('/class_profile', util_profile.ViewClassProfile),
 
-    ('/press/.*', ViewArticle),
     ('/login', Login),
     ('/login/mobileoauth', MobileOAuthLogin),
     ('/postlogin', PostLogin),
