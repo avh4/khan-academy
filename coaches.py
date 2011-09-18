@@ -46,7 +46,7 @@ class ViewCoaches(RequestHandler):
                         'selected_nav_link': 'coach'
                     }
 
-            self.render_template('viewcoaches.html', template_values)
+            self.render_jinja2_template('viewcoaches.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -94,7 +94,7 @@ class ViewStudents(RequestHandler):
                 "coach_requests_json": json.dumps(coach_requests),
                 'selected_nav_link': 'coach'
             }
-            self.render_template('viewstudentlists.html', template_values)
+            self.render_jinja2_template('viewstudentlists.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
