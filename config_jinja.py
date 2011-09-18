@@ -8,7 +8,7 @@ import simplejson as json
 from models import UserData
 from templateext import escapejs
 from templatetags import playlist_browser, column_major_sorted_videos, streak_bar
-from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago_short, youtube_timestamp_links
+from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago_short, youtube_timestamp_links, mygetattr
 from api.auth.xsrf import render_xsrf_js
 from phantom_users.templatetags import login_notifications
 from js_css_packages.templatetags import css_package, js_package
@@ -54,6 +54,7 @@ jinja2.default_config = {
         "linebreaksbr_ellipsis": linebreaksbr_ellipsis,
         "youtube_timestamp_links": youtube_timestamp_links,
         "timesince_ago": timesince_ago_short,
+        "mygetattr": mygetattr,
         "find_column_index": find_column_index,
         "in_list": in_list,
         "column_height": column_height,
