@@ -266,27 +266,25 @@
 {%- endmacro %}
 
 {% macro question_answers(answers, standalone=False, video=None, playlist=None) -%}
-    {% block answers scoped %}
-        {% for answer in answers %}
-            <div class="answer_container">
-                <input type="hidden" name="entity_key" value="{{ answer.key() }}" />
-                <div class="answer">
-                    {{ vote_tools(answer) }}
-                    {% if standalone %}
-                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{answer.question().key()}}#q_{{answer.question().key()}}">
-                            {{ answer.content|truncate(40)|escape|linebreaksbr }}
-                        </a>
-                    {% else %}
-                        <span>{{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
-                    {% endif %}
-                </div>
-
-                <div class="answer_sig sig">
-                    {{ signature(answer, "answered") }}
-                </div>
-
-                {{ feedback_controls_answer("Edit this answer", answer) }}
+    {% for answer in answers %}
+        <div class="answer_container">
+            <input type="hidden" name="entity_key" value="{{ answer.key() }}" />
+            <div class="answer">
+                {{ vote_tools(answer) }}
+                {% if standalone %}
+                    <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{answer.question().key()}}#q_{{answer.question().key()}}">
+                        {{ answer.content|truncate(40)|escape|linebreaksbr }}
+                    </a>
+                {% else %}
+                    <span>{{ answer.content|escape|urlize|linebreaksbr|youtube_timestamp_links }}</span>
+                {% endif %}
             </div>
-        {% endfor %}
-    {% endblock %}
+
+            <div class="answer_sig sig">
+                {{ signature(answer, "answered") }}
+            </div>
+
+            {{ feedback_controls_answer("Edit this answer", answer) }}
+        </div>
+    {% endfor %}
 {%- endmacro %}

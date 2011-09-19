@@ -40,7 +40,7 @@ class PageComments(request_handler.RequestHandler):
             comments_hidden = self.request_bool("comments_hidden", default=True)
             template_values = video_comments_context(video, playlist, page, comments_hidden, sort_order)
 
-            html = self.render_template_to_string("discussion/video_comments_content.html", template_values)
+            html = self.render_jinja2_template_to_string("discussion/video_comments_content.html", template_values)
             json = simplejson.dumps({"html": html, "page": page}, ensure_ascii=False)
             self.response.out.write(json)
 
