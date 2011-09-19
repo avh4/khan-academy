@@ -9,7 +9,7 @@ import util
 class Register(request_handler.RequestHandler):
     def get(self):
         if models.UserData.current():
-            self.render_template("oauth_provider/register_app.html", {})
+            self.render_jinja2_template("oauth_provider/register_app.html", {})
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -41,7 +41,7 @@ class Register(request_handler.RequestHandler):
 
             if name_error or description_error or agree_error:
 
-                self.render_template("oauth_provider/register_app.html",
+                self.render_jinja2_template("oauth_provider/register_app.html",
                         {
                             "name": name,
                             "description": description,
@@ -68,7 +68,7 @@ class Register(request_handler.RequestHandler):
                         )
                 consumer.generate_random_codes()
 
-                self.render_template("oauth_provider/register_app.html",
+                self.render_jinja2_template("oauth_provider/register_app.html",
                         {
                             "consumer_key": consumer.key_,
                             "consumer_secret": consumer.secret
