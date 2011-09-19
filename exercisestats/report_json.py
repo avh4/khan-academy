@@ -308,7 +308,7 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
         text1 = 'We now have more exercises than %s (%s)!' % (
             cgi.escape(greater_than_fact), str(first_available_num))
         text2 = math_fact
-        text3 = "In year %d, %s." % (number, cgi.escape(year_fact))
+        text3 = "In year %d, %s" % (number, cgi.escape(year_fact))
 
         return {
             'item': [
