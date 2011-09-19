@@ -190,8 +190,8 @@ class GeckoboardExerciseRedirect(request_handler.RequestHandler):
 class ExerciseStatsMapGraph(request_handler.RequestHandler):
     # TODO: Just move this logic into get and make get_use_cache take a day parameter.
     def get_request_params(self):
-        yesterday = dt.date.today() - dt.timedelta(days=1)
-        interested_day = self.request_date('date', "%Y/%m/%d", yesterday)
+        default_day = dt.date.today() - dt.timedelta(days=2)
+        interested_day = self.request_date('date', "%Y/%m/%d", default_day)
 
         return {
             'interested_day': interested_day
@@ -322,8 +322,8 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
 
 class UserLocationsMap(request_handler.RequestHandler):
     def get(self):
-        yesterday = dt.date.today() - dt.timedelta(days=1)
-        date = self.request_date('date', "%Y/%m/%d", yesterday)
+        default_day = dt.date.today() - dt.timedelta(days=2)
+        date = self.request_date('date', "%Y/%m/%d", default_day)
 
         self.render_json(self.get_ip_addresses_for_geckoboard_map(date))
 
