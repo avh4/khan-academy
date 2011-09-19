@@ -49,6 +49,19 @@ def remove_deleted_studentlists(studentlist):
         pass
         # do nothing, as this studentlist is fine.
 
+def dedupe_related_videos(exercise):
+    exvids = exercise.related_videos_query().fetch(100)
+    video_keys = set()
+    for exvid in exvids:
+        video_key = exvid.video.key()
+        if video_key in video_keys:
+            logging.critical("Deleting ExerciseVideo for %s, %s",
+                exercise.name,
+                video_key.id_or_name())
+            yield op.db.Delete(exvid)
+        else:
+            video_keys.add(video_key)
+
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
         # pass
@@ -58,10 +71,10 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
 
         # Start a new Mapper task.
         mapreduce_id = control.start_map(
-            name = "RemoveDeletedStudentlists",
-            handler_spec = "backfill.remove_deleted_studentlists",
+            name = "dedupe_related_videos",
+            handler_spec = "backfill.dedupe_related_videos",
             reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-            reader_parameters = {"entity_kind": "models.StudentList"},
+            reader_parameters = {"entity_kind": "models.Exercise"},
             shard_count = 64,
             queue_name = "backfill-mapreduce-queue",
           )

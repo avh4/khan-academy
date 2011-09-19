@@ -14,6 +14,7 @@ from api.auth.xsrf import ensure_xsrf_cookie
 class Email(request_handler.RequestHandler):
 
     @user_util.developer_only
+    @ensure_xsrf_cookie
     def get(self):
         current_email = self.request.get('curremail') #email that is currently used 
         new_email = self.request.get('newemail') #email the user wants to change to
@@ -26,7 +27,7 @@ class Email(request_handler.RequestHandler):
         if swap and currdata: #are we swapping? make sure account exists
             currdata.current_user = users.User(new_email)
             currdata.user_email = new_email
-            currdata.user_id = new_data.user_id
+            currdata.user_id = newdata.user_id
             currdata.put()
             if newdata: #delete old account 
                 newdata.delete()
@@ -49,6 +50,7 @@ class Manage(request_handler.RequestHandler):
 class ManageCoworkers(request_handler.RequestHandler):
 
     @user_util.developer_only
+    @ensure_xsrf_cookie
     def get(self):
 
         user_data_coach = self.request_user_data("coach_email")

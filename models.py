@@ -33,6 +33,7 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -52,8 +53,7 @@ class Setting(db.Model):
             return Setting._cache_get_by_key_name(key)
         else:
             setting = Setting(Setting.entity_group_key(), key, value=str(val))
-            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
-            db.put([setting, setting_old])
+            db.put(setting)
             Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
@@ -71,13 +71,6 @@ class Setting(db.Model):
         # ancestor query to ensure consistent results
         query = Setting.all().ancestor(Setting.entity_group_key())
         results = dict((setting.key().name(), setting) for setting in query.fetch(20))
-
-        # backfill with old style settings
-        for setting in Setting.all().fetch(20):
-            key = setting.key()
-            if key.parent() is None and not key.name() in results.keys():
-                results[key.name()] = setting
-
         return results
 
     @staticmethod
@@ -577,7 +570,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
     uvc.version = version
     db.put(uvc)
 
-class UserData(db.Model):
+class UserData(GAEBingoIdentityModel, db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
     user_nickname = db.StringProperty(indexed=False)

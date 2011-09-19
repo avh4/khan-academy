@@ -4,13 +4,14 @@
 
 {% block pagescript %}
 
-{% if renderable %}
+    {% css_package "exercises" %}
+
+    {% if renderable %}
 
     <style>#page_sub_nav {display: none;}</style>
 
     <script>var userExercise = {{ user_exercise_json }};</script>
 
-    {% css_package "exercises" %}
     {% js_package "exercises" %}
 
     <script>{{ exercise_inline_script }}</script>
@@ -40,6 +41,14 @@
         {% if browser_disabled %}
 
         <div id='browserwarning'>
+            {% if is_webos %}
+
+            <p>
+                We're sorry. Your device is not supported for Khan Academy's practice exercises.
+            </p>
+
+            {% else %}
+
             <p>
                 You need to upgrade your browser to use Khan Academy's practice exercises.
             </p>
@@ -50,6 +59,8 @@
                 <a href="http://www.apple.com/safari/">Safari</a>, or
                 <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home">a recent version of Internet Explorer</a>.
             </p>
+
+            {% endif %}
         </div>
 
         {% else %}

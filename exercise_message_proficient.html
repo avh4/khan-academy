@@ -1,6 +1,3 @@
-{% extends "exercise_message.html" %}
-{% block exercise_message_block %}
 <div class="exercise_message">
-    <h2 class="pulls">Nice work!</h2>You're proficient in this topic. <a href="/exercisedashboard?k" class="exercise button green">Choose a new exercise</a> to earn more points, or you can do more problems to increase your streak.
+    <h2 class="pulls">{{ heading }}</h2>You're proficient in this topic. <a href="/exercisedashboard?move_on=1" class="simple-button action-gradient green">Choose a new exercise</a> to earn more points, or you can do more problems to increase your streak.
 </div>
-{% endblock %}
