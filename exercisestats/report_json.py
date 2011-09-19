@@ -173,7 +173,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             'showLegend': json.dumps(showLegend),
         }
 
-        return self.render_template_to_string(
+        return self.render_jinja2_template_to_string(
             'exercisestats/highcharts_area_spline.json', context)
 
 # This redirect is to eliminate duplicate code so we don't have to change every
@@ -247,7 +247,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             'maxYValue': max_y + 1,
         }
 
-        return self.render_template_to_string(
+        return self.render_jinja2_template_to_string(
             'exercisestats/highcharts_scatter_map.json', context)
 
 class ExercisesLastAuthorCounter(request_handler.RequestHandler):
@@ -391,7 +391,7 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
             ],
         }
 
-        return self.render_template_to_string(
+        return self.render_jinja2_template_to_string(
             'exercisestats/highcharts_exercises_created_histogram.json', context)
 
 class SetAllExerciseCreationDates(request_handler.RequestHandler):
