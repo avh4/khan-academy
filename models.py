@@ -33,7 +33,7 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
-from gae_bingo.gae_bingo import ab_test
+from gae_bingo.gae_bingo import ab_test, bingo
 from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
@@ -455,6 +455,8 @@ class UserExercise(db.Model):
                 user_data.put()
 
                 util_notify.update(user_data, self, False, True)
+
+                bingo('partial_reset_streak_bar')  # Score a conversion for A/B test
 
         else:
             if self.exercise in user_data.proficient_exercises:
