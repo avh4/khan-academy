@@ -322,15 +322,22 @@ class UserExercise(db.Model):
     # attaining proficiency, in range [0,1]. This is so we can abstract away
     # the internal algorithm so the front-end does not need to change.
     # TODO: Refactor code to use this measure instead of streak
+    # TODO(david): take into account longest_progress
     @property
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
+        def progress_with_start(streak, start, required_streak):
+            return start + float(streak) / required_streak * (1 - start)
+
         if self.summative:
-            # FIXME(david)
-            return 0.0
+            saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            saved_progress = float(saved_streak) / self.required_streak
+            current_progress = progress_with_start(self.streak - saved_streak,
+                self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
+            return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
         else:
-            return self.streak_start + float(self.streak) / consts.REQUIRED_STREAK * (1 - self.streak_start)
+            return progress_with_start(self.streak, self.streak_start, self.required_streak)
 
     @staticmethod
     def get_key_for_email(email):
@@ -378,7 +385,9 @@ class UserExercise(db.Model):
     def reset_streak(self):
         if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
+            old_progress = self.progress
             self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
         else:
             self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
             self.streak = 0

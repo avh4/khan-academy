@@ -10,6 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import deferred
 
 from app import App
+import consts
 import datetime
 import models
 import request_handler
@@ -399,6 +400,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.total_correct += 1
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
+
+                if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
+                    user_exercise.streak_start = 0.0
 
                 if user_exercise.streak >= exercise.required_streak and not explicitly_proficient:
                     user_exercise.set_proficient(True, user_data)
