@@ -186,7 +186,7 @@ class Answers(request_handler.RequestHandler):
                 "is_mod": util_discussion.is_current_user_moderator()
             }
 
-            html = self.render_template_block_to_string('discussion/question_answers.html', 'answers', template_values)
+            html = self.render_jinja2_template_to_string('discussion/question_answers_only.html', template_values)
             self.render_json({"html": html})
 
         return
