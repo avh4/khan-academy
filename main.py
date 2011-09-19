@@ -264,11 +264,7 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-        user_points_html = self.render_template_block_to_string(
-            "user_points.html",
-            "user_points_block",
-            user_points(user_data)
-        )
+        user_points_html = self.render_jinja2_template_to_string("user_points_only.html", user_points(user_data))
 
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)

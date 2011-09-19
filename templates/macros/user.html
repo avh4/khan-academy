@@ -8,8 +8,11 @@
     {% if user_data %}
         {% set points = user_data.points if user_data else 0 %}
     {% endif %}
+    <span id="user-points-container">{{ user_points_content(points) }}</span>
+{%- endmacro %}
 
-    <span id="user-points-container">{% block user_points_block scoped %}<span title="{{ points|thousands_separated }} energy points" class="energy-points-badge" onclick="location.href='/profile?k'" {% if not points %} style="display: none" {% endif %}>{{ points|thousands_separated }}</span>{% endblock %}</span>
+{% macro user_points_content(points=0) -%}
+<span title="{{ points|thousands_separated }} energy points" class="energy-points-badge" onclick="location.href='/profile?k'" {% if not points %} style="display: none" {% endif %}>{{ points|thousands_separated }}</span>
 {%- endmacro %}
 
 {% macro username_and_notification(username, user_data) -%}
