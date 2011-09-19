@@ -33,6 +33,7 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+from gae_bingo.gae_bingo import ab_test
 from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
@@ -327,17 +328,21 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        def progress_with_start(streak, start, required_streak):
-            return start + float(streak) / required_streak * (1 - start)
+        if ab_test('partial_reset_streak_bar'):
+            def progress_with_start(streak, start, required_streak):
+                return start + float(streak) / required_streak * (1 - start)
 
-        if self.summative:
-            saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-            saved_progress = float(saved_streak) / self.required_streak
-            current_progress = progress_with_start(self.streak - saved_streak,
-                self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
-            return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
+            if self.summative:
+                saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+                saved_progress = float(saved_streak) / self.required_streak
+                current_progress = progress_with_start(self.streak - saved_streak,
+                    self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
+                return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
+            else:
+                return progress_with_start(self.streak, self.streak_start, self.required_streak)
+
         else:
-            return progress_with_start(self.streak, self.streak_start, self.required_streak)
+            return float(self.streak) / self.required_streak
 
     @staticmethod
     def get_key_for_email(email):
@@ -386,7 +391,7 @@ class UserExercise(db.Model):
         if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
             old_progress = self.progress
-            self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            self.streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
             self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
         else:
             self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
