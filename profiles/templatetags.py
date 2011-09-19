@@ -4,6 +4,8 @@ import logging
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
+from webapp2_extras import jinja2
+
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
 from profiles import class_exercises_over_time_graph, class_progress_report_graph, class_energy_points_per_minute_graph, class_time_graph
 
@@ -112,11 +114,13 @@ def profile_exercise_progress_block(exercise_data, exercise):
         'short_name': exercise_data[exercise.name]["short_name"]
     }
 
-@register.inclusion_tag("profiles/recent_activity.html")
+@register.simple_tag
 def profile_recent_activity(user_data, view="standard"):
     context = recent_activity.recent_activity_context(user_data)
     context["view"] = view
-    return context
+
+    # TODO: nicer way to do these inclusion tag thingies for jinja
+    return jinja2.get_jinja2().render_template("profiles/recent_activity.html", **context)
 
 @register.inclusion_tag("profiles/recent_activity_entry_badge.html")
 def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry, view="standard"):

@@ -143,7 +143,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'selected_nav_link': 'coach',
                     "view": self.request_string("view", default=""),
                     }
-            self.render_template('viewclassprofile.html', template_values)
+            self.render_jinja2_template('viewclassprofile.html', template_values)
         else:
             self.redirect(util.create_login_url(self.request.uri))
 
@@ -188,7 +188,7 @@ class ViewProfile(request_handler.RequestHandler):
             "view": self.request_string("view", default=""),
         }
 
-        self.render_template('viewprofile.html', template_values)
+        self.render_jinja2_template('viewprofile.html', template_values)
 
 class ProfileGraph(request_handler.RequestHandler):
 

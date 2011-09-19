@@ -606,7 +606,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
-            "user_nickname", "user_email",
+            "user_nickname", "user_email", "seconds_since_joined",
     ]
 
     @property
@@ -658,6 +658,10 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @property
     def is_phantom(self):
         return util.is_phantom_user(self.user_id)
+
+    @property
+    def seconds_since_joined(self):
+        return util.seconds_since(self.joined)
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id:%s" % user_id)

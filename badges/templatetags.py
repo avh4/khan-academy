@@ -3,6 +3,8 @@ import logging
 
 from google.appengine.ext.webapp import template
 
+from webapp2_extras import jinja2
+
 import badges
 import util_badges
 from notifications import UserNotifier
@@ -56,7 +58,7 @@ def badge_counts(user_data):
     path = os.path.join(os.path.dirname(__file__), "badge_counts.html")
     return template.render(path, template_context)
 
-@register.inclusion_tag("badges/badge_block.html")
+@register.simple_tag
 def badge_block(badge, user_badge=None, show_frequency=False):
 
     if user_badge:
@@ -69,5 +71,8 @@ def badge_block(badge, user_badge=None, show_frequency=False):
     if show_frequency:
         frequency = badge.frequency()
 
-    return {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
+    template_values = {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
+
+    # TODO: nicer way to do these inclusion tag thingies for jinja
+    return jinja2.get_jinja2().render_template("badges/badge_block.html", **template_values)
 

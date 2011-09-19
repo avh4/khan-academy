@@ -113,6 +113,9 @@ def absolute_url(relative_url):
 def linebreaksbr(s):
     return s.replace('\n', '<br/>')
 
+def pluralize(i):
+    return "" if i == 1 else "s"
+
 def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
 
     # After a specified number of linebreaks, apply span with a CSS class
