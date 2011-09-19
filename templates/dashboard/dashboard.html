@@ -1,0 +1,15 @@
+{% extends "page_template_mini.html" %}
+
+{% import 'macros/dashboard.html' as dashboard %}
+
+{% block pagecontent %}
+
+    {{ dashboard.daily_graph("users", "New Users Registered / Day", "New Users", user_counts) }}
+    {{ dashboard.daily_graph("problems", "Problems Done / Day", "Problems", problem_counts) }}
+
+{% endblock pagecontent %}
+
+{% block bottompagescript %}
+    {{ js_package("profile") }}
+{% endblock bottompagescript %}
+
