@@ -4,7 +4,7 @@ import layer_cache
 import request_handler
 import user_util
 
-from models import ProblemLog, Exercise
+from models import ProblemLog, Exercise, Setting
 from .models import ExerciseStatistic
 
 import bisect
@@ -111,7 +111,8 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 
     # TODO: What's the best way to deal with the wrapped function having default values?
     def get_cache_key(self, exids, dates, title='', showLegend=False):
-        return "%s|%s|%s|%s" % (str(sorted(exids)), str(sorted(dates)), title, str(showLegend))
+        return "%s|%s|%s|%s|%s" % (Setting.cached_exercises_date(),
+            sorted(exids), sorted(dates), title, showLegend)
 
     @layer_cache.cache_with_key_fxn(get_cache_key,
         expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
@@ -199,7 +200,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
     def get(self):
         self.response.out.write(self.get_use_cache())
 
-    @layer_cache.cache_with_key_fxn(lambda self: str(self.get_request_params()),
+    @layer_cache.cache_with_key_fxn(lambda self: "%s|%s" % (Setting.cached_exercises_date(), self.get_request_params()),
         expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def get_use_cache(self):
         params = self.get_request_params()
@@ -255,7 +256,8 @@ class ExercisesLastAuthorCounter(request_handler.RequestHandler):
         self.render_json(self.exercise_counter_for_geckoboard_rag())
 
     @staticmethod
-    @layer_cache.cache(expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
+    @layer_cache.cache_with_key_fxn(lambda: "last_author_%s" % Setting.cached_exercises_date(),
+        expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def exercise_counter_for_geckoboard_rag():
         exercises = Exercise.get_all_use_cache()
         exercises.sort(key=lambda ex: ex.creation_date, reverse=True)
@@ -289,7 +291,7 @@ class ExerciseNumberTrivia(request_handler.RequestHandler):
         self.render_json(self.number_facts_for_geckboard_text(number))
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(lambda number: str(number),
+    @layer_cache.cache_with_key_fxn(lambda number: "%s|%s" % (Setting.cached_exercises_date(), number),
         expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def number_facts_for_geckboard_text(number):
         import exercisestats.number_trivia as number_trivia
@@ -351,7 +353,7 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
 
         self.response.out.write(self.get_histogram_spline_for_highcharts(earliest_dt))
 
-    @layer_cache.cache_with_key_fxn(lambda self, date: str(date),
+    @layer_cache.cache_with_key_fxn(lambda self, date: "%s|%s" % (Setting.cached_exercises_date(), date),
         expiration=CACHE_EXPIRATION_SECS, layer=layer_cache.Layers.Memcache)
     def get_histogram_spline_for_highcharts(self, earliest_dt=dt.datetime.min):
         histogram = {}
