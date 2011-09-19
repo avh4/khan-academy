@@ -356,8 +356,10 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
     def get_histogram_spline_for_highcharts(self, earliest_dt=dt.datetime.min):
         histogram = {}
         for ex in Exercise.get_all_use_cache():
-            timestamp = to_unix_secs(ex.creation_date) * 1000 if ex.creation_date else 0
-            histogram[timestamp] = histogram.get(timestamp, 0) + 1
+            if ex.creation_date:
+                creation_day = dt.datetime.combine(ex.creation_date, dt.time())
+                timestamp = to_unix_secs(creation_day) * 1000
+                histogram[timestamp] = histogram.get(timestamp, 0) + 1
 
         total_exercises = {}
         prev_value = 0
