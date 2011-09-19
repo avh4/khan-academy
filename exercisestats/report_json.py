@@ -260,7 +260,7 @@ class ExercisesLastAuthorCounter(request_handler.RequestHandler):
         exercises = Exercise.get_all_use_cache()
         exercises.sort(key=lambda ex: ex.creation_date, reverse=True)
 
-        last_exercise = exercises[-1]
+        last_exercise = exercises[0]
         num_exercises = len(exercises)
         last_exercise_author = last_exercise.author.nickname() if last_exercise.author else 'random person'
 
