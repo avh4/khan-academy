@@ -4,9 +4,9 @@ import util
 from app import App
 
 class AboutRequestHandler(request_handler.RequestHandler):
-    def render_template(self, template_name, template_values):
+    def render_jinja2_template(self, template_name, template_values):
         template_values["selected_nav_link"] = "about"
-        request_handler.RequestHandler.render_template(self, template_name, template_values)
+        request_handler.RequestHandler.render_jinja2_template(self, template_name, template_values)
 
 class ViewAbout(AboutRequestHandler):
     def get(self):
