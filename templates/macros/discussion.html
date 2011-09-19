@@ -265,7 +265,7 @@
     </nobr>
 {%- endmacro %}
 
-{% macro question_answers(answers) -%}
+{% macro question_answers(answers, standalone=False, video=None, playlist=None) -%}
     {% block answers scoped %}
         {% for answer in answers %}
             <div class="answer_container">
@@ -273,7 +273,7 @@
                 <div class="answer">
                     {{ vote_tools(answer) }}
                     {% if standalone %}
-                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{answer.question.key}}#q_{{answer.question.key}}">
+                        <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}&qa_expand_key={{answer.question().key()}}#q_{{answer.question().key()}}">
                             {{ answer.content|truncate(40)|escape|linebreaksbr }}
                         </a>
                     {% else %}

@@ -56,7 +56,7 @@ class VideoFeedbackNotificationList(request_handler.RequestHandler):
                     "dict_answers": dict_answers
                   }
 
-        self.render_template('discussion/video_feedback_notification_list.html', context)
+        self.render_jinja2_template('discussion/video_feedback_notification_list.html', context)
 
 class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
 
@@ -74,7 +74,7 @@ class VideoFeedbackNotificationFeed(request_handler.RequestHandler):
                   }
 
         self.response.headers['Content-Type'] = 'text/xml'
-        self.render_template('discussion/video_feedback_notification_feed.xml', context)
+        self.render_jinja2_template('discussion/video_feedback_notification_feed.xml', context)
 
 def feedback_answers_for_user_data(user_data):
     feedbacks = []
