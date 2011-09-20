@@ -300,7 +300,7 @@ def exercise_contents(exercise):
     if not len(body_contents):
         raise MissingExerciseException("Missing exercise body in content for exid '%s'" % exercise.name)
 
-    return (body_contents, script_contents, style_contents, data_require, sha1)
+    return map(lambda s: s.decode('utf-8'), (body_contents, script_contents, style_contents, data_require, sha1))
 
 @layer_cache.cache_with_key_fxn(lambda exercise_file: "exercise_raw_html_%s" % exercise_file, layer=layer_cache.Layers.InAppMemory)
 def raw_exercise_contents(exercise_file):
