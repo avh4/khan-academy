@@ -2,7 +2,7 @@ import datetime
 import util
 import logging
 
-from models import UserExercise, Exercise, UserData
+from models import UserExercise, Exercise, UserData, ExerciseGraph
 
 def exercise_progress_graph_context(user_data_student):
 
@@ -11,8 +11,13 @@ def exercise_progress_graph_context(user_data_student):
     
     exercise_data = {}
     
-    exercises = Exercise.get_all_use_cache()
+    exercise_graph = ExerciseGraph()
+    exercises = exercise_graph.exercises
+
     user_exercises = UserExercise.get_for_user_data_use_cache(user_data_student)
+
+    exercise_graph.initialize_for_user(user_data_student, user_exercises)
+    review_exercise_names = [e.name for e in exercise_graph.get_review_exercises()]
 
     dict_user_exercises = {}
     for user_exercise in user_exercises:
@@ -30,9 +35,9 @@ def exercise_progress_graph_context(user_data_student):
                 
         user_exercise = dict_user_exercises[exercise.name] if dict_user_exercises.has_key(exercise.name) else None
 
-        if user_data_student.is_proficient_at(exercise.name):
+        if user_data_student.is_proficient_at(exercise.name, exercise_graph):
 
-            if user_data_student.is_reviewing( exercise.name, user_exercise, datetime.datetime.now() ) :
+            if exercise.name in review_exercise_names :
                 status = "Review"
                 color = "review"
             else :
