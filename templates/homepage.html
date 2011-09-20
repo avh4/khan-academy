@@ -2,6 +2,7 @@
 
 {% import 'macros/youtube.html' as youtube %}
 {% import 'macros/analytics.html' as analytics %}
+{% import 'macros/mailing_lists.html' as mailing_lists %}
 
 {% block pagescript %}
 <style>
@@ -46,7 +47,7 @@
                 </tr>
                 <tr>
                     <td colspan=3 class="homepage-mailing">
-                        <span>{{ mailing_list_signup_form(3, "Get Updates", "Enter your email to learn about new courses.") }}</span>
+                        <span>{{ mailing_lists.signup_form(3, "Get Updates", "Enter your email to learn about new courses.") }}</span>
                     </td>
                 </tr>
             </table>

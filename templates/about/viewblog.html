@@ -1,5 +1,7 @@
 {% extends "about/about_template.html" %}
 
+{% import 'macros/mailing_lists.html' as mailing_lists %}
+
 {% block aboutcontent %}
 <div id="about-blog">
     <div id="blog-content">
@@ -60,7 +62,7 @@
                 anyone else for any reason.
             </p>
             <p>
-                {{ mailing_list_signup_form(1, "Sign me up", "Enter your email address") }}
+                {{ mailing_lists.signup_form(1, "Sign me up", "Enter your email address") }}
             </p>
         </div>
         <div id="pilot-list">
@@ -71,7 +73,7 @@
                 can be used in schools.
             </p>
             <p>
-                {{ mailing_list_signup_form(2, "Sign me up", "Enter your email address") }}
+                {{ mailing_lists.signup_form(2, "Sign me up", "Enter your email address") }}
             </p>
         </div>
     </div>

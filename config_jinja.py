@@ -15,7 +15,6 @@ from phantom_users.templatetags import login_notifications
 from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
-from mailing_lists.templatetags import mailing_list_signup_form
 from profiles.templatetags import get_graph_url, profile_recent_activity
 from badges.templatetags import badge_block
 from util import static_url, thousands_separated_number, create_login_url, linebreaksbr, linebreaksbr_ellipsis, pluralize
@@ -39,7 +38,6 @@ jinja2.default_config = {
         "badge_notifications": badge_notifications,
         "badge_counts": badge_counts,
         "profiler_includes": profiler_includes,
-        "mailing_list_signup_form": mailing_list_signup_form,
         "playlist_browser": playlist_browser,
         "column_major_sorted_videos": column_major_sorted_videos,
         "streak_bar": streak_bar,
