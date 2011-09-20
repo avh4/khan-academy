@@ -25,7 +25,7 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
-from gae_bingo.gae_bingo import bingo
+from gae_bingo.gae_bingo import bingo, ab_test
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -171,6 +171,9 @@ class ViewExercise(request_handler.RequestHandler):
 
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints
+        else: # not read only
+            user_exercise.hints_first = ab_test('hints_first', [True, False],
+                ['used_hints', 'used_video', 'used_hints_or_video'])
 
         is_webos = self.is_webos()
         browser_disabled = is_webos or self.is_older_ie()
@@ -183,7 +186,7 @@ class ViewExercise(request_handler.RequestHandler):
             (exid, user_data_student.key_email , problem_number+1)
 
         user_exercise_json = jsonify.jsonify(user_exercise)
-        
+
         template_values = {
             'exercise': exercise,
             'user_exercise_json': user_exercise_json,
