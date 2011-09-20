@@ -339,7 +339,7 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        if ab_test('partial_reset_streak_bar', conversion_name = UserExercise._streak_bar_conversion_tests):
+        if ab_test('partial_reset_streak_bar_conversions', conversion_name = UserExercise._streak_bar_conversion_tests):
             def progress_with_start(streak, start, required_streak):
                 return start + float(streak) / required_streak * (1 - start)
 
