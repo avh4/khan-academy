@@ -5,9 +5,7 @@ import os
 import simplejson as json
 
 from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template as webapp_template
-from django import template
-from django.template.defaultfilters import escape
+from jinja2.utils import escape
 
 from app import App
 from templatefilters import seconds_to_time_string, slugify
@@ -198,8 +196,7 @@ def playlist_browser(browser_id):
         'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE
     }
 
-    path = os.path.join(os.path.dirname(__file__), "playlist_browser.html")
-    return webapp_template.render(path, template_values)
+    return shared_jinja.get().render_template("playlist_browser.html", **template_values)
 
 @register.simple_tag
 def playlist_browser_structure(structure, class_name="", level=0):

@@ -8,7 +8,7 @@ from webapp2_extras import jinja2
 
 from models import UserData
 from templateext import escapejs
-from templatetags import playlist_browser, column_major_sorted_videos, streak_bar
+from templatetags import playlist_browser, column_major_sorted_videos, streak_bar, playlist_browser_structure
 from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago_short, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link
 from api.auth.xsrf import render_xsrf_js
 from js_css_packages.templatetags import css_package, js_package
@@ -38,6 +38,7 @@ jinja2.default_config = {
         "badge_counts": badge_counts,
         "profiler_includes": profiler_includes,
         "playlist_browser": playlist_browser,
+        "playlist_browser_structure": playlist_browser_structure,
         "column_major_sorted_videos": column_major_sorted_videos,
         "streak_bar": streak_bar,
         "get_graph_url": get_graph_url,
