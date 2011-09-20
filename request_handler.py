@@ -8,7 +8,6 @@ import re
 import traceback
 
 from google.appengine.api import users
-from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
 import webapp2
