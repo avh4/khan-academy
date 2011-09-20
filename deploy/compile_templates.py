@@ -39,10 +39,6 @@ from webapp2_extras import jinja2
 # Using our app's standard jinja config so we pick up custom globals and filters
 import config_jinja
 
-# Only compile .html files
-def filter_templates(src):
-    return os.path.basename(src).endswith(".html")
-
 def compile_templates():
 
     src_path = os.path.join(os.path.dirname(__file__), "..", "templates")
@@ -58,9 +54,8 @@ def compile_templates():
         pass
 
     # Compile templates to zip, crashing on any compilation errors
-    env.compile_templates(dest_path, extensions=None, 
-            ignore_errors=False, py_compile=False, zip='deflated',
-            filter_func=filter_templates)
+    env.compile_templates(dest_path, extensions=["html", "json"], 
+            ignore_errors=False, py_compile=False, zip='deflated')
 
 if __name__ == "__main__":
     compile_templates()
