@@ -94,19 +94,9 @@
                          Download
                 </a>
                 {% endif %}
-                  
-                 <a href="#" style="z-index:101;" class="simple-button action-gradient with-icon download-icon share-link" onclick="_gaq.push(['_trackEvent', 'Click', 'Video-Page-Share-Button']);return false;">
-                 <img src="/images/share-icon-small.png" />
-                         Share
-                 </a>
 
-                 <span class="sharepop" style="display: none;">
-					<span class="triangle-isosceles top">
-						<a href="javascript:void(0);" class="facebookShare" onclick="_gaq.push(['_trackEvent', 'Click', 'Video-Page-Share-Facebook']);Social.facebookVideo('{{video.title|escape}}','{{video.description}}','/video?v={{video.youtube_id}}');"></a>
-						<a class="twitterShare" href="http://twitter.com/share?text=just%20learned%20about%20{{video.title|escape}}&amp;related=khanacademy:Trying%20to%20make%20a world-class%20education%20available%20to%20anyone,%20anywhere.&amp;via=khanacademy" onclick="_gaq.push(['_trackEvent', 'Click', 'Video-Page-Share-Twitter']);"> </a>
-					</span>
-				</span>
-					
+                {{ social.share_video_button(video.title, video.description, video.youtube_id, "Video-Page-Share") }}
+                
          	</div>
 			<span style="float:right;" id="points-badge-hover">
                 {{ user.possible_points_badge(awarded_points, video_points_base, logged_in) }}

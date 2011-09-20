@@ -144,7 +144,7 @@ function exercise_url(point) {
                                     fSummary: true,
                                     correct: {% if problem.correct %}true{% else %}false{% endif %},
                                     count_hints: {% if problem.count_hints %}true{% else %}false{% endif %},
-                                    time_used: '{{ problem.exercise_time|escapejs }}',
+                                    time_used: '{{ problem.exercise_time()|escapejs }}',
                                     timesince: '{{ problem.time_done|timesince_ago }}',
                                     {% if problem.exercise_non_summative %}
                                         exercise_non_summative_display_name: '{{ problem.exercise_non_summative_display_name|escapejs }}',
@@ -176,8 +176,8 @@ function exercise_url(point) {
                                     x: {{ loop.index }} + {{ x_offset }},
                                     {% if problem.video_point %}
                                         y: {{ problem.time_taken }},
-                                        desc: '{{ problem.video_titles_html|escapejs }}',
-                                        time_watched: '{{ problem.video_time|escapejs }}',
+                                        desc: '{{ problem.video_titles_html()|escapejs }}',
+                                        time_watched: '{{ problem.video_time()|escapejs }}',
                                         marker: { symbol: 'url(/images/camera-small-chart.png)'}
                                     {% else %}
                                         y: 0,
@@ -199,7 +199,7 @@ function exercise_url(point) {
                                     {% if problem.count_hints %}
                                         y: {{ problem.time_taken }},
                                         desc: 'Hint used',
-                                        time_watched: '{{ problem.video_time|escapejs }}',
+                                        time_watched: '{{ problem.video_time()|escapejs }}',
                                         marker: { symbol: 'url(/images/hint-small-chart.png)'}
                                     {% else %}
                                         y: 0,
