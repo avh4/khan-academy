@@ -1,7 +1,6 @@
 import os
 import re
 from google.appengine.ext import webapp
-from django import template
 
 import models
 import models_discussion

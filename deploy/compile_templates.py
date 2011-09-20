@@ -37,7 +37,6 @@ import webapp2
 from webapp2_extras import jinja2
 
 # Using our app's standard jinja config so we pick up custom globals and filters
-import config_django
 import config_jinja
 
 # Only compile .html files

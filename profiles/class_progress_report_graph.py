@@ -1,4 +1,4 @@
-from django.template.defaultfilters import escape
+from jinja2.utils import escape
 from templateext import escapejs
 
 import models
