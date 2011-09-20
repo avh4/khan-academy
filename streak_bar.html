@@ -5,12 +5,12 @@
         <div class="current-streak">
             <ul class="unit-rating" style="width:{{ streak_max_width }}px;">
                 <li class="current-rating" style="width:{{ streak_width }}px;"></li>
-                <li class="streak-icon" style="width:{{ streak_icon_width }}px;"></li>
-                <li class="best-label" style="width:{{ longest_streak_width }}px;">{% if show_longest_streak_label %}{{ longest_streak }}&nbsp;{% endif %}</li>
+                <!-- <li class="streak-icon" style="width:{{ streak_icon_width }}px;"></li> -->
+                <!-- <li class="best-label" style="width:{{ longest_streak_width }}px;"></li> -->
                 {% for level in levels %}
-                    <li class="level-label" style="width:{{ level }}px;"></li>
+                    <li class="level-label" style="left:{{ level }}px;"></li>
                 {% endfor %}
-                <li class="current-label" style="width:{{ streak_width }}px;">{% if show_streak_label %}{{ streak }}&nbsp;{% endif %}</li>
+                <li class="current-label" style="width:{{ streak_width }}px;"></li>
             </ul>
         </div>
     </div>

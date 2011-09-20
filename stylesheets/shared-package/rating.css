@@ -95,24 +95,23 @@
     font-weight: bold;
     font-size: 14px;
     height: 30px;
-    padding-top: 5px;
     }
 
 .unit-rating li.best-label {
-	background: url('/images/streak-meter-active.png') no-repeat left top;
     z-index: 3;
-    opacity: 0.2;
-    filter:alpha(opacity=20);
-    }
+}
 
 .unit-rating li.level-label {
-    background: url('/images/streak-meter-separator.png') no-repeat right top;
+    background-color:white;
+    width:2px; 
+    position:absolute;
     z-index: 4;
     }
 
 .unit-rating li.current-label {
+    background: url('/images/ministreakbar.png') no-repeat -228px 0px;
     z-index: 5;
-    }
+}
 
 .unit-rating li.streak-icon {
 	background-image: url(/images/non-repeating-sprites.1.png);
