@@ -9,7 +9,7 @@ from webapp2_extras import jinja2
 from models import UserData
 from templateext import escapejs
 from templatetags import playlist_browser, column_major_sorted_videos, streak_bar, playlist_browser_structure
-from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago_short, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link
+from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link
 from api.auth.xsrf import render_xsrf_js
 from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
@@ -62,7 +62,7 @@ jinja2.default_config = {
         "linebreaksbr": linebreaksbr,
         "linebreaksbr_ellipsis": linebreaksbr_ellipsis,
         "youtube_timestamp_links": youtube_timestamp_links,
-        "timesince_ago": timesince_ago_short,
+        "timesince_ago": timesince_ago,
         "seconds_to_time_string": seconds_to_time_string,
         "mygetattr": mygetattr,
         "find_column_index": find_column_index,

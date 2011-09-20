@@ -2,10 +2,6 @@ import re
 import datetime
 import math
 
-from google.appengine.ext import webapp
-from django import template
-from django.template.defaultfilters import timesince, pluralize
-
 import util
 import logging
 
@@ -27,11 +23,6 @@ def hash(h, key):
 def timesince_ago(content):
     if not content:
         return ""
-    return append_ago(timesince(content))
-
-def timesince_ago_short(content):
-    if not content:
-        return ""
     return append_ago(seconds_to_time_string(util.seconds_since(content)))
 
 def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
@@ -51,22 +42,22 @@ def seconds_to_time_string(seconds_init, short_display = True, show_hours = True
     seconds -= minutes * 60
 
     if years and days:
-        return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
+        return "%d year%s and %d day%s" % (years, util.pluralize(years), days, util.pluralize(days))
     elif years:
-        return "%d year%s" % (years, pluralize(years))
+        return "%d year%s" % (years, util.pluralize(years))
     elif days and hours and show_hours:
-        return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
+        return "%d day%s and %d hour%s" % (days, util.pluralize(days), hours, util.pluralize(hours))
     elif days:
-        return "%d day%s" % (days, pluralize(days))
+        return "%d day%s" % (days, util.pluralize(days))
     elif hours:
         if not short_display and minutes:
-            return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
+            return "%d hour%s and %d minute%s" % (hours, util.pluralize(hours), minutes, util.pluralize(minutes))
         else:
-            return "%d hour%s" % (hours, pluralize(hours))
+            return "%d hour%s" % (hours, util.pluralize(hours))
     else:
         if not short_display and seconds and not minutes:
-            return "%d second%s" % (seconds, pluralize(seconds))
-        return "%d minute%s" % (minutes, pluralize(minutes))
+            return "%d second%s" % (seconds, util.pluralize(seconds))
+        return "%d minute%s" % (minutes, util.pluralize(minutes))
 
 def utc_to_ctz(content, tz_offset):
     return content + datetime.timedelta(minutes=tz_offset)
