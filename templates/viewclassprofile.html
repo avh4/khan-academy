@@ -1,4 +1,8 @@
 {% extends "profile_template.html" %}
+
+{% import 'macros/coach.html' as coach %}
+{% import 'macros/profiles.html' as profile_macros %}
+
 {% block meta_page_title %}Class Profile | {% endblock meta_page_title %}
 
 {% block pagescript %}
@@ -44,7 +48,7 @@
 
     <ul id="nav-accordion">
         <li>
-            {{ profiles.class_graph_link(user_data_coach, "Progress Report", "classprogressreport", selected_graph_type, list_id) }}
+            {{ profile_macros.class_graph_link(user_data_coach, "Progress Report", "classprogressreport", selected_graph_type, list_id) }}
             <p class="accordion-content">
                 Shows you which exercises your class has worked on and completed.
                 <span class="graph-options">
@@ -56,15 +60,15 @@
             </p>
         </li>
         <li>
-            {{ profiles.class_graph_link(user_data_coach, "Daily Activity Report", "classtime", selected_graph_type, list_id) }}
+            {{ profile_macros.class_graph_link(user_data_coach, "Daily Activity Report", "classtime", selected_graph_type, list_id) }}
             <p class="accordion-content">
                 Shows your total class activity on a specific date.
-                {{ profiles.graph_calendar_picker(user_data_coach, "classtime") }}
+                {{ profile_macros.graph_calendar_picker(user_data_coach, "classtime") }}
                 <span class="instructions">Light blue activity shows normal school hours, and dark blue is outside normal hours.</span>
             </p>
         </li>
         <li>
-            {{ profiles.class_graph_link(user_data_coach, "Exercise Progress Over Time", "classexercisesovertime", selected_graph_type, list_id) }}
+            {{ profile_macros.class_graph_link(user_data_coach, "Exercise Progress Over Time", "classexercisesovertime", selected_graph_type, list_id) }}
             <div class="accordion-content">Shows how many exercises your students have completed over time.<br /><br />
                 <span class="instructions">Highlight a <a href="#" class="highlight-section show-students-highlight">specific student</a> or a <a href="#" class="highlight-section show-exercises-highlight">specific exercise</a>.</span><br />
 
@@ -91,7 +95,7 @@
             </div>
         </li>
         <li>
-            {{ profiles.class_graph_link(user_data_coach, "Class Points per Minute", "classenergypointsperminute", selected_graph_type, list_id) }}
+            {{ profile_macros.class_graph_link(user_data_coach, "Class Points per Minute", "classenergypointsperminute", selected_graph_type, list_id) }}
             <p class="accordion-content">
                 Shows your total class energy points per minute as a continuously updating rolling average.
             </p>

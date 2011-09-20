@@ -7,21 +7,6 @@ import logging
 import util
 from app import App
 
-def smart_truncate(content, length=100, suffix='...'):
-    if len(content) <= length:
-        return content
-    else:
-        return content[:length].rsplit(' ', 1)[0]+suffix
-
-def greater_than(x, y):
-    return x > y
-
-def hash(h, key):
-    try:
-        return h[key]
-    except KeyError:
-        return None
-
 def timesince_ago(content):
     if not content:
         return ""
@@ -61,12 +46,6 @@ def seconds_to_time_string(seconds_init, short_display = True, show_hours = True
             return "%d second%s" % (seconds, pluralize(seconds))
         return "%d minute%s" % (minutes, pluralize(minutes))
 
-def utc_to_ctz(content, tz_offset):
-    return content + datetime.timedelta(minutes=tz_offset)
-
-def thousands_separated(content):
-    return util.thousands_separated_number(content)
-
 def youtube_timestamp_links(content):
     dict_replaced = {}
     html_template = "<span class='youTube' seconds='%s'>%s</span>"
@@ -94,12 +73,6 @@ def append_ago(s_time):
     if not s_time:
         return ""
     return re.sub("^0 minutes ago", "just now", s_time + " ago")
-
-def mod(content, i):
-    return content % i
-
-def multiply(x, y):
-    return (x * y)
 
 def in_list(content, list):
     return content in list
