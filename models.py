@@ -402,10 +402,16 @@ class UserExercise(db.Model):
         if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
             old_progress = self.progress
+            old_streak = self.streak
+
             self.streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-            self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
+
+            if old_streak != self.streak:  # Only bring down streak bar at most once per problem
+                self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
+
         else:
-            self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
+            if self.streak != 0:  # Only bring down streak bar at most once per problem
+                self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
             self.streak = 0
 
     def struggling_threshold(self):
