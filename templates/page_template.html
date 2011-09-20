@@ -56,7 +56,7 @@
             {{ js_css_packages.js_package("shared") }}
         {% endif %}
 
-        {{ render_xsrf_js() }}
+        {{ xsrf.render_xsrf_js() }}
 
         {{ user.user_video_css(user_data) }}
 
@@ -202,7 +202,7 @@
 	</script>
     {% endif %}
 
-    {{ profiler_includes() }}
+    {{ gae_mini_profiler.profiler_includes() }}
 
     </body>
 </html>

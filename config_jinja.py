@@ -13,8 +13,6 @@ from google.appengine.dist import use_library
 use_library('django', '0.96')
 
 from models import UserData
-from api.auth.xsrf import render_xsrf_js
-from gae_mini_profiler.templatetags import profiler_includes
 
 import templatetags
 import templatefilters
@@ -23,6 +21,8 @@ import profiles.templatetags
 import social.templatetags
 import phantom_users.templatetags
 import js_css_packages.templatetags
+import gae_mini_profiler.templatetags
+import api.auth.xsrf
 import util
 from app import App
 
@@ -33,15 +33,14 @@ jinja2.default_config = {
     "cache_size": 0 if App.is_dev_server else -1, # Only cache in production
     "auto_reload": App.is_dev_server, # Don't check for template updates in production
     "globals": {
-        "render_xsrf_js": render_xsrf_js,
-        "profiler_includes": profiler_includes,
-
         "templatetags": templatetags,
         "social": social.templatetags,
         "profiles": profiles.templatetags,
         "badges": badges.templatetags,
         "phantom_users": phantom_users.templatetags,
         "js_css_packages": js_css_packages.templatetags,
+        "gae_mini_profiler": gae_mini_profiler.templatetags,
+        "xsrf": api.auth.xsrf,
         "UserData": UserData,
         "hash": hash,
         "json": json,
