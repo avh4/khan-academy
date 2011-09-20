@@ -1,9 +1,6 @@
 import os
 import logging
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-
 import shared_jinja
 
 SITE_TAGLINE = "Trying to make a world-class education available to anyone, anywhere."
