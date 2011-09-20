@@ -54,7 +54,7 @@ def compile_templates():
         pass
 
     # Compile templates to zip, crashing on any compilation errors
-    env.compile_templates(dest_path, extensions=["html", "json"], 
+    env.compile_templates(dest_path, extensions=["html", "json", "xml"], 
             ignore_errors=False, py_compile=False, zip='deflated')
 
 if __name__ == "__main__":
