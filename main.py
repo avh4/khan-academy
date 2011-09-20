@@ -4,6 +4,7 @@ import os
 import datetime
 import time
 import urllib
+import urlparse
 import logging
 import re
 import devpanel
@@ -172,8 +173,19 @@ class ViewVideo(request_handler.RequestHandler):
 
             redirect_to_canonical_url = True
 
+        exid = self.request_string('exid', default=None)
+        if exid:
+            bingo("used_video")
+            bingo("used_hints_or_video")
+
         if redirect_to_canonical_url:
-            self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
+            qs = {'playlist': playlist.title}
+            if exid:
+                qs['exid'] = exid
+
+            urlpath = "/video/%s" % urllib.quote(readable_id)
+            url = urlparse.urlunparse(('', '', urlpath, '', urllib.urlencode(qs), ''))
+            self.redirect(url, True)
             return
 
         # If we got here, we have a readable_id and a playlist_title, so we can display
