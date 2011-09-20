@@ -50,11 +50,9 @@ def class_progress_report_graph_context(user_data, student_list):
 
     exercises = get_class_exercises(list_students)
     exercise_graph = models.ExerciseGraph()
-    #exercises_all = models.Exercise.get_all_use_cache()
-    exercises_all = exercise_graph.get_all_exercises() 
+    exercises_all = exercise_graph.exercises 
     exercises_found = []
 
-    #for exercise_name in exercise_graph.get_all_exercise_names():
     for exercise in exercises_all:
         for (email, _) in student_emails:
             if exercises[email]["user_exercises"].has_key(exercise.name):

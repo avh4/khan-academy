@@ -808,10 +808,9 @@ class UserData(GAEBingoIdentityModel, db.Model):
         self.need_to_reassess = False
         return is_changed
 
-    def reassess_if_necessary(self, exgraph=None):
+    def reassess_if_necessary(self, ex_graph=None):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        ex_graph = exgraph
         if ex_graph is None:
             ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
@@ -1805,9 +1804,7 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
-    
-    def get_all_exercises(self):
-        return self.exercises
+
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
