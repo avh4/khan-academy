@@ -1,7 +1,7 @@
 import datetime
 import random
 
-from django.template.defaultfilters import escape
+from jinja2.utils import escape
 
 import consts
 import library
