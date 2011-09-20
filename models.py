@@ -808,14 +808,16 @@ class UserData(GAEBingoIdentityModel, db.Model):
         self.need_to_reassess = False
         return is_changed
 
-    def reassess_if_necessary(self):
+    def reassess_if_necessary(self, exgraph=None):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        ex_graph = ExerciseGraph(self)
+        ex_graph = exgraph
+        if ex_graph is None:
+            ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
 
-    def is_proficient_at(self, exid):
-        self.reassess_if_necessary()
+    def is_proficient_at(self, exid, exgraph=None):
+        self.reassess_if_necessary(exgraph)
         return (exid in self.all_proficient_exercises)
 
     def is_explicitly_proficient_at(self, exid):
@@ -1624,10 +1626,12 @@ class ExerciseGraph(object):
             self.exercise_by_name[ex.name] = ex
 
         if user_data is not None :
-            user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
-            self.initialize_for_user(user_data, user_exercises)
+            self.initialize_for_user(user_data)
             
-    def initialize_for_user(self, user_data, user_exercises):
+    def initialize_for_user(self, user_data, user_exercises=None):
+
+        if user_exercises is None:
+            user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
 
         for ex in self.exercises:
             ex.coverers = []

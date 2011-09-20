@@ -93,7 +93,7 @@ def class_progress_report_graph_context(user_data, student_list):
             hover = ""
             color = "transparent"
 
-            if student.is_proficient_at(exercise_name):
+            if student.is_proficient_at(exercise_name, exercise_graph):
 
                 if exercise_name in student_review_exercise_names:
                     status = "Review"
