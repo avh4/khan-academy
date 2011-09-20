@@ -398,8 +398,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
             if exercise.name == 'addition_1':
                 add_to_conversions(models.UserExercise.addition_1_conversions)
-
-            if exercise.name == 'geometry_1':
+            elif exercise.name == 'geometry_1':
                 add_to_conversions(models.UserExercise.geometry_1_conversions)
 
             add_to_conversions(models.UserExercise.any_exercise_conversions)

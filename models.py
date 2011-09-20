@@ -478,14 +478,12 @@ class UserExercise(db.Model):
 
                 if len(user_data.proficient_exercises) == 5:
                     bingo('sbar_gained_5th_proficiency')
-
-                if len(user_data.proficient_exercises) == 10:
+                elif len(user_data.proficient_exercises) == 10:
                     bingo('sbar_gained_10th_proficiency')
 
                 if self.exercise == 'addition_1':
                     bingo('sbar_addition_1_proficiency')
-
-                if self.exercise == 'geometry_1':
+                elif self.exercise == 'geometry_1':
                     bingo('sbar_geometry_1_proficiency')
 
         else:
