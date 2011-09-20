@@ -16,7 +16,6 @@ from webapp2_extras import jinja2
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from app import App
-from render import render_block_to_string
 import cookie_util
 
 from gae_bingo.gae_bingo import ab_test
@@ -331,11 +330,6 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
         # Don't turn on debug in production even for admins because filesystem access is sloooow
         debug = App.is_dev_server
         return template.render(path, template_values, debug)
-
-    @staticmethod
-    def render_template_block_to_string(template_name, block, context):
-        path = os.path.join(os.path.dirname(__file__), template_name)
-        return render_block_to_string(path, block, context).strip()
 
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)
