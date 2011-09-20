@@ -1,5 +1,5 @@
 from jinja2.utils import escape
-from templateext import escapejs
+from templatefilters import escapejs
 
 import models
 import util

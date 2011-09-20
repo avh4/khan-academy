@@ -13,9 +13,8 @@ from google.appengine.dist import use_library
 use_library('django', '0.96')
 
 from models import UserData
-from templateext import escapejs
 from templatetags import playlist_browser, column_major_sorted_videos, streak_bar, playlist_browser_structure
-from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link
+from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link, escapejs
 from api.auth.xsrf import render_xsrf_js
 from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
