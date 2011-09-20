@@ -824,11 +824,11 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     def is_reviewing(self, exid, user_exercise, time):
 
+        if user_exercise is None:
+            return False
         # Short circuit out of full review check if not proficient or review time hasn't come around yet
-
         if not self.is_proficient_at(exid):
             return False
-
         if user_exercise.last_review + user_exercise.get_review_interval() > time:
             return False
 
