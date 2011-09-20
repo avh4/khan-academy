@@ -112,8 +112,8 @@
         </ul>
         {% else %}
         <div id="browse-control-anchor"></div>
-        {{ playlist_browser("browse") }}
-        {{ playlist_browser("browse-fixed") }}
+        {{ templatetags.playlist_browser("browse") }}
+        {{ templatetags.playlist_browser("browse-fixed") }}
         
         {% endif %}
         <a href="/mobilefullsite" class="mobile-only" data-role="button" data-ajax="false">View standard site</a>
@@ -132,7 +132,7 @@
 
 {% block bottompagescript %}
     {% if not is_mobile %}
-        {{ js_package("homepage") }}
+        {{ js_css_packages.js_package("homepage") }}
     {% endif %}
 
     <script type="text/javascript">

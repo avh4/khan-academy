@@ -13,18 +13,17 @@ from google.appengine.dist import use_library
 use_library('django', '0.96')
 
 from models import UserData
-from templatetags import playlist_browser, column_major_sorted_videos, streak_bar, playlist_browser_structure
-from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link, escapejs, linebreaksbr, linebreaksbr_ellipsis, pluralize
 from api.auth.xsrf import render_xsrf_js
-from js_css_packages.templatetags import css_package, js_package
-from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
-from profiles.templatetags import get_graph_url, profile_recent_activity
-from badges.templatetags import badge_block
-from util import static_url, thousands_separated_number, create_login_url
-from discussion.templatetags import video_comments, video_qa
+
+import templatetags
+import templatefilters
+import badges.templatetags
+import profiles.templatetags
 import social.templatetags
 import phantom_users.templatetags
+import js_css_packages.templatetags
+import util
 from app import App
 
 jinja2.default_config = {
@@ -34,44 +33,38 @@ jinja2.default_config = {
     "cache_size": 0 if App.is_dev_server else -1, # Only cache in production
     "auto_reload": App.is_dev_server, # Don't check for template updates in production
     "globals": {
-        "css_package": css_package,
-        "js_package": js_package,
         "render_xsrf_js": render_xsrf_js,
-        "badge_notifications": badge_notifications,
-        "badge_counts": badge_counts,
         "profiler_includes": profiler_includes,
-        "playlist_browser": playlist_browser,
-        "playlist_browser_structure": playlist_browser_structure,
-        "column_major_sorted_videos": column_major_sorted_videos,
-        "streak_bar": streak_bar,
-        "get_graph_url": get_graph_url,
-        "badge_block": badge_block,
-        "profile_recent_activity": profile_recent_activity,
+
+        "templatetags": templatetags,
         "social": social.templatetags,
+        "profiles": profiles.templatetags,
+        "badges": badges.templatetags,
         "phantom_users": phantom_users.templatetags,
+        "js_css_packages": js_css_packages.templatetags,
         "UserData": UserData,
         "hash": hash,
         "json": json,
         "App": App,
     }, 
     "filters": {
-        "escapejs": escapejs,
         "urlencode": lambda s: quote_plus(s or ""),
-        "static_url": static_url,
-        "login_url": create_login_url,
-        "phantom_login_link": phantom_login_link,
-        "slugify": slugify,
-        "pluralize": pluralize,
-        "linebreaksbr": linebreaksbr,
-        "linebreaksbr_ellipsis": linebreaksbr_ellipsis,
-        "youtube_timestamp_links": youtube_timestamp_links,
-        "timesince_ago": timesince_ago,
-        "seconds_to_time_string": seconds_to_time_string,
-        "mygetattr": mygetattr,
-        "find_column_index": find_column_index,
-        "in_list": in_list,
-        "column_height": column_height,
-        "thousands_separated": thousands_separated_number,
+        "escapejs": templatefilters.escapejs,
+        "phantom_login_link": templatefilters.phantom_login_link,
+        "slugify": templatefilters.slugify,
+        "pluralize": templatefilters.pluralize,
+        "linebreaksbr": templatefilters.linebreaksbr,
+        "linebreaksbr_ellipsis": templatefilters.linebreaksbr_ellipsis,
+        "youtube_timestamp_links": templatefilters.youtube_timestamp_links,
+        "timesince_ago": templatefilters.timesince_ago,
+        "seconds_to_time_string": templatefilters.seconds_to_time_string,
+        "mygetattr": templatefilters.mygetattr,
+        "find_column_index": templatefilters.find_column_index,
+        "in_list": templatefilters.in_list,
+        "column_height": templatefilters.column_height,
+        "thousands_separated": util.thousands_separated_number,
+        "static_url": util.static_url,
+        "login_url": util.create_login_url,
     }, 
     "environment_args": {
         "autoescape": False, 

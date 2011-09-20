@@ -1,6 +1,6 @@
 {% macro user_info(username, user_data) -%}
 {{ username_and_notification(username, user_data) }}
-{{ badge_counts(user_data) }}
+{{ badges.badge_counts(user_data) }}
 {{ user_points(user_data) }}
 {%- endmacro %}
 

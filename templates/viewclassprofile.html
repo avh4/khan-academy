@@ -2,7 +2,7 @@
 {% block meta_page_title %}Class Profile | {% endblock meta_page_title %}
 
 {% block pagescript %}
-{{ css_package("studentlists") }}
+{{ js_css_packages.css_package("studentlists") }}
 {% endblock pagescript %}
 
 {% block pagesubmenu %}
@@ -104,7 +104,7 @@
 
 {% block bottompagescript %}
 {{ super() }}
-{{ js_package("studentlists") }}
+{{ js_css_packages.js_package("studentlists") }}
 <script type="text/javascript">
 $(function() {
     ClassProfile.student_lists = {{student_lists_json}};

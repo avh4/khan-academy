@@ -84,7 +84,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {{ js_package("profile") }}
+    {{ js_css_packages.js_package("profile") }}
     <script type="text/javascript">Profile.initialGraphUrl = '{{ initial_graph_url|escapejs }}';</script>
     {{ analytics.crazyegg_tracker(False) }}
 {% endblock bottompagescript %}

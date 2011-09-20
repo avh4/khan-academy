@@ -4,7 +4,7 @@
 
 {% block meta_page_title %}Manage Students | {% endblock meta_page_title %}
 {% block pagescript %}
-{{ css_package("studentlists") }}
+{{ js_css_packages.css_package("studentlists") }}
 <style type="text/css" media="screen">
 #empty-class ol li.click-register div.coach-email {
     top: 97px;
@@ -120,7 +120,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-{{ js_package("studentlists") }}
+{{ js_css_packages.js_package("studentlists") }}
 <script type="text/javascript" charset="utf-8">
 $(function() {
     StudentLists.Data.students = {{students_json}};

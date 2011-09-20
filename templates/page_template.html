@@ -48,12 +48,12 @@
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
 
         {% if is_mobile %}
-            {{ css_package("mobile") }}
-            {{ js_package("mobile") }}
+            {{ js_css_packages.css_package("mobile") }}
+            {{ js_css_packages.js_package("mobile") }}
         {% else %}
-            {{ css_package("shared") }}
+            {{ js_css_packages.css_package("shared") }}
             {% block pagecss %}{% endblock pagecss %}
-            {{ js_package("shared") }}
+            {{ js_css_packages.js_package("shared") }}
         {% endif %}
 
         {{ render_xsrf_js() }}
@@ -159,7 +159,7 @@
             <div id="end-of-page-spacer" style="padding: 10px;">&nbsp;</div>
 
 
-            {{ badge_notifications() }}
+            {{ badges.badge_notifications() }}
 
     </div>
     </div>

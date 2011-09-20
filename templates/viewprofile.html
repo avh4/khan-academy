@@ -1,7 +1,7 @@
 {% extends "profile_template.html" %}
 
-{% import 'macros/user.html' as user %}
-{% import 'macros/profiles.html' as profiles %}
+{% import 'macros/user.html' as user_macros %}
+{% import 'macros/profiles.html' as profile_macros %}
 
 {% block meta_page_title %}User Profile | {% endblock meta_page_title %}
 {% block profile_name %}
@@ -9,7 +9,7 @@
     <img src="/images/darth.png" />
 
     {% if logged_in %}
-        <span id="name">{{ student_nickname|escape }}{{ user.simple_student_info(user_data_student) }}</span>
+        <span id="name">{{ student_nickname|escape }}{{ user_macros.simple_student_info(user_data_student) }}</span>
     {% else %}
         <span id="phantom-login"><a href="{{ login_url|escape }}">Log in to save your progress</a></span>
     {% endif %}
@@ -41,21 +41,21 @@
 {% block graph_accordion %}
     <ul id="nav-accordion">
         <li>
-            {{ profiles.graph_link(user_data_student, "Activity", "activity", selected_graph_type) }}
+            {{ profile_macros.graph_link(user_data_student, "Activity", "activity", selected_graph_type) }}
             <p class="accordion-content">
                 Shows how much work you're doing each day.
-                {{ profiles.graph_date_picker(user_data_student, "activity") }}
+                {{ profile_macros.graph_date_picker(user_data_student, "activity") }}
             </p>
         </li>
         <li>
-            {{ profiles.graph_link(user_data_student, "Focus", "focus", selected_graph_type) }}
+            {{ profile_macros.graph_link(user_data_student, "Focus", "focus", selected_graph_type) }}
             <p class="accordion-content">
                 Shows how well you've focused on exercises and video playlists.
-                {{ profiles.graph_date_picker(user_data_student, "focus") }}
+                {{ profile_macros.graph_date_picker(user_data_student, "focus") }}
             </p>
         </li>
         <li>
-            {{ profiles.graph_link(user_data_student, "Exercise Progress", "exerciseprogress", selected_graph_type) }}
+            {{ profile_macros.graph_link(user_data_student, "Exercise Progress", "exerciseprogress", selected_graph_type) }}
             <p class="accordion-content">
                 Shows you which exercises you've worked on and completed.
                 <span class="graph-options">
@@ -66,7 +66,7 @@
             </p>
         </li>
         <li>
-            {{ profiles.graph_link(user_data_student, "Exercise Progress Over Time", "exercisesovertime", selected_graph_type) }}
+            {{ profile_macros.graph_link(user_data_student, "Exercise Progress Over Time", "exercisesovertime", selected_graph_type) }}
             <p class="accordion-content">Shows how many exercises you've completed over time. </p>
         </li>
     </ul>
@@ -118,7 +118,7 @@
                         <div id="user-owned">
                         <h2 style="display: block; margin-left: 10px;">Badges Earned</h2>
                             {% for user_badge in user_badges[badge.badge_category] %}
-                                {{ badge_block(user_badge.badge, user_badge) }}
+                                {{ badges.badge_block(user_badge.badge, user_badge) }}
                             {% endfor %}
                             <div class="clear"></div>
                         </div>
@@ -126,7 +126,7 @@
                         <div id="all-badges">
                         <h2 style="display: block; margin-left: 10px;">Possible Badges</h2>
                     {% endif %}
-                        {{ badge_block(badge, None, show_badge_frequencies) }}
+                        {{ badges.badge_block(badge, None, show_badge_frequencies) }}
                     {% if loop.last %}
                         </div>
                         <div class="clear"></div>
@@ -138,6 +138,6 @@
             </div>
         </div>
     </div>
-    {{ profile_recent_activity(user_data_student, view) }}
+    {{ profile_macros.profile_recent_activity(user_data_student, view) }}
 {% endblock profile_extended_sections %}
 

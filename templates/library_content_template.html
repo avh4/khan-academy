@@ -18,7 +18,7 @@
                     {% if playlist_data.playlist.description %}
                         <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
                     {% endif %}
-                    {{ column_major_sorted_videos(playlist_data.videos) }}
+                    {{ templatetags.column_major_sorted_videos(playlist_data.videos) }}
                     <div class="clear desktop-only">
                     {% if playlist_data.next %}
                         <a name="{{ playlist_data.next.title|slugify|escape }}" id="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>

@@ -7,7 +7,7 @@
 {% import 'macros/discussion.html' as discussion %}
 
 {% block pagecss %}
-    {{ css_package("video") }}
+    {{ js_css_packages.css_package("video") }}
 {% endblock pagecss %}
 
 {% block pagesubmenu %}
@@ -126,7 +126,7 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-    {{ js_package("video") }}
+    {{ js_css_packages.js_package("video") }}
     <script>
       $(function(){VideoStats.startLoggingProgress("{{ video.key()|escapejs }}");});
 
