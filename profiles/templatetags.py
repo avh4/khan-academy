@@ -54,65 +54,8 @@ def get_graph_url(graph_type, student, coach, list_id):
     urlpath = "/profile/graph/%s" % graph_type
     return urlunparse(('', '', urlpath, '', urlencode(qs), ''))
 
-def profile_graph_link(user_data, graph_name, graph_type, selected_graph_type):
-    selected = (graph_type == selected_graph_type)
-    return {
-        "url": get_graph_url(graph_type, user_data, None, None),
-        "user_data_student": user_data,
-        "graph_name": graph_name,
-        "selected": selected
-    }
-
-def profile_class_graph_link(user_data_coach, graph_name, graph_type, selected_graph_type, list_id):
-    selected = (graph_type == selected_graph_type)
-    return {
-        "url": get_graph_url(graph_type, None, user_data_coach, list_id),
-        "graph_name": graph_name,
-        "selected": selected,
-    }
-
-def profile_graph_date_picker(user_data, graph_type):
-    return {
-        "user_data": user_data,
-        "graph_type": graph_type
-    }
-
-def profile_graph_calendar_picker(user_data, graph_type):
-    return {
-        "user_data": user_data,
-        "graph_type": graph_type
-    }
-
-def profile_exercise_progress_block(exercise_data, exercise):
-    return {
-        'chart_link': exercise_data[exercise.name]["chart_link"],
-        'ex_link': exercise_data[exercise.name]["ex_link"],
-        'hover': exercise_data[exercise.name]["hover"],
-        'color': exercise_data[exercise.name]["color"],
-        'short_name': exercise_data[exercise.name]["short_name"]
-    }
-
 def profile_recent_activity(user_data, view="standard"):
     context = recent_activity.recent_activity_context(user_data)
     context["view"] = view
 
     return shared_jinja.get().render_template("profiles/recent_activity.html", **context)
-
-def profile_recent_activity_entry_badge(user_data_student, recent_activity_entry, view="standard"):
-    return {
-        "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email,
-        "view": view
-    }
-def profile_recent_activity_entry_exercise(user_data_student, recent_activity_entry, view="standard"):
-    return {
-        "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email,
-        "view": view
-    }
-def profile_recent_activity_entry_video(user_data_student, recent_activity_entry, view="standard"):
-    return {
-        "recent_activity": recent_activity_entry,
-        "student_email": user_data_student.email,
-        "view": view
-    }
