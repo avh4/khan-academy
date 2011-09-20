@@ -147,14 +147,16 @@ var setupSuggestedVideos = function() {
     jel.attr('data-weight', weight);
 
     // make it link to the correct video
-    jel.removeAttr('id').find('span').html( buildLink(suggestion) ).end().hide();
+    var exid = userExercise.exercise_model.name;
+    jel.removeAttr('id').find('span').html( buildLink(suggestion, exid) ).end().hide();
 
     $('.exercise_message').append(jel);
 };
 
-var buildLink = function(video) {
+var buildLink = function(video, exid) {
+    var exid_param = exid ? "?exid=" + exid : "";
     return $('<a></a>')
-        .attr('href', video.ka_url)
+        .attr('href', video.ka_url + exid_param)
         .text(video.title);
 };
 

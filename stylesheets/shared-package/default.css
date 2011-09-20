@@ -2083,9 +2083,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-left: 95px;
 }
 #module-progress .proficient,
+#module-progress .review,
 #module-progress .struggling,
 #module-progress .started,
 .progress-legend.proficient,
+.progress-legend.review,
 .progress-legend.struggling,
 .progress-legend.started {
     cursor: pointer;
@@ -2096,6 +2098,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .progress-legend.proficient,
 #module-progress .proficient {
     background-color: #80C65A;
+}
+.progress-legend.review,
+#module-progress .review {
+    background-color: #e35d04;
 }
 .progress-legend.struggling,
 #module-progress .struggling {

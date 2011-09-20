@@ -807,14 +807,15 @@ class UserData(GAEBingoIdentityModel, db.Model):
         self.need_to_reassess = False
         return is_changed
 
-    def reassess_if_necessary(self):
+    def reassess_if_necessary(self, ex_graph=None):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        ex_graph = ExerciseGraph(self)
+        if ex_graph is None:
+            ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
 
-    def is_proficient_at(self, exid):
-        self.reassess_if_necessary()
+    def is_proficient_at(self, exid, exgraph=None):
+        self.reassess_if_necessary(exgraph)
         return (exid in self.all_proficient_exercises)
 
     def is_explicitly_proficient_at(self, exid):
@@ -822,11 +823,11 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     def is_reviewing(self, exid, user_exercise, time):
 
+        if user_exercise is None:
+            return False
         # Short circuit out of full review check if not proficient or review time hasn't come around yet
-
         if not self.is_proficient_at(exid):
             return False
-
         if user_exercise.last_review + user_exercise.get_review_interval() > time:
             return False
 
@@ -1615,13 +1616,22 @@ class ExerciseVideo(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data):
-        user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
-        exercises = Exercise.get_all_use_cache()
-        self.exercises = exercises
+    def __init__(self, user_data=None):
+        
+        self.exercises = Exercise.get_all_use_cache()
         self.exercise_by_name = {}
-        for ex in exercises:
+        for ex in self.exercises:
             self.exercise_by_name[ex.name] = ex
+
+        if user_data is not None :
+            self.initialize_for_user(user_data)
+            
+    def initialize_for_user(self, user_data, user_exercises=None):
+
+        if user_exercises is None:
+            user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
+
+        for ex in self.exercises:
             ex.coverers = []
             ex.user_exercise = None
             ex.next_review = None  # Not set initially
@@ -1645,7 +1655,7 @@ class ExerciseGraph(object):
             ex = self.exercise_by_name.get(name)
             if ex:
                 ex.assigned = True
-        for ex in exercises:
+        for ex in self.exercises:
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
                 if ex_cover:
@@ -1677,7 +1687,7 @@ class ExerciseGraph(object):
                         break
             return ex.proficient
 
-        for ex in exercises:
+        for ex in self.exercises:
             compute_proficient(ex)
 
         def compute_suggested(ex):
@@ -1699,12 +1709,12 @@ class ExerciseGraph(object):
                     break
             return ex.suggested
 
-        for ex in exercises:
+        for ex in self.exercises:
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)
 
         phantom = user_data.is_phantom
-        for ex in exercises:
+        for ex in self.exercises:
             ex.phantom = phantom
 
 
@@ -1793,6 +1803,7 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
+
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
