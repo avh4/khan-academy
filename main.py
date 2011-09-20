@@ -57,7 +57,7 @@ from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import all_topics_list
 from custom_exceptions import MissingVideoException
-from templatetags import streak_bar, exercise_message, exercise_icon, user_points
+from templatetags import user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, get_phantom_user_id_from_cookies
