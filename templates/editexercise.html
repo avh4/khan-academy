@@ -96,7 +96,7 @@
     {% endfor %}
 
     {% for exercise_video in exercise_videos %}
-        insertVideo('{{ exercise_video.video.key|escapejs }}', '{{ exercise_video.video.title|escapejs }}');
+        insertVideo('{{ exercise_video.video.key()|escapejs }}', '{{ exercise_video.video.title|escapejs }}');
     {% endfor %}
     });
 

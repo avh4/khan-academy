@@ -65,10 +65,10 @@
         {% endif %}
             <td style="text-align:left;width:1%;" class="mod_action_col">
                 <nobr>
-                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key|escape}}" data-desc="Cleared flags">
+                <form method="POST" action="/discussion/clearflags?entity_key={{feedback.key()|escape}}" data-desc="Cleared flags">
                     <input type="submit" class="simple-button action-gradient" value="Clear flags"/>
                 </form>
-                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key|escape}}" data-desc="Deleted">
+                <form method="POST" action="/discussion/deleteentity?entity_key={{feedback.key()|escape}}" data-desc="Deleted">
                     <input type="submit" class="simple-button action-gradient" value="Delete post"/>
                 </form>
                 </nobr>
@@ -77,11 +77,11 @@
                 <nobr>
                 {{feedback.types.0|capitalize|escape}}
                 {% if feedback.types.0 == feedback_type_comment %}
-                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_question}}" data-desc="Changed to question">
+                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key()|escape}}&target_type={{feedback_type_question}}" data-desc="Changed to question">
                         <input type="submit" class="simple-button action-gradient" value="Change to Question"/>
                     </form>
                 {% else %}
-                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key|escape}}&target_type={{feedback_type_comment}}" data-desc="Changed to comment">
+                    <form method="POST" action="/discussion/changeentitytype?clear_flags=1&entity_key={{feedback.key()|escape}}&target_type={{feedback_type_comment}}" data-desc="Changed to comment">
                         <input type="submit" class="simple-button action-gradient" value="Change to Comment"/>
                     </form>
                 {% endif %}
