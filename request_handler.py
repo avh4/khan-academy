@@ -316,21 +316,6 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
     def render_jinja2_template_to_string(self, template_name, template_values):
         return self.jinja2.render_template(template_name, **template_values)
 
-    def render_template(self, template_name, template_values):
-        self.add_global_template_values(template_values)
-        self.render_template_simple(template_name, template_values)
-
-    def render_template_simple(self, template_name, template_values):
-        self.response.out.write(self.render_template_to_string(template_name, template_values))
-
-    @staticmethod
-    def render_template_to_string(template_name, template_values):
-        path = os.path.join(os.path.dirname(__file__), template_name)
-
-        # Don't turn on debug in production even for admins because filesystem access is sloooow
-        debug = App.is_dev_server
-        return template.render(path, template_values, debug)
-
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)
         self.response.out.write(json)
