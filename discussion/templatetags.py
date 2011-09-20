@@ -10,7 +10,7 @@ import voting
 import app
 import util
 
-from webapp2_extras import jinja2
+import shared_jinja
 
 import template_cached
 register = template_cached.create_template_register()
@@ -27,7 +27,7 @@ def video_comments(video, playlist, page=0):
             "login_url": util.create_login_url("/video?v=%s" % video.youtube_id),
             }
 
-    return jinja2.get_jinja2().render_template("discussion/video_comments.html", **template_values)
+    return shared_jinja.get().render_template("discussion/video_comments.html", **template_values)
 
 @register.simple_tag
 def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_override=-1):
@@ -50,7 +50,7 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_overri
             "issue_labels": ('Component-Videos,Video-%s' % video.youtube_id),
             }
 
-    return jinja2.get_jinja2().render_template("discussion/video_qa.html", **template_values)
+    return shared_jinja.get().render_template("discussion/video_qa.html", **template_values)
 
 @register.inclusion_tag("discussion/signature.html")
 def signature(target=None, verb=None):

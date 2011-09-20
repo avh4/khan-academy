@@ -1,9 +1,7 @@
 import os
 import logging
 
-from google.appengine.ext.webapp import template
-
-from webapp2_extras import jinja2
+import shared_jinja
 
 import badges
 import util_badges
@@ -29,8 +27,9 @@ def badge_notifications_html(user_badges):
     if len(user_badges) > 1:
         user_badges = sorted(user_badges, reverse=True, key=lambda user_badge: user_badge.badge.points)[:badges.UserNotifier.NOTIFICATION_LIMIT]
 
-    path = os.path.join(os.path.dirname(__file__), "notifications.html")
-    return template.render(path, {"user_badges": user_badges})
+    context = {"user_badges": user_badges}
+
+    return shared_jinja.get().render_template("badges/notifications.html", **context)
 
 @register.simple_tag
 def badge_counts(user_data):
@@ -55,8 +54,7 @@ def badge_counts(user_data):
             "master": counts_dict[badges.BadgeCategory.MASTER],
     }
 
-    path = os.path.join(os.path.dirname(__file__), "badge_counts.html")
-    return template.render(path, template_context)
+    return shared_jinja.get().render_template("badges/badge_counts.html", **template_context)
 
 @register.simple_tag
 def badge_block(badge, user_badge=None, show_frequency=False):
@@ -73,6 +71,5 @@ def badge_block(badge, user_badge=None, show_frequency=False):
 
     template_values = {"badge": badge, "user_badge": user_badge, "extended_description": badge.safe_extended_description, "frequency": frequency}
 
-    # TODO: nicer way to do these inclusion tag thingies for jinja
-    return jinja2.get_jinja2().render_template("badges/badge_block.html", **template_values)
+    return shared_jinja.get().render_template("badges/badge_block.html", **template_values)
 

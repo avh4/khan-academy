@@ -9,8 +9,6 @@ from google.appengine.ext.webapp import template as webapp_template
 from django import template
 from django.template.defaultfilters import escape
 
-from webapp2_extras import jinja2
-
 from app import App
 from templatefilters import seconds_to_time_string, slugify
 from models import UserData, UserVideoCss
@@ -19,6 +17,7 @@ import util
 import topics_list
 import models
 from api.auth import xsrf
+import shared_jinja
 
 from gae_bingo.gae_bingo import ab_test
 
@@ -28,8 +27,8 @@ register = template_cached.create_template_register()
 
 @register.simple_tag
 def user_info(username, user_data):
-    path = os.path.join(os.path.dirname(__file__), "user_info.html")
-    return webapp_template.render(path, {"username": username, "user_data": user_data})
+    context = {"username": username, "user_data": user_data}
+    return shared_jinja.get().render_template("user_info_only.html", **context)
 
 @register.inclusion_tag("column_major_order_styles.html")
 def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
@@ -61,8 +60,7 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
         "list_height": column_indices[0] * link_height,
     }
 
-    # TODO: nicer way to do these inclusion tag thingies for jinja
-    return jinja2.get_jinja2().render_template("column_major_order_videos.html", **template_values)
+    return shared_jinja.get().render_template("column_major_order_videos.html", **template_values)
 
 @register.inclusion_tag("flv_player_embed.html")
 def flv_player_embed(video_path, width=800, height=480):
@@ -110,11 +108,8 @@ def exercise_message(exercise, coaches, exercise_states):
         exercise_states['exercise_videos'] = exercise.related_videos_fetch()
     else:
         return None
-    filename = "exercise_message%s.html" % state
-    path = os.path.join(os.path.dirname(__file__), filename)
 
-    exercise_states.update({"exercise": exercise, "coaches": coaches})
-    return webapp_template.render(path, exercise_states)
+    return shared_jinja.get().render_template(filename, **exercise_states)
 
 @register.inclusion_tag("user_points.html")
 def user_points(user_data):
@@ -188,8 +183,7 @@ def streak_bar(user_exercise):
         "levels": levels
     }
 
-    # TODO: nicer way to do these inclusion tag thingies for jinja
-    return jinja2.get_jinja2().render_template("streak_bar.html", **template_values)
+    return shared_jinja.get().render_template("streak_bar.html", **template_values)
 
 @register.inclusion_tag("reports_navigation.html")
 def reports_navigation(coach_email, current_report="classreport"):

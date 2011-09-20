@@ -1,9 +1,10 @@
 # Jinja2 config
 
-from webapp2_extras import jinja2
-
 from urllib import quote_plus
 import simplejson as json
+import os
+
+from webapp2_extras import jinja2
 
 from models import UserData
 from templateext import escapejs
@@ -25,8 +26,8 @@ from app import App
 # TODO: globals "custom tag" loading
 
 jinja2.default_config = {
-    "template_path": "templates", 
-    "compiled_path": "compiled_templates.zip",
+    "template_path": os.path.join(os.path.dirname(__file__), "templates"),
+    "compiled_path": os.path.join(os.path.dirname(__file__), "compiled_templates.zip"),
     "force_compiled": not App.is_dev_server, # Only use compiled templates in production 
     "cache_size": 0 if App.is_dev_server else -1, # Only cache in production
     "auto_reload": App.is_dev_server, # Don't check for template updates in production

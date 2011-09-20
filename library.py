@@ -2,7 +2,7 @@ import datetime
 import os
 import logging
 
-from webapp2_extras import jinja2
+import shared_jinja
 
 from app import App
 import layer_cache
@@ -92,7 +92,7 @@ def library_content_html(bust_cache = False):
         'all_playlists': all_playlists,
         }
 
-    html = jinja2.get_jinja2().render_template("library_content_template.html", **template_values)
+    html = shared_jinja.get().render_template("library_content_template.html", **template_values)
 
     # Set shared date of last generated content
     Setting.cached_library_content_date(str(datetime.datetime.now()))

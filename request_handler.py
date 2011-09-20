@@ -11,7 +11,7 @@ from google.appengine.api import users
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 
 import webapp2
-from webapp2_extras import jinja2
+import shared_jinja
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from app import App
@@ -303,17 +303,12 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
 
         return template_values
 
-    @webapp2.cached_property
-    def jinja2(self):
-        # Returns a Jinja2 renderer cached in the app registry.
-        return jinja2.get_jinja2(app=self.app)
-
     def render_jinja2_template(self, template_name, template_values):
         self.add_global_template_values(template_values)
         self.response.write(self.render_jinja2_template_to_string(template_name, template_values))
 
     def render_jinja2_template_to_string(self, template_name, template_values):
-        return self.jinja2.render_template(template_name, **template_values)
+        return shared_jinja.get().render_template(template_name, **template_values)
 
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)
