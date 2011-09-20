@@ -174,6 +174,9 @@ class ViewVideo(request_handler.RequestHandler):
             redirect_to_canonical_url = True
 
         exid = self.request_string('exid', default=None)
+        if exid:
+            bingo("used_video")
+            bingo("used_hints_or_video")
 
         if redirect_to_canonical_url:
             qs = {'playlist': playlist.title}
