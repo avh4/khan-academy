@@ -33,7 +33,7 @@ def exercise_progress_graph_context(user_data_student):
         if user_data_student.is_proficient_at(exercise.name):
 
             if user_data_student.is_reviewing( exercise.name, user_exercise, datetime.datetime.now() ) :
-                status = "Needs Review"
+                status = "Review"
                 color = "review"
             else :
                 status = "Proficient"
