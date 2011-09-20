@@ -1,9 +1,6 @@
 import os
 import logging
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-
 import shared_jinja
 
 from profiles import focus_graph, activity_graph, exercises_over_time_graph, exercise_problems_graph, exercise_progress_graph, recent_activity
@@ -20,8 +17,8 @@ def profile_graph_control():
     return {}
 
 def render_graph_html_and_context(filename, context):
-    path = os.path.join(os.path.dirname(__file__), filename)
-    return {"html": template.render(path, context), "context": context}
+    path = os.path.join("profiles", filename)
+    return {"html": shared_jinja.get().render_template(path, **context), "context": context}
 
 # Profile Graph Types
 @register.simple_tag

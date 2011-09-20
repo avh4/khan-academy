@@ -109,6 +109,7 @@ def exercise_message(exercise, coaches, exercise_states):
     else:
         return None
 
+    filename = "exercise_message%s.html" % state
     return shared_jinja.get().render_template(filename, **exercise_states)
 
 @register.inclusion_tag("user_points.html")

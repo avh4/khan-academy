@@ -68,7 +68,7 @@
 {% macro recent_activity_entry_video(user_data_student, recent_activity, view="standard") -%}
 <li class="video">
 <span class="activity-image"><img src="/images/video-camera-icon-inset.png" /></span><div class="ach-text">
-    Watched <span class="video-minutes">{{ recent_activity.time_watched|escape }}</span> of <a href="/video?v={{recent_activity.video_log.video.youtube_id}}">{{ recent_activity.video_log.video_title|escape }}</a>
+    Watched <span class="video-minutes">{{ recent_activity.time_watched()|escape }}</span> of <a href="/video?v={{recent_activity.video_log.video.youtube_id}}">{{ recent_activity.video_log.video_title|escape }}</a>
    <br /> <span class="time">{{ recent_activity.timestamp()|escape }}</span>
 	{% if view != "mobile" %}
     {{ social.share_video_button(recent_activity.video_log.video_title, recent_activity.video_log.video.description, recent_activity.video_log.video.youtube_id, "Recent-Activity-Share") }}
@@ -77,3 +77,11 @@
 </li>
 {%- endmacro %}
 
+{% macro exercise_progress_block(exercise_data, exercise) -%}
+<div class="student-module-status exercise-progress-block {{exercise_data[exercise.name]["color"]}}" onclick="drillIntoExercise('{{exercise_data[exercise.name]["chart_link"]|escapejs}}');">
+    <span class="exercise-display-name"><nobr>{{exercise_data[exercise.name]["short_name"]}}</nobr></span>
+    <div class="hover-data" style="display: none;">
+        {{exercise_data[exercise.name]["hover"]}}
+    </div>
+</div>
+{%- endmacro %}
