@@ -134,7 +134,7 @@ def static_url(relative_url):
         return "http://khan-academy.appspot.com%s" % relative_url
 
 def linebreaksbr(s):
-    return s.replace('\n', '<br />')
+    return unicode(s).replace('\n', '<br />')
 
 def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
 
