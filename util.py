@@ -111,7 +111,7 @@ def absolute_url(relative_url):
 		return 'http://%s%s' % (os.environ['HTTP_HOST'], relative_url)
 
 def linebreaksbr(s):
-    return s.replace('\n', '<br/>')
+    return s.replace('\n', '<br />')
 
 def pluralize(i):
     return "" if i == 1 else "s"
@@ -123,7 +123,7 @@ def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
     # based on its context.
     max_linebreaks = 4
 
-    # We use django's built-in "linebreaksbr" filter, so we don't
+    # We use our specific "linebreaksbr" filter, so we don't
     # need to worry about alternate representations of the <br /> tag.
     content = linebreaksbr(content.strip())
 
