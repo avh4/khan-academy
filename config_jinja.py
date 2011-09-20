@@ -14,14 +14,14 @@ use_library('django', '0.96')
 
 from models import UserData
 from templatetags import playlist_browser, column_major_sorted_videos, streak_bar, playlist_browser_structure
-from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link, escapejs
+from templatefilters import slugify, find_column_index, column_height, in_list, timesince_ago, youtube_timestamp_links, mygetattr, seconds_to_time_string, phantom_login_link, escapejs, linebreaksbr, linebreaksbr_ellipsis, pluralize
 from api.auth.xsrf import render_xsrf_js
 from js_css_packages.templatetags import css_package, js_package
 from badges.templatetags import badge_notifications, badge_counts
 from gae_mini_profiler.templatetags import profiler_includes
 from profiles.templatetags import get_graph_url, profile_recent_activity
 from badges.templatetags import badge_block
-from util import static_url, thousands_separated_number, create_login_url, linebreaksbr, linebreaksbr_ellipsis, pluralize
+from util import static_url, thousands_separated_number, create_login_url
 from discussion.templatetags import video_comments, video_qa
 import social.templatetags
 import phantom_users.templatetags

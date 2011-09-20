@@ -1,9 +1,11 @@
 import re
+import os
 import datetime
 import math
+import logging
 
 import util
-import logging
+from app import App
 
 def smart_truncate(content, length=100, suffix='...'):
     if len(content) <= length:
@@ -42,22 +44,22 @@ def seconds_to_time_string(seconds_init, short_display = True, show_hours = True
     seconds -= minutes * 60
 
     if years and days:
-        return "%d year%s and %d day%s" % (years, util.pluralize(years), days, util.pluralize(days))
+        return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
     elif years:
-        return "%d year%s" % (years, util.pluralize(years))
+        return "%d year%s" % (years, pluralize(years))
     elif days and hours and show_hours:
-        return "%d day%s and %d hour%s" % (days, util.pluralize(days), hours, util.pluralize(hours))
+        return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
-        return "%d day%s" % (days, util.pluralize(days))
+        return "%d day%s" % (days, pluralize(days))
     elif hours:
         if not short_display and minutes:
-            return "%d hour%s and %d minute%s" % (hours, util.pluralize(hours), minutes, util.pluralize(minutes))
+            return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
         else:
-            return "%d hour%s" % (hours, util.pluralize(hours))
+            return "%d hour%s" % (hours, pluralize(hours))
     else:
         if not short_display and seconds and not minutes:
-            return "%d second%s" % (seconds, util.pluralize(seconds))
-        return "%d minute%s" % (minutes, util.pluralize(minutes))
+            return "%d second%s" % (seconds, pluralize(seconds))
+        return "%d minute%s" % (minutes, pluralize(minutes))
 
 def utc_to_ctz(content, tz_offset):
     return content + datetime.timedelta(minutes=tz_offset)
@@ -151,3 +153,37 @@ def escapejs(value):
         value = value.replace(bad, good)
 
     return value
+
+def static_url(relative_url):
+    if App.is_dev_server or not os.environ['HTTP_HOST'].lower().endswith(".khanacademy.org"):
+        return relative_url
+    else:
+        return "http://khan-academy.appspot.com%s" % relative_url
+
+def linebreaksbr(s):
+    return s.replace('\n', '<br />')
+
+def linebreaksbr_ellipsis(content, ellipsis_content = "&hellip;"):
+
+    # After a specified number of linebreaks, apply span with a CSS class
+    # to the rest of the content so it can be optionally hidden or shown
+    # based on its context.
+    max_linebreaks = 4
+
+    # We use our specific "linebreaksbr" filter, so we don't
+    # need to worry about alternate representations of the <br /> tag.
+    content = linebreaksbr(content.strip())
+
+    rg_s = re.split("<br />", content)
+    if len(rg_s) > (max_linebreaks + 1):
+        # More than max_linebreaks <br />'s were found.
+        # Place everything after the 3rd <br /> in a hidden span that can be exposed by CSS later, and
+        # Append an ellipsis at the cutoff point with a class that can also be controlled by CSS.
+        rg_s[max_linebreaks] = "<span class='ellipsisExpand'>%s</span><span class='hiddenExpand'>%s" % (ellipsis_content, rg_s[max_linebreaks])
+        rg_s[-1] += "</span>"
+
+    # Join the string back up w/ its original <br />'s
+    return "<br />".join(rg_s)
+
+def pluralize(i):
+    return "" if i == 1 else "s"
