@@ -11,7 +11,7 @@
         "height": 340,
         "type": "areaspline"
     },
-    "colors": [ "#058DC7", "#50B432", "#EF561A" ],
+    "colors": [ "#058DC7", "#50B432", "#FF00AF" ],
     "credits": { "enabled": false },
     "title": { "text": "{{ title }}" },
     "legend": { "enabled": {{ showLegend }} },

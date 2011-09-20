@@ -108,18 +108,6 @@ def knowledgemap_embed(exercises, map_coords, admin=False):
         'admin':json.dumps(admin)
     }
 
-@register.inclusion_tag("related_videos.html")
-def related_videos_with_points(exercise_videos):
-    return related_videos(exercise_videos, True)
-
-@register.inclusion_tag("related_videos.html")
-def related_videos(exercise_videos, show_points=False):
-    return {
-        "exercise_videos": exercise_videos,
-        "video_points_base": consts.VIDEO_POINTS_BASE,
-        "show_points": show_points
-    }
-
 @register.inclusion_tag("exercise_icon.html")
 def exercise_icon(exercise, App):
     s_prefix = "node"
@@ -150,7 +138,7 @@ def exercise_message(exercise, coaches, exercise_states):
         state = '_struggling'
         exercise_states['exercise_videos'] = exercise.related_videos_fetch()
     else:
-        state = ''
+        return None
     filename = "exercise_message%s.html" % state
     path = os.path.join(os.path.dirname(__file__), filename)
 
@@ -300,6 +288,10 @@ def empty_class_instructions(class_is_empty=True):
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
 
+@register.inclusion_tag("exercise_legend.html")
+def exercise_legend():
+    return {}
+
 @register.simple_tag
 def xsrf_value():
     return xsrf.render_xsrf_js()
@@ -319,6 +311,7 @@ def user_video_css(user_data):
     else:
         return ''
 
+
 register.tag(highlight)
 
 webapp.template.register_template_library('templatetags')
@@ -330,4 +323,5 @@ webapp.template.register_template_library('profiles.templatetags')
 webapp.template.register_template_library('mailing_lists.templatetags')
 webapp.template.register_template_library('js_css_packages.templatetags')
 webapp.template.register_template_library('dashboard.templatetags')
+webapp.template.register_template_library('social.templatetags')
 

@@ -4,6 +4,7 @@ import os
 import datetime
 import time
 import urllib
+import urlparse
 import logging
 import re
 import devpanel
@@ -172,8 +173,19 @@ class ViewVideo(request_handler.RequestHandler):
 
             redirect_to_canonical_url = True
 
+        exid = self.request_string('exid', default=None)
+        if exid:
+            bingo("used_video")
+            bingo("used_hints_or_video")
+
         if redirect_to_canonical_url:
-            self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
+            qs = {'playlist': playlist.title}
+            if exid:
+                qs['exid'] = exid
+
+            urlpath = "/video/%s" % urllib.quote(readable_id)
+            url = urlparse.urlunparse(('', '', urlpath, '', urllib.urlencode(qs), ''))
+            self.redirect(url, True)
             return
 
         # If we got here, we have a readable_id and a playlist_title, so we can display
@@ -958,6 +970,16 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         self.response.out.write(user_video_css.video_css)
 
+class RealtimeEntityCount(request_handler.RequestHandler):
+    def get(self):
+        if not App.is_dev_server:
+            raise Exception("Only works on dev servers.")
+        default_kinds = 'Exercise'
+        kinds = self.request_string("kinds", default_kinds).split(',')
+        for kind in kinds:
+            count = getattr(models, kind).all().count(10000)
+            self.response.out.write("%s: %d<br>" % (kind, count))
+
 def main():
 
     application = webapp.WSGIApplication([
@@ -1028,6 +1050,8 @@ def main():
         ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
         ('/admin/changeemail', ChangeEmail),
         ('/admin/rendertemplate', ViewRenderTemplate),
+        ('/admin/realtimeentitycount', RealtimeEntityCount),
+
 
         ('/devadmin/emailchange', devpanel.Email),
         ('/devadmin/managedevs', devpanel.Manage),
