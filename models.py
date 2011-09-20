@@ -6,8 +6,6 @@ import urllib
 import pickle
 import random
 
-import config_django
-
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
