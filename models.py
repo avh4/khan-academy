@@ -271,6 +271,9 @@ class Exercise(db.Model):
             exercise_dict[fxn_key(exercise)] = exercise
         return exercise_dict
 
+def get_conversion_tests_dict(exid, checkpoints):
+    return dict([(c, 'sbar_%s_%d_problems' % (exid, c)) for c in checkpoints])
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -292,6 +295,14 @@ class UserExercise(db.Model):
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
     _serialize_blacklist = ["review_interval_secs"]
+
+    conversion_checkpoints = [5, 10, 20, 30]
+    any_exercise_conversions = get_conversion_tests_dict('did', conversion_checkpoints)
+    addition_1_conversions = get_conversion_tests_dict('addition_1', conversion_checkpoints)
+    geometry_1_conversions = get_conversion_tests_dict('geometry_1', conversion_checkpoints)
+    _streak_bar_conversion_tests = (['sbar_gained_proficiency', 'sbar_gained_5th_proficiency',
+        'sbar_gained_10th_proficiency', 'sbar_addition_1_proficiency', 'sbar_geometry_1_proficiency'] +
+        any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
 
     @property
     def required_streak(self):
@@ -328,7 +339,7 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        if ab_test('partial_reset_streak_bar'):
+        if ab_test('partial_reset_streak_bar', conversion_name = UserExercise._streak_bar_conversion_tests):
             def progress_with_start(streak, start, required_streak):
                 return start + float(streak) / required_streak * (1 - start)
 
@@ -456,7 +467,20 @@ class UserExercise(db.Model):
 
                 util_notify.update(user_data, self, False, True)
 
-                bingo('partial_reset_streak_bar')  # Score a conversion for A/B test
+                # Score conversions for A/B test
+                bingo('sbar_gained_proficiency')
+
+                if len(user_data.proficient_exercises) == 5:
+                    bingo('sbar_gained_5th_proficiency')
+
+                if len(user_data.proficient_exercises) == 10:
+                    bingo('sbar_gained_10th_proficiency')
+
+                if self.exercise == 'addition_1':
+                    bingo('sbar_addition_1_proficiency')
+
+                if self.exercise == 'geometry_1':
+                    bingo('sbar_geometry_1_proficiency')
 
         else:
             if self.exercise in user_data.proficient_exercises:
