@@ -1,6 +1,6 @@
 {% extends "page_template.html" %}
 
-{% import 'macros/profiles.html' as profiles %}
+{% import 'macros/profiles.html' as profile_macros %}
 {% import 'macros/analytics.html' as analytics %}
 
 {% block pagescript %}
@@ -70,7 +70,7 @@
                 {% block graph_accordion %}{% endblock graph_accordion %}
             </div>
             <div id="stats-charts" class="fancy-scrollbar -ce-capture">
-                {{ profiles.graph_control() }}
+                {{ profile_macros.graph_control() }}
             </div>
         </div>
 

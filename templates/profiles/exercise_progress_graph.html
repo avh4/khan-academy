@@ -1,9 +1,9 @@
-{% import 'macros/profiles.html' as profiles %}
+{% import 'macros/profiles.html' as profile_macros %}
 
 {% if exercise_data %}
     <div id="module-progress" style="margin: 0;">
     {% for exercise in exercises %}
-        {{ profiles.exercise_progress_block(exercise_data, exercise) }}
+        {{ profile_macros.exercise_progress_block(exercise_data, exercise) }}
     {% endfor %}
         <div class="clear"></div>
     </div>

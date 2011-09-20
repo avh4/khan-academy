@@ -12,8 +12,9 @@ from webapp2_extras import jinja2
 from google.appengine.dist import use_library
 use_library('django', '0.96')
 
+# Bring in our globally available custom templates and tags.
+# When possible, we now use jinja macros instead of these global tags.
 from models import UserData
-
 import templatetags
 import templatefilters
 import badges.templatetags

@@ -1,4 +1,4 @@
-{% import 'macros/profiles.html' as profiles %}
+{% import 'macros/profiles.html' as profile_macros %}
 
 <div id="recent-activity">
     <h2>Recent Activity</h2>
@@ -8,15 +8,15 @@
             {% for recent_activity in list_recent_activity %}
 			
                 {% if recent_activity.s_type == "Badge" %}
-                {{ profiles.recent_activity_entry_badge(user_data_student, recent_activity, view) }}
+                {{ profile_macros.recent_activity_entry_badge(user_data_student, recent_activity, view) }}
                 {% endif %}
 
                 {% if recent_activity.s_type == "Exercise" %}
-                {{ profiles.recent_activity_entry_exercise(user_data_student, recent_activity, view) }}
+                {{ profile_macros.recent_activity_entry_exercise(user_data_student, recent_activity, view) }}
                 {% endif %}
 
                 {% if recent_activity.s_type == "Video" %}
-                {{ profiles.recent_activity_entry_video(user_data_student, recent_activity, view) }}
+                {{ profile_macros.recent_activity_entry_video(user_data_student, recent_activity, view) }}
                 {% endif %}
 
             {% endfor %}
