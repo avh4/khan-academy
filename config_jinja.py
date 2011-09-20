@@ -6,6 +6,12 @@ import os
 
 from webapp2_extras import jinja2
 
+# We configure django's version here just to make sure
+# we've got it specified in case a 3rd-party library wants to use it.
+# (gae_mini_profiler and gae_bingo currently use it)
+from google.appengine.dist import use_library
+use_library('django', '0.96')
+
 from models import UserData
 from templateext import escapejs
 from templatetags import playlist_browser, column_major_sorted_videos, streak_bar, playlist_browser_structure
