@@ -83,6 +83,7 @@ javascript = {
             "utils/stat.js",
             "utils/tmpl.js",
             "utils/word-problems.js",
+            "utils/spin.js",
         ]
     },
 }
