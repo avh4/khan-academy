@@ -22,8 +22,6 @@ import social.templatetags
 import phantom_users.templatetags
 from app import App
 
-# TODO: globals "custom tag" loading
-
 jinja2.default_config = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
     "compiled_path": os.path.join(os.path.dirname(__file__), "compiled_templates.zip"),
