@@ -1,9 +1,3 @@
-from google.appengine.ext import webapp
-from django.template.defaultfilters import stringfilter
-
-import template_cached
-register = template_cached.create_template_register()
-
 # ------------------------------------------------------------------------------
 # Code copied from more recent Django than App Engine defaults to; if using
 # Django 1.0 or later for templating, just throw out this module.
@@ -57,12 +51,13 @@ _js_escapes = (_base_js_escapes +
 
 def escapejs(value):
     """Hex encodes characters for use in JavaScript strings."""
+    if not isinstance(value, basestring):
+        value = str(value)
+
     for bad, good in _js_escapes:
         value = value.replace(bad, good)
+
     return value
-escapejs = stringfilter(escapejs)
 
 # END of code copied from Django
 # ------------------------------------------------------------------------------
-
-register.filter(escapejs)

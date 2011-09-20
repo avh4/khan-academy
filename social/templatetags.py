@@ -6,15 +6,11 @@ from google.appengine.ext.webapp import template
 
 import shared_jinja
 
-import template_cached
-register = template_cached.create_template_register()
-
 SITE_TAGLINE = "Trying to make a world-class education available to anyone, anywhere."
 BASE_VIDEO_URL = "http://khanacademy.org/video?v=%s"
 BASE_EXERCISE_URL = "http://khanacademy.org/exercisedashboard"
 BASE_BADGE_URL = "http://khanacademy.org/"
 
-@register.inclusion_tag("social/facebook_share.html")
 def facebook_share_badge(desc, icon, extended_desc, activity, event_description=None):
     context = {}
     if desc and icon and extended_desc:
@@ -27,7 +23,6 @@ def facebook_share_badge(desc, icon, extended_desc, activity, event_description=
 
     return shared_jinja.get().render_template("social/facebook_share.html", **context)
 
-@register.inclusion_tag("social/facebook_share.html")
 def facebook_share_video(name, desc, youtube_id, event_description=None):
     context = {}
     if name and desc and id:
@@ -39,7 +34,6 @@ def facebook_share_video(name, desc, youtube_id, event_description=None):
 
     return shared_jinja.get().render_template("social/facebook_share.html", **context)
 
-@register.inclusion_tag("social/facebook_share.html")
 def facebook_share_exercise(problem_count, proficiency, name, event_description=None):
     context = {}
     if problem_count and name:
@@ -52,7 +46,6 @@ def facebook_share_exercise(problem_count, proficiency, name, event_description=
 
     return shared_jinja.get().render_template("social/facebook_share.html", **context)
     
-@register.inclusion_tag("social/twitter_share.html")
 def twitter_share_video(title, youtube_id, event_description=None):
     context = {}
     if title and youtube_id :
@@ -66,7 +59,6 @@ def twitter_share_video(title, youtube_id, event_description=None):
 
     return shared_jinja.get().render_template("social/twitter_share.html", **context)
     
-@register.inclusion_tag("social/twitter_share.html")
 def twitter_share_badge(desc, activity, event_description=None):
     context= {}
     if desc:
@@ -80,7 +72,6 @@ def twitter_share_badge(desc, activity, event_description=None):
 
     return shared_jinja.get().render_template("social/twitter_share.html", **context)
 
-@register.inclusion_tag("social/twitter_share.html")
 def twitter_share_exercise(name, problems, proficiency, event_description=None):
     context = {}
     if name and problems:
@@ -93,7 +84,6 @@ def twitter_share_exercise(name, problems, proficiency, event_description=None):
 
     return shared_jinja.get().render_template("social/twitter_share.html", **context)
 
-@register.inclusion_tag("social/email_share.html")
 def email_share_video(title, youtube_id, event_description=None):
     contex = {}
     if title and youtube_id:
@@ -105,7 +95,6 @@ def email_share_video(title, youtube_id, event_description=None):
 
     return shared_jinja.get().render_template("social/email_share.html", **context)
 
-@register.inclusion_tag("social/email_share.html")
 def email_share_badge(desc, activity, event_description=None):
     contex = {}
     if desc:
@@ -117,7 +106,6 @@ def email_share_badge(desc, activity, event_description=None):
 
     return shared_jinja.get().render_template("social/email_share.html", **context)
     
-@register.inclusion_tag("social/email_share.html")
 def email_share_exercise(name, problems, proficiency, event_description=None):
     contex = {}
     if name and problems:
@@ -129,7 +117,6 @@ def email_share_exercise(name, problems, proficiency, event_description=None):
 
     return shared_jinja.get().render_template("social/email_share.html", **context)
     
-@register.inclusion_tag("social/share_button.html")
 def share_video_button(video_title, description, youtube_id, event_description=None):
     context = {}
     if video_title and description and youtube_id:
@@ -141,7 +128,6 @@ def share_video_button(video_title, description, youtube_id, event_description=N
 
     return shared_jinja.get().render_template("social/share_button.html", **context)
 
-@register.inclusion_tag("social/share_button.html")
 def share_badge_button(description, icon_src, extended_description, context_name, event_description=None):
     context = {}
     if description and icon_src and extended_description:
@@ -154,7 +140,6 @@ def share_badge_button(description, icon_src, extended_description, context_name
 
     return shared_jinja.get().render_template("social/share_button.html", **context)
     
-@register.inclusion_tag("social/share_button.html")
 def share_exercise_button(problem_count, proficiency, name, event_description=None):
     context = {}
     if problem_count and name:

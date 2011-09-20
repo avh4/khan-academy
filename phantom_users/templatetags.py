@@ -3,10 +3,6 @@ import os
 import shared_jinja
 from notifications import UserNotifier
 
-import template_cached
-register = template_cached.create_template_register()
-
-@register.simple_tag
 def login_notifications(user_data, continue_url):
     login_notifications = UserNotifier.pop_for_current_user_data()["login"]
     return login_notifications_html(login_notifications, user_data, continue_url)
@@ -17,7 +13,6 @@ def login_notifications_html(login_notifications, user_data, continue_url="/"):
     context = {"login_notification": login_notification, "continue": continue_url, "user_data":user_data}
     return shared_jinja.get().render_template("phantom_users/notifications.html", **context)
 
-@register.simple_tag
 def badge_info(user_data):
     from .badges import badges, util_badges
 
@@ -42,7 +37,6 @@ def badge_info(user_data):
     }
     return shared_jinja.get().render_template("phantom_users/badge_counts.html", **context)
     
-@register.simple_tag
 def point_info(user_data):
     if user_data:
         points = user_data.points

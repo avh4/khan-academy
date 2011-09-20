@@ -12,10 +12,6 @@ import util
 
 import shared_jinja
 
-import template_cached
-register = template_cached.create_template_register()
-
-@register.simple_tag
 def video_comments(video, playlist, page=0):
     user_data = models.UserData.current()
     template_values = {
@@ -29,7 +25,6 @@ def video_comments(video, playlist, page=0):
 
     return shared_jinja.get().render_template("discussion/video_comments.html", **template_values)
 
-@register.simple_tag
 def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_override=-1):
 
     sort_order = voting.VotingSortOrder.HighestPointsFirst
@@ -52,7 +47,6 @@ def video_qa(user_data, video, playlist, page=0, qa_expand_key=None, sort_overri
 
     return shared_jinja.get().render_template("discussion/video_qa.html", **template_values)
 
-@register.inclusion_tag("discussion/signature.html")
 def signature(target=None, verb=None):
     return {
                 "target": target,
@@ -61,7 +55,6 @@ def signature(target=None, verb=None):
                 "is_comment": target and target.is_type(models_discussion.FeedbackType.Comment),
             }
 
-@register.inclusion_tag("discussion/mod_tools.html")
 def mod_tools(target):
     return {
                 "target": target,
@@ -71,15 +64,12 @@ def mod_tools(target):
                 "is_comment": target.is_type(models_discussion.FeedbackType.Comment)
             }
 
-@register.inclusion_tag("discussion/flag_tools.html")
 def flag_tools(target):
     return {"target": target}
 
-@register.inclusion_tag("discussion/vote_tools.html")
 def vote_tools(target):
     return { "target": target, "is_comment": target.is_type(models_discussion.FeedbackType.Comment) }
 
-@register.inclusion_tag("discussion/vote_sum.html")
 def vote_sum(target):
     sum_original = target.sum_votes_incremented()
     if target.up_voted:
@@ -93,27 +83,22 @@ def vote_sum(target):
             "is_comment": target.is_type(models_discussion.FeedbackType.Comment),
             }
 
-@register.inclusion_tag("discussion/author_tools.html")
 def author_tools(target):
     return {
                 "target": target,
                 "editable": not target.is_type(models_discussion.FeedbackType.Comment)
             }
 
-@register.inclusion_tag("discussion/question_answers.html")
 def question_answers(answers):
     return { "answers": answers }
 
-@register.inclusion_tag("discussion/question_answers.html")
 def standalone_answers(video, playlist, dict_answers):
     return { "answers": dict_answers[video.key()], "video": video, "playlist": playlist, "standalone": True }
 
-@register.inclusion_tag("discussion/username_and_notification.html")
 def username_and_notification(username, user_data):
     count = user_data.feedback_notification_count() if user_data else 0
     return { "username": username, "count": count }
 
-@register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_question(button_label, target=None):
     return {
                 "feedback_type": models_discussion.FeedbackType.Question,
@@ -123,7 +108,6 @@ def feedback_controls_question(button_label, target=None):
                 "hidden": True
             }
 
-@register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_answer(button_label, target=None):
     return {
                 "feedback_type": models_discussion.FeedbackType.Answer,
@@ -133,7 +117,6 @@ def feedback_controls_answer(button_label, target=None):
                 "hidden": True
             }
 
-@register.inclusion_tag("discussion/feedback_controls.html")
 def feedback_controls_comment(button_label, target=None):
     return {
                 "feedback_type": models_discussion.FeedbackType.Comment,
@@ -143,7 +126,6 @@ def feedback_controls_comment(button_label, target=None):
                 "hidden": False
             }
 
-@register.inclusion_tag("discussion/honeypots.html")
 def honeypots():
     # Honeypots are used to attact spam bots
     return {}

@@ -9,33 +9,26 @@ from django.template.defaultfilters import timesince, pluralize
 import util
 import logging
 
-import template_cached
-register = template_cached.create_template_register()
-
 def smart_truncate(content, length=100, suffix='...'):
     if len(content) <= length:
         return content
     else:
         return content[:length].rsplit(' ', 1)[0]+suffix
 
-@register.filter
 def greater_than(x, y):
     return x > y
 
-@register.filter
 def hash(h, key):
     try:
         return h[key]
     except KeyError:
         return None
 
-@register.filter
 def timesince_ago(content):
     if not content:
         return ""
     return append_ago(timesince(content))
 
-@register.filter
 def timesince_ago_short(content):
     if not content:
         return ""
@@ -75,15 +68,12 @@ def seconds_to_time_string(seconds_init, short_display = True, show_hours = True
             return "%d second%s" % (seconds, pluralize(seconds))
         return "%d minute%s" % (minutes, pluralize(minutes))
 
-@register.filter
 def utc_to_ctz(content, tz_offset):
     return content + datetime.timedelta(minutes=tz_offset)
 
-@register.filter
 def thousands_separated(content):
     return util.thousands_separated_number(content)
 
-@register.filter
 def youtube_timestamp_links(content):
     dict_replaced = {}
     html_template = "<span class='youTube' seconds='%s'>%s</span>"
@@ -101,11 +91,9 @@ def youtube_timestamp_links(content):
 
     return content
 
-@register.simple_tag
 def youtube_jump_link(content, seconds):
     return "<span class='youTube' seconds='%s'>%s</span>" % (seconds, content)
 
-@register.filter
 def phantom_login_link(login_notifications, continue_url):
     return login_notifications.replace("[login]", "<a href='/login?k&continue="+continue_url+"' class='simple-button action-gradient green'>Log in to save your progress</a>")
 
@@ -141,16 +129,5 @@ def slugify(value):
     value = re.sub('[^\w\s-]', '', value).strip().lower()
     return re.sub('[-\s]+', '-', value)
 
-@register.filter  #use to get model property value 
 def mygetattr(obj, name): 
     return getattr(obj, name)
-    
-register.filter(smart_truncate)
-register.filter(mod)
-register.filter(multiply)
-register.filter(in_list)
-register.filter(find_column_index)
-register.filter(column_height)
-
-webapp.template.register_template_library('templatefilters')
-webapp.template.register_template_library('discussion.templatefilters')

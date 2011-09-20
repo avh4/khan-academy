@@ -7,10 +7,6 @@ import badges
 import util_badges
 from notifications import UserNotifier
 
-import template_cached
-register = template_cached.create_template_register()
-
-@register.simple_tag
 def badge_notifications():
     user_badges = UserNotifier.pop_for_current_user_data()["badges"]
     return badge_notifications_html(user_badges)
@@ -31,7 +27,6 @@ def badge_notifications_html(user_badges):
 
     return shared_jinja.get().render_template("badges/notifications.html", **context)
 
-@register.simple_tag
 def badge_counts(user_data):
 
     counts_dict = {}
@@ -56,7 +51,6 @@ def badge_counts(user_data):
 
     return shared_jinja.get().render_template("badges/badge_counts.html", **template_context)
 
-@register.simple_tag
 def badge_block(badge, user_badge=None, show_frequency=False):
 
     if user_badge:

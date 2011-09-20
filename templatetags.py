@@ -4,7 +4,6 @@ import math
 import os
 import simplejson as json
 
-from google.appengine.ext import webapp
 from jinja2.utils import escape
 
 from app import App
@@ -19,16 +18,10 @@ import shared_jinja
 
 from gae_bingo.gae_bingo import ab_test
 
-# get registry, we need it to register our filter later.
-import template_cached
-register = template_cached.create_template_register()
-
-@register.simple_tag
 def user_info(username, user_data):
     context = {"username": username, "user_data": user_data}
     return shared_jinja.get().render_template("user_info_only.html", **context)
 
-@register.inclusion_tag("column_major_order_styles.html")
 def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size=12):
     col_list = range(0, num_cols)
     link_height = font_size * 1.5
@@ -41,7 +34,6 @@ def column_major_order_styles(num_cols=3, column_width=300, gutter=20, font_size
         "column_width_plus_gutter": column_width + gutter,
     }
 
-@register.simple_tag
 def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, font_size=12):
     items_in_column = len(videos) / num_cols
     remainder = len(videos) % num_cols
@@ -60,13 +52,11 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
 
     return shared_jinja.get().render_template("column_major_order_videos.html", **template_values)
 
-@register.inclusion_tag("flv_player_embed.html")
 def flv_player_embed(video_path, width=800, height=480):
     return {
         "video_path": video_path, "width": width, "height": height
     }
 
-@register.inclusion_tag("knowledgemap_embed.html")
 def knowledgemap_embed(exercises, map_coords, admin=False):
     return {
         "App": App,
@@ -75,7 +65,6 @@ def knowledgemap_embed(exercises, map_coords, admin=False):
         'admin':json.dumps(admin)
     }
 
-@register.inclusion_tag("exercise_icon.html")
 def exercise_icon(exercise, App):
     s_prefix = "node"
     if exercise.summative:
@@ -92,7 +81,6 @@ def exercise_icon(exercise, App):
         src = "/images/%s-not-started.png" % s_prefix
     return {"src": src, "version": App.version}
 
-@register.simple_tag
 def exercise_message(exercise, coaches, exercise_states):
     if exercise_states['endangered']:
         state = '_endangered'
@@ -110,7 +98,6 @@ def exercise_message(exercise, coaches, exercise_states):
     filename = "exercise_message%s.html" % state
     return shared_jinja.get().render_template(filename, **exercise_states)
 
-@register.inclusion_tag("user_points.html")
 def user_points(user_data):
     if user_data:
         points = user_data.points
@@ -119,7 +106,6 @@ def user_points(user_data):
 
     return {"points": points}
 
-@register.inclusion_tag("possible_points_badge.html")
 def possible_points_badge(points, possible_points, logged_in=True):
     return {
         "points": points,
@@ -127,14 +113,12 @@ def possible_points_badge(points, possible_points, logged_in=True):
         "logged_in": logged_in
     }
 
-@register.inclusion_tag('simple_student_info.html')
 def simple_student_info(user_data):
     member_for = seconds_to_time_string(util.seconds_since(user_data.joined), show_hours=False)
     return {
         "member_for": member_for
     }
 
-@register.simple_tag
 def streak_bar(user_exercise):
     streak = user_exercise.streak
     longest_streak = 0
@@ -184,13 +168,11 @@ def streak_bar(user_exercise):
 
     return shared_jinja.get().render_template("streak_bar.html", **template_values)
 
-@register.inclusion_tag("reports_navigation.html")
 def reports_navigation(coach_email, current_report="classreport"):
     return {
         'coach_email': coach_email, 'current_report': current_report
     }
 
-@register.simple_tag
 def playlist_browser(browser_id):
     template_values = {
         'browser_id': browser_id, 'playlist_structure': topics_list.PLAYLIST_STRUCTURE
@@ -198,7 +180,6 @@ def playlist_browser(browser_id):
 
     return shared_jinja.get().render_template("playlist_browser.html", **template_values)
 
-@register.simple_tag
 def playlist_browser_structure(structure, class_name="", level=0):
     if type(structure) == list:
 
@@ -238,11 +219,9 @@ def playlist_browser_structure(structure, class_name="", level=0):
 
         return s
 
-@register.simple_tag
 def static_url(relative_url):
     return util.static_url(relative_url)
 
-@register.inclusion_tag("empty_class_instructions.html")
 def empty_class_instructions(class_is_empty=True):
     user_data = UserData.current()
     coach_email = "Not signed in. Please sign in to see your Coach ID."
@@ -253,19 +232,15 @@ def empty_class_instructions(class_is_empty=True):
         'App': App, 'class_is_empty': class_is_empty, 'coach_email': coach_email
     }
 
-@register.inclusion_tag("crazyegg_tracker.html")
 def crazyegg_tracker(enabled=True):
 	return { 'enabled': enabled }
 
-@register.simple_tag
 def xsrf_value():
     return xsrf.render_xsrf_js()
 
-@register.simple_tag
 def video_name_and_progress(video):
     return "<span class='vid-progress v%d'>%s</span>" % (video.key().id(), escape(video.title.encode('utf-8', 'ignore')))
 
-@register.simple_tag
 def user_video_css(user_data):
     if user_data:
         return "<link "\
@@ -275,15 +250,3 @@ def user_video_css(user_data):
                 "</link>" % (user_data.uservideocss_version, hash(user_data.user))
     else:
         return ''
-
-
-webapp.template.register_template_library('templatetags')
-webapp.template.register_template_library('templateext')
-webapp.template.register_template_library('discussion.templatetags')
-webapp.template.register_template_library('badges.templatetags')
-webapp.template.register_template_library('phantom_users.templatetags')
-webapp.template.register_template_library('profiles.templatetags')
-webapp.template.register_template_library('js_css_packages.templatetags')
-webapp.template.register_template_library('dashboard.templatetags')
-webapp.template.register_template_library('social.templatetags')
-
