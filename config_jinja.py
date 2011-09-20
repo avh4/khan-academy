@@ -42,7 +42,6 @@ jinja2.default_config = {
         "gae_mini_profiler": gae_mini_profiler.templatetags,
         "xsrf": api.auth.xsrf,
         "UserData": UserData,
-        "hash": hash,
         "json": json,
         "App": App,
     }, 
