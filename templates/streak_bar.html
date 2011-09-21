@@ -1,6 +1,6 @@
 <div id="streak-bar-container">
 {% block streak_bar_block %}
-<div class="streak-bar{% if is_proficient %} proficient{% elif is_suggested %} suggested{% endif %}"  title="Current progress: {{ progress }}">
+<div class="streak-bar{% if float_progress >= 1 %} proficient{% elif is_suggested %} suggested{% endif %}"  title="Current progress: {{ progress }}">
     <div class="current-streak">
         <ul class="unit-rating" style="width:{{ bar_max_width }}px;">
             <li class="current-rating" style="width:{{ bar_width }}px;"></li>

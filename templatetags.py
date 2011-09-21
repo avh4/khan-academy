@@ -87,7 +87,7 @@ def streak_bar(user_exercise):
         return '%.0f%%' % math.floor(num * 100.0)
 
     template_values = {
-        "is_proficient": user_exercise.proficient,
+        "float_progress": progress,
         "is_suggested": user_exercise.suggested,
         "progress": format_percent(progress),
         "bar_width": bar_width,
