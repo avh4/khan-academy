@@ -24,7 +24,7 @@
     "series": [
         {% for data in series %}
             {
-                "data": {{ data.values }},
+                "data": {{ data.data_values }},
                 "name": "{{ data.name }}",
                 "type": "{{ data.type }}",
                 "yAxis": {{ data.axis }},

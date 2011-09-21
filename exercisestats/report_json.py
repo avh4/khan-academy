@@ -149,19 +149,19 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                 {
                     'name': 'Problems done',
                     'type': 'areaspline',
-                    'values': json.dumps(done_list),
+                    'data_values': json.dumps(done_list),
                     'axis': 0,
                 },
                 {
                     'name': 'Proficient',
                     'type': 'column',
-                    'values': json.dumps(prof_list),
+                    'data_values': json.dumps(prof_list),
                     'axis': 1,
                 },
                 {
                     'name': 'First attempts',
                     'type': 'spline',
-                    'values': json.dumps(new_users_list),
+                    'data_values': json.dumps(new_users_list),
                     'axis': 1,
                 },
             ],
@@ -242,7 +242,7 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             'title': 'Exercises map - First attempts',
             'series': {
                 'name': 'First attempts',
-                'values': json.dumps(data_points),
+                'data_values': json.dumps(data_points),
             },
             'minYValue': min_y - 1,
             'maxYValue': max_y + 1,
@@ -378,13 +378,13 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
                 {
                     'name': 'Histogram (created per day)',
                     'type': 'column',
-                    'values': json.dumps(histogram),
+                    'data_values': json.dumps(histogram),
                     'axis': 0,
                 },
                 {
                     'name': 'Total exercises',
                     'type': 'spline',
-                    'values': json.dumps(total_exercises),
+                    'data_values': json.dumps(total_exercises),
                     'axis': 1,
                 }
             ],

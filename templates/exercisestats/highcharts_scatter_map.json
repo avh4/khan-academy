@@ -28,7 +28,7 @@
     },
     "series": [
         {
-            "data": {{ series.values }},
+            "data": {{ series.data_values }},
             "name": "{{ series.name }}"
         },
     ],

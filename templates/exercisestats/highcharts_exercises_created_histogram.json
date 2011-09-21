@@ -25,7 +25,7 @@
             {
                 "name": "{{ data.name }}",
                 "type": "{{ data.type }}",
-                "data": {{ data.values }},
+                "data": {{ data.data_values }},
                 "yAxis": {{ data.axis }},
             }{% if not loop.last %},{% endif %}
         {% endfor %}
