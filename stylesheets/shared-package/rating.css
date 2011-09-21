@@ -105,7 +105,7 @@
     background-color:white;
     width:2px; 
     position:absolute;
-    z-index: 4;
+    z-index: 6;
     }
 
 .unit-rating li.current-label {
@@ -121,8 +121,12 @@
 .unit-rating li.current-label .label{
   width:20px; height:30px;
   background: url('/images/streaksprite.png') no-repeat 0 -35px;
-  position:absolute; right:0; top:0;
+  position:absolute; right:0px; top:0;
 }
+.unit-rating .suggested li.current-label .label{
+  right:-10px;
+}
+
 .unit-rating li.streak-icon {
 	background-image: url(/images/non-repeating-sprites.1.png);
     background-position: -10px -820px;

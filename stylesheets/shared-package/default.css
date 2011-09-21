@@ -1496,8 +1496,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     .streak-bar {
         width: 228px;
         height: 30px;
-        background-color:#8cc63f;
         line-height: 18px;
+        background-color:#ccc;
+        overflow:hidden;
+    }
+    .streak-bar.suggested {
+      background-color:#8cc63f;
     }
     .streak-bar.proficient .current-label{
       background: url('/images/streaksprite.png') no-repeat 0 -70px;
@@ -1509,7 +1513,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     
     .streak-bar .streak-icon{
       background-image: url(/images/streaksprite.png);
-      background-position: -1 -110px;
+      background-position: 0 -110px;
       width:100%;
       z-index:10;
     }
@@ -1517,12 +1521,12 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
       background-position: -301px 0;
     }
     
-    .streak-bar .current-label{overflow:hidden;}
+    .streak-bar .current-label{/*overflow:hidden;*/}
     
     /* the streak bar on exercise pages */    
     .single-exercise #streak-bar-container .streak-bar{
       width:400px;
-      
+      background-color:#8cc63f;
       bottom: auto;
       left: auto;
       top: 21px;
@@ -1530,6 +1534,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     .single-exercise #streak-bar-container .streak-bar.proficient{
       background-image:none;
+    }
+
+    .single-exercise #streak-bar-container .streak-bar .label{
+      right:-10px;
     }
 
     #streak-bar-container .unit-label{width:100%;}
