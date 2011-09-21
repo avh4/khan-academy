@@ -109,17 +109,27 @@
     }
 
 .unit-rating li.current-label {
-    background: url('/images/ministreakbar.png') no-repeat -228px 0px;
+    background-color:#06f;
+    position:relative;
     z-index: 5;
 }
 
+.unit-rating li.current-label.proficient{
+  background: url('/images/streaksprite.png') no-repeat 0 -70px;
+}
+
+.unit-rating li.current-label .label{
+  width:20px; height:30px;
+  background: url('/images/streaksprite.png') no-repeat 0 -35px;
+  position:absolute; right:0; top:0;
+}
 .unit-rating li.streak-icon {
 	background-image: url(/images/non-repeating-sprites.1.png);
     background-position: -10px -820px;
     z-index: 2;
     }
 .single-exercise .unit-rating li.streak-icon {
-    top: 2px;
+/*    top: 2px;*/
 }
 
 .voted {color:#999;}

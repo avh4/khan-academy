@@ -1494,38 +1494,51 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         }
     /* the streak bar on the dashboard */
     .streak-bar {
-        background-image: url(/images/ministreakbar.png);
-        background-position: 0 0;
         width: 228px;
         height: 30px;
+        background-color:#8cc63f;
         line-height: 18px;
     }
-    .streak-bar .best-label{
-      background-image: url(/images/ministreakbar.png);
-      background-position: -301px 0;
-      
+    .streak-bar.proficient .current-label{
+      background: url('/images/streaksprite.png') no-repeat 0 -70px;
+      background-color:#06f;
+    }
+    .streak-bar.proficient .label{
+      display:none;
     }
     
-    /* the streak bar on exercise pages */
+    .streak-bar .streak-icon{
+      background-image: url(/images/streaksprite.png);
+      background-position: -1 -110px;
+      width:100%;
+      z-index:10;
+    }
+    .streak-bar .best-label{
+      background-position: -301px 0;
+    }
     
+    .streak-bar .current-label{overflow:hidden;}
+    
+    /* the streak bar on exercise pages */    
     .single-exercise #streak-bar-container .streak-bar{
       width:400px;
-      background: url(/images/streakgradient.png) no-repeat 0px 0px;
+      
       bottom: auto;
       left: auto;
       top: 21px;
       right: 8px;
     }
-    .single-exercise #streak-bar-container .current-label{
-      background: url(/images/streakgradient.png) no-repeat -401px 0px;
+    .single-exercise #streak-bar-container .streak-bar.proficient{
+      background-image:none;
     }
+
     #streak-bar-container .unit-label{width:100%;}
     .single-exercise #streak-bar-container .streak-icon, 
     #streak-bar-container .streak-icon{
       width:100%;
-      background-color:white;
-      background-image:none;
-      opacity:.75;
+      z-index:10;
+      background:url(/images/streaksprite.png) no-repeat 0 0px;
+      
     }
     
     
