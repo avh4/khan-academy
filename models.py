@@ -230,10 +230,8 @@ class Exercise(db.Model):
         return query.fetch(200)
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_safe_%s" % Setting.cached_exercises_date())
     def __get_all_use_cache_safe__():
-        query = Exercise.all(live_only = True).order('h_position')
-        return query.fetch(200)
+        return filter(lambda exercise: exercise.live, Exercise.__get_all_use_cache_unsafe__())
 
     @staticmethod
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_dict_unsafe_%s" % Setting.cached_exercises_date())
@@ -1623,7 +1621,7 @@ class ExerciseGraph(object):
         for ex in self.exercises:
             self.exercise_by_name[ex.name] = ex
 
-        if user_data is not None :
+        if user_data is not None:
             self.initialize_for_user(user_data)
             
     def initialize_for_user(self, user_data, user_exercises=None):
