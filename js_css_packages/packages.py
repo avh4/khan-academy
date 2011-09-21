@@ -67,6 +67,7 @@ javascript = {
             "utils/answer-types.js",
             "utils/calculus.js",
             "utils/convert-values.js",
+            "utils/derivative-intuition.js",
             "utils/exponents.js",
             "utils/expressions.js",
             "utils/graphie-geometry.js",
