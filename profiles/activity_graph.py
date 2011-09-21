@@ -2,8 +2,6 @@ import datetime
 import time
 import logging
 
-from django.template.defaultfilters import pluralize
-
 import models
 import activity_summary
 import util

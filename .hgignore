@@ -19,3 +19,4 @@ sample_data/bulkloader-*
 offline/*
 .*.swp
 .*.un~
+compiled_templates*

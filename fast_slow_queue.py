@@ -14,7 +14,6 @@ from google.appengine.ext import deferred
 # ...if you need to run one-time configuration or path manipulation code when an instance
 # is started, you may need to add that code to this file as this file will become
 # a possibly instance-starting entry point. See above Stack Oveflow question.
-import config_django
 
 QUEUE_NAME = "fast-background-queue"
 SLOW_QUEUE_NAME = "slow-background-queue"

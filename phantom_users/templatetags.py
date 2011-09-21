@@ -1,15 +1,8 @@
 import os
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
-
+import shared_jinja
 from notifications import UserNotifier
-from .badges import badges, util_badges
 
-import template_cached
-register = template_cached.create_template_register()
-
-@register.simple_tag
 def login_notifications(user_data, continue_url):
     login_notifications = UserNotifier.pop_for_current_user_data()["login"]
     return login_notifications_html(login_notifications, user_data, continue_url)
@@ -17,11 +10,11 @@ def login_notifications(user_data, continue_url):
 def login_notifications_html(login_notifications, user_data, continue_url="/"):
     login_notification = None if len(login_notifications) == 0 else login_notifications[0]
 
-    path = os.path.join(os.path.dirname(__file__), "notifications.html")
-    return template.render(path, {"login_notification": login_notification, "continue": continue_url, "user_data":user_data})
+    context = {"login_notification": login_notification, "continue": continue_url, "user_data":user_data}
+    return shared_jinja.get().render_template("phantom_users/notifications.html", **context)
 
-@register.inclusion_tag("phantom_users/badge_counts.html")
 def badge_info(user_data):
+    from .badges import badges, util_badges
 
     counts_dict = {}
     if user_data:
@@ -33,7 +26,7 @@ def badge_info(user_data):
     for key in counts_dict:
         sum_counts += counts_dict[key]
 
-    return {
+    context = {
             "sum": sum_counts,
             "bronze": counts_dict[badges.BadgeCategory.BRONZE],
             "silver": counts_dict[badges.BadgeCategory.SILVER],
@@ -42,12 +35,13 @@ def badge_info(user_data):
             "diamond": counts_dict[badges.BadgeCategory.DIAMOND],
             "master": counts_dict[badges.BadgeCategory.MASTER],
     }
+    return shared_jinja.get().render_template("phantom_users/badge_counts.html", **context)
     
-@register.inclusion_tag("phantom_users/user_points.html")
 def point_info(user_data):
     if user_data:
         points = user_data.points
     else:
         points = 0
-    return {"points": points}
+    context = {"points": points}
+    return shared_jinja.get().render_template("phantom_users/user_points.html", **context)
 

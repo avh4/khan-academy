@@ -42,20 +42,7 @@ import time
 import logging
 import urllib
 import urllib2
-
-# Find a JSON parser
-try:
-    import json
-    _parse_json = lambda s: json.loads(s)
-except ImportError:
-    try:
-        import simplejson
-        _parse_json = lambda s: simplejson.loads(s)
-    except ImportError:
-        # For Google AppEngine
-        from django.utils import simplejson
-        _parse_json = lambda s: simplejson.loads(s)
-
+import simplejson
 
 class GraphAPI(object):
     """A client for the Facebook Graph API.
@@ -178,7 +165,7 @@ class GraphAPI(object):
                                   urllib.urlencode(args), post_data)
 
         try:
-            response = _parse_json(file.read())
+            response = simplejson.loads(file.read())
         finally:
             file.close()
         if response.get("error"):

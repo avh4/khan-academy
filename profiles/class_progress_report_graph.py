@@ -1,5 +1,5 @@
-from django.template.defaultfilters import escape
-from templateext import escapejs
+from jinja2.utils import escape
+from templatefilters import escapejs
 
 import models
 import util

@@ -2,8 +2,7 @@ import datetime
 import time
 import logging
 
-from django.template.defaultfilters import pluralize
-from templatefilters import seconds_to_time_string
+from templatefilters import seconds_to_time_string, pluralize
 
 import models
 import util
