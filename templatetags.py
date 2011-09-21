@@ -16,8 +16,6 @@ import models
 from api.auth import xsrf
 import shared_jinja
 
-from gae_bingo.gae_bingo import ab_test
-
 def user_info(username, user_data):
     context = {"username": username, "user_data": user_data}
     return shared_jinja.get().render_template("user_info_only.html", **context)
@@ -47,7 +45,6 @@ def exercise_message(exercise, coaches, exercise_states):
         state = '_reviewing'
     elif exercise_states['proficient']:
         state = '_proficient'
-        exercise_states.update({"heading": ab_test("proficiency_message_heading", ["Nice work!", "You're ready to move on!"])})
     elif exercise_states['struggling']:
         state = '_struggling'
         exercise_states['exercise_videos'] = exercise.related_videos_fetch()
