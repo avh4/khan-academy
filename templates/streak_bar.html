@@ -1,11 +1,11 @@
 <div id="streak-bar-container">
 {% block streak_bar_block %}
-<div class="streak-bar{% if is_proficient %} proficient{% elif is_suggested %} suggested{% endif %}"  title="Current progress: {{ progress }}">
+<div class="streak-bar{% if is_proficient %} proficient{% elif is_suggested or float_progress > 0 %} suggested{% endif %}"  title="Current progress: {{ progress }}">
     <div class="current-streak">
         <ul class="unit-rating" style="width:{{ bar_max_width }}px;">
             <li class="current-rating" style="width:{{ bar_width }}px;"></li>
             {% for level in levels %}
-                <li class="level-label" style="width:{{ level }}px;"></li>
+                <li class="level-label" style="left:{{ level }}px;"></li>
             {% endfor %}
             <li class="current-label" style="width:{{ bar_width }}px;"><div class="label"></div></li>
             <li class="streak-icon"></li>

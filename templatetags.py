@@ -89,6 +89,7 @@ def streak_bar(user_exercise):
     template_values = {
         "is_proficient": user_exercise.proficient,
         "is_suggested": user_exercise.suggested,
+        "float_progress" : progress,
         "progress": format_percent(progress),
         "bar_width": bar_width,
         "bar_max_width": bar_max_width,

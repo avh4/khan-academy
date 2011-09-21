@@ -1498,6 +1498,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         height: 30px;
         line-height: 18px;
         background-color:#ccc;
+        overflow:hidden;
     }
     .streak-bar.suggested {
       background-color:#8cc63f;
@@ -1520,7 +1521,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
       background-position: -301px 0;
     }
     
-    .streak-bar .current-label{overflow:hidden;}
+    .streak-bar .current-label{/*overflow:hidden;*/}
     
     /* the streak bar on exercise pages */    
     .single-exercise #streak-bar-container .streak-bar{
@@ -1533,6 +1534,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     .single-exercise #streak-bar-container .streak-bar.proficient{
       background-image:none;
+    }
+
+    .single-exercise #streak-bar-container .streak-bar .label{
+      right:-10px;
     }
 
     #streak-bar-container .unit-label{width:100%;}
