@@ -67,25 +67,14 @@ def user_points(user_data):
 
 def streak_bar(user_exercise):
     streak = user_exercise.streak
-    longest_streak = 0
-
-    if hasattr(user_exercise, "longest_streak"):
-        longest_streak = user_exercise.longest_streak
 
     if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
         streak = 0
-        longest_streak = 0
 
     streak_max_width = 227
     required_streak = user_exercise.required_streak
 
     streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * streak))
-    longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * longest_streak))
-    streak_icon_width = min(streak_max_width - 2, max(43, streak_width)) # 43 is width of streak icon
-
-    width_required_for_label = 20
-    show_streak_label = streak_width > width_required_for_label
-    show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - streak_width) > width_required_for_label
 
     levels = []
     if user_exercise.summative:
@@ -97,18 +86,10 @@ def streak_bar(user_exercise):
         if streak > consts.MAX_STREAK_SHOWN:
             streak = "Max"
 
-        if longest_streak > consts.MAX_STREAK_SHOWN:
-            longest_streak = "Max"
-
     template_values = {
         "streak": streak,
-        "longest_streak": longest_streak,
         "streak_width": streak_width,
-        "longest_streak_width": longest_streak_width,
         "streak_max_width": streak_max_width,
-        "streak_icon_width": streak_icon_width,
-        "show_streak_label": show_streak_label,
-        "show_longest_streak_label": show_longest_streak_label,
         "levels": levels
     }
 
