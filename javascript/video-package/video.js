@@ -36,7 +36,7 @@ var Video = {
                 menu.hide();
             e.preventDefault();
         });
-        
+
         $('.and-more').click(function(){
             $(this).hide();
             $('.more-content').show();
@@ -47,23 +47,23 @@ var Video = {
         if (readCookie(this.SHOW_SUBTITLES_COOKIE))
             this.showSubtitles();
 
-	
-		$('.sharepop').hide();
-		
-		$('.share-link').click(function() {
-			$(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");	
-			return false;
-		});
-	
+
+        $('.sharepop').hide();
+
+        $('.share-link').click(function() {
+            $(this).next(".sharepop").toggle("drop",{direction:'up'},"fast");
+            return false;
+        });
+
     },
-	
+
     toggleSubtitles: function() {
         if ($('.subtitles-warning').is(":visible"))
             this.hideSubtitles();
         else
             this.showSubtitles();
     },
-	
+
 
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);
@@ -87,7 +87,7 @@ var Video = {
                 Throbber.show($(".subtitles-warning"), true);
             }, 1);
 
-            $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', function() { 
+            $.getScript('http://s3.www.universalsubtitles.org/js/mirosubs-widgetizer.js', function() {
                 // Workaround bug where subtitles are not displayed if video was already playing until
                 // video is paused and restarted.  We wait 3 secs to give subtitles a chance to load.
                 setTimeout(function() {
