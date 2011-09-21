@@ -124,6 +124,9 @@
   position:absolute; right:0px; top:0;
 }
 .unit-rating .suggested li.current-label .label{
+  /*nudge the gradient over if you've started the exercise but only
+    on the dashboard, not on exercises because performance not so good
+  */
   right:-10px;
 }
 
