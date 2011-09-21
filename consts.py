@@ -5,9 +5,6 @@ REQUIRED_STREAK = 10
 # Number of problems required to reach a barrier/milestone in a challenge exercise
 CHALLENGE_STREAK_BARRIER = 10
 
-# Max streak shown in streak bars
-MAX_STREAK_SHOWN = 100
-
 # Number of problems that reward a slowly degrading amount of energy points after the required streak has been reached
 # before energy points bottom out for the exercise
 DEGRADING_EXERCISES_AFTER_STREAK = 15

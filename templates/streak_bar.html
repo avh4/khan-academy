@@ -1,14 +1,13 @@
 <div id="streak-bar-container">
 {% block streak_bar_block %}
-<div class="streak-bar" title="Current streak: {{ streak }}">
+<div class="streak-bar" title="Current progress: {{ progress }}">
     <div class="current-streak">
-        <ul class="unit-rating" style="width:{{ streak_max_width }}px;">
-            <li class="current-rating" style="width:{{ streak_width }}px;"></li>
-            <li class="streak-icon" style="width:{{ streak_icon_width }}px;"></li>
+        <ul class="unit-rating" style="width:{{ bar_max_width }}px;">
+            <li class="current-rating" style="width:{{ bar_width }}px;"></li>
             {% for level in levels %}
                 <li class="level-label" style="width:{{ level }}px;"></li>
             {% endfor %}
-            <li class="current-label" style="width:{{ streak_width }}px;"></li>
+            <li class="current-label" style="width:{{ bar_width }}px;"></li>
         </ul>
     </div>
 </div>

@@ -1705,6 +1705,7 @@ class ExerciseGraph(object):
             ex.assigned = False
             ex.streak = 0
             ex.longest_streak = 0
+            ex.progress = 0.0
             ex.total_done = 0
             if hasattr(ex, 'last_done'):
                 # Clear leftovers from cache to fix random recents on new accounts
@@ -1732,6 +1733,7 @@ class ExerciseGraph(object):
             if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
                 ex.user_exercise = user_ex
                 ex.streak = user_ex.streak
+                ex.progress = user_ex.progress
                 ex.longest_streak = user_ex.longest_streak
                 ex.total_done = user_ex.total_done
                 ex.last_done = user_ex.last_done
