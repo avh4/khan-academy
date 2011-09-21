@@ -292,7 +292,7 @@ def user_videos_all():
     return None
 
 @route("/api/v1/user/videos/<youtube_id>", methods=["GET"])
-@oauth_required()
+@oauth_optional()
 @jsonp
 @jsonify
 def user_videos_specific(youtube_id):
