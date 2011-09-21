@@ -442,7 +442,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 # 2+ in a row wrong -> not proficient
                 user_exercise.set_proficient(False, user_data)
 
-            user_exercise.reset_streak()
+            # Only shrink the progress bar at most once per problem
+            shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
+            user_exercise.reset_streak(shrink_start)
 
         # Manually clear exercise's memcache since we're throwing it in a bulk put
         user_exercise.clear_memcache()

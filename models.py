@@ -394,7 +394,7 @@ class UserExercise(db.Model):
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
 
-    def reset_streak(self):
+    def reset_streak(self, shrink_start=True):
         if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
             old_progress = self.progress
@@ -402,11 +402,11 @@ class UserExercise(db.Model):
 
             self.streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
 
-            if old_streak != self.streak:  # Only bring down streak bar at most once per problem
+            if shrink_start:
                 self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
 
         else:
-            if self.streak != 0:  # Only bring down streak bar at most once per problem
+            if shrink_start:
                 self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
             self.streak = 0
 
