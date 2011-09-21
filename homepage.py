@@ -78,7 +78,7 @@ def new_and_noteworthy_link_sets():
 
     if len(exercises) == 0:
         # Temporary hard-coding of a couple exercises until Sal picks a few
-        playlist.tags = ['solid_geometry', 'estimation_with_decimals', 'multiplication_4']
+        playlist.tags = ['derivative_intuition', 'inequalities_on_a_number_line', 'multiplication_4', 'solid_geometry']
         for tag in playlist.tags:
             exercise = models.Exercise.get_by_name(tag)
             if exercise:
