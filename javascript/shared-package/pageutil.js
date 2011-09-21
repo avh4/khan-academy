@@ -1,20 +1,20 @@
 function addCommas(nStr) // to show clean number format for "people learning right now" -- no built in JS function
 {
-	nStr += '';
-	var x = nStr.split('.');
-	var x1 = x[0];
-	var x2 = x.length > 1 ? '.' + x[1] : '';
-	var rgx = /(\d+)(\d{3})/;
-	while (rgx.test(x1)) {
-		x1 = x1.replace(rgx, '$1' + ',' + '$2');
-	}
-	return x1 + x2;
+    nStr += '';
+    var x = nStr.split('.');
+    var x1 = x[0];
+    var x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
 }
 
 function validateEmail(sEmail)
-{ 
-     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/ 
-     return sEmail.match(re) 
+{
+     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+     return sEmail.match(re)
 }
 
 function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
@@ -46,7 +46,7 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
                 if (data != null)
                 {
                     var reMatch = null;
-                    
+
                     // Try to find the "scent" of the match.  If regexp fails
                     // to compile for any input reason, ignore.
                     try {
@@ -57,7 +57,7 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
                     }
 
                     // Add playlist and video matches to list of autocomplete suggestions
-                    
+
                     if (fPlaylists)
                     {
                         for (var ix = 0; ix < data.playlists.length; ix++)
@@ -96,7 +96,7 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
             {
                 // Keep right side of search input and autocomplete menu aligned
                 jelMenu.offset({
-                                    right: pxRightInput - jelMenu.outerWidth(), 
+                                    right: pxRightInput - jelMenu.outerWidth(),
                                     top: jelMenu.offset().top
                                 });
             }
@@ -208,8 +208,8 @@ var VideoControls = {
         var animationOptions = {duration: 150, queue: false};
 
         $("#thumbnails")
-            .cycle({ 
-                fx:     'scrollHorz', 
+            .cycle({
+                fx:     'scrollHorz',
                 timeout: 0,
                 speed: 550,
                 slideResize: 0,
@@ -359,7 +359,7 @@ var VideoStats = {
         var dtSinceSaveBeforeError = this.dtSinceSave;
 
         $.ajax({type: "GET",
-                url: "/logvideoprogress", 
+                url: "/logvideoprogress",
                 data: {
                     video_key: this.sVideoKey,
                     last_second_watched: this.getSecondsWatched(),
@@ -379,7 +379,7 @@ var VideoStats = {
     /* Use qtip2 (http://craigsworks.com/projects/qtip2/) to create a tooltip
      * that looks like the ones on youtube.
      *
-     * Example: 
+     * Example:
      * VideoStats.tooltip('#points-badge-hover', '0 of 500 points');
      */
     tooltip: function(selector, content) {
@@ -459,9 +459,9 @@ function onYouTubePlayerReady(playerID) {
 
     VideoControls.player = player;
     VideoStats.player = player;
-    // The UniSub (aka mirosubs) widget replaces the YouTube player with a copy 
-    // and that will cause onYouTubePlayerReady() to be called again.  So, we trigger 
-    // 'playerready' events on any objects that are using the player so that they can 
+    // The UniSub (aka mirosubs) widget replaces the YouTube player with a copy
+    // and that will cause onYouTubePlayerReady() to be called again.  So, we trigger
+    // 'playerready' events on any objects that are using the player so that they can
     // take appropriate action to use the new player.
     $(VideoControls).trigger('playerready');
     $(VideoStats).trigger('playerready');
@@ -477,7 +477,7 @@ var Drawer = {
             window.location = $(".exercise-title a", this).attr("href");
             return false;
         });
-        
+
         $('.toggle-drawer').click(function() {Drawer.toggle(); return false;});
 
         $(window).resize(function(){Drawer.resize();});
@@ -494,11 +494,11 @@ var Drawer = {
             if (window.KnowledgeMap)
             {
                 $(".exercise-badge").hover(
-                        function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
+                        function(){KnowledgeMap.onBadgeMouseover.apply(this);},
                         function(){KnowledgeMap.onBadgeMouseout.apply(this);}
                 );
                 $(".exercise-edit").hover(
-                        function(){KnowledgeMap.onBadgeMouseover.apply(this);}, 
+                        function(){KnowledgeMap.onBadgeMouseover.apply(this);},
                         function(){KnowledgeMap.onBadgeMouseout.apply(this);}
                 );
             }
@@ -538,10 +538,10 @@ var Drawer = {
 
         var jelDrawer = $("#dashboard-drawer");
         var leftDrawer = fExpanded ? -1 * (jelDrawer.width() + 20) : 0;
-        
+
         var jelTitle = $("#dashboard-title");
         var leftTitle = fExpanded ? -1 * (jelTitle.width() +10 ): 5;
-        
+
         jelTitle.animate({left: leftTitle}, 500);
 
         this.fToggling = true;
@@ -550,7 +550,7 @@ var Drawer = {
         if (window.KnowledgeMap)
         {
             var leftMap = (fExpanded ? 0 : 340);
-            $("#map-canvas").animate({marginRight: leftMap + "px", left: leftMap + "px"}, 
+            $("#map-canvas").animate({marginRight: leftMap + "px", left: leftMap + "px"},
                     500,
                     function() {
                         google.maps.event.trigger(KnowledgeMap.map, 'resize');
@@ -646,7 +646,7 @@ var Notifications = {
 
         if (!jel.is(":visible")) {
             setTimeout(function(){
-                
+
                 jel
                     .css("visibility", "hidden")
                     .css("display", "")
@@ -655,7 +655,7 @@ var Notifications = {
 
                 // Queue:false to make sure all of these run at the same time
                 var animationOptions = {duration: 350, queue: false};
-                
+
                 $(".notification-bar-spacer").animate({ height: 35 }, animationOptions);
                 jel.show().animate({ top: 0 }, animationOptions);
 
@@ -668,16 +668,16 @@ var Notifications = {
 
         // Queue:false to make sure all of these run at the same time
         var animationOptions = {duration: 350, queue: false};
-        
+
         $(".notification-bar-spacer").animate({ height: 0 }, animationOptions);
         jel.animate(
                 { top: -jel.height() - 2 }, // 2 for border and outline
-                $.extend({}, animationOptions, 
+                $.extend({}, animationOptions,
                     { complete: function(){ jel.empty().css("display", "none"); } }
                 )
         );
 
-        $.post("/notifierclose"); 
+        $.post("/notifierclose");
     }
 }
 
@@ -810,29 +810,29 @@ var FacebookHook = {
                     url += "&hc=" + (hasCookie ? "1" : "0");
 
                     url += "&hs=" + (response.session ? "1": "0");
-                    
+
                     window.location = url;
                });
             }
 
             FB.getLoginStatus(function(response) {
-                
+
                 $('#page_logout').click(function(e) {
-                    
+
                     eraseCookie("fbs_" + FB_APP_ID);
-                    
+
                     if (response.session) {
-                        
-                        FB.logout(function() { 
-                            window.location = $("#page_logout").attr("href"); 
+
+                        FB.logout(function() {
+                            window.location = $("#page_logout").attr("href");
                         });
-                        
+
                         e.preventDefault();
                         return false;
                     }
-                    
+
                 });
-                
+
             });
         };
 
@@ -842,7 +842,7 @@ var FacebookHook = {
             document.getElementById('fb-root').appendChild(e);
         });
     },
-    
+
     fixMissingCookie: function(session) {
         // In certain circumstances, Facebook's JS SDK fails to set their cookie
         // but still thinks users are logged in. To avoid continuous reloads, we
