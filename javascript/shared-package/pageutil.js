@@ -267,6 +267,7 @@ var VideoStats = {
     cachedCurrentTime: 0, // For use by alternative FLV player
     dtSinceSave: null,
     sVideoKey: null,
+    sYoutubeId: null,
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
@@ -287,11 +288,17 @@ var VideoStats = {
         return this.getSecondsWatched() / duration;
     },
 
-    startLoggingProgress: function(sVideoKey) {
+    startLoggingProgress: function(sVideoKey, sYoutubeId) {
+        if (sYoutubeId) {
+            this.sYoutubeId = sYoutubeId;
+        }
+        else if (sVideoKey) {
+            this.sVideoKey = sVideoKey;
+        }
+        else {
+            return; // no key given, can't log anything.
+        }
 
-        if (!sVideoKey) return;
-
-        this.sVideoKey = sVideoKey;
         this.dPercentLastSaved = 0;
         this.cachedDuration = 0;
         this.cachedCurrentTime = 0;
@@ -358,13 +365,20 @@ var VideoStats = {
         var percent = this.getPercentWatched();
         var dtSinceSaveBeforeError = this.dtSinceSave;
 
+        var data = {
+            last_second_watched: this.getSecondsWatched(),
+            seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
+        };
+
+        if ( this.sVideoKey !== null ) {
+            data.video_key = this.sVideoKey;
+        } else if ( this.sYoutubeId !== null ) {
+            data.youtube_id = this.sYoutubeId;
+        }
+
         $.ajax({type: "GET",
                 url: "/logvideoprogress",
-                data: {
-                    video_key: this.sVideoKey,
-                    last_second_watched: this.getSecondsWatched(),
-                    seconds_watched: this.getSecondsWatchedRestrictedByPageTime()
-                },
+                data: data,
                 success: function (data) { VideoStats.finishSave(data, percent); },
                 error: function () {
                     // Restore pre-error stats so user can still get full
