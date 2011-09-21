@@ -161,6 +161,10 @@ def compress_css():
     print "Compressing stylesheets"
     compress.compress_all_stylesheets()
 
+def compile_templates():
+    print "Compiling all templates"
+    return 0 == popen_return_code(['python', 'deploy/compile_templates.py'])
+
 def deploy(version):
     print "Deploying version " + str(version)
     return 0 == popen_return_code(['appcfg.py', '-V', str(version), "update", "."])
@@ -223,6 +227,11 @@ def main():
 
     print "Deploying version " + str(version)
     compress.revert_js_css_hashes()
+
+    if not compile_templates():
+        print "Failed to compile templates, bailing."
+        return
+
     compress_js()
     compress_css()
 

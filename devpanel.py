@@ -34,7 +34,7 @@ class Email(request_handler.RequestHandler):
 
         template_values = {'App' : App, 'curremail': current_email, 'newemail':  new_email, 'currdata': currdata, 'newdata': newdata, "properties": UserData.properties()}
 
-        self.render_template('devemailpanel.html', template_values)
+        self.render_jinja2_template('devemailpanel.html', template_values)
         
 class Manage(request_handler.RequestHandler):
 
@@ -45,7 +45,7 @@ class Manage(request_handler.RequestHandler):
         developers.filter('developer = ', True).fetch(1000)
         template_values = { "developers": developers }
 
-        self.render_template('managedevs.html', template_values) 
+        self.render_jinja2_template('managedevs.html', template_values) 
         
 class ManageCoworkers(request_handler.RequestHandler):
 
@@ -64,4 +64,4 @@ class ManageCoworkers(request_handler.RequestHandler):
             "user_data_coworkers": user_data_coworkers
         }
 
-        self.render_template("managecoworkers.html", template_values)
+        self.render_jinja2_template("managecoworkers.html", template_values)

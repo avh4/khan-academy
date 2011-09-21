@@ -21,7 +21,7 @@ class Dashboard(request_handler.RequestHandler):
         context.update(daily_graph_context(RegisteredUserCount, "user_counts"))
         context.update(daily_graph_context(EntityStatistic("ProblemLog"), "problem_counts"))
 
-        self.render_template("dashboard/dashboard.html", context)
+        self.render_jinja2_template("dashboard/dashboard.html", context)
 
 class Entityboard(request_handler.RequestHandler):
 
@@ -40,7 +40,7 @@ class Entityboard(request_handler.RequestHandler):
             d['title'] = "%s created per day" % kind
             graphs.append(d)
 
-        self.render_template("dashboard/entityboard.html", {'graphs': graphs})
+        self.render_jinja2_template("dashboard/entityboard.html", {'graphs': graphs})
 
 def daily_graph_context(cls, key):
     # Grab last ~4 months
@@ -81,4 +81,4 @@ class EntityCounts(request_handler.RequestHandler):
             grouped = sorted(group, key=lambda s: s.timestamp, reverse=True)
             counts.append(dict(kind=key, count=grouped[0].count, timestamp=grouped[0].timestamp))
 
-        self.render_template("dashboard/entitycounts.html", {'counts':counts})
+        self.render_jinja2_template("dashboard/entitycounts.html", {'counts':counts})

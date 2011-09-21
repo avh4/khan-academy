@@ -203,7 +203,7 @@ class ViewExercise(request_handler.RequestHandler):
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
-        self.render_template("exercise_template.html", template_values)
+        self.render_jinja2_template("exercise_template.html", template_values)
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
@@ -249,7 +249,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'selected_nav_link': 'practice',
             }
 
-        self.render_template('viewexercises.html', template_values)
+        self.render_jinja2_template('viewexercises.html', template_values)
 
 class RawExercise(request_handler.RequestHandler):
     def get(self):
@@ -301,7 +301,7 @@ def exercise_contents(exercise):
     if not len(body_contents):
         raise MissingExerciseException("Missing exercise body in content for exid '%s'" % exercise.name)
 
-    return (body_contents, script_contents, style_contents, data_require, sha1)
+    return map(lambda s: s.decode('utf-8'), (body_contents, script_contents, style_contents, data_require, sha1))
 
 @layer_cache.cache_with_key_fxn(lambda exercise_file: "exercise_raw_html_%s" % exercise_file, layer=layer_cache.Layers.InAppMemory)
 def raw_exercise_contents(exercise_file):
@@ -492,7 +492,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
         exercises.sort(key=lambda e: e.name)
         template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
-        self.render_template('exerciseadmin.html', template_values)
+        self.render_jinja2_template('exerciseadmin.html', template_values)
 
 class EditExercise(request_handler.RequestHandler):
 
@@ -519,7 +519,7 @@ class EditExercise(request_handler.RequestHandler):
                 'saved': self.request_bool('saved', default=False),
                 }
 
-            self.render_template("editexercise.html", template_values)
+            self.render_jinja2_template("editexercise.html", template_values)
 
 class UpdateExercise(request_handler.RequestHandler):
 

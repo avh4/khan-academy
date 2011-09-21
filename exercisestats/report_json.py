@@ -149,19 +149,19 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
                 {
                     'name': 'Problems done',
                     'type': 'areaspline',
-                    'values': json.dumps(done_list),
+                    'data_values': json.dumps(done_list),
                     'axis': 0,
                 },
                 {
                     'name': 'Proficient',
                     'type': 'column',
-                    'values': json.dumps(prof_list),
+                    'data_values': json.dumps(prof_list),
                     'axis': 1,
                 },
                 {
                     'name': 'First attempts',
                     'type': 'spline',
-                    'values': json.dumps(new_users_list),
+                    'data_values': json.dumps(new_users_list),
                     'axis': 1,
                 },
             ],
@@ -174,7 +174,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
             'showLegend': json.dumps(showLegend),
         }
 
-        return self.render_template_to_string(
+        return self.render_jinja2_template_to_string(
             'exercisestats/highcharts_area_spline.json', context)
 
 # This redirect is to eliminate duplicate code so we don't have to change every
@@ -242,13 +242,13 @@ class ExerciseStatsMapGraph(request_handler.RequestHandler):
             'title': 'Exercises map - First attempts',
             'series': {
                 'name': 'First attempts',
-                'values': json.dumps(data_points),
+                'data_values': json.dumps(data_points),
             },
             'minYValue': min_y - 1,
             'maxYValue': max_y + 1,
         }
 
-        return self.render_template_to_string(
+        return self.render_jinja2_template_to_string(
             'exercisestats/highcharts_scatter_map.json', context)
 
 class ExercisesLastAuthorCounter(request_handler.RequestHandler):
@@ -378,13 +378,13 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
                 {
                     'name': 'Histogram (created per day)',
                     'type': 'column',
-                    'values': json.dumps(histogram),
+                    'data_values': json.dumps(histogram),
                     'axis': 0,
                 },
                 {
                     'name': 'Total exercises',
                     'type': 'spline',
-                    'values': json.dumps(total_exercises),
+                    'data_values': json.dumps(total_exercises),
                     'axis': 1,
                 }
             ],
@@ -395,7 +395,7 @@ class ExercisesCreatedHistogram(request_handler.RequestHandler):
             ],
         }
 
-        return self.render_template_to_string(
+        return self.render_jinja2_template_to_string(
             'exercisestats/highcharts_exercises_created_histogram.json', context)
 
 class SetAllExerciseCreationDates(request_handler.RequestHandler):

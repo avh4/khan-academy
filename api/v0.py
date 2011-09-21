@@ -9,7 +9,6 @@ import datetime
 import urllib
 
 import simplejson as json
-from google.appengine.ext.webapp import template
 from google.appengine.api import users
 
 from app import App

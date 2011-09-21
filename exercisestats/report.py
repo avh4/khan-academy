@@ -59,4 +59,4 @@ class Test(request_handler.RequestHandler):
 
         context = { 'selected_nav_link': 'practice', 'hist': hist, 'total': total }
 
-        self.render_template('exercisestats/test.html', context)
+        self.render_jinja2_template('exercisestats/test.html', context)

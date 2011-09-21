@@ -6,16 +6,10 @@ import urllib
 import pickle
 import random
 
-import config_django
-
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
 from api.jsonify import jsonify
-# Do not remove this webapp.template import, as suggested
-# by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
-from google.appengine.ext.webapp import template
-from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
@@ -33,6 +27,8 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+
+from templatefilters import slugify
 from gae_bingo.gae_bingo import ab_test, bingo
 from gae_bingo.models import GAEBingoIdentityModel
 
@@ -666,7 +662,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
-            "user_nickname", "user_email",
+            "user_nickname", "user_email", "seconds_since_joined",
     ]
 
     @property
@@ -718,6 +714,10 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @property
     def is_phantom(self):
         return util.is_phantom_user(self.user_id)
+
+    @property
+    def seconds_since_joined(self):
+        return util.seconds_since(self.joined)
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id:%s" % user_id)

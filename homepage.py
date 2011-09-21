@@ -1,7 +1,7 @@
 import datetime
 import random
 
-from django.template.defaultfilters import escape
+from jinja2.utils import escape
 
 import consts
 import library
@@ -181,4 +181,5 @@ class ViewHomePage(request_handler.RequestHandler):
                             'is_mobile_allowed': True,
                             'approx_vid_count': consts.APPROX_VID_COUNT,
                         }
-        self.render_template('homepage.html', template_values)
+
+        self.render_jinja2_template('homepage.html', template_values)
