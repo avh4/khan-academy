@@ -1536,10 +1536,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
       background-image:none;
     }
 
-    .single-exercise #streak-bar-container .streak-bar .label{
-      right:-10px;
-    }
-
     #streak-bar-container .unit-label{width:100%;}
     .single-exercise #streak-bar-container .streak-icon, 
     #streak-bar-container .streak-icon{
