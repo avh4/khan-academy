@@ -95,40 +95,24 @@
     font-weight: bold;
     font-size: 14px;
     height: 30px;
+    padding-top: 5px;
     }
 
 .unit-rating li.best-label {
+	background: url('/images/streak-meter-active.png') no-repeat left top;
     z-index: 3;
-}
+    opacity: 0.2;
+    filter:alpha(opacity=20);
+    }
 
 .unit-rating li.level-label {
-    background-color:white;
-    width:2px; 
-    position:absolute;
-    z-index: 6;
+    background: url('/images/streak-meter-separator.png') no-repeat right top;
+    z-index: 4;
     }
 
 .unit-rating li.current-label {
-    background-color:#06f;
-    position:relative;
     z-index: 5;
-}
-
-.unit-rating li.current-label.proficient{
-  background: url('/images/streaksprite.png') no-repeat 0 -70px;
-}
-
-.unit-rating li.current-label .label{
-  width:20px; height:30px;
-  background: url('/images/streaksprite.png') no-repeat 0 -35px;
-  position:absolute; right:0px; top:0;
-}
-.unit-rating .suggested li.current-label .label{
-  /*nudge the gradient over if you've started the exercise but only
-    on the dashboard, not on exercises because performance not so good
-  */
-  right:-10px;
-}
+    }
 
 .unit-rating li.streak-icon {
 	background-image: url(/images/non-repeating-sprites.1.png);
@@ -136,7 +120,7 @@
     z-index: 2;
     }
 .single-exercise .unit-rating li.streak-icon {
-/*    top: 2px;*/
+    top: 2px;
 }
 
 .voted {color:#999;}

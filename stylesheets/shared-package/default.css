@@ -1451,6 +1451,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
 
 .exercise-badge {
+    background: #f3f3f3;
     margin-bottom: 5px;
     margin-left: 1px;
     position: relative;
@@ -1492,61 +1493,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-badge .exercise-title a:hover {
             color: #006699;
         }
-    /* the streak bar on the dashboard */
     .streak-bar {
+        background-image: url(/images/non-repeating-sprites.1.png);
+        background-position: -10px -730px;
         width: 228px;
         height: 30px;
         line-height: 18px;
-        background-color:#ccc;
-        overflow:hidden;
     }
-    .streak-bar.suggested {
-      background-color:#d1e8b2;
-    }
-    .streak-bar.proficient .current-label{
-      background: url('/images/streaksprite.png') no-repeat 0 -70px;
-      background-color:#06f;
-    }
-    .streak-bar.proficient .label{
-      display:none;
-    }
-    
-    .streak-bar .streak-icon{
-      background-image: url(/images/streaksprite.png);
-      background-position: 0 -110px;
-      width:100%;
-      z-index:10;
-    }
-    .streak-bar .best-label{
-      background-position: -301px 0;
-    }
-    
-    .streak-bar .current-label{/*overflow:hidden;*/}
-    
-    /* the streak bar on exercise pages */    
-    .single-exercise #streak-bar-container .streak-bar{
-      width:400px;
-      background-color:#d1e8b2;
-      bottom: auto;
-      left: auto;
-      top: 21px;
-      right: 8px;
-    }
-    .single-exercise #streak-bar-container .streak-bar.proficient{
-      background-image:none;
-    }
-
-    #streak-bar-container .unit-label{width:100%;}
-    .single-exercise #streak-bar-container .streak-icon, 
-    #streak-bar-container .streak-icon{
-      width:100%;
-      z-index:10;
-      background:url(/images/streaksprite.png) no-repeat 0 0px;
-      
-    }
-    
-    
-
     .streak-bar-challenge {
         background: url(/images/streak-meter-empty-challenge.png) no-repeat;
         /*! data-uri(/images/streak-meter-empty-challenge.png) */
@@ -1783,7 +1736,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     top: 22px;
     height:21px;
     padding-top: 1px;
-    display:none;
 }
 .exercise-badge.single-exercise .exercise-title {
     font-size:18px;
@@ -1791,13 +1743,19 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     left: 75px;
     width: 550px;
 }
-/*.exercise-badge.single-exercise .streak-bar {
+.exercise-badge.single-exercise .streak-bar {
     bottom: auto;
     left: auto;
     top: 21px;
-    right: 8px;
 }
-*/
+.exercise-badge.single-exercise .original .streak-bar {
+  right: 66px;
+}
+
+.exercise-badge.single-exercise .new_partial_reset .streak-bar,
+.exercise-badge.single-exercise .new_full_reset .streak-bar  {
+  right: 103px;  
+}
 .exercise-badge.single-exercise .related-content,
 .exercise-badge.single-exercise .summative-help {
     bottom: 7px;
