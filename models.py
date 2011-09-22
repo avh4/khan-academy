@@ -1641,20 +1641,24 @@ class ExerciseGraph(object):
             if hasattr(ex, 'last_done'):
                 # Clear leftovers from cache to fix random recents on new accounts
                 del ex.last_done
+
         for name in user_data.proficient_exercises:
             ex = self.exercise_by_name.get(name)
             if ex:
                 ex.proficient = True
+
         for ex in self.exercises:
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
                 if ex_cover:
                     ex_cover.coverers.append(ex)
+
             ex.prerequisites_ex = []
             for prereq in ex.prerequisites:
                 ex_prereq = self.exercise_by_name.get(prereq)
                 if ex_prereq:
                     ex.prerequisites_ex.append(ex_prereq)
+
         for user_ex in user_exercises:
             ex = self.exercise_by_name.get(user_ex.exercise)
             if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
@@ -1669,12 +1673,14 @@ class ExerciseGraph(object):
             # the user has never missed a problem and a covering ancestor is proficient
             if ex.proficient is not None:
                 return ex.proficient
+
             ex.proficient = False
             if ex.streak == ex.total_done:
                 for c in ex.coverers:
                     if compute_proficient(c) is True:
                         ex.proficient = True
                         break
+
             return ex.proficient
 
         for ex in self.exercises:
@@ -1683,20 +1689,24 @@ class ExerciseGraph(object):
         def compute_suggested(ex):
             if ex.suggested is not None:
                 return ex.suggested
+
             if ex.proficient is True:
                 ex.suggested = False
                 return ex.suggested
+
             ex.suggested = True
             # Don't suggest exs that are covered by suggested exs
             for c in ex.coverers:
                 if compute_suggested(c) is True:
                     ex.suggested = False
                     return ex.suggested
+
             # Don't suggest exs if the user isn't proficient in all prereqs
             for prereq in ex.prerequisites_ex:
                 if not prereq.proficient:
                     ex.suggested = False
                     break
+
             return ex.suggested
 
         for ex in self.exercises:
@@ -1764,17 +1774,7 @@ class ExerciseGraph(object):
                 proficient_exercises.append(ex)
         return proficient_exercises
 
-    def get_summative_exercises(self):
-        summative_exercises = []
-        for ex in self.exercises:
-            if ex.summative:
-                summative_exercises.append(ex)
-        return summative_exercises
-
     def get_suggested_exercises(self):
-        # Mark an exercise as proficient if it or a a covering ancestor is proficient
-        # Select all the exercises where the user is not proficient but the
-        # user is proficient in all prereqs.
         suggested_exercises = []
         for ex in self.exercises:
             if ex.suggested:
@@ -1788,7 +1788,6 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
-
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
