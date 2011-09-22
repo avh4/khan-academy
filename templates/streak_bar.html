@@ -11,7 +11,7 @@
             <li class="current-rating" style="width:{{ bar_width }}px;"></li>
             <li class="streak-icon"></li>
             <li class="best-label" style="width:{{ longest_streak_width }}px;">
-              {% if show_longest_streak_label %}{{ longest_streak }}&nbsp;{% endif %}
+              {% if show_longest_streak_label and use_old_bar %}{{ longest_streak }}&nbsp;{% endif %}
             </li>
             {% for level in levels %}
                 <li class="level-label" style="left:{{ level }}px;"></li>
