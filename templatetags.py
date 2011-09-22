@@ -67,13 +67,22 @@ def streak_bar(user_exercise):
     streak = user_exercise.streak
     use_old_bar = user_exercise.progress_bar_alternative == 'original'
 
+    longest_streak = user_exercise.longest_streak if hasattr(user_exercise, "longest_streak") else 0
+
     if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
-        progress = 0
+        streak = longest_streak = progress = 0
 
     required_streak = user_exercise.required_streak
 
     bar_max_width = 227
     bar_width = min(1.0, progress) * bar_max_width
+
+    longest_streak_width = min(bar_max_width, math.ceil((bar_max_width / float(required_streak)) * longest_streak))
+    streak_icon_width = min(bar_max_width - 2, max(43, bar_width)) # 43 is width of streak icon
+
+    width_required_for_label = 20
+    show_streak_label = bar_width > width_required_for_label
+    show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - bar_width) > width_required_for_label
 
     levels = []
     if user_exercise.summative:
@@ -85,12 +94,20 @@ def streak_bar(user_exercise):
         if streak > consts.MAX_STREAK_SHOWN:
             streak = 'Max'
 
+        if longest_streak > consts.MAX_STREAK_SHOWN:
+            longest_streak = 'Max'
+
     def progress_display(num):
         return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
 
     template_values = {
         "use_old_bar": use_old_bar,
         "streak": streak,
+        "longest_streak": longest_streak,
+        "longest_streak_width": longest_streak_width,
+        "streak_icon_width": streak_icon_width,
+        "show_streak_label": show_streak_label,
+        "show_longest_streak_label": show_longest_streak_label,
         "is_suggested": user_exercise.suggested,
         "is_proficient": user_exercise.proficient,
         "float_progress": progress,
