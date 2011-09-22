@@ -14,7 +14,7 @@
 <span class="breadcrumbs_nav video-nav">
         <a href="/#browse">All videos</a>
         <span class="breadcrumb-separator">&#187;</span>
-        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|slugify|urlencode}}">{{playlist.title|escape}}</a> 
+        <a href="/?video={{video.readable_id|urlencode}}#{{playlist.title|slugify|urlencode}}">{{playlist.title|escape}}</a>
         <span class="breadcrumb-separator">&#187;</span>
     <span id="video_dropdown" style="display:none;" class="selected">
         <a href="/video/{{video.readable_id}}?playlist={{playlist.title|urlencode}}">{{video.title|escape}}</a>
@@ -59,7 +59,7 @@
                 {% endif %}
             <div class="clear"></div>
       	</nav>
-    
+
         <div id="youtube_blocked" class="desktop-only">
             {{ youtube.flv_player_embed(video_path) }}
         </div>
@@ -67,16 +67,16 @@
             {{ youtube.player_embed(video.youtube_id) }}
         	<div class="subtitles-warning">
                 &lArr; Use this menu to view and help create subtitles for this video in many different languages.
-                You'll probably want to hide YouTube's captions if using these subtitles. 
+                You'll probably want to hide YouTube's captions if using these subtitles.
                <a href="#" class="subtitles-link">Close subtitles</a>
            	</div>
       	</div>
-    
+
         <span class="video_extra_links desktop-only">
 			<nobr>
-       		
+
        		<div class="extra-link-bar">
-              	{% if exercise %}					 
+              	{% if exercise %}
 				<a href="/exercises?exid={{exercise}}" title="View related exercises" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
                 <img  src="/images/exercise-icon-small.png" />
                          Exercises
@@ -96,21 +96,21 @@
                 {% endif %}
 
                 {{ social.share_video_button(video.title, video.description, video.youtube_id, "Video-Page-Share") }}
-                
+
          	</div>
 			<span style="float:right;" id="points-badge-hover">
                 {{ user.possible_points_badge(awarded_points, video_points_base, logged_in) }}
 			</span>
          	</nobr>
 		 </span>
-			
+
     	<div class="desktop-only">
             {{ discussion.comments(user_data, video, playlist, comments_page) }}
             {{ discussion.qa(user_data, video, playlist, qa_page, qa_expand_key, sort) }}
         </div>
 	</div>
     </div>
-	
+
 </article>
 </div>
 {% endblock pagecontent %}
@@ -118,14 +118,17 @@
 {% block bottompagescript %}
     {{ js_css_packages.js_package("video") }}
     <script>
-      $(function(){VideoStats.startLoggingProgress("{{ video.key()|escapejs }}");});
+      $(function() {
+        Video.init();
+        VideoStats.startLoggingProgress("{{ video.key()|escapejs }}");
+      });
 
       // We take the message in the title of the energy points box and place it
-      // in a tooltip, and if it's the message with a link to the login we 
+      // in a tooltip, and if it's the message with a link to the login we
       // replace it with a nicer link (we don't want to have to pass the url to
       // the templatetag).
       var $points = $('.video-energy-points');
-      $points.data('title', $points.attr('title').replace(/Sign in/, 
+      $points.data('title', $points.attr('title').replace(/Sign in/,
                  '<a href="{{ login_url|escape }}">Sign in</a>'))
              .removeAttr('title');
 

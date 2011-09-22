@@ -11,31 +11,34 @@ var Video = {
            VideoStats.prepareAlternativePlayer(); // If YouTube is hidden, use the flv player for statistics
         }).attr('src', 'http://www.youtube.com/favicon.ico?' + Math.random()).appendTo('#page-container');
 
-        $('#video_dropdown').css('display', 'inline-block');
+        var jVideoDropdown = $('#video_dropdown');
+        if ( jVideoDropdown.length ) {
+            jVideoDropdown.css('display', 'inline-block');
 
-        var menu = $('#video_dropdown ol').menu();
-        // Set the width explicitly before positioning it absolutely to satisfy IE7.
-        menu.width(menu.width()).hide().css('position', 'absolute');
-        menu.bind("menuselect", function(e, ui){
-            window.location.href = ui.item.children('a').attr('href');
-        });
-        $(document).bind("click focusin", function(e){
-            if ($(e.target).closest("#video_dropdown").length == 0) {
-                menu.hide();
-            }
-        });
+            var menu = $('#video_dropdown ol').menu();
+            // Set the width explicitly before positioning it absolutely to satisfy IE7.
+            menu.width(menu.width()).hide().css('position', 'absolute');
+            menu.bind("menuselect", function(e, ui){
+                window.location.href = ui.item.children('a').attr('href');
+            });
+            $(document).bind("click focusin", function(e){
+                if ($(e.target).closest("#video_dropdown").length == 0) {
+                    menu.hide();
+                }
+            });
 
-        var button = $('#video_dropdown > a').button({
-            icons: {
-                secondary: 'ui-icon-triangle-1-s'
-            }
-        }).show().click(function(e){
-            if (menu.css('display') == 'none')
-                menu.show().menu("activate", e, $('#video_dropdown li[data-selected=selected]')).focus();
-            else
-                menu.hide();
-            e.preventDefault();
-        });
+            var button = $('#video_dropdown > a').button({
+                icons: {
+                    secondary: 'ui-icon-triangle-1-s'
+                }
+            }).show().click(function(e){
+                if (menu.css('display') == 'none')
+                    menu.show().menu("activate", e, $('#video_dropdown li[data-selected=selected]')).focus();
+                else
+                    menu.hide();
+                e.preventDefault();
+            });
+        }
 
         $('.and-more').click(function(){
             $(this).hide();
@@ -101,6 +104,3 @@ var Video = {
         }
     }
 }
-
-$(function(){Video.init();});
-
