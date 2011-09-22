@@ -17,7 +17,7 @@
                 <li class="level-label" style="left:{{ level }}px;"></li>
             {% endfor %}
             <li class="current-label" style="width:{{ bar_width }}px;">
-              <div class="label">{% if show_streak_label %}{{ streak }}&nbsp;{% endif %}</div>
+              <div class="label">{% if show_streak_label and use_old_bar %}{{ streak }}&nbsp;{% endif %}</div>
             </li>
         </ul>
     </div>
