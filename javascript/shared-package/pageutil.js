@@ -260,7 +260,7 @@ var VideoStats = {
     dPercentLastSaved: 0.0,
     fSaving: false,
     player: null,
-    fIntervalStarted: false,
+    intervalId: null,
     fAlternativePlayer: false,
     fEventsAttached: false,
     cachedDuration: 0, // For use by alternative FLV player
@@ -315,15 +315,23 @@ var VideoStats = {
             me.listenToPlayerStateChange();
         });
 
-        if (!this.fIntervalStarted)
+        if (this.intervalId === null)
         {
             // Every 10 seconds check to see if we've crossed over our percent
             // granularity logging boundary
-            setInterval(function(){VideoStats.playerStateChange(-2);}, 10000);
-            this.fIntervalStarted = true;
+            this.intervalId = setInterval(function() {
+                VideoStats.playerStateChange(-2);
+            }, 10000);;
         }
 
         this.fEventsAttached = true;
+    },
+
+    stopLoggingProgress: function() {
+        if ( this.intervalId !== null ) {
+            clearInterval(this.intervalId);
+            this.intervalId = null;
+        }
     },
 
     listenToPlayerStateChange: function() {
