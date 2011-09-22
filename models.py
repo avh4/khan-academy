@@ -290,6 +290,7 @@ class UserExercise(db.Model):
 
     _serialize_blacklist = ["review_interval_secs"]
 
+    # Returns a value from UserData._streak_bar_alternatives depending on which experiment the user is in
     @property
     def progress_bar_alternative(self):
       user_data = self.get_user_data()
