@@ -290,21 +290,10 @@ class UserExercise(db.Model):
 
     _serialize_blacklist = ["review_interval_secs"]
 
-    conversion_checkpoints = [5, 10, 20, 30]
-    any_exercise_conversions = get_conversion_tests_dict('did', conversion_checkpoints)
-    addition_1_conversions = get_conversion_tests_dict('addition_1', conversion_checkpoints)
-    geometry_1_conversions = get_conversion_tests_dict('geometry_1', conversion_checkpoints)
-    _streak_bar_alternatives = ['original', 'new_partial_reset', 'new_full_reset']
-    _streak_bar_conversion_tests = (['sbar_gained_proficiency', 'sbar_gained_5th_proficiency',
-        'sbar_gained_10th_proficiency', 'sbar_addition_1_proficiency', 'sbar_geometry_1_proficiency'] +
-        any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
-
-    # progress_bar_alternative = ["new_partial_reset" | "original"]
     @property
     def progress_bar_alternative(self):
-      return ab_test('partial_reset_streak_bar_3_way',
-          UserExercise._streak_bar_alternatives,
-          UserExercise._streak_bar_conversion_tests)
+      user_data = self.get_user_data()
+      return user_data.progress_bar_alternative if user_data else 'original'
 
     @property
     def required_streak(self):
@@ -669,6 +658,22 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
             "user_nickname", "user_email", "seconds_since_joined",
     ]
+
+    _conversion_checkpoints = [5, 10, 20, 30]
+    any_exercise_conversions = get_conversion_tests_dict('did', _conversion_checkpoints)
+    addition_1_conversions = get_conversion_tests_dict('addition_1', _conversion_checkpoints)
+    geometry_1_conversions = get_conversion_tests_dict('geometry_1', _conversion_checkpoints)
+    _streak_bar_alternatives = ['original', 'new_partial_reset', 'new_full_reset']
+    _streak_bar_conversion_tests = (['sbar_gained_proficiency', 'sbar_gained_5th_proficiency',
+        'sbar_gained_10th_proficiency', 'sbar_addition_1_proficiency', 'sbar_geometry_1_proficiency'] +
+        any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
+
+    # Returns a value from _streak_bar_alternatives depending on which experiment the user is in
+    @property
+    def progress_bar_alternative(self):
+      return ab_test('partial_reset_streak_bar_3_way',
+          UserData._streak_bar_alternatives,
+          UserData._streak_bar_conversion_tests)
 
     @property
     def nickname(self):
@@ -1711,7 +1716,7 @@ class ExerciseGraph(object):
             ex.streak = 0
             ex.longest_streak = 0
             ex.progress = 0.0
-            ex.progress_bar_alternative = None
+            ex.progress_bar_alternative = user_data.progress_bar_alternative
             ex.total_done = 0
             if hasattr(ex, 'last_done'):
                 # Clear leftovers from cache to fix random recents on new accounts
@@ -1740,7 +1745,6 @@ class ExerciseGraph(object):
                 ex.user_exercise = user_ex
                 ex.streak = user_ex.streak
                 ex.progress = user_ex.progress
-                ex.progress_bar_alternative = user_ex.progress_bar_alternative
                 ex.longest_streak = user_ex.longest_streak
                 ex.total_done = user_ex.total_done
                 ex.last_done = user_ex.last_done
