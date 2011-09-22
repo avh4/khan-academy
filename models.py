@@ -300,6 +300,12 @@ class UserExercise(db.Model):
         any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
 
     @property
+    def progress_bar_alternative(self):
+      return ab_test('partial_reset_streak_bar_3_way',
+          UserExercise._streak_bar_alternatives,
+          UserExercise._streak_bar_conversion_tests)
+
+    @property
     def required_streak(self):
         if self.summative:
             return self.exercise_model.required_streak
@@ -329,16 +335,11 @@ class UserExercise(db.Model):
     # attaining proficiency, in range [0,1]. This is so we can abstract away
     # the internal algorithm so the front-end does not need to change.
     # TODO: Refactor code to use this measure instead of streak
-    # TODO(david): take into account longest_progress
     @property
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        alternative = ab_test('partial_reset_streak_bar_3_way',
-            UserExercise._streak_bar_alternatives,
-            UserExercise._streak_bar_conversion_tests)
-
-        if alternative == 'new_partial_reset':
+        if self.progress_bar_alternative == 'new_partial_reset':
             def progress_with_start(streak, start, required_streak):
                 return start + float(streak) / required_streak * (1 - start)
 
