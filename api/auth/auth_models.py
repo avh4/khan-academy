@@ -61,13 +61,16 @@ class OAuthMap(db.Model):
         from models import UserData
 
         user_id = None
+        email = None
 
         if self.uses_google():
-            user_id = get_google_user_id_from_oauth_map(self)
+            user_id, email = get_google_user_id_and_email_from_oauth_map(self)
         elif self.uses_facebook():
             user_id = get_facebook_user_id_from_oauth_map(self)
+            email = user_id
 
-        user_data = UserData.get_from_user_id(user_id)
+        user_data = UserData.get_from_user_id(user_id) or \
+                    UserData.insert_for(user_id, email)
 
         return user_data
 
@@ -101,5 +104,5 @@ class OAuthMap(db.Model):
         return OAuthMap.if_not_expired(OAuthMap.all().filter("access_token =", access_token).get())
 
 from api.auth.auth_util import append_url_params
-from api.auth.google_util import get_google_user_id_from_oauth_map
+from api.auth.google_util import get_google_user_id_and_email_from_oauth_map
 from ..facebook_util import get_facebook_user_id_from_oauth_map
