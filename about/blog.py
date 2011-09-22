@@ -132,7 +132,7 @@ class ViewBlog(util_about.AboutRequestHandler):
                 "selected_id": "blog",
         }
 
-        self.render_template('about/viewblog.html', dict_context)
+        self.render_jinja2_template('about/viewblog.html', dict_context)
 
 class ViewBlogPost(util_about.AboutRequestHandler):
 
@@ -165,4 +165,4 @@ class ViewBlogPost(util_about.AboutRequestHandler):
         except TumblrException:
             post = TumblrDownBlogPost()
 
-        self.render_template('about/viewblogpost.html', {"post": post, "selected_id": "blog"})
+        self.render_jinja2_template('about/viewblogpost.html', {"post": post, "selected_id": "blog"})

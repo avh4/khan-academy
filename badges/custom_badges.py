@@ -49,7 +49,7 @@ class CreateCustomBadge(request_handler.RequestHandler):
                 "failed": self.request_bool("failed", default=False),
                 }
 
-        self.render_template("badges/create_custom_badge.html", template_values)
+        self.render_jinja2_template("badges/create_custom_badge.html", template_values)
 
     @user_util.developer_only
     def post(self):
@@ -78,7 +78,7 @@ class AwardCustomBadge(request_handler.RequestHandler):
                 "custom_badges": CustomBadge.all(),
                 }
 
-        self.render_template("badges/award_custom_badge.html", template_values)
+        self.render_jinja2_template("badges/award_custom_badge.html", template_values)
 
     @user_util.developer_only
     def post(self):
@@ -111,5 +111,5 @@ class AwardCustomBadge(request_handler.RequestHandler):
                 "emails_awarded": emails_awarded
                 }
 
-        self.render_template("badges/award_custom_badge.html", template_values)
+        self.render_jinja2_template("badges/award_custom_badge.html", template_values)
 

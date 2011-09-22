@@ -7,16 +7,14 @@ import sys
 import re
 import traceback
 
-import google
-import django
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
 from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
+
+import webapp2
+import shared_jinja
 
 from custom_exceptions import MissingVideoException, MissingExerciseException
 from app import App
-from render import render_block_to_string
 import cookie_util
 
 class RequestInputHandler(object):
@@ -79,7 +77,7 @@ class RequestInputHandler(object):
         else:
             return self.request_int(key, 1 if default else 0) == 1
 
-class RequestHandler(webapp.RequestHandler, RequestInputHandler):
+class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
 
     def is_ajax_request(self):
         # jQuery sets X-Requested-With header for this detection.
@@ -129,11 +127,14 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
             sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
 
         if not silence_report:
-            webapp.RequestHandler.handle_exception(self, e, args)
+            self.error(500)
+            logging.exception(e)
 
         # Show a nice stack trace on development machines, but not in production
         if App.is_dev_server or users.is_current_user_admin():
             try:
+                import google
+
                 exc_type, exc_value, exc_traceback = sys.exc_info()
 
                 # Grab module and convert "__main__" to just "main"
@@ -146,11 +147,8 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
                 sdk_root = os.path.normpath(os.path.join(os.path.dirname(google.__file__), '..'))
                 sdk_version = os.environ['SDK_VERSION'] if os.environ.has_key('SDK_VERSION') else os.environ['SERVER_SOFTWARE'].split('/')[-1]
-                django_root = os.path.normpath(os.path.join(os.path.dirname(django.__file__), '..'))
-                django_version = '.'.join(str(v) for v in django.VERSION if v != None)
                 app_root = App.root
                 r_sdk_root = re.compile(r'^%s/' % re.escape(sdk_root))
-                r_django_root = re.compile(r'^%s/' % re.escape(django_root))
                 r_app_root = re.compile(r'^%s/' % re.escape(app_root))
 
                 (template_filename, template_line, extracted_source) = (None, None, None)
@@ -173,7 +171,6 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
                 def format_frame(frame):
                     filename, line, function, text = frame
-                    filename = r_django_root.sub('django (%s) ' % django_version, filename)
                     filename = r_sdk_root.sub('google_appengine (%s) ' % sdk_version, filename)
                     filename = r_app_root.sub('', filename)
                     return "%s:%s:in `%s'" % (filename, line, function)
@@ -198,13 +195,13 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
                 env_dump = '\n'.join('%s: %s' % (k, environ[k]) for k in sorted(environ))
 
                 self.response.clear()
-                self.render_template('viewtraceback.html', { "title": title, "message": message, "template_filename": template_filename, "template_line": template_line, "extracted_source": extracted_source, "app_root": app_root, "application_trace": application_trace, "framework_trace": framework_trace, "full_trace": full_trace, "params_dump": params_dump, "env_dump": env_dump })
+                self.render_jinja2_template('viewtraceback.html', { "title": title, "message": message, "template_filename": template_filename, "template_line": template_line, "extracted_source": extracted_source, "app_root": app_root, "application_trace": application_trace, "framework_trace": framework_trace, "full_trace": full_trace, "params_dump": params_dump, "env_dump": env_dump })
             except:
                 # We messed something up showing the backtrace nicely; just show it normally
                 pass
         else:
             self.response.clear()
-            self.render_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
+            self.render_jinja2_template('viewerror.html', { "title": title, "message_html": message_html, "sub_message_html": sub_message_html })
 
     @classmethod
     def exceptions_to_http(klass, status):
@@ -234,6 +231,11 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
         return user_agent_lower.find("msie 7.") > -1 or \
                 user_agent_lower.find("msie 6.") > -1
 
+    def is_webos(self):
+        user_agent_lower = self.user_agent().lower()
+        return user_agent_lower.find("webos") > -1 or \
+                user_agent_lower.find("hp-tablet") > -1
+
     def is_mobile(self):
         if self.is_mobile_capable():
             return not self.has_mobile_full_site_cookie()
@@ -253,8 +255,11 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
     def set_cookie(self, key, value='', max_age=None,
                    path='/', domain=None, secure=None, httponly=False,
                    version=None, comment=None):
+
+        # We manually add the header here so we can support httponly cookies in Python 2.5,
+        # which self.response.set_cookie does not.
         header_value = cookie_util.set_cookie_value(key, value, max_age, path, domain, secure, httponly, version, comment)
-        self.response.headers._headers.append(('Set-Cookie', header_value))
+        self.response.headerlist.append(('Set-Cookie', header_value))
 
     def delete_cookie(self, key, path='/', domain=None):
         self.set_cookie(key, '', path=path, domain=domain, max_age=0)
@@ -294,25 +299,12 @@ class RequestHandler(webapp.RequestHandler, RequestInputHandler):
 
         return template_values
 
-    def render_template(self, template_name, template_values):
+    def render_jinja2_template(self, template_name, template_values):
         self.add_global_template_values(template_values)
-        self.render_template_simple(template_name, template_values)
+        self.response.write(self.render_jinja2_template_to_string(template_name, template_values))
 
-    def render_template_simple(self, template_name, template_values):
-        self.response.out.write(self.render_template_to_string(template_name, template_values))
-
-    @staticmethod
-    def render_template_to_string(template_name, template_values):
-        path = os.path.join(os.path.dirname(__file__), template_name)
-
-        # Don't turn on debug in production even for admins because filesystem access is sloooow
-        debug = App.is_dev_server
-        return template.render(path, template_values, debug)
-
-    @staticmethod
-    def render_template_block_to_string(template_name, block, context):
-        path = os.path.join(os.path.dirname(__file__), template_name)
-        return render_block_to_string(path, block, context).strip()
+    def render_jinja2_template_to_string(self, template_name, template_values):
+        return shared_jinja.get().render_template(template_name, **template_values)
 
     def render_json(self, obj):
         json = simplejson.dumps(obj, ensure_ascii=False)

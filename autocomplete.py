@@ -1,7 +1,6 @@
 import logging
 
 from google.appengine.ext import db
-from django.template.defaultfilters import slugify
 import simplejson
 
 import app
@@ -10,6 +9,7 @@ import request_handler
 import consts
 import layer_cache
 from models import Video, Playlist, VideoPlaylist
+from templatefilters import slugify
 
 CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 3 # Expires after three days
 MAX_RESULTS_PER_TYPE = 10

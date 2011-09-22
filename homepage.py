@@ -1,7 +1,7 @@
 import datetime
 import random
 
-from django.template.defaultfilters import escape
+from jinja2.utils import escape
 
 import consts
 import library
@@ -32,7 +32,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     if exercise:
         link_dict = {
-            "href": exercise.ka_url,
+            "href": exercise.relative_url,
             "thumb_url": thumb_url,
             "desc_html": escape(exercise.display_name),
             "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
@@ -52,7 +52,9 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     return None
 
-@layer_cache.cache(expiration=60*60*24) # Expire daily
+@layer_cache.cache_with_key_fxn(
+        lambda *args, **kwargs: "new_and_noteworthy_link_sets_%s" % models.Setting.cached_library_content_date()
+        )
 def new_and_noteworthy_link_sets():
 
     playlist = models.Playlist.all().filter("title =", "New and Noteworthy").get()
@@ -76,7 +78,7 @@ def new_and_noteworthy_link_sets():
 
     if len(exercises) == 0:
         # Temporary hard-coding of a couple exercises until Sal picks a few
-        playlist.tags = ['solid_geometry', 'estimation_with_decimals', 'multiplication_4']
+        playlist.tags = ['derivative_intuition', 'inequalities_on_a_number_line', 'multiplication_4', 'solid_geometry']
         for tag in playlist.tags:
             exercise = models.Exercise.get_by_name(tag)
             if exercise:
@@ -179,4 +181,5 @@ class ViewHomePage(request_handler.RequestHandler):
                             'is_mobile_allowed': True,
                             'approx_vid_count': consts.APPROX_VID_COUNT,
                         }
-        self.render_template('homepage.html', template_values)
+
+        self.render_jinja2_template('homepage.html', template_values)

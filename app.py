@@ -50,12 +50,7 @@ class App(object):
 
     root = os.path.dirname(__file__)
 
-    is_dev_server = False
-    if os.environ["SERVER_SOFTWARE"].startswith('Development'):
-        is_dev_server = True
+    is_dev_server = os.environ["SERVER_SOFTWARE"].startswith('Development')
+
     accepts_openid = False
-    if not users.create_login_url('/').startswith('https://www.google.com/accounts/ServiceLogin'):
-        accepts_openid = True
-    if is_dev_server:
-        accepts_openid = False # Change to True when we plan to support it on the live server.
     offline_mode = False

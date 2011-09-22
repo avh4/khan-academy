@@ -3,8 +3,6 @@ import logging
 
 from google.appengine.api import users
 from google.appengine.ext import db
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp import template
 from mapreduce import control
 from mapreduce import operation as op
 
@@ -29,7 +27,7 @@ class ModeratorList(request_handler.RequestHandler):
             return
 
         mods = models.UserData.gql("WHERE moderator = :1", True)
-        self.render_template('discussion/mod_list.html', {"mods" : mods})
+        self.render_jinja2_template('discussion/mod_list.html', {"mods" : mods})
 
     def post(self):
 
@@ -66,7 +64,7 @@ class FlaggedFeedback(request_handler.RequestHandler):
                 "feedback_type_comment": models_discussion.FeedbackType.Comment,
                 }
 
-        self.render_template("discussion/flagged_feedback.html", template_content)
+        self.render_jinja2_template("discussion/flagged_feedback.html", template_content)
 
 def feedback_flag_update_map(feedback):
     feedback.recalculate_flagged()
@@ -114,7 +112,7 @@ class PageQuestions(request_handler.RequestHandler):
 
         if video:
             template_values = video_qa_context(user_data, video, playlist, page, qa_expand_key, sort)
-            html = self.render_template_to_string("discussion/video_qa_content.html", template_values)
+            html = self.render_jinja2_template_to_string("discussion/video_qa_content.html", template_values)
             self.render_json({"html": html, "page": page, "qa_expand_key": qa_expand_key})
 
         if qa_expand_key > 0:
@@ -186,7 +184,7 @@ class Answers(request_handler.RequestHandler):
                 "is_mod": util_discussion.is_current_user_moderator()
             }
 
-            html = self.render_template_block_to_string('discussion/question_answers.html', 'answers', template_values)
+            html = self.render_jinja2_template_to_string('discussion/question_answers_only.html', template_values)
             self.render_json({"html": html})
 
         return

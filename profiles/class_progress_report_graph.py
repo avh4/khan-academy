@@ -1,9 +1,10 @@
-from django.template.defaultfilters import escape
-from templateext import escapejs
+from jinja2.utils import escape
+from templatefilters import escapejs
 
 import models
 import util
 from itertools import izip
+import datetime
 
 def get_class_exercises(students):
 
@@ -11,7 +12,7 @@ def get_class_exercises(students):
     async_queries = []
 
     for s in students:
-        exercises[s.email] = {"user_data_student": s}
+        exercises[s.email] = {"user_data_student": s, "user_exercises": {} }
         async_queries.append(models.UserExercise.get_for_user_data(s))
 
     results = util.async_queries(async_queries)
@@ -21,7 +22,7 @@ def get_class_exercises(students):
         user_exercises = results[i].get_result()
         for user_exercise in user_exercises:
             if user_exercise.exercise not in exercises[s.email]:
-                exercises[s.email][user_exercise.exercise] = user_exercise
+                exercises[s.email]["user_exercises"][user_exercise.exercise] = user_exercise
 
     return exercises
 
@@ -48,12 +49,13 @@ def class_progress_report_graph_context(user_data, student_list):
     emails_escapejsed = [escapejs(s.email) for s in list_students]
 
     exercises = get_class_exercises(list_students)
-    exercises_all = models.Exercise.get_all_use_cache()
+    exercise_graph = models.ExerciseGraph()
+    exercises_all = exercise_graph.exercises 
     exercises_found = []
 
     for exercise in exercises_all:
         for (email, _) in student_emails:
-            if exercises[email].has_key(exercise.name):
+            if exercises[email]["user_exercises"].has_key(exercise.name):
                 exercises_found.append(exercise)
                 break
 
@@ -68,13 +70,16 @@ def class_progress_report_graph_context(user_data, student_list):
             continue
 
         escaped_name = escape(student.nickname)
+                
+        exercise_graph.initialize_for_user(student, exercises[student_email]["user_exercises"].values())
+        student_review_exercise_names = [e.name for e in exercise_graph.get_review_exercises()]
 
         for (exercise, (_, exercise_display, exercise_name_js)) in izip(exercises_found, exercise_names):
 
             exercise_name = exercise.name
             user_exercise = models.UserExercise()
-            if exercises[student_email].has_key(exercise_name):
-                user_exercise = exercises[student_email][exercise_name]
+            if exercises[student_email]["user_exercises"].has_key(exercise_name):
+                user_exercise = exercises[student_email]["user_exercises"][exercise_name]
 
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
@@ -86,13 +91,17 @@ def class_progress_report_graph_context(user_data, student_list):
             hover = ""
             color = "transparent"
 
-            if student.is_proficient_at(exercise_name):
-                status = "Proficient"
-                color = "proficient"
+            if student.is_proficient_at(exercise_name, exercise_graph):
 
-                if not student.is_explicitly_proficient_at(exercise_name):
-                    status = "Proficient (due to proficiency in a more advanced module)"
-
+                if exercise_name in student_review_exercise_names:
+                    status = "Review"
+                    color = "review"
+                else:
+                    status = "Proficient"
+                    color = "proficient"
+                    if not student.is_explicitly_proficient_at(exercise_name):
+                        status = "Proficient (due to proficiency in a more advanced module)"
+                        
             elif user_exercise.exercise is not None and models.UserExercise.is_struggling_with(user_exercise, exercise):
                 status = "Struggling"
                 color = "struggling"

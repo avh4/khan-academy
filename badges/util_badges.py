@@ -215,7 +215,7 @@ class ViewBadges(request_handler.RequestHandler):
                 "show_badge_frequencies": self.request_bool("show_badge_frequencies", default=False)
                 }
 
-        self.render_template('viewbadges.html', template_values)
+        self.render_jinja2_template('viewbadges.html', template_values)
     
 # /admin/badgestatistics is called periodically by a cron job
 class BadgeStatistics(request_handler.RequestHandler):

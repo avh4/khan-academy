@@ -3,7 +3,6 @@ import time
 import logging
 
 from google.appengine.api import users
-from django.template.defaultfilters import pluralize
 
 import models
 import classtime

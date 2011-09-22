@@ -1,33 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-import datetime
-import time
 import urllib
+import urlparse
 import logging
 import re
-import devpanel
-from pprint import pformat
-from google.appengine.api import capabilities
-from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
-from google.appengine.runtime.apiproxy_errors import DeadlineExceededError
-
-import config_django
-
-from django.template.loader import render_to_string
 import simplejson
-from google.appengine.ext.webapp import template
+
+from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 from google.appengine.api import users
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import db
 
-from google.appengine.api import taskqueue
+import webapp2
 
+import devpanel
 import bulk_update.handler
-import facebook
 import request_cache
 from gae_mini_profiler import profiler
+from gae_bingo.middleware import GAEBingoWSGIMiddleware
+from gae_bingo.gae_bingo import bingo
 import autocomplete
 import coaches
 import knowledgemap
@@ -37,7 +29,6 @@ import warmup
 import library
 import homepage
 
-from search import Searchable
 import search
 
 import request_handler
@@ -66,8 +57,7 @@ from mailing_lists import util_mailing_lists
 from profiles import util_profile
 from topics_list import all_topics_list
 from custom_exceptions import MissingVideoException
-from render import render_block_to_string
-from templatetags import streak_bar, exercise_message, exercise_icon, user_points
+from templatetags import user_points
 from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, get_phantom_user_id_from_cookies
@@ -75,6 +65,8 @@ from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
+
+import config_jinja
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -170,8 +162,19 @@ class ViewVideo(request_handler.RequestHandler):
 
             redirect_to_canonical_url = True
 
+        exid = self.request_string('exid', default=None)
+        if exid:
+            bingo("used_video")
+            bingo("used_hints_or_video")
+
         if redirect_to_canonical_url:
-            self.redirect("/video/%s?playlist=%s" % (urllib.quote(readable_id), urllib.quote(playlist.title)), True)
+            qs = {'playlist': playlist.title}
+            if exid:
+                qs['exid'] = exid
+
+            urlpath = "/video/%s" % urllib.quote(readable_id)
+            url = urlparse.urlunparse(('', '', urlpath, '', urllib.urlencode(qs), ''))
+            self.redirect(url, True)
             return
 
         # If we got here, we have a readable_id and a playlist_title, so we can display
@@ -229,7 +232,7 @@ class ViewVideo(request_handler.RequestHandler):
                         }
         template_values = qa.add_template_values(template_values, self.request)
 
-        self.render_template('viewvideo.html', template_values)
+        self.render_jinja2_template('viewvideo.html', template_values)
 
 class LogVideoProgress(request_handler.RequestHandler):
 
@@ -273,89 +276,10 @@ class LogVideoProgress(request_handler.RequestHandler):
 
                 user_video, video_log, video_points_total = VideoLog.add_entry(user_data, video, seconds_watched, last_second_watched)
 
-        user_points_html = self.render_template_block_to_string(
-            "user_points.html",
-            "user_points_block",
-            user_points(user_data)
-        )
+        user_points_html = self.render_jinja2_template_to_string("user_points_only.html", user_points(user_data))
 
         json = simplejson.dumps({"user_points_html": user_points_html, "video_points": video_points_total}, ensure_ascii=False)
         self.response.out.write(json)
-
-class PrintProblem(request_handler.RequestHandler):
-
-    def get(self):
-
-        exid = self.request.get('exid')
-        problem_number = self.request.get('problem_number')
-
-        template_values = {
-                'App' : App,
-                'arithmetic_template': 'arithmetic_print_template.html',
-                'exid': exid,
-                'extitle': exid.replace('_', ' ').capitalize(),
-                'problem_number': self.request.get('problem_number')
-                }
-
-        self.render_template(exid + '.html', template_values)
-
-class PrintExercise(request_handler.RequestHandler):
-
-    def get(self):
-
-        user_data = UserData.current()
-
-        if user_data:
-            exid = self.request.get('exid')
-            key = self.request.get('key')
-            problem_number = int(self.request.get('problem_number') or '0')
-            num_problems = int(self.request.get('num_problems'))
-            time_warp = self.request.get('time_warp')
-
-            query = Exercise.all()
-            query.filter('name =', exid)
-            exercise = query.get()
-
-            exercise_videos = None
-            query = ExerciseVideo.all()
-            query.filter('exercise =', exercise.key())
-            exercise_videos = query.fetch(50)
-
-            if not exid:
-                exid = 'addition_1'
-
-            user_exercise = user_data.get_or_insert_exercise(exercise)
-
-            if not problem_number:
-                problem_number = user_exercise.total_done+1
-            proficient = False
-            endangered = False
-            reviewing = False
-
-            template_values = {
-                'arithmetic_template': 'arithmetic_print_template.html',
-                'proficient': proficient,
-                'endangered': endangered,
-                'reviewing': reviewing,
-                'key': user_exercise.key(),
-                'exercise': exercise,
-                'exid': exid,
-                'expath': exid + '.html',
-                'start_time': time.time(),
-                'exercise_videos': exercise_videos,
-                'extitle': exid.replace('_', ' ').capitalize(),
-                'user_exercise': user_exercise,
-                'time_warp': time_warp,
-                'user_data': user_data,
-                'num_problems': num_problems,
-                'problem_numbers': range(problem_number, problem_number+num_problems),
-                }
-
-            self.render_template('print_template.html', template_values)
-
-        else:
-
-            self.redirect(util.create_login_url(self.request.uri))
 
 class ReportIssue(request_handler.RequestHandler):
 
@@ -385,76 +309,7 @@ class ReportIssue(request_handler.RequestHandler):
         elif issue_type == 'Question':
             page = 'askquestion.html'
 
-        self.render_template(page, template_values)
-
-class ProvideFeedback(request_handler.RequestHandler):
-    def get(self):
-        self.render_template("provide_feedback.html", {})
-
-class VideolessExercises(request_handler.RequestHandler):
-
-    def get(self):
-        query = Exercise.all().order('h_position')
-        exercises = query.fetch(200)
-        self.response.out.write('<html>')
-        for exercise in exercises:
-            query = ExerciseVideo.all()
-            query.filter('exercise =', exercise.key())
-            videos = query.fetch(200)
-            if not videos:
-                self.response.out.write('<P><A href="/exercises?exid=' + exercise.name + '">' + exercise.name + '</A>')
-
-class ShowUnusedPlaylists(request_handler.RequestHandler):
-
-    def get(self):
-
-        playlists = Playlist.all()
-        playlists_unused = []
-
-        for playlist in playlists:
-            if not playlist.title in all_topics_list:
-                playlists_unused.append(playlist)
-
-        self.response.out.write("Unused playlists:<br/><br/>")
-        for playlist_unused in playlists_unused:
-            self.response.out.write(" + " + playlist_unused.title + "<br/>")
-        self.response.out.write("</br>Done")
-
-class YoutubeVideoList(request_handler.RequestHandler):
-
-    def get(self):
-        for playlist_title in all_topics_list:
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True)
-            query.order('video_position')
-            for pv in query.fetch(500):
-                v = pv.video
-                self.response.out.write('http://www.youtube.com/watch?v=' + v.youtube_id + '\n')
-
-class ExerciseAndVideoEntityList(request_handler.RequestHandler):
-
-    def get(self):
-        self.response.out.write("Exercises:\n")
-
-        for exercise in Exercise.all():
-            self.response.out.write(str(exercise.key().id()) + "\t" + exercise.display_name + "\n")
-
-        self.response.out.write("\n\nVideos:\n")
-        for playlist_title in all_topics_list:
-            query = Playlist.all()
-            query.filter('title =', playlist_title)
-            playlist = query.get()
-            query = VideoPlaylist.all()
-            query.filter('playlist =', playlist)
-            query.filter('live_association = ', True)
-            query.order('video_position')
-            for pv in query.fetch(1000):
-                v = pv.video
-                self.response.out.write(str(v.key().id()) + "\t" + v.title + "\n")
+        self.render_jinja2_template(page, template_values)
 
 class Crash(request_handler.RequestHandler):
     def get(self):
@@ -498,11 +353,15 @@ class ViewGetInvolved(request_handler.RequestHandler):
 
 class ViewContribute(request_handler.RequestHandler):
     def get(self):
-        self.render_template('contribute.html', {"selected_nav_link": "contribute"})
+
+        if self.request_bool("convert", default=False):
+            bingo("contribute_text")
+
+        self.render_jinja2_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
     def get(self):
-        self.render_template('viewcredits.html', {"selected_nav_link": "contribute"})
+        self.render_jinja2_template('viewcredits.html', {"selected_nav_link": "contribute"})
 
 class Donate(request_handler.RequestHandler):
     def get(self):
@@ -510,24 +369,15 @@ class Donate(request_handler.RequestHandler):
 
 class ViewTOS(request_handler.RequestHandler):
     def get(self):
-        self.render_template('tos.html', {"selected_nav_link": "tos"})
+        self.render_jinja2_template('tos.html', {"selected_nav_link": "tos"})
 
 class ViewPrivacyPolicy(request_handler.RequestHandler):
     def get(self):
-        self.render_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
+        self.render_jinja2_template('privacy-policy.html', {"selected_nav_link": "privacy-policy"})
 
 class ViewDMCA(request_handler.RequestHandler):
     def get(self):
-        self.render_template('dmca.html', {"selected_nav_link": "dmca"})
-
-class ViewStore(request_handler.RequestHandler):
-    def get(self):
-        self.render_template('store.html', {})
-
-class ViewHowToHelp(request_handler.RequestHandler):
-    def get(self):
-        self.redirect("/contribute", True)
-        return
+        self.render_jinja2_template('dmca.html', {"selected_nav_link": "dmca"})
 
 class ViewSAT(request_handler.RequestHandler):
 
@@ -546,7 +396,7 @@ class ViewSAT(request_handler.RequestHandler):
                 'videos': playlist_videos,
         }
 
-        self.render_template('sat.html', template_values)
+        self.render_jinja2_template('sat.html', template_values)
 
 class ViewGMAT(request_handler.RequestHandler):
 
@@ -558,7 +408,7 @@ class ViewGMAT(request_handler.RequestHandler):
                             'problem_solving': problem_solving,
         }
 
-        self.render_template('gmat.html', template_values)
+        self.render_jinja2_template('gmat.html', template_values)
 
 
 class RetargetFeedback(bulk_update.handler.UpdateKind):
@@ -590,125 +440,6 @@ class RetargetFeedback(bulk_update.handler.UpdateKind):
         if video is not None and video.key() != orig_video.key():
             logging.info("Retargeting Feedback %s from Video %s to Video %s", feedback.key().id(), orig_video.key().id(), video.key().id())
             feedback.targets[0] = video.key()
-            return True
-        else:
-            return False
-
-class DeleteStaleVideoPlaylists(bulk_update.handler.UpdateKind):
-    def get_keys_query(self, kind):
-        """Returns a keys-only query to get the keys of the entities to update"""
-        return db.GqlQuery('select __key__ from VideoPlaylist')
-
-    def use_transaction(self):
-        return False
-
-    def update(self, video_playlist):
-        if video_playlist.live_association == True:
-            logging.debug("Keeping VideoPlaylist %s", video_playlist.key().id())
-            return False
-        logging.info("Deleting stale VideoPlaylist %s", video_playlist.key().id())
-        video_playlist.delete()
-        return False
-
-class DeleteStaleVideos(bulk_update.handler.UpdateKind):
-    def get_keys_query(self, kind):
-        """Returns a keys-only query to get the keys of the entities to update"""
-        return db.GqlQuery('select __key__ from Video')
-
-    def use_transaction(self):
-        return False
-
-    def update(self, video):
-        query = ExerciseVideo.all()
-        query.filter('video =', video)
-        referrer = query.get()
-        if referrer is not None:
-            logging.debug("Keeping Video %s.  It is still referenced by ExerciseVideo %s", video.key().id(), referrer.key().id())
-            return False
-        query = VideoPlaylist.all()
-        query.filter('video =', video)
-        referrer = query.get()
-        if referrer is not None:
-            logging.debug("Keeping Video %s.  It is still referenced by VideoPlaylist %s", video.key().id(), referrer.key().id())
-            return False
-        logging.info("Deleting stale Video %s", video.key().id())
-        video.delete()
-        return False
-
-
-class DeleteStalePlaylists(bulk_update.handler.UpdateKind):
-    def get_keys_query(self, kind):
-        """Returns a keys-only query to get the keys of the entities to update"""
-        return db.GqlQuery('select __key__ from Playlist')
-
-    def use_transaction(self):
-        return False
-
-    def update(self, playlist):
-        query = VideoPlaylist.all()
-        query.filter('playlist =', playlist)
-        referrer = query.get()
-        if referrer is not None:
-            logging.debug("Keeping Playlist %s.  It is still referenced by VideoPlaylist %s", playlist.key().id(), referrer.key().id())
-            return False
-        logging.info("Deleting stale Playlist %s", playlist.key().id())
-        playlist.delete()
-        return False
-
-
-class FixVideoRef(bulk_update.handler.UpdateKind):
-    def use_transaction(self):
-        return False
-
-    def update(self, entity):
-        orig_video = entity.video
-
-        if orig_video == None or type(orig_video).__name__ != "Video":
-            return False
-        readable_id = orig_video.readable_id
-        query = Video.all()
-        query.filter('readable_id =', readable_id)
-        # The database currently contains multiple Video objects for a particular
-        # video.  Some are old.  Some are due to a YouTube sync where the youtube urls
-        # changed and our code was producing youtube_ids that ended with '_player'.
-        # This hack gets the most recent valid Video object.
-        key_id = 0
-        for v in query:
-            if v.key().id() > key_id and not v.youtube_id.endswith('_player'):
-                video = v
-                key_id = v.key().id()
-        # End of hack
-        if video is not None and video.key() != orig_video.key():
-            logging.info("Retargeting %s %s from Video %s to Video %s", type(entity), entity.key().id(), orig_video.key().id(), video.key().id())
-            entity.video = video
-            return True
-        else:
-            return False
-
-class FixPlaylistRef(bulk_update.handler.UpdateKind):
-    def use_transaction(self):
-        return False
-
-    def update(self, entity):
-        orig_playlist = entity.playlist
-
-        if orig_playlist == None or type(orig_playlist).__name__ != "Playlist":
-            return False
-        youtube_id = orig_playlist.youtube_id
-        query = Playlist.all()
-        query.filter('youtube_id =', youtube_id)
-        # The database currently contains multiple Playlist objects for a particular
-        # playlist.  Some are old.
-        # This hack gets the most recent valid Playlist object.
-        key_id = 0
-        for p in query:
-            if p.key().id() > key_id:
-                playlist = p
-                key_id = p.key().id()
-        # End of hack
-        if playlist is not None and playlist.key() != orig_playlist.key():
-            logging.info("Retargeting %s %s from Playlist %s to Playlist %s", type(entity), entity.key().id(), orig_playlist.key().id(), playlist.key().id())
-            entity.playlist = playlist
             return True
         else:
             return False
@@ -762,24 +493,6 @@ class ChangeEmail(bulk_update.handler.UpdateKind):
         setattr(entity, prop, users.User(new_email))
         return True
 
-class ViewArticle(request_handler.RequestHandler):
-
-    def get(self):
-        video = None
-        path = self.request.path
-        readable_id  = urllib.unquote(path.rpartition('/')[2])
-
-        article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-        if readable_id == "fortune":
-            article_url = "http://money.cnn.com/2010/08/23/technology/sal_khan_academy.fortune/index.htm"
-
-        template_values = {
-                'article_url': article_url,
-                'issue_labels': ('Component-Videos,Video-%s' % readable_id),
-        }
-
-        self.render_template("article.html", template_values)
-
 class Login(request_handler.RequestHandler):
     def get(self):
         return self.post()
@@ -803,11 +516,11 @@ class Login(request_handler.RequestHandler):
                            'continue': cont,
                            'direct': direct
                            }
-        self.render_template('login.html', template_values)
+        self.render_jinja2_template('login.html', template_values)
 
 class MobileOAuthLogin(request_handler.RequestHandler):
     def get(self):
-        self.render_template('login_mobile_oauth.html', {
+        self.render_jinja2_template('login_mobile_oauth.html', {
             "oauth_map_id": self.request_string("oauth_map_id", default=""),
             "anointed": self.request_bool("an", default=False),
             "view": self.request_string("view", default="")
@@ -833,9 +546,10 @@ class PostLogin(request_handler.RequestHandler):
                 user_data.user_nickname = current_nickname
                 user_data.put()
 
-            # Set developer to True if user is admin
-            if not user_data.developer and users.is_current_user_admin():
+            # Set developer and moderator to True if user is admin
+            if (not user_data.developer or not user_data.moderator) and users.is_current_user_admin():
                 user_data.developer = True
+                user_data.moderator = True
                 user_data.put()
 
             # If user is brand new and has 0 points, migrate data
@@ -894,7 +608,7 @@ class Search(request_handler.RequestHandler):
         if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
             if len(query) > 0:
                 template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
-            self.render_template("searchresults.html", template_values)
+            self.render_jinja2_template("searchresults.html", template_values)
             return
         searched_phrases = []
         playlists = Playlist.search(query, limit=50, searched_phrases_out=searched_phrases)
@@ -904,7 +618,7 @@ class Search(request_handler.RequestHandler):
                            'videos': videos,
                            'searched_phrases': searched_phrases
                            })
-        self.render_template("searchresults.html", template_values)
+        self.render_jinja2_template("searchresults.html", template_values)
 
 class RedirectToJobvite(request_handler.RequestHandler):
     def get(self):
@@ -932,11 +646,6 @@ class PermanentRedirectToHome(request_handler.RequestHandler):
 
         self.redirect(redirect_target, True)
 
-class ViewRenderTemplate(request_handler.RequestHandler):
-    def get(self):
-        template = self.request_string('template', 'templatetest.html')
-        self.render_template(template, { 'user_data': UserData.current() })
-
 class ServeUserVideoCss(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
@@ -952,198 +661,194 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         self.response.out.write(user_video_css.video_css)
 
+class RealtimeEntityCount(request_handler.RequestHandler):
+    def get(self):
+        if not App.is_dev_server:
+            raise Exception("Only works on dev servers.")
+        default_kinds = 'Exercise'
+        kinds = self.request_string("kinds", default_kinds).split(',')
+        for kind in kinds:
+            count = getattr(models, kind).all().count(10000)
+            self.response.out.write("%s: %d<br>" % (kind, count))
+
+application = webapp2.WSGIApplication([
+    ('/', homepage.ViewHomePage),
+    ('/about', util_about.ViewAbout),
+    ('/about/blog', blog.ViewBlog),
+    ('/about/blog/.*', blog.ViewBlogPost),
+    ('/about/the-team', util_about.ViewAboutTheTeam),
+    ('/about/getting-started', util_about.ViewGettingStarted),
+    ('/about/tos', ViewTOS ),
+    ('/about/privacy-policy', ViewPrivacyPolicy ),
+    ('/about/dmca', ViewDMCA ),
+    ('/contribute', ViewContribute ),
+    ('/contribute/credits', ViewCredits ),
+    ('/frequently-asked-questions', util_about.ViewFAQ),
+    ('/about/faq', util_about.ViewFAQ),
+    ('/downloads', util_about.ViewDownloads),
+    ('/about/downloads', util_about.ViewDownloads),
+    ('/getinvolved', ViewGetInvolved),
+    ('/donate', Donate),
+    ('/exercisedashboard', exercises.ViewAllExercises),
+    ('/library_content', library.GenerateLibraryContent),
+    ('/exercises', exercises.ViewExercise),
+    ('/khan-exercises/exercises/.*', exercises.RawExercise),
+    ('/viewexercisesonmap', exercises.ViewAllExercises),
+    ('/editexercise', exercises.EditExercise),
+    ('/updateexercise', exercises.UpdateExercise),
+    ('/moveexercisemapnode', exercises.MoveMapNode),
+    ('/admin94040', exercises.ExerciseAdmin),
+    ('/video/.*', ViewVideo),
+    ('/v/.*', ViewVideo),
+    ('/video', ViewVideo), # Backwards URL compatibility
+    ('/logvideoprogress', LogVideoProgress),
+    ('/sat', ViewSAT),
+    ('/gmat', ViewGMAT),
+    ('/reportissue', ReportIssue),
+    ('/search', Search),
+    ('/autocomplete', autocomplete.Autocomplete),
+    ('/savemapcoords', knowledgemap.SaveMapCoords),
+    ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
+    ('/crash', Crash),
+
+    ('/mobilefullsite', MobileFullSite),
+    ('/mobilesite', MobileSite),
+
+    ('/admin/reput', bulk_update.handler.UpdateKind),
+    ('/admin/retargetfeedback', RetargetFeedback),
+    ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
+    ('/admin/badgestatistics', util_badges.BadgeStatistics),
+    ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
+    ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
+    ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+    ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
+    ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
+    ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
+    ('/admin/changeemail', ChangeEmail),
+    ('/admin/realtimeentitycount', RealtimeEntityCount),
+
+    ('/devadmin/emailchange', devpanel.Email),
+    ('/devadmin/managedevs', devpanel.Manage),
+    ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
+
+    ('/coaches', coaches.ViewCoaches),
+    ('/students', coaches.ViewStudents),
+    ('/registercoach', coaches.RegisterCoach),
+    ('/unregistercoach', coaches.UnregisterCoach),
+    ('/unregisterstudent', coaches.UnregisterStudent),
+    ('/requeststudent', coaches.RequestStudent),
+    ('/acceptcoach', coaches.AcceptCoach),
+
+    ('/createstudentlist', coaches.CreateStudentList),
+    ('/deletestudentlist', coaches.DeleteStudentList),
+    ('/removestudentfromlist', coaches.RemoveStudentFromList),
+    ('/addstudenttolist', coaches.AddStudentToList),
+
+    ('/individualreport', coaches.ViewIndividualReport),
+    ('/progresschart', coaches.ViewProgressChart),
+    ('/sharedpoints', coaches.ViewSharedPoints),
+    ('/classreport', coaches.ViewClassReport),
+    ('/classtime', coaches.ViewClassTime),
+    ('/charts', coaches.ViewCharts),
+
+    ('/mailing-lists/subscribe', util_mailing_lists.Subscribe),
+
+    ('/profile/graph/activity', util_profile.ActivityGraph),
+    ('/profile/graph/focus', util_profile.FocusGraph),
+    ('/profile/graph/exercisesovertime', util_profile.ExercisesOverTimeGraph),
+    ('/profile/graph/exerciseproblems', util_profile.ExerciseProblemsGraph),
+    ('/profile/graph/exerciseprogress', util_profile.ExerciseProgressGraph),
+    ('/profile', util_profile.ViewProfile),
+
+    ('/profile/graph/classexercisesovertime', util_profile.ClassExercisesOverTimeGraph),
+    ('/profile/graph/classprogressreport', util_profile.ClassProgressReportGraph),
+    ('/profile/graph/classenergypointsperminute', util_profile.ClassEnergyPointsPerMinuteGraph),
+    ('/profile/graph/classtime', util_profile.ClassTimeGraph),
+    ('/class_profile', util_profile.ViewClassProfile),
+
+    ('/login', Login),
+    ('/login/mobileoauth', MobileOAuthLogin),
+    ('/postlogin', PostLogin),
+    ('/logout', Logout),
+
+    ('/api-apps/register', oauth_apps.Register),
+
+    # These are dangerous, should be able to clean things manually from the remote python shell
+
+    ('/deletevideoplaylists', DeleteVideoPlaylists),
+    ('/killliveassociations', KillLiveAssociations),
+
+    # Below are all discussion related pages
+    ('/discussion/addcomment', comments.AddComment),
+    ('/discussion/pagecomments', comments.PageComments),
+
+    ('/discussion/addquestion', qa.AddQuestion),
+    ('/discussion/expandquestion', qa.ExpandQuestion),
+    ('/discussion/addanswer', qa.AddAnswer),
+    ('/discussion/editentity', qa.EditEntity),
+    ('/discussion/answers', qa.Answers),
+    ('/discussion/pagequestions', qa.PageQuestions),
+    ('/discussion/clearflags', qa.ClearFlags),
+    ('/discussion/flagentity', qa.FlagEntity),
+    ('/discussion/voteentity', voting.VoteEntity),
+    ('/discussion/updateqasort', voting.UpdateQASort),
+    ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
+    ('/discussion/deleteentity', qa.DeleteEntity),
+    ('/discussion/changeentitytype', qa.ChangeEntityType),
+    ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
+    ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
+    ('/discussion/moderatorlist', qa.ModeratorList),
+    ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
+
+    ('/githubpost', github.NewPost),
+    ('/githubcomment', github.NewComment),
+
+    ('/toolkit', RedirectToToolkit),
+
+    ('/paypal/ipn', paypal.IPN),
+
+    ('/badges/view', util_badges.ViewBadges),
+    ('/badges/custom/create', custom_badges.CreateCustomBadge),
+    ('/badges/custom/award', custom_badges.AwardCustomBadge),
+
+    ('/notifierclose', util_notify.ToggleNotify),
+    ('/newaccount', Clone),
+
+    ('/jobs', RedirectToJobvite),
+    ('/jobs/.*', RedirectToJobvite),
+
+    ('/dashboard', dashboard.Dashboard),
+    ('/entityboard', dashboard.Entityboard),
+    ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
+    ('/admin/entitycounts', dashboard.EntityCounts),
+
+    ('/sendtolog', SendToLog),
+
+    ('/user_video_css', ServeUserVideoCss),
+
+    ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
+    ('/exercisestats/report', exercisestats.report.Test),
+    ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
+    ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
+    ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
+    ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
+    ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
+    ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
+    ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
+
+    # Redirect any links to old JSP version
+    ('/.*\.jsp', PermanentRedirectToHome),
+    ('/index\.html', PermanentRedirectToHome),
+
+    ('/_ah/warmup.*', warmup.Warmup),
+
+    ], debug=True)
+
+application = profiler.ProfilerWSGIMiddleware(application)
+application = GAEBingoWSGIMiddleware(application)
+application = request_cache.RequestCacheMiddleware(application)
+
 def main():
-
-    application = webapp.WSGIApplication([
-        ('/', homepage.ViewHomePage),
-        ('/about', util_about.ViewAbout),
-        ('/about/blog', blog.ViewBlog),
-        ('/about/blog/.*', blog.ViewBlogPost),
-        ('/about/the-team', util_about.ViewAboutTheTeam),
-        ('/about/getting-started', util_about.ViewGettingStarted),
-        ('/about/tos', ViewTOS ),
-        ('/about/privacy-policy', ViewPrivacyPolicy ),
-        ('/about/dmca', ViewDMCA ),
-        ('/contribute', ViewContribute ),
-        ('/contribute/credits', ViewCredits ),
-        ('/frequently-asked-questions', util_about.ViewFAQ),
-        ('/about/faq', util_about.ViewFAQ),
-        ('/downloads', util_about.ViewDownloads),
-        ('/about/downloads', util_about.ViewDownloads),
-        ('/getinvolved', ViewGetInvolved),
-        ('/donate', Donate),
-        ('/exercisedashboard', exercises.ViewAllExercises),
-        ('/library_content', library.GenerateLibraryContent),
-        ('/youtube_list', YoutubeVideoList),
-        ('/exerciseandvideoentitylist', ExerciseAndVideoEntityList),
-        ('/exercises', exercises.ViewExercise),
-        ('/khan-exercises/exercises/.*', exercises.RawExercise),
-        ('/printexercise', PrintExercise),
-        ('/printproblem', PrintProblem),
-        ('/viewexercisesonmap', exercises.ViewAllExercises),
-        ('/editexercise', exercises.EditExercise),
-        ('/updateexercise', exercises.UpdateExercise),
-        ('/moveexercisemapnode', exercises.MoveMapNode),
-        ('/admin94040', exercises.ExerciseAdmin),
-        ('/videoless', VideolessExercises),
-        ('/video/.*', ViewVideo),
-        ('/v/.*', ViewVideo),
-        ('/video', ViewVideo), # Backwards URL compatibility
-        ('/logvideoprogress', LogVideoProgress),
-        ('/sat', ViewSAT),
-        ('/gmat', ViewGMAT),
-        ('/store', ViewStore),
-        ('/reportissue', ReportIssue),
-        ('/provide-feedback', ProvideFeedback),
-        ('/search', Search),
-        ('/autocomplete', autocomplete.Autocomplete),
-        ('/savemapcoords', knowledgemap.SaveMapCoords),
-        ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
-        ('/showunusedplaylists', ShowUnusedPlaylists),
-        ('/crash', Crash),
-
-        ('/mobilefullsite', MobileFullSite),
-        ('/mobilesite', MobileSite),
-
-        ('/admin/reput', bulk_update.handler.UpdateKind),
-        ('/admin/retargetfeedback', RetargetFeedback),
-        ('/admin/fixvideoref', FixVideoRef),
-        ('/admin/deletestalevideoplaylists', DeleteStaleVideoPlaylists),
-        ('/admin/deletestalevideos', DeleteStaleVideos),
-        ('/admin/fixplaylistref', FixPlaylistRef),
-        ('/admin/deletestaleplaylists', DeleteStalePlaylists),
-        ('/admin/startnewbadgemapreduce', util_badges.StartNewBadgeMapReduce),
-        ('/admin/badgestatistics', util_badges.BadgeStatistics),
-        ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
-        ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
-        ('/admin/backfill', backfill.StartNewBackfillMapReduce),
-        ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
-        ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
-        ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
-        ('/admin/changeemail', ChangeEmail),
-        ('/admin/rendertemplate', ViewRenderTemplate),
-
-        ('/devadmin/emailchange', devpanel.Email),
-        ('/devadmin/managedevs', devpanel.Manage),
-        ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
-
-        ('/coaches', coaches.ViewCoaches),
-        ('/students', coaches.ViewStudents),
-        ('/registercoach', coaches.RegisterCoach),
-        ('/unregistercoach', coaches.UnregisterCoach),
-        ('/unregisterstudent', coaches.UnregisterStudent),
-        ('/requeststudent', coaches.RequestStudent),
-        ('/acceptcoach', coaches.AcceptCoach),
-
-        ('/createstudentlist', coaches.CreateStudentList),
-        ('/deletestudentlist', coaches.DeleteStudentList),
-        ('/removestudentfromlist', coaches.RemoveStudentFromList),
-        ('/addstudenttolist', coaches.AddStudentToList),
-
-        ('/individualreport', coaches.ViewIndividualReport),
-        ('/progresschart', coaches.ViewProgressChart),
-        ('/sharedpoints', coaches.ViewSharedPoints),
-        ('/classreport', coaches.ViewClassReport),
-        ('/classtime', coaches.ViewClassTime),
-        ('/charts', coaches.ViewCharts),
-
-        ('/mailing-lists/subscribe', util_mailing_lists.Subscribe),
-
-        ('/profile/graph/activity', util_profile.ActivityGraph),
-        ('/profile/graph/focus', util_profile.FocusGraph),
-        ('/profile/graph/exercisesovertime', util_profile.ExercisesOverTimeGraph),
-        ('/profile/graph/exerciseproblems', util_profile.ExerciseProblemsGraph),
-        ('/profile/graph/exerciseprogress', util_profile.ExerciseProgressGraph),
-        ('/profile', util_profile.ViewProfile),
-
-        ('/profile/graph/classexercisesovertime', util_profile.ClassExercisesOverTimeGraph),
-        ('/profile/graph/classprogressreport', util_profile.ClassProgressReportGraph),
-        ('/profile/graph/classenergypointsperminute', util_profile.ClassEnergyPointsPerMinuteGraph),
-        ('/profile/graph/classtime', util_profile.ClassTimeGraph),
-        ('/class_profile', util_profile.ViewClassProfile),
-
-        ('/press/.*', ViewArticle),
-        ('/login', Login),
-        ('/login/mobileoauth', MobileOAuthLogin),
-        ('/postlogin', PostLogin),
-        ('/logout', Logout),
-
-        ('/api-apps/register', oauth_apps.Register),
-
-        # These are dangerous, should be able to clean things manually from the remote python shell
-
-        ('/deletevideoplaylists', DeleteVideoPlaylists),
-        ('/killliveassociations', KillLiveAssociations),
-
-        # Below are all discussion related pages
-        ('/discussion/addcomment', comments.AddComment),
-        ('/discussion/pagecomments', comments.PageComments),
-
-        ('/discussion/addquestion', qa.AddQuestion),
-        ('/discussion/expandquestion', qa.ExpandQuestion),
-        ('/discussion/addanswer', qa.AddAnswer),
-        ('/discussion/editentity', qa.EditEntity),
-        ('/discussion/answers', qa.Answers),
-        ('/discussion/pagequestions', qa.PageQuestions),
-        ('/discussion/clearflags', qa.ClearFlags),
-        ('/discussion/flagentity', qa.FlagEntity),
-        ('/discussion/voteentity', voting.VoteEntity),
-        ('/discussion/updateqasort', voting.UpdateQASort),
-        ('/admin/discussion/finishvoteentity', voting.FinishVoteEntity),
-        ('/discussion/deleteentity', qa.DeleteEntity),
-        ('/discussion/changeentitytype', qa.ChangeEntityType),
-        ('/discussion/videofeedbacknotificationlist', notification.VideoFeedbackNotificationList),
-        ('/discussion/videofeedbacknotificationfeed', notification.VideoFeedbackNotificationFeed),
-        ('/discussion/moderatorlist', qa.ModeratorList),
-        ('/discussion/flaggedfeedback', qa.FlaggedFeedback),
-
-        ('/githubpost', github.NewPost),
-        ('/githubcomment', github.NewComment),
-
-        ('/toolkit', RedirectToToolkit),
-
-        ('/paypal/ipn', paypal.IPN),
-
-        ('/badges/view', util_badges.ViewBadges),
-        ('/badges/custom/create', custom_badges.CreateCustomBadge),
-        ('/badges/custom/award', custom_badges.AwardCustomBadge),
-
-        ('/notifierclose', util_notify.ToggleNotify),
-        ('/newaccount', Clone),
-
-        ('/jobs', RedirectToJobvite),
-        ('/jobs/.*', RedirectToJobvite),
-
-        ('/dashboard', dashboard.Dashboard),
-        ('/entityboard', dashboard.Entityboard),
-        ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
-        ('/admin/entitycounts', dashboard.EntityCounts),
-
-        ('/sendtolog', SendToLog),
-
-        ('/user_video_css', ServeUserVideoCss),
-
-        ('/admin/exercisestats/collectfancyexercisestatistics', exercisestats.CollectFancyExerciseStatistics),
-        ('/exercisestats/report', exercisestats.report.Test),
-        ('/exercisestats/exerciseovertime', exercisestats.report_json.ExerciseOverTimeGraph),
-        ('/exercisestats/geckoboardexerciseredirect', exercisestats.report_json.GeckoboardExerciseRedirect),
-        ('/exercisestats/exercisestatsmap', exercisestats.report_json.ExerciseStatsMapGraph),
-        ('/exercisestats/exerciseslastauthorcounter', exercisestats.report_json.ExercisesLastAuthorCounter),
-        ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
-        ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
-        ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
-
-        # Redirect any links to old JSP version
-        ('/.*\.jsp', PermanentRedirectToHome),
-        ('/index\.html', PermanentRedirectToHome),
-
-        ('/_ah/warmup.*', warmup.Warmup),
-
-        ], debug=True)
-
-    application = profiler.ProfilerWSGIMiddleware(application)
-    application = request_cache.RequestCacheMiddleware(application)
-
     run_wsgi_app(application)
 
 if __name__ == '__main__':

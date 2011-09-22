@@ -24,6 +24,7 @@ from phantom_users.phantom_util import create_phantom
 from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
+from gae_bingo.gae_bingo import bingo, ab_test
 
 class MoveMapNode(request_handler.RequestHandler):
     def post(self):
@@ -106,7 +107,7 @@ class ViewExercise(request_handler.RequestHandler):
                 renderable = False
 
             query = models.ProblemLog.all()
-            query.filter("user = ", user_data.user)
+            query.filter("user = ", user_data_student.user)
             query.filter("exercise = ", exid)
 
             # adding this ordering to ensure that query is served by an existing index.
@@ -121,6 +122,7 @@ class ViewExercise(request_handler.RequestHandler):
                     break
 
             user_activity = []
+            previous_time = 0
 
             if not problem_log or not hasattr(problem_log, "hint_after_attempt_list"):
                 renderable = False
@@ -132,8 +134,10 @@ class ViewExercise(request_handler.RequestHandler):
                     user_activity.append([
                         "hint-activity",
                         "0",
-                        max(0, problem_log.hint_time_taken_list[0])
+                        max(0, problem_log.hint_time_taken_list[0] - previous_time)
                         ])
+
+                    previous_time = problem_log.hint_time_taken_list[0]
                     problem_log.hint_after_attempt_list.pop(0)
                     problem_log.hint_time_taken_list.pop(0)
 
@@ -146,14 +150,17 @@ class ViewExercise(request_handler.RequestHandler):
                         max(0, problem_log.time_taken_attempts[i])
                         ])
 
+                    previous_time = 0
+
                     # Here i is 0-indexed but problems are numbered starting at 1
                     while len(problem_log.hint_after_attempt_list) and problem_log.hint_after_attempt_list[0] == i+1:
                         user_activity.append([
                             "hint-activity",
                             "0",
-                            max(0, problem_log.hint_time_taken_list[0])
+                            max(0, problem_log.hint_time_taken_list[0] - previous_time)
                             ])
 
+                        previous_time = problem_log.hint_time_taken_list[0]
                         # easiest to just pop these instead of maintaining
                         # another index into this list
                         problem_log.hint_after_attempt_list.pop(0)
@@ -163,8 +170,12 @@ class ViewExercise(request_handler.RequestHandler):
 
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints
+        else: # not read only
+            user_exercise.hints_first = ab_test('hints_first', [True, False],
+                ['used_hints', 'used_video', 'used_hints_or_video'])
 
-        browser_disabled = self.is_older_ie()
+        is_webos = self.is_webos()
+        browser_disabled = is_webos or self.is_older_ie()
         renderable = renderable and not browser_disabled
 
         url_pattern = "/exercises?exid=%s&student_email=%s&problem_number=%d"
@@ -186,11 +197,12 @@ class ViewExercise(request_handler.RequestHandler):
             'read_only': read_only,
             'selected_nav_link': 'practice',
             'browser_disabled': browser_disabled,
+            'is_webos': is_webos,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
             }
 
-        self.render_template("exercise_template.html", template_values)
+        self.render_jinja2_template("exercise_template.html", template_values)
 
 class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
@@ -222,6 +234,9 @@ class ViewAllExercises(request_handler.RequestHandler):
                 exercise.review = True
                 exercise.status = "Review"
 
+        if self.request_bool("move_on", default=False):
+            bingo("proficiency_message_heading")
+
         template_values = {
             'exercises': ex_graph.exercises,
             'recent_exercises': recent_exercises,
@@ -233,7 +248,7 @@ class ViewAllExercises(request_handler.RequestHandler):
             'selected_nav_link': 'practice',
             }
 
-        self.render_template('viewexercises.html', template_values)
+        self.render_jinja2_template('viewexercises.html', template_values)
 
 class RawExercise(request_handler.RequestHandler):
     def get(self):
@@ -285,7 +300,7 @@ def exercise_contents(exercise):
     if not len(body_contents):
         raise MissingExerciseException("Missing exercise body in content for exid '%s'" % exercise.name)
 
-    return (body_contents, script_contents, style_contents, data_require, sha1)
+    return map(lambda s: s.decode('utf-8'), (body_contents, script_contents, style_contents, data_require, sha1))
 
 @layer_cache.cache_with_key_fxn(lambda exercise_file: "exercise_raw_html_%s" % exercise_file, layer=layer_cache.Layers.InAppMemory)
 def raw_exercise_contents(exercise_file):
@@ -459,7 +474,7 @@ class ExerciseAdmin(request_handler.RequestHandler):
         exercises.sort(key=lambda e: e.name)
         template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
 
-        self.render_template('exerciseadmin.html', template_values)
+        self.render_jinja2_template('exerciseadmin.html', template_values)
 
 class EditExercise(request_handler.RequestHandler):
 
@@ -486,7 +501,7 @@ class EditExercise(request_handler.RequestHandler):
                 'saved': self.request_bool('saved', default=False),
                 }
 
-            self.render_template("editexercise.html", template_values)
+            self.render_jinja2_template("editexercise.html", template_values)
 
 class UpdateExercise(request_handler.RequestHandler):
 

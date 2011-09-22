@@ -1,6 +1,6 @@
 import sys, urllib, os, traceback
 from pprint import pprint
-from django.utils import simplejson as json
+import simplejson as json
 
 video_mapping = {}
 

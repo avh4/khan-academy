@@ -6,16 +6,10 @@ import urllib
 import pickle
 import random
 
-import config_django
-
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
 from api.jsonify import jsonify
-# Do not remove this webapp.template import, as suggested
-# by Guido here: http://code.google.com/p/googleappengine/issues/detail?id=3632
-from google.appengine.ext.webapp import template
-from django.template.defaultfilters import slugify
 
 from google.appengine.ext import db
 import object_property
@@ -33,6 +27,8 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+from templatefilters import slugify
+from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -52,8 +48,7 @@ class Setting(db.Model):
             return Setting._cache_get_by_key_name(key)
         else:
             setting = Setting(Setting.entity_group_key(), key, value=str(val))
-            setting_old = Setting(key_name=key, value=str(val)) # delete once migration complete
-            db.put([setting, setting_old])
+            db.put(setting)
             Setting._get_settings_dict(bust_cache=True)
             return setting.value
 
@@ -71,13 +66,6 @@ class Setting(db.Model):
         # ancestor query to ensure consistent results
         query = Setting.all().ancestor(Setting.entity_group_key())
         results = dict((setting.key().name(), setting) for setting in query.fetch(20))
-
-        # backfill with old style settings
-        for setting in Setting.all().fetch(20):
-            key = setting.key()
-            if key.parent() is None and not key.name() in results.keys():
-                results[key.name()] = setting
-
         return results
 
     @staticmethod
@@ -126,6 +114,10 @@ class Exercise(db.Model):
             "author", "raw_html", "last_modified",
             "coverers", "prerequisites_ex", "assigned",
             ]
+
+    @property
+    def relative_url(self):
+        return "/exercises?exid=%s" % self.name
 
     @property
     def ka_url(self):
@@ -242,10 +234,8 @@ class Exercise(db.Model):
         return query.fetch(200)
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_safe_%s" % Setting.cached_exercises_date())
     def __get_all_use_cache_safe__():
-        query = Exercise.all(live_only = True).order('h_position')
-        return query.fetch(200)
+        return filter(lambda exercise: exercise.live, Exercise.__get_all_use_cache_unsafe__())
 
     @staticmethod
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_dict_unsafe_%s" % Setting.cached_exercises_date())
@@ -577,7 +567,7 @@ def set_css_deferred(user_data_key, video_key, status, version):
     uvc.version = version
     db.put(uvc)
 
-class UserData(db.Model):
+class UserData(GAEBingoIdentityModel, db.Model):
     user = db.UserProperty()
     user_id = db.StringProperty()
     user_nickname = db.StringProperty(indexed=False)
@@ -613,7 +603,7 @@ class UserData(db.Model):
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
-            "user_nickname", "user_email",
+            "user_nickname", "user_email", "seconds_since_joined",
     ]
 
     @property
@@ -665,6 +655,10 @@ class UserData(db.Model):
     @property
     def is_phantom(self):
         return util.is_phantom_user(self.user_id)
+
+    @property
+    def seconds_since_joined(self):
+        return util.seconds_since(self.joined)
 
     @staticmethod
     @request_cache.cache_with_key_fxn(lambda user_id: "UserData_user_id:%s" % user_id)
@@ -815,14 +809,15 @@ class UserData(db.Model):
         self.need_to_reassess = False
         return is_changed
 
-    def reassess_if_necessary(self):
+    def reassess_if_necessary(self, ex_graph=None):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        ex_graph = ExerciseGraph(self)
+        if ex_graph is None:
+            ex_graph = ExerciseGraph(self)
         return self.reassess_from_graph(ex_graph)
 
-    def is_proficient_at(self, exid):
-        self.reassess_if_necessary()
+    def is_proficient_at(self, exid, exgraph=None):
+        self.reassess_if_necessary(exgraph)
         return (exid in self.all_proficient_exercises)
 
     def is_explicitly_proficient_at(self, exid):
@@ -830,11 +825,11 @@ class UserData(db.Model):
 
     def is_reviewing(self, exid, user_exercise, time):
 
+        if user_exercise is None:
+            return False
         # Short circuit out of full review check if not proficient or review time hasn't come around yet
-
         if not self.is_proficient_at(exid):
             return False
-
         if user_exercise.last_review + user_exercise.get_review_interval() > time:
             return False
 
@@ -1623,13 +1618,22 @@ class ExerciseVideo(db.Model):
 
 class ExerciseGraph(object):
 
-    def __init__(self, user_data):
-        user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
-        exercises = Exercise.get_all_use_cache()
-        self.exercises = exercises
+    def __init__(self, user_data=None):
+        
+        self.exercises = Exercise.get_all_use_cache()
         self.exercise_by_name = {}
-        for ex in exercises:
+        for ex in self.exercises:
             self.exercise_by_name[ex.name] = ex
+
+        if user_data is not None:
+            self.initialize_for_user(user_data)
+            
+    def initialize_for_user(self, user_data, user_exercises=None):
+
+        if user_exercises is None:
+            user_exercises = UserExercise.get_for_user_data_use_cache(user_data)
+
+        for ex in self.exercises:
             ex.coverers = []
             ex.user_exercise = None
             ex.next_review = None  # Not set initially
@@ -1653,7 +1657,7 @@ class ExerciseGraph(object):
             ex = self.exercise_by_name.get(name)
             if ex:
                 ex.assigned = True
-        for ex in exercises:
+        for ex in self.exercises:
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
                 if ex_cover:
@@ -1685,7 +1689,7 @@ class ExerciseGraph(object):
                         break
             return ex.proficient
 
-        for ex in exercises:
+        for ex in self.exercises:
             compute_proficient(ex)
 
         def compute_suggested(ex):
@@ -1707,12 +1711,12 @@ class ExerciseGraph(object):
                     break
             return ex.suggested
 
-        for ex in exercises:
+        for ex in self.exercises:
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)
 
         phantom = user_data.is_phantom
-        for ex in exercises:
+        for ex in self.exercises:
             ex.phantom = phantom
 
 
@@ -1801,6 +1805,7 @@ class ExerciseGraph(object):
         recent_exercises = recent_exercises[0:n_recent]
 
         return filter(lambda ex: hasattr(ex, "last_done") and ex.last_done, recent_exercises)
+
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify

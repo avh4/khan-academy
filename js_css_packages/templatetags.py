@@ -9,9 +9,6 @@ from js_css_packages import packages
 import util
 import request_cache
 
-import template_cached
-register = template_cached.create_template_register()
-
 @request_cache.cache()
 def use_compressed_packages():
 
@@ -25,7 +22,6 @@ def use_compressed_packages():
 
     return True
 
-@register.simple_tag
 def js_package(package_name):
     package = packages.javascript[package_name]
     base_url = package.get("base_url") or "/javascript/%s-package" % package_name
@@ -38,7 +34,6 @@ def js_package(package_name):
     else:
         return "<script type='text/javascript' src='%s/%s'></script>" % (util.static_url(base_url), package["hashed-filename"])
 
-@register.simple_tag
 def css_package(package_name):
     package = packages.stylesheets[package_name]
     base_url = package.get("base_url") or "/stylesheets/%s-package" % package_name

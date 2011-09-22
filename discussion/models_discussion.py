@@ -71,6 +71,7 @@ class Feedback(db.Model):
     def authored_by(self, user_data):
         return user_data and self.author == user_data.user
 
+    @property
     def sum_votes_incremented(self):
         # Always add an extra vote when displaying vote counts to convey the author's implicit "vote"
         # and make the site a little more positive.
