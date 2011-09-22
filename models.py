@@ -1635,7 +1635,6 @@ class ExerciseGraph(object):
             ex.is_ancestor_review_candidate = None  # Not set initially
             ex.proficient = None # Not set initially
             ex.suggested = None # Not set initially
-            ex.assigned = False
             ex.streak = 0
             ex.longest_streak = 0
             ex.total_done = 0
@@ -1646,10 +1645,6 @@ class ExerciseGraph(object):
             ex = self.exercise_by_name.get(name)
             if ex:
                 ex.proficient = True
-        for name in user_data.assigned_exercises:
-            ex = self.exercise_by_name.get(name)
-            if ex:
-                ex.assigned = True
         for ex in self.exercises:
             for covered in ex.covers:
                 ex_cover = self.exercise_by_name.get(covered)
