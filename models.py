@@ -776,7 +776,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
-        reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
+        reviewing = exercise.review = False # TODO: use UserExerciseGraph here
         struggling = UserExercise.is_struggling_with(user_exercise, exercise)
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
 
@@ -789,26 +789,27 @@ class UserData(GAEBingoIdentityModel, db.Model):
             'summative': exercise.summative,
         }
 
-    def reassess_from_graph(self, ex_graph):
-        all_proficient_exercises = []
-        for ex in ex_graph.get_proficient_exercises():
-            all_proficient_exercises.append(ex.name)
-        suggested_exercises = []
-        for ex in ex_graph.get_suggested_exercises():
-            suggested_exercises.append(ex.name)
+    def reassess_from_graph(self, user_exercise_graph):
+        all_proficient_exercises = user_exercise_graph.proficient_exercise_names()
+        suggested_exercises = user_exercise_graph.suggested_exercise_names()
+
         is_changed = (all_proficient_exercises != self.all_proficient_exercises or
                       suggested_exercises != self.suggested_exercises)
+
         self.all_proficient_exercises = all_proficient_exercises
         self.suggested_exercises = suggested_exercises
         self.need_to_reassess = False
+
         return is_changed
 
-    def reassess_if_necessary(self, ex_graph=None):
+    def reassess_if_necessary(self, user_exercise_graph=None):
         if not self.need_to_reassess or self.all_proficient_exercises is None:
             return False
-        if ex_graph is None:
-            ex_graph = ExerciseGraph(self)
-        return self.reassess_from_graph(ex_graph)
+
+        if user_exercise_graph is None:
+            user_exercise_graph = UserExerciseGraph.get(self)
+
+        return self.reassess_from_graph(user_exercise_graph)
 
     def is_proficient_at(self, exid, exgraph=None):
         self.reassess_if_necessary(exgraph)
@@ -816,20 +817,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     def is_explicitly_proficient_at(self, exid):
         return (exid in self.proficient_exercises)
-
-    def is_reviewing(self, exid, user_exercise, time):
-
-        if user_exercise is None:
-            return False
-        # Short circuit out of full review check if not proficient or review time hasn't come around yet
-        if not self.is_proficient_at(exid):
-            return False
-        if user_exercise.last_review + user_exercise.get_review_interval() > time:
-            return False
-
-        ex_graph = ExerciseGraph(self)
-        review_exercise_names = map(lambda exercise: exercise.name, ex_graph.get_review_exercises(time))
-        return (exid in review_exercise_names)
 
     def is_suggested(self, exid):
         self.reassess_if_necessary()
@@ -1610,6 +1597,163 @@ class ExerciseVideo(db.Model):
 
         return exercise_video_key_dict
 
+# UserExerciseGraph is an optimized-for-read-and-deserialization cache of the exercise graph, with data specific
+# for each user. It can be reconstituted at any time via UserExercise objects.
+#
+class UserExerciseGraph(db.Model):
+
+    CURRENT_VERSION = 1 # Bump this whenever you need to change the model of the cached graph
+
+    version = db.IntegerProperty()
+    graph = object_property.ObjectProperty()
+
+    def proficient_exercise_names(self):
+        return map(lambda exercise_dict: exercise_dict["name"], filter(lambda key: exercise_dict["proficient"], graph.values()))
+
+    def suggested_exercise_names(self):
+        return map(lambda exercise_dict: exercise_dict["name"], filter(lambda key: exercise_dict["suggested"], graph.values()))
+
+    @staticmethod
+    def key_for_user_data(user_data):
+        return "UserExerciseGraph:%s" % user_data.key_email
+
+    @staticmethod
+    def get(user_data, put_if_missing=True):
+        if not user_data:
+            raise Exception("Must provide UserData when loading UserExerciseGraph")
+
+        user_exercise_graph = UserExerciseGraph.get_by_key_name(UserExerciseGraph.key_for_user_data(user_data))
+        if user_exercise_graph and user_Exercise_graph.version == UserExerciseGraph.CURRENT_VERSION:
+            return user_exercise_graph
+
+        user_exercise_graph = UserExerciseGraph.generate(user_data)
+        if put_if_missing:
+            user_exercise_graph.put()
+
+        return user_exercise_graph
+
+    @staticmethod
+    def generate(user_data):
+        exercises = Exercise.get_all_use_cache()
+        user_exercises = UserExercise.get_for_user_data(user_data)
+
+        user_exercises_by_name = {}
+        for user_exercise in user_exercises:
+            user_exercises_by_name[user_exercise.exercise] = user_exercise
+
+        graph = {}
+
+        # Build up base of graph
+        for exercise in exercises:
+            user_exercise = user_exercises_by_name.get(exercise.name)
+
+            exercise_dict = {
+                    "name": exercise.name,
+                    "proficient": None,
+                    "suggested": None,
+                    "summative": exercise.summative,
+                    "covers": exercise.covers,
+                    "prerequisites": exercise.prerequisites,
+                    "streak": user_exercise.streak if user_exercise else 0,
+                    "longest_streak": user_exercise.longest_streak if user_exercise else 0,
+                    "total_done": user_exercise.total_done if user_exercise else 0,
+                    "last_done": user_exercise.last_done if user_exercise else None,
+                    "last_review": user_exercise.last_review if user_exercise else None,
+                    "review_interval_secs": user_exercise.review_interval_secs if user_exercise else (60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS),
+                    "tmp": {
+                        "coverer_dicts": [],
+                        "prerequisite_dicts": [],
+                    }, # Tmp storage for use during buildup of graph that won't be serialized
+                }
+
+            # In case user has multiple UserExercise mappings for a specific exercise,
+            # always prefer the one w/ more problems done
+            if exercise.name not in graph or graph[exercise.name]["total_done"] < exercise_dict["total_done"]
+                graph[exercise.name] = exercise_dict
+
+        # Cache coverers and prereqs for later
+        for exercise in exercises:
+            exercise_dict = graph.get(exercise.name)
+            if exercise_dict:
+
+                # Cache coverers
+                for covered_exercise_name in exercise.covers:
+                    covered_exercise_dict = graph.get(covered_exercise_name)
+                    if covered_exercise_dict:
+                        covered_exercise_dict["tmp"]["coverer_dicts"] = exercise_dict
+
+                # Cache prereqs
+                for prerequisite_exercise_name in exercise.prerequisites:
+                    prerequisite_exercise_dict = graph.get(prerequisite_exercise_name)
+                    if prerequisite_exercise_dict:
+                        exercise_dict["tmp"]["prerequisite_dicts"].append(prerequisite_exercise_dict)
+
+        # Set explicit proficiencies
+        for exercise_name in user_data.proficient_exercises:
+            exercise_dict = graph.get(exercise_name)
+            if exercise_dict:
+                exercise_dict["proficient"] = True
+
+        # Calculate implicit proficiencies
+        def set_implicit_proficiency(exercise_dict):
+            if exercise_dict["proficient"] is not None:
+                return exercise_dict["proficient"]
+
+            exercise_dict["proficient"] = False
+
+            # Consider an exercise implicitly proficient if the user has 
+            # never missed a problem and a covering ancestor is proficient
+            if exercise_dict["streak"] == exercise_dict["total_done"]:
+                for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"].values():
+                    if set_implicit_proficient(covering_exercise_dict):
+                        exercise_dict["proficient"] = True
+                        break
+
+            return exercise_dict["proficient"]
+
+        for exercise_name in graph:
+            set_implicit_proficiency(graph[exercise_name])
+
+        # Calculate suggested
+        def set_suggested(exercise_dict):
+            if exercise_dict["suggested"] is not None:
+                return exercise_dict["suggested"]
+
+            # Don't suggest already-proficient exercises
+            if exercise_dict["proficient"]:
+                exercise_dict["suggested"] = False
+                return exercise_dict["suggested"]
+
+            # First, assume we're suggesting this exercise
+            exercise_dict["suggested"] = True
+
+            # Don't suggest exercises that are covered by other suggested exercises
+            for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"].values():
+                if set_suggested(covering_exercise_dict):
+                    exercise_dict["suggested"] = False
+                    return exercise_dict["suggested"]
+
+            # Don't suggest exercises if the user isn't proficient in all prerequisites
+            for prerequisite_exercise_dict in exercise_dict["tmp"]["prerequisite_dicts"].values():
+                if not prerequisite_exercise_dict["proficient"]:
+                    exercise_dict["suggested"] = False
+                    return exercise_dict["suggested"]
+
+            return exercise_dict["suggested"]
+
+        for exercise_name in graph:
+            set_suggested(graph[exercise_name])
+
+        # Clear temporary vars before serialization
+        for exercise_name in graph:
+            del graph[exercise.name]["tmp"]
+
+        return UserExerciseGraph(
+                key_name = UserExerciseGraph.key_for_user_data(user_data),
+                parent = user_data,
+                graph = graph,
+            )
+
 class ExerciseGraph(object):
 
     def __init__(self, user_data=None):
@@ -1733,16 +1877,21 @@ class ExerciseGraph(object):
         def compute_next_review(ex):
             if ex.next_review is None:
                 ex.next_review = datetime.datetime.min
+
                 if ex.user_exercise is not None and ex.user_exercise.last_review > datetime.datetime.min:
                     next_review = ex.user_exercise.last_review + ex.user_exercise.get_review_interval()
+
                     if next_review > now and ex.proficient and ex.user_exercise.streak == 0:
                         next_review = now
+
                     if next_review > ex.next_review:
                         ex.next_review = next_review
+
                 for c in ex.coverers:
                     c_next_review = compute_next_review(c)
                     if c_next_review > ex.next_review:
                         ex.next_review = c_next_review
+
             return ex.next_review
 
         def compute_is_ancestor_review_candidate(rc):
@@ -1754,6 +1903,7 @@ class ExerciseGraph(object):
 
         for ex in self.exercises:
             compute_next_review(ex)
+
         review_candidates = []
         for ex in self.exercises:
             if not ex.summative and ex.proficient and ex.next_review <= now:
@@ -1761,10 +1911,12 @@ class ExerciseGraph(object):
                 review_candidates.append(ex)
             else:
                 ex.is_review_candidate = False
+
         review_exercises = []
         for rc in review_candidates:
             if not compute_is_ancestor_review_candidate(rc):
                 review_exercises.append(rc)
+
         return review_exercises
 
     def get_proficient_exercises(self):
