@@ -1479,6 +1479,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         left: 265px;
         top: 5px;
     }
+    .exercise-badge .energy-points-badge.new_partial_reset, .exercise-badge .energy-points-badge.new_full_reset{
+      display:none;
+    }
     .exercise-badge .exercise-title {
         font-weight: bold;
         position: absolute;

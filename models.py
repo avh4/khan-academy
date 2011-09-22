@@ -299,7 +299,7 @@ class UserExercise(db.Model):
         'sbar_gained_10th_proficiency', 'sbar_addition_1_proficiency', 'sbar_geometry_1_proficiency'] +
         any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
 
-    # progress_bar_alternative = ["new_partial_reset" | "original"]
+    # progress_bar_alternative = ["new_full_reset" | "new_partial_reset" | "original"]
     @property
     def progress_bar_alternative(self):
       return ab_test('partial_reset_streak_bar_3_way',
