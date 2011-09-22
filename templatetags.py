@@ -64,13 +64,15 @@ def user_points(user_data):
 
 def streak_bar(user_exercise):
     progress = user_exercise.progress
+    streak = user_exercise.streak
+    use_old_bar = user_exercise.progress_bar_alternative == 'original'
 
     if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
         progress = 0
 
-    bar_max_width = 227
-
     required_streak = user_exercise.required_streak
+
+    bar_max_width = 227
     bar_width = min(1.0, progress) * bar_max_width
 
     levels = []
@@ -79,15 +81,20 @@ def streak_bar(user_exercise):
         level_offset = bar_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
+    else:
+        if streak > consts.MAX_STREAK_SHOWN:
+            streak = 'Max'
 
-    def format_percent(num):
-        return '%.0f%%' % math.floor(num * 100.0)
+    def progress_display(num):
+        return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
 
     template_values = {
+        "use_old_bar": use_old_bar,
+        "streak": streak,
         "is_suggested": user_exercise.suggested,
         "is_proficient": user_exercise.proficient,
         "float_progress": progress,
-        "progress": format_percent(progress),
+        "progress": progress_display(progress),
         "bar_width": bar_width,
         "bar_max_width": bar_max_width,
         "levels": levels
