@@ -1501,7 +1501,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         overflow:hidden;
     }
     .streak-bar.suggested {
-      background-color:#8cc63f;
+      background-color:#d1e8b2;
     }
     .streak-bar.proficient .current-label{
       background: url('/images/streaksprite.png') no-repeat 0 -70px;
@@ -1526,7 +1526,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     /* the streak bar on exercise pages */    
     .single-exercise #streak-bar-container .streak-bar{
       width:400px;
-      background-color:#8cc63f;
+      background-color:#d1e8b2;
       bottom: auto;
       left: auto;
       top: 21px;
