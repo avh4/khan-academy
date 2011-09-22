@@ -774,7 +774,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
         return userExercise
 
     def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
-        phantom = exercise.phantom = util.is_phantom_user(self.user_id)
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = self.is_reviewing(exercise.name, user_exercise, current_time)
@@ -782,7 +781,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
 
         return {
-            'phantom': phantom,
             'proficient': proficient,
             'suggested': suggested,
             'reviewing': reviewing,
@@ -1637,7 +1635,6 @@ class ExerciseGraph(object):
             ex.is_ancestor_review_candidate = None  # Not set initially
             ex.proficient = None # Not set initially
             ex.suggested = None # Not set initially
-            ex.phantom = False
             ex.assigned = False
             ex.streak = 0
             ex.longest_streak = 0
@@ -1710,11 +1707,6 @@ class ExerciseGraph(object):
         for ex in self.exercises:
             compute_suggested(ex)
             ex.points = points.ExercisePointCalculator(ex, ex.suggested, ex.proficient)
-
-        phantom = user_data.is_phantom
-        for ex in self.exercises:
-            ex.phantom = phantom
-
 
     def get_review_exercises(self, now = datetime.datetime.now()):
 

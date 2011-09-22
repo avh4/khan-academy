@@ -69,10 +69,6 @@ def streak_bar(user_exercise):
     if hasattr(user_exercise, "longest_streak"):
         longest_streak = user_exercise.longest_streak
 
-    if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
-        streak = 0
-        longest_streak = 0
-
     streak_max_width = 227
     required_streak = user_exercise.required_streak
 
