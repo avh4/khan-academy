@@ -268,6 +268,7 @@ var VideoStats = {
     dtSinceSave: null,
     sVideoKey: null,
     sYoutubeId: null,
+    playing: false, //ensures pause and end events are idempotent
 
     getSecondsWatched: function() {
         if (!this.player) return 0;
@@ -311,7 +312,7 @@ var VideoStats = {
         // If the player isn't ready yet or if it is replaced in the future,
         // listen to the state changes once it is ready/replaced.
         var me = this;
-        $(this).bind("playerready", function() {
+        $(this).bind("playerready.videostats", function() {
             me.listenToPlayerStateChange();
         });
 
@@ -321,17 +322,32 @@ var VideoStats = {
             // granularity logging boundary
             this.intervalId = setInterval(function() {
                 VideoStats.playerStateChange(-2);
-            }, 10000);;
+            }, 10000);
         }
 
         this.fEventsAttached = true;
     },
 
     stopLoggingProgress: function() {
+        // unhook event handler initializer
+        $(this).unbind('playerready.videostats');
+
+        // send a final pause event
+        this.playerStateChange(2);
+
+        // now unhook playback polling
         if ( this.intervalId !== null ) {
             clearInterval(this.intervalId);
             this.intervalId = null;
         }
+
+        // and unhook statechange handler
+        if (this.player && this.player.fStateChangeHookAttached) {
+            this.player.removeEventListener("onStateChange", "onYouTubePlayerStateChange");
+            this.player.fStateChangeHookAttached = false;
+        }
+
+        this.fEventsAttached = false;
     },
 
     listenToPlayerStateChange: function() {
@@ -353,20 +369,22 @@ var VideoStats = {
                 // Another 10% has been watched
                 this.save();
             }
-        } else if (state == 0) { // ended
+        } else if (state == 0 && this.playing) { // ended
+            this.playing = false;
             this.save();
-        } else if (state == 2) { // paused
+        } else if (state == 2 && this.playing) { // paused
+            this.playing = false;
             if (this.getSecondsWatchedRestrictedByPageTime() > 1) {
               this.save();
             }
         } else if (state == 1) { // play
+            this.playing = true;
             this.dtSinceSave = new Date();
         }
         // If state is buffering, unstarted, or cued, don't do anything
     },
 
     save: function() {
-
         if (this.fSaving) return;
 
         this.fSaving = true;
@@ -470,6 +488,8 @@ var VideoStats = {
     }
 };
 
+// called by youtube player upon load. see:
+// http://code.google.com/apis/youtube/js_api_reference.html
 function onYouTubePlayerReady(playerID) {
     // Ensure UniSub widget will know about ready players if/when it loads.
     (window.unisubs_readyAPIIDs = window.unisubs_readyAPIIDs || []).push((playerID == "undefined" || !playerID) ? '' : playerID);
