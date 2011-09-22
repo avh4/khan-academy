@@ -118,6 +118,10 @@ class Exercise(db.Model):
             ]
 
     @property
+    def relative_url(self):
+        return "/exercises?exid=%s" % self.name
+
+    @property
     def ka_url(self):
         return util.absolute_url("/exercises?exid=%s" % self.name)
 
