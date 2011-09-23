@@ -228,6 +228,11 @@ class ViewAllExercises(request_handler.RequestHandler):
         for exercise_dict in review_exercise_dicts:
             exercise_dict["status"] = "Review"
 
+            try:
+                suggested_exercise_dicts.remove(exercise_dict)
+            except KeyError:
+                pass
+
         template_values = {
             'exercise_dicts': exercise_dicts,
             'suggested_exercise_dicts': suggested_exercise_dicts,
