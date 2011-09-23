@@ -661,12 +661,6 @@ var Comments = {
 
 };
 
-$(Discussion.init);
-$(Moderation.init);
-$(Voting.init);
-$(Comments.init);
-$(QA.init);
-
 // Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
 // we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm
 // most users b/c it only manifests itself during page unload, but for anybody with IE's "show all errors"
