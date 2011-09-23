@@ -192,6 +192,7 @@ def remove_images(path, path_combined, suffix):
     new_file = open(path_without_urls, 'w')
 
     r = re.compile('/\*! *data-uri\(\'?/images/(\S+)\.(png|gif|GIF|jpg)\'?\) *\*/')
+    rs = re.compile('/\*! *data-uri\(\'?data:image/(?:png|gif|jpg);base64,[0-9A-Za-z=/+]+\'?\) *\*/')
     with open(path_combined) as f:
         for line in f:
             if r.search(line):
@@ -204,7 +205,7 @@ def remove_images(path, path_combined, suffix):
                     line = re.sub(urlpath, remove_images_from_line, line)
 
                 # remove the data-uri comments
-                line = r.sub('', line)
+                line = rs.sub('', line)
             new_file.write(line)
 
     new_file.close()
