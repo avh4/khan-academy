@@ -1608,10 +1608,25 @@ class UserExerciseGraph(db.Model):
     graph = object_property.ObjectProperty()
 
     def proficient_exercise_names(self):
-        return map(lambda exercise_dict: exercise_dict["name"], filter(lambda key: exercise_dict["proficient"], graph.values()))
+        return map(lambda exercise_dict: exercise_dict["name"], self.proficient_exercise_dicts())
 
     def suggested_exercise_names(self):
-        return map(lambda exercise_dict: exercise_dict["name"], filter(lambda key: exercise_dict["suggested"], graph.values()))
+        return map(lambda exercise_dict: exercise_dict["name"], self.suggested_exercise_dicts())
+
+    def exercise_dicts(self):
+        return self.graph.values()
+
+    def suggested_exercise_dicts(self):
+        return filter(lambda exercise_dict: exercise_dict["suggested"], self.graph.values())
+
+    def proficient_exercise_dicts(self):
+        return filter(lambda exercise_dict: exercise_dict["proficient"], self.graph.values())
+
+    def recent_exercise_dicts(self):
+        return self.graph.values()[:2] # TODO: do this.
+
+    def review_exercise_dicts(self):
+        return self.graph.values()[:2] # TODO: do this.
 
     @staticmethod
     def key_for_user_data(user_data):
@@ -1649,11 +1664,14 @@ class UserExerciseGraph(db.Model):
 
             exercise_dict = {
                     "name": exercise.name,
+                    "display_name": exercise.display_name,
+                    "h_position": exercise.h_position,
+                    "v_position": exercise.v_position,
                     "proficient": None,
                     "suggested": None,
                     "summative": exercise.summative,
-                    "covers": exercise.covers,
-                    "prerequisites": exercise.prerequisites,
+                    "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
+                    "required_streak": exercise.required_streak,
                     "streak": user_exercise.streak if user_exercise else 0,
                     "longest_streak": user_exercise.longest_streak if user_exercise else 0,
                     "total_done": user_exercise.total_done if user_exercise else 0,
@@ -1668,7 +1686,7 @@ class UserExerciseGraph(db.Model):
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
-            if exercise.name not in graph or graph[exercise.name]["total_done"] < exercise_dict["total_done"]
+            if exercise.name not in graph or graph[exercise.name]["total_done"] < exercise_dict["total_done"]:
                 graph[exercise.name] = exercise_dict
 
         # Cache coverers and prereqs for later
@@ -1704,7 +1722,7 @@ class UserExerciseGraph(db.Model):
             # Consider an exercise implicitly proficient if the user has 
             # never missed a problem and a covering ancestor is proficient
             if exercise_dict["streak"] == exercise_dict["total_done"]:
-                for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"].values():
+                for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"]:
                     if set_implicit_proficient(covering_exercise_dict):
                         exercise_dict["proficient"] = True
                         break
@@ -1728,13 +1746,13 @@ class UserExerciseGraph(db.Model):
             exercise_dict["suggested"] = True
 
             # Don't suggest exercises that are covered by other suggested exercises
-            for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"].values():
+            for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"]:
                 if set_suggested(covering_exercise_dict):
                     exercise_dict["suggested"] = False
                     return exercise_dict["suggested"]
 
             # Don't suggest exercises if the user isn't proficient in all prerequisites
-            for prerequisite_exercise_dict in exercise_dict["tmp"]["prerequisite_dicts"].values():
+            for prerequisite_exercise_dict in exercise_dict["tmp"]["prerequisite_dicts"]:
                 if not prerequisite_exercise_dict["proficient"]:
                     exercise_dict["suggested"] = False
                     return exercise_dict["suggested"]
@@ -1745,8 +1763,8 @@ class UserExerciseGraph(db.Model):
             set_suggested(graph[exercise_name])
 
         # Clear temporary vars before serialization
-        for exercise_name in graph:
-            del graph[exercise.name]["tmp"]
+        for exercise_name in graph.keys():
+            del graph[exercise_name]["tmp"]
 
         return UserExerciseGraph(
                 key_name = UserExerciseGraph.key_for_user_data(user_data),

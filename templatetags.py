@@ -62,15 +62,12 @@ def user_points(user_data):
 
     return {"points": points}
 
-def streak_bar(user_exercise):
-    streak = user_exercise.streak
-    longest_streak = 0
-
-    if hasattr(user_exercise, "longest_streak"):
-        longest_streak = user_exercise.longest_streak
+def streak_bar(user_exercise_dict):
+    streak = user_exercise_dict["streak"]
+    longest_streak = user_exercise_dict["longest_streak"]
 
     streak_max_width = 227
-    required_streak = user_exercise.required_streak
+    required_streak = user_exercise_dict["required_streak"]
 
     streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * streak))
     longest_streak_width = min(streak_max_width, math.ceil((streak_max_width / float(required_streak)) * longest_streak))
@@ -81,7 +78,7 @@ def streak_bar(user_exercise):
     show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - streak_width) > width_required_for_label
 
     levels = []
-    if user_exercise.summative:
+    if user_exercise_dict["summative"]:
         c_levels = required_streak / consts.REQUIRED_STREAK
         level_offset = streak_max_width / float(c_levels)
         for ix in range(c_levels - 1):

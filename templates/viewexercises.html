@@ -55,8 +55,8 @@
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
        <h3>Suggested Exercises</h3>
-        {% if review_exercises %}
-        {% for exercise in review_exercises %}
+        {% if review_exercise_dicts %}
+        {% for exercise in review_exercise_dicts %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
         		<div class="energy-points-badge">{{exercise.points}}</div>
@@ -66,7 +66,7 @@
             </div>
         {% endfor %}
         {% endif %}
-        {% for exercise in suggested_exercises %}
+        {% for exercise in suggested_exercise_dicts %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
         		<div class="energy-points-badge">{{exercise.points}}</div>
@@ -76,9 +76,9 @@
             </div>
         {% endfor %}
         <br>
-        {% if recent_exercises %}
+        {% if recent_exercise_dicts %}
             <h3>Recent Exercises</h3>
-            {% for exercise in recent_exercises %}
+            {% for exercise in recent_exercise_dicts %}
                 <div class="exercise-badge" data-id="{{exercise.name}}">
                     {{ exercise_macros.exercise_icon(exercise) }}
                     <div class="energy-points-badge">{{exercise.points}}</div>
@@ -93,7 +93,7 @@
             <span class="subheader">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
         </h3>
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
-        {% for exercise in exercises %}
+        {% for exercise in exercise_dicts %}
             <div class="exercise-badge" data-id="{{exercise.name}}" id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
         		<div class="energy-points-badge">{{exercise.points}}</div>
@@ -106,7 +106,7 @@
     </div>
 
     <div id="dashboard-map">
-        {{ exercise_macros.knowledgemap(exercises, map_coords) }}
+        {{ exercise_macros.knowledgemap(exercise_dicts, map_coords) }}
     </div>
 </div>
 </div>

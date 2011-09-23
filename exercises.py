@@ -208,40 +208,30 @@ class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
         user_data = models.UserData.current() or models.UserData.pre_phantom()
 
-        ex_graph = models.ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
+        user_exercise_graph = models.UserExerciseGraph.get(user_data)
+        if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
-        recent_exercises = ex_graph.get_recent_exercises()
-        review_exercises = ex_graph.get_review_exercises()
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
+        exercise_dicts = user_exercise_graph.exercise_dicts()
+        suggested_exercise_dicts = user_exercise_graph.suggested_exercise_dicts()
+        proficient_exercise_dicts = user_exercise_graph.proficient_exercise_dicts()
+        recent_exercise_dicts = user_exercise_graph.recent_exercise_dicts()
+        review_exercise_dicts = user_exercise_graph.review_exercise_dicts()
 
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
+        for exercise_dict in suggested_exercise_dicts:
+            exercise_dict["status"] = "Suggested"
 
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            if exercise in review_exercises:
-                exercise.review = True
-                exercise.status = "Review"
+        for exercise_dict in proficient_exercise_dicts:
+            exercise_dict["status"] = "Proficient"
 
-        if self.request_bool("move_on", default=False):
-            bingo("proficiency_message_heading")
+        for exercise_dict in review_exercise_dicts:
+            exercise_dict["status"] = "Review"
 
         template_values = {
-            'exercises': ex_graph.exercises,
-            'recent_exercises': recent_exercises,
-            'review_exercises': review_exercises,
-            'suggested_exercises': suggested_exercises,
+            'exercise_dicts': exercise_dicts,
+            'suggested_exercise_dicts': suggested_exercise_dicts,
+            'recent_exercise_dicts': recent_exercise_dicts,
+            'review_exercise_dicts': review_exercise_dicts,
             'user_data': user_data,
             'expanded_all_exercises': user_data.expanded_all_exercises,
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),

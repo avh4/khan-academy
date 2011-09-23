@@ -68,7 +68,7 @@
                 </th>
             </tr>
             {% for exercise in exercises %}
-            <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default("0") }}' data-streak='{{ exercise.streak }}' data-h_position='{{ exercise.h_position }}' data-v_position='{{ exercise.v_position }}' data-summative='{{ exercise.summative }}'>
+            <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak }}' data-streak='{{ exercise.streak }}' data-h_position='{{ exercise.h_position }}' data-v_position='{{ exercise.v_position }}' data-summative='{{ exercise.summative }}'>
                 <td class="points">
                     {{ exercise.points }}
                 </td>
@@ -79,14 +79,14 @@
                     {{ exercise.status }}
                 </td>
                 <td class="longest_streak">
-                    {{ exercise.longest_streak|default("0") }}
+                    {{ exercise.longest_streak }}
                 </td>
                 <td class="streak">
                     {{ exercise.streak }}
                 </td>
                 <td class="prereqs">
                     <ul>
-                        {% for prereq in exercise.prerequisites_ex %}
+                        {% for prereq in exercise.prerequisites %}
                         <li data-prereq="{{ prereq.name }}">
                             <a href="/exercises?exid={{prereq.name }}">{{ prereq.display_name }}</a>
                         </li>
