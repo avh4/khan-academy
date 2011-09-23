@@ -341,11 +341,7 @@ var VideoStats = {
             this.intervalId = null;
         }
 
-        // and unhook statechange handler
-        if (this.player && this.player.fStateChangeHookAttached) {
-            this.player.removeEventListener("onStateChange", "onYouTubePlayerStateChange");
-            this.player.fStateChangeHookAttached = false;
-        }
+        // cannot unhook statechange handler as there is no removeEventListener
 
         this.fEventsAttached = false;
     },
