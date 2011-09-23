@@ -1683,10 +1683,10 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseGraph(db.Model):
 
-    CURRENT_VERSION = 7 # Bump this whenever you need to change the model of the cached graph
+    CURRENT_VERSION = 8 # Bump this whenever you need to change the model of the cached graph
 
     version = db.IntegerProperty()
-    graph = object_property.ObjectProperty()
+    graph = object_property.UnvalidatedObjectProperty()
 
     def exercise_dict(self, exercise_name):
         return self.graph.get(exercise_name)
