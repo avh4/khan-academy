@@ -1607,11 +1607,17 @@ class UserExerciseGraph(db.Model):
     version = db.IntegerProperty()
     graph = object_property.ObjectProperty()
 
+    def exercise_dict(self, exercise_name):
+        return self.graph.get(exercise_name)
+
     def proficient_exercise_names(self):
         return map(lambda exercise_dict: exercise_dict["name"], self.proficient_exercise_dicts())
 
     def suggested_exercise_names(self):
         return map(lambda exercise_dict: exercise_dict["name"], self.suggested_exercise_dicts())
+
+    def review_exercise_names(self):
+        return map(lambda exercise_dict: exercise_dict["name"], self.review_exercise_dicts())
 
     def exercise_dicts(self):
         return sorted(self.graph.values(), key=lambda exercise_dict: exercise_dict["h_position"])
@@ -1637,24 +1643,64 @@ class UserExerciseGraph(db.Model):
         return "UserExerciseGraph:%s" % user_data.key_email
 
     @staticmethod
-    def get(user_data, put_if_missing=True):
-        if not user_data:
+    def get(user_data_or_list, put_if_missing=True):
+        if not user_data_or_list:
             raise Exception("Must provide UserData when loading UserExerciseGraph")
 
-        user_exercise_graph = UserExerciseGraph.get_by_key_name(UserExerciseGraph.key_for_user_data(user_data))
-        if user_exercise_graph and user_Exercise_graph.version == UserExerciseGraph.CURRENT_VERSION:
-            return user_exercise_graph
+        # We can grab a single UserExerciseGraph or do an optimized grab of a bunch of 'em
+        user_data_list = user_data_or_list if type(user_data_or_list) == list else [user_data_or_list]
 
-        user_exercise_graph = UserExerciseGraph.generate(user_data)
-        if put_if_missing:
-            user_exercise_graph.put()
+        # Try to get 'em all by key name
+        user_exercise_graphs = UserExerciseGraph.get_by_key_name(
+                map(
+                    lambda user_data: UserExerciseGraph.key_for_user_data(user_data), 
+                    user_data_list)
+                )
 
-        return user_exercise_graph
+        # For any that are missing or are out of date,
+        # build up asynchronous queries to repopulate their data
+        async_queries = []
+        for i, user_exercise_graph in enumerate(user_exercise_graphs):
+            if not user_exercise_graph or user_exercise_graph.version != UserExerciseGraph.CURRENT_VERSION:
+                # This user's cached graph is missing or out-of-date, 
+                # put it in the list of graphs to be regenerated.
+                async_queries.append(UserExercise.get_for_user_data(user_data_list[i]))
+
+        if len(async_queries) > 0:
+
+            # Run the async queries
+            results = util.async_queries(async_queries)
+            exercises = Exercise.get_all_use_cache()
+
+            # Populate the missing graphs w/ results from async queries
+            index_result = 0
+            for i, user_exercise_graph in enumerate(user_exercise_graphs):
+                if not user_exercise_graph or user_exercise_graph.version != UserExerciseGraph.CURRENT_VERSION:
+                    user_data = user_data_list[i]
+                    user_exercises = results[index_result].get_result()
+
+                    user_exercise_graph = UserExerciseGraph.generate(user_data, exercises, user_exercises)
+                    if put_if_missing:
+                        user_exercise_graph.put()
+
+                    user_exercise_graphs[i] = user_exercise_graph
+
+                    index_result += 1
+
+        if not user_exercise_graphs:
+            return []
+
+        # Return list of graphs if a list was passed in,
+        # otherwise return single graph
+        return user_exercise_graphs if type(user_data_or_list) == list else user_exercise_graphs[0]
 
     @staticmethod
-    def generate(user_data):
-        exercises = Exercise.get_all_use_cache()
-        user_exercises = UserExercise.get_for_user_data(user_data)
+    def generate(user_data, exercises=None, user_exercises=None):
+
+        if not exercises:
+            exercises = Exercise.get_all_use_cache()
+        if not user_exercises:
+            user_exercises = UserExercise.get_for_user_data(user_data)
 
         user_exercises_by_name = {}
         for user_exercise in user_exercises:
@@ -1668,11 +1714,14 @@ class UserExerciseGraph(db.Model):
 
             exercise_dict = {
                     "name": exercise.name,
+                    "exists": bool(user_exercise),
                     "display_name": exercise.display_name,
                     "h_position": exercise.h_position,
                     "v_position": exercise.v_position,
                     "proficient": None,
+                    "explicitly_proficient": None,
                     "suggested": None,
+                    "struggling": UserExercise.is_struggling_with(user_exercise, exercise) if user_exercise else False,
                     "summative": exercise.summative,
                     "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
                     "required_streak": exercise.required_streak,
@@ -1714,7 +1763,7 @@ class UserExerciseGraph(db.Model):
         for exercise_name in user_data.proficient_exercises:
             exercise_dict = graph.get(exercise_name)
             if exercise_dict:
-                exercise_dict["proficient"] = True
+                exercise_dict["proficient"] = exercise_dict["explicitly_proficient"] = True
 
         # Calculate implicit proficiencies
         def set_implicit_proficiency(exercise_dict):
@@ -1772,7 +1821,7 @@ class UserExerciseGraph(db.Model):
 
         return UserExerciseGraph(
                 key_name = UserExerciseGraph.key_for_user_data(user_data),
-                parent = user_data,
+                version = UserExerciseGraph.CURRENT_VERSION,
                 graph = graph,
             )
 
