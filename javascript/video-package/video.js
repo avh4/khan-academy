@@ -70,19 +70,25 @@ var Video = {
 
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);
+        Video.hideSubtitleElements();
+    },
 
+    hideSubtitleElements: function() {
         $('.unisubs-videoTab').hide();
         $('.subtitles-warning').hide();
         $('.youtube-video').css('marginBottom', '0px');
         Throbber.hide();
     },
 
-    showSubtitles: function() {
-        createCookie(this.SHOW_SUBTITLES_COOKIE, true, 365);
-
+    showSubtitleElements: function() {
         $('.youtube-video').css('marginBottom', '32px');
         $('.subtitles-warning').show();
         $('.unisubs-videoTab').show();
+    },
+
+    showSubtitles: function() {
+        createCookie(this.SHOW_SUBTITLES_COOKIE, true, 365);
+        Video.showSubtitleElements();
 
         if ($('.unisubs-videoTab').length == 0)
         {
