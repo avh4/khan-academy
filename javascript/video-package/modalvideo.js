@@ -21,7 +21,19 @@ var ModalVideo = {
         // add click handlers to all related video links for lightbox
         jQuery('.thumbnail a, .related-video-inline').each(function(i, el) {
             var jel = $(el);
-            jel.click(function(ev) {
+
+            // ev.which doesn't work in IE<9 on click events, so get it from
+            // ev.button on a mouseup event (which comes first)
+            var mouseup_button = 0;
+
+            jel.mouseup(function(ev) {
+                mouseup_button = ev.button;
+                return true;
+            }).click(function(ev) {
+                // workaround for IE<9
+                ev.which = ev.which || mouseup_button;
+                mouseup_button = 0;
+
                 if ( ev.which == 1 ) {
                     // left mouse button: show modal video
                     ev.preventDefault();
