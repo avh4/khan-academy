@@ -297,7 +297,7 @@ class UserExercise(db.Model):
     # Returns a value from UserData._streak_bar_alternatives depending on which experiment the user is in
     @property
     def progress_bar_alternative(self):
-      user_data = self.get_user_data()
+      user_data = UserData.current()
       return user_data.progress_bar_alternative if user_data else 'original'
 
     @property
@@ -675,10 +675,12 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     # Returns a value from _streak_bar_alternatives depending on which experiment the user is in
     @property
+    @request_cache.cache()
     def progress_bar_alternative(self):
-      return ab_test('partial_reset_streak_bar_3_way',
-          UserData._streak_bar_alternatives,
-          UserData._streak_bar_conversion_tests)
+        return ab_test('partial_reset_streak_bar_3_way',
+                UserData._streak_bar_alternatives,
+                UserData._streak_bar_conversion_tests
+                )
 
     @property
     def nickname(self):
