@@ -677,8 +677,9 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @property
     @request_cache.cache()
     def progress_bar_alternative(self):
-        # Put new users in a different experiment
-        test_name = 'partial_reset_streak_bar_3_way' if self.points > 0 else 'partial_reset_streak_bar_new_users'
+        # Put new users (those who have not seen the old streak bar) in a different experiment
+        test_name = ('partial_reset_streak_bar_new_users' if self.joined > datetime.datetime(2011, 9, 23)
+            else 'partial_reset_streak_bar_3_way')
 
         return ab_test(test_name, UserData._streak_bar_alternatives, UserData._streak_bar_conversion_tests)
 
