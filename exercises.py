@@ -230,7 +230,7 @@ class ViewAllExercises(request_handler.RequestHandler):
 
             try:
                 suggested_exercise_dicts.remove(exercise_dict)
-            except KeyError:
+            except ValueError:
                 pass
 
         template_values = {
