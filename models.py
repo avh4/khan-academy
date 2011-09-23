@@ -1623,10 +1623,10 @@ class UserExerciseGraph(db.Model):
         return filter(lambda exercise_dict: exercise_dict["proficient"], self.graph.values())
 
     def recent_exercise_dicts(self):
-        return self.graph.values()[:2] # TODO: do this.
+        return self.graph.values()[:1] # TODO: do this.
 
     def review_exercise_dicts(self):
-        return self.graph.values()[:2] # TODO: do this.
+        return self.graph.values()[:1] # TODO: do this.
 
     @staticmethod
     def key_for_user_data(user_data):

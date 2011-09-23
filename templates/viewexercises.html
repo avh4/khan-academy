@@ -60,7 +60,7 @@
             <div class="exercise-badge" data-id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
         		<div class="energy-points-badge">{{exercise.points}}</div>
-        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+        		<div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
 
                 {{ templatetags.streak_bar(exercise) }}
             </div>
@@ -70,7 +70,7 @@
             <div class="exercise-badge" data-id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
         		<div class="energy-points-badge">{{exercise.points}}</div>
-        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+        		<div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
         		
                 {{ templatetags.streak_bar(exercise) }}
             </div>
@@ -82,7 +82,7 @@
                 <div class="exercise-badge" data-id="{{exercise.name}}">
                     {{ exercise_macros.exercise_icon(exercise) }}
                     <div class="energy-points-badge">{{exercise.points}}</div>
-                    <div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+                    <div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
 
                     {{ templatetags.streak_bar(exercise) }}
                 </div>
@@ -97,7 +97,7 @@
             <div class="exercise-badge" data-id="{{exercise.name}}" id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
         		<div class="energy-points-badge">{{exercise.points}}</div>
-        		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
+        		<div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
                 {{ templatetags.streak_bar(exercise) }}
             </div>
         {% endfor %}
