@@ -10,6 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import deferred
 
 from app import App
+import consts
 import datetime
 import models
 import request_handler
@@ -388,6 +389,20 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
             user_exercise.total_done += 1
 
+            # Score a conversion in GAE/Bingo if appropriate
+            total_done = user_exercise.total_done
+
+            def add_to_conversions(conversions_dict):
+                if conversions_dict.has_key(total_done):
+                    bingo(conversions_dict[total_done])
+
+            if exercise.name == 'addition_1':
+                add_to_conversions(models.UserData.addition_1_conversions)
+            elif exercise.name == 'geometry_1':
+                add_to_conversions(models.UserData.geometry_1_conversions)
+
+            add_to_conversions(models.UserData.any_exercise_conversions)
+
             if problem_log.correct:
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)
@@ -402,6 +417,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.total_correct += 1
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
+
+                if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
+                    user_exercise.streak_start = 0.0
 
                 if user_exercise.streak >= exercise.required_streak and not explicitly_proficient:
                     user_exercise.set_proficient(True, user_data)
@@ -424,7 +442,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 # 2+ in a row wrong -> not proficient
                 user_exercise.set_proficient(False, user_data)
 
-            user_exercise.reset_streak()
+            # Only shrink the progress bar at most once per problem
+            shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
+            user_exercise.reset_streak(shrink_start)
 
         # Manually clear exercise's memcache since we're throwing it in a bulk put
         user_exercise.clear_memcache()

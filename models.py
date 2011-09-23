@@ -27,7 +27,9 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+
 from templatefilters import slugify
+from gae_bingo.gae_bingo import ab_test, bingo
 from gae_bingo.models import GAEBingoIdentityModel
 
 # Setting stores per-application key-value pairs
@@ -114,6 +116,10 @@ class Exercise(db.Model):
             "author", "raw_html", "last_modified",
             "coverers", "prerequisites_ex", "assigned",
             ]
+
+    @property
+    def relative_url(self):
+        return "/exercises?exid=%s" % self.name
 
     @property
     def ka_url(self):
@@ -230,10 +236,8 @@ class Exercise(db.Model):
         return query.fetch(200)
 
     @staticmethod
-    @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_safe_%s" % Setting.cached_exercises_date())
     def __get_all_use_cache_safe__():
-        query = Exercise.all(live_only = True).order('h_position')
-        return query.fetch(200)
+        return filter(lambda exercise: exercise.live, Exercise.__get_all_use_cache_unsafe__())
 
     @staticmethod
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_dict_unsafe_%s" % Setting.cached_exercises_date())
@@ -265,6 +269,9 @@ class Exercise(db.Model):
             exercise_dict[fxn_key(exercise)] = exercise
         return exercise_dict
 
+def get_conversion_tests_dict(exid, checkpoints):
+    return dict([(c, 'sbar_%s_%d_problems' % (exid, c)) for c in checkpoints])
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -272,6 +279,7 @@ class UserExercise(db.Model):
     exercise_model = db.ReferenceProperty(Exercise)
     streak = db.IntegerProperty(default = 0)
     longest_streak = db.IntegerProperty(default = 0, indexed=False)
+    streak_start = db.FloatProperty(default = 0.0)  # The starting point of the streak bar as it appears to the user, in [0,1)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
@@ -285,6 +293,12 @@ class UserExercise(db.Model):
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
     _serialize_blacklist = ["review_interval_secs"]
+
+    # Returns a value from UserData._streak_bar_alternatives depending on which experiment the user is in
+    @property
+    def progress_bar_alternative(self):
+      user_data = UserData.current()
+      return user_data.progress_bar_alternative if user_data else 'original'
 
     @property
     def required_streak(self):
@@ -311,6 +325,30 @@ class UserExercise(db.Model):
             proficient = user_data.is_proficient_at(self.exercise)
 
         return points.ExercisePointCalculator(self, suggested, proficient)
+
+    # A float for the progress bar indicating how close the user is to
+    # attaining proficiency, in range [0,1]. This is so we can abstract away
+    # the internal algorithm so the front-end does not need to change.
+    # TODO: Refactor code to use this measure instead of streak
+    @property
+    def progress(self):
+        # Currently this is just the "more forgiving" streak bar
+
+        if self.progress_bar_alternative == 'new_partial_reset':
+            def progress_with_start(streak, start, required_streak):
+                return start + float(streak) / required_streak * (1 - start)
+
+            if self.summative:
+                saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+                saved_progress = float(saved_streak) / self.required_streak
+                current_progress = progress_with_start(self.streak - saved_streak,
+                    self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
+                return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
+            else:
+                return progress_with_start(self.streak, self.streak_start, self.required_streak)
+
+        else:
+            return float(self.streak) / self.required_streak
 
     @staticmethod
     def get_key_for_email(email):
@@ -355,11 +393,20 @@ class UserExercise(db.Model):
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
 
-    def reset_streak(self):
+    def reset_streak(self, shrink_start=True):
         if self.exercise_model.summative:
             # Reset streak to latest 10 milestone
-            self.streak = (self.streak / consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            old_progress = self.progress
+            old_streak = self.streak
+
+            self.streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+
+            if shrink_start:
+                self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
+
         else:
+            if shrink_start:
+                self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
             self.streak = 0
 
     def struggling_threshold(self):
@@ -420,6 +467,19 @@ class UserExercise(db.Model):
                 user_data.put()
 
                 util_notify.update(user_data, self, False, True)
+
+                # Score conversions for A/B test
+                bingo('sbar_gained_proficiency')
+
+                if len(user_data.proficient_exercises) == 5:
+                    bingo('sbar_gained_5th_proficiency')
+                elif len(user_data.proficient_exercises) == 10:
+                    bingo('sbar_gained_10th_proficiency')
+
+                if self.exercise == 'addition_1':
+                    bingo('sbar_addition_1_proficiency')
+                elif self.exercise == 'geometry_1':
+                    bingo('sbar_geometry_1_proficiency')
 
         else:
             if self.exercise in user_data.proficient_exercises:
@@ -604,6 +664,24 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "user_nickname", "user_email", "seconds_since_joined",
     ]
 
+    _conversion_checkpoints = [5, 10, 20, 30]
+    any_exercise_conversions = get_conversion_tests_dict('did', _conversion_checkpoints)
+    addition_1_conversions = get_conversion_tests_dict('addition_1', _conversion_checkpoints)
+    geometry_1_conversions = get_conversion_tests_dict('geometry_1', _conversion_checkpoints)
+    _streak_bar_alternatives = ['original', 'new_partial_reset', 'new_full_reset']
+    _streak_bar_conversion_tests = (['sbar_gained_proficiency', 'sbar_gained_5th_proficiency',
+        'sbar_gained_10th_proficiency', 'sbar_addition_1_proficiency', 'sbar_geometry_1_proficiency'] +
+        any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
+
+    # Returns a value from _streak_bar_alternatives depending on which experiment the user is in
+    @property
+    @request_cache.cache()
+    def progress_bar_alternative(self):
+        return ab_test('partial_reset_streak_bar_3_way',
+                UserData._streak_bar_alternatives,
+                UserData._streak_bar_conversion_tests
+                )
+
     @property
     def nickname(self):
         # Only return cached value if it exists and it wasn't cached during a Facebook API hiccup
@@ -766,6 +844,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 exercise=exid,
                 exercise_model=exercise,
                 streak=0,
+                streak_start=0.0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),
                 last_done=None,
@@ -1623,7 +1702,7 @@ class ExerciseGraph(object):
         for ex in self.exercises:
             self.exercise_by_name[ex.name] = ex
 
-        if user_data is not None :
+        if user_data is not None:
             self.initialize_for_user(user_data)
             
     def initialize_for_user(self, user_data, user_exercises=None):
@@ -1643,6 +1722,8 @@ class ExerciseGraph(object):
             ex.assigned = False
             ex.streak = 0
             ex.longest_streak = 0
+            ex.progress = 0.0
+            ex.progress_bar_alternative = user_data.progress_bar_alternative
             ex.total_done = 0
             if hasattr(ex, 'last_done'):
                 # Clear leftovers from cache to fix random recents on new accounts
@@ -1670,6 +1751,7 @@ class ExerciseGraph(object):
             if ex and (not ex.user_exercise or ex.user_exercise.total_done < user_ex.total_done):
                 ex.user_exercise = user_ex
                 ex.streak = user_ex.streak
+                ex.progress = user_ex.progress
                 ex.longest_streak = user_ex.longest_streak
                 ex.total_done = user_ex.total_done
                 ex.last_done = user_ex.last_done

@@ -53,6 +53,7 @@ javascript = {
             "jquery.js",
             "jquery.mobile-1.0a4.1.js",
             "iscroll-lite.min.js",
+            "mobile.js",
         ]
     },
     "studentlists": {
@@ -70,6 +71,7 @@ javascript = {
             "utils/answer-types.js",
             "utils/calculus.js",
             "utils/convert-values.js",
+            "utils/derivative-intuition.js",
             "utils/exponents.js",
             "utils/expressions.js",
             "utils/graphie-geometry.js",

@@ -8,9 +8,17 @@ CHALLENGE_STREAK_BARRIER = 10
 # Max streak shown in streak bars
 MAX_STREAK_SHOWN = 100
 
+# Max progress shown in progress bars
+MAX_PROGRESS_SHOWN = 10.0
+
 # Number of problems that reward a slowly degrading amount of energy points after the required streak has been reached
 # before energy points bottom out for the exercise
 DEGRADING_EXERCISES_AFTER_STREAK = 15
+
+# The amount of the streak bar remaining after it becomes reset (this is meant
+# to be a makeshift solution to make the3 streak bar appear more forgiving
+# while we iterate on a better proficiency measure).
+STREAK_RESET_FACTOR = 0.25
 
 # Number of problems after which a non-summative exercise no longer rewards substantive points
 # (all problems capped at EXERCISE_POINTS_BASE to avoid 9-correct, 1-wrong streak loophole abuse)
