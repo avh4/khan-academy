@@ -208,7 +208,7 @@ class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
         user_data = models.UserData.current() or models.UserData.pre_phantom()
 
-        user_exercise_graph = models.UserExerciseGraph.get(user_data)
+        user_exercise_graph = models.UserExerciseGraph.get(user_data, put_if_missing=True)
         if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 

@@ -1602,7 +1602,7 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseGraph(db.Model):
 
-    CURRENT_VERSION = 1 # Bump this whenever you need to change the model of the cached graph
+    CURRENT_VERSION = 2 # Bump this whenever you need to change the model of the cached graph
 
     version = db.IntegerProperty()
     graph = object_property.ObjectProperty()
@@ -1670,6 +1670,7 @@ class UserExerciseGraph(db.Model):
 
             # Run the async queries
             results = util.async_queries(async_queries)
+            graphs_to_put = []
             exercises = Exercise.get_all_use_cache()
 
             # Populate the missing graphs w/ results from async queries
@@ -1681,11 +1682,14 @@ class UserExerciseGraph(db.Model):
 
                     user_exercise_graph = UserExerciseGraph.generate(user_data, exercises, user_exercises)
                     if put_if_missing:
-                        user_exercise_graph.put()
+                        graphs_to_put.append(user_exercise_graph)
 
                     user_exercise_graphs[i] = user_exercise_graph
 
                     index_result += 1
+
+            if len(graphs_to_put) > 0:
+                db.put(graphs_to_put)
 
         if not user_exercise_graphs:
             return []
