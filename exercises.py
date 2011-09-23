@@ -438,31 +438,21 @@ class ExerciseAdmin(request_handler.RequestHandler):
         user_data = models.UserData.current()
         user = models.UserData.current().user
 
-        ex_graph = models.ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
+        user_exercise_graph = models.UserExerciseGraph.get(user_data)
+        if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
-        recent_exercises = ex_graph.get_recent_exercises()
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
-        exercises = []
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
+        exercise_dicts = user_exercise_graph.exercise_dicts()
+        for exercise_dict in exercise_dicts:
+            exercise = models.Exercise.get_by_name(exercise_dict["name"])
+            exercise_dict["live"] = exercise and exercise.live
 
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            exercises.append(exercise)
-
-        exercises.sort(key=lambda e: e.name)
-        template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
+        template_values = {
+            'exercise_dicts': sorted(exercise_dicts, key=lambda exercise_dict: exercise_dict["name"]),
+            'admin': True,
+            'map_coords': (0, 0, 0),
+            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
+            }
 
         self.render_jinja2_template('exerciseadmin.html', template_values)
 

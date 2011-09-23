@@ -75,7 +75,7 @@
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
         
-        {% for exercise in exercises %}
+        {% for exercise in exercise_dicts %}
      
                 <div class="exercise-edit" data-id="{{exercise.name}}">
                 <a href="/editexercise?name={{ exercise.name|escape }}" 
@@ -93,7 +93,7 @@
     </div>
 
     <div id="dashboard-map">
-        {{ exercise_macros.knowledgemap(exercises, map_coords, admin) }}
+        {{ exercise_macros.knowledgemap(exercise_dicts, map_coords, admin) }}
     </div>
 </div>
 </div>{% endblock pagecontent %}
