@@ -32,7 +32,7 @@ def thumbnail_link_dict(video = None, exercise = None, thumb_url = None):
 
     if exercise:
         link_dict = {
-            "href": exercise.ka_url,
+            "href": exercise.relative_url,
             "thumb_url": thumb_url,
             "desc_html": escape(exercise.display_name),
             "teaser_html": "Exercise your <em>%s</em> skills" % escape(exercise.display_name),
