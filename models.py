@@ -1862,7 +1862,7 @@ class UserExerciseGraph(db.Model):
             # never missed a problem and a covering ancestor is proficient
             if exercise_dict["streak"] == exercise_dict["total_done"]:
                 for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"]:
-                    if set_implicit_proficient(covering_exercise_dict):
+                    if set_implicit_proficiency(covering_exercise_dict):
                         exercise_dict["proficient"] = True
                         break
 
