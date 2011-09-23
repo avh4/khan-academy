@@ -16,21 +16,19 @@
     {% set s_prefix = "node-challenge" if exercise.summative else "node" %}
 
     <div id="exercise-icon-container">
-    {% block exercise_icon_block scoped %}
-    <div class="proficient-badge">
-        <img src="
-        {%- if exercise.review -%}
-            /images/node-review.png
-        {%- elif exercise.suggested -%}
-            /images/{{ s_prefix }}-suggested.png
-        {%- elif exercise.proficient -%}
-            /images/{{ s_prefix }}-complete.png
-        {%- else -%}
-            /images/{{ s_prefix }}-not-started.png
-        {%- endif -%}
-        ?{{App.version}}" height=80 width=76>
-    </div>
-    {% endblock %}
+        <div class="proficient-badge">
+            <img src="
+            {%- if exercise.status == "Review" -%}
+                /images/node-review.png
+            {%- elif exercise.status == "Suggested" -%}
+                /images/{{ s_prefix }}-suggested.png
+            {%- elif exercise.status == "Proficient" -%}
+                /images/{{ s_prefix }}-complete.png
+            {%- else -%}
+                /images/{{ s_prefix }}-not-started.png
+            {%- endif -%}
+            ?{{App.version}}" height=80 width=76>
+        </div>
     </div>
 
 {%- endmacro %}
