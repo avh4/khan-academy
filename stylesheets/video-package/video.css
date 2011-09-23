@@ -125,16 +125,16 @@
 }
 .subtitles-warning {
     display: none;
-    margin-left: 200px;
+    margin-left: 256px;
     padding-left: 8px;
     padding-top: 0px;
     position: absolute;
-    bottom: -30px;
+    bottom: -33px;
     right: 0px;
 }
 .extra-link-bar .more-content {
     display: none;
-	
+
 }
 .extra-link-bar a {
     color: #069;
@@ -156,7 +156,7 @@
 }
 
 .extra-link-bar {
-	float:right; 
+	float:right;
 	position:relative;
 	top: 1px;
 }
