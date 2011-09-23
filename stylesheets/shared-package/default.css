@@ -74,15 +74,15 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /*! data-uri(/
     height: 100%;
     margin: 0 0 -77px;
 }
+#page-container, #page-container-inner {
+    background: transparent url(/images/content-border.1.png) no-repeat right 85px; /*! data-uri(/images/content-border.1.png) */
+}
 #page-container {
-    background: transparent url(/images/content-border.1.png) no-repeat 0 85px;
+    background-position: 0 85px;
     min-width: 1000px;
     max-width: 1200px;
     position: relative;
     margin: 0 auto;
-}
-#page-container-inner {
-    background: transparent url(/images/content-border.1.png) no-repeat right 85px;
 }
 
 /* Basic typography for the entire site */
