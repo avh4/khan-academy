@@ -1622,8 +1622,12 @@ class UserExerciseGraph(db.Model):
     def proficient_exercise_dicts(self):
         return filter(lambda exercise_dict: exercise_dict["proficient"], self.graph.values())
 
-    def recent_exercise_dicts(self):
-        return self.graph.values()[:1] # TODO: do this.
+    def recent_exercise_dicts(self, n_recent=2):
+        return sorted(
+                filter(lambda exercise_dict: exercise_dict["last_done"], self.graph.values()),
+                reverse=True, 
+                key=lambda exercise_dict: exercise_dict["last_done"],
+                )[0:n_recent]
 
     def review_exercise_dicts(self):
         return self.graph.values()[:1] # TODO: do this.
