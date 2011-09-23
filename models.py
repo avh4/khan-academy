@@ -1683,7 +1683,7 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseGraph(db.Model):
 
-    CURRENT_VERSION = 5 # Bump this whenever you need to change the model of the cached graph
+    CURRENT_VERSION = 7 # Bump this whenever you need to change the model of the cached graph
 
     version = db.IntegerProperty()
     graph = object_property.ObjectProperty()
@@ -1837,7 +1837,7 @@ class UserExerciseGraph(db.Model):
                 for covered_exercise_name in exercise.covers:
                     covered_exercise_dict = graph.get(covered_exercise_name)
                     if covered_exercise_dict:
-                        covered_exercise_dict["tmp"]["coverer_dicts"] = exercise_dict
+                        covered_exercise_dict["tmp"]["coverer_dicts"].append(exercise_dict)
 
                 # Cache prereqs
                 for prerequisite_exercise_name in exercise.prerequisites:
