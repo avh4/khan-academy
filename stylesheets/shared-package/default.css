@@ -1739,6 +1739,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     top: 22px;
     height:21px;
     padding-top: 1px;
+    display:none;
 }
 .exercise-badge.single-exercise .exercise-title {
     font-size:18px;
@@ -1757,7 +1758,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 .exercise-badge.single-exercise .new_partial_reset .streak-bar,
 .exercise-badge.single-exercise .new_full_reset .streak-bar  {
-  right: 103px;  
+  right: 10px;  
 }
 .exercise-badge.single-exercise .related-content,
 .exercise-badge.single-exercise .summative-help {
