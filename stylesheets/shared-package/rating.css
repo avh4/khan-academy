@@ -70,14 +70,14 @@
 .unit-rating a.r10-unit:hover{width: 200px;}
 
 .unit-rating li.current-rating {
-	background-image: url(/images/non-repeating-sprites.1.png);
+	background-image: url(/images/non-repeating-sprites.2.png);
     background-position: -10px -780px;
 	height: 30px;
 	z-index: 1;
 	}
 
 .new li.current-rating, .new_partial_reset .unit-rating li.current-rating, .new_full_reset .unit-rating li.current-rating {
-	background-image: url(/images/non-repeating-sprites.1.png);
+	background-image: url(/images/non-repeating-sprites.2.png);
   background-position: -300px -780px;
 	height: 30px;
 	z-index: 1;
@@ -118,7 +118,7 @@
 .new .unit-rating li.current-rating,  
 .new_partial_reset .unit-rating li.current-rating, 
 .new_full_reset .unit-rating li.current-rating{
-  background-image: url(/images/non-repeating-sprites.1.png);
+  background-image: url(/images/non-repeating-sprites.2.png);
   background-position: -300px -780px;
   z-index: 3;
 }
@@ -141,7 +141,7 @@
     }
 
 .unit-rating li.streak-icon {
-	background-image: url(/images/non-repeating-sprites.1.png);
+	background-image: url(/images/non-repeating-sprites.2.png);
     background-position: -10px -820px;
     z-index: 2;
     }

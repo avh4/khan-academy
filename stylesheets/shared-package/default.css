@@ -376,7 +376,7 @@ footer {
         z-index: 10;
     }
     footer #leaves {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: 319px -908px;
         height: 188px;
     }
@@ -414,7 +414,7 @@ footer {
         padding: 8px 10px 0 0;
     }
     footer #creative-commons-link {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -143px -67px;
         display: inline-block;
         height: 15px;
@@ -442,15 +442,15 @@ footer {
         padding-right: 0;
     }
     footer.short .small-social-links .youtube {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -10px -67px;
     }
     footer.short .small-social-links .twitter {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -10px -111px;
     }
     footer.short .small-social-links .facebook {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -10px -155px;
     }
     footer.short .inner {
@@ -473,7 +473,7 @@ footer {
 #top-header #logo {
     height: 100px;
     position: relative;
-    background-image: url(/images/non-repeating-sprites.1.png);
+    background-image: url(/images/non-repeating-sprites.2.png);
     background-position: -10px -261px;
     width: 317px;
 }
@@ -486,11 +486,11 @@ footer {
     #top-header #logo #logo-image {
         width: 280px;
         height: 65px;
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -10px -465px;
     }
         .dark #top-header #logo #logo-image {
-            background-image: url(/images/non-repeating-sprites.1.png);
+            background-image: url(/images/non-repeating-sprites.2.png);
             background-position: -320px -465px;
         }
 
@@ -891,7 +891,7 @@ footer {
     padding: 0;
 }
     .light #top-header #page_search #search-input {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -5px -867px;
         background-color: #fafafa;
         border:1px solid #C6D1AD;
@@ -911,7 +911,7 @@ footer {
         padding-top: 5px\9;
     }
     .dark #top-header #page_search #search-input {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -215px -867px;
         background-color: #36485C;
         border:1px solid #1A222C;
@@ -1184,7 +1184,7 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -5px -867px;
 		border: 1px solid #ddd;
 	}
@@ -1497,7 +1497,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: #006699;
         }
     .streak-bar {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.2.png);
         background-position: -10px -730px;
         width: 228px;
         height: 30px;
@@ -1804,7 +1804,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-left: 10px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
-    background-image: url(/images/non-repeating-sprites.1.png);
+    background-image: url(/images/non-repeating-sprites.2.png);
     background-position: -1px -598px;
     color: #333;
     display: block;
@@ -1812,7 +1812,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding: 48px 0 0 4px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
-    background-image: url(/images/non-repeating-sprites.1.png);
+    background-image: url(/images/non-repeating-sprites.2.png);
     background-position: -81px -598px;
     color: #E35D04;
 }
