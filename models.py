@@ -1614,17 +1614,17 @@ class UserExerciseGraph(db.Model):
         return map(lambda exercise_dict: exercise_dict["name"], self.suggested_exercise_dicts())
 
     def exercise_dicts(self):
-        return self.graph.values()
+        return sorted(self.graph.values(), key=lambda exercise_dict: exercise_dict["h_position"])
 
     def suggested_exercise_dicts(self):
-        return filter(lambda exercise_dict: exercise_dict["suggested"], self.graph.values())
+        return filter(lambda exercise_dict: exercise_dict["suggested"], self.exercise_dicts())
 
     def proficient_exercise_dicts(self):
-        return filter(lambda exercise_dict: exercise_dict["proficient"], self.graph.values())
+        return filter(lambda exercise_dict: exercise_dict["proficient"], self.exercise_dicts())
 
     def recent_exercise_dicts(self, n_recent=2):
         return sorted(
-                filter(lambda exercise_dict: exercise_dict["last_done"], self.graph.values()),
+                filter(lambda exercise_dict: exercise_dict["last_done"], self.exercise_dicts()),
                 reverse=True, 
                 key=lambda exercise_dict: exercise_dict["last_done"],
                 )[0:n_recent]
