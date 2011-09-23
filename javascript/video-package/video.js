@@ -71,7 +71,7 @@ var Video = {
     hideSubtitles: function() {
         eraseCookie(this.SHOW_SUBTITLES_COOKIE);
 
-        $('.mirosubs-videoTab').hide();
+        $('.unisubs-videoTab').hide();
         $('.subtitles-warning').hide();
         $('.youtube-video').css('marginBottom', '0px');
         Throbber.hide();
@@ -82,9 +82,9 @@ var Video = {
 
         $('.youtube-video').css('marginBottom', '32px');
         $('.subtitles-warning').show();
-        $('.mirosubs-videoTab').show();
+        $('.unisubs-videoTab').show();
 
-        if ($('.mirosubs-videoTab').length == 0)
+        if ($('.unisubs-videoTab').length == 0)
         {
             setTimeout(function() {
                 Throbber.show($(".subtitles-warning"), true);
