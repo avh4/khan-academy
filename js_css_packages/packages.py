@@ -50,6 +50,7 @@ javascript = {
             "jquery.js",
             "jquery.mobile-1.0a4.1.js",
             "iscroll-lite.min.js",
+            "mobile.js",
         ]
     },
     "studentlists": {
