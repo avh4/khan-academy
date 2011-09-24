@@ -171,9 +171,6 @@ class ViewExercise(request_handler.RequestHandler):
 
                 if problem_log.count_hints is not None:
                     user_exercise.count_hints = problem_log.count_hints
-        else: # not read only
-            user_exercise.hints_first = ab_test('hints_first', [True, False],
-                ['used_hints', 'used_video', 'used_hints_or_video'])
 
         is_webos = self.is_webos()
         browser_disabled = is_webos or self.is_older_ie()

@@ -15,7 +15,6 @@ from exercises import attempt_problem, reset_streak
 from phantom_users.phantom_util import api_create_phantom
 import util
 import notifications
-from gae_bingo.gae_bingo import bingo
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
@@ -519,9 +518,6 @@ def hint_problem_number(exercise_name, problem_number):
                     request.request_string("problem_type"),
                     request.remote_addr,
                     )
-
-            bingo('used_hints')
-            bingo('used_hints_or_video')
 
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
