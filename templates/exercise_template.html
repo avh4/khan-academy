@@ -13,6 +13,7 @@
     <script>var userExercise = {{ user_exercise_json }};</script>
 
     {{ js_css_packages.js_package("exercises") }}
+    {{ js_css_packages.css_package("video") }}
 
     <script>{{ exercise_inline_script }}</script>
     <style>{{exercise_inline_style}}</style>
@@ -81,7 +82,6 @@
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
-{{ js_css_packages.css_package("video") }}
 {{ js_css_packages.js_package("video") }}
 <!-- modal video jquery templates -->
 {% raw %}
