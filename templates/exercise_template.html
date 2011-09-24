@@ -1,5 +1,7 @@
 {% extends "page_template.html" %}
 
+{% import 'macros/youtube.html' as youtube %}
+
 {% block meta_page_title %}{{ exercise.display_name|escape }} | {% endblock meta_page_title %}
 
 {% block pagescript %}
@@ -84,16 +86,10 @@
 {% block bottompagescript %}
 {{ js_css_packages.js_package("video") }}
 <!-- modal video jquery templates -->
-{% raw %}
 <script id="youtube-player-tmpl" type="text/x-jquery-tmpl">
-    <object id="idOVideo" name="idOVideo" width="${width}" height="${height}" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000">
-        <param name="movie" value="http://www.youtube.com/v/${video.youtube_id}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1">
-        <param name="allowFullScreen" value="true">
-        <param name="allowScriptAccess" value="always">
-        <param name="wmode" value="transparent">
-        <embed id="idPlayer" name="idPlayer" wmode="transparent" src="http://www.youtube.com/v/${video.youtube_id}&hl=en_US&fs=1&rel=0&hd=1&border=0&enablejsapi=1" type="application/x-shockwave-flash" allowScriptAccess="always" allowfullscreen="true" width="${width}" height="${height}">
-    </object>
+{{ youtube.player_embed("${video.youtube_id}", width="${width}", height="${height}") }}
 </script>
+{% raw %}
 <script id="possible-points-tmpl" type="text/x-jquery-tmpl">
     <div class="video-energy-points" {{if logged_in}}title="${points} Energy Points earned for watching this video"{{else}}title="You're earning points for watching this video. Sign in to keep them"{{/if}} >
         <span class="video-energy-points-current">${points}</span>
