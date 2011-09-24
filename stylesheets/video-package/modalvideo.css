@@ -131,3 +131,6 @@
     -moz-opacity: 0.2;
     opacity: 0.2;
 }
+.unisubs-dropdown {
+  z-index: 11001 !important;
+}
