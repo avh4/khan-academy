@@ -131,7 +131,7 @@
                         Subtitles
                     </a>
 
-                    {{if video.download_urls.mp4}}
+                    {{if video.download_urls && video.download_urls.mp4}}
                     <a href="${video.download_urls.mp4}" title="Download this lesson" style="z-index:101;" class="simple-button action-gradient with-icon download-icon download-link">
                     <img src="/images/download-icon-small.png" />
                              Download
