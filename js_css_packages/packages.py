@@ -6,7 +6,6 @@ javascript = {
             "jquery.ui.menu.js",
             "jquery.watermark.js",
             "jquery.placeholder.js",
-            "jquery.tmpl.min.js",
             "pageutil.js",
             "api.js",
             "social.js",
@@ -15,6 +14,7 @@ javascript = {
     "video": {
         "files": [
             "jquery.qtip.js",
+            "jquery.tmpl.min.js",
             "bootstrap-modal.js",
             "video.js",
             "discussion.js",
