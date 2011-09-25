@@ -14,9 +14,10 @@ js_css_packages/packages_hash.py
 *.pem
 secrets.py
 datastore/*
-sample_data/bulkloader-*
+sample_data/bulkloader*
 *.DS_Store
 offline/*
 .*.swp
 .*.un~
 compiled_templates*
+khan-exercises/*

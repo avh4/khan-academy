@@ -222,7 +222,7 @@ def replace_playlist_values(structure, playlist_dict):
 
 # Return specific user data requests from request
 # IFF currently logged in user has permission to view
-def get_visible_user_data_from_request():
+def get_visible_user_data_from_request(allow_for_students = True):
 
     user_data = models.UserData.current()
     if not user_data:
@@ -231,7 +231,7 @@ def get_visible_user_data_from_request():
     if request.request_string("email"):
         user_data_student = request.request_user_data("email")
 
-        if user_data_student and (user_data.developer or user_data_student.is_coached_by(user_data)):
+        if user_data_student and (user_data.developer or (user_data_student.is_coached_by(user_data) && allow_for_students)):
             return user_data_student
         else:
             return None
@@ -249,6 +249,20 @@ def user_data_other():
         user_data_student = get_visible_user_data_from_request()
         if user_data_student:
             return user_data_student
+
+    return None
+
+@route("/api/v1/user/students", methods=["GET"])
+@oauth_required()
+@jsonp
+@jsonify
+def user_data_student():
+    user_data = models.UserData.current()
+
+    if user_data:
+        user_data_student = get_visible_user_data_from_request(allow_for_students = False)
+        if user_data_student:
+            return user_data_student.get_students_data()
 
     return None
 
