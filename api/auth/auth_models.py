@@ -70,6 +70,7 @@ class OAuthMap(db.Model):
             email = user_id
 
         user_data = UserData.get_from_user_id(user_id) or \
+                    UserData.get_from_db_key_email(email) or \
                     UserData.insert_for(user_id, email)
 
         return user_data
