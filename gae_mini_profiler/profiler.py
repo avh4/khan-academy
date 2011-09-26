@@ -12,6 +12,10 @@ import zlib
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
 
+from unformatter import unformatter
+from pprint import pformat
+import cleanup
+
 import gae_mini_profiler.config
 if os.environ["SERVER_SOFTWARE"].startswith("Devel"):
     config = gae_mini_profiler.config.ProfilerConfigDevelopment
@@ -20,6 +24,7 @@ else:
 
 # request_id is a per-request identifier accessed by a couple other pieces of gae_mini_profiler
 request_id = None
+
 
 class SharedStatsHandler(RequestHandler):
 
@@ -212,8 +217,12 @@ class RequestStats(object):
                 if "." in service_prefix:
                     service_prefix = service_prefix[:service_prefix.find(".")]
 
-                if not service_totals_dict.has_key(service_prefix):
-                    service_totals_dict[service_prefix] = {"total_call_count": 0, "total_time": 0}
+                if service_prefix not in service_totals_dict:
+                    service_totals_dict[service_prefix] = {
+                        "total_call_count": 0,
+                        "total_time": 0,
+                        "total_misses": 0,
+                    }
 
                 service_totals_dict[service_prefix]["total_call_count"] += 1
                 service_totals_dict[service_prefix]["total_time"] += trace.duration_milliseconds()
@@ -225,25 +234,59 @@ class RequestStats(object):
                                 frame.line_number(),
                                 frame.function_name()))
 
-                request = trace.request_data_summary()
-                request_short = request
-                if len(request_short) > 100:
-                    request_short = request_short[:100] + "..."
+                request_string = trace.request_data_summary()
+                response_string = trace.response_data_summary()
 
-                likely_dupe = dict_requests.has_key(request)
+                likely_dupe = request_string in dict_requests
                 likely_dupes = likely_dupes or likely_dupe
+                dict_requests[request_string] = True
 
-                dict_requests[request] = True
+                # clean up request
+                result = unformatter.UnformatObject()
+                unformatter.unformat_value(request_string, out=result)
+                request = result.value
 
-                response = trace.response_data_summary()[:100]
+                result = unformatter.UnformatObject()
+                unformatter.unformat_value(response_string, out=result)
+                response = result.value
+
+                request_short = None
+                response_short = None
+                response_miss = 0
+
+                if "MemcacheGetRequest" in request:
+                    request_short = cleanup.memcache_request_safe(request["MemcacheGetRequest"])
+                    response_short, response_miss = \
+                        cleanup.memcache_response_safe(response["MemcacheGetResponse"])
+                elif "Query" in request:
+                    request_short = cleanup.gql_query_safe(request["Query"])
+                elif "GetRequest" in request:
+                    request_short = cleanup.gql_getrequest(request["GetRequest"])
+                # todo:
+                # MemcacheSetRequest
+                # PutRequest
+                # TaskQueueBulkAddRequest
+                # BeginTransaction
+                # Transaction
+
+                if not request_short:
+                    request_short = cleanup.truncate(request_string)
+                if not response_short:
+                    response_short = cleanup.truncate(response_string)
+
+                request_pretty = pformat(request)
+                response_pretty = pformat(response)
+
+                service_totals_dict[service_prefix]["total_misses"] += response_miss
 
                 calls.append({
                     "service": trace.service_call_name(),
                     "start_offset": RequestStats.milliseconds_fmt(trace.start_offset_milliseconds()),
                     "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
-                    "request": request,
+                    "request": request_pretty,
                     "request_short": request_short,
-                    "response": response,
+                    "response": response_pretty,
+                    "response_short": response_short,
                     "stack_frames_desc": stack_frames_desc,
                     "likely_dupe": likely_dupe,
                 })
@@ -253,6 +296,7 @@ class RequestStats(object):
                 service_totals.append({
                     "service_prefix": service_prefix,
                     "total_call_count": service_totals_dict[service_prefix]["total_call_count"],
+                    "total_misses": service_totals_dict[service_prefix]["total_misses"],
                     "total_time": RequestStats.milliseconds_fmt(service_totals_dict[service_prefix]["total_time"]),
                 })
             service_totals = sorted(service_totals, reverse=True, key=lambda service_total: float(service_total["total_time"]))
