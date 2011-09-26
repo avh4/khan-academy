@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import datetime, logging
+import datetime, time, logging
 import math
 import urllib
 import pickle
@@ -1683,10 +1683,10 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseGraph(db.Model):
 
-    CURRENT_VERSION = 8 # Bump this whenever you need to change the model of the cached graph
+    CURRENT_VERSION = 9 # Bump this whenever you need to change the model of the cached graph
 
     version = db.IntegerProperty()
-    graph = object_property.UnvalidatedObjectProperty()
+    graph = object_property.UnvalidatedJsonProperty()
 
     def exercise_dict(self, exercise_name):
         return self.graph.get(exercise_name)
@@ -1814,8 +1814,8 @@ class UserExerciseGraph(db.Model):
                     "longest_streak": user_exercise.longest_streak if user_exercise else 0,
                     "progress": user_exercise.progress if user_exercise else 0.0,
                     "total_done": user_exercise.total_done if user_exercise else 0,
-                    "last_done": user_exercise.last_done if user_exercise else None,
-                    "last_review": user_exercise.last_review if user_exercise else None,
+                    "last_done": time.mktime(user_exercise.last_done.timetuple()) if (user_exercise and user_exercise.last_done) else 0,
+                    "last_review": None, #user_exercise.last_review if user_exercise else None,
                     "review_interval_secs": user_exercise.review_interval_secs if user_exercise else (60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS),
                     "tmp": {
                         "coverer_dicts": [],
