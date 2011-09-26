@@ -231,7 +231,7 @@ def get_visible_user_data_from_request(disable_coach_visibility = False):
     if request.request_string("email"):
         user_data_student = request.request_user_data("email")
 
-        if user_data_student and (user_data.developer or (not disable_coach visibility and user_data_student.is_coached_by(user_data))):
+        if user_data_student and (user_data.developer or (not disable_coach_visibility and user_data_student.is_coached_by(user_data))):
             return user_data_student
         else:
             return None
