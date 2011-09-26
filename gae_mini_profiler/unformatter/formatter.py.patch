@@ -1,0 +1,6 @@
+101,103c101
+<       head = repr(val[:n1])
+<       tail = repr(val[-n2:])
+<       return head[:n1] + '...' + tail[-n2:]
+---
+>       return repr(val[:n1] + '...' + val[-n2:])
