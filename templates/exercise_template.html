@@ -85,7 +85,7 @@
 
 {% block bottompagescript %}
 {{ js_css_packages.js_package("video") }}
-<!-- modal video jquery templates -->
+{# modal video jquery templates #}
 <script id="youtube-player-tmpl" type="text/x-jquery-tmpl">
 {{ youtube.player_embed("${video.youtube_id}", width="${width}", height="${height}") }}
 </script>
@@ -146,5 +146,21 @@
     </div>
 </script>
 {% endraw %}
-<!-- end modal video templates -->
+{# end modal video templates #}
+{# related video templates #}
+<script id="thumbnail-tmpl" type="text/x-jquery-tmpl">
+    <div class="thumbnail">
+        <a href="${video_url}" title="${title}" class="related-video">
+            <div class="thumb" style="background-image: url(http://img.youtube.com/vi/${youtube_id}/hqdefault.jpg); ">
+                <div class="thumbnail_label">
+                    <div class="thumbnail_desc">
+                        <span class="vid-progress v23824">${title}</span>
+                    </div>
+                    <div class="thumbnail_teaser">${description}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</script>
+{# end related video templates #}
 {% endblock bottompagescript %}
