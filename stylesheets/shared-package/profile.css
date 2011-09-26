@@ -246,7 +246,6 @@
         width: 70px;
         float: left;
         overflow: hidden;
-        text-shadow: 0 1px 0 rgba(255,255,255, .5);
         height: auto;
         padding-left: 0;
     }

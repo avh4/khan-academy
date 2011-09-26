@@ -1335,14 +1335,14 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-size: 12px;
         color: #fff;
     }
-    .exercise-legend .legend-color, .exercise-legend .legend-label {
+    .exercise-legend .exercise-color, .exercise-legend .legend-label {
         display: inline-block;
     }
     .exercise-legend .legend-label {
         position: relative;
         top: -1px;
     }
-    .exercise-legend .legend-color {
+    .exercise-legend .exercise-color {
         width: 12px;
         height: 12px;
         margin-left: 3px;
@@ -1351,27 +1351,27 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-border-radius: 2px;
         border-radius: 2px;
     }
-        .legend-color.proficient {
+        .exercise-color.proficient {
             background-color: #0080C9;
             color: #eee !important;
         }
-        .legend-color.suggested {
+        .exercise-color.suggested {
             background-color: #73982C;
             color: #eee !important;
         }
-        .legend-color.review {
+        .exercise-color.review {
             background-color: #E35D04;
             color: #eee !important;
         }
-        .legend-color.not-started {
+        .exercise-color.not-started {
             background-color: #ccc;
         }
-        .legend-color.struggling {
+        .exercise-color.struggling {
             background-color: #C30202;
             color: #dfdfdf !important;
         }
-        .legend-color.started {
-            background-color: #b5d4e6;
+        .exercise-color.started {
+            background-color: #c7e5f7;
         }
 
     #container #dashboard-drawer {

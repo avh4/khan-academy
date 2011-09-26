@@ -78,7 +78,7 @@
 {%- endmacro %}
 
 {% macro exercise_progress_block(exercise_data, exercise) -%}
-<div class="student-module-status exercise-progress-block legend-color {{exercise_data[exercise.name]["color"]}}" onclick="drillIntoExercise('{{exercise_data[exercise.name]["chart_link"]|escapejs}}');">
+<div class="student-module-status exercise-progress-block exercise-color {{exercise_data[exercise.name]["color"]}}" onclick="drillIntoExercise('{{exercise_data[exercise.name]["chart_link"]|escapejs}}');">
     <span class="exercise-display-name"><nobr>{{exercise_data[exercise.name]["short_name"]}}</nobr></span>
     <div class="hover-data" style="display: none;">
         {{exercise_data[exercise.name]["hover"]}}
