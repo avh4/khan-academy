@@ -158,7 +158,12 @@ class YouTubeSync(request_handler.RequestHandler):
 
                         if playlist.title.text not in video_data.playlists:
                             video_data.playlists.append(playlist.title.text.decode('utf-8'))
-                        video_data.keywords = video.media.keywords.text.decode('utf-8')
+
+                        if video.media.keywords.text:
+                            video_data.keywords = video.media.keywords.text.decode('utf-8')
+                        else:
+                            video_data.keywords = ''
+
                         video_data.position = video.position
                         video_data_list.append(video_data)
                     db.put(video_data_list)

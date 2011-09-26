@@ -57,7 +57,7 @@ def badge_block(badge, user_badge=None, show_frequency=False):
         badge.is_owned = True
 
     if badge.is_hidden():
-        return {} # Don't render anything for this hidden badge
+        return "" # Don't render anything for this hidden badge
 
     frequency = None
     if show_frequency:

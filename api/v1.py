@@ -15,7 +15,6 @@ from exercises import attempt_problem, reset_streak
 from phantom_users.phantom_util import api_create_phantom
 import util
 import notifications
-from gae_bingo.gae_bingo import bingo
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
@@ -223,7 +222,7 @@ def replace_playlist_values(structure, playlist_dict):
 
 # Return specific user data requests from request
 # IFF currently logged in user has permission to view
-def get_visible_user_data_from_request():
+def get_visible_user_data_from_request(disable_coach_visibility = False):
 
     user_data = models.UserData.current()
     if not user_data:
@@ -232,7 +231,7 @@ def get_visible_user_data_from_request():
     if request.request_string("email"):
         user_data_student = request.request_user_data("email")
 
-        if user_data_student and (user_data.developer or user_data_student.is_coached_by(user_data)):
+        if user_data_student and (user_data.developer or (not disable_coach_visibility and user_data_student.is_coached_by(user_data))):
             return user_data_student
         else:
             return None
@@ -250,6 +249,20 @@ def user_data_other():
         user_data_student = get_visible_user_data_from_request()
         if user_data_student:
             return user_data_student
+
+    return None
+
+@route("/api/v1/user/students", methods=["GET"])
+@oauth_required()
+@jsonp
+@jsonify
+def user_data_student():
+    user_data = models.UserData.current()
+
+    if user_data:
+        user_data_student = get_visible_user_data_from_request(disable_coach_visibility = True)
+        if user_data_student:
+            return user_data_student.get_students_data()
 
     return None
 
@@ -292,7 +305,7 @@ def user_videos_all():
     return None
 
 @route("/api/v1/user/videos/<youtube_id>", methods=["GET"])
-@oauth_required()
+@oauth_optional()
 @jsonp
 @jsonify
 def user_videos_specific(youtube_id):
@@ -519,9 +532,6 @@ def hint_problem_number(exercise_name, problem_number):
                     request.request_string("problem_type"),
                     request.remote_addr,
                     )
-
-            bingo('used_hints')
-            bingo('used_hints_or_video')
 
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),

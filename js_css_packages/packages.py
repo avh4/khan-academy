@@ -14,8 +14,11 @@ javascript = {
     "video": {
         "files": [
             "jquery.qtip.js",
+            "jquery.tmpl.min.js",
+            "bootstrap-modal.js",
             "video.js",
             "discussion.js",
+            "modalvideo.js",
         ]
     },
     "homepage": {
@@ -113,6 +116,7 @@ stylesheets = {
             "jquery.qtip.css",
             "video.css",
             "discussion.css",
+            "modalvideo.css",
         ]
     },
     "studentlists": {
