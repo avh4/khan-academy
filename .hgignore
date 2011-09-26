@@ -20,4 +20,3 @@ offline/*
 .*.swp
 .*.un~
 compiled_templates*
-khan-exercises/*
