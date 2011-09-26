@@ -1353,15 +1353,25 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
         .legend-color.proficient {
             background-color: #0080C9;
+            color: #eee !important;
         }
         .legend-color.suggested {
             background-color: #73982C;
+            color: #eee !important;
         }
         .legend-color.review {
             background-color: #E35D04;
+            color: #eee !important;
         }
         .legend-color.not-started {
             background-color: #ccc;
+        }
+        .legend-color.struggling {
+            background-color: #C30202;
+            color: #dfdfdf !important;
+        }
+        .legend-color.started {
+            background-color: #b5d4e6;
         }
 
     #container #dashboard-drawer {
@@ -2102,25 +2112,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .progress-legend.struggling,
 .progress-legend.started {
     cursor: pointer;
-    background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .25)), to(rgba(255, 255, 255,.1)));
-    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .4), rgba(255, 255, 255,.1));
     border-color: #fff;
-}
-.progress-legend.proficient,
-#module-progress .proficient {
-    background-color: #80C65A;
-}
-.progress-legend.review,
-#module-progress .review {
-    background-color: #e35d04;
-}
-.progress-legend.struggling,
-#module-progress .struggling {
-    background-color: red;
-}
-.progress-legend.started,
-#module-progress .started {
-    background-color: lightblue;
 }
 .exercise-info-hover, #info-hover-container {
     background: #fff;
