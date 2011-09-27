@@ -468,13 +468,13 @@ class ExerciseAdmin(request_handler.RequestHandler):
         if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
-        exercise_dicts = user_exercise_graph.exercise_dicts()
-        for exercise_dict in exercise_dicts:
-            exercise = models.Exercise.get_by_name(exercise_dict["name"])
-            exercise_dict["live"] = exercise and exercise.live
+        graph_dicts = user_exercise_graph.graph_dicts()
+        for graph_dict in graph_dicts:
+            exercise = models.Exercise.get_by_name(graph_dict["name"])
+            graph_dict["live"] = exercise and exercise.live
 
         template_values = {
-            'exercise_dicts': sorted(exercise_dicts, key=lambda exercise_dict: exercise_dict["name"]),
+            'graph_dicts': sorted(graph_dicts, key=lambda graph_dict: graph_dict["name"]),
             'admin': True,
             'map_coords': (0, 0, 0),
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
