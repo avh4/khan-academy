@@ -25,20 +25,18 @@ var ModalVideo = {
         // add click handlers to all related video links for lightbox
         jQuery(document).delegate("a.related-video", {
             'mouseup': function(ev) {
-                console.log('mouseup', ev);
                 mouseup_button = ev.button;
                 return true;
             },
             'click': function(ev) {
-                console.log('click', ev);
                 // workaround for IE<9
                 ev.which = ev.which || mouseup_button;
                 mouseup_button = 0;
 
                 if ( ev.which == 1 ) {
                     // left mouse button: show modal video
-                    ev.preventDefault();
                     ModalVideo.show( $(ev.currentTarget).data('video') );
+                    ev.preventDefault();
                     return false;
                 } else {
                     // anything else, probably middle mouse: follow the link
