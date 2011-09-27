@@ -227,15 +227,11 @@
     }
     #individual_report #vital-statistics #stats-nav ul > li > p .graph-options .progress-legend {
         display: inline-block;
-        padding: 3px 3px 2px;
+        padding: 4px;
         color: #333;
-        text-shadow: 0 1px 0 rgba(255,255,255, .4);
         cursor: default;
         height: auto;
     }
-        #individual_report #vital-statistics #stats-nav ul > li > p .graph-options .progress-legend.struggling {
-            color: #333;
-        }
     #individual_report #vital-statistics #stats-charts {
         float: right;
         position: absolute;
@@ -250,7 +246,6 @@
         width: 70px;
         float: left;
         overflow: hidden;
-        text-shadow: 0 1px 0 rgba(255,255,255, .5);
         height: auto;
         padding-left: 0;
     }

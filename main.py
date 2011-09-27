@@ -252,8 +252,8 @@ class LogVideoProgress(request_handler.RequestHandler):
         if user_data:
 
             video = None
-            key_str = self.request_string("video_key", default = "")
 
+            key_str = self.request_string("video_key")
             if key_str:
                 key = db.Key(key_str)
                 app_id = os.environ['APPLICATION_ID']
@@ -265,6 +265,10 @@ class LogVideoProgress(request_handler.RequestHandler):
                     logging.warning("Key '%s' had invalid app_id '%s'. Changed to new key '%s'", str(key), key.app(), str(new_key))
                     key = new_key
                 video = db.get(key)
+            else:
+                youtube_id = self.request_string("youtube_id")
+                if youtube_id:
+                    video = Video.all().filter('youtube_id =', youtube_id).get()
 
             if video:
 

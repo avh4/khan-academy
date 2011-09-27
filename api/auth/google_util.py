@@ -14,11 +14,13 @@ from api import route
 from api.auth.auth_util import current_oauth_map, authorize_token_redirect, access_token_response, append_url_params, oauth_error_response
 from api.auth.google_oauth_client import GoogleOAuthClient
 from api.auth.auth_models import OAuthMap
+from api.decorators import jsonify
 
 # Utility request handler to let Google authorize the OAuth token/request and 
-# return the authorized user's id.
-@route("/api/auth/current_google_oauth_user_id")
-def current_google_oauth_user_id():
+# return the authorized user's id and email address.
+@route("/api/auth/current_google_oauth_user_id_and_email")
+@jsonify
+def current_google_oauth_user_id_and_email():
     user = None
 
     try:
@@ -28,19 +30,14 @@ def current_google_oauth_user_id():
         pass
 
     if user:
-        return "http://googleid.khanacademy.org/" + user.user_id()
+        return ["http://googleid.khanacademy.org/" + user.user_id(), user.email()]
 
-    return ""
+    return []
 
-def get_google_user_id_from_oauth_map(oauth_map):
-    if oauth_map and oauth_map.uses_google():
-        return get_google_user_id_from_oauth_map(oauth_map)
-    return None
-
-@layer_cache.cache_with_key_fxn(lambda oauth_map: "google_id_from_oauth_token_%s" % oauth_map.google_access_token, layer=layer_cache.Layers.Memcache)
-def get_google_user_id_from_oauth_map(oauth_map):
+@layer_cache.cache_with_key_fxn(lambda oauth_map: "google_id_and_email_from_oauth_token_%s" % oauth_map.google_access_token, layer=layer_cache.Layers.Memcache)
+def get_google_user_id_and_email_from_oauth_map(oauth_map):
     google_client = GoogleOAuthClient()
-    return google_client.access_user_id(oauth_map)
+    return google_client.access_user_id_and_email(oauth_map)
 
 def google_request_token_handler(oauth_map):
     # Start Google request token process

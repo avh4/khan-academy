@@ -180,7 +180,7 @@
                     {% for student_email in student_emails %}
                     <tr {% if loop.first %}id="firstTr"{% endif %}>
                     {% for exercise_name in exercise_names %}
-                    <td class="student-module-status {{ exercise_data[exercise_name.0][student_email.0]["color"]}}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('{{exercise_data[exercise_name.0][student_email.0]["link"]}}');" data-hover="{{exercise_data[exercise_name.0][student_email.0]["hover"]|escape}}"></td>
+                    <td class="student-module-status exercise-color {{ exercise_data[exercise_name.0][student_email.0]["color"]}}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('{{exercise_data[exercise_name.0][student_email.0]["link"]}}');" data-hover="{{exercise_data[exercise_name.0][student_email.0]["hover"]|escape}}"></td>
                     {% endfor %}
                     </tr>
                 {% endfor %}

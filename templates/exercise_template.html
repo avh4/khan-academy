@@ -1,5 +1,7 @@
 {% extends "page_template.html" %}
 
+{% import 'macros/youtube.html' as youtube %}
+
 {% block meta_page_title %}{{ exercise.display_name|escape }} | {% endblock meta_page_title %}
 
 {% block pagescript %}
@@ -13,6 +15,7 @@
     <script>var userExercise = {{ user_exercise_json }};</script>
 
     {{ js_css_packages.js_package("exercises") }}
+    {{ js_css_packages.css_package("video") }}
 
     <script>{{ exercise_inline_script }}</script>
     <style>{{exercise_inline_style}}</style>
@@ -79,3 +82,92 @@
     {% endif %}
 </div>
 {% endblock pagecontent %}
+
+{% block bottompagescript %}
+{{ js_css_packages.js_package("video") }}
+{# modal video jquery templates #}
+<script id="youtube-player-tmpl" type="text/x-jquery-tmpl">
+{{ youtube.player_embed("${video.youtube_id}", width="${width}", height="${height}") }}
+</script>
+{% raw %}
+<script id="possible-points-tmpl" type="text/x-jquery-tmpl">
+    <div class="video-energy-points" {{if logged_in}}title="${points} Energy Points earned for watching this video"{{else}}title="You're earning points for watching this video. Sign in to keep them"{{/if}} >
+        <span class="video-energy-points-current">${points}</span>
+        of ${possible_points}
+    </div>
+</script>
+<script id="modal-video-tmpl" type="text/x-jquery-tmpl">
+    <div id="modal-video" class="video modal fade hide">
+        <div class="modal-header">
+            <a href="#" class="close-button close">x</a>
+            <div id="description">
+                <h3>
+                    <span class="title">${video.title}</span>
+                    <span class="long-description">: <span>${video.description}</span></span>
+                </h3>
+            </div>
+        </div>
+        <div class="modal-body">
+            <!-- <div id="youtube_blocked" class="desktop-only">
+
+            </div> -->
+            <div class="youtube-video">
+                {{tmplPlugin "#youtube-player-tmpl"}}
+                <div class="subtitles-warning">
+                    &lArr; Use this menu to view and help create subtitles for this video in many different languages.
+                    You'll probably want to hide YouTube's captions if using these subtitles.
+                   <a href="#" class="subtitles-link">Close subtitles</a>
+                </div>
+            </div>
+            <span class="video_extra_links">
+                <nobr>
+                <div class="extra-link-bar">
+                    <a href="#" title="Toggle subtitles and translations" style="z-index:101;" class="simple-button action-gradient with-icon subtitles-link">
+                        <img src="/images/subtitles-icon-small.png" />
+                        Subtitles
+                    </a>
+
+                    {{if video.download_urls && video.download_urls.mp4}}
+                    <a href="${video.download_urls.mp4}" title="Download this lesson" style="z-index:101;" class="simple-button action-gradient with-icon download-icon download-link">
+                    <img src="/images/download-icon-small.png" />
+                             Download
+                    </a>
+                    {{/if}}
+                </div>
+                <span style="float:right;" id="points-badge-hover">
+                    {{tmplPlugin '#possible-points-tmpl'}}
+                </span>
+                </nobr>
+             </span>
+        </div>
+        <div class="modal-footer">
+            <a href="${video_url}" class="simple-button action-gradient green">Watch on video page</a>
+        </div>
+    </div>
+</script>
+<script id="thumbnail-tmpl" type="text/x-jquery-tmpl">
+    <div class="thumbnail">
+        <a href="${href}" title="${video.title}" class="related-video">
+            <div class="thumb" style="background-image: url(http://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg); ">
+                <div class="thumbnail_label">
+                    <div class="thumbnail_desc">
+                        <span class="vid-progress v${video.id}">${video.title}</span>
+                    </div>
+                    <div class="thumbnail_teaser">${video.description}</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</script>
+<script id="related-video-link-tmpl" type="text/x-jquery-tmpl">
+    <a href="${href}" title="${video.title}" class="related-video">
+        <span class="video-title vid-progress v${video.id}">
+            ${video.title}
+            {{if separator}}
+            <span class='separator'>, </span>
+            {{/if}}
+        </span>
+    </a>
+</script>
+{% endraw %}
+{% endblock bottompagescript %}
