@@ -1684,7 +1684,7 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseCache(db.Model):
 
-    CURRENT_VERSION = 2 # Bump this whenever you need to change the structure of the cached UserExercises
+    CURRENT_VERSION = 4 # Bump this whenever you need to change the structure of the cached UserExercises
     
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
@@ -1743,7 +1743,15 @@ class UserExerciseCache(db.Model):
                     index_result += 1
 
             if len(caches_to_put) > 0:
-                db.put(caches_to_put)
+                # Fire off an asynchronous put to cache the missing results. On the production server,
+                # we don't wait for the put to finish before dealing w/ the rest of the request
+                # because we don't really care if the cache misses.
+                future_put = db.put_async(caches_to_put)
+
+                if App.is_dev_server:
+                    # On the dev server, we have to explicitly wait for get_result in order to 
+                    # trigger the put (not truly asynchronous).
+                    future_put.get_result()
 
         if not user_exercise_caches:
             return []
