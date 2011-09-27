@@ -65,7 +65,6 @@ def user_points(user_data):
 def streak_bar(user_exercise):
     progress = user_exercise.progress
     streak = user_exercise.streak
-    use_old_bar = user_exercise.progress_bar_alternative == 'original'
 
     longest_streak = user_exercise.longest_streak if hasattr(user_exercise, "longest_streak") else 0
 
@@ -101,7 +100,6 @@ def streak_bar(user_exercise):
         return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
 
     template_values = {
-        "use_old_bar": use_old_bar,
         "streak": streak,
         "longest_streak": longest_streak,
         "longest_streak_width": longest_streak_width,

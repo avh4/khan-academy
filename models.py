@@ -270,7 +270,7 @@ class Exercise(db.Model):
         return exercise_dict
 
 def get_conversion_tests_dict(exid, checkpoints):
-    return dict([(c, 'sbar_%s_%d_problems' % (exid, c)) for c in checkpoints])
+    return dict([(c, 'mario_%s_%d_problems' % (exid, c)) for c in checkpoints])
 
 class UserExercise(db.Model):
 
@@ -293,12 +293,6 @@ class UserExercise(db.Model):
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
     _serialize_blacklist = ["review_interval_secs"]
-
-    # Returns a value from UserData._streak_bar_alternatives depending on which experiment the user is in
-    @property
-    def progress_bar_alternative(self):
-      user_data = UserData.current()
-      return user_data.progress_bar_alternative if user_data else 'original'
 
     @property
     def point_display(self):
@@ -353,21 +347,17 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        if self.progress_bar_alternative == 'new_partial_reset':
-            def progress_with_start(streak, start, required_streak):
-                return start + float(streak) / required_streak * (1 - start)
+        def progress_with_start(streak, start, required_streak):
+            return start + float(streak) / required_streak * (1 - start)
 
-            if self.summative:
-                saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-                saved_progress = float(saved_streak) / self.required_streak
-                current_progress = progress_with_start(self.streak - saved_streak,
-                    self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
-                return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
-            else:
-                return progress_with_start(self.streak, self.streak_start, self.required_streak)
-
+        if self.summative:
+            saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            saved_progress = float(saved_streak) / self.required_streak
+            current_progress = progress_with_start(self.streak - saved_streak,
+                self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
+            return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
         else:
-            return float(self.streak) / self.required_streak
+            return progress_with_start(self.streak, self.streak_start, self.required_streak)
 
     @staticmethod
     def get_key_for_email(email):
@@ -686,26 +676,14 @@ class UserData(GAEBingoIdentityModel, db.Model):
     _conversion_checkpoints = [5, 10, 20, 30]
     any_exercise_conversions = get_conversion_tests_dict('did', _conversion_checkpoints)
     addition_1_conversions = get_conversion_tests_dict('addition_1', _conversion_checkpoints)
-    geometry_1_conversions = get_conversion_tests_dict('geometry_1', _conversion_checkpoints)
-    _streak_bar_alternatives = ['original', 'new_partial_reset', 'new_full_reset']
-    _streak_bar_conversion_tests = (['sbar_gained_proficiency', 'sbar_gained_5th_proficiency',
-        'sbar_gained_10th_proficiency', 'sbar_addition_1_proficiency', 'sbar_geometry_1_proficiency'] +
-        any_exercise_conversions.values() + addition_1_conversions.values() + geometry_1_conversions.values())
-
-    # Returns a value from _streak_bar_alternatives depending on which experiment the user is in
-    @property
-    @request_cache.cache()
-    def progress_bar_alternative(self):
-        # Put new users (those who have not seen the old streak bar) in a different experiment
-        test_name = ('partial_reset_streak_bar_new_users' if self.joined > datetime.datetime(2011, 9, 23)
-            else 'partial_reset_streak_bar_3_way')
-
-        return ab_test(test_name, UserData._streak_bar_alternatives, UserData._streak_bar_conversion_tests)
+    _mario_points_conversion_tests = (['mario_gained_proficiency', 'mario_gained_5th_proficiency',
+        'mario_gained_10th_proficiency', 'mario_addition_1_proficiency'] +
+        any_exercise_conversions.values() + addition_1_conversions.values())
 
     @property
     @request_cache.cache()
     def point_display(self):
-        return ab_test("mario points",["on", "off"])
+        return ab_test("mario points", ["on", "off"], UserData._mario_points_conversion_tests)
 
     @property
     def nickname(self):
@@ -1748,7 +1726,6 @@ class ExerciseGraph(object):
             ex.streak = 0
             ex.longest_streak = 0
             ex.progress = 0.0
-            ex.progress_bar_alternative = user_data.progress_bar_alternative
             ex.total_done = 0
             if hasattr(ex, 'last_done'):
                 # Clear leftovers from cache to fix random recents on new accounts

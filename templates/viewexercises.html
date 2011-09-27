@@ -59,7 +59,7 @@
         {% for exercise in review_exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
-        		<div class="energy-points-badge {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
+        		<div class="energy-points-badge new_partial_reset">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
 
                 {{ templatetags.streak_bar(exercise) }}
@@ -69,7 +69,7 @@
         {% for exercise in suggested_exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
-        		<div class="energy-points-badge {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
+        		<div class="energy-points-badge new_partial_reset">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
         		
                 {{ templatetags.streak_bar(exercise) }}
@@ -81,7 +81,7 @@
             {% for exercise in recent_exercises %}
                 <div class="exercise-badge" data-id="{{exercise.name}}">
                     {{ exercise_macros.exercise_icon(exercise) }}
-                    <div class="energy-points-badge {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
+                    <div class="energy-points-badge new_partial_reset">{{exercise.points}}</div>
                     <div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
 
                     {{ templatetags.streak_bar(exercise) }}
@@ -96,7 +96,7 @@
         {% for exercise in exercises %}
             <div class="exercise-badge" data-id="{{exercise.name}}" id="{{exercise.name}}">
                 {{ exercise_macros.exercise_icon(exercise) }}
-        		<div class="energy-points-badge  {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
+        		<div class="energy-points-badge new_partial_reset">{{exercise.points}}</div>
         		<div class="exercise-title"><A href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</A></div>
                 {{ templatetags.streak_bar(exercise) }}
             </div>
