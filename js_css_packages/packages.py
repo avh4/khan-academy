@@ -78,6 +78,7 @@ javascript = {
             "utils/graphie-helpers-arithmetic.js",
             "utils/graphie-helpers.js",
             "utils/graphie.js",
+            "utils/jquery-color.js",
             "utils/kinematics.js",
             "utils/math-format.js",
             "utils/math.js",
@@ -89,6 +90,7 @@ javascript = {
             "utils/tmpl.js",
             "utils/word-problems.js",
             "utils/spin.js",
+            "utils/unit-circle.js",
         ]
     },
 }

@@ -12,6 +12,7 @@ enabled_profiler_emails = [
     "ParkerKuivila@gmail.com",
     "jace.kohlmeier@gmail.com",
     "davidhu91@gmail.com",
+    "marcos@khanacademy.org"
 ]
 
 # Customize should_profile to return true whenever a request should be profiled.
