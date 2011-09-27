@@ -304,7 +304,7 @@ class UserExercise(db.Model):
     @property
     def required_streak(self):
         if self.summative:
-            return self.exercise_model.required_streak
+            return Exercise.get_by_name(self.exercise).required_streak
         else:
             return consts.REQUIRED_STREAK
 
