@@ -1807,7 +1807,7 @@ class UserExerciseGraph(object):
         return self.graph.get(exercise_name)
 
     def graph_dicts(self):
-        return sorted(self.graph.values(), key=lambda graph_dict: graph_dict["h_position"])
+        return sorted(sorted(self.graph.values(), key=lambda graph_dict: graph_dict["v_position"]), key=lambda graph_dict: graph_dict["h_position"])
 
     def proficient_exercise_names(self):
         return map(lambda graph_dict: graph_dict["name"], self.proficient_graph_dicts())
