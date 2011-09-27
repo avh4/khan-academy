@@ -1770,13 +1770,20 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .exercise-badge.single-exercise .new_full_reset .streak-bar  {
   right: 10px;  
   width:325px;
-  overflow:hidden;
   background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
   background-image: -moz-linear-gradient( left, #eee, #ccc );
   filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
   background-position:0 0;
   border:1px solid rgb(204,204,204);
 }
+
+.exercise-badge.single-exercise .new_partial_reset .streak-bar .energy-points-badge,
+.exercise-badge.single-exercise .new_full_reset .streak-bar  .energy-points-badge{
+  position:absolute;
+  top:-10px; right:-5px;
+  z-index:10; display:none;
+}
+
 .exercise-badge.single-exercise .related-content,
 .exercise-badge.single-exercise .summative-help {
     bottom: 7px;
