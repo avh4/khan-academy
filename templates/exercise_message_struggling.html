@@ -158,6 +158,7 @@ var buildLink = function(video, exid) {
     return $('<a></a>')
         .attr('href', video.ka_url + exid_param)
         .addClass("related-video")
+        .data('video', video)
         .text(video.title);
 };
 
