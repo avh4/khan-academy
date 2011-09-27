@@ -301,6 +301,11 @@ class UserExercise(db.Model):
       return user_data.progress_bar_alternative if user_data else 'original'
 
     @property
+    def point_display(self):
+      user_data = UserData.current()
+      return user_data.point_display if user_data else 'off'
+
+    @property
     def required_streak(self):
         if self.summative:
             return self.exercise_model.required_streak
@@ -695,6 +700,11 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 UserData._streak_bar_alternatives,
                 UserData._streak_bar_conversion_tests
                 )
+
+    @property
+    @request_cache.cache()
+    def point_display(self):
+        return ab_test("mario points",["on", "off"])
 
     @property
     def nickname(self):
