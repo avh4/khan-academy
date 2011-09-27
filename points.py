@@ -1,19 +1,24 @@
 import math
 import consts
 
-def ExercisePointCalculator(user_exercise, suggested, proficient):
+# user_exercise is a user_exercise object
+# suggested and proficient are both bools
+# offset is used to derive a point value for the nth + offset problem (i.e. to get the current or last point value)
+# with offset = 0, ExercisePointCalculator yields the point value for the *next* correct exercise.
+# with offset = -1, ExercisePointCalculator yields the point value for the last correct exercise.
+def ExercisePointCalculator(user_exercise, suggested, proficient, offset=0):
 
     points = 0
     
     required_streak = user_exercise.required_streak
     degrade_threshold = required_streak + consts.DEGRADING_EXERCISES_AFTER_STREAK
 
-    if user_exercise.longest_streak <= required_streak:
+    if user_exercise.longest_streak + offset <= required_streak:
         # Have never hit a streak, higher base than normal
         points = consts.INCOMPLETE_EXERCISE_POINTS_BASE
-    elif user_exercise.longest_streak < degrade_threshold:
+    elif user_exercise.longest_streak + offset < degrade_threshold:
         # Significantly past hitting a streak, start to degrade points
-        points = degrade_threshold - user_exercise.longest_streak
+        points = degrade_threshold - user_exercise.longest_streak - offset
 
     if (points < consts.EXERCISE_POINTS_BASE):
         # Never award less than a few points

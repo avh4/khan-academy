@@ -74,15 +74,15 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /*! data-uri(/
     height: 100%;
     margin: 0 0 -77px;
 }
+#page-container, #page-container-inner {
+    background: transparent url(/images/content-border.1.png) no-repeat right 85px; /*! data-uri(/images/content-border.1.png) */
+}
 #page-container {
-    background: transparent url(/images/content-border.1.png) no-repeat 0 85px;
+    background-position: 0 85px;
     min-width: 1000px;
     max-width: 1200px;
     position: relative;
     margin: 0 auto;
-}
-#page-container-inner {
-    background: transparent url(/images/content-border.1.png) no-repeat right 85px;
 }
 
 /* Basic typography for the entire site */
@@ -376,7 +376,7 @@ footer {
         z-index: 10;
     }
     footer #leaves {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: 319px -908px;
         height: 188px;
     }
@@ -414,7 +414,7 @@ footer {
         padding: 8px 10px 0 0;
     }
     footer #creative-commons-link {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -143px -67px;
         display: inline-block;
         height: 15px;
@@ -442,15 +442,15 @@ footer {
         padding-right: 0;
     }
     footer.short .small-social-links .youtube {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -67px;
     }
     footer.short .small-social-links .twitter {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -111px;
     }
     footer.short .small-social-links .facebook {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -155px;
     }
     footer.short .inner {
@@ -473,7 +473,7 @@ footer {
 #top-header #logo {
     height: 100px;
     position: relative;
-    background-image: url(/images/non-repeating-sprites.1.png);
+    background-image: url(/images/non-repeating-sprites.3.png);
     background-position: -10px -261px;
     width: 317px;
 }
@@ -486,11 +486,11 @@ footer {
     #top-header #logo #logo-image {
         width: 280px;
         height: 65px;
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -465px;
     }
         .dark #top-header #logo #logo-image {
-            background-image: url(/images/non-repeating-sprites.1.png);
+            background-image: url(/images/non-repeating-sprites.3.png);
             background-position: -320px -465px;
         }
 
@@ -891,7 +891,7 @@ footer {
     padding: 0;
 }
     .light #top-header #page_search #search-input {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -5px -867px;
         background-color: #fafafa;
         border:1px solid #C6D1AD;
@@ -911,7 +911,7 @@ footer {
         padding-top: 5px\9;
     }
     .dark #top-header #page_search #search-input {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -215px -867px;
         background-color: #36485C;
         border:1px solid #1A222C;
@@ -1184,7 +1184,7 @@ a:link.google-analytics-link-track
 		width:390px;
 		padding: 2px 2px 2px 18px;
 		font-size:12px;
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -5px -867px;
 		border: 1px solid #ddd;
 	}
@@ -1335,14 +1335,14 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         font-size: 12px;
         color: #fff;
     }
-    .exercise-legend .legend-color, .exercise-legend .legend-label {
+    .exercise-legend .exercise-color, .exercise-legend .legend-label {
         display: inline-block;
     }
     .exercise-legend .legend-label {
         position: relative;
         top: -1px;
     }
-    .exercise-legend .legend-color {
+    .exercise-legend .exercise-color {
         width: 12px;
         height: 12px;
         margin-left: 3px;
@@ -1351,17 +1351,27 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-border-radius: 2px;
         border-radius: 2px;
     }
-        .legend-color.proficient {
+        .exercise-color.proficient {
             background-color: #0080C9;
+            color: #eee !important;
         }
-        .legend-color.suggested {
+        .exercise-color.suggested {
             background-color: #73982C;
+            color: #eee !important;
         }
-        .legend-color.review {
+        .exercise-color.review {
             background-color: #E35D04;
+            color: #eee !important;
         }
-        .legend-color.not-started {
+        .exercise-color.not-started {
             background-color: #ccc;
+        }
+        .exercise-color.struggling {
+            background-color: #C30202;
+            color: #dfdfdf !important;
+        }
+        .exercise-color.started {
+            background-color: #c7e5f7;
         }
 
     #container #dashboard-drawer {
@@ -1497,7 +1507,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             color: #006699;
         }
     .streak-bar {
-        background-image: url(/images/non-repeating-sprites.1.png);
+        background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -730px;
         width: 228px;
         height: 30px;
@@ -1739,6 +1749,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     top: 22px;
     height:21px;
     padding-top: 1px;
+    display:none;
 }
 .exercise-badge.single-exercise .exercise-title {
     font-size:18px;
@@ -1757,8 +1768,22 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 .exercise-badge.single-exercise .new_partial_reset .streak-bar,
 .exercise-badge.single-exercise .new_full_reset .streak-bar  {
-  right: 103px;  
+  right: 10px;
+  width:325px;
+  background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
+  background-image: -moz-linear-gradient( left, #eee, #ccc );
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
+  background-position:0 0;
+  border:1px solid rgb(204,204,204);
 }
+
+.exercise-badge.single-exercise .new_partial_reset .streak-bar .energy-points-badge,
+.exercise-badge.single-exercise .new_full_reset .streak-bar  .energy-points-badge{
+  position:absolute;
+  top:-10px; right:-5px;
+  z-index:10; display:none;
+}
+
 .exercise-badge.single-exercise .related-content,
 .exercise-badge.single-exercise .summative-help {
     bottom: 7px;
@@ -1789,7 +1814,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-badge.single-exercise .related-content ul.related-video-list li span.separator {
             padding-right: 5px;
         }
-        .exercise-badge.single-exercise .related-content ul.related-video-list li.related-video-extended {
+        .exercise-badge.single-exercise .related-content ul.related-video-list {
             display: none;
         }
 #extras.single-exercise {
@@ -1803,7 +1828,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding-left: 10px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb {
-    background-image: url(/images/non-repeating-sprites.1.png);
+    background-image: url(/images/non-repeating-sprites.3.png);
     background-position: -1px -598px;
     color: #333;
     display: block;
@@ -1811,7 +1836,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     padding: 48px 0 0 4px;
 }
 #back-to-dashboard.single-exercise a#dashboard-breadcrumb:hover {
-    background-image: url(/images/non-repeating-sprites.1.png);
+    background-image: url(/images/non-repeating-sprites.3.png);
     background-position: -81px -598px;
     color: #E35D04;
 }
@@ -2101,25 +2126,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .progress-legend.struggling,
 .progress-legend.started {
     cursor: pointer;
-    background-image: -webkit-gradient(linear, 0% 40%, 0% 70%, from(rgba(255, 255, 255, .25)), to(rgba(255, 255, 255,.1)));
-    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, .4), rgba(255, 255, 255,.1));
     border-color: #fff;
-}
-.progress-legend.proficient,
-#module-progress .proficient {
-    background-color: #80C65A;
-}
-.progress-legend.review,
-#module-progress .review {
-    background-color: #e35d04;
-}
-.progress-legend.struggling,
-#module-progress .struggling {
-    background-color: red;
-}
-.progress-legend.started,
-#module-progress .started {
-    background-color: lightblue;
 }
 .exercise-info-hover, #info-hover-container {
     background: #fff;

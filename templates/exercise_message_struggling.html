@@ -1,5 +1,5 @@
 <div class="exercise_message">
-    <span style="float: right;"><a href="#" class="close-button">close</a></span>
+    <a href="#" class="close-button" title="Close this notification">x</a>
     <h2 class="pulls">Having trouble?</h2>
 
     {% if coaches.__len__() == 0 %}
@@ -157,6 +157,8 @@ var buildLink = function(video, exid) {
     var exid_param = exid ? "?exid=" + exid : "";
     return $('<a></a>')
         .attr('href', video.ka_url + exid_param)
+        .addClass("related-video")
+        .data('video', video)
         .text(video.title);
 };
 

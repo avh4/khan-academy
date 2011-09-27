@@ -29,7 +29,7 @@ var Discussion = {
                 else
                     $("input[type=button]", jForm).removeClass("buttonDisabled").removeAttr("disabled");
             }
-            
+
             $(charCountSelector, parent).html(c);
         }, 1);
     }
@@ -140,14 +140,14 @@ var Moderation = {
         var flag = $(this).attr("data-flag");
         if (!flag) return;
 
-        return Moderation.actionWithoutConfirmation(this, 
+        return Moderation.actionWithoutConfirmation(this,
                 "/discussion/flagentity",
                 {flag: flag},
                 "flagged!");
     },
 
     deleteEntity: function() {
-        return Moderation.actionWithConfirmation(this, 
+        return Moderation.actionWithConfirmation(this,
                 "/discussion/deleteentity",
                 null,
                 "Are you sure you want to delete this?",
@@ -163,7 +163,7 @@ var Moderation = {
         var target_type = $(this).attr("data-target_type");
         if (!target_type) return;
 
-        return Moderation.actionWithConfirmation(this, 
+        return Moderation.actionWithConfirmation(this,
                 "/discussion/changeentitytype",
                 {target_type: target_type},
                 "Are you sure you want to change this to a " + target_type + "?",
@@ -264,8 +264,8 @@ var QA = {
             jData = jData.add(jPlaylist);
         }
 
-        $.post(sUrl, 
-                jData.serialize() + data_suffix, 
+        $.post(sUrl,
+                jData.serialize() + data_suffix,
                 function(data) {fxnCallback(data, jText[0]);});
 
         QA.disable();
@@ -300,14 +300,14 @@ var QA = {
 
         if (page < 0) return;
 
-        $.get("/discussion/pagequestions", 
+        $.get("/discussion/pagequestions",
                 {
-                    video_key: $("#video_key").val(), 
+                    video_key: $("#video_key").val(),
                     playlist_key: $("#playlist_key").val(),
                     sort: $("#sort").val(),
                     qa_expand_key: qa_expand_key,
                     page: page
-                }, 
+                },
                 function(data) { QA.finishLoadPage(data, fInitialLoad); });
 
         if (!fInitialLoad) Throbber.show($(".questions_page_controls span"));
@@ -348,7 +348,7 @@ var QA = {
     },
 
     updateRemainingQuestion: function() {
-        Discussion.updateRemaining(500, ".question_text", 
+        Discussion.updateRemaining(500, ".question_text",
                                         ".question_add_controls .chars_remaining",
                                         ".question_add_controls .chars_remaining_count");
     },
@@ -529,8 +529,8 @@ var QA = {
         $(this).addClass("question_container_expanded");
 
         var key = $(".question", this).attr("data-question_key");
-        $.post("/discussion/expandquestion", 
-                {qa_expand_key: key}, 
+        $.post("/discussion/expandquestion",
+                {qa_expand_key: key},
                 function(){ /* Fire and forget */ });
 
         // If user clicks on a link inside of a question during the expand, don't follow the link.
@@ -576,12 +576,12 @@ var Comments = {
 
         if (page < 0) return;
 
-        $.get("/discussion/pagecomments", 
+        $.get("/discussion/pagecomments",
                 {
-                    video_key: $("#video_key").val(), 
+                    video_key: $("#video_key").val(),
                     playlist_key: $("#playlist_key").val(),
                     page: page
-                }, 
+                },
                 function(data) { Comments.finishLoadPage(data, fInitialLoad); });
 
         if (!fInitialLoad) Throbber.show($(".comments_page_controls span"));
@@ -627,8 +627,8 @@ var Comments = {
 
         var fCommentsHidden = $("div.comments_hidden").length && !$("div.comments_hidden").is(":visible");
         var data_suffix = "&comments_hidden=" + (fCommentsHidden ? "1" : "0");
-        $.post("/discussion/addcomment", 
-                $("form.comments").serialize() + data_suffix, 
+        $.post("/discussion/addcomment",
+                $("form.comments").serialize() + data_suffix,
                 Comments.finishSubmit);
 
         Comments.disable();
@@ -654,18 +654,12 @@ var Comments = {
     },
 
     updateRemaining: function() {
-        Discussion.updateRemaining(300, ".comment_text", 
+        Discussion.updateRemaining(300, ".comment_text",
                                         ".comment_add_controls .chars_remaining",
                                         ".comment_add_controls .chars_remaining_count");
     }
 
 };
-
-$(Discussion.init);
-$(Moderation.init);
-$(Voting.init);
-$(Comments.init);
-$(QA.init);
 
 // Now that we enable YouTube's JS api so we can control the player w/ "{minute}:{second}"-style links,
 // we are vulnerable to a bug in IE's flash player's removeCallback implementation.  This wouldn't harm

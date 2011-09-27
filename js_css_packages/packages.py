@@ -14,8 +14,11 @@ javascript = {
     "video": {
         "files": [
             "jquery.qtip.js",
+            "jquery.tmpl.min.js",
+            "bootstrap-modal.js",
             "video.js",
             "discussion.js",
+            "modalvideo.js",
         ]
     },
     "homepage": {
@@ -50,6 +53,7 @@ javascript = {
             "jquery.js",
             "jquery.mobile-1.0a4.1.js",
             "iscroll-lite.min.js",
+            "mobile.js",
         ]
     },
     "studentlists": {
@@ -74,6 +78,7 @@ javascript = {
             "utils/graphie-helpers-arithmetic.js",
             "utils/graphie-helpers.js",
             "utils/graphie.js",
+            "utils/jquery-color.js",
             "utils/kinematics.js",
             "utils/math-format.js",
             "utils/math.js",
@@ -85,6 +90,7 @@ javascript = {
             "utils/tmpl.js",
             "utils/word-problems.js",
             "utils/spin.js",
+            "utils/unit-circle.js",
         ]
     },
 }
@@ -112,6 +118,7 @@ stylesheets = {
             "jquery.qtip.css",
             "video.css",
             "discussion.css",
+            "modalvideo.css",
         ]
     },
     "studentlists": {

@@ -93,10 +93,10 @@
 
     <div class="clear"></div>
 
-<div data-role="page" data-theme"b" {% if is_mobile %}id="browse"{% endif %}>
+<div data-role="page" data-theme="b" {% if is_mobile %}id="browse"{% endif %}>
     <div data-role="content">
         <div id="mobile-homepage" class="mobile-only">
-            <img src="{{ "/images/logo-horizontal-large.png"|static_url }}" id="mobile-logo" />
+            <img data-src="{{ "/images/logo-horizontal-large.png"|static_url }}" id="mobile-logo" />
             <span id="page_visitors">
                     <span id="page_num_visitors">
                         <!-- Content will get populated by javacript at end of page -->
