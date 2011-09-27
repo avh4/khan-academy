@@ -150,13 +150,13 @@
 {# related video templates #}
 <script id="thumbnail-tmpl" type="text/x-jquery-tmpl">
     <div class="thumbnail">
-        <a href="${video_url}" title="${title}" class="related-video">
-            <div class="thumb" style="background-image: url(http://img.youtube.com/vi/${youtube_id}/hqdefault.jpg); ">
+        <a href="${href}" title="${video.title}" class="related-video">
+            <div class="thumb" style="background-image: url(http://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg); ">
                 <div class="thumbnail_label">
                     <div class="thumbnail_desc">
-                        <span class="vid-progress v23824">${title}</span>
+                        <span class="vid-progress v${video.id}">${video.title}</span>
                     </div>
-                    <div class="thumbnail_teaser">${description}</div>
+                    <div class="thumbnail_teaser">${video.description}</div>
                 </div>
             </div>
         </a>
