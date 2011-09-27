@@ -310,9 +310,9 @@ class UserExercise(db.Model):
 
     @property
     def exercise_states(self):
-        user_data = self.get_user_data()
-        if user_data:
-            return user_data.get_exercise_states(self.exercise_model, self)
+        user_exercise_graph = self.get_user_exercise_graph()
+        if user_exercise_graph:
+            return user_exercise_graph.states(self.exercise)
         return None
 
     @property
@@ -383,6 +383,16 @@ class UserExercise(db.Model):
             logging.critical("Empty user data for UserExercise w/ .user = %s" % self.user)
 
         return user_data
+
+    def get_user_exercise_graph(self):
+        user_exercise_graph = None
+
+        if hasattr(self, "_user_exercise_graph"):
+            user_exercise_graph = self._user_exercise_graph
+        else:
+            user_exercise_graph = UserExerciseGraph.get(self.get_user_data())
+
+        return user_exercise_graph
 
     def clear_memcache(self):
         memcache.delete(UserExercise.get_key_for_email(self.user.email()), namespace=App.version)
@@ -851,22 +861,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 )
 
         return userExercise
-
-    def get_exercise_states(self, exercise, user_exercise, current_time = datetime.datetime.now()):
-        proficient = exercise.proficient = self.is_proficient_at(exercise.name)
-        suggested = exercise.suggested = self.is_suggested(exercise.name)
-        reviewing = exercise.review = False # TODO: use UserExerciseGraph here
-        struggling = False # UserExercise.is_struggling_with(user_exercise, exercise) # TODO: use UserExerciseGraph here
-        endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
-
-        return {
-            'proficient': proficient,
-            'suggested': suggested,
-            'reviewing': reviewing,
-            'struggling': struggling,
-            'endangered': endangered,
-            'summative': exercise.summative,
-        }
 
     def reassess_from_graph(self, user_exercise_graph):
         all_proficient_exercises = user_exercise_graph.proficient_exercise_names()
@@ -1690,6 +1684,9 @@ class UserExerciseCache(db.Model):
     def user_exercise_dict(self, exercise_name):
         return self.dicts.get(exercise_name) or UserExerciseCache.dict_from_user_exercise(None)
 
+    def update(self, user_exercise):
+        self.dicts[user_exercise.exercise] = UserExerciseCache.dict_from_user_exercise(user_exercise)
+
     @staticmethod
     def key_for_user_data(user_data):
         return "UserExerciseCache:%s" % user_data.key_email
@@ -1800,8 +1797,9 @@ class UserExerciseCache(db.Model):
 
 class UserExerciseGraph(object):
 
-    def __init__(self, graph={}):
+    def __init__(self, graph={}, cache=None):
         self.graph = graph
+        self.cache = cache
 
     def graph_dict(self, exercise_name):
         return self.graph.get(exercise_name)
@@ -1900,6 +1898,22 @@ class UserExerciseGraph(object):
 
         return review_dicts
 
+    def states(self, exercise_name):
+        graph_dict = self.graph_dict(exercise_name)
+
+        return {
+            "proficient": graph_dict["proficient"],
+            "suggested": graph_dict["suggested"],
+            "struggling": graph_dict["struggling"],
+            "endangered": graph_dict["endangered"],
+            "summative": graph_dict["summative"],
+            "reviewing": graph_dict in self.review_graph_dicts(),
+        }
+
+    @staticmethod
+    def current():
+        return UserExerciseGraph.get(UserData.current())
+
     @staticmethod
     def get(user_data_or_list):
         if not user_data_or_list:
@@ -1913,7 +1927,7 @@ class UserExerciseGraph(object):
         if not user_exercise_cache_list:
             return []
 
-        exercise_dicts = map(UserExerciseGraph.dict_from_exercise, Exercise.get_all_use_cache())
+        exercise_dicts = UserExerciseGraph.exercise_dicts()
 
         user_exercise_graphs = map(
                 lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercise_dicts), 
@@ -1942,6 +1956,16 @@ class UserExerciseGraph(object):
             }
 
     @staticmethod
+    def exercise_dicts():
+        return map(UserExerciseGraph.dict_from_exercise, Exercise.get_all_use_cache())
+
+    @staticmethod
+    def get_and_update(user_data, user_exercise):
+        user_exercise_cache = UserExerciseCache.get(user_data)
+        user_exercise_cache.update(user_exercise)
+        return UserExerciseGraph.generate(user_data, user_exercise_cache, UserExerciseGraph.exercise_dicts())
+
+    @staticmethod
     def generate(user_data, user_exercise_cache, exercise_dicts):
 
         graph = {}
@@ -1963,6 +1987,10 @@ class UserExerciseGraph(object):
             graph_dict["struggling"] = (graph_dict["streak"] == 0 and 
                     graph_dict["longest_streak"] < graph_dict["required_streak"] and 
                     graph_dict["total_done"] > graph_dict["struggling_threshold"])
+
+            graph_dict["endangered"] = (graph_dict["proficient"] and 
+                    graph_dict["streak"] == 0 and 
+                    graph_dict["longest_streak"] >= graph_dict["required_streak"])
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
@@ -2039,7 +2067,7 @@ class UserExerciseGraph(object):
         for exercise_name in graph:
             set_suggested(graph[exercise_name])
 
-        return UserExerciseGraph(graph = graph)
+        return UserExerciseGraph(graph = graph, cache=user_exercise_cache)
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify

@@ -442,11 +442,10 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
             user_exercise.reset_streak(shrink_start)
 
-        # Manually clear exercise's memcache since we're throwing it in a bulk put
-        user_exercise.clear_memcache()
+        user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
 
         # Bulk put
-        db.put([user_data, user_exercise])
+        db.put([user_data, user_exercise, user_exercise_graph.cache])
 
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
@@ -455,16 +454,15 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                        _queue="problem-log-queue",
                        _url="/_ah/queue/deferred_problemlog")
 
-        return user_exercise
+        return user_exercise, user_exercise_graph
 
 class ExerciseAdmin(request_handler.RequestHandler):
 
     @user_util.developer_only
     def get(self):
         user_data = models.UserData.current()
-        user = models.UserData.current().user
+        user_exercise_graph = models.UserExerciseGraph.current()
 
-        user_exercise_graph = models.UserExerciseGraph.get(user_data)
         if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
