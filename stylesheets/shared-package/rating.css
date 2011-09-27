@@ -131,7 +131,7 @@
 	background-image: url(/images/non-repeating-sprites.3.png);
   background-position: -300px -820px;
 	height: 30px;
-	z-index: 1;
+	z-index: 3;
 }
 
 
