@@ -413,13 +413,6 @@ class UserExercise(db.Model):
     def struggling_threshold(self):
         return self.exercise_model.struggling_threshold()
 
-    @staticmethod
-    def is_struggling_with(user_exercise, exercise):
-        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak and user_exercise.total_done > exercise.struggling_threshold()
-
-    def is_struggling(self):
-        return UserExercise.is_struggling_with(self, self.exercise_model)
-
     def get_review_interval(self):
         review_interval = datetime.timedelta(seconds=self.review_interval_secs)
 
@@ -859,7 +852,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
         proficient = exercise.proficient = self.is_proficient_at(exercise.name)
         suggested = exercise.suggested = self.is_suggested(exercise.name)
         reviewing = exercise.review = False # TODO: use UserExerciseGraph here
-        struggling = UserExercise.is_struggling_with(user_exercise, exercise)
+        struggling = False # UserExercise.is_struggling_with(user_exercise, exercise) # TODO: use UserExerciseGraph here
         endangered = proficient and user_exercise.streak == 0 and user_exercise.longest_streak >= exercise.required_streak
 
         return {
@@ -1867,6 +1860,7 @@ class UserExerciseGraph(object):
                 "h_position": exercise.h_position,
                 "v_position": exercise.v_position,
                 "summative": exercise.summative,
+                "struggling_threshold": exercise.struggling_threshold(),
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,
@@ -1893,6 +1887,10 @@ class UserExerciseGraph(object):
 
             graph_dict.update(user_exercise_dict)
             graph_dict.update(exercise_dict)
+
+            graph_dict["struggling"] = (graph_dict["streak"] == 0 and 
+                    graph_dict["longest_streak"] < graph_dict["required_streak"] and 
+                    graph_dict["total_done"] > graph_dict["struggling_threshold"])
 
             graph_dict["tmp"]["coverer_dicts"] = []
             graph_dict["tmp"]["prerequisite_dicts"] = []
