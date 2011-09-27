@@ -233,7 +233,7 @@ class Exercise(db.Model):
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_unsafe_%s" % Setting.cached_exercises_date())
     def __get_all_use_cache_unsafe__():
         query = Exercise.all_unsafe().order('h_position')
-        return query.fetch(200)
+        return query.fetch(400)
 
     @staticmethod
     def __get_all_use_cache_safe__():
