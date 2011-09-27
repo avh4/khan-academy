@@ -1684,13 +1684,13 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseCache(db.Model):
 
-    CURRENT_VERSION = 1 # Bump this whenever you need to change the structure of the cached UserExercises
+    CURRENT_VERSION = 2 # Bump this whenever you need to change the structure of the cached UserExercises
     
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
 
     def exercise_dict(self, exercise_name):
-        return self.dicts.get(exercise_name) or UserExerciseCache.dict_from_user_exercise(UserExercise(exercise = exercise_name))
+        return self.dicts.get(exercise_name) or UserExerciseCache.dict_from_user_exercise(None)
 
     @staticmethod
     def key_for_user_data(user_data):
@@ -1755,15 +1755,13 @@ class UserExerciseCache(db.Model):
     @staticmethod
     def dict_from_user_exercise(user_exercise):
         return {
-                "name": user_exercise.exercise,
-                "explicitly_proficient": None,
-                "streak": user_exercise.streak,
-                "longest_streak": user_exercise.longest_streak,
-                "progress": user_exercise.progress,
-                "total_done": user_exercise.total_done,
-                "last_done": user_exercise.last_done,
-                "last_review": user_exercise.last_review,
-                "review_interval_secs": user_exercise.review_interval_secs,
+                "streak": user_exercise.streak if user_exercise else 0,
+                "longest_streak": user_exercise.longest_streak if user_exercise else 0,
+                "progress": user_exercise.progress if user_exercise else 0.0,
+                "total_done": user_exercise.total_done if user_exercise else 0,
+                "last_done": user_exercise.last_done if user_exercise else None,
+                "last_review": user_exercise.last_review if user_exercise else None,
+                "review_interval_secs": user_exercise.review_interval_secs if user_exercise else 0,
                 }
 
     @staticmethod
@@ -1843,10 +1841,10 @@ class UserExerciseGraph(object):
         if not user_exercise_cache_list:
             return []
 
-        exercises = Exercise.get_all_use_cache()
+        exercise_dicts = map(UserExerciseGraph.dict_from_exercise, Exercise.get_all_use_cache())
 
         user_exercise_graphs = map(
-                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercises), 
+                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercise_dicts), 
                 itertools.izip(user_data_list, user_exercise_cache_list))
 
         # Return list of graphs if a list was passed in,
@@ -1854,51 +1852,59 @@ class UserExerciseGraph(object):
         return user_exercise_graphs if type(user_data_or_list) == list else user_exercise_graphs[0]
 
     @staticmethod
-    def generate(user_data, user_exercise_cache, exercises):
-
-        graph = {}
-
-        # Build up base of graph
-        for exercise in exercises:
-            user_exercise_dict = user_exercise_cache.exercise_dict(exercise.name)
-
-            exercise_dict = dict((key, user_exercise_dict[key]) for key in user_exercise_dict)
-
-            exercise_dict.update({
+    def dict_from_exercise(exercise):
+        return {
+                "name": exercise.name,
                 "display_name": exercise.display_name,
                 "h_position": exercise.h_position,
                 "v_position": exercise.v_position,
+                "summative": exercise.summative,
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,
                 "struggling": False, #TODO: do this. UserExercise.is_struggling_with(user_exercise, exercise) if user_exercise else False,
-                "summative": exercise.summative,
                 "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
                 "required_streak": exercise.required_streak,
                 "tmp": {
+                    "covers": exercise.covers,
+                    "prerequisites": exercise.prerequisites,
                     "coverer_dicts": [],
                     "prerequisite_dicts": [],
                 }, # Tmp storage for use during buildup of graph that won't be serialized
-            })
+            }
+
+    @staticmethod
+    def generate(user_data, user_exercise_cache, exercise_dicts):
+
+        graph = {}
+
+        # Build up base of graph
+        for exercise_dict in exercise_dicts:
+
+            user_exercise_dict = user_exercise_cache.exercise_dict(exercise_dict["name"])
+
+            graph_dict = {}
+            graph_dict.update(user_exercise_dict)
+            graph_dict.update(exercise_dict)
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
-            if exercise.name not in graph or graph[exercise.name]["total_done"] < exercise_dict["total_done"]:
-                graph[exercise.name] = exercise_dict
+            if graph_dict["name"] not in graph or graph[graph_dict["name"]]["total_done"] < graph_dict["total_done"]:
+                graph[graph_dict["name"]] = graph_dict
 
         # Cache coverers and prereqs for later
-        for exercise in exercises:
-            exercise_dict = graph.get(exercise.name)
+        for exercise in exercise_dicts:
+            exercise_dict = graph.get(exercise["name"])
             if exercise_dict:
 
                 # Cache coverers
-                for covered_exercise_name in exercise.covers:
+                for covered_exercise_name in exercise["tmp"]["covers"]:
                     covered_exercise_dict = graph.get(covered_exercise_name)
                     if covered_exercise_dict:
                         covered_exercise_dict["tmp"]["coverer_dicts"].append(exercise_dict)
 
                 # Cache prereqs
-                for prerequisite_exercise_name in exercise.prerequisites:
+                for prerequisite_exercise_name in exercise["tmp"]["prerequisites"]:
                     prerequisite_exercise_dict = graph.get(prerequisite_exercise_name)
                     if prerequisite_exercise_dict:
                         exercise_dict["tmp"]["prerequisite_dicts"].append(prerequisite_exercise_dict)
