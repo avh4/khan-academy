@@ -35,8 +35,8 @@ def class_progress_report_graph_context(user_data, student_list):
 
     for exercise in exercises_all:
         for user_exercise_graph in user_exercise_graphs:
-            exercise_dict = user_exercise_graph.exercise_dict(exercise.name)
-            if exercise_dict and exercise_dict["total_done"]:
+            graph_dict = user_exercise_graph.graph_dict(exercise.name)
+            if graph_dict and graph_dict["total_done"]:
                 exercises_found.append(exercise)
                 break
 
@@ -56,7 +56,7 @@ def class_progress_report_graph_context(user_data, student_list):
         for (exercise, (_, exercise_display, exercise_name_js)) in izip(exercises_found, exercise_names):
 
             exercise_name = exercise.name
-            exercise_dict = user_exercise_graph.exercise_dict(exercise_name)
+            graph_dict = user_exercise_graph.graph_dict(exercise_name)
 
             if not exercise_data.has_key(exercise_name):
                 exercise_data[exercise_name] = {}
@@ -68,7 +68,7 @@ def class_progress_report_graph_context(user_data, student_list):
             hover = ""
             color = "transparent"
 
-            if exercise_dict["proficient"]:
+            if graph_dict["proficient"]:
 
                 if exercise_name in student_review_exercise_names:
                     status = "Review"
@@ -76,13 +76,13 @@ def class_progress_report_graph_context(user_data, student_list):
                 else:
                     status = "Proficient"
                     color = "proficient"
-                    if not exercise_dict["explicitly_proficient"]:
+                    if not graph_dict["explicitly_proficient"]:
                         status = "Proficient (due to proficiency in a more advanced module)"
                         
-            elif exercise_dict["struggling"]:
+            elif graph_dict["struggling"]:
                 status = "Struggling"
                 color = "struggling"
-            elif exercise_dict["total_done"] > 0:
+            elif graph_dict["total_done"] > 0:
                 status = "Started"
                 color = "started"
 
@@ -95,8 +95,8 @@ def class_progress_report_graph_context(user_data, student_list):
 <em>Problems attempted: %s</em>""" % (escaped_nickname,
                                       exercise_display,
                                       status,
-                                      exercise_dict["streak"],
-                                      exercise_dict["total_done"])
+                                      graph_dict["streak"],
+                                      graph_dict["total_done"])
 
             exercise_data[exercise_name][student_email] = {
                 "link": link,
