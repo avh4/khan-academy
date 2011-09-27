@@ -1768,7 +1768,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 .exercise-badge.single-exercise .new_partial_reset .streak-bar,
 .exercise-badge.single-exercise .new_full_reset .streak-bar  {
-  right: 10px;  
+  right: 10px;
   width:325px;
   overflow:hidden;
   background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
@@ -1807,7 +1807,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-badge.single-exercise .related-content ul.related-video-list li span.separator {
             padding-right: 5px;
         }
-        .exercise-badge.single-exercise .related-content ul.related-video-list li.related-video-extended {
+        .exercise-badge.single-exercise .related-content ul.related-video-list {
             display: none;
         }
 #extras.single-exercise {

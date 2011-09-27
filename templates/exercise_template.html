@@ -145,9 +145,6 @@
         </div>
     </div>
 </script>
-{% endraw %}
-{# end modal video templates #}
-{# related video templates #}
 <script id="thumbnail-tmpl" type="text/x-jquery-tmpl">
     <div class="thumbnail">
         <a href="${href}" title="${video.title}" class="related-video">
@@ -162,5 +159,15 @@
         </a>
     </div>
 </script>
-{# end related video templates #}
+<script id="related-video-link-tmpl" type="text/x-jquery-tmpl">
+    <a href="${href}" title="${video.title}" class="related-video">
+        <span class="video-title vid-progress v${video.id}">
+            ${video.title}
+            {{if separator}}
+            <span class='separator'>, </span>
+            {{/if}}
+        </span>
+    </a>
+</script>
+{% endraw %}
 {% endblock bottompagescript %}
