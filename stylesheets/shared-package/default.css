@@ -1489,7 +1489,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         left: 265px;
         top: 5px;
     }
-    .exercise-badge .energy-points-badge.new_partial_reset, .exercise-badge .energy-points-badge.new_full_reset{
+    .exercise-badge .energy-points-badge{
       display:none;
     }
     .exercise-badge .exercise-title {
@@ -1515,7 +1515,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     .streak-bar-challenge {
         background: url(/images/streak-meter-empty-challenge.png) no-repeat;
-        /*! data-uri(/images/streak-meter-empty-challenge.png) */
     }
     .exercise-badge .streak-bar {
          position: absolute;
@@ -1761,24 +1760,16 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     bottom: auto;
     left: auto;
     top: 21px;
-}
-.exercise-badge.single-exercise .original .streak-bar {
-  right: 66px;
-}
-
-.exercise-badge.single-exercise .new_partial_reset .streak-bar,
-.exercise-badge.single-exercise .new_full_reset .streak-bar  {
-  right: 10px;  
-  width:325px;
-  background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
-  background-image: -moz-linear-gradient( left, #eee, #ccc );
-  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
-  background-position:0 0;
-  border:1px solid rgb(204,204,204);
+    right: 10px;  
+    width:325px;
+    background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
+    background-image: -moz-linear-gradient( left, #eee, #ccc );
+    filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
+    background-position:0 0;
+    border:1px solid rgb(204,204,204);
 }
 
-.exercise-badge.single-exercise .new_partial_reset .streak-bar .energy-points-badge,
-.exercise-badge.single-exercise .new_full_reset .streak-bar  .energy-points-badge{
+.exercise-badge.single-exercise .streak-bar .energy-points-badge{
   position:absolute;
   top:-10px; right:-5px;
   z-index:10; display:none;
