@@ -1696,7 +1696,7 @@ class ExerciseVideo(db.Model):
 class ExerciseGraph(object):
 
     def __init__(self, user_data=None):
-        
+
         self.exercises = Exercise.get_all_use_cache()
         self.exercise_by_name = {}
         for ex in self.exercises:
@@ -1704,7 +1704,7 @@ class ExerciseGraph(object):
 
         if user_data is not None:
             self.initialize_for_user(user_data)
-            
+
     def initialize_for_user(self, user_data, user_exercises=None):
 
         if user_exercises is None:
