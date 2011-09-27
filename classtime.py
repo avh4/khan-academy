@@ -6,7 +6,7 @@ from google.appengine.api import users
 from asynctools import AsyncMultiTask, QueryTask
 
 import util
-from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, ExerciseGraph
+from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog
 
 class ClassTimeAnalyzer:
 

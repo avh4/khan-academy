@@ -2,7 +2,7 @@ import datetime
 import util
 import logging
 
-from models import UserExercise, Exercise, UserData, ExerciseGraph
+from models import UserExercise, Exercise, UserData
 
 def exercise_progress_graph_context(user_data_student):
 
@@ -11,7 +11,7 @@ def exercise_progress_graph_context(user_data_student):
     
     exercise_data = {}
     
-    exercise_graph = ExerciseGraph()
+    exercise_graph = ExerciseGraph() # TODO: use UserExerciseGraph
     exercises = exercise_graph.exercises
 
     user_exercises = UserExercise.get_for_user_data_use_cache(user_data_student)
