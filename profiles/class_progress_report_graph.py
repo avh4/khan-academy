@@ -36,7 +36,7 @@ def class_progress_report_graph_context(user_data, student_list):
     for exercise in exercises_all:
         for user_exercise_graph in user_exercise_graphs:
             exercise_dict = user_exercise_graph.exercise_dict(exercise.name)
-            if exercise_dict and exercise_dict["exists"]:
+            if exercise_dict and exercise_dict["total_done"]:
                 exercises_found.append(exercise)
                 break
 

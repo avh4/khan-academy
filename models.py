@@ -5,6 +5,7 @@ import math
 import urllib
 import pickle
 import random
+import itertools
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -1678,15 +1679,125 @@ class ExerciseVideo(db.Model):
 
         return exercise_video_key_dict
 
-# UserExerciseGraph is an optimized-for-read-and-deserialization cache of the exercise graph, with data specific
-# for each user. It can be reconstituted at any time via UserExercise objects.
+# UserExerciseCache is an optimized-for-read-and-deserialization cache of user-specific exercise states.
+# It can be reconstituted at any time via UserExercise objects.
 #
-class UserExerciseGraph(db.Model):
+class UserExerciseCache(db.Model):
 
-    CURRENT_VERSION = 8 # Bump this whenever you need to change the model of the cached graph
-
+    CURRENT_VERSION = 1 # Bump this whenever you need to change the structure of the cached UserExercises
+    
     version = db.IntegerProperty()
-    graph = object_property.UnvalidatedObjectProperty()
+    dicts = object_property.UnvalidatedObjectProperty()
+
+    def exercise_dict(self, exercise_name):
+        return self.dicts.get(exercise_name) or UserExerciseCache.dict_from_user_exercise(UserExercise(exercise = exercise_name))
+
+    @staticmethod
+    def key_for_user_data(user_data):
+        return "UserExerciseCache:%s" % user_data.key_email
+
+    @staticmethod
+    def get(user_data_or_list, put_if_missing=True):
+        if not user_data_or_list:
+            raise Exception("Must provide UserData when loading UserExerciseCache")
+
+        # We can grab a single UserExerciseCache or do an optimized grab of a bunch of 'em
+        user_data_list = user_data_or_list if type(user_data_or_list) == list else [user_data_or_list]
+
+        # Try to get 'em all by key name
+        user_exercise_caches = UserExerciseCache.get_by_key_name(
+                map(
+                    lambda user_data: UserExerciseCache.key_for_user_data(user_data), 
+                    user_data_list)
+                )
+
+        # For any that are missing or are out of date,
+        # build up asynchronous queries to repopulate their data
+        async_queries = []
+        for i, user_exercise_cache in enumerate(user_exercise_caches):
+            if not user_exercise_cache or user_exercise_cache.version != UserExerciseCache.CURRENT_VERSION:
+                # This user's cached graph is missing or out-of-date, 
+                # put it in the list of graphs to be regenerated.
+                async_queries.append(UserExercise.get_for_user_data(user_data_list[i]))
+
+        if len(async_queries) > 0:
+
+            # Run the async queries
+            results = util.async_queries(async_queries)
+            caches_to_put = []
+            exercises = Exercise.get_all_use_cache()
+
+            # Populate the missing graphs w/ results from async queries
+            index_result = 0
+            for i, user_exercise_cache in enumerate(user_exercise_caches):
+                if not user_exercise_cache or user_exercise_cache.version != UserExerciseCache.CURRENT_VERSION:
+                    user_data = user_data_list[i]
+                    user_exercises = results[index_result].get_result()
+
+                    user_exercise_cache = UserExerciseCache.generate(user_data, user_exercises)
+                    if put_if_missing:
+                        caches_to_put.append(user_exercise_cache)
+
+                    user_exercise_caches[i] = user_exercise_cache
+
+                    index_result += 1
+
+            if len(caches_to_put) > 0:
+                db.put(caches_to_put)
+
+        if not user_exercise_caches:
+            return []
+
+        # Return list of caches if a list was passed in,
+        # otherwise return single cache
+        return user_exercise_caches if type(user_data_or_list) == list else user_exercise_caches[0]
+
+    @staticmethod
+    def dict_from_user_exercise(user_exercise):
+        return {
+                "name": user_exercise.exercise,
+                "explicitly_proficient": None,
+                "streak": user_exercise.streak,
+                "longest_streak": user_exercise.longest_streak,
+                "progress": user_exercise.progress,
+                "total_done": user_exercise.total_done,
+                "last_done": user_exercise.last_done,
+                "last_review": user_exercise.last_review,
+                "review_interval_secs": user_exercise.review_interval_secs,
+                }
+
+    @staticmethod
+    def generate(user_data, user_exercises=None):
+
+        if not user_exercises:
+            user_exercises = UserExercise.get_for_user_data(user_data)
+
+        user_exercises_by_name = {}
+        for user_exercise in user_exercises:
+            user_exercises_by_name[user_exercise.exercise] = user_exercise
+
+        dicts = {}
+
+        # Build up cache
+        for user_exercise in user_exercises:
+
+            user_exercise_dict = UserExerciseCache.dict_from_user_exercise(user_exercise)
+
+            # In case user has multiple UserExercise mappings for a specific exercise,
+            # always prefer the one w/ more problems done
+            if user_exercise.exercise not in dicts or dicts[user_exercise.name]["total_done"] < user_exercise_dict["total_done"]:
+                dicts[user_exercise.exercise] = user_exercise_dict
+
+        return UserExerciseCache(
+                key_name = UserExerciseCache.key_for_user_data(user_data),
+                version = UserExerciseCache.CURRENT_VERSION,
+                dicts = dicts,
+            )
+
+class UserExerciseGraph(object):
+
+    def __init__(self, graph={}):
+        self.graph = graph
 
     def exercise_dict(self, exercise_name):
         return self.graph.get(exercise_name)
@@ -1720,10 +1831,6 @@ class UserExerciseGraph(db.Model):
         return self.graph.values()[:1] # TODO: do this.
 
     @staticmethod
-    def key_for_user_data(user_data):
-        return "UserExerciseGraph:%s" % user_data.key_email
-
-    @staticmethod
     def get(user_data_or_list, put_if_missing=True):
         if not user_data_or_list:
             raise Exception("Must provide UserData when loading UserExerciseGraph")
@@ -1731,97 +1838,48 @@ class UserExerciseGraph(db.Model):
         # We can grab a single UserExerciseGraph or do an optimized grab of a bunch of 'em
         user_data_list = user_data_or_list if type(user_data_or_list) == list else [user_data_or_list]
 
-        # Try to get 'em all by key name
-        user_exercise_graphs = UserExerciseGraph.get_by_key_name(
-                map(
-                    lambda user_data: UserExerciseGraph.key_for_user_data(user_data), 
-                    user_data_list)
-                )
+        user_exercise_cache_list = UserExerciseCache.get(user_data_list)
 
-        # For any that are missing or are out of date,
-        # build up asynchronous queries to repopulate their data
-        async_queries = []
-        for i, user_exercise_graph in enumerate(user_exercise_graphs):
-            if not user_exercise_graph or user_exercise_graph.version != UserExerciseGraph.CURRENT_VERSION:
-                # This user's cached graph is missing or out-of-date, 
-                # put it in the list of graphs to be regenerated.
-                async_queries.append(UserExercise.get_for_user_data(user_data_list[i]))
-
-        if len(async_queries) > 0:
-
-            # Run the async queries
-            results = util.async_queries(async_queries)
-            graphs_to_put = []
-            exercises = Exercise.get_all_use_cache()
-
-            # Populate the missing graphs w/ results from async queries
-            index_result = 0
-            for i, user_exercise_graph in enumerate(user_exercise_graphs):
-                if not user_exercise_graph or user_exercise_graph.version != UserExerciseGraph.CURRENT_VERSION:
-                    user_data = user_data_list[i]
-                    user_exercises = results[index_result].get_result()
-
-                    user_exercise_graph = UserExerciseGraph.generate(user_data, exercises, user_exercises)
-                    if put_if_missing:
-                        graphs_to_put.append(user_exercise_graph)
-
-                    user_exercise_graphs[i] = user_exercise_graph
-
-                    index_result += 1
-
-            if len(graphs_to_put) > 0:
-                db.put(graphs_to_put)
-
-        if not user_exercise_graphs:
+        if not user_exercise_cache_list:
             return []
+
+        exercises = Exercise.get_all_use_cache()
+
+        user_exercise_graphs = map(
+                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercises), 
+                itertools.izip(user_data_list, user_exercise_cache_list))
 
         # Return list of graphs if a list was passed in,
         # otherwise return single graph
         return user_exercise_graphs if type(user_data_or_list) == list else user_exercise_graphs[0]
 
     @staticmethod
-    def generate(user_data, exercises=None, user_exercises=None):
-
-        if not exercises:
-            exercises = Exercise.get_all_use_cache()
-        if not user_exercises:
-            user_exercises = UserExercise.get_for_user_data(user_data)
-
-        user_exercises_by_name = {}
-        for user_exercise in user_exercises:
-            user_exercises_by_name[user_exercise.exercise] = user_exercise
+    def generate(user_data, user_exercise_cache, exercises):
 
         graph = {}
 
         # Build up base of graph
         for exercise in exercises:
-            user_exercise = user_exercises_by_name.get(exercise.name)
+            user_exercise_dict = user_exercise_cache.exercise_dict(exercise.name)
 
-            exercise_dict = {
-                    "name": exercise.name,
-                    "exists": bool(user_exercise),
-                    "display_name": exercise.display_name,
-                    "h_position": exercise.h_position,
-                    "v_position": exercise.v_position,
-                    "proficient": None,
-                    "explicitly_proficient": None,
-                    "suggested": None,
-                    "struggling": UserExercise.is_struggling_with(user_exercise, exercise) if user_exercise else False,
-                    "summative": exercise.summative,
-                    "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
-                    "required_streak": exercise.required_streak,
-                    "streak": user_exercise.streak if user_exercise else 0,
-                    "longest_streak": user_exercise.longest_streak if user_exercise else 0,
-                    "progress": user_exercise.progress if user_exercise else 0.0,
-                    "total_done": user_exercise.total_done if user_exercise else 0,
-                    "last_done": user_exercise.last_done if user_exercise else None,
-                    "last_review": user_exercise.last_review if user_exercise else None,
-                    "review_interval_secs": user_exercise.review_interval_secs if user_exercise else (60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS),
-                    "tmp": {
-                        "coverer_dicts": [],
-                        "prerequisite_dicts": [],
-                    }, # Tmp storage for use during buildup of graph that won't be serialized
-                }
+            exercise_dict = dict((key, user_exercise_dict[key]) for key in user_exercise_dict)
+
+            exercise_dict.update({
+                "display_name": exercise.display_name,
+                "h_position": exercise.h_position,
+                "v_position": exercise.v_position,
+                "proficient": None,
+                "explicitly_proficient": None,
+                "suggested": None,
+                "struggling": False, #TODO: do this. UserExercise.is_struggling_with(user_exercise, exercise) if user_exercise else False,
+                "summative": exercise.summative,
+                "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
+                "required_streak": exercise.required_streak,
+                "tmp": {
+                    "coverer_dicts": [],
+                    "prerequisite_dicts": [],
+                }, # Tmp storage for use during buildup of graph that won't be serialized
+            })
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
@@ -1905,11 +1963,7 @@ class UserExerciseGraph(db.Model):
         for exercise_name in graph.keys():
             del graph[exercise_name]["tmp"]
 
-        return UserExerciseGraph(
-                key_name = UserExerciseGraph.key_for_user_data(user_data),
-                version = UserExerciseGraph.CURRENT_VERSION,
-                graph = graph,
-            )
+        return UserExerciseGraph(graph = graph)
 
 class ExerciseGraph(object):
 
