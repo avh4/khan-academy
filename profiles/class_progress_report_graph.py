@@ -29,7 +29,7 @@ def class_progress_report_graph_context(user_data, student_list):
     emails_escapejsed = [escapejs(s.email) for s in list_students]
 
     exercises_all = models.Exercise.get_all_use_cache()
-    user_exercise_graphs = models.UserExerciseGraph.get(list_students, put_if_missing=True)
+    user_exercise_graphs = models.UserExerciseGraph.get(list_students)
 
     exercises_found = []
 

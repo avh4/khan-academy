@@ -1684,7 +1684,7 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseCache(db.Model):
 
-    CURRENT_VERSION = 4 # Bump this whenever you need to change the structure of the cached UserExercises
+    CURRENT_VERSION = 5 # Bump this whenever you need to change the structure of the cached UserExercises
     
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
@@ -1697,7 +1697,7 @@ class UserExerciseCache(db.Model):
         return "UserExerciseCache:%s" % user_data.key_email
 
     @staticmethod
-    def get(user_data_or_list, put_if_missing=True):
+    def get(user_data_or_list):
         if not user_data_or_list:
             raise Exception("Must provide UserData when loading UserExerciseCache")
 
@@ -1735,8 +1735,8 @@ class UserExerciseCache(db.Model):
                     user_exercises = results[index_result].get_result()
 
                     user_exercise_cache = UserExerciseCache.generate(user_data, user_exercises)
-                    if put_if_missing:
-                        caches_to_put.append(user_exercise_cache)
+
+                    caches_to_put.append(user_exercise_cache)
 
                     user_exercise_caches[i] = user_exercise_cache
 
@@ -1837,7 +1837,7 @@ class UserExerciseGraph(object):
         return self.graph.values()[:1] # TODO: do this.
 
     @staticmethod
-    def get(user_data_or_list, put_if_missing=True):
+    def get(user_data_or_list):
         if not user_data_or_list:
             raise Exception("Must provide UserData when loading UserExerciseGraph")
 
