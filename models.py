@@ -1876,8 +1876,6 @@ class UserExerciseGraph(object):
                 "tmp": {
                     "covers": exercise.covers,
                     "prerequisites": exercise.prerequisites,
-                    "coverer_dicts": [],
-                    "prerequisite_dicts": [],
                 }, # Tmp storage for use during buildup of graph that won't be serialized
             }
 
@@ -1892,8 +1890,12 @@ class UserExerciseGraph(object):
             user_exercise_dict = user_exercise_cache.exercise_dict(exercise_dict["name"])
 
             graph_dict = {}
+
             graph_dict.update(user_exercise_dict)
             graph_dict.update(exercise_dict)
+
+            graph_dict["tmp"]["coverer_dicts"] = []
+            graph_dict["tmp"]["prerequisite_dicts"] = []
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
@@ -1901,74 +1903,74 @@ class UserExerciseGraph(object):
                 graph[graph_dict["name"]] = graph_dict
 
         # Cache coverers and prereqs for later
-        for exercise in exercise_dicts:
-            exercise_dict = graph.get(exercise["name"])
-            if exercise_dict:
+        for exercise_dict in exercise_dicts:
+            graph_dict = graph.get(exercise_dict["name"])
+            if graph_dict:
 
                 # Cache coverers
-                for covered_exercise_name in exercise["tmp"]["covers"]:
-                    covered_exercise_dict = graph.get(covered_exercise_name)
-                    if covered_exercise_dict:
-                        covered_exercise_dict["tmp"]["coverer_dicts"].append(exercise_dict)
+                for covered_exercise_name in exercise_dict["tmp"]["covers"]:
+                    covered_graph_dict = graph.get(covered_exercise_name)
+                    if covered_graph_dict:
+                        covered_graph_dict["tmp"]["coverer_dicts"].append(graph_dict)
 
                 # Cache prereqs
-                for prerequisite_exercise_name in exercise["tmp"]["prerequisites"]:
-                    prerequisite_exercise_dict = graph.get(prerequisite_exercise_name)
-                    if prerequisite_exercise_dict:
-                        exercise_dict["tmp"]["prerequisite_dicts"].append(prerequisite_exercise_dict)
+                for prerequisite_exercise_name in exercise_dict["tmp"]["prerequisites"]:
+                    prerequisite_graph_dict = graph.get(prerequisite_exercise_name)
+                    if prerequisite_graph_dict:
+                        graph_dict["tmp"]["prerequisite_dicts"].append(prerequisite_graph_dict)
 
         # Set explicit proficiencies
         for exercise_name in user_data.proficient_exercises:
-            exercise_dict = graph.get(exercise_name)
-            if exercise_dict:
-                exercise_dict["proficient"] = exercise_dict["explicitly_proficient"] = True
+            graph_dict = graph.get(exercise_name)
+            if graph_dict:
+                graph_dict["proficient"] = graph_dict["explicitly_proficient"] = True
 
         # Calculate implicit proficiencies
-        def set_implicit_proficiency(exercise_dict):
-            if exercise_dict["proficient"] is not None:
-                return exercise_dict["proficient"]
+        def set_implicit_proficiency(graph_dict):
+            if graph_dict["proficient"] is not None:
+                return graph_dict["proficient"]
 
-            exercise_dict["proficient"] = False
+            graph_dict["proficient"] = False
 
             # Consider an exercise implicitly proficient if the user has 
             # never missed a problem and a covering ancestor is proficient
-            if exercise_dict["streak"] == exercise_dict["total_done"]:
-                for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"]:
-                    if set_implicit_proficiency(covering_exercise_dict):
-                        exercise_dict["proficient"] = True
+            if graph_dict["streak"] == graph_dict["total_done"]:
+                for covering_graph_dict in graph_dict["tmp"]["coverer_dicts"]:
+                    if set_implicit_proficiency(covering_graph_dict):
+                        graph_dict["proficient"] = True
                         break
 
-            return exercise_dict["proficient"]
+            return graph_dict["proficient"]
 
         for exercise_name in graph:
             set_implicit_proficiency(graph[exercise_name])
 
         # Calculate suggested
-        def set_suggested(exercise_dict):
-            if exercise_dict["suggested"] is not None:
-                return exercise_dict["suggested"]
+        def set_suggested(graph_dict):
+            if graph_dict["suggested"] is not None:
+                return graph_dict["suggested"]
 
             # Don't suggest already-proficient exercises
-            if exercise_dict["proficient"]:
-                exercise_dict["suggested"] = False
-                return exercise_dict["suggested"]
+            if graph_dict["proficient"]:
+                graph_dict["suggested"] = False
+                return graph_dict["suggested"]
 
             # First, assume we're suggesting this exercise
-            exercise_dict["suggested"] = True
+            graph_dict["suggested"] = True
 
             # Don't suggest exercises that are covered by other suggested exercises
-            for covering_exercise_dict in exercise_dict["tmp"]["coverer_dicts"]:
-                if set_suggested(covering_exercise_dict):
-                    exercise_dict["suggested"] = False
-                    return exercise_dict["suggested"]
+            for covering_graph_dict in graph_dict["tmp"]["coverer_dicts"]:
+                if set_suggested(covering_graph_dict):
+                    graph_dict["suggested"] = False
+                    return graph_dict["suggested"]
 
             # Don't suggest exercises if the user isn't proficient in all prerequisites
-            for prerequisite_exercise_dict in exercise_dict["tmp"]["prerequisite_dicts"]:
-                if not prerequisite_exercise_dict["proficient"]:
-                    exercise_dict["suggested"] = False
-                    return exercise_dict["suggested"]
+            for prerequisite_graph_dict in graph_dict["tmp"]["prerequisite_dicts"]:
+                if not prerequisite_graph_dict["proficient"]:
+                    graph_dict["suggested"] = False
+                    return graph_dict["suggested"]
 
-            return exercise_dict["suggested"]
+            return graph_dict["suggested"]
 
         for exercise_name in graph:
             set_suggested(graph[exercise_name])
