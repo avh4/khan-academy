@@ -55,36 +55,36 @@
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
        <h3>Suggested Exercises</h3>
-        {% if review_exercise_dicts %}
-        {% for exercise in review_exercise_dicts %}
-            <div class="exercise-badge" data-id="{{exercise.name}}">
-                {{ exercise_macros.exercise_icon(exercise) }}
-        		<div class="energy-points-badge {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
-        		<div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
+        {% if review_graph_dicts %}
+        {% for graph_dict in review_graph_dicts %}
+            <div class="exercise-badge" data-id="{{graph_dict.name}}">
+                {{ exercise_macros.exercise_icon(graph_dict) }}
+        		<div class="energy-points-badge {{progress_bar_alternative}}">{{graph_dict.points}}</div>
+        		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
 
-                {{ templatetags.streak_bar(exercise) }}
+                {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
         {% endif %}
-        {% for exercise in suggested_exercise_dicts %}
-            <div class="exercise-badge" data-id="{{exercise.name}}">
-                {{ exercise_macros.exercise_icon(exercise) }}
-        		<div class="energy-points-badge {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
-        		<div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
+        {% for graph_dict in suggested_graph_dicts %}
+            <div class="exercise-badge" data-id="{{graph_dict.name}}">
+                {{ exercise_macros.exercise_icon(graph_dict) }}
+        		<div class="energy-points-badge {{progress_bar_alternative}}">{{graph_dict.points}}</div>
+        		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
         		
-                {{ templatetags.streak_bar(exercise) }}
+                {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
         <br>
-        {% if recent_exercise_dicts %}
+        {% if recent_graph_dicts %}
             <h3>Recent Exercises</h3>
-            {% for exercise in recent_exercise_dicts %}
-                <div class="exercise-badge" data-id="{{exercise.name}}">
-                    {{ exercise_macros.exercise_icon(exercise) }}
-                    <div class="energy-points-badge {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
-                    <div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
+            {% for graph_dict in recent_graph_dicts %}
+                <div class="exercise-badge" data-id="{{graph_dict.name}}">
+                    {{ exercise_macros.exercise_icon(graph_dict) }}
+                    <div class="energy-points-badge {{progress_bar_alternative}}">{{graph_dict.points}}</div>
+                    <div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
 
-                    {{ templatetags.streak_bar(exercise) }}
+                    {{ templatetags.streak_bar(graph_dict) }}
                 </div>
             {% endfor %}
             <br/>
@@ -93,12 +93,12 @@
             <span class="subheader">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
         </h3>
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
-        {% for exercise in exercise_dicts %}
-            <div class="exercise-badge" data-id="{{exercise.name}}" id="{{exercise.name}}">
-                {{ exercise_macros.exercise_icon(exercise) }}
-        		<div class="energy-points-badge  {{exercise.progress_bar_alternative}}">{{exercise.points}}</div>
-        		<div class="exercise-title"><a href="/exercises?exid={{exercise.name}}">{{exercise.display_name}}</a></div>
-                {{ templatetags.streak_bar(exercise) }}
+        {% for graph_dict in graph_dicts %}
+            <div class="exercise-badge" data-id="{{graph_dict.name}}" id="{{graph_dict.name}}">
+                {{ exercise_macros.exercise_icon(graph_dict) }}
+        		<div class="energy-points-badge  {{progress_bar_alternative}}">{{graph_dict.points}}</div>
+        		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
         </div>
@@ -106,7 +106,7 @@
     </div>
 
     <div id="dashboard-map">
-        {{ exercise_macros.knowledgemap(exercise_dicts, map_coords) }}
+        {{ exercise_macros.knowledgemap(graph_dicts, map_coords) }}
     </div>
 </div>
 </div>

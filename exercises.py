@@ -213,33 +213,34 @@ class ViewAllExercises(request_handler.RequestHandler):
         if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
-        exercise_dicts = user_exercise_graph.exercise_dicts()
-        suggested_exercise_dicts = user_exercise_graph.suggested_exercise_dicts()
-        proficient_exercise_dicts = user_exercise_graph.proficient_exercise_dicts()
-        recent_exercise_dicts = user_exercise_graph.recent_exercise_dicts()
-        review_exercise_dicts = user_exercise_graph.review_exercise_dicts()
+        graph_dicts = user_exercise_graph.graph_dicts()
+        suggested_graph_dicts = user_exercise_graph.suggested_graph_dicts()
+        proficient_graph_dicts = user_exercise_graph.proficient_graph_dicts()
+        recent_graph_dicts = user_exercise_graph.recent_graph_dicts()
+        review_graph_dicts = user_exercise_graph.review_graph_dicts()
 
-        for exercise_dict in suggested_exercise_dicts:
-            exercise_dict["status"] = "Suggested"
+        for graph_dict in suggested_graph_dicts:
+            graph_dict["status"] = "Suggested"
 
-        for exercise_dict in proficient_exercise_dicts:
-            exercise_dict["status"] = "Proficient"
+        for graph_dict in proficient_graph_dicts:
+            graph_dict["status"] = "Proficient"
 
-        for exercise_dict in review_exercise_dicts:
-            exercise_dict["status"] = "Review"
+        for graph_dict in review_graph_dicts:
+            graph_dict["status"] = "Review"
 
             try:
-                suggested_exercise_dicts.remove(exercise_dict)
+                suggested_graph_dicts.remove(graph_dict)
             except ValueError:
                 pass
 
         template_values = {
-            'exercise_dicts': exercise_dicts,
-            'suggested_exercise_dicts': suggested_exercise_dicts,
-            'recent_exercise_dicts': recent_exercise_dicts,
-            'review_exercise_dicts': review_exercise_dicts,
+            'graph_dicts': graph_dicts,
+            'suggested_graph_dicts': suggested_graph_dicts,
+            'recent_graph_dicts': recent_graph_dicts,
+            'review_graph_dicts': review_graph_dicts,
             'user_data': user_data,
             'expanded_all_exercises': user_data.expanded_all_exercises,
+            'progress_bar_alternative': user_data.progress_bar_alternative,
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
             'selected_nav_link': 'practice',
             }

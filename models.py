@@ -1681,12 +1681,13 @@ class ExerciseVideo(db.Model):
 #
 class UserExerciseCache(db.Model):
 
-    CURRENT_VERSION = 5 # Bump this whenever you need to change the structure of the cached UserExercises
+    # Bump this whenever you change the structure of the cached UserExercises and need to invalidate all old caches
+    CURRENT_VERSION = 5
     
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
 
-    def exercise_dict(self, exercise_name):
+    def user_exercise_dict(self, exercise_name):
         return self.dicts.get(exercise_name) or UserExerciseCache.dict_from_user_exercise(None)
 
     @staticmethod
@@ -1802,35 +1803,35 @@ class UserExerciseGraph(object):
     def __init__(self, graph={}):
         self.graph = graph
 
-    def exercise_dict(self, exercise_name):
+    def graph_dict(self, exercise_name):
         return self.graph.get(exercise_name)
 
-    def exercise_dicts(self):
-        return sorted(self.graph.values(), key=lambda exercise_dict: exercise_dict["h_position"])
+    def graph_dicts(self):
+        return sorted(self.graph.values(), key=lambda graph_dict: graph_dict["h_position"])
 
     def proficient_exercise_names(self):
-        return map(lambda exercise_dict: exercise_dict["name"], self.proficient_exercise_dicts())
+        return map(lambda graph_dict: graph_dict["name"], self.proficient_graph_dicts())
 
     def suggested_exercise_names(self):
-        return map(lambda exercise_dict: exercise_dict["name"], self.suggested_exercise_dicts())
+        return map(lambda graph_dict: graph_dict["name"], self.suggested_graph_dicts())
 
     def review_exercise_names(self):
-        return map(lambda exercise_dict: exercise_dict["name"], self.review_exercise_dicts())
+        return map(lambda graph_dict: graph_dict["name"], self.review_graph_dicts())
 
-    def suggested_exercise_dicts(self):
-        return filter(lambda exercise_dict: exercise_dict["suggested"], self.exercise_dicts())
+    def suggested_graph_dicts(self):
+        return filter(lambda graph_dict: graph_dict["suggested"], self.graph_dicts())
 
-    def proficient_exercise_dicts(self):
-        return filter(lambda exercise_dict: exercise_dict["proficient"], self.exercise_dicts())
+    def proficient_graph_dicts(self):
+        return filter(lambda graph_dict: graph_dict["proficient"], self.graph_dicts())
 
-    def recent_exercise_dicts(self, n_recent=2):
+    def recent_graph_dicts(self, n_recent=2):
         return sorted(
-                filter(lambda exercise_dict: exercise_dict["last_done"], self.exercise_dicts()),
+                filter(lambda graph_dict: graph_dict["last_done"], self.graph_dicts()),
                 reverse=True, 
-                key=lambda exercise_dict: exercise_dict["last_done"],
+                key=lambda graph_dict: graph_dict["last_done"],
                 )[0:n_recent]
 
-    def review_exercise_dicts(self):
+    def review_graph_dicts(self):
 
         # an exercise ex should be reviewed iff all of the following are true:
         #   * ex and all of ex's covering ancestors either
@@ -1881,11 +1882,11 @@ class UserExerciseGraph(object):
 
             return graph_dict["is_ancestor_review_candidate"]
 
-        for graph_dict in self.exercise_dicts():
+        for graph_dict in self.graph_dicts():
             compute_next_review(graph_dict)
 
         candidate_dicts = []
-        for graph_dict in self.exercise_dicts():
+        for graph_dict in self.graph_dicts():
             if not graph_dict["summative"] and graph_dict["proficient"] and graph_dict["next_review"] <= now:
                 graph_dict["is_review_candidate"] = True
                 candidate_dicts.append(graph_dict)
@@ -1935,7 +1936,7 @@ class UserExerciseGraph(object):
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,
-                "struggling": False, #TODO: do this. UserExercise.is_struggling_with(user_exercise, exercise) if user_exercise else False,
+                "struggling": False,
                 "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
                 "covers": exercise.covers,
             }
@@ -1948,7 +1949,7 @@ class UserExerciseGraph(object):
         # Build up base of graph
         for exercise_dict in exercise_dicts:
 
-            user_exercise_dict = user_exercise_cache.exercise_dict(exercise_dict["name"])
+            user_exercise_dict = user_exercise_cache.user_exercise_dict(exercise_dict["name"])
 
             graph_dict = {}
 
@@ -1969,21 +1970,18 @@ class UserExerciseGraph(object):
                 graph[graph_dict["name"]] = graph_dict
 
         # Cache coverers and prereqs for later
-        for exercise_dict in exercise_dicts:
-            graph_dict = graph.get(exercise_dict["name"])
-            if graph_dict:
+        for graph_dict in graph.values():
+            # Cache coverers
+            for covered_exercise_name in graph_dict["covers"]:
+                covered_graph_dict = graph.get(covered_exercise_name)
+                if covered_graph_dict:
+                    covered_graph_dict["coverer_dicts"].append(graph_dict)
 
-                # Cache coverers
-                for covered_exercise_name in exercise_dict["covers"]:
-                    covered_graph_dict = graph.get(covered_exercise_name)
-                    if covered_graph_dict:
-                        covered_graph_dict["coverer_dicts"].append(graph_dict)
-
-                # Cache prereqs
-                for prerequisite_exercise_name in exercise_dict["prerequisites"]:
-                    prerequisite_graph_dict = graph.get(prerequisite_exercise_name["name"])
-                    if prerequisite_graph_dict:
-                        graph_dict["prerequisite_dicts"].append(prerequisite_graph_dict)
+            # Cache prereqs
+            for prerequisite_exercise_name in graph_dict["prerequisites"]:
+                prerequisite_graph_dict = graph.get(prerequisite_exercise_name["name"])
+                if prerequisite_graph_dict:
+                    graph_dict["prerequisite_dicts"].append(prerequisite_graph_dict)
 
         # Set explicit proficiencies
         for exercise_name in user_data.proficient_exercises:
