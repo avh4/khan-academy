@@ -1676,7 +1676,7 @@ class ExerciseVideo(db.Model):
 class UserExerciseCache(db.Model):
 
     # Bump this whenever you change the structure of the cached UserExercises and need to invalidate all old caches
-    CURRENT_VERSION = 5
+    CURRENT_VERSION = 6
     
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
@@ -1765,6 +1765,7 @@ class UserExerciseCache(db.Model):
                 "last_done": user_exercise.last_done if user_exercise else datetime.datetime.min,
                 "last_review": user_exercise.last_review if user_exercise else datetime.datetime.min,
                 "review_interval_secs": user_exercise.review_interval_secs if user_exercise else 0,
+                "proficient_date": user_exercise.proficient_date if user_exercise else 0,
                 }
 
     @staticmethod
