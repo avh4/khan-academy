@@ -344,7 +344,7 @@ def user_exercises_all():
 
         if user_data_student:
             exercises = models.Exercise.get_all_use_cache()
-            user_exercise_graph = UserExerciseGraph.get(user_data_student)
+            user_exercise_graph = models.UserExerciseGraph.get(user_data_student)
             user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
 
             exercises_dict = dict((exercise.name, exercise) for exercise in exercises)
