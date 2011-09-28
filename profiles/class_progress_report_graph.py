@@ -95,7 +95,7 @@ def class_progress_report_graph_context(user_data, student_list):
 
                 if exercise_name in student_review_exercise_names:
                     status = "Review"
-                    color = "review"
+                    color = "review light"
                 else:
                     status = "Proficient"
                     color = "proficient"
