@@ -231,6 +231,8 @@
         color: #333;
         cursor: default;
         height: auto;
+        font-size: 11px;
+        font-weight: bold;
     }
     #individual_report #vital-statistics #stats-charts {
         float: right;
@@ -253,7 +255,6 @@
         cursor: pointer;
     }
     #individual_report #vital-statistics #stats-charts #module-progress .exercise-progress-block .exercise-display-name {
-        color: #333;
         text-align: center;
         font-size: 11px;
         margin: 10px 4px;

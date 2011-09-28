@@ -32,7 +32,7 @@ def exercise_progress_graph_context(user_data_student):
 
             if exercise.name in review_exercise_names:
                 status = "Review"
-                color = "review"
+                color = "review light"
             else:
                 status = "Proficient"
                 color = "proficient"

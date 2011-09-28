@@ -1688,7 +1688,8 @@ class UserExerciseCache(db.Model):
         user_exercise_caches = UserExerciseCache.get_by_key_name(
                 map(
                     lambda user_data: UserExerciseCache.key_for_user_data(user_data), 
-                    user_data_list)
+                    user_data_list),
+                config=db.create_config(read_policy=db.EVENTUAL_CONSISTENCY)
                 )
 
         # For any that are missing or are out of date,

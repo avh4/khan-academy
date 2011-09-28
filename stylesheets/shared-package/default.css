@@ -260,6 +260,10 @@ input.simple-button {
     background-image: -moz-linear-gradient( top, #e35d04, #bf4f04 );
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e35d04', endColorstr='#bf4f04');
 }
+.action-gradient.seethrough {
+    background-image: -webkit-gradient(linear, left top, left bottom,  from(rgba(255,255,255, .35)), to(rgba(255,255,255, .0)));
+    background-image: -moz-linear-gradient( top, rgba(255,255,255, .35), rgba(255,255,255, 0) );
+}
 
 .mobile-only { display: none; }
 /* Borrowed from those smart guys @ Fog Creek. Props to Justin & Bobby */
@@ -1362,6 +1366,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-color.review {
             background-color: #E35D04;
             color: #eee !important;
+        }
+        .exercise-color.review.light {
+            background-color: #f2b891;
+            color: #333 !important;
         }
         .exercise-color.not-started {
             background-color: #ccc;
