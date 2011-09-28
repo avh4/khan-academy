@@ -57,6 +57,8 @@ import exercisestats.report
 import exercisestats.report_json
 import github
 import paypal
+import smarthistory
+import smarthistorytest
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -958,7 +960,14 @@ class ServeUserVideoCss(request_handler.RequestHandler):
 
         self.response.out.write(user_video_css.video_css)
 
-def main():
+def main():	
+   
+    if os.environ["SERVER_NAME"] == "smarthistory.khanacademy.org":
+        application = webapp.WSGIApplication([
+            ('/.*', smarthistory.SmartHistoryProxy)
+        ])
+        run_wsgi_app(application)
+        return
 
     application = webapp.WSGIApplication([
         ('/', homepage.ViewHomePage),
@@ -1119,6 +1128,9 @@ def main():
 
         ('/jobs', RedirectToJobvite),
         ('/jobs/.*', RedirectToJobvite),
+
+	('/smarthistory', smarthistory.SmartHistoryProxy),
+	('/smarthistory/.*', smarthistory.SmartHistoryProxy),
 
         ('/dashboard', dashboard.Dashboard),
         ('/entityboard', dashboard.Entityboard),
