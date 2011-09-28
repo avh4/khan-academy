@@ -86,6 +86,11 @@ class Setting(db.Model):
     def last_youtube_sync_generation_start(val = None):
         return Setting._get_or_set_with_key("last_youtube_sync_generation_start", val) or 0
 
+    @staticmethod
+    def smarthistory_version(val = None):
+        return Setting._get_or_set_with_key("smarthistory_version", val) or 0
+
+
 class Exercise(db.Model):
 
     name = db.StringProperty()
