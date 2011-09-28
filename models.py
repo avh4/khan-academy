@@ -166,7 +166,11 @@ class Exercise(db.Model):
         return self.live or user_util.is_current_user_developer()
 
     def struggling_threshold(self):
-        return 3 * self.required_streak
+        # 96% of users have proficiency before they get to 30 problems
+        # return 3 * self.required_streak
+
+        # 85% of users have proficiency before they get to 19 problems
+        return 19
 
     def summative_children(self):
         if not self.summative:
@@ -233,7 +237,7 @@ class Exercise(db.Model):
     @layer_cache.cache_with_key_fxn(lambda *args, **kwargs: "all_exercises_unsafe_%s" % Setting.cached_exercises_date())
     def __get_all_use_cache_unsafe__():
         query = Exercise.all_unsafe().order('h_position')
-        return query.fetch(200)
+        return query.fetch(400)
 
     @staticmethod
     def __get_all_use_cache_safe__():
@@ -414,7 +418,9 @@ class UserExercise(db.Model):
 
     @staticmethod
     def is_struggling_with(user_exercise, exercise):
-        return user_exercise.streak == 0 and user_exercise.longest_streak < exercise.required_streak and user_exercise.total_done > exercise.struggling_threshold()
+        return (user_exercise.streak == 0 and
+                user_exercise.longest_streak < exercise.required_streak and
+                user_exercise.total_done > exercise.struggling_threshold())
 
     def is_struggling(self):
         return UserExercise.is_struggling_with(self, self.exercise_model)
@@ -1696,7 +1702,7 @@ class ExerciseVideo(db.Model):
 class ExerciseGraph(object):
 
     def __init__(self, user_data=None):
-        
+
         self.exercises = Exercise.get_all_use_cache()
         self.exercise_by_name = {}
         for ex in self.exercises:
@@ -1704,7 +1710,7 @@ class ExerciseGraph(object):
 
         if user_data is not None:
             self.initialize_for_user(user_data)
-            
+
     def initialize_for_user(self, user_data, user_exercises=None):
 
         if user_exercises is None:
