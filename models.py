@@ -326,20 +326,6 @@ class UserExercise(db.Model):
 
         return points.ExercisePointCalculator(self, suggested, proficient)
 
-    # curr_points very similar to next points but instead gives the number
-    # of points *this* exercise will yield on successful answer
-    @property
-    def curr_points(self):
-        user_data = self.get_user_data()
-
-        suggested = proficient = False
-
-        if user_data:
-            suggested = user_data.is_suggested(self.exercise)
-            proficient = user_data.is_proficient_at(self.exercise)
-
-        return points.ExercisePointCalculator(self, suggested, proficient, -1)
-
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
     # the internal algorithm so the front-end does not need to change.
