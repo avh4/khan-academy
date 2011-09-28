@@ -146,35 +146,19 @@
     }
 
 .unit-rating li.streak-icon {
-	background-image: url(/images/non-repeating-sprites.3.png);
-    background-position: -10px -820px;
-    z-index: 2;
-    
-    top: 6px;
-    width: 100%;
-    text-align: left;
-    background: none;
-    font-size: 15px;
-    text-indent: 5px;
-    color: #888;
-    text-shadow: 0 1px 0 #EEE;
-    padding: 0;
-    }
-.single-exercise .unit-rating li.streak-icon {
-    top: 2px;
-}
-
-/*.single-exercise .new_partial_reset .unit-rating li.streak-icon {
-    top: 6px;
-    width: 100%;
-    text-align: left;
-    background: none;
-    font-size: 15px;
-    text-indent: 5px;
-    color: #888;
-    text-shadow: 0 1px 0 #EEE;
-    padding: 0;
-}*/
+  background-image: url(/images/non-repeating-sprites.3.png);
+  background-position: -10px -820px;
+  z-index: 2;
+  top: 6px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  font-size: 15px;
+  text-indent: 5px;
+  color: #888;
+  text-shadow: 0 1px 0 #EEE;
+  padding: 0;
+  }
 
 .voted {color:#999;}
 .thanks {color:#36AA3D;}
