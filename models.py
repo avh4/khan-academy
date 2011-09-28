@@ -960,11 +960,22 @@ class UserData(GAEBingoIdentityModel, db.Model):
         return self.is_coworker_of(user_data) or user_data.developer or user_data.is_administrator()
 
     def add_points(self, points):
+        
         if self.points == None:
             self.points = 0
+        
+        if not hasattr(self, "_original_points"):
+            self._original_points = self.points
+        
         if (self.points % 2500) > ((self.points+points) % 2500): #Check if we crossed an interval of 2500 points
             util_notify.update(self,None,True)
         self.points += points
+    
+    # the user's points before they've scored anything, added in above
+    def original_points(self):
+        if hasattr(self, "_original_points"):
+          return self._original_points
+        return 0
 
     def get_videos_completed(self):
         if self.videos_completed < 0:

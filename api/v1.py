@@ -22,6 +22,15 @@ from api.auth.decorators import oauth_required, oauth_optional, admin_required, 
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
+# add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
+# case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
+# response so that we can visibly award badges while the page silently posts log info in the background.
+# 
+# If you're wondering how this happens, it's add_action_results has the side-effect of actually mutating 
+# the `obj` passed into it (but, i mean, that's what you want here)
+# 
+# but you ask, what matter of client-side code actually takes care of doing that?
+# have you seen javascript/shared-package/api.js ?
 def add_action_results(obj, dict_results):
 
     badges_earned = []
@@ -29,6 +38,7 @@ def add_action_results(obj, dict_results):
 
     if user_data:
         dict_results["user_data"] = user_data
+        dict_results["points_earned"] = user_data.points - user_data.original_points()
         dict_results["user_info_html"] = templatetags.user_info(user_data.nickname, user_data)
 
         user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
