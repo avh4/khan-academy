@@ -472,7 +472,6 @@ class ExerciseAdmin(request_handler.RequestHandler):
             'graph_dicts': sorted(graph_dicts, key=lambda graph_dict: graph_dict["name"]),
             'admin': True,
             'map_coords': (0, 0, 0),
-            'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
             }
 
         self.render_jinja2_template('exerciseadmin.html', template_values)
