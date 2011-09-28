@@ -167,7 +167,11 @@ class Exercise(db.Model):
         return self.live or user_util.is_current_user_developer()
 
     def struggling_threshold(self):
-        return 3 * self.required_streak
+        # 96% of users have proficiency before they get to 30 problems
+        # return 3 * self.required_streak
+
+        # 85% of users have proficiency before they get to 19 problems
+        return 19
 
     def summative_children(self):
         if not self.summative:
@@ -326,20 +330,6 @@ class UserExercise(db.Model):
             proficient = user_data.is_proficient_at(self.exercise)
 
         return points.ExercisePointCalculator(self, suggested, proficient)
-
-    # curr_points very similar to next points but instead gives the number
-    # of points *this* exercise will yield on successful answer
-    @property
-    def curr_points(self):
-        user_data = self.get_user_data()
-
-        suggested = proficient = False
-
-        if user_data:
-            suggested = user_data.is_suggested(self.exercise)
-            proficient = user_data.is_proficient_at(self.exercise)
-
-        return points.ExercisePointCalculator(self, suggested, proficient, -1)
 
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
