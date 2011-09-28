@@ -106,7 +106,6 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
             if not h in ["If-Modified-Since", "If-None-Match", "Content-Length","Host"]:
                 request.headers[h]= headers[h]
         
-        self.response.out.write(request.headers)
         try:
             response = urllib2.urlopen(request)
             data=response.read()     
