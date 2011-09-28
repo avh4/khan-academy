@@ -1806,23 +1806,23 @@ class UserExerciseGraph(object):
         return sorted(sorted(self.graph.values(), key=lambda graph_dict: graph_dict["v_position"]), key=lambda graph_dict: graph_dict["h_position"])
 
     def proficient_exercise_names(self):
-        return map(lambda graph_dict: graph_dict["name"], self.proficient_graph_dicts())
+        return [graph_dict["name"] for graph_dict in self.proficient_graph_dicts()]
 
     def suggested_exercise_names(self):
-        return map(lambda graph_dict: graph_dict["name"], self.suggested_graph_dicts())
+        return [graph_dict["name"] for graph_dict in self.suggested_graph_dicts()]
 
     def review_exercise_names(self):
-        return map(lambda graph_dict: graph_dict["name"], self.review_graph_dicts())
+        return [graph_dict["name"] for graph_dict in self.review_graph_dicts()]
 
     def suggested_graph_dicts(self):
-        return filter(lambda graph_dict: graph_dict["suggested"], self.graph_dicts())
+        return [graph_dict for graph_dict in self.graph_dicts() if graph_dict["suggested"]]
 
     def proficient_graph_dicts(self):
-        return filter(lambda graph_dict: graph_dict["proficient"], self.graph_dicts())
+        return [graph_dict for graph_dict in self.graph_dicts() if graph_dict["proficient"]]
 
     def recent_graph_dicts(self, n_recent=2):
         return sorted(
-                filter(lambda graph_dict: graph_dict["last_done"], self.graph_dicts()),
+                [graph_dict for graph_dict in self.graph_dicts() if graph_dict["last_done"]],
                 reverse=True, 
                 key=lambda graph_dict: graph_dict["last_done"],
                 )[0:n_recent]
