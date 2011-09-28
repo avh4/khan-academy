@@ -5,7 +5,6 @@ import urllib2
 import simplejson
 from google.appengine.api import memcache
 
-import request_handler
 from custom_exceptions import TumblrException
 from app import App
 from about import util_about
