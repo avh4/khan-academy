@@ -1934,7 +1934,8 @@ class UserExerciseGraph(object):
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,
-                "struggling": False,
+                "struggling": None,
+                "endangered": None,
                 "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
                 "covers": exercise.covers,
             }
@@ -1971,10 +1972,6 @@ class UserExerciseGraph(object):
             graph_dict["struggling"] = (graph_dict["streak"] == 0 and 
                     graph_dict["longest_streak"] < graph_dict["required_streak"] and 
                     graph_dict["total_done"] > graph_dict["struggling_threshold"])
-
-            graph_dict["endangered"] = (graph_dict["proficient"] and 
-                    graph_dict["streak"] == 0 and 
-                    graph_dict["longest_streak"] >= graph_dict["required_streak"])
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
@@ -2048,8 +2045,14 @@ class UserExerciseGraph(object):
 
             return graph_dict["suggested"]
 
+        def set_endangered(graph_dict):
+            graph_dict["endangered"] = (graph_dict["proficient"] and 
+                    graph_dict["streak"] == 0 and 
+                    graph_dict["longest_streak"] >= graph_dict["required_streak"])
+
         for exercise_name in graph:
             set_suggested(graph[exercise_name])
+            set_endangered(graph[exercise_name])
 
         return UserExerciseGraph(graph = graph, cache=user_exercise_cache)
 
