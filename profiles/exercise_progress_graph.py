@@ -2,7 +2,7 @@ import datetime
 import util
 import logging
 
-from models import UserExercise, Exercise, UserData, ExerciseGraph
+from models import UserExercise, Exercise, UserData, UserExerciseGraph
 
 def exercise_progress_graph_context(user_data_student):
 
@@ -11,17 +11,10 @@ def exercise_progress_graph_context(user_data_student):
     
     exercise_data = {}
     
-    exercise_graph = ExerciseGraph()
-    exercises = exercise_graph.exercises
+    exercises = Exercise.get_all_use_cache()
+    user_exercise_graph = UserExerciseGraph.get(user_data_student)
 
-    user_exercises = UserExercise.get_for_user_data_use_cache(user_data_student)
-
-    exercise_graph.initialize_for_user(user_data_student, user_exercises)
-    review_exercise_names = [e.name for e in exercise_graph.get_review_exercises()]
-
-    dict_user_exercises = {}
-    for user_exercise in user_exercises:
-        dict_user_exercises[user_exercise.exercise] = user_exercise
+    review_exercise_names = user_exercise_graph.review_exercise_names()
 
     for exercise in exercises:
         chart_link =""
@@ -33,31 +26,31 @@ def exercise_progress_graph_context(user_data_student):
 
         chart_link = "/profile/graph/exerciseproblems?student_email=%s&exercise_name=%s" % (user_data_student.email, exercise.name) 
                 
-        user_exercise = dict_user_exercises[exercise.name] if dict_user_exercises.has_key(exercise.name) else None
+        graph_dict = user_exercise_graph.graph_dict(exercise.name)
 
-        if user_data_student.is_proficient_at(exercise.name, exercise_graph):
+        if graph_dict["proficient"]:
 
-            if exercise.name in review_exercise_names :
+            if exercise.name in review_exercise_names:
                 status = "Review"
                 color = "review"
-            else :
+            else:
                 status = "Proficient"
                 color = "proficient"
-                if not user_data_student.is_explicitly_proficient_at(exercise.name):
+                if not graph_dict["explicitly_proficient"]:
                     status = "Proficient (due to proficiency in a more advanced module)"
 
-        elif user_exercise is not None and UserExercise.is_struggling_with(user_exercise, exercise):
+        elif graph_dict["struggling"]:
             status = "Struggling"
             color = "struggling"
-        elif user_exercise is not None and user_exercise.total_done > 0:
+        elif graph_dict["total_done"] > 0:
             status = "Started"
             color = "started"
 
         if len(status) > 0:
             hover = "<b>%s</b><br/><em><nobr>Status: %s</nobr></em><br/><em>Streak: %s</em><br/><em>Problems attempted: %s</em>" % (exercise_display, 
                         status, 
-                        user_exercise.streak if user_exercise is not None else 0, 
-                        user_exercise.total_done if user_exercise is not None else 0)
+                        graph_dict["streak"],
+                        graph_dict["total_done"])
 
         exercise_data[exercise.name] = {
                 "short_name": exercise.short_name(),

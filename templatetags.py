@@ -8,7 +8,6 @@ from jinja2.utils import escape
 
 from app import App
 from templatefilters import seconds_to_time_string, slugify
-from models import UserData, UserVideoCss
 import consts
 import util
 import topics_list
@@ -62,16 +61,14 @@ def user_points(user_data):
 
     return {"points": points}
 
-def streak_bar(user_exercise):
-    progress = user_exercise.progress
-    streak = user_exercise.streak
+def streak_bar(user_exercise_dict):
 
-    longest_streak = user_exercise.longest_streak if hasattr(user_exercise, "longest_streak") else 0
+    progress = user_exercise_dict["progress"]
+    streak = user_exercise_dict["streak"]
+    longest_streak = user_exercise_dict["longest_streak"]
+    required_streak = user_exercise_dict["required_streak"]
 
-    if hasattr(user_exercise, 'phantom') and user_exercise.phantom:
-        streak = longest_streak = progress = 0
-
-    required_streak = user_exercise.required_streak
+    user_data = models.UserData.current()
 
     bar_max_width = 227
     bar_width = min(1.0, progress) * bar_max_width
@@ -84,7 +81,7 @@ def streak_bar(user_exercise):
     show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - bar_width) > width_required_for_label
 
     levels = []
-    if user_exercise.summative:
+    if user_exercise_dict["summative"]:
         c_levels = required_streak / consts.REQUIRED_STREAK
         level_offset = bar_max_width / float(c_levels)
         for ix in range(c_levels - 1):
@@ -106,8 +103,8 @@ def streak_bar(user_exercise):
         "streak_icon_width": streak_icon_width,
         "show_streak_label": show_streak_label,
         "show_longest_streak_label": show_longest_streak_label,
-        "is_suggested": user_exercise.suggested,
-        "is_proficient": user_exercise.proficient,
+        "is_suggested": user_exercise_dict["suggested"],
+        "is_proficient": user_exercise_dict["proficient"],
         "float_progress": progress,
         "progress": progress_display(progress),
         "bar_width": bar_width,

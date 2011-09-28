@@ -357,10 +357,6 @@ class ViewGetInvolved(request_handler.RequestHandler):
 
 class ViewContribute(request_handler.RequestHandler):
     def get(self):
-
-        if self.request_bool("convert", default=False):
-            bingo("contribute_text")
-
         self.render_jinja2_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
