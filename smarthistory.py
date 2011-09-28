@@ -79,8 +79,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
             data=response.read()     
         # TODO: write better exception handler
         except Exception, e:
-            # self.response.out.write("error="+e)
-            raise e
+            raise SmartHistoryLoadException("Post attempt failed to SmartHsitory with :"+str(e))  
             return      
 
         self.response.out.write(data)   
@@ -117,7 +116,6 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
                 return self.load_resource()
             else:
                 raise SmartHistoryLoadException("After attempt #"+str(self.attempt_counter) +"Failed loading "+str(path)+" from SmartHsitory "+str(e)) 
-            # self.response.out.write("error="+e)
                 return      
         
         #load the response headers into a dictionary as layer_cache was throwing an error caching an object of class mimetools.Message   
