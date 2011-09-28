@@ -170,7 +170,7 @@ class Exercise(db.Model):
         # return 3 * self.required_streak
 
         # 85% of users have proficiency before they get to 19 problems
-        return 19
+        return 2 * self.required_streak
 
     def summative_children(self):
         if not self.summative:
