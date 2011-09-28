@@ -357,6 +357,7 @@ def user_exercises_all():
 
         if user_data_student:
             exercises = models.Exercise.get_all_use_cache()
+            user_exercise_graph = models.UserExerciseGraph.get(user_data_student)
             user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
 
             exercises_dict = dict((exercise.name, exercise) for exercise in exercises)
@@ -372,6 +373,7 @@ def user_exercises_all():
             for exercise_name in user_exercises_dict:
                 user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
                 user_exercises_dict[exercise_name]._user_data = user_data_student
+                user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
 
             return user_exercises_dict.values()
 
@@ -478,7 +480,7 @@ def attempt_problem_number(exercise_name, problem_number):
 
         if user_exercise and problem_number:
 
-            user_exercise = attempt_problem(
+            user_exercise, user_exercise_graph = attempt_problem(
                     user_data,
                     user_exercise,
                     problem_number,
@@ -495,7 +497,7 @@ def attempt_problem_number(exercise_name, problem_number):
                     )
 
             add_action_results(user_exercise, {
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
             })
 
             return user_exercise
@@ -517,7 +519,7 @@ def hint_problem_number(exercise_name, problem_number):
 
         if user_exercise and problem_number:
 
-            user_exercise = attempt_problem(
+            user_exercise, user_exercise_graph = attempt_problem(
                     user_data,
                     user_exercise,
                     problem_number,
@@ -534,7 +536,7 @@ def hint_problem_number(exercise_name, problem_number):
                     )
 
             add_action_results(user_exercise, {
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
             })
 
             return user_exercise

@@ -75,16 +75,16 @@
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
         
-        {% for exercise in exercises %}
+        {% for graph_dict in graph_dicts %}
      
-                <div class="exercise-edit" data-id="{{exercise.name}}">
-                <a href="/editexercise?name={{ exercise.name|escape }}" 
-                    {% if exercise.live %}
+                <div class="exercise-edit" data-id="{{graph_dict.name}}">
+                <a href="/editexercise?name={{ graph_dict.name|escape }}" 
+                    {% if graph_dict.live %}
                     style="color:#069;"
                     {% else %}
                     style="color:red;text-decoration:line-through;"
                     {% endif %}
-                    title="{{ exercise.display_name|escape }}"><nobr>{{ exercise.display_name|truncate(25)|escape }}</nobr></a>
+                    title="{{ graph_dict.display_name|escape }}"><nobr>{{ graph_dict.display_name|truncate(25)|escape }}</nobr></a>
                     </div>
               
             <br />
@@ -93,7 +93,7 @@
     </div>
 
     <div id="dashboard-map">
-        {{ exercise_macros.knowledgemap(exercises, map_coords, admin) }}
+        {{ exercise_macros.knowledgemap(graph_dicts, map_coords, admin) }}
     </div>
 </div>
 </div>{% endblock pagecontent %}

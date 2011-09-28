@@ -18,31 +18,31 @@ var ModalVideo = {
     },
 
     hookup: function() {
+        // ev.which doesn't work in IE<9 on click events, so get it from
+        // ev.button on a mouseup event (which comes first)
+        var mouseup_button = 0;
+
         // add click handlers to all related video links for lightbox
-        jQuery('.thumbnail a, .related-video-inline').each(function(i, el) {
-            var jel = $(el);
-
-            // ev.which doesn't work in IE<9 on click events, so get it from
-            // ev.button on a mouseup event (which comes first)
-            var mouseup_button = 0;
-
-            jel.mouseup(function(ev) {
+        jQuery(document).delegate("a.related-video", {
+            'mouseup': function(ev) {
                 mouseup_button = ev.button;
                 return true;
-            }).click(function(ev) {
+            },
+            'click': function(ev) {
                 // workaround for IE<9
                 ev.which = ev.which || mouseup_button;
                 mouseup_button = 0;
 
                 if ( ev.which == 1 ) {
                     // left mouse button: show modal video
+                    ModalVideo.show( $(ev.currentTarget).data('video') );
                     ev.preventDefault();
-                    ModalVideo.show( jel.data('video') );
+                    return false;
                 } else {
                     // anything else, probably middle mouse: follow the link
                     return true;
                 }
-            });
+            }
         });
     },
 
