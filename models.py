@@ -1718,7 +1718,9 @@ class UserExerciseCache(db.Model):
 
                     user_exercise_cache = UserExerciseCache.generate(user_data, user_exercises)
 
-                    caches_to_put.append(user_exercise_cache)
+                    if len(caches_to_put) < 10:
+                        # We only put 10 at a time in case a teacher views a report w/ tons and tons of uncached students
+                        caches_to_put.append(user_exercise_cache)
 
                     user_exercise_caches[i] = user_exercise_cache
 
