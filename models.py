@@ -1901,7 +1901,7 @@ class UserExerciseGraph(object):
     @staticmethod
     def get(user_data_or_list):
         if not user_data_or_list:
-            raise Exception("Must provide UserData when loading UserExerciseGraph")
+            return [] if type(user_data_or_list) == list else None
 
         # We can grab a single UserExerciseGraph or do an optimized grab of a bunch of 'em
         user_data_list = user_data_or_list if type(user_data_or_list) == list else [user_data_or_list]
@@ -1909,7 +1909,7 @@ class UserExerciseGraph(object):
         user_exercise_cache_list = UserExerciseCache.get(user_data_list)
 
         if not user_exercise_cache_list:
-            return []
+            return [] if type(user_data_or_list) == list else None
 
         exercise_dicts = UserExerciseGraph.exercise_dicts()
 
