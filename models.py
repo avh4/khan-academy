@@ -1771,10 +1771,6 @@ class UserExerciseCache(db.Model):
         if not user_exercises:
             user_exercises = UserExercise.get_for_user_data(user_data)
 
-        user_exercises_by_name = {}
-        for user_exercise in user_exercises:
-            user_exercises_by_name[user_exercise.exercise] = user_exercise
-
         dicts = {}
 
         # Build up cache
