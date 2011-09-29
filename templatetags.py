@@ -68,8 +68,6 @@ def streak_bar(user_exercise_dict):
     longest_streak = user_exercise_dict["longest_streak"]
     required_streak = user_exercise_dict["required_streak"]
 
-    user_data = models.UserData.current()
-
     bar_max_width = 227
     bar_width = min(1.0, progress) * bar_max_width
 
