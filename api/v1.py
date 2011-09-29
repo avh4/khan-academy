@@ -38,11 +38,7 @@ def add_action_results(obj, dict_results):
 
     if user_data:
         dict_results["user_data"] = user_data
-        # this always returns a delta of points earned
-        points_earned = user_data.points - user_data.original_points()
-        points_earned = points_earned if (user_data.points != points_earned) and (user_data.original_points() != 0) else 0
 
-        dict_results["points_earned"] = {"points" : points_earned, "point_display" : user_data.point_display }
         dict_results["user_info_html"] = templatetags.user_info(user_data.nickname, user_data)
 
         user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
@@ -510,8 +506,19 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.remote_addr,
                     )
 
+            # this always returns a delta of points earned each attempt
+            points_earned = user_data.points - user_data.original_points()
+            if(user_exercise.streak == 0):
+                # never award points for a zero streak
+                points_earned = 0
+            if(user_exercise.streak == 1):
+                # award points for the first correct exercise done, even if no prior history exists
+                # and the above pts-original points gives a wrong answer
+                points_earned = user_data.points if (user_data.points == points_earned) else points_earned
+
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
+                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display }
             })
 
             return user_exercise
