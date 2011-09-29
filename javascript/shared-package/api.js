@@ -69,7 +69,7 @@ $(function(){ APIActionResults.register("user_info_html",
 $(function(){ 
 
   var updatePointDisplay = function( data ) {
-    if( jQuery(".single-exercise").length > 0 && data.point_display === "on" ) {
+    if( jQuery(".single-exercise").length > 0 && data.point_display === "on" && data.points > 0) {
       var coin = jQuery("<div>+"+data.points+"</div>").addClass("energy-points-badge");
       jQuery(".streak-bar").append(coin);
       jQuery(coin)

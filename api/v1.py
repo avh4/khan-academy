@@ -39,7 +39,10 @@ def add_action_results(obj, dict_results):
     if user_data:
         dict_results["user_data"] = user_data
         # this always returns a delta of points earned
-        dict_results["points_earned"] = {"points" : user_data.points - user_data.original_points(), "point_display" : user_data.point_display }
+        points_earned = user_data.points - user_data.original_points()
+        points_earned = points_earned if (user_data.points != points_earned) and (user_data.original_points() != 0) else 0
+
+        dict_results["points_earned"] = {"points" : points_earned, "point_display" : user_data.point_display }
         dict_results["user_info_html"] = templatetags.user_info(user_data.nickname, user_data)
 
         user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
