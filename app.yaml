@@ -1,4 +1,4 @@
-application: james-khanacademy
+application: khan-academy
 version: 764
 runtime: python
 api_version: 1
