@@ -109,4 +109,6 @@ def class_progress_report_graph_context(user_data, student_list):
         'exercise_names': exercise_names,
         'exercise_data': exercise_data,
         'coach_email': user_data.email,
+        'user_data_students': list_students,
+        'c_points': reduce(lambda a, b: a + b, map(lambda s: s.points, list_students), 0)
     }
