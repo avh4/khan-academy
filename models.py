@@ -464,17 +464,15 @@ class UserExercise(db.Model):
                 util_notify.update(user_data, self, False, True)
 
                 # Score conversions for A/B test
-                bingo('sbar_gained_proficiency')
+                bingo('mario_gained_proficiency')
 
                 if len(user_data.proficient_exercises) == 5:
-                    bingo('sbar_gained_5th_proficiency')
+                    bingo('mario_gained_5th_proficiency')
                 elif len(user_data.proficient_exercises) == 10:
-                    bingo('sbar_gained_10th_proficiency')
+                    bingo('mario_gained_10th_proficiency')
 
                 if self.exercise == 'addition_1':
-                    bingo('sbar_addition_1_proficiency')
-                elif self.exercise == 'geometry_1':
-                    bingo('sbar_geometry_1_proficiency')
+                    bingo('mario_addition_1_proficiency')
 
         else:
             if self.exercise in user_data.proficient_exercises:
