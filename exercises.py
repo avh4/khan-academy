@@ -145,10 +145,11 @@ class ViewExercise(request_handler.RequestHandler):
                 # For each attempt, add it to the list and then add any hints
                 # that came after it
                 for i in range(0, len(problem_log.attempts)):
+                    logging.critical( previous_time )
                     user_activity.append([
                         "correct-activity" if problem_log.correct else "incorrect-activity",
                         unicode(problem_log.attempts[i] if problem_log.attempts[i] else 0),
-                        max(0, problem_log.time_taken_attempts[i])
+                        max(0, problem_log.time_taken_attempts[i] - previous_time)
                         ])
 
                     previous_time = 0
