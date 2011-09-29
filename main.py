@@ -854,7 +854,7 @@ application = GAEBingoWSGIMiddleware(application)
 application = request_cache.RequestCacheMiddleware(application)
 
 def main():
-    if os.environ["SERVER_NAME"] == "smarthistory.khanacademy.org":
+    if os.environ["SERVER_NAME"] != "smarthistory.khanacademy.org":
         run_wsgi_app(applicationSmartHistory)
     else:
         run_wsgi_app(application)
