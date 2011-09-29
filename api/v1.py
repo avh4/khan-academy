@@ -22,6 +22,15 @@ from api.auth.decorators import oauth_required, oauth_optional, admin_required, 
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
+# add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
+# case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
+# response so that we can visibly award badges while the page silently posts log info in the background.
+# 
+# If you're wondering how this happens, it's add_action_results has the side-effect of actually mutating 
+# the `obj` passed into it (but, i mean, that's what you want here)
+# 
+# but you ask, what matter of client-side code actually takes care of doing that?
+# have you seen javascript/shared-package/api.js ?
 def add_action_results(obj, dict_results):
 
     badges_earned = []
@@ -29,6 +38,7 @@ def add_action_results(obj, dict_results):
 
     if user_data:
         dict_results["user_data"] = user_data
+
         dict_results["user_info_html"] = templatetags.user_info(user_data.nickname, user_data)
 
         user_notifications_dict = notifications.UserNotifier.pop_for_user_data(user_data)
@@ -357,6 +367,7 @@ def user_exercises_all():
 
         if user_data_student:
             exercises = models.Exercise.get_all_use_cache()
+            user_exercise_graph = models.UserExerciseGraph.get(user_data_student)
             user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
 
             exercises_dict = dict((exercise.name, exercise) for exercise in exercises)
@@ -372,6 +383,7 @@ def user_exercises_all():
             for exercise_name in user_exercises_dict:
                 user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
                 user_exercises_dict[exercise_name]._user_data = user_data_student
+                user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
 
             return user_exercises_dict.values()
 
@@ -478,7 +490,7 @@ def attempt_problem_number(exercise_name, problem_number):
 
         if user_exercise and problem_number:
 
-            user_exercise = attempt_problem(
+            user_exercise, user_exercise_graph = attempt_problem(
                     user_data,
                     user_exercise,
                     problem_number,
@@ -494,8 +506,19 @@ def attempt_problem_number(exercise_name, problem_number):
                     request.remote_addr,
                     )
 
+            # this always returns a delta of points earned each attempt
+            points_earned = user_data.points - user_data.original_points()
+            if(user_exercise.streak == 0):
+                # never award points for a zero streak
+                points_earned = 0
+            if(user_exercise.streak == 1):
+                # award points for the first correct exercise done, even if no prior history exists
+                # and the above pts-original points gives a wrong answer
+                points_earned = user_data.points if (user_data.points == points_earned) else points_earned
+
             add_action_results(user_exercise, {
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
+                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display }
             })
 
             return user_exercise
@@ -517,7 +540,7 @@ def hint_problem_number(exercise_name, problem_number):
 
         if user_exercise and problem_number:
 
-            user_exercise = attempt_problem(
+            user_exercise, user_exercise_graph = attempt_problem(
                     user_data,
                     user_exercise,
                     problem_number,
@@ -534,7 +557,7 @@ def hint_problem_number(exercise_name, problem_number):
                     )
 
             add_action_results(user_exercise, {
-                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_data.get_exercise_states(exercise, user_exercise)),
+                "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
             })
 
             return user_exercise

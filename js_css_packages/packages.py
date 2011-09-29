@@ -74,6 +74,7 @@ javascript = {
             "utils/derivative-intuition.js",
             "utils/exponents.js",
             "utils/expressions.js",
+            "utils/functional.js",
             "utils/graphie-geometry.js",
             "utils/graphie-helpers-arithmetic.js",
             "utils/graphie-helpers.js",

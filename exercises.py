@@ -148,7 +148,7 @@ class ViewExercise(request_handler.RequestHandler):
                     user_activity.append([
                         "correct-activity" if problem_log.correct else "incorrect-activity",
                         unicode(problem_log.attempts[i] if problem_log.attempts[i] else 0),
-                        max(0, problem_log.time_taken_attempts[i])
+                        max(0, problem_log.time_taken_attempts[i] - previous_time)
                         ])
 
                     previous_time = 0
@@ -206,40 +206,35 @@ class ViewAllExercises(request_handler.RequestHandler):
     def get(self):
         user_data = models.UserData.current() or models.UserData.pre_phantom()
 
-        ex_graph = models.ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
+        user_exercise_graph = models.UserExerciseGraph.get(user_data)
+        if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
-        recent_exercises = ex_graph.get_recent_exercises()
-        review_exercises = ex_graph.get_review_exercises()
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
+        graph_dicts = user_exercise_graph.graph_dicts()
+        suggested_graph_dicts = user_exercise_graph.suggested_graph_dicts()
+        proficient_graph_dicts = user_exercise_graph.proficient_graph_dicts()
+        recent_graph_dicts = user_exercise_graph.recent_graph_dicts()
+        review_graph_dicts = user_exercise_graph.review_graph_dicts()
 
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
+        for graph_dict in suggested_graph_dicts:
+            graph_dict["status"] = "Suggested"
 
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            if exercise in review_exercises:
-                exercise.review = True
-                exercise.status = "Review"
+        for graph_dict in proficient_graph_dicts:
+            graph_dict["status"] = "Proficient"
 
-        if self.request_bool("move_on", default=False):
-            bingo("proficiency_message_heading")
+        for graph_dict in review_graph_dicts:
+            graph_dict["status"] = "Review"
+
+            try:
+                suggested_graph_dicts.remove(graph_dict)
+            except ValueError:
+                pass
 
         template_values = {
-            'exercises': ex_graph.exercises,
-            'recent_exercises': recent_exercises,
-            'review_exercises': review_exercises,
-            'suggested_exercises': suggested_exercises,
+            'graph_dicts': graph_dicts,
+            'suggested_graph_dicts': suggested_graph_dicts,
+            'recent_graph_dicts': recent_graph_dicts,
+            'review_graph_dicts': review_graph_dicts,
             'user_data': user_data,
             'expanded_all_exercises': user_data.expanded_all_exercises,
             'map_coords': knowledgemap.deserializeMapCoords(user_data.map_coords),
@@ -395,8 +390,6 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
             if exercise.name == 'addition_1':
                 add_to_conversions(models.UserData.addition_1_conversions)
-            elif exercise.name == 'geometry_1':
-                add_to_conversions(models.UserData.geometry_1_conversions)
 
             add_to_conversions(models.UserData.any_exercise_conversions)
 
@@ -443,11 +436,10 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
             user_exercise.reset_streak(shrink_start)
 
-        # Manually clear exercise's memcache since we're throwing it in a bulk put
-        user_exercise.clear_memcache()
+        user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
 
         # Bulk put
-        db.put([user_data, user_exercise])
+        db.put([user_data, user_exercise, user_exercise_graph.cache])
 
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
@@ -456,40 +448,28 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                        _queue="problem-log-queue",
                        _url="/_ah/queue/deferred_problemlog")
 
-        return user_exercise
+        return user_exercise, user_exercise_graph
 
 class ExerciseAdmin(request_handler.RequestHandler):
 
     @user_util.developer_only
     def get(self):
         user_data = models.UserData.current()
-        user = models.UserData.current().user
+        user_exercise_graph = models.UserExerciseGraph.current()
 
-        ex_graph = models.ExerciseGraph(user_data)
-        if user_data.reassess_from_graph(ex_graph):
+        if user_data.reassess_from_graph(user_exercise_graph):
             user_data.put()
 
-        recent_exercises = ex_graph.get_recent_exercises()
-        suggested_exercises = ex_graph.get_suggested_exercises()
-        proficient_exercises = ex_graph.get_proficient_exercises()
-        exercises = []
-        for exercise in ex_graph.exercises:
-            exercise.phantom = False
-            exercise.suggested = False
-            exercise.proficient = False
-            exercise.review = False
-            exercise.status = ""
+        graph_dicts = user_exercise_graph.graph_dicts()
+        for graph_dict in graph_dicts:
+            exercise = models.Exercise.get_by_name(graph_dict["name"])
+            graph_dict["live"] = exercise and exercise.live
 
-            if exercise in suggested_exercises:
-                exercise.suggested = True
-                exercise.status = "Suggested"
-            if exercise in proficient_exercises:
-                exercise.proficient = True
-                exercise.status = "Proficient"
-            exercises.append(exercise)
-
-        exercises.sort(key=lambda e: e.name)
-        template_values = {'App' : App,'admin': True,  'exercises': exercises, 'map_coords': (0,0,0)}
+        template_values = {
+            'graph_dicts': sorted(graph_dicts, key=lambda graph_dict: graph_dict["name"]),
+            'admin': True,
+            'map_coords': (0, 0, 0),
+            }
 
         self.render_jinja2_template('exerciseadmin.html', template_values)
 

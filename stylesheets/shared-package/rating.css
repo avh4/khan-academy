@@ -71,19 +71,19 @@
 
 .unit-rating li.current-rating {
 	background-image: url(/images/non-repeating-sprites.3.png);
-    background-position: -10px -780px;
-	height: 30px;
-	z-index: 1;
-	}
-
-.new li.current-rating,
-.new_partial_reset .unit-rating li.current-rating,
-.new_full_reset .unit-rating li.current-rating {
-	background-image: url(/images/non-repeating-sprites.3.png);
   background-position: -300px -780px;
 	height: 30px;
 	z-index: 1;
 }
+
+/*.new li.current-rating,
+.new_partial_reset .unit-rating li.current-rating,
+.new_full_reset .unit-rating li.current-rating {
+  background-image: url(/images/non-repeating-sprites.3.png);
+  background-position: -300px -780px;
+  height: 30px;
+  z-index: 1;
+}*/
 
 
 .unit-rating li.current-rating, 
@@ -113,28 +113,17 @@
   z-index: 3;
   opacity: 0.2;
   filter:alpha(opacity=20);
-  }
-
-.new .unit-rating li.best-label,  
-.new_partial_reset .unit-rating li.best-label, 
-.new_full_reset .unit-rating li.best-label,
-.new .unit-rating li.current-rating,  
-.new_partial_reset .unit-rating li.current-rating, 
-.new_full_reset .unit-rating li.current-rating{
   background-image: url(/images/non-repeating-sprites.3.png);
-  background-position: -300px -780px;
+  background-position: -300px -820px;
   z-index: 3;
 }
 
-.single-exercise .new_partial_reset .unit-rating li.current-rating,
-.single-exercise .new_full_reset .unit-rating li.current-rating {
-	background-image: url(/images/non-repeating-sprites.3.png);
+.single-exercise .unit-rating li.current-rating{
+  background-image: url(/images/non-repeating-sprites.3.png);
   background-position: -300px -820px;
-	height: 30px;
-	z-index: 3;
+  height: 30px;
+  z-index: 3;
 }
-
-
 
 .new .unit-rating li.best-label,  
 .new_partial_reset .unit-rating li.best-label, 
@@ -148,36 +137,28 @@
     z-index: 4;
     width:2px;
     }
-
-.single-exercise .new_partial_reset .unit-rating li.level-label,
-.single-exercise .new_full_reset .unit-rating li.level-label {
-  background: url('/images/streak-meter-separator.2.png') no-repeat right top;
-}
+.single-exercise .unit-rating li.level-label {
+    background: url('/images/streak-meter-separator.2.png') no-repeat right top;
+    }
 
 .unit-rating li.current-label {
     z-index: 5;
     }
 
 .unit-rating li.streak-icon {
-	background-image: url(/images/non-repeating-sprites.3.png);
-    background-position: -10px -820px;
-    z-index: 2;
-    }
-.single-exercise .unit-rating li.streak-icon {
-    top: 2px;
-}
-
-.single-exercise .new_partial_reset .unit-rating li.streak-icon {
-    top: 6px;
-    width: 100%;
-    text-align: left;
-    background: none;
-    font-size: 15px;
-    text-indent: 5px;
-    color: #888;
-    text-shadow: 0 1px 0 #EEE;
-    padding: 0;
-}
+  background-image: url(/images/non-repeating-sprites.3.png);
+  background-position: -10px -820px;
+  z-index: 2;
+  top: 6px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  font-size: 15px;
+  text-indent: 5px;
+  color: #888;
+  text-shadow: 0 1px 0 #EEE;
+  padding: 0;
+  }
 
 .voted {color:#999;}
 .thanks {color:#36AA3D;}
