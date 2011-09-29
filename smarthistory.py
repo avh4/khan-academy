@@ -80,7 +80,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         self.response.out.write(data)   
 
     @staticmethod
-    def clearCache(self):
+    def clearCache():
         Setting.smarthistory_version(int(Setting.smarthistory_version()) + 1)  
 
     #load the resource from smart history's server and then cache it in the data store
