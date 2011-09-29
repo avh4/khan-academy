@@ -45,7 +45,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         if self.request.headers.has_key("If-None-Match") and response_headers.has_key("etag") and self.request.headers["If-None-Match"]==response_headers["etag"]:
             logging.info("sending 304 from within the application");
             
-            if self.response.headers.get("content-type").find("image") != -1:
+            if response_headers.get("content-type").find("image") != -1:
                 self.response.headers["Cache-Control"]="public, max-age="+str(SMARTHISTORY_IMAGE_CACHE_EXPIRATION)+";"
             else:
                 self.response.headers["Cache-Control"]="public, max-age="+str(SMARTHISTORY_CACHE_EXPIRATION_TIME)+";"
