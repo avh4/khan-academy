@@ -1,3 +1,11 @@
+// Hello friend!
+// APIActionResults is an observer for all XHR responses that go through the page
+// The key being that it will listen for XHR messages with the magic header "X-KA-API-Response"
+// which is added in from api/__init__.py
+// 
+// In api/v1.py, add_action_results takes care of bundling data to be digested by this client-side
+// listener. As a result, if you have something which happens as a result of an API POST, it's worth
+// investigating whether or not you can have it triggered here rather than in khan-exercise.js
 var APIActionResults = {
 
     init: function() {
@@ -55,4 +63,22 @@ $(function(){ APIActionResults.register("user_info_html",
             $("#user-info").html(sUserInfoHtml);
         }
     );
+});
+
+// show point animation above streak bar when (in exercise pages && if part of test)
+$(function(){ 
+
+  var updatePointDisplay = function( data ) {
+    if( jQuery(".single-exercise").length > 0 && data.point_display === "on" && data.points > 0) {
+      var coin = jQuery("<div>+"+data.points+"</div>").addClass("energy-points-badge");
+      jQuery(".streak-bar").append(coin);
+      jQuery(coin)
+        .fadeIn(195)
+        .delay(650)
+        .animate({top:"-30", opacity:0}, 350, "easeInOutCubic",
+          function(){jQuery(coin).hide(0).remove();}); // remove coin on animation complete
+    }
+  };
+
+  APIActionResults.register( "points_earned", updatePointDisplay );
 });

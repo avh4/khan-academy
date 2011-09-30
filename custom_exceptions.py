@@ -7,3 +7,6 @@ class MissingExerciseException(Exception):
 
 class TumblrException(Exception):
     pass
+
+class SmartHistoryLoadException(Exception):
+    pass

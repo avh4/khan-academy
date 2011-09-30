@@ -46,6 +46,7 @@ import exercisestats.report
 import exercisestats.report_json
 import github
 import paypal
+import smarthistory
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -357,10 +358,6 @@ class ViewGetInvolved(request_handler.RequestHandler):
 
 class ViewContribute(request_handler.RequestHandler):
     def get(self):
-
-        if self.request_bool("convert", default=False):
-            bingo("contribute_text")
-
         self.render_jinja2_template('contribute.html', {"selected_nav_link": "contribute"})
 
 class ViewCredits(request_handler.RequestHandler):
@@ -675,6 +672,10 @@ class RealtimeEntityCount(request_handler.RequestHandler):
             count = getattr(models, kind).all().count(10000)
             self.response.out.write("%s: %d<br>" % (kind, count))
 
+applicationSmartHistory = webapp2.WSGIApplication([
+    ('/.*', smarthistory.SmartHistoryProxy)
+])
+
 application = webapp2.WSGIApplication([
     ('/', homepage.ViewHomePage),
     ('/about', util_about.ViewAbout),
@@ -853,7 +854,10 @@ application = GAEBingoWSGIMiddleware(application)
 application = request_cache.RequestCacheMiddleware(application)
 
 def main():
-    run_wsgi_app(application)
+    if os.environ["SERVER_NAME"] == "smarthistory.khanacademy.org":
+        run_wsgi_app(applicationSmartHistory)
+    else:
+        run_wsgi_app(application)
 
 if __name__ == '__main__':
     main()

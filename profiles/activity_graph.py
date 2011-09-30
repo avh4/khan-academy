@@ -178,17 +178,17 @@ def get_badge_activity_data(user_data, bucket_list, bucket_type, dt_start_utc, d
 def get_proficiency_activity_data(user_data, bucket_list, bucket_type, dt_start_utc, dt_end_utc, tz_offset):
 
     dict_bucket = get_empty_dict_bucket(bucket_list)
-    user_exercises = models.UserExercise.get_for_user_data_use_cache(user_data)
+    user_exercise_graph = models.UserExerciseGraph.get(user_data)
 
-    for user_exercise in user_exercises:
+    for graph_dict in user_exercise_graph.graph_dicts():
 
-        if not user_exercise.proficient_date:
+        if not graph_dict["proficient_date"]:
             continue
 
-        if user_exercise.proficient_date < dt_start_utc or user_exercise.proficient_date > dt_end_utc:
+        if graph_dict["proficient_date"] < dt_start_utc or graph_dict["proficient_date"] > dt_end_utc:
             continue
 
-        key = get_bucket_value(user_exercise.proficient_date, tz_offset, bucket_type)
+        key = get_bucket_value(graph_dict["proficient_date"], tz_offset, bucket_type)
 
         if not dict_bucket.has_key(key):
             continue;
@@ -196,7 +196,7 @@ def get_proficiency_activity_data(user_data, bucket_list, bucket_type, dt_start_
         if not dict_bucket[key]:
             dict_bucket[key] = {"exercise_names": {}}
 
-        dict_bucket[key]["exercise_names"][models.Exercise.to_display_name(user_exercise.exercise)] = True
+        dict_bucket[key]["exercise_names"][models.Exercise.to_display_name(graph_dict["name"])] = True
 
     add_bucket_html_summary(dict_bucket, "exercise_names", 3)
 
