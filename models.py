@@ -1671,7 +1671,7 @@ class UserExerciseCache(db.Model):
 
     # Bump this whenever you change the structure of the cached UserExercises and need to invalidate all old caches
     CURRENT_VERSION = 6
-    
+
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
 
@@ -1696,7 +1696,7 @@ class UserExerciseCache(db.Model):
         # Try to get 'em all by key name
         user_exercise_caches = UserExerciseCache.get_by_key_name(
                 map(
-                    lambda user_data: UserExerciseCache.key_for_user_data(user_data), 
+                    lambda user_data: UserExerciseCache.key_for_user_data(user_data),
                     user_data_list),
                 config=db.create_config(read_policy=db.EVENTUAL_CONSISTENCY)
                 )
@@ -1706,7 +1706,7 @@ class UserExerciseCache(db.Model):
         async_queries = []
         for i, user_exercise_cache in enumerate(user_exercise_caches):
             if not user_exercise_cache or user_exercise_cache.version != UserExerciseCache.CURRENT_VERSION:
-                # This user's cached graph is missing or out-of-date, 
+                # This user's cached graph is missing or out-of-date,
                 # put it in the list of graphs to be regenerated.
                 async_queries.append(UserExercise.get_for_user_data(user_data_list[i]))
 
@@ -1741,7 +1741,7 @@ class UserExerciseCache(db.Model):
                 future_put = db.put_async(caches_to_put)
 
                 if App.is_dev_server:
-                    # On the dev server, we have to explicitly wait for get_result in order to 
+                    # On the dev server, we have to explicitly wait for get_result in order to
                     # trigger the put (not truly asynchronous).
                     future_put.get_result()
 
@@ -1819,7 +1819,7 @@ class UserExerciseGraph(object):
     def recent_graph_dicts(self, n_recent=2):
         return sorted(
                 [graph_dict for graph_dict in self.graph_dicts() if graph_dict["last_done"]],
-                reverse=True, 
+                reverse=True,
                 key=lambda graph_dict: graph_dict["last_done"],
                 )[0:n_recent]
 
@@ -1868,8 +1868,8 @@ class UserExerciseGraph(object):
                 graph_dict["is_ancestor_review_candidate"] = False
 
                 for covering_graph_dict in graph_dict["coverer_dicts"]:
-                    graph_dict["is_ancestor_review_candidate"] = (graph_dict["is_ancestor_review_candidate"] or 
-                            covering_graph_dict["is_review_candidate"] or 
+                    graph_dict["is_ancestor_review_candidate"] = (graph_dict["is_ancestor_review_candidate"] or
+                            covering_graph_dict["is_review_candidate"] or
                             compute_is_ancestor_review_candidate(covering_graph_dict))
 
             return graph_dict["is_ancestor_review_candidate"]
@@ -1924,7 +1924,7 @@ class UserExerciseGraph(object):
         exercise_dicts = UserExerciseGraph.exercise_dicts()
 
         user_exercise_graphs = map(
-                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercise_dicts), 
+                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercise_dicts),
                 itertools.izip(user_data_list, user_exercise_cache_list))
 
         # Return list of graphs if a list was passed in,
@@ -1979,8 +1979,8 @@ class UserExerciseGraph(object):
                 "prerequisite_dicts": [],
             })
 
-            graph_dict["struggling"] = (graph_dict["streak"] == 0 and 
-                    graph_dict["longest_streak"] < graph_dict["required_streak"] and 
+            graph_dict["struggling"] = (graph_dict["streak"] == 0 and
+                    graph_dict["longest_streak"] < graph_dict["required_streak"] and
                     graph_dict["total_done"] > graph_dict["struggling_threshold"])
 
             # In case user has multiple UserExercise mappings for a specific exercise,
@@ -2015,7 +2015,7 @@ class UserExerciseGraph(object):
 
             graph_dict["proficient"] = False
 
-            # Consider an exercise implicitly proficient if the user has 
+            # Consider an exercise implicitly proficient if the user has
             # never missed a problem and a covering ancestor is proficient
             if graph_dict["streak"] == graph_dict["total_done"]:
                 for covering_graph_dict in graph_dict["coverer_dicts"]:
@@ -2056,8 +2056,8 @@ class UserExerciseGraph(object):
             return graph_dict["suggested"]
 
         def set_endangered(graph_dict):
-            graph_dict["endangered"] = (graph_dict["proficient"] and 
-                    graph_dict["streak"] == 0 and 
+            graph_dict["endangered"] = (graph_dict["proficient"] and
+                    graph_dict["streak"] == 0 and
                     graph_dict["longest_streak"] >= graph_dict["required_streak"])
 
         for exercise_name in graph:
