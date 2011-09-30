@@ -55,11 +55,15 @@
 
 {% block body %}
     <div id="main">
-        <div id="header"><h1>GAE/Bingo Timeline Plot</h1></div>
-        <div class="experiment-container block">
-            <h2 class="experiment-title">{{ experiment.pretty_name|escape }}</h2>
+        <div id="header"><h1><a href="/gae_bingo/dashboard">GAE/Bingo Experiments</a></h1></div>
 
+        <div class="experiment-container block">
+            {% if not experiment_data %}
+            No historical experiment data to plot.
+            {% else %}
+            <h2 class="experiment-title">{{ experiment.pretty_name|escape }}</h2>
             <div id="highchart"></div>
+            {% endif %}
         </div>
     </div>
 {% endblock body %}

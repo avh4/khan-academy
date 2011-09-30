@@ -13,8 +13,7 @@ class TimeSeries:
         self.snapshots = []
     
 class Timeline(RequestHandler):
-
-    def post(self):
+    def get(self):
 
         experiment_name = self.request.get("experiment_name")
 
