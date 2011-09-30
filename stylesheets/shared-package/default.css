@@ -1480,6 +1480,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         box-shadow: 0 0 3px #666;
         border: 1px solid #aaa;
     }
+    .drawer-hoverable .exercise-badge:hover .exercise-title a,
+    .drawer-hoverable .exercise-badge-hover .exercise-title a {
+        text-decoration: underline;
+    }
     .exercise-badge .energy-points-badge {
         padding: 0;
 		width: 48px;
