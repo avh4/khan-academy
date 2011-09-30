@@ -630,7 +630,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
     proficient_exercises = db.StringListProperty(indexed=False) # Names of exercises in which the user is *explicitly* proficient
     all_proficient_exercises = db.StringListProperty(indexed=False) # Names of all exercises in which the user is proficient
     suggested_exercises = db.StringListProperty(indexed=False)
-    assigned_exercises = db.StringListProperty(indexed=False)
     badges = db.StringListProperty(indexed=False) # All awarded badges
     need_to_reassess = db.BooleanProperty(indexed=False)
     points = db.IntegerProperty(default = 0)
@@ -650,7 +649,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     uservideocss_version = db.IntegerProperty(default = 0, indexed=False)
 
     _serialize_blacklist = [
-            "assigned_exercises", "badges", "count_feedback_notification",
+            "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
@@ -774,7 +773,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
             last_login=datetime.datetime.now(),
             proficient_exercises=[],
             suggested_exercises=[],
-            assigned_exercises=[],
             need_to_reassess=True,
             points=0,
             coaches=[],
