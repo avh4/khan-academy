@@ -77,10 +77,6 @@ def get_coach_student_and_student_list(request_handler):
     return (coach, student, student_list)
 
 class ViewClassProfile(request_handler.RequestHandler):
-    @staticmethod
-    def class_points(students):
-        return reduce(lambda a,b: a + b, map(lambda s: s.points, students), 0)
-
     @disallow_phantoms
     def get(self):
         coach = UserData.current()
@@ -93,23 +89,16 @@ class ViewClassProfile(request_handler.RequestHandler):
                 # if you are a dev, admin, or coworker.
                 coach = user_override
 
-            students_data = coach.get_students_data()
-
             student_lists = StudentList.get_for_coach(coach.key())
 
             student_lists_list = [{
                 'key': 'allstudents',
                 'name': 'All students',
-                'nstudents': len(students_data),
-                'class_points': self.class_points(students_data)
             }];
             for student_list in student_lists:
-                students = [s for s in students_data if student_list.key() in s.student_lists]
                 student_lists_list.append({
                     'key': str(student_list.key()),
                     'name': student_list.name,
-                    'nstudents': len(students),
-                    'class_points': self.class_points(students)
                 })
 
             list_id, _ = get_last_student_list(self, student_lists, coach==UserData.current())
@@ -117,11 +106,6 @@ class ViewClassProfile(request_handler.RequestHandler):
             for student_list in student_lists_list:
                 if student_list['key'] == list_id:
                     current_list = student_list
-
-            dict_students = map(lambda s: {
-                "email": s.email,
-                "nickname": s.nickname,
-            }, students_data)
 
             selected_graph_type = self.request_string("selected_graph_type") or ClassProgressReportGraph.GRAPH_TYPE
             initial_graph_url = "/profile/graph/%s?coach_email=%s&%s" % (selected_graph_type, urllib.quote(coach.email), urllib.unquote(self.request_string("graph_query_params", default="")))
@@ -138,8 +122,7 @@ class ViewClassProfile(request_handler.RequestHandler):
                     'selected_graph_type': selected_graph_type,
                     'initial_graph_url': initial_graph_url,
                     'exercises': models.Exercise.get_all_use_cache(),
-                    'is_profile_empty': len(dict_students) <= 0,
-                    'dict_students': dict_students,
+                    'is_profile_empty': not coach.has_students(),
                     'selected_nav_link': 'coach',
                     "view": self.request_string("view", default=""),
                     }

@@ -892,7 +892,13 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 map(lambda coworker_email: UserData.get_from_db_key_email(coworker_email) , self.coworkers))
 
     def has_students(self):
-        return len(self.get_students_data()) > 0
+        coach_email = self.key_email
+        count = UserData.all().filter('coaches =', coach_email).count()
+
+        if coach_email.lower() != coach_email:
+            count += UserData.all().filter('coaches =', coach_email.lower()).count()
+
+        return count > 0
 
     def coach_emails(self):
         emails = []
