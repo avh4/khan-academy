@@ -59,7 +59,15 @@ class RequestInputHandler(object):
     def request_user_data(self, key):
         email = self.request_string(key)
         if email:
+
+            user_data_current = UserData.current()
+            if user_data_current and user_data_current.user_email == email:
+                # Avoid an extra DB call in the (fairly often) case that the requested email
+                # is the email of the currently logged-in user
+                return user_data_current
+
             return UserData.get_from_user_input_email(email)
+
         return None
 
     def request_float(self, key, default = None):
