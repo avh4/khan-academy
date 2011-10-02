@@ -627,10 +627,10 @@ class UserData(GAEBingoIdentityModel, db.Model):
     developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty(indexed=False)
-    proficient_exercises = object_property.TsvCompatStringListProperty() # Names of exercises in which the user is *explicitly* proficient
-    all_proficient_exercises = object_property.TsvCompatStringListProperty() # Names of all exercises in which the user is proficient
-    suggested_exercises = object_property.TsvCompatStringListProperty()
-    badges = object_property.TsvCompatStringListProperty() # All awarded badges
+    proficient_exercises = object_property.StringListCompatTsvProperty() # Names of exercises in which the user is *explicitly* proficient
+    all_proficient_exercises = object_property.StringListCompatTsvProperty() # Names of all exercises in which the user is proficient
+    suggested_exercises = object_property.StringListCompatTsvProperty()
+    badges = object_property.StringListCompatTsvProperty() # All awarded badges
     need_to_reassess = db.BooleanProperty(indexed=False)
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
