@@ -48,5 +48,9 @@ def class_exercises_over_time_graph_context(user_data, student_list):
             dict_student_exercises[student_nickname]["exercises"].append(data)
             end_date = user_exercise.proficient_date
 
-    return { 'dict_student_exercises': dict_student_exercises }
+    return {
+            "dict_student_exercises": dict_student_exercises,
+            "user_data_students": students_data,
+            "c_points": reduce(lambda a, b: a + b, map(lambda s: s.points, students_data), 0)
+            }
 

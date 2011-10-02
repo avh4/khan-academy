@@ -312,3 +312,9 @@ indexes:
   properties:
   - name: playlist.title
   - name: video_position
+
+- kind: _GAEBingoSnapshotLog
+  ancestor: yes
+  properties:
+  - name: time_recorded
+    direction: desc

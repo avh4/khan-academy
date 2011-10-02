@@ -36,12 +36,12 @@
     <span id="students-coached">
         <span class="profile-header-icon"><img src="/images/class-students-icon-shadow.png" /></span>
         <span class="count">
-            <span id="count_students">{{ student_list.nstudents|thousands_separated }}</span><br />
+            <span id="count_students">&hellip;</span><br />
             <span class="label">Students</span>
         </span>
     </span>
     <span id="energy-points">
-        <span class="energy-points-badge">{{ student_list.class_points|thousands_separated }}</span><br />
+        <span class="energy-points-badge">&hellip;</span><br />
         <span class="label">Class Energy Points</span>
     </span>
 </div>
@@ -54,7 +54,7 @@
                 <span class="graph-options">
                     <span class="progress-legend exercise-color started">Started</span>                
                     <span class="progress-legend exercise-color proficient">Proficient</span>
-                    <span class="progress-legend exercise-color review">Review</span>
+                    <span class="progress-legend exercise-color review light">Review</span>
                     <span class="progress-legend exercise-color struggling">Struggling</span>
                 </span>
             </p>
@@ -74,11 +74,7 @@
 
                 <div id="students-highlight" class="vertical-choice-container" style="display:none;">
                     <ul>
-                        {% for dict_student in dict_students %}
-                        <li>
-                        <a href="#" class="highlight-student-series" data-email="{{ dict_student["email"]|escape }}">{{ dict_student["nickname"]|escape }}</a>
-                        </li>
-                        {% endfor %}
+                        <li>&hellip;</li>
                     </ul>
                 </div>
 

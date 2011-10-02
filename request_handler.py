@@ -13,7 +13,7 @@ from google.appengine.runtime.apiproxy_errors import CapabilityDisabledError
 import webapp2
 import shared_jinja
 
-from custom_exceptions import MissingVideoException, MissingExerciseException
+from custom_exceptions import MissingVideoException, MissingExerciseException, SmartHistoryLoadException
 from app import App
 import cookie_util
 
@@ -59,7 +59,15 @@ class RequestInputHandler(object):
     def request_user_data(self, key):
         email = self.request_string(key)
         if email:
+
+            user_data_current = UserData.current()
+            if user_data_current and user_data_current.user_email == email:
+                # Avoid an extra DB call in the (fairly often) case that the requested email
+                # is the email of the currently logged-in user
+                return user_data_current
+
             return UserData.get_from_user_input_email(email)
+
         return None
 
     def request_float(self, key, default = None):
@@ -124,6 +132,11 @@ class RequestHandler(webapp2.RequestHandler, RequestInputHandler):
             logging.info(e)
             title = "This video is no longer around."
             message_html = "You're looking for a video that either never existed or wandered away. <a href='/'>Head to our video library</a> to find it."
+            sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
+
+        elif type(e) is SmartHistoryLoadException:
+            title = "This page of the Smarthistory section of Khan Academy does not exist"
+            message_html = "Go to <a href='/'>our Smarthistory homepage</a> to find more art history content."
             sub_message_html = "If this problem continues and you think something is wrong, please <a href='/reportissue?type=Defect'>let us know by sending a report</a>."
 
         if not silence_report:

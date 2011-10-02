@@ -16,26 +16,24 @@
     {% set s_prefix = "node-challenge" if exercise.summative else "node" %}
 
     <div id="exercise-icon-container">
-    {% block exercise_icon_block scoped %}
-    <div class="proficient-badge">
-        <img src="
-        {%- if exercise.review -%}
-            /images/node-review.png
-        {%- elif exercise.suggested -%}
-            /images/{{ s_prefix }}-suggested.png
-        {%- elif exercise.proficient -%}
-            /images/{{ s_prefix }}-complete.png
-        {%- else -%}
-            /images/{{ s_prefix }}-not-started.png
-        {%- endif -%}
-        ?{{App.version}}" height=80 width=76>
-    </div>
-    {% endblock %}
+        <div class="proficient-badge">
+            <img src="
+            {%- if exercise.status == "Review" -%}
+                /images/node-review.png
+            {%- elif exercise.status == "Suggested" -%}
+                /images/{{ s_prefix }}-suggested.png
+            {%- elif exercise.status == "Proficient" -%}
+                /images/{{ s_prefix }}-complete.png
+            {%- else -%}
+                /images/{{ s_prefix }}-not-started.png
+            {%- endif -%}
+            ?{{App.version}}" height=80 width=76>
+        </div>
     </div>
 
 {%- endmacro %}
 
-{% macro knowledgemap(exercises, map_coords, admin=False) -%}
+{% macro knowledgemap(graph_dicts, map_coords, admin=False) -%}
     <script src="http://maps.google.com/maps/api/js?v=3.3&sensor=false" type="text/javascript"></script>
     {{ js_css_packages.js_package("maps") }}
 
@@ -67,26 +65,26 @@
                     Prerequisites
                 </th>
             </tr>
-            {% for exercise in exercises %}
-            <tr data-id="{{ exercise.name }}" data-points="{{ exercise.points }}" data-name="{{ exercise.display_name }}" data-status="{{ exercise.status }}" data-longest_streak='{{ exercise.longest_streak|default("0") }}' data-streak='{{ exercise.streak }}' data-h_position='{{ exercise.h_position }}' data-v_position='{{ exercise.v_position }}' data-summative='{{ exercise.summative }}'>
+            {% for graph_dict in graph_dicts %}
+            <tr data-id="{{ graph_dict.name }}" data-points="{{ graph_dict.points }}" data-name="{{ graph_dict.display_name }}" data-status="{{ graph_dict.status }}" data-longest_streak='{{ graph_dict.longest_streak }}' data-streak='{{ graph_dict.streak }}' data-h_position='{{ graph_dict.h_position }}' data-v_position='{{ graph_dict.v_position }}' data-summative='{{ graph_dict.summative }}'>
                 <td class="points">
-                    {{ exercise.points }}
+                    {{ graph_dict.points }}
                 </td>
                 <td class="name">
-                    <a href="/exercises?exid={{exercise.name}}">{{ exercise.display_name }}</a>
+                    <a href="/exercises?exid={{graph_dict.name}}">{{ graph_dict.display_name }}</a>
                 </td>
                 <td class="status">
-                    {{ exercise.status }}
+                    {{ graph_dict.status }}
                 </td>
                 <td class="longest_streak">
-                    {{ exercise.longest_streak|default("0") }}
+                    {{ graph_dict.longest_streak }}
                 </td>
                 <td class="streak">
-                    {{ exercise.streak }}
+                    {{ graph_dict.streak }}
                 </td>
                 <td class="prereqs">
                     <ul>
-                        {% for prereq in exercise.prerequisites_ex %}
+                        {% for prereq in graph_dict.prerequisites %}
                         <li data-prereq="{{ prereq.name }}">
                             <a href="/exercises?exid={{prereq.name }}">{{ prereq.display_name }}</a>
                         </li>

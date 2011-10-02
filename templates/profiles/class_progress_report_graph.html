@@ -1,3 +1,7 @@
+{% extends 'profiles/class_graph.html' %}
+
+{% block graph_content %}
+
 {% if not student_emails %}
     <div class="graph-notification">You don't have any students yet.</div>
 {% endif %}
@@ -180,7 +184,7 @@
                     {% for student_email in student_emails %}
                     <tr {% if loop.first %}id="firstTr"{% endif %}>
                     {% for exercise_name in exercise_names %}
-                    <td class="student-module-status exercise-color {{ exercise_data[exercise_name.0][student_email.0]["color"]}}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('{{exercise_data[exercise_name.0][student_email.0]["link"]}}');" data-hover="{{exercise_data[exercise_name.0][student_email.0]["hover"]|escape}}"></td>
+                    <td class="student-module-status exercise-color {{ exercise_data[exercise_name.0][student_email.0]["color"]}} {% if exercise_data[exercise_name.0][student_email.0]["color"] != "transparent" %}action-gradient seethrough{% endif %}" onclick="ProgressReport.onUnhover();Profile.collapseAccordion();Profile.loadGraph('{{exercise_data[exercise_name.0][student_email.0]["link"]}}');" data-hover="{{exercise_data[exercise_name.0][student_email.0]["hover"]|escape}}"></td>
                     {% endfor %}
                     </tr>
                 {% endfor %}
@@ -190,3 +194,5 @@
 
     </tr>
 </table>
+
+{% endblock graph_content %}
