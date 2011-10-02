@@ -47,7 +47,6 @@ import exercisestats.report_json
 import github
 import paypal
 import smarthistory
-import debug
 
 import models
 from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
@@ -732,7 +731,6 @@ application = webapp2.WSGIApplication([
     ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
     ('/admin/changeemail', ChangeEmail),
     ('/admin/realtimeentitycount', RealtimeEntityCount),
-    ('/admin/cachedump', debug.CacheDump),
 
     ('/devadmin/emailchange', devpanel.Email),
     ('/devadmin/managedevs', devpanel.Manage),
