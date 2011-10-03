@@ -49,6 +49,8 @@ def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
             "coach_email": user_data.email,
             "width": (60 * len(graph_data)) + 120,
             "graph_data": graph_data,
-            "is_graph_empty": len(classtime_table.rows) <= 0
+            "is_graph_empty": len(classtime_table.rows) <= 0,
+            "user_data_students": students_data,
+            "c_points": reduce(lambda a, b: a + b, map(lambda s: s.points, students_data), 0)
         }
 

@@ -627,11 +627,10 @@ class UserData(GAEBingoIdentityModel, db.Model):
     developer = db.BooleanProperty(default=False)
     joined = db.DateTimeProperty(auto_now_add=True)
     last_login = db.DateTimeProperty(indexed=False)
-    proficient_exercises = db.StringListProperty(indexed=False) # Names of exercises in which the user is *explicitly* proficient
-    all_proficient_exercises = db.StringListProperty(indexed=False) # Names of all exercises in which the user is proficient
-    suggested_exercises = db.StringListProperty(indexed=False)
-    assigned_exercises = db.StringListProperty(indexed=False)
-    badges = db.StringListProperty(indexed=False) # All awarded badges
+    proficient_exercises = object_property.StringListCompatTsvProperty() # Names of exercises in which the user is *explicitly* proficient
+    all_proficient_exercises = object_property.StringListCompatTsvProperty() # Names of all exercises in which the user is proficient
+    suggested_exercises = object_property.StringListCompatTsvProperty()
+    badges = object_property.StringListCompatTsvProperty() # All awarded badges
     need_to_reassess = db.BooleanProperty(indexed=False)
     points = db.IntegerProperty(default = 0)
     total_seconds_watched = db.IntegerProperty(default = 0)
@@ -650,7 +649,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     uservideocss_version = db.IntegerProperty(default = 0, indexed=False)
 
     _serialize_blacklist = [
-            "assigned_exercises", "badges", "count_feedback_notification",
+            "badges", "count_feedback_notification",
             "last_daily_summary", "need_to_reassess", "videos_completed",
             "moderator", "expanded_all_exercises", "question_sort_order",
             "last_login", "user", "current_user", "map_coords", "expanded_all_exercises",
@@ -774,7 +773,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
             last_login=datetime.datetime.now(),
             proficient_exercises=[],
             suggested_exercises=[],
-            assigned_exercises=[],
             need_to_reassess=True,
             points=0,
             coaches=[],
@@ -892,7 +890,13 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 map(lambda coworker_email: UserData.get_from_db_key_email(coworker_email) , self.coworkers))
 
     def has_students(self):
-        return len(self.get_students_data()) > 0
+        coach_email = self.key_email
+        count = UserData.all().filter('coaches =', coach_email).count()
+
+        if coach_email.lower() != coach_email:
+            count += UserData.all().filter('coaches =', coach_email.lower()).count()
+
+        return count > 0
 
     def coach_emails(self):
         emails = []
@@ -1665,7 +1669,7 @@ class UserExerciseCache(db.Model):
 
     # Bump this whenever you change the structure of the cached UserExercises and need to invalidate all old caches
     CURRENT_VERSION = 6
-    
+
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
 
@@ -1690,7 +1694,7 @@ class UserExerciseCache(db.Model):
         # Try to get 'em all by key name
         user_exercise_caches = UserExerciseCache.get_by_key_name(
                 map(
-                    lambda user_data: UserExerciseCache.key_for_user_data(user_data), 
+                    lambda user_data: UserExerciseCache.key_for_user_data(user_data),
                     user_data_list),
                 config=db.create_config(read_policy=db.EVENTUAL_CONSISTENCY)
                 )
@@ -1700,7 +1704,7 @@ class UserExerciseCache(db.Model):
         async_queries = []
         for i, user_exercise_cache in enumerate(user_exercise_caches):
             if not user_exercise_cache or user_exercise_cache.version != UserExerciseCache.CURRENT_VERSION:
-                # This user's cached graph is missing or out-of-date, 
+                # This user's cached graph is missing or out-of-date,
                 # put it in the list of graphs to be regenerated.
                 async_queries.append(UserExercise.get_for_user_data(user_data_list[i]))
 
@@ -1735,7 +1739,7 @@ class UserExerciseCache(db.Model):
                 future_put = db.put_async(caches_to_put)
 
                 if App.is_dev_server:
-                    # On the dev server, we have to explicitly wait for get_result in order to 
+                    # On the dev server, we have to explicitly wait for get_result in order to
                     # trigger the put (not truly asynchronous).
                     future_put.get_result()
 
@@ -1774,7 +1778,7 @@ class UserExerciseCache(db.Model):
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
-            if user_exercise.exercise not in dicts or dicts[user_exercise.name]["total_done"] < user_exercise_dict["total_done"]:
+            if user_exercise.exercise not in dicts or dicts[user_exercise.exercise]["total_done"] < user_exercise_dict["total_done"]:
                 dicts[user_exercise.exercise] = user_exercise_dict
 
         return UserExerciseCache(
@@ -1813,7 +1817,7 @@ class UserExerciseGraph(object):
     def recent_graph_dicts(self, n_recent=2):
         return sorted(
                 [graph_dict for graph_dict in self.graph_dicts() if graph_dict["last_done"]],
-                reverse=True, 
+                reverse=True,
                 key=lambda graph_dict: graph_dict["last_done"],
                 )[0:n_recent]
 
@@ -1862,8 +1866,8 @@ class UserExerciseGraph(object):
                 graph_dict["is_ancestor_review_candidate"] = False
 
                 for covering_graph_dict in graph_dict["coverer_dicts"]:
-                    graph_dict["is_ancestor_review_candidate"] = (graph_dict["is_ancestor_review_candidate"] or 
-                            covering_graph_dict["is_review_candidate"] or 
+                    graph_dict["is_ancestor_review_candidate"] = (graph_dict["is_ancestor_review_candidate"] or
+                            covering_graph_dict["is_review_candidate"] or
                             compute_is_ancestor_review_candidate(covering_graph_dict))
 
             return graph_dict["is_ancestor_review_candidate"]
@@ -1918,7 +1922,7 @@ class UserExerciseGraph(object):
         exercise_dicts = UserExerciseGraph.exercise_dicts()
 
         user_exercise_graphs = map(
-                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercise_dicts), 
+                lambda (user_data, user_exercise_cache): UserExerciseGraph.generate(user_data, user_exercise_cache, exercise_dicts),
                 itertools.izip(user_data_list, user_exercise_cache_list))
 
         # Return list of graphs if a list was passed in,
@@ -1973,8 +1977,8 @@ class UserExerciseGraph(object):
                 "prerequisite_dicts": [],
             })
 
-            graph_dict["struggling"] = (graph_dict["streak"] == 0 and 
-                    graph_dict["longest_streak"] < graph_dict["required_streak"] and 
+            graph_dict["struggling"] = (graph_dict["streak"] == 0 and
+                    graph_dict["longest_streak"] < graph_dict["required_streak"] and
                     graph_dict["total_done"] > graph_dict["struggling_threshold"])
 
             # In case user has multiple UserExercise mappings for a specific exercise,
@@ -2009,7 +2013,7 @@ class UserExerciseGraph(object):
 
             graph_dict["proficient"] = False
 
-            # Consider an exercise implicitly proficient if the user has 
+            # Consider an exercise implicitly proficient if the user has
             # never missed a problem and a covering ancestor is proficient
             if graph_dict["streak"] == graph_dict["total_done"]:
                 for covering_graph_dict in graph_dict["coverer_dicts"]:
@@ -2050,8 +2054,8 @@ class UserExerciseGraph(object):
             return graph_dict["suggested"]
 
         def set_endangered(graph_dict):
-            graph_dict["endangered"] = (graph_dict["proficient"] and 
-                    graph_dict["streak"] == 0 and 
+            graph_dict["endangered"] = (graph_dict["proficient"] and
+                    graph_dict["streak"] == 0 and
                     graph_dict["longest_streak"] >= graph_dict["required_streak"])
 
         for exercise_name in graph:

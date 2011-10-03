@@ -85,3 +85,21 @@
     </div>
 </div>
 {%- endmacro %}
+
+{% macro student_highlight_control(user_data_students) -%}
+<ul>
+    {% for user_data_student in user_data_students %}
+    <li>
+    <a href="#" class="highlight-student-series" data-email="{{ user_data_student.email|escape }}">{{ user_data_student.nickname|escape }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{%- endmacro %}
+
+{% macro class_profile_meta_data_js(user_data_students, c_points) -%}
+<script>
+    $('#count_students').text('{{ user_data_students.__len__()|thousands_separated|escapejs }}');
+    $('#energy-points .energy-points-badge').text('{{ c_points|thousands_separated|escapejs }}');
+    $('#students-highlight').html('{{ student_highlight_control(user_data_students)|escapejs }}');
+</script>
+{%- endmacro %}
