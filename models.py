@@ -1778,7 +1778,7 @@ class UserExerciseCache(db.Model):
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
-            if user_exercise.exercise not in dicts or dicts[user_exercise.name]["total_done"] < user_exercise_dict["total_done"]:
+            if user_exercise.exercise not in dicts or dicts[user_exercise.exercise]["total_done"] < user_exercise_dict["total_done"]:
                 dicts[user_exercise.exercise] = user_exercise_dict
 
         return UserExerciseCache(
