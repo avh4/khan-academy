@@ -14,6 +14,8 @@ def cleanup(request, response):
         response = response["MemcacheGetResponse"]
         request_short = memcache_request(request)
         response_short, miss = memcache_response(response)
+    elif "MemcacheSetRequest" in request:
+        request_short = memcache_set_request(request["MemcacheSetRequest"])
     elif "Query" in request:
         request_short = gql_query(request["Query"])
     elif "GetRequest" in request:
@@ -21,7 +23,6 @@ def cleanup(request, response):
     elif "PutRequest" in request:
         request_short = datastore_put_request(request["PutRequest"])
     # todo:
-    # MemcacheSetRequest
     # TaskQueueBulkAddRequest
     # BeginTransaction
     # Transaction
@@ -53,6 +54,10 @@ def memcache_request(request):
             request_short += ' '
         request_short += '(ns:%s)' % truncate(namespace)
     return request_short
+
+def memcache_set_request(request):
+    keys = [truncate(i["MemcacheSetRequest_Item"]["key_"]) for i in request["item_"]]
+    return "\n".join(keys)
 
 def gql_query(query):
     kind = query.get('kind_', 'UnknownKind')
