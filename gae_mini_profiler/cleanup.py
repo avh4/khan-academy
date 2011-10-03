@@ -18,9 +18,10 @@ def cleanup(request, response):
         request_short = gql_query(request["Query"])
     elif "GetRequest" in request:
         request_short = gql_getrequest(request["GetRequest"])
+    elif "PutRequest" in request:
+        request_short = datastore_put_request(request["PutRequest"])
     # todo:
     # MemcacheSetRequest
-    # PutRequest
     # TaskQueueBulkAddRequest
     # BeginTransaction
     # Transaction
@@ -148,14 +149,22 @@ def gql_getrequest(request):
     keys = request["key_"]
     if len(keys) > 1:
         raise Exception(keys)
-    key = keys[0]
+    return cleanup_key(keys[0])
+
+def cleanup_key(key):
     els = key['Reference']['path_']['Path']['element_']
     paths = []
     for el in els:
         path = el['Path_Element']
         paths.append("%s(%s)" % (path['type_'], id_or_name(path)))
-    value = "->".join(paths)
-    return "GET %s" % value
+    return "->".join(paths)
+
+def datastore_put_request(request):
+    entities = request["entity_"]
+    keys = []
+    for entity in entities:
+        keys.append(cleanup_key(entity["EntityProto"]["key_"]))
+    return "\n".join(keys)
 
 def truncate(value, limit=100):
     if len(value) > limit:
