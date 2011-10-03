@@ -12,16 +12,16 @@ def cleanup(request, response):
     if "MemcacheGetRequest" in request:
         request = request["MemcacheGetRequest"]
         response = response["MemcacheGetResponse"]
-        request_short = memcache_request(request)
-        response_short, miss = memcache_response(response)
+        request_short = memcache_get(request)
+        response_short, miss = memcache_get_response(response)
     elif "MemcacheSetRequest" in request:
-        request_short = memcache_set_request(request["MemcacheSetRequest"])
+        request_short = memcache_set(request["MemcacheSetRequest"])
     elif "Query" in request:
-        request_short = gql_query(request["Query"])
+        request_short = datastore_query(request["Query"])
     elif "GetRequest" in request:
-        request_short = gql_getrequest(request["GetRequest"])
+        request_short = datastore_get(request["GetRequest"])
     elif "PutRequest" in request:
-        request_short = datastore_put_request(request["PutRequest"])
+        request_short = datastore_put(request["PutRequest"])
     # todo:
     # TaskQueueBulkAddRequest
     # BeginTransaction
@@ -29,7 +29,7 @@ def cleanup(request, response):
 
     return request_short, response_short, miss
 
-def memcache_response(response):
+def memcache_get_response(response):
     response_miss = 0
     items = response['item_']
     for i, item in enumerate(items):
@@ -42,7 +42,7 @@ def memcache_response(response):
         response_miss = 1
     return response_short, response_miss
 
-def memcache_request(request):
+def memcache_get(request):
     keys = request['key_']
     request_short = "\n".join([truncate(k) for k in keys])
     namespace = ''
@@ -55,16 +55,16 @@ def memcache_request(request):
         request_short += '(ns:%s)' % truncate(namespace)
     return request_short
 
-def memcache_set_request(request):
+def memcache_set(request):
     keys = [truncate(i["MemcacheSetRequest_Item"]["key_"]) for i in request["item_"]]
     return "\n".join(keys)
 
-def gql_query(query):
+def datastore_query(query):
     kind = query.get('kind_', 'UnknownKind')
     count = query.get('count_', '')
 
-    filters_clean = gql_query_filter(query)
-    orders_clean = gql_query_order(query)
+    filters_clean = datastore_query_filter(query)
+    orders_clean = datastore_query_order(query)
 
     s = StringIO.StringIO()
     s.write("SELECT FROM %s\n" % kind)
@@ -83,7 +83,7 @@ def gql_query(query):
     s.close()
     return result
 
-def gql_query_filter(query):
+def datastore_query_filter(query):
     _Operator_NAMES = {
         0: "?",
         1: "<",
@@ -129,7 +129,7 @@ def gql_query_filter(query):
             filters_clean.append((name, op, value))
     return filters_clean
 
-def gql_query_order(query):
+def datastore_query_order(query):
     orders = query.get('order_', [])
     _Direction_NAMES = {
         0: "?DIR",
@@ -150,7 +150,7 @@ def id_or_name(path):
     else:
         return path['id_']
 
-def gql_getrequest(request):
+def datastore_get(request):
     keys = request["key_"]
     if len(keys) > 1:
         raise Exception(keys)
@@ -164,7 +164,7 @@ def cleanup_key(key):
         paths.append("%s(%s)" % (path['type_'], id_or_name(path)))
     return "->".join(paths)
 
-def datastore_put_request(request):
+def datastore_put(request):
     entities = request["entity_"]
     keys = []
     for entity in entities:
