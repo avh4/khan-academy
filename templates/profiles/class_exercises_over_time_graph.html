@@ -1,3 +1,7 @@
+{% extends 'profiles/class_graph.html' %}
+
+{% block graph_content %}
+
 {% if not dict_student_exercises %}
     <div class="graph-notification">Your students don't have any proficient exercises...yet. Point them to <a href="/exercisedashboard?k">the exercise dashboard</a>.</div>
 {% endif %}
@@ -21,9 +25,9 @@
                 return false;
             });
 
-            $("a.highlight-student-series").click(function() {
+            $("a.highlight-student-series").live("click", function(e) {
                 ClassExerciseProgressChart.highlightStudentSeries(this);
-                return false;
+                e.preventDefault();
             });
 
             $("a.highlight-exercise-points").click(function() {
@@ -203,3 +207,5 @@
 <div id="highchart-container" class="{% if not dict_student_exercises %}empty-chart{% endif %}">
     <div id="highchart"></div>
 </div>
+
+{% endblock graph_content %}

@@ -12,6 +12,10 @@ import zlib
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
 
+import unformatter
+from pprint import pformat
+import cleanup
+
 import gae_mini_profiler.config
 if os.environ["SERVER_SOFTWARE"].startswith("Devel"):
     config = gae_mini_profiler.config.ProfilerConfigDevelopment
@@ -193,7 +197,7 @@ class RequestStats(object):
             likely_dupes = False
             end_offset_last = 0
 
-            dict_requests = {}
+            requests_set = set()
 
             appstats_key = long(middleware.recorder.start_timestamp * 1000)
 
@@ -212,8 +216,12 @@ class RequestStats(object):
                 if "." in service_prefix:
                     service_prefix = service_prefix[:service_prefix.find(".")]
 
-                if not service_totals_dict.has_key(service_prefix):
-                    service_totals_dict[service_prefix] = {"total_call_count": 0, "total_time": 0}
+                if service_prefix not in service_totals_dict:
+                    service_totals_dict[service_prefix] = {
+                        "total_call_count": 0,
+                        "total_time": 0,
+                        "total_misses": 0,
+                    }
 
                 service_totals_dict[service_prefix]["total_call_count"] += 1
                 service_totals_dict[service_prefix]["total_time"] += trace.duration_milliseconds()
@@ -226,24 +234,36 @@ class RequestStats(object):
                                 frame.function_name()))
 
                 request = trace.request_data_summary()
-                request_short = request
-                if len(request_short) > 100:
-                    request_short = request_short[:100] + "..."
+                response = trace.response_data_summary()
 
-                likely_dupe = dict_requests.has_key(request)
+                likely_dupe = request in requests_set
                 likely_dupes = likely_dupes or likely_dupe
+                requests_set.add(request)
 
-                dict_requests[request] = True
+                request_short = request_pretty = None
+                response_short = response_pretty = None
+                miss = 0
+                try:
+                    request_object = unformatter.unformat(request)
+                    response_object = unformatter.unformat(response)
 
-                response = trace.response_data_summary()[:100]
+                    request_short, response_short, miss = cleanup.cleanup(request_object, response_object)
+
+                    request_pretty = pformat(request_object)
+                    response_pretty = pformat(response_object)
+                except Exception, e:
+                    logging.warning("Prettifying RPC calls failed.\n%s", e)
+
+                service_totals_dict[service_prefix]["total_misses"] += miss
 
                 calls.append({
                     "service": trace.service_call_name(),
                     "start_offset": RequestStats.milliseconds_fmt(trace.start_offset_milliseconds()),
                     "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
-                    "request": request,
-                    "request_short": request_short,
-                    "response": response,
+                    "request": request_pretty or request,
+                    "response": response_pretty or response,
+                    "request_short": request_short or cleanup.truncate(request),
+                    "response_short": response_short or cleanup.truncate(response),
                     "stack_frames_desc": stack_frames_desc,
                     "likely_dupe": likely_dupe,
                 })
@@ -253,6 +273,7 @@ class RequestStats(object):
                 service_totals.append({
                     "service_prefix": service_prefix,
                     "total_call_count": service_totals_dict[service_prefix]["total_call_count"],
+                    "total_misses": service_totals_dict[service_prefix]["total_misses"],
                     "total_time": RequestStats.milliseconds_fmt(service_totals_dict[service_prefix]["total_time"]),
                 })
             service_totals = sorted(service_totals, reverse=True, key=lambda service_total: float(service_total["total_time"]))
@@ -317,6 +338,13 @@ class ProfilerWSGIMiddleware(object):
 
             # Configure AppStats output, keeping a high level of request
             # content so we can detect dupe RPCs more accurately
+
+            # monkey patch appstats.formatting to fix string quoting bug
+            # see http://code.google.com/p/googleappengine/issues/detail?id=5976
+            import unformatter.formatting
+            import google.appengine.ext.appstats.formatting
+            google.appengine.ext.appstats.formatting._format_value = unformatter.formatting._format_value
+
             from google.appengine.ext.appstats import recording
             recording.config.MAX_REPR = 750
 

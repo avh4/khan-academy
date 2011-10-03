@@ -103,6 +103,7 @@
                     <tr>
                         <th class="left"><nobr>service type</nobr></th>
                         <th class="right">calls</th>
+                        <th class="right">misses</th>
                         <th class="right headerSortDown"><nobr>total ms</nobr></th>
                     </tr>
                 </thead>
@@ -110,6 +111,7 @@
                 <tr>
                     <td>${$value.service_prefix}</td>
                     <td class="right">${$value.total_call_count}</td>
+                    <td class="right">${$value.total_misses}</td>
                     <td class="right">${$value.total_time}</td>
                 </tr>
                 {{/each}}
@@ -149,7 +151,11 @@
                             ${$value.request_short}
                         </span>
                     </td>
-                    <td>${$value.response}</td>
+                    <td>
+                        <span title="${$value.response}">
+                            ${$value.response_short}
+                        </span>
+                    </td>
                 </tr>
                 {{/each}}
             </table>
