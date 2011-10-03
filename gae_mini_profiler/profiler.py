@@ -12,7 +12,7 @@ import zlib
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
 
-from unformatter import unformatter
+import unformatter
 from pprint import pformat
 import cleanup
 
@@ -338,6 +338,13 @@ class ProfilerWSGIMiddleware(object):
 
             # Configure AppStats output, keeping a high level of request
             # content so we can detect dupe RPCs more accurately
+
+            # monkey patch appstats.formatting to fix string quoting bug
+            # see http://code.google.com/p/googleappengine/issues/detail?id=5976
+            import unformatter.formatting
+            import google.appengine.ext.appstats.formatting
+            google.appengine.ext.appstats.formatting._format_value = unformatter.formatting._format_value
+
             from google.appengine.ext.appstats import recording
             recording.config.MAX_REPR = 750
 
