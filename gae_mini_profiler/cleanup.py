@@ -1,13 +1,31 @@
-import logging
 import StringIO
 
-def memcache_response_safe(response):
-    try:
-        return memcache_response(response)
-    except Exception, e:
-        logging.critical(e)
-        logging.critical(response)
-        return None, 0
+def cleanup(request, response):
+    '''
+    Convert request and response dicts to a human readable format where
+    possible.
+    '''
+    request_short = None
+    response_short = None
+    miss = 0
+
+    if "MemcacheGetRequest" in request:
+        request = request["MemcacheGetRequest"]
+        response = response["MemcacheGetResponse"]
+        request_short = memcache_request(request)
+        response_short, miss = memcache_response(response)
+    elif "Query" in request:
+        request_short = gql_query(request["Query"])
+    elif "GetRequest" in request:
+        request_short = gql_getrequest(request["GetRequest"])
+    # todo:
+    # MemcacheSetRequest
+    # PutRequest
+    # TaskQueueBulkAddRequest
+    # BeginTransaction
+    # Transaction
+
+    return request_short, response_short, miss
 
 def memcache_response(response):
     response_miss = 0
@@ -22,14 +40,6 @@ def memcache_response(response):
         response_miss = 1
     return response_short, response_miss
 
-def memcache_request_safe(request):
-    try:
-        return memcache_request(request)
-    except Exception, e:
-        logging.critical(e)
-        logging.critical(request)
-        return None
-
 def memcache_request(request):
     keys = request['key_']
     request_short = "\n".join([truncate(k) for k in keys])
@@ -42,14 +52,6 @@ def memcache_request(request):
             request_short += ' '
         request_short += '(ns:%s)' % truncate(namespace)
     return request_short
-
-def gql_query_safe(query):
-    try:
-        return gql_query(query)
-    except Exception, e:
-        logging.critical(repr(e))
-        logging.critical(query)
-        return None
 
 def gql_query(query):
     kind = query.get('kind_', 'UnknownKind')

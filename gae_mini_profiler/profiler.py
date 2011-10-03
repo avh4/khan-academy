@@ -25,7 +25,6 @@ else:
 # request_id is a per-request identifier accessed by a couple other pieces of gae_mini_profiler
 request_id = None
 
-
 class SharedStatsHandler(RequestHandler):
 
     def get(self):
@@ -198,7 +197,7 @@ class RequestStats(object):
             likely_dupes = False
             end_offset_last = 0
 
-            dict_requests = {}
+            requests_set = set()
 
             appstats_key = long(middleware.recorder.start_timestamp * 1000)
 
@@ -234,59 +233,37 @@ class RequestStats(object):
                                 frame.line_number(),
                                 frame.function_name()))
 
-                request_string = trace.request_data_summary()
-                response_string = trace.response_data_summary()
+                request = trace.request_data_summary()
+                response = trace.response_data_summary()
 
-                likely_dupe = request_string in dict_requests
+                likely_dupe = request in requests_set
                 likely_dupes = likely_dupes or likely_dupe
-                dict_requests[request_string] = True
+                requests_set.add(request)
 
-                # clean up request
-                result = unformatter.UnformatObject()
-                unformatter.unformat_value(request_string, out=result)
-                request = result.value
+                request_short = request_pretty = None
+                response_short = response_pretty = None
+                miss = 0
+                try:
+                    request_object = unformatter.unformat(request)
+                    response_object = unformatter.unformat(response)
 
-                result = unformatter.UnformatObject()
-                unformatter.unformat_value(response_string, out=result)
-                response = result.value
+                    request_short, response_short, miss = cleanup.cleanup(request_object, response_object)
 
-                request_short = None
-                response_short = None
-                response_miss = 0
+                    request_pretty = pformat(request_object)
+                    response_pretty = pformat(response_object)
+                except Exception, e:
+                    logging.warning("Prettifying RPC calls failed.\n%s", e)
 
-                if "MemcacheGetRequest" in request:
-                    request_short = cleanup.memcache_request_safe(request["MemcacheGetRequest"])
-                    response_short, response_miss = \
-                        cleanup.memcache_response_safe(response["MemcacheGetResponse"])
-                elif "Query" in request:
-                    request_short = cleanup.gql_query_safe(request["Query"])
-                elif "GetRequest" in request:
-                    request_short = cleanup.gql_getrequest(request["GetRequest"])
-                # todo:
-                # MemcacheSetRequest
-                # PutRequest
-                # TaskQueueBulkAddRequest
-                # BeginTransaction
-                # Transaction
-
-                if not request_short:
-                    request_short = cleanup.truncate(request_string)
-                if not response_short:
-                    response_short = cleanup.truncate(response_string)
-
-                request_pretty = pformat(request)
-                response_pretty = pformat(response)
-
-                service_totals_dict[service_prefix]["total_misses"] += response_miss
+                service_totals_dict[service_prefix]["total_misses"] += miss
 
                 calls.append({
                     "service": trace.service_call_name(),
                     "start_offset": RequestStats.milliseconds_fmt(trace.start_offset_milliseconds()),
                     "total_time": RequestStats.milliseconds_fmt(trace.duration_milliseconds()),
                     "request": request_pretty,
-                    "request_short": request_short,
                     "response": response_pretty,
-                    "response_short": response_short,
+                    "request_short": request_short or cleanup.truncate(request),
+                    "response_short": response_short or cleanup.truncate(response),
                     "stack_frames_desc": stack_frames_desc,
                     "likely_dupe": likely_dupe,
                 })

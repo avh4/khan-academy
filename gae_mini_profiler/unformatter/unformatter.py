@@ -73,6 +73,11 @@ class UnformatObject(object):
                 raise Exception('invalid token %s', token)
             parent[key] = val
 
+def unformat(text):
+    result = UnformatObject()
+    unformat_value(text, out=result)
+    return result.value
+
 def unformat_value(text, i=0, level=0, delim=None, out=UnformatStream()):
     start = i
     if text[i].isdigit():
