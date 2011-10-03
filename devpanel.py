@@ -27,10 +27,10 @@ class Email(request_handler.RequestHandler):
         if swap and currdata: #are we swapping? make sure account exists
             currdata.current_user = users.User(new_email)
             currdata.user_email = new_email
-            if newdata: #delete old account 
-                currdata.user_id = newdata.user_id
-                newdata.delete()
+            currdata.user_id = newdata.user_id
             currdata.put()
+            if newdata: #delete old account 
+                newdata.delete()
 
         template_values = {'App' : App, 'curremail': current_email, 'newemail':  new_email, 'currdata': currdata, 'newdata': newdata, "properties": UserData.properties()}
 
