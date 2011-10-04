@@ -8,6 +8,8 @@ import models
 import facebook_util
 from nicknames import get_nickname_for
 
+from google.appengine.ext import db
+
 def cache_user_nickname(user_data):
     if not user_data or not user_data.user:
         return
@@ -77,5 +79,31 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
             reader_parameters = {"entity_kind": "models.Exercise"},
             shard_count = 64,
             queue_name = "backfill-mapreduce-queue",
+          )
+        self.response.out.write("OK: " + str(mapreduce_id))
+
+def transactional_entity_put(entity_key):
+    def entity_put(entity_key):
+        entity = db.get(entity_key)
+        entity.put()
+    db.run_in_transaction(entity_put, entity_key)
+
+class BackfillEntity(request_handler.RequestHandler):
+    def get(self):
+        entity = self.request_string("kind")
+        if not entity:
+            self.response.out.write("Must provide kind")
+            return
+
+        mapreduce_id = control.start_map(
+            name="Put all UserData entities",
+            handler_spec="backfill.transactional_entity_put",
+            reader_spec="mapreduce.input_readers.DatastoreKeyInputReader",
+            reader_parameters={
+                "entity_kind": entity,
+                "processing_rate": 200
+            },
+            shard_count=64,
+            queue_name="backfill-mapreduce-queue",
           )
         self.response.out.write("OK: " + str(mapreduce_id))
