@@ -19,7 +19,7 @@ from google.appengine.ext import db
 import logging
 
 # Constants for Geckoboard display.
-NUM_BUCKETS = 20
+NUM_BUCKETS = 19
 PAST_DAYS_TO_SHOW = 7
 REFRESH_SECS = 30
 
