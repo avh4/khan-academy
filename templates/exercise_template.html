@@ -162,10 +162,7 @@
 <script id="related-video-link-tmpl" type="text/x-jquery-tmpl">
     <a href="${href}" title="${video.title}" class="related-video">
         <span class="video-title vid-progress v${video.id}">
-            ${video.title}
-            {{if separator}}
-            <span class='separator'>, </span>
-            {{/if}}
+            ${video.title}{{if separator}}<span class='separator'>, </span>{{/if}}
         </span>
     </a>
 </script>
