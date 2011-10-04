@@ -2130,6 +2130,8 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 .progress-legend.started {
     cursor: pointer;
     border-color: #fff;
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled="0");
+    outline: 1px solid #fff\9;
 }
 .exercise-info-hover, #info-hover-container {
     background: #fff;
