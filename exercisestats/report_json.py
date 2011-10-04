@@ -99,7 +99,7 @@ class ExerciseOverTimeGraph(request_handler.RequestHandler):
 
             return self.exercise_over_time_for_highcharts([exid], days, title, showLegend=True)
 
-        num_buckets = self.request_int('buckets', 1)
+        num_buckets = self.request_int('buckets', NUM_BUCKETS)
         bucket_index = self.request_int('ix', 0)
         bucket_size = get_bucket_size(num_buckets, bucket_index)
         bucket_cursor = get_bucket_cursor(refresh_secs, bucket_size)
