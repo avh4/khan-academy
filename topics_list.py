@@ -119,12 +119,16 @@ PLAYLIST_STRUCTURE = [
                 "playlist": "Chemistry"
             },
             {
-                "name": "Physics",
-                "playlist": "Physics"
-            },
-            {
                 "name": "Organic Chemistry",
                 "playlist": "Organic Chemistry"
+            },
+            {
+                "name": "Healthcare and Medicine",
+                "playlist": "Healthcare and Medicine"
+            },
+            {
+                "name": "Physics",
+                "playlist": "Physics"
             },
             {
                 "name": "Cosmology and Astronomy",
