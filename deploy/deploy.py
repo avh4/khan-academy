@@ -10,7 +10,7 @@ import compress
 
 try:
     import secrets
-    hipchat_deploy_token = secrets.hipchat_deploy_tokens
+    hipchat_deploy_token = secrets.hipchat_deploy_token
 except Exception, e:
     print "Exception raised while trying to import secrets. Attempting to continue..."
     print repr(e)
