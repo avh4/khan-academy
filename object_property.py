@@ -49,7 +49,11 @@ class TsvProperty(db.UnindexedProperty):
         return db.Text("\t".join(value))
 
     def make_value_from_datastore(self, value):
-        return value.split("\t")
+        return self.str_to_tsv(value)
+
+    @staticmethod
+    def str_to_tsv(value):
+        return value.split("\t") if value else []
 
     def empty(self, value):
         """Is list property empty.
@@ -80,9 +84,9 @@ class TsvCompatStringListProperty(db.StringListProperty):
     'A StringListProperty that can also lists serialized as read tab separated strings'
     def make_value_from_datastore(self, value):
         if isinstance(value, list):
-            return value
+            return super(TsvCompatStringListProperty, self).make_value_from_datastore(value)
         else:
-            return value.split("\t")
+            return TsvProperty.str_to_tsv(value)
 
 class StringListCompatTsvProperty(TsvProperty):
     'A TsvProperty that can also read lists serialized as native Python lists'
@@ -90,4 +94,4 @@ class StringListCompatTsvProperty(TsvProperty):
         if isinstance(value, list):
             return value
         else:
-            return value.split("\t")
+            return super(StringListCompatTsvProperty, self).make_value_from_datastore(value)
