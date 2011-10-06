@@ -163,6 +163,7 @@ class ViewHomePage(request_handler.RequestHandler):
 
         # temporary steve jobs tribute
         video_id = "D1R-jKKp3NA"
+        video_key = ""
 
         template_values = {
                             'video_id': video_id,
