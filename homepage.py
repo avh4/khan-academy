@@ -161,6 +161,9 @@ class ViewHomePage(request_handler.RequestHandler):
         # Get pregenerated library content from our in-memory/memcache two-layer cache
         library_content = library.library_content_html()
 
+        # temporary steve jobs tribute
+        video_id = "D1R-jKKp3NA"
+
         template_values = {
                             'video_id': video_id,
                             'video_key': video_key,
