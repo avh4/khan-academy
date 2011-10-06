@@ -201,7 +201,6 @@ class RequestStats(object):
 
             try:
                 appstats_key = long(middleware.recorder.start_timestamp * 1000)
-                raise AttributeError("onoo")
             except AttributeError:
                 # Until App Engine works out the kinks in http://code.google.com/p/googleappengine/issues/detail?id=6053, 
                 # only report profiling information -- just leave out the RPC stuff.
