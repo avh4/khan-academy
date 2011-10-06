@@ -9,13 +9,17 @@ sys.path.append(os.path.abspath("."))
 import compress
 
 try:
-    from secrets import hipchat_deploy_token
+    import secrets
+    hipchat_deploy_token = secrets.hipchat_deploy_token
+except Exception, e:
+    print "Exception raised while trying to import secrets. Attempting to continue..."
+    print repr(e)
+    hipchat_deploy_token = None
 
+if hipchat_deploy_token:
     import hipchat.room
     import hipchat.config
     hipchat.config.manual_init(hipchat_deploy_token)
-except:
-    hipchat_deploy_token = None
 
 def popen_results(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
@@ -33,6 +37,7 @@ def send_hipchat_deploy_message(version, includes_local_changes):
     app_id = get_app_id()
     if app_id != "khan-academy":
         # Don't notify hipchat about deployments to test apps
+        print 'Skipping hipchat notification as %s looks like a test app' % app_id
         return
 
     url = "http://%s.%s.appspot.com" % (version, app_id)
@@ -46,7 +51,7 @@ def send_hipchat_deploy_message(version, includes_local_changes):
     github_url = "https://github.com/Khan/khan-exercises/commit/%s" % git_id
 
     local_changes_warning = " (including uncommitted local changes)" if includes_local_changes else ""
-    
+
     hipchat_message("""
             Just deployed %(hg_id)s%(local_changes_warning)s to <a href='%(url)s'>a non-default url</a>. Includes
             website changeset "<a href='%(kiln_url)s'>%(hg_msg)s</a>" and khan-exercises
@@ -76,7 +81,7 @@ def hipchat_message(msg):
                 result = str(hipchat.room.Room.message(**msg_dict))
             except:
                 pass
-            
+
             if "sent" in result:
                 print "Notified Hipchat room %s" % room.name
             else:
@@ -116,7 +121,7 @@ def hg_version():
 
     if changeset:
         return changeset.split(":")[1]
-    
+
     return -1
 
 def hg_changeset_msg(changeset_id):
