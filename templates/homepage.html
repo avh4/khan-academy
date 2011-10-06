@@ -22,8 +22,8 @@
         <h1 class="section-headline pulls"><a href="/#browse">Watch.</a> <a href="/exercisedashboard?k">Practice.</a></h1>
         <h1>Learn almost anything for free.</h1>
         <p>
-            With a library of over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> covering 
-            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">200 practice exercises</a>,
+            With a library of over <a href="/#browse">{{approx_vid_count|thousands_separated}} videos</a> covering
+            everything from arithmetic to physics, finance, and history and <a href="/exercisedashboard?k">{{exercise_count}} practice exercises</a>,
             <a href="/about">we're on a mission</a> to help you learn what you want, when you want, at your own pace.
         </p>
         <p class="call-to-action-buttons">
@@ -114,7 +114,7 @@
         <div id="browse-control-anchor"></div>
         {{ templatetags.playlist_browser("browse") }}
         {{ templatetags.playlist_browser("browse-fixed") }}
-        
+
         {% endif %}
         <a href="/mobilefullsite" class="mobile-only" data-role="button" data-ajax="false">View standard site</a>
     </div>

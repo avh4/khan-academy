@@ -172,7 +172,8 @@ class ViewHomePage(request_handler.RequestHandler):
                             'library_content': library_content,
                             'DVD_list': DVD_list,
                             'is_mobile_allowed': True,
-                            'approx_vid_count': consts.APPROX_VID_COUNT,
+                            'approx_vid_count': models.Video.approx_count(),
+                            'exercise_count': models.Exercise.get_count()
                         }
 
         self.render_jinja2_template('homepage.html', template_values)
