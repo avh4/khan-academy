@@ -850,7 +850,7 @@ application = webapp2.WSGIApplication([
 
     ], debug=True)
 
-application = profiler.ProfilerWSGIMiddleware(application)
+# application = profiler.ProfilerWSGIMiddleware(application)
 application = GAEBingoWSGIMiddleware(application)
 application = request_cache.RequestCacheMiddleware(application)
 
