@@ -199,7 +199,21 @@ class RequestStats(object):
 
             requests_set = set()
 
-            appstats_key = long(middleware.recorder.start_timestamp * 1000)
+            try:
+                appstats_key = long(middleware.recorder.start_timestamp * 1000)
+                raise AttributeError("onoo")
+            except AttributeError:
+                # Until App Engine works out the kinks in http://code.google.com/p/googleappengine/issues/detail?id=6053, 
+                # only report profiling information -- just leave out the RPC stuff.
+                return  {
+                            "error": True,
+                            "total_call_count": 0,
+                            "total_time": 0,
+                            "calls": [],
+                            "service_totals": [],
+                            "likely_dupes": False,
+                            "appstats_key": None,
+                        }
 
             for trace in middleware.recorder.traces:
                 total_call_count += 1
