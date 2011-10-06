@@ -1,3 +1,7 @@
+{% extends 'profiles/class_graph.html' %}
+
+{% block graph_content %}
+
 <script>
     var updateInterval = 5000;
     var movingAverageInterval = 60000;
@@ -137,3 +141,5 @@
 <div id="highchart-container">
     <div id="highchart"></div>
 </div>
+
+{% endblock graph_content %}
