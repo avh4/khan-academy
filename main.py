@@ -726,6 +726,7 @@ application = webapp2.WSGIApplication([
     ('/admin/startnewexercisestatisticsmapreduce', exercise_statistics.StartNewExerciseStatisticsMapReduce),
     ('/admin/startnewvotemapreduce', voting.StartNewVoteMapReduce),
     ('/admin/backfill', backfill.StartNewBackfillMapReduce),
+    ('/admin/backfill_entity', backfill.BackfillEntity),
     ('/admin/feedbackflagupdate', qa.StartNewFlagUpdateMapReduce),
     ('/admin/dailyactivitylog', activity_summary.StartNewDailyActivityLogMapReduce),
     ('/admin/youtubesync.*', youtube_sync.YouTubeSync),
