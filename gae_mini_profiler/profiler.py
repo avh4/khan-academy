@@ -12,8 +12,8 @@ import zlib
 from google.appengine.ext.webapp import template, RequestHandler
 from google.appengine.api import memcache
 
-import unformatter
-from pprint import pformat
+# import unformatter
+# from pprint import pformat
 import cleanup
 
 import gae_mini_profiler.config
@@ -243,16 +243,16 @@ class RequestStats(object):
                 request_short = request_pretty = None
                 response_short = response_pretty = None
                 miss = 0
-                try:
-                    request_object = unformatter.unformat(request)
-                    response_object = unformatter.unformat(response)
+                # try:
+                #     request_object = unformatter.unformat(request)
+                #     response_object = unformatter.unformat(response)
 
-                    request_short, response_short, miss = cleanup.cleanup(request_object, response_object)
+                #     request_short, response_short, miss = cleanup.cleanup(request_object, response_object)
 
-                    request_pretty = pformat(request_object)
-                    response_pretty = pformat(response_object)
-                except Exception, e:
-                    logging.warning("Prettifying RPC calls failed.\n%s", e)
+                #     request_pretty = pformat(request_object)
+                #     response_pretty = pformat(response_object)
+                # except Exception, e:
+                #     logging.warning("Prettifying RPC calls failed.\n%s", e)
 
                 service_totals_dict[service_prefix]["total_misses"] += miss
 
@@ -341,9 +341,9 @@ class ProfilerWSGIMiddleware(object):
 
             # monkey patch appstats.formatting to fix string quoting bug
             # see http://code.google.com/p/googleappengine/issues/detail?id=5976
-            import unformatter.formatting
-            import google.appengine.ext.appstats.formatting
-            google.appengine.ext.appstats.formatting._format_value = unformatter.formatting._format_value
+            # import unformatter.formatting
+            # import google.appengine.ext.appstats.formatting
+            # google.appengine.ext.appstats.formatting._format_value = unformatter.formatting._format_value
 
             from google.appengine.ext.appstats import recording
             recording.config.MAX_REPR = 750
