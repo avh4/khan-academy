@@ -258,14 +258,10 @@ class Exercise(db.Model):
             dict_exercises[exercise.name] = exercise
         return dict_exercises
 
-    _EXERCISES_COUNT_KEY = "Exercise.count()"
     @staticmethod
+    @layer_cache(expiration=3600)
     def get_count():
-        count = memcache.get(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
-        if count is None:
-            count = Exercise.all().count()
-            memcache.set(Exercise._EXERCISES_COUNT_KEY, count, namespace=App.version)
-        return count
+        return Exercise.all().count()
 
     def put(self):
         Setting.cached_exercises_date(str(datetime.datetime.now()))
@@ -1078,8 +1074,9 @@ class Video(Searchable, db.Model):
         return exercise_video or ExerciseVideo()
 
     @staticmethod
-    def approx_count(rounding=100):
-        return int(Setting.count_videos()) / rounding * rounding
+    @layer_cache(expiration=3600)
+    def approx_count():
+        return int(Setting.count_videos()) / 100 * 100
 
 class Playlist(Searchable, db.Model):
 
