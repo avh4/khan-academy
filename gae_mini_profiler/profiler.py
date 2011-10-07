@@ -78,7 +78,7 @@ class RequestStatsHandler(RequestHandler):
 class RequestStats(object):
 
     serialized_properties = ["request_id", "url", "url_short", "s_dt",
-                             "profiler_results", "appstats_results",
+                             "profiler_results", # "appstats_results",
                              "temporary_redirect", "logs"]
 
     def __init__(self, request_id, environ, middleware):
@@ -95,7 +95,7 @@ class RequestStats(object):
         self.s_dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.profiler_results = RequestStats.calc_profiler_results(middleware)
-        self.appstats_results = RequestStats.calc_appstats_results(middleware)
+        # self.appstats_results = RequestStats.calc_appstats_results(middleware)
         self.logs = middleware.logs
 
         self.temporary_redirect = middleware.temporary_redirect

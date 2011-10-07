@@ -6,6 +6,10 @@
 {% import 'macros/analytics.html' as analytics %}
 {% import 'macros/discussion.html' as discussion %}
 
+{% block meta_page_title %}{{video.title}} | {% endblock %}
+{% block meta_keywords %}{{video.keywords}}{% endblock %}
+{% block meta_description %}{{video.description}}{% endblock %}
+
 {% block pagecss %}
     {{ js_css_packages.css_package("video") }}
 {% endblock pagecss %}

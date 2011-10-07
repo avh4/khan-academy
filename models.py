@@ -1077,6 +1077,10 @@ class Video(Searchable, db.Model):
             exercise_video.exercise # Pre-cache exercise entity
         return exercise_video or ExerciseVideo()
 
+    @staticmethod
+    def approx_count(rounding=100):
+        return int(Setting.count_videos()) / rounding * rounding
+
 class Playlist(Searchable, db.Model):
 
     youtube_id = db.StringProperty()

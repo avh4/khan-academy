@@ -64,6 +64,16 @@ def dedupe_related_videos(exercise):
         else:
             video_keys.add(video_key)
 
+def migrate_userdata(key):
+    def tn(key):
+        user_data = db.get(key)
+        # remove blank entries if present
+        user_data.all_proficient_exercises.remove('')
+        user_data.proficient_exercises.remove('')
+        user_data.badges.remove('')
+        user_data.put()
+    db.run_in_transaction(tn, key)
+
 class StartNewBackfillMapReduce(request_handler.RequestHandler):
     def get(self):
         # pass
@@ -73,12 +83,15 @@ class StartNewBackfillMapReduce(request_handler.RequestHandler):
 
         # Start a new Mapper task.
         mapreduce_id = control.start_map(
-            name = "dedupe_related_videos",
-            handler_spec = "backfill.dedupe_related_videos",
-            reader_spec = "mapreduce.input_readers.DatastoreInputReader",
-            reader_parameters = {"entity_kind": "models.Exercise"},
-            shard_count = 64,
-            queue_name = "backfill-mapreduce-queue",
+            name="migrate_userdata",
+            handler_spec="backfill.migrate_userdata",
+            reader_spec="mapreduce.input_readers.DatastoreKeyInputReader",
+            reader_parameters={
+                "entity_kind": "models.UserData",
+                "processing_rate": 200,
+            },
+            shard_count=64,
+            queue_name="backfill-mapreduce-queue",
           )
         self.response.out.write("OK: " + str(mapreduce_id))
 

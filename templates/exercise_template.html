@@ -3,6 +3,7 @@
 {% import 'macros/youtube.html' as youtube %}
 
 {% block meta_page_title %}{{ exercise.display_name|escape }} | {% endblock meta_page_title %}
+{% block meta_description %}Practice {{ exercise.display_name|escape }} with Khan Academy's free online exercises.{% endblock %}
 
 {% block pagescript %}
 

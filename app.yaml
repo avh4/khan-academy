@@ -38,6 +38,10 @@ handlers:
   static_files: robots.txt
   upload: robots.txt
 
+- url: /google663128d2a1a65b87.html
+  static_files: google663128d2a1a65b87.html
+  upload: google663128d2a1a65b87.html
+
 - url: /images/favicon.ico
   static_files: images/favicon.ico
   mime_type: image/x-icon
