@@ -263,7 +263,7 @@ class DeleteStudentList(RequestHandler):
             self.redirect_to('/students')
 
 class AddStudentToList(RequestHandler):
-    # @RequestHandler.exceptions_to_http(400)
+    @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
 
@@ -274,7 +274,7 @@ class AddStudentToList(RequestHandler):
         student_data.put()
 
 class RemoveStudentFromList(RequestHandler):
-    # @RequestHandler.exceptions_to_http(400)
+    @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
 
