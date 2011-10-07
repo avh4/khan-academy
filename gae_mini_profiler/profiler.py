@@ -199,20 +199,7 @@ class RequestStats(object):
 
             requests_set = set()
 
-            try:
-                appstats_key = long(middleware.recorder.start_timestamp * 1000)
-            except AttributeError:
-                # Until App Engine works out the kinks in http://code.google.com/p/googleappengine/issues/detail?id=6053, 
-                # only report profiling information -- just leave out the RPC stuff.
-                return  {
-                            "error": True,
-                            "total_call_count": 0,
-                            "total_time": 0,
-                            "calls": [],
-                            "service_totals": [],
-                            "likely_dupes": False,
-                            "appstats_key": None,
-                        }
+            appstats_key = long(middleware.recorder.start_timestamp * 1000)
 
             for trace in middleware.recorder.traces:
                 total_call_count += 1
@@ -365,7 +352,12 @@ class ProfilerWSGIMiddleware(object):
             old_app = self.app
             def wrapped_appstats_app(environ, start_response):
                 # Use this wrapper to grab the app stats recorder for RequestStats.save()
-                self.recorder = recording.recorder
+
+                if hasattr(recording.recorder, "get_for_current_request"):
+                    self.recorder = recording.recorder.get_for_current_request()
+                else:
+                    self.recorder = recording.recorder
+
                 return old_app(environ, start_response)
             self.app = recording.appstats_wsgi_middleware(wrapped_appstats_app)
 
