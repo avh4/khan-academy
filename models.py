@@ -259,7 +259,7 @@ class Exercise(db.Model):
         return dict_exercises
 
     @staticmethod
-    @layer_cache(expiration=3600)
+    @layer_cache.cache(expiration=3600)
     def get_count():
         return Exercise.all().count()
 
@@ -1074,7 +1074,7 @@ class Video(Searchable, db.Model):
         return exercise_video or ExerciseVideo()
 
     @staticmethod
-    @layer_cache(expiration=3600)
+    @layer_cache.cache(expiration=3600)
     def approx_count():
         return int(Setting.count_videos()) / 100 * 100
 
