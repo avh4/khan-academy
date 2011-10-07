@@ -225,6 +225,7 @@ var Profile = {
             var list_id = $dropdown.data('selected').key;
             var qs = this.parseQueryString(url);
             qs['list_id'] = list_id;
+            qs['dt'] = $("#targetDatepicker").val();
             url = this.baseGraphHref(url) + '?' + this.reconstructQueryString(qs);
         }
 
