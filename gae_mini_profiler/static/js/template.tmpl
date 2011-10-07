@@ -81,6 +81,7 @@
             </table>
         </div>
 
+        {{if typeof(appstats_results) !== "undefined"}}
         <div class="expand">
             <a href="#rpc-link" class="rpc-link link uses_script">Remote Procedure Calls</a>
             <div class="summary">
@@ -161,6 +162,7 @@
             </table>
             {{/if}}
         </div>
+        {{/if}}
 
         <div class="expand">
             <a href="#logs-link" class="logs-link link uses_script">Logs</a>
