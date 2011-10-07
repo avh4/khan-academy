@@ -265,8 +265,8 @@ class Exercise(db.Model):
 
     def put(self):
         Setting.cached_exercises_date(str(datetime.datetime.now()))
-        memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
+        Exercise.get_count(bust_cache=True)
 
     @staticmethod
     def get_dict(query, fxn_key):
