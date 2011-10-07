@@ -1,5 +1,4 @@
-{% import 'macros/user.html' as user %}
-
+{%- import 'macros/user.html' as user -%}
 <!DOCTYPE html>
 <html itemscope itemtype="http://schema.org/Organization"
     xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:og="http://opengraphprotocol.org/schema/"
@@ -9,25 +8,25 @@
 
         <!--[if lte IE 6]><script src="/javascript/ie-warning.js"></script><script>window.onload=function(){e("/images/ie-warning/")}</script><![endif]-->
 
-
         <script type="text/javascript">
-            var _sf_startpt=(new Date()).getTime(); // for Chartbeat Analytics
+            var _sf_startpt=(new Date()).getTime(); {# for Chartbeat Analytics #}
             var KA_VERSION = '{{ App.version }}';
             var FB_APP_ID = '{{ App.facebook_app_id }}';
             var URL_CONTINUE = '{{ continue|escapejs }}';
             var USERNAME = '{{ username|escapejs }}';
         </script>
 
-        {% if video %}<title>{{video.title}} | Khan Academy</title>
+        <title>{% block meta_page_title %}{% endblock meta_page_title %}Khan Academy</title>
+        {% if video -%}
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-        <meta name="description" content="{{video.description}}" />
-        <meta name="keywords" content="{{video.keywords}}" />
-        {% else %}
-	    <title>{% block meta_page_title %}{% endblock meta_page_title %}Khan Academy</title>
-        {% endif %}
-        <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -->
+        {%- endif %}
+        <meta name="description" content="{% block meta_description -%}
+        Khan Academy is on a mission to provide a free world-class education to anyone anywhere. With over 2,600 videos covering everything from arithmetic to physics, finance, and history and 200 practice exercises, we're helping students learn whatever they want, whenever they want, at their own pace.
+        {%- endblock %}" />
+        <meta name="keywords" content="{% block meta_keywords %}khan academy, learn, videos, lectures, practice, exercises{% endblock %}" />
+        {# Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights START -#}
         <meta property="fb:page_id" content="159403248441" />
-        <!-- Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights END -->
+        {# Allows the KA FB Page Admins to see the KA stats for FB Like in FB insights END -#}
         <meta property="og:title" content="The Khan Academy"/>
         <meta property="og:type" content="non_profit"/>
         <meta property="og:url" content="http://www.khanacademy.org"/>
@@ -36,14 +35,14 @@
         <meta property="fb:admins" content="100000121497109,1305017,100001572496923"/> {# Sal/Ben/Jason #}
         <meta property="fb:app_id" content="{{App.facebook_app_id}}"/>
 
-        {# Google+ #}
+        {# Google+ -#}
         <meta itemprop="name" content="Khan Academy">
         <meta itemprop="description" content="Watch. Practice. Learn almost anything for free.">
         <meta itemprop="image" content="http://www.khanacademy.org/images/khan-logo-vertical-transparent.png">
-        {# End Google+ #}
+        {# End Google+ -#}
 
         <meta property="og:description"
-              content="The Khan Academy is a not-for-profit 501(c)(3) with the mission of providing a world-class education to anyone, anywhere.  With over 2400+ videos  covering everything from arithmetic to physics, finance, and history and 150 practice exercises, we're helping students learn whatever they want, whenever they want, at their own pace."/>
+              content="{{ self.meta_description() }}"/>
         <link rel="shortcut icon" href="/favicon.ico?leaf">
         <link rel="apple-touch-icon" href="/images/apple-touch-icon.png"/>
 
@@ -63,25 +62,21 @@
         {% block pagescript %}
         {% endblock pagescript %}
 
-    {% if hide_analytics %}
-    {% else %}
-	<!-- New, faster Google Analytics async tag START -->
-	<script type="text/javascript">
+    {%- if not hide_analytics -%}
+    <script type="text/javascript">
 
-	  var _gaq = _gaq || [];
-	  _gaq.push(['_setAccount', 'UA-6742635-1']);
-	  _gaq.push(['_setDomainName', '.khanacademy.org']);
-	  _gaq.push(['_trackPageview']);
-	  _gaq.push(['_trackPageLoadTime']);
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-6742635-1']);
+      _gaq.push(['_setDomainName', '.khanacademy.org']);
+      _gaq.push(['_trackPageview']);
+      _gaq.push(['_trackPageLoadTime']);
 
-	  // For OER Analytics
-	  _gaq.push(['ht._setAccount', 'UA-5033010-1']);
-	  _gaq.push(['ht._setDomainName', '.khanacademy.org']);
-	  _gaq.push(['ht._trackPageview']);
-	</script>
-	<!-- New, faster Google Analytics async tag END -->
-    {% endif %}
-
+      {# For OER Analytics #}
+      _gaq.push(['ht._setAccount', 'UA-5033010-1']);
+      _gaq.push(['ht._setDomainName', '.khanacademy.org']);
+      _gaq.push(['ht._trackPageview']);
+    </script>
+    {%- endif -%}
     </head>
 
     <body class="light">
@@ -92,8 +87,8 @@
         {# Facebook connect root #}
         <div id="fb-root"></div>
 
-    	{# Make script-requiring elements visible. #}
-    	<script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
+        {# Make script-requiring elements visible. #}
+        <script>document.writeln('<style scoped type="text/css">a[href="#"], .requires_script { visibility: visible; }</style>');</script>
 
             <header>
                 <div id="top-header">
@@ -106,7 +101,7 @@
                                 <span class="separator"></span>
                                 <a id="page_logout" href="{{ logout_url|escape }}">Logout</a>
                             {% else %}
-								<a class="badge-target" href="{{ login_url|escape }}">Login</a>
+                                <a class="badge-target" href="{{ login_url|escape }}">Login</a>
                             {% endif %}
                             <span class="separator"></span>
                             <a href="/contribute" id="donate-link">Donate</a>
@@ -172,10 +167,9 @@
     {% block bottompagescript %}
     {% endblock bottompagescript %}
 
-    {% if hide_analytics %}
-    {% else %}
-	<script type="text/javascript">
-        // Chartbeat
+    {%- if not hide_analytics -%}
+    <script type="text/javascript">
+        {# Chartbeat #}
         var _sf_async_config={uid:10894,domain:"khanacademy.org"};
         (function(){
             function loadChartbeat() {
@@ -193,16 +187,15 @@
                 loadChartbeat : function() { oldonload(); loadChartbeat(); };
         })();
 
-        // GA
+        {# GA #}
         (function() {
             var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
         })();
-	</script>
-    {% endif %}
+    </script>
+    {%- endif -%}
 
     {{ gae_mini_profiler.profiler_includes() }}
-
     </body>
 </html>
