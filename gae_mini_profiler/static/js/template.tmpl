@@ -81,28 +81,20 @@
             </table>
         </div>
 
-        {{if typeof(appstats_results) !== "undefined"}}
         <div class="expand">
             <a href="#rpc-link" class="rpc-link link uses_script">Remote Procedure Calls</a>
             <div class="summary">
-                    {{if appstats_results.error}}
-                        <em>Temporarily disabled</em>
-                    {{else}}
                     ${appstats_results.total_time} <span class="ms">ms</span>
                     spent in ${appstats_results.total_call_count} RPC{{if appstats_results.total_call_count != 1}}s{{/if}}
 
                     {{if appstats_results.likely_dupes}}
                         <span class="dupe">(likely dupes)</span>
                     {{/if}}
-                    {{/if}}
             </div>
         </div>
 
         <div class="rpc-details details fancy-scrollbar" style="display:none;">
 
-            {{if appstats_results.error}}
-                <em>Temporarily disabled until http://code.google.com/p/googleappengine/issues/detail?id=6053 is resolved.</em>
-            {{else}}
             <a class="appstats-link" target="_appstats" href="/_ah/stats/details?time=${appstats_results.appstats_key}">Full Appstats Details</a>
 
             {{if appstats_results.calls.length}}
@@ -168,9 +160,7 @@
                 {{/each}}
             </table>
             {{/if}}
-            {{/if}}
         </div>
-        {{/if}}
 
         <div class="expand">
             <a href="#logs-link" class="logs-link link uses_script">Logs</a>
