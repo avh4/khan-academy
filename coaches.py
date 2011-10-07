@@ -263,17 +263,23 @@ class DeleteStudentList(RequestHandler):
             self.redirect_to('/students')
 
 class AddStudentToList(RequestHandler):
-    @RequestHandler.exceptions_to_http(400)
+    # @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
+
+        if student_list.key() in student_data.student_lists:
+            raise Exception("Student %s is already in list %s" % (student_data.key(), student_list.key()))
 
         student_data.student_lists.append(student_list.key())
         student_data.put()
 
 class RemoveStudentFromList(RequestHandler):
-    @RequestHandler.exceptions_to_http(400)
+    # @RequestHandler.exceptions_to_http(400)
     def post(self):
         coach_data, student_data, student_list = util_profile.get_coach_student_and_student_list(self)
+
+        # due to a bug, we have duplicate lists in the collection. fix this:
+        student_data.student_lists = list(set(student_data.student_lists))
 
         student_data.student_lists.remove(student_list.key())
         student_data.put()
