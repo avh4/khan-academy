@@ -216,7 +216,12 @@ var VideoControls = {
                 easing: 'easeInOutBack',
                 startingSlide: 0,
                 prev: '#arrow-left',
-                next: '#arrow-right'
+                next: '#arrow-right',
+                before: function() {
+                    $(this).find("div.pending").each(function() {
+                        $(this).css("background-image", "url('" + $(this).data("src") + "')");
+                    });
+                }
             })
             .css({ width: "" }) // We want #thumbnails to be full width even though the cycle plugin doesn't
             .find(".thumbnail_link")
