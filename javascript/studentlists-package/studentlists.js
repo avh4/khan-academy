@@ -481,7 +481,7 @@ var EditListsMenu = {
             }
 
             jelNewList.before(jel);
-            jelInput.click(function(event){EditListsMenu.itemClick(event);})
+            jelInput.click(EditListsMenu.itemClick)
                   .data('student-list', studentList);
         });
 
@@ -500,10 +500,10 @@ var EditListsMenu = {
         var studentList = jelInput.data('student-list');
         var student_id = jelInput.closest('.student-row').data('student_id');
         var student = StudentLists.Data.students_by_id[student_id];
-        if (jelInput.attr('checked'))
-            this.addStudentToListAjax(student, studentList.key);
+        if (jelInput.get(0).checked)
+            EditListsMenu.addStudentToListAjax(student, studentList.key);
         else
-            this.removeStudentFromListAjax(student, studentList.key);
+            EditListsMenu.removeStudentFromListAjax(student, studentList.key);
     },
 
     addStudentToListAjax: function(student, list_id) {

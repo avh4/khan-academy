@@ -10,7 +10,7 @@ from app import App
 
 # layer_cache provides an easy way to cache the result of functions across requests.
 # layer_cache uses cachepy's in-memory storage, memcache, and the datastore.
-# 
+#
 # Unless otherwise specified, memcache and in-memory storage are used.
 # The datastore layer must be explicitly requested.
 #
@@ -90,7 +90,7 @@ def cache(
     return decorator
 
 def cache_with_key_fxn(
-        key_fxn, 
+        key_fxn,
         expiration=DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS,
         layer = Layers.Memcache | Layers.InAppMemory,
         persist_across_app_versions = False):
@@ -101,12 +101,12 @@ def cache_with_key_fxn(
     return decorator
 
 def layer_cache_check_set_return(
-        target, 
-        key_fxn, 
-        expiration = DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS, 
+        target,
+        key_fxn,
+        expiration = DEFAULT_LAYER_CACHE_EXPIRATION_SECONDS,
         layer = Layers.Memcache | Layers.InAppMemory,
         persist_across_app_versions = False,
-        *args, 
+        *args,
         **kwargs):
 
     key = key_fxn(*args, **kwargs)
@@ -114,7 +114,12 @@ def layer_cache_check_set_return(
 
     if persist_across_app_versions:
         namespace = None
-    bust_cache = kwargs.get("bust_cache", False)
+
+    bust_cache = False
+    if "bust_cache" in kwargs:
+        bust_cache = kwargs["bust_cache"]
+        # delete from kwargs so it's not passed to the target
+        del kwargs["bust_cache"]
 
     if not bust_cache:
 

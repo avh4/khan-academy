@@ -74,6 +74,3 @@ MIN_REVIEW_INTERVAL_DAYS = 1
 
 # Maximum range of days we'll show on a profile graph
 MAX_GRAPH_DAY_RANGE = 30
-
-# Approximate Video Count to display on content pages
-APPROX_VID_COUNT = 2400
