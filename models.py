@@ -417,12 +417,15 @@ class UserExercise(db.Model):
 
         return review_interval
 
+    def has_been_proficient(self):
+        return self.longest_streak >= self.required_streak
+
     def get_review_interval(self):
         return UserExercise.get_review_interval_from_seconds(self.review_interval_secs)
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
         # If the user is not now and never has been proficient, don't schedule a review
-        if (self.streak + correct) < self.required_streak and self.longest_streak < self.required_streak:
+        if (self.streak + correct) < self.required_streak and not self.has_been_proficient():
             return
 
         # If the user is hitting a new streak either for the first time or after having lost
@@ -445,7 +448,7 @@ class UserExercise(db.Model):
         self.review_interval_secs = review_interval.days * 86400 + review_interval.seconds
 
     def set_proficient(self, proficient, user_data):
-        if not proficient and self.longest_streak < self.required_streak:
+        if not proficient and not self.has_been_proficient():
             # Not proficient and never has been so nothing to do
             return
 
@@ -1978,6 +1981,7 @@ class UserExerciseGraph(object):
                 "prerequisite_dicts": [],
             })
 
+            # TODO(david): refactor struggling into a fn in UserExercise. Don't use streak here.
             graph_dict["struggling"] = (graph_dict["streak"] == 0 and
                     graph_dict["longest_streak"] < graph_dict["required_streak"] and
                     graph_dict["total_done"] > graph_dict["struggling_threshold"])
@@ -2055,6 +2059,7 @@ class UserExerciseGraph(object):
             return graph_dict["suggested"]
 
         def set_endangered(graph_dict):
+            # TODO(david): refactor here as well
             graph_dict["endangered"] = (graph_dict["proficient"] and
                     graph_dict["streak"] == 0 and
                     graph_dict["longest_streak"] >= graph_dict["required_streak"])
