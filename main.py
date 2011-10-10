@@ -204,10 +204,7 @@ class ViewVideo(request_handler.RequestHandler):
         else:
             video_path = video.download_video_url()
 
-        exercise = None
-        exercise_video = video.get_related_exercise()
-        if exercise_video and exercise_video.exercise:
-            exercise = exercise_video.exercise.name
+        exercises = video.related_exercises()
 
         if video.description == video.title:
             video.description = None
@@ -224,7 +221,7 @@ class ViewVideo(request_handler.RequestHandler):
                             'videos': videos,
                             'video_path': video_path,
                             'video_points_base': consts.VIDEO_POINTS_BASE,
-                            'exercise': exercise,
+                            'exercises': exercises,
                             'previous_video': previous_video,
                             'next_video': next_video,
                             'selected_nav_link': 'watch',

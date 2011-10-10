@@ -48,6 +48,22 @@
                 <span class="long-description"><span class="desktop-only">: </span>{{video.description|escape}}</span>
             {% endif %}
             </h3>
+
+            {%- if exercises %}
+            <div class="related-content visited-no-recolor">
+                <span class="related-content-title">Related exercises:</span>
+                <ul class="related-exercise-list">
+                    {%- for exercise in exercises %}
+                    <li>
+                        <a href="{{exercise.relative_url}}" title="{{exercise.display_name}}">{{exercise.display_name}}</a>
+                        {%- if not loop.last -%}
+                        <span class="separator">, </span>
+                        {%- endif -%}
+                    </li>
+                    {%- endfor %}
+                </ul>
+            </div>
+            {%- endif %}
         </div>
     <div style="margin-top: -5px;">
     	<nav class="prev_next_nav desktop-only">
@@ -80,8 +96,8 @@
 			<nobr>
 
        		<div class="extra-link-bar">
-              	{% if exercise %}
-				<a href="/exercises?exid={{exercise}}" title="View related exercises" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
+              	{% if exercises %}
+				<a href="{{exercises[0].relative_url}}" title="View exercise {{exercises[0].display_name}}" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
                 <img  src="/images/exercise-icon-small.png" />
                          Exercises
                 </a>
