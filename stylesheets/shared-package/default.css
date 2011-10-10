@@ -1839,6 +1839,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         padding-right: 5px;
     }
 
+#description .practice.simple-button {
+    float: right;
+    font-size: 110%;
+}
+
 #extras.single-exercise {
     text-align: right;
     margin: 6px 0 10px;

@@ -42,6 +42,9 @@
     </div>
     <div data-role="content">
         <div id="description">
+            {%- if exercises %}
+            <a href="{{exercises[0].relative_url}}" class="practice simple-button action-gradient green" title="Test your understanding with an exercise">Practice this concept</a>
+            {%- endif %}
             <h3>
                 <span class="title desktop-only">{{video.title|escape}}</span>
             {% if video.description %}
