@@ -287,14 +287,14 @@ def filter_query_by_request_dates(query, property):
             dt_start = request.request_date_iso("dt_start")
             query.filter("%s >=" % property, dt_start)
         except ValueError:
-            raise ValueError("Invalid date format sent to dt_start, use ISO 8601.")
+            raise ValueError("Invalid date format sent to dt_start, use ISO 8601 Combined.")
 
     if request.request_string("dt_end"):
         try:
             dt_end = request.request_date_iso("dt_end")
             query.filter("%s <=" % property, dt_end)
         except ValueError:
-            raise ValueError("Invalid date format sent to dt_end, use ISO 8601.")
+            raise ValueError("Invalid date format sent to dt_end, use ISO 8601 Combined.")
 
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()
