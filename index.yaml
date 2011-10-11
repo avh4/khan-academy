@@ -162,6 +162,17 @@ indexes:
   - name: user
   - name: date
 
+- kind: LogSummary
+  properties:
+  - name: user
+  - name: end
+    direction: desc
+
+- kind: LogSummary
+  properties:
+  - name: user
+  - name: start
+
 - kind: Playlist
   properties:
   - name: __key__
