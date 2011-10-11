@@ -295,6 +295,8 @@ class UserExercise(db.Model):
     proficient_date = db.DateTimeProperty()
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM, indexed=False) # Seconds expected to finish a problem 'quickly' for badge calculation
     summative = db.BooleanProperty(default=False, indexed=False)
+    # FIXME(david): Think about how we're going to transition users to this new model.
+    accuracy_model = object_property.ObjectProperty()  # TODO: Change to UnvalidatedObjectProperty when things are stable?
 
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
@@ -331,6 +333,16 @@ class UserExercise(db.Model):
 
         return points.ExercisePointCalculator(self, suggested, proficient)
 
+    # TODO(david): Is there a common idiom to do this? This is meant as a guard
+    #     for a newly-created property that old objects may not have.
+    def get_accuracy_model(self):
+        if self.accuracy_model is None:
+            self.accuracy_model = AccuracyModel(self)
+        return self.accuracy_model
+
+    def update_accuracy_model(self):
+        self.accuracy_model.update(self)
+
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
     # the internal algorithm so the front-end does not need to change.
@@ -338,6 +350,9 @@ class UserExercise(db.Model):
     @property
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
+
+        # XXX
+        return self.get_accuracy_model().probabilty_next_correct()
 
         def progress_with_start(streak, start, required_streak):
             return start + float(streak) / required_streak * (1 - start)
@@ -2069,6 +2084,23 @@ class UserExerciseGraph(object):
             set_endangered(graph[exercise_name])
 
         return UserExerciseGraph(graph = graph, cache=user_exercise_cache)
+
+class AccuracyModel(object):
+    # FIXME(david): versioning
+    def __init__(self, user_exercise=None):
+        if user_exercise is not None:
+            self.update(user_exercise)
+        else:
+            self.current_streak = 0
+
+    # TODO: This should have a parameter for whether the last problem attempt
+    #     was correct or not for the actual logistic regression model.
+    def update(self, user_exercise):
+        self.current_streak = user_exercise.streak
+
+    def probabilty_next_correct(self):
+        # FIXME(david): This is just based on the streak for now.
+        return float(self.current_streak) / consts.REQUIRED_STREAK
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
