@@ -244,6 +244,7 @@ class ViewVideo(request_handler.RequestHandler):
                             'selected_nav_link': 'watch',
                             'awarded_points': awarded_points,
                             'issue_labels': ('Component-Videos,Video-%s' % readable_id),
+                            'author_profile': 'https://plus.google.com/103970106103092409324'
                         }
         template_values = qa.add_template_values(template_values, self.request)
 
