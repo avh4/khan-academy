@@ -334,7 +334,8 @@ class UserExercise(db.Model):
         return points.ExercisePointCalculator(self, suggested, proficient)
 
     # TODO(david): Is there a common idiom to do this? This is meant as a guard
-    #     for a newly-created property that old objects may not have.
+    #     for a newly-created property that old objects may not have. Is there
+    #     a way to just set accuracy_model's getter to this?
     def get_accuracy_model(self):
         if self.accuracy_model is None:
             self.accuracy_model = AccuracyModel(self)
@@ -351,7 +352,7 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        # XXX
+        # XXX. Should be under A/B test.
         return self.get_accuracy_model().probabilty_next_correct()
 
         def progress_with_start(streak, start, required_streak):
@@ -418,8 +419,11 @@ class UserExercise(db.Model):
                 self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
             self.streak = 0
 
-    def struggling_threshold(self):
-        return self.exercise_model.struggling_threshold()
+    def is_struggling(self):
+        # TODO: Use accuracy model to predict when user is struggling.
+        return (self.streak == 0 and
+            self.longest_streak < self.required_streak and
+            self.total_done > self.exercise_model.struggling_threshold())
 
     @staticmethod
     def get_review_interval_from_seconds(seconds):
@@ -1780,6 +1784,7 @@ class UserExerciseCache(db.Model):
                 "last_review": user_exercise.last_review if user_exercise else datetime.datetime.min,
                 "review_interval_secs": user_exercise.review_interval_secs if user_exercise else 0,
                 "proficient_date": user_exercise.proficient_date if user_exercise else 0,
+                "struggling": user_exercise.is_struggling() if user_exercise else False,
                 }
 
     @staticmethod
@@ -1956,12 +1961,10 @@ class UserExerciseGraph(object):
                 "h_position": exercise.h_position,
                 "v_position": exercise.v_position,
                 "summative": exercise.summative,
-                "struggling_threshold": exercise.struggling_threshold(),
                 "required_streak": exercise.required_streak,
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,
-                "struggling": None,
                 "endangered": None,
                 "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
                 "covers": exercise.covers,
@@ -1995,11 +1998,6 @@ class UserExerciseGraph(object):
                 "coverer_dicts": [],
                 "prerequisite_dicts": [],
             })
-
-            # TODO(david): refactor struggling into a fn in UserExercise. Don't use streak here.
-            graph_dict["struggling"] = (graph_dict["streak"] == 0 and
-                    graph_dict["longest_streak"] < graph_dict["required_streak"] and
-                    graph_dict["total_done"] > graph_dict["struggling_threshold"])
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
