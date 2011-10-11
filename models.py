@@ -341,7 +341,7 @@ class UserExercise(db.Model):
         return self.accuracy_model
 
     def update_accuracy_model(self):
-        self.accuracy_model.update(self)
+        self.get_accuracy_model().update(self)
 
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
