@@ -57,6 +57,9 @@ class ViewExercise(request_handler.RequestHandler):
         if not exercise:
             raise MissingExerciseException("Missing exercise w/ exid '%s'" % exid)
 
+        if self.request_bool("bingo", False):
+            bingo("exercise_button_at_top")
+
         user_exercise = user_data.get_or_insert_exercise(exercise)
 
         # Cache this so we don't have to worry about future lookups
