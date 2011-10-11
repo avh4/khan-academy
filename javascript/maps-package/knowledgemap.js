@@ -172,7 +172,7 @@ var KnowledgeMap = {
 
     attachNodeEvents: function(el, node) {
         $(el).click(
-                function(){KnowledgeMap.onNodeClick(node);}
+                function(evt){KnowledgeMap.onNodeClick(node, evt);}
             ).hover(
                 function(){KnowledgeMap.onNodeMouseover(this, node);},
                 function(){KnowledgeMap.onNodeMouseout(this, node);}
@@ -321,13 +321,13 @@ var KnowledgeMap = {
             jel.removeClass("nodeLabelHighlight");
     },
 
-    onNodeClick: function(node) {
+    onNodeClick: function(node, evt) {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
         if (KnowledgeMap.admin)
         {
-            if (event.shiftKey)
+            if (evt.shiftKey)
             {
                 if (node.id in KnowledgeMap.selectedNodes)
                 {
@@ -408,7 +408,7 @@ var KnowledgeMap = {
                 }
             });
             
-            event.stopPropagation();
+            evt.stopPropagation();
         }
         else
         {
