@@ -67,8 +67,6 @@ from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
 
-from gae_bingo.gae_bingo import ab_test
-
 import config_jinja
 
 class VideoDataTest(request_handler.RequestHandler):
@@ -210,19 +208,14 @@ class ViewVideo(request_handler.RequestHandler):
             video.description = None
 
         related_exercises = video.related_exercises()
-        button_top_exercise = button_bottom_exercise = None
+        button_top_exercise = None
         if related_exercises:
-            # decide whether to display exercise button at top or bottom
             def ex_to_dict(exercise):
                 return {
                     'name': exercise.display_name,
-                    'url': exercise.relative_url + "&bingo=1",
+                    'url': exercise.relative_url,
                 }
-
-            if ab_test("exercise_button_at_top"):
-                button_top_exercise = ex_to_dict(related_exercises[0])
-            else:
-                button_bottom_exercise = ex_to_dict(related_exercises[0])
+            button_top_exercise = ex_to_dict(related_exercises[0])
 
         user_video = UserVideo.get_for_video_and_user_data(video, UserData.current(), insert_if_missing=True)
 
@@ -237,7 +230,6 @@ class ViewVideo(request_handler.RequestHandler):
                             'video_path': video_path,
                             'video_points_base': consts.VIDEO_POINTS_BASE,
                             'button_top_exercise': button_top_exercise,
-                            'button_bottom_exercise': button_bottom_exercise,
                             'related_exercises': [], # disabled for now
                             'previous_video': previous_video,
                             'next_video': next_video,
