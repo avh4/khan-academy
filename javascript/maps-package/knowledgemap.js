@@ -7,8 +7,7 @@ var KnowledgeMap = {
     markers: [],
     widthPoints: 200,
     heightPoints: 120,
-	selectedNodes: {},
-    clickHandled: false,
+    selectedNodes: {},
     colors: {
         blue: "#0080C9",
         green: "#8EBE4F",
@@ -173,7 +172,7 @@ var KnowledgeMap = {
 
     attachNodeEvents: function(el, node) {
         $(el).click(
-                function(){KnowledgeMap.onNodeClick(node);}
+                function(evt){KnowledgeMap.onNodeClick(node, evt);}
             ).hover(
                 function(){KnowledgeMap.onNodeMouseover(this, node);},
                 function(){KnowledgeMap.onNodeMouseout(this, node);}
@@ -322,18 +321,13 @@ var KnowledgeMap = {
             jel.removeClass("nodeLabelHighlight");
     },
 
-    onNodeClick: function(node) {
+    onNodeClick: function(node, evt) {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
         if (KnowledgeMap.admin)
         {
-            this.clickHandled = true;    
-            setTimeout(function() {
-                KnowledgeMap.clickHandled = false;
-            }, 20);
-
-            if (event.shiftKey)
+            if (evt.shiftKey)
             {
                 if (node.id in KnowledgeMap.selectedNodes)
                 {
@@ -342,16 +336,17 @@ var KnowledgeMap = {
                 }
                 else
                 {
-                    KnowledgeMap.selectedNodes[node.id] = '';
+                    KnowledgeMap.selectedNodes[node.id] = true;
                     this.highlightNode(node, true);
                 }
             }
             else
             {
-                for (var node_id in KnowledgeMap.selectedNodes)
-                    this.highlightNode(this.dictNodes[node_id], false);
+                $.each(KnowledgeMap.selectedNodes, function(node_id) {
+                    KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], false);
+                });
                 KnowledgeMap.selectedNodes = { };
-                KnowledgeMap.selectedNodes[node.id] = '';
+                KnowledgeMap.selectedNodes[node.id] = true;
                 this.highlightNode(node, true);
             }
             
@@ -378,15 +373,14 @@ var KnowledgeMap = {
                 if (delta_v != 0 || delta_h != 0) {
                     var id_array = [];
 
-                    for (var node_id in KnowledgeMap.selectedNodes)
-                    {
+                    $.each(KnowledgeMap.selectedNodes, function(node_id) {
                         var actual_node = KnowledgeMap.dictNodes[node_id];
 
                         actual_node.v_position = parseInt(actual_node.v_position) + delta_v;
                         actual_node.h_position = parseInt(actual_node.h_position) + delta_h;
 
                         id_array.push(node_id);
-                    }
+                    });
                     $.post("/moveexercisemapnodes", { exercises: id_array.join(","), delta_h: delta_h, delta_v: delta_v } );
 
                     var zoom =KnowledgeMap.map.getZoom();
@@ -400,20 +394,21 @@ var KnowledgeMap = {
                             rgTargets[ix].line.setMap(null);
                         }
                     }
-                    //KnowledgeMap.dictNodes[node.id] = node;
                     KnowledgeMap.overlay.setMap(null);
                     KnowledgeMap.layoutGraph();
                     KnowledgeMap.drawOverlay();
 
                     setTimeout(function() {
-                            for (var node_id in KnowledgeMap.selectedNodes)
-                            KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], true);
-                            }, 100);
+                            $.each(KnowledgeMap.selectedNodes, function(node_id) {
+                                KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], true);
+                            });
+                        }, 100);
 
                     return false;
                 }
             });
             
+            evt.stopPropagation();
         }
         else
         {
@@ -514,9 +509,10 @@ var KnowledgeMap = {
     },
 
     onClick: function() {
-        if (KnowledgeMap.admin && KnowledgeMap.clickHandled == false) {
-            for (var node_id in KnowledgeMap.selectedNodes)
+        if (KnowledgeMap.admin) {
+            $.each(KnowledgeMap.selectedNodes, function(node_id) {
                 KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], false);
+            });
             KnowledgeMap.selectedNodes = { };
         }
     },
