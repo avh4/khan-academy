@@ -6,7 +6,7 @@
 {% import 'macros/analytics.html' as analytics %}
 {% import 'macros/discussion.html' as discussion %}
 
-{% block meta_page_title %}{{video.title}} | {% endblock %}
+{% block meta_page_title %}{{video.title|escape}} | {{playlist.title|escape}} | {% endblock %}
 {% block meta_keywords %}{{video.keywords}}{% endblock %}
 {% block meta_description %}{{video.description}}{% endblock %}
 
@@ -69,46 +69,40 @@
             {%- endif %}
         </div>
     <div style="margin-top: -5px;">
-    	<nav class="prev_next_nav desktop-only">
-        	{% if previous_video %}
+        <nav class="prev_next_nav desktop-only">
+            {% if previous_video %}
             <label id="prev_video">
                 <a rel=prev href="/video/{{previous_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Previous Video:</b>{{ library.video_name_and_progress(previous_video) }}</a>
             </label>
-            	{% endif %}
+                {% endif %}
                 {% if next_video %}
             <label id="next_video">
                 <a rel=next href="/video/{{next_video.readable_id}}?playlist={{playlist.title|urlencode}}"><b>Next Video:</b> {{ library.video_name_and_progress(next_video) }}</a>
             </label>
                 {% endif %}
             <div class="clear"></div>
-      	</nav>
+        </nav>
 
         <div id="youtube_blocked" class="desktop-only">
             {{ youtube.flv_player_embed(video_path) }}
         </div>
         <div class="youtube-video">
             {{ youtube.player_embed(video.youtube_id) }}
-        	<div class="subtitles-warning">
+            <div class="subtitles-warning">
                 &lArr; Use this menu to view and help create subtitles for this video in many different languages.
                 You'll probably want to hide YouTube's captions if using these subtitles.
                <a href="#" class="subtitles-link">Close subtitles</a>
-           	</div>
-      	</div>
+            </div>
+        </div>
 
         <span class="video_extra_links desktop-only">
-			<nobr>
+            <nobr>
 
-       		<div class="extra-link-bar">
-              	{% if button_bottom_exercise -%}
-				<a href="{{button_bottom_exercise.url}}" title="View exercise {{button_bottom_exercise.name}}" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
-                <img  src="/images/exercise-icon-small.png" />
-                         Exercises
-                </a>
-				{%- endif %}
+            <div class="extra-link-bar">
 
                 <a href="#" title="Toggle subtitles and translations" style="z-index:101;" class="simple-button action-gradient with-icon subtitles-link">
                 <img src="/images/subtitles-icon-small.png" />
-                       	Subtitles
+                        Subtitles
                 </a>
 
                 {% if video_path %}
@@ -120,18 +114,18 @@
 
                 {{ social.share_video_button(video.title, video.description, video.youtube_id, "Video-Page-Share") }}
 
-         	</div>
-			<span style="float:right;" id="points-badge-hover">
+            </div>
+            <span style="float:right;" id="points-badge-hover">
                 {{ user.possible_points_badge(awarded_points, video_points_base, logged_in) }}
-			</span>
-         	</nobr>
-		 </span>
+            </span>
+            </nobr>
+         </span>
 
-    	<div class="desktop-only">
+        <div class="desktop-only">
             {{ discussion.comments(user_data, video, playlist, comments_page) }}
             {{ discussion.qa(user_data, video, playlist, qa_page, qa_expand_key, sort) }}
         </div>
-	</div>
+    </div>
     </div>
 
 </article>
