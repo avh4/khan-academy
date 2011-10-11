@@ -701,7 +701,7 @@ application = webapp2.WSGIApplication([
     ('/viewexercisesonmap', exercises.ViewAllExercises),
     ('/editexercise', exercises.EditExercise),
     ('/updateexercise', exercises.UpdateExercise),
-    ('/moveexercisemapnode', exercises.MoveMapNode),
+    ('/moveexercisemapnodes', exercises.MoveMapNodes),
     ('/admin94040', exercises.ExerciseAdmin),
     ('/video/.*', ViewVideo),
     ('/v/.*', ViewVideo),
