@@ -98,8 +98,8 @@ class Exercise(db.Model):
     short_display_name = db.StringProperty(default="")
     prerequisites = db.StringListProperty()
     covers = db.StringListProperty()
-    v_position = db.IntegerProperty()
-    h_position = db.IntegerProperty()
+    v_position = db.IntegerProperty() # actually horizontal position on knowledge map
+    h_position = db.IntegerProperty() # actually vertical position on knowledge map
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
 
     # True if this exercise is live and visible to all users.
@@ -258,19 +258,15 @@ class Exercise(db.Model):
             dict_exercises[exercise.name] = exercise
         return dict_exercises
 
-    _EXERCISES_COUNT_KEY = "Exercise.count()"
     @staticmethod
+    @layer_cache.cache(expiration=3600)
     def get_count():
-        count = memcache.get(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
-        if count is None:
-            count = Exercise.all().count()
-            memcache.set(Exercise._EXERCISES_COUNT_KEY, count, namespace=App.version)
-        return count
+        return Exercise.all().count()
 
     def put(self):
         Setting.cached_exercises_date(str(datetime.datetime.now()))
-        memcache.delete(Exercise._EXERCISES_COUNT_KEY, namespace=App.version)
         db.Model.put(self)
+        Exercise.get_count(bust_cache=True)
 
     @staticmethod
     def get_dict(query, fxn_key):
@@ -1064,22 +1060,22 @@ class Video(Searchable, db.Model):
             video_dict[fxn_key(video)] = video
         return video_dict
 
+    @layer_cache.cache_with_key_fxn(
+        lambda self: "related_exercises_%s" % self.key(),
+        layer=layer_cache.Layers.Memcache,
+        expiration=3600 * 2)
     def related_exercises(self):
-        exercise_videos = None
-        query = ExerciseVideo.all()
-        query.filter('video =', self.key())
-        return query
-
-    @layer_cache.cache_with_key_fxn(lambda self: "related_exercise_%s" % self.key(), layer=layer_cache.Layers.Memcache)
-    def get_related_exercise(self):
-        exercise_video = self.related_exercises().get()
-        if exercise_video:
-            exercise_video.exercise # Pre-cache exercise entity
-        return exercise_video or ExerciseVideo()
+        exvids = ExerciseVideo.all()
+        exvids.filter('video =', self.key())
+        exercises = [ev.exercise for ev in exvids]
+        exercises.sort(key=lambda e: e.h_position)
+        exercises.sort(key=lambda e: e.v_position)
+        return exercises
 
     @staticmethod
-    def approx_count(rounding=100):
-        return int(Setting.count_videos()) / rounding * rounding
+    @layer_cache.cache(expiration=3600)
+    def approx_count():
+        return int(Setting.count_videos()) / 100 * 100
 
 class Playlist(Searchable, db.Model):
 

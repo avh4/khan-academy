@@ -68,11 +68,18 @@
                 <td width="94%">
                     <div id="thumbnails" class="visited-no-recolor">
                         {% for thumbnail_link_set in thumbnail_link_sets %}
+                            {% set outerloop = loop %}
                             <div {% if not loop.first %}style="display:none;"{% endif %}><table style="width:100%"><tr>
                             {% for thumbnail_link in thumbnail_link_set %}
                             <td style="width:25%" class="thumbnail_td {{ thumbnail_link["type"] }} {% if thumbnail_link["selected"] %}selected{% endif %}" data-key="{{ thumbnail_link["key"]|escape }}" data-youtube-id="{{ thumbnail_link["youtube_id"]|escape }}">
 
-                                    <a href="{{ thumbnail_link["href"]|escape }}" class="thumbnail_link"><div class="thumb" style="background-image:url('{{ thumbnail_link["thumb_url"]|escape }}')"></div></a>
+                                <a href="{{ thumbnail_link["href"]|escape }}" class="thumbnail_link"><div 
+                                        {% if outerloop.first %}
+                                        class="thumb" style="background-image:url('{{ thumbnail_link["thumb_url"]|escape }}')"
+                                        {% else %}
+                                        class="thumb pending" data-src="{{ thumbnail_link["thumb_url"]|escape }}"
+                                        {% endif %}
+                                        ></div></a>
 
                                     <a href="{{ thumbnail_link["href"]|escape }}" class="thumbnail_link"><div class="thumbnail_label"><div class="thumbnail_desc">{{ thumbnail_link["desc_html"] }}</div><div class="thumbnail_teaser">{{ thumbnail_link["teaser_html"] }}</div></div></a>
                                 </td>

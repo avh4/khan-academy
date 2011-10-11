@@ -42,12 +42,31 @@
     </div>
     <div data-role="content">
         <div id="description">
+            {%- if button_top_exercise %}
+            <a href="{{button_top_exercise.url}}" class="practice simple-button action-gradient green" title="Test your understanding with an exercise">Practice this concept</a>
+            {%- endif %}
             <h3>
                 <span class="title desktop-only">{{video.title|escape}}</span>
             {% if video.description %}
                 <span class="long-description"><span class="desktop-only">: </span>{{video.description|escape}}</span>
             {% endif %}
             </h3>
+
+            {%- if related_exercises %}
+            <div class="related-content visited-no-recolor">
+                <span class="related-content-title">Related exercises:</span>
+                <ul class="related-exercise-list">
+                    {%- for exercise in related_exercises %}
+                    <li>
+                        <a href="{{exercise.url}}" title="{{exercise.name}}">{{exercise.name}}</a>
+                        {%- if not loop.last -%}
+                        <span class="separator">, </span>
+                        {%- endif -%}
+                    </li>
+                    {%- endfor %}
+                </ul>
+            </div>
+            {%- endif %}
         </div>
     <div style="margin-top: -5px;">
     	<nav class="prev_next_nav desktop-only">
@@ -80,12 +99,12 @@
 			<nobr>
 
        		<div class="extra-link-bar">
-              	{% if exercise %}
-				<a href="/exercises?exid={{exercise}}" title="View related exercises" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
+              	{% if button_bottom_exercise -%}
+				<a href="{{button_bottom_exercise.url}}" title="View exercise {{button_bottom_exercise.name}}" style="z-index:101;" class="simple-button action-gradient with-icon exercise-link">
                 <img  src="/images/exercise-icon-small.png" />
                          Exercises
                 </a>
-				{% endif %}
+				{%- endif %}
 
                 <a href="#" title="Toggle subtitles and translations" style="z-index:101;" class="simple-button action-gradient with-icon subtitles-link">
                 <img src="/images/subtitles-icon-small.png" />
