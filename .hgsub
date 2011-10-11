@@ -1,1 +1,2 @@
 khan-exercises = [git]http://github.com/Khan/khan-exercises.git
+gae_bingo = [git]/Users/marcos/projects/gae_bingo
