@@ -1241,15 +1241,29 @@ class VideoLog(db.Model):
     _serialize_blacklist = ["video"]
 
     @staticmethod
-    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b, order=True):
         query = VideoLog.all()
         query.filter('user =', user_data.user)
 
         query.filter('time_watched >=', dt_a)
         query.filter('time_watched <=', dt_b)
-        query.order('time_watched')
+        if order:
+            query.order('time_watched')
 
         return query
+
+    @staticmethod
+    def get_for_users_between_dts(user_data_list, dt_a, dt_b, order=True):        
+        query = VideoLog.all()
+        query.filter('user IN', [user.user for user in user_data_list])
+        query.filter('time_watched >=', dt_a)
+        query.filter('time_watched <', dt_b)
+        # query.order('user') error says that first ordering property must be the same as inequality filter - time_done
+        if order:
+            query.order('time_watched')
+ 
+        return query
+
 
     @staticmethod
     def get_for_user_data_and_video(user_data, video):
@@ -1372,6 +1386,8 @@ class VideoLog(db.Model):
 # commit_video_log is used by our deferred video log insertion process
 def commit_video_log(video_log):
     video_log.put()
+    from classtime import ClassDailyActivitySummary #putting this at the top would get a circular reference
+    LogSummary.add_or_update_entry(video_log.user, video_log, ClassDailyActivitySummary)
 
 class DailyActivityLog(db.Model):
     user = db.UserProperty()
@@ -1400,6 +1416,75 @@ class DailyActivityLog(db.Model):
         query.order('date')
 
         return query
+
+    
+
+class LogSummary(db.Model):
+    user = db.UserProperty()
+    start = db.DateTimeProperty()
+    end = db.DateTimeProperty()
+    summary = object_property.ObjectProperty()
+
+    #TODO: divide the day/year up by delta and find the period that activity.time_started() belongs in
+    @staticmethod
+    def get_period_key_by_activity(user_data, activity, delta):
+        pass
+
+    #activity needs to have activity.time_started() and activity.time_done() functions
+    #summaryClass needs to have a method .add(activity)
+    #delta is a time period in minutes
+    #method is either "proximity"   - new event is added to last summary if it is within delta
+    #              or "period"      - day is divided up into buckets of delta minutes
+    @staticmethod
+    def add_or_update_entry(user_data, activity, summaryClass, delta=30, method="proximity"):
+        if method=="proximity":
+            #find the summary which ends within delta of the current activity's start
+            log_summary = LogSummary.get_closest_summary(user_data, activity, delta).get()
+        
+            if log_summary:
+                log_summary.start=min(log_summary.start, activity.time_started())
+                log_summary.end=max(log_summary.end, activity.time_ended())
+                log_summary.summary.add(user_data, activity)
+                log_summary.put()
+            else:
+                log_summary = LogSummary()
+                log_summary.user=user_data.user
+                log_summary.start=activity.time_started()
+                log_summary.end=activity.time_ended() 
+                log_summary.summary=summaryClass() 
+                log_summary.summary.add(user_data, activity)  
+                log_summary.put()
+
+        elif method=="period":
+            pass
+    
+    @staticmethod
+    def get_description():
+        return self.summary.description(self.start, self.end)
+
+    #get the summary which ends within delta minutes of the start of the activity, that the current activity should be added to
+    @staticmethod
+    def get_closest_summary(user_data, activity, delta):
+        query = LogSummary.all()
+        query.filter('user =',user_data.user)
+        query.filter('end >=',activity.time_started() -  datetime.timedelta(minutes=delta))
+        query.filter('end <',activity.time_ended() + datetime.timedelta(minutes=delta)) #really should use start here instead of end, but gae doesnt allow inequalities on two items
+        query.order('-end')
+        return query
+
+    @staticmethod
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
+        query = LogSummary.all()
+        query.filter('user =', user_data.user)
+
+        query.filter('start >=', dt_a)
+        query.filter('start <', dt_b)
+        query.order('start')
+
+        return query
+
+
+
 
 class ProblemLog(db.Model):
 
@@ -1437,15 +1522,29 @@ class ProblemLog(db.Model):
             (self.exercise, self.problem_number))
 
     @staticmethod
-    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b, order=True):
         query = ProblemLog.all()
         query.filter('user =', user_data.user)
 
         query.filter('time_done >=', dt_a)
         query.filter('time_done <', dt_b)
-        query.order('time_done')
+        if order:
+            query.order('time_done')
 
         return query
+
+    @staticmethod
+    def get_for_users_between_dts(user_data_list, dt_a, dt_b, order=True):        
+        query = ProblemLog.all()
+        query.filter('user IN', [user.user for user in user_data_list])
+        query.filter('time_done >=', dt_a)
+        query.filter('time_done <', dt_b)
+        # query.order('user') error says that first ordering property must be the same as inequality filter - time_done
+        if(order):
+            query.order('time_done')
+ 
+        return query
+
 
     def time_taken_capped_for_reporting(self):
         # For reporting's sake, we cap the amount of time that you can be considered to be
@@ -1463,7 +1562,7 @@ class ProblemLog(db.Model):
         return util.minutes_between(self.time_started(), self.time_ended())
 
 # commit_problem_log is used by our deferred problem log insertion process
-def commit_problem_log(problem_log_source):
+def commit_problem_log(problem_log_source, user_data):
     try:
         if not problem_log_source or not problem_log_source.key().name:
             logging.critical("Skipping problem log commit due to missing problem_log_source or key().name")
@@ -1551,9 +1650,16 @@ def commit_problem_log(problem_log_source):
         # Correct cannot be changed from False to True after first attempt
         problem_log.correct = (problem_log_source.count_attempts == 1 or problem_log.correct) and problem_log_source.correct and not problem_log.count_hints
 
+        logging.info(problem_log.time_ended())
         problem_log.put()
-
+        
+        
     db.run_in_transaction(txn)
+    logging.info("ran transaction")
+    from classtime import ClassDailyActivitySummary #if this line is at the top it creates a circular reference
+    LogSummary.add_or_update_entry(user_data, problem_log_source, ClassDailyActivitySummary)
+    logging.info(problem_log_source)
+
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and

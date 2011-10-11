@@ -27,7 +27,38 @@ def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
     if classtime_analyzer.timezone_offset != -1:
         # If no timezone offset is specified, don't bother grabbing all the data
         # because we'll be redirecting back to here w/ timezone information.
-        classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
+        ''' 
+        import time
+        minOld=999999
+        minNew=999999
+        for i in range(1,2):
+            start=time.time()
+            classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)
+            end=time.time()
+            minOld=min(minOld, end-start)
+
+            start=time.time()
+            classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
+            end=time.time()
+            minNew=min(minNew, end-start)
+       
+        logging.info("old="+ str(minOld))
+        logging.info("new="+ str(minNew))
+        '''
+        import os
+        import time
+        logging.info(os.environ["QUERY_STRING"])
+        logging.info(os.environ["QUERY_STRING"].find("&version=2"))
+        if os.environ["QUERY_STRING"].find("&version=2")!=-1:
+            start=time.time()
+            classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
+            end=time.time()
+            logging.info("new="+ str(end-start))
+        else:
+            start=time.time()
+            classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)
+            end=time.time()
+            logging.info("old="+ str(end-start))
 
     for user_data_student in students_data:
 

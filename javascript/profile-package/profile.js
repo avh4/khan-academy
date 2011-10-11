@@ -1,6 +1,7 @@
 
 var Profile = {
 
+    version: 1,
     initialGraphUrl: null,
     fLoadingGraph: false,
     fLoadedGraph: false,
@@ -225,9 +226,11 @@ var Profile = {
             var list_id = $dropdown.data('selected').key;
             var qs = this.parseQueryString(url);
             qs['list_id'] = list_id;
+            qs['dt'] = $("#targetDatepicker").val();
+            qs['version']=Profile.version;
             url = this.baseGraphHref(url) + '?' + this.reconstructQueryString(qs);
         }
-
+        
         this.loadGraph(url);
     },
 
