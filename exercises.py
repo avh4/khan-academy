@@ -375,6 +375,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
         # If this is the first attempt, update review schedule appropriately
         if attempt_number == 1:
+            # TODO(david): It's weird that this fn takes a "completed" parameter.
             user_exercise.schedule_review(completed)
 
         if completed:
@@ -411,7 +412,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
                     user_exercise.streak_start = 0.0
 
-                if user_exercise.streak >= exercise.required_streak and not explicitly_proficient:
+                if user_exercise.is_currently_proficient() and not explicitly_proficient:
                     user_exercise.set_proficient(True, user_data)
                     user_data.reassess_if_necessary()
 
