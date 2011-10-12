@@ -83,8 +83,9 @@ class AB_Test(RequestHandler):
         
         
         self.response.set_status(status)
-        if response:
-            self.response.out.write(json.dumps(response))
+        response = json.dumps(response)
+        if response is not 'null':
+            self.response.out.write(response)
         return
 
 
