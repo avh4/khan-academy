@@ -659,20 +659,31 @@ class Search(request_handler.RequestHandler):
         video_key_list = [result["key"] for result in video_partial_results]
         video_key_list.extend([str(key_and_title[0]) for key_and_title in video_text_keys])
         video_key_list = list(set(video_key_list))
-        video_count = len(video_key_list)
         videos = db.get(video_key_list)
 
         # Get playlists for videos not in matching playlists
+        filtered_videos = []
         for video in videos:
             if [(playlist.title in video.playlists) for playlist in playlists].count(True) == 0:
-                playlists.append(video.first_playlist())
+                video_playlist = video.first_playlist()
+                if video_playlist != None:
+                    playlists.append(video_playlist)
+                    filtered_videos.append(video)
+            else:
+                filtered_videos.append(video)
+        video_count = len(filtered_videos)
                 
+        # Count number of videos in each playlist and sort descending
         for playlist in playlists:
-            playlist.match_count = [(playlist.title in video.playlists) for video in videos].count(True);
+            if len(filtered_videos) > 0:
+                playlist.match_count = [(playlist.title in video.playlists) for video in filtered_videos].count(True)
+            else:
+                playlist.match_count = 0
+        playlists = sorted(playlists, key=lambda playlist: -playlist.match_count)
 
         template_values.update({
                            'playlists': playlists,
-                           'videos': videos,
+                           'videos': filtered_videos,
                            'search_string': query,
                            'video_count': video_count,
                            'playlist_count': playlist_count,

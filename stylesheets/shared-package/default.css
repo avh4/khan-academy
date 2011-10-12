@@ -3325,11 +3325,12 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     font-size: 18px
 }
 #search-playlists .videos {
-    margin-left: 30px;
+    margin-left: 24px;
 }
 #search-playlists .description,.keywords {
     font-size: 11px;
     margin: 0px;
+    line-height: 18px;
 }
 #search-playlists .keywords {
     font-style: italic;

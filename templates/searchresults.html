@@ -63,7 +63,11 @@
         <button type="submit">New Search</button>
     </form>
     <section class="searchresult-counts">
-        Found {{ video_count }} {% if (video_count == 1) %}video{% else %}videos{% endif %} and {{ playlist_count }}  {% if (playlist_count == 1) %}playlist{% else %}playlists{% endif %} that match your query:
+        {% if (video_count == 0) %}
+            No results for this search. Please try a different query.
+        {% else %}
+            Found {{ video_count }} {% if (video_count == 1) %}video{% else %}videos{% endif %} and {{ playlist_count }}  {% if (playlist_count == 1) %}playlist{% else %}playlists{% endif %} that match your query:
+        {% endif %}
     </section>
     {% if playlists %}
     <section class="playlists" id="search-playlists">
@@ -120,6 +124,8 @@ $(function() {
         var jelTop = $("#back-to-top");
         jelTop.css("display", "block");
     }
+
+    initAutocomplete("#search_results #search-page-box", true);
 })
 </script>
 {% endblock bottompagescript %}
