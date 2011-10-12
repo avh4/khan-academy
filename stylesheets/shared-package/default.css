@@ -1829,6 +1829,30 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-badge.single-exercise .related-content ul.related-video-list li.related-video-extended {
             display: none;
         }
+
+#description .related-content {
+    margin-top: -22px;
+    line-height: 13px;
+}
+
+#description .related-content ul.related-exercise-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: inline;
+}
+    #description .related-content ul.related-exercise-list li {
+        display: inline;
+    }
+    #description .related-content ul.related-exercise-list li span.separator {
+        padding-right: 5px;
+    }
+
+#description .practice.simple-button {
+    float: right;
+    font-size: 110%;
+}
+
 #extras.single-exercise {
     text-align: right;
     margin: 6px 0 10px;

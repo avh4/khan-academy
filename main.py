@@ -164,9 +164,6 @@ class ViewVideo(request_handler.RequestHandler):
             redirect_to_canonical_url = True
 
         exid = self.request_string('exid', default=None)
-        if exid:
-            bingo("used_video")
-            bingo("used_hints_or_video")
 
         if redirect_to_canonical_url:
             qs = {'playlist': playlist.title}
@@ -204,13 +201,18 @@ class ViewVideo(request_handler.RequestHandler):
         else:
             video_path = video.download_video_url()
 
-        exercise = None
-        exercise_video = video.get_related_exercise()
-        if exercise_video and exercise_video.exercise:
-            exercise = exercise_video.exercise.name
-
         if video.description == video.title:
             video.description = None
+
+        related_exercises = video.related_exercises()
+        button_top_exercise = None
+        if related_exercises:
+            def ex_to_dict(exercise):
+                return {
+                    'name': exercise.display_name,
+                    'url': exercise.relative_url,
+                }
+            button_top_exercise = ex_to_dict(related_exercises[0])
 
         user_video = UserVideo.get_for_video_and_user_data(video, UserData.current(), insert_if_missing=True)
 
@@ -224,12 +226,14 @@ class ViewVideo(request_handler.RequestHandler):
                             'videos': videos,
                             'video_path': video_path,
                             'video_points_base': consts.VIDEO_POINTS_BASE,
-                            'exercise': exercise,
+                            'button_top_exercise': button_top_exercise,
+                            'related_exercises': [], # disabled for now
                             'previous_video': previous_video,
                             'next_video': next_video,
                             'selected_nav_link': 'watch',
                             'awarded_points': awarded_points,
                             'issue_labels': ('Component-Videos,Video-%s' % readable_id),
+                            'author_profile': 'https://plus.google.com/103970106103092409324'
                         }
         template_values = qa.add_template_values(template_values, self.request)
 
@@ -701,7 +705,7 @@ application = webapp2.WSGIApplication([
     ('/viewexercisesonmap', exercises.ViewAllExercises),
     ('/editexercise', exercises.EditExercise),
     ('/updateexercise', exercises.UpdateExercise),
-    ('/moveexercisemapnode', exercises.MoveMapNode),
+    ('/moveexercisemapnodes', exercises.MoveMapNodes),
     ('/admin94040', exercises.ExerciseAdmin),
     ('/video/.*', ViewVideo),
     ('/v/.*', ViewVideo),
