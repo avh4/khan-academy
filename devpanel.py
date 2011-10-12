@@ -13,10 +13,7 @@ from api.auth.xsrf import ensure_xsrf_cookie
 import gdata.youtube
 import gdata.youtube.data
 import gdata.youtube.service
-import urllib
-import urllib2
 import csv
-from xml.etree import ElementTree as ET
 
 class Email(request_handler.RequestHandler):
 
@@ -80,20 +77,20 @@ class CommonCore(request_handler.RequestHandler):
     def get(self):
         
         cc_videos = []
-        auth_sub_url = ""
         youtube_account = ""
         cc_file = "common_core/"
-        authsub_next = ""
-        is_test = True # Change to False in production
         
-        if is_test: 
+        # set query param test=1 to request to test tagging (e.g., /devadmin/commoncore?test=1)
+        
+        if self.request_string("test") == "1": test = True
+        else: test = False
+        
+        if test: 
             youtube_account = "khanacademyschools"
             cc_file += "test_data.csv"
-            auth_sub_next = "http://localhost:8080/devadmin/commoncore"
         else:
             youtube_account = "khanacademy"
-            cc_file += "cc_data.csv"
-            auth_sub_next = "http://khanacademy.org/devadmin/commoncore"
+            cc_file += "cc_video_mapping.csv"
         
         token = self.request_string("token")
         
@@ -116,32 +113,22 @@ class CommonCore(request_handler.RequestHandler):
                     keywords = entry.media.keywords.text
                 else:
                     keywords = ""
-
+                
                 entry.media.keywords.text = keywords + "," + record["keyword"]
 
                 updated_entry = yt_service.UpdateVideoEntry(entry, video_url)
                 
                 if not updated_entry:
-                        logging.warning("***Video NOT updated*** Title: " + record["title"] + ", ID: " + record["youtube_id"])
+                        logging.warning("***NOT updated*** Title: " + record["title"] + ", ID: " + record["youtube_id"])
+                
+                if test:
+                    logging.info("***UPDATED*** " + entry.media.title.text)
                 
                 cc_videos.append(record)
             f.close() 
-        
-        else: # Get YouTube AuthSub token
-            
-            params = {
-                'next': auth_sub_next,
-                'scope': "http://gdata.youtube.com", 
-                'session': "1", 
-                'secure': "0"
-            }
-            
-            base_url = "https://www.google.com/accounts/AuthSubRequest?"
-            auth_sub_url = base_url + urllib.urlencode(params)
                         
         template_values = {
             "token" : token,
-            "auth_sub_url" : auth_sub_url,
             "cc_videos" : cc_videos,
         }
         

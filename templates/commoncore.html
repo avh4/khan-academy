@@ -34,9 +34,26 @@
                 </tbody>
                 </table>
             {% else %}
-				
-                <a href="{{auth_sub_url}}">Log in to your YouTube account</a>
+            
+				<script type="text/javascript" charset="utf-8">
+				    
+				    $(document).ready(function() {
 
+    				    var auth_sub = "https://www.google.com/accounts/AuthSubRequest?" +
+    				        "next=" + window.location.href +
+    				        "&scope=" + "http://gdata.youtube.com" + 
+    				        "&session=" + "1" +
+    				        "&secure=" + "0";
+
+    				    var auth_sub_url = encodeURI(auth_sub);
+
+    				    $("#auth_link").attr("href", auth_sub_url);
+				        
+				    });
+				
+				</script>
+				
+                <a id="auth_link" href="#">Log in to your YouTube account</a>
 
             {% endif %}
         </div>
