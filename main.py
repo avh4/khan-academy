@@ -627,8 +627,37 @@ class Search(request_handler.RequestHandler):
             self.render_jinja2_template("searchresults.html", template_values)
             return
         searched_phrases = []
-        playlists = Playlist.search(query, limit=50, searched_phrases_out=searched_phrases)
-        videos = Video.search(query, limit=50, searched_phrases_out=searched_phrases)
+
+        # Full (non-partial) search
+        playlist_text_keys = Playlist.full_text_search(
+                            query, limit=50, kind=Playlist.kind(),
+                            stemming=Playlist.INDEX_STEMMING,
+                            multi_word_literal=Playlist.INDEX_MULTI_WORD,
+                            searched_phrases_out=searched_phrases)
+
+        # Quick title-only partial search
+        playlist_partial_results = filter(lambda playlist_dict: query in playlist_dict["title"].lower(), autocomplete.playlist_title_dicts())
+
+        # Combine results
+        playlist_key_list = [result["key"] for result in playlist_partial_results]
+        playlist_key_list.extend([str(key_and_title[0]) for key_and_title in playlist_text_keys])
+        playlists = db.get(list(set(playlist_key_list)))
+
+        # Full (non-partial) search
+        video_text_keys = Video.full_text_search(
+                            query, limit=50, kind=Video.kind(),
+                            stemming=Video.INDEX_STEMMING,
+                            multi_word_literal=Video.INDEX_MULTI_WORD,
+                            searched_phrases_out=searched_phrases)
+
+        # Quick title-only partial search
+        video_partial_results = filter(lambda video_dict: query in video_dict["title"].lower(), autocomplete.video_title_dicts())
+
+        # Combine results
+        video_key_list = [result["key"] for result in video_partial_results]
+        video_key_list.extend([str(key_and_title[0]) for key_and_title in video_text_keys])
+        videos = db.get(list(set(video_key_list)))
+
         template_values.update({
                            'playlists': playlists,
                            'videos': videos,
