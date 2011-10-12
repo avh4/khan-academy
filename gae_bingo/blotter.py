@@ -31,7 +31,10 @@ class AB_Test(RequestHandler):
         }
     *q.v. gae_bingo.ab_test*
     
-    This will return a 201 and the jsonified state of the user calling ab_test
+    Creating a new experiment will return a 201 and the 
+    jsonified state of the user calling ab_test
+    
+    Simply querying an experiment successfully will return a 200
     
     failed requests return 404 if the experiment is not found and
     return a 400 if the params are passed incorrectly
