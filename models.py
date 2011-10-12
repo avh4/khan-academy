@@ -437,7 +437,7 @@ class UserExercise(db.Model):
         return review_interval
 
     def has_been_proficient(self):
-        return self.longest_streak >= self.required_streak
+        return self.proficient_date is not None
 
     def get_review_interval(self):
         return UserExercise.get_review_interval_from_seconds(self.review_interval_secs)
@@ -1691,7 +1691,7 @@ class ExerciseVideo(db.Model):
 class UserExerciseCache(db.Model):
 
     # Bump this whenever you change the structure of the cached UserExercises and need to invalidate all old caches
-    CURRENT_VERSION = 6
+    CURRENT_VERSION = 7
 
     version = db.IntegerProperty()
     dicts = object_property.UnvalidatedObjectProperty()
@@ -1777,7 +1777,7 @@ class UserExerciseCache(db.Model):
     def dict_from_user_exercise(user_exercise):
         return {
                 "streak": user_exercise.streak if user_exercise else 0,
-                "longest_streak": user_exercise.longest_streak if user_exercise else 0,
+                "longest_streak": user_exercise.longest_streak if user_exercise else 0,  # TODO(david): remove this
                 "progress": user_exercise.progress if user_exercise else 0.0,
                 "total_done": user_exercise.total_done if user_exercise else 0,
                 "last_done": user_exercise.last_done if user_exercise else datetime.datetime.min,
@@ -2072,10 +2072,9 @@ class UserExerciseGraph(object):
             return graph_dict["suggested"]
 
         def set_endangered(graph_dict):
-            # TODO(david): refactor here as well
             graph_dict["endangered"] = (graph_dict["proficient"] and
                     graph_dict["streak"] == 0 and
-                    graph_dict["longest_streak"] >= graph_dict["required_streak"])
+                    graph_dict["proficient_date"] is not None)
 
         for exercise_name in graph:
             set_suggested(graph[exercise_name])
@@ -2083,6 +2082,7 @@ class UserExerciseGraph(object):
 
         return UserExerciseGraph(graph = graph, cache=user_exercise_cache)
 
+# TODO: inheritance for streak accuracy model, logistic regression, etc.
 class AccuracyModel(object):
     # FIXME(david): versioning
     def __init__(self, user_exercise=None):
