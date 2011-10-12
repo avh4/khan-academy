@@ -62,32 +62,42 @@
         <input id="search-page-box" type="text" name="page_search_query" value='{{page_search_query|escape}}'>
         <button type="submit">Search</button>
     </form>
-    {% if videos %}
-    <section class="videos">
-        <h1>Videos</h1>
-        <dl>
-        {% for video in videos %}
-            <dt><a href="/video/{{video.readable_id|urlencode}}" class="searchresulthighlight">{{ video.title|escape }}</a></dt>
-            <dd>
-            {% if video.description %}
-            <p class="description searchresulthighlight">{{ video.description|escape }}</p>
-            {% endif %}
-            {% if video.keywords %}
-            <p>Keywords: <span class="keywords searchresulthighlight">{{ video.keywords|escape }}</span></p>
-            {% endif %}
-            </dd>
-        {% endfor %}        
-        </dl>
+    <section class="searchresult-counts">
+        Found {{ video_count }} {% if (video_count == 1) %}video{% else %}videos{% endif %} and {{ playlist_count }}  {% if (playlist_count == 1) %}playlist{% else %}playlists{% endif %} that match your query:
     </section>
-    {% endif %}
     {% if playlists %}
-    <section class="playlists">
-        <h1>Playlists</h1>
+    <section class="playlists" id="search-playlists">
         <dl>
         {% for playlist in playlists %}
+            <dt><h2 class="playlist searchresulthighlight">{{ playlist.title }}
+            <span class="match_count">
+                {% if playlist.match_count > 0 %}
+                    ({{ playlist.match_count }} matching {% if (playlist.match_count == 1) %}video{% else %}videos{% endif %})
+                {% endif %}
+            </span>
+            </h2>
+            </dt>
             {% if playlist.description %}
-            <dt><a href="/#{{playlist.title|slugify|escape}}" class="searchresulthighlight">{{ playlist.title }}</a></dt><dd class="searchresulthighlight">{{ playlist.description }}</dd>
+            <dd class="searchresulthighlight">{{ playlist.description }}</dd>
             {% endif %}
+
+            <ol>
+            {% for video in videos %}
+                {% if playlist.title in video.playlists %}
+                    <li class="videos"><a href="/video/{{video.readable_id|urlencode}}" class="vl searchresulthighlight">{{ video.title|escape }}</a>
+                    {% if video.description %}
+                    <p class="description searchresulthighlight">{{ video.description|escape }}</p>
+                    {% endif %}
+                    {% if video.keywords %}
+                    <p class="keywords">Keywords: <span class="searchresulthighlight">{{ video.keywords|escape }}</span></p>
+                    {% endif %}
+                    </li>
+                {% endif %}
+            {% endfor %}        
+            <li>
+                <a href="/#{{playlist.title|slugify|escape}}">See all videos from playlist {{ playlist.title }}</a>
+            </li>
+            </ol>
         {% endfor %}        
         </dl>
     </section>

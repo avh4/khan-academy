@@ -3315,7 +3315,26 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     text-indent: -9999px;
     background: url(/images/email-button-24.png) no-repeat;
 }
-.searchresult-highlighted {
+
+#search-playlists span.highlighted {
     font-weight: bold;
-    background-color: #ffff80;
 }
+#search-playlists .playlist {
+    margin-top: 38px;
+    margin-bottom: 5px;
+    font-size: 18px
+}
+#search-playlists .videos {
+    margin-left: 30px;
+}
+#search-playlists .description,.keywords {
+    font-size: 11px;
+    margin: 0px;
+}
+#search-playlists li {
+    margin-bottom: 10px;
+}
+#search-playlists .match_count {
+    font-size: 14px;
+}
+

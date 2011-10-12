@@ -641,7 +641,9 @@ class Search(request_handler.RequestHandler):
         # Combine results
         playlist_key_list = [result["key"] for result in playlist_partial_results]
         playlist_key_list.extend([str(key_and_title[0]) for key_and_title in playlist_text_keys])
-        playlists = db.get(list(set(playlist_key_list)))
+        playlist_key_list = list(set(playlist_key_list))
+        playlist_count = len(playlist_key_list)
+        playlists = db.get(playlist_key_list)
 
         # Full (non-partial) search
         video_text_keys = Video.full_text_search(
@@ -656,12 +658,24 @@ class Search(request_handler.RequestHandler):
         # Combine results
         video_key_list = [result["key"] for result in video_partial_results]
         video_key_list.extend([str(key_and_title[0]) for key_and_title in video_text_keys])
-        videos = db.get(list(set(video_key_list)))
+        video_key_list = list(set(video_key_list))
+        video_count = len(video_key_list)
+        videos = db.get(video_key_list)
+
+        # Get playlists for videos not in matching playlists
+        for video in videos:
+            if [(playlist.title in video.playlists) for playlist in playlists].count(True) == 0:
+                playlists.append(video.first_playlist())
+                
+        for playlist in playlists:
+            playlist.match_count = [(playlist.title in video.playlists) for video in videos].count(True);
 
         template_values.update({
                            'playlists': playlists,
                            'videos': videos,
-                           'search_string': query
+                           'search_string': query,
+                           'video_count': video_count,
+                           'playlist_count': playlist_count,
                            })
         self.render_jinja2_template("searchresults.html", template_values)
 
