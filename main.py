@@ -661,7 +661,7 @@ class Search(request_handler.RequestHandler):
         template_values.update({
                            'playlists': playlists,
                            'videos': videos,
-                           'searched_phrases': searched_phrases
+                           'search_string': query
                            })
         self.render_jinja2_template("searchresults.html", template_values)
 

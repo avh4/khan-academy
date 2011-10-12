@@ -3315,3 +3315,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     text-indent: -9999px;
     background: url(/images/email-button-24.png) no-repeat;
 }
+.searchresult-highlighted {
+    font-weight: bold;
+    background-color: #ffff80;
+}
