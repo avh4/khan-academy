@@ -103,6 +103,11 @@
     </section>
     {% endif %}
 </article>
+
+<div id="back-to-top">
+    <a class="arrow" href="#">▲</a>
+    <a class="text" href="#">Back to Top</a>
+</div>
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
@@ -110,6 +115,11 @@
 <script type="text/javascript">
 $(function() {
     SearchResultHighlight.highlight('{{ search_string|escape }}');
+
+    if (!$.browser.msie) {
+        var jelTop = $("#back-to-top");
+        jelTop.css("display", "block");
+    }
 })
 </script>
 {% endblock bottompagescript %}

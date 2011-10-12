@@ -3331,6 +3331,9 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     font-size: 11px;
     margin: 0px;
 }
+#search-playlists .keywords {
+    font-style: italic;
+}
 #search-playlists li {
     margin-bottom: 10px;
 }
