@@ -1787,7 +1787,7 @@ class UserExerciseCache(db.Model):
     def dict_from_user_exercise(user_exercise):
         return {
                 "streak": user_exercise.streak if user_exercise else 0,
-                "longest_streak": user_exercise.longest_streak if user_exercise else 0,  # TODO(david): remove this
+                "longest_streak": user_exercise.longest_streak if user_exercise else 0,  # TODO(david): remove this. Does streak_badges.py use this?
                 "progress": user_exercise.progress if user_exercise else 0.0,
                 "total_done": user_exercise.total_done if user_exercise else 0,
                 "last_done": user_exercise.last_done if user_exercise else datetime.datetime.min,
