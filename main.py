@@ -66,6 +66,7 @@ from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
+import robots
 
 import config_jinja
 
@@ -845,6 +846,8 @@ application = webapp2.WSGIApplication([
     ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
     ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
     ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
+
+    ('/robots.txt', robots.RobotsTxt),
 
     # Redirect any links to old JSP version
     ('/.*\.jsp', PermanentRedirectToHome),
