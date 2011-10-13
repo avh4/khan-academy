@@ -109,17 +109,17 @@ def layer_cache_check_set_return(
         *args,
         **kwargs):
 
-    key = key_fxn(*args, **kwargs)
-    namespace = App.version
-
-    if persist_across_app_versions:
-        namespace = None
-
     bust_cache = False
     if "bust_cache" in kwargs:
         bust_cache = kwargs["bust_cache"]
         # delete from kwargs so it's not passed to the target
         del kwargs["bust_cache"]
+
+    key = key_fxn(*args, **kwargs)
+    namespace = App.version
+
+    if persist_across_app_versions:
+        namespace = None
 
     if not bust_cache:
 

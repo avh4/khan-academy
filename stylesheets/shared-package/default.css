@@ -1518,20 +1518,24 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-badge .exercise-title a:hover {
             color: #006699;
         }
+
+    .exercise-badge #streak-bar-container{
+      /* the streak bar container on the dashboard */
+      position:absolute;
+      bottom:2px; left:85px;
+      width:228px;
+    }
+
     .streak-bar {
+        /* the dashboard streak bar doesn't use a generated gradient*/
         background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -730px;
-        width: 228px;
+        width: 100%;
         height: 30px;
         line-height: 18px;
     }
     .streak-bar-challenge {
         background: url(/images/streak-meter-empty-challenge.png) no-repeat;
-    }
-    .exercise-badge .streak-bar {
-         position: absolute;
-         left: 85px;
-         bottom: 5px;
     }
 
 .achievement-badge-counts {
@@ -1768,17 +1772,22 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     left: 75px;
     width: 550px;
 }
+
+.exercise-badge.single-exercise #streak-bar-container{
+  width:325px;
+  position:absolute;
+  right:10px; left:auto; top:20px;
+}
+
 .exercise-badge.single-exercise .streak-bar {
-    bottom: auto;
-    left: auto;
-    top: 21px;
-    right: 10px;
+    position:relative;
     width:325px;
     background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
     background-image: -moz-linear-gradient( left, #eee, #ccc );
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
     background-position:0 0;
-    border:1px solid rgb(204,204,204);
+    outline:1px solid rgb(204,204,204);
+    z-index:10;
 }
 
 .exercise-badge.single-exercise .streak-bar .energy-points-badge{

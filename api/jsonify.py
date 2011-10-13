@@ -19,7 +19,7 @@ def dumps(obj):
             items.append(dumps(item))
         return items
     elif isinstance(obj, datetime):
-        return obj.strftime("%Y-%m-%dT%H:%M:%S")
+        return obj.strftime("%Y-%m-%dT%H:%M:%SZ")
     elif isinstance(obj, dict):
         properties = {}
         for key in obj:
