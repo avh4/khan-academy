@@ -618,6 +618,10 @@ class Search(request_handler.RequestHandler):
             return
         searched_phrases = []
 
+        # Do an async query for all ExerciseVideos, since this may be slow
+        exvids_query = ExerciseVideo.all()
+        exvids_future = util.async_queries([exvids_query])
+
         # One full (non-partial) search, then sort by kind
         all_text_keys = Playlist.full_text_search(
                             query, limit=50, kind=None,
@@ -637,12 +641,14 @@ class Search(request_handler.RequestHandler):
         all_key_list = list(set(all_key_list))
         all_entities = db.get(all_key_list)
 
+        # Filter results by type
         playlists = []
         videos = []
         for entity in all_entities:
             if isinstance(entity, Playlist):
                 playlists.append(entity)
             elif isinstance(entity, Video):
+                entity.exercise_keys = []
                 videos.append(entity)
             else:
                 logging.error("Unhandled kind in search results: " + str(type(entity)))
@@ -651,15 +657,35 @@ class Search(request_handler.RequestHandler):
 
         # Get playlists for videos not in matching playlists
         filtered_videos = []
+        filtered_videos_by_key = {}
         for video in videos:
             if [(playlist.title in video.playlists) for playlist in playlists].count(True) == 0:
                 video_playlist = video.first_playlist()
                 if video_playlist != None:
                     playlists.append(video_playlist)
                     filtered_videos.append(video)
+                    filtered_videos_by_key[str(video.key())] = video
             else:
                 filtered_videos.append(video)
+                filtered_videos_by_key[str(video.key())] = video
         video_count = len(filtered_videos)
+
+        # Get the related exercises
+        all_exercise_videos = exvids_future[0].get_result()
+        exercise_keys = []
+        for exvid in all_exercise_videos:
+            video_key = ExerciseVideo.video.get_value_for_datastore(exvid)
+            if str(video_key) in filtered_videos_by_key:
+                exercise_key = ExerciseVideo.exercise.get_value_for_datastore(exvid)
+                video = filtered_videos_by_key[str(video_key)]
+                video.exercise_keys.append(exercise_key)
+                exercise_keys.append(exercise_key)
+        exercises = db.get(exercise_keys)
+
+        # Sort exercises with videos
+        for video in filtered_videos:
+            video.exercises = map(lambda exkey: [exercise for exercise in exercises if exercise.key() == exkey][0], video.exercise_keys)
+            video.exercise_count = len(video.exercises)
                 
         # Count number of videos in each playlist and sort descending
         for playlist in playlists:
