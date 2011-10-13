@@ -13,7 +13,7 @@ class ProblemPoint:
         self.exercise_non_summative = problem_log.exercise_non_summative
         self.exercise_non_summative_display_name = models.Exercise.to_display_name(problem_log.exercise_non_summative)
         self.dt = problem_log.time_done
-        self.problem_number = problem_log.problem_number or 1
+        self.problem_number = max(problem_log.problem_number, 1)
         self.video_point = None
 
         # We cannot render old problems that were created in the v1 exercise framework.
