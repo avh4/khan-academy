@@ -8,12 +8,13 @@ enabled_profiler_emails = [
     "joelburget@gmail.com",
     "dmnd@desmondbrand.com",
     "marcia.lee@gmail.com",
-    "spicyjalapeno@gmail.com",
+    "spicyjalapeno@gmail.com", # Ben Alpert
     "ParkerKuivila@gmail.com",
     "jace.kohlmeier@gmail.com",
     "davidhu91@gmail.com",
     "marcos@khanacademy.org",
-    "tallnerd@gmail.com",
+    "tallnerd@gmail.com", # James Irwin
+    "netzen@gmail.com", # Brian Bondy
 ]
 
 # Customize should_profile to return true whenever a request should be profiled.
