@@ -6,6 +6,7 @@ import urllib
 import pickle
 import random
 import itertools
+import operator
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -341,8 +342,8 @@ class UserExercise(db.Model):
             self.accuracy_model = AccuracyModel(self)
         return self.accuracy_model
 
-    def update_accuracy_model(self):
-        self.get_accuracy_model().update(self)
+    def update_accuracy_model(self, correct):
+        self.get_accuracy_model().update(correct)
 
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
@@ -352,8 +353,8 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
-        # XXX. Should be under A/B test.
-        return self.get_accuracy_model().probabilty_next_correct()
+        # XXX. Should be under A/B test. But still update pro
+        return self.get_accuracy_model().probabilty_next_correct(self)
 
         def progress_with_start(streak, start, required_streak):
             return start + float(streak) / required_streak * (1 - start)
@@ -871,7 +872,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 last_done=None,
                 total_done=0,
                 summative=exercise.summative,
-                accuracy_model=None,
+                accuracy_model=AccuracyModel(),
                 )
 
         return userExercise
@@ -2102,23 +2103,52 @@ class UserExerciseGraph(object):
 
         return UserExerciseGraph(graph = graph, cache=user_exercise_cache)
 
-# TODO: inheritance for streak accuracy model, logistic regression, etc.
+# Only responsible for predicting the probablity of the next problem correct
 class AccuracyModel(object):
     # FIXME(david): versioning
     def __init__(self, user_exercise=None):
+        # See http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
+        self.ewma_3 = 0.9
+        self.ewma_10 = 0.9
+
         if user_exercise is not None:
-            self.update(user_exercise)
-        else:
-            self.current_streak = 0
+            # Switching the user from streak model to new accuracy model. Use
+            # current streak as known history, and simulate streak correct answers.
+            for i in xrange(0, user_exercise.streak):
+                self.update(True)
 
-    # TODO: This should have a parameter for whether the last problem attempt
-    #     was correct or not for the actual logistic regression model.
-    def update(self, user_exercise):
-        self.current_streak = user_exercise.streak
+    def update(self, correct):
+        def update_exp_moving_avg(y, prev, weight):
+            return float(weight) * y + float(1 - weight) * prev
 
-    def probabilty_next_correct(self):
-        # FIXME(david): This is just based on the streak for now.
-        return float(self.current_streak) / consts.REQUIRED_STREAK
+        self.ewma_3 = update_exp_moving_avg(correct, self.ewma_3, 0.333)
+        self.ewma_10 = update_exp_moving_avg(correct, self.ewma_10, 0.1)
+
+    def probabilty_next_correct(self, user_exercise):
+        # TODO(david): These values should not be in the raw script itself. Perhaps import as a dict from a Python file.
+        INTERCEPT = -0.6384147
+
+        weighted_features = [
+            (self.ewma_3, 0.9595278),
+            (self.ewma_10, 1.3383701),
+            (user_exercise.streak, 0.0070444),
+            (math.log(user_exercise.total_done), 0.4862635),
+            # FIXME(david): percent correct, num done, num missed, etc. (Ask Jace hipchat)
+        ]
+
+        X, weight_vector = zip(*weighted_features)  # unzip the list of pairs
+
+        return AccuracyModel.logistic_regression_predict(INTERCEPT, weight_vector, X)
+
+    # See http://en.wikipedia.org/wiki/Logistic_regression
+    @staticmethod
+    def logistic_regression_predict(intercept, weight_vector, X):
+        # TODO: Reimplement using numpy when it's supported?
+
+        dot_product = sum(itertools.imap(operator.mul, weight_vector, X))
+        z = dot_product + intercept
+
+        return 1.0 / (1.0 + math.exp(-z))
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify

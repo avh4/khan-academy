@@ -437,7 +437,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
             user_exercise.reset_streak(shrink_start)
 
-        user_exercise.update_accuracy_model()
+        user_exercise.update_accuracy_model(completed)
 
         user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
 
