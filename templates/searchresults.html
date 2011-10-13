@@ -88,13 +88,24 @@
             <ol>
             {% for video in videos %}
                 {% if playlist.title in video.playlists %}
-                    <li class="videos"><a href="/video/{{video.readable_id|urlencode}}" class="vl"><span class="vid-progress v{{ video.key().id() }} searchresulthighlight">{{ video.title|escape }}</span></a>
-                    {% if video.description %}
-                    <p class="description searchresulthighlight">{{ video.description|escape }}</p>
+                    <li class="videos">
+                    <div class="video">
+                        <a href="/video/{{video.readable_id|urlencode}}" class="vl"><span class="vid-progress v{{ video.key().id() }} searchresulthighlight">{{ video.title|escape }}</span></a>
+                        {% if video.description %}
+                        <p class="description searchresulthighlight">{{ video.description|escape }}</p>
+                        {% endif %}
+                        {% if video.keywords %}
+                        <p class="keywords">Keywords: <span class="searchresulthighlight">{{ video.keywords|escape }}</span></p>
+                        {% endif %}
+                    </div>
+                    {% if video.exercises %}
+                        <div class="exercises"><p class="exercise-header">Practice the concepts from this video:</p>
+                        {% for exercise in video.exercises %}
+                          <p><a href="{{ exercise.ka_url }}" class="exercise-link">{{ exercise.display_name|escape }}</a></p>
+                        {% endfor %}
+                        </div>
                     {% endif %}
-                    {% if video.keywords %}
-                    <p class="keywords">Keywords: <span class="searchresulthighlight">{{ video.keywords|escape }}</span></p>
-                    {% endif %}
+                    <br />
                     </li>
                 {% endif %}
             {% endfor %}        
