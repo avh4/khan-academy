@@ -105,26 +105,29 @@ class CommonCore(request_handler.RequestHandler):
             reader = csv.DictReader(f, dialect='excel')
             
             for record in reader:
-                entry = yt_service.GetYouTubeVideoEntry(video_id=record["youtube_id"])
                 
-                video_url = "https://gdata.youtube.com/feeds/api/users/"+ youtube_account + "/uploads/" + record["youtube_id"]
+                if not record["youtube_id"] == "#N/A":
+                    
+                    entry = yt_service.GetYouTubeVideoEntry(video_id=record["youtube_id"])
+                    
+                    if entry:
+                                    
+                        if entry.media.keywords.text:
+                            keywords = entry.media.keywords.text
+                        else:
+                            keywords = ""
+                                    
+                        entry.media.keywords.text = keywords + "," + record["keyword"]
+                        video_url = "https://gdata.youtube.com/feeds/api/users/"+ youtube_account + "/uploads/" + record["youtube_id"]
+                        updated_entry = yt_service.UpdateVideoEntry(entry, video_url)
+                                    
+                        if not updated_entry:
+                                logging.warning("***NOT updated*** Title: " + record["title"] + ", ID: " + record["youtube_id"])  
+                        if test:
+                            logging.info("***UPDATED*** " + entry.media.title.text)
                 
-                if entry.media.keywords.text:
-                    keywords = entry.media.keywords.text
-                else:
-                    keywords = ""
-                
-                entry.media.keywords.text = keywords + "," + record["keyword"]
-
-                updated_entry = yt_service.UpdateVideoEntry(entry, video_url)
-                
-                if not updated_entry:
-                        logging.warning("***NOT updated*** Title: " + record["title"] + ", ID: " + record["youtube_id"])
-                
-                if test:
-                    logging.info("***UPDATED*** " + entry.media.title.text)
-                
-                cc_videos.append(record)
+                    cc_videos.append(record)
+                    
             f.close() 
                         
         template_values = {
