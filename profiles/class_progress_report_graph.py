@@ -91,11 +91,11 @@ def class_progress_report_graph_context(user_data, student_list):
 """<b>%s</b><br/>
 <b>%s</b><br/>
 <em><nobr>Status: %s</nobr></em><br/>
-<em>Streak: %s</em><br/>
+<em>Progress: %s</em><br/>
 <em>Problems attempted: %s</em>""" % (escaped_nickname,
                                       exercise_display,
                                       status,
-                                      graph_dict["streak"],
+                                      models.UserExercise.to_progress_display(graph_dict["progress"]),
                                       graph_dict["total_done"])
 
             exercise_data[exercise_name][student_email] = {

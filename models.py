@@ -371,6 +371,9 @@ class UserExercise(db.Model):
     def to_progress_display(num):
         return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
 
+    def progress_display(self):
+        return UserExercise.to_progress_display(self.progress)
+
     @staticmethod
     def get_key_for_email(email):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % email
@@ -441,6 +444,7 @@ class UserExercise(db.Model):
         return review_interval
 
     def is_currently_proficient(self, additional_problem_correct=False):
+        # TODO(david): rename to is_proficient_by_accuracy or someting like that
         # TODO(david): This should use the new accuracy model, or be under an A/B test.
         # TODO(david): THis is sorta ugly. Can we have is_currently_proficient
         #     not take additional parameter and just move where schedule_review is?
@@ -867,6 +871,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 last_done=None,
                 total_done=0,
                 summative=exercise.summative,
+                accuracy_model=None,
                 )
 
         return userExercise
