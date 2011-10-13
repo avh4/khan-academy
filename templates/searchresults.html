@@ -88,7 +88,7 @@
             <ol>
             {% for video in videos %}
                 {% if playlist.title in video.playlists %}
-                    <li class="videos"><a href="/video/{{video.readable_id|urlencode}}" class="vl searchresulthighlight">{{ video.title|escape }}</a>
+                    <li class="videos"><a href="/video/{{video.readable_id|urlencode}}" class="vl searchresulthighlight"><span class="vid-progress v{{ video.key().id() }}">{{ video.title|escape }}</span></a>
                     {% if video.description %}
                     <p class="description searchresulthighlight">{{ video.description|escape }}</p>
                     {% endif %}

@@ -3336,7 +3336,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     font-style: italic;
 }
 #search-playlists li {
-    margin-bottom: 10px;
+    margin-bottom: 18px;
 }
 #search-playlists .match_count {
     font-size: 14px;
