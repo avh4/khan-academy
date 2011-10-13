@@ -9,7 +9,6 @@ def can_control_experiments():
     from models import UserData
     user_data = UserData.current(bust_cache=True)
     return users.is_current_user_admin() or (user_data and user_data.developer)
-
 # CUSTOMIZE current_logged_in_identity to make your a/b sessions
 # stickier and more persistent per user.
 #
