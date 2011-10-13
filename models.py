@@ -353,8 +353,16 @@ class UserExercise(db.Model):
     def progress(self):
         # Currently this is just the "more forgiving" streak bar
 
+        def clamp(minval, value, maxval):
+            return sorted((minval, value, maxval))[1]
+
+        # Takes probablity and transforms into a displayable progress in [0, 1)
+        def normalize_progress(num):
+            slope = 1.0 / (consts.PROFICIENCY_ACCURACY_THRESHOLD - consts.MIN_DISPLAY_PROGRESS)
+            return clamp(0, (num - consts.MIN_DISPLAY_PROGRESS) * slope, 1.0)
+
         # XXX. Should be under A/B test. But still update pro
-        return self.get_accuracy_model().probabilty_next_correct(self)
+        return normalize_progress(self.get_accuracy_model().probabilty_next_correct(self))
 
         def progress_with_start(streak, start, required_streak):
             return start + float(streak) / required_streak * (1 - start)
@@ -2108,6 +2116,7 @@ class AccuracyModel(object):
     # FIXME(david): versioning
     def __init__(self, user_exercise=None):
         # See http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
+        # These are seeded on the mean correct of a sample of 1 million problem logs
         self.ewma_3 = 0.9
         self.ewma_10 = 0.9
 
@@ -2125,15 +2134,28 @@ class AccuracyModel(object):
         self.ewma_10 = update_exp_moving_avg(correct, self.ewma_10, 0.1)
 
     def probabilty_next_correct(self, user_exercise):
-        # TODO(david): These values should not be in the raw script itself. Perhaps import as a dict from a Python file.
+        # We don't try to predict the first problem (no user-exercise history)
+        if user_exercise.total_done == 0:
+            return consts.PROBABILITY_FIRST_PROBLEM_CORRECT
+
+        # TODO(david): These values should not be in the raw script itself.
+        #     Perhaps import as a dict from a Python file.
         INTERCEPT = -0.6384147
 
+        ewma_3 = self.ewma_3
+        ewma_10 = self.ewma_10
+        current_streak = user_exercise.streak
+        log_num_done = math.log(user_exercise.total_done)
+        log_num_missed = math.log(user_exercise.total_done - user_exercise.total_correct + 1)  # log (num_missed + 1)
+        percent_correct = float(user_exercise.total_correct) / user_exercise.total_done
+
         weighted_features = [
-            (self.ewma_3, 0.9595278),
-            (self.ewma_10, 1.3383701),
-            (user_exercise.streak, 0.0070444),
-            (math.log(user_exercise.total_done), 0.4862635),
-            # FIXME(david): percent correct, num done, num missed, etc. (Ask Jace hipchat)
+            (ewma_3, 0.9595278),
+            (ewma_10, 1.3383701),
+            (current_streak, 0.0070444),
+            (log_num_done, 0.4862635),
+            (log_num_missed, -0.7135976),
+            (percent_correct, 0.6336906),
         ]
 
         X, weight_vector = zip(*weighted_features)  # unzip the list of pairs
@@ -2143,8 +2165,7 @@ class AccuracyModel(object):
     # See http://en.wikipedia.org/wiki/Logistic_regression
     @staticmethod
     def logistic_regression_predict(intercept, weight_vector, X):
-        # TODO: Reimplement using numpy when it's supported?
-
+        # TODO: Use numpy's dot product fn when we support numpy
         dot_product = sum(itertools.imap(operator.mul, weight_vector, X))
         z = dot_product + intercept
 
