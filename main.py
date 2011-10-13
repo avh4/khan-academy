@@ -628,38 +628,36 @@ class Search(request_handler.RequestHandler):
             return
         searched_phrases = []
 
-        # Full (non-partial) search
-        playlist_text_keys = Playlist.full_text_search(
-                            query, limit=50, kind=Playlist.kind(),
+        # One full (non-partial) search, then sort by kind
+        all_text_keys = Playlist.full_text_search(
+                            query, limit=50, kind=None,
                             stemming=Playlist.INDEX_STEMMING,
                             multi_word_literal=Playlist.INDEX_MULTI_WORD,
                             searched_phrases_out=searched_phrases)
 
+
         # Quick title-only partial search
         playlist_partial_results = filter(lambda playlist_dict: query in playlist_dict["title"].lower(), autocomplete.playlist_title_dicts())
-
-        # Combine results
-        playlist_key_list = [result["key"] for result in playlist_partial_results]
-        playlist_key_list.extend([str(key_and_title[0]) for key_and_title in playlist_text_keys])
-        playlist_key_list = list(set(playlist_key_list))
-        playlist_count = len(playlist_key_list)
-        playlists = db.get(playlist_key_list)
-
-        # Full (non-partial) search
-        video_text_keys = Video.full_text_search(
-                            query, limit=50, kind=Video.kind(),
-                            stemming=Video.INDEX_STEMMING,
-                            multi_word_literal=Video.INDEX_MULTI_WORD,
-                            searched_phrases_out=searched_phrases)
-
-        # Quick title-only partial search
         video_partial_results = filter(lambda video_dict: query in video_dict["title"].lower(), autocomplete.video_title_dicts())
 
-        # Combine results
-        video_key_list = [result["key"] for result in video_partial_results]
-        video_key_list.extend([str(key_and_title[0]) for key_and_title in video_text_keys])
-        video_key_list = list(set(video_key_list))
-        videos = db.get(video_key_list)
+        # Combine results & do one big get!
+        all_key_list = [str(key_and_title[0]) for key_and_title in all_text_keys]
+        all_key_list.extend([result["key"] for result in playlist_partial_results])
+        all_key_list.extend([result["key"] for result in video_partial_results])
+        all_key_list = list(set(all_key_list))
+        all_entities = db.get(all_key_list)
+
+        playlists = []
+        videos = []
+        for entity in all_entities:
+            if isinstance(entity, Playlist):
+                playlists.append(entity)
+            elif isinstance(entity, Video):
+                videos.append(entity)
+            else:
+                logging.error("Unhandled kind in search results: " + str(type(entity)))
+                
+        playlist_count = len(playlists)
 
         # Get playlists for videos not in matching playlists
         filtered_videos = []

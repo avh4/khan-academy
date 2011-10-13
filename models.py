@@ -1038,12 +1038,9 @@ class Video(Searchable, db.Model):
 
 
     def first_playlist(self):
-        query = VideoPlaylist.all()
-        query.filter('video =', self)
-        query.filter('live_association =', True)
-        video_playlist = query.get()
-        if video_playlist:
-            return video_playlist.playlist
+        playlists = VideoPlaylist.get_cached_playlists_for_video(self)
+        if playlists:
+            return playlists[0]
         return None
 
     def current_user_points(self):

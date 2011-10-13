@@ -63,7 +63,7 @@
         <button type="submit">New Search</button>
     </form>
     <section class="searchresult-counts">
-        {% if (video_count == 0) %}
+        {% if (video_count == 0 and playlist_count == 0) %}
             No results for this search. Please try a different query.
         {% else %}
             Found {{ video_count }} {% if (video_count == 1) %}video{% else %}videos{% endif %} and {{ playlist_count }}  {% if (playlist_count == 1) %}playlist{% else %}playlists{% endif %} that match your query:
