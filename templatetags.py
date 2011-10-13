@@ -77,14 +77,11 @@ def streak_bar(user_exercise_dict):
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
 
-    def progress_display(num):
-        return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
-
     template_values = {
         "is_suggested": user_exercise_dict["suggested"],
         "is_proficient": user_exercise_dict["proficient"],
         "float_progress": progress,
-        "progress": progress_display(progress),
+        "progress": models.UserExercise.to_progress_display(progress),
         "bar_width": bar_width,
         "bar_max_width": bar_max_width,
         "levels": levels

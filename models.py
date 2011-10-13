@@ -368,6 +368,10 @@ class UserExercise(db.Model):
             return progress_with_start(self.streak, self.streak_start, self.required_streak)
 
     @staticmethod
+    def to_progress_display(num):
+        return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
+
+    @staticmethod
     def get_key_for_email(email):
         return UserExercise._USER_EXERCISE_KEY_FORMAT % email
 
