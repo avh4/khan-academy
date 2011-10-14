@@ -202,6 +202,9 @@ var KnowledgeMap = {
 
         var nodeTarget = this.dictNodes[edgeTarget.target];
 
+        // If either of the nodes is missing, don't draw the edge.
+        if (!nodeSource || !nodeTarget) return;
+
         var coordinates = [
             nodeSource.latLng,
             nodeTarget.latLng
