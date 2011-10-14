@@ -8,9 +8,6 @@ PROFICIENCY_ACCURACY_THRESHOLD = 0.95
 # The minimum
 MIN_DISPLAY_PROGRESS = 0.7
 
-# TODO(david): Find out what this actually is
-PROBABILITY_FIRST_PROBLEM_CORRECT = 0.8
-
 # Number of problems required to reach a barrier/milestone in a challenge exercise
 CHALLENGE_STREAK_BARRIER = 10
 

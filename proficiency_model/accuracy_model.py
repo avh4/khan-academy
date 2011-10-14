@@ -2,7 +2,8 @@ import math
 import itertools
 import operator
 
-import consts
+# TODO(david): Find out what this actually is
+PROBABILITY_FIRST_PROBLEM_CORRECT = 0.8
 
 class AccuracyModel(object):
     """
@@ -34,7 +35,7 @@ class AccuracyModel(object):
         self.ewma_3 = update_exp_moving_avg(correct, self.ewma_3, 0.333)
         self.ewma_10 = update_exp_moving_avg(correct, self.ewma_10, 0.1)
 
-        if hasattr(self, 'streak'):  # Keeping all state ourself
+        if hasattr(self, 'streak'):  # Keeping all state ourselves
             self.streak = self.streak + 1 if correct else 0
             self.total_done += 1
             self.total_correct += correct
@@ -84,3 +85,11 @@ class AccuracyModel(object):
         z = dot_product + intercept
 
         return 1.0 / (1.0 + math.exp(-z))
+
+    @staticmethod
+    def simulate(answer_history):
+        model = AccuracyModel(keep_all_state=True)
+        for response in answer_history:
+            model.update(response)
+
+        return model.predict()
