@@ -1392,6 +1392,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
     }
+    #container #dashboard-filter {
+        overflow: auto;
+        padding: 0px 0px 10px 0px;
+    }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
         overflow: auto;
@@ -1468,6 +1472,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin-right: 350px;
     }
 
+.exercise-filter-count {
+    font-size: 11px;
+    color: #444;
+}
 .exercise-badge {
     background: #f3f3f3;
     margin-bottom: 5px;
@@ -2929,6 +2937,10 @@ div.arrow-right-shadow, div.arrow-left-shadow {
 
 .nodeLabelHidden {
     display: none;
+}
+.nodeLabelFiltered {
+    opacity: 0.3;
+    filter:alpha(opacity=30);
 }
 .nodeLabelProficient div {
 }

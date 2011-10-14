@@ -568,6 +568,10 @@ var Drawer = {
         }); // Fire and forget
     },
 
+    areExercisesVisible: function() {
+        return $('#all-exercises').is(':visible');
+    },
+
     isExpanded: function() {
         var sCSSLeft = $("#dashboard-drawer").css("left").toLowerCase();
         return sCSSLeft == "0px" || sCSSLeft == "auto" || sCSSLeft == "";
