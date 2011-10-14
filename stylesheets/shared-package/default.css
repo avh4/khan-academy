@@ -3334,25 +3334,41 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     font-size: 18px
 }
 #search-playlists .videos {
-    margin-left: 24px;
+    margin-left: 0px;
 }
-#search-playlists .description,.keywords {
+#search-playlists .video-result {
+    font-size: 14px;
+}
+#search-playlists .description {
+    margin: 2px 0px 0px 0px;
     font-size: 11px;
-    margin: 0px;
     line-height: 18px;
-}
-#search-playlists .exercises {
-    font-size: 12px;
-    margin: 10px 0px 0px 0px;
-    line-height: 18px;
-}
-#search-playlists .keywords {
-    font-style: italic;
 }
 #search-playlists li {
-    margin-bottom: 18px;
+    margin-top: 40px;
+    margin-bottom: 40px;
 }
 #search-playlists .match_count {
     font-size: 14px;
+}
+#search-playlists .column {
+    float: left;
+    width: 200px;
+    padding-right: 20px;
+}
+#search-playlists .column:first-child {
+    width: 300px;
+}
+#search-playlists .column-heading {
+    width: 180px;
+    border-bottom: 2px solid black;
+    margin: 0px;
+}
+#search-playlists .column li {
+    margin: 5px 0px 0px 0px;
+    line-height: 12px;
+}
+#search-playlists br {
+    clear: left;
 }
 

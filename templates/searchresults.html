@@ -89,21 +89,29 @@
             {% for video in videos %}
                 {% if playlist.title in video.playlists %}
                     <li class="videos">
-                    <a href="/video/{{video.readable_id|urlencode}}" class="vl"><span class="vid-progress v{{ video.key().id() }} searchresulthighlight">{{ video.title|escape }}</span></a>
-                    {% if video.description %}
-                    <p class="description searchresulthighlight">{{ video.description|escape }}</p>
-                    {% endif %}
-                    {% if video.keywords %}
-                    <p class="keywords">Keywords: <span class="searchresulthighlight">{{ video.keywords|escape }}</span></p>
-                    {% endif %}
-                    {% if video_exercises[video.key().__str__()] %}
-                        <p class="exercises">Exercises:
-                        {% for exercise in video_exercises[video.key().__str__()] %}
-                          {% if not loop.first %}, {% endif %}
-                          <a href="{{ exercise.ka_url }}" class="exercise-link">{{ exercise.display_name|escape }}</a>
-                        {% endfor %}
-                        </p>
-                    {% endif %}
+                      <div class="column">
+                        <a href="/video/{{video.readable_id|urlencode}}" class="video-result"><span class="searchresulthighlight">{{ video.title|escape }}</span></a>
+                        {% if video.description %}
+                        <p class="description searchresulthighlight">{{ video.description|escape }}</p>
+                        {% endif %}
+                      </div>  
+                      <div class="column">
+                        <p class="column-heading">Watch</p>
+                        <ul>
+                          <li><a href="/video/{{video.readable_id|urlencode}}" class="vl"><span class="vid-progress v{{ video.key().id() }}">Watch the video lesson</a></li>
+                        </ul>
+                      </div>  
+                      {% if video_exercises[video.key().__str__()] %}
+                      <div class="column">
+                        <p class="column-heading">Practice Exercises</p>
+                          <ul>
+                            {% for exercise in video_exercises[video.key().__str__()] %}
+                              <li><a href="{{ exercise.ka_url }}" class="exercise-link">{{ exercise.display_name|escape }}</a></li>
+                            {% endfor %}
+                          </ul>
+                      </div>  
+                      {% endif %}
+                      <br>
                     </li>
                 {% endif %}
             {% endfor %}        
