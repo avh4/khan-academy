@@ -3357,7 +3357,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     padding-right: 20px;
 }
 #search-playlists .column:first-child {
-    width: 300px;
+    width: 360px;
 }
 #search-playlists .column-heading {
     width: 180px;
