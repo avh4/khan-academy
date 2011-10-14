@@ -298,11 +298,11 @@ class UserExercise(db.Model):
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM, indexed=False) # Seconds expected to finish a problem 'quickly' for badge calculation
     summative = db.BooleanProperty(default=False, indexed=False)
     # FIXME(david): Think about how we're going to transition users to this new model.
-    accuracy_model = object_property.ObjectProperty()  # TODO(david): Change to UnvalidatedObjectProperty when things are stable?
+    _accuracy_model = object_property.ObjectProperty()  # TODO(david): Change to UnvalidatedObjectProperty when things are stable?
 
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
-    _serialize_blacklist = ["review_interval_secs"]
+    _serialize_blacklist = ["review_interval_secs", "accuracy_model"]
 
     # A bound function object to normalize the progress bar display from a probability
     _normalize_progress = InvFnExponentialNormalizer(
@@ -341,17 +341,14 @@ class UserExercise(db.Model):
 
         return points.ExercisePointCalculator(self, suggested, proficient)
 
-    # TODO(david): Is there a common idiom to do this? This is meant as a guard
-    #     for a newly-created property that old objects may not have. Is there
-    #     a way to just set accuracy_model's getter to this?
-    # http://docs.python.org/library/functions.html#property
-    def get_accuracy_model(self):
-        if self.accuracy_model is None:
-            self.accuracy_model = AccuracyModel(self)
-        return self.accuracy_model
+    @property
+    def accuracy_model(self):
+        if self._accuracy_model is None:
+            self._accuracy_model = AccuracyModel(self)
+        return self._accuracy_model
 
     def update_accuracy_model(self, correct, **kwargs):
-        self.get_accuracy_model().update(correct, **kwargs)
+        self.accuracy_model.update(correct, **kwargs)
 
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
@@ -367,7 +364,7 @@ class UserExercise(db.Model):
             return 0.0
 
         # XXX(david): debugging
-        prediction = self.get_accuracy_model().predict(self)
+        prediction = self.accuracy_model.predict(self)
         normalized = UserExercise._normalize_progress(prediction)
         logging.warn('PREDICTED --- %s --- NORMALIZED ---- %s ----' % (prediction, normalized))
 
@@ -889,7 +886,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 last_done=None,
                 total_done=0,
                 summative=exercise.summative,
-                accuracy_model=AccuracyModel(),
+                _accuracy_model=AccuracyModel(),
                 )
 
         return userExercise

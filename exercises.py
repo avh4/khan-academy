@@ -441,7 +441,6 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             user_exercise.reset_streak(shrink_start=first_attempt)
 
             if first_attempt:
-                logging.warn('-'*80 + 'counting as wrong')
                 user_exercise.update_accuracy_model(correct = False, total_done = user_exercise.total_done + 1)
 
         user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
