@@ -94,7 +94,7 @@
             <br/>
         {% endif %}
         <h3>All Exercises <span class="exercise-filter-count"></span>
-            <span class="subheader">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
+            <span class="subheader exercise-all-exercises">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
         </h3>
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
         {% for graph_dict in graph_dicts %}

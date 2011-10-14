@@ -1472,7 +1472,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin-right: 350px;
     }
 
-.exercise-filter-count {
+.exercise-filter-count,.exercise-all-exercises {
     font-size: 11px;
     color: #444;
 }

@@ -514,7 +514,7 @@ var Drawer = {
 
     init: function() {
 
-        $('#show-all-exercises').click(function() {Drawer.toggleAllExercises(); return false;});
+        $('#show-all-exercises').click(function() {Drawer.toggleAllExercises(true); return false;});
 
         $('#dashboard-drawer .exercise-badge').click( function() {
             window.location = $(".exercise-title a", this).attr("href");
@@ -548,7 +548,7 @@ var Drawer = {
         }
     },
 
-    toggleAllExercises: function() {
+    toggleAllExercises: function(saveSetting) {
 
         var fVisible = $('#all-exercises').is(':visible');
 
@@ -563,9 +563,11 @@ var Drawer = {
             $('#show-all-exercises').html('Hide All');
         }
 
-        $.post("/saveexpandedallexercises", {
-            "expanded": fVisible ? "0" : "1"
-        }); // Fire and forget
+        if (saveSetting) {
+            $.post("/saveexpandedallexercises", {
+                "expanded": fVisible ? "0" : "1"
+            }); // Fire and forget
+        }
     },
 
     areExercisesVisible: function() {

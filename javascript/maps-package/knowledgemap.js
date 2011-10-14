@@ -10,6 +10,7 @@ var KnowledgeMap = {
     selectedNodes: {},
     filteredNodes: {},
     updateFilterTimeout: null,
+    allExercisesVisibleBeforeFiltering: false,
     colors: {
         blue: "#0080C9",
         green: "#8EBE4F",
@@ -640,8 +641,17 @@ var KnowledgeMap = {
         var jrgNodes = $(".nodeLabel");
         KnowledgeMap.onZoomChange(jrgNodes);
 
-        if (filterText != '' && !Drawer.areExercisesVisible()) {
-            Drawer.toggleAllExercises();
+        if (filterText != '') {
+            this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
+            if (!Drawer.areExercisesVisible()) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('.exercise-all-exercises').hide();
+        } else if (filterText == '') {
+            if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('.exercise-all-exercises').show();
         }
     }
 };
