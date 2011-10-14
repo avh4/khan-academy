@@ -3336,13 +3336,14 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 #search-playlists .videos {
     margin-left: 24px;
 }
-#search-playlists .video {
-    float: left;
-    width: 480px;
-}
 #search-playlists .description,.keywords {
     font-size: 11px;
     margin: 0px;
+    line-height: 18px;
+}
+#search-playlists .exercises {
+    font-size: 12px;
+    margin: 10px 0px 0px 0px;
     line-height: 18px;
 }
 #search-playlists .keywords {
@@ -3353,21 +3354,5 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 #search-playlists .match_count {
     font-size: 14px;
-}
-#search-playlists .exercises {
-    float: left;
-    margin-left: 10px;
-    font-size: 12px;
-}
-#search-playlists .exercises p {
-    margin: 0px;
-    line-height: 18px;
-    font-size: 12px;
-}
-#search-playlists .exercise-header {
-    font-style: italic;
-}
-#search-playlists .videos br {
-    clear: left;
 }
 
