@@ -932,17 +932,19 @@ var Throbber = {
 
 var SearchResultHighlight = {
     doReplace: function(word, element) {
-        var text = element.firstChild;
-        var pos = text.data.toLowerCase().indexOf(word);
-        if (pos >= 0) {
-            var new_span = document.createElement('span');
-            new_span.className = 'highlighted';
-            var highlight_text = text.splitText(pos);
-            var end_text = highlight_text.splitText(word.length);
-            var highlight_clone = highlight_text.cloneNode(true);
-            new_span.appendChild(highlight_clone);
-            highlight_text.parentNode.replaceChild(new_span, highlight_text);
-        }
+        // Find all text elements
+        textElements = $(element).contents().filter(function(){ return this.nodeType != 1; });
+        textElements.each(function(index, textElement) {
+            var pos = textElement.data.toLowerCase().indexOf(word);
+            if (pos >= 0) {
+                // Split text element into three elements 
+                var highlightText = textElement.splitText(pos);
+                highlightText.splitText(word.length);
+
+                // Highlight the matching text
+                $(highlightText).wrap('<span class="highlighted" />');
+            }
+        });
     },
     highlight: function(query) {
         $('.searchresulthighlight').each(function(index,element) {

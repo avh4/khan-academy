@@ -648,7 +648,6 @@ class Search(request_handler.RequestHandler):
             if isinstance(entity, Playlist):
                 playlists.append(entity)
             elif isinstance(entity, Video):
-                entity.exercise_keys = []
                 videos.append(entity)
             else:
                 logging.error("Unhandled kind in search results: " + str(type(entity)))
@@ -664,28 +663,28 @@ class Search(request_handler.RequestHandler):
                 if video_playlist != None:
                     playlists.append(video_playlist)
                     filtered_videos.append(video)
-                    filtered_videos_by_key[str(video.key())] = video
+                    filtered_videos_by_key[str(video.key())] = []
             else:
                 filtered_videos.append(video)
-                filtered_videos_by_key[str(video.key())] = video
+                filtered_videos_by_key[str(video.key())] = []
         video_count = len(filtered_videos)
 
         # Get the related exercises
         all_exercise_videos = exvids_future[0].get_result()
         exercise_keys = []
         for exvid in all_exercise_videos:
-            video_key = ExerciseVideo.video.get_value_for_datastore(exvid)
-            if str(video_key) in filtered_videos_by_key:
+            video_key = str(ExerciseVideo.video.get_value_for_datastore(exvid))
+            if video_key in filtered_videos_by_key:
                 exercise_key = ExerciseVideo.exercise.get_value_for_datastore(exvid)
-                video = filtered_videos_by_key[str(video_key)]
-                video.exercise_keys.append(exercise_key)
+                video_exercise_keys = filtered_videos_by_key[video_key]
+                video_exercise_keys.append(exercise_key)
                 exercise_keys.append(exercise_key)
         exercises = db.get(exercise_keys)
 
         # Sort exercises with videos
-        for video in filtered_videos:
-            video.exercises = map(lambda exkey: [exercise for exercise in exercises if exercise.key() == exkey][0], video.exercise_keys)
-            video.exercise_count = len(video.exercises)
+        video_exercises = {}
+        for video_key, exercise_keys in filtered_videos_by_key.iteritems():
+            video_exercises[video_key] = map(lambda exkey: [exercise for exercise in exercises if exercise.key() == exkey][0], exercise_keys)
                 
         # Count number of videos in each playlist and sort descending
         for playlist in playlists:
@@ -698,6 +697,7 @@ class Search(request_handler.RequestHandler):
         template_values.update({
                            'playlists': playlists,
                            'videos': filtered_videos,
+                           'video_exercises': video_exercises,
                            'search_string': query,
                            'video_count': video_count,
                            'playlist_count': playlist_count,
