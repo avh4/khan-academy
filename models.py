@@ -6,7 +6,6 @@ import urllib
 import pickle
 import random
 import itertools
-import operator
 
 from google.appengine.api import users
 from google.appengine.api import memcache
@@ -29,6 +28,8 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
+from proficiency_model.accuracy_model import AccuracyModel
+from proficiency_model.progress_normalizer import InvFnLinInterpNormalizer
 
 from templatefilters import slugify
 from gae_bingo.gae_bingo import ab_test, bingo
@@ -303,6 +304,12 @@ class UserExercise(db.Model):
 
     _serialize_blacklist = ["review_interval_secs"]
 
+    # A bound function object to normalize the progress bar display from a probability
+    _normalize_progress = InvFnLinInterpNormalizer(
+        AccuracyModel(keep_all_state=True),
+        consts.PROFICIENCY_ACCURACY_THRESHOLD
+    ).normalize
+
     @property
     def point_display(self):
       user_data = UserData.current()
@@ -354,7 +361,7 @@ class UserExercise(db.Model):
         # Currently this is just the "more forgiving" streak bar
 
         # XXX. Should be under A/B test. But still update pro
-        return ProgressDisplayNormalize().normalize(self.get_accuracy_model().predict(self))
+        return UserExercise._normalize_progress(self.get_accuracy_model().predict(self))
 
         def progress_with_start(streak, start, required_streak):
             return start + float(streak) / required_streak * (1 - start)
@@ -2102,157 +2109,6 @@ class UserExerciseGraph(object):
             set_endangered(graph[exercise_name])
 
         return UserExerciseGraph(graph = graph, cache=user_exercise_cache)
-
-# TODO(david): Move this stuff to another file?
-# Only responsible for predicting the probablity of the next problem correct
-class AccuracyModel(object):
-    # FIXME(david): versioning
-    def __init__(self, user_exercise=None, keep_all_state=False):
-        # See http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
-        # These are seeded on the mean correct of a sample of 1 million problem logs
-        self.ewma_3 = 0.9
-        self.ewma_10 = 0.9
-
-        if keep_all_state:
-            self.streak = 0
-            self.total_done = 0
-            self.total_correct = 0
-
-        if user_exercise is not None:
-            # Switching the user from streak model to new accuracy model. Use
-            # current streak as known history, and simulate streak correct answers.
-            for i in xrange(0, user_exercise.streak):
-                self.update(True)
-
-    def update(self, correct):
-        def update_exp_moving_avg(y, prev, weight):
-            return float(weight) * y + float(1 - weight) * prev
-
-        self.ewma_3 = update_exp_moving_avg(correct, self.ewma_3, 0.333)
-        self.ewma_10 = update_exp_moving_avg(correct, self.ewma_10, 0.1)
-
-        if hasattr(self, 'streak'):  # Keeping all state ourself
-            self.streak = self.streak + 1 if correct else 0
-            self.total_done += 1
-            self.total_correct += correct
-
-    def predict(self, user_exercise=None):
-        """
-        Returns: the probabilty of the next problem correct using logistic regression.
-        """
-
-        total_done = user_exercise.total_done if user_exercise else self.total_done
-        total_correct = user_exercise.total_correct if user_exercise else self.total_correct
-
-        # We don't try to predict the first problem (no user-exercise history)
-        if total_done == 0:
-            return consts.PROBABILITY_FIRST_PROBLEM_CORRECT
-
-        # TODO(david): These values should not be in the raw script itself.
-        #     Perhaps import as a dict from a Python file.
-        INTERCEPT = -0.6384147
-
-        # Get values for the feature vector X
-        ewma_3 = self.ewma_3
-        ewma_10 = self.ewma_10
-        current_streak = user_exercise.streak if user_exercise else self.streak
-        log_num_done = math.log(total_done)
-        log_num_missed = math.log(total_done - total_correct + 1)  # log (num_missed + 1)
-        percent_correct = float(total_correct) / total_done
-
-        weighted_features = [
-            (ewma_3, 0.9595278),
-            (ewma_10, 1.3383701),
-            (current_streak, 0.0070444),
-            (log_num_done, 0.4862635),
-            (log_num_missed, -0.7135976),
-            (percent_correct, 0.6336906),
-        ]
-
-        X, weight_vector = zip(*weighted_features)  # unzip the list of pairs
-
-        return AccuracyModel.logistic_regression_predict(INTERCEPT, weight_vector, X)
-
-    # See http://en.wikipedia.org/wiki/Logistic_regression
-    @staticmethod
-    def logistic_regression_predict(intercept, weight_vector, X):
-        # TODO: Use numpy's dot product fn when we support numpy
-        dot_product = sum(itertools.imap(operator.mul, weight_vector, X))
-        z = dot_product + intercept
-
-        return 1.0 / (1.0 + math.exp(-z))
-
-# FIXME(david): This should be in a module in its own separate folder along with teh accuracy stuff
-class ProgressDisplayNormalize(object):
-    """
-    This is basically a function that takes an accuracy prediction (probability
-    of next problem correct) and attempts to "evenly" distribute it in [0, 1]
-    such that progress bar appears to fill up linearly.
-
-    The current algorithm is as follows:
-    Let
-        f(n) = probabilty of next problem correct after doing n problems,
-        all of which are correct.
-    Let
-        g(x) = f^(-1)(x)
-    that is, the inverse function of f. Since f is discrete but we want g to be
-    continuous, unknown values in the domain of g will be approximated by
-    linear interpolation, with the additional artificial ordered pair (0, 0).
-    Intuitively, g(x) is a function that takes your accuracy and returns how
-    many problems correct in a row it would've taken to get to that, as a real
-    number. Now our progress display function is
-        h(x) = f(x) / MIN_PROBLEMS_TO_PROFICIENCY
-    where MIN_PROBLEMS_TO_PROFICIENCY is the smallest n such that f(n) >=
-    consts.PROFICIENCY_ACCURACY_THRESHOLD
-
-    The rationale behind this is that if you don't get any problems wrong, your
-    progress bar will increment by the same amount each time and be full
-    right when you're proficient (i.e. reach the required accuracy threshold).
-
-    (Sorry if the explanation is not very clear... best to draw a graph of f(n)
-    and g(x) to see for yourself.)
-
-    This is a class because of static initialization of state.
-    """
-
-    def __init__(self):
-        self.ordered_pairs = [(0.0, 0.0)]
-
-        accuracy_model = AccuracyModel(keep_all_state=True)
-        consts.PROFICIENCY_ACCURACY_THRESHOLD
-
-        for i in itertools.count(1):
-            accuracy_model.update(correct=True)
-            probability = accuracy_model.predict()
-            self.ordered_pairs.append((probability, i))
-
-            if probability >= consts.PROFICIENCY_ACCURACY_THRESHOLD:
-                self.ordered_pairs.append((1.0, i + 1))  # sentinel for interpolation
-                self.min_problems_to_proficiency = i
-                break
-
-    def linear_interpolate(self, x):
-        # TODO: Use numpy when we get it. This is a brain-dead quick-and-dirty
-        #     O(n) implementation.
-
-        # pre: ordered_pairs is ordered on its first element
-
-        prev_x, prev_y = self.ordered_pairs[0]
-
-        for cur_x, cur_y in self.ordered_pairs[1:]:
-            if prev_x <= x < cur_x:
-                return prev_y + float(x - prev_x) * (cur_y - prev_y) / (cur_x - prev_x)
-
-            prev_x, prev_y = cur_x, cur_y
-
-        raise NotImplementedError('Does not support extrapolation.')
-
-    def normalize(self, p_val):
-        def clamp(value, minval, maxval):
-            return sorted((minval, value, maxval))[1]
-
-        return clamp(self.linear_interpolate(p_val) / self.min_problems_to_proficiency,
-            0.0, 1.0)
 
 from badges import util_badges, last_action_cache
 from phantom_users import util_notify
