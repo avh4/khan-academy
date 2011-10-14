@@ -221,6 +221,17 @@ class Exercise(db.Model):
             exercise_video.video # Pre-cache video entity
         return exercise_videos
 
+    # followup_exercises reverse walks the prerequisites to give you
+    # the exercises that list the current exercise as its prerequisite.
+    # i.e. follow this exercise up with these other exercises
+    @property
+    @layer_cache.cache_with_key_fxn(lambda self: "followup_exercises_%s" % self.key(), layer=layer_cache.Layers.Memcache)
+    def followup_exercises(self):
+        query = Exercise.all()
+        query.filter("prerequisites = ", self.name)
+        # ~==> return [ex for ex in Exercises.all() if self.name in ex.prerequisites]
+        return [e.name for e in query.fetch(200)]
+
     @classmethod
     def all(cls, live_only = False):
         query = super(Exercise, cls).all()
