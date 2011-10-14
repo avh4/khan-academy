@@ -1,3 +1,4 @@
+import logging
 import math
 import itertools
 import operator
@@ -10,8 +11,14 @@ class AccuracyModel(object):
     Predicts the probabilty of the next problem correct using logistic regression.
     """
 
-    # FIXME(david): versioning
+    # Bump this whenever you change the state we keep around so we can
+    # reconstitute existing old AccuracyModel objects. Also remember to update
+    # the function update_to_new_version accordingly.
+    CURRENT_VERSION = 1
+
     def __init__(self, user_exercise=None, keep_all_state=False):
+        self.version = AccuracyModel.CURRENT_VERSION
+
         # See http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
         # These are seeded on the mean correct of a sample of 1 million problem logs
         self.ewma_3 = 0.9
@@ -29,6 +36,9 @@ class AccuracyModel(object):
                 self.update(True)
 
     def update(self, correct):
+        if self.version != AccuracyModel.CURRENT_VERSION:
+            self.update_to_new_version()
+
         def update_exp_moving_avg(y, prev, weight):
             return float(weight) * y + float(1 - weight) * prev
 
@@ -40,10 +50,25 @@ class AccuracyModel(object):
             self.total_done += 1
             self.total_correct += correct
 
+    def update_to_new_version(self):
+        """
+        Updates old AccuracyModel objects to new objects. This function should
+        be updated whenever we make a change to the internal state of this
+        class.
+        """
+
+        # Bump this up when bumping up CURRENT_VERSION. This is here to ensure
+        # that this function gets updated along with CURRENT_VERSION.
+        UPDATE_TO_VERSION = 1
+        assert(UPDATE_TO_VERSION == AccuracyModel.CURRENT_VERSION)
+
     def predict(self, user_exercise=None):
         """
         Returns: the probabilty of the next problem correct using logistic regression.
         """
+
+        if self.version != AccuracyModel.CURRENT_VERSION:
+            self.update_to_new_version()
 
         total_done = user_exercise.total_done if user_exercise else self.total_done
         total_correct = user_exercise.total_correct if user_exercise else self.total_correct
