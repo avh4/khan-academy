@@ -25,6 +25,7 @@ class AccuracyModel(object):
         self.ewma_10 = 0.9
 
         if keep_all_state:
+            self.keep_all_state = True
             self.streak = 0
             self.total_done = 0
             self.total_correct = 0
@@ -35,7 +36,7 @@ class AccuracyModel(object):
             for i in xrange(0, user_exercise.streak):
                 self.update(True)
 
-    def update(self, correct):
+    def update(self, correct, **kwargs):
         if self.version != AccuracyModel.CURRENT_VERSION:
             self.update_to_new_version()
 
@@ -45,10 +46,15 @@ class AccuracyModel(object):
         self.ewma_3 = update_exp_moving_avg(correct, self.ewma_3, 0.333)
         self.ewma_10 = update_exp_moving_avg(correct, self.ewma_10, 0.1)
 
-        if hasattr(self, 'streak'):  # Keeping all state ourselves
+        if hasattr(self, 'keep_all_state'):
             self.streak = self.streak + 1 if correct else 0
             self.total_done += 1
             self.total_correct += correct
+
+        if kwargs:
+            self.__dict__.update(kwargs)
+
+        # TODO(david): Delete any unused features as optimization
 
     def update_to_new_version(self):
         """
@@ -70,8 +76,11 @@ class AccuracyModel(object):
         if self.version != AccuracyModel.CURRENT_VERSION:
             self.update_to_new_version()
 
-        total_done = user_exercise.total_done if user_exercise else self.total_done
-        total_correct = user_exercise.total_correct if user_exercise else self.total_correct
+        def get_feature_max_value(feature):
+            return max(getattr(self, feature, 0.0), getattr(user_exercise, feature, 0.0))
+
+        total_done = get_feature_max_value('total_done')
+        total_correct = get_feature_max_value('total_correct')
 
         # We don't try to predict the first problem (no user-exercise history)
         if total_done == 0:
@@ -84,7 +93,7 @@ class AccuracyModel(object):
         # Get values for the feature vector X
         ewma_3 = self.ewma_3
         ewma_10 = self.ewma_10
-        current_streak = user_exercise.streak if user_exercise else self.streak
+        current_streak = get_feature_max_value('streak')
         log_num_done = math.log(total_done)
         log_num_missed = math.log(total_done - total_correct + 1)  # log (num_missed + 1)
         percent_correct = float(total_correct) / total_done

@@ -344,13 +344,14 @@ class UserExercise(db.Model):
     # TODO(david): Is there a common idiom to do this? This is meant as a guard
     #     for a newly-created property that old objects may not have. Is there
     #     a way to just set accuracy_model's getter to this?
+    # http://docs.python.org/library/functions.html#property
     def get_accuracy_model(self):
         if self.accuracy_model is None:
             self.accuracy_model = AccuracyModel(self)
         return self.accuracy_model
 
-    def update_accuracy_model(self, correct):
-        self.get_accuracy_model().update(correct)
+    def update_accuracy_model(self, correct, **kwargs):
+        self.get_accuracy_model().update(correct, **kwargs)
 
     # A float for the progress bar indicating how close the user is to
     # attaining proficiency, in range [0,1]. This is so we can abstract away
