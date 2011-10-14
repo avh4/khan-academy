@@ -29,7 +29,7 @@ import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
 from proficiency_model.accuracy_model import AccuracyModel
-from proficiency_model.progress_normalizer import InvFnLinInterpNormalizer
+from proficiency_model.progress_normalizer import InvFnExponentialNormalizer
 
 from templatefilters import slugify
 from gae_bingo.gae_bingo import ab_test, bingo
@@ -305,7 +305,7 @@ class UserExercise(db.Model):
     _serialize_blacklist = ["review_interval_secs"]
 
     # A bound function object to normalize the progress bar display from a probability
-    _normalize_progress = InvFnLinInterpNormalizer(
+    _normalize_progress = InvFnExponentialNormalizer(
         AccuracyModel(keep_all_state=True),
         consts.PROFICIENCY_ACCURACY_THRESHOLD
     ).normalize
