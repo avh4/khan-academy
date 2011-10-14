@@ -2933,6 +2933,10 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     font-size: 12px;
     width: 80px;
     border: 1px solid transparent;
+    /* Fallback for web browsers that doesn't support RGBa */
+    background: rgb(0, 0, 0) transparent;
+    /* RGBa with 0.6 opacity */
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .nodeLabelHidden {
