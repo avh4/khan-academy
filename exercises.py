@@ -409,6 +409,8 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
 
+                user_exercise.update_accuracy_model(correct=True)
+
                 if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
                     user_exercise.streak_start = 0.0
 
@@ -433,11 +435,14 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 # 2+ in a row wrong -> not proficient
                 user_exercise.set_proficient(False, user_data)
 
-            # Only shrink the progress bar at most once per problem
-            shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
-            user_exercise.reset_streak(shrink_start)
+            # Only count wrong answer at most once per problem
+            first_attempt = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
 
-        user_exercise.update_accuracy_model(completed)
+            user_exercise.reset_streak(shrink_start=first_attempt)
+
+            if first_attempt:
+                logging.warn('-'*80 + 'counting as wrong')
+                user_exercise.update_accuracy_model(correct=False)
 
         user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
 

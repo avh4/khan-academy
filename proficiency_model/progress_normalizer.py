@@ -17,10 +17,9 @@ class InvFnLinInterpNormalizer(object):
     linear interpolation, with the additional artificial ordered pair (0, 0).
     Intuitively, g(x) is a function that takes your accuracy and returns how
     many problems correct in a row it would've taken to get to that, as a real
-    number. Now our progress display function is
-        h(x) = f(x) / MIN_PROBLEMS_TO_PROFICIENCY
-    where MIN_PROBLEMS_TO_PROFICIENCY is the smallest n such that f(n) >=
-    consts.PROFICIENCY_ACCURACY_THRESHOLD
+    number. Thus, our progress display function is just
+        h(x) = g(x) / g(consts.PROFICIENCY_ACCURACY_THRESHOLD)
+    clamped between [0, 1].
 
     The rationale behind this is that if you don't get any problems wrong, your
     progress bar will increment by the same amount each time and be full
@@ -34,6 +33,7 @@ class InvFnLinInterpNormalizer(object):
 
     def __init__(self, accuracy_model, proficiency_threshold):
         self.ordered_pairs = [(0.0, 0.0)]
+        self.proficiency_threshold = proficiency_threshold
 
         for i in itertools.count(1):
             accuracy_model.update(correct=True)
@@ -42,8 +42,9 @@ class InvFnLinInterpNormalizer(object):
 
             if probability >= proficiency_threshold:
                 self.ordered_pairs.append((1.0, i + 1))  # sentinel for interpolation
-                self.min_problems_to_proficiency = i
                 break
+
+        self.normalized_threshold = self.linear_interpolate(proficiency_threshold)
 
     def linear_interpolate(self, x):
         # TODO: Use numpy when we get it. This is a brain-dead quick-and-dirty
@@ -65,5 +66,8 @@ class InvFnLinInterpNormalizer(object):
         def clamp(value, minval, maxval):
             return sorted((minval, value, maxval))[1]
 
-        return clamp(self.linear_interpolate(p_val) / self.min_problems_to_proficiency,
+        # TODO: Should fit an exponential curve to the data points so that we
+        #     get meaningful values for when p_val is between 0 and x-value of
+        #     the first data point.
+        return clamp(self.linear_interpolate(p_val) / self.normalized_threshold,
             0.0, 1.0)

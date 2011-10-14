@@ -361,7 +361,16 @@ class UserExercise(db.Model):
         # Currently this is just the "more forgiving" streak bar
 
         # XXX. Should be under A/B test. But still update pro
-        return UserExercise._normalize_progress(self.get_accuracy_model().predict(self))
+
+        if self.total_correct == 0:
+            return 0.0
+
+        # XXX(david): debugging
+        prediction = self.get_accuracy_model().predict(self)
+        normalized = UserExercise._normalize_progress(prediction)
+        logging.warn('PREDICTED --- %s --- NORMALIZED ---- %s ----' % (prediction, normalized))
+
+        return normalized
 
         def progress_with_start(streak, start, required_streak):
             return start + float(streak) / required_streak * (1 - start)
