@@ -3366,7 +3366,7 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 }
 #search-playlists .column li {
     margin: 5px 0px 0px 0px;
-    line-height: 12px;
+    line-height: 14px;
 }
 #search-playlists br {
     clear: left;
