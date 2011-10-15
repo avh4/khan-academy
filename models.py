@@ -458,13 +458,6 @@ class UserExercise(db.Model):
 
         return review_interval
 
-    def is_currently_proficient(self, additional_problem_correct=False):
-        # TODO(david): rename to is_proficient_by_accuracy or someting like that
-        # TODO(david): This should use the new accuracy model, or be under an A/B test.
-        # TODO(david): THis is sorta ugly. Can we have is_currently_proficient
-        #     not take additional parameter and just move where schedule_review is?
-        return (self.streak + additional_problem_correct) >= self.required_streak
-
     def has_been_proficient(self):
         return self.proficient_date is not None
 
@@ -473,16 +466,12 @@ class UserExercise(db.Model):
 
     def schedule_review(self, correct, now=datetime.datetime.now()):
         # If the user is not now and never has been proficient, don't schedule a review
-        if not self.is_currently_proficient(correct) and not self.has_been_proficient():
+        if self.progress < 1.0 and not self.has_been_proficient():
             return
-
-        # TODO(david): Code does not reflect what comment says. Code seems
-        #     buggy. Should probably have been ==, not >=. So, should add
-        #     just_gained_proficiency method.
 
         # If the user is hitting a new streak either for the first time or after having lost
         # proficiency, reset their review interval counter.
-        if self.is_currently_proficient(correct):
+        if self.progress >= 1.0:
             self.review_interval_secs = 60 * 60 * 24 * consts.DEFAULT_REVIEW_INTERVAL_DAYS
 
         review_interval = self.get_review_interval()
@@ -2106,7 +2095,7 @@ class UserExerciseGraph(object):
             return graph_dict["suggested"]
 
         def set_endangered(graph_dict):
-            # TODO: Should probably change this logic to when accuracy model goes below a threshold.
+            # TODO(david): Should probably change this logic to when accuracy model goes below a threshold.
             graph_dict["endangered"] = (graph_dict["proficient"] and
                     graph_dict["streak"] == 0 and
                     graph_dict["proficient_date"] is not None)

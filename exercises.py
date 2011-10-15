@@ -373,11 +373,6 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         if exercise.summative:
             problem_log.exercise_non_summative = exercise_non_summative
 
-        # If this is the first attempt, update review schedule appropriately
-        if attempt_number == 1:
-            # TODO(david): It's weird that this fn takes a "completed" parameter.
-            user_exercise.schedule_review(completed)
-
         if completed:
 
             user_exercise.total_done += 1
@@ -414,7 +409,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
                     user_exercise.streak_start = 0.0
 
-                if user_exercise.is_currently_proficient() and not explicitly_proficient:
+                if user_exercise.progress >= 1.0 and not explicitly_proficient:
                     user_exercise.set_proficient(True, user_data)
                     user_data.reassess_if_necessary()
 
@@ -442,6 +437,10 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
             if first_attempt:
                 user_exercise.update_accuracy_model(correct = False, total_done = user_exercise.total_done + 1)
+
+        # If this is the first attempt, update review schedule appropriately
+        if attempt_number == 1:
+            user_exercise.schedule_review(completed)
 
         user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
 
