@@ -27,33 +27,15 @@
 				{% for cc_video in cc_videos %}
 			    <tr>
 			        <td>{{cc_video['keyword']}}</td>
-			        <td><a href="http://www.youtube.com/watch?v={{cc_video['youtube_id']}}" target="_blank">{{cc_video['title']}}</td>
+			        <td><a href="http://www.youtube.com/watch?v={{ cc_video['youtube_id']|escape }}" target="_blank">{{ cc_video['title']|escape }}</td>
 			    </tr>    
 				{% endfor %}
 				
                 </tbody>
                 </table>
             {% else %}
-            
-				<script type="text/javascript" charset="utf-8">
-				    
-				    $(document).ready(function() {
-
-    				    var auth_sub = "https://www.google.com/accounts/AuthSubRequest?" +
-    				        "next=" + window.location.href +
-    				        "&scope=" + "http://gdata.youtube.com" + 
-    				        "&session=" + "1" +
-    				        "&secure=" + "0";
-
-    				    var auth_sub_url = encodeURI(auth_sub);
-
-    				    $("#auth_link").attr("href", auth_sub_url);
-				        
-				    });
 				
-				</script>
-				
-                <a id="auth_link" href="#">Log in to your YouTube account</a>
+                <a id="auth_link" href="{{auth_sub_url|escape}}">Log in to your YouTube account</a>
 
             {% endif %}
         </div>

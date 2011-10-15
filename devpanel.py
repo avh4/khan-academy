@@ -13,6 +13,7 @@ from api.auth.xsrf import ensure_xsrf_cookie
 import gdata.youtube
 import gdata.youtube.data
 import gdata.youtube.service
+import urllib
 import csv
 
 class Email(request_handler.RequestHandler):
@@ -73,24 +74,21 @@ class ManageCoworkers(request_handler.RequestHandler):
 class CommonCore(request_handler.RequestHandler):
     
     @user_util.developer_only
-    @ensure_xsrf_cookie
     def get(self):
         
         cc_videos = []
         youtube_account = ""
         cc_file = "common_core/"
+        auth_sub_url = ""
         
         # set query param test=1 to request to test tagging (e.g., /devadmin/commoncore?test=1)
         
-        if self.request_string("test") == "1": test = True
-        else: test = False
-        
-        if test: 
-            youtube_account = "khanacademyschools"
-            cc_file += "test_data.csv"
-        else:
+        if self.request_bool("test", default=False):
             youtube_account = "khanacademy"
             cc_file += "cc_video_mapping.csv"
+        else:
+            youtube_account = "khanacademyschools"
+            cc_file += "test_data.csv"
         
         token = self.request_string("token")
         
@@ -110,17 +108,14 @@ class CommonCore(request_handler.RequestHandler):
                     
                     entry = yt_service.GetYouTubeVideoEntry(video_id=record["youtube_id"])
                     
-                    if entry:
+                    if entry and record["keyword"] not in entry.media.keywords.text:
                                     
-                        if entry.media.keywords.text:
-                            keywords = entry.media.keywords.text
-                        else:
-                            keywords = ""
+                        keywords = entry.media.keywords.text or "" 
                                     
                         entry.media.keywords.text = keywords + "," + record["keyword"]
                         video_url = "https://gdata.youtube.com/feeds/api/users/"+ youtube_account + "/uploads/" + record["youtube_id"]
                         updated_entry = yt_service.UpdateVideoEntry(entry, video_url)
-                                    
+                                
                         if not updated_entry:
                                 logging.warning("***NOT updated*** Title: " + record["title"] + ", ID: " + record["youtube_id"])  
                         if test:
@@ -129,10 +124,22 @@ class CommonCore(request_handler.RequestHandler):
                     cc_videos.append(record)
                     
             f.close() 
-                        
+            
+        else:         
+            params = {
+                'next': self.request.url,
+                'scope': "http://gdata.youtube.com", 
+                'session': "1", 
+                'secure': "0"
+            }
+
+            base_url = "https://www.google.com/accounts/AuthSubRequest?"
+            auth_sub_url = base_url + urllib.urlencode(params)
+                 
         template_values = {
             "token" : token,
             "cc_videos" : cc_videos,
+            "auth_sub_url" : auth_sub_url
         }
         
         self.render_jinja2_template("commoncore.html", template_values)
