@@ -1365,7 +1365,7 @@ class VideoLog(db.Model):
         # Defer the put of VideoLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(commit_video_log, video_log,
+        deferred.defer(commit_video_log, video_log, user_data,
                        _queue="video-log-queue",
                        _url="/_ah/queue/deferred_videolog")
 
@@ -1384,10 +1384,17 @@ class VideoLog(db.Model):
         return VideoLog.video.get_value_for_datastore(self)
 
 # commit_video_log is used by our deferred video log insertion process
-def commit_video_log(video_log):
+def commit_video_log(video_log, user_data):
     video_log.put()
-    from classtime import ClassDailyActivitySummary #putting this at the top would get a circular reference
-    LogSummary.add_or_update_entry(video_log.user, video_log, ClassDailyActivitySummary)
+    
+    #TODO: assuming we do the summary by coaches route the following two lines can be removed
+    from classtime import UserAdjacentActivitySummary #putting this at the top would get a circular reference
+    LogSummary.add_or_update_entry(user_data, video_log, UserAdjacentActivitySummary, "UserAdjacentActivity")
+    
+    from classtime import  ClassDailyActivitySummary #putting this at the top would get a circular reference
+    for coach in user_data.coaches:
+        LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), video_log, ClassDailyActivitySummary, "ClassDailyActivity", 1440, "period")
+
 
 class DailyActivityLog(db.Model):
     user = db.UserProperty()
@@ -1416,19 +1423,39 @@ class DailyActivityLog(db.Model):
         query.order('date')
 
         return query
-
-    
-
+   
+# can keep a variety of different types of summaries pulled from the logs
 class LogSummary(db.Model):
     user = db.UserProperty()
     start = db.DateTimeProperty()
     end = db.DateTimeProperty()
+    summaryType = db.StringProperty() 
     summary = object_property.ObjectProperty()
 
-    #TODO: divide the day/year up by delta and find the period that activity.time_started() belongs in
     @staticmethod
-    def get_period_key_by_activity(user_data, activity, delta):
-        pass
+    def get_start_of_period(activity, delta):
+        date = activity.time_started()
+
+        if delta == 1440:
+            return datetime.datetime(date.year, date.month, date.day)
+        
+        if delta == 60:
+            return datetime.datetime(date.year, date.month, date.day, date.hour)
+        
+        raise Exception("unhandled delta to get_key_name")
+
+
+    @staticmethod
+    def get_end_of_period(activity, delta):
+        return LogSummary.get_start_of_period(activity, delta) + datetime.timedelta(minutes=delta)
+
+    @staticmethod
+    def get_key_name(user_data, summaryType, activity, delta):
+        return LogSummary.get_key_name_by_dates(user_data, summaryType, LogSummary.get_start_of_period(activity, delta), LogSummary.get_end_of_period(activity, delta))
+
+    @staticmethod
+    def get_key_name_by_dates(user_data, summaryType, start, end):
+        return "%s:%s:%s:%s" % (user_data.key_email, summaryType, start.strftime("%Y-%m-%d-%H-%M"), end.strftime("%Y-%m-%d-%H-%M"))
 
     #activity needs to have activity.time_started() and activity.time_done() functions
     #summaryClass needs to have a method .add(activity)
@@ -1436,47 +1463,80 @@ class LogSummary(db.Model):
     #method is either "proximity"   - new event is added to last summary if it is within delta
     #              or "period"      - day is divided up into buckets of delta minutes
     @staticmethod
-    def add_or_update_entry(user_data, activity, summaryClass, delta=30, method="proximity"):
-        if method=="proximity":
-            #find the summary which ends within delta of the current activity's start
-            log_summary = LogSummary.get_closest_summary(user_data, activity, delta).get()
-        
-            if log_summary:
-                log_summary.start=min(log_summary.start, activity.time_started())
-                log_summary.end=max(log_summary.end, activity.time_ended())
-                log_summary.summary.add(user_data, activity)
-                log_summary.put()
-            else:
-                log_summary = LogSummary()
-                log_summary.user=user_data.user
-                log_summary.start=activity.time_started()
-                log_summary.end=activity.time_ended() 
-                log_summary.summary=summaryClass() 
-                log_summary.summary.add(user_data, activity)  
+    def add_or_update_entry(user_data, activity, summaryClass, summaryType, delta=30, method="proximity"):
+
+        def txn(user_data, activity, summaryClass, summaryType, delta, method):
+            if method=="proximity":
+                #find the summary which ends within delta of the current activity's start
+                log_summary = LogSummary.get_closest_summary(user_data, activity, summaryType, delta).get()
+
+                if log_summary is not None:
+                    log_summary.start=min(log_summary.start, activity.time_started())
+                    log_summary.end=max(log_summary.end, activity.time_ended())
+                    log_summary.summary.add(user_data, activity)
+                    log_summary.put()
+                else:
+                    log_summary = LogSummary(parent=user_data)
+                    log_summary.user=user_data.user
+                    log_summary.start=activity.time_started()
+                    log_summary.end=activity.time_ended() 
+                    log_summary.summaryType = summaryType
+                    log_summary.summary=summaryClass() 
+                    log_summary.summary.add(user_data, activity)  
+                    log_summary.put()
+
+            elif method=="period":
+                #if activities is a list, we assume all activities belong to the same period - this is used in classtime.fill_class_summaries_from_logs()
+                if type(activity) is list:
+                    activities = activity
+                    activity=activities[0]
+                else:
+                    activities=[activity]
+
+                key_name = LogSummary.get_key_name(user_data, summaryType, activity, delta)
+                log_summary = LogSummary.get_by_key_name(key_name)
+                             
+                if log_summary is None:
+                    log_summary = LogSummary(key_name=key_name)   
+                    log_summary.user=user_data.user
+                    log_summary.start=LogSummary.get_start_of_period(activity, delta)
+                    log_summary.end=LogSummary.get_end_of_period(activity, delta)
+                    log_summary.summaryType = summaryType
+                    log_summary.summary=summaryClass() 
+                    log_summary.summary.add(user_data, activity)  
+                    log_summary.put()
+
+                for activity in activities:
+                    log_summary.summary.add(user_data, activity)
+                
                 log_summary.put()
 
-        elif method=="period":
-            pass
-    
+        
+        #running function within a transaction because time might elapse between the get and the put 
+        #and two processes could get before either puts. Transactions will ensure that its mutually exclusive
+        #since they are operating on the same function
+        db.run_in_transaction(txn, user_data, activity, summaryClass, summaryType, delta, method) 
+            
     @staticmethod
     def get_description():
         return self.summary.description(self.start, self.end)
 
-    #get the summary which ends within delta minutes of the start of the activity, that the current activity should be added to
+    #get the summary which ends within delta minutes of the start of the activity, that the current activity should be added to, for proximity summaries
     @staticmethod
-    def get_closest_summary(user_data, activity, delta):
+    def get_closest_summary(user_data, activity, summaryType, delta):
         query = LogSummary.all()
-        query.filter('user =',user_data.user)
+        query.ancestor(user_data.key())
+        query.filter('summaryType =', summaryType)
         query.filter('end >=',activity.time_started() -  datetime.timedelta(minutes=delta))
         query.filter('end <',activity.time_ended() + datetime.timedelta(minutes=delta)) #really should use start here instead of end, but gae doesnt allow inequalities on two items
         query.order('-end')
         return query
 
     @staticmethod
-    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
+    def get_for_user_data_between_dts(user_data, summaryType, dt_a, dt_b):
         query = LogSummary.all()
         query.filter('user =', user_data.user)
-
+        query.filter('summaryType', summaryType)
         query.filter('start >=', dt_a)
         query.filter('start <', dt_b)
         query.order('start')
@@ -1655,10 +1715,15 @@ def commit_problem_log(problem_log_source, user_data):
         
         
     db.run_in_transaction(txn)
-    logging.info("ran transaction")
-    from classtime import ClassDailyActivitySummary #if this line is at the top it creates a circular reference
-    LogSummary.add_or_update_entry(user_data, problem_log_source, ClassDailyActivitySummary)
-    logging.info(problem_log_source)
+
+    #TODO: assuming we do the summary by coaches route the following two lines can be removed
+    from classtime import UserAdjacentActivitySummary #if this line is at the top it creates a circular reference
+    LogSummary.add_or_update_entry(user_data, problem_log_source, UserAdjacentActivitySummary, "UserAdjacentActivity")
+
+    from classtime import  ClassDailyActivitySummary #putting this at the top would get a circular reference
+    for coach in user_data.coaches:
+        LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), problem_log_source, ClassDailyActivitySummary, "ClassDailyActivity", 1440, "period")
+
 
 
 # Represents a matching between a playlist and a video

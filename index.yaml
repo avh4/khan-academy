@@ -164,6 +164,12 @@ indexes:
 
 - kind: LogSummary
   properties:
+  - name: summaryType
+  - name: user
+  - name: start
+
+- kind: LogSummary
+  properties:
   - name: user
   - name: end
     direction: desc
@@ -172,6 +178,19 @@ indexes:
   properties:
   - name: user
   - name: start
+
+- kind: LogSummary
+  ancestor: yes
+  properties:
+  - name: end
+    direction: desc
+
+- kind: LogSummary
+  ancestor: yes
+  properties:
+  - name: summaryType
+  - name: end
+    direction: desc
 
 - kind: Playlist
   properties:
