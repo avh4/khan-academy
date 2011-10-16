@@ -288,10 +288,10 @@ class UserExercise(db.Model):
     exercise = db.StringProperty()
     exercise_model = db.ReferenceProperty(Exercise)
     streak = db.IntegerProperty(default = 0)
-    _progress = db.FloatProperty(default = None)  # A continuous value >= 0.0, where 1.0 means proficiency. This measure abstracts away the internal proficiency model.
+    _progress = db.FloatProperty(default = None, indexed=False)  # A continuous value >= 0.0, where 1.0 means proficiency. This measure abstracts away the internal proficiency model.
     longest_streak = db.IntegerProperty(default = 0, indexed=False)
     # TODO: This property can be removed once we completely move off the streak display.
-    streak_start = db.FloatProperty(default = 0.0)  # The starting point of the streak bar as it appears to the user, in [0,1)
+    streak_start = db.FloatProperty(default = 0.0, indexed=False)  # The starting point of the streak bar as it appears to the user, in [0,1)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
     total_done = db.IntegerProperty(default = 0)
