@@ -1525,6 +1525,20 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         height: 30px;
         line-height: 18px;
     }
+    .streak-bar.proficient {
+        -webkit-box-shadow: 0 0 3px yellow;
+        -moz-box-shadow: 0 0 3px yellow;
+        box-shadow: 0 0 3px yellow;
+        background-color: rgba(255, 255, 0, 0.5);
+        height: 25px;
+    }
+    .single-exercise .streak-bar.proficient {
+        -webkit-box-shadow: 0 0 7px yellow;
+        -moz-box-shadow: 0 0 7px yellow;
+        box-shadow: 0 0 7px yellow;
+        background-color: rgba(255, 255, 0, 0.5);
+        height: 30px;
+    }
     .streak-bar-challenge {
         background: url(/images/streak-meter-empty-challenge.png) no-repeat;
     }

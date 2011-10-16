@@ -66,7 +66,7 @@ def streak_bar(user_exercise_dict):
     progress = user_exercise_dict["progress"]
     required_streak = user_exercise_dict["required_streak"]
 
-    bar_max_width = 227
+    bar_max_width = 228
     bar_width = min(1.0, progress) * bar_max_width
 
     levels = []
