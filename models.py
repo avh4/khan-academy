@@ -28,8 +28,8 @@ from topics_list import all_topics_list
 import nicknames
 from counters import user_counter
 from facebook_util import is_facebook_user_id
-from proficiency_model.accuracy_model import AccuracyModel
-from proficiency_model.progress_normalizer import InvFnExponentialNormalizer
+from accuracy_model.accuracy_model import AccuracyModel
+from accuracy_model.progress_normalizer import InvFnExponentialNormalizer
 
 from templatefilters import slugify
 from gae_bingo.gae_bingo import ab_test, bingo
