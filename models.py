@@ -286,7 +286,9 @@ class UserExercise(db.Model):
     exercise = db.StringProperty()
     exercise_model = db.ReferenceProperty(Exercise)
     streak = db.IntegerProperty(default = 0)
+    _progress = db.FloatProperty(default = None)  # A continuous value >= 0.0, where 1.0 means proficiency. This measure abstracts away the internal proficiency model.
     longest_streak = db.IntegerProperty(default = 0, indexed=False)
+    # TODO: This property can be removed once we completely move off the streak display.
     streak_start = db.FloatProperty(default = 0.0)  # The starting point of the streak bar as it appears to the user, in [0,1)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
@@ -341,46 +343,51 @@ class UserExercise(db.Model):
 
         return points.ExercisePointCalculator(self, suggested, proficient)
 
+    # Faciliate transition for old objects that did not have _accuracy_model property
     @property
     def accuracy_model(self):
         if self._accuracy_model is None:
             self._accuracy_model = AccuracyModel(self)
         return self._accuracy_model
 
-    def update_accuracy_model(self, correct, **kwargs):
-        self.accuracy_model.update(correct, **kwargs)
-
-    # A float for the progress bar indicating how close the user is to
-    # attaining proficiency, in range [0,1]. This is so we can abstract away
-    # the internal algorithm so the front-end does not need to change.
-    # TODO: Refactor code to use this measure instead of streak
+    # Faciliate transition for old objects that did not have the _progress property
     @property
     def progress(self):
-        # Currently this is just the "more forgiving" streak bar
+        if self._progress is None:
+            self._update_progress()
+        return self._progress
 
-        # XXX. Should be under A/B test. But still update pro
+    def update_progress(self, correct, **kwargs):
+        logging.warn('-'*80 + ' update progress')
+
+        #if self.summative:
+            #saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            #saved_progress = float(saved_streak) / self.required_streak
+            #current_progress = progress_with_start(self.streak - saved_streak,
+                #self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
+            #return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
+        #else:
+            #return progress_with_start(self.streak, self.streak_start, self.required_streak)
+
+        # First update the accuracy model
+        if correct:
+            self.accuracy_model.update(correct)
+        else:
+            # Since total_done isn't incremented until a problem is correctly
+            # answered, we need to manually override it for correct accuracy
+            # model calculation.
+            self.accuracy_model.update(correct, total_done=self.total_done+1)
+
+        self._update_progress()
+
+    def _update_progress(self):
+        # TODO(david): Original streak bar update
 
         if self.total_correct == 0:
-            return 0.0
-
-        # XXX(david): debugging
-        prediction = self.accuracy_model.predict(self)
-        normalized = UserExercise._normalize_progress(prediction)
-        logging.warn('PREDICTED --- %s --- NORMALIZED ---- %s ----' % (prediction, normalized))
-
-        return normalized
-
-        def progress_with_start(streak, start, required_streak):
-            return start + float(streak) / required_streak * (1 - start)
-
-        if self.summative:
-            saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-            saved_progress = float(saved_streak) / self.required_streak
-            current_progress = progress_with_start(self.streak - saved_streak,
-                self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
-            return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
+            self._progress = 0.0
         else:
-            return progress_with_start(self.streak, self.streak_start, self.required_streak)
+            prediction = self.accuracy_model.predict(self)
+            self._progress = UserExercise._normalize_progress(prediction)
 
     @staticmethod
     def to_progress_display(num):
@@ -869,6 +876,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
                 exercise=exid,
                 exercise_model=exercise,
                 streak=0,
+                _progress=0.0,
                 streak_start=0.0,
                 longest_streak=0,
                 first_done=datetime.datetime.now(),

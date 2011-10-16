@@ -404,7 +404,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
 
-                user_exercise.update_accuracy_model(correct=True)
+                user_exercise.update_progress(correct=True)
 
                 if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
                     user_exercise.streak_start = 0.0
@@ -436,7 +436,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             user_exercise.reset_streak(shrink_start=first_attempt)
 
             if first_attempt:
-                user_exercise.update_accuracy_model(correct = False, total_done = user_exercise.total_done + 1)
+                user_exercise.update_progress(correct=False)
 
         # If this is the first attempt, update review schedule appropriately
         if attempt_number == 1:
