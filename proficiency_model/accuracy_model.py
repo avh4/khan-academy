@@ -24,10 +24,18 @@ class AccuracyModel(object):
         self.ewma_3 = 0.9
         self.ewma_10 = 0.9
 
+        # This is kept here because this is not equivalent to
+        # UserExercise.total_done. The latter counts total problems completed
+        # (solved), this one counts problems where the user made an attempt at
+        # an answer. The distinction is significant when a user incorrectly
+        # answers a problem - UserExercise.total_done would not be incremented,
+        # whereas this would (which is what we want).
+        # TODO: Is there a better, non-hack solution that doesn't require
+        #     storing this additional state?
+        self.total_attempted = 0
+
         if keep_all_state:
-            self.keep_all_state = True
             self.streak = 0
-            self.total_done = 0
             self.total_correct = 0
 
         if user_exercise is not None:
@@ -36,7 +44,7 @@ class AccuracyModel(object):
             for i in xrange(0, user_exercise.streak):
                 self.update(True)
 
-    def update(self, correct, **kwargs):
+    def update(self, correct):
         if self.version != AccuracyModel.CURRENT_VERSION:
             self.update_to_new_version()
 
@@ -45,16 +53,13 @@ class AccuracyModel(object):
 
         self.ewma_3 = update_exp_moving_avg(correct, self.ewma_3, 0.333)
         self.ewma_10 = update_exp_moving_avg(correct, self.ewma_10, 0.1)
+        self.total_attempted += 1
 
-        if hasattr(self, 'keep_all_state'):
+        if hasattr(self, 'streak'):
             self.streak = self.streak + 1 if correct else 0
-            self.total_done += 1
+
+        if hasattr(self, 'total_correct'):
             self.total_correct += correct
-
-        if kwargs:
-            self.__dict__.update(kwargs)
-
-        # TODO(david): Delete any unused features as optimization
 
     def update_to_new_version(self):
         """
@@ -76,14 +81,13 @@ class AccuracyModel(object):
         if self.version != AccuracyModel.CURRENT_VERSION:
             self.update_to_new_version()
 
-        def get_feature_max_value(feature):
-            return max(getattr(self, feature, 0.0), getattr(user_exercise, feature, 0.0))
+        def get_feature_value(feature):
+            return getattr(self, feature, getattr(user_exercise, feature, None))
 
-        total_done = get_feature_max_value('total_done')
-        total_correct = get_feature_max_value('total_correct')
+        total_correct = get_feature_value('total_correct')
 
         # We don't try to predict the first problem (no user-exercise history)
-        if total_done == 0:
+        if self.total_attempted == 0:
             return consts.PROBABILITY_FIRST_PROBLEM_CORRECT
 
         # TODO(david): These values should not be in the raw script itself.
@@ -93,10 +97,10 @@ class AccuracyModel(object):
         # Get values for the feature vector X
         ewma_3 = self.ewma_3
         ewma_10 = self.ewma_10
-        current_streak = get_feature_max_value('streak')
-        log_num_done = math.log(total_done)
-        log_num_missed = math.log(total_done - total_correct + 1)  # log (num_missed + 1)
-        percent_correct = float(total_correct) / total_done
+        current_streak = get_feature_value('streak')
+        log_num_done = math.log(self.total_attempted)
+        log_num_missed = math.log(self.total_attempted - total_correct + 1)  # log (num_missed + 1)
+        percent_correct = float(total_correct) / self.total_attempted
 
         weighted_features = [
             (ewma_3, 0.9595278),

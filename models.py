@@ -151,12 +151,14 @@ class Exercise(db.Model):
     def display_name(self):
         return Exercise.to_display_name(self.name)
 
+    # The number of "sub-bars" in a summative (equivalently, # of save points + 1)
+    @property
+    def num_milestones(self):
+        return len(self.prerequisites) if self.summative else 1
+
     @property
     def required_streak(self):
-        if self.summative:
-            return consts.REQUIRED_STREAK * len(self.prerequisites)
-        else:
-            return consts.REQUIRED_STREAK
+        return consts.REQUIRED_STREAK * self.num_milestones
 
     @staticmethod
     def to_short_name(name):
@@ -343,6 +345,10 @@ class UserExercise(db.Model):
 
         return points.ExercisePointCalculator(self, suggested, proficient)
 
+    @property
+    def num_milestones(self):
+        return self.exercise_model.num_milestones
+
     # Faciliate transition for old objects that did not have _accuracy_model property
     @property
     def accuracy_model(self):
@@ -357,9 +363,7 @@ class UserExercise(db.Model):
             self._update_progress()
         return self._progress
 
-    def update_progress(self, correct, **kwargs):
-        logging.warn('-'*80 + ' update progress')
-
+    def update_progress(self, correct):
         #if self.summative:
             #saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
             #saved_progress = float(saved_streak) / self.required_streak
@@ -369,15 +373,7 @@ class UserExercise(db.Model):
         #else:
             #return progress_with_start(self.streak, self.streak_start, self.required_streak)
 
-        # First update the accuracy model
-        if correct:
-            self.accuracy_model.update(correct)
-        else:
-            # Since total_done isn't incremented until a problem is correctly
-            # answered, we need to manually override it for correct accuracy
-            # model calculation.
-            self.accuracy_model.update(correct, total_done=self.total_done+1)
-
+        self.accuracy_model.update(correct)
         self._update_progress()
 
     def _update_progress(self):
@@ -385,9 +381,27 @@ class UserExercise(db.Model):
 
         if self.total_correct == 0:
             self._progress = 0.0
+            return
+
+        prediction = self.accuracy_model.predict(self)
+        normalized_prediction = UserExercise._normalize_progress(prediction)
+
+        if self.summative:
+            if self._progress is None:
+                milestones_completed = self.streak // consts.CHALLENGE_STREAK_BARRIER
+            else:
+                milestones_completed = math.floor(self._progress * self.num_milestones)
+
+            if normalized_prediction >= 1.0:
+                # The user just crossed a challenge barrier. Reset their
+                # accuracy model to one that keeps all state, because we want
+                # to start fresh and don't want total_done, etc. to carry over.
+                self._accuracy_model = AccuracyModel(keep_all_state=True)
+
+            self._progress = float(milestones_completed + normalized_prediction) / self.num_milestones
+
         else:
-            prediction = self.accuracy_model.predict(self)
-            self._progress = UserExercise._normalize_progress(prediction)
+            self._progress = normalized_prediction
 
     @staticmethod
     def to_progress_display(num):
