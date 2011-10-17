@@ -13,7 +13,9 @@
             <h2>Common Core</h2>
 
             {% if token %}
-
+			    
+			    {% if cc_videos %}
+			    
 				<h4>The following videos were successfully mapped:</h4>
 			    <table id="CCTable" class="tablesorter"> 
                 <thead>
@@ -23,13 +25,19 @@
                 </tr>    
 			    </thead>
 			    <tbody>
+			    
+
 			        
-				{% for cc_video in cc_videos %}
-			    <tr>
-			        <td>{{cc_video['keyword']}}</td>
-			        <td><a href="http://www.youtube.com/watch?v={{ cc_video['youtube_id']|escape }}" target="_blank">{{ cc_video['title']|escape }}</td>
-			    </tr>    
-				{% endfor %}
+    				{% for cc_video in cc_videos %}
+    			    <tr>
+    			        <td>{{cc_video['keyword']}}</td>
+    			        <td><a href="http://www.youtube.com/watch?v={{ cc_video['youtube_id']|escape }}" target="_blank">{{ cc_video['title']|escape }}</td>
+    			    </tr>    
+    				{% endfor %}
+				
+				{% else %}
+				
+				<h4>All videos up to date!</h4>
 				
                 </tbody>
                 </table>
