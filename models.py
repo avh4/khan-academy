@@ -282,10 +282,6 @@ class Exercise(db.Model):
 def get_conversion_tests_dict(exid, checkpoints):
     return dict([(c, 'mario_%s_%d_problems' % (exid, c)) for c in checkpoints])
 
-# XXX(david): SHould be actual a/b test
-def AB_TEST_TRUE():
-    return True
-
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -322,6 +318,10 @@ class UserExercise(db.Model):
     def point_display(self):
       user_data = UserData.current()
       return user_data.point_display if user_data else 'off'
+
+    def proficiency_model(self):
+        user_data = UserData.current()
+        return user_data.proficiency_model() if user_data else 'streak'
 
     @property
     def required_streak(self):
@@ -370,12 +370,12 @@ class UserExercise(db.Model):
     def update_progress(self, correct):
         self.accuracy_model.update(correct)
         self._update_progress()
-        if AB_TEST_TRUE():
+        if self.proficiency_model() == 'streak':
             self._update_streak_from_answer(correct)
 
     def _update_progress(self):
 
-        if AB_TEST_TRUE():
+        if self.proficiency_model() == 'streak':
             if self._progress is not None:
                 return
 
@@ -736,6 +736,10 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @request_cache.cache()
     def point_display(self):
         return ab_test("mario points", ["on", "off"], UserData._mario_points_conversion_tests)
+
+    @request_cache.cache()
+    def proficiency_model(self):
+        return ab_test("Proficiency Model", ["accuracy", "streak"])
 
     @property
     def nickname(self):
