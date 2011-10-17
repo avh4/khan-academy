@@ -56,8 +56,9 @@
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
        <div id="dashboard-filter">
-          Filter: <input size="40" id="dashboard-filter-text" /><input id="dashboard-filter-clear" type="button" value="Clear"></input>
+          Filter: <input size="36" id="dashboard-filter-text" /><input id="dashboard-filter-clear" type="button" value="Clear"></input><img id="dashboard-filter-loading" src="/images/throbber.gif" style="display:none;">
        </div>
+       <span class="exercise-sublist">
        <h3>Suggested Exercises <span class="exercise-filter-count"></span></h3>
         {% if review_graph_dicts %}
         {% for graph_dict in review_graph_dicts %}
@@ -81,8 +82,10 @@
                 {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
+        </span>
         <br>
         {% if recent_graph_dicts %}
+            <span class="exercise-sublist">
             <h3>Recent Exercises <span class="exercise-filter-count"></span></h3>
             {% for graph_dict in recent_graph_dicts %}
                 <div class="exercise-badge" data-id="{{graph_dict.name}}">
@@ -94,8 +97,10 @@
                     {{ templatetags.streak_bar(graph_dict) }}
                 </div>
             {% endfor %}
+            </span>
             <br/>
         {% endif %}
+        <span class="exercise-sublist">
         <h3>All Exercises <span class="exercise-filter-count"></span>
             <span class="subheader exercise-all-exercises">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
         </h3>
@@ -110,6 +115,7 @@
             </div>
         {% endfor %}
         </div>
+        </span>
     </div></div>
     </div>
 
