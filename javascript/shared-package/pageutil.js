@@ -544,6 +544,7 @@ var Drawer = {
                         function(){KnowledgeMap.onBadgeMouseover.apply(this);},
                         function(){KnowledgeMap.onBadgeMouseout.apply(this);}
                 );
+                $(".exercise-show").click(KnowledgeMap.onShowExerciseClick);
             }
         }
     },

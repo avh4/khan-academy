@@ -1389,6 +1389,17 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             background-color: #c7e5f7;
         }
 
+    .exercise-show {
+        position: absolute;
+        padding: 5px 5px;
+        left: 282px;
+        top: 5px;
+        line-height: 1px;
+    }
+    .exercise-show:hover {
+        top: 6px;
+    }
+
     #container #dashboard-drawer {
         position: absolute;
         background: #fff;
