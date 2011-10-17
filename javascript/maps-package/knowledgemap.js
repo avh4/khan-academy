@@ -96,6 +96,11 @@ var KnowledgeMap = {
         this.giveNasaCredit();
     },
 
+    panToNode: function(dataID) {
+        var node = this.dictNodes[dataID];
+        this.map.panTo(node.latLng);
+    },
+
     escapeSelector: function(s) {
         return s.replace(/(:|\.)/g,'\\$1');
     },
@@ -459,6 +464,8 @@ var KnowledgeMap = {
 
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, true);
+
+        $('.exercise-show[data-id="' + exid + '"]').show();
     },
 
     onBadgeMouseout: function() {
@@ -468,6 +475,18 @@ var KnowledgeMap = {
 
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, false);
+
+        $('.exercise-show[data-id="' + exid + '"]').hide();
+    },
+
+    onShowExerciseClick: function(evt) {
+        var exid = $(this).attr("data-id");
+        KnowledgeMap.panToNode(exid);
+
+        var node = KnowledgeMap.dictNodes[exid];
+        if (node) KnowledgeMap.highlightNode(node, true);
+
+        evt.stopPropagation();
     },
 
     onZoomChange: function(jrgNodes) {

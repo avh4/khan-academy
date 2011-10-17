@@ -65,6 +65,7 @@
                 {{ exercise_macros.exercise_icon(graph_dict) }}
         		<div class="energy-points-badge">{{graph_dict.points}}</div>
         		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
 
                 {{ templatetags.streak_bar(graph_dict) }}
             </div>
@@ -75,6 +76,7 @@
                 {{ exercise_macros.exercise_icon(graph_dict) }}
         		<div class="energy-points-badge">{{graph_dict.points}}</div>
         		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
         		
                 {{ templatetags.streak_bar(graph_dict) }}
             </div>
@@ -87,6 +89,7 @@
                     {{ exercise_macros.exercise_icon(graph_dict) }}
                     <div class="energy-points-badge">{{graph_dict.points}}</div>
                     <div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                    <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
 
                     {{ templatetags.streak_bar(graph_dict) }}
                 </div>
@@ -102,6 +105,7 @@
                 {{ exercise_macros.exercise_icon(graph_dict) }}
         		<div class="energy-points-badge">{{graph_dict.points}}</div>
         		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
                 {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
