@@ -1334,6 +1334,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         right: 5px;
         top: 40px;
         z-index: 1;
+        /* Fallback for web browsers that doesn't support RGBa */
+        background: rgb(0, 0, 0) transparent;
+        /* RGBa with 0.75 opacity */
+        background: rgba(0, 0, 0, 0.75);
+        padding: 3px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
     }
     .exercise-legend {
         font-size: 12px;
@@ -1391,6 +1398,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+    }
+    #container #dashboard-filter {
+        overflow: auto;
+        padding: 0px 0px 10px 0px;
     }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
@@ -1468,6 +1479,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin-right: 350px;
     }
 
+.exercise-filter-count,.exercise-all-exercises {
+    font-size: 11px;
+    color: #444;
+}
 .exercise-badge {
     background: #f3f3f3;
     margin-bottom: 5px;
@@ -2925,10 +2940,18 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     font-size: 12px;
     width: 80px;
     border: 1px solid transparent;
+    /* Fallback for web browsers that doesn't support RGBa */
+    background: rgb(0, 0, 0) transparent;
+    /* RGBa with 0.5 opacity */
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .nodeLabelHidden {
     display: none;
+}
+.nodeLabelFiltered {
+    opacity: 0.3;
+    filter:alpha(opacity=30);
 }
 .nodeLabelProficient div {
 }

@@ -36,7 +36,8 @@
 		}
 	}
 	
-    $(function(){Drawer.init();});
+    $(function(){Drawer.init(); KnowledgeMap.initFilter();});
+    
 </script>
 {% endblock pagescript %}
 {% block pagetitle %}Exercise Dashboard{% endblock pagetitle %}
@@ -54,7 +55,10 @@
         </div>
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
-       <h3>Suggested Exercises</h3>
+       <div id="dashboard-filter">
+          Filter: <input size="40" id="dashboard-filter-text" /><input id="dashboard-filter-clear" type="button" value="Clear"></input>
+       </div>
+       <h3>Suggested Exercises <span class="exercise-filter-count"></span></h3>
         {% if review_graph_dicts %}
         {% for graph_dict in review_graph_dicts %}
             <div class="exercise-badge" data-id="{{graph_dict.name}}">
@@ -77,7 +81,7 @@
         {% endfor %}
         <br>
         {% if recent_graph_dicts %}
-            <h3>Recent Exercises</h3>
+            <h3>Recent Exercises <span class="exercise-filter-count"></span></h3>
             {% for graph_dict in recent_graph_dicts %}
                 <div class="exercise-badge" data-id="{{graph_dict.name}}">
                     {{ exercise_macros.exercise_icon(graph_dict) }}
@@ -89,8 +93,8 @@
             {% endfor %}
             <br/>
         {% endif %}
-        <h3>All Exercises
-            <span class="subheader">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
+        <h3>All Exercises <span class="exercise-filter-count"></span>
+            <span class="subheader exercise-all-exercises">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
         </h3>
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
         {% for graph_dict in graph_dicts %}
