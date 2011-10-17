@@ -8,8 +8,14 @@ var KnowledgeMap = {
     widthPoints: 200,
     heightPoints: 120,
     selectedNodes: {},
+
     filteredNodes: {},
     updateFilterTimeout: null,
+    
+    toShowList: [],
+    toHideList: [],
+    showHideTimeout: null,
+
     allExercisesVisibleBeforeFiltering: false,
     colors: {
         blue: "#0080C9",
@@ -619,8 +625,47 @@ var KnowledgeMap = {
         this.doFilter();
     },
 
+    updateVisibility: function() {
+        var remaining = 30; // Show/hide 30 elements at a time
+        while (KnowledgeMap.toShowList.length > 0 && remaining > 0) {
+            var node = KnowledgeMap.toShowList.pop();
+            $(node).show(0);
+            remaining--;
+        }
+        while (KnowledgeMap.toHideList.length > 0 && remaining > 0) {
+            var node = KnowledgeMap.toHideList.pop();
+            $(node).hide(0);
+            remaining--;
+        }
+        if (KnowledgeMap.toShowList.length > 0 || KnowledgeMap.toHideList.length > 0) {
+            KnowledgeMap.showHideTimeout = setTimeout(KnowledgeMap.updateVisibility, 100);
+        } else {
+            KnowledgeMap.showHideTimeout = null;
+
+            var filterText = $('#dashboard-filter-text').val().toLowerCase();
+
+            if (filterText != '') {
+                this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
+                if (!Drawer.areExercisesVisible()) {
+                    Drawer.toggleAllExercises(false);
+                }
+                $('.exercise-all-exercises').hide();
+            } else if (filterText == '') {
+                if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
+                    Drawer.toggleAllExercises(false);
+                }
+                $('.exercise-all-exercises').show();
+            }
+            $('#dashboard-filter-loading').hide(0);
+        }
+    },
+
     doFilter: function() {
         var filterText = $('#dashboard-filter-text').val().toLowerCase();
+
+        if (KnowledgeMap.showHideTimeout != null)
+            clearTimeout(KnowledgeMap.showHideTimeout);
+        KnowledgeMap.showHideTimeout = null;
 
         // Reset counts
         $('.exercise-filter-count').each(function(index, element) {
@@ -629,23 +674,18 @@ var KnowledgeMap = {
 
         $('.exercise-badge').each(function(index, element) {
             // Look for the count div by finding the h3 heading for this block
-            var countElement = $(element);
-            if (countElement.parent().is('#all-exercises'))
-                countElement = countElement.parent();
-            while (countElement.length > 0 && !countElement.is('h3'))
-                countElement = countElement.prev();
-            countElement = countElement.find('.exercise-filter-count');
+            var countElement = $(element).parents('.exercise-sublist').find('.exercise-filter-count');
 
             // Perform substring matching
             var exerciseTitle = $(element).find('.exercise-title').text().toLowerCase();
             if (exerciseTitle.indexOf(filterText) >= 0) {
-                $(element).show(750);
+                KnowledgeMap.toShowList.push(element);
                 KnowledgeMap.filteredNodes[$(element).attr('data-id')] = false;
                 if (countElement.length == 1)
                     countElement.data('exercises').exercise_count++;
             } else {
                 KnowledgeMap.filteredNodes[$(element).attr('data-id')] = true;
-                $(element).hide(750);
+                KnowledgeMap.toHideList.push(element);
             }
             if (countElement.length == 1)
                 countElement.data('exercises').exercise_total++;
@@ -663,17 +703,8 @@ var KnowledgeMap = {
         var jrgNodes = $(".nodeLabel");
         KnowledgeMap.onZoomChange(jrgNodes);
 
-        if (filterText != '') {
-            this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
-            if (!Drawer.areExercisesVisible()) {
-                Drawer.toggleAllExercises(false);
-            }
-            $('.exercise-all-exercises').hide();
-        } else if (filterText == '') {
-            if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
-                Drawer.toggleAllExercises(false);
-            }
-            $('.exercise-all-exercises').show();
-        }
+        $('#dashboard-filter-loading').show(0);
+
+        KnowledgeMap.updateVisibility();
     }
 };
