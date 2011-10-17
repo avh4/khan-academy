@@ -316,9 +316,10 @@ def raw_exercise_contents(exercise_file):
 
     return contents
 
+# TODO(david): Rename this function
 def reset_streak(user_data, user_exercise):
     if user_exercise and user_exercise.belongs_to(user_data):
-        user_exercise.reset_streak()
+        user_exercise.update_progress(correct=False)
         user_exercise.put()
 
         return user_exercise
@@ -431,11 +432,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.set_proficient(False, user_data)
 
             # Only count wrong answer at most once per problem
-            first_attempt = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
-
-            user_exercise.reset_streak(shrink_start=first_attempt)
-
-            if first_attempt:
+            if (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0):
                 user_exercise.update_progress(correct=False)
 
         # If this is the first attempt, update review schedule appropriately

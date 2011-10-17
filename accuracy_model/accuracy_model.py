@@ -21,6 +21,9 @@ class AccuracyModel(object):
 
         # See http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
         # These are seeded on the mean correct of a sample of 1 million problem logs
+        # TODO(david): Allow these seeds to be adjusted or passed in, or at
+        #     least use a more accurate seed (one that corresponds to P(first
+        #     problem correct)).
         self.ewma_3 = 0.9
         self.ewma_10 = 0.9
 
@@ -71,7 +74,7 @@ class AccuracyModel(object):
         # Bump this up when bumping up CURRENT_VERSION. This is here to ensure
         # that this function gets updated along with CURRENT_VERSION.
         UPDATE_TO_VERSION = 1
-        assert(UPDATE_TO_VERSION == AccuracyModel.CURRENT_VERSION)
+        assert UPDATE_TO_VERSION == AccuracyModel.CURRENT_VERSION
 
     def predict(self, user_exercise=None):
         """

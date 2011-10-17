@@ -282,6 +282,10 @@ class Exercise(db.Model):
 def get_conversion_tests_dict(exid, checkpoints):
     return dict([(c, 'mario_%s_%d_problems' % (exid, c)) for c in checkpoints])
 
+# XXX(david): SHould be actual a/b test
+def AB_TEST_TRUE():
+    return True
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -364,20 +368,23 @@ class UserExercise(db.Model):
         return self._progress
 
     def update_progress(self, correct):
-        #if self.summative:
-            #saved_streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-            #saved_progress = float(saved_streak) / self.required_streak
-            #current_progress = progress_with_start(self.streak - saved_streak,
-                #self.streak_start, consts.CHALLENGE_STREAK_BARRIER)
-            #return saved_progress + current_progress * float(consts.CHALLENGE_STREAK_BARRIER) / self.required_streak
-        #else:
-            #return progress_with_start(self.streak, self.streak_start, self.required_streak)
-
         self.accuracy_model.update(correct)
         self._update_progress()
+        if AB_TEST_TRUE():
+            self._update_streak_from_answer(correct)
 
     def _update_progress(self):
-        # TODO(david): Original streak bar update
+
+        if AB_TEST_TRUE():
+            if self._progress is not None:
+                return
+
+            if self.summative:
+                self._progress = float(self.streak) / self.required_streak
+            else:
+                self._progress = self.streak_start + (
+                    float(self.streak) / self.required_streak * (1.0 - self.streak_start))
+            return
 
         if self.total_correct == 0:
             self._progress = 0.0
@@ -402,6 +409,23 @@ class UserExercise(db.Model):
 
         else:
             self._progress = normalized_prediction
+
+    def _update_streak_from_answer(self, correct):
+        assert self._progress is not None
+
+        if correct:
+            if self._progress >= 1.0:
+                self._progress = 1.0
+                return
+
+            progress_increment = 1.0 / self.required_streak if self.summative else (
+                1.0 - self._progress) / (self.required_streak - self.streak)
+            self._progress += progress_increment
+
+        else:
+
+            self.streak = 0
+            self._progress *= consts.STREAK_RESET_FACTOR
 
     @staticmethod
     def to_progress_display(num):
@@ -445,22 +469,6 @@ class UserExercise(db.Model):
 
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
-
-    def reset_streak(self, shrink_start=True):
-        if self.exercise_model.summative:
-            # Reset streak to latest 10 milestone
-            old_progress = self.progress
-            old_streak = self.streak
-
-            self.streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
-
-            if shrink_start:
-                self.streak_start = float((old_progress - self.progress) * consts.STREAK_RESET_FACTOR * (self.required_streak / consts.CHALLENGE_STREAK_BARRIER))
-
-        else:
-            if shrink_start:
-                self.streak_start = float(self.progress * consts.STREAK_RESET_FACTOR)
-            self.streak = 0
 
     def is_struggling(self):
         # TODO: Use accuracy model to predict when user is struggling.
