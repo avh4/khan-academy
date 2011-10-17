@@ -279,8 +279,8 @@ class Exercise(db.Model):
             exercise_dict[fxn_key(exercise)] = exercise
         return exercise_dict
 
-def get_conversion_tests_dict(exid, checkpoints):
-    return dict([(c, 'mario_%s_%d_problems' % (exid, c)) for c in checkpoints])
+def get_conversion_tests_dict(exid, checkpoints, prefix):
+    return dict([(c, '%s_%s_%d_problems' % (prefix, exid, c)) for c in checkpoints])
 
 class UserExercise(db.Model):
 
@@ -319,9 +319,10 @@ class UserExercise(db.Model):
       user_data = UserData.current()
       return user_data.point_display if user_data else 'off'
 
+    @property
     def proficiency_model(self):
         user_data = UserData.current()
-        return user_data.proficiency_model() if user_data else 'streak'
+        return user_data.proficiency_model if user_data else 'streak'
 
     @property
     def required_streak(self):
@@ -370,12 +371,12 @@ class UserExercise(db.Model):
     def update_progress(self, correct):
         self.accuracy_model.update(correct)
         self._update_progress()
-        if self.proficiency_model() == 'streak':
+        if self.proficiency_model == 'streak':
             self._update_streak_from_answer(correct)
 
     def _update_progress(self):
 
-        if self.proficiency_model() == 'streak':
+        if self.proficiency_model == 'streak':
             if self._progress is not None:
                 return
 
@@ -533,15 +534,12 @@ class UserExercise(db.Model):
                 util_notify.update(user_data, self, False, True)
 
                 # Score conversions for A/B test
-                bingo('mario_gained_proficiency')
+                bingo('prof_gained_proficiency')
 
                 if len(user_data.proficient_exercises) == 5:
-                    bingo('mario_gained_5th_proficiency')
+                    bingo('prof_gained_5th_proficiency')
                 elif len(user_data.proficient_exercises) == 10:
-                    bingo('mario_gained_10th_proficiency')
-
-                if self.exercise == 'addition_1':
-                    bingo('mario_addition_1_proficiency')
+                    bingo('prof_gained_10th_proficiency')
 
         else:
             if self.exercise in user_data.proficient_exercises:
@@ -725,21 +723,26 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "user_nickname", "user_email", "seconds_since_joined",
     ]
 
+    # TODO(david): These conversion tests are not very useful or accurate for
+    #     testing the performance of a proficiency model (eg. new prof model
+    #     may require less than 10 problems to proficiency).
     _conversion_checkpoints = [5, 10, 20, 30]
-    any_exercise_conversions = get_conversion_tests_dict('did', _conversion_checkpoints)
-    addition_1_conversions = get_conversion_tests_dict('addition_1', _conversion_checkpoints)
-    _mario_points_conversion_tests = (['mario_gained_proficiency', 'mario_gained_5th_proficiency',
-        'mario_gained_10th_proficiency', 'mario_addition_1_proficiency'] +
-        any_exercise_conversions.values() + addition_1_conversions.values())
+    any_exercise_conversions = get_conversion_tests_dict('did', _conversion_checkpoints, 'prof')
+    _prof_model_conversion_tests = (['prof_gained_proficiency',
+        'prof_gained_5th_proficiency', 'prof_gained_10th_proficiency'] +
+        any_exercise_conversions.values())
 
     @property
     @request_cache.cache()
     def point_display(self):
-        return ab_test("mario points", ["on", "off"], UserData._mario_points_conversion_tests)
+        # TODO: Remove other mario points A/B test code, including this fn
+        return "on"
 
+    @property
     @request_cache.cache()
     def proficiency_model(self):
-        return ab_test("Proficiency Model", ["accuracy", "streak"])
+        return ab_test("Proficiency Model", ["accuracy", "streak"],
+            UserData._prof_model_conversion_tests)
 
     @property
     def nickname(self):

@@ -385,9 +385,6 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 if conversions_dict.has_key(total_done):
                     bingo(conversions_dict[total_done])
 
-            if exercise.name == 'addition_1':
-                add_to_conversions(models.UserData.addition_1_conversions)
-
             add_to_conversions(models.UserData.any_exercise_conversions)
 
             if problem_log.correct:
