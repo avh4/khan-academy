@@ -181,10 +181,13 @@ class TestSequenceFunctions(unittest.TestCase):
         self.lt('1010', '0101')
 
     def test_sanity(self):
-        # Some loose general bounds... if these are violated, something fishy's going on...
+        # Some loose general bounds (very unscientific)... at least if these
+        # are violated, we know something fishy's going on.
         self.assertTrue(self.sim('1' * 20) > 0.95)
         self.assertTrue(self.sim('0' * 20) < 0.8)
-        self.assertTrue(0.5 < self.sim('0') < self.sim('') < self.sim('1') < 0.95)
+        self.assertTrue(0.3 < self.sim('0') < 0.8)
+        self.assertTrue(0.4 < self.sim('') < 0.9)
+        self.assertTrue(0.5 < self.sim('1') < 1.0)
 
     def test_expected_behavior(self):
         self.lt('11110', '1111')
