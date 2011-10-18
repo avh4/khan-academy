@@ -148,6 +148,10 @@ PLAYLIST_STRUCTURE = [
                 "playlist": "History"
             },
             {
+                "name": "Art History",
+                "playlist": "Smarthistory"
+            },
+            {
                 "name": "American Civics",
                 "playlist": "American Civics"
             },

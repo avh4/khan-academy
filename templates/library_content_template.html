@@ -19,6 +19,28 @@
                         <p class='playlist-desc'>{{playlist_data.playlist.description|escape}}</p>
                     {% endif %}
                     {{ templatetags.column_major_sorted_videos(playlist_data.videos) }}
+
+
+                    {% if playlist_data.title == "Arithmetic" %}
+                    <div class="clear desktop-only">
+                    {% if playlist_data.next %}
+                        <a name="smarthistory" id="smarthistory">&nbsp;</a>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div data-role="page" id="smarthistory" data-theme="b">
+                <div data-role="header">
+                    <a href="#" data-rel="back" data-icon="arrow-l" class="mobile-only">Back</a>
+                    <h2 class='playlist-heading'>Art History</h2>
+                    <a href="/" data-icon="home" data-iconpos="notext" data-direction="reverse" class="mobile-only"></a>
+                </div>
+                <div data-role="content">
+                    <p class='playlist-desc'>Art History is Smarthistory.  Learn about the ages through the eyes of the painters.</p>
+                    {{smart_history}}                    
+                    {% endif %}
+
                     <div class="clear desktop-only">
                     {% if playlist_data.next %}
                         <a name="{{ playlist_data.next.title|slugify|escape }}" id="{{ playlist_data.next.title|slugify|escape }}">&nbsp;</a>
@@ -26,6 +48,8 @@
                     </div>
                 </div>
             </div>
+
+           
             {% endfor %}
             </div>
         </div>
