@@ -819,6 +819,7 @@ application = webapp2.WSGIApplication([
     ('/devadmin/emailchange', devpanel.Email),
     ('/devadmin/managedevs', devpanel.Manage),
     ('/devadmin/managecoworkers', devpanel.ManageCoworkers),
+    ('/devadmin/commoncore', devpanel.CommonCore),
 
     ('/coaches', coaches.ViewCoaches),
     ('/students', coaches.ViewStudents),
