@@ -34,10 +34,6 @@ handlers:
   mime_type: image/x-icon
   upload: images/favicon.ico
 
-- url: /robots.txt
-  static_files: robots.txt
-  upload: robots.txt
-
 - url: /google663128d2a1a65b87.html
   static_files: google663128d2a1a65b87.html
   upload: google663128d2a1a65b87.html

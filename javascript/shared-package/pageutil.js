@@ -929,3 +929,26 @@ var Throbber = {
         if (Throbber.jElement) Throbber.jElement.css("display", "none");
     }
 };
+
+var SearchResultHighlight = {
+    doReplace: function(word, element) {
+        // Find all text elements
+        textElements = $(element).contents().filter(function(){ return this.nodeType != 1; });
+        textElements.each(function(index, textElement) {
+            var pos = textElement.data.toLowerCase().indexOf(word);
+            if (pos >= 0) {
+                // Split text element into three elements 
+                var highlightText = textElement.splitText(pos);
+                highlightText.splitText(word.length);
+
+                // Highlight the matching text
+                $(highlightText).wrap('<span class="highlighted" />');
+            }
+        });
+    },
+    highlight: function(query) {
+        $('.searchresulthighlight').each(function(index,element) {
+            SearchResultHighlight.doReplace(query, element);
+        });
+    }
+};

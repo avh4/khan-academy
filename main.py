@@ -66,6 +66,7 @@ from phantom_users.cloner import Clone
 from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
+import robots
 
 import config_jinja
 
@@ -616,12 +617,90 @@ class Search(request_handler.RequestHandler):
             self.render_jinja2_template("searchresults.html", template_values)
             return
         searched_phrases = []
-        playlists = Playlist.search(query, limit=50, searched_phrases_out=searched_phrases)
-        videos = Video.search(query, limit=50, searched_phrases_out=searched_phrases)
+
+        # Do an async query for all ExerciseVideos, since this may be slow
+        exvids_query = ExerciseVideo.all()
+        exvids_future = util.async_queries([exvids_query])
+
+        # One full (non-partial) search, then sort by kind
+        all_text_keys = Playlist.full_text_search(
+                            query, limit=50, kind=None,
+                            stemming=Playlist.INDEX_STEMMING,
+                            multi_word_literal=Playlist.INDEX_MULTI_WORD,
+                            searched_phrases_out=searched_phrases)
+
+
+        # Quick title-only partial search
+        playlist_partial_results = filter(lambda playlist_dict: query in playlist_dict["title"].lower(), autocomplete.playlist_title_dicts())
+        video_partial_results = filter(lambda video_dict: query in video_dict["title"].lower(), autocomplete.video_title_dicts())
+
+        # Combine results & do one big get!
+        all_key_list = [str(key_and_title[0]) for key_and_title in all_text_keys]
+        all_key_list.extend([result["key"] for result in playlist_partial_results])
+        all_key_list.extend([result["key"] for result in video_partial_results])
+        all_key_list = list(set(all_key_list))
+        all_entities = db.get(all_key_list)
+
+        # Filter results by type
+        playlists = []
+        videos = []
+        for entity in all_entities:
+            if isinstance(entity, Playlist):
+                playlists.append(entity)
+            elif isinstance(entity, Video):
+                videos.append(entity)
+            else:
+                logging.error("Unhandled kind in search results: " + str(type(entity)))
+                
+        playlist_count = len(playlists)
+
+        # Get playlists for videos not in matching playlists
+        filtered_videos = []
+        filtered_videos_by_key = {}
+        for video in videos:
+            if [(playlist.title in video.playlists) for playlist in playlists].count(True) == 0:
+                video_playlist = video.first_playlist()
+                if video_playlist != None:
+                    playlists.append(video_playlist)
+                    filtered_videos.append(video)
+                    filtered_videos_by_key[str(video.key())] = []
+            else:
+                filtered_videos.append(video)
+                filtered_videos_by_key[str(video.key())] = []
+        video_count = len(filtered_videos)
+
+        # Get the related exercises
+        all_exercise_videos = exvids_future[0].get_result()
+        exercise_keys = []
+        for exvid in all_exercise_videos:
+            video_key = str(ExerciseVideo.video.get_value_for_datastore(exvid))
+            if video_key in filtered_videos_by_key:
+                exercise_key = ExerciseVideo.exercise.get_value_for_datastore(exvid)
+                video_exercise_keys = filtered_videos_by_key[video_key]
+                video_exercise_keys.append(exercise_key)
+                exercise_keys.append(exercise_key)
+        exercises = db.get(exercise_keys)
+
+        # Sort exercises with videos
+        video_exercises = {}
+        for video_key, exercise_keys in filtered_videos_by_key.iteritems():
+            video_exercises[video_key] = map(lambda exkey: [exercise for exercise in exercises if exercise.key() == exkey][0], exercise_keys)
+                
+        # Count number of videos in each playlist and sort descending
+        for playlist in playlists:
+            if len(filtered_videos) > 0:
+                playlist.match_count = [(playlist.title in video.playlists) for video in filtered_videos].count(True)
+            else:
+                playlist.match_count = 0
+        playlists = sorted(playlists, key=lambda playlist: -playlist.match_count)
+
         template_values.update({
                            'playlists': playlists,
-                           'videos': videos,
-                           'searched_phrases': searched_phrases
+                           'videos': filtered_videos,
+                           'video_exercises': video_exercises,
+                           'search_string': query,
+                           'video_count': video_count,
+                           'playlist_count': playlist_count,
                            })
         self.render_jinja2_template("searchresults.html", template_values)
 
@@ -846,6 +925,8 @@ application = webapp2.WSGIApplication([
     ('/exercisestats/exercisenumbertrivia', exercisestats.report_json.ExerciseNumberTrivia),
     ('/exercisestats/userlocationsmap', exercisestats.report_json.UserLocationsMap),
     ('/exercisestats/exercisescreatedhistogram', exercisestats.report_json.ExercisesCreatedHistogram),
+
+    ('/robots.txt', robots.RobotsTxt),
 
     # Redirect any links to old JSP version
     ('/.*\.jsp', PermanentRedirectToHome),

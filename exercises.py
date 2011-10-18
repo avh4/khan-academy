@@ -560,6 +560,12 @@ class UpdateExercise(request_handler.RequestHandler):
 
         video_keys = []
         for c_check_video in range(0, 1000):
+            video_name_append = self.request_string("video-%s-readable" % c_check_video, default="")
+            if video_name_append:
+                video = models.Video.get_for_readable_id(video_name_append)
+                if not video.key() in video_keys:
+                    video_keys.append(str(video.key()))
+
             video_append = self.request_string("video-%s" % c_check_video, default="")
             if video_append and not video_append in video_keys:
                 video_keys.append(video_append)
