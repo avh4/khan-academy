@@ -305,7 +305,7 @@ class UserExercise(db.Model):
 
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
-    _serialize_blacklist = ["review_interval_secs", "accuracy_model"]
+    _serialize_blacklist = ["review_interval_secs", "_progress", "_accuracy_model"]
 
     # A bound function object to normalize the progress bar display from a probability
     _normalize_progress = InvFnExponentialNormalizer(
