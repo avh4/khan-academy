@@ -319,7 +319,7 @@ def raw_exercise_contents(exercise_file):
 # TODO(david): Rename this function
 def reset_streak(user_data, user_exercise):
     if user_exercise and user_exercise.belongs_to(user_data):
-        user_exercise.update_progress(correct=False)
+        user_exercise.update_proficiency_model(correct=False)
         user_exercise.put()
 
         return user_exercise
@@ -402,7 +402,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
 
-                user_exercise.update_progress(correct=True)
+                user_exercise.update_proficiency_model(correct=True)
 
                 if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
                     user_exercise.streak_start = 0.0
@@ -430,7 +430,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
             # Only count wrong answer at most once per problem
             if (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0):
-                user_exercise.update_progress(correct=False)
+                user_exercise.update_proficiency_model(correct=False)
 
         # If this is the first attempt, update review schedule appropriately
         if attempt_number == 1:

@@ -318,7 +318,6 @@ class UserExercise(db.Model):
       user_data = UserData.current()
       return user_data.point_display if user_data else 'off'
 
-    @property
     def proficiency_model(self):
         user_data = UserData.current()
         return user_data.proficiency_model if user_data else 'streak'
@@ -354,7 +353,6 @@ class UserExercise(db.Model):
         return self.exercise_model.num_milestones
 
     # Faciliate transition for old objects that did not have _accuracy_model property
-    @property
     def accuracy_model(self):
         if self._accuracy_model is None:
             self._accuracy_model = AccuracyModel(self)
@@ -364,37 +362,35 @@ class UserExercise(db.Model):
     @property
     def progress(self):
         if self._progress is None:
-            self._update_progress()
+            self._progress = self._get_progress_from_current_state()
         return self._progress
 
-    def update_progress(self, correct):
-        self.accuracy_model.update(correct)
-        self._update_progress()
-
+    def update_proficiency_model(self, correct):
         if not correct:
             self.streak = 0
 
-        if self.proficiency_model == 'streak':
+        self.accuracy_model().update(correct)
+        self._progress = self._get_progress_from_current_state()
+
+        if self.proficiency_model() == 'streak':
             self._update_progress_from_streak_model(correct)
 
-    def _update_progress(self):
+    def _get_progress_from_current_state(self):
 
-        if self.proficiency_model == 'streak':
+        if self.proficiency_model() == 'streak':
             if self._progress is not None:
-                return
+                return self._progress
 
             if self.summative:
-                self._progress = float(self.streak) / self.required_streak
+                return float(self.streak) / self.required_streak
             else:
-                self._progress = self.streak_start + (
+                return self.streak_start + (
                     float(self.streak) / self.required_streak * (1.0 - self.streak_start))
-            return
 
         if self.total_correct == 0:
-            self._progress = 0.0
-            return
+            return 0.0
 
-        prediction = self.accuracy_model.predict(self)
+        prediction = self.accuracy_model().predict(self)
         normalized_prediction = UserExercise._normalize_progress(prediction)
 
         if self.summative:
@@ -409,10 +405,10 @@ class UserExercise(db.Model):
                 # to start fresh and don't want total_done, etc. to carry over.
                 self._accuracy_model = AccuracyModel(keep_all_state=True)
 
-            self._progress = float(milestones_completed + normalized_prediction) / self.num_milestones
+            return float(milestones_completed + normalized_prediction) / self.num_milestones
 
         else:
-            self._progress = normalized_prediction
+            return normalized_prediction
 
     def _update_progress_from_streak_model(self, correct):
         assert self._progress is not None
@@ -422,9 +418,13 @@ class UserExercise(db.Model):
                 self._progress = 1.0
                 return
 
-            progress_increment = 1.0 / self.required_streak if self.summative else (
-                1.0 - self._progress) / (self.required_streak - self.streak)
+            if self.summative:
+                progress_increment = 1.0 / self.required_streak
+            else:
+                progress_increment = (1.0 - self._progress) / (self.required_streak - self.streak)
+
             self._progress += progress_increment
+
         else:
             self._progress *= consts.STREAK_RESET_FACTOR
 
