@@ -371,8 +371,12 @@ class UserExercise(db.Model):
     def update_progress(self, correct):
         self.accuracy_model.update(correct)
         self._update_progress()
+
+        if not correct:
+            self.streak = 0
+
         if self.proficiency_model == 'streak':
-            self._update_streak_from_answer(correct)
+            self._update_progress_from_streak_model(correct)
 
     def _update_progress(self):
 
@@ -411,7 +415,7 @@ class UserExercise(db.Model):
         else:
             self._progress = normalized_prediction
 
-    def _update_streak_from_answer(self, correct):
+    def _update_progress_from_streak_model(self, correct):
         assert self._progress is not None
 
         if correct:
@@ -422,10 +426,7 @@ class UserExercise(db.Model):
             progress_increment = 1.0 / self.required_streak if self.summative else (
                 1.0 - self._progress) / (self.required_streak - self.streak)
             self._progress += progress_increment
-
         else:
-
-            self.streak = 0
             self._progress *= consts.STREAK_RESET_FACTOR
 
     @staticmethod
@@ -471,11 +472,8 @@ class UserExercise(db.Model):
     def belongs_to(self, user_data):
         return user_data and self.user.email().lower() == user_data.key_email.lower()
 
-    def is_struggling(self):
-        # TODO: Use accuracy model to predict when user is struggling.
-        return (self.streak == 0 and
-            self.longest_streak < self.required_streak and
-            self.total_done > self.exercise_model.struggling_threshold())
+    def struggling_threshold(self):
+        return self.exercise_model.struggling_threshold()
 
     @staticmethod
     def get_review_interval_from_seconds(seconds):
@@ -1837,14 +1835,13 @@ class UserExerciseCache(db.Model):
     def dict_from_user_exercise(user_exercise):
         return {
                 "streak": user_exercise.streak if user_exercise else 0,
-                "longest_streak": user_exercise.longest_streak if user_exercise else 0,  # TODO(david): remove this. Does streak_badges.py use this?
+                "longest_streak": user_exercise.longest_streak if user_exercise else 0,
                 "progress": user_exercise.progress if user_exercise else 0.0,
                 "total_done": user_exercise.total_done if user_exercise else 0,
                 "last_done": user_exercise.last_done if user_exercise else datetime.datetime.min,
                 "last_review": user_exercise.last_review if user_exercise else datetime.datetime.min,
                 "review_interval_secs": user_exercise.review_interval_secs if user_exercise else 0,
                 "proficient_date": user_exercise.proficient_date if user_exercise else 0,
-                "struggling": user_exercise.is_struggling() if user_exercise else False,
                 }
 
     @staticmethod
@@ -2021,10 +2018,12 @@ class UserExerciseGraph(object):
                 "h_position": exercise.h_position,
                 "v_position": exercise.v_position,
                 "summative": exercise.summative,
+                "struggling_threshold": exercise.struggling_threshold(),
                 "required_streak": exercise.required_streak,
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,
+                "struggling": None,
                 "endangered": None,
                 "prerequisites": map(lambda exercise_name: {"name": exercise_name, "display_name": Exercise.to_display_name(exercise_name)}, exercise.prerequisites),
                 "covers": exercise.covers,
@@ -2058,6 +2057,11 @@ class UserExerciseGraph(object):
                 "coverer_dicts": [],
                 "prerequisite_dicts": [],
             })
+
+            # TODO: Use accuracy to determine when struggling
+            graph_dict["struggling"] = (graph_dict["streak"] == 0 and
+                    not graph_dict["proficient_date"] and
+                    graph_dict["total_done"] > graph_dict["struggling_threshold"])
 
             # In case user has multiple UserExercise mappings for a specific exercise,
             # always prefer the one w/ more problems done
