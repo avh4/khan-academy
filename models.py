@@ -2019,7 +2019,7 @@ class UserExerciseGraph(object):
                 "v_position": exercise.v_position,
                 "summative": exercise.summative,
                 "struggling_threshold": exercise.struggling_threshold(),
-                "required_streak": exercise.required_streak,
+                "num_milestones": exercise.num_milestones,
                 "proficient": None,
                 "explicitly_proficient": None,
                 "suggested": None,

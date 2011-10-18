@@ -62,17 +62,14 @@ def user_points(user_data):
     return {"points": points}
 
 def streak_bar(user_exercise_dict):
-
     progress = user_exercise_dict["progress"]
-    required_streak = user_exercise_dict["required_streak"]
 
     bar_max_width = 228
     bar_width = min(1.0, progress) * bar_max_width
 
     levels = []
     if user_exercise_dict["summative"]:
-        # TODO(david): Refactor into just looking at # of milestones required
-        c_levels = required_streak / consts.REQUIRED_STREAK
+        c_levels = user_exercise_dict["num_milestones"]
         level_offset = bar_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
