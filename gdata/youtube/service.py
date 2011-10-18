@@ -724,7 +724,7 @@ class YouTubeService(gdata.service.GDataService):
         youtube_token = child.text
     return (post_url, youtube_token)
 
-  def UpdateVideoEntry(self, video_entry):
+  def UpdateVideoEntry(self, video_entry, video_url):
     """Updates a video entry's meta-data.
 
     Needs authentication.
@@ -736,9 +736,14 @@ class YouTubeService(gdata.service.GDataService):
     Returns:
       An updated YouTubeVideoEntry on success or None.
     """
-    for link in video_entry.link:
-      if link.rel == 'edit':
-        edit_uri = link.href
+    
+    edit_uri = video_url
+    
+    # Deprecated portion of the API required <link rel="edit"...
+    # for link in video_entry.link:
+    #   if link.rel == 'edit':
+    #     edit_uri = link.href
+    
     return self.Put(video_entry, uri=edit_uri,
                     converter=gdata.youtube.YouTubeVideoEntryFromString)
 
