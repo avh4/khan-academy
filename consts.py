@@ -5,9 +5,6 @@ REQUIRED_STREAK = 10
 # Minimum accuracy (probabilty of getting next problem correct) required to be considered proficient
 PROFICIENCY_ACCURACY_THRESHOLD = 0.95
 
-# The minimum
-MIN_DISPLAY_PROGRESS = 0.7
-
 # Number of problems required to reach a barrier/milestone in a challenge exercise
 CHALLENGE_STREAK_BARRIER = 10
 
