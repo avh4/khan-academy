@@ -77,22 +77,20 @@ class CommonCore(request_handler.RequestHandler):
     def get(self):
         
         cc_videos = []
-        youtube_account = ""
         cc_file = "common_core/"
         auth_sub_url = ""
-        
-        # set query param test=1 to request to test tagging (e.g., /devadmin/commoncore?test=1)
-        
-        if self.request_bool("test", default=False):
-            youtube_account = "khanacademy"
-            cc_file += "cc_video_mapping.csv"
-        else:
-            youtube_account = "khanacademyschools"
-            cc_file += "test_data.csv"
         
         token = self.request_string("token")
         
         if token: # AuthSub token from YouTube API - load and tag videos            
+            
+            # default for yt_user is test account khanacademyschools
+            
+            yt_account = self.request_string("account") if self.request_string("account") else "khanacademyschools"
+            
+            logging.info("****Youtube Account: " + yt_account)
+            
+            cc_file += "cc_video_mapping.csv" if yt_account == "khanacademy" else "test_data.csv"
             
             yt_service = gdata.youtube.service.YouTubeService()
             yt_service.SetAuthSubToken(token)
@@ -113,15 +111,15 @@ class CommonCore(request_handler.RequestHandler):
                         keywords = entry.media.keywords.text or "" 
                                     
                         entry.media.keywords.text = keywords + "," + record["keyword"]
-                        video_url = "https://gdata.youtube.com/feeds/api/users/"+ youtube_account + "/uploads/" + record["youtube_id"]
-                        updated_entry = yt_service.UpdateVideoEntry(entry, video_url)
+                        video_url = "https://gdata.youtube.com/feeds/api/users/"+ yt_account + "/uploads/" + record["youtube_id"]
+                        updated_entry = yt_service.UpdateVideoEntry(entry, video_url)  
+                          
+                        logging.info("***PROCESSED*** Title: " + entry.media.title.text)
                                 
                         if not updated_entry:
-                                logging.warning("***NOT updated*** Title: " + record["title"] + ", ID: " + record["youtube_id"])  
-                        if test:
-                            logging.info("***UPDATED*** " + entry.media.title.text)
+                                logging.warning("***FAILED update*** Title: " + record["title"] + ", ID: " + record["youtube_id"])  
                 
-                    cc_videos.append(record)
+                        cc_videos.append(record)
                     
             f.close() 
             
