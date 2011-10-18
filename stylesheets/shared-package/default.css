@@ -1414,6 +1414,15 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         overflow: auto;
         padding: 0px 0px 10px 0px;
     }
+    #container #dashboard-filter-text {
+        font-size:10px;
+        font-style: italic;
+        height: 24px;
+        padding: 0;
+        padding-left: 5px;
+        border:1px solid #C6D1AD;
+        margin-right: 6px;
+    }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
         overflow: auto;
@@ -1490,7 +1499,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin-right: 350px;
     }
 
-.exercise-filter-count,.exercise-all-exercises {
+.exercise-filter-count,#exercise-all-exercises {
     font-size: 11px;
     color: #444;
 }

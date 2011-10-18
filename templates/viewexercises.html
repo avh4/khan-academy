@@ -56,16 +56,17 @@
     <div id="dashboard-drawer" class="drawer-hoverable">
     <div id="dashboard-drawer-inner" class="fancy-scrollbar"><div>
        <div id="dashboard-filter">
-          Filter: <input size="36" id="dashboard-filter-text" /><input id="dashboard-filter-clear" type="button" value="Clear"></input><img id="dashboard-filter-loading" src="/images/throbber.gif" style="display:none;">
+          <input size="56" id="dashboard-filter-text" class="ui-corner-all" placeholder="Filter exercise list" /><input id="dashboard-filter-clear" type="button" value="Clear" class="simple-button action-gradient" style="display: none;"></input>
        </div>
+       <div id="exercist-list">
        <span class="exercise-sublist">
        <h3>Suggested Exercises <span class="exercise-filter-count"></span></h3>
         {% if review_graph_dicts %}
         {% for graph_dict in review_graph_dicts %}
             <div class="exercise-badge" data-id="{{graph_dict.name}}">
                 {{ exercise_macros.exercise_icon(graph_dict) }}
-        		<div class="energy-points-badge">{{graph_dict.points}}</div>
-        		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                <div class="energy-points-badge">{{graph_dict.points}}</div>
+                <div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
                 <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
 
                 {{ templatetags.streak_bar(graph_dict) }}
@@ -75,10 +76,10 @@
         {% for graph_dict in suggested_graph_dicts %}
             <div class="exercise-badge" data-id="{{graph_dict.name}}">
                 {{ exercise_macros.exercise_icon(graph_dict) }}
-        		<div class="energy-points-badge">{{graph_dict.points}}</div>
-        		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                <div class="energy-points-badge">{{graph_dict.points}}</div>
+                <div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
                 <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
-        		
+
                 {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
@@ -102,20 +103,22 @@
         {% endif %}
         <span class="exercise-sublist">
         <h3>All Exercises <span class="exercise-filter-count"></span>
-            <span class="subheader exercise-all-exercises">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
+            <span class="subheader" id="exercise-all-exercises">(<a href="#" id="show-all-exercises">{% if expanded_all_exercises %}Hide All{% else %}Show All{% endif %}</a>)</span>
         </h3>
         <div id="all-exercises" style="{% if not expanded_all_exercises %}display: none;{% endif %}">
         {% for graph_dict in graph_dicts %}
             <div class="exercise-badge" data-id="{{graph_dict.name}}" id="{{graph_dict.name}}">
                 {{ exercise_macros.exercise_icon(graph_dict) }}
-        		<div class="energy-points-badge">{{graph_dict.points}}</div>
-        		<div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
+                <div class="energy-points-badge">{{graph_dict.points}}</div>
+                <div class="exercise-title"><a href="/exercises?exid={{graph_dict.name}}">{{graph_dict.display_name}}</a></div>
                 <span class="exercise-show simple-button action-gradient" data-id="{{graph_dict.name}}" style="display:none;"><img src="images/map-target.png" alt="Show in map"></span>
                 {{ templatetags.streak_bar(graph_dict) }}
             </div>
         {% endfor %}
         </div>
         </span>
+        <span id="exercise-no-results" style="display:none;">No exercises match your query.</span>
+        </div>
     </div></div>
     </div>
 
