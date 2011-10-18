@@ -3,6 +3,8 @@ import math
 import itertools
 import operator
 
+from parameters import log_reg_full_history_tail1m as params
+
 # TODO(david): Find out what this actually is
 PROBABILITY_FIRST_PROBLEM_CORRECT = 0.8
 
@@ -91,11 +93,7 @@ class AccuracyModel(object):
 
         # We don't try to predict the first problem (no user-exercise history)
         if self.total_attempted == 0:
-            return consts.PROBABILITY_FIRST_PROBLEM_CORRECT
-
-        # TODO(david): These values should not be in the raw script itself.
-        #     Perhaps import as a dict from a Python file.
-        INTERCEPT = -0.6384147
+            return PROBABILITY_FIRST_PROBLEM_CORRECT
 
         # Get values for the feature vector X
         ewma_3 = self.ewma_3
@@ -106,17 +104,17 @@ class AccuracyModel(object):
         percent_correct = float(total_correct) / self.total_attempted
 
         weighted_features = [
-            (ewma_3, 0.9595278),
-            (ewma_10, 1.3383701),
-            (current_streak, 0.0070444),
-            (log_num_done, 0.4862635),
-            (log_num_missed, -0.7135976),
-            (percent_correct, 0.6336906),
+            (ewma_3, params.EWMA_3),
+            (ewma_10, params.EWMA_10),
+            (current_streak, params.CURRENT_STREAK),
+            (log_num_done, params.LOG_NUM_DONE),
+            (log_num_missed, params.LOG_NUM_MISSED),
+            (percent_correct, params.PERCENT_CORRECT),
         ]
 
         X, weight_vector = zip(*weighted_features)  # unzip the list of pairs
 
-        return AccuracyModel.logistic_regression_predict(INTERCEPT, weight_vector, X)
+        return AccuracyModel.logistic_regression_predict(params.INTERCEPT, weight_vector, X)
 
     # See http://en.wikipedia.org/wiki/Logistic_regression
     @staticmethod
