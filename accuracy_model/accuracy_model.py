@@ -33,7 +33,7 @@ class AccuracyModel(object):
         # an answer. The distinction is significant when a user incorrectly
         # answers a problem - UserExercise.total_done would not be incremented,
         # whereas this would (which is what we want).
-        # TODO: Is there a better, non-hack solution that doesn't require
+        # TODO(david): Is there a better solution that doesn't require
         #     storing this additional state?
         self.total_attempted = 0
 
@@ -121,7 +121,7 @@ class AccuracyModel(object):
     # See http://en.wikipedia.org/wiki/Logistic_regression
     @staticmethod
     def logistic_regression_predict(intercept, weight_vector, X):
-        # TODO: Use numpy's dot product fn when we support numpy
+        # TODO(david): Use numpy's dot product fn when we support numpy
         dot_product = sum(itertools.imap(operator.mul, weight_vector, X))
         z = dot_product + intercept
 

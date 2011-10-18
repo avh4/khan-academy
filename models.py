@@ -290,7 +290,7 @@ class UserExercise(db.Model):
     streak = db.IntegerProperty(default = 0)
     _progress = db.FloatProperty(default = None, indexed=False)  # A continuous value >= 0.0, where 1.0 means proficiency. This measure abstracts away the internal proficiency model.
     longest_streak = db.IntegerProperty(default = 0, indexed=False)
-    # TODO: This property can be removed once we completely move off the streak display.
+    # TODO(david): This property can be removed once we completely move off the streak display.
     streak_start = db.FloatProperty(default = 0.0, indexed=False)  # The starting point of the streak bar as it appears to the user, in [0,1)
     first_done = db.DateTimeProperty(auto_now_add=True)
     last_done = db.DateTimeProperty()
@@ -301,8 +301,7 @@ class UserExercise(db.Model):
     proficient_date = db.DateTimeProperty()
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM, indexed=False) # Seconds expected to finish a problem 'quickly' for badge calculation
     summative = db.BooleanProperty(default=False, indexed=False)
-    # FIXME(david): Think about how we're going to transition users to this new model.
-    _accuracy_model = object_property.ObjectProperty()  # TODO(david): Change to UnvalidatedObjectProperty when things are stable?
+    _accuracy_model = object_property.ObjectProperty()
 
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
@@ -733,7 +732,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @property
     @request_cache.cache()
     def point_display(self):
-        # TODO: Remove other mario points A/B test code, including this fn
+        # TODO(david): Remove other mario points A/B test code, including this fn
         return "on"
 
     @property
@@ -2058,7 +2057,7 @@ class UserExerciseGraph(object):
                 "prerequisite_dicts": [],
             })
 
-            # TODO: Use accuracy to determine when struggling
+            # TODO(david): Use accuracy to determine when struggling
             graph_dict["struggling"] = (graph_dict["streak"] == 0 and
                     not graph_dict["proficient_date"] and
                     graph_dict["total_done"] > graph_dict["struggling_threshold"])
@@ -2136,7 +2135,6 @@ class UserExerciseGraph(object):
             return graph_dict["suggested"]
 
         def set_endangered(graph_dict):
-            # TODO(david): Should probably change this logic to when accuracy model goes below a threshold.
             graph_dict["endangered"] = (graph_dict["proficient"] and
                     graph_dict["streak"] == 0 and
                     graph_dict["proficient_date"] is not None)

@@ -4,9 +4,9 @@ import math
 
 def exponential_fit(X, Y):
     # See http://mathworld.wolfram.com/LeastSquaresFittingExponential.html
-    # TODO: This just uses the simpler fit given by equations (3) and (4) of
+    # TODO(david): This just uses the simpler fit given by equations (3) and (4) of
     #     above link. Try equations (9) and (10).
-    # TODO: Use numpy when supported
+    # TODO(david): Use numpy when supported
 
     def sqr(x):
         return x * x
@@ -79,7 +79,7 @@ class InvFnExponentialNormalizer(object):
         return self.A * math.exp(self.B * x)
 
     def normalize(self, p_val):
-        # TODO: Use numpy clip
+        # TODO(david): Use numpy clip
         def clamp(value, minval, maxval):
             return sorted((minval, value, maxval))[1]
 
