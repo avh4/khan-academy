@@ -11,10 +11,6 @@ var KnowledgeMap = {
 
     filteredNodes: {},
     updateFilterTimeout: null,
-    
-    toShowList: [],
-    toHideList: [],
-    showHideTimeout: null,
 
     allExercisesVisibleBeforeFiltering: false,
     colors: {
@@ -471,7 +467,7 @@ var KnowledgeMap = {
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, true);
 
-        $('.exercise-show[data-id="' + exid + '"]').show();
+        $(this).find('.exercise-show').show();
     },
 
     onBadgeMouseout: function() {
@@ -482,7 +478,7 @@ var KnowledgeMap = {
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, false);
 
-        $('.exercise-show[data-id="' + exid + '"]').hide();
+        $(this).find('.exercise-show').hide();
     },
 
     onShowExerciseClick: function(evt) {
@@ -507,9 +503,7 @@ var KnowledgeMap = {
         jrgNodes.each(function() {
             var jel = $(this);
             var node = KnowledgeMap.dictNodes[jel.attr("data-id")];
-            var filtered = KnowledgeMap.filteredNodes[jel.attr("data-id")];
-            if (filtered == undefined)
-                filtered = false;
+            var filtered = !!KnowledgeMap.filteredNodes[jel.attr("data-id")];
 
             var iconOptions = KnowledgeMap.getIconOptions(node, zoom);
             $("img", jel).attr("src", iconOptions.url);
@@ -606,6 +600,18 @@ var KnowledgeMap = {
     // Filtering
 
     initFilter: function() {
+        // Do DOM traversal once at the beginning. Makes filtering reasonably fast
+        KnowledgeMap.badgeElements = [];
+        $('.exercise-badge').each(function(index, element) {
+            KnowledgeMap.badgeElements[index] = {
+                badgeElement: $(element),
+                countElement: $(element).parents('.exercise-sublist').find('.exercise-filter-count'),
+                titleString: $(element).find('.exercise-title').text().toLowerCase(),
+                dataID: $(element).attr('data-id'),
+            };
+        });
+        KnowledgeMap.filterCountElements = $('.exercise-filter-count');
+
         $('#dashboard-filter-text').keyup(function() {
             if (KnowledgeMap.updateFilterTimeout == null) {
                 KnowledgeMap.updateFilterTimeout = setTimeout(function() {
@@ -625,86 +631,79 @@ var KnowledgeMap = {
         this.doFilter();
     },
 
-    updateVisibility: function() {
-        var remaining = 30; // Show/hide 30 elements at a time
-        while (KnowledgeMap.toShowList.length > 0 && remaining > 0) {
-            var node = KnowledgeMap.toShowList.pop();
-            $(node).show(0);
-            remaining--;
-        }
-        while (KnowledgeMap.toHideList.length > 0 && remaining > 0) {
-            var node = KnowledgeMap.toHideList.pop();
-            $(node).hide(0);
-            remaining--;
-        }
-        if (KnowledgeMap.toShowList.length > 0 || KnowledgeMap.toHideList.length > 0) {
-            KnowledgeMap.showHideTimeout = setTimeout(KnowledgeMap.updateVisibility, 100);
-        } else {
-            KnowledgeMap.showHideTimeout = null;
-
-            var filterText = $('#dashboard-filter-text').val().toLowerCase();
-
-            if (filterText != '') {
-                this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
-                if (!Drawer.areExercisesVisible()) {
-                    Drawer.toggleAllExercises(false);
-                }
-                $('.exercise-all-exercises').hide();
-            } else if (filterText == '') {
-                if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
-                    Drawer.toggleAllExercises(false);
-                }
-                $('.exercise-all-exercises').show();
-            }
-            $('#dashboard-filter-loading').hide(0);
-        }
-    },
-
     doFilter: function() {
-        var filterText = $('#dashboard-filter-text').val().toLowerCase();
+        var filterText = $('#dashboard-filter-text').val().toLowerCase().trim();
+        var foundExercises = false;
 
-        if (KnowledgeMap.showHideTimeout != null)
-            clearTimeout(KnowledgeMap.showHideTimeout);
-        KnowledgeMap.showHideTimeout = null;
+        var container = $('#exercise-list').detach();
 
         // Reset counts
-        $('.exercise-filter-count').each(function(index, element) {
+        KnowledgeMap.filterCountElements.each(function(index, element) {
             $(element).data('exercises', {'exercise_count': 0, 'exercise_total': 0});
         });
 
-        $('.exercise-badge').each(function(index, element) {
-            // Look for the count div by finding the h3 heading for this block
-            var countElement = $(element).parents('.exercise-sublist').find('.exercise-filter-count');
+        for (var badgeIdx = 0; badgeIdx < KnowledgeMap.badgeElements.length; badgeIdx++) {
+            var badge = KnowledgeMap.badgeElements[badgeIdx];
 
             // Perform substring matching
-            var exerciseTitle = $(element).find('.exercise-title').text().toLowerCase();
-            if (exerciseTitle.indexOf(filterText) >= 0) {
-                KnowledgeMap.toShowList.push(element);
-                KnowledgeMap.filteredNodes[$(element).attr('data-id')] = false;
-                if (countElement.length == 1)
-                    countElement.data('exercises').exercise_count++;
+            if (badge.titleString.indexOf(filterText) >= 0) {
+                badge.badgeElement.show();
+                KnowledgeMap.filteredNodes[badge.dataID] = false;
+
+                if (badge.countElement.length == 1)
+                    badge.countElement.data('exercises').exercise_count++;
             } else {
-                KnowledgeMap.filteredNodes[$(element).attr('data-id')] = true;
-                KnowledgeMap.toHideList.push(element);
+                badge.badgeElement.hide();
+                KnowledgeMap.filteredNodes[badge.dataID] = true;
             }
-            if (countElement.length == 1)
-                countElement.data('exercises').exercise_total++;
-        });
+
+            if (badge.countElement.length == 1)
+                badge.countElement.data('exercises').exercise_total++;
+        }
         
         // Update count div texts
-        $('.exercise-filter-count').each(function(index, element) {
+        KnowledgeMap.filterCountElements.each(function(index, element) {
             var counts = $(element).data('exercises');
-            if (counts.exercise_count < counts.exercise_total)
-                $(element).html('(Showing ' + counts.exercise_count + ' of ' + counts.exercise_total + ')');
-            else
-                $(element).html('');
+            var sublistElement = $(element).parents('.exercise-sublist');
+
+            if (counts.exercise_count == 0) {
+                sublistElement.hide();
+            } else {
+                sublistElement.show();
+
+                foundExercises = true;
+
+                if (counts.exercise_count < counts.exercise_total)
+                    $(element).html('(Showing ' + counts.exercise_count + ' of ' + counts.exercise_total + ')');
+                else
+                    $(element).html('');
+            }
         });
+
+        if (foundExercises) {
+            $('#exercise-no-results').hide();
+        } else {
+            $('#exercise-no-results').show();
+        }
 
         var jrgNodes = $(".nodeLabel");
         KnowledgeMap.onZoomChange(jrgNodes);
 
-        $('#dashboard-filter-loading').show(0);
+        if (filterText) {
+            this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
+            if (!Drawer.areExercisesVisible()) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('#exercise-all-exercises').hide();
+            $('#dashboard-filter-clear').show();
+        } else if (filterText == '') {
+            if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('#exercise-all-exercises').show();
+            $('#dashboard-filter-clear').hide();
+        }
 
-        KnowledgeMap.updateVisibility();
+        container.insertAfter("#dashboard-filter");
     }
 };
