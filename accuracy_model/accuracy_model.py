@@ -134,3 +134,10 @@ class AccuracyModel(object):
             model.update(response)
 
         return model.predict()
+
+    # The minimum number of problems correct in a row to be greater than the given threshold
+    @staticmethod
+    def min_streak_till_threshold(threshold):
+        for i in itertools.count(1):
+            if AccuracyModel.simulate([True] * i) >= threshold:
+                return i
