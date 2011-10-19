@@ -894,7 +894,8 @@ footer {
     display: block;
     padding: 0;
 }
-    .light #top-header #page_search #search-input {
+    .light #top-header #page_search #search-input,
+    #container #dashboard-filter-text {
         background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -5px -867px;
         background-color: #fafafa;
@@ -1415,13 +1416,9 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         padding: 0px 0px 10px 0px;
     }
     #container #dashboard-filter-text {
-        font-size:10px;
-        font-style: italic;
-        height: 24px;
-        padding: 0;
-        padding-left: 5px;
-        border:1px solid #C6D1AD;
+        background-image: none;
         margin-right: 6px;
+        padding-left: 5px;
     }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
