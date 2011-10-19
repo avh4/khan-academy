@@ -632,7 +632,7 @@ var KnowledgeMap = {
     },
 
     doFilter: function() {
-        var filterText = $('#dashboard-filter-text').val().toLowerCase().trim();
+        var filterText = $.trim($('#dashboard-filter-text').val().toLowerCase());
         var foundExercises = false;
 
         // Temporarily remove the exercise list container div for better performance
