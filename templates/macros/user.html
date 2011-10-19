@@ -48,6 +48,6 @@
 
 {% macro simple_student_info(user_data_student) -%}
 <div id="simple-student-info">
-    <nobr><span class="member-for">Member for: {{ user_data_student.seconds_since_joined|seconds_to_time_string(show_hours=False) }}</span></nobr>
+    <nobr><span class="member-for">Member for: {{ user_data_student.seconds_since_joined|seconds_to_time_string() }}</span></nobr>
 </div>
 {%- endmacro %}
