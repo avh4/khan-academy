@@ -22,6 +22,7 @@ def getSmartHistoryContent():
         smart_history = re.search(re.compile("<body>(.*)</body>", re.S), smart_history).group(1).decode("utf-8")  
         smart_history.replace("script", "")
     except Exception, e:
+        logging.exception("Failed fetching smarthistory playlist")
         smart_history = None 
         pass
     return smart_history
@@ -31,7 +32,7 @@ def getSmartHistoryContent():
         )
 def library_content_html(bust_cache = False):
     # No cache found -- regenerate HTML
-    smart_history=getSmartHistoryContent()
+    smart_history = getSmartHistoryContent()
  
     all_playlists = []
 
