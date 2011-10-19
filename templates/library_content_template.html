@@ -21,7 +21,7 @@
                     {{ templatetags.column_major_sorted_videos(playlist_data.videos) }}
 
 
-                    {% if playlist_data.title == "Arithmetic" %}
+                    {% if playlist_data.title == "Arithmetic" and smart_history %}
                     <div class="clear desktop-only">
                     {% if playlist_data.next %}
                         <a name="smarthistory" id="smarthistory">&nbsp;</a>

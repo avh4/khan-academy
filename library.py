@@ -13,23 +13,26 @@ import util
 import urllib2
 import re
 
+@layer_cache.cache(layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore, expiration=86400)
+def getSmartHistoryContent():
+    request = urllib2.Request("http://smarthistory.org/khan-home.html")
+    try:
+        response = urllib2.urlopen(request)
+        smart_history = response.read()  
+        smart_history = re.search(re.compile("<body>(.*)</body>", re.S), smart_history).group(1).decode("utf-8")  
+        smart_history.replace("script", "")
+    except Exception, e:
+        smart_history = None 
+        pass
+    return smart_history
+
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         )
 def library_content_html(bust_cache = False):
     # No cache found -- regenerate HTML
-    request = urllib2.Request("http://smarthistory.org/khan-home.html")
-    try:
-        response = urllib2.urlopen(request)
-        smart_history = response.read()     
-    except Exception, e:
-        print e
-        return
-        smart_history = None 
-    
-    smart_history = re.search(re.compile("<body>(.*)</body>", re.S), smart_history).group(1).decode("utf-8")
-    #print smart_history.encode("utf-8")
-
+    smart_history=getSmartHistoryContent()
+ 
     all_playlists = []
 
     dict_videos = {}
