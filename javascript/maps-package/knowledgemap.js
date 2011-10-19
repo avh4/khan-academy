@@ -8,6 +8,11 @@ var KnowledgeMap = {
     widthPoints: 200,
     heightPoints: 120,
     selectedNodes: {},
+
+    filteredNodes: {},
+    updateFilterTimeout: null,
+
+    allExercisesVisibleBeforeFiltering: false,
     colors: {
         blue: "#0080C9",
         green: "#8EBE4F",
@@ -36,6 +41,7 @@ var KnowledgeMap = {
     latLngBounds: null,
     reZoom: /nodeLabelZoom(\d)+/g,
     reHidden: /nodeLabelHidden/g,
+    reFiltered: /nodeLabelFiltered/g,
     fFirstDraw: true,
     fCenterChanged: false,
     fZoomChanged: false,
@@ -90,6 +96,11 @@ var KnowledgeMap = {
         google.maps.event.addListener(this.map, "click", function(){KnowledgeMap.onClick();});
 
         this.giveNasaCredit();
+    },
+
+    panToNode: function(dataID) {
+        var node = this.dictNodes[dataID];
+        this.map.panTo(node.latLng);
     },
 
     escapeSelector: function(s) {
@@ -272,7 +283,7 @@ var KnowledgeMap = {
         var marker = new com.redfin.FastMarker(
                 "marker-" + node.id, 
                 node.latLng, 
-                ["<div id='node-" + node.id + "' data-id='" + node.id + "' class='" + this.getLabelClass(labelClass, node, zoom) + "'><img src='" + iconOptions.url +"'/><div>" + node.name + "</div></div>"], 
+                ["<div id='node-" + node.id + "' data-id='" + node.id + "' class='" + this.getLabelClass(labelClass, node, zoom, false) + "'><img src='" + iconOptions.url +"'/><div>" + node.name + "</div></div>"], 
                 "", 
                 node.summative ? 2 : 1,
                 0,0);
@@ -304,7 +315,7 @@ var KnowledgeMap = {
         return this.iconCache[iconUrlCacheKey];
     },
 
-    getLabelClass: function(classOrig, node, zoom) {
+    getLabelClass: function(classOrig, node, zoom, filtered) {
 
         var visible = !node.summative || zoom == this.options.minZoom;
         classOrig = classOrig.replace(this.reHidden, "") + (visible ? "" : " nodeLabelHidden");
@@ -312,6 +323,8 @@ var KnowledgeMap = {
         if (node.summative && visible) zoom = this.options.maxZoom - 1;
 
         classOrig = classOrig.replace(this.reZoom, "") + (" nodeLabelZoom" + zoom);
+
+        classOrig = classOrig.replace(this.reFiltered, "") + (filtered ? " nodeLabelFiltered" : "");
 
         return classOrig;
     },
@@ -453,6 +466,8 @@ var KnowledgeMap = {
 
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, true);
+
+        $(this).find('.exercise-show').show();
     },
 
     onBadgeMouseout: function() {
@@ -462,6 +477,18 @@ var KnowledgeMap = {
 
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, false);
+
+        $(this).find('.exercise-show').hide();
+    },
+
+    onShowExerciseClick: function(evt) {
+        var exid = $(this).attr("data-id");
+        KnowledgeMap.panToNode(exid);
+
+        var node = KnowledgeMap.dictNodes[exid];
+        if (node) KnowledgeMap.highlightNode(node, true);
+
+        evt.stopPropagation();
     },
 
     onZoomChange: function(jrgNodes) {
@@ -476,10 +503,11 @@ var KnowledgeMap = {
         jrgNodes.each(function() {
             var jel = $(this);
             var node = KnowledgeMap.dictNodes[jel.attr("data-id")];
+            var filtered = !!KnowledgeMap.filteredNodes[jel.attr("data-id")];
 
             var iconOptions = KnowledgeMap.getIconOptions(node, zoom);
             $("img", jel).attr("src", iconOptions.url);
-            jel.attr("class", KnowledgeMap.getLabelClass(jel.attr("class"), node, zoom));
+            jel.attr("class", KnowledgeMap.getLabelClass(jel.attr("class"), node, zoom, filtered));
         });
 
         for (var key in this.dictEdges)
@@ -567,5 +595,116 @@ var KnowledgeMap = {
         }
 
         return urlfunc({x:x,y:y}, zoom);
+    },
+
+    // Filtering
+
+    initFilter: function() {
+        // Do DOM traversal once at the beginning. Makes filtering reasonably fast
+        KnowledgeMap.badgeElements = [];
+        $('.exercise-badge').each(function(index, element) {
+            KnowledgeMap.badgeElements[index] = {
+                badgeElement: $(element),
+                countElement: $(element).parents('.exercise-sublist').find('.exercise-filter-count'),
+                titleString: $(element).find('.exercise-title').text().toLowerCase(),
+                dataID: $(element).attr('data-id'),
+            };
+        });
+        KnowledgeMap.filterCountElements = $('.exercise-filter-count');
+
+        $('#dashboard-filter-text').keyup(function() {
+            if (KnowledgeMap.updateFilterTimeout == null) {
+                KnowledgeMap.updateFilterTimeout = setTimeout(function() {
+                    KnowledgeMap.doFilter();
+                    KnowledgeMap.updateFilterTimeout = null;
+                }, 250);
+            }
+        });
+        $('#dashboard-filter-clear').click(function() {
+            KnowledgeMap.clearFilter();
+        });
+        $('#dashboard-filter-text').val('');
+    },
+
+    clearFilter: function() {
+        $('#dashboard-filter-text').val('');
+        this.doFilter();
+    },
+
+    doFilter: function() {
+        var filterText = $.trim($('#dashboard-filter-text').val().toLowerCase());
+        var foundExercises = false;
+
+        // Temporarily remove the exercise list container div for better performance
+        var container = $('#exercise-list').detach();
+
+        // Reset counts
+        KnowledgeMap.filterCountElements.each(function(index, element) {
+            $(element).data('exercises', {'exercise_count': 0, 'exercise_total': 0});
+        });
+
+        $.each(KnowledgeMap.badgeElements, function(index, badge) {
+
+            // Perform substring matching
+            if (badge.titleString.indexOf(filterText) >= 0) {
+                badge.badgeElement.show();
+                KnowledgeMap.filteredNodes[badge.dataID] = false;
+
+                if (badge.countElement.length == 1)
+                    badge.countElement.data('exercises').exercise_count++;
+            } else {
+                badge.badgeElement.hide();
+                KnowledgeMap.filteredNodes[badge.dataID] = true;
+            }
+
+            if (badge.countElement.length == 1)
+                badge.countElement.data('exercises').exercise_total++;
+        });
+        
+        // Update count div texts
+        KnowledgeMap.filterCountElements.each(function(index, element) {
+            var counts = $(element).data('exercises');
+            var sublistElement = $(element).parents('.exercise-sublist');
+
+            if (counts.exercise_count == 0) {
+                sublistElement.hide();
+            } else {
+                sublistElement.show();
+
+                foundExercises = true;
+
+                if (counts.exercise_count < counts.exercise_total)
+                    $(element).html('(Showing ' + counts.exercise_count + ' of ' + counts.exercise_total + ')');
+                else
+                    $(element).html('');
+            }
+        });
+
+        // Re-insert the container div
+        container.insertAfter("#dashboard-filter");
+
+        if (foundExercises) {
+            $('#exercise-no-results').hide();
+        } else {
+            $('#exercise-no-results').show();
+        }
+
+        if (filterText) {
+            this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
+            if (!Drawer.areExercisesVisible()) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('#exercise-all-exercises').hide();
+            $('#dashboard-filter-clear').show();
+        } else {
+            if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('#exercise-all-exercises').show();
+            $('#dashboard-filter-clear').hide();
+        }
+
+        var jrgNodes = $(".nodeLabel");
+        KnowledgeMap.onZoomChange(jrgNodes);
     }
 };
