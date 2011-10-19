@@ -10,9 +10,9 @@ from app import App
 def timesince_ago(content):
     if not content:
         return ""
-    return append_ago(seconds_to_time_string(util.seconds_since(content), True, False))
+    return append_ago(seconds_to_time_string(util.seconds_since(content)))
 
-def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
+def seconds_to_time_string(seconds_init, short_display = True):
 
     seconds = seconds_init
 
@@ -37,12 +37,12 @@ def seconds_to_time_string(seconds_init, short_display = True, show_hours = True
         return "%d month%s" % (months, pluralize(months))
     elif weeks:
         return "%d week%s" % (weeks, pluralize(weeks))
-    elif days and hours and show_hours:
+    elif days and hours and not short_display:
         return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
         return "%d day%s" % (days, pluralize(days))
     elif hours:
-        if not short_display and minutes:
+        if minutes and not short_display:
             return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
         else:
             return "%d hour%s" % (hours, pluralize(hours))
