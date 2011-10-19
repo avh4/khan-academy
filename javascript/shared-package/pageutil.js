@@ -547,6 +547,8 @@ var Drawer = {
                 $(".exercise-show").click(KnowledgeMap.onShowExerciseClick);
             }
         }
+
+        $('#dashboard-filter-text input[type=text]').placeholder();
     },
 
     toggleAllExercises: function(saveSetting) {

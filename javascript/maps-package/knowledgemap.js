@@ -617,7 +617,7 @@ var KnowledgeMap = {
                 KnowledgeMap.updateFilterTimeout = setTimeout(function() {
                     KnowledgeMap.doFilter();
                     KnowledgeMap.updateFilterTimeout = null;
-                }, 500);
+                }, 250);
             }
         });
         $('#dashboard-filter-clear').click(function() {
@@ -642,8 +642,7 @@ var KnowledgeMap = {
             $(element).data('exercises', {'exercise_count': 0, 'exercise_total': 0});
         });
 
-        for (var badgeIdx = 0; badgeIdx < KnowledgeMap.badgeElements.length; badgeIdx++) {
-            var badge = KnowledgeMap.badgeElements[badgeIdx];
+        $.each(KnowledgeMap.badgeElements, function(index, badge) {
 
             // Perform substring matching
             if (badge.titleString.indexOf(filterText) >= 0) {
@@ -659,7 +658,7 @@ var KnowledgeMap = {
 
             if (badge.countElement.length == 1)
                 badge.countElement.data('exercises').exercise_total++;
-        }
+        });
         
         // Update count div texts
         KnowledgeMap.filterCountElements.each(function(index, element) {
@@ -696,7 +695,7 @@ var KnowledgeMap = {
             }
             $('#exercise-all-exercises').hide();
             $('#dashboard-filter-clear').show();
-        } else if (filterText == '') {
+        } else {
             if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
                 Drawer.toggleAllExercises(false);
             }
