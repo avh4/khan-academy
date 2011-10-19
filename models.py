@@ -309,7 +309,7 @@ class UserExercise(db.Model):
 
     # A bound function object to normalize the progress bar display from a probability
     _normalize_progress = InvFnExponentialNormalizer(
-        AccuracyModel(keep_all_state=True),
+        AccuracyModel(),
         consts.PROFICIENCY_ACCURACY_THRESHOLD
     ).normalize
 
@@ -390,7 +390,7 @@ class UserExercise(db.Model):
         if self.total_correct == 0:
             return 0.0
 
-        prediction = self.accuracy_model().predict(self)
+        prediction = self.accuracy_model().predict()
         normalized_prediction = UserExercise._normalize_progress(prediction)
 
         if self.summative:
@@ -401,9 +401,8 @@ class UserExercise(db.Model):
 
             if normalized_prediction >= 1.0:
                 # The user just crossed a challenge barrier. Reset their
-                # accuracy model to one that keeps all state, because we want
-                # to start fresh and don't want total_done, etc. to carry over.
-                self._accuracy_model = AccuracyModel(keep_all_state=True)
+                # accuracy model to start fresh.
+                self._accuracy_model = AccuracyModel()
 
             return float(milestones_completed + normalized_prediction) / self.num_milestones
 
