@@ -206,6 +206,10 @@ def main():
 
     options, args = parser.parse_args()
 
+    if(options.clean):
+        root = os.getcwd()
+        
+
     includes_local_changes = hg_st()
     if not options.force and includes_local_changes:
         print "Local changes found in this directory, canceling deploy."
