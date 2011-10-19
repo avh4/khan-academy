@@ -632,9 +632,10 @@ var KnowledgeMap = {
     },
 
     doFilter: function() {
-        var filterText = $('#dashboard-filter-text').val().toLowerCase().trim();
+        var filterText = $.trim($('#dashboard-filter-text').val().toLowerCase());
         var foundExercises = false;
 
+        // Temporarily remove the exercise list container div for better performance
         var container = $('#exercise-list').detach();
 
         // Reset counts
@@ -679,14 +680,14 @@ var KnowledgeMap = {
             }
         });
 
+        // Re-insert the container div
+        container.insertAfter("#dashboard-filter");
+
         if (foundExercises) {
             $('#exercise-no-results').hide();
         } else {
             $('#exercise-no-results').show();
         }
-
-        var jrgNodes = $(".nodeLabel");
-        KnowledgeMap.onZoomChange(jrgNodes);
 
         if (filterText) {
             this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
@@ -703,6 +704,7 @@ var KnowledgeMap = {
             $('#dashboard-filter-clear').hide();
         }
 
-        container.insertAfter("#dashboard-filter");
+        var jrgNodes = $(".nodeLabel");
+        KnowledgeMap.onZoomChange(jrgNodes);
     }
 };
