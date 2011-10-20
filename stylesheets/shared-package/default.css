@@ -231,6 +231,22 @@ input.simple-button {
     box-shadow: 0 1px 3px #ccc;
 }
 
+.ui-corner-right.strict {
+    -moz-border-radius-bottomleft: 0;
+    -moz-border-radius-topleft: 0;
+    -webkit-border-bottom-left-radius: 0;
+    -webkit-border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    
+    -moz-border-radius-bottomright: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
 /* default silver button gradient */
 .action-gradient {
     background: #eee;
@@ -1412,13 +1428,29 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
     }
     #container #dashboard-filter {
-        overflow: auto;
+        overflow: hidden;
         padding: 0px 0px 10px 0px;
     }
     #container #dashboard-filter-text {
         background-image: none;
         margin-right: 6px;
-        padding-left: 5px;
+        padding: 0 55px 0 5px;
+        width: 260px;
+        border-color: #ccc;
+        outline: none;
+    }
+    #container #dashboard-filter-text:focus {
+        -webkit-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+        -moz-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+        box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+    }
+    #dashboard-filter-clear {
+        position: absolute;
+        top: 10px;
+        right: 23px;
+        height: 26px;
+        padding-top: 4px;
+        z-index: 100;
     }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
