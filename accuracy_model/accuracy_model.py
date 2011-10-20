@@ -21,7 +21,7 @@ MAX_HISTORY_KEPT = 20
 MAX_HISTORY_BIT_MASK = (1 << MAX_HISTORY_KEPT) - 1
 
 def bit_count(num):
-    # TODO(david): This uses Kernignhan's method, which would not be very quick
+    # TODO(david): This uses Kerninghan's method, which would not be very quick
     #     for dense 1s. Use numpy or some library.
     count = 0
     while num:
@@ -57,10 +57,10 @@ class AccuracyModel(object):
         if self.version != AccuracyModel.CURRENT_VERSION:
             self.update_to_new_version()
 
-        if isinstance(correct, list) or isinstance(correct, types.GeneratorType):
+        if hasattr(correct, '__iter__'):
             # TODO(david): This can definitely be made more efficient.
             for answer in correct:
-                self.update(answer)
+                self.update(answer or answer == '1')
         else:
             self.total_done = min(self.total_done + 1, MAX_HISTORY_KEPT)
             self.answer_history = ((self.answer_history << 1) | correct) & MAX_HISTORY_BIT_MASK
