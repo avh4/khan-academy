@@ -1433,11 +1433,11 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     }
     #container #dashboard-filter-text {
         background-image: none;
-        margin-right: 6px;
+        border-color: #ccc;
+        height: 24px\9;
+        outline: none;
         padding: 0 55px 0 5px;
         width: 260px;
-        border-color: #ccc;
-        outline: none;
     }
     #container #dashboard-filter-text:focus {
         -webkit-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
@@ -1445,11 +1445,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
     }
     #dashboard-filter-clear {
-        position: absolute;
-        top: 10px;
-        right: 23px;
         height: 26px;
         padding-top: 4px;
+        
+        position: absolute;
+        top: 10px;
+        top: 12px\9;
+        right: 23px;
         z-index: 100;
     }
     #container #dashboard-drawer-inner {
