@@ -100,6 +100,14 @@ var KnowledgeMap = {
 
     panToNode: function(dataID) {
         var node = this.dictNodes[dataID];
+
+        // Set appropriate zoom level if necessary
+        if (node.summative && this.map.getZoom() > this.options.minZoom)
+            this.map.setZoom(this.options.minZoom);
+        else if (!node.summative && this.map.getZoom() == this.options.minZoom)
+            this.map.setZoom(this.options.minZoom+1);
+
+        // Move the node to the center of the view
         this.map.panTo(node.latLng);
     },
 
