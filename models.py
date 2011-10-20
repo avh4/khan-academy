@@ -159,6 +159,9 @@ class Exercise(db.Model):
     def required_streak(self):
         return consts.REQUIRED_STREAK * self.num_milestones
 
+    def min_problems_imposed(self):
+        return consts.MIN_PROBLEMS_IMPOSED
+
     @staticmethod
     def to_short_name(name):
         exercise = Exercise.get_by_name(name)
@@ -306,6 +309,8 @@ class UserExercise(db.Model):
 
     _serialize_blacklist = ["review_interval_secs", "_progress", "_accuracy_model"]
 
+    _MIN_PROBLEMS_FROM_ACCURACY_MODEL = AccuracyModel.min_streak_till_threshold(consts.PROFICIENCY_ACCURACY_THRESHOLD)
+
     # A bound function object to normalize the progress bar display from a probability
     _normalize_progress = InvFnExponentialNormalizer(
         AccuracyModel(),
@@ -351,6 +356,12 @@ class UserExercise(db.Model):
     def num_milestones(self):
         return self.exercise_model.num_milestones
 
+    def min_problems_imposed(self):
+        return self.exercise_model.min_problems_imposed()
+
+    def min_problems_required(self):
+        return max(self.min_problems_imposed(), UserExercise._MIN_PROBLEMS_FROM_ACCURACY_MODEL)
+
     # Faciliate transition for old objects that did not have _accuracy_model property
     def accuracy_model(self):
         if self._accuracy_model is None:
@@ -391,6 +402,11 @@ class UserExercise(db.Model):
 
         prediction = self.accuracy_model().predict()
         normalized_prediction = UserExercise._normalize_progress(prediction)
+
+        # Impose a minimum number of problems required to be done
+        if self.total_done < self.min_problems_imposed():
+            normalized_prediction = min(normalized_prediction,
+                float(self.total_correct) / self.min_problems_required())
 
         if self.summative:
             if self._progress is None:

@@ -1,3 +1,5 @@
+# Minimum number of problems that a user must do before they are even judged for proficiency
+MIN_PROBLEMS_IMPOSED = 6
 
 # Number of problems required to complete a streak in a normal exercise
 REQUIRED_STREAK = 10
