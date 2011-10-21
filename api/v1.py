@@ -22,6 +22,8 @@ from api.auth.decorators import oauth_required, oauth_optional, admin_required, 
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
+import simplejson
+
 # add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
 # case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
 # response so that we can visibly award badges while the page silently posts log info in the background.
@@ -157,6 +159,22 @@ def playlists_library_list_fresh():
 @jsonify
 def exercises():
     return models.Exercise.get_all_use_cache()
+
+@route("/api/v1/exercises/info", methods=["GET"])
+@jsonp
+@jsonify
+def exercise_info():
+    exercises = request.request_string("ids", default="[]")
+    exercises = simplejson.loads(exercises)
+    if(exercises):
+        if type(exercises) == unicode or type(exercises) == str:
+            exerciselist = [exercises]
+        else:
+            exerciselist = exercises
+        return [models.Exercise.get_by_name(exercise_name) for exercise_name in exerciselist]
+    return []
+
+
 
 @route("/api/v1/exercises/<exercise_name>", methods=["GET"])
 @jsonp
