@@ -4,7 +4,7 @@ import math
 import operator
 import types
 
-from parameters import log_reg_full_history_tail1m as params
+from parameters import log_reg_past_20_tail1m as params
 
 # TODO(david): Find out what this actually is
 PROBABILITY_FIRST_PROBLEM_CORRECT = 0.8

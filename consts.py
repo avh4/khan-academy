@@ -1,11 +1,11 @@
 # Minimum number of problems that a user must do before they are even judged for proficiency
-MIN_PROBLEMS_IMPOSED = 6
+MIN_PROBLEMS_IMPOSED = 5
 
 # Number of problems required to complete a streak in a normal exercise
 REQUIRED_STREAK = 10
 
 # Minimum accuracy (probabilty of getting next problem correct) required to be considered proficient
-PROFICIENCY_ACCURACY_THRESHOLD = 0.95
+PROFICIENCY_ACCURACY_THRESHOLD = 0.94
 
 # Number of problems required to reach a barrier/milestone in a challenge exercise
 CHALLENGE_STREAK_BARRIER = 10
