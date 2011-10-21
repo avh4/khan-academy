@@ -40,7 +40,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
        
         #redirect file back to smarthistory.org if the file is an audio/video and hence might be too big to store in blobstore
         extension = self.request.path[self.request.path.rfind(".") + 1:]
-        if extension in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v"):
+        if extension in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v", "swf"):
             logging.info("multimedia: sending redirect request back to Smarthistory for %s" % self.request.path)
             self.redirect( SMARTHISTORY_URL + str(self.request.path), True )
             return                  
