@@ -80,6 +80,7 @@ javascript = {
             "utils/graphie-geometry.js",
             "utils/graphie-helpers-arithmetic.js",
             "utils/graphie-helpers.js",
+            "utils/graphie-polygon.js",
             "utils/graphie.js",
             "utils/interactive.js",
             "utils/jquery-color.js",

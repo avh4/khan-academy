@@ -203,7 +203,7 @@ class KeyValueCache(db.Model):
         namespaced_key = KeyValueCache.get_namespaced_key(key, namespace)
         key_value = KeyValueCache.get_by_key_name(namespaced_key)
 
-        if key_value and not key_value.is_expired():
+        if key_value: # Temporarily disable cache expiration -- Ben/James -- and not key_value.is_expired():
             return pickle.loads(key_value.value)
 
         return None

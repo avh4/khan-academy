@@ -231,6 +231,22 @@ input.simple-button {
     box-shadow: 0 1px 3px #ccc;
 }
 
+.ui-corner-right.strict {
+    -moz-border-radius-bottomleft: 0;
+    -moz-border-radius-topleft: 0;
+    -webkit-border-bottom-left-radius: 0;
+    -webkit-border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    
+    -moz-border-radius-bottomright: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
 /* default silver button gradient */
 .action-gradient {
     background: #eee;
@@ -894,7 +910,8 @@ footer {
     display: block;
     padding: 0;
 }
-    .light #top-header #page_search #search-input {
+    .light #top-header #page_search #search-input,
+    #container #dashboard-filter-text {
         background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -5px -867px;
         background-color: #fafafa;
@@ -1334,6 +1351,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         right: 5px;
         top: 40px;
         z-index: 1;
+        /* Fallback for web browsers that doesn't support RGBa */
+        background: rgb(0, 0, 0) transparent;
+        /* RGBa with 0.75 opacity */
+        background: rgba(0, 0, 0, 0.75);
+        padding: 3px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
     }
     .exercise-legend {
         font-size: 12px;
@@ -1382,6 +1406,17 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             background-color: #c7e5f7;
         }
 
+    .exercise-show {
+        position: absolute;
+        padding: 5px 5px;
+        left: 282px;
+        top: 5px;
+        line-height: 1px;
+    }
+    .exercise-show:hover {
+        top: 6px;
+    }
+
     #container #dashboard-drawer {
         position: absolute;
         background: #fff;
@@ -1391,6 +1426,33 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+    }
+    #container #dashboard-filter {
+        overflow: hidden;
+        padding: 0px 0px 10px 0px;
+    }
+    #container #dashboard-filter-text {
+        background-image: none;
+        border-color: #ccc;
+        height: 24px\9;
+        outline: none;
+        padding: 0 55px 0 5px;
+        width: 260px;
+    }
+    #container #dashboard-filter-text:focus {
+        -webkit-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+        -moz-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+        box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+    }
+    #dashboard-filter-clear {
+        height: 26px;
+        padding-top: 4px;
+        
+        position: absolute;
+        top: 10px;
+        top: 12px\9;
+        right: 23px;
+        z-index: 100;
     }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
@@ -1468,6 +1530,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin-right: 350px;
     }
 
+.exercise-filter-count,#exercise-all-exercises {
+    font-size: 11px;
+    color: #444;
+}
 .exercise-badge {
     background: #f3f3f3;
     margin-bottom: 5px;
@@ -2925,10 +2991,18 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     font-size: 12px;
     width: 80px;
     border: 1px solid transparent;
+    /* Fallback for web browsers that doesn't support RGBa */
+    background: rgb(0, 0, 0) transparent;
+    /* RGBa with 0.5 opacity */
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .nodeLabelHidden {
     display: none;
+}
+.nodeLabelFiltered {
+    opacity: 0.3;
+    filter:alpha(opacity=30);
 }
 .nodeLabelProficient div {
 }
