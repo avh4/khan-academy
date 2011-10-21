@@ -20,7 +20,7 @@ from datetime import datetime
 
 SMARTHISTORY_CACHE_EXPIRATION_TIME=86400
 SMARTHISTORY_IMAGE_CACHE_EXPIRATION=2419200 #28 days
-SMARTHISTORY_URL = "http://test.smarthistory.org"
+SMARTHISTORY_URL = "http://khan.smarthistory.org"
 
 def deleteOldBlobs():
     blobs=BlobInfo.all().fetch(500)
@@ -39,30 +39,30 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
             self.clearCache()
        
         #redirect file back to smarthistory.org if the file is an audio/video and hence might be too big to store in blobstore
-        extension = self.request.path[self.request.path.rfind(".")+1:]
+        extension = self.request.path[self.request.path.rfind(".") + 1:]
         if extension in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v"):
-            logging.info("sending redirect request back to Smarthistory for %s" % self.request.path)
-            self.response.headers["Location"] = SMARTHISTORY_URL + str(self.request.path)
-            self.response.set_status(301)
-            return
+            logging.info("multimedia: sending redirect request back to Smarthistory for %s" % self.request.path)
+            self.redirect( SMARTHISTORY_URL + str(self.request.path), True )
+            return                  
  
         data, response_headers, blob_key=self.load_resource()
 
         if response_headers.has_key("Location"):
             logging.info("sending redirect request back to Smarthistory for %s" % self.request.path)
-            self.response.headers["Location"] = response_headers["Location"]
-            self.response.set_status(301)
+            self.redirect( response_headers["Location"], True )
             return
         
         #might need to convert all dictionary keys to lower case
         #check to see if we need to return 304 - might need to add handling of If-Modified-Since, in case If-None-Match is not sent 
-        if self.request.headers.has_key("If-None-Match") and response_headers.has_key("etag") and self.request.headers["If-None-Match"]==response_headers["etag"]:
+        if self.request.headers.has_key("If-None-Match") and response_headers.has_key("etag") and self.request.headers["If-None-Match"] == response_headers["etag"]:
             logging.info("sending 304 from within the application");
             
-            if response_headers.get("content-type").find("image") != -1:
-                self.response.headers["Cache-Control"]="public, max-age="+str(SMARTHISTORY_IMAGE_CACHE_EXPIRATION)+";"
+            content_type = response_headers.get("content-type")[:response_headers.get("content-type").find("/")]
+            
+            if content_type in ("image", "audio", "video"):
+                self.response.headers["Cache-Control"] = "public, max-age=" + str(SMARTHISTORY_IMAGE_CACHE_EXPIRATION) + ";"
             else:
-                self.response.headers["Cache-Control"]="public, max-age="+str(SMARTHISTORY_CACHE_EXPIRATION_TIME)+";"
+                self.response.headers["Cache-Control"] = "public, max-age=" + str(SMARTHISTORY_CACHE_EXPIRATION_TIME) + ";"
             
             self.response.set_status(304)
             return
@@ -136,17 +136,17 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
             response_headers["Location"] = SMARTHISTORY_URL + str(self.request.path)
             return ["", response_headers, None]    
 
-        contentType = response.headers.get("content-type")[:response.headers.get("content-type").find("/")]
+        content_type = response.headers.get("content-type")[:response.headers.get("content-type").find("/")]
 
         #check to see if it is an image, audio, or video, if so store it in blobstore, set the appropriate headers and remove data from the output
-        if(contentType in ("image", "audio", "video")):
+        if content_type in ("image", "audio", "video"):
 
             # Create the file
             file_name = files.blobstore.create(mime_type=response.headers.get("content-type"),_blobinfo_uploaded_filename = SMARTHISTORY_URL+path)
   
-            #writing too large a chunk to the blobstore at a single time throws an error, so it should be done in pieces 
-            pos=0
-            chunkSize=65536
+            # Writing too large a chunk to the blobstore at a single time throws an error, so it should be done in pieces 
+            pos = 0
+            chunkSize = 65536
             with files.open(file_name, 'a') as f:
                 while pos < len(data):
                     chunk = data[pos:pos+chunkSize]
