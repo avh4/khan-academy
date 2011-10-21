@@ -50,7 +50,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
 
         if response_headers.has_key("Location"):
             logging.info("sending redirect request back to Smarthistory for %s" % self.request.path)
-            self.response.headers["Location"]=response_headers["Location"]
+            self.response.headers["Location"] = response_headers["Location"]
             self.response.set_status(301)
             return
         
@@ -118,7 +118,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         except Exception, e:
             self.attempt_counter += 1
 
-            if e.code == 404:
+            if e.hasattr("code") and e.code == 404:
                 raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
             
             if self.attempt_counter < 3:
@@ -126,16 +126,13 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
                 return self.load_resource()
             else:
                 raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
-       
-        logging.info("content-length returned is "+response.headers.get("Content-Length"))  
-        
+               
         #load the response headers into a dictionary as layer_cache was throwing an error caching an object of class mimetools.Message   
         response_headers = dict( (h, response.headers[h]) for h in response.headers if h not in ["Content-Length", "Host"])
 
         #if the file response got cut off because it was too big - should not happen too often as movies and mp3s redirect before hand
         if len(data) >= 33554432:
             logging.info("got too large a file back, sending redirect headers")
-            
             response_headers["Location"] = SMARTHISTORY_URL + str(self.request.path)
             return ["", response_headers, None]    
 
@@ -143,8 +140,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
 
         #check to see if it is an image, audio, or video, if so store it in blobstore, set the appropriate headers and remove data from the output
         if(contentType in ("image", "audio", "video")):
-            logging.info("size of data is "+str(len(data)))         
- 
+
             # Create the file
             file_name = files.blobstore.create(mime_type=response.headers.get("content-type"),_blobinfo_uploaded_filename = SMARTHISTORY_URL+path)
   
