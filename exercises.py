@@ -378,15 +378,6 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
             user_exercise.total_done += 1
 
-            # Score a conversion in GAE/Bingo if appropriate
-            total_done = user_exercise.total_done
-
-            def add_to_conversions(conversions_dict):
-                if conversions_dict.has_key(total_done):
-                    bingo(conversions_dict[total_done])
-
-            add_to_conversions(models.UserData.any_exercise_conversions)
-
             if problem_log.correct:
 
                 proficient = user_data.is_proficient_at(user_exercise.exercise)

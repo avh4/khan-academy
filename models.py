@@ -281,9 +281,6 @@ class Exercise(db.Model):
             exercise_dict[fxn_key(exercise)] = exercise
         return exercise_dict
 
-def get_conversion_tests_dict(exid, checkpoints, prefix):
-    return dict([(c, '%s_%s_%d_problems' % (prefix, exid, c)) for c in checkpoints])
-
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -545,12 +542,12 @@ class UserExercise(db.Model):
                 util_notify.update(user_data, self, False, True)
 
                 # Score conversions for A/B test
-                bingo('prof_gained_proficiency')
+                bingo('prof_gained_proficiency_all')
 
-                if len(user_data.proficient_exercises) == 5:
-                    bingo('prof_gained_5th_proficiency')
-                elif len(user_data.proficient_exercises) == 10:
-                    bingo('prof_gained_10th_proficiency')
+                if self.exercise in UserData.conversion_test_hard_exercises:
+                    bingo('prof_gained_proficiency_hard')
+                elif self.exercise in UserData._conversion_test_easy_exercises:
+                    bingo('prof_gained_proficiency_easy')
 
         else:
             if self.exercise in user_data.proficient_exercises:
@@ -734,14 +731,14 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "user_nickname", "user_email", "seconds_since_joined",
     ]
 
-    # TODO(david): These conversion tests are not very useful or accurate for
-    #     testing the performance of a proficiency model (eg. new prof model
-    #     may require less than 10 problems to proficiency).
-    _conversion_checkpoints = [5, 10, 20, 30]
-    any_exercise_conversions = get_conversion_tests_dict('did', _conversion_checkpoints, 'prof')
-    _prof_model_conversion_tests = (['prof_gained_proficiency',
-        'prof_gained_5th_proficiency', 'prof_gained_10th_proficiency'] +
-        any_exercise_conversions.values())
+    _prof_model_conversion_tests = (['prof_gained_proficiency_all',
+      'prof_gained_proficiency_easy', 'prof_gained_proficiency_hard'])
+
+    conversion_test_hard_exercises = set(['order_of_operations', 'graphing_points',
+        'probability_1', 'domain_of_a_function', 'division_4',
+        'ratio_word_problems', 'writing_expressions_1', 'ordering_numbers',
+        'geometry_1', 'converting_mixed_numbers_and_improper_fractions'])
+    conversion_test_easy_exercises = set(['counting_1', 'significant_figures_1', 'addition_1'])
 
     @property
     @request_cache.cache()
@@ -752,7 +749,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @property
     @request_cache.cache()
     def proficiency_model(self):
-        return ab_test("Proficiency Model", ["accuracy", "streak"],
+        return ab_test("Proficiency Model", {"accuracy": 1, "streak": 9},
             UserData._prof_model_conversion_tests)
 
     @property
