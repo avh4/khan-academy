@@ -84,6 +84,7 @@ javascript = {
             "utils/graphie.js",
             "utils/interactive.js",
             "utils/jquery-color.js",
+            "utils/jquery.mobile.vmouse.js",
             "utils/kinematics.js",
             "utils/math-format.js",
             "utils/math.js",
