@@ -10,6 +10,11 @@ import user_util
 import itertools
 from api.auth.xsrf import ensure_xsrf_cookie
 
+import gdata.youtube
+import gdata.youtube.data
+import gdata.youtube.service
+import urllib
+import csv
 
 class Email(request_handler.RequestHandler):
 
@@ -65,3 +70,74 @@ class ManageCoworkers(request_handler.RequestHandler):
         }
 
         self.render_jinja2_template("managecoworkers.html", template_values)
+        
+class CommonCore(request_handler.RequestHandler):
+    
+    @user_util.developer_only
+    def get(self):
+        
+        cc_videos = []
+        cc_file = "common_core/"
+        auth_sub_url = ""
+        
+        token = self.request_string("token")
+        
+        if token: # AuthSub token from YouTube API - load and tag videos            
+            
+            # default for yt_user is test account khanacademyschools
+            
+            yt_account = self.request_string("account") if self.request_string("account") else "khanacademyschools"
+            
+            logging.info("****Youtube Account: " + yt_account)
+            
+            cc_file += "cc_video_mapping.csv" if yt_account == "khanacademy" else "test_data.csv"
+            
+            yt_service = gdata.youtube.service.YouTubeService()
+            yt_service.SetAuthSubToken(token)
+            yt_service.UpgradeToSessionToken()
+            yt_service.developer_key = 'AI39si6eFsAasPBlI_xQLee6-Ii70lrEhGAXn_ryCSWQdMP8xW67wkawIjDYI_XieWc0FsdsH5HMPPpvenAtaEl5fCLmHX8A5w'
+            
+            f = open(cc_file, 'U')
+            reader = csv.DictReader(f, dialect='excel')
+            
+            for record in reader:
+                
+                if not record["youtube_id"] == "#N/A":
+                    
+                    entry = yt_service.GetYouTubeVideoEntry(video_id=record["youtube_id"])
+                    
+                    if entry and record["keyword"] not in entry.media.keywords.text:
+                                    
+                        keywords = entry.media.keywords.text or "" 
+                                    
+                        entry.media.keywords.text = keywords + "," + record["keyword"]
+                        video_url = "https://gdata.youtube.com/feeds/api/users/"+ yt_account + "/uploads/" + record["youtube_id"]
+                        updated_entry = yt_service.UpdateVideoEntry(entry, video_url)  
+                          
+                        logging.info("***PROCESSED*** Title: " + entry.media.title.text)
+                                
+                        if not updated_entry:
+                                logging.warning("***FAILED update*** Title: " + record["title"] + ", ID: " + record["youtube_id"])  
+                
+                        cc_videos.append(record)
+                    
+            f.close() 
+            
+        else:         
+            params = {
+                'next': self.request.url,
+                'scope': "http://gdata.youtube.com", 
+                'session': "1", 
+                'secure': "0"
+            }
+
+            base_url = "https://www.google.com/accounts/AuthSubRequest?"
+            auth_sub_url = base_url + urllib.urlencode(params)
+                 
+        template_values = {
+            "token" : token,
+            "cc_videos" : cc_videos,
+            "auth_sub_url" : auth_sub_url
+        }
+        
+        self.render_jinja2_template("commoncore.html", template_values)

@@ -25,10 +25,10 @@ from api.api_util import api_error_response
 # add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
 # case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
 # response so that we can visibly award badges while the page silently posts log info in the background.
-# 
-# If you're wondering how this happens, it's add_action_results has the side-effect of actually mutating 
+#
+# If you're wondering how this happens, it's add_action_results has the side-effect of actually mutating
 # the `obj` passed into it (but, i mean, that's what you want here)
-# 
+#
 # but you ask, what matter of client-side code actually takes care of doing that?
 # have you seen javascript/shared-package/api.js ?
 def add_action_results(obj, dict_results):
@@ -197,8 +197,7 @@ def video_download_available(video_id):
 def video_exercises(video_id):
     video = models.Video.all().filter("youtube_id =", video_id).get()
     if video:
-        exercise_videos = video.related_exercises()
-        return map(lambda exercise_video: exercise_video.exercise, exercise_videos)
+        return video.related_exercises(bust_cache=True)
     return []
 
 def fully_populated_playlists():
@@ -287,14 +286,14 @@ def filter_query_by_request_dates(query, property):
             dt_start = request.request_date_iso("dt_start")
             query.filter("%s >=" % property, dt_start)
         except ValueError:
-            raise ValueError("Invalid date format sent to dt_start, use ISO 8601.")
+            raise ValueError("Invalid date format sent to dt_start, use ISO 8601 Combined.")
 
     if request.request_string("dt_end"):
         try:
             dt_end = request.request_date_iso("dt_end")
             query.filter("%s <=" % property, dt_end)
         except ValueError:
-            raise ValueError("Invalid date format sent to dt_end, use ISO 8601.")
+            raise ValueError("Invalid date format sent to dt_end, use ISO 8601 Combined.")
 
 @route("/api/v1/user/videos", methods=["GET"])
 @oauth_required()

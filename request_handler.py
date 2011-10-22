@@ -49,7 +49,7 @@ class RequestInputHandler(object):
 
         # Try to parse date in our approved ISO 8601 format
         try:
-            return datetime.datetime.strptime(s_date, "%Y-%m-%dT%H:%M:%S")
+            return datetime.datetime.strptime(s_date, "%Y-%m-%dT%H:%M:%SZ")
         except ValueError:
             if default is not None:
                 return default

@@ -99,8 +99,8 @@ class Exercise(db.Model):
     short_display_name = db.StringProperty(default="")
     prerequisites = db.StringListProperty()
     covers = db.StringListProperty()
-    v_position = db.IntegerProperty()
-    h_position = db.IntegerProperty()
+    v_position = db.IntegerProperty() # actually horizontal position on knowledge map
+    h_position = db.IntegerProperty() # actually vertical position on knowledge map
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM) # Seconds expected to finish a problem 'quickly' for badge calculation
 
     # True if this exercise is live and visible to all users.
@@ -226,6 +226,17 @@ class Exercise(db.Model):
         for exercise_video in exercise_videos:
             exercise_video.video # Pre-cache video entity
         return exercise_videos
+
+    # followup_exercises reverse walks the prerequisites to give you
+    # the exercises that list the current exercise as its prerequisite.
+    # i.e. follow this exercise up with these other exercises
+    @property
+    @layer_cache.cache_with_key_fxn(lambda self: "followup_exercises_%s" % self.key(), layer=layer_cache.Layers.Memcache)
+    def followup_exercises(self):
+        query = Exercise.all()
+        query.filter("prerequisites = ", self.name)
+        # ~==> return [ex for ex in Exercises.all() if self.name in ex.prerequisites]
+        return [e.name for e in query.fetch(200)]
 
     @classmethod
     def all(cls, live_only = False):
@@ -1128,12 +1139,9 @@ class Video(Searchable, db.Model):
 
 
     def first_playlist(self):
-        query = VideoPlaylist.all()
-        query.filter('video =', self)
-        query.filter('live_association =', True)
-        video_playlist = query.get()
-        if video_playlist:
-            return video_playlist.playlist
+        playlists = VideoPlaylist.get_cached_playlists_for_video(self)
+        if playlists:
+            return playlists[0]
         return None
 
     def current_user_points(self):
@@ -1150,18 +1158,17 @@ class Video(Searchable, db.Model):
             video_dict[fxn_key(video)] = video
         return video_dict
 
+    @layer_cache.cache_with_key_fxn(
+        lambda self: "related_exercises_%s" % self.key(),
+        layer=layer_cache.Layers.Memcache,
+        expiration=3600 * 2)
     def related_exercises(self):
-        exercise_videos = None
-        query = ExerciseVideo.all()
-        query.filter('video =', self.key())
-        return query
-
-    @layer_cache.cache_with_key_fxn(lambda self: "related_exercise_%s" % self.key(), layer=layer_cache.Layers.Memcache)
-    def get_related_exercise(self):
-        exercise_video = self.related_exercises().get()
-        if exercise_video:
-            exercise_video.exercise # Pre-cache exercise entity
-        return exercise_video or ExerciseVideo()
+        exvids = ExerciseVideo.all()
+        exvids.filter('video =', self.key())
+        exercises = [ev.exercise for ev in exvids]
+        exercises.sort(key=lambda e: e.h_position)
+        exercises.sort(key=lambda e: e.v_position)
+        return exercises
 
     @staticmethod
     @layer_cache.cache(expiration=3600)

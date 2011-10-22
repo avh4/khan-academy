@@ -37,18 +37,32 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
     def get(self):
         if self.request.params.has_key("clearcache"):
             self.clearCache()
-        
+       
+        #redirect file back to smarthistory.org if the file is an audio/video and hence might be too big to store in blobstore
+        extension = self.request.path[self.request.path.rfind(".") + 1:]
+        if extension in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v", "swf"):
+            logging.info("multimedia: sending redirect request back to Smarthistory for %s" % self.request.path)
+            self.redirect( SMARTHISTORY_URL + str(self.request.path), True )
+            return                  
+ 
         data, response_headers, blob_key=self.load_resource()
+
+        if response_headers.has_key("Location"):
+            logging.info("sending redirect request back to Smarthistory for %s" % self.request.path)
+            self.redirect( response_headers["Location"], True )
+            return
         
         #might need to convert all dictionary keys to lower case
         #check to see if we need to return 304 - might need to add handling of If-Modified-Since, in case If-None-Match is not sent 
-        if self.request.headers.has_key("If-None-Match") and response_headers.has_key("etag") and self.request.headers["If-None-Match"]==response_headers["etag"]:
+        if self.request.headers.has_key("If-None-Match") and response_headers.has_key("etag") and self.request.headers["If-None-Match"] == response_headers["etag"]:
             logging.info("sending 304 from within the application");
             
-            if response_headers.get("content-type").find("image") != -1:
-                self.response.headers["Cache-Control"]="public, max-age="+str(SMARTHISTORY_IMAGE_CACHE_EXPIRATION)+";"
+            content_type = response_headers.get("content-type")[:response_headers.get("content-type").find("/")]
+            
+            if content_type in ("image", "audio", "video"):
+                self.response.headers["Cache-Control"] = "public, max-age=" + str(SMARTHISTORY_IMAGE_CACHE_EXPIRATION) + ";"
             else:
-                self.response.headers["Cache-Control"]="public, max-age="+str(SMARTHISTORY_CACHE_EXPIRATION_TIME)+";"
+                self.response.headers["Cache-Control"] = "public, max-age=" + str(SMARTHISTORY_CACHE_EXPIRATION_TIME) + ";"
             
             self.response.set_status(304)
             return
@@ -99,26 +113,45 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         
         try:
             response = urllib2.urlopen(request)
-            data = response.read()     
+            data = response.read()             
+
         except Exception, e:
             self.attempt_counter += 1
+     
             if self.attempt_counter < 3:
-                logging.info("Attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e))
-                return self.load_resource()
+                if hasattr(e, "code") and e.code == 404:
+                    raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
+                else: 
+                    logging.info("Attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e))
+                    return self.load_resource()
             else:
-                raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + "Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
-        
+                raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
+               
         #load the response headers into a dictionary as layer_cache was throwing an error caching an object of class mimetools.Message   
         response_headers = dict( (h, response.headers[h]) for h in response.headers if h not in ["Content-Length", "Host"])
-     
-        #check to see if it is an image, if so store it in blobstore, set the appropriate headers and remove data from the output
-        if(response.headers.get("content-type").find("image") != -1):
+
+        #if the file response got cut off because it was too big - should not happen too often as movies and mp3s redirect before hand
+        if len(data) >= 33554432:
+            logging.info("got too large a file back, sending redirect headers")
+            response_headers["Location"] = SMARTHISTORY_URL + str(self.request.path)
+            return ["", response_headers, None]    
+
+        content_type = response.headers.get("content-type")[:response.headers.get("content-type").find("/")]
+
+        #check to see if it is an image, audio, or video, if so store it in blobstore, set the appropriate headers and remove data from the output
+        if content_type in ("image", "audio", "video"):
+
             # Create the file
             file_name = files.blobstore.create(mime_type=response.headers.get("content-type"),_blobinfo_uploaded_filename = SMARTHISTORY_URL+path)
-    
-            # Open the file and write to it
+  
+            # Writing too large a chunk to the blobstore at a single time throws an error, so it should be done in pieces 
+            pos = 0
+            chunkSize = 65536
             with files.open(file_name, 'a') as f:
-                f.write(data)
+                while pos < len(data):
+                    chunk = data[pos:pos+chunkSize]
+                    pos += chunkSize
+                    f.write(chunk)
     
             # Finalize the file. Do this before attempting to read it.
             files.finalize(file_name)

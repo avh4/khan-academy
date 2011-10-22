@@ -122,6 +122,9 @@ def playlist_browser_structure(structure, class_name="", level=0):
             else:
                 s += "<li class='%s'><a href='%s'>%s</a></li>" % (class_name, href, escape(name))
 
+            if playlist_title=="History":
+                s += "<li class=''><a href='#smarthistory'>Art History</a></li>"
+
         else:
             items = structure["items"]
 

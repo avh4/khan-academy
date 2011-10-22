@@ -10,7 +10,7 @@ from api import route
 from api.auth.auth_models import OAuthMap
 from api.auth.auth_util import oauth_error_response, append_url_params, requested_oauth_callback, access_token_response, custom_scheme_redirect, set_current_oauth_map_in_session
 from api.auth.google_util import google_request_token_handler
-from api.auth.facebook_util import facebook_request_token_handler
+from api.auth.facebook_utils import facebook_request_token_handler
 from api.auth.decorators import oauth_required
 
 from oauth_provider.oauth import OAuthError

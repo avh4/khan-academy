@@ -98,7 +98,7 @@ def class_progress_report_graph_context(user_data, student_list):
                                       models.UserExercise.to_progress_display(graph_dict["progress"]),
                                       graph_dict["total_done"])
 
-            exercise_data[exercise_name][student_email] = {
+            exercise_data[exercise_name][escaped_student_email] = {
                 "link": link,
                 "hover": hover,
                 "color": color

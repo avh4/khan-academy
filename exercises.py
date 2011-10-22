@@ -19,6 +19,7 @@ import user_util
 import points
 import layer_cache
 import knowledgemap
+import string
 from badges import util_badges, last_action_cache, custom_badges
 from phantom_users import util_notify
 from phantom_users.phantom_util import create_phantom
@@ -27,27 +28,23 @@ from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
 from gae_bingo.gae_bingo import bingo, ab_test
 
-class MoveMapNode(request_handler.RequestHandler):
+class MoveMapNodes(request_handler.RequestHandler):
     def post(self):
         self.get()
 
     @user_util.developer_only
     def get(self):
-        node = self.request_string('exercise')
-        direction = self.request_string('direction')
+        node_list = string.split(self.request_string('exercises'), ',')
+        delta_h = self.request_int('delta_h')
+        delta_v = self.request_int('delta_v')
 
-        exercise = models.Exercise.get_by_name(node)
+        for node_id in node_list:
+            exercise = models.Exercise.get_by_name(node_id)
 
-        if direction=="up":
-            exercise.h_position -= 1
-        elif direction=="down":
-            exercise.h_position += 1
-        elif direction=="left":
-            exercise.v_position -= 1
-        elif direction=="right":
-            exercise.v_position += 1
+            exercise.h_position += delta_h
+            exercise.v_position += delta_v
 
-        exercise.put()
+            exercise.put()
 
 class ViewExercise(request_handler.RequestHandler):
     @ensure_xsrf_cookie
@@ -554,6 +551,12 @@ class UpdateExercise(request_handler.RequestHandler):
 
         video_keys = []
         for c_check_video in range(0, 1000):
+            video_name_append = self.request_string("video-%s-readable" % c_check_video, default="")
+            if video_name_append:
+                video = models.Video.get_for_readable_id(video_name_append)
+                if not video.key() in video_keys:
+                    video_keys.append(str(video.key()))
+
             video_append = self.request_string("video-%s" % c_check_video, default="")
             if video_append and not video_append in video_keys:
                 video_keys.append(video_append)
