@@ -22,7 +22,7 @@ from api.auth.decorators import oauth_required, oauth_optional, admin_required, 
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
 
-import simplejson
+import simplejson as json
 
 # add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
 # case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
@@ -160,27 +160,18 @@ def playlists_library_list_fresh():
 def exercises():
     return models.Exercise.get_all_use_cache()
 
-@route("/api/v1/exercises/info", methods=["GET"])
-@jsonp
-@jsonify
-def exercise_info():
-    exercises = request.request_string("ids", default="[]")
-    exercises = simplejson.loads(exercises)
-    if(exercises):
-        if type(exercises) == unicode or type(exercises) == str:
-            exerciselist = [exercises]
-        else:
-            exerciselist = exercises
-        return [models.Exercise.get_by_name(exercise_name) for exercise_name in exerciselist]
-    return []
-
-
-
 @route("/api/v1/exercises/<exercise_name>", methods=["GET"])
 @jsonp
 @jsonify
 def exercises(exercise_name):
     return models.Exercise.get_by_name(exercise_name)
+
+@route("/api/v1/exercises/<exercise_name>/followup_exercises", methods=["GET"])
+@jsonp
+@jsonify
+def exercise_info(exercise_name):
+    exerciselist = models.Exercise.get_by_name(exercise_name).followup_exercises
+    return [models.Exercise.get_by_name(exercise_name) for exercise_name in exerciselist]
 
 @route("/api/v1/exercises/<exercise_name>/videos", methods=["GET"])
 @jsonp
