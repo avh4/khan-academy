@@ -56,5 +56,6 @@ def video_title_dicts():
 def playlist_title_dicts():
     return map(lambda playlist: {
         "title": playlist.title,
+        "key": str(playlist.key()),
         "url": "/#%s" % slugify(playlist.title.lower())
     }, Playlist.all())

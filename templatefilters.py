@@ -12,7 +12,7 @@ def timesince_ago(content):
         return ""
     return append_ago(seconds_to_time_string(util.seconds_since(content)))
 
-def seconds_to_time_string(seconds_init, short_display = True, show_hours = True):
+def seconds_to_time_string(seconds_init, short_display = True):
 
     seconds = seconds_init
 
@@ -22,27 +22,32 @@ def seconds_to_time_string(seconds_init, short_display = True, show_hours = True
     days = math.floor(seconds / 86400)
     seconds -= days * 86400
 
+    months = math.floor(days / 30.5)
+    weeks = math.floor(days / 7)
+
     hours = math.floor(seconds / 3600)
     seconds -= hours * 3600
 
     minutes = math.floor(seconds / 60)
     seconds -= minutes * 60
 
-    if years and days:
-        return "%d year%s and %d day%s" % (years, pluralize(years), days, pluralize(days))
-    elif years:
+    if years:
         return "%d year%s" % (years, pluralize(years))
-    elif days and hours and show_hours:
+    elif months:
+        return "%d month%s" % (months, pluralize(months))
+    elif weeks:
+        return "%d week%s" % (weeks, pluralize(weeks))
+    elif days and hours and not short_display:
         return "%d day%s and %d hour%s" % (days, pluralize(days), hours, pluralize(hours))
     elif days:
         return "%d day%s" % (days, pluralize(days))
     elif hours:
-        if not short_display and minutes:
+        if minutes and not short_display:
             return "%d hour%s and %d minute%s" % (hours, pluralize(hours), minutes, pluralize(minutes))
         else:
             return "%d hour%s" % (hours, pluralize(hours))
     else:
-        if not short_display and seconds and not minutes:
+        if seconds and not minutes:
             return "%d second%s" % (seconds, pluralize(seconds))
         return "%d minute%s" % (minutes, pluralize(minutes))
 

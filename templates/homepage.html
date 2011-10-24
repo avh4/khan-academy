@@ -164,4 +164,8 @@
     </script>
 
     {{ analytics.crazyegg_tracker(False) }}
+
+    {%- if link_heat -%}
+    <script type="text/javascript" src="/javascript/random/linkheat.js?{{App.version}}"></script>
+    {%- endif -%}
 {% endblock bottompagescript %}
