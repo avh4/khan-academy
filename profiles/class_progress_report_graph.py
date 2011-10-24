@@ -98,7 +98,7 @@ def class_progress_report_graph_context(user_data, student_list):
                                       graph_dict["streak"],
                                       graph_dict["total_done"])
 
-            exercise_data[exercise_name][student_email] = {
+            exercise_data[exercise_name][escaped_student_email] = {
                 "link": link,
                 "hover": hover,
                 "color": color
