@@ -35,6 +35,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         self.attempt_counter = 0	
 	
     def get(self):
+
         if self.request.params.has_key("clearcache"):
             self.clearCache()
        
@@ -101,10 +102,10 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
 
     #load the resource from smart history's server and then cache it in the data store
     #if it is an image then cache it in the blob store and store the blobkey in the data store 
-    @layer_cache.cache_with_key_fxn(lambda self: "smart_history_v%s_%s%s" % (Setting.smarthistory_version(),self.request.path, "?"+str(self.request.query) if self.request.query else ""), expiration = SMARTHISTORY_CACHE_EXPIRATION_TIME, layer = layer_cache.Layers.Datastore, persist_across_app_versions = True)
+    @layer_cache.cache_with_key_fxn(lambda self: "smart_history_v%s_%s%s" % (Setting.smarthistory_version(),self.request.path, "?"+str(self.request.query) if self.request.query else ""), layer = layer_cache.Layers.Datastore, expiration = SMARTHISTORY_CACHE_EXPIRATION_TIME, persist_across_app_versions = True , permanent_key_fxn = lambda self: "smart_history_permanent_%s%s" % (self.request.path,  "?"+str(self.request.query) if self.request.query else ""))
     def load_resource(self):
         path = self.request.path
- 
+
         #img is in users browser cache - we don't want to cache a Not-Modified response otherwise people who don't have image in browser cache won't get it
         headers = dict((k, v) for (k, v) in self.request.headers.iteritems() if k not in ["If-Modified-Since", "If-None-Match", "Content-Length","Host"])
 
@@ -116,7 +117,7 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
             response_headers = {"Location": SMARTHISTORY_URL + str(self.request.path)}
             return ["", response_headers, None]    
         except Exception, e:
-            raise SmartHistoryLoadException("Failed loading %s from SmartHsitory with Exception: %s" % (path, e))
+            raise SmartHistoryLoadException("Failed loading %s from SmartHistory with Exception: %s" % (path, e))
 
 
         if response.status_code != 200:
