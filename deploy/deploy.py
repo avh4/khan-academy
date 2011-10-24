@@ -7,6 +7,7 @@ import datetime
 
 sys.path.append(os.path.abspath("."))
 import compress
+import glob
 
 try:
     import secrets
@@ -158,6 +159,39 @@ def check_secrets():
     regex = re.compile("^facebook_app_secret = '050c.+'$", re.MULTILINE)
     return regex.search(content)
 
+def tidy_up():
+    """moves all pycs and compressed js/css to a rubbish folder alongside the project"""
+    root = os.getcwd()
+    try:
+        trashname = os.tempnam("../","rubbish-")
+        trashdir = os.path.join(root, trashname)
+        os.makedirs(trashdir)
+    except Exception, e:
+        pass 
+    
+    print "Moving old files to %s." % trashname
+    
+    junkfiles = open(".hgignore","r")
+    please_tidy = [filename.strip() for filename in junkfiles 
+                      if not filename.strip().startswith("#")]
+    but_ignore = ["secrets.py", "", "syntax: glob"]
+    [please_tidy.remove(path) for path in but_ignore]
+    
+    for root, dirs, files in os.walk("."):
+        if ".git" in dirs:
+            dirs.remove(".git")
+        if ".hg" in dirs:
+            dirs.remove(".hg")
+        
+        for dirname in dirs:
+            removables = [glob.glob( os.path.join(root, dirname, rubbish) ) for rubbish in please_tidy
+                          if len( glob.glob( os.path.join(root, dirname, rubbish) ) ) > 0]
+            # flatten sublists of removable filse
+            please_remove = [filename for sublist in removables for filename in sublist]
+            if please_remove:
+                [ os.renames(stuff, os.path.join(trashdir,stuff)) for stuff in please_remove ]
+    
+
 def compress_js():
     print "Compressing javascript"
     compress.compress_all_javascript()
@@ -207,9 +241,9 @@ def main():
     options, args = parser.parse_args()
 
     if(options.clean):
-        root = os.getcwd()
+        print "Cleaning previously generated files"
+        tidy_up()
         
-
     includes_local_changes = hg_st()
     if not options.force and includes_local_changes:
         print "Local changes found in this directory, canceling deploy."
