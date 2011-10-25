@@ -1852,7 +1852,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background-image: -moz-linear-gradient( left, #eee, #ccc );
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
     background-position:0 0;
-    outline:1px solid rgb(204,204,204);
+    border:1px solid rgb(204,204,204);
     z-index:10;
 }
 
