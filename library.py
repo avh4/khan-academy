@@ -30,7 +30,7 @@ def getSmartHistoryContent():
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         )
-def library_content_html(bust_cache = False):
+def library_content_html():
     # No cache found -- regenerate HTML
     smart_history = getSmartHistoryContent()
 
