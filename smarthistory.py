@@ -102,7 +102,12 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
 
     #load the resource from smart history's server and then cache it in the data store
     #if it is an image then cache it in the blob store and store the blobkey in the data store 
-    @layer_cache.cache_with_key_fxn(lambda self: "smart_history_v%s_%s%s" % (Setting.smarthistory_version(),self.request.path, "?"+str(self.request.query) if self.request.query else ""), layer = layer_cache.Layers.Datastore, expiration = SMARTHISTORY_CACHE_EXPIRATION_TIME, persist_across_app_versions = True , permanent_key_fxn = lambda self: "smart_history_permanent_%s%s" % (self.request.path,  "?"+str(self.request.query) if self.request.query else ""))
+    @layer_cache.cache_with_key_fxn(
+        lambda self: "smart_history_v%s_%s" % (Setting.smarthistory_version(), self.request.path_qs), 
+        layer = layer_cache.Layers.Datastore, 
+        expiration = SMARTHISTORY_CACHE_EXPIRATION_TIME, 
+        persist_across_app_versions = True, 
+        permanent_key_fxn = lambda self: "smart_history_permanent_%s" % (self.request.path_qs))
     def load_resource(self):
         path = self.request.path
 

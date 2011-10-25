@@ -116,7 +116,7 @@ def layer_cache_check_set_return(
         *args,
         **kwargs):
 
-    def get_result(key, namespace, expiration, layer):
+    def get_cached_result(key, namespace, expiration, layer):
         
         if layer & Layers.InAppMemory:
             result = cachepy.get(key)
@@ -141,7 +141,7 @@ def layer_cache_check_set_return(
                     memcache.set(key, result, time=expiration, namespace=namespace)
                 return result
 
-    def set_result(key, namespace, expiration, layer, result):
+    def set_cached_result(key, namespace, expiration, layer, result):
         # Cache the result
         if layer & Layers.InAppMemory:
             cachepy.set(key, result, expiry=expiration)
@@ -168,43 +168,44 @@ def layer_cache_check_set_return(
 
     if not bust_cache:
 
-        result = get_result(key, namespace, expiration, layer)
+        result = get_cached_result(key, namespace, expiration, layer)
         if result is not None:
             return result
 
     try:
         result = target(*args, **kwargs)
     
-    #an error happened trying to recompute the result, see if there is a value for it in the permanent cache
+    # an error happened trying to recompute the result, see if there is a value for it in the permanent cache
     except Exception, e:
-        # In case the key's value has been changed by target's execution
-        key = key_fxn(*args, **kwargs)
         if permanent_key_fxn is not None:
             permanent_key = permanent_key_fxn(*args, **kwargs)
 
-            result = get_result(permanent_key, namespace, expiration, layer)
+            result = get_cached_result(permanent_key, namespace, expiration, layer)
             
             if result is not None:
                 logging.info("resource is not available, restoring from permanent cache")
                  
+                # In case the key's value has been changed by target's execution
+                key = key_fxn(*args, **kwargs)
+
                 #retreived item from permanent cache - save it to the more temporary cache and then return it
-                set_result(key, namespace, expiration, layer, result)
+                set_cached_result(key, namespace, expiration, layer, result)
                 return result
 
-        #could not retrieve item from a permanent cache, raise the error on up
+        # could not retrieve item from a permanent cache, raise the error on up
         raise e
     
     if isinstance(result, UncachedResult):
         # Don't cache this result, just return it
         result = result.result
     else:
-        # In case the key's value has been changed by target's execution
-        key = key_fxn(*args, **kwargs)
         if permanent_key_fxn is not None:
             permanent_key = permanent_key_fxn(*args, **kwargs)
-            set_result(permanent_key, namespace, 0, layer, result)
+            set_cached_result(permanent_key, namespace, 0, layer, result)
 
-        set_result(key, namespace, expiration, layer, result)
+        # In case the key's value has been changed by target's execution
+        key = key_fxn(*args, **kwargs)
+        set_cached_result(key, namespace, expiration, layer, result)
                   
     return result
 
@@ -243,7 +244,7 @@ class KeyValueCache(db.Model):
         namespaced_key = KeyValueCache.get_namespaced_key(key, namespace)
         key_value = KeyValueCache.get_by_key_name(namespaced_key)
 
-        if key_value: # Temporarily disable cache expiration -- Ben/James -- and not key_value.is_expired():
+        if key_value and not key_value.is_expired():
             return pickle.loads(key_value.value)
 
         return None
