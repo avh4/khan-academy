@@ -557,7 +557,7 @@ class UserExercise(db.Model):
 
                 if self.exercise in UserData.conversion_test_hard_exercises:
                     bingo('prof_gained_proficiency_hard')
-                elif self.exercise in UserData._conversion_test_easy_exercises:
+                elif self.exercise in UserData.conversion_test_easy_exercises:
                     bingo('prof_gained_proficiency_easy')
 
         else:
