@@ -181,7 +181,7 @@ def get_user_badges(user_data = None):
     user_badges_platinum = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.PLATINUM, user_badges)
     user_badges_gold = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.GOLD, user_badges)
     user_badges_silver = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.SILVER, user_badges)
-    user_badges_bronze = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.BRONZE, user_badges)    
+    user_badges_bronze = filter(lambda user_badge: user_badge.badge.badge_category == badges.BadgeCategory.BRONZE, user_badges)
 
     bronze_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.BRONZE, possible_badges), key=lambda badge:badge.points or sys.maxint)
     silver_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.SILVER, possible_badges), key=lambda badge:badge.points or sys.maxint)
@@ -189,11 +189,11 @@ def get_user_badges(user_data = None):
     platinum_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.PLATINUM, possible_badges), key=lambda badge:badge.points or sys.maxint)
     diamond_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.DIAMOND, possible_badges), key=lambda badge:badge.points or sys.maxint)
     master_badges = sorted(filter(lambda badge:badge.badge_category == badges.BadgeCategory.MASTER, possible_badges), key=lambda badge:badge.points or sys.maxint)
-    
-    
-    return { 'possible_badges': possible_badges, 
-             'user_badges': user_badges, 
-             'user_badges_normal': user_badges_normal, 
+
+
+    return { 'possible_badges': possible_badges,
+             'user_badges': user_badges,
+             'user_badges_normal': user_badges_normal,
              'user_badges_master': user_badges_master,
              "badge_collections": [bronze_badges, silver_badges, gold_badges, platinum_badges, diamond_badges, master_badges],
              'bronze_badges': user_badges_bronze,
@@ -207,7 +207,7 @@ class ViewBadges(request_handler.RequestHandler):
     def get(self):
 
         user_badges = get_user_badges()
-        
+
         template_values = {
                 "user_badges_normal": user_badges['user_badges_normal'],
                 "user_badges_master": user_badges['user_badges_master'],
@@ -216,7 +216,7 @@ class ViewBadges(request_handler.RequestHandler):
                 }
 
         self.render_jinja2_template('viewbadges.html', template_values)
-    
+
 # /admin/badgestatistics is called periodically by a cron job
 class BadgeStatistics(request_handler.RequestHandler):
 
@@ -339,7 +339,7 @@ def update_with_user_exercise(user_data, user_exercise, include_other_badges = F
 def update_with_user_playlist(user_data, user_playlist, include_other_badges = False, action_cache = None):
     possible_badges = badges_with_context_type(badges.BadgeContextType.PLAYLIST)
     action_cache = action_cache or last_action_cache.LastActionCache.get_for_user_data(user_data)
-    
+
     awarded = False
     for badge in possible_badges:
         # Pass in pre-retrieved user_playlist data so each badge check doesn't have to talk to the datastore

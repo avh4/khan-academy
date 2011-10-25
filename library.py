@@ -18,12 +18,12 @@ def getSmartHistoryContent():
     request = urllib2.Request("http://smarthistory.org/khan-home.html")
     try:
         response = urllib2.urlopen(request)
-        smart_history = response.read()  
-        smart_history = re.search(re.compile("<body>(.*)</body>", re.S), smart_history).group(1).decode("utf-8")  
+        smart_history = response.read()
+        smart_history = re.search(re.compile("<body>(.*)</body>", re.S), smart_history).group(1).decode("utf-8")
         smart_history.replace("script", "")
     except Exception, e:
         logging.exception("Failed fetching smarthistory playlist")
-        smart_history = None 
+        smart_history = None
         pass
     return smart_history
 
@@ -33,7 +33,7 @@ def getSmartHistoryContent():
 def library_content_html(bust_cache = False):
     # No cache found -- regenerate HTML
     smart_history = getSmartHistoryContent()
- 
+
     all_playlists = []
 
     dict_videos = {}
