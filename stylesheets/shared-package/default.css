@@ -1601,17 +1601,16 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         line-height: 18px;
     }
     .streak-bar.proficient {
-        -webkit-box-shadow: 0 0 3px yellow;
-        -moz-box-shadow: 0 0 3px yellow;
-        box-shadow: 0 0 3px yellow;
-        background-color: rgba(255, 255, 0, 0.5);
+        -webkit-box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        -moz-box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        background-color: rgba(0, 128, 201, 0.4);
         height: 25px;
     }
     .single-exercise .streak-bar.proficient {
-        -webkit-box-shadow: 0 0 7px yellow;
-        -moz-box-shadow: 0 0 7px yellow;
-        box-shadow: 0 0 7px yellow;
-        background-color: rgba(255, 255, 0, 0.5);
+        -webkit-box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        -moz-box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
         height: 30px;
     }
     .streak-bar-challenge {
