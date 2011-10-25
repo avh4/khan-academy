@@ -371,6 +371,11 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         if exercise.summative:
             problem_log.exercise_non_summative = exercise_non_summative
 
+        first_response = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
+
+        if user_exercise.total_done == 0 and first_response:
+            bingo('prof_new_exercises_attempted')
+
         if completed:
 
             user_exercise.total_done += 1
@@ -419,7 +424,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.set_proficient(False, user_data)
 
             # Only count wrong answer at most once per problem
-            if (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0):
+            if first_response:
                 user_exercise.update_proficiency_model(correct=False)
 
         # If this is the first attempt, update review schedule appropriately

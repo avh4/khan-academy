@@ -747,6 +747,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
         ('prof_gained_proficiency_easy', ConversionTypes.Binary),
         ('prof_gained_proficiency_hard', ConversionTypes.Binary),
         ('prof_problems_done', ConversionTypes.Counting),
+        ('prof_new_exercises_attempted', ConversionTypes.Counting),
     ])
     _prof_model_conversion_names, _prof_model_conversion_types = [list(x) for x in zip(*_prof_model_conversion_tests)]
 
