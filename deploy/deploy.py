@@ -8,6 +8,7 @@ import datetime
 sys.path.append(os.path.abspath("."))
 import compress
 import glob
+import tempfile
 
 try:
     import secrets
@@ -161,15 +162,9 @@ def check_secrets():
 
 def tidy_up():
     """moves all pycs and compressed js/css to a rubbish folder alongside the project"""
-    root = os.getcwd()
-    try:
-        trashname = os.tempnam("../","rubbish-")
-        trashdir = os.path.join(root, trashname)
-        os.makedirs(trashdir)
-    except Exception, e:
-        pass 
+    trashdir = tempfile.mkdtemp(dir="../", prefix="rubbish-")
     
-    print "Moving old files to %s." % trashname
+    print "Moving old files to %s." % trashdir
     
     junkfiles = open(".hgignore","r")
     please_tidy = [filename.strip() for filename in junkfiles 
@@ -236,13 +231,15 @@ def main():
 
     parser.add_option('-c', '--clean',
         action="store_true", dest="clean",
-        help="Clean the old packages and generate them again", default=False)
+        help="Clean the old packages and generate them again. If used with -d,the app is not compiled at all and is only cleaned.", default=False)
 
     options, args = parser.parse_args()
 
     if(options.clean):
         print "Cleaning previously generated files"
         tidy_up()
+        if options.dryrun:
+            return
         
     includes_local_changes = hg_st()
     if not options.force and includes_local_changes:
