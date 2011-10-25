@@ -129,12 +129,12 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
             self.attempt_counter += 1
 
             if response.status_code == 404:
-                 raise SmartHistoryLoadException("After attempt #%i Failed loading %s from SmartHsitory with response code:%i " % (self.attempt_counter, path, response.status_code))  
+                 raise SmartHistoryLoadException("After attempt #%i Failed loading %s from SmartHistory with response code:%i " % (self.attempt_counter, path, response.status_code))  
             elif self.attempt_counter < 3:
-                 logging.info("After attempt #%i Failed loading %s from SmartHsitory with response code:%i " % (self.attempt_counter, path, response.status_code))
+                 logging.info("After attempt #%i Failed loading %s from SmartHistory with response code:%i " % (self.attempt_counter, path, response.status_code))
                  return self.load_resource()
             else:
-                raise SmartHistoryLoadException("After attempt #%i Failed loading %s from SmartHsitory with response code:%i " % (self.attempt_counter, path, response.status_code))
+                raise SmartHistoryLoadException("After attempt #%i Failed loading %s from SmartHistory with response code:%i " % (self.attempt_counter, path, response.status_code))
 
         data = response.content
 
