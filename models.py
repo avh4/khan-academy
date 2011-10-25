@@ -698,7 +698,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @staticmethod
     @request_cache.cache()
     def current():
-        user_id = util.util.get_current_user_id(bust_cache=True)
+        user_id = util.get_current_user_id(bust_cache=True)
         email = user_id
 
         google_user = users.get_current_user()
