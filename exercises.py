@@ -410,6 +410,8 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             # Update phantom user notifications
             util_notify.update(user_data, user_exercise)
 
+            bingo('prof_problems_done')
+
         else:
 
             if user_exercise.streak == 0:

@@ -32,7 +32,7 @@ from accuracy_model import AccuracyModel, InvFnExponentialNormalizer
 
 from templatefilters import slugify
 from gae_bingo.gae_bingo import ab_test, bingo
-from gae_bingo.models import GAEBingoIdentityModel
+from gae_bingo.models import GAEBingoIdentityModel, ConversionTypes
 
 # Setting stores per-application key-value pairs
 # for app-wide settings that must be synchronized
@@ -742,8 +742,13 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "user_nickname", "user_email", "seconds_since_joined",
     ]
 
-    _prof_model_conversion_tests = (['prof_gained_proficiency_all',
-      'prof_gained_proficiency_easy', 'prof_gained_proficiency_hard'])
+    _prof_model_conversion_tests = ([
+        ('prof_gained_proficiency_all', ConversionTypes.Binary),
+        ('prof_gained_proficiency_easy', ConversionTypes.Binary),
+        ('prof_gained_proficiency_hard', ConversionTypes.Binary),
+        ('prof_problems_done', ConversionTypes.Counting),
+    ])
+    _prof_model_conversion_names, _prof_model_conversion_types = [list(x) for x in zip(*_prof_model_conversion_tests)]
 
     conversion_test_hard_exercises = set(['order_of_operations', 'graphing_points',
         'probability_1', 'domain_of_a_function', 'division_4',
@@ -761,7 +766,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     @request_cache.cache()
     def proficiency_model(self):
         return ab_test("Proficiency Model", {"accuracy": 1, "streak": 9},
-            UserData._prof_model_conversion_tests)
+            UserData._prof_model_conversion_names, UserData._prof_model_conversion_types)
 
     @property
     def nickname(self):
