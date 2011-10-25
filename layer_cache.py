@@ -177,6 +177,9 @@ def layer_cache_check_set_return(
     
     # an error happened trying to recompute the result, see if there is a value for it in the permanent cache
     except Exception, e:
+        import traceback
+        traceback.print_exc()
+
         if permanent_key_fxn is not None:
             permanent_key = permanent_key_fxn(*args, **kwargs)
 
