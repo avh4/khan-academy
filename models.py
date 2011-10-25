@@ -757,7 +757,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
         'probability_1', 'domain_of_a_function', 'division_4',
         'ratio_word_problems', 'writing_expressions_1', 'ordering_numbers',
         'geometry_1', 'converting_mixed_numbers_and_improper_fractions'])
-    conversion_test_easy_exercises = set(['counting_1', 'significant_figures_1', 'addition_1'])
+    conversion_test_easy_exercises = set(['counting_1', 'significant_figures_1', 'subtraction_1'])
 
     @property
     @request_cache.cache()
