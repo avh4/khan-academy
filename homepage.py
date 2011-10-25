@@ -123,6 +123,11 @@ def new_and_noteworthy_link_sets():
 
 class ViewHomePage(request_handler.RequestHandler):
 
+    def head(self):
+        # Respond to HEAD requests for our homepage so twitter's tweet counter will update:
+        # https://dev.twitter.com/docs/tweet-button/faq#count-api-increment
+        pass
+
     # See https://sites.google.com/a/khanacademy.org/forge/for-team-members/how-to-use-new-and-noteworthy-content
     # for info on how to update the New & Noteworthy videos
     def get(self):
@@ -169,7 +174,8 @@ class ViewHomePage(request_handler.RequestHandler):
                             'DVD_list': DVD_list,
                             'is_mobile_allowed': True,
                             'approx_vid_count': models.Video.approx_count(),
-                            'exercise_count': models.Exercise.get_count()
+                            'exercise_count': models.Exercise.get_count(),
+                            'link_heat': self.request_bool("heat", default=False),
                         }
 
         self.render_jinja2_template('homepage.html', template_values)
