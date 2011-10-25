@@ -65,7 +65,7 @@ class Setting(db.Model):
     @staticmethod
     @request_cache.cache()
     @layer_cache.cache(layer=layer_cache.Layers.Memcache)
-    def _get_settings_dict(bust_cache = False):
+    def _get_settings_dict():
         # ancestor query to ensure consistent results
         query = Setting.all().ancestor(Setting.entity_group_key())
         results = dict((setting.key().name(), setting) for setting in query.fetch(20))
@@ -697,11 +697,8 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     @staticmethod
     @request_cache.cache()
-    def current(bust_cache=True):
-        if bust_cache:
-            util.get_current_user_id(bust_cache=True)
-
-        user_id = util.get_current_user_id()
+    def current():
+        user_id = util.get_current_user_id(bust_cache=True)
         email = user_id
 
         google_user = users.get_current_user()
