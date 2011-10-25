@@ -329,6 +329,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         dt_now = datetime.datetime.now()
         exercise = user_exercise.exercise_model
 
+        prev_last_done = user_exercise.last_done
         user_exercise.last_done = dt_now
         user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
         user_exercise.summative = exercise.summative
@@ -372,9 +373,14 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             problem_log.exercise_non_summative = exercise_non_summative
 
         first_response = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
+        first_problem_after_proficiency = prev_last_done and user_exercise.proficient_date and (
+            abs(prev_last_done - user_exercise.proficient_date) <= datetime.timedelta(seconds=1))
 
         if user_exercise.total_done == 0 and first_response:
             bingo('prof_new_exercises_attempted')
+
+        if first_problem_after_proficiency:
+            bingo('prof_does_problem_just_after_proficiency')
 
         if completed:
 
@@ -405,6 +411,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                     user_data.reassess_if_necessary()
 
                     problem_log.earned_proficiency = True
+
+                if first_problem_after_proficiency:
+                    bingo('prof_problem_correct_just_after_proficiency')
 
             util_badges.update_with_user_exercise(
                 user_data,
