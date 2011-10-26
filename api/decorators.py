@@ -1,6 +1,8 @@
 import logging
 import hashlib
 import zlib
+from base64 import b64encode, b64decode
+from pickle import dumps, loads
 from functools import wraps
 
 from flask import request
@@ -68,3 +70,26 @@ def decompress(func):
         return zlib.decompress(func(*args, **kwargs)).decode('utf-8')
     return decompressed
 
+def pickle(func):
+    @wraps(func)
+    def pickled(*args, **kwargs):
+        return dumps(func(*args, **kwargs))
+    return pickled
+
+def unpickle(func):
+    @wraps(func)
+    def unpickled(*args, **kwargs):
+        return loads(func(*args, **kwargs))
+    return unpickled
+
+def base64_encode(func):
+    @wraps(func)
+    def base64_encoded(*args, **kwargs):
+        return b64encode(func(*args, **kwargs))
+    return base64_encoded
+
+def base64_decode(func):
+    @wraps(func)
+    def base64_decoded(*args, **kwargs):
+        return b64decode(func(*args, **kwargs))
+    return base64_decoded
