@@ -383,12 +383,30 @@ class UserExercise(db.Model):
             self._progress = self._get_progress_from_current_state()
         return self._progress
 
+    def bingo_prof_model_accuracy_threshold_tests(self):
+        if self.total_done < 5:
+            return
+
+        accuracy = self.accuracy_model().predict()
+
+        if self.exercise in UserData.conversion_test_easy_exercises:
+            for threshold in UserData.prof_conversion_accuracy_thresholds:
+                if accuracy >= threshold:
+                    bingo('prof_accuracy_above_%s_easy' % threshold)
+
+        elif self.exercise in UserData.conversion_test_hard_exercises:
+            for threshold in UserData.prof_conversion_accuracy_thresholds:
+                if accuracy >= threshold:
+                    bingo('prof_accuracy_above_%s_hard' % threshold)
+
     def update_proficiency_model(self, correct):
         if not correct:
             self.streak = 0
 
         self.accuracy_model().update(correct)
         self._progress = self._get_progress_from_current_state()
+
+        self.bingo_prof_model_accuracy_threshold_tests()
 
         if self.proficiency_model() == 'streak':
             self._update_progress_from_streak_model(correct)
@@ -742,6 +760,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
             "user_nickname", "user_email", "seconds_since_joined",
     ]
 
+    prof_conversion_accuracy_thresholds = [0.85, 0.90, 0.92, 0.94, 0.96]
     _prof_model_conversion_tests = ([
         ('prof_gained_proficiency_all', ConversionTypes.Counting),
         ('prof_gained_proficiency_easy', ConversionTypes.Counting),
@@ -750,7 +769,8 @@ class UserData(GAEBingoIdentityModel, db.Model):
         ('prof_new_exercises_attempted', ConversionTypes.Counting),
         ('prof_does_problem_just_after_proficiency', ConversionTypes.Counting),
         ('prof_problem_correct_just_after_proficiency', ConversionTypes.Counting),
-    ])
+    ] + [('prof_accuracy_above_%s_easy' % p, ConversionTypes.Binary) for p in prof_conversion_accuracy_thresholds]
+    + [('prof_accuracy_above_%s_hard' % p, ConversionTypes.Binary) for p in prof_conversion_accuracy_thresholds])
     _prof_model_conversion_names, _prof_model_conversion_types = [list(x) for x in zip(*_prof_model_conversion_tests)]
 
     conversion_test_hard_exercises = set(['order_of_operations', 'graphing_points',
