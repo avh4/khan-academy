@@ -174,7 +174,7 @@ def compile_templates():
 
 def prime_autocomplete_cache(version):
     try:
-        resp = urllib2.urlopen("http://%s.%s.appspot.com" % (version, get_app_id()))
+        resp = urllib2.urlopen("http://%s.%s.appspot.com/api/v1/autocomplete?q=calc" % (version, get_app_id()))
         resp.read()
         print "Primed autocomplete cache"
     except:
@@ -258,8 +258,8 @@ def main():
         compress.revert_js_css_hashes()
         if success:
             send_hipchat_deploy_message(version, includes_local_changes)
-            prime_autocomplete_cache(version)
             open_browser_to_ka_version(version)
+            prime_autocomplete_cache(version)
 
     end = datetime.datetime.now()
     print "Done. Duration: %s" % (end - start)
