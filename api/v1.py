@@ -15,6 +15,7 @@ from exercises import attempt_problem, reset_streak
 from phantom_users.phantom_util import api_create_phantom
 import util
 import notifications
+from gae_bingo.gae_bingo import bingo
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
@@ -521,7 +522,8 @@ def attempt_problem_number(exercise_name, problem_number):
 
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
-                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display }
+                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display },
+                "attempt_correct" : request.request_bool("complete")
             })
 
             return user_exercise
@@ -535,6 +537,9 @@ def attempt_problem_number(exercise_name, problem_number):
 @jsonp
 @jsonify
 def hint_problem_number(exercise_name, problem_number):
+    
+    bingo("alternate_hints_costly")
+    
     user_data = models.UserData.current()
 
     if user_data:
