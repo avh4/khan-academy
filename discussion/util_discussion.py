@@ -1,7 +1,7 @@
 from google.appengine.api import users
 
 from models import UserData
-from decorators import pickle, unpickle, compress, decompress
+from api.decorators import pickle, unpickle, compress, decompress, base64_encode, base64_decode
 import request_cache
 import layer_cache
 import models_discussion
@@ -23,9 +23,11 @@ def feedback_query(target_key):
 
 @request_cache.cache_with_key_fxn(models_discussion.Feedback.memcache_key_for_video)
 @unpickle
+@base64_decode
 @decompress
 @layer_cache.cache_with_key_fxn(models_discussion.Feedback.memcache_key_for_video, layer=layer_cache.Layers.Memcache)
 @compress
+@base64_encode
 @pickle
 def get_feedback_for_video(video):
     return feedback_query(video.key()).fetch(500)
