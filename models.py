@@ -311,7 +311,7 @@ class UserExercise(db.Model):
     proficient_date = db.DateTimeProperty()
     seconds_per_fast_problem = db.FloatProperty(default = consts.MIN_SECONDS_PER_FAST_PROBLEM, indexed=False) # Seconds expected to finish a problem 'quickly' for badge calculation
     summative = db.BooleanProperty(default=False, indexed=False)
-    _accuracy_model = object_property.ObjectProperty()
+    _accuracy_model = object_property.ObjectProperty()  # Stateful function object that estimates P(next problem correct). Only exists for new UserExercise objects.
 
     _USER_EXERCISE_KEY_FORMAT = "UserExercise.all().filter('user = '%s')"
 
@@ -370,11 +370,27 @@ class UserExercise(db.Model):
     def min_problems_required(self):
         return max(self.min_problems_imposed(), UserExercise._MIN_PROBLEMS_FROM_ACCURACY_MODEL)
 
-    # Faciliate transition for old objects that did not have _accuracy_model property
+    # Do not transition old objects that did not have the _accuracy_model
+    # property - only new UserExercise objects can use the new proficiency
+    # model.
     def accuracy_model(self):
-        if self._accuracy_model is None:
-            self._accuracy_model = AccuracyModel(self)
+        # TODO(david): When we fully switch away from the streak model,
+        #     uncomment the lines below and refactor code to remove
+        #     accuracy_model guards.
+        #if self._accuracy_model is None:
+        #    self._accuracy_model = AccuracyModel(self)
         return self._accuracy_model
+
+    def bingo_proficiency_model(self, test):
+        # We only want to score conversions for newly-created UserExercise
+        # objects that could actually use the new proficiency model behavior
+        # (all existing UserExercise objects use the old streak model to
+        # facilitate transitioning).
+        if self.accuracy_model():
+            bingo(test)
+
+    def use_streak_model(self):
+        return self.proficiency_model() == 'streak' or not self.accuracy_model()
 
     # Faciliate transition for old objects that did not have the _progress property
     @property
@@ -384,7 +400,7 @@ class UserExercise(db.Model):
         return self._progress
 
     def bingo_prof_model_accuracy_threshold_tests(self):
-        if self.total_done < 5:
+        if self.total_done < 5 or not self.accuracy_model():
             return
 
         accuracy = self.accuracy_model().predict()
@@ -392,28 +408,29 @@ class UserExercise(db.Model):
         if self.exercise in UserData.conversion_test_easy_exercises:
             for threshold in UserData.prof_conversion_accuracy_thresholds:
                 if accuracy >= threshold:
-                    bingo('prof_accuracy_above_%s_easy' % threshold)
+                    self.bingo_proficiency_model('prof_accuracy_above_%s_easy' % threshold)
 
         elif self.exercise in UserData.conversion_test_hard_exercises:
             for threshold in UserData.prof_conversion_accuracy_thresholds:
                 if accuracy >= threshold:
-                    bingo('prof_accuracy_above_%s_hard' % threshold)
+                    self.bingo_proficiency_model('prof_accuracy_above_%s_hard' % threshold)
 
     def update_proficiency_model(self, correct):
         if not correct:
             self.streak = 0
 
-        self.accuracy_model().update(correct)
+        if self.accuracy_model():
+            self.accuracy_model().update(correct)
+            self.bingo_prof_model_accuracy_threshold_tests()
+
         self._progress = self._get_progress_from_current_state()
 
-        self.bingo_prof_model_accuracy_threshold_tests()
-
-        if self.proficiency_model() == 'streak':
+        if self.use_streak_model():
             self._update_progress_from_streak_model(correct)
 
     def _get_progress_from_current_state(self):
 
-        if self.proficiency_model() == 'streak':
+        if self.use_streak_model():
             if self._progress is not None:
                 return self._progress
 
@@ -571,12 +588,12 @@ class UserExercise(db.Model):
                 util_notify.update(user_data, self, False, True)
 
                 # Score conversions for A/B test
-                bingo('prof_gained_proficiency_all')
+                self.bingo_proficiency_model('prof_gained_proficiency_all')
 
                 if self.exercise in UserData.conversion_test_hard_exercises:
-                    bingo('prof_gained_proficiency_hard')
+                    self.bingo_proficiency_model('prof_gained_proficiency_hard')
                 elif self.exercise in UserData.conversion_test_easy_exercises:
-                    bingo('prof_gained_proficiency_easy')
+                    self.bingo_proficiency_model('prof_gained_proficiency_easy')
 
         else:
             if self.exercise in user_data.proficient_exercises:
