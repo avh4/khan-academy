@@ -1,6 +1,6 @@
 #for blobstore of images
 from __future__ import with_statement
-from google.appengine.api import files
+from google.appengine.api import files, urlfetch
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.blobstore import BlobInfo
 
@@ -35,12 +35,13 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         self.attempt_counter = 0	
 	
     def get(self):
+
         if self.request.params.has_key("clearcache"):
             self.clearCache()
        
         #redirect file back to smarthistory.org if the file is an audio/video and hence might be too big to store in blobstore
         extension = self.request.path[self.request.path.rfind(".") + 1:]
-        if extension in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v", "swf"):
+        if extension.lower() in ("mp3", "m4a", "flv", "mp4", "mov", "avi", "m4v", "swf"):
             logging.info("multimedia: sending redirect request back to Smarthistory for %s" % self.request.path)
             self.redirect( SMARTHISTORY_URL + str(self.request.path), True )
             return                  
@@ -84,9 +85,11 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
         post_data = dict( (a, self.request.get(a)) for a in arguments )
 
         try:
-            request = urllib2.Request(SMARTHISTORY_URL + self.request.path)
-            response = urllib2.urlopen(request, urllib.urlencode(post_data))
-            data=response.read()     
+            response = urlfetch.fetch(url = SMARTHISTORY_URL + self.request.path, payload = urllib.urlencode(post_data) , method="POST", headers = self.request.headers, deadline=25)
+            if response.status_code == 200:
+                data=response.content
+            else:
+                raise SmartHistoryLoadException(response.status_code)     
         except Exception, e:
             raise SmartHistoryLoadException("Post attempt failed to SmartHsitory with :"+str(e))  
             return      
@@ -99,42 +102,44 @@ class SmartHistoryProxy(RequestHandler, blobstore_handlers.BlobstoreDownloadHand
 
     #load the resource from smart history's server and then cache it in the data store
     #if it is an image then cache it in the blob store and store the blobkey in the data store 
-    @layer_cache.cache_with_key_fxn(lambda self: "smart_history_v%s_%s%s" % (Setting.smarthistory_version(),self.request.path, "?"+str(self.request.query) if self.request.query else ""), expiration = SMARTHISTORY_CACHE_EXPIRATION_TIME, layer = layer_cache.Layers.Datastore, persist_across_app_versions = True)
+    @layer_cache.cache_with_key_fxn(
+        lambda self: "smart_history_v%s_%s" % (Setting.smarthistory_version(), self.request.path_qs), 
+        layer = layer_cache.Layers.Datastore, 
+        expiration = SMARTHISTORY_CACHE_EXPIRATION_TIME, 
+        persist_across_app_versions = True, 
+        permanent_key_fxn = lambda self: "smart_history_permanent_%s" % (self.request.path_qs))
     def load_resource(self):
         path = self.request.path
-        headers = self.request.headers
-        logging.info("getting resource " + str(path) + " from "+SMARTHISTORY_URL);
-       
-        request = urllib2.Request(SMARTHISTORY_URL + path)
-        for h in headers:
-            #img is in users browser cache - we don't want to cache a Not-Modified response otherwise people who don't have image in browser cache won't get it
-            if not h in ["If-Modified-Since", "If-None-Match", "Content-Length","Host"]:
-                request.headers[h] = headers[h]
-        
+
+        #img is in users browser cache - we don't want to cache a Not-Modified response otherwise people who don't have image in browser cache won't get it
+        headers = dict((k, v) for (k, v) in self.request.headers.iteritems() if k not in ["If-Modified-Since", "If-None-Match", "Content-Length","Host"])
+
+        logging.info("getting resource " + str(path) + " from "+SMARTHISTORY_URL);       
         try:
-            response = urllib2.urlopen(request)
-            data = response.read()             
-
-        except Exception, e:
-            self.attempt_counter += 1
-     
-            if self.attempt_counter < 3:
-                if hasattr(e, "code") and e.code == 404:
-                    raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
-                else: 
-                    logging.info("Attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e))
-                    return self.load_resource()
-            else:
-                raise SmartHistoryLoadException("After attempt #" + str(self.attempt_counter) + " Failed loading " + str(path) + " from SmartHsitory " + str(e)) 
-               
-        #load the response headers into a dictionary as layer_cache was throwing an error caching an object of class mimetools.Message   
-        response_headers = dict( (h, response.headers[h]) for h in response.headers if h not in ["Content-Length", "Host"])
-
-        #if the file response got cut off because it was too big - should not happen too often as movies and mp3s redirect before hand
-        if len(data) >= 33554432:
+            response = urlfetch.fetch(url = SMARTHISTORY_URL + path, headers = headers, deadline=25)
+        except urlfetch.ResponseTooLargeError, e:
             logging.info("got too large a file back, sending redirect headers")
-            response_headers["Location"] = SMARTHISTORY_URL + str(self.request.path)
+            response_headers = {"Location": SMARTHISTORY_URL + str(self.request.path)}
             return ["", response_headers, None]    
+        except Exception, e:
+            raise SmartHistoryLoadException("Failed loading %s from SmartHistory with Exception: %s" % (path, e))
+
+
+        if response.status_code != 200:
+            self.attempt_counter += 1
+
+            if response.status_code == 404:
+                 raise SmartHistoryLoadException("After attempt #%i Failed loading %s from SmartHistory with response code:%i " % (self.attempt_counter, path, response.status_code))  
+            elif self.attempt_counter < 3:
+                 logging.info("After attempt #%i Failed loading %s from SmartHistory with response code:%i " % (self.attempt_counter, path, response.status_code))
+                 return self.load_resource()
+            else:
+                raise SmartHistoryLoadException("After attempt #%i Failed loading %s from SmartHistory with response code:%i " % (self.attempt_counter, path, response.status_code))
+
+        data = response.content
+
+        #load the response headers into a dictionary as layer_cache was throwing an error caching an object of class mimetools.Message   
+        response_headers = dict( (h, response.headers[h]) for h in response.headers if h not in ["Content-Length", "Host"]) 
 
         content_type = response.headers.get("content-type")[:response.headers.get("content-type").find("/")]
 
