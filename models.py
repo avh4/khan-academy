@@ -769,6 +769,8 @@ class UserData(GAEBingoIdentityModel, db.Model):
         ('prof_new_exercises_attempted', ConversionTypes.Counting),
         ('prof_does_problem_just_after_proficiency', ConversionTypes.Counting),
         ('prof_problem_correct_just_after_proficiency', ConversionTypes.Counting),
+        ('prof_wrong_problems', ConversionTypes.Counting),
+        ('prof_keep_going_after_wrong', ConversionTypes.Counting),
     ] + [('prof_accuracy_above_%s_easy' % p, ConversionTypes.Binary) for p in prof_conversion_accuracy_thresholds]
     + [('prof_accuracy_above_%s_hard' % p, ConversionTypes.Binary) for p in prof_conversion_accuracy_thresholds])
     _prof_model_conversion_names, _prof_model_conversion_types = [list(x) for x in zip(*_prof_model_conversion_tests)]
