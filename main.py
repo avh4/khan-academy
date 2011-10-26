@@ -794,7 +794,6 @@ application = webapp2.WSGIApplication([
     ('/gmat', ViewGMAT),
     ('/reportissue', ReportIssue),
     ('/search', Search),
-    ('/autocomplete', autocomplete.Autocomplete),
     ('/savemapcoords', knowledgemap.SaveMapCoords),
     ('/saveexpandedallexercises', knowledgemap.SaveExpandedAllExercises),
     ('/crash', Crash),
