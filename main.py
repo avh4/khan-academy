@@ -649,7 +649,7 @@ class Search(request_handler.RequestHandler):
                 playlists.append(entity)
             elif isinstance(entity, Video):
                 videos.append(entity)
-            else:
+            elif entity is not None:
                 logging.error("Unhandled kind in search results: " + str(type(entity)))
                 
         playlist_count = len(playlists)
