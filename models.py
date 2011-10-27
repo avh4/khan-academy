@@ -333,11 +333,6 @@ class UserExercise(db.Model):
         consts.PROFICIENCY_ACCURACY_THRESHOLD
     ).normalize
 
-    @property
-    def point_display(self):
-      user_data = UserData.current()
-      return user_data.point_display if user_data else 'off'
-
     def proficiency_model(self):
         user_data = UserData.current()
         return user_data.proficiency_model if user_data else 'streak'
@@ -816,12 +811,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
         'ratio_word_problems', 'writing_expressions_1', 'ordering_numbers',
         'geometry_1', 'converting_mixed_numbers_and_improper_fractions'])
     conversion_test_easy_exercises = set(['counting_1', 'significant_figures_1', 'subtraction_1'])
-
-    @property
-    @request_cache.cache()
-    def point_display(self):
-        # TODO(david): Remove other mario points A/B test code, including this fn
-        return "on"
 
     @property
     @request_cache.cache()
