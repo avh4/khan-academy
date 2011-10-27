@@ -751,3 +751,18 @@ def autocomplete():
             "videos": video_results, 
             "playlists": playlist_results
     }
+
+@route("/api/v1/admin/problems", methods=["GET"])
+@jsonp
+@jsonify
+def problem_logs():
+    problem_log_query = models.ProblemLog.all()
+
+    try:
+        filter_query_by_request_dates(problem_log_query, "time_done")
+    except ValueError, e:
+        return api_error_response(e)
+
+    problem_log_query.order("time_done")
+
+    return problem_log_query.fetch(500)
