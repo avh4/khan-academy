@@ -66,7 +66,7 @@ body {
     line-height: 22px;
     background: url(/images/light-page-bg.png) repeat-x;
 }
-body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /*! data-uri(/images/dark-page-bg.png) */
+
 
 #outer-wrapper {
     min-height: 100%;
@@ -83,6 +83,14 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /*! data-uri(/
     max-width: 1200px;
     position: relative;
     margin: 0 auto;
+}
+
+article {
+    padding: 0 19px;
+    background: #fff;
+    position: relative;
+    margin: 0 1px;
+    border-top: 1px solid #C6D1AD;
 }
 
 /* Basic typography for the entire site */
@@ -1080,23 +1088,23 @@ article, section {
     display: block;
 }
 
-article.video {
+div.video {
     margin-left: auto;
     margin-right: auto;
     width: 800px;
 }
 
-article.video > div {
+div.video > div {
     width: 800px;
 }
 
-article.video details {
+div.video details {
     display: block;
     width: 798px;
     background-color: #d2dded;
 }
 
-article.video summary {
+div.video summary {
     display: block;
     background-color: #E6F8DD;
     border-top: 1px solid #80C65A;
@@ -1104,38 +1112,38 @@ article.video summary {
     font-weight: bold;
 }
 
-article.video label.video_playlist_prev {
+div.video label.video_playlist_prev {
     float: left;
     border-right: solid 1px white;
 }
 
-article.video label.video_playlist_next {
+div.video label.video_playlist_next {
     float: right;
     border-left: solid 1px white;
 }
 
-article.video div.video_playlist_container {
+div.video div.video_playlist_container {
     clear: both;
     border-top: 1px solid grey;
     overflow: hidden;
 }
 
-article.video ol li {
+div.video ol li {
     display: inline-block;
     width: 260px;
     vertical-align: top;
 }
 
-article.video ol li, article.video summary, article.video label.video_playlist_prev, article.video label.video_playlist_next {
+div.video ol li, div.video summary, div.video label.video_playlist_prev, div.video label.video_playlist_next {
     padding: .5ex 3px .5ex 3px;
 }
 
-article.video ol li:before {
+div.video ol li:before {
     content: counter(video) ".";
     counter-increment: video;
 }
 
-article.video ol {
+div.video ol {
     counter-reset: video;
     padding: 0ex 0em 8ex 0em;
     display: inline;
@@ -1144,7 +1152,7 @@ article.video ol {
     background-image: url(/images/798white_798grey.png); /*! data-uri(/images/798white_798grey.png) */
 }
 
-article.video p#keywords {
+div.video p#keywords {
     clear: both;
 }
 
@@ -1865,7 +1873,7 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     background-image: -moz-linear-gradient( left, #eee, #ccc );
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
     background-position:0 0;
-    outline:1px solid rgb(204,204,204);
+    border:1px solid rgb(204,204,204);
     z-index:10;
 }
 
@@ -2285,27 +2293,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 /* One-Off Page Styles */
 
-#coaches, #students, #donate, #individual_report,
-.achievement-badges-container, #login-page,
-#about-us, #homepage, #video-page, #contribute,
-#credits, #report-problem, #tos, #privacy-policy,
-#dmca, #search_results, #exercise-stats {
-    padding: 0 19px;
-    background: #fff;
-    position: relative;
-    margin: 0 1px;
-    border-top: 1px solid #C6D1AD;
-}
-
-.dark #coaches, .dark #students, .dark #donate, .dark #individual_report, .dark
-.achievement-badges-container, .dark #login-page, .dark #about-us,
-.dark #homepage, .dark #video-page, .dark #contribute,
-.dark #credits, .dark #report-problem, .dark #tos, .dark #privacy-policy,
-.dark #dmca {
-    -webkit-box-shadow: 0 -2px 0 #1A222C;
-    -moz-box-shadow: 0 -2px 0 #1A222C;
-    box-shadow: 0 -2px 0 #1A222C;
-}
 #about-us {
     *position: static;
 }
@@ -3459,3 +3446,8 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
     clear: left;
 }
 
+#you-are-here{
+  position:absolute;
+  top:0px;
+  left:66px;
+}
