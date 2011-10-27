@@ -91,6 +91,14 @@ class Setting(db.Model):
     def smarthistory_version(val = None):
         return Setting._get_or_set_with_key("smarthistory_version", val) or 0
 
+    @staticmethod
+    def classtime_report_method(val = None):
+        return Setting._get_or_set_with_key("classtime_report_method", val) 
+
+    @staticmethod
+    def classtime_report_startdate(val = None):
+        return Setting._get_or_set_with_key("classtime_report_startdate", val)
+
 
 class Exercise(db.Model):
 
@@ -1241,30 +1249,16 @@ class VideoLog(db.Model):
     _serialize_blacklist = ["video"]
 
     @staticmethod
-    def get_for_user_data_between_dts(user_data, dt_a, dt_b, order=True):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = VideoLog.all()
         query.filter('user =', user_data.user)
 
         query.filter('time_watched >=', dt_a)
         query.filter('time_watched <=', dt_b)
-        if order:
-            query.order('time_watched')
+        query.order('time_watched')
 
         return query
-
-    @staticmethod
-    def get_for_users_between_dts(user_data_list, dt_a, dt_b, order=True):        
-        query = VideoLog.all()
-        query.filter('user IN', [user.user for user in user_data_list])
-        query.filter('time_watched >=', dt_a)
-        query.filter('time_watched <', dt_b)
-        # query.order('user') error says that first ordering property must be the same as inequality filter - time_done
-        if order:
-            query.order('time_watched')
- 
-        return query
-
-
+   
     @staticmethod
     def get_for_user_data_and_video(user_data, video):
         query = VideoLog.all()
@@ -1384,16 +1378,13 @@ class VideoLog(db.Model):
         return VideoLog.video.get_value_for_datastore(self)
 
 # commit_video_log is used by our deferred video log insertion process
-def commit_video_log(video_log, user_data):
+def commit_video_log(video_log, user_data = None):
     video_log.put()
     
-    #TODO: assuming we do the summary by coaches route the following two lines can be removed
-    from classtime import UserAdjacentActivitySummary #putting this at the top would get a circular reference
-    LogSummary.add_or_update_entry(user_data, video_log, UserAdjacentActivitySummary, "UserAdjacentActivity")
-    
-    from classtime import  ClassDailyActivitySummary #putting this at the top would get a circular reference
-    for coach in user_data.coaches:
-        LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), video_log, ClassDailyActivitySummary, "ClassDailyActivity", 1440, "period")
+    if user_data is not None:
+        from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
+        for coach in user_data.coaches:
+            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), video_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
 
 
 class DailyActivityLog(db.Model):
@@ -1423,7 +1414,11 @@ class DailyActivityLog(db.Model):
         query.order('date')
 
         return query
-   
+
+class LogSummaryTypes:
+    USER_ADJACENT_ACTIVITY = "UserAdjacentActivity"
+    CLASS_DAILY_ACTIVITY = "ClassDailyActivity"
+    
 # can keep a variety of different types of summaries pulled from the logs
 class LogSummary(db.Model):
     user = db.UserProperty()
@@ -1444,7 +1439,6 @@ class LogSummary(db.Model):
         
         raise Exception("unhandled delta to get_key_name")
 
-
     @staticmethod
     def get_end_of_period(activity, delta):
         return LogSummary.get_start_of_period(activity, delta) + datetime.timedelta(minutes=delta)
@@ -1457,17 +1451,17 @@ class LogSummary(db.Model):
     def get_key_name_by_dates(user_data, summaryType, start, end):
         return "%s:%s:%s:%s" % (user_data.key_email, summaryType, start.strftime("%Y-%m-%d-%H-%M"), end.strftime("%Y-%m-%d-%H-%M"))
 
-    #activity needs to have activity.time_started() and activity.time_done() functions
-    #summaryClass needs to have a method .add(activity)
-    #delta is a time period in minutes
-    #method is either "proximity"   - new event is added to last summary if it is within delta
+    # activity needs to have activity.time_started() and activity.time_done() functions
+    # summaryClass needs to have a method .add(activity)
+    # delta is a time period in minutes
+    # method is either "proximity"   - new event is added to last summary if it is within delta
     #              or "period"      - day is divided up into buckets of delta minutes
     @staticmethod
     def add_or_update_entry(user_data, activity, summaryClass, summaryType, delta=30, method="proximity"):
 
         def txn(user_data, activity, summaryClass, summaryType, delta, method):
             if method=="proximity":
-                #find the summary which ends within delta of the current activity's start
+                # find the summary which ends within delta of the current activity's start
                 log_summary = LogSummary.get_closest_summary(user_data, activity, summaryType, delta).get()
 
                 if log_summary is not None:
@@ -1486,7 +1480,7 @@ class LogSummary(db.Model):
                     log_summary.put()
 
             elif method=="period":
-                #if activities is a list, we assume all activities belong to the same period - this is used in classtime.fill_class_summaries_from_logs()
+                # if activities is a list, we assume all activities belong to the same period - this is used in classtime.fill_class_summaries_from_logs()
                 if type(activity) is list:
                     activities = activity
                     activity=activities[0]
@@ -1512,23 +1506,23 @@ class LogSummary(db.Model):
                 log_summary.put()
 
         
-        #running function within a transaction because time might elapse between the get and the put 
-        #and two processes could get before either puts. Transactions will ensure that its mutually exclusive
-        #since they are operating on the same function
+        # running function within a transaction because time might elapse between the get and the put 
+        # and two processes could get before either puts. Transactions will ensure that its mutually exclusive
+        # since they are operating on the same function
         db.run_in_transaction(txn, user_data, activity, summaryClass, summaryType, delta, method) 
             
     @staticmethod
     def get_description():
         return self.summary.description(self.start, self.end)
 
-    #get the summary which ends within delta minutes of the start of the activity, that the current activity should be added to, for proximity summaries
+    # get the summary which ends within delta minutes of the start of the activity, that the current activity should be added to, for proximity summaries
     @staticmethod
     def get_closest_summary(user_data, activity, summaryType, delta):
         query = LogSummary.all()
-        query.ancestor(user_data.key())
+        query.ancestor(user_data)
         query.filter('summaryType =', summaryType)
         query.filter('end >=',activity.time_started() -  datetime.timedelta(minutes=delta))
-        query.filter('end <',activity.time_ended() + datetime.timedelta(minutes=delta)) #really should use start here instead of end, but gae doesnt allow inequalities on two items
+        query.filter('end <',activity.time_ended() + datetime.timedelta(minutes=delta)) # really should use start here instead of end, but gae doesnt allow inequalities on two items
         query.order('-end')
         return query
 
@@ -1542,9 +1536,6 @@ class LogSummary(db.Model):
         query.order('start')
 
         return query
-
-
-
 
 class ProblemLog(db.Model):
 
@@ -1582,29 +1573,16 @@ class ProblemLog(db.Model):
             (self.exercise, self.problem_number))
 
     @staticmethod
-    def get_for_user_data_between_dts(user_data, dt_a, dt_b, order=True):
+    def get_for_user_data_between_dts(user_data, dt_a, dt_b):
         query = ProblemLog.all()
         query.filter('user =', user_data.user)
 
         query.filter('time_done >=', dt_a)
         query.filter('time_done <', dt_b)
-        if order:
-            query.order('time_done')
+        
+        query.order('time_done')
 
         return query
-
-    @staticmethod
-    def get_for_users_between_dts(user_data_list, dt_a, dt_b, order=True):        
-        query = ProblemLog.all()
-        query.filter('user IN', [user.user for user in user_data_list])
-        query.filter('time_done >=', dt_a)
-        query.filter('time_done <', dt_b)
-        # query.order('user') error says that first ordering property must be the same as inequality filter - time_done
-        if(order):
-            query.order('time_done')
- 
-        return query
-
 
     def time_taken_capped_for_reporting(self):
         # For reporting's sake, we cap the amount of time that you can be considered to be
@@ -1622,7 +1600,7 @@ class ProblemLog(db.Model):
         return util.minutes_between(self.time_started(), self.time_ended())
 
 # commit_problem_log is used by our deferred problem log insertion process
-def commit_problem_log(problem_log_source, user_data):
+def commit_problem_log(problem_log_source, user_data = None):
     try:
         if not problem_log_source or not problem_log_source.key().name:
             logging.critical("Skipping problem log commit due to missing problem_log_source or key().name")
@@ -1716,13 +1694,10 @@ def commit_problem_log(problem_log_source, user_data):
         
     db.run_in_transaction(txn)
 
-    #TODO: assuming we do the summary by coaches route the following two lines can be removed
-    from classtime import UserAdjacentActivitySummary #if this line is at the top it creates a circular reference
-    LogSummary.add_or_update_entry(user_data, problem_log_source, UserAdjacentActivitySummary, "UserAdjacentActivity")
-
-    from classtime import  ClassDailyActivitySummary #putting this at the top would get a circular reference
-    for coach in user_data.coaches:
-        LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), problem_log_source, ClassDailyActivitySummary, "ClassDailyActivity", 1440, "period")
+    if user_data is not None:
+        from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
+        for coach in user_data.coaches:
+            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), problem_log_source, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
 
 
 

@@ -8,7 +8,7 @@ from google.appengine.ext import deferred
 from asynctools import AsyncMultiTask, QueryTask
 
 import util
-from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, LogSummary
+from models import UserExercise, Exercise, UserData, ProblemLog, VideoLog, LogSummary, LogSummaryTypes
 import activity_summary
 
 def dt_to_utc(dt, timezone_adjustment):
@@ -49,7 +49,7 @@ def fill_class_summaries_from_logs(user_data_coach, students_data, dt_start_utc)
         problem_and_video_logs = sorted(problem_and_video_logs, key=lambda log: log.time_started())
 
         if problem_and_video_logs:       
-            LogSummary.add_or_update_entry(user_data_coach, problem_and_video_logs, ClassDailyActivitySummary, "ClassDailyActivity", 1440, "period")
+            LogSummary.add_or_update_entry(user_data_coach, problem_and_video_logs, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
 
 
 #this function will make the summaries for the day
@@ -84,7 +84,7 @@ def fill_summaries_from_logs(students_data, dt_start_utc, timezone_adjustment):
         problem_and_video_logs = sorted(problem_and_video_logs, key=lambda log: log.time_started())
 
         for activity in problem_and_video_logs:
-            LogSummary.add_or_update_entry(user_data_student, activity, UserAdjacentActivitySummary, "UserAdjacentActivity")
+            LogSummary.add_or_update_entry(user_data_student, activity, UserAdjacentActivitySummary, LogSummaryTypes.USER_ADJACENT_ACTIVITY)
     
 class ClassTimeAnalyzer:
 
@@ -121,7 +121,7 @@ class ClassTimeAnalyzer:
         dt_end_utc1 = dt_start_utc1 + datetime.timedelta(days = 1)
 
         # try and get and add the summary from the first day
-        log_summary1 = LogSummary.get_by_key_name(LogSummary.get_key_name_by_dates(user_data_coach, "ClassDailyActivity", dt_start_utc1, dt_end_utc1))
+        log_summary1 = LogSummary.get_by_key_name(LogSummary.get_key_name_by_dates(user_data_coach, LogSummaryTypes.CLASS_DAILY_ACTIVITY, dt_start_utc1, dt_end_utc1))
         
         class_daily_activity_summary = None
         if log_summary1 is not None:
@@ -136,26 +136,13 @@ class ClassTimeAnalyzer:
             dt_end_utc2 = dt_start_utc2 + datetime.timedelta(days = 1)
 
             # try and get and add the summary from the second day
-            log_summary2 = LogSummary.get_by_key_name(LogSummary.get_key_name_by_dates(user_data_coach, "ClassDailyActivity", dt_start_utc2, dt_end_utc2))
+            log_summary2 = LogSummary.get_by_key_name(LogSummary.get_key_name_by_dates(user_data_coach, LogSummaryTypes.CLASS_DAILY_ACTIVITY, dt_start_utc2, dt_end_utc2))
 
             if log_summary2 is not None:
                 if class_daily_activity_summary is not None :        
                     class_daily_activity_summary.merge(log_summary2.summary)
                 else:
-                    class_daily_activity_summary = log_summary2.summary
-                    
-        # if there is no summary for either day, run a deferred task creating them, and show the old logs
-        # TODO: might have to serve old class report based upon deploy date, as it stands if they look at the day before the deploy date log_summary2 will have something but log_summary1 will not
-        if log_summary1 is None and log_summary2 is None:
-            students_data = user_data_coach.get_students_data()
-
-            for student_data in students_data:
-                deferred.defer(fill_class_summaries_from_logs, user_data_coach, [student_data], dt_start_utc1)
-                if dt_start_utc2 is not None:
-                    deferred.defer(fill_class_summaries_from_logs, user_data_coach, [student_data], dt_start_utc2)
-            
-            return self.get_classtime_table_old(students_data, dt_start_utc)
-        
+                    class_daily_activity_summary = log_summary2.summary        
 
         rows=0
         # only consider sudents that are in the coach's currently looked at list (some students might have stopped having their current coach, or we might only be interested in a coach's student_list
@@ -189,7 +176,7 @@ class ClassTimeAnalyzer:
         # Asynchronously grab all student data at once
         async_queries = []
         for user_data_student in students_data:
-            query = LogSummary.get_for_user_data_between_dts(user_data_student, "UserAdjacentActivity", self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
+            query = LogSummary.get_for_user_data_between_dts(user_data_student, LogSummaryTypes.USER_ADJACENT_ACTIVITY, self.dt_to_utc(dt_start_ctz), self.dt_to_utc(dt_end_ctz))
 
             async_queries.append(query)
 
@@ -203,18 +190,9 @@ class ClassTimeAnalyzer:
             for summary in summaries:
                 rows += 1
                 summary.summary.setTimezoneOffset(self.timezone_offset)
-                logging.info("row="+str(rows)+" user="+str(summary.user)+" time start="+str(summary.start)+" time end="+str(summary.end))
                 classtime_table.drop_into_column(summary.summary, i)                
 
         logging.info("new rows="+str(rows))
-
-
-        # if there is no data, perhaps they are trying to get report from before there were summaries - try fetching the summaries and load old version
-        if len(classtime_table.rows)<=0 and not self.tried_logs:
-            for i, user_data_student in enumerate(students_data):
-                logging.info("deferring updating for "+str(user_data_student.user))
-                deferred.defer(fill_summaries_from_logs, [user_data_student], dt_start_utc, self.timezone_adjustment)
-            return self.get_classtime_table_old(students_data, dt_start_utc)
             
         classtime_table.balance()
         return classtime_table
@@ -257,7 +235,7 @@ class ClassTimeAnalyzer:
                 problem_and_video_logs.append(video_log)
 
             problem_and_video_logs = sorted(problem_and_video_logs, key=lambda log: log.time_started())
-            rows+=len(problem_and_video_logs)
+            rows += len(problem_and_video_logs)
             
             chunk_current = None
 
@@ -265,7 +243,7 @@ class ClassTimeAnalyzer:
 
                 if chunk_current is not None and self.dt_to_ctz(activity.time_started()) > (chunk_current.end + self.chunk_delta):
                     chunks += 1
-                    #logging.info("row="+str(chunks)+" user="+str(chunk_current.user_data_student.user)+" time start="+str(chunk_current.start)+" time end="+str(chunk_current.end))
+
                     classtime_table.drop_into_column_old(chunk_current, column)
                     chunk_current.description()
                     chunk_current = None
@@ -281,7 +259,7 @@ class ClassTimeAnalyzer:
 
             if chunk_current is not None:
                 chunks += 1
-                #logging.info("row="+str(chunks)+" user="+str(chunk_current.user_data_student.user)+" time start="+str(chunk_current.start)+" time end="+str(chunk_current.end))
+
                 classtime_table.drop_into_column_old(chunk_current, column)
                 chunk_current.description()
 
@@ -317,15 +295,15 @@ class ClassTimeTable:
         return datetime.datetime(
                 year = self.start.year, 
                 month = self.start.month, 
-                day=self.start.day, 
-                hour=ClassTimeChunk.SCHOOLDAY_START_HOURS)
+                day = self.start.day, 
+                hour = ClassTimeChunk.SCHOOLDAY_START_HOURS)
 
     def schoolday_end(self):
         return datetime.datetime(
                 year = self.start.year, 
                 month = self.start.month, 
-                day=self.start.day, 
-                hour=ClassTimeChunk.SCHOOLDAY_END_HOURS)
+                day = self.start.day, 
+                hour = ClassTimeChunk.SCHOOLDAY_END_HOURS)
 
     def during_schoolday(self):
         return self.start >= self.schoolday_start() and self.end <= self.schoolday_end()
@@ -529,10 +507,10 @@ class ClassDailyActivitySummary:
     def add(self, user, activity):
         if self.user_data_coach is None:
             self.user_data_coach = user
-        elif self.user_data_coach.user != user.user:
+        elif self.user_data_coach.user_id != user.user_id:
             raise Exception("Trying to add a activity belonging to the coach %s to the ClassDailyActivitySummary of %s" % (user.user, self.user_data_coach.user))
 
-        user_data_student=activity.user
+        user_data_student = activity.user
         if self.student_dict.has_key(activity.user):
             #cycle through the students adjacent activity summaries to see if the current activity is close enough to and should be added to them
             for adjacent_summary in self.student_dict[activity.user]:
@@ -541,12 +519,12 @@ class ClassDailyActivitySummary:
                     return
         
         #no summary close to the current activity was found so making a new one    
-        new_summary=UserAdjacentActivitySummary()
+        new_summary = UserAdjacentActivitySummary()
         new_summary.add(activity.user, activity)
         if self.student_dict.has_key(activity.user):
             self.student_dict[activity.user].append(new_summary)
         else:
-            self.student_dict[activity.user]=[new_summary]      
+            self.student_dict[activity.user] = [new_summary]      
 
     #cycles through all students and adds the second days data to the first, in the case that an activity chunk was started near midnight UTC between the two days it will merge those two AdjacentActivitySummaries together
     def merge(self, secondSummary):

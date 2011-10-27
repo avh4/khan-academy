@@ -27,44 +27,14 @@ def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
     if classtime_analyzer.timezone_offset != -1:
         # If no timezone offset is specified, don't bother grabbing all the data
         # because we'll be redirecting back to here w/ timezone information.
-        
-        #TODO: remove commented out tests below and go with the version of get_classtime_table that is the fastest
-        ''' 
-        import time
-        minOld=999999
-        minNew=999999
-        for i in range(1,2):
-            start=time.time()
-            classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)
-            end=time.time()
-            minOld=min(minOld, end-start)
 
-            start=time.time()
-            classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
-            end=time.time()
-            minNew=min(minNew, end-start)
-       
-        logging.info("old="+ str(minOld))
-        logging.info("new="+ str(minNew))
-        '''
-        import os
-        import time
-        
-        if os.environ["QUERY_STRING"].find("&version=2")!=-1:
-            start=time.time()
-            classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
-            end=time.time()
-            logging.info("new="+ str(end-start))
-        elif os.environ["QUERY_STRING"].find("&version=3")!=-1:
-            start=time.time()
+        if int(models.Setting.classtime_report_method()) == 2 and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
             classtime_table = classtime_analyzer.get_classtime_table_by_coach(user_data, students_data, dt_utc)
-            end=time.time()
-            logging.info("new by coach="+ str(end-start))
+        elif int(models.Setting.classtime_report_method()) == 1  and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
+            classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
         else:
-            start=time.time()
             classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)
-            end=time.time()
-            logging.info("old="+ str(end-start))
+
 
     for user_data_student in students_data:
 
