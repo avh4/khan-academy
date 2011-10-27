@@ -66,7 +66,7 @@ body {
     line-height: 22px;
     background: url(/images/light-page-bg.png) repeat-x;
 }
-body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /*! data-uri(/images/dark-page-bg.png) */
+
 
 #outer-wrapper {
     min-height: 100%;
@@ -83,6 +83,14 @@ body.dark { background: url(/images/dark-page-bg.png) repeat-x; } /*! data-uri(/
     max-width: 1200px;
     position: relative;
     margin: 0 auto;
+}
+
+article {
+    padding: 0 19px;
+    background: #fff;
+    position: relative;
+    margin: 0 1px;
+    border-top: 1px solid #C6D1AD;
 }
 
 /* Basic typography for the entire site */
@@ -229,6 +237,22 @@ input.simple-button {
     -webkit-box-shadow: 0 1px 3px #ccc;
     -moz-box-shadow: 0 1px 3px #ccc;
     box-shadow: 0 1px 3px #ccc;
+}
+
+.ui-corner-right.strict {
+    -moz-border-radius-bottomleft: 0;
+    -moz-border-radius-topleft: 0;
+    -webkit-border-bottom-left-radius: 0;
+    -webkit-border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+    
+    -moz-border-radius-bottomright: 5px;
+    -moz-border-radius-topright: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 /* default silver button gradient */
@@ -894,7 +918,8 @@ footer {
     display: block;
     padding: 0;
 }
-    .light #top-header #page_search #search-input {
+    .light #top-header #page_search #search-input,
+    #container #dashboard-filter-text {
         background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -5px -867px;
         background-color: #fafafa;
@@ -1063,23 +1088,23 @@ article, section {
     display: block;
 }
 
-article.video {
+div.video {
     margin-left: auto;
     margin-right: auto;
     width: 800px;
 }
 
-article.video > div {
+div.video > div {
     width: 800px;
 }
 
-article.video details {
+div.video details {
     display: block;
     width: 798px;
     background-color: #d2dded;
 }
 
-article.video summary {
+div.video summary {
     display: block;
     background-color: #E6F8DD;
     border-top: 1px solid #80C65A;
@@ -1087,38 +1112,38 @@ article.video summary {
     font-weight: bold;
 }
 
-article.video label.video_playlist_prev {
+div.video label.video_playlist_prev {
     float: left;
     border-right: solid 1px white;
 }
 
-article.video label.video_playlist_next {
+div.video label.video_playlist_next {
     float: right;
     border-left: solid 1px white;
 }
 
-article.video div.video_playlist_container {
+div.video div.video_playlist_container {
     clear: both;
     border-top: 1px solid grey;
     overflow: hidden;
 }
 
-article.video ol li {
+div.video ol li {
     display: inline-block;
     width: 260px;
     vertical-align: top;
 }
 
-article.video ol li, article.video summary, article.video label.video_playlist_prev, article.video label.video_playlist_next {
+div.video ol li, div.video summary, div.video label.video_playlist_prev, div.video label.video_playlist_next {
     padding: .5ex 3px .5ex 3px;
 }
 
-article.video ol li:before {
+div.video ol li:before {
     content: counter(video) ".";
     counter-increment: video;
 }
 
-article.video ol {
+div.video ol {
     counter-reset: video;
     padding: 0ex 0em 8ex 0em;
     display: inline;
@@ -1127,7 +1152,7 @@ article.video ol {
     background-image: url(/images/798white_798grey.png); /*! data-uri(/images/798white_798grey.png) */
 }
 
-article.video p#keywords {
+div.video p#keywords {
     clear: both;
 }
 
@@ -1334,6 +1359,13 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         right: 5px;
         top: 40px;
         z-index: 1;
+        /* Fallback for web browsers that doesn't support RGBa */
+        background: rgb(0, 0, 0) transparent;
+        /* RGBa with 0.75 opacity */
+        background: rgba(0, 0, 0, 0.75);
+        padding: 3px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
     }
     .exercise-legend {
         font-size: 12px;
@@ -1382,6 +1414,17 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
             background-color: #c7e5f7;
         }
 
+    .exercise-show {
+        position: absolute;
+        padding: 5px 5px;
+        left: 282px;
+        top: 5px;
+        line-height: 1px;
+    }
+    .exercise-show:hover {
+        top: 6px;
+    }
+
     #container #dashboard-drawer {
         position: absolute;
         background: #fff;
@@ -1391,6 +1434,33 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         -webkit-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         -moz-box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
         box-shadow: 2px 0px 3px rgba(0, 0, 0, .1);
+    }
+    #container #dashboard-filter {
+        overflow: hidden;
+        padding: 0px 0px 10px 0px;
+    }
+    #container #dashboard-filter-text {
+        background-image: none;
+        border-color: #ccc;
+        height: 24px\9;
+        outline: none;
+        padding: 0 55px 0 5px;
+        width: 260px;
+    }
+    #container #dashboard-filter-text:focus {
+        -webkit-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+        -moz-box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+        box-shadow: inset 0 0 5px rgba(115, 152, 44, .5);
+    }
+    #dashboard-filter-clear {
+        height: 26px;
+        padding-top: 4px;
+        
+        position: absolute;
+        top: 10px;
+        top: 12px\9;
+        right: 23px;
+        z-index: 100;
     }
     #container #dashboard-drawer-inner {
         margin-right: 2px;
@@ -1468,6 +1538,10 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         margin-right: 350px;
     }
 
+.exercise-filter-count,#exercise-all-exercises {
+    font-size: 11px;
+    color: #444;
+}
 .exercise-badge {
     background: #f3f3f3;
     margin-bottom: 5px;
@@ -1518,20 +1592,37 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         .exercise-badge .exercise-title a:hover {
             color: #006699;
         }
+
+    .exercise-badge #streak-bar-container{
+      /* the streak bar container on the dashboard */
+      position:absolute;
+      bottom:2px; left:85px;
+      width:228px;
+    }
+
     .streak-bar {
+        /* the dashboard streak bar doesn't use a generated gradient*/
         background-image: url(/images/non-repeating-sprites.3.png);
         background-position: -10px -730px;
-        width: 228px;
+        width: 100%;
         height: 30px;
         line-height: 18px;
     }
+    .streak-bar.proficient {
+        -webkit-box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        -moz-box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        background-color: rgba(0, 128, 201, 0.4);
+        height: 25px;
+    }
+    .single-exercise .streak-bar.proficient {
+        -webkit-box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        -moz-box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        height: 30px;
+    }
     .streak-bar-challenge {
         background: url(/images/streak-meter-empty-challenge.png) no-repeat;
-    }
-    .exercise-badge .streak-bar {
-         position: absolute;
-         left: 85px;
-         bottom: 5px;
     }
 
 .achievement-badge-counts {
@@ -1768,17 +1859,22 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
     left: 75px;
     width: 550px;
 }
+
+.exercise-badge.single-exercise #streak-bar-container{
+  width:325px;
+  position:absolute;
+  right:10px; left:auto; top:20px;
+}
+
 .exercise-badge.single-exercise .streak-bar {
-    bottom: auto;
-    left: auto;
-    top: 21px;
-    right: 10px;
+    position:relative;
     width:325px;
     background-image:-webkit-gradient(linear, left top, right top, from(#eee), to(#ccc));
     background-image: -moz-linear-gradient( left, #eee, #ccc );
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#eeeeee', endColorstr='#cccccc');
     background-position:0 0;
     border:1px solid rgb(204,204,204);
+    z-index:10;
 }
 
 .exercise-badge.single-exercise .streak-bar .energy-points-badge{
@@ -2197,27 +2293,6 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
 
 /* One-Off Page Styles */
 
-#coaches, #students, #donate, #individual_report,
-.achievement-badges-container, #login-page,
-#about-us, #homepage, #video-page, #contribute,
-#credits, #report-problem, #tos, #privacy-policy,
-#dmca, #search_results, #exercise-stats {
-    padding: 0 19px;
-    background: #fff;
-    position: relative;
-    margin: 0 1px;
-    border-top: 1px solid #C6D1AD;
-}
-
-.dark #coaches, .dark #students, .dark #donate, .dark #individual_report, .dark
-.achievement-badges-container, .dark #login-page, .dark #about-us,
-.dark #homepage, .dark #video-page, .dark #contribute,
-.dark #credits, .dark #report-problem, .dark #tos, .dark #privacy-policy,
-.dark #dmca {
-    -webkit-box-shadow: 0 -2px 0 #1A222C;
-    -moz-box-shadow: 0 -2px 0 #1A222C;
-    box-shadow: 0 -2px 0 #1A222C;
-}
 #about-us {
     *position: static;
 }
@@ -2916,10 +2991,18 @@ div.arrow-right-shadow, div.arrow-left-shadow {
     font-size: 12px;
     width: 80px;
     border: 1px solid transparent;
+    /* Fallback for web browsers that doesn't support RGBa */
+    background: rgb(0, 0, 0) transparent;
+    /* RGBa with 0.5 opacity */
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .nodeLabelHidden {
     display: none;
+}
+.nodeLabelFiltered {
+    opacity: 0.3;
+    filter:alpha(opacity=30);
 }
 .nodeLabelProficient div {
 }
@@ -3314,4 +3397,57 @@ div.clearFloat { overflow:hidden; height:1px; clear:both; }
 .emailShare {
     text-indent: -9999px;
     background: url(/images/email-button-24.png) no-repeat;
+}
+
+#search-playlists span.highlighted {
+    font-weight: bold;
+}
+#search-playlists .playlist {
+    margin-top: 38px;
+    margin-bottom: 5px;
+    font-size: 18px
+}
+#search-playlists .videos {
+    margin-left: 0px;
+}
+#search-playlists .video-result {
+    font-size: 14px;
+}
+#search-playlists .description {
+    margin: 2px 0px 0px 0px;
+    font-size: 11px;
+    line-height: 18px;
+}
+#search-playlists li {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+#search-playlists .match_count {
+    font-size: 14px;
+}
+#search-playlists .column {
+    float: left;
+    width: 200px;
+    padding-right: 20px;
+}
+#search-playlists .column:first-child {
+    width: 360px;
+}
+#search-playlists .column-heading {
+    width: 180px;
+    border-bottom: 2px solid black;
+    margin: 0px;
+}
+#search-playlists .column li {
+    margin: 5px 0px 0px 0px;
+    line-height: 14px;
+}
+#search-playlists br {
+    clear: left;
+}
+
+#you-are-here{
+  position:absolute;
+  top:0px;
+  left:66px;
 }

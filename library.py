@@ -10,12 +10,30 @@ from models import Video, Playlist, VideoPlaylist, Setting
 from topics_list import topics_list
 import request_handler
 import util
+import urllib2
+import re
+
+@layer_cache.cache(layer=layer_cache.Layers.Memcache | layer_cache.Layers.Datastore, expiration=86400)
+def getSmartHistoryContent():
+    request = urllib2.Request("http://smarthistory.org/khan-home.html")
+    try:
+        response = urllib2.urlopen(request)
+        smart_history = response.read()
+        smart_history = re.search(re.compile("<body>(.*)</body>", re.S), smart_history).group(1).decode("utf-8")
+        smart_history.replace("script", "")
+    except Exception, e:
+        logging.exception("Failed fetching smarthistory playlist")
+        smart_history = None
+        pass
+    return smart_history
 
 @layer_cache.cache_with_key_fxn(
         lambda *args, **kwargs: "library_content_html_%s" % Setting.cached_library_content_date()
         )
-def library_content_html(bust_cache = False):
+def library_content_html():
     # No cache found -- regenerate HTML
+    smart_history = getSmartHistoryContent()
+
     all_playlists = []
 
     dict_videos = {}
@@ -90,6 +108,7 @@ def library_content_html(bust_cache = False):
     template_values = {
         'App' : App,
         'all_playlists': all_playlists,
+        'smart_history': smart_history,
         }
 
     html = shared_jinja.get().render_template("library_content_template.html", **template_values)

@@ -4,9 +4,13 @@ import subprocess
 import os
 import optparse
 import datetime
+import urllib2
+import webbrowser
 
 sys.path.append(os.path.abspath("."))
 import compress
+import glob
+import tempfile
 
 try:
     import secrets
@@ -158,6 +162,33 @@ def check_secrets():
     regex = re.compile("^facebook_app_secret = '050c.+'$", re.MULTILINE)
     return regex.search(content)
 
+def tidy_up():
+    """moves all pycs and compressed js/css to a rubbish folder alongside the project"""
+    trashdir = tempfile.mkdtemp(dir="../", prefix="rubbish-")
+    
+    print "Moving old files to %s." % trashdir
+    
+    junkfiles = open(".hgignore","r")
+    please_tidy = [filename.strip() for filename in junkfiles 
+                      if not filename.strip().startswith("#")]
+    but_ignore = ["secrets.py", "", "syntax: glob"]
+    [please_tidy.remove(path) for path in but_ignore]
+    
+    for root, dirs, files in os.walk("."):
+        if ".git" in dirs:
+            dirs.remove(".git")
+        if ".hg" in dirs:
+            dirs.remove(".hg")
+        
+        for dirname in dirs:
+            removables = [glob.glob( os.path.join(root, dirname, rubbish) ) for rubbish in please_tidy
+                          if len( glob.glob( os.path.join(root, dirname, rubbish) ) ) > 0]
+            # flatten sublists of removable filse
+            please_remove = [filename for sublist in removables for filename in sublist]
+            if please_remove:
+                [ os.renames(stuff, os.path.join(trashdir,stuff)) for stuff in please_remove ]
+    
+
 def compress_js():
     print "Compressing javascript"
     compress.compress_all_javascript()
@@ -169,6 +200,17 @@ def compress_css():
 def compile_templates():
     print "Compiling all templates"
     return 0 == popen_return_code(['python', 'deploy/compile_templates.py'])
+
+def prime_autocomplete_cache(version):
+    try:
+        resp = urllib2.urlopen("http://%s.%s.appspot.com/api/v1/autocomplete?q=calc" % (version, get_app_id()))
+        resp.read()
+        print "Primed autocomplete cache"
+    except:
+        print "Error when priming autocomplete cache"
+
+def open_browser_to_ka_version(version):
+    webbrowser.open("http://%s.%s.appspot.com" % (version, get_app_id()))
 
 def deploy(version):
     print "Deploying version " + str(version)
@@ -202,10 +244,16 @@ def main():
 
     parser.add_option('-c', '--clean',
         action="store_true", dest="clean",
-        help="Clean the old packages and generate them again", default=False)
+        help="Clean the old packages and generate them again. If used with -d,the app is not compiled at all and is only cleaned.", default=False)
 
     options, args = parser.parse_args()
 
+    if(options.clean):
+        print "Cleaning previously generated files"
+        tidy_up()
+        if options.dryrun:
+            return
+        
     includes_local_changes = hg_st()
     if not options.force and includes_local_changes:
         print "Local changes found in this directory, canceling deploy."
@@ -245,6 +293,8 @@ def main():
         compress.revert_js_css_hashes()
         if success:
             send_hipchat_deploy_message(version, includes_local_changes)
+            open_browser_to_ka_version(version)
+            prime_autocomplete_cache(version)
 
     end = datetime.datetime.now()
     print "Done. Duration: %s" % (end - start)

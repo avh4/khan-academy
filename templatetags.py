@@ -62,49 +62,23 @@ def user_points(user_data):
     return {"points": points}
 
 def streak_bar(user_exercise_dict):
-
     progress = user_exercise_dict["progress"]
-    streak = user_exercise_dict["streak"]
-    longest_streak = user_exercise_dict["longest_streak"]
-    required_streak = user_exercise_dict["required_streak"]
 
-    bar_max_width = 227
+    bar_max_width = 228
     bar_width = min(1.0, progress) * bar_max_width
-
-    longest_streak_width = min(bar_max_width, math.ceil((bar_max_width / float(required_streak)) * longest_streak))
-    streak_icon_width = min(bar_max_width - 2, max(43, bar_width)) # 43 is width of streak icon
-
-    width_required_for_label = 20
-    show_streak_label = bar_width > width_required_for_label
-    show_longest_streak_label = longest_streak_width > width_required_for_label and (longest_streak_width - bar_width) > width_required_for_label
 
     levels = []
     if user_exercise_dict["summative"]:
-        c_levels = required_streak / consts.REQUIRED_STREAK
+        c_levels = user_exercise_dict["num_milestones"]
         level_offset = bar_max_width / float(c_levels)
         for ix in range(c_levels - 1):
             levels.append(math.ceil((ix + 1) * level_offset) + 1)
-    else:
-        if streak > consts.MAX_STREAK_SHOWN:
-            streak = 'Max'
-
-        if longest_streak > consts.MAX_STREAK_SHOWN:
-            longest_streak = 'Max'
-
-    def progress_display(num):
-        return '%.0f%%' % math.floor(num * 100.0) if num <= consts.MAX_PROGRESS_SHOWN else 'Max'
 
     template_values = {
-        "streak": streak,
-        "longest_streak": longest_streak,
-        "longest_streak_width": longest_streak_width,
-        "streak_icon_width": streak_icon_width,
-        "show_streak_label": show_streak_label,
-        "show_longest_streak_label": show_longest_streak_label,
         "is_suggested": user_exercise_dict["suggested"],
         "is_proficient": user_exercise_dict["proficient"],
         "float_progress": progress,
-        "progress": progress_display(progress),
+        "progress": models.UserExercise.to_progress_display(progress),
         "bar_width": bar_width,
         "bar_max_width": bar_max_width,
         "levels": levels
@@ -147,6 +121,9 @@ def playlist_browser_structure(structure, class_name="", level=0):
                 s += "<li class='solo'><a href='%s' class='menulink'>%s</a></li>" % (href, escape(name))
             else:
                 s += "<li class='%s'><a href='%s'>%s</a></li>" % (class_name, href, escape(name))
+
+            if playlist_title=="History":
+                s += "<li class=''><a href='#smarthistory'>Art History</a></li>"
 
         else:
             items = structure["items"]

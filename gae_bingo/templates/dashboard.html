@@ -37,7 +37,9 @@
                 </nobr>
             </div>
 
-            <h2 class="experiment-title">{{ results.0.pretty_name|escape }}</h2>
+            <h2 class="experiment-title">
+              {{ results.0.name|escape }}
+            </h2>
 
             {% if results.0.live %}
             <p>
@@ -66,7 +68,7 @@
                         <th>Participants</th>
                         <th>Conversions
                             {% ifnotequal results.0.conversion_name results.0.name %}
-                            to <em>{{ results.0.conversion_name|escape }}</em>
+                            to <br><em class="conversion-name">{{ results.0.conversion_name|escape }}</em>
                             {% endifnotequal%}
                         </th>
                         <th>&nbsp;</th>

@@ -13,7 +13,7 @@ class ProblemPoint:
         self.exercise_non_summative = problem_log.exercise_non_summative
         self.exercise_non_summative_display_name = models.Exercise.to_display_name(problem_log.exercise_non_summative)
         self.dt = problem_log.time_done
-        self.problem_number = problem_log.problem_number
+        self.problem_number = max(problem_log.problem_number, 1)
         self.video_point = None
 
         # We cannot render old problems that were created in the v1 exercise framework.
@@ -117,7 +117,7 @@ def exercise_problems_graph_context(user_data_student, exid):
         'exercise_display_name': models.Exercise.to_display_name(exid),
         'exid': exid,
         'problem_list': problem_list,
-        'streak': user_exercise.streak,
+        'progress': user_exercise.progress_display(),
         'longest_streak': user_exercise.longest_streak,
         'percent_last_ten_correct': percent_last_ten_correct,
         'student_nickname': user_data_student.nickname,

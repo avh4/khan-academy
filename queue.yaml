@@ -16,7 +16,7 @@ queue:
   rate: 5/s
 
 - name: problem-log-queue
-  rate: 60/s
+  rate: 80/s
 
 - name: video-log-queue
   rate: 60/s

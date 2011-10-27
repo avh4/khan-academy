@@ -7,6 +7,12 @@ var KnowledgeMap = {
     markers: [],
     widthPoints: 200,
     heightPoints: 120,
+    selectedNodes: {},
+
+    filteredNodes: {},
+    updateFilterTimeout: null,
+
+    allExercisesVisibleBeforeFiltering: false,
     colors: {
         blue: "#0080C9",
         green: "#8EBE4F",
@@ -35,6 +41,7 @@ var KnowledgeMap = {
     latLngBounds: null,
     reZoom: /nodeLabelZoom(\d)+/g,
     reHidden: /nodeLabelHidden/g,
+    reFiltered: /nodeLabelFiltered/g,
     fFirstDraw: true,
     fCenterChanged: false,
     fZoomChanged: false,
@@ -86,8 +93,22 @@ var KnowledgeMap = {
 
         google.maps.event.addListener(this.map, "center_changed", function(){KnowledgeMap.onCenterChange();});
         google.maps.event.addListener(this.map, "idle", function(){KnowledgeMap.onIdle();});
+        google.maps.event.addListener(this.map, "click", function(){KnowledgeMap.onClick();});
 
         this.giveNasaCredit();
+    },
+
+    panToNode: function(dataID) {
+        var node = this.dictNodes[dataID];
+
+        // Set appropriate zoom level if necessary
+        if (node.summative && this.map.getZoom() > this.options.minZoom)
+            this.map.setZoom(this.options.minZoom);
+        else if (!node.summative && this.map.getZoom() == this.options.minZoom)
+            this.map.setZoom(this.options.minZoom+1);
+
+        // Move the node to the center of the view
+        this.map.panTo(node.latLng);
     },
 
     escapeSelector: function(s) {
@@ -170,7 +191,7 @@ var KnowledgeMap = {
 
     attachNodeEvents: function(el, node) {
         $(el).click(
-                function(){KnowledgeMap.onNodeClick(node);}
+                function(evt){KnowledgeMap.onNodeClick(node, evt);}
             ).hover(
                 function(){KnowledgeMap.onNodeMouseover(this, node);},
                 function(){KnowledgeMap.onNodeMouseout(this, node);}
@@ -199,6 +220,9 @@ var KnowledgeMap = {
     drawEdge: function(nodeSource, edgeTarget, zoom) {
 
         var nodeTarget = this.dictNodes[edgeTarget.target];
+
+        // If either of the nodes is missing, don't draw the edge.
+        if (!nodeSource || !nodeTarget) return;
 
         var coordinates = [
             nodeSource.latLng,
@@ -267,7 +291,7 @@ var KnowledgeMap = {
         var marker = new com.redfin.FastMarker(
                 "marker-" + node.id, 
                 node.latLng, 
-                ["<div id='node-" + node.id + "' data-id='" + node.id + "' class='" + this.getLabelClass(labelClass, node, zoom) + "'><img src='" + iconOptions.url +"'/><div>" + node.name + "</div></div>"], 
+                ["<div id='node-" + node.id + "' data-id='" + node.id + "' class='" + this.getLabelClass(labelClass, node, zoom, false) + "'><img src='" + iconOptions.url +"'/><div>" + node.name + "</div></div>"], 
                 "", 
                 node.summative ? 2 : 1,
                 0,0);
@@ -299,7 +323,7 @@ var KnowledgeMap = {
         return this.iconCache[iconUrlCacheKey];
     },
 
-    getLabelClass: function(classOrig, node, zoom) {
+    getLabelClass: function(classOrig, node, zoom, filtered) {
 
         var visible = !node.summative || zoom == this.options.minZoom;
         classOrig = classOrig.replace(this.reHidden, "") + (visible ? "" : " nodeLabelHidden");
@@ -307,6 +331,8 @@ var KnowledgeMap = {
         if (node.summative && visible) zoom = this.options.maxZoom - 1;
 
         classOrig = classOrig.replace(this.reZoom, "") + (" nodeLabelZoom" + zoom);
+
+        classOrig = classOrig.replace(this.reFiltered, "") + (filtered ? " nodeLabelFiltered" : "");
 
         return classOrig;
     },
@@ -319,57 +345,94 @@ var KnowledgeMap = {
             jel.removeClass("nodeLabelHighlight");
     },
 
-    onNodeClick: function(node) {
+    onNodeClick: function(node, evt) {
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
 
         if (KnowledgeMap.admin)
         {
+            if (evt.shiftKey)
+            {
+                if (node.id in KnowledgeMap.selectedNodes)
+                {
+                    delete KnowledgeMap.selectedNodes[node.id];
+                    this.highlightNode(node, false);
+                }
+                else
+                {
+                    KnowledgeMap.selectedNodes[node.id] = true;
+                    this.highlightNode(node, true);
+                }
+            }
+            else
+            {
+                $.each(KnowledgeMap.selectedNodes, function(node_id) {
+                    KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], false);
+                });
+                KnowledgeMap.selectedNodes = { };
+                KnowledgeMap.selectedNodes[node.id] = true;
+                this.highlightNode(node, true);
+            }
             
             //Unbind other keydowns to prevent a spawn of hell
             $(document).unbind('keydown');
 
             // If keydown is an arrow key
             $(document).keydown(function(e){
+                var delta_v = 0, delta_h = 0;
+                    
                 if (e.keyCode == 37) { 
-                    dir = "left";
-                    node.v_position = parseInt(node.v_position)-(1); 
+                    delta_v = -1; // Left
                 }
                 if (e.keyCode == 38) { 
-                    dir = "up";
-                    node.h_position = parseInt(node.h_position)-(1); 
+                    delta_h = -1; // Up
                 }
                 if (e.keyCode == 39) { 
-                    dir = "right";
-                    node.v_position = parseInt(node.v_position)+(1); 
+                    delta_v = 1; // Right
                 }
                 if (e.keyCode == 40) { 
-                    dir = "down";
-                    node.h_position = parseInt(node.h_position)+(1); 
+                    delta_h = 1; // Down
                 }
 
-                if ( 37 <= e.keyCode && e.keyCode <= 40 ) {
-                    $.post("/moveexercisemapnode", { exercise: node.id, direction: dir } );
-                    
+                if (delta_v != 0 || delta_h != 0) {
+                    var id_array = [];
+
+                    $.each(KnowledgeMap.selectedNodes, function(node_id) {
+                        var actual_node = KnowledgeMap.dictNodes[node_id];
+
+                        actual_node.v_position = parseInt(actual_node.v_position) + delta_v;
+                        actual_node.h_position = parseInt(actual_node.h_position) + delta_h;
+
+                        id_array.push(node_id);
+                    });
+                    $.post("/moveexercisemapnodes", { exercises: id_array.join(","), delta_h: delta_h, delta_v: delta_v } );
+
                     var zoom =KnowledgeMap.map.getZoom();
                     KnowledgeMap.markers = [];
 
                     for (var key in KnowledgeMap.dictEdges) // this loop lets us update the edges wand will remove the old edges
+                    {
+                        var rgTargets = KnowledgeMap.dictEdges[key];
+                        for (var ix = 0; ix < rgTargets.length; ix++)
                         {
-                            var rgTargets = KnowledgeMap.dictEdges[key];
-                            for (var ix = 0; ix < rgTargets.length; ix++)
-                            {
-                                rgTargets[ix].line.setMap(null);
-                            }
+                            rgTargets[ix].line.setMap(null);
                         }
-                    KnowledgeMap.dictNodes[node.id] = node;
+                    }
                     KnowledgeMap.overlay.setMap(null);
                     KnowledgeMap.layoutGraph();
                     KnowledgeMap.drawOverlay();
+
+                    setTimeout(function() {
+                            $.each(KnowledgeMap.selectedNodes, function(node_id) {
+                                KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], true);
+                            });
+                        }, 100);
+
                     return false;
-               }
+                }
             });
             
+            evt.stopPropagation();
         }
         else
         {
@@ -383,6 +446,8 @@ var KnowledgeMap = {
             return;
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
+        if (node.id in KnowledgeMap.selectedNodes)
+            return;
       
         $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").addClass("exercise-badge-hover");
         this.highlightNode(node, true);
@@ -394,6 +459,8 @@ var KnowledgeMap = {
             return;
         if (!node.summative && this.map.getZoom() <= this.options.minZoom)
             return;
+        if (node.id in KnowledgeMap.selectedNodes)
+            return;
     
         $(".exercise-badge[data-id=\"" + KnowledgeMap.escapeSelector(node.id) + "\"]").removeClass("exercise-badge-hover");
         this.highlightNode(node, false);
@@ -402,14 +469,34 @@ var KnowledgeMap = {
 
     onBadgeMouseover: function() {
         var exid = $(this).attr("data-id");
+        if (exid in KnowledgeMap.selectedNodes)
+            return;
+
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, true);
+
+        $(this).find('.exercise-show').show();
     },
 
     onBadgeMouseout: function() {
         var exid = $(this).attr("data-id");
+        if (exid in KnowledgeMap.selectedNodes)
+            return;
+
         var node = KnowledgeMap.dictNodes[exid];
         if (node) KnowledgeMap.highlightNode(node, false);
+
+        $(this).find('.exercise-show').hide();
+    },
+
+    onShowExerciseClick: function(evt) {
+        var exid = $(this).attr("data-id");
+        KnowledgeMap.panToNode(exid);
+
+        var node = KnowledgeMap.dictNodes[exid];
+        if (node) KnowledgeMap.highlightNode(node, true);
+
+        evt.stopPropagation();
     },
 
     onZoomChange: function(jrgNodes) {
@@ -424,10 +511,11 @@ var KnowledgeMap = {
         jrgNodes.each(function() {
             var jel = $(this);
             var node = KnowledgeMap.dictNodes[jel.attr("data-id")];
+            var filtered = !!KnowledgeMap.filteredNodes[jel.attr("data-id")];
 
             var iconOptions = KnowledgeMap.getIconOptions(node, zoom);
             $("img", jel).attr("src", iconOptions.url);
-            jel.attr("class", KnowledgeMap.getLabelClass(jel.attr("class"), node, zoom));
+            jel.attr("class", KnowledgeMap.getLabelClass(jel.attr("class"), node, zoom, filtered));
         });
 
         for (var key in this.dictEdges)
@@ -457,6 +545,15 @@ var KnowledgeMap = {
             "lng": center.lng(),
             "zoom": this.map.getZoom()
         }); // Fire and forget
+    },
+
+    onClick: function() {
+        if (KnowledgeMap.admin) {
+            $.each(KnowledgeMap.selectedNodes, function(node_id) {
+                KnowledgeMap.highlightNode(KnowledgeMap.dictNodes[node_id], false);
+            });
+            KnowledgeMap.selectedNodes = { };
+        }
     },
 
     onCenterChange: function() {
@@ -506,5 +603,116 @@ var KnowledgeMap = {
         }
 
         return urlfunc({x:x,y:y}, zoom);
+    },
+
+    // Filtering
+
+    initFilter: function() {
+        // Do DOM traversal once at the beginning. Makes filtering reasonably fast
+        KnowledgeMap.badgeElements = [];
+        $('.exercise-badge').each(function(index, element) {
+            KnowledgeMap.badgeElements[index] = {
+                badgeElement: $(element),
+                countElement: $(element).parents('.exercise-sublist').find('.exercise-filter-count'),
+                titleString: $(element).find('.exercise-title').text().toLowerCase(),
+                dataID: $(element).attr('data-id'),
+            };
+        });
+        KnowledgeMap.filterCountElements = $('.exercise-filter-count');
+
+        $('#dashboard-filter-text').keyup(function() {
+            if (KnowledgeMap.updateFilterTimeout == null) {
+                KnowledgeMap.updateFilterTimeout = setTimeout(function() {
+                    KnowledgeMap.doFilter();
+                    KnowledgeMap.updateFilterTimeout = null;
+                }, 250);
+            }
+        });
+        $('#dashboard-filter-clear').click(function() {
+            KnowledgeMap.clearFilter();
+        });
+        $('#dashboard-filter-text').val('');
+    },
+
+    clearFilter: function() {
+        $('#dashboard-filter-text').val('');
+        this.doFilter();
+    },
+
+    doFilter: function() {
+        var filterText = $.trim($('#dashboard-filter-text').val().toLowerCase());
+        var foundExercises = false;
+
+        // Temporarily remove the exercise list container div for better performance
+        var container = $('#exercise-list').detach();
+
+        // Reset counts
+        KnowledgeMap.filterCountElements.each(function(index, element) {
+            $(element).data('exercises', {'exercise_count': 0, 'exercise_total': 0});
+        });
+
+        $.each(KnowledgeMap.badgeElements, function(index, badge) {
+
+            // Perform substring matching
+            if (badge.titleString.indexOf(filterText) >= 0) {
+                badge.badgeElement.show();
+                KnowledgeMap.filteredNodes[badge.dataID] = false;
+
+                if (badge.countElement.length == 1)
+                    badge.countElement.data('exercises').exercise_count++;
+            } else {
+                badge.badgeElement.hide();
+                KnowledgeMap.filteredNodes[badge.dataID] = true;
+            }
+
+            if (badge.countElement.length == 1)
+                badge.countElement.data('exercises').exercise_total++;
+        });
+        
+        // Update count div texts
+        KnowledgeMap.filterCountElements.each(function(index, element) {
+            var counts = $(element).data('exercises');
+            var sublistElement = $(element).parents('.exercise-sublist');
+
+            if (counts.exercise_count == 0) {
+                sublistElement.hide();
+            } else {
+                sublistElement.show();
+
+                foundExercises = true;
+
+                if (counts.exercise_count < counts.exercise_total)
+                    $(element).html('(Showing ' + counts.exercise_count + ' of ' + counts.exercise_total + ')');
+                else
+                    $(element).html('');
+            }
+        });
+
+        // Re-insert the container div
+        container.insertAfter("#dashboard-filter");
+
+        if (foundExercises) {
+            $('#exercise-no-results').hide();
+        } else {
+            $('#exercise-no-results').show();
+        }
+
+        if (filterText) {
+            this.allExercisesVisibleBeforeFiltering = Drawer.areExercisesVisible();
+            if (!Drawer.areExercisesVisible()) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('#exercise-all-exercises').hide();
+            $('#dashboard-filter-clear').show();
+        } else {
+            if (Drawer.areExercisesVisible() != this.allExercisesVisibleBeforeFiltering) {
+                Drawer.toggleAllExercises(false);
+            }
+            $('#exercise-all-exercises').show();
+            $('#dashboard-filter-clear').hide();
+        }
+
+        var jrgNodes = $(".nodeLabel");
+        KnowledgeMap.onZoomChange(jrgNodes);
     }
 };
