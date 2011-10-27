@@ -315,9 +315,10 @@ def raw_exercise_contents(exercise_file):
 
     return contents
 
+# TODO(david): Rename this function
 def reset_streak(user_data, user_exercise):
     if user_exercise and user_exercise.belongs_to(user_data):
-        user_exercise.reset_streak()
+        user_exercise.update_proficiency_model(correct=False)
         user_exercise.put()
 
         return user_exercise
@@ -330,6 +331,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         dt_now = datetime.datetime.now()
         exercise = user_exercise.exercise_model
 
+        prev_last_done = user_exercise.last_done
         user_exercise.last_done = dt_now
         user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
         user_exercise.summative = exercise.summative
@@ -372,25 +374,23 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         if exercise.summative:
             problem_log.exercise_non_summative = exercise_non_summative
 
-        # If this is the first attempt, update review schedule appropriately
-        if attempt_number == 1:
-            user_exercise.schedule_review(completed)
+        first_response = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
+
+        if user_exercise.total_done == 0 and first_response:
+            user_exercise.bingo_proficiency_model('prof_new_exercises_attempted')
+
+        if user_exercise.total_done > 0 and user_exercise.streak == 0 and first_response:
+            user_exercise.bingo_proficiency_model('prof_keep_going_after_wrong')
+
+        first_problem_after_proficiency = prev_last_done and user_exercise.proficient_date and (
+            abs(prev_last_done - user_exercise.proficient_date) <= datetime.timedelta(seconds=1))
+
+        if first_problem_after_proficiency:
+            user_exercise.bingo_proficiency_model('prof_does_problem_just_after_proficiency')
 
         if completed:
 
             user_exercise.total_done += 1
-
-            # Score a conversion in GAE/Bingo if appropriate
-            total_done = user_exercise.total_done
-
-            def add_to_conversions(conversions_dict):
-                if conversions_dict.has_key(total_done):
-                    bingo(conversions_dict[total_done])
-
-            if exercise.name == 'addition_1':
-                add_to_conversions(models.UserData.addition_1_conversions)
-
-            add_to_conversions(models.UserData.any_exercise_conversions)
 
             if problem_log.correct:
 
@@ -407,15 +407,20 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                 user_exercise.streak += 1
                 user_exercise.longest_streak = max(user_exercise.longest_streak, user_exercise.streak)
 
+                user_exercise.update_proficiency_model(correct=True)
+
                 if user_exercise.summative and user_exercise.streak % consts.CHALLENGE_STREAK_BARRIER == 0:
                     user_exercise.streak_start = 0.0
 
-                if user_exercise.streak >= exercise.required_streak and not explicitly_proficient:
+                if user_exercise.progress >= 1.0 and not explicitly_proficient:
                     bingo("alternate_hints_proficiency")
                     user_exercise.set_proficient(True, user_data)
                     user_data.reassess_if_necessary()
 
                     problem_log.earned_proficiency = True
+
+                if first_problem_after_proficiency:
+                    user_exercise.bingo_proficiency_model('prof_problem_correct_just_after_proficiency')
 
             util_badges.update_with_user_exercise(
                 user_data,
@@ -426,15 +431,22 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             # Update phantom user notifications
             util_notify.update(user_data, user_exercise)
 
+            user_exercise.bingo_proficiency_model('prof_problems_done')
+
         else:
 
             if user_exercise.streak == 0:
                 # 2+ in a row wrong -> not proficient
                 user_exercise.set_proficient(False, user_data)
 
-            # Only shrink the progress bar at most once per problem
-            shrink_start = (attempt_number == 1 and count_hints == 0) or (count_hints == 1 and attempt_number == 0)
-            user_exercise.reset_streak(shrink_start)
+            # Only count wrong answer at most once per problem
+            if first_response:
+                user_exercise.update_proficiency_model(correct=False)
+                user_exercise.bingo_proficiency_model('prof_wrong_problems')
+
+        # If this is the first attempt, update review schedule appropriately
+        if attempt_number == 1:
+            user_exercise.schedule_review(completed)
 
         user_exercise_graph = models.UserExerciseGraph.get_and_update(user_data, user_exercise)
 
@@ -444,7 +456,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(models.commit_problem_log, problem_log,
+        deferred.defer(models.commit_problem_log, problem_log, user_data,
                        _queue="problem-log-queue",
                        _url="/_ah/queue/deferred_problemlog")
 

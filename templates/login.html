@@ -17,7 +17,7 @@
 {% endblock pagescript %}
 
 {% block pagecontent %}
-<div id="login-page">
+<article id="login-page">
     <h2 class="pulls">{% if direct %}Login{% else %}You need to login to access this part of the site.{% endif %}</h2>
     <h3>Already have an account with one of these sites? Click the logo to use your account to login here:</h3>
     <form class="openid" method="post" action="/login?k&continue={{continue|urlencode}}"> 
@@ -98,5 +98,5 @@
     <div class="feature"><a href="/about"><img src="/images/class-report-medium.png" height="250" width="320" /></a><br />Coaches: <strong>Track all of your students</strong> with the class report.</div>
         <div class="clear">&nbsp;</div>
     </div>
-</div>
+</article>
 {% endblock pagecontent %}

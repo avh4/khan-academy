@@ -1,4 +1,5 @@
 import logging
+import inspect
 
 # request_cache is similar to layer_cache, except it only memoizes results
 # for each individual request. If you need to cache results for longer than
@@ -22,6 +23,10 @@ import logging
 
 CACHE = {}
 
+def accepts_kwargs(target):
+    args, varargs, varkw, defaults = inspect.getargspec(target)
+    return varkw is not None
+
 def cache():
     def decorator(target):
         key = "__request_cache_%s.%s__" % (target.__module__, target.__name__)
@@ -31,7 +36,7 @@ def cache():
         return wrapper
     return decorator
 
-def cache_with_key_fxn(key_fxn): 
+def cache_with_key_fxn(key_fxn):
     def decorator(target):
         def wrapper(*args, **kwargs):
             return request_cache_check_set_return(target, key_fxn, *args, **kwargs)
@@ -39,14 +44,19 @@ def cache_with_key_fxn(key_fxn):
     return decorator
 
 def request_cache_check_set_return(
-        target, 
-        key_fxn, 
-        *args, 
+        target,
+        key_fxn,
+        *args,
         **kwargs):
 
     key = key_fxn(*args, **kwargs)
 
-    bust_cache = kwargs.get("bust_cache", False)
+    bust_cache = False
+    if "bust_cache" in kwargs:
+        bust_cache = kwargs["bust_cache"]
+        if not accepts_kwargs(target):
+            # delete from kwargs so it's not passed to the target
+            del kwargs["bust_cache"]
 
     if not bust_cache:
         if has(key):
@@ -70,20 +80,20 @@ def get(key):
 
     if not has(key):
         return None
-    
+
     return CACHE[key]
 
 def set(key, value):
     global CACHE
     CACHE[key] = value
- 
+
 def flush():
     global CACHE
     CACHE = {}
 
 class RequestCacheMiddleware(object):
     def __init__(self, app):
-        self.app = app    
+        self.app = app
 
     def __call__(self, environ, start_response):
         # Clear the cache at the beginning of every request. Since GAE's Python

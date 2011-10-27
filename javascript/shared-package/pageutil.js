@@ -21,7 +21,7 @@ function addAutocompleteMatchToList(list, match, fPlaylist, reMatch) {
     var o = {
                 "label": match.title,
                 "title": match.title,
-                "value": match.url,
+                "value": match.ka_url,
                 "key": match.key,
                 "fPlaylist": fPlaylist
             }
@@ -39,7 +39,7 @@ function initAutocomplete(selector, fPlaylists, fxnSelect, fIgnoreSubmitOnEnter)
         source: function(req, fxnCallback) {
 
             // Get autocomplete matches
-            $.getJSON("/autocomplete", {"q": req.term}, function(data) {
+            $.getJSON("/api/v1/autocomplete", {"q": req.term}, function(data) {
 
                 var matches = [];
 

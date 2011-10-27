@@ -16,12 +16,15 @@ from phantom_users.phantom_util import api_create_phantom
 import util
 import notifications
 from gae_bingo.gae_bingo import bingo
+from autocomplete import video_title_dicts, playlist_title_dicts
 
 from api import route
 from api.decorators import jsonify, jsonp, compress, decompress, etag
 from api.auth.decorators import oauth_required, oauth_optional, admin_required, developer_required
 from api.auth.auth_util import unauthorized_response
 from api.api_util import api_error_response
+
+import simplejson as json
 
 # add_action_results allows page-specific updatable info to be ferried along otherwise plain-jane responses
 # case in point: /api/v1/user/videos/<youtube_id>/log which adds in user-specific video progress info to the
@@ -164,6 +167,13 @@ def exercises():
 @jsonify
 def exercises(exercise_name):
     return models.Exercise.get_by_name(exercise_name)
+
+@route("/api/v1/exercises/<exercise_name>/followup_exercises", methods=["GET"])
+@jsonp
+@jsonify
+def exercise_info(exercise_name):
+    exerciselist = models.Exercise.get_by_name(exercise_name).followup_exercises
+    return [models.Exercise.get_by_name(exercise_name) for exercise_name in exerciselist]
 
 @route("/api/v1/exercises/<exercise_name>/videos", methods=["GET"])
 @jsonp
@@ -385,9 +395,11 @@ def user_exercises_all():
                     user_exercises_dict[exercise_name] = user_exercise
 
             for exercise_name in user_exercises_dict:
-                user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
-                user_exercises_dict[exercise_name]._user_data = user_data_student
-                user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
+                # Make sure this exercise still exists
+                if exercise_name in exercises_dict:
+                    user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
+                    user_exercises_dict[exercise_name]._user_data = user_data_student
+                    user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
 
             return user_exercises_dict.values()
 
@@ -720,3 +732,29 @@ def remove_coworker():
             user_data_coworker.put()
 
     return True
+
+@route("/api/v1/autocomplete", methods=["GET"])
+@jsonp
+@jsonify
+def autocomplete():
+
+    video_results = []
+    playlist_results = []
+
+    query = request.request_string("q", default="").strip().lower()
+
+    if query:
+
+        max_results_per_type = 10
+
+        video_results = filter(lambda video_dict: query in video_dict["title"].lower(), video_title_dicts())
+        playlist_results = filter(lambda playlist_dict: query in playlist_dict["title"].lower(), playlist_title_dicts())
+
+        video_results = sorted(video_results, key=lambda dict: dict["title"].lower().index(query))[:max_results_per_type]
+        playlist_results = sorted(playlist_results, key=lambda dict: dict["title"].lower().index(query))[:max_results_per_type]
+
+    return {
+            "query": query, 
+            "videos": video_results, 
+            "playlists": playlist_results
+    }
