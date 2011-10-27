@@ -394,9 +394,11 @@ def user_exercises_all():
                     user_exercises_dict[exercise_name] = user_exercise
 
             for exercise_name in user_exercises_dict:
-                user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
-                user_exercises_dict[exercise_name]._user_data = user_data_student
-                user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
+                # Make sure this exercise still exists
+                if exercise_name in exercises_dict:
+                    user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
+                    user_exercises_dict[exercise_name]._user_data = user_data_student
+                    user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
 
             return user_exercises_dict.values()
 
