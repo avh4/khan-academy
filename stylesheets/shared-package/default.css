@@ -1608,6 +1608,19 @@ ul.ui-autocomplete .ui-menu-item a span.playlist {
         height: 30px;
         line-height: 18px;
     }
+    .streak-bar.proficient {
+        -webkit-box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        -moz-box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        box-shadow: 0 0 12px rgba(0, 128, 201, 0.7);
+        background-color: rgba(0, 128, 201, 0.4);
+        height: 25px;
+    }
+    .single-exercise .streak-bar.proficient {
+        -webkit-box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        -moz-box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        box-shadow: 0 0 15px rgba(0, 128, 201, 0.7);
+        height: 30px;
+    }
     .streak-bar-challenge {
         background: url(/images/streak-meter-empty-challenge.png) no-repeat;
     }
