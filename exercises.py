@@ -453,9 +453,14 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(models.commit_problem_log, problem_log, user_data,
+        deferred.defer(models.commit_problem_log, problem_log,
                        _queue="problem-log-queue",
                        _url="/_ah/queue/deferred_problemlog")
+
+        # Making a separate queue for the log summaries so we can clearly see how much they are getting used
+        # deferred.defer(models.commit_log_summary, problem_log, user_data,
+        #               _queue = "log-summary-queue",
+        #               _url = "/ah/queue/deferred_log_summary") 
 
         return user_exercise, user_exercise_graph
 

@@ -1512,9 +1512,14 @@ class VideoLog(db.Model):
         # Defer the put of VideoLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(commit_video_log, video_log, user_data,
-                       _queue="video-log-queue",
-                       _url="/_ah/queue/deferred_videolog")
+        deferred.defer(commit_video_log, video_log,
+                       _queue = "video-log-queue",
+                       _url = "/_ah/queue/deferred_videolog")
+
+        # Making a separate queue for the log summaries so we can clearly see how much they are getting used
+        # deferred.defer(commit_log_summary, video_log, user_data,
+        #               _queue = "log-summary-queue",
+        #               _url = "/ah/queue/deferred_log_summary") 
 
         return (user_video, video_log, video_points_total)
 
@@ -1532,13 +1537,7 @@ class VideoLog(db.Model):
 
 # commit_video_log is used by our deferred video log insertion process
 def commit_video_log(video_log, user_data = None):
-    video_log.put()
-    
-    if user_data is not None:
-        from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
-        for coach in user_data.coaches:
-            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), video_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
-
+    video_log.put() 
 
 class DailyActivityLog(db.Model):
     user = db.UserProperty()
@@ -1692,6 +1691,13 @@ class LogSummary(db.Model):
         query.order('start')
 
         return query
+
+# commit_log_summary is used by our deferred log summary insertion process
+def commit_log_summary(activity_log, user_data):
+    if user_data is not None:
+        from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
+        for coach in user_data.coaches:
+            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), activity_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
 
 class ProblemLog(db.Model):
 
@@ -1849,13 +1855,6 @@ def commit_problem_log(problem_log_source, user_data = None):
         
         
     db.run_in_transaction(txn)
-
-    if user_data is not None:
-        from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
-        for coach in user_data.coaches:
-            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), problem_log_source, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
-
-
 
 # Represents a matching between a playlist and a video
 # Allows us to keep track of which videos are in a playlist and
