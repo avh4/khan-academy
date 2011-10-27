@@ -21,6 +21,30 @@
     <script>{{ exercise_inline_script }}</script>
     <style>{{exercise_inline_style}}</style>
 
+    {% if alternate_hints_treatment %}
+    <script>
+    
+        jQuery(Khan).bind( "checkAnswer", function(event, pass) {
+            // change the color of the hint button
+            $("#hint").switchClass("orange", "green");
+    
+            jQuery(".hint-box .info-box-sub-description").text("Now that you've already submitted an answer, viewing hints for this problem will not hurt your streak.");
+            if( pass === false ) {
+                jQuery(".hint-box .info-box-sub-description").effect("pulsate", { times:3 }, 2000);
+                jQuery(".hint-box").effect("shake", { times:2 }, 150);
+            }
+        });
+    
+        jQuery(Khan).bind( "newProblem", function() {
+            $("#hint").switchClass("green", "orange");
+            jQuery(".hint-box .info-box-sub-description").html("This <strong>will</strong> reset your streak!");
+        });
+    
+        Khan.disableOneTimeHintWarning();
+    
+    </script>
+    {% endif %}
+
     {% else %}
 
     <style>

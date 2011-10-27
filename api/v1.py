@@ -15,6 +15,7 @@ from exercises import attempt_problem, reset_streak
 from phantom_users.phantom_util import api_create_phantom
 import util
 import notifications
+from gae_bingo.gae_bingo import bingo
 from autocomplete import video_title_dicts, playlist_title_dicts
 
 from api import route
@@ -394,9 +395,11 @@ def user_exercises_all():
                     user_exercises_dict[exercise_name] = user_exercise
 
             for exercise_name in user_exercises_dict:
-                user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
-                user_exercises_dict[exercise_name]._user_data = user_data_student
-                user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
+                # Make sure this exercise still exists
+                if exercise_name in exercises_dict:
+                    user_exercises_dict[exercise_name].exercise_model = exercises_dict[exercise_name]
+                    user_exercises_dict[exercise_name]._user_data = user_data_student
+                    user_exercises_dict[exercise_name]._user_exercise_graph = user_exercise_graph
 
             return user_exercises_dict.values()
 
@@ -531,7 +534,8 @@ def attempt_problem_number(exercise_name, problem_number):
 
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
-                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display }
+                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display },
+                "attempt_correct" : request.request_bool("complete")
             })
 
             return user_exercise
@@ -545,6 +549,9 @@ def attempt_problem_number(exercise_name, problem_number):
 @jsonp
 @jsonify
 def hint_problem_number(exercise_name, problem_number):
+    
+    bingo("alternate_hints_costly")
+    
     user_data = models.UserData.current()
 
     if user_data:
