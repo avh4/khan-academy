@@ -417,7 +417,11 @@ class UserExercise(db.Model):
 
     def update_proficiency_model(self, correct):
         if not correct:
-            self.streak = 0
+            if self.summative:
+                # Reset to latest milestone
+                self.streak = (self.streak // consts.CHALLENGE_STREAK_BARRIER) * consts.CHALLENGE_STREAK_BARRIER
+            else:
+                self.streak = 0
 
         if self.accuracy_model():
             self.accuracy_model().update(correct)
@@ -483,7 +487,10 @@ class UserExercise(db.Model):
             self._progress += progress_increment
 
         else:
-            self._progress *= consts.STREAK_RESET_FACTOR
+            if self.summative:
+                self._progress = float(self.streak) / self.required_streak
+            else:
+                self._progress *= consts.STREAK_RESET_FACTOR
 
     @staticmethod
     def to_progress_display(num):
