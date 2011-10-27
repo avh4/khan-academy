@@ -28,11 +28,15 @@ def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
         # If no timezone offset is specified, don't bother grabbing all the data
         # because we'll be redirecting back to here w/ timezone information.
 
-        if int(models.Setting.classtime_report_method()) == 2 and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
-            classtime_table = classtime_analyzer.get_classtime_table_by_coach(user_data, students_data, dt_utc)
-        elif int(models.Setting.classtime_report_method()) == 1  and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
-            classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
-        else:
+        try:
+            if int(models.Setting.classtime_report_method()) == 2 and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
+                classtime_table = classtime_analyzer.get_classtime_table_by_coach(user_data, students_data, dt_utc)
+            elif int(models.Setting.classtime_report_method()) == 1  and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
+                classtime_table = classtime_analyzer.get_classtime_table(students_data, dt_utc)
+            else:
+                classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)
+        except Exception, e:
+            logging.error("caught error in calculating report" + str(e))
             classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)
 
 
