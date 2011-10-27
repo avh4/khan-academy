@@ -1,4 +1,5 @@
 import logging
+import inspect
 
 # request_cache is similar to layer_cache, except it only memoizes results
 # for each individual request. If you need to cache results for longer than
@@ -21,6 +22,10 @@ import logging
 #   return result_for_cache
 
 CACHE = {}
+
+def accepts_kwargs(target):
+    args, varargs, varkw, defaults = inspect.getargspec(target)
+    return varkw is not None
 
 def cache():
     def decorator(target):
@@ -49,8 +54,9 @@ def request_cache_check_set_return(
     bust_cache = False
     if "bust_cache" in kwargs:
         bust_cache = kwargs["bust_cache"]
-        # delete from kwargs so it's not passed to the target
-        del kwargs["bust_cache"]
+        if not accepts_kwargs(target):
+            # delete from kwargs so it's not passed to the target
+            del kwargs["bust_cache"]
 
     if not bust_cache:
         if has(key):
