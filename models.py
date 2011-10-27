@@ -1459,6 +1459,9 @@ class LogSummary(db.Model):
     @staticmethod
     def add_or_update_entry(user_data, activity, summaryClass, summaryType, delta=30, method="proximity"):
 
+        if user_data is None:
+            return
+
         def txn(user_data, activity, summaryClass, summaryType, delta, method):
             if method=="proximity":
                 # find the summary which ends within delta of the current activity's start
