@@ -34,7 +34,7 @@ def run_tests():
 
     # Delete all experiments (response should be count of experiments left)
     assert(test_response("delete_all") == 0)
-    return
+
     # Refresh bot's identity record so it doesn't pollute tests
     assert(test_response("refresh_identity_record", bot=True) == True)
     

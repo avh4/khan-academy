@@ -172,8 +172,8 @@ def exercises(exercise_name):
 @jsonp
 @jsonify
 def exercise_info(exercise_name):
-    exerciselist = models.Exercise.get_by_name(exercise_name).followup_exercises
-    return [models.Exercise.get_by_name(exercise_name) for exercise_name in exerciselist]
+    exercise = models.Exercise.get_by_name(exercise_name)
+    return exercise.followup_exercises() if exercise else []
 
 @route("/api/v1/exercises/<exercise_name>/videos", methods=["GET"])
 @jsonp

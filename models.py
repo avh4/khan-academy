@@ -238,13 +238,8 @@ class Exercise(db.Model):
     # followup_exercises reverse walks the prerequisites to give you
     # the exercises that list the current exercise as its prerequisite.
     # i.e. follow this exercise up with these other exercises
-    @property
-    @layer_cache.cache_with_key_fxn(lambda self: "followup_exercises_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def followup_exercises(self):
-        query = Exercise.all()
-        query.filter("prerequisites = ", self.name)
-        # ~==> return [ex for ex in Exercises.all() if self.name in ex.prerequisites]
-        return [e.name for e in query.fetch(200)]
+        return [exercise for exercise in Exercise.get_all_use_cache() if self.name in exercise.prerequisites]
 
     @classmethod
     def all(cls, live_only = False):
@@ -450,13 +445,15 @@ class UserExercise(db.Model):
         if self.total_correct == 0:
             return 0.0
 
-        prediction = self.accuracy_model().predict()
-        normalized_prediction = UserExercise._normalize_progress(prediction)
-
-        # Impose a minimum number of problems required to be done
-        if self.total_done < self.min_problems_imposed():
-            normalized_prediction = min(normalized_prediction,
-                float(self.total_correct) / self.min_problems_required())
+        if self.accuracy_model().total_done <= self.accuracy_model().total_correct():
+            # Impose a minimum number of problems required to be done.
+            # If the user has no wrong answers yet, we can get a progress bar
+            # amount by just dividing correct answers by the # of problems
+            # required.
+            normalized_prediction = min(float(self.accuracy_model().total_correct()) / self.min_problems_required(), 1.0)
+        else:
+            prediction = self.accuracy_model().predict()
+            normalized_prediction = UserExercise._normalize_progress(prediction)
 
         if self.summative:
             if self._progress is None:

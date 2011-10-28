@@ -196,7 +196,11 @@ class ViewExercise(request_handler.RequestHandler):
             'is_webos': is_webos,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number)), 
-            'alternate_hints_treatment': ab_test('Alternate Hints Treatment', conversion_name=['alternate_hints_free', 'alternate_hints_costly', 'alternate_hints_proficiency'], conversion_type=[ConversionTypes.Counting, ConversionTypes.Counting, ConversionTypes.Counting])
+            'alternate_hints_treatment': ab_test(
+                'Alternate Hints Treatment', 
+                conversion_name=['alternate_hints_free', 'alternate_hints_costly', 'alternate_hints_proficiency'], 
+                conversion_type=[ConversionTypes.Counting, ConversionTypes.Counting, ConversionTypes.Counting]
+                )
             }
 
         self.render_jinja2_template("exercise_template.html", template_values)

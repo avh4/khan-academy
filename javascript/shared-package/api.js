@@ -82,16 +82,3 @@ $(function(){
 
   APIActionResults.register( "points_earned", updatePointDisplay );
 });
-
-// change hint text when a problem has been answered
-$(function(){ 
-
-  var updateHintPrompt = function( data ) {
-
-    if( jQuery(".single-exercise").length > 0 ) {
-    }
-
-  };
-
-  APIActionResults.register( "attempt_correct", updateHintPrompt );
-});
