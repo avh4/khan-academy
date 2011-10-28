@@ -445,13 +445,15 @@ class UserExercise(db.Model):
         if self.total_correct == 0:
             return 0.0
 
-        prediction = self.accuracy_model().predict()
-        normalized_prediction = UserExercise._normalize_progress(prediction)
-
-        # Impose a minimum number of problems required to be done
-        if self.total_done < self.min_problems_imposed():
-            normalized_prediction = min(normalized_prediction,
-                float(self.total_correct) / self.min_problems_required())
+        if self.accuracy_model().total_done <= self.accuracy_model().total_correct():
+            # Impose a minimum number of problems required to be done.
+            # If the user has no wrong answers yet, we can get a progress bar
+            # amount by just dividing correct answers by the # of problems
+            # required.
+            normalized_prediction = min(float(self.accuracy_model().total_correct()) / self.min_problems_required(), 1.0)
+        else:
+            prediction = self.accuracy_model().predict()
+            normalized_prediction = UserExercise._normalize_progress(prediction)
 
         if self.summative:
             if self._progress is None:
