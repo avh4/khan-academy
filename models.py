@@ -10,6 +10,7 @@ import itertools
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import deferred
+from google.appengine.ext.db import TransactionFailedError
 from api.jsonify import jsonify
 
 from google.appengine.ext import db
@@ -1517,9 +1518,9 @@ class VideoLog(db.Model):
                        _url = "/_ah/queue/deferred_videolog")
 
         # Making a separate queue for the log summaries so we can clearly see how much they are getting used
-        # deferred.defer(commit_log_summary, video_log, user_data,
-        #               _queue = "log-summary-queue",
-        #               _url = "/ah/queue/deferred_log_summary") 
+        deferred.defer(commit_log_summary, video_log, user_data,
+                       _queue = "log-summary-queue",
+                       _url = "/_ah/queue/deferred_log_summary") 
 
         return (user_video, video_log, video_points_total)
 
@@ -1570,7 +1571,30 @@ class DailyActivityLog(db.Model):
 class LogSummaryTypes:
     USER_ADJACENT_ACTIVITY = "UserAdjacentActivity"
     CLASS_DAILY_ACTIVITY = "ClassDailyActivity"
-    
+ 
+# Tracks the number of shards for each named log summary  
+class LogSummaryShardConfig(db.Model):
+    name = db.StringProperty(required=True)
+    num_shards = db.IntegerProperty(required=True, default=1)
+
+    @staticmethod
+    def increase_shards(name, num):
+        """Increase the number of shards for a given sharded counter.
+        Will never decrease the number of shards.
+
+        Parameters:
+        name - The name of the counter
+        num - How many shards to use
+
+        """
+        config = LogSummaryShardConfig.get_or_insert(name, name=name)
+        def txn():
+            if config.num_shards < num:
+                config.num_shards = num
+                config.put()
+
+        db.run_in_transaction(txn)
+
 # can keep a variety of different types of summaries pulled from the logs
 class LogSummary(db.Model):
     user = db.UserProperty()
@@ -1578,6 +1602,7 @@ class LogSummary(db.Model):
     end = db.DateTimeProperty()
     summaryType = db.StringProperty() 
     summary = object_property.ObjectProperty()
+    name = db.StringProperty(required=True) 
 
     @staticmethod
     def get_start_of_period(activity, delta):
@@ -1596,100 +1621,77 @@ class LogSummary(db.Model):
         return LogSummary.get_start_of_period(activity, delta) + datetime.timedelta(minutes=delta)
 
     @staticmethod
-    def get_key_name(user_data, summaryType, activity, delta):
-        return LogSummary.get_key_name_by_dates(user_data, summaryType, LogSummary.get_start_of_period(activity, delta), LogSummary.get_end_of_period(activity, delta))
+    def get_name(user_data, summaryType, activity, delta):
+        return LogSummary.get_name_by_dates(user_data, summaryType, LogSummary.get_start_of_period(activity, delta), LogSummary.get_end_of_period(activity, delta))
 
     @staticmethod
-    def get_key_name_by_dates(user_data, summaryType, start, end):
+    def get_name_by_dates(user_data, summaryType, start, end):    
         return "%s:%s:%s:%s" % (user_data.key_email, summaryType, start.strftime("%Y-%m-%d-%H-%M"), end.strftime("%Y-%m-%d-%H-%M"))
 
     # activity needs to have activity.time_started() and activity.time_done() functions
     # summaryClass needs to have a method .add(activity)
     # delta is a time period in minutes
-    # method is either "proximity"   - new event is added to last summary if it is within delta
-    #              or "period"      - day is divided up into buckets of delta minutes
     @staticmethod
-    def add_or_update_entry(user_data, activity, summaryClass, summaryType, delta=30, method="proximity"):
+    def add_or_update_entry(user_data, activity, summaryClass, summaryType, delta=30):
 
         if user_data is None:
             return
 
-        def txn(user_data, activity, summaryClass, summaryType, delta, method):
-            if method=="proximity":
-                # find the summary which ends within delta of the current activity's start
-                log_summary = LogSummary.get_closest_summary(user_data, activity, summaryType, delta).get()
-
-                if log_summary is not None:
-                    log_summary.start=min(log_summary.start, activity.time_started())
-                    log_summary.end=max(log_summary.end, activity.time_ended())
-                    log_summary.summary.add(user_data, activity)
-                    log_summary.put()
-                else:
-                    log_summary = LogSummary(parent=user_data)
-                    log_summary.user=user_data.user
-                    log_summary.start=activity.time_started()
-                    log_summary.end=activity.time_ended() 
-                    log_summary.summaryType = summaryType
-                    log_summary.summary=summaryClass() 
-                    log_summary.summary.add(user_data, activity)  
-                    log_summary.put()
-
-            elif method=="period":
-                # if activities is a list, we assume all activities belong to the same period - this is used in classtime.fill_class_summaries_from_logs()
-                if type(activity) is list:
-                    activities = activity
-                    activity=activities[0]
-                else:
-                    activities=[activity]
-
-                key_name = LogSummary.get_key_name(user_data, summaryType, activity, delta)
-                log_summary = LogSummary.get_by_key_name(key_name)
+        def txn(shard_name, user_data, activities, summaryClass, summaryType, delta):
+                log_summary = LogSummary.get_by_key_name(shard_name)
                              
                 if log_summary is None:
-                    log_summary = LogSummary(key_name=key_name)   
-                    log_summary.user=user_data.user
-                    log_summary.start=LogSummary.get_start_of_period(activity, delta)
-                    log_summary.end=LogSummary.get_end_of_period(activity, delta)
-                    log_summary.summaryType = summaryType
-                    log_summary.summary=summaryClass() 
-                    log_summary.summary.add(user_data, activity)  
-                    log_summary.put()
+                    activity = activities[0]
+
+                    log_summary = LogSummary(key_name = shard_name, \
+                                             name = name, \
+                                             user = user_data.user, \
+                                             start = LogSummary.get_start_of_period(activity, delta), \
+                                             end = LogSummary.get_end_of_period(activity, delta), \
+                                             summaryType = summaryType)
+                    
+                    log_summary.summary = summaryClass() 
 
                 for activity in activities:
                     log_summary.summary.add(user_data, activity)
                 
                 log_summary.put()
 
+
+        # if activities is a list, we assume all activities belong to the same period - this is used in classtime.fill_class_summaries_from_logs()
+        if type(activity) is list:
+            activities = activity
+            activity = activities[0]
+        else:
+            activities = [activity]
+
+        name = LogSummary.get_name(user_data, summaryType, activity, delta)
+        config = LogSummaryShardConfig.get_or_insert(name, name=name)
+                
+        index = random.randint(0, config.num_shards - 1)
+        shard_name = str(index) + ":" + name
+
         
         # running function within a transaction because time might elapse between the get and the put 
         # and two processes could get before either puts. Transactions will ensure that its mutually exclusive
-        # since they are operating on the same function
-        db.run_in_transaction(txn, user_data, activity, summaryClass, summaryType, delta, method) 
-            
+        # since they are operating on the same entity
+        try:
+            db.run_in_transaction(txn, shard_name, user_data, activities, summaryClass, summaryType, delta) 
+        except TransactionFailedError:
+            # if it is a transaction lock
+            logging.info("increasing the number of shards to %i log summary: %s" %(config.num_shards+1, name))
+            LogSummaryShardConfig.increase_shards(name, config.num_shards+1)
+            shard_name = str(config.num_shards) + ":" + name
+            db.run_in_transaction(txn, shard_name, user_data, activities, summaryClass, summaryType, delta) 
+
     @staticmethod
     def get_description():
         return self.summary.description(self.start, self.end)
 
-    # get the summary which ends within delta minutes of the start of the activity, that the current activity should be added to, for proximity summaries
     @staticmethod
-    def get_closest_summary(user_data, activity, summaryType, delta):
+    def get_by_name(name):
         query = LogSummary.all()
-        query.ancestor(user_data)
-        query.filter('summaryType =', summaryType)
-        query.filter('end >=',activity.time_started() -  datetime.timedelta(minutes=delta))
-        query.filter('end <',activity.time_ended() + datetime.timedelta(minutes=delta)) # really should use start here instead of end, but gae doesnt allow inequalities on two items
-        query.order('-end')
-        return query
-
-    @staticmethod
-    def get_for_user_data_between_dts(user_data, summaryType, dt_a, dt_b):
-        query = LogSummary.all()
-        query.filter('user =', user_data.user)
-        query.filter('summaryType', summaryType)
-        query.filter('start >=', dt_a)
-        query.filter('start <', dt_b)
-        query.order('start')
-
+        query.filter('name =', name)
         return query
 
 # commit_log_summary is used by our deferred log summary insertion process
@@ -1697,7 +1699,7 @@ def commit_log_summary(activity_log, user_data):
     if user_data is not None:
         from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
         for coach in user_data.coaches:
-            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), activity_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440, "period")
+            LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), activity_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440)
 
 class ProblemLog(db.Model):
 

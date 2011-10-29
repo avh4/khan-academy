@@ -461,9 +461,9 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                        _url="/_ah/queue/deferred_problemlog")
 
         # Making a separate queue for the log summaries so we can clearly see how much they are getting used
-        # deferred.defer(models.commit_log_summary, problem_log, user_data,
-        #               _queue = "log-summary-queue",
-        #               _url = "/ah/queue/deferred_log_summary") 
+        deferred.defer(models.commit_log_summary, problem_log, user_data,
+                       _queue = "log-summary-queue",
+                       _url = "/_ah/queue/deferred_log_summary") 
 
         return user_exercise, user_exercise_graph
 
