@@ -32,7 +32,7 @@ def class_time_graph_context(user_data, dt_utc, tz_offset, student_list):
             classtime.reload_class(user_data, dt_utc)
             return
         try:
-            if os.environ["QUERY_STRING"].find("&version=2") !=- 1 or int(models.Setting.classtime_report_method()) == 2 and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
+            if os.environ["QUERY_STRING"].find("&version=2") != -1 or int(models.Setting.classtime_report_method()) == 2 and datetime.datetime.strptime(models.Setting.classtime_report_startdate(), "%Y-%m-%dT%H:%M:%S") < dt_utc:
                 classtime_table = classtime_analyzer.get_classtime_table_by_coach(user_data, students_data, dt_utc)
             else:
                 classtime_table = classtime_analyzer.get_classtime_table_old(students_data, dt_utc)

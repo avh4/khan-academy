@@ -1600,7 +1600,7 @@ class LogSummary(db.Model):
     user = db.UserProperty()
     start = db.DateTimeProperty()
     end = db.DateTimeProperty()
-    summaryType = db.StringProperty() 
+    summary_type = db.StringProperty() 
     summary = object_property.ObjectProperty()
     name = db.StringProperty(required=True) 
 
@@ -1621,23 +1621,23 @@ class LogSummary(db.Model):
         return LogSummary.get_start_of_period(activity, delta) + datetime.timedelta(minutes=delta)
 
     @staticmethod
-    def get_name(user_data, summaryType, activity, delta):
-        return LogSummary.get_name_by_dates(user_data, summaryType, LogSummary.get_start_of_period(activity, delta), LogSummary.get_end_of_period(activity, delta))
+    def get_name(user_data, summary_type, activity, delta):
+        return LogSummary.get_name_by_dates(user_data, summary_type, LogSummary.get_start_of_period(activity, delta), LogSummary.get_end_of_period(activity, delta))
 
     @staticmethod
-    def get_name_by_dates(user_data, summaryType, start, end):    
-        return "%s:%s:%s:%s" % (user_data.key_email, summaryType, start.strftime("%Y-%m-%d-%H-%M"), end.strftime("%Y-%m-%d-%H-%M"))
+    def get_name_by_dates(user_data, summary_type, start, end):    
+        return "%s:%s:%s:%s" % (user_data.key_email, summary_type, start.strftime("%Y-%m-%d-%H-%M"), end.strftime("%Y-%m-%d-%H-%M"))
 
     # activity needs to have activity.time_started() and activity.time_done() functions
-    # summaryClass needs to have a method .add(activity)
+    # summary_class needs to have a method .add(activity)
     # delta is a time period in minutes
     @staticmethod
-    def add_or_update_entry(user_data, activity, summaryClass, summaryType, delta=30):
+    def add_or_update_entry(user_data, activity, summary_class, summary_type, delta=30):
 
         if user_data is None:
             return
 
-        def txn(shard_name, user_data, activities, summaryClass, summaryType, delta):
+        def txn(shard_name, user_data, activities, summary_class, summary_type, delta):
                 log_summary = LogSummary.get_by_key_name(shard_name)
                              
                 if log_summary is None:
@@ -1648,9 +1648,9 @@ class LogSummary(db.Model):
                                              user = user_data.user, \
                                              start = LogSummary.get_start_of_period(activity, delta), \
                                              end = LogSummary.get_end_of_period(activity, delta), \
-                                             summaryType = summaryType)
+                                             summary_type = summary_type)
                     
-                    log_summary.summary = summaryClass() 
+                    log_summary.summary = summary_class() 
 
                 for activity in activities:
                     log_summary.summary.add(user_data, activity)
@@ -1659,13 +1659,13 @@ class LogSummary(db.Model):
 
 
         # if activities is a list, we assume all activities belong to the same period - this is used in classtime.fill_class_summaries_from_logs()
-        if type(activity) is list:
+        if type(activity) == list:
             activities = activity
             activity = activities[0]
         else:
             activities = [activity]
 
-        name = LogSummary.get_name(user_data, summaryType, activity, delta)
+        name = LogSummary.get_name(user_data, summary_type, activity, delta)
         config = LogSummaryShardConfig.get_or_insert(name, name=name)
                 
         index = random.randint(0, config.num_shards - 1)
@@ -1676,13 +1676,13 @@ class LogSummary(db.Model):
         # and two processes could get before either puts. Transactions will ensure that its mutually exclusive
         # since they are operating on the same entity
         try:
-            db.run_in_transaction(txn, shard_name, user_data, activities, summaryClass, summaryType, delta) 
+            db.run_in_transaction(txn, shard_name, user_data, activities, summary_class, summary_type, delta) 
         except TransactionFailedError:
             # if it is a transaction lock
             logging.info("increasing the number of shards to %i log summary: %s" %(config.num_shards+1, name))
             LogSummaryShardConfig.increase_shards(name, config.num_shards+1)
             shard_name = str(config.num_shards) + ":" + name
-            db.run_in_transaction(txn, shard_name, user_data, activities, summaryClass, summaryType, delta) 
+            db.run_in_transaction(txn, shard_name, user_data, activities, summary_class, summary_type, delta) 
 
     @staticmethod
     def get_description():

@@ -101,41 +101,33 @@ class ClassTimeAnalyzer:
         # get the query to get the summary shards from the first day
         log_summary_query_1 = LogSummary.get_by_name(LogSummary.get_name_by_dates(user_data_coach, LogSummaryTypes.CLASS_DAILY_ACTIVITY, dt_start_utc1, dt_end_utc1))
         
-        # there is the chance that the reporting day in the teacher's timezone starts at exactly midnight utc - in that case ignore the second day
-        if dt_start_utc1 != dt_start_utc:
-            # find the second utc day that spans the teacher's day
-            dt_start_utc2 = dt_end_utc1
-            dt_end_utc2 = dt_start_utc2 + datetime.timedelta(days = 1)
 
-            log_summary_query_2 = LogSummary.get_by_name(LogSummary.get_name_by_dates(user_data_coach, LogSummaryTypes.CLASS_DAILY_ACTIVITY, dt_start_utc2, dt_end_utc2))
+        # find the second utc day that spans the teacher's day
+        dt_start_utc2 = dt_end_utc1
+        dt_end_utc2 = dt_start_utc2 + datetime.timedelta(days = 1)
 
-            results = util.async_queries([log_summary_query_1, log_summary_query_2], limit = 10000)
+        log_summary_query_2 = LogSummary.get_by_name(LogSummary.get_name_by_dates(user_data_coach, LogSummaryTypes.CLASS_DAILY_ACTIVITY, dt_start_utc2, dt_end_utc2))
 
-            class_summary_shards = results[0].get_result()
-            class_summary = None
-            if class_summary_shards:
-                class_summary = reduce(lambda x, y: x.merge_shard(y), map(lambda x: x.summary, class_summary_shards)) 
-            
-            logging.info(class_summary)
+        results = util.async_queries([log_summary_query_1, log_summary_query_2], limit = 10000)
 
-            class_summary_day2_shards = results[1].get_result()
-            class_summary_day2 = None
-            if class_summary_day2_shards:
-                class_summary_day2 = reduce(lambda x, y: x.merge_shard(y), map(lambda x: x.summary, class_summary_day2_shards))
-            
-            if class_summary_day2 is not None:
-                if class_summary is not None :        
-                    class_summary.merge_day(class_summary_day2)
-                else:
-                    class_summary = class_summary_day2
+        class_summary_shards = results[0].get_result()
+        class_summary = None
+        if class_summary_shards:
+            class_summary = reduce(lambda x, y: x.merge_shard(y), map(lambda x: x.summary, class_summary_shards)) 
         
-        # They are on utc time - so only need to get 1 day
-        else:
-            class_summary_shards =  log_summary_query_1.fetch(10000)
-            class_summary = None
-            if class_summary_shards:
-                class_summary = reduce(lambda x, y: x.merge_shard(y), map(lambda x: x.summary, class_summary_shards))    
+        logging.info(class_summary)
 
+        class_summary_day2_shards = results[1].get_result()
+        class_summary_day2 = None
+        if class_summary_day2_shards:
+            class_summary_day2 = reduce(lambda x, y: x.merge_shard(y), map(lambda x: x.summary, class_summary_day2_shards))
+        
+        if class_summary_day2 is not None:
+            if class_summary is not None :        
+                class_summary.merge_day(class_summary_day2)
+            else:
+                class_summary = class_summary_day2
+        
         if not class_summary:
             return classtime_table
 
@@ -490,31 +482,31 @@ class ClassDailyActivitySummary:
             self.student_dict[activity.user] = [new_summary]      
 
     # cycles through all students and adds the second days data (assumed to be the next day) to the first, in the case that an activity chunk was started near midnight UTC between the two days it will merge those two AdjacentActivitySummaries together
-    def merge_day(self, secondSummary):
+    def merge_day(self, second_summary):
         
-        for student, secondSummaryList in secondSummary.student_dict.iteritems():
+        for student, second_summary_list in second_summary.student_dict.iteritems():
             if self.student_dict.has_key(student):
-                firstSummaryList = self.student_dict[student]
+                first_summary_list = self.student_dict[student]
 
                 #check to see if the last summary of the first day is close enough to the first summary of the next day to merge the two, if so then merge them
-                if firstSummaryList[-1].should_merge(secondSummaryList[0]):
-                    firstSummaryList[-1].merge(secondSummaryList[0])
-                    firstSummaryList.extend(secondSummaryList[1:])
+                if first_summary_list[-1].should_merge(second_summary_list[0]):
+                    first_summary_list[-1].merge(second_summary_list[0])
+                    first_summary_list.extend(second_summary_list[1:])
                 else:
-                    firstSummaryList.extend(secondSummaryList)
+                    first_summary_list.extend(second_summary_list)
             else:
-                self.student_dict[student] = secondSummaryList             
+                self.student_dict[student] = second_summary_list             
 
 
     # cycles through all students and adds the second summary data to the first, it will merge any two AdjacentActivitySummaries together if they are close enough to be merged
-    def merge_shard(self, secondSummary):
+    def merge_shard(self, second_summary):
 
-        for student, secondSummaryList in secondSummary.student_dict.iteritems():
+        for student, second_summary_list in second_summary.student_dict.iteritems():
             if self.student_dict.has_key(student):
-                firstSummaryList = self.student_dict[student]
-                self.student_dict[student] = self._merge_lists(firstSummaryList, secondSummaryList)
+                first_summary_list = self.student_dict[student]
+                self.student_dict[student] = self._merge_lists(first_summary_list, second_summary_list)
             else:
-                self.student_dict[student] = secondSummaryList       
+                self.student_dict[student] = second_summary_list       
         
         return self
 
@@ -592,8 +584,8 @@ class UserAdjacentActivitySummary:
     def should_include(self, activity):
         return activity.time_ended()+datetime.timedelta(minutes=self.DELTA) > self.start and activity.time_started()-datetime.timedelta(minutes=self.DELTA) < self.end
 
-    def should_merge(self, secondSummary):
-        return abs(secondSummary.start - self.end) < datetime.timedelta(minutes=self.DELTA)  or abs(self.start-secondSummary.end) < +datetime.timedelta(minutes=self.DELTA) 
+    def should_merge(self, second_summary):
+        return abs(second_summary.start - self.end) < datetime.timedelta(minutes=self.DELTA)  or abs(self.start-second_summary.end) < +datetime.timedelta(minutes=self.DELTA) 
         
     def update_activity_class(self):
         if len(self.dict_exercises) and len(self.dict_videos):
@@ -608,11 +600,11 @@ class UserAdjacentActivitySummary:
         else:
             self.activity_class = None
    
-    def merge(self, secondSummary):
-        self.start = min(self.start, secondSummary.start)
-        self.end = max(self.end, secondSummary.end)
-        self.dict_videos.update(secondSummary.dict_videos)
-        self.dict_exercises.update(secondSummary.dict_exercises)
+    def merge(self, second_summary):
+        self.start = min(self.start, second_summary.start)
+        self.end = max(self.end, second_summary.end)
+        self.dict_videos.update(second_summary.dict_videos)
+        self.dict_exercises.update(second_summary.dict_exercises)
         
 
     #updates the activity class based upon the new activity
