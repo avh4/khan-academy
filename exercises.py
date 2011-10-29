@@ -197,9 +197,10 @@ class ViewExercise(request_handler.RequestHandler):
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number)), 
             'alternate_hints_treatment': ab_test(
-                'Alternate Hints Treatment', 
-                conversion_name=['alternate_hints_free', 'alternate_hints_costly', 'alternate_hints_proficiency'], 
-                conversion_type=[ConversionTypes.Counting, ConversionTypes.Counting, ConversionTypes.Counting]
+                'Hints or Show Solution',
+                alternative_params=['old', 'more_visible', 'solution_button', 'full_solution'],
+                conversion_name=['hints_free', 'hints_costly_no_attempt', 'hints_problems_done', 'hints_proficiency'],
+                conversion_type=[ConversionTypes.Counting] * 4
                 )
             }
 
