@@ -18,6 +18,7 @@ import request_handler
 import privileges
 import voting
 from phantom_users.phantom_util import disallow_phantoms
+from rate_limiter import FlagRateLimiter
 
 class ModeratorList(request_handler.RequestHandler):
     def get(self):
@@ -264,6 +265,11 @@ class FlagEntity(request_handler.RequestHandler):
         # You have to at least be logged in to flag
         user_data = models.UserData.current()
         if not user_data:
+            return
+
+        limiter = FlagRateLimiter(user_data)
+        if not limiter.increment():
+            self.render_json({"error": limiter.denied_desc()})
             return
 
         key = self.request_string("entity_key", default="")

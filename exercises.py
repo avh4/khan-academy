@@ -27,6 +27,7 @@ from custom_exceptions import MissingExerciseException
 from api.auth.xsrf import ensure_xsrf_cookie
 from api import jsonify
 from gae_bingo.gae_bingo import bingo, ab_test
+from gae_bingo.models import ConversionTypes
 
 class MoveMapNodes(request_handler.RequestHandler):
     def post(self):
@@ -194,7 +195,12 @@ class ViewExercise(request_handler.RequestHandler):
             'browser_disabled': browser_disabled,
             'is_webos': is_webos,
             'renderable': renderable,
-            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number))
+            'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number)), 
+            'alternate_hints_treatment': ab_test(
+                'Alternate Hints Treatment', 
+                conversion_name=['alternate_hints_free', 'alternate_hints_costly', 'alternate_hints_proficiency'], 
+                conversion_type=[ConversionTypes.Counting, ConversionTypes.Counting, ConversionTypes.Counting]
+                )
             }
 
         self.render_jinja2_template("exercise_template.html", template_values)
@@ -411,6 +417,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                     user_exercise.streak_start = 0.0
 
                 if user_exercise.progress >= 1.0 and not explicitly_proficient:
+                    bingo("alternate_hints_proficiency")
                     user_exercise.set_proficient(True, user_data)
                     user_data.reassess_if_necessary()
 
@@ -453,9 +460,14 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         # Defer the put of ProblemLog for now, as we think it might be causing hot tablets
         # and want to shift it off to an automatically-retrying task queue.
         # http://ikaisays.com/2011/01/25/app-engine-datastore-tip-monotonically-increasing-values-are-bad/
-        deferred.defer(models.commit_problem_log, problem_log, user_data,
+        deferred.defer(models.commit_problem_log, problem_log,
                        _queue="problem-log-queue",
                        _url="/_ah/queue/deferred_problemlog")
+
+        # Making a separate queue for the log summaries so we can clearly see how much they are getting used
+        # deferred.defer(models.commit_log_summary, problem_log, user_data,
+        #               _queue = "log-summary-queue",
+        #               _url = "/ah/queue/deferred_log_summary") 
 
         return user_exercise, user_exercise_graph
 
