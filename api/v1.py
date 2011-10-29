@@ -552,8 +552,6 @@ def attempt_problem_number(exercise_name, problem_number):
 @jsonify
 def hint_problem_number(exercise_name, problem_number):
     
-    bingo("alternate_hints_costly")
-    
     user_data = models.UserData.current()
 
     if user_data:
@@ -562,16 +560,19 @@ def hint_problem_number(exercise_name, problem_number):
 
         if user_exercise and problem_number:
 
+            attempt_number = request.request_int("attempt_number")
+            count_hints = request.request_int("count_hints")
+
             user_exercise, user_exercise_graph = attempt_problem(
                     user_data,
                     user_exercise,
                     problem_number,
-                    request.request_int("attempt_number"),
+                    attempt_number,
                     request.request_string("attempt_content"),
                     request.request_string("sha1"),
                     request.request_string("seed"),
                     request.request_bool("complete"),
-                    request.request_int("count_hints"),
+                    count_hints,
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     request.request_string("problem_type"),
@@ -581,6 +582,11 @@ def hint_problem_number(exercise_name, problem_number):
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
             })
+
+            # A hint will count against the user iff they haven't attempted the question yet and it's their first hint
+            if attempt_number == 0 and count_hints == 1:
+                bingo("hints_costly_hint")
+                bingo("hints_costly_hint_binary")
 
             return user_exercise
 
