@@ -115,8 +115,6 @@ class ClassTimeAnalyzer:
         if class_summary_shards:
             class_summary = reduce(lambda x, y: x.merge_shard(y), map(lambda x: x.summary, class_summary_shards)) 
         
-        logging.info(class_summary)
-
         class_summary_day2_shards = results[1].get_result()
         class_summary_day2 = None
         if class_summary_day2_shards:
@@ -147,7 +145,7 @@ class ClassTimeAnalyzer:
                         rows += 1
                         adjacent_activity_summary.setTimezoneOffset(self.timezone_offset)
                         #logging.info("row="+str(rows)+" user="+str(adjacent_activity_summary.user_data_student)+" time start="+str(adjacent_activity_summary.start)+" time end="+str(adjacent_activity_summary.end))
-                        classtime_table.drop_into_column(adjacent_activity_summary, i)       
+                        classtime_table.drop_into_column(adjacent_activity_summary, i)      
         
         logging.info("summary by coach rows="+str(rows))
 
@@ -637,7 +635,7 @@ class UserAdjacentActivitySummary:
         return (self.start >= self.schoolday_start() and self.start <= self.schoolday_end()) or (self.end >= self.schoolday_start() and self.end <= self.schoolday_end())  
 
     def add(self, user, activity):
-        self.user_data_student = activity.user
+        self.user_data_student = activity.user.email()
         self.start = min(self.start, activity.time_started()) if self.start is not None else activity.time_started()
         self.end   = max(self.end, activity.time_ended()) if self.end is not None else activity.time_ended()
 
