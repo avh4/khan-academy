@@ -775,6 +775,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     last_daily_summary = db.DateTimeProperty(indexed=False)
     last_badge_review = db.DateTimeProperty(indexed=False)
     last_activity = db.DateTimeProperty(indexed=False)
+    start_consecutive_activity_date = db.DateTimeProperty(indexed=False)
     count_feedback_notification = db.IntegerProperty(default = -1, indexed=False)
     question_sort_order = db.IntegerProperty(default = -1, indexed=False)
     user_email = db.StringProperty()
@@ -1077,6 +1078,35 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     def are_students_visible_to(self, user_data):
         return self.is_coworker_of(user_data) or user_data.developer or user_data.is_administrator()
+
+    def record_activity(self, dt_activity):
+
+        # Make sure last_activity and start_consecutive_activity_date have values
+        self.last_activity = self.last_activity or dt_activity
+        self.start_consecutive_activity_date = self.start_consecutive_activity_date or dt_activity
+
+        if dt_activity > self.last_activity:
+
+            # If it has been over 36 hours since we last saw this user, restart the consecutive activity streak.
+            #
+            # We allow for a lenient 36 hours in order to offer kinder timezone interpretation.
+            # See http://meta.stackoverflow.com/questions/55483/proposed-consecutive-days-badge-tracking-change
+            if util.hours_between(self.last_activity, dt_activity) >= 36:
+                self.start_consecutive_activity_date = dt_activity
+            
+            self.last_activity = dt_activity
+
+    def current_consecutive_activity_days(self):
+        if not self.last_activity or not self.start_consecutive_activity_date:
+            return 0
+
+        dt_now = datetime.datetime.now()
+
+        # If it has been over 36 hours since last activity, bail.
+        if util.hours_between(self.last_activity, dt_now) >= 36:
+            return 0
+
+        return (self.last_activity - self.start_consecutive_activity_date).days
 
     def add_points(self, points):
         if self.points == None:
@@ -1478,7 +1508,7 @@ class VideoLog(db.Model):
         user_video.last_watched = datetime.datetime.now()
         user_video.duration = video.duration
 
-        user_data.last_activity = user_video.last_watched
+        user_data.record_activity(user_video.last_watched)
 
         video_points_total = points.VideoPointCalculator(user_video)
         video_points_received = video_points_total - video_points_previous

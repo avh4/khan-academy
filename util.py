@@ -82,6 +82,9 @@ def seconds_between(dt1, dt2):
 def minutes_between(dt1, dt2):
     return seconds_between(dt1, dt2) / 60.0
 
+def hours_between(dt1, dt2):
+    return seconds_between(dt1, dt2) / (60.0 * 60.0)
+
 def thousands_separated_number(x):
     # See http://stackoverflow.com/questions/1823058/how-to-print-number-with-commas-as-thousands-separators-in-python-2-x
     if x < 0:

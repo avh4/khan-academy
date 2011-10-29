@@ -360,7 +360,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
         user_exercise.summative = exercise.summative
 
-        user_data.last_activity = user_exercise.last_done
+        user_data.record_activity(user_exercise.last_done)
 
         # If a non-admin tries to answer a problem out-of-order, just ignore it
         if problem_number != user_exercise.total_done + 1 and not user_util.is_current_user_developer():
