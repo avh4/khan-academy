@@ -600,9 +600,11 @@ class UserExercise(db.Model):
                 if self.exercise in UserData.conversion_test_hard_exercises:
                     self.bingo_proficiency_model('prof_gained_proficiency_hard')
                     self.bingo_proficiency_model('prof_gained_proficiency_hard_binary')
+                    bingo('hints_gained_proficiency_hard_binary')
                 elif self.exercise in UserData.conversion_test_easy_exercises:
                     self.bingo_proficiency_model('prof_gained_proficiency_easy')
                     self.bingo_proficiency_model('prof_gained_proficiency_easy_binary')
+                    bingo('hints_gained_proficiency_easy_binary')
 
         else:
             if self.exercise in user_data.proficient_exercises:
