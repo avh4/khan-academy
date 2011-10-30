@@ -2,7 +2,7 @@ import os
 import logging
 import simplejson
 
-from google.appengine.ext.webapp import template, RequestHandler
+from google.appengine.ext.webapp import RequestHandler
 from google.appengine.api import memcache
 
 from gae_bingo.gae_bingo import ab_test, bingo, choose_alternative

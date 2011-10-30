@@ -14,7 +14,6 @@ from .cache import BingoCache
 from .config import can_control_experiments
 import simplejson as json
 
-
 class AB_Test(RequestHandler):
     """request user alternative/state for an experiment by passing 
     { canonical_name : "experiment_name" }
