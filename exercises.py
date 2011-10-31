@@ -48,6 +48,27 @@ class MoveMapNodes(request_handler.RequestHandler):
             exercise.put()
 
 class ViewExercise(request_handler.RequestHandler):
+
+    _hints_ab_test_alternatives = {
+        'old': 17,  # The original, where it was unclear if a hint was costly after an attempt
+        'more_visible': 1,  # Jace's shaking and pulsating emphasis on free hints after an attempt
+        'solution_button': 1,  # David's show solution button in lieu of hint button after an attempt
+        'full_solution': 1,  # Jason's just show the complete solution after an incorrect answer
+    }
+    _hints_conversion_tests = [
+        ('hints_free_hint', ConversionTypes.Counting),
+        ('hints_free_hint_binary', ConversionTypes.Binary),
+        ('hints_costly_hint', ConversionTypes.Counting),
+        ('hints_costly_hint_binary', ConversionTypes.Binary),
+        ('hints_problems_done', ConversionTypes.Counting),
+        ('hints_gained_proficiency_all', ConversionTypes.Counting),
+        ('hints_gained_proficiency_easy_binary', ConversionTypes.Binary),
+        ('hints_gained_proficiency_hard_binary', ConversionTypes.Binary),
+        ('hints_wrong_problems', ConversionTypes.Counting),
+        ('hints_keep_going_after_wrong', ConversionTypes.Counting),
+    ]
+    _hints_conversion_names, _hints_conversion_types = [list(x) for x in zip(*_hints_conversion_tests)]
+
     @ensure_xsrf_cookie
     def get(self):
         user_data = models.UserData.current() or models.UserData.pre_phantom()
@@ -196,7 +217,10 @@ class ViewExercise(request_handler.RequestHandler):
             'is_webos': is_webos,
             'renderable': renderable,
             'issue_labels': ('Component-Code,Exercise-%s,Problem-%s' % (exid, problem_number)), 
-            'alternate_hints_treatment': ab_test('Alternate Hints Treatment', conversion_name=['alternate_hints_free', 'alternate_hints_costly', 'alternate_hints_proficiency'], conversion_type=[ConversionTypes.Counting, ConversionTypes.Counting, ConversionTypes.Counting])
+            'alternate_hints_treatment': ab_test('Hints or Show Solution',
+                ViewExercise._hints_ab_test_alternatives,
+                ViewExercise._hints_conversion_names,
+                ViewExercise._hints_conversion_types)
             }
 
         self.render_jinja2_template("exercise_template.html", template_values)
@@ -336,7 +360,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
         user_exercise.seconds_per_fast_problem = exercise.seconds_per_fast_problem
         user_exercise.summative = exercise.summative
 
-        user_data.last_activity = user_exercise.last_done
+        user_data.record_activity(user_exercise.last_done)
 
         # If a non-admin tries to answer a problem out-of-order, just ignore it
         if problem_number != user_exercise.total_done + 1 and not user_util.is_current_user_developer():
@@ -381,6 +405,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
 
         if user_exercise.total_done > 0 and user_exercise.streak == 0 and first_response:
             user_exercise.bingo_proficiency_model('prof_keep_going_after_wrong')
+            bingo('hints_keep_going_after_wrong')
 
         first_problem_after_proficiency = prev_last_done and user_exercise.proficient_date and (
             abs(prev_last_done - user_exercise.proficient_date) <= datetime.timedelta(seconds=1))
@@ -413,7 +438,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
                     user_exercise.streak_start = 0.0
 
                 if user_exercise.progress >= 1.0 and not explicitly_proficient:
-                    bingo("alternate_hints_proficiency")
+                    bingo("hints_gained_proficiency_all")
                     user_exercise.set_proficient(True, user_data)
                     user_data.reassess_if_necessary()
 
@@ -432,6 +457,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             util_notify.update(user_data, user_exercise)
 
             user_exercise.bingo_proficiency_model('prof_problems_done')
+            bingo('hints_problems_done')
 
         else:
 
@@ -443,6 +469,7 @@ def attempt_problem(user_data, user_exercise, problem_number, attempt_number,
             if first_response:
                 user_exercise.update_proficiency_model(correct=False)
                 user_exercise.bingo_proficiency_model('prof_wrong_problems')
+                bingo('hints_wrong_problems')
 
         # If this is the first attempt, update review schedule appropriately
         if attempt_number == 1:

@@ -239,13 +239,8 @@ class Exercise(db.Model):
     # followup_exercises reverse walks the prerequisites to give you
     # the exercises that list the current exercise as its prerequisite.
     # i.e. follow this exercise up with these other exercises
-    @property
-    @layer_cache.cache_with_key_fxn(lambda self: "followup_exercises_%s" % self.key(), layer=layer_cache.Layers.Memcache)
     def followup_exercises(self):
-        query = Exercise.all()
-        query.filter("prerequisites = ", self.name)
-        # ~==> return [ex for ex in Exercises.all() if self.name in ex.prerequisites]
-        return [e.name for e in query.fetch(200)]
+        return [exercise for exercise in Exercise.get_all_use_cache() if self.name in exercise.prerequisites]
 
     @classmethod
     def all(cls, live_only = False):
@@ -333,11 +328,6 @@ class UserExercise(db.Model):
         AccuracyModel(),
         consts.PROFICIENCY_ACCURACY_THRESHOLD
     ).normalize
-
-    @property
-    def point_display(self):
-      user_data = UserData.current()
-      return user_data.point_display if user_data else 'off'
 
     def proficiency_model(self):
         user_data = UserData.current()
@@ -456,13 +446,15 @@ class UserExercise(db.Model):
         if self.total_correct == 0:
             return 0.0
 
-        prediction = self.accuracy_model().predict()
-        normalized_prediction = UserExercise._normalize_progress(prediction)
-
-        # Impose a minimum number of problems required to be done
-        if self.total_done < self.min_problems_imposed():
-            normalized_prediction = min(normalized_prediction,
-                float(self.total_correct) / self.min_problems_required())
+        if self.accuracy_model().total_done <= self.accuracy_model().total_correct():
+            # Impose a minimum number of problems required to be done.
+            # If the user has no wrong answers yet, we can get a progress bar
+            # amount by just dividing correct answers by the # of problems
+            # required.
+            normalized_prediction = min(float(self.accuracy_model().total_correct()) / self.min_problems_required(), 1.0)
+        else:
+            prediction = self.accuracy_model().predict()
+            normalized_prediction = UserExercise._normalize_progress(prediction)
 
         if self.summative:
             if self._progress is None:
@@ -609,9 +601,11 @@ class UserExercise(db.Model):
                 if self.exercise in UserData.conversion_test_hard_exercises:
                     self.bingo_proficiency_model('prof_gained_proficiency_hard')
                     self.bingo_proficiency_model('prof_gained_proficiency_hard_binary')
+                    bingo('hints_gained_proficiency_hard_binary')
                 elif self.exercise in UserData.conversion_test_easy_exercises:
                     self.bingo_proficiency_model('prof_gained_proficiency_easy')
                     self.bingo_proficiency_model('prof_gained_proficiency_easy_binary')
+                    bingo('hints_gained_proficiency_easy_binary')
 
         else:
             if self.exercise in user_data.proficient_exercises:
@@ -782,6 +776,7 @@ class UserData(GAEBingoIdentityModel, db.Model):
     last_daily_summary = db.DateTimeProperty(indexed=False)
     last_badge_review = db.DateTimeProperty(indexed=False)
     last_activity = db.DateTimeProperty(indexed=False)
+    start_consecutive_activity_date = db.DateTimeProperty(indexed=False)
     count_feedback_notification = db.IntegerProperty(default = -1, indexed=False)
     question_sort_order = db.IntegerProperty(default = -1, indexed=False)
     user_email = db.StringProperty()
@@ -817,12 +812,6 @@ class UserData(GAEBingoIdentityModel, db.Model):
         'ratio_word_problems', 'writing_expressions_1', 'ordering_numbers',
         'geometry_1', 'converting_mixed_numbers_and_improper_fractions'])
     conversion_test_easy_exercises = set(['counting_1', 'significant_figures_1', 'subtraction_1'])
-
-    @property
-    @request_cache.cache()
-    def point_display(self):
-        # TODO(david): Remove other mario points A/B test code, including this fn
-        return "on"
 
     @property
     @request_cache.cache()
@@ -1090,6 +1079,35 @@ class UserData(GAEBingoIdentityModel, db.Model):
 
     def are_students_visible_to(self, user_data):
         return self.is_coworker_of(user_data) or user_data.developer or user_data.is_administrator()
+
+    def record_activity(self, dt_activity):
+
+        # Make sure last_activity and start_consecutive_activity_date have values
+        self.last_activity = self.last_activity or dt_activity
+        self.start_consecutive_activity_date = self.start_consecutive_activity_date or dt_activity
+
+        if dt_activity > self.last_activity:
+
+            # If it has been over 36 hours since we last saw this user, restart the consecutive activity streak.
+            #
+            # We allow for a lenient 36 hours in order to offer kinder timezone interpretation.
+            # See http://meta.stackoverflow.com/questions/55483/proposed-consecutive-days-badge-tracking-change
+            if util.hours_between(self.last_activity, dt_activity) >= 36:
+                self.start_consecutive_activity_date = dt_activity
+            
+            self.last_activity = dt_activity
+
+    def current_consecutive_activity_days(self):
+        if not self.last_activity or not self.start_consecutive_activity_date:
+            return 0
+
+        dt_now = datetime.datetime.now()
+
+        # If it has been over 36 hours since last activity, bail.
+        if util.hours_between(self.last_activity, dt_now) >= 36:
+            return 0
+
+        return (self.last_activity - self.start_consecutive_activity_date).days
 
     def add_points(self, points):
         if self.points == None:
@@ -1491,7 +1509,7 @@ class VideoLog(db.Model):
         user_video.last_watched = datetime.datetime.now()
         user_video.duration = video.duration
 
-        user_data.last_activity = user_video.last_watched
+        user_data.record_activity(user_video.last_watched)
 
         video_points_total = points.VideoPointCalculator(user_video)
         video_points_received = video_points_total - video_points_previous

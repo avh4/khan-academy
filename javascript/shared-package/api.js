@@ -65,11 +65,11 @@ $(function(){ APIActionResults.register("user_info_html",
     );
 });
 
-// show point animation above streak bar when (in exercise pages && if part of test)
+// show point animation above streak bar when in exercise pages
 $(function(){ 
 
   var updatePointDisplay = function( data ) {
-    if( jQuery(".single-exercise").length > 0 && data.point_display === "on" && data.points > 0) {
+    if( jQuery(".single-exercise").length > 0 && data.points > 0) {
       var coin = jQuery("<div>+"+data.points+"</div>").addClass("energy-points-badge");
       jQuery(".streak-bar").append(coin);
       jQuery(coin)
@@ -81,17 +81,4 @@ $(function(){
   };
 
   APIActionResults.register( "points_earned", updatePointDisplay );
-});
-
-// change hint text when a problem has been answered
-$(function(){ 
-
-  var updateHintPrompt = function( data ) {
-
-    if( jQuery(".single-exercise").length > 0 ) {
-    }
-
-  };
-
-  APIActionResults.register( "attempt_correct", updateHintPrompt );
 });

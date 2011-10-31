@@ -172,8 +172,8 @@ def exercises(exercise_name):
 @jsonp
 @jsonify
 def exercise_info(exercise_name):
-    exerciselist = models.Exercise.get_by_name(exercise_name).followup_exercises
-    return [models.Exercise.get_by_name(exercise_name) for exercise_name in exerciselist]
+    exercise = models.Exercise.get_by_name(exercise_name)
+    return exercise.followup_exercises() if exercise else []
 
 @route("/api/v1/exercises/<exercise_name>/videos", methods=["GET"])
 @jsonp
@@ -250,15 +250,17 @@ def get_visible_user_data_from_request(disable_coach_visibility = False):
 
     if request.request_string("email"):
         user_data_student = request.request_user_data("email")
-	if user_data_student.user_email == user_data.user_email:
-	    # if email in request is that of the current user, simply return the
-	    # current user_data, no need to check permission to view
-	    return user_data
+
+        if user_data_student and user_data_student.user_email == user_data.user_email:
+            # if email in request is that of the current user, simply return the
+            # current user_data, no need to check permission to view
+            return user_data
 
         if user_data_student and (user_data.developer or (not disable_coach_visibility and user_data_student.is_coached_by(user_data))):
             return user_data_student
         else:
             return None
+
     else:
         return user_data
 
@@ -534,7 +536,7 @@ def attempt_problem_number(exercise_name, problem_number):
 
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
-                "points_earned" : { "points" : points_earned, "point_display" : user_data.point_display },
+                "points_earned" : { "points" : points_earned },
                 "attempt_correct" : request.request_bool("complete")
             })
 
@@ -550,8 +552,6 @@ def attempt_problem_number(exercise_name, problem_number):
 @jsonify
 def hint_problem_number(exercise_name, problem_number):
     
-    bingo("alternate_hints_costly")
-    
     user_data = models.UserData.current()
 
     if user_data:
@@ -560,16 +560,19 @@ def hint_problem_number(exercise_name, problem_number):
 
         if user_exercise and problem_number:
 
+            attempt_number = request.request_int("attempt_number")
+            count_hints = request.request_int("count_hints")
+
             user_exercise, user_exercise_graph = attempt_problem(
                     user_data,
                     user_exercise,
                     problem_number,
-                    request.request_int("attempt_number"),
+                    attempt_number,
                     request.request_string("attempt_content"),
                     request.request_string("sha1"),
                     request.request_string("seed"),
                     request.request_bool("complete"),
-                    request.request_int("count_hints"),
+                    count_hints,
                     int(request.request_float("time_taken")),
                     request.request_string("non_summative"),
                     request.request_string("problem_type"),
@@ -579,6 +582,11 @@ def hint_problem_number(exercise_name, problem_number):
             add_action_results(user_exercise, {
                 "exercise_message_html": templatetags.exercise_message(exercise, user_data.coaches, user_exercise_graph.states(exercise.name)),
             })
+
+            # A hint will count against the user iff they haven't attempted the question yet and it's their first hint
+            if attempt_number == 0 and count_hints == 1:
+                bingo("hints_costly_hint")
+                bingo("hints_costly_hint_binary")
 
             return user_exercise
 
