@@ -296,6 +296,13 @@ class Exercise(db.Model):
             exercise_dict[fxn_key(exercise)] = exercise
         return exercise_dict
 
+def clamp(min_val, max_val):
+    def decorator(target_fn):
+        def wrapped(*arg, **kwargs):
+            return sorted((min_val, target_fn(*arg, **kwargs), max_val))[1]
+        return wrapped
+    return decorator
+
 class UserExercise(db.Model):
 
     user = db.UserProperty()
@@ -393,6 +400,7 @@ class UserExercise(db.Model):
 
     # Faciliate transition for old objects that did not have the _progress property
     @property
+    @clamp(0.0, 1.0)
     def progress(self):
         if self._progress is None:
             self._progress = self._get_progress_from_current_state()
@@ -431,6 +439,7 @@ class UserExercise(db.Model):
         if self.use_streak_model():
             self._update_progress_from_streak_model(correct)
 
+    @clamp(0.0, 1.0)
     def _get_progress_from_current_state(self):
 
         if self.use_streak_model():
