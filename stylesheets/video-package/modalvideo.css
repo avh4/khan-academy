@@ -18,7 +18,7 @@
   -moz-opacity: 0.3;
   opacity: 0.3;
 }
-.modal {
+#modal-video {
   position: fixed;
   /* set the point on which top and left operate to the middle top edge*/
   width: 830px; /* this is redundant but here for clarity */
