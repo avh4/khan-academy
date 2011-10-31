@@ -1637,7 +1637,7 @@ class LogSummary(db.Model):
         if user_data is None:
             return
 
-        def txn(shard_name, user_data, activities, summary_class, summary_type, delta):
+        def txn(name, shard_name, user_data, activities, summary_class, summary_type, delta):
                 log_summary = LogSummary.get_by_key_name(shard_name)
                              
                 if log_summary is None:
@@ -1676,7 +1676,7 @@ class LogSummary(db.Model):
         # and two processes could get before either puts. Transactions will ensure that its mutually exclusive
         # since they are operating on the same entity
         try:
-            db.run_in_transaction(txn, shard_name, user_data, activities, summary_class, summary_type, delta) 
+            db.run_in_transaction(txn, name, shard_name, user_data, activities, summary_class, summary_type, delta) 
         except TransactionFailedError:
             # if it is a transaction lock
             logging.info("increasing the number of shards to %i log summary: %s" %(config.num_shards+1, name))
