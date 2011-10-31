@@ -12,7 +12,7 @@ function submitForm(value)
 {% endblock pagescript %}
 {% block pagetitle %}Report an issue{% endblock pagetitle %}
 {% block pagecontent %}
-<div id="report-problem">
+<article id="report-problem">
 	{% if message %}
 	<p style="color: red;">
 	{{message}}
@@ -43,5 +43,5 @@ function submitForm(value)
         link in one of them and click on the star to make it dim.
         </p>
         <p><em>Thanks for taking the time to help us make Khan Academy better!</em></p>
-</div>
+</article>
 {% endblock pagecontent %}

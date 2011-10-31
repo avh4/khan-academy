@@ -33,8 +33,8 @@
 </span>
 {% endblock pagesubmenu %}
 {% block pagecontent %}
-<div id="video-page">
-<article class="video" data-role="page" data-theme="b">
+<article id="video-page">
+<div class="video" data-role="page" data-theme="b">
     <div data-role="header" class="mobile-only">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h2>{{video.title|escape}}</h2>
@@ -128,8 +128,8 @@
     </div>
     </div>
 
-</article>
 </div>
+</article>
 {% endblock pagecontent %}
 
 {% block bottompagescript %}

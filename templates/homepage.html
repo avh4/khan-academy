@@ -14,7 +14,7 @@
 {% endblock pagescript %}
 {% block pagetitle %}{% endblock pagetitle %}
 {% block pagecontent %}
-<div id="homepage">
+<article id="homepage">
     <div id="main-video">
         {{ youtube.player_embed(video_id, 480, 395) }}
     </div>
@@ -129,7 +129,7 @@
 <div class="clear"></div>
 {{ library_content }}
 
-</div>
+</article>
 
 <div id="back-to-top">
     <a class="arrow" href="#">▲</a>

@@ -50,7 +50,7 @@ class Timeline(RequestHandler):
             conv_rate = 0.0
             if snapshot.participants > 0:
                 conv_rate = float(snapshot.conversions) / float(snapshot.participants) * y_scale_multiplier
-            conv_rate = round(conv_rate, 1)
+            conv_rate = round(conv_rate, 3)
 
             utc_time = time.mktime(snapshot.time_recorded.timetuple()) * 1000
 

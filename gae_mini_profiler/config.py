@@ -17,6 +17,8 @@ enabled_profiler_emails = [
     "spicyjalapeno@gmail.com", # Ben Alpert
     "tallnerd@gmail.com", # James Irwin
     "tom@khanacademy.org",
+    "sundar@khanacademy.org",
+    "shantanu@khanacademy.org",
 ]
 
 # Customize should_profile to return true whenever a request should be profiled.

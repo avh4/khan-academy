@@ -24,6 +24,8 @@ import unfinished_streak_problem_badges
 import points_badges
 import tenure_badges
 import video_time_badges
+import consecutive_activity_badges
+
 import fast_slow_queue
 
 import layer_cache
@@ -104,6 +106,11 @@ def all_badges():
         tenure_badges.YearThreeBadge(),
 
         video_time_badges.ActOneSceneOneBadge(),
+
+        consecutive_activity_badges.FiveDayConsecutiveActivityBadge(),
+        consecutive_activity_badges.FifteenDayConsecutiveActivityBadge(),
+        consecutive_activity_badges.ThirtyDayConsecutiveActivityBadge(),
+        consecutive_activity_badges.HundredDayConsecutiveActivityBadge(),
 
     ]
 
