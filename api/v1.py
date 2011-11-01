@@ -438,11 +438,11 @@ def user_exercises_specific(exercise_name):
 @jsonp
 @jsonify
 def user_exercises_specific(exercise_name):
-    user_data = models.UserData.current() or models.UserData.get_from_user_input_email("test@example.com") #FIXME
+    user_data = models.UserData.current()
 
     if user_data and exercise_name:
 
-        user_data_student = get_visible_user_data_from_request() or user_data #FIXME
+        user_data_student = get_visible_user_data_from_request()
         user_exercise_graph = models.UserExerciseGraph.get(user_data)
 
         user_exercises = models.UserExercise.all().filter("user =", user_data_student.user).fetch(10000)
