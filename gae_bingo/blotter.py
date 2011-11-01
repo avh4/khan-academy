@@ -110,7 +110,7 @@ class Bingo(RequestHandler):
         if conversion:
             try:
                 conversion = json.loads(conversion)
-            except JSONDecodeError, e:
+            except json.JSONDecodeError, e:
                 logging.error("json.loads FAILED on input: %s", conversion)
                 raise e
 
