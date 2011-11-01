@@ -58,6 +58,7 @@ var GAEDashboard = {
                                         .end()
                                     .end()
                                 .parents("div.experiment-container")
+                                    .css("min-height", function() { return $(this).height(); })
                                     .find("div.experiment-conversions-content")
                                         .empty()
                                         .append($("#progress-bar").clone().css("visibility", "visible"))
@@ -85,6 +86,7 @@ var GAEDashboard = {
             success: function(data) {
 
                 $( "div.experiment-container[data-canonical-name=\"" + data.canonical_name + "\"]")
+                    .css("min-height", "")
                     .find( "div.experiment-conversions-content" )
                         .html( $("#tmpl-experiment-conversions-content").mustache( data ) )
                         .end()
