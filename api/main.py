@@ -5,14 +5,12 @@ from wsgiref.handlers import CGIHandler
 import request_cache
 from app import App
 from api import api_app
-from api import api_request_class
-from api import auth
-
-from api import v0
-from api import v1
-
 from gae_mini_profiler import profiler
 from gae_bingo import middleware
+
+# While not referenced directly, these imports have necessary side-effects
+from api import v0 #@UnusedImport
+from api import v1 #@UnusedImport
 
 def real_main():
 

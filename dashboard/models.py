@@ -19,9 +19,18 @@ class DailyStatisticLog(db.Model):
         return "%s:%s" % (stat_name, dt.date().isoformat())
 
 class DailyStatistic(object):
+    """ Abstract base type for some kind of statistic that can be tracked.
+    
+    Subclasses should implement the calc method to implement collection of
+    the statistic.
+    
+    This data is typically used for diagnostic or analytics purposes
+    for development. The data is not intended for end-user consumption.
+    
+    """
 
     @classmethod
-    def all(cls):
+    def all(cls): #@ReservedAssignment
         return DailyStatisticLog.all().filter("stat_name =", cls.__name__)
 
     def calc(self):
@@ -32,11 +41,13 @@ class DailyStatistic(object):
         stat_name = self.__class__.__name__
 
         if stat_name == DailyStatistic.__name__:
-            raise Exception("DailyStatistic cannot be used directly. Must use an implementing subclass.")
+            raise Exception("DailyStatistic cannot be used directly. " +
+                            "Must use an implementing subclass.")
 
         return stat_name
 
     def record(self, val = None, dt = None):
+        """ Computes the internal value (if needed) and writes to the db. """
 
         if val is None:
             # Grab actual stat value, implemented by subclass
@@ -46,7 +57,6 @@ class DailyStatistic(object):
             dt = datetime.datetime.now()
 
         if val is not None:
-
             stat_name = self.name()
 
             return DailyStatisticLog.get_or_insert(
@@ -60,7 +70,6 @@ class DailyStatistic(object):
 
     @staticmethod
     def record_all():
-
         dt = datetime.datetime.now()
 
         # Record stats for all implementing subclasses
@@ -72,7 +81,7 @@ class EntityStatistic(DailyStatistic):
     def __init__(self, kind_name=None):
         self.kind_name = kind_name
 
-    def all(self):
+    def all(self): #@ReservedAssignment
         return DailyStatisticLog.all().filter("stat_name =", self.kind_name+'Count')
 
     # actually updates for all entity kinds

@@ -19,7 +19,6 @@ import bulk_update.handler
 import request_cache
 from gae_mini_profiler import profiler
 from gae_bingo.middleware import GAEBingoWSGIMiddleware
-from gae_bingo.gae_bingo import bingo
 import autocomplete
 import coaches
 import knowledgemap
@@ -33,10 +32,8 @@ import search
 
 import request_handler
 from app import App
-import app
 import util
 import user_util
-import points
 import exercise_statistics
 import backfill
 import activity_summary
@@ -49,17 +46,15 @@ import paypal
 import smarthistory
 
 import models
-from models import UserExercise, Exercise, UserData, Video, Playlist, ProblemLog, VideoPlaylist, ExerciseVideo, Setting, UserVideo, UserPlaylist, VideoLog
+from models import UserData, Video, Playlist, VideoPlaylist, ExerciseVideo, UserVideo, VideoLog
 from discussion import comments, notification, qa, voting
 from about import blog, util_about
 from phantom_users import util_notify
 from badges import util_badges, custom_badges
 from mailing_lists import util_mailing_lists
 from profiles import util_profile
-from topics_list import all_topics_list
 from custom_exceptions import MissingVideoException
 from templatetags import user_points
-from badges.templatetags import badge_notifications, badge_counts
 from oauth_provider import apps as oauth_apps
 from phantom_users.phantom_util import create_phantom, get_phantom_user_id_from_cookies
 from phantom_users.cloner import Clone
@@ -67,8 +62,6 @@ from counters import user_counter
 from notifications import UserNotifier
 from nicknames import get_nickname_for
 import robots
-
-import config_jinja
 
 class VideoDataTest(request_handler.RequestHandler):
 
@@ -253,7 +246,6 @@ class LogVideoProgress(request_handler.RequestHandler):
     def get(self):
         user_data = UserData.current()
         video_points_total = 0
-        points_total = 0
 
         if user_data:
 
@@ -608,12 +600,13 @@ class Search(request_handler.RequestHandler):
 
     def get(self):
         query = self.request.get('page_search_query')
-        template_values = { 'page_search_query': query }
+        template_values = {'page_search_query': query}
         query = query.strip()
-        query_too_short = None
         if len(query) < search.SEARCH_PHRASE_MIN_LENGTH:
             if len(query) > 0:
-                template_values.update({'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH})
+                template_values.update({
+                    'query_too_short': search.SEARCH_PHRASE_MIN_LENGTH
+                })
             self.render_jinja2_template("searchresults.html", template_values)
             return
         searched_phrases = []
@@ -624,15 +617,19 @@ class Search(request_handler.RequestHandler):
 
         # One full (non-partial) search, then sort by kind
         all_text_keys = Playlist.full_text_search(
-                            query, limit=50, kind=None,
-                            stemming=Playlist.INDEX_STEMMING,
-                            multi_word_literal=Playlist.INDEX_MULTI_WORD,
-                            searched_phrases_out=searched_phrases)
+                query, limit=50, kind=None,
+                stemming=Playlist.INDEX_STEMMING,
+                multi_word_literal=Playlist.INDEX_MULTI_WORD,
+                searched_phrases_out=searched_phrases)
 
 
         # Quick title-only partial search
-        playlist_partial_results = filter(lambda playlist_dict: query in playlist_dict["title"].lower(), autocomplete.playlist_title_dicts())
-        video_partial_results = filter(lambda video_dict: query in video_dict["title"].lower(), autocomplete.video_title_dicts())
+        playlist_partial_results = filter(
+                lambda playlist_dict: query in playlist_dict["title"].lower(),
+                autocomplete.playlist_title_dicts())
+        video_partial_results = filter(
+                lambda video_dict: query in video_dict["title"].lower(),
+                autocomplete.video_title_dicts())
 
         # Combine results & do one big get!
         all_key_list = [str(key_and_title[0]) for key_and_title in all_text_keys]
@@ -650,7 +647,8 @@ class Search(request_handler.RequestHandler):
             elif isinstance(entity, Video):
                 videos.append(entity)
             elif entity is not None:
-                logging.error("Unhandled kind in search results: " + str(type(entity)))
+                logging.error("Unhandled kind in search results: " +
+                              str(type(entity)))
                 
         playlist_count = len(playlists)
 
@@ -907,7 +905,6 @@ application = webapp2.WSGIApplication([
     ('/jobs/.*', RedirectToJobvite),
 
     ('/dashboard', dashboard.Dashboard),
-    ('/entityboard', dashboard.Entityboard),
     ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
     ('/admin/entitycounts', dashboard.EntityCounts),
 

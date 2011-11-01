@@ -1,14 +1,5 @@
-import logging
-
-from google.appengine.ext import db
-import simplejson
-
-import app
-from app import App
-import request_handler
-import consts
 import layer_cache
-from models import Video, Playlist, VideoPlaylist
+from models import Video, Playlist
 from templatefilters import slugify
 
 CACHE_EXPIRATION_SECONDS = 60 * 60 * 24 * 3 # Expires after three days

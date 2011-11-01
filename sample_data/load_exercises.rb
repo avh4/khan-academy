@@ -1,3 +1,6 @@
+### Loads exercise videos information from production and posts it to the
+### specified test (defaults to localhost) server.
+
 DOMAIN = ARGV.length > 0 ? ARGV[0].gsub(/^\d+$/, "http://127.0.0.1:\\0") : "http://127.0.0.1:8080"
 
 ###

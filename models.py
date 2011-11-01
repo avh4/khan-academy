@@ -1568,6 +1568,13 @@ def commit_video_log(video_log, user_data = None):
     video_log.put() 
 
 class DailyActivityLog(db.Model):
+    """ A log entry for a dashboard presented to users and coaches.
+    
+    This is used in the end-user-visible dashboards that display
+    student activity and breaks down where the user is spending her time.
+    
+    """
+    
     user = db.UserProperty()
     date = db.DateTimeProperty()
     activity_summary = object_property.ObjectProperty()
