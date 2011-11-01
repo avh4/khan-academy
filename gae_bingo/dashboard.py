@@ -1,7 +1,7 @@
 import logging
 import os
 
-from google.appengine.ext.webapp import template, RequestHandler
+from google.appengine.ext.webapp import RequestHandler
 from .config import can_control_experiments
 
 class Dashboard(RequestHandler):
@@ -12,7 +12,7 @@ class Dashboard(RequestHandler):
             self.redirect("/")
             return
 
-        path = os.path.join(os.path.dirname(__file__), "templates/base2.html")
+        path = os.path.join(os.path.dirname(__file__), "templates/base.html")
         f = None
 
         try:

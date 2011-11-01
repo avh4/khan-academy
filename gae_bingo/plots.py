@@ -2,7 +2,7 @@ import logging
 import os
 import time
 
-from google.appengine.ext.webapp import template, RequestHandler
+from google.appengine.ext.webapp import RequestHandler
 
 from .cache import BingoCache
 from .models import _GAEBingoSnapshotLog, ConversionTypes
