@@ -1711,7 +1711,7 @@ class LogSummary(db.Model):
             logging.info("increasing the number of shards to %i log summary: %s" %(config.num_shards+1, name))
             LogSummaryShardConfig.increase_shards(name, config.num_shards+1)
             shard_name = str(config.num_shards) + ":" + name
-            db.run_in_transaction(txn, shard_name, user_data, activities, summary_class, summary_type, delta) 
+            db.run_in_transaction(txn, name, shard_name, user_data, activities, summary_class, summary_type, delta) 
 
     @staticmethod
     def get_description():
