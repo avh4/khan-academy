@@ -1545,7 +1545,7 @@ class VideoLog(db.Model):
                        _url = "/_ah/queue/deferred_videolog")
 
 
-        if user_data is not None:
+        if user_data is not None and user_data.coaches:
             # Making a separate queue for the log summaries so we can clearly see how much they are getting used
             deferred.defer(commit_log_summary_coaches, video_log, user_data.coaches,
                 _queue = "log-summary-queue",
