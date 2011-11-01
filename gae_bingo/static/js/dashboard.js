@@ -40,7 +40,7 @@ var GAEDashboard = {
             dataType: "json",
             type: "GET",
             success: function(dataSummary) {
-                var jel = $( "div.experiment-container[data-canonical-name=" + dataSummary.canonical_name + "] .experiment-summary-content" );
+                var jel = $( "div.experiment-container[data-canonical-name=\"" + dataSummary.canonical_name + "\"] .experiment-summary-content" );
                 jel
                     .css("min-height", jel.height())
                     .stop()
@@ -84,7 +84,7 @@ var GAEDashboard = {
             type: "GET",
             success: function(data) {
 
-                $( "div.experiment-container[data-canonical-name=" + data.canonical_name + "]")
+                $( "div.experiment-container[data-canonical-name=\"" + data.canonical_name + "\"]")
                     .find( "div.experiment-conversions-content" )
                         .html( $("#tmpl-experiment-conversions-content").mustache( data ) )
                         .end()
