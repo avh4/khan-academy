@@ -4,15 +4,16 @@ from wsgiref.handlers import CGIHandler
 
 import request_cache
 from app import App
-from api import api_app
 from gae_mini_profiler import profiler
 from gae_bingo import middleware
 
 # While not referenced directly, these imports have necessary side-effects.
-# (Paths are mapped to the API request handlers with the "route" wrapper)
+# (e.g. Paths are mapped to the API request handlers with the "route" wrapper)
+from api import api_app
+from api import api_request_class #@UnusedImport
+from api import auth #@UnusedImport
 from api import v0 #@UnusedImport
 from api import v1 #@UnusedImport
-from api import auth #@UnusedImport
 
 def real_main():
 
