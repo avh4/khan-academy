@@ -8,7 +8,8 @@ from api import api_app
 from gae_mini_profiler import profiler
 from gae_bingo import middleware
 
-# While not referenced directly, these imports have necessary side-effects
+# While not referenced directly, these imports have necessary side-effects.
+# (Paths are mapped to the API request handlers with the "route" wrapper)
 from api import v0 #@UnusedImport
 from api import v1 #@UnusedImport
 

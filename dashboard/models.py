@@ -3,8 +3,6 @@ import datetime
 from google.appengine.ext import db
 from google.appengine.ext.db import stats
 
-from counters import user_counter
-
 from itertools import groupby
 
 class DailyStatisticLog(db.Model):
@@ -78,6 +76,8 @@ class DailyStatistic(object):
             instance.record(dt = dt)
 
 class EntityStatistic(DailyStatistic):
+    """ A generic statistic about a particular Entity count in the database """
+
     def __init__(self, kind_name=None):
         self.kind_name = kind_name
 
@@ -99,17 +99,3 @@ class EntityStatistic(DailyStatistic):
                 dt=dt
             ))
         db.put(logs)
-
-class RegisteredUserCount(DailyStatistic):
-    def calc(self):
-        return user_counter.get_count()
-
-# Use ~once-or-twice-a-day-updated google.appengine.ext.db.stats to grab entity count
-def get_approximate_entity_count(kind_name):
-    kind_stats = stats.KindStat.all().filter("kind_name =", kind_name).fetch(100)
-
-    if kind_stats:
-        kind_stats.sort(key = lambda kind_stat: kind_stat.timestamp, reverse=True)
-        return kind_stats[0].count
-
-    return None

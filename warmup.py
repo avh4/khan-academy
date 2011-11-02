@@ -1,7 +1,6 @@
 import logging
 
 import request_handler
-import models
 import library
 from badges import util_badges
 

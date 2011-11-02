@@ -15,7 +15,6 @@ from api.jsonify import jsonify
 
 from google.appengine.ext import db
 import object_property
-import app
 import util
 import user_util
 import consts
