@@ -1543,10 +1543,12 @@ class VideoLog(db.Model):
                        _queue = "video-log-queue",
                        _url = "/_ah/queue/deferred_videolog")
 
-        # Making a separate queue for the log summaries so we can clearly see how much they are getting used
-        deferred.defer(commit_log_summary, video_log, user_data,
-                       _queue = "log-summary-queue",
-                       _url = "/_ah/queue/deferred_log_summary") 
+
+        if user_data is not None and user_data.coaches:
+            # Making a separate queue for the log summaries so we can clearly see how much they are getting used
+            deferred.defer(commit_log_summary_coaches, video_log, user_data.coaches,
+                _queue = "log-summary-queue",
+                _url = "/_ah/queue/deferred_log_summary") 
 
         return (user_video, video_log, video_points_total)
 
@@ -1715,7 +1717,7 @@ class LogSummary(db.Model):
             logging.info("increasing the number of shards to %i log summary: %s" %(config.num_shards+1, name))
             LogSummaryShardConfig.increase_shards(name, config.num_shards+1)
             shard_name = str(config.num_shards) + ":" + name
-            db.run_in_transaction(txn, shard_name, user_data, activities, summary_class, summary_type, delta) 
+            db.run_in_transaction(txn, name, shard_name, user_data, activities, summary_class, summary_type, delta) 
 
     @staticmethod
     def get_description():
@@ -1733,6 +1735,12 @@ def commit_log_summary(activity_log, user_data):
         from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
         for coach in user_data.coaches:
             LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), activity_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440)
+
+# commit_log_summary is used by our deferred log summary insertion process
+def commit_log_summary_coaches(activity_log, coaches):
+    from classtime import  ClassDailyActivitySummary # putting this at the top would get a circular reference
+    for coach in coaches:
+        LogSummary.add_or_update_entry(UserData.get_from_db_key_email(coach), activity_log, ClassDailyActivitySummary, LogSummaryTypes.CLASS_DAILY_ACTIVITY, 1440)
 
 class ProblemLog(db.Model):
 

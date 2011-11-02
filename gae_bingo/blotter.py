@@ -14,7 +14,6 @@ from .cache import BingoCache
 from .config import can_control_experiments
 import simplejson as json
 
-
 class AB_Test(RequestHandler):
     """request user alternative/state for an experiment by passing 
     { canonical_name : "experiment_name" }
@@ -109,7 +108,11 @@ class Bingo(RequestHandler):
         
         conversion = self.request.get("convert", None)
         if conversion:
-            conversion = json.loads(conversion)
+            try:
+                conversion = json.loads(conversion)
+            except json.JSONDecodeError, e:
+                logging.error("json.loads FAILED on input: %s", conversion)
+                raise e
 
         self.response.headers['Content-Type'] = 'text/json'
 

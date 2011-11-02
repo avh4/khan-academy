@@ -148,7 +148,7 @@ hr {
 }
 
 .secondary-navigation {
-  background: #e0e0e0 url("images/boxbar-background.png") top;
+  background: #e0e0e0;
   border-bottom-width: 0px;
   -moz-border-radius-topleft: 6px;
   -webkit-border-top-left-radius: 6px;
@@ -157,7 +157,7 @@ hr {
   -webkit-border-top-right-radius: 6px;
   border-top-right-radius: 6px;
 }
-.secondary-navigation li.first a, .secondary-navigation ul li.first {
+.secondary-navigation li.first a, .secondary-navigation ul li.first, .secondary-navigation ul li.first:hover {
   -moz-border-radius-topleft: 6px;
   -webkit-border-top-left-radius: 6px;
   border-top-left-radius: 6px;
@@ -170,11 +170,12 @@ hr {
   padding: 10px 15px;
   color: #818171;
 }
-.secondary-navigation ul li.active {
-  background-color: white;
-}
+.secondary-navigation ul li.active,
 .secondary-navigation ul li.active a:hover {
   background-color: white;
+}
+.secondary-navigation ul li a:hover {
+  background-color: #B8D1E2;
 }
 
 #user-navigation {
