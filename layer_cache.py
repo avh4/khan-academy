@@ -7,7 +7,7 @@ from google.appengine.ext import db
 
 from app import App
 
-if App.is_dev_server and False:
+if App.is_dev_server:
     # cachepy disables itself during development presumably to avoid confusion.
     # Instead, alias it to request_cache. This means individual requests will
     # behave more like production, but the cache will be flushed after a request.
