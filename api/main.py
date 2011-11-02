@@ -12,6 +12,7 @@ from gae_bingo import middleware
 # (Paths are mapped to the API request handlers with the "route" wrapper)
 from api import v0 #@UnusedImport
 from api import v1 #@UnusedImport
+from api import auth #@UnusedImport
 
 def real_main():
 
