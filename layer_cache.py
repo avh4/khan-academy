@@ -5,8 +5,15 @@ import pickle
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
-import cachepy
 from app import App
+
+if App.is_dev_server and False:
+    # cachepy disables itself during development presumably to avoid confusion.
+    # Instead, alias it to request_cache. This means individual requests will
+    # behave more like production, but the cache will be flushed after a request.
+    import request_cache as cachepy
+else:
+    import cachepy
 
 # layer_cache provides an easy way to cache the result of functions across requests.
 # layer_cache uses cachepy's in-memory storage, memcache, and the datastore.
