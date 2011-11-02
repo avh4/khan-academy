@@ -905,6 +905,7 @@ application = webapp2.WSGIApplication([
     ('/jobs/.*', RedirectToJobvite),
 
     ('/dashboard', dashboard.Dashboard),
+    ('/contentdash', dashboard.ContentDashboard),
     ('/admin/dashboard/record_statistics', dashboard.RecordStatistics),
     ('/admin/entitycounts', dashboard.EntityCounts),
 

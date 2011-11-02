@@ -5,7 +5,7 @@ from google.appengine.api import users
 from app import App
 import request_handler
 import user_util
-from dashboard.models import DailyStatistic, RegisteredUserCount, EntityStatistic
+from dashboard.models import DailyStatistic, EntityStatistic
 from google.appengine.ext.db import stats
 from itertools import groupby
 
@@ -80,3 +80,19 @@ class EntityCounts(request_handler.RequestHandler):
             counts.append(dict(kind=key, count=grouped[0].count, timestamp=grouped[0].timestamp))
 
         self.render_jinja2_template("dashboard/entitycounts.html", {'counts':counts})
+        
+
+class ContentDashboard(request_handler.RequestHandler):
+    """
+    Handles request to show an internal dashboard that shows problematic
+    issues in our content.
+    
+    An example of data that would go in this dashboard are statistics
+    related to searches users make where they cannot find content for.
+    
+    """
+
+    def get(self):
+        # Right now there is no dynamic data from the db necessary.
+        # the template does, however, query Google Analytics
+        self.render_jinja2_template("dashboard/contentdash.html", {})
