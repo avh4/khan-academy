@@ -584,7 +584,8 @@ class UserAdjacentActivitySummary:
         return activity.time_ended()+datetime.timedelta(minutes=self.DELTA) > self.start and activity.time_started()-datetime.timedelta(minutes=self.DELTA) < self.end
 
     def should_merge(self, second_summary):
-        return abs(second_summary.start - self.end) < datetime.timedelta(minutes=self.DELTA)  or abs(self.start-second_summary.end) < +datetime.timedelta(minutes=self.DELTA) 
+        return self.start - datetime.timedelta(minutes=self.DELTA) < second_summary.start < self.end+datetime.timedelta(minutes=self.DELTA) or \
+            self.start - datetime.timedelta(minutes=self.DELTA) < second_summary.end < self.end+datetime.timedelta(minutes=self.DELTA) 
         
     def update_activity_class(self):
         if len(self.dict_exercises) and len(self.dict_videos):
