@@ -124,6 +124,8 @@ class Bingo(RequestHandler):
             
             else:
                 # send error
+                logging.error("bingo could not find: %s", conversion)
+                logging.info("request.body: %s", str(self.request.body))
                 status = 404
         
         else:
