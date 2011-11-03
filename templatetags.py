@@ -38,19 +38,26 @@ def column_major_sorted_videos(videos, num_cols=3, column_width=300, gutter=20, 
     return shared_jinja.get().render_template("column_major_order_videos.html", **template_values)
 
 def exercise_message(exercise, coaches, exercise_states):
+    """Render UserExercise html for APIActionResults["exercise_message_html"] listener in khan-exercise.js.
+    
+    This is called each time a problem is either attempted or a hint is called (via /api/v1.py) and
+    renders a template only if a user is in any of these states, otherwise, it returns nothing
+    
+    See Also: APIActionResults
+    
+    """
     if exercise_states['endangered']:
-        state = '_endangered'
+        filename = 'exercise_message_endangered.html'
     elif exercise_states['reviewing']:
-        state = '_reviewing'
+        filename = 'exercise_message_reviewing.html'
     elif exercise_states['proficient']:
-        state = '_proficient'
+        filename = 'exercise_message_proficient.html'
     elif exercise_states['struggling']:
-        state = '_struggling'
+        filename = 'exercise_message_struggling.html'
         exercise_states['exercise_videos'] = exercise.related_videos_fetch()
     else:
         return None
 
-    filename = "exercise_message%s.html" % state
     return shared_jinja.get().render_template(filename, **exercise_states)
 
 def user_points(user_data):
