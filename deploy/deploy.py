@@ -140,25 +140,13 @@ def hg_pull_up():
 
 def hg_version():
     # grab the tip changeset hash
-    output = popen_results(['hg', 'tip'])
-    changeset = parse_hg_info(output, "changeset")
-
-    if changeset:
-        return changeset.split(":")[1]
-
-    return -1
+    current_version = popen_results(['hg', 'identify','-i']).strip()
+    return current_version or -1
 
 def hg_changeset_msg(changeset_id):
     # grab the summary and date
-    output = popen_results(['hg', 'log', '-r', changeset_id])
-    return parse_hg_info(output, "summary")
-
-def parse_hg_info(output, label):
-    pattern = re.compile("^%s:\\s+(.+)$" % label, re.MULTILINE)
-    matches = pattern.search(output)
-    if matches:
-        return matches.groups()[0].strip()
-    return None
+    output = popen_results(['hg', 'log', '--template','{desc}', '-r', changeset_id])
+    return output
 
 def git_version():
     # grab the tip changeset hash

@@ -5,8 +5,15 @@ import pickle
 from google.appengine.api import memcache
 from google.appengine.ext import db
 
-import cachepy
 from app import App
+
+if App.is_dev_server:
+    # cachepy disables itself during development presumably to avoid confusion.
+    # Instead, alias it to request_cache. This means individual requests will
+    # behave more like production, but the cache will be flushed after a request.
+    import request_cache as cachepy
+else:
+    import cachepy
 
 # layer_cache provides an easy way to cache the result of functions across requests.
 # layer_cache uses cachepy's in-memory storage, memcache, and the datastore.
@@ -117,7 +124,7 @@ def layer_cache_check_set_return(
         **kwargs):
 
     def get_cached_result(key, namespace, expiration, layer):
-        
+
         if layer & Layers.InAppMemory:
             result = cachepy.get(key)
             if result is not None:
@@ -145,7 +152,7 @@ def layer_cache_check_set_return(
         # Cache the result
         if layer & Layers.InAppMemory:
             cachepy.set(key, result, expiry=expiration)
-  
+
         if layer & Layers.Memcache:
             if not memcache.set(key, result, time=expiration, namespace=namespace):
                 logging.error("Memcache set failed for %s" % key)
@@ -174,7 +181,7 @@ def layer_cache_check_set_return(
 
     try:
         result = target(*args, **kwargs)
-    
+
     # an error happened trying to recompute the result, see if there is a value for it in the permanent cache
     except Exception, e:
         import traceback
@@ -184,10 +191,10 @@ def layer_cache_check_set_return(
             permanent_key = permanent_key_fxn(*args, **kwargs)
 
             result = get_cached_result(permanent_key, namespace, expiration, layer)
-            
+
             if result is not None:
                 logging.info("resource is not available, restoring from permanent cache")
-                 
+
                 # In case the key's value has been changed by target's execution
                 key = key_fxn(*args, **kwargs)
 
@@ -197,7 +204,7 @@ def layer_cache_check_set_return(
 
         # could not retrieve item from a permanent cache, raise the error on up
         raise e
-    
+
     if isinstance(result, UncachedResult):
         # Don't cache this result, just return it
         result = result.result
@@ -209,7 +216,7 @@ def layer_cache_check_set_return(
         # In case the key's value has been changed by target's execution
         key = key_fxn(*args, **kwargs)
         set_cached_result(key, namespace, expiration, layer, result)
-                  
+
     return result
 
 # Functions can return an UncachedResult-wrapped object
