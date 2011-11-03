@@ -27,7 +27,7 @@
 </style>
 
 <!-- invisible image needed for Gdata API -->
-<img src="/images/download-icon-small.png" style="display:none" />
+<img src="/images/download-icon-small.png" style="display:none">
 <div id="analytics-container">
 </div>
 {% endblock pagecontent %}
@@ -107,7 +107,7 @@ function handleResponse( result ) {
   // An array of Analytics feed entries.
   var entries = result.feed.getEntries();
 
-  function extraSearchQuery( path ) {
+  function extractSearchQuery( path ) {
     return decodeURIComponent( path.substr( path.indexOf( '=' ) + 1 ) );
   }
   function formatRate( rate ) {
@@ -125,12 +125,12 @@ function handleResponse( result ) {
   ];
   for ( var i = 0, entry; entry = entries[i]; i++ ) {
     html.push(
-        '<tr><td>', extraSearchQuery( entry.getValueOf( 'ga:pagePath' ) ),
+        '<tr><td>', extractSearchQuery( entry.getValueOf( 'ga:pagePath' ) ),
         '</td><td>', entry.getValueOf( 'ga:pageviews' ),
         '</td><td> ', formatRate( entry.getValueOf( 'ga:exitRate' ) ),
         '</td></tr>');
   }
-  document.getElementById( 'analytics-container' ).innerHTML += html.join( '' );
+  jQuery( '#analytics-container' ).html( html.join( '' ) )
 }
 
 function handleError(e) {
