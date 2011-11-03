@@ -1,5 +1,3 @@
-import logging
-
 from flask import Request
 
 from request_handler import RequestInputHandler

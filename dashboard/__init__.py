@@ -5,11 +5,23 @@ from google.appengine.api import users
 from app import App
 import request_handler
 import user_util
-from dashboard.models import DailyStatistic, RegisteredUserCount, EntityStatistic
+from dashboard.models import DailyStatistic, EntityStatistic
 from google.appengine.ext.db import stats
 from itertools import groupby
 
 class Dashboard(request_handler.RequestHandler):
+    """
+    Handles request to show the main internal dashboard.
+    
+    Shows graphs for particular entity counts which may be specified as
+    a comma separated URL parameter called "kinds".
+    
+    """
+
+    DEFAULT_KINDS = ','.join([
+            'RegisteredUser',
+            'ProblemLog',
+    ])
 
     def get(self):
         if not user_util.is_current_user_developer():
@@ -17,21 +29,7 @@ class Dashboard(request_handler.RequestHandler):
                 self.redirect(users.create_login_url(self.request.uri))
                 return
 
-        context = {}
-        context.update(daily_graph_context(RegisteredUserCount, "user_counts"))
-        context.update(daily_graph_context(EntityStatistic("ProblemLog"), "problem_counts"))
-
-        self.render_jinja2_template("dashboard/dashboard.html", context)
-
-class Entityboard(request_handler.RequestHandler):
-
-    def get(self):
-        if not user_util.is_current_user_developer():
-            if App.dashboard_secret and self.request_string("x", default=None) != App.dashboard_secret:
-                self.redirect(users.create_login_url(self.request.uri))
-                return
-
-        kinds = self.request_string("kinds", "ProblemLog").split(',')
+        kinds = self.request_string("kinds", Dashboard.DEFAULT_KINDS).split(',')
 
         graphs = []
         for kind in kinds:
@@ -40,7 +38,7 @@ class Entityboard(request_handler.RequestHandler):
             d['title'] = "%s created per day" % kind
             graphs.append(d)
 
-        self.render_jinja2_template("dashboard/entityboard.html", {'graphs': graphs})
+        self.render_jinja2_template("dashboard/dashboard.html", {'graphs': graphs})
 
 def daily_graph_context(cls, key):
     # Grab last ~4 months
@@ -82,3 +80,19 @@ class EntityCounts(request_handler.RequestHandler):
             counts.append(dict(kind=key, count=grouped[0].count, timestamp=grouped[0].timestamp))
 
         self.render_jinja2_template("dashboard/entitycounts.html", {'counts':counts})
+        
+
+class ContentDashboard(request_handler.RequestHandler):
+    """
+    Handles request to show an internal dashboard that shows problematic
+    issues in our content.
+    
+    An example of data that would go in this dashboard are statistics
+    related to searches users make where they cannot find content for.
+    
+    """
+
+    def get(self):
+        # Right now there is no dynamic data from the db necessary.
+        # the template does, however, query Google Analytics
+        self.render_jinja2_template("dashboard/contentdash.html", {})

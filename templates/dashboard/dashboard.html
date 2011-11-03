@@ -3,10 +3,9 @@
 {% import 'macros/dashboard.html' as dashboard %}
 
 {% block pagecontent %}
-
-    {{ dashboard.daily_graph("users", "New Users Registered / Day", "New Users", user_counts) }}
-    {{ dashboard.daily_graph("problems", "Problems Done / Day", "Problems", problem_counts) }}
-
+    {% for graph in graphs %}
+        {{ dashboard.daily_graph(graph.kind_name, graph.title, graph.kind_name, graph.data) }}
+    {% endfor %}
 {% endblock pagecontent %}
 
 {% block bottompagescript %}
