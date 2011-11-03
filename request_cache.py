@@ -83,7 +83,7 @@ def get(key):
 
     return CACHE[key]
 
-def set(key, value):
+def set(key, value, **kwargs):
     global CACHE
     CACHE[key] = value
 
